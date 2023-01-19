@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { Kernel, KernelSpec, Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
 import { jupyterIcon, LabIcon } from '@jupyterlab/ui-components';
@@ -114,8 +114,7 @@ namespace Private {
       for (const session of this.sessions.running()) {
         if (this.kernel.id === session.kernel?.id) {
           const { path, type } = session;
-          const kernel = `${this.kernel.name} (${this.kernel.id})`;
-          title.push(trans.__(`%1\nPath: %2\nKernel: %3`, type, path, kernel));
+          title.push(trans.__(`%1\nPath: %2`, type, path));
         }
       }
       return title.join('\n\n');
