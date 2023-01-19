@@ -111,7 +111,7 @@ test = [
     "requests_cache",
     "virtualenv",
 ]
-dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version", "ruff==0.0.177", "black[jupyter]==22.12.0"]
+dev = ["build", "pre-commit", "pytest-cov", "coverage", "hatch", "bump2version", "ruff==0.0.226", "black[jupyter]==22.12.0"]
 
 [tool.check-wheel-contents]
 ignore = ["W002", "W004"]
