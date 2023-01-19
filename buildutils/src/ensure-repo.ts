@@ -82,7 +82,8 @@ const UNUSED: Dict<string[]> = {
     'to-string-loader',
     'url-loader',
     'webpack-cli',
-    'worker-loader'
+    'worker-loader',
+    'source-map-loader'
   ],
   '@jupyterlab/buildutils': ['verdaccio'],
   '@jupyterlab/coreutils': ['path-browserify'],
