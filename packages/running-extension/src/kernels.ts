@@ -45,7 +45,7 @@ export async function addKernelRunningSessionManager(
             trans
           })
       ),
-    shutdownAll: () => sessions.shutdownAll(),
+    shutdownAll: () => kernels.shutdownAll(),
     refreshRunning: () =>
       Promise.all([kernels.refreshRunning(), sessions.refreshRunning()]),
     runningChanged,
