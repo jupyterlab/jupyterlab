@@ -102,12 +102,24 @@ export class NotebookModel implements INotebookModel {
    */
   constructor(options: NotebookModel.IOptions = {}) {
     this.standaloneModel = typeof options.sharedModel === 'undefined';
-    this.sharedModel =
-      options.sharedModel ??
-      YNotebook.create({
+
+    if (options.sharedModel) {
+      this.sharedModel = options.sharedModel;
+    } else {
+      this.sharedModel = YNotebook.create({
         disableDocumentWideUndoRedo:
-          options.disableDocumentWideUndoRedo ?? false
+          options.disableDocumentWideUndoRedo ?? false,
+        data: {
+          nbformat: nbformat.MAJOR_VERSION,
+          nbformat_minor: nbformat.MINOR_VERSION,
+          metadata: {
+            kernelspec: { name: '', display_name: '' },
+            language_info: { name: options.languagePreference ?? '' }
+          }
+        }
       });
+    }
+
     this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
     this._deletedCells = [];
