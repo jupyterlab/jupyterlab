@@ -321,7 +321,7 @@ namespace Private {
     regex: boolean,
     wholeWords: boolean
   ): RegExp | null {
-    const flag = caseSensitive ? 'g' : 'gi';
+    const flag = caseSensitive ? 'gm' : 'gim';
     // escape regex characters in query if its a string search
     let queryText = regex
       ? queryString
