@@ -140,7 +140,7 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
 
   return (
     <div className={REPLACE_WRAPPER_CLASS}>
-      <input
+      <textarea
         placeholder={trans.__('Replace')}
         className={REPLACE_ENTRY_CLASS}
         value={props.replaceText ?? ''}
