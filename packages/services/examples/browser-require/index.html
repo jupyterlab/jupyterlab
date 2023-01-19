@@ -7,6 +7,11 @@
 <html lang="en">
   <head>
     <title>Jupyter Services Demo</title>
+    {% set page_config_full = {'baseUrl': base_url} %}
+
+    <script id="jupyter-config-data" type="application/json">
+      {{ page_config_full | tojson }}
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.js"></script>
     <style type="text/css">
     #cell {
@@ -15,11 +20,6 @@
     </style>
   </head>
   <body>
-    {% set page_config_full = {'baseUrl': base_url} %}
-
-    <script id="jupyter-config-data" type="application/json">
-      {{ page_config_full | tojson }}
-    </script>
 
     <h1>Run code!</h1>
     <p>

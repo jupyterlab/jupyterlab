@@ -37,6 +37,11 @@ class ExampleApp(LabServerApp):
     # of looking in each of the Jupyter data paths.
     labextensions_path = [os.path.join(HERE, "labextensions")]
 
+    def initialize_settings(self):
+        super().initialize_settings()
+        settings = self.serverapp.web_app.settings
+        settings["terminals_available"] = False
+
 
 if __name__ == "__main__":
     ExampleApp.launch_instance()
