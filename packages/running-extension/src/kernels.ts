@@ -66,6 +66,7 @@ export async function addKernelRunningSessionManager(
 namespace Private {
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
+      this.commands = options.commands;
       this.kernel = options.kernel;
       this.kernels = options.kernels;
       this.sessions = options.sessions;
@@ -73,6 +74,8 @@ namespace Private {
       this.trans = options.trans;
       this._icon = options.icon || jupyterIcon;
     }
+
+    readonly commands: CommandRegistry;
 
     readonly kernel: Kernel.IModel;
 
@@ -85,13 +88,17 @@ namespace Private {
     readonly trans: IRenderMime.TranslationBundle;
 
     open() {
-      console.log(`open() is not implemented`);
-      // const { path, type } = this._model;
-      // if (type.toLowerCase() === 'console') {
-      //   void app.commands.execute('console:open', { path });
-      // } else {
-      //   void app.commands.execute('docmanager:open', { path });
-      // }
+      for (const session of this.sessions.running()) {
+        if (this.kernel.id !== session.kernel?.id) {
+          continue;
+        }
+        const { path, type } = session;
+        if (type.toLowerCase() === 'console') {
+          void this.commands.execute('console:open', { path });
+        } else {
+          void this.commands.execute('docmanager:open', { path });
+        }
+      }
     }
 
     shutdown() {
