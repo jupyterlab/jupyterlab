@@ -2,19 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-// import { PathExt } from '@jupyterlab/coreutils';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Kernel, KernelSpec, Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
-import {
-  // consoleIcon,
-  jupyterIcon,
-  LabIcon
-  // notebookIcon
-} from '@jupyterlab/ui-components';
+import { jupyterIcon, LabIcon } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import { Debouncer } from '@lumino/polling';
+import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 
 /**
@@ -28,23 +22,22 @@ export async function addKernelRunningSessionManager(
   const { commands } = app;
   const trans = translator.load('jupyterlab');
   const { kernels, kernelspecs, sessions } = app.serviceManager;
-  const { runningChanged } = Private;
-  const emitter = new Debouncer(() => runningChanged.emit(undefined), 50);
+  const { runningChanged, RunningKernel } = Private;
+  const throttler = new Throttler(() => runningChanged.emit(undefined), 100);
 
-  // Debounce signal emissions from the kernel and session managers.
-  kernels.runningChanged.connect(() => void emitter.invoke());
-  sessions.runningChanged.connect(() => void emitter.invoke());
+  // Throttle signal emissions from the kernel and session managers.
+  kernels.runningChanged.connect(() => void throttler.invoke());
+  sessions.runningChanged.connect(() => void throttler.invoke());
 
-  await kernelspecs.ready;
+  await Promise.all([kernelspecs.ready, kernels.ready]);
 
   managers.add({
     name: trans.__('Kernels'),
     running: () =>
       Array.from(kernels.running()).map(
         kernel =>
-          new Private.RunningKernel({
+          new RunningKernel({
             commands,
-            icon: jupyterIcon,
             kernel,
             kernels,
             sessions,
@@ -53,8 +46,9 @@ export async function addKernelRunningSessionManager(
           })
       ),
     shutdownAll: () => sessions.shutdownAll(),
-    refreshRunning: () => kernels.refreshRunning(),
-    runningChanged: Private.runningChanged,
+    refreshRunning: () =>
+      Promise.all([kernels.refreshRunning(), sessions.refreshRunning()]),
+    runningChanged,
     shutdownLabel: trans.__('Shut Down'),
     shutdownAllLabel: trans.__('Shut Down All'),
     shutdownAllConfirmationText: trans.__(
@@ -93,11 +87,8 @@ namespace Private {
           continue;
         }
         const { path, type } = session;
-        if (type.toLowerCase() === 'console') {
-          void this.commands.execute('console:open', { path });
-        } else {
-          void this.commands.execute('docmanager:open', { path });
-        }
+        const command = type === 'console' ? 'console:open' : 'docmanager:open';
+        void this.commands.execute(command, { path });
       }
     }
 
@@ -106,24 +97,28 @@ namespace Private {
     }
 
     icon() {
-      // TODO: Use the icons in this.spec instead.
+      // TODO: Use the icon from `this.spec.resources` instead.
       return this._icon;
     }
 
     label() {
-      return this.spec?.display_name || this.kernel.name;
+      const { kernel, spec } = this;
+      const name = spec?.display_name || kernel.name;
+      return `${name} {${kernel.connections ?? '-'}}`;
     }
 
     labelTitle() {
-      console.log(`labelTitle() is not implemented`);
-      // const { kernel, path } = this._model;
-      // let kernelName = kernel?.name;
-      // if (kernelName && kernelspecs.specs) {
-      //   const spec = kernelspecs.specs.kernelspecs[kernelName];
-      //   kernelName = spec ? spec.display_name : 'unknown';
-      // }
-      // return trans.__('Path: %1\nKernel: %2', path, kernelName);
-      return this.kernel.id;
+      const { trans } = this;
+      const { id } = this.kernel;
+      const title = [`${this.label()}: ${id}`];
+      for (const session of this.sessions.running()) {
+        if (this.kernel.id === session.kernel?.id) {
+          const { path, type } = session;
+          const kernel = `${this.kernel.name} (${this.kernel.id})`;
+          title.push(trans.__(`%1\nPath: %2\nKernel: %3`, type, path, kernel));
+        }
+      }
+      return title.join('\n\n');
     }
 
     private _icon: LabIcon;
