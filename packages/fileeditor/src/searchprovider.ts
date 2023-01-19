@@ -73,7 +73,5 @@ export class FileEditorSearchProvider
       cm.state.selection.main.from,
       cm.state.selection.main.to
     );
-    // if there are newlines, just return empty string
-    return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
   }
 }
