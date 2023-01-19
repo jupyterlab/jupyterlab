@@ -99,7 +99,7 @@ bumped their major version (following semver convention). We want to point out p
      ``renameAck`` is not optional anymore in ``IDocumentProvider``.
    * Removed the token and type ``IDocumentProviderFactory``.
    * Removed the property collaborative from the interface ``WebSocketProvider.IOptions``. It doesn't extend from
-    ``IDocumentProviderFactory.IOptions``. And the ``ymodel`` attribute has been renamed ``model``.
+     ``IDocumentProviderFactory.IOptions``. And the ``ymodel`` attribute has been renamed ``model``.
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
