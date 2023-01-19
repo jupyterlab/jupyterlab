@@ -23,3 +23,7 @@
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+
+.jp-MainAreaWidget {
+  contain: strict;
+}
