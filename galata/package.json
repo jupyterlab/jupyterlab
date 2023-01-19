@@ -62,7 +62,7 @@
     "@stdlib/stats": "~0.0.13",
     "fs-extra": "^10.1.0",
     "http-server": "^13.0.0",
-    "json5": "^2.1.1",
+    "json5": "^2.2.3",
     "path": "~0.12.7",
     "systeminformation": "^5.8.6",
     "vega": "^5.20.0",
