@@ -76,8 +76,8 @@ const langMenu: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     settings: ISettingRegistry,
     translator: ITranslator,
-    mainMenu: IMainMenu,
-    palette: ICommandPalette
+    mainMenu: IMainMenu | null,
+    palette: ICommandPalette | null
   ) => {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
