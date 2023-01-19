@@ -86,7 +86,7 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
 
   return (
     <div className={wrapperClass}>
-      <input
+      <textarea
         placeholder={trans.__('Find')}
         className={INPUT_CLASS}
         value={props.searchText}
