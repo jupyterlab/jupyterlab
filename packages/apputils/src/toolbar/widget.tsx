@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ISessionContext, sessionContextDialogs } from '../sessioncontext';
+import { ISessionContext } from '../sessioncontext';
 import { translateKernelStatuses } from '../kernelstatuses';
 /**
  * The class name added to toolbar kernel name text.
@@ -73,7 +73,7 @@ export namespace Toolbar {
     return new ToolbarButton({
       icon: refreshIcon,
       onClick: () => {
-        void (dialogs ?? sessionContextDialogs).restart(
+        void (dialogs ?? sessionContext.dialogs).restart(
           sessionContext,
           translator
         );
@@ -97,7 +97,7 @@ export namespace Toolbar {
     const el = ReactWidget.create(
       <Private.KernelNameComponent
         sessionContext={sessionContext}
-        dialogs={dialogs ?? sessionContextDialogs}
+        dialogs={dialogs ?? sessionContext.dialogs}
         translator={translator}
       />
     );

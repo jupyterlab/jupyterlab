@@ -200,6 +200,11 @@ export interface ISessionContext extends IObservableDisposable {
   readonly specsManager: KernelSpec.IManager;
 
   /**
+   * Session dialogs for selecting a kernel.
+   */
+  readonly dialogs: ISessionContext.IDialogs;
+
+  /**
    * Starts new Kernel.
    *
    * @returns Whether to ask the user to pick a kernel.
@@ -331,6 +336,7 @@ export class SessionContext implements ISessionContext {
    * Construct a new session context.
    */
   constructor(options: SessionContext.IOptions) {
+    this.dialogs = options.dialogs;
     this.sessionManager = options.sessionManager;
     this.specsManager = options.specsManager;
     this.translator = options.translator || nullTranslator;
@@ -488,6 +494,11 @@ export class SessionContext implements ISessionContext {
   get isRestarting(): boolean {
     return this._isRestarting;
   }
+
+  /**
+   * Session dialogs for selecting a kernel.
+   */
+  readonly dialogs: ISessionContext.IDialogs;
 
   /**
    * The session manager used by the session.
@@ -1234,6 +1245,11 @@ export namespace SessionContext {
     specsManager: KernelSpec.IManager;
 
     /**
+     * Session dialogs for selecting a kernel.
+     */
+    dialogs: ISessionContext.IDialogs;
+
+    /**
      * The initial path of the file.
      */
     path?: string;
@@ -1303,8 +1319,8 @@ export namespace SessionContext {
  * The default implementation of the client session dialog provider.
  */
 export class SessionContextDialogs implements ISessionContext.IDialogs {
-  constructor(settings: ISettingRegistry.ISettings, translator?: ITranslator) {
-    this._settings = settings;
+  constructor(settings?: ISettingRegistry.ISettings, translator?: ITranslator) {
+    this._settings = settings || null;
     this._translator = translator || nullTranslator;
   }
 
@@ -1332,7 +1348,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       Dialog.okButton({ label: trans.__('Select') })
     ];
 
-    const selectPreferredKernel = this._settings.get('selectPreferredKernel')
+    const selectPreferredKernel = this._settings?.get('selectPreferredKernel')
       .composite as boolean;
 
     const dialog = new Dialog({
@@ -1351,7 +1367,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     const result = await dialog.launch();
 
     if (result.isChecked) {
-      this._settings.set('selectPreferredKernel', result.isChecked);
+      this._settings?.set('selectPreferredKernel', result.isChecked);
     }
 
     if (sessionContext.isDisposed || !result.button.accept) {
@@ -1419,7 +1435,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     return false;
   }
 
-  private _settings: ISettingRegistry.ISettings;
+  private _settings: ISettingRegistry.ISettings | null;
   private _translator: ITranslator;
 }
 

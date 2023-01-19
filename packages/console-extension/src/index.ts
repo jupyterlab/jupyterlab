@@ -19,7 +19,6 @@ import {
   ISessionContext,
   ISessionContextDialogs,
   Sanitizer,
-  sessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -105,6 +104,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     IEditorServices,
     IRenderMimeRegistry,
     ISettingRegistry,
+    ISessionContextDialogs,
     ITranslator
   ],
   optional: [
@@ -114,7 +114,6 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ICommandPalette,
     ILauncher,
     ILabStatus,
-    ISessionContextDialogs,
     IFormRendererRegistry
   ],
   activate: activateConsole,
@@ -240,6 +239,7 @@ async function activateConsole(
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
+  sessionDialogs: ISessionContextDialogs,
   translator: ITranslator,
   restorer: ILayoutRestorer | null,
   filebrowser: IDefaultFileBrowser | null,
@@ -247,14 +247,12 @@ async function activateConsole(
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   status: ILabStatus | null,
-  sessionDialogs: ISessionContextDialogs | null,
   formRegistry: IFormRendererRegistry | null
 ): Promise<IConsoleTracker> {
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = trans.__('Console');
-  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
   // Create a widget tracker for all console panels.
   const tracker = new WidgetTracker<ConsolePanel>({
@@ -359,6 +357,7 @@ async function activateConsole(
     await manager.ready;
 
     const panel = new ConsolePanel({
+      sessionDialogs: sessionDialogs,
       manager,
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,

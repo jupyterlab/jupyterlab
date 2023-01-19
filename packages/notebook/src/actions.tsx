@@ -5,7 +5,6 @@ import {
   Clipboard,
   Dialog,
   ISessionContext,
-  sessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
 import {
@@ -2202,7 +2201,7 @@ namespace Private {
           if (sessionContext.hasNoKernel) {
             promise = sessionContext.startKernel().then(shouldSelect => {
               if (shouldSelect) {
-                return sessionContextDialogs.selectKernel(sessionContext);
+                return sessionContext.dialogs.selectKernel(sessionContext);
               }
             });
           }

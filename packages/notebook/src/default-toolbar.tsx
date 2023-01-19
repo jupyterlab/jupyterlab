@@ -6,7 +6,6 @@ import {
   Dialog,
   ISessionContext,
   ISessionContextDialogs,
-  sessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -216,7 +215,7 @@ export namespace ToolbarItems {
     return new ToolbarButton({
       icon: fastForwardIcon,
       onClick: () => {
-        void (dialogs ?? sessionContextDialogs)
+        void (dialogs || panel.sessionContext.dialogs)
           .restart(panel.sessionContext, translator)
           .then(restarted => {
             if (restarted) {

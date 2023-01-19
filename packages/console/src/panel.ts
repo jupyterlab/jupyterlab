@@ -4,8 +4,7 @@
 import {
   ISessionContext,
   MainAreaWidget,
-  SessionContext,
-  sessionContextDialogs
+  SessionContext
 } from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt, Time, URLExt } from '@jupyterlab/coreutils';
@@ -60,6 +59,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     sessionContext = this._sessionContext =
       sessionContext ||
       new SessionContext({
+        dialogs: options.sessionDialogs,
         sessionManager: manager.sessions,
         specsManager: manager.kernelspecs,
         path,
@@ -87,7 +87,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     void sessionContext.initialize().then(async value => {
       if (value) {
-        await sessionContextDialogs.selectKernel(sessionContext!);
+        await sessionContext?.dialogs.selectKernel(sessionContext!);
       }
       this._connected = new Date();
       this._updateTitlePanel();
@@ -230,6 +230,8 @@ export namespace ConsolePanel {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    sessionDialogs: ISessionContext.IDialogs;
 
     /**
      * A function to call when the kernel is busy.

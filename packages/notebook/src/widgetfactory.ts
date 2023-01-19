@@ -137,7 +137,7 @@ export namespace NotebookWidgetFactory {
     /**
      * The session context dialogs.
      */
-    sessionDialogs?: ISessionContextDialogs;
+    sessionDialogs: ISessionContextDialogs;
 
     /**
      * The application language translator.

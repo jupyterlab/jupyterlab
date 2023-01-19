@@ -5,7 +5,6 @@ import {
   Dialog,
   ISessionContext,
   SessionContext,
-  sessionContextDialogs,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
@@ -46,7 +45,7 @@ export class Context<
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._factory = options.factory;
-    this._dialogs = options.sessionDialogs || sessionContextDialogs;
+    this._dialogs = options.sessionDialogs;
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
@@ -75,6 +74,7 @@ export class Context<
 
     const ext = PathExt.extname(this._path);
     this.sessionContext = new SessionContext({
+      dialogs: this._dialogs,
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
       path: this._path,
@@ -960,7 +960,7 @@ export namespace Context {
     /**
      * The dialogs used for the session context.
      */
-    sessionDialogs?: ISessionContext.IDialogs;
+    sessionDialogs: ISessionContext.IDialogs;
 
     /**
      * The application language translator.
