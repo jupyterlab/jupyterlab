@@ -10,6 +10,6 @@
     "install:all": "jlpm run install:core && jlpm run install:middle && jlpm run install:md && jlpm run install:phosphor",
     "install:core": "cd core_package && jlpm install",
     "install:md": "cd md_package && jlpm install",
-    "install:middle": "cd middle_package && jlpm install",
+    "install:middle": "cd middle_package && jlpm install"
   }
 }
