@@ -26,7 +26,6 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
-  sessionContextDialogs,
   showDialog,
   Toolbar,
   WidgetTracker
@@ -310,6 +309,9 @@ namespace CommandIDs {
   export const selectCompleter = 'completer:select-notebook';
 
   export const tocRunCells = 'toc:run-cells';
+
+  export const setSelectPreferredKernel =
+    'notebook:set-select-preferred-kernel';
 }
 
 /**
@@ -339,7 +341,7 @@ const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory, IEditorExtensionRegistry],
+  requires: [INotebookWidgetFactory, IEditorExtensionRegistry, ISessionContextDialogs],
   optional: [
     ICommandPalette,
     IDefaultFileBrowser,
@@ -348,7 +350,6 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     IMainMenu,
     IRouter,
     ISettingRegistry,
-    ISessionContextDialogs,
     ITranslator,
     IFormRendererRegistry
   ],
@@ -1528,6 +1529,7 @@ function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
   extensions: IEditorExtensionRegistry,
+  sessionDialogs: ISessionContextDialogs,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
@@ -1535,7 +1537,6 @@ function activateNotebookHandler(
   mainMenu: IMainMenu | null,
   router: IRouter | null,
   settingRegistry: ISettingRegistry | null,
-  sessionDialogs: ISessionContextDialogs | null,
   translator: ITranslator | null,
   formRegistry: IFormRendererRegistry | null
 ): INotebookTracker {
@@ -1621,6 +1622,12 @@ function activateNotebookHandler(
               }
             })
             .catch(console.error);
+        }
+      });
+      commands.addCommand(CommandIDs.setSelectPreferredKernel, {
+        label: trans.__('Auto Select The Preferred Kernel'),
+        execute: args => {
+          void settings.set('selectPreferredKernel', true);
         }
       });
     })
@@ -2012,13 +2019,11 @@ function addCommands(
   app: JupyterFrontEnd,
   tracker: NotebookTracker,
   translator: ITranslator,
-  sessionDialogs: ISessionContextDialogs | null,
+  sessionDialogs: ISessionContextDialogs,
   isEnabled: () => boolean
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
-
-  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
   const isEnabledAndSingleSelected = (): boolean => {
     return Private.isEnabledAndSingleSelected(shell, tracker);
@@ -3397,11 +3402,9 @@ function populatePalette(
 function populateMenus(
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
-  sessionDialogs: ISessionContextDialogs | null,
+  sessionDialogs: ISessionContextDialogs,
   isEnabled: () => boolean
 ): void {
-  sessionDialogs = sessionDialogs || sessionContextDialogs;
-
   // Add undo/redo hooks to the edit menu.
   mainMenu.editMenu.undoers.redo.add({
     id: CommandIDs.redo,

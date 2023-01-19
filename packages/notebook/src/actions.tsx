@@ -2202,6 +2202,7 @@ namespace Private {
           if (sessionContext.hasNoKernel) {
             promise = sessionContext.startKernel().then(shouldSelect => {
               if (shouldSelect) {
+                sessionContext.kernelPreference.selectPreferredKernel = true;
                 return sessionContextDialogs.selectKernel(sessionContext);
               }
             });

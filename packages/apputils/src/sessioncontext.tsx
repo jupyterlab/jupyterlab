@@ -9,6 +9,7 @@ import {
   ServerConnection,
   Session
 } from '@jupyterlab/services';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
@@ -1301,7 +1302,12 @@ export namespace SessionContext {
 /**
  * The default implementation of the client session dialog provider.
  */
-export const sessionContextDialogs: ISessionContext.IDialogs = {
+export class SessionContextDialogs implements ISessionContext.IDialogs {
+  constructor(settings: ISettingRegistry.ISettings, translator?: ITranslator) {
+    this._settings = settings;
+    this._translator = translator || nullTranslator;
+  }
+
   /**
    * Select a kernel for the session.
    */
@@ -1312,7 +1318,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
     if (sessionContext.isDisposed) {
       return Promise.resolve();
     }
-    translator = translator || nullTranslator;
+    translator = translator || this._translator;
     const trans = translator.load('jupyterlab');
 
     // If there is no existing kernel, offer the option
@@ -1326,13 +1332,28 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
       Dialog.okButton({ label: trans.__('Select') })
     ];
 
+    const selectPreferredKernel = this._settings.get('selectPreferredKernel')
+      .composite as boolean;
+
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
       body: new Private.KernelSelector(sessionContext, translator),
-      buttons
+      buttons,
+      checkbox: {
+        label: trans.__('Always select the preferred kernel'),
+        caption: trans.__(
+          'Remember my choice and always select the preferred kernel'
+        ),
+        checked: selectPreferredKernel
+      }
     });
 
     const result = await dialog.launch();
+
+    if (result.isChecked) {
+      this._settings.set('selectPreferredKernel', result.isChecked);
+    }
+
     if (sessionContext.isDisposed || !result.button.accept) {
       return;
     }
@@ -1343,7 +1364,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
     if (model) {
       await sessionContext.changeKernel(model);
     }
-  },
+  }
 
   /**
    * Restart the session.
@@ -1359,7 +1380,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
     sessionContext: ISessionContext,
     translator?: ITranslator
   ): Promise<boolean> {
-    translator = translator || nullTranslator;
+    translator = translator || this._translator;
     const trans = translator.load('jupyterlab');
 
     await sessionContext.initialize();
@@ -1397,7 +1418,10 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
     }
     return false;
   }
-};
+
+  private _settings: ISettingRegistry.ISettings;
+  private _translator: ITranslator;
+}
 
 /**
  * The namespace for module private data.

@@ -23,7 +23,7 @@ import {
   MainAreaWidget,
   Printing,
   Sanitizer,
-  sessionContextDialogs,
+  SessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
@@ -555,9 +555,17 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
   id: '@jupyterlab/apputils-extension:sessionDialogs',
   provides: ISessionContextDialogs,
+  requires: [ISettingRegistry, ITranslator],
   autoStart: true,
-  activate: () => {
-    return sessionContextDialogs;
+  activate: async (
+    app: JupyterFrontEnd,
+    settingRegistry: ISettingRegistry,
+    translator: ITranslator
+  ) => {
+    const settings = await settingRegistry.load(
+      '@jupyterlab/notebook-extension:tracker'
+    );
+    return new SessionContextDialogs(settings, translator);
   }
 };
 
