@@ -190,8 +190,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       editor?.state.selection.main.from,
       editor?.state.selection.main.to
     );
-    // if there are newlines, just return empty string
-    return selection?.search(/\r?\n|\r/g) === -1 ? selection : '';
   }
 
   /**
