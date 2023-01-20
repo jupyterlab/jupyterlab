@@ -36,7 +36,7 @@
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "start": "jupyter lab --config ./jupyter_server_test_config.py",
     "start:detached": "(npm run start&)",
-    "start:doc": "jupyter lab --config ./jupyter_server_test_config.py --extensions-in-dev-mode",
+    "start:doc": "PYTHONWARNINGS=ignore jupyter lab --config ./jupyter_server_test_config.py --extensions-in-dev-mode",
     "test": "playwright test",
     "test:benchmark": "jlpm run test -c playwright-benchmark.config.js",
     "test:benchmark:update": "BENCHMARK_NUMBER_SAMPLES=1 jlpm run test -c playwright-benchmark.config.js --update-snapshots",
