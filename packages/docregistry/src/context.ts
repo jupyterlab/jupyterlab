@@ -55,21 +55,30 @@ export class Context<
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
     // Get shared model from IDrive.sharedModelFactory
-    const collaborative = PageConfig.getOption('collaborative') === 'true';
-    if (collaborative && this._factory.collaborative) {
+    const collaborationEnabled =
+      PageConfig.getOption('collaborative') === 'true';
+    if (collaborationEnabled && this._factory.collaborative) {
       const sharedFactory = this._manager.contents.getSharedModelFactory(
         this._path
       );
       const sharedModel = sharedFactory?.createNew({
         path: localPath,
-        format: this._factory.fileFormat!,
+        format: this._factory.fileFormat,
         contentType: this._factory.contentType,
         collaborative: this._factory.collaborative
       });
 
-      this._model = this._factory.createNew(lang, sharedModel, collaborative);
+      this._model = this._factory.createNew({
+        languagePreference: lang,
+        sharedModel,
+        collaborationEnabled
+      });
     } else {
-      this._model = this._factory.createNew(lang, undefined, collaborative);
+      this._model = this._factory.createNew({
+        languagePreference: lang,
+        sharedModel: undefined,
+        collaborationEnabled
+      });
     }
 
     this._readyPromise = manager.ready.then(() => {
@@ -202,6 +211,8 @@ export class Context<
     this._isDisposed = true;
     this.sessionContext.dispose();
     this._model.dispose();
+    // Ensure we dispose the `sharedModel` as it may have been generated in the context
+    // through the shared model factory.
     this._model.sharedModel.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);

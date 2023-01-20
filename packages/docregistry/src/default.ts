@@ -24,15 +24,12 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(
-    languagePreference?: string,
-    sharedModel?: ISharedFile,
-    collaborationEnabled?: boolean
-  ) {
-    super({ sharedModel });
-    this._defaultLang = languagePreference || '';
+  constructor(options?: DocumentModel.IOptions) {
+    super({ sharedModel: options?.sharedModel });
+    this._defaultLang = options?.languagePreference || '';
+    this._collaborationEnabled = !!options?.collaborationEnabled;
+
     this.sharedModel.changed.connect(this._onStateChanged, this);
-    this._collaborationEnabled = !!collaborationEnabled;
   }
 
   /**
@@ -199,6 +196,20 @@ export class DocumentModel
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
   private _collaborationEnabled: boolean;
 }
+/**
+ * The DocumentModel namespace.
+ */
+export namespace DocumentModel {
+  /**
+   * The options used to create a DocumentModel.
+   */
+  export interface IOptions extends DocumentRegistry.IModelOptions {
+    /**
+     * The shared model.
+     */
+    sharedModel?: ISharedFile;
+  }
+}
 
 /**
  * An implementation of a model factory for text files.
@@ -270,13 +281,12 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    *
    * @returns A new document model.
    */
-  createNew(
-    languagePreference?: string,
-    sharedModel?: ISharedFile,
-    collaborationEnabled?: boolean
-  ): DocumentRegistry.ICodeModel {
-    const collaborative = collaborationEnabled && this.collaborative;
-    return new DocumentModel(languagePreference, sharedModel, collaborative);
+  createNew(options?: DocumentModel.IOptions): DocumentRegistry.ICodeModel {
+    const collaborative = options?.collaborationEnabled && this.collaborative;
+    return new DocumentModel({
+      ...options,
+      collaborationEnabled: collaborative
+    });
   }
 
   /**

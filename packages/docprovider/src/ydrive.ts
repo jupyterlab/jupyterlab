@@ -3,7 +3,6 @@
 
 import {
   DocumentChange,
-  IFactory,
   ISharedDocument,
   YDocument,
   YFile,
@@ -40,7 +39,7 @@ export class YDrive extends Drive {
   /**
    * SharedModel factory for the YDrive.
    */
-  readonly sharedModelFactory: IFactory;
+  readonly sharedModelFactory: Contents.ISharedFactory;
 
   /**
    * Delete a file.
@@ -54,8 +53,9 @@ export class YDrive extends Drive {
    */
   async delete(localPath: string): Promise<void> {
     await super.delete(localPath);
-    // TODO should we remove the path from the sharedPath?
-    this._sharedPaths.delete(localPath);
+    // FIXME
+    // We are not removing the path from `sharedPaths` as multiple providers of the same file (with different model) may exist.
+    //this._sharedPaths.delete(localPath);
   }
 
   /**
@@ -154,9 +154,12 @@ export class YDrive extends Drive {
   }
 
   private _onCreate = (
-    options: IFactory.IOptions,
+    options: Contents.ISharedFactoryOptions,
     sharedModel: YDocument<DocumentChange>
   ) => {
+    if (typeof options.format !== 'string') {
+      return;
+    }
     try {
       const provider = new WebSocketProvider({
         url: URLExt.join(this.serverSettings.wsUrl, Y_DOCUMENT_PROVIDER_URL),
@@ -169,7 +172,7 @@ export class YDrive extends Drive {
 
       const key = `${options.contentType}:${options.format}:${options.path}`;
       this._providers.set(key, provider);
-      // FIXME
+
       sharedModel.disposed.connect(() => {
         const provider = this._providers.get(key);
         if (provider) {
@@ -192,42 +195,43 @@ export class YDrive extends Drive {
 }
 
 /**
- *
+ * Yjs sharedModel factory for real-time collaboration.
  */
-export class SharedModelFactory implements IFactory {
+class SharedModelFactory implements Contents.ISharedFactory {
   constructor(
     private _onCreate: (
-      options: IFactory.IOptions,
+      options: Contents.ISharedFactoryOptions,
       sharedModel: YDocument<DocumentChange>
     ) => void
   ) {}
 
-  createNew(options: IFactory.IOptions): ISharedDocument | undefined {
-    if (
-      typeof options?.format !== 'string' ||
-      typeof options?.contentType !== 'string'
-    ) {
-      throw new Error('Format and content type must be provided.');
+  createNew(
+    options: Contents.ISharedFactoryOptions
+  ): ISharedDocument | undefined {
+    if (typeof options.format !== 'string') {
+      console.warn(`Only defined format are supported; got ${options.format}.`);
+      return;
     }
 
-    if (options.collaborative !== true) {
+    if (!options.collaborative) {
       return;
     }
 
     let sharedModel: YDocument<DocumentChange> | undefined;
-    switch (options?.contentType) {
+    switch (options.contentType) {
       case 'file':
         sharedModel = new YFile();
         break;
       case 'notebook':
         sharedModel = new YNotebook();
         break;
-      case 'directory':
-      default:
-        return;
+      //default:
+      // FIXME we should request a registry for the proper sharedModel
     }
 
-    this._onCreate(options, sharedModel);
+    if (sharedModel) {
+      this._onCreate(options, sharedModel);
+    }
 
     return sharedModel;
   }

@@ -9,7 +9,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { IFactory } from '@jupyter/ydoc';
+import { ISharedDocument } from '@jupyter/ydoc';
 
 import { ServerConnection } from '..';
 
@@ -221,6 +221,43 @@ export namespace Contents {
   }
 
   /**
+   * A factory interface for creating `ISharedDocument` objects.
+   */
+  export interface ISharedFactory {
+    /**
+     * Create a new `ISharedDocument` instance.
+     *
+     * It should return `undefined` if the factory is not able to create a `ISharedDocument`.
+     */
+    createNew(options: ISharedFactoryOptions): ISharedDocument | undefined;
+  }
+
+  /**
+   * The options used to instantiate a ISharedDocument
+   */
+  export interface ISharedFactoryOptions {
+    /**
+     * The path of the file.
+     */
+    path: string;
+    /**
+     * The format of the document. If null, the document won't be
+     * collaborative.
+     */
+    format: FileFormat;
+    /**
+     * The content type of the document.
+     */
+    contentType: ContentType;
+    /**
+     * Wether the document is collaborative or not.
+     *
+     *  The default value is `true`.
+     */
+    collaborative?: boolean;
+  }
+
+  /**
    * The interface for a contents manager.
    */
   export interface IManager extends IDisposable {
@@ -289,7 +326,7 @@ export namespace Contents {
      * relevant backend. Returns `null` if the backend
      * does not provide one.
      */
-    getSharedModelFactory(path: string): IFactory | null;
+    getSharedModelFactory(path: string): ISharedFactory | null;
 
     /**
      * Get a file or directory.
@@ -431,7 +468,7 @@ export namespace Contents {
      * An optional shared model IFactory instance for the
      * drive.
      */
-    readonly sharedModelFactory?: IFactory;
+    readonly sharedModelFactory?: ISharedFactory;
 
     /**
      * A signal emitted when a file operation takes place.
@@ -623,7 +660,7 @@ export class ContentsManager implements Contents.IManager {
    * relevant backend. Returns `null` if the backend
    * does not provide one.
    */
-  getSharedModelFactory(path: string): IFactory | null {
+  getSharedModelFactory(path: string): Contents.ISharedFactory | null {
     const [drive] = this._driveForPath(path);
     return drive?.sharedModelFactory ?? null;
   }

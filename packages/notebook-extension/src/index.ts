@@ -41,7 +41,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { FileBrowser, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import {
   ILSPCodeExtractorsManager,
@@ -324,7 +324,7 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   requires: [INotebookWidgetFactory],
   optional: [
     ICommandPalette,
-    IFileBrowserFactory,
+    IDefaultFileBrowser,
     ILauncher,
     ILayoutRestorer,
     IMainMenu,
@@ -1405,7 +1405,7 @@ function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
   palette: ICommandPalette | null,
-  browserFactory: IFileBrowserFactory | null,
+  defaultBrowser: FileBrowser | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
@@ -1678,7 +1678,7 @@ function activateNotebookHandler(
     execute: args => {
       const cwd =
         (args['cwd'] as string) ||
-        (browserFactory ? browserFactory.defaultBrowser.model.path : '');
+        (defaultBrowser ? defaultBrowser.model.path : '');
       const kernelName = (args['kernelName'] as string) || '';
       return createNew(cwd, kernelName);
     }

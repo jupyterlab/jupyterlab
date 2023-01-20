@@ -77,15 +77,11 @@ export class NotebookModelFactory
    *
    * @returns A new document model.
    */
-  createNew(
-    languagePreference?: string,
-    sharedModel?: ISharedNotebook,
-    collaborationEnabled?: boolean
-  ): INotebookModel {
+  createNew(options?: NotebookModelFactory.IModelOptions): INotebookModel {
     return new NotebookModel({
-      languagePreference,
-      sharedModel,
-      collaborationEnabled: collaborationEnabled && this.collaborative,
+      languagePreference: options?.languagePreference,
+      sharedModel: options?.sharedModel,
+      collaborationEnabled: options?.collaborationEnabled && this.collaborative,
       disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo
     });
   }
@@ -122,5 +118,23 @@ export namespace NotebookModelFactory {
      * Defines if the document can be undo/redo.
      */
     disableDocumentWideUndoRedo?: boolean;
+  }
+
+  /**
+   * The options used to create a notebook model.
+   */
+  export interface IModelOptions {
+    /**
+     * The preferred language.
+     */
+    languagePreference?: string;
+    /**
+     * The shared model.
+     */
+    sharedModel?: ISharedNotebook;
+    /**
+     * Whether the model is collaborative or not.
+     */
+    collaborationEnabled?: boolean;
   }
 }
