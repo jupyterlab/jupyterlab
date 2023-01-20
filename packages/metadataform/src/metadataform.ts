@@ -6,6 +6,7 @@
  */
 
 import { NotebookTools } from '@jupyterlab/notebook';
+import { BaseSettings } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
@@ -423,7 +424,10 @@ export class MetadataFormWidget
 
     this.buildWidget({
       properties: formProperties,
-      settings: new Private.Settings(this._metaInformation),
+      settings: new Private.Settings({
+        metaInformation: this._metaInformation,
+        schema: this._metadataSchema
+      }),
       uiSchema: this._uiSchema,
       translator: this.translator || null,
       formData: formData,
@@ -457,17 +461,16 @@ namespace Private {
   /**
    * The settings to send to RJSF templates in formContext.
    */
-  export class Settings implements MetadataForm.ISettings {
-    constructor(metaInformation: MetadataForm.IMetaInformation) {
+  export class Settings extends BaseSettings implements MetadataForm.ISettings {
+    constructor({
+      metaInformation,
+      schema
+    }: {
+      metaInformation: MetadataForm.IMetaInformation;
+      schema: PartialJSONObject;
+    }) {
+      super({ schema });
       this.metaInformation = metaInformation;
-    }
-
-    /**
-     * Returns the default value for a specific key.
-     * @param metadataKey - the key for which we expect default value.
-     */
-    default(metadataKey: string) {
-      return this.metaInformation[metadataKey]?.default;
     }
 
     metaInformation: MetadataForm.IMetaInformation;

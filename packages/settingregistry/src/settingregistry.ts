@@ -660,13 +660,70 @@ export class SettingRegistry implements ISettingRegistry {
 }
 
 /**
+ * Base settings specified by a JSON schema.
+ */
+export class BaseSettings<
+  T extends ISettingRegistry.IProperty = ISettingRegistry.IProperty
+> {
+  constructor(options: { schema: T }) {
+    this._schema = options.schema;
+  }
+
+  /**
+   * The plugin's schema.
+   */
+  get schema(): T {
+    return this._schema;
+  }
+
+  /**
+   * Checks if any fields are different from the default value.
+   */
+  isDefault(user: ReadonlyPartialJSONObject): boolean {
+    for (const key in this.schema.properties) {
+      const value = user[key];
+      const defaultValue = this.default(key);
+      if (
+        value === undefined ||
+        defaultValue === undefined ||
+        JSONExt.deepEqual(value, JSONExt.emptyObject) ||
+        JSONExt.deepEqual(value, JSONExt.emptyArray)
+      ) {
+        continue;
+      }
+      if (!JSONExt.deepEqual(value, defaultValue)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Calculate the default value of a setting by iterating through the schema.
+   *
+   * @param key - The name of the setting whose default value is calculated.
+   *
+   * @returns A calculated default JSON value for a specific setting.
+   */
+  default(key?: string): PartialJSONValue | undefined {
+    return Private.reifyDefault(this.schema, key);
+  }
+
+  private _schema: T;
+}
+
+/**
  * A manager for a specific plugin's settings.
  */
-export class Settings implements ISettingRegistry.ISettings {
+export class Settings
+  extends BaseSettings<ISettingRegistry.ISchema>
+  implements ISettingRegistry.ISettings
+{
   /**
    * Instantiate a new plugin settings manager.
    */
   constructor(options: Settings.IOptions) {
+    super({ schema: options.plugin.schema });
     this.id = options.plugin.id;
     this.registry = options.registry;
     this.registry.pluginChanged.connect(this._onPluginChanged, this);
@@ -708,39 +765,10 @@ export class Settings implements ISettingRegistry.ISettings {
   }
 
   /**
-   * The plugin's schema.
-   */
-  get schema(): ISettingRegistry.ISchema {
-    return this.plugin.schema;
-  }
-
-  /**
    * The plugin settings raw text value.
    */
   get raw(): string {
     return this.plugin.raw;
-  }
-
-  /**
-   * Checks if any fields are different from the default value.
-   */
-  isDefault(user: ReadonlyPartialJSONObject): boolean {
-    for (const key in this.schema.properties) {
-      const value = user[key];
-      const defaultValue = this.default(key);
-      if (
-        value === undefined ||
-        defaultValue === undefined ||
-        JSONExt.deepEqual(value, JSONExt.emptyObject) ||
-        JSONExt.deepEqual(value, JSONExt.emptyArray)
-      ) {
-        continue;
-      }
-      if (!JSONExt.deepEqual(value, defaultValue)) {
-        return false;
-      }
-    }
-    return true;
   }
 
   /**
@@ -769,17 +797,6 @@ export class Settings implements ISettingRegistry.ISettings {
    */
   annotatedDefaults(): string {
     return Private.annotatedDefaults(this.schema, this.id);
-  }
-
-  /**
-   * Calculate the default value of a setting by iterating through the schema.
-   *
-   * @param key - The name of the setting whose default value is calculated.
-   *
-   * @returns A calculated default JSON value for a specific setting.
-   */
-  default(key?: string): PartialJSONValue | undefined {
-    return Private.reifyDefault(this.schema, key);
   }
 
   /**

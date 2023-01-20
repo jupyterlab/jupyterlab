@@ -28,10 +28,13 @@ export namespace MetadataForm {
    */
   export interface ISettings {
     /**
-     * Returns the default value for a specific key.
-     * @param metadataKey - the key for which we expect default value.
+     * Calculate the default value of a setting by iterating through the schema.
+     *
+     * @param key - The name of the setting whose default value is calculated.
+     *
+     * @returns A calculated default JSON value for a specific setting.
      */
-    default(metadataKey: string): PartialJSONValue | undefined;
+    default(key?: string): PartialJSONValue | undefined;
 
     /**
      * The meta information associated to all properties.

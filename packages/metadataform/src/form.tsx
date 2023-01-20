@@ -33,7 +33,7 @@ export class FormWidget extends ReactWidget {
    */
   render(): JSX.Element {
     const formContext = {
-      defaultFormData: null, // this._props.settings.default(), // FIXME
+      defaultFormData: this._props.settings.default(),
       settings: this._props.settings,
       updateMetadata: this._props.metadataFormWidget.updateMetadata
     };
