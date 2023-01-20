@@ -1795,7 +1795,7 @@ class _AppHandler:
             info["path"] = path
         if pin:
             old_path = info["path"]
-            new_path = pjoin(osp.dirname(old_path), "{}{}.tgz".format(PIN_PREFIX, pin))
+            new_path = pjoin(osp.dirname(old_path), f"{PIN_PREFIX}{pin}.tgz")
             shutil.move(old_path, new_path)
             info["path"] = new_path
 
@@ -2015,7 +2015,7 @@ def _yarn_config(logger):
             )
         )
     except Exception as e:
-        logger.error("Fail to get yarn configuration. {!s}".format(e))
+        logger.error(f"Fail to get yarn configuration. {e!s}")
 
     return configuration
 
@@ -2119,7 +2119,7 @@ def _tarsum(input_file):
     """
     tar = tarfile.open(input_file, "r")
     chunk_size = 100 * 1024
-    h = hashlib.new("sha1")
+    h = hashlib.new("sha1")  # noqa: S324
 
     for member in tar:
         if not member.isfile():

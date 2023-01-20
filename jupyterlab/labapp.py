@@ -622,7 +622,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         if self.override_static_url:
             return self.override_static_url
         else:
-            static_url = "/static/{name}/".format(name=self.name)
+            static_url = f"/static/{self.name}/"
             return ujoin(self.serverapp.base_url, static_url)
 
     @default("theme_url")

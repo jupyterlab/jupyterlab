@@ -295,7 +295,7 @@ class TestExtension(AppHandlerTest):
             subprocess.run(
                 ["npm", "pack", name],
                 stdout=subprocess.PIPE,
-                universal_newlines=True,
+                text=True,
                 check=True,
                 cwd=str(base_dir),
             ).stdout.strip()
