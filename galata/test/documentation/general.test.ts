@@ -461,7 +461,9 @@ test.describe('General', () => {
 
     await page.click('[title="Running Terminals and Kernels"]');
 
-    await expect(page.locator('text="Python 3 (ipykernel) {1}"')).toHaveCount(2);
+    await expect(page.locator('text="Python 3 (ipykernel) {1}"')).toHaveCount(
+      2
+    );
 
     expect(
       await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
