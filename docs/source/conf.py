@@ -80,7 +80,7 @@ version_ns = {}
 exec(_version_py.read_text(), version_ns)  # noqa
 
 # The short X.Y version.
-version = "{0:d}.{1:d}".format(*version_ns["version_info"])
+version = "{0:d}.{1:d}".format(*version_ns["version_info"])  # noqa
 # The full version, including alpha/beta/rc tags.
 release = version_ns["__version__"]
 

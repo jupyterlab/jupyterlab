@@ -483,6 +483,4 @@ def _get_labextension_metadata(module):
         except Exception as exc:
             errors.append(exc)
 
-    raise ModuleNotFoundError(
-        f"There is no labextension at {module}. Errors encountered: {errors}"
-    )
+    raise ModuleNotFoundError(f"There is no labextension at {module}. Errors encountered: {errors}")

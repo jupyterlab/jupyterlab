@@ -102,7 +102,7 @@ large_prs = []
 cursor = None
 while True:
     json["variables"]["cursor"] = cursor
-    r = requests.post(url=url, json=json, headers=headers)
+    r = requests.post(url=url, json=json, headers=headers, timeout=120)
     results = r.json()["data"]["search"]
     total_prs = results["issueCount"]
 
@@ -156,7 +156,7 @@ for prnumber in large_prs:
     prjson["variables"]["pr"] = prnumber
     pr_commits = set()
     while True:
-        r = requests.post(url=url, json=prjson, headers=headers)
+        r = requests.post(url=url, json=prjson, headers=headers, timeout=120)
         pr = r.json()["data"]["repository"]["pullRequest"]
         assert pr["number"] == prnumber  # noqa
         total_commits = pr["commits"]["totalCount"]

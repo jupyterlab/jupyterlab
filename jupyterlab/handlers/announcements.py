@@ -166,7 +166,7 @@ class CheckForUpdateHandler(APIHandler):
         if out:
             message, link = (out, ()) if isinstance(out, str) else out
             now = datetime.now().timestamp() * 1000.0
-            hash_ = hashlib.sha1(message.encode()).hexdigest()
+            hash_ = hashlib.sha1(message.encode()).hexdigest()  # noqa: S324
             notification = Notification(
                 message=message,
                 createdAt=now,
