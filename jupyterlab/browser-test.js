@@ -4,7 +4,6 @@
  */
 
 const playwright = require('playwright');
-const inspect = require('util').inspect;
 const path = require('path');
 const fs = require('fs');
 
@@ -64,10 +63,13 @@ async function main() {
   await page.waitForNavigation();
 
   console.log('Waiting for page content..');
-  const html = await page.content();
-  if (inspect(html).indexOf('jupyter-config-data') === -1) {
+
+  try {
+    await page.locator('#jupyter-config-data').waitFor();
+  } catch (reason) {
     console.error('Error loading JupyterLab page:');
-    console.error(html);
+    // Limit to 1000 characters
+    console.error((await page.content()).substring(0, 1000));
   }
 
   console.log('Waiting for #main selector...');

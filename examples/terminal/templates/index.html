@@ -7,8 +7,6 @@
 <html>
 <head>
   <title>{{page_config['appName'] | e}}</title>
-</head>
-<body>
 
   {# Copy so we do not modify the page_config with updates. #}
   {% set page_config_full = page_config.copy() %}
@@ -21,6 +19,8 @@
   </script>
 
   <script src="{{page_config['fullStaticUrl'] | e}}/bundle.js" main="index"></script>
+</head>
+<body>
 
   <script type="text/javascript">
     /* Remove token from URL. */
