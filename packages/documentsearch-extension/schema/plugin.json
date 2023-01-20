@@ -41,17 +41,17 @@
     {
       "command": "documentsearch:highlightNext",
       "keys": ["Accel G"],
-      "selector": ".jp-mod-searchable"
+      "selector": ".jp-mod-searchable-active"
     },
     {
       "command": "documentsearch:highlightPrevious",
       "keys": ["Accel Shift G"],
-      "selector": ".jp-mod-searchable"
+      "selector": ".jp-mod-searchable-active"
     },
     {
       "command": "documentsearch:end",
       "keys": ["Escape"],
-      "selector": ".jp-mod-searchable"
+      "selector": ".jp-mod-searchable-active"
     }
   ],
   "properties": {

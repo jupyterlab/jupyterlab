@@ -22,6 +22,7 @@ import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
 const SEARCHABLE_CLASS = 'jp-mod-searchable';
+const SEARCHABLE_CLASS_ACTIVE = 'jp-mod-searchable-active';
 
 namespace CommandIDs {
   /**
@@ -234,6 +235,9 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
             searchWidget.setSearchText(searchText);
           }
           searchWidget.focusSearchInput();
+          const widget = app.shell.currentWidget;
+          widget?.addClass(SEARCHABLE_CLASS_ACTIVE);
+          //widget?.removeClass(SEARCHABLE_CLASS);
         }
       }
     });
@@ -254,6 +258,8 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           }
           searchWidget.showReplace();
           searchWidget.focusSearchInput();
+          const widget = app.shell.currentWidget;
+          widget?.addClass(SEARCHABLE_CLASS_ACTIVE);
         }
       }
     });
@@ -300,6 +306,9 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         }
 
         searchViews.get(currentWidget.id)?.close();
+        const widget = app.shell.currentWidget;
+        widget?.removeClass(SEARCHABLE_CLASS_ACTIVE);
+        //widget?.addClass(SEARCHABLE_CLASS);
       }
     });
 

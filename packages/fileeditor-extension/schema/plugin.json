@@ -144,13 +144,6 @@
       }
     ]
   },
-  "jupyter.lab.shortcuts": [
-    {
-      "command": "fileeditor:override-esc",
-      "keys": ["Escape"],
-      "selector": ".jp-FileEditor"
-    }
-  ],
   "jupyter.lab.toolbars": {
     "Editor": []
   },
