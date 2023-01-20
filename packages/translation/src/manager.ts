@@ -30,12 +30,11 @@ export class TranslationManager implements ITranslator {
     if (this._languageData && locale === 'default') {
       try {
         for (const lang of Object.values(this._languageData.data ?? {})) {
-          this._currentLocale = (
+          this._currentLocale =
             // If the language is provided by the system set up, we need to retrieve the final
             // language. This is done through the `""` entry in `_languageData` that contains
             // language metadata.
-            (lang as any)['']['language'] as string
-          ).replace('_', '-');
+            ((lang as any)['']['language'] as string).replace('_', '-');
           break;
         }
       } catch (reason) {
