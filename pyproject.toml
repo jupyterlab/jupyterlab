@@ -93,7 +93,7 @@ docs-screenshots = [
     "jupyterlab-language-pack-zh-CN==3.2.post7",
     "matplotlib==3.5.1",
     "nbconvert>=7.0.0",
-    "pandas==1.3.5",
+    "pandas==1.5.3",
     "scipy==1.7.3",
     "vdom==0.6",
     "vega_datasets==0.9.0",
