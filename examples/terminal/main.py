@@ -37,7 +37,7 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
 
     def get(self):
         """Get the main page for the application's interface."""
-        available = self.settings["terminals_available"]
+        available = self.settings.get("terminals_available", True)
         config_data = {
             # Use camelCase here, since that's what the lab components expect
             "appVersion": version,
