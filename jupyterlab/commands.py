@@ -2119,7 +2119,7 @@ def _tarsum(input_file):
     """
     tar = tarfile.open(input_file, "r")
     chunk_size = 100 * 1024
-    h = hashlib.new("sha1")
+    h = hashlib.new("sha1")  # noqa: S324
 
     for member in tar:
         if not member.isfile():
