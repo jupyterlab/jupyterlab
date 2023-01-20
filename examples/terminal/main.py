@@ -65,7 +65,8 @@ class ExampleApp(LabServerApp):
     default_url = "/example"
     app_url = "/example"
     name = __name__
-    load_other_extensions = False
+    # In jupyter-server v2 terminals are an extension.
+    load_other_extensions = True
     app_name = "JupyterLab Example Terminal"
     app_settings_dir = os.path.join(HERE, "build", "application_settings")
     schemas_dir = os.path.join(HERE, "build", "schemas")
