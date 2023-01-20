@@ -170,7 +170,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 
               if (palette) {
                 palette.addItem({
-                  category: trans.__('Languages'),
+                  category: trans.__('Display Languages'),
                   command
                 });
               }
