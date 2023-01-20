@@ -386,7 +386,7 @@ def _get_labextension_dir(user=False, sys_prefix=False, prefix=None, labextensio
         ("labextensions_dir", labextensions_dir),
         ("sys_prefix", sys_prefix),
     ]
-    conflicting_set = ["{}={!r}".format(n, v) for n, v in conflicting if v]
+    conflicting_set = [f"{n}={v!r}" for n, v in conflicting if v]
     if len(conflicting_set) > 1:
         raise ArgumentConflict(
             "cannot specify more than one of user, sys_prefix, prefix, or labextensions_dir, but got: {}".format(
@@ -423,7 +423,7 @@ def _get_labextension_metadata(module):
     """
     mod_path = osp.abspath(module)
     if not osp.exists(mod_path):
-        raise FileNotFoundError("The path `{}` does not exist.".format(mod_path))
+        raise FileNotFoundError(f"The path `{mod_path}` does not exist.")
 
     errors = []
 
@@ -484,5 +484,5 @@ def _get_labextension_metadata(module):
             errors.append(exc)
 
     raise ModuleNotFoundError(
-        "There is no labextension at {}. Errors encountered: {}".format(module, errors)
+        f"There is no labextension at {module}. Errors encountered: {errors}"
     )

@@ -362,7 +362,7 @@ def semver(version, loose):
         else:
             version = version.version
     elif not isinstance(version, string_type):  # xxx:
-        raise ValueError("Invalid Version: {}".format(version))
+        raise ValueError(f"Invalid Version: {version}")
 
     """
     if (!(this instanceof SemVer))
@@ -383,7 +383,7 @@ class SemVer:
         m = regexp[LOOSE if loose else FULL].search(version.strip())
         if not m:
             if not loose:
-                raise ValueError("Invalid Version: {}".format(version))
+                raise ValueError(f"Invalid Version: {version}")
             m = regexp[RECOVERYVERSIONNAME].search(version.strip())
             self.major = int(m.group(1)) if m.group(1) else 0
             self.minor = int(m.group(2)) if m.group(2) else 0
@@ -415,13 +415,13 @@ class SemVer:
         self.format()  # xxx:
 
     def format(self):  # noqa
-        self.version = "{}.{}.{}".format(self.major, self.minor, self.patch)
+        self.version = f"{self.major}.{self.minor}.{self.patch}"
         if len(self.prerelease) > 0:
             self.version += "-{}".format(".".join(str(v) for v in self.prerelease))
         return self.version
 
     def __repr__(self):
-        return "<SemVer {} >".format(self)
+        return f"<SemVer {self} >"
 
     def __str__(self):
         return self.version
@@ -554,7 +554,7 @@ class SemVer:
                 else:
                     self.prerelease = [identifier, 0]
         else:
-            raise ValueError("invalid increment argument: {}".format(release))
+            raise ValueError(f"invalid increment argument: {release}")
         self.format()
         self.raw = self.version
         return self
@@ -678,7 +678,7 @@ def cmp(a, op, b, loose):
     elif op == "<=":
         return lte(a, b, loose)
     else:
-        raise ValueError("Invalid operator: {}".format(op))
+        raise ValueError(f"Invalid operator: {op}")
 
 
 def comparator(comp, loose):
@@ -720,7 +720,7 @@ class Comparator:
         m = r.search(comp)
 
         if m is None:
-            raise ValueError("Invalid comparator: {}".format(comp))
+            raise ValueError(f"Invalid comparator: {comp}")
 
         self.operator = m.group(1)
         # if it literally is just '>' or '' then allow anything.
@@ -730,7 +730,7 @@ class Comparator:
             self.semver = semver(m.group(2), self.loose)
 
     def __repr__(self):
-        return '<SemVer Comparator "{}">'.format(self)
+        return f'<SemVer Comparator "{self}">'
 
     def __str__(self):
         return self.value
@@ -761,12 +761,12 @@ class Range:
         self.set = [r for r in xs if r]
 
         if not len(self.set):
-            raise ValueError("Invalid SemVer Range: {}".format(range_))
+            raise ValueError(f"Invalid SemVer Range: {range_}")
 
         self.format()
 
     def __repr__(self):
-        return '<SemVer Range "{}">'.format(self.range)
+        return f'<SemVer Range "{self.range}">'
 
     def format(self):  # noqa
         self.range = "||".join(
