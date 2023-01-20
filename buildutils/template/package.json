@@ -27,14 +27,14 @@
     "src/**/*.{ts,tsx}"
   ],
   "scripts": {
-    "build": "jlpm run tsc -b",
-    "build:test": "jlpm run tsc --build tsconfig.test.json",
-    "clean": "jlpm run rimraf lib tsconfig.tsbuildinfo",
-    "test": "jlpm run jest",
-    "test:cov": "jlpm run jest --collect-coverage",
-    "test:debug": "jlpm run node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "jlpm run node --inspect-brk node_modules/.bin/jest --runInBand --watch",
-    "watch": "jlpm run tsc -b --watch"
+    "build": "tsc -b",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "watch": "tsc -b --watch"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.0.0-alpha.21",

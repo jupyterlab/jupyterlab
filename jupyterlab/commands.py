@@ -699,34 +699,14 @@ class _AppHandler:
         staging = pjoin(app_dir, "staging")
 
         # Make sure packages are installed.
-        import subprocess as sproc
-
-        with sproc.Popen(
-            ["jlpm", "config"],
-            bufsize=1,
-            cwd=staging,
-            stdout=sproc.PIPE,
-            universal_newlines=True
-        ) as p:
-            for line in p.stdout:
-                print(line, end='', flush=True)
-        with sproc.Popen(
-            ["jlpm", "install"],
-            bufsize=1,
-            cwd=staging,
-            stdout=sproc.PIPE,
-            universal_newlines=True
-        ) as p:
-            for line in p.stdout:
-                print(line, end='', flush=True)
-        ret = self._run(["node", YARN_PATH, "install"], cwd=staging)
+        ret = self._run(["node", YARN_PATH, "install", "--non-interactive"], cwd=staging)
         if ret != 0:
             msg = "npm dependencies failed to install"
             self.logger.debug(msg)
             raise RuntimeError(msg)
 
         # Build the app.
-        # dedupe_yarn(staging, self.logger)
+        dedupe_yarn(staging, self.logger)
         command = f'build:{"prod" if production else "dev"}{":minimize" if minimize else ""}'
         ret = self._run(["node", YARN_PATH, "run", command], cwd=staging)
         if ret != 0:
@@ -1266,7 +1246,7 @@ class _AppHandler:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(source_dir, fname), target)
 
-        for fname in [".yarnrc", "yarn.js"]:
+        for fname in [".yarnrc.yml", "yarn.js"]:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, "staging", fname), target)
 
@@ -2015,7 +1995,7 @@ def _yarn_config(logger):
 
     try:
         output_binary = subprocess.check_output(
-            [node, YARN_PATH, "config", "list", "--json"], stderr=subprocess.PIPE, cwd=HERE
+            [node, YARN_PATH, "config", "--json"], stderr=subprocess.PIPE, cwd=HERE
         )
         output = output_binary.decode("utf-8")
         lines = iter(output.splitlines())

@@ -4,16 +4,16 @@
   "private": true,
   "license": "BSD-3-Clause",
   "scripts": {
-    "build": "npm run clean && webpack",
-    "build:dev": "npm run build",
+    "build": "$npm_execpath run clean && webpack",
+    "build:dev": "$npm_execpath run build",
     "build:prod": "webpack --config webpack.prod.config.js",
     "build:prod:minimize": "webpack --config webpack.prod.minimize.config.js",
-    "build:prod:minimize:report": "npm run build:prod:minimize:stats && webpack-bundle-analyzer --no-open --mode static --report static/webpack-bundle-analyzer.html stats.json static",
+    "build:prod:minimize:report": "$npm_execpath run build:prod:minimize:stats && webpack-bundle-analyzer --no-open --mode static --report static/webpack-bundle-analyzer.html stats.json static",
     "build:prod:minimize:stats": "webpack --profile --config webpack.prod.minimize.config.js --json > stats.json",
     "build:prod:release": "webpack --config webpack.prod.release.config.js",
     "build:stats": "webpack --profile --json > stats.json",
     "clean": "rimraf build",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "$npm_execpath run build",
     "watch": "webpack --watch"
   },
   "resolutions": {
