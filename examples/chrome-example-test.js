@@ -4,7 +4,6 @@
  * string being printed.
  */
 const puppeteer = require('puppeteer');
-const inspect = require('util').inspect;
 const URL = process.argv[2];
 
 async function main() {
@@ -59,10 +58,9 @@ async function main() {
   // https://stackoverflow.com/q/46948489/425458
   await page.waitForNavigation();
 
-  const html = await page.content();
-  if (inspect(html).indexOf('jupyter-config-data') === -1) {
+  if ((await page.$('#jupyter-config-data')) === null) {
     console.error('Error loading JupyterLab page:');
-    console.error(html);
+    console.error((await page.content()).substring(0, 1000));
   }
   console.info('Page loaded');
 }
