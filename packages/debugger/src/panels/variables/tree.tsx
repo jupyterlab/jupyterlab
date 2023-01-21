@@ -3,6 +3,8 @@
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
+import { ISignal, Signal } from '@lumino/signaling';
+
 import {
   caretDownEmptyIcon,
   ReactWidget,
@@ -15,7 +17,7 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { DebugProtocol } from '@vscode/debugprotocol';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { convertType } from '.';
 
@@ -24,6 +26,8 @@ import { Debugger } from '../../debugger';
 import { IDebugger } from '../../tokens';
 
 import { VariablesModel } from './model';
+
+const BUTTONS_CLASS = 'jp-DebuggerVariables-buttons';
 
 /**
  * The body for tree of variables.
@@ -39,6 +43,7 @@ export class VariablesBodyTree extends ReactWidget {
     this._commands = options.commands;
     this._service = options.service;
     this._translator = options.translator;
+    this._hoverChanged = new Signal(this);
 
     const model = (this.model = options.model);
     model.changed.connect(this._updateScopes, this);
@@ -53,18 +58,34 @@ export class VariablesBodyTree extends ReactWidget {
     const scope =
       this._scopes.find(scope => scope.name === this._scope) ?? this._scopes[0];
 
+    const handleSelectVariable = (variable: IDebugger.IVariable) => {
+      this.model.selectedVariable = variable;
+    };
+    const collapserIcon = (
+      <caretDownEmptyIcon.react stylesheet="menuItem" tag="span" />
+    );
     return scope ? (
-      <VariablesComponent
-        key={scope.name}
-        commands={this._commands}
-        service={this._service}
-        data={scope.variables}
-        filter={this._filter}
-        translator={this._translator}
-        handleSelectVariable={variable => {
-          this.model.selectedVariable = variable;
-        }}
-      />
+      <>
+        <VariablesBranch
+          key={scope.name}
+          commands={this._commands}
+          service={this._service}
+          data={scope.variables}
+          filter={this._filter}
+          translator={this._translator}
+          handleSelectVariable={handleSelectVariable}
+          onHoverChanged={(data: IHoverData) => {
+            this._hoverChanged.emit(data);
+          }}
+          collapserIcon={collapserIcon}
+        />
+        <TreeButtons
+          commands={this._commands}
+          service={this._service}
+          hoverChanged={this._hoverChanged}
+          handleSelectVariable={handleSelectVariable}
+        />
+      </>
     ) : (
       <div></div>
     );
@@ -106,9 +127,153 @@ export class VariablesBodyTree extends ReactWidget {
   private _filter = new Set<string>();
   private _service: IDebugger;
   private _translator: ITranslator | undefined;
+  private _hoverChanged: Signal<VariablesBodyTree, IHoverData>;
 }
 
-interface IVariablesComponentProps {
+interface IHoverData {
+  /**
+   * The mouse target.
+   */
+  target: (EventTarget & HTMLElement) | null;
+  /**
+   * The variable corresponding to node under cursor.
+   */
+  variable: IDebugger.IVariable | null;
+}
+
+interface ITreeButtonsProps {
+  /**
+   * The commands registry.
+   */
+  commands: CommandRegistry;
+  /**
+   * The debugger service.
+   */
+  service: IDebugger;
+  /**
+   * The application language translator
+   */
+  translator?: ITranslator;
+  /**
+   * Callback on variable selection
+   */
+  handleSelectVariable: (variable: IDebugger.IVariable) => void;
+  /**
+   * Signal to be emitted on mouse over event.
+   */
+  hoverChanged: ISignal<VariablesBodyTree, IHoverData>;
+}
+
+/**
+ * The singleton buttons bar shown by the variables.
+ */
+const TreeButtons = (props: ITreeButtonsProps): JSX.Element => {
+  const { commands, service, translator, handleSelectVariable } = props;
+  const trans = (translator ?? nullTranslator).load('jupyterlab');
+
+  const [buttonsTop, setButtonsTop] = useState<number>(0);
+  const [variable, setVariable] = useState<IDebugger.IVariable | null>(null);
+
+  let stateRefreshLock = 0;
+
+  // Empty dependency array is to only register once per lifetime.
+  const handleHover = useCallback((_: VariablesBodyTree, data: IHoverData) => {
+    const current = ++stateRefreshLock;
+    if (!data.variable) {
+      // Handle mouse leave.
+      if (current !== stateRefreshLock) {
+        return;
+      }
+      const target = data.target;
+      if (
+        target &&
+        // Note: Element, not HTMLElement to permit entering <svg> icon.
+        target instanceof Element &&
+        target.closest(`.${BUTTONS_CLASS}`)
+      ) {
+        // Allow to enter the buttons.
+        return;
+      }
+      setVariable(null);
+    } else {
+      // Handle mouse over.
+      setVariable(data.variable);
+      requestAnimationFrame(() => {
+        if (current !== stateRefreshLock || !data.target) {
+          return;
+        }
+        setButtonsTop(data.target.offsetTop);
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    props.hoverChanged.connect(handleHover);
+    return () => {
+      props.hoverChanged.disconnect(handleHover);
+    };
+  }, [handleHover]);
+
+  return (
+    <div
+      className={BUTTONS_CLASS}
+      style={
+        // Positioning and hiding is implemented using compositor-only
+        // properties (transform and opacity) for performance.
+        {
+          transform: `translateY(${buttonsTop}px)`,
+          opacity:
+            !variable ||
+            // Do not show buttons display for special entries, defined in debugpy:
+            // https://github.com/microsoft/debugpy/blob/cf0d684566edc339545b161da7c3dfc48af7c7d5/src/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_utils.py#L359
+            [
+              'special variables',
+              'protected variables',
+              'function variables',
+              'class variables'
+            ].includes(variable.name)
+              ? 0
+              : 1
+        }
+      }
+    >
+      <button
+        className="jp-DebuggerVariables-renderVariable"
+        disabled={
+          !variable ||
+          !service.model.hasRichVariableRendering ||
+          !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, {
+            name: variable.name,
+            frameID: service.model.callstack.frame?.id
+          } as any)
+        }
+        onClick={e => {
+          if (!variable || !handleSelectVariable) {
+            return;
+          }
+          e.stopPropagation();
+          handleSelectVariable(variable);
+          commands
+            .execute(Debugger.CommandIDs.renderMimeVariable, {
+              name: variable.name,
+              frameID: service.model.callstack.frame?.id
+            } as any)
+            .catch(reason => {
+              console.error(
+                `Failed to render variable ${variable?.name}`,
+                reason
+              );
+            });
+        }}
+        title={trans.__('Render variable: %1', variable?.name)}
+      >
+        <searchIcon.react stylesheet="menuItem" tag="span" />
+      </button>
+    </div>
+  );
+};
+
+interface IVariablesBranchProps {
   /**
    * The commands registry.
    */
@@ -124,6 +289,14 @@ interface IVariablesComponentProps {
    * Callback on variable selection
    */
   handleSelectVariable?: (variable: IDebugger.IVariable) => void;
+  /**
+   * Callback on mouseOver/mouseLeave event.
+   */
+  onHoverChanged?: (data: IHoverData) => void;
+  /**
+   * Collapser icon component
+   */
+  collapserIcon: JSX.Element;
 }
 
 /**
@@ -134,9 +307,17 @@ interface IVariablesComponentProps {
  * @param props.service The debugger service.
  * @param props.filter Optional variable filter list.
  */
-const VariablesComponent = (props: IVariablesComponentProps): JSX.Element => {
-  const { commands, data, service, filter, translator, handleSelectVariable } =
-    props;
+const VariablesBranch = (props: IVariablesBranchProps): JSX.Element => {
+  const {
+    commands,
+    data,
+    service,
+    filter,
+    translator,
+    handleSelectVariable,
+    onHoverChanged,
+    collapserIcon
+  } = props;
   const [variables, setVariables] = useState(data);
 
   useEffect(() => {
@@ -144,9 +325,9 @@ const VariablesComponent = (props: IVariablesComponentProps): JSX.Element => {
   }, [data]);
 
   return (
-    <ul>
+    <ul className="jp-DebuggerVariables-branch">
       {variables
-        ?.filter(
+        .filter(
           variable => !(filter || new Set()).has(variable.evaluateName || '')
         )
         .map(variable => {
@@ -160,6 +341,8 @@ const VariablesComponent = (props: IVariablesComponentProps): JSX.Element => {
               filter={filter}
               translator={translator}
               onSelect={handleSelectVariable}
+              onHoverChanged={onHoverChanged}
+              collapserIcon={collapserIcon}
             />
           );
         })}
@@ -195,6 +378,24 @@ interface IVariableComponentProps {
    * Callback on selection
    */
   onSelect?: (variable: IDebugger.IVariable) => void;
+  /**
+   * Callback on mouseOver/mouseLeave event.
+   */
+  onHoverChanged?: (data: IHoverData) => void;
+  /**
+   * Collapser icon component
+   */
+  collapserIcon: JSX.Element;
+}
+
+function _prepareDetail(variable: IDebugger.IVariable) {
+  const detail = convertType(variable);
+  if (variable.type === 'float' && isNaN(detail as number)) {
+    // silence React warning:
+    // `Received NaN for the `children` attribute. If this is expected, cast the value to a string`
+    return 'NaN';
+  }
+  return detail;
 }
 
 /**
@@ -206,23 +407,24 @@ interface IVariableComponentProps {
  * @param props.filter Optional variable filter list.
  */
 const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
-  const { commands, data, service, filter, translator, onSelect } = props;
+  const {
+    commands,
+    data,
+    service,
+    filter,
+    translator,
+    onSelect,
+    onHoverChanged,
+    collapserIcon
+  } = props;
   const [variable] = useState(data);
   const [expanded, setExpanded] = useState<boolean>();
   const [variables, setVariables] = useState<DebugProtocol.Variable[]>();
-  const styleName = {
-    color: 'var(--jp-mirror-editor-attribute-color)'
-  };
 
-  const styleType = {
-    color: 'var(--jp-mirror-editor-string-color)'
-  };
   const onSelection = onSelect ?? (() => void 0);
 
   const expandable =
     variable.variablesReference !== 0 || variable.type === 'function';
-
-  const trans = (translator ?? nullTranslator).load('jupyterlab');
 
   const onVariableClicked = async (e: React.MouseEvent): Promise<void> => {
     if (!expandable) {
@@ -243,57 +445,39 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
         e.stopPropagation();
         onSelection(variable);
       }}
+      onMouseOver={(event: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
+        if (onHoverChanged) {
+          onHoverChanged({ target: event.currentTarget, variable });
+          event.stopPropagation();
+        }
+      }}
+      onMouseLeave={(event: React.MouseEvent<HTMLLIElement, MouseEvent>) => {
+        if (onHoverChanged) {
+          onHoverChanged({
+            target: event.relatedTarget as EventTarget & HTMLElement,
+            variable: null
+          });
+          event.stopPropagation();
+        }
+      }}
     >
-      <caretDownEmptyIcon.react
-        visibility={expandable ? 'visible' : 'hidden'}
-        stylesheet="menuItem"
-        tag="span"
-        transform={expanded ? 'rotate(0deg)' : 'rotate(-90deg)'}
-      />
-      <span style={styleName}>{variable.name}</span>
-      <span>: </span>
-      <span style={styleType}>{convertType(variable)}</span>
-      <span className="jp-DebuggerVariables-hspacer"></span>
-      {service.model.hasRichVariableRendering &&
-        // Don't add rich display for special entries
-        // debugpy: https://github.com/microsoft/debugpy/blob/cf0d684566edc339545b161da7c3dfc48af7c7d5/src/debugpy/_vendored/pydevd/_pydevd_bundle/pydevd_utils.py#L359
-        ![
-          'special variables',
-          'protected variables',
-          'function variables',
-          'class variables'
-        ].includes(variable.name) && (
-          <button
-            className="jp-DebuggerVariables-renderVariable"
-            disabled={
-              !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, {
-                name: variable.name,
-                frameID: service.model.callstack.frame?.id
-              } as any)
-            }
-            onClick={e => {
-              e.stopPropagation();
-              onSelection(variable);
-              commands
-                .execute(Debugger.CommandIDs.renderMimeVariable, {
-                  name: variable.name,
-                  frameID: service.model.callstack.frame?.id
-                } as any)
-                .catch(reason => {
-                  console.error(
-                    `Failed to render variable ${variable.name}`,
-                    reason
-                  );
-                });
-            }}
-            title={trans.__('Render variable')}
-          >
-            <searchIcon.react stylesheet="menuItem" tag="span" />
-          </button>
-        )}
-
+      <span
+        className={
+          'jp-DebuggerVariables-collapser' +
+          (expanded ? ' jp-mod-expanded' : '')
+        }
+      >
+        {
+          // note: using React.cloneElement due to high typestyle cost
+          expandable ? React.cloneElement(collapserIcon) : null
+        }
+      </span>
+      <span className="jp-DebuggerVariables-name">{variable.name}</span>
+      <span className="jp-DebuggerVariables-detail">
+        {_prepareDetail(variable)}
+      </span>
       {expanded && variables && (
-        <VariablesComponent
+        <VariablesBranch
           key={variable.name}
           commands={commands}
           data={variables}
@@ -301,6 +485,8 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
           filter={filter}
           translator={translator}
           handleSelectVariable={onSelect}
+          onHoverChanged={onHoverChanged}
+          collapserIcon={collapserIcon}
         />
       )}
     </li>
