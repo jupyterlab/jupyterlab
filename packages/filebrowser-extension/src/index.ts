@@ -293,25 +293,15 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
  * The default file browser factory provider.
  */
 const defaultFileBrowser: JupyterFrontEndPlugin<FileBrowser> = {
-  id: '@jupyterlab/filebrowser-extension:factory',
+  id: '@jupyterlab/filebrowser-extension:defaultFileBrowser',
   provides: IDefaultFileBrowser,
-  requires: [IFileBrowserFactory, IDocumentManager, ITranslator],
-  optional: [
-    IStateDB,
-    IRouter,
-    JupyterFrontEnd.ITreeResolver,
-    JupyterLab.IInfo,
-    ILabShell
-  ],
+  requires: [IFileBrowserFactory],
+  optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
   activate: async (
     app: JupyterFrontEnd,
     fileBrowserFactory: IFileBrowserFactory,
-    docManager: IDocumentManager,
-    translator: ITranslator,
-    state: IStateDB | null,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    info: JupyterLab.IInfo | null,
     labShell: ILabShell | null
   ): Promise<FileBrowser> => {
     const { commands } = app;
