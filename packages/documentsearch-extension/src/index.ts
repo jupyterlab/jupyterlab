@@ -22,7 +22,7 @@ import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
 const SEARCHABLE_CLASS = 'jp-mod-searchable';
-const SEARCHABLE_CLASS_ACTIVE = 'jp-mod-searchable-active';
+//const SEARCHABLE_CLASS_ACTIVE = 'search-active';
 
 namespace CommandIDs {
   /**
@@ -64,7 +64,14 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
       }
       if (registry.hasProvider(widget)) {
         widget.addClass(SEARCHABLE_CLASS);
+        //         if (registry.getProvider(widget)?.isDisposed){
+        //             widget.removeClass(SEARCHABLE_CLASS_ACTIVE);
+        //         }
+        //         else {
+        //             widget.addClass(SEARCHABLE_CLASS_ACTIVE);
+        //         }
       } else {
+        // widget.removeClass(SEARCHABLE_CLASS_ACTIVE);
         widget.removeClass(SEARCHABLE_CLASS);
       }
     };
@@ -235,9 +242,6 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
             searchWidget.setSearchText(searchText);
           }
           searchWidget.focusSearchInput();
-          const widget = app.shell.currentWidget;
-          widget?.addClass(SEARCHABLE_CLASS_ACTIVE);
-          //widget?.removeClass(SEARCHABLE_CLASS);
         }
       }
     });
@@ -258,8 +262,6 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           }
           searchWidget.showReplace();
           searchWidget.focusSearchInput();
-          const widget = app.shell.currentWidget;
-          widget?.addClass(SEARCHABLE_CLASS_ACTIVE);
         }
       }
     });
@@ -274,7 +276,6 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         if (!currentWidget) {
           return;
         }
-
         await searchViews.get(currentWidget.id)?.model.highlightNext();
       }
     });
@@ -289,7 +290,6 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         if (!currentWidget) {
           return;
         }
-
         await searchViews.get(currentWidget.id)?.model.highlightPrevious();
       }
     });
@@ -304,11 +304,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         if (!currentWidget) {
           return;
         }
-
         searchViews.get(currentWidget.id)?.close();
-        const widget = app.shell.currentWidget;
-        widget?.removeClass(SEARCHABLE_CLASS_ACTIVE);
-        //widget?.addClass(SEARCHABLE_CLASS);
       }
     });
 
