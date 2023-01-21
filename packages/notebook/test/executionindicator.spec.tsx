@@ -166,7 +166,7 @@ describe('@jupyterlab/notebook', () => {
         expect(executed).toEqual(expect.arrayContaining([3, 3, 3, 2, 2, 2, 0]));
       });
 
-      it('should reset to idle when kernel gets abruptly interrupted', async () => {
+      it('should reset to idle when kernel gets abruptly terminated', async () => {
         const model = new NotebookModel();
         const modelJson = {
           ...utils.DEFAULT_CONTENT,
