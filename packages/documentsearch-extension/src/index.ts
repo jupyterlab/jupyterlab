@@ -64,14 +64,7 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
       }
       if (registry.hasProvider(widget)) {
         widget.addClass(SEARCHABLE_CLASS);
-        //         if (registry.getProvider(widget)?.isDisposed){
-        //             widget.removeClass(SEARCHABLE_CLASS_ACTIVE);
-        //         }
-        //         else {
-        //             widget.addClass(SEARCHABLE_CLASS_ACTIVE);
-        //         }
       } else {
-        // widget.removeClass(SEARCHABLE_CLASS_ACTIVE);
         widget.removeClass(SEARCHABLE_CLASS);
       }
     };
