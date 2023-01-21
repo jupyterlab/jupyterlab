@@ -1,4 +1,3 @@
-# coding: utf-8
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
@@ -97,7 +96,7 @@ def _create_workspaces_dir():
     return root_dir
 
 
-class TestEnv(object):
+class TestEnv:
     """Set Jupyter path variables to a temporary directory
 
     Useful as a context manager or with explicit start/stop

@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Set, Tuple
 import tornado
 from traitlets.config import Configurable, LoggingConfigurable
 
-from ..commands import (
+from jupyterlab.commands import (
     _AppHandler,
     _ensure_options,
     disable_extension,
@@ -92,7 +92,7 @@ class ExtensionPackage:
     latest_version: str = ""
     status: str = "ok"
     author: Optional[str] = None
-    license: Optional[str] = None
+    license: Optional[str] = None  # noqa
     bug_tracker_url: Optional[str] = None
     documentation_url: Optional[str] = None
     package_manager_url: Optional[str] = None
@@ -195,7 +195,7 @@ class ExtensionManager(LoggingConfigurable):
         ext_options: Optional[dict] = None,
         parent: Optional[Configurable] = None,
     ) -> None:
-        super(ExtensionManager, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         app_options = _ensure_options(app_options)
         self.log = app_options.logger
         self.app_dir = Path(app_options.app_dir)

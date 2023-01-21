@@ -107,6 +107,7 @@
   --jp-icon-user: url('icons/sidebar/user.svg');
   --jp-icon-users: url('icons/sidebar/users.svg');
   --jp-icon-vega: url('icons/filetype/vega.svg');
+  --jp-icon-word: url('icons/search/word.svg');
   --jp-icon-yaml: url('icons/filetype/yaml.svg');
 }
 
@@ -490,6 +491,10 @@
 
 .jp-VegaIcon {
   background-image: var(--jp-icon-vega);
+}
+
+.jp-WordIcon {
+  background-image: var(--jp-icon-word);
 }
 
 .jp-YamlIcon {

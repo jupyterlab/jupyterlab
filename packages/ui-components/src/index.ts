@@ -11,5 +11,4 @@ export * from './hoverbox';
 export * from './tokens';
 export * from './utils';
 export * from './FormComponentRegistry';
-export * from './FormWidgetRegistry';
 export * from './rjsfTemplates';

@@ -1,4 +1,3 @@
-# -*- coding:utf-8 -*-
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
@@ -36,14 +35,10 @@ logger = logging.getLogger(__name__)
 
 SEMVER_SPEC_VERSION = "2.0.0"
 
-# Python 2/3 compatibility
-try:
-    string_type = basestring
-except NameError:
-    string_type = str
+string_type = str
 
 
-class _R(object):
+class _R:
     def __init__(self, i):
         self.i = i
 
@@ -367,7 +362,7 @@ def semver(version, loose):
         else:
             version = version.version
     elif not isinstance(version, string_type):  # xxx:
-        raise ValueError("Invalid Version: {}".format(version))
+        raise ValueError(f"Invalid Version: {version}")
 
     """
     if (!(this instanceof SemVer))
@@ -379,7 +374,7 @@ def semver(version, loose):
 make_semver = semver
 
 
-class SemVer(object):
+class SemVer:
     def __init__(self, version, loose):
         logger.debug("SemVer %s, %s", version, loose)
         self.loose = loose
@@ -388,7 +383,7 @@ class SemVer(object):
         m = regexp[LOOSE if loose else FULL].search(version.strip())
         if not m:
             if not loose:
-                raise ValueError("Invalid Version: {}".format(version))
+                raise ValueError(f"Invalid Version: {version}")
             m = regexp[RECOVERYVERSIONNAME].search(version.strip())
             self.major = int(m.group(1)) if m.group(1) else 0
             self.minor = int(m.group(2)) if m.group(2) else 0
@@ -397,7 +392,7 @@ class SemVer(object):
                 self.prerelease = []
             else:
                 self.prerelease = [
-                    (int(id) if NUMERIC.search(id) else id) for id in m.group(3).split(".")
+                    (int(id_) if NUMERIC.search(id_) else id_) for id_ in m.group(3).split(".")
                 ]
         else:
             #  these are actually numbers
@@ -410,7 +405,7 @@ class SemVer(object):
             else:
 
                 self.prerelease = [
-                    (int(id) if NUMERIC.search(id) else id) for id in m.group(4).split(".")
+                    (int(id_) if NUMERIC.search(id_) else id_) for id_ in m.group(4).split(".")
                 ]
             if m.group(5):
                 self.build = m.group(5).split(".")
@@ -419,14 +414,14 @@ class SemVer(object):
 
         self.format()  # xxx:
 
-    def format(self):
-        self.version = "{}.{}.{}".format(self.major, self.minor, self.patch)
+    def format(self):  # noqa
+        self.version = f"{self.major}.{self.minor}.{self.patch}"
         if len(self.prerelease) > 0:
             self.version += "-{}".format(".".join(str(v) for v in self.prerelease))
         return self.version
 
     def __repr__(self):
-        return "<SemVer {} >".format(self)
+        return f"<SemVer {self} >"
 
     def __str__(self):
         return self.version
@@ -559,7 +554,7 @@ class SemVer(object):
                 else:
                     self.prerelease = [identifier, 0]
         else:
-            raise ValueError("invalid increment argument: {}".format(release))
+            raise ValueError(f"invalid increment argument: {release}")
         self.format()
         self.raw = self.version
         return self
@@ -628,16 +623,16 @@ loose_key_function = make_key_function(True)
 full_key_function = make_key_function(True)
 
 
-def sort(list, loose):
+def sort(list_, loose):
     keyf = loose_key_function if loose else full_key_function
-    list.sort(key=keyf)
-    return list
+    list_.sort(key=keyf)
+    return list_
 
 
-def rsort(list, loose):
+def rsort(list_, loose):
     keyf = loose_key_function if loose else full_key_function
-    list.sort(key=keyf, reverse=True)
-    return list
+    list_.sort(key=keyf, reverse=True)
+    return list_
 
 
 def gt(a, b, loose):
@@ -683,7 +678,7 @@ def cmp(a, op, b, loose):
     elif op == "<=":
         return lte(a, b, loose)
     else:
-        raise ValueError("Invalid operator: {}".format(op))
+        raise ValueError(f"Invalid operator: {op}")
 
 
 def comparator(comp, loose):
@@ -703,7 +698,7 @@ make_comparator = comparator
 ANY = object()
 
 
-class Comparator(object):
+class Comparator:
     semver = None
 
     def __init__(self, comp, loose):
@@ -725,7 +720,7 @@ class Comparator(object):
         m = r.search(comp)
 
         if m is None:
-            raise ValueError("Invalid comparator: {}".format(comp))
+            raise ValueError(f"Invalid comparator: {comp}")
 
         self.operator = m.group(1)
         # if it literally is just '>' or '' then allow anything.
@@ -735,7 +730,7 @@ class Comparator(object):
             self.semver = semver(m.group(2), self.loose)
 
     def __repr__(self):
-        return '<SemVer Comparator "{}">'.format(self)
+        return f'<SemVer Comparator "{self}">'
 
     def __str__(self):
         return self.value
@@ -757,7 +752,7 @@ def make_range(range_, loose):
     return Range(range_, loose)
 
 
-class Range(object):
+class Range:
     def __init__(self, range_, loose):
         self.loose = loose
         #  First, split based on boolean or ||
@@ -766,14 +761,14 @@ class Range(object):
         self.set = [r for r in xs if r]
 
         if not len(self.set):
-            raise ValueError("Invalid SemVer Range: {}".format(range_))
+            raise ValueError(f"Invalid SemVer Range: {range_}")
 
         self.format()
 
     def __repr__(self):
-        return '<SemVer Range "{}">'.format(self.range)
+        return f'<SemVer Range "{self.range}">'
 
-    def format(self):
+    def format(self):  # noqa
         self.range = "||".join(
             [" ".join(c.value for c in comps).strip() for comps in self.set]
         ).strip()
@@ -865,8 +860,8 @@ def parse_comparator(comp, loose):
     return comp
 
 
-def is_x(id):
-    return id is None or id == "" or id.lower() == "x" or id == "*"
+def is_x(id_):
+    return id_ is None or id_ == "" or id_.lower() == "x" or id_ == "*"
 
 
 #  ~, ~> --> * (any, kinda silly)

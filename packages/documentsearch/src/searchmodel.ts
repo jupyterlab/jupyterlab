@@ -154,6 +154,20 @@ export class SearchDocumentModel
   }
 
   /**
+   * Whether to match whole words or not.
+   */
+  get wholeWords(): boolean {
+    return this._wholeWords;
+  }
+  set wholeWords(v: boolean) {
+    if (this._wholeWords !== v) {
+      this._wholeWords = v;
+      this.stateChanged.emit();
+      this.refresh();
+    }
+  }
+
+  /**
    * Dispose the model.
    */
   dispose(): void {
@@ -262,7 +276,8 @@ export class SearchDocumentModel
         ? Private.parseQuery(
             this.searchExpression,
             this.caseSensitive,
-            this.useRegex
+            this.useRegex,
+            this.wholeWords
           )
         : null;
       if (query) {
@@ -288,6 +303,7 @@ export class SearchDocumentModel
   private _searchDebouncer: Debouncer;
   private _searchExpression = '';
   private _useRegex = false;
+  private _wholeWords = false;
 }
 
 namespace Private {
@@ -302,15 +318,19 @@ namespace Private {
   export function parseQuery(
     queryString: string,
     caseSensitive: boolean,
-    regex: boolean
+    regex: boolean,
+    wholeWords: boolean
   ): RegExp | null {
     const flag = caseSensitive ? 'g' : 'gi';
     // escape regex characters in query if its a string search
-    const queryText = regex
+    let queryText = regex
       ? queryString
       : queryString.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
-    let ret;
-    ret = new RegExp(queryText, flag);
+
+    if (wholeWords) {
+      queryText = '\\b' + queryText + '\\b';
+    }
+    const ret = new RegExp(queryText, flag);
 
     // If the empty string is hit, the search logic will freeze the browser tab
     //  Trying /^/ or /$/ on the codemirror search demo, does not find anything.

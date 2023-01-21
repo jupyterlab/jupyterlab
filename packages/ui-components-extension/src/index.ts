@@ -11,9 +11,7 @@ import {
 } from '@jupyterlab/application';
 import {
   FormComponentRegistry,
-  FormWidgetRegistry,
   IFormComponentRegistry,
-  IFormWidgetRegistry,
   ILabIconManager
 } from '@jupyterlab/ui-components';
 
@@ -33,8 +31,8 @@ const labiconManager: JupyterFrontEndPlugin<ILabIconManager> = {
 /**
  * Sets up the component registry to be used by the FormEditor component.
  */
-const registryPlugin: JupyterFrontEndPlugin<IFormComponentRegistry> = {
-  id: '@jupyterlab/settingeditor-extension:form-registry',
+const componentRegistryPlugin: JupyterFrontEndPlugin<IFormComponentRegistry> = {
+  id: '@jupyterlab/ui-components-extension:form-component-registry',
   provides: IFormComponentRegistry,
   autoStart: true,
   activate: (app: JupyterFrontEnd): IFormComponentRegistry => {
@@ -43,17 +41,4 @@ const registryPlugin: JupyterFrontEndPlugin<IFormComponentRegistry> = {
   }
 };
 
-/**
- * Sets up the widget registry to be used by a RJSF form.
- */
-const widgetRegistryPlugin: JupyterFrontEndPlugin<IFormWidgetRegistry> = {
-  id: '@jupyterlab/ui-components-extension:widget-registry',
-  provides: IFormWidgetRegistry,
-  autoStart: true,
-  activate: (app: JupyterFrontEnd): IFormWidgetRegistry => {
-    const formRegistry = new FormWidgetRegistry();
-    return formRegistry;
-  }
-};
-
-export default [labiconManager, registryPlugin, widgetRegistryPlugin];
+export default [labiconManager, componentRegistryPlugin];

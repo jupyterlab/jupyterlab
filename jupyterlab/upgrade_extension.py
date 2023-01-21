@@ -17,7 +17,7 @@ from pathlib import Path
 try:
     from cookiecutter.main import cookiecutter
 except ImportError:
-    raise RuntimeError("Please install cookiecutter")
+    raise RuntimeError("Please install cookiecutter") from None
 
 
 DEFAULT_COOKIECUTTER_BRANCH = "3.0"
@@ -183,9 +183,9 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
 
     # Print out all warnings
     for warning in warnings:
-        print("**", warning)
+        print("**", warning)  # noqa
 
-    print("** Remove _temp_extensions directory when finished")
+    print("** Remove _temp_extensions directory when finished")  # noqa
 
 
 if __name__ == "__main__":

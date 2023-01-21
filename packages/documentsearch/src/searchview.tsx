@@ -16,7 +16,8 @@ import {
   closeIcon,
   ellipsesIcon,
   regexIcon,
-  VDomRenderer
+  VDomRenderer,
+  wordIcon
 } from '@jupyterlab/ui-components';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Message } from '@lumino/messaging';
@@ -55,10 +56,12 @@ interface ISearchEntryProps {
   inputRef: React.RefObject<HTMLInputElement>;
   onCaseSensitiveToggled: () => void;
   onRegexToggled: () => void;
+  onWordToggled: () => void;
   onKeydown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   caseSensitive: boolean;
   useRegex: boolean;
+  wholeWords: boolean;
   searchText: string;
   translator?: ITranslator;
 }
@@ -72,6 +75,10 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
   );
   const regexButtonToggleClass = classes(
     props.useRegex ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
+    BUTTON_CONTENT_CLASS
+  );
+  const wordButtonToggleClass = classes(
+    props.wholeWords ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
     BUTTON_CONTENT_CLASS
   );
 
@@ -98,6 +105,14 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
         title={trans.__('Match Case')}
       >
         <caseSensitiveIcon.react className={caseButtonToggleClass} tag="span" />
+      </button>
+      <button
+        className={BUTTON_WRAPPER_CLASS}
+        onClick={() => props.onWordToggled()}
+        tabIndex={0}
+        title={trans.__('Match Whole Word')}
+      >
+        <wordIcon.react className={wordButtonToggleClass} tag="span" />
       </button>
       <button
         className={BUTTON_WRAPPER_CLASS}
@@ -336,6 +351,10 @@ interface ISearchOverlayProps {
    */
   useRegex: boolean;
   /**
+   * Whether the search matches entire words or any substring.
+   */
+  wholeWords: boolean;
+  /**
    * Callback on case sensitive toggled.
    */
   onCaseSensitiveToggled: () => void;
@@ -361,6 +380,10 @@ interface ISearchOverlayProps {
    * Callback on use regular expression toggled
    */
   onRegexToggled: () => void;
+  /**
+   * Callback on use whole word toggled.
+   */
+  onWordToggled: () => void;
   /**
    * Callback on replace all button click.
    */
@@ -515,8 +538,10 @@ class SearchOverlay extends React.Component<
             inputRef={this.props.searchInputRef}
             useRegex={this.props.useRegex}
             caseSensitive={this.props.caseSensitive}
+            wholeWords={this.props.wholeWords}
             onCaseSensitiveToggled={this.props.onCaseSensitiveToggled}
             onRegexToggled={this.props.onRegexToggled}
+            onWordToggled={this.props.onWordToggled}
             onKeydown={(e: React.KeyboardEvent<HTMLInputElement>) =>
               this._onSearchKeydown(e)
             }
@@ -676,11 +701,15 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         totalMatches={this.model.totalMatches}
         translator={this.translator}
         useRegex={this.model.useRegex}
+        wholeWords={this.model.wholeWords}
         onCaseSensitiveToggled={() => {
           this.model.caseSensitive = !this.model.caseSensitive;
         }}
         onRegexToggled={() => {
           this.model.useRegex = !this.model.useRegex;
+        }}
+        onWordToggled={() => {
+          this.model.wholeWords = !this.model.wholeWords;
         }}
         onFilterChanged={async (name: string, value: boolean) => {
           await this.model.setFilter(name, value);

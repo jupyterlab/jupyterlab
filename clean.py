@@ -18,7 +18,7 @@ if os.name == "nt":
 subprocess.check_call("python -m pip uninstall -y jupyterlab".split(), cwd=here)
 
 
-def resolvePattern(pat):
+def resolve_pattern(pat):
     """handle a leading `#` or `@` in a pattern"""
     pat = pat.strip()
 
@@ -33,7 +33,7 @@ def resolvePattern(pat):
 
 # get the exclude patterns listed in .cleanignore
 with open(os.path.join(here, ".cleanignore")) as f:
-    git_clean_exclude = [f"--exclude={pat}" for line in f for pat in resolvePattern(line)]
+    git_clean_exclude = [f"--exclude={pat}" for line in f for pat in resolve_pattern(line)]
 
 git_clean_command = ["git", "clean", "-dfx"] + git_clean_exclude
 subprocess.check_call(git_clean_command, cwd=here)

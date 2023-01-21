@@ -81,7 +81,7 @@ class PyPIExtensionManager(ExtensionManager):
         ext_options: Optional[dict] = None,
         parent: Optional[config.Configurable] = None,
     ) -> None:
-        super(PyPIExtensionManager, self).__init__(app_options, ext_options, parent)
+        super().__init__(app_options, ext_options, parent)
         # Set configurable cache size to fetch function
         self._fetch_package_metadata = _fetch_package_metadata
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
@@ -139,7 +139,7 @@ class PyPIExtensionManager(ExtensionManager):
                 return self._normalize_name(install_metadata["packageName"])
         return self._normalize_name(extension.name)
 
-    async def __throttleRequest(self, recursive: bool, fn: Callable, *args) -> Any:
+    async def __throttleRequest(self, recursive: bool, fn: Callable, *args) -> Any:  # noqa
         """Throttle XMLRPC API request
 
         Args:

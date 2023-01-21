@@ -54,6 +54,11 @@
   height: 100%;
 }
 
+.jp-DocumentSearch-button-content svg {
+  width: 100%;
+  height: 100%;
+}
+
 .jp-DocumentSearch-input-wrapper {
   border: var(--jp-border-width) solid var(--jp-border-color0);
   display: flex;

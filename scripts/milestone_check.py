@@ -52,7 +52,7 @@ if MILESTONE not in ranges:
 
 
 out = subprocess.run(
-    "git log {} --format='%H,%cE,%s'".format(ranges[MILESTONE]),
+    f"git log {ranges[MILESTONE]} --format='%H,%cE,%s'",
     shell=True,
     encoding="utf8",
     stdout=subprocess.PIPE,
@@ -102,7 +102,7 @@ large_prs = []
 cursor = None
 while True:
     json["variables"]["cursor"] = cursor
-    r = requests.post(url=url, json=json, headers=headers)
+    r = requests.post(url=url, json=json, headers=headers, timeout=120)
     results = r.json()["data"]["search"]
     total_prs = results["issueCount"]
 
@@ -156,9 +156,9 @@ for prnumber in large_prs:
     prjson["variables"]["pr"] = prnumber
     pr_commits = set()
     while True:
-        r = requests.post(url=url, json=prjson, headers=headers)
+        r = requests.post(url=url, json=prjson, headers=headers, timeout=120)
         pr = r.json()["data"]["repository"]["pullRequest"]
-        assert pr["number"] == prnumber
+        assert pr["number"] == prnumber  # noqa
         total_commits = pr["commits"]["totalCount"]
         pr_commits.update(i["commit"]["oid"] for i in pr["commits"]["nodes"])
         has_next_page = results["pageInfo"]["hasNextPage"]
@@ -177,7 +177,7 @@ for prnumber in large_prs:
 
 
 # Check we got all PRs
-assert len(prs) == total_prs
+assert len(prs) == total_prs  # noqa
 
 # Reverse dictionary
 commits_to_prs = {}

@@ -12,10 +12,7 @@ import {
 import { INotebookTools } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import {
-  IFormComponentRegistry,
-  IFormWidgetRegistry
-} from '@jupyterlab/ui-components';
+import { IFormComponentRegistry } from '@jupyterlab/ui-components';
 import { JSONExt, PartialJSONArray } from '@lumino/coreutils';
 
 import {
@@ -33,7 +30,6 @@ namespace Private {
     registry: ISettingRegistry,
     notebookTools: INotebookTools,
     translator: ITranslator,
-    formWidgetsRegistry: IFormWidgetRegistry,
     formComponentRegistry: IFormComponentRegistry
   ): Promise<IMetadataFormProvider> {
     let canonical: ISettingRegistry.ISchema | null;
@@ -225,27 +221,20 @@ namespace Private {
           }
 
           // Optionally links key to a custom widget.
-          if (options.customWidget) {
-            const formWidget = formWidgetsRegistry.getRenderer(
-              options.customWidget as string
+          if (options.customComponent) {
+            const component = formComponentRegistry.getComponent(
+              options.customComponent as string
             );
 
             // If renderer is defined (custom widget has been registered), set it as used widget.
-            if (formWidget !== undefined)
+            if (component !== undefined) {
               if (!uiSchema[metadataKey]) uiSchema[metadataKey] = {};
-            uiSchema[metadataKey]['ui:widget'] = formWidget;
-          }
-
-          // Optionally links key to a custom field.
-          if (options.customField) {
-            const formField = formComponentRegistry.getRenderer(
-              options.customField as string
-            );
-
-            // If renderer is defined (custom widget has been registered), set it as used widget.
-            if (formField !== undefined)
-              if (!uiSchema[metadataKey]) uiSchema[metadataKey] = {};
-            uiSchema[metadataKey]['ui:field'] = formField;
+              if (component.fieldRenderer) {
+                uiSchema[metadataKey]['ui:field'] = component.fieldRenderer;
+              } else {
+                uiSchema[metadataKey]['ui:widget'] = component.widgetRenderer;
+              }
+            }
           }
         }
       }
@@ -285,7 +274,6 @@ const metadataForm: JupyterFrontEndPlugin<IMetadataFormProvider> = {
   requires: [
     INotebookTools,
     ITranslator,
-    IFormWidgetRegistry,
     IFormComponentRegistry,
     ISettingRegistry
   ],
@@ -294,7 +282,6 @@ const metadataForm: JupyterFrontEndPlugin<IMetadataFormProvider> = {
     app: JupyterFrontEnd,
     notebookTools: INotebookTools,
     translator: ITranslator,
-    widgetsRegistry: IFormWidgetRegistry,
     componentsRegistry: IFormComponentRegistry,
     settings: ISettingRegistry
   ): Promise<IMetadataFormProvider> => {
@@ -303,7 +290,6 @@ const metadataForm: JupyterFrontEndPlugin<IMetadataFormProvider> = {
       settings,
       notebookTools,
       translator,
-      widgetsRegistry,
       componentsRegistry
     );
   }
