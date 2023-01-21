@@ -32,6 +32,14 @@ const slowCellModel = {
   source: ['import time\n', 'time.sleep(3.05)\n']
 };
 
+const killerCellModel = {
+  cell_type: 'code',
+  execution_count: 1,
+  metadata: { tags: [] },
+  outputs: [],
+  source: ['import os\n', 'os.system(f"kill {os.getpid()}")\n']
+};
+
 const server = new JupyterServer();
 
 beforeAll(async () => {
@@ -156,6 +164,32 @@ describe('@jupyterlab/notebook', () => {
 
         await NotebookActions.run(widget, ipySessionContext);
         expect(executed).toEqual(expect.arrayContaining([3, 3, 3, 2, 2, 2, 0]));
+      });
+
+      it('should reset to idle when kernel gets abruptly interrupted', async () => {
+        const model = new NotebookModel();
+        const modelJson = {
+          ...utils.DEFAULT_CONTENT,
+          cells: [killerCellModel, slowCellModel]
+        };
+
+        model.fromJSON(modelJson);
+        widget.model = model;
+
+        widget.activeCellIndex = 0;
+        for (let idx = 0; idx < widget.widgets.length; idx++) {
+          widget.select(widget.widgets[idx]);
+        }
+        let scheduledTally: Array<number> = [];
+
+        indicator.model.stateChanged.connect(state => {
+          scheduledTally.push(state.executionState(widget)!.scheduledCell.size);
+        });
+
+        let completed = await NotebookActions.run(widget, ipySessionContext);
+        expect(completed).toBe(false);
+
+        expect(scheduledTally).toEqual(expect.arrayContaining([2, 0]));
       });
     });
   });
