@@ -355,7 +355,7 @@ interface ISearchOverlayProps {
   /**
    * Support for replace options
    */
-  replaceOptionsSupport: IReplaceOptionsSupport | undefined;
+  replaceOptionsSupport?: IReplaceOptionsSupport;
   /**
    * Replacement expression
    */

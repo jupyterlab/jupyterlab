@@ -119,6 +119,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     return this.widget?.content.model?.readOnly ?? false;
   }
 
+  /**
+   * Support for options adjusting replacement behavior.
+   */
   get replaceOptionsSupport(): IReplaceOptionsSupport {
     return {
       preserveCase: true
