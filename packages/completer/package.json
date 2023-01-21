@@ -53,7 +53,7 @@
     "@lumino/domutils": "^1.8.0",
     "@lumino/messaging": "^1.10.0",
     "@lumino/signaling": "^1.10.0",
-    "@lumino/widgets": "^1.33.0"
+    "@lumino/widgets": "^1.37.0"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.6.0-rc.0",

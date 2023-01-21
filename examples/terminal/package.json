@@ -12,7 +12,7 @@
     "@jupyterlab/services": "^6.6.0-rc.0",
     "@jupyterlab/terminal": "^3.6.0-rc.0",
     "@jupyterlab/theme-light-extension": "^3.6.0-rc.0",
-    "@lumino/widgets": "^1.33.0",
+    "@lumino/widgets": "^1.37.0",
     "es6-promise": "~4.2.8"
   },
   "devDependencies": {

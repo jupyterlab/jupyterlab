@@ -53,7 +53,7 @@
     "@lumino/algorithm": "^1.9.0",
     "@lumino/commands": "^1.19.0",
     "@lumino/coreutils": "^1.11.0",
-    "@lumino/widgets": "^1.33.0"
+    "@lumino/widgets": "^1.37.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

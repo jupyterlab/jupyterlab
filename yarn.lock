@@ -2231,10 +2231,27 @@
   dependencies:
     "@lumino/algorithm" "^1.9.2"
 
-"@lumino/widgets@^1.33.0", "@lumino/widgets@^1.36.0":
+"@lumino/widgets@^1.36.0":
   version "1.36.0"
   resolved "https://registry.yarnpkg.com/@lumino/widgets/-/widgets-1.36.0.tgz#8e9734db86d78fb3f8714d247b52194eec999526"
   integrity sha512-6EEzhEcGxLlIo6eCRDFYDA3cviXRQ+V2eVaJCpwP8bVyAJxi0vESskkenVaB38K5uB2cobkxgYr2PlS6REviIw==
+  dependencies:
+    "@lumino/algorithm" "^1.9.2"
+    "@lumino/commands" "^1.21.0"
+    "@lumino/coreutils" "^1.12.1"
+    "@lumino/disposable" "^1.10.3"
+    "@lumino/domutils" "^1.8.2"
+    "@lumino/dragdrop" "^1.14.3"
+    "@lumino/keyboard" "^1.8.2"
+    "@lumino/messaging" "^1.10.3"
+    "@lumino/properties" "^1.8.2"
+    "@lumino/signaling" "^1.11.0"
+    "@lumino/virtualdom" "^1.14.3"
+
+"@lumino/widgets@^1.37.0":
+  version "1.37.0"
+  resolved "https://registry.yarnpkg.com/@lumino/widgets/-/widgets-1.37.0.tgz#6761789c185197fccfaf5116d7bae960c7cb7cc2"
+  integrity sha512-gex1J7PGvcGfWiUvP8M0xdzRPN1ip2OeSxa7uSCSbsViCHXjYC3dl8k2NiLOc9ufoi/pitFDk6PUoOH+pWy5Ow==
   dependencies:
     "@lumino/algorithm" "^1.9.2"
     "@lumino/commands" "^1.21.0"
