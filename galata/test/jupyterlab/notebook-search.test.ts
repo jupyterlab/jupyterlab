@@ -39,7 +39,7 @@ test.describe('Notebook Search', () => {
     // Enter first cell
     await page.notebook.enterCellEditingMode(0);
 
-    // Got to first line
+    // Go to first line
     await page.keyboard.press('PageUp');
 
     // Select first line
