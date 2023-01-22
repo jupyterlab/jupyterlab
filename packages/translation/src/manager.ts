@@ -20,6 +20,10 @@ export class TranslationManager implements ITranslator {
     this._englishBundle = new Gettext({ stringsPrefix: this._stringsPrefix });
   }
 
+  get languageCode(): string {
+    return this._currentLocale;
+  }
+
   /**
    * Fetch the localization data from the server.
    *
