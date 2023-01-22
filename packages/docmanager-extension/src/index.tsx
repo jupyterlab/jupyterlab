@@ -1197,10 +1197,7 @@ namespace Private {
     const date = new Date(checkpoint.last_modified);
     lastCheckpointDate.style.textAlign = 'center';
     lastCheckpointDate.textContent =
-      Time.format(date, 'dddd, MMMM Do YYYY, h:mm:ss a') +
-      ' (' +
-      Time.formatHuman(date) +
-      ')';
+      Time.format(date) + ' (' + Time.formatHuman(date) + ')';
 
     lastCheckpointMessage.appendChild(lastCheckpointText);
     lastCheckpointMessage.appendChild(lastCheckpointDate);

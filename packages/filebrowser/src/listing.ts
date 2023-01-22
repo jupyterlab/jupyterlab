@@ -2226,13 +2226,13 @@ export namespace DirListing {
       if (model.created) {
         hoverText += trans.__(
           '\nCreated: %1',
-          Time.format(new Date(model.created), 'YYYY-MM-DD HH:mm:ss')
+          Time.format(new Date(model.created))
         );
       }
       if (model.last_modified) {
         hoverText += trans.__(
           '\nModified: %1',
-          Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss')
+          Time.format(new Date(model.last_modified))
         );
       }
       hoverText += trans.__('\nWritable: %1', model.writable);
@@ -2275,7 +2275,7 @@ export namespace DirListing {
       let modTitle = '';
       if (model.last_modified) {
         modText = Time.formatHuman(new Date(model.last_modified));
-        modTitle = Time.format(new Date(model.last_modified), 'lll');
+        modTitle = Time.format(new Date(model.last_modified));
       }
       modified.textContent = modText;
       modified.title = modTitle;

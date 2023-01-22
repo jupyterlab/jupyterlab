@@ -233,6 +233,8 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           const searchText = args['searchText'] as string;
           if (searchText) {
             searchWidget.setSearchText(searchText);
+          } else {
+            searchWidget.setSearchText(searchWidget.model.initialQuery);
           }
           searchWidget.focusSearchInput();
         }
@@ -248,6 +250,8 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           const searchText = args['searchText'] as string;
           if (searchText) {
             searchWidget.setSearchText(searchText);
+          } else {
+            searchWidget.setSearchText(searchWidget.model.initialQuery);
           }
           const replaceText = args['replaceText'] as string;
           if (replaceText) {

@@ -84,6 +84,10 @@ bumped their major version (following semver convention). We want to point out p
    The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
    in particular those with the strict null checks enabled.
+- ``@jupyterlab/coreutils`` from 3.x to 4.x
+   The ``Time`` namespace does not use the ``moment`` library anymore for managing dates. Instead it switched to using
+   the ``Intl`` API now available in modern web browsers. The ``Time.format`` function is still available but does not accept the
+   ``timeFormat`` argument anymore.
 - ``@jupyterlab/debugger`` from 3.x to 4.x
    * The command ``debugger:pause`` command ID has been renamed ``debugger:pause-on-exceptions`` to avoid ambiguity with
      pausing the current running thread.
