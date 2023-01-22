@@ -112,8 +112,6 @@ export namespace CommandIDs {
 
   export const invokeCompleter = 'completer:invoke-file';
 
-  export const dismissCompleter = 'completer:dismiss-file';
-
   export const selectCompleter = 'completer:select-file';
 
   export const openCodeViewer = 'code-viewer:open';
@@ -914,17 +912,6 @@ export namespace Commands {
           editorTracker.currentWidget && editorTracker.currentWidget.id;
         if (id) {
           return manager.select(id);
-        }
-      }
-    });
-
-    commands.addCommand(CommandIDs.dismissCompleter, {
-      label: trans.__('Dismisses the completion widget.'),
-      execute: () => {
-        const id =
-          editorTracker.currentWidget && editorTracker.currentWidget.id;
-        if (id) {
-          return manager.dismiss(id);
         }
       }
     });

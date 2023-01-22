@@ -92,8 +92,6 @@ namespace CommandIDs {
   export const invokeCompleter = 'completer:invoke-console';
 
   export const selectCompleter = 'completer:select-console';
-
-  export const dismissCompleter = 'completer:dismiss-console';
 }
 
 /**
@@ -932,16 +930,6 @@ function activateConsoleCompleterService(
 
       if (id) {
         return manager.select(id);
-      }
-    }
-  });
-
-  app.commands.addCommand(CommandIDs.dismissCompleter, {
-    label: trans.__('Dismisses the completion widget.'),
-    execute: () => {
-      const id = consoles.currentWidget && consoles.currentWidget.id;
-      if (id) {
-        return manager.dismiss(id);
       }
     }
   });

@@ -6,11 +6,6 @@
       "command": "completer:invoke-file",
       "keys": ["Tab"],
       "selector": ".jp-FileEditor .jp-mod-completer-enabled"
-    },
-    {
-      "command": "completer:dismiss-file",
-      "keys": ["Escape"],
-      "selector": ".jp-FileEditor .jp-mod-completer-active"
     }
   ],
   "properties": {},

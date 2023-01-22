@@ -291,8 +291,6 @@ namespace CommandIDs {
 
   export const selectCompleter = 'completer:select-notebook';
 
-  export const dismissCompleter = 'completer:dismiss-notebook';
-
   export const tocRunCells = 'toc:run-cells';
 }
 
@@ -1761,16 +1759,6 @@ function activateNotebookCompleterService(
       const id = notebooks.currentWidget && notebooks.currentWidget.id;
       if (id) {
         return manager.select(id);
-      }
-    }
-  });
-
-  app.commands.addCommand(CommandIDs.dismissCompleter, {
-    label: trans.__('Dismisses the completion widget.'),
-    execute: () => {
-      const id = notebooks.currentWidget && notebooks.currentWidget.id;
-      if (id) {
-        return manager.dismiss(id);
       }
     }
   });

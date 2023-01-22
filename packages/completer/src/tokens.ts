@@ -134,13 +134,6 @@ export interface ICompletionProviderManager {
   invoke(id: string): void;
 
   /**
-   * Dismiss the completer in the widget with provided id.
-   *
-   * @param {string} id - the id of notebook panel, console panel or code editor.
-   */
-  dismiss(id: string): void;
-
-  /**
    * Activate `select` command in the widget with provided id.
    *
    * @param {string} id - the id of notebook panel, console panel or code editor.

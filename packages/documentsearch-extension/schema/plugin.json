@@ -51,7 +51,7 @@
     {
       "command": "documentsearch:end",
       "keys": ["Escape"],
-      "selector": ".jp-mod-searchable"
+      "selector": ".jp-DocumentSearch-input"
     }
   ],
   "properties": {

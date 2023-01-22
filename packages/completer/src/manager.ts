@@ -152,18 +152,6 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * Dismiss the completer in the widget with provided id.
-   *
-   * @param id - the id of notebook panel, console panel or code editor.
-   */
-  dismiss(id: string): void {
-    const handler = this._panelHandlers.get(id);
-    if (handler) {
-      handler.completer.reset();
-    }
-  }
-
-  /**
    * Activate `select` command in the widget with provided id.
    *
    * @param {string} id - the id of notebook panel, console panel or code editor.

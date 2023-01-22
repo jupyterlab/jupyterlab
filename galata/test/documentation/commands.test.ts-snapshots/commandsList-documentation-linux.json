@@ -284,14 +284,6 @@
     ]
   },
   {
-    "id": "completer:dismiss-console",
-    "label": "Dismisses the completion widget.",
-    "caption": "",
-    "shortcuts": [
-      "Escape"
-    ]
-  },
-  {
     "id": "completer:select-file",
     "label": "Select the completion suggestion.",
     "caption": "",
@@ -300,27 +292,11 @@
     ]
   },
   {
-    "id": "completer:dismiss-file",
-    "label": "Dismisses the completion widget.",
-    "caption": "",
-    "shortcuts": [
-      "Escape"
-    ]
-  },
-  {
     "id": "completer:select-notebook",
     "label": "Select the completion suggestion.",
     "caption": "",
     "shortcuts": [
       "Enter"
-    ]
-  },
-  {
-    "id": "completer:dismiss-notebook",
-    "label": "Dismisses the completion widget.",
-    "caption": "",
-    "shortcuts": [
-      "Escape"
     ]
   },
   {
@@ -990,12 +966,6 @@
   {
     "id": "fileeditor:select-all",
     "label": "Select All",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "fileeditor:override-esc",
-    "label": "Override Esc",
     "caption": "",
     "shortcuts": []
   },
