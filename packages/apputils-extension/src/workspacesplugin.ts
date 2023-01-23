@@ -14,11 +14,7 @@ import {
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import {
-  FileBrowser,
-  IDefaultFileBrowser,
-  IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { Contents, Workspace, WorkspaceManager } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -43,7 +39,6 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [
     IDefaultFileBrowser,
-    IFileBrowserFactory,
     IWindowResolver,
     IStateDB,
     ITranslator,
@@ -52,8 +47,7 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   optional: [IRouter],
   activate: (
     app: JupyterFrontEnd,
-    fileBrowser: FileBrowser,
-    fbf: IFileBrowserFactory,
+    fileBrowser: IDefaultFileBrowser,
     resolver: IWindowResolver,
     state: IStateDB,
     translator: ITranslator,
@@ -146,7 +140,7 @@ namespace Private {
    * Default location is the current directory in the file browser
    */
   export async function saveAs(
-    browser: FileBrowser,
+    browser: IDefaultFileBrowser,
     contents: Contents.IManager,
     data: Promise<Workspace.IWorkspace>,
     state: IStateDB,

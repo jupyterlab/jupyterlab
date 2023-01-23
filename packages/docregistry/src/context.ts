@@ -54,32 +54,21 @@ export class Context<
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
-    // Get shared model from IDrive.sharedModelFactory
-    const collaborationEnabled =
-      PageConfig.getOption('collaborative') === 'true';
-    if (collaborationEnabled && this._factory.collaborative) {
-      const sharedFactory = this._manager.contents.getSharedModelFactory(
-        this._path
-      );
-      const sharedModel = sharedFactory?.createNew({
-        path: localPath,
-        format: this._factory.fileFormat,
-        contentType: this._factory.contentType,
-        collaborative: this._factory.collaborative
-      });
+    const sharedFactory = this._manager.contents.getSharedModelFactory(
+      this._path
+    );
+    const sharedModel = sharedFactory?.createNew({
+      path: localPath,
+      format: this._factory.fileFormat,
+      contentType: this._factory.contentType,
+      collaborative: this._factory.collaborative
+    });
 
-      this._model = this._factory.createNew({
-        languagePreference: lang,
-        sharedModel,
-        collaborationEnabled
-      });
-    } else {
-      this._model = this._factory.createNew({
-        languagePreference: lang,
-        sharedModel: undefined,
-        collaborationEnabled
-      });
-    }
+    this._model = this._factory.createNew({
+      languagePreference: lang,
+      sharedModel,
+      collaborationEnabled: PageConfig.getOption('collaborative') === 'true'
+    });
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;

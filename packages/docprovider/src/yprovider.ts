@@ -7,17 +7,27 @@ import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection, User } from '@jupyterlab/services';
 import { DocumentChange, YDocument } from '@jupyter/ydoc';
 import { PromiseDelegate } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { Awareness } from 'y-protocols/awareness';
 import { WebsocketProvider as YWebsocketProvider } from 'y-websocket';
 import type { Doc } from 'yjs';
-import { IDocumentProvider } from './tokens';
 
 /**
  * Room Id endpoint provided by `jupyter-server-ydoc`
  * See https://github.com/jupyter-server/jupyter_server_ydoc
  */
 const FILE_PATH_TO_ROOM_ID_URL = 'api/yjs/roomid';
+
+/**
+ * An interface for a document provider.
+ */
+export interface IDocumentProvider extends IDisposable {
+  /**
+   * Returns a Promise that resolves when the document provider is ready.
+   */
+  readonly ready: Promise<void>;
+}
 
 /**
  * A class to provide Yjs synchronization over WebSocket.

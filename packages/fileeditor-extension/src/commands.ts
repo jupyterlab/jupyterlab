@@ -20,7 +20,10 @@ import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -240,7 +243,7 @@ export namespace Commands {
     id: string,
     isEnabled: () => boolean,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    defaultBrowser: FileBrowser,
+    defaultBrowser: IDefaultFileBrowser,
     browserFactory: IFileBrowserFactory,
     consoleTracker: IConsoleTracker | null,
     sessionDialogs: ISessionContextDialogs | null

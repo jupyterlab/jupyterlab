@@ -31,7 +31,6 @@ import { IConsoleTracker } from '@jupyterlab/console';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import {
-  FileBrowser,
   IDefaultFileBrowser,
   IFileBrowserFactory
 } from '@jupyterlab/filebrowser';
@@ -243,7 +242,7 @@ export default plugins;
 function activate(
   app: JupyterFrontEnd,
   editorServices: IEditorServices,
-  fileBrowser: FileBrowser,
+  fileBrowser: IDefaultFileBrowser,
   browserFactory: IFileBrowserFactory,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,

@@ -1154,7 +1154,10 @@ export namespace DocumentRegistry {
   /**
    * The interface for a model factory.
    */
-  export interface IModelFactory<T extends IModel> extends IDisposable {
+  export interface IModelFactory<
+    T extends IModel,
+    U extends ISharedDocument = ISharedDocument
+  > extends IDisposable {
     /**
      * The name of the model.
      */
@@ -1182,7 +1185,7 @@ export namespace DocumentRegistry {
      *
      * @returns A new document model.
      */
-    createNew(options?: DocumentRegistry.IModelOptions): T;
+    createNew(options?: IModelOptions<U>): T;
 
     /**
      * Get the preferred kernel language given a file path.
@@ -1193,7 +1196,7 @@ export namespace DocumentRegistry {
   /**
    * The options used to create a document model.
    */
-  export interface IModelOptions {
+  export interface IModelOptions<T extends ISharedDocument = ISharedDocument> {
     /**
      * The preferred language.
      */
@@ -1201,7 +1204,7 @@ export namespace DocumentRegistry {
     /**
      * The shared model.
      */
-    sharedModel?: ISharedDocument;
+    sharedModel?: T;
     /**
      * Whether the model is collaborative or not.
      */

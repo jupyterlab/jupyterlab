@@ -511,17 +511,8 @@ export namespace NotebookModel {
   /**
    * An options object for initializing a notebook model.
    */
-  export interface IOptions {
-    /**
-     * The language preference for the model.
-     */
-    languagePreference?: string;
-
-    /**
-     * The shared model that contains the data.
-     */
-    sharedModel?: ISharedNotebook;
-
+  export interface IOptions
+    extends DocumentRegistry.IModelOptions<ISharedNotebook> {
     /**
      * Default cell type.
      */
@@ -536,10 +527,5 @@ export namespace NotebookModel {
      * Defines if the document can be undo/redo.
      */
     disableDocumentWideUndoRedo?: boolean;
-
-    /**
-     * Whether collaboration should be enabled for this document model.
-     */
-    collaborationEnabled?: boolean;
   }
 }

@@ -12,7 +12,6 @@ import {
 } from '@jupyterlab/application';
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 import {
-  FileBrowser,
   FileBrowserModel,
   IDefaultFileBrowser,
   IFileBrowserFactory
@@ -61,7 +60,7 @@ function activate(
   translator: ITranslator,
   labShell: ILabShell | null,
   palette: ICommandPalette | null,
-  defaultBrowser: FileBrowser,
+  defaultBrowser: IDefaultFileBrowser | null,
   factory: IFileBrowserFactory | null
 ): ILauncher {
   const { commands, shell } = app;
@@ -72,7 +71,7 @@ function activate(
     label: trans.__('New Launcher'),
     icon: args => (args.toolbar ? addIcon : undefined),
     execute: (args: JSONObject) => {
-      const cwd = (args['cwd'] as string) ?? defaultBrowser.model.path ?? '';
+      const cwd = (args['cwd'] as string) ?? defaultBrowser?.model.path ?? '';
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {
         // If widget is attached to the main area replace the launcher
@@ -111,7 +110,7 @@ function activate(
         }, main);
       }
 
-      if (factory) {
+      if (defaultBrowser) {
         const onPathChanged = (model: FileBrowserModel) => {
           launcher.cwd = model.path;
         };
@@ -126,18 +125,20 @@ function activate(
   });
 
   if (labShell) {
-    void Promise.all([app.restored, defaultBrowser.model.restored]).then(() => {
-      function maybeCreate() {
-        // Create a launcher if there are no open items.
-        if (labShell!.isEmpty('main')) {
-          void commands.execute(CommandIDs.create);
+    void Promise.all([app.restored, defaultBrowser?.model.restored]).then(
+      () => {
+        function maybeCreate() {
+          // Create a launcher if there are no open items.
+          if (labShell!.isEmpty('main')) {
+            void commands.execute(CommandIDs.create);
+          }
         }
+        // When layout is modified, create a launcher if there are no open items.
+        labShell.layoutModified.connect(() => {
+          maybeCreate();
+        });
       }
-      // When layout is modified, create a launcher if there are no open items.
-      labShell.layoutModified.connect(() => {
-        maybeCreate();
-      });
-    });
+    );
   }
 
   if (palette) {

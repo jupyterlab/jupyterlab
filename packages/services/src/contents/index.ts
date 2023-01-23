@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISharedDocument } from '@jupyter/ydoc';
+
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { PartialJSONObject } from '@lumino/coreutils';
@@ -8,8 +10,6 @@ import { PartialJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { ISharedDocument } from '@jupyter/ydoc';
 
 import { ServerConnection } from '..';
 
@@ -252,7 +252,7 @@ export namespace Contents {
     /**
      * Wether the document is collaborative or not.
      *
-     *  The default value is `true`.
+     * The default value is `true`.
      */
     collaborative?: boolean;
   }
@@ -465,7 +465,7 @@ export namespace Contents {
     readonly serverSettings: ServerConnection.ISettings;
 
     /**
-     * An optional shared model IFactory instance for the
+     * An optional shared model factory instance for the
      * drive.
      */
     readonly sharedModelFactory?: ISharedFactory;
@@ -656,7 +656,7 @@ export class ContentsManager implements Contents.IManager {
   }
 
   /**
-   * Given a path, get a shared model IFactory from the
+   * Given a path, get a shared model factory from the
    * relevant backend. Returns `null` if the backend
    * does not provide one.
    */

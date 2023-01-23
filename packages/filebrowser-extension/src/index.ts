@@ -157,7 +157,7 @@ const browser: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
-    defaultFileBrowser: FileBrowser,
+    defaultFileBrowser: IDefaultFileBrowser,
     factory: IFileBrowserFactory,
     translator: ITranslator,
     restorer: ILayoutRestorer | null,
@@ -254,7 +254,6 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
     info: JupyterLab.IInfo | null
   ): Promise<IFileBrowserFactory> => {
     const tracker = new WidgetTracker<FileBrowser>({ namespace });
-
     const createFileBrowser = (
       id: string,
       options: IFileBrowserFactory.IOptions = {}
@@ -292,7 +291,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
 /**
  * The default file browser factory provider.
  */
-const defaultFileBrowser: JupyterFrontEndPlugin<FileBrowser> = {
+const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   id: '@jupyterlab/filebrowser-extension:defaultFileBrowser',
   provides: IDefaultFileBrowser,
   requires: [IFileBrowserFactory],
@@ -303,7 +302,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<FileBrowser> = {
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
     labShell: ILabShell | null
-  ): Promise<FileBrowser> => {
+  ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
 
     const drive = new YDrive(app.serviceManager.user);
@@ -402,7 +401,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     docManager: IDocumentManager,
-    browser: FileBrowser,
+    browser: IDefaultFileBrowser,
     factory: IFileBrowserFactory,
     settings: ISettingRegistry,
     toolbarRegistry: IToolbarWidgetRegistry,

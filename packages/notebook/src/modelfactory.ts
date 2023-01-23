@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISharedNotebook } from '@jupyter/ydoc';
+import type { ISharedNotebook } from '@jupyter/ydoc';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Contents } from '@jupyterlab/services';
 import { INotebookModel, NotebookModel } from './model';
@@ -77,11 +77,13 @@ export class NotebookModelFactory
    *
    * @returns A new document model.
    */
-  createNew(options?: NotebookModelFactory.IModelOptions): INotebookModel {
+  createNew(
+    options: DocumentRegistry.IModelOptions<ISharedNotebook> = {}
+  ): INotebookModel {
     return new NotebookModel({
-      languagePreference: options?.languagePreference,
-      sharedModel: options?.sharedModel,
-      collaborationEnabled: options?.collaborationEnabled && this.collaborative,
+      languagePreference: options.languagePreference,
+      sharedModel: options.sharedModel,
+      collaborationEnabled: options.collaborationEnabled && this.collaborative,
       disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo
     });
   }
@@ -118,23 +120,5 @@ export namespace NotebookModelFactory {
      * Defines if the document can be undo/redo.
      */
     disableDocumentWideUndoRedo?: boolean;
-  }
-
-  /**
-   * The options used to create a notebook model.
-   */
-  export interface IModelOptions {
-    /**
-     * The preferred language.
-     */
-    languagePreference?: string;
-    /**
-     * The shared model.
-     */
-    sharedModel?: ISharedNotebook;
-    /**
-     * Whether the model is collaborative or not.
-     */
-    collaborationEnabled?: boolean;
   }
 }
