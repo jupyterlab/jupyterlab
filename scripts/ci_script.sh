@@ -18,6 +18,18 @@ if [[ $GROUP != nonode ]]; then
 fi
 
 
+if [[ $GROUP == python ]]; then
+    export JUPYTERLAB_DIR="${HOME}/share/jupyter/lab/"
+    mkdir -p $JUPYTERLAB_DIR
+
+    # the env var ensures that `yarn.lock` in app dir does not change on a simple `jupyter lab build` call
+    YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
+
+    # Run the python tests
+    python -m pytest
+fi
+
+
 if [[ $GROUP == js* ]]; then
 
     # extract the group name
@@ -42,19 +54,6 @@ if [[ $GROUP == docs ]]; then
 fi
 
 
-if [[ $GROUP == examples ]]; then
-    # Run the integrity script to link binary files
-    jlpm integrity
-
-    # Build the examples.
-    jlpm run build:packages
-    jlpm run build:examples
-
-    # Test the examples
-    jlpm run test:examples
-fi
-
-
 if [[ $GROUP == integrity ]]; then
     # Run the integrity script first
     jlpm run integrity --force
@@ -62,6 +61,20 @@ if [[ $GROUP == integrity ]]; then
     # Run a browser check in dev mode
     jlpm run build
     python -m jupyterlab.browser_check --dev-mode
+fi
+
+
+if [[ $GROUP == lint ]]; then
+    # Lint our files.
+    jlpm run prettier:check || (echo 'Please run `jlpm run prettier` locally and push changes' && exit 1)
+    jlpm run eslint:check || (echo 'Please run `jlpm run eslint` locally and push changes' && exit 1)
+    jlpm run eslint:check:typed || (echo echo 'Please run `jlpm run eslint:typed` locally and push changes' && exit 1)
+    jlpm run stylelint:check || (echo 'Please run `jlpm run stylelint` locally and push changes' && exit 1)
+
+    # Python checks
+    black --check --diff --color .
+    ruff .
+    pipx run 'validate-pyproject[all]' pyproject.toml
 fi
 
 
@@ -120,125 +133,10 @@ if [[ $GROUP == integrity3 ]]; then
 fi
 
 
-if [[ $GROUP == interop ]]; then
-    cd jupyterlab/tests/mock_packages/interop
-
-    # Install a source extension that depends on a prebuilt extension
-    pushd token
-    jupyter labextension link . --no-build
-    popd
-    pushd provider
-    jupyter labextension build .
-    pip install .
-    popd
-    pushd consumer
-    jupyter labextension install .
-    popd
-    jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
-    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
-
-    python -m jupyterlab.browser_check
-
-    # Clear install
-    pip uninstall -y jlab_mock_provider
-    jupyter lab clean --all
-
-    # Install a prebuilt extension that depends on a source extension
-    pushd token
-    jupyter labextension link . --no-build
-    popd
-    pushd provider
-    jupyter labextension install .
-    popd
-    pushd consumer
-    jupyter labextension build .
-    pip install .
-    popd
-    jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
-    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
-    python -m jupyterlab.browser_check
-
-    # Clear install
-    pip uninstall -y jlab_mock_consumer
-    jupyter lab clean --all
-
-    # Install the mock consumer as a source extension and as a
-    # prebuilt extension to test shadowing
-    pushd token
-    jupyter labextension link . --no-build
-    popd
-    pushd provider
-    jupyter labextension install . --no-build
-    popd
-    pushd consumer
-    # Need to install source first because it would get ignored
-    # if installed after
-    jupyter labextension install .
-    jupyter labextension build .
-    pip install .
-    popd
-    jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
-    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
-    python -m jupyterlab.browser_check
-fi
-
-
-if [[ $GROUP == lint ]]; then
-    # Lint our files.
-    jlpm run prettier:check || (echo 'Please run `jlpm run prettier` locally and push changes' && exit 1)
-    jlpm run eslint:check || (echo 'Please run `jlpm run eslint` locally and push changes' && exit 1)
-    jlpm run eslint:check:typed || (echo echo 'Please run `jlpm run eslint:typed` locally and push changes' && exit 1)
-    jlpm run stylelint:check || (echo 'Please run `jlpm run stylelint` locally and push changes' && exit 1)
-
-    # Python checks
-    black --check --diff --color .
-    ruff .
-    pipx run 'validate-pyproject[all]' pyproject.toml
-fi
-
-
-if [[ $GROUP == nonode ]]; then
-    # Make sure we can install the wheel
-    virtualenv -p $(which python3) test_install
-    ./test_install/bin/pip install -v --pre --no-cache-dir --no-deps jupyterlab --no-index --find-links=dist  # Install latest jupyterlab
-    ./test_install/bin/pip install jupyterlab  # Install jupyterlab dependencies
-    ./test_install/bin/python -m jupyterlab.browser_check --no-browser-test
-
-    # Make sure we can start and kill the lab server
-    ./test_install/bin/jupyter lab --no-browser &
-    TASK_PID=$!
-    # Make sure the task is running
-    ps -p $TASK_PID || exit 1
-    sleep 5
-    kill $TASK_PID
-    wait $TASK_PID
-
-    # Make sure we can install the tarball
-    virtualenv -p $(which python3) test_sdist
-    ./test_sdist/bin/pip install dist/*.tar.gz
-    ./test_sdist/bin/python -m jupyterlab.browser_check --no-browser-test
-fi
-
-
-if [[ $GROUP == python ]]; then
-    export JUPYTERLAB_DIR="${HOME}/share/jupyter/lab/"
-    mkdir -p $JUPYTERLAB_DIR
-
-    # the env var ensures that `yarn.lock` in app dir does not change on a simple `jupyter lab build` call
-    YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
-
-    # Run the python tests
-    py.test
-fi
-
-
-if [[ $GROUP == release_check ]]; then
-    jlpm run publish:js --dry-run
-    jlpm run prepare:python-release
-    ./scripts/release_test.sh
+if [[ $GROUP == release_test ]]; then
+    # bump the version
+    git checkout -b test HEAD
+    jlpm bumpversion next --force
 
     # Use verdaccio during publish
     node buildutils/lib/local-repository.js start
@@ -253,33 +151,16 @@ if [[ $GROUP == release_check ]]; then
 fi
 
 
-if [[ $GROUP == splice_source ]]; then
+if [[ $GROUP == examples ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
 
-    jupyter lab build --minimize=False --debug --dev-build=True --splice-source
-    jupyter lab --version > version.txt
-    cat version.txt
-    cat version.txt | grep -q "spliced"
-    python -m jupyterlab.browser_check
+    # Build the examples.
+    jlpm run build:packages
+    jlpm run build:examples
 
-    cd jupyterlab/tests/mock_packages/mimeextension
-    jupyter labextension install .
-    python -m jupyterlab.browser_check
-
-    jupyter lab --version > version.txt
-    cat version.txt
-    cat version.txt | grep -q "spliced"
-
-    jupyter lab clean --all
-    jupyter lab --version > version.txt
-    cat version.txt
-    cat version.txt | grep -q "spliced" && exit 1
-
-    jupyter labextension install --splice-source .
-    jupyter lab --version > version.txt
-    cat version.txt | grep -q "spliced"
-    python -m jupyterlab.browser_check
+    # Test the examples
+    jlpm run test:examples
 fi
 
 
@@ -375,6 +256,7 @@ fi
 
 
 if [[ $GROUP == usage2 ]]; then
+
     ## Test app directory support being a symlink
     mkdir tmp
     pushd tmp
@@ -404,15 +286,9 @@ if [[ $GROUP == usage2 ]]; then
     # Make sure we can non-dev install.
     TEST_INSTALL_PATH="${HOME}/test_install"
     virtualenv -p $(which python3) $TEST_INSTALL_PATH
-    $TEST_INSTALL_PATH/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
+    $TEST_INSTALL_PATH/bin/pip install -q ".[dev,test]"  # this populates <sys_prefix>/share/jupyter/lab
 
     $TEST_INSTALL_PATH/bin/jupyter server extension list 1>serverextensions 2>&1
-    cat serverextensions
-    cat serverextensions | grep -i "jupyterlab.*enabled"
-    cat serverextensions | grep -i "jupyterlab.*OK"
-
-    # TODO: remove when we no longer support classic notebook
-    $TEST_INSTALL_PATH/bin/jupyter serverextension list 1>serverextensions 2>&1
     cat serverextensions
     cat serverextensions | grep -i "jupyterlab.*enabled"
     cat serverextensions | grep -i "jupyterlab.*OK"
@@ -447,4 +323,122 @@ if [[ $GROUP == usage2 ]]; then
     jupyter lab clean --settings
     jupyter lab clean --static
     jupyter lab clean --all
+fi
+
+
+if [[ $GROUP == splice_source ]]; then
+    # Run the integrity script to link binary files
+    jlpm integrity
+
+    jupyter lab build --minimize=False --debug --dev-build=True --splice-source
+    jupyter lab --version > version.txt
+    cat version.txt
+    cat version.txt | grep -q "spliced"
+    python -m jupyterlab.browser_check
+
+    cd jupyterlab/tests/mock_packages/mimeextension
+    jupyter labextension install .
+    python -m jupyterlab.browser_check
+
+    jupyter lab --version > version.txt
+    cat version.txt
+    cat version.txt | grep -q "spliced"
+
+    jupyter lab clean --all
+    jupyter lab --version > version.txt
+    cat version.txt
+    cat version.txt | grep -q "spliced" && exit 1
+
+    jupyter labextension install --splice-source .
+    jupyter lab --version > version.txt
+    cat version.txt | grep -q "spliced"
+    python -m jupyterlab.browser_check
+fi
+
+
+if [[ $GROUP == interop ]]; then
+    cd jupyterlab/tests/mock_packages/interop
+
+    # Install a source extension that depends on a prebuilt extension
+    pushd token
+    jupyter labextension link . --no-build
+    popd
+    pushd provider
+    jupyter labextension build .
+    pip install .
+    popd
+    pushd consumer
+    jupyter labextension install .
+    popd
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
+    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
+
+    python -m jupyterlab.browser_check
+
+    # Clear install
+    pip uninstall -y jlab_mock_provider
+    jupyter lab clean --all
+
+    # Install a prebuilt extension that depends on a source extension
+    pushd token
+    jupyter labextension link . --no-build
+    popd
+    pushd provider
+    jupyter labextension install .
+    popd
+    pushd consumer
+    jupyter labextension build .
+    pip install .
+    popd
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
+    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
+    python -m jupyterlab.browser_check
+
+    # Clear install
+    pip uninstall -y jlab_mock_consumer
+    jupyter lab clean --all
+
+    # Install the mock consumer as a source extension and as a
+    # prebuilt extension to test shadowing
+    pushd token
+    jupyter labextension link . --no-build
+    popd
+    pushd provider
+    jupyter labextension install . --no-build
+    popd
+    pushd consumer
+    # Need to install source first because it would get ignored
+    # if installed after
+    jupyter labextension install .
+    jupyter labextension build .
+    pip install .
+    popd
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
+    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
+    python -m jupyterlab.browser_check
+fi
+
+if [[ $GROUP == nonode ]]; then
+    # Make sure we can install the wheel
+    virtualenv -p $(which python3) test_install
+    ./test_install/bin/pip install -v --pre --no-cache-dir --no-deps jupyterlab --no-index --find-links=dist  # Install latest jupyterlab
+    ./test_install/bin/pip install jupyterlab  # Install jupyterlab dependencies
+    ./test_install/bin/python -m jupyterlab.browser_check --no-browser-test
+
+    # Make sure we can start and kill the lab server
+    ./test_install/bin/jupyter lab --no-browser &
+    TASK_PID=$!
+    # Make sure the task is running
+    ps -p $TASK_PID || exit 1
+    sleep 5
+    kill $TASK_PID
+    wait $TASK_PID
+
+    # Make sure we can install the tarball
+    virtualenv -p $(which python3) test_sdist
+    ./test_sdist/bin/pip install dist/*.tar.gz
+    ./test_sdist/bin/python -m jupyterlab.browser_check --no-browser-test
 fi

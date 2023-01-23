@@ -41,7 +41,7 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
       true
     );
   } catch (e) {
-    console.log('WARNING: unable to get registry from yarn config');
+    // Do nothing
   }
   if (!prev_npm || prev_npm.indexOf('0.0.0.0') !== -1) {
     prev_npm = 'https://registry.npmjs.org/';
@@ -155,7 +155,7 @@ packages:
       '["localhost"]'
     ]);
   } catch (e) {
-    console.log('WARNING: unable to set registry in yarn config');
+    // yarn not available
   }
 
   // Log in using cli and temp credentials
@@ -192,12 +192,7 @@ packages:
             loginPs.stdin.write(email + '\n');
             break;
           default:
-            if (data.indexOf('Logged in as') !== -1) {
-            loginPs.stdin.end();
-            // do not accept here yet, the token may not have been written
-          } else {
             reject(`Unexpected prompt: "${data}"`);
-          }
         }
       }
       loginPs.stderr.on('data', (chunk: string) => {
@@ -254,9 +249,7 @@ async function stopLocalRegistry(out_dir: string) {
       child_process.execSync(`yarn config unset npmRegistryServer`);
       child_process.execSync(`yarn config unset unsafeHttpWhitelist`);
     } catch (e) {
-      console.log(
-        'WARNING: unable to revert registry to previous value in yarn config'
-      );
+      // yarn not available
     }
   }
 }
@@ -273,7 +266,7 @@ function fixLinks(package_dir: string) {
       true
     );
   } catch (e) {
-    console.log('WARNING: unable to get registry from yarn config');
+    // Do nothing
   }
   yarn_reg = yarn_reg || 'https://registry.yarnpkg.com';
   const lock_file = path.join(package_dir, 'yarn.lock');
