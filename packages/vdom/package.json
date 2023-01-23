@@ -38,7 +38,7 @@
     "@jupyterlab/services": "^6.6.0-rc.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/messaging": "^1.10.0",
-    "@lumino/widgets": "^1.37.0",
+    "@lumino/widgets": "^1.37.1",
     "@nteract/transform-vdom": "^4.0.16-alpha.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"

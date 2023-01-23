@@ -11,7 +11,7 @@
     "@jupyterlab/application": "^3.6.0-rc.0",
     "@jupyterlab/example-federated-middle": "^2.7.0-rc.0",
     "@jupyterlab/markdownviewer-extension": "^3.6.0-rc.0",
-    "@lumino/widgets": "^1.37.0"
+    "@lumino/widgets": "^1.37.1"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.6.0-rc.0",

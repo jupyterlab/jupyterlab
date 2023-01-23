@@ -45,7 +45,7 @@
     "@jupyterlab/notebook": "^3.6.0-rc.0",
     "@jupyterlab/services": "^6.6.0-rc.0",
     "@lumino/algorithm": "^1.9.0",
-    "@lumino/widgets": "^1.37.0"
+    "@lumino/widgets": "^1.37.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

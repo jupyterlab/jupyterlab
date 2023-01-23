@@ -71,7 +71,7 @@
     "@lumino/messaging": "^1.10.0",
     "@lumino/polling": "^1.9.0",
     "@lumino/signaling": "^1.10.0",
-    "@lumino/widgets": "^1.37.0",
+    "@lumino/widgets": "^1.37.1",
     "@vscode/debugprotocol": "^1.51.0",
     "codemirror": "~5.61.0",
     "react": "^17.0.1"

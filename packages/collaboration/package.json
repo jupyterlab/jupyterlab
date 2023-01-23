@@ -42,7 +42,7 @@
     "@jupyterlab/ui-components": "^3.6.0-rc.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/virtualdom": "^1.14.0",
-    "@lumino/widgets": "^1.37.0",
+    "@lumino/widgets": "^1.37.1",
     "react": "^17.0.1",
     "y-protocols": "^1.0.5",
     "yjs": "^13.5.17"
