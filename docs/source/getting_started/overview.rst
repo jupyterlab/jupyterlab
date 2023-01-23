@@ -84,9 +84,10 @@ The extension developer API is evolving, and we also are currently iterating on 
 We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`__
 as we evolve towards a stable extension development API.
 
-JupyterLab will eventually replace the classic Jupyter Notebook.
+As JupyterLab 4 development continues, and Notebook 7 development follows,
+Notebook 7 will eventually replace the classic Jupyter Notebook.
 Throughout this transition, the same notebook document format will
-be supported by both the classic Notebook and JupyterLab.
+be supported by both the classic Notebook, Notebook 7 and JupyterLab.
 As of JupyterLab 4, the Notebook web application, will no longer
 be installed alongside JupyterLab as it is no longer a JupyterLab
 dependency. To find out more about the future of the classic
