@@ -125,14 +125,20 @@ export class CodeConsole extends Widget {
     this.rendermime = options.rendermime;
     this.sessionContext = options.sessionContext;
     this._mimeTypeService = options.mimeTypeService;
+    this._promptCellPosition = options.promptCellPosition ?? 'bottom';
 
     // Add top-level CSS classes.
     this._content.addClass(CONTENT_CLASS);
     this._input.addClass(INPUT_CLASS);
 
     // Insert the content and input panes into the widget.
-    layout.addWidget(this._content);
-    layout.addWidget(this._input);
+    if (this._promptCellPosition === 'bottom') {
+      layout.addWidget(this._content);
+      layout.addWidget(this._input);
+    } else {
+      layout.addWidget(this._input);
+      layout.addWidget(this._content);
+    }
 
     this._history = new ConsoleHistory({
       sessionContext: this.sessionContext
@@ -220,7 +226,11 @@ export class CodeConsole extends Widget {
    */
   addCell(cell: CodeCell, msgId?: string): void {
     cell.addClass(CONSOLE_CELL_CLASS);
-    this._content.addWidget(cell);
+    if (this._promptCellPosition === 'bottom') {
+      this._content.addWidget(cell);
+    } else {
+      this._content.insertWidget(0, cell);
+    }
     this._cells.push(cell);
     if (msgId) {
       this._msgIds.set(msgId, cell);
@@ -271,7 +281,11 @@ export class CodeConsole extends Widget {
     })).initializeState();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
-    this._content.addWidget(banner);
+    if (this._promptCellPosition === 'bottom') {
+      this._content.addWidget(banner);
+    } else {
+      this._content.insertWidget(0, banner);
+    }
   }
 
   /**
@@ -890,6 +904,7 @@ export class CodeConsole extends Widget {
   private _executor: IConsoleCellExecutor;
   private _executed = new Signal<this, Date>(this);
   private _history: IConsoleHistory;
+  private _promptCellPosition = 'bottom';
   private _input: Panel;
   private _mimetype = 'text/x-ipython';
   private _mimeTypeService: IEditorMimeTypeService;
@@ -910,6 +925,8 @@ export class CodeConsole extends Widget {
  * A namespace for CodeConsole statics.
  */
 export namespace CodeConsole {
+  export type promptCellPosition = 'bottom' | 'top';
+
   /**
    * The initialization options for a console widget.
    */
@@ -948,6 +965,11 @@ export namespace CodeConsole {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * The position of the input cell for the console widget
+     */
+    promptCellPosition?: promptCellPosition;
   }
 
   /**
