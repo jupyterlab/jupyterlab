@@ -19,10 +19,6 @@ class NullTranslator implements ITranslator {
     return this._languageBundle;
   }
 
-  locale(): string {
-    return 'en';
-  }
-
   private _languageBundle: TranslationBundle;
 }
 
