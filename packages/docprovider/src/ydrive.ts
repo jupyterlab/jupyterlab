@@ -30,7 +30,6 @@ export class YDrive extends Drive {
   constructor(user: User.IManager) {
     super({ name: 'YDrive' });
     this._user = user;
-    this._sharedPaths = new Set<string>();
     this._providers = new Map<string, WebSocketProvider>();
 
     this.sharedModelFactory = new SharedModelFactory(this._onCreate);
@@ -65,7 +64,6 @@ export class YDrive extends Drive {
     if (this.isDisposed) {
       return;
     }
-    this._sharedPaths.clear();
     this._providers.forEach(p => p.dispose());
     this._providers.clear();
     super.dispose();
@@ -91,7 +89,6 @@ export class YDrive extends Drive {
       const provider = this._providers.get(key);
 
       if (provider) {
-        this._sharedPaths.add(localPath);
         const model = super.get(localPath, { ...options, content: false });
         await provider.ready;
         return model;
@@ -118,12 +115,7 @@ export class YDrive extends Drive {
     oldLocalPath: string,
     newLocalPath: string
   ): Promise<Contents.IModel> {
-    const model = await super.rename(oldLocalPath, newLocalPath);
-    if (this._sharedPaths.has(oldLocalPath)) {
-      this._sharedPaths.delete(oldLocalPath);
-      this._sharedPaths.add(model.path);
-    }
-    return model;
+    return await super.rename(oldLocalPath, newLocalPath);
   }
 
   /**
@@ -145,12 +137,8 @@ export class YDrive extends Drive {
     localPath: string,
     options: Partial<Contents.IModel> = {}
   ): Promise<Contents.IModel> {
-    if (this._sharedPaths.has(localPath)) {
-      // Save is done from the backend
-      return this.get(localPath, { ...options, content: false });
-    } else {
-      return super.save(localPath, options);
-    }
+    // Save is done from the backend
+    return this.get(localPath, { ...options, content: false });
   }
 
   private _onCreate = (
@@ -190,7 +178,6 @@ export class YDrive extends Drive {
   };
 
   private _user: User.IManager;
-  private _sharedPaths: Set<string>;
   private _providers: Map<string, WebSocketProvider>;
 }
 
