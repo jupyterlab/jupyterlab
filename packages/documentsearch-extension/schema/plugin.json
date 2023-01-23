@@ -47,11 +47,6 @@
       "command": "documentsearch:highlightPrevious",
       "keys": ["Accel Shift G"],
       "selector": ".jp-mod-searchable"
-    },
-    {
-      "command": "documentsearch:end",
-      "keys": ["Escape"],
-      "selector": ".jp-DocumentSearch-input"
     }
   ],
   "properties": {

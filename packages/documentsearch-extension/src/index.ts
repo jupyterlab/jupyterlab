@@ -64,6 +64,13 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
       }
       if (registry.hasProvider(widget)) {
         widget.addClass(SEARCHABLE_CLASS);
+        // Only bind Esc in case the document is currently searchable,
+        // else it will clash with Esc to close completer on fileeditor
+        app.commands.addKeyBinding({
+          command: CommandIDs.end,
+          keys: ['Escape'],
+          selector: '.jp-mod-searchable'
+        });
       } else {
         widget.removeClass(SEARCHABLE_CLASS);
       }
