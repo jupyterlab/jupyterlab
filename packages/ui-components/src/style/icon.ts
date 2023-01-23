@@ -355,38 +355,6 @@ export namespace LabIconStyle {
     },
 
     sideBar: {
-      container: {
-        // `&` will be substituted for the generated classname (interpolation)
-        $nest: {
-          // left sidebar tab divs
-          '.jp-SideBar.jp-mod-left .lm-TabBar-tab &': {
-            transform: 'rotate(90deg)'
-          },
-          // left sidebar currently selected tab div
-          '.jp-SideBar.jp-mod-left .lm-TabBar-tab.lm-mod-current &': {
-            transform:
-              'rotate(90deg)\n' +
-              '    translate(\n' +
-              '      calc(-0.5 * var(--jp-border-width)),\n' +
-              '      calc(-0.5 * var(--jp-border-width))\n' +
-              '    )'
-          },
-
-          // right sidebar tab divs
-          '.jp-SideBar.jp-mod-right .lm-TabBar-tab &': {
-            transform: 'rotate(-90deg)'
-          },
-          // right sidebar currently selected tab div
-          '.jp-SideBar.jp-mod-right .lm-TabBar-tab.lm-mod-current &': {
-            transform:
-              'rotate(-90deg)\n' +
-              '    translate(\n' +
-              '      calc(0.5 * var(--jp-border-width)),\n' +
-              '      calc(-0.5 * var(--jp-border-width))\n' +
-              '    )'
-          }
-        }
-      },
       element: {
         height: 'auto',
         width: '20px'
