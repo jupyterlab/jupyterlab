@@ -22,7 +22,7 @@ here = osp.abspath(osp.dirname(__file__))
 def header(path):
     test_name = osp.basename(path)
     print(  # noqa
-        "\n".join(("\n", "*" * 40, "Starting %s test in %s" % (test_name, path), "*" * 40)),
+        "\n".join(("\n", "*" * 40, f"Starting {test_name} test in {path}", "*" * 40)),
         flush=True,
     )
 

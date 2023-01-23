@@ -612,7 +612,7 @@ def make_key_function(loose):
             key = key + tuple(v.prerelease)
         else:
             #  NOT having a prerelease is > having one
-            key = key + (float("inf"),)
+            key = (*key, float("inf"))
 
         return key
 
@@ -931,10 +931,10 @@ def replace_caret(comp, loose):
         if is_x(M):
             ret = ""
         elif is_x(m):
-            ret = ">=" + M + ".0.0 <" + str((int(M) + 1)) + ".0.0"
+            ret = ">=" + M + ".0.0 <" + str(int(M) + 1) + ".0.0"
         elif is_x(p):
             if M == "0":
-                ret = ">=" + M + "." + m + ".0 <" + M + "." + str((int(m) + 1)) + ".0"
+                ret = ">=" + M + "." + m + ".0 <" + M + "." + str(int(m) + 1) + ".0"
             else:
                 ret = ">=" + M + "." + m + ".0 <" + str(int(M) + 1) + ".0.0"
         elif pr:
@@ -1003,7 +1003,7 @@ def replace_caret(comp, loose):
                         + " <"
                         + M
                         + "."
-                        + str((int(m) + 1))
+                        + str(int(m) + 1)
                         + ".0"
                     )
             else:

@@ -307,7 +307,7 @@ def watch_dev(logger=None):
         startup_regex=WEBPACK_EXPECT,
     )
 
-    return package_procs + [wp_proc]
+    return [*package_procs, wp_proc]
 
 
 class AppOptions(HasTraits):
@@ -755,14 +755,14 @@ class _AppHandler:
         if local:
             logger.info("\n   local extensions:")
             for name in sorted(local):
-                logger.info("        %s: %s" % (name, local[name]))
+                logger.info(f"        {name}: {local[name]}")
 
         linked_packages = info["linked_packages"]
         if linked_packages:
             logger.info("\n   linked packages:")
             for key in sorted(linked_packages):
                 source = linked_packages[key]["source"]
-                logger.info("        %s: %s" % (key, source))
+                logger.info(f"        {key}: {source}")
 
         uninstalled_core = info["uninstalled_core"]
         if uninstalled_core:
@@ -928,7 +928,7 @@ class _AppHandler:
         for (extname, data) in info["extensions"].items():
             path = data["path"]
             if extname == name:
-                msg = "Uninstalling %s from %s" % (name, osp.dirname(path))
+                msg = f"Uninstalling {name} from {osp.dirname(path)}"
                 logger.info(msg)
                 os.remove(path)
                 # Handle local extensions.
@@ -991,13 +991,13 @@ class _AppHandler:
         except URLError:
             return False
         if latest is None:
-            self.logger.warning("No compatible version found for %s!" % (name,))
+            self.logger.warning(f"No compatible version found for {name}!")
             return False
         if latest == data["version"]:
             self.logger.info("Extension %r already up to date" % name)
             return False
-        self.logger.info("Updating %s to version %s" % (name, latest))
-        return self.install_extension("%s@%s" % (name, latest))
+        self.logger.info(f"Updating {name} to version {latest}")
+        return self.install_extension(f"{name}@{latest}")
 
     def link_package(self, path):
         """Link a package at the given path.
@@ -1099,7 +1099,7 @@ class _AppHandler:
             return self._check_core_extension(extension, info, check_installed_only)
 
         if extension in info["linked_packages"]:
-            self.logger.info("%s:%s" % (extension, GREEN_ENABLED))
+            self.logger.info(f"{extension}:{GREEN_ENABLED}")
             return True
 
         return self._check_common_extension(extension, info, check_installed_only)
@@ -1107,37 +1107,37 @@ class _AppHandler:
     def _check_core_extension(self, extension, info, check_installed_only):
         """Check if a core extension is enabled or disabled"""
         if extension in info["uninstalled_core"]:
-            self.logger.info("%s:%s" % (extension, RED_X))
+            self.logger.info(f"{extension}:{RED_X}")
             return False
         if check_installed_only:
-            self.logger.info("%s: %s" % (extension, GREEN_OK))
+            self.logger.info(f"{extension}: {GREEN_OK}")
             return True
         if extension in info["disabled_core"]:
-            self.logger.info("%s: %s" % (extension, RED_DISABLED))
+            self.logger.info(f"{extension}: {RED_DISABLED}")
             return False
-        self.logger.info("%s:%s" % (extension, GREEN_ENABLED))
+        self.logger.info(f"{extension}:{GREEN_ENABLED}")
         return True
 
     def _check_common_extension(self, extension, info, check_installed_only):
         """Check if a common (non-core) extension is enabled or disabled"""
         if extension not in info["extensions"]:
-            self.logger.info("%s:%s" % (extension, RED_X))
+            self.logger.info(f"{extension}:{RED_X}")
             return False
 
         errors = self._get_extension_compat()[extension]
         if errors:
-            self.logger.info("%s:%s (compatibility errors)" % (extension, RED_X))
+            self.logger.info(f"{extension}:{RED_X} (compatibility errors)")
             return False
 
         if check_installed_only:
-            self.logger.info("%s: %s" % (extension, GREEN_OK))
+            self.logger.info(f"{extension}: {GREEN_OK}")
             return True
 
         if _is_disabled(extension, info["disabled"]):
-            self.logger.info("%s: %s" % (extension, RED_DISABLED))
+            self.logger.info(f"{extension}: {RED_DISABLED}")
             return False
 
-        self.logger.info("%s:%s" % (extension, GREEN_ENABLED))
+        self.logger.info(f"{extension}:{GREEN_ENABLED}")
         return True
 
     def _get_app_info(self):
@@ -1592,7 +1592,7 @@ class _AppHandler:
 
         error_accumulator = {}
 
-        logger.info("   %s dir: %s" % (ext_type, dname))
+        logger.info(f"   {ext_type} dir: {dname}")
         for name in sorted(names):
             if name in info["federated_extensions"]:
                 continue
@@ -1613,9 +1613,9 @@ class _AppHandler:
             # If we have the package name in the data, this means this extension's name is the alias name
             alias_package_source = data["alias_package_source"]
             if alias_package_source:
-                logger.info("        %s %s v%s%s" % (name, alias_package_source, version, extra))
+                logger.info(f"        {name} {alias_package_source} v{version}{extra}")
             else:
-                logger.info("        %s v%s%s" % (name, version, extra))
+                logger.info(f"        {name} v{version}{extra}")
             if errors:
                 error_accumulator[name] = (version, errors)
 
@@ -1660,8 +1660,8 @@ class _AppHandler:
 
                 install = data.get("install")
                 if install:
-                    extra += " (%s, %s)" % (install["packageManager"], install["packageName"])
-                logger.info("        %s v%s%s" % (name, version, extra))
+                    extra += " ({}, {})".format(install["packageManager"], install["packageName"])
+                logger.info(f"        {name} v{version}{extra}")
                 if errors:
                     error_accumulator[name] = (version, errors)
             # Add a spacer line after
@@ -1698,7 +1698,7 @@ class _AppHandler:
 
         for name in dead:
             link_type = source.replace("_", " ")
-            msg = '**Note: Removing dead %s "%s"' % (link_type, name)
+            msg = f'**Note: Removing dead {link_type} "{name}"'
             self.logger.warning(msg)
             del data[name]
 
@@ -1748,7 +1748,7 @@ class _AppHandler:
                     self.logger.debug("Incompatible extension:\n%s", name)
                     self.logger.debug("Found compatible version: %s", version)
                     with TemporaryDirectory() as tempdir2:
-                        return self._install_extension("%s@%s" % (name, version), tempdir2)
+                        return self._install_extension(f"{name}@{version}", tempdir2)
 
                 # Extend message to better guide the user what to do:
                 conflicts = "\n".join(msg.splitlines()[2:])
@@ -1832,7 +1832,7 @@ class _AppHandler:
                     continue
                 # Verify that the version is a valid extension.
                 with TemporaryDirectory() as tempdir:
-                    info = self._extract_package("%s@%s" % (name, version), tempdir)
+                    info = self._extract_package(f"{name}@{version}", tempdir)
                 if _validate_extension(info["data"]):
                     # Invalid, do not consider other versions
                     return
@@ -1869,14 +1869,14 @@ class _AppHandler:
                 errors = _validate_compatibility(name, deps, core_data)
                 if not errors:
                     # Found a compatible version
-                    keys.append("%s@%s" % (name, version))
+                    keys.append(f"{name}@{version}")
                     break  # break inner for
 
         versions = {}
         if not keys:
             return versions
         with TemporaryDirectory() as tempdir:
-            ret = self._run([which("npm"), "pack"] + keys, cwd=tempdir)
+            ret = self._run([which("npm"), "pack", *keys], cwd=tempdir)
             if ret != 0:
                 msg = '"%s" is not a valid npm package'
                 raise ValueError(msg % keys)
@@ -2323,8 +2323,7 @@ def _log_multiple_compat_errors(logger, errors_map):
     if outdated:
         logger.warning(
             "\n        ".join(
-                ["\n   The following extension are outdated:"]
-                + outdated
+                ["\n   The following extension are outdated:", *outdated]
                 + [
                     '\n   Consider running "jupyter labextension update --all" '
                     "to check for updates.\n"
@@ -2423,10 +2422,10 @@ def _semver_key(version, prerelease_first=False):
         key = (0,) if v.prerelease else (1,)
     else:
         key = ()
-    key = key + (v.major, v.minor, v.patch)
+    key = (*key, v.major, v.minor, v.patch)
     if not prerelease_first:
         #  NOT having a prerelease is > having one
-        key = key + (0,) if v.prerelease else (1,)
+        key = (*key, 0) if v.prerelease else (1,)
     if v.prerelease:
         key = key + tuple(_semver_prerelease_key(v.prerelease))
 

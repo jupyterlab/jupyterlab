@@ -231,7 +231,7 @@ This probably means the commit's PR needs to be assigned to this milestone,
 or the commit was pushed to master directly.
 """
     )
-    print("\n".join("%s %s %s" % (c, commits[c][0], commits[c][1]) for c in notfound))
+    print("\n".join(f"{c} {commits[c][0]} {commits[c][1]}" for c in notfound))
     prs_to_check = [
         c
         for c in notfound
@@ -243,7 +243,7 @@ or the commit was pushed to master directly.
             "Try checking these PRs. They probably should be in the milestone, but probably aren't:"
         )
         print()
-        print("\n".join("%s %s" % (c, commits[c][1]) for c in prs_to_check))
+        print("\n".join(f"{c} {commits[c][1]}" for c in prs_to_check))
 else:
     print(
         "Congratulations! All commits in the commit history are included in some PR in this milestone."

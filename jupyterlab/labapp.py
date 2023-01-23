@@ -97,7 +97,7 @@ build_flags["splice-source"] = (
 version = __version__
 app_version = get_app_version()
 if version != app_version:
-    version = "%s (dev), %s (app)" % (__version__, app_version)
+    version = f"{__version__} (dev), {app_version} (app)"
 
 build_failure_msg = """Build failed.
 Troubleshooting: If the build failed due to an out-of-memory error, you

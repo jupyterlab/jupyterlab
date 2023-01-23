@@ -120,8 +120,8 @@ def build_api_docs(out_dir: Path):
         pass
     else:
         check_call(jlpm, cwd=str(root))
-        check_call(jlpm + ["build:packages"], cwd=str(root))
-        check_call(jlpm + ["docs"], cwd=str(root))
+        check_call([*jlpm, "build:packages"], cwd=str(root))
+        check_call([*jlpm, "docs"], cwd=str(root))
 
     dest_dir = out_dir / "api"
     if dest_dir.exists():

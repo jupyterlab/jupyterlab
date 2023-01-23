@@ -69,7 +69,7 @@ class CoreConfig:
         if not semver:
             raise ValueError("Missing package semver")
         if name in data["resolutions"]:
-            raise ValueError("Package already present: %r" % (name,))
+            raise ValueError(f"Package already present: {name!r}")
         data["resolutions"][name] = semver
 
         # If both mimeExtension and extensions are True, treat
