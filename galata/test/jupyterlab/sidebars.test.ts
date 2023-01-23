@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import { expect, galata, Handle, test } from '@jupyterlab/galata';
 
 const sidebarIds: galata.SidebarTabId[] = [
   'filebrowser',
@@ -10,6 +10,21 @@ const sidebarIds: galata.SidebarTabId[] = [
   'table-of-contents',
   'extensionmanager.main-view'
 ];
+
+/**
+ * Add provided text as label on first tab in given tabbar.
+ * By default we only have icons, but we should test for the
+ * styling of labels which are used downstream (e.g. sidecar).
+ */
+async function mockLabelOnFirstTab(tabbar: Handle, text: string) {
+  await tabbar.$eval(
+    '.lm-TabBar-tabLabel',
+    (node: HTMLElement, text: string) => {
+      node.innerText = text;
+    },
+    text
+  );
+}
 
 test.describe('Sidebars', () => {
   sidebarIds.forEach(sidebarId => {
@@ -55,12 +70,20 @@ test.describe('Sidebars', () => {
     expect(unusedRules.length).toEqual(0);
   });
 
-  test('Toggle Light theme', async ({ page }) => {
-    await page.theme.setDarkTheme();
-
+  test('Left light tabbar (with text)', async ({ page }) => {
     await page.theme.setLightTheme();
+    const imageName = 'left-light-tabbar-with-text.png';
+    const tabbar = await page.sidebar.getTabBar();
+    await mockLabelOnFirstTab(tabbar, 'File Browser');
+    expect(await tabbar.screenshot()).toMatchSnapshot(imageName.toLowerCase());
+  });
 
-    expect(await page.theme.getTheme()).toEqual('JupyterLab Light');
+  test('Right dark tabbar (with text)', async ({ page }) => {
+    await page.theme.setDarkTheme();
+    const imageName = 'right-dark-tabbar-with-text.png';
+    const tabbar = await page.sidebar.getTabBar('right');
+    await mockLabelOnFirstTab(tabbar, 'Property Inspector');
+    expect(await tabbar.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
 
   test('Move File Browser to right', async ({ page }) => {
