@@ -221,9 +221,9 @@ namespace Private {
           }
 
           // Optionally links key to a custom widget.
-          if (options.customComponent) {
+          if (options.customRenderer) {
             const component = formComponentRegistry.getRenderer(
-              options.customComponent as string
+              options.customRenderer as string
             );
 
             // If renderer is defined (custom widget has been registered), set it as used widget.
