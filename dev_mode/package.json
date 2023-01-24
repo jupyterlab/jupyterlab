@@ -112,7 +112,7 @@
     "@jupyterlab/vdom-extension": "~3.6.0-rc.0",
     "@jupyterlab/vega5-extension": "~3.6.0-rc.0",
     "@lumino/algorithm": "^1.9.0",
-    "@lumino/application": "^1.31.1",
+    "@lumino/application": "^1.31.3",
     "@lumino/commands": "^1.19.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/disposable": "^1.10.0",
@@ -122,7 +122,7 @@
     "@lumino/properties": "^1.8.0",
     "@lumino/signaling": "^1.10.0",
     "@lumino/virtualdom": "^1.14.0",
-    "@lumino/widgets": "^1.33.0",
+    "@lumino/widgets": "^1.37.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "yjs": "^13.5.17"
