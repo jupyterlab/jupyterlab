@@ -101,7 +101,6 @@
     "watch:packages": "python scripts/watch_packages.py"
   },
   "resolutions": {
-    "@jupyter/ydoc": "~0.3.0",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/disposable": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6",
@@ -110,7 +109,6 @@
     "yjs": "^13.5.40"
   },
   "dependencies": {
-    "@jupyter/ydoc": "~0.3.0",
     "@typescript-eslint/eslint-plugin": "~5.28.0",
     "@typescript-eslint/parser": "~5.28.0",
     "eslint": "~8.17.0",
