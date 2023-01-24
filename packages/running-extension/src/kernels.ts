@@ -2,14 +2,24 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { PathExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { Kernel, KernelSpec, Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
-import { jupyterIcon, LabIcon } from '@jupyterlab/ui-components';
+import {
+  closeIcon,
+  consoleIcon,
+  jupyterIcon,
+  LabIcon,
+  notebookIcon
+} from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
+import { Menu } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
+
+const ITEM_CLASS = 'jp-kernel';
 
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.
@@ -19,18 +29,20 @@ export async function addKernelRunningSessionManager(
   translator: ITranslator,
   app: JupyterFrontEnd
 ): Promise<void> {
-  const { commands } = app;
-  const trans = translator.load('jupyterlab');
-  const { kernels, kernelspecs, sessions } = app.serviceManager;
+  const { commands, contextMenu, serviceManager } = app;
+  const { kernels, kernelspecs, sessions } = serviceManager;
   const { runningChanged, RunningKernel } = Private;
   const throttler = new Throttler(() => runningChanged.emit(undefined), 100);
+  const trans = translator.load('jupyterlab');
 
   // Throttle signal emissions from the kernel and session managers.
   kernels.runningChanged.connect(() => void throttler.invoke());
   sessions.runningChanged.connect(() => void throttler.invoke());
 
-  await Promise.all([kernelspecs.ready, kernels.ready]);
+  // Wait until the relevant services are ready.
+  await Promise.all([kernels.ready, kernelspecs.ready, sessions.ready]);
 
+  // Add the kernels pane to the running sidebar.
   managers.add({
     name: trans.__('Kernels'),
     running: () =>
@@ -55,19 +67,137 @@ export async function addKernelRunningSessionManager(
       'Are you sure you want to permanently shut down all running kernels?'
     )
   });
+
+  // Add running kernels commands to the registry.
+  const test = (node: HTMLElement) => node.classList.contains(ITEM_CLASS);
+  commands.addCommand('running:kernel-new-console', {
+    icon: consoleIcon,
+    label: trans.__('New Console for Kernel'),
+    execute: args => {
+      const node = app.contextMenuHitTest(test);
+      const id = (args.id as string) ?? node?.dataset['context'];
+      if (id) {
+        return commands.execute('console:create', { kernelPreference: { id } });
+      }
+    }
+  });
+  commands.addCommand('running:kernel-new-notebook', {
+    icon: notebookIcon,
+    label: trans.__('New Notebook for Kernel'),
+    execute: args => {
+      const node = app.contextMenuHitTest(test);
+      const id = (args.id as string) ?? node?.dataset['context'];
+      if (id) {
+        return commands.execute('notebook:create-new', { kernelId: id });
+      }
+    }
+  });
+  commands.addCommand('running:kernel-open-session', {
+    icon: args =>
+      args.type === 'console'
+        ? consoleIcon
+        : args.type === 'notebook'
+        ? notebookIcon
+        : undefined,
+    label: ({ name, path }) =>
+      trans.__('Open %1', name || PathExt.basename((path as string) || '')),
+    execute: ({ path, type }) => {
+      if (!type || path === undefined) {
+        return;
+      }
+      const command = type === 'console' ? 'console:open' : 'docmanager:open';
+      return commands.execute(command, { path });
+    }
+  });
+  commands.addCommand('running:kernel-shutdown', {
+    icon: closeIcon,
+    label: trans.__('Shut Down Kernel'),
+    execute: args => {
+      const node = app.contextMenuHitTest(test);
+      const id = (args.id as string) ?? node?.dataset['context'];
+      if (id) {
+        return kernels.shutdown(id);
+      }
+    }
+  });
+
+  // Add "new" options to the running kernels context menu.
+  let rank = 0;
+  contextMenu.addItem({
+    command: 'running:kernel-new-console',
+    rank: rank++,
+    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`
+  });
+  contextMenu.addItem({
+    command: 'running:kernel-new-notebook',
+    rank: rank++,
+    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`
+  });
+  contextMenu.addItem({
+    rank: rank++,
+    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`,
+    type: 'separator'
+  });
+
+  // Create and populate connected sessions submenu when context menu is opened.
+  const submenu = new Menu({ commands: app.commands });
+  submenu.title.label = trans.__('Connected Sessions…');
+  contextMenu.addItem({
+    rank: rank++,
+    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`,
+    type: 'submenu',
+    submenu
+  });
+  contextMenu.opened.connect(async () => {
+    const node = app.contextMenuHitTest(test);
+    const id = node?.dataset['context'];
+    if (!id) {
+      return;
+    }
+
+    // Empty the submenu and repopulate with sessions connected to this kernel.
+    while (submenu.items.length) {
+      submenu.removeItemAt(0);
+    }
+    for (const session of sessions.running()) {
+      if (id === session.kernel?.id) {
+        const command = 'running:kernel-open-session';
+        const { name, path, type } = session;
+        submenu.addItem({ command, args: { name, path, type } });
+      }
+    }
+  });
+
+  // Add shut down option at the bottom.
+  contextMenu.addItem({
+    rank: rank++,
+    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`,
+    type: 'separator'
+  });
+  contextMenu.addItem({
+    command: 'running:kernel-shutdown',
+    rank: rank++,
+    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`
+  });
 }
 
 namespace Private {
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
+      this.className = 'jp-kernel';
       this.commands = options.commands;
       this.kernel = options.kernel;
+      this.context = this.kernel.id;
       this.kernels = options.kernels;
       this.sessions = options.sessions;
       this.spec = options.spec || null;
       this.trans = options.trans;
       this._icon = options.icon || jupyterIcon;
     }
+
+    readonly className: string;
+
+    readonly context: string;
 
     readonly commands: CommandRegistry;
 
@@ -104,7 +234,7 @@ namespace Private {
     label() {
       const { kernel, spec } = this;
       const name = spec?.display_name || kernel.name;
-      return `${name} {${kernel.connections ?? '-'}}`;
+      return `${name} (${kernel.connections ?? '-'})`;
     }
 
     labelTitle() {
