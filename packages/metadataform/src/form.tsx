@@ -34,7 +34,6 @@ export class FormWidget extends ReactWidget {
   render(): JSX.Element {
     const formContext = {
       defaultFormData: this._props.settings.default(),
-      settings: this._props.settings,
       updateMetadata: this._props.metadataFormWidget.updateMetadata
     };
     return (
