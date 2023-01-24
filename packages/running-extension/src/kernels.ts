@@ -2,83 +2,138 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { PathExt } from '@jupyterlab/coreutils';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
-import { Session } from '@jupyterlab/services';
+import { Kernel, KernelSpec, Session } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
-import { consoleIcon, fileIcon, notebookIcon } from '@jupyterlab/ui-components';
+import { jupyterIcon, LabIcon } from '@jupyterlab/ui-components';
+import { CommandRegistry } from '@lumino/commands';
+import { Throttler } from '@lumino/polling';
+import { Signal } from '@lumino/signaling';
 
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.
  */
-export function addKernelRunningSessionManager(
+export async function addKernelRunningSessionManager(
   managers: IRunningSessionManagers,
   translator: ITranslator,
   app: JupyterFrontEnd
-): void {
+): Promise<void> {
+  const { commands } = app;
   const trans = translator.load('jupyterlab');
-  const manager = app.serviceManager.sessions;
-  const specsManager = app.serviceManager.kernelspecs;
-  function filterSessions(m: Session.IModel) {
-    return !!(
-      (m.name || PathExt.basename(m.path)).indexOf('.') !== -1 || m.name
-    );
-  }
+  const { kernels, kernelspecs, sessions } = app.serviceManager;
+  const { runningChanged, RunningKernel } = Private;
+  const throttler = new Throttler(() => runningChanged.emit(undefined), 100);
 
-  class RunningKernel implements IRunningSessions.IRunningItem {
-    constructor(model: Session.IModel) {
-      this._model = model;
-    }
-    open() {
-      const { path, type } = this._model;
-      if (type.toLowerCase() === 'console') {
-        void app.commands.execute('console:open', { path });
-      } else {
-        void app.commands.execute('docmanager:open', { path });
-      }
-    }
-    shutdown() {
-      return manager.shutdown(this._model.id);
-    }
-    icon() {
-      const { name, path, type } = this._model;
-      if ((name || PathExt.basename(path)).indexOf('.ipynb') !== -1) {
-        return notebookIcon;
-      } else if (type.toLowerCase() === 'console') {
-        return consoleIcon;
-      }
-      return fileIcon;
-    }
-    label() {
-      return this._model.name || PathExt.basename(this._model.path);
-    }
-    labelTitle() {
-      const { kernel, path } = this._model;
-      let kernelName = kernel?.name;
-      if (kernelName && specsManager.specs) {
-        const spec = specsManager.specs.kernelspecs[kernelName];
-        kernelName = spec ? spec.display_name : 'unknown';
-      }
-      return trans.__('Path: %1\nKernel: %2', path, kernelName);
-    }
+  // Throttle signal emissions from the kernel and session managers.
+  kernels.runningChanged.connect(() => void throttler.invoke());
+  sessions.runningChanged.connect(() => void throttler.invoke());
 
-    private _model: Session.IModel;
-  }
+  await Promise.all([kernelspecs.ready, kernels.ready]);
 
   managers.add({
     name: trans.__('Kernels'),
-    running: () => {
-      return Array.from(manager.running())
-        .filter(filterSessions)
-        .map(model => new RunningKernel(model));
-    },
-    shutdownAll: () => manager.shutdownAll(),
-    refreshRunning: () => manager.refreshRunning(),
-    runningChanged: manager.runningChanged,
+    running: () =>
+      Array.from(kernels.running()).map(
+        kernel =>
+          new RunningKernel({
+            commands,
+            kernel,
+            kernels,
+            sessions,
+            spec: kernelspecs.specs?.kernelspecs[kernel.name],
+            trans
+          })
+      ),
+    shutdownAll: () => kernels.shutdownAll(),
+    refreshRunning: () =>
+      Promise.all([kernels.refreshRunning(), sessions.refreshRunning()]),
+    runningChanged,
     shutdownLabel: trans.__('Shut Down'),
     shutdownAllLabel: trans.__('Shut Down All'),
     shutdownAllConfirmationText: trans.__(
       'Are you sure you want to permanently shut down all running kernels?'
     )
   });
+}
+
+namespace Private {
+  export class RunningKernel implements IRunningSessions.IRunningItem {
+    constructor(options: RunningKernel.IOptions) {
+      this.commands = options.commands;
+      this.kernel = options.kernel;
+      this.kernels = options.kernels;
+      this.sessions = options.sessions;
+      this.spec = options.spec || null;
+      this.trans = options.trans;
+      this._icon = options.icon || jupyterIcon;
+    }
+
+    readonly commands: CommandRegistry;
+
+    readonly kernel: Kernel.IModel;
+
+    readonly kernels: Kernel.IManager;
+
+    readonly sessions: Session.IManager;
+
+    readonly spec: KernelSpec.ISpecModel | null;
+
+    readonly trans: IRenderMime.TranslationBundle;
+
+    open() {
+      for (const session of this.sessions.running()) {
+        if (this.kernel.id !== session.kernel?.id) {
+          continue;
+        }
+        const { path, type } = session;
+        const command = type === 'console' ? 'console:open' : 'docmanager:open';
+        void this.commands.execute(command, { path });
+      }
+    }
+
+    shutdown() {
+      return this.kernels.shutdown(this.kernel.id);
+    }
+
+    icon() {
+      // TODO: Use the icon from `this.spec.resources` instead.
+      return this._icon;
+    }
+
+    label() {
+      const { kernel, spec } = this;
+      const name = spec?.display_name || kernel.name;
+      return `${name} {${kernel.connections ?? '-'}}`;
+    }
+
+    labelTitle() {
+      const { trans } = this;
+      const { id } = this.kernel;
+      const title = [`${this.label()}: ${id}`];
+      for (const session of this.sessions.running()) {
+        if (this.kernel.id === session.kernel?.id) {
+          const { path, type } = session;
+          title.push(trans.__(`%1\nPath: %2`, type, path));
+        }
+      }
+      return title.join('\n\n');
+    }
+
+    private _icon: LabIcon;
+  }
+
+  export namespace RunningKernel {
+    export interface IOptions {
+      commands: CommandRegistry;
+      icon?: LabIcon;
+      kernel: Kernel.IModel;
+      kernels: Kernel.IManager;
+      sessions: Session.IManager;
+      spec?: KernelSpec.ISpecModel;
+      trans: IRenderMime.TranslationBundle;
+    }
+  }
+
+  export const runningChanged = new Signal<unknown, unknown>({});
 }
