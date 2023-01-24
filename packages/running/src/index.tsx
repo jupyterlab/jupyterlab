@@ -143,6 +143,7 @@ function Item(props: {
 }) {
   const { runningItem } = props;
   const icon = runningItem.icon();
+  const className = `${ITEM_CLASS} ${runningItem.className || ''}`;
   const detail = runningItem.detail?.();
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
@@ -150,7 +151,7 @@ function Item(props: {
   const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
 
   return (
-    <li className={ITEM_CLASS}>
+    <li className={className} data-context={runningItem.context || ''}>
       <icon.react tag="span" stylesheet="runningItem" />
       <span
         className={ITEM_LABEL_CLASS}
@@ -347,10 +348,7 @@ export class RunningSessions extends SidePanel {
    * @param managers Managers
    * @param manager New manager
    */
-  protected addSection(
-    managers: IRunningSessionManagers,
-    manager: IRunningSessions.IManager
-  ) {
+  protected addSection(_: unknown, manager: IRunningSessions.IManager) {
     this.addWidget(new Section({ manager, translator: this.translator }));
   }
 
@@ -366,23 +364,49 @@ export namespace IRunningSessions {
    * A manager of running items grouped under a single section.
    */
   export interface IManager {
-    // Name that is shown to the user in plural
+    /**
+     * Name that is shown to the user in plural.
+     */
     name: string;
-    // called when the shutdown all button is pressed
+
+    /**
+     * Called when the shutdown all button is pressed.
+     */
     shutdownAll(): void;
-    // list the running models.
+
+    /**
+     * List the running models.
+     */
     running(): IRunningItem[];
-    // Force a refresh of the running models.
+
+    /**
+     * Force a refresh of the running models.
+     */
     refreshRunning(): void;
-    // A signal that should be emitted when the item list has changed.
+
+    /**
+     * A signal that should be emitted when the item list has changed.
+     */
     runningChanged: ISignal<any, any>;
-    // A string used to describe the shutdown action.
+
+    /**
+     * A string used to describe the shutdown action.
+     */
     shutdownLabel?: string;
-    // A string used to describe the shutdown all action.
+
+    /**
+     * A string used to describe the shutdown all action.
+     */
     shutdownAllLabel?: string;
-    // A string used as the body text in the shutdown all confirmation dialog.
+
+    /**
+     * A string used as the body text in the shutdown all confirmation dialog.
+     */
     shutdownAllConfirmationText?: string;
-    // The icon to show for shutting down an individual item in this section.
+
+    /**
+     * The icon to show for shutting down an individual item in this section.
+     */
     shutdownItemIcon?: LabIcon;
   }
 
@@ -390,18 +414,46 @@ export namespace IRunningSessions {
    * A running item.
    */
   export interface IRunningItem {
-    // called when the running item is clicked
+    /**
+     * Optional CSS class name to add to the running item.
+     */
+    className?: string;
+
+    /**
+     * Optional context hint to add to the `data-context` attribute of an item.
+     */
+    context?: string;
+
+    /**
+     * Called when the running item is clicked.
+     */
     open: () => void;
-    // called when the shutdown button is pressed on a particular item
+
+    /**
+     * Called when the shutdown button is pressed on a particular item.
+     */
     shutdown: () => void;
-    // LabIcon to use as the icon
+
+    /**
+     * The `LabIcon` to use as the icon for the running item.
+     */
     icon: () => LabIcon;
-    // called to determine the label for each item
+
+    /**
+     * Called to determine the label for each item.
+     */
     label: () => string;
-    // called to determine the `title` attribute for each item, which is revealed on hover
+
+    /**
+     * Called to determine the `title` attribute for each item, which is
+     * revealed on hover.
+     */
     labelTitle?: () => string;
-    // called to determine the `detail` attribute which is shown optionally
-    // in a column after the label
+
+    /**
+     * Called to determine the `detail` attribute, which is shown optionally in
+     * a column after the label.
+     */
     detail?: () => string;
   }
 }
