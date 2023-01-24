@@ -61,7 +61,7 @@ export async function addKernelRunningSessionManager(
     refreshRunning: () =>
       Promise.all([kernels.refreshRunning(), sessions.refreshRunning()]),
     runningChanged,
-    shutdownLabel: trans.__('Shut Down'),
+    shutdownLabel: trans.__('Shut Down Kernel'),
     shutdownAllLabel: trans.__('Shut Down All'),
     shutdownAllConfirmationText: trans.__(
       'Are you sure you want to permanently shut down all running kernels?'
@@ -155,13 +155,15 @@ export async function addKernelRunningSessionManager(
       return;
     }
 
-    // Empty the submenu and repopulate with sessions connected to this kernel.
+    // Empty the connected sessions submenu.
     while (submenu.items.length) {
       submenu.removeItemAt(0);
     }
+
+    // Populate the submenu with sessions connected to this kernel.
+    const command = 'running:kernel-open-session';
     for (const session of sessions.running()) {
       if (id === session.kernel?.id) {
-        const command = 'running:kernel-open-session';
         const { name, path, type } = session;
         submenu.addItem({ command, args: { name, path, type } });
       }
@@ -218,7 +220,6 @@ namespace Private {
       for (const session of this.sessions.running()) {
         if (this.kernel.id === session.kernel?.id) {
           const { name, path, type } = session;
-          this.commands.execute;
           children.push({
             className: ITEM_CLASS,
             context: this.kernel.id,
