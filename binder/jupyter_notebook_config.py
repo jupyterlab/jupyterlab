@@ -15,7 +15,21 @@ common = [
 
 
 lab_splice_command = " ".join(
-    ["jupyter", "lab", "build", "--splice-source", "--minimize=False", "--dev-build=True", "--debug", ">jupyterlab-spliced.log 2>&1", "&&", "jupyter", "lab", "--ServerApp.base_url={base_url}lab-spliced", *common]
+    [
+        "jupyter",
+        "lab",
+        "build",
+        "--splice-source",
+        "--minimize=False",
+        "--dev-build=True",
+        "--debug",
+        ">jupyterlab-spliced.log 2>&1",
+        "&&",
+        "jupyter",
+        "lab",
+        "--ServerApp.base_url={base_url}lab-spliced",
+        *common,
+    ]
     + [">jupyterlab-spliced.log 2>&1"]
 )
 
