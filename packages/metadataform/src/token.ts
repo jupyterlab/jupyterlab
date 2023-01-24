@@ -7,11 +7,10 @@
 
 import { CellType } from '@jupyterlab/nbformat';
 import { NotebookTools } from '@jupyterlab/notebook';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { BaseSettings, ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   PartialJSONObject,
-  PartialJSONValue,
   ReadonlyJSONObject,
   Token
 } from '@lumino/coreutils';
@@ -22,25 +21,6 @@ export namespace MetadataForm {
    * The metadata schema as defined in JSON schema.
    */
   export type IMetadataSchema = ISettingRegistry.IMetadataSchema;
-
-  /**
-   * The settings to send to RJSF templates in formContext.
-   */
-  export interface ISettings {
-    /**
-     * Calculate the default value of a setting by iterating through the schema.
-     *
-     * @param key - The name of the setting whose default value is calculated.
-     *
-     * @returns A calculated default JSON value for a specific setting.
-     */
-    default(key?: string): PartialJSONValue | undefined;
-
-    /**
-     * The meta information associated to all properties.
-     */
-    metaInformation: IMetaInformation;
-  }
 
   /**
    * The meta information associated to all properties.
@@ -135,7 +115,7 @@ export namespace MetadataForm {
     /**
      * Meta information associated to properties.
      */
-    settings: ISettings;
+    settings: BaseSettings;
 
     /**
      * Current data of the form.
@@ -181,7 +161,7 @@ export namespace MetadataForm {
      * The list contains also the conditional fields, which are not necessary
      * displayed and filled.
      */
-    get metadataKeys(): string[];
+    readonly metadataKeys: string[];
 
     /**
      * Get the properties of a MetadataKey.

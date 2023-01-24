@@ -145,7 +145,10 @@ export class MetadataFormWidget
    * in metadata before performing update.
    * It uses an arrow function to allow using 'this' properly when called from a custom field.
    */
-  updateMetadata = (formData: ReadonlyPartialJSONObject, reload?: boolean) => {
+  updateMetadata = (
+    formData: ReadonlyPartialJSONObject,
+    reload?: boolean
+  ): void => {
     if (this.notebookTools == undefined) return;
 
     const notebook = this.notebookTools.activeNotebookPanel;
@@ -424,9 +427,8 @@ export class MetadataFormWidget
 
     this.buildWidget({
       properties: formProperties,
-      settings: new Private.Settings({
-        metaInformation: this._metaInformation,
-        schema: this._metadataSchema
+      settings: new BaseSettings({
+        schema: this._metadataSchema as PartialJSONObject
       }),
       uiSchema: this._uiSchema,
       translator: this.translator || null,
@@ -458,23 +460,6 @@ namespace Private {
     [metadata: string]: PartialJSONObject | PartialJSONValue | undefined;
   }
 
-  /**
-   * The settings to send to RJSF templates in formContext.
-   */
-  export class Settings extends BaseSettings implements MetadataForm.ISettings {
-    constructor({
-      metaInformation,
-      schema
-    }: {
-      metaInformation: MetadataForm.IMetaInformation;
-      schema: PartialJSONObject;
-    }) {
-      super({ schema });
-      this.metaInformation = metaInformation;
-    }
-
-    metaInformation: MetadataForm.IMetaInformation;
-  }
   /**
    * Recursive function to clean the empty nested metadata before updating real metadata.
    * this function is called when a nested metadata is undefined (or default), so maybe some
