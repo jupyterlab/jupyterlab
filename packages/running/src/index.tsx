@@ -136,6 +136,7 @@ export class RunningSessionManagers implements IRunningSessionManagers {
 }
 
 function Item(props: {
+  child?: boolean;
   runningItem: IRunningSessions.IRunningItem;
   shutdownLabel?: string;
   shutdownItemIcon?: LabIcon;
@@ -143,35 +144,58 @@ function Item(props: {
 }) {
   const { runningItem } = props;
   const icon = runningItem.icon();
-  const className = `${ITEM_CLASS} ${runningItem.className || ''}`;
   const detail = runningItem.detail?.();
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
   const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
   const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
+  const classList = [ITEM_CLASS];
+
+  if (runningItem.className) {
+    classList.push(runningItem.className);
+  }
+  if (props.child) {
+    classList.push('jp-mod-running-child');
+  }
 
   return (
-    <li className={className} data-context={runningItem.context || ''}>
-      <icon.react tag="span" stylesheet="runningItem" />
-      <span
-        className={ITEM_LABEL_CLASS}
-        title={runningItem.labelTitle ? runningItem.labelTitle() : ''}
-        onClick={() => runningItem.open()}
+    <>
+      <li
+        className={classList.join(' ')}
+        data-context={runningItem.context || ''}
       >
-        {runningItem.label()}
-      </span>
-      {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
-      <ToolbarButtonComponent
-        className={SHUTDOWN_BUTTON_CLASS}
-        icon={shutdownItemIcon}
-        onClick={() => runningItem.shutdown()}
-        tooltip={shutdownLabel}
-      />
-    </li>
+        <icon.react tag="span" stylesheet="runningItem" />
+        <span
+          className={ITEM_LABEL_CLASS}
+          title={runningItem.labelTitle ? runningItem.labelTitle() : ''}
+          onClick={() => runningItem.open()}
+        >
+          {runningItem.label()}
+        </span>
+        {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
+        {runningItem.shutdown && (
+          <ToolbarButtonComponent
+            className={SHUTDOWN_BUTTON_CLASS}
+            icon={shutdownItemIcon}
+            onClick={() => runningItem.shutdown!()}
+            tooltip={shutdownLabel}
+          />
+        )}
+      </li>
+      {runningItem.children && runningItem.children.length && (
+        <List
+          child={true}
+          runningItems={runningItem.children}
+          shutdownItemIcon={shutdownItemIcon}
+          translator={translator}
+        />
+      )}
+    </>
   );
 }
 
 function List(props: {
+  child?: boolean;
   runningItems: IRunningSessions.IRunningItem[];
   shutdownLabel?: string;
   shutdownAllLabel?: string;
@@ -182,6 +206,7 @@ function List(props: {
     <ul className={LIST_CLASS}>
       {props.runningItems.map((item, i) => (
         <Item
+          child={props.child}
           key={i}
           runningItem={item}
           shutdownLabel={props.shutdownLabel}
@@ -415,6 +440,11 @@ export namespace IRunningSessions {
    */
   export interface IRunningItem {
     /**
+     * Optional child nodes that belong to a top-level running item.
+     */
+    children?: IRunningItem[];
+
+    /**
      * Optional CSS class name to add to the running item.
      */
     className?: string;
@@ -432,7 +462,7 @@ export namespace IRunningSessions {
     /**
      * Called when the shutdown button is pressed on a particular item.
      */
-    shutdown: () => void;
+    shutdown?: () => void;
 
     /**
      * The `LabIcon` to use as the icon for the running item.

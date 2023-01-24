@@ -44,6 +44,7 @@
 }
 
 .jp-RunningSessions-sectionList {
+  display: block;
   margin: 0;
   padding: 0;
   list-style-type: none;
@@ -60,6 +61,10 @@
 
 .jp-RunningSessions-item:hover {
   background-color: var(--jp-layout-color2);
+}
+
+.jp-RunningSessions-item.jp-mod-running-child {
+  padding-left: 24px;
 }
 
 .jp-RunningSessions-itemLabel {

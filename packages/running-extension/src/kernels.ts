@@ -19,7 +19,7 @@ import { Menu } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 
-const ITEM_CLASS = 'jp-kernel';
+const ITEM_CLASS = 'jp-mod-kernel';
 
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.
@@ -184,7 +184,7 @@ export async function addKernelRunningSessionManager(
 namespace Private {
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
-      this.className = 'jp-kernel';
+      this.className = ITEM_CLASS;
       this.commands = options.commands;
       this.kernel = options.kernel;
       this.context = this.kernel.id;
@@ -211,6 +211,32 @@ namespace Private {
 
     readonly trans: IRenderMime.TranslationBundle;
 
+    get children(): IRunningSessions.IRunningItem[] {
+      const children: IRunningSessions.IRunningItem[] = [];
+      const open = 'running:kernel-open-session';
+      const { commands } = this;
+      for (const session of this.sessions.running()) {
+        if (this.kernel.id === session.kernel?.id) {
+          const { name, path, type } = session;
+          this.commands.execute;
+          children.push({
+            className: ITEM_CLASS,
+            context: this.kernel.id,
+            open: () => void commands.execute(open, { name, path, type }),
+            icon: () =>
+              type === 'console'
+                ? consoleIcon
+                : type === 'notebook'
+                ? notebookIcon
+                : jupyterIcon,
+            label: () => name,
+            labelTitle: () => path
+          });
+        }
+      }
+      return children;
+    }
+
     open() {
       for (const session of this.sessions.running()) {
         if (this.kernel.id !== session.kernel?.id) {
@@ -233,8 +259,7 @@ namespace Private {
 
     label() {
       const { kernel, spec } = this;
-      const name = spec?.display_name || kernel.name;
-      return `${name} (${kernel.connections ?? '-'})`;
+      return spec?.display_name || kernel.name;
     }
 
     labelTitle() {
