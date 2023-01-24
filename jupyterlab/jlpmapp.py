@@ -40,4 +40,4 @@ def main(argv=None):
     """Run node and return the result."""
     # Make sure node is available.
     argv = argv or sys.argv[1:]
-    execvp("node", ["node", YARN_PATH] + argv)
+    execvp("node", ["node", YARN_PATH, *argv])
