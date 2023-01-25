@@ -682,8 +682,9 @@ detect the changes, this can be related to `the number of available watches <htt
 
 Note that the application is built against **released** versions of the
 core JupyterLab extensions. You should specify the version using the ``^``
-operator, such as ``^4.0.0``, so that the build system can use package
-versions with particular major and minor version. If your extension depends on JupyterLab
+operator, such as ``^4.0.0``, so that the build system can use patch
+versions of a package with a particular major and minor version.
+If your extension depends on JupyterLab
 packages, it should be compatible with the dependencies in the
 ``jupyterlab/static/package.json`` file.  Note that building will always use the latest JavaScript packages that meet the dependency requirements of JupyterLab itself and any installed extensions.  If you wish to test against a
 specific patch release of one of the core JupyterLab packages you can
