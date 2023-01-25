@@ -1090,6 +1090,7 @@ namespace Private {
     if (password) {
       input.type = 'password';
     }
+    // input.dataset.lmSuppressShortcuts = 'true';
     node.appendChild(promptNode);
     promptNode.appendChild(input);
     return node;

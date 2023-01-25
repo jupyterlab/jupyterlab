@@ -67,7 +67,6 @@ export class MainAreaWidget<T extends Widget = Widget>
     if (!content.id) {
       content.id = DOMUtils.createDomID();
     }
-    content.node.tabIndex = -1;
 
     this._updateTitle();
     content.title.changed.connect(this._updateTitle, this);
