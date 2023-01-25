@@ -1960,6 +1960,30 @@
     "shortcuts": []
   },
   {
+    "id": "running:kernel-new-console",
+    "label": "New Console for Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-new-notebook",
+    "label": "New Notebook for Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-open-session",
+    "label": "Open ",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-shutdown",
+    "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "running:show-panel",
     "label": "Sessions and Tabs",
     "caption": "",
