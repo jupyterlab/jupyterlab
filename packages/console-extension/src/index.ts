@@ -30,7 +30,7 @@ import {
 } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -109,7 +109,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   ],
   optional: [
     ILayoutRestorer,
-    IFileBrowserFactory,
+    IDefaultFileBrowser,
     IMainMenu,
     ICommandPalette,
     ILauncher,
@@ -241,7 +241,7 @@ async function activateConsole(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   restorer: ILayoutRestorer | null,
-  browserFactory: IFileBrowserFactory | null,
+  filebrowser: IDefaultFileBrowser | null,
   mainMenu: IMainMenu | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
@@ -600,7 +600,7 @@ async function activateConsole(
       const basePath =
         ((args['basePath'] as string) ||
           (args['cwd'] as string) ||
-          browserFactory?.defaultBrowser.model.path) ??
+          filebrowser?.model.path) ??
         '';
       return createConsole({ basePath, ...args });
     }

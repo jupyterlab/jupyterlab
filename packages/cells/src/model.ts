@@ -689,7 +689,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   private _onSharedModelChanged(
     slot: ISharedCodeCell,
-    change: CellChange<nbformat.ICodeCellMetadata>
+    change: CellChange
   ): void {
     if (change.outputsChange) {
       globalModelDBMutex(() => {

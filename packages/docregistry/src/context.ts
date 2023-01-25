@@ -11,11 +11,6 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import {
-  IDocumentProvider,
-  IDocumentProviderFactory,
-  ProviderMock
-} from '@jupyterlab/docprovider';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
@@ -58,20 +53,22 @@ export class Context<
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
-    this._model = this._factory.createNew(
-      lang,
-      PageConfig.getOption('collaborative') === 'true'
+
+    const sharedFactory = this._manager.contents.getSharedModelFactory(
+      this._path
     );
-    const docProviderFactory = options.docProviderFactory;
-    this._provider = docProviderFactory
-      ? docProviderFactory({
-          path: this._path,
-          contentType: this._factory.contentType,
-          format: this._factory.fileFormat!,
-          model: this._model.sharedModel,
-          collaborative: this._model.collaborative
-        })
-      : new ProviderMock();
+    const sharedModel = sharedFactory?.createNew({
+      path: localPath,
+      format: this._factory.fileFormat,
+      contentType: this._factory.contentType,
+      collaborative: this._factory.collaborative
+    });
+
+    this._model = this._factory.createNew({
+      languagePreference: lang,
+      sharedModel,
+      collaborationEnabled: PageConfig.getOption('collaborative') === 'true'
+    });
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -203,7 +200,8 @@ export class Context<
     this._isDisposed = true;
     this.sessionContext.dispose();
     this._model.dispose();
-    this._provider.dispose();
+    // Ensure we dispose the `sharedModel` as it may have been generated in the context
+    // through the shared model factory.
     this._model.sharedModel.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
@@ -508,8 +506,6 @@ export class Context<
    * Handle an initial population.
    */
   private async _populate(): Promise<void> {
-    await this._provider.ready;
-
     this._isPopulated = true;
     this._isReady = true;
     this._populatedPromise.resolve(void 0);
@@ -902,28 +898,30 @@ or load the version on disk (revert)?`,
   }
 
   protected translator: ITranslator;
+
+  private _isReady = false;
+  private _isDisposed = false;
+  private _isPopulated = false;
   private _trans: TranslationBundle;
   private _manager: ServiceManager.IManager;
   private _opener: (
     widget: Widget,
     options?: DocumentRegistry.IOpenOptions
   ) => void;
+
   private _model: T;
   private _path = '';
   private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;
+
   private _readyPromise: Promise<void>;
   private _populatedPromise = new PromiseDelegate<void>();
-  private _isPopulated = false;
-  private _isReady = false;
-  private _isDisposed = false;
   private _pathChanged = new Signal<this, string>(this);
   private _fileChanged = new Signal<this, Contents.IModel>(this);
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
-  private _provider: IDocumentProvider;
   private _lastModifiedCheckMargin = 500;
   private _timeConflictModalIsOpen = false;
 }
@@ -955,11 +953,6 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: ISessionContext.IKernelPreference;
-
-    /**
-     * An factory method for the document provider.
-     */
-    docProviderFactory?: IDocumentProviderFactory<ISharedDocument>;
 
     /**
      * An optional callback for opening sibling widgets.

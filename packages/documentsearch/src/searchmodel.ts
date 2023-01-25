@@ -5,7 +5,12 @@ import { VDomModel } from '@jupyterlab/ui-components';
 import { IObservableDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-import { IFilter, IFilters, ISearchProvider } from './tokens';
+import {
+  IFilter,
+  IFilters,
+  IReplaceOptionsSupport,
+  ISearchProvider
+} from './tokens';
 
 /**
  * Search in a document model.
@@ -99,10 +104,31 @@ export class SearchDocumentModel
   }
 
   /**
+   * Replace options support.
+   */
+  get replaceOptionsSupport(): IReplaceOptionsSupport | undefined {
+    return this.searchProvider.replaceOptionsSupport;
+  }
+
+  /**
    * Parsing regular expression error message.
    */
   get parsingError(): string {
     return this._parsingError;
+  }
+
+  /**
+   * Whether to preserve case when replacing.
+   */
+  get preserveCase(): boolean {
+    return this._preserveCase;
+  }
+  set preserveCase(v: boolean) {
+    if (this._preserveCase !== v) {
+      this._preserveCase = v;
+      this.stateChanged.emit();
+      this.refresh();
+    }
   }
 
   /**
@@ -229,7 +255,9 @@ export class SearchDocumentModel
    * Replace all matches.
    */
   async replaceAllMatches(): Promise<void> {
-    await this.searchProvider.replaceAllMatches(this._replaceText);
+    await this.searchProvider.replaceAllMatches(this._replaceText, {
+      preserveCase: this.preserveCase
+    });
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -238,7 +266,9 @@ export class SearchDocumentModel
    * Replace the current match.
    */
   async replaceCurrentMatch(): Promise<void> {
-    await this.searchProvider.replaceCurrentMatch(this._replaceText);
+    await this.searchProvider.replaceCurrentMatch(this._replaceText, true, {
+      preserveCase: this.preserveCase
+    });
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -298,6 +328,7 @@ export class SearchDocumentModel
   private _caseSensitive = false;
   private _disposed = new Signal<this, void>(this);
   private _parsingError = '';
+  private _preserveCase = false;
   private _filters: IFilters = {};
   private _replaceText: string;
   private _searchDebouncer: Debouncer;

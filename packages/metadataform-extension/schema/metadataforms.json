@@ -75,7 +75,7 @@
     },
     "metadataOptions": {
       "properties": {
-        "customComponent": {
+        "customRenderer": {
           "type": "string"
         },
         "metadataLevel": {

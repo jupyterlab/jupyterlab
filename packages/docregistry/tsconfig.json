@@ -19,9 +19,6 @@
       "path": "../coreutils"
     },
     {
-      "path": "../docprovider"
-    },
-    {
       "path": "../observables"
     },
     {

@@ -12,7 +12,7 @@ import {
 import { INotebookTools } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import { IFormComponentRegistry } from '@jupyterlab/ui-components';
+import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { JSONExt, PartialJSONArray } from '@lumino/coreutils';
 
 import {
@@ -30,7 +30,7 @@ namespace Private {
     registry: ISettingRegistry,
     notebookTools: INotebookTools,
     translator: ITranslator,
-    formComponentRegistry: IFormComponentRegistry
+    formComponentRegistry: IFormRendererRegistry
   ): Promise<IMetadataFormProvider> {
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IMetadataForm[] } = {};
@@ -221,9 +221,9 @@ namespace Private {
           }
 
           // Optionally links key to a custom widget.
-          if (options.customComponent) {
-            const component = formComponentRegistry.getComponent(
-              options.customComponent as string
+          if (options.customRenderer) {
+            const component = formComponentRegistry.getRenderer(
+              options.customRenderer as string
             );
 
             // If renderer is defined (custom widget has been registered), set it as used widget.
@@ -274,7 +274,7 @@ const metadataForm: JupyterFrontEndPlugin<IMetadataFormProvider> = {
   requires: [
     INotebookTools,
     ITranslator,
-    IFormComponentRegistry,
+    IFormRendererRegistry,
     ISettingRegistry
   ],
   provides: IMetadataFormProvider,
@@ -282,7 +282,7 @@ const metadataForm: JupyterFrontEndPlugin<IMetadataFormProvider> = {
     app: JupyterFrontEnd,
     notebookTools: INotebookTools,
     translator: ITranslator,
-    componentsRegistry: IFormComponentRegistry,
+    componentsRegistry: IFormRendererRegistry,
     settings: ISettingRegistry
   ): Promise<IMetadataFormProvider> => {
     return await Private.loadSettingsMetadataForm(
