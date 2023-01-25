@@ -261,7 +261,14 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
         if (!existing) {
           return false;
         }
-        return existing.name === model.name;
+        return (
+          existing.connections === model.connections &&
+          existing.execution_state === model.execution_state &&
+          existing.last_activity === model.last_activity &&
+          existing.name === model.name &&
+          existing.reason === model.reason &&
+          existing.traceback === model.traceback
+        );
       })
     ) {
       // Identical models list (presuming models does not contain duplicate

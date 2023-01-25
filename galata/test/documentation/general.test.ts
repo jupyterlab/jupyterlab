@@ -141,6 +141,7 @@ test.describe('General', () => {
 
     await page.click('[title="Running Terminals and Kernels"]');
 
+    await page.locator('text="Python 3 (ipykernel) {1}"').waitFor();
     expect(
       await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
     ).toMatchSnapshot('interface_tabs.png');
@@ -459,6 +460,10 @@ test.describe('General', () => {
     await page.dblclick('text=Julia.ipynb');
 
     await page.click('[title="Running Terminals and Kernels"]');
+
+    await expect(page.locator('text="Python 3 (ipykernel) {1}"')).toHaveCount(
+      2
+    );
 
     expect(
       await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })

@@ -181,6 +181,8 @@ bumped their major version (following semver convention). We want to point out p
    * The ``FormComponentRegistry`` registers ``FormComponent`` instead of field renderers.
      The methods have been renamed from ``...renderer``  to ``...component``. For example, ``addRenderer`` is now ``addComponent``.
      A ``FormComponent`` defines a ``fieldRenderer`` or a ``widgetRenderer``.
+- ``@jupyterlab/translation`` from 3.x to 4.x
+   Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
 
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.

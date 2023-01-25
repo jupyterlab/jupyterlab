@@ -113,7 +113,7 @@ class ExtensionHandler(APIHandler):
         if cmd not in ("install", "uninstall", "enable", "disable") or not name:
             raise web.HTTPError(
                 422,
-                "Could not process instruction %r with extension name %r" % (cmd, name),
+                f"Could not process instruction {cmd!r} with extension name {name!r}",
             )
 
         ret_value = None

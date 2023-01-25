@@ -35,5 +35,5 @@ def resolve_pattern(pat):
 with open(os.path.join(here, ".cleanignore")) as f:
     git_clean_exclude = [f"--exclude={pat}" for line in f for pat in resolve_pattern(line)]
 
-git_clean_command = ["git", "clean", "-dfx"] + git_clean_exclude
+git_clean_command = ["git", "clean", "-dfx", *git_clean_exclude]
 subprocess.check_call(git_clean_command, cwd=here)

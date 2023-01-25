@@ -709,7 +709,7 @@ export function addToolbarButtonClass(w: Widget): Widget {
 }
 
 /**
- * Phosphor Widget version of static ToolbarButtonComponent.
+ * Lumino Widget version of static ToolbarButtonComponent.
  */
 export class ToolbarButton extends ReactWidget {
   /**
