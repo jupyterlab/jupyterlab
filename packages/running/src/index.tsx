@@ -187,7 +187,13 @@ function Item(props: {
         ) : collapsible ? (
           <caretDownIcon.react tag="span" stylesheet="runningItem" />
         ) : undefined}
-        <icon.react tag="span" stylesheet="runningItem" />
+        {typeof icon === 'string' ? (
+          icon ? (
+            <img src={icon} />
+          ) : undefined
+        ) : (
+          <icon.react tag="span" stylesheet="runningItem" />
+        )}
         <span
           className={ITEM_LABEL_CLASS}
           title={title}
@@ -488,9 +494,10 @@ export namespace IRunningSessions {
     shutdown?: () => void;
 
     /**
-     * The `LabIcon` to use as the icon for the running item.
+     * The `LabIcon` to use as the icon for the running item or the string
+     * `src` URL.
      */
-    icon: () => LabIcon;
+    icon: () => LabIcon | string;
 
     /**
      * Called to determine the label for each item.

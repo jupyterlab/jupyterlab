@@ -11,7 +11,6 @@ import {
   closeIcon,
   consoleIcon,
   jupyterIcon,
-  LabIcon,
   notebookIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
@@ -195,7 +194,6 @@ namespace Private {
       this.sessions = options.sessions;
       this.spec = options.spec || null;
       this.trans = options.trans;
-      this._icon = options.icon || jupyterIcon;
     }
 
     readonly className: string;
@@ -248,8 +246,15 @@ namespace Private {
     }
 
     icon() {
-      // TODO: Use the icon from `this.spec.resources` instead.
-      return this._icon;
+      const { spec } = this;
+      if (!spec || !spec.resources) {
+        return jupyterIcon;
+      }
+      return (
+        spec.resources['logo-svg'] ||
+        spec.resources['logo-64x64'] ||
+        spec.resources['logo-32x32']
+      );
     }
 
     label() {
@@ -269,14 +274,11 @@ namespace Private {
       }
       return title.join('\n\n');
     }
-
-    private _icon: LabIcon;
   }
 
   export namespace RunningKernel {
     export interface IOptions {
       commands: CommandRegistry;
-      icon?: LabIcon;
       kernel: Kernel.IModel;
       kernels: Kernel.IManager;
       sessions: Session.IManager;

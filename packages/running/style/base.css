@@ -64,7 +64,12 @@
 }
 
 .jp-RunningSessions-item.jp-mod-running-child {
-  padding-left: 24px;
+  padding-left: 40px;
+}
+
+.jp-RunningSessions-item img {
+  height: 16px;
+  margin-top: 4px;
 }
 
 .jp-RunningSessions-itemLabel {
