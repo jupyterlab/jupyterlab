@@ -8,6 +8,8 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
+  caretDownIcon,
+  caretRightIcon,
   closeIcon,
   LabIcon,
   PanelWithToolbar,
@@ -143,13 +145,19 @@ function Item(props: {
   translator?: ITranslator;
 }) {
   const { runningItem } = props;
-  const icon = runningItem.icon();
+  const classList = [ITEM_CLASS];
   const detail = runningItem.detail?.();
+  const icon = runningItem.icon();
+  const title = runningItem.labelTitle ? runningItem.labelTitle() : '';
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
-  const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
   const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
-  const classList = [ITEM_CLASS];
+  const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
+
+  // Manage collapsed state.
+  const [collapsed, collapse] = React.useState(false);
+  const collapsible = !!runningItem.children?.length;
+  const onClick = collapsible ? () => collapse(!collapsed) : undefined;
 
   if (runningItem.className) {
     classList.push(runningItem.className);
@@ -161,13 +169,19 @@ function Item(props: {
   return (
     <>
       <li
+        onClick={onClick}
         className={classList.join(' ')}
         data-context={runningItem.context || ''}
       >
+        {collapsible && collapsed ? (
+          <caretRightIcon.react tag="span" stylesheet="runningItem" />
+        ) : collapsible ? (
+          <caretDownIcon.react tag="span" stylesheet="runningItem" />
+        ) : undefined}
         <icon.react tag="span" stylesheet="runningItem" />
         <span
           className={ITEM_LABEL_CLASS}
-          title={runningItem.labelTitle ? runningItem.labelTitle() : ''}
+          title={title}
           onClick={() => runningItem.open()}
         >
           {runningItem.label()}
@@ -182,10 +196,10 @@ function Item(props: {
           />
         )}
       </li>
-      {runningItem.children && runningItem.children.length && (
+      {collapsible && !collapsed && (
         <List
           child={true}
-          runningItems={runningItem.children}
+          runningItems={runningItem.children!}
           shutdownItemIcon={shutdownItemIcon}
           translator={translator}
         />

@@ -101,7 +101,7 @@ export async function addKernelRunningSessionManager(
         ? notebookIcon
         : undefined,
     label: ({ name, path }) =>
-      trans.__('Open %1', name || PathExt.basename((path as string) || '')),
+      (name as string) || PathExt.basename((path as string) || ''),
     execute: ({ path, type }) => {
       if (!type || path === undefined) {
         return;
@@ -240,14 +240,7 @@ namespace Private {
     }
 
     open() {
-      for (const session of this.sessions.running()) {
-        if (this.kernel.id !== session.kernel?.id) {
-          continue;
-        }
-        const { path, type } = session;
-        const command = type === 'console' ? 'console:open' : 'docmanager:open';
-        void this.commands.execute(command, { path });
-      }
+      /* no-op */
     }
 
     shutdown() {
