@@ -176,14 +176,17 @@ bumped their major version (following semver convention). We want to point out p
      need to switch to the Blueprint components as the interfaces of those components in JupyterLab
      do not match those of Blueprint JS.
    * Remove ``Collapse`` React component.
-   * Change the ``IFormComponentRegistry`` token, from ``@jupyterlab/ui-components:ISettingEditorRegistry`` to
-     ``@jupyterlab/ui-components:IFormComponentRegistry``.
-   * The ``FormComponentRegistry`` registers ``FormComponent`` instead of field renderers.
-     The methods have been renamed from ``...renderer``  to ``...component``. For example, ``addRenderer`` is now ``addComponent``.
-     A ``FormComponent`` defines a ``fieldRenderer`` or a ``widgetRenderer``.
+   * Form component registry changes:
+      - Rename the plugin ``'@jupyterlab/ui-components-extension:form-component-registry'`` to ``'@jupyterlab/ui-components-extension:form-renderer-registry'``
+      - Rename the ``IFormComponentRegistry`` token to ``IFormRendererRegistry``, from ``@jupyterlab/ui-components:ISettingEditorRegistry``
+        to ``@jupyterlab/ui-components:IFormRendererRegistry``.
+      - The ``FormRendererRegistry`` registers ``IFormRenderer`` instead of ``Field`` renderers.
+        A ``IFormRenderer`` defines a ``fieldRenderer`` (this is the renderer to set for backward compatibility)
+        or a ``widgetRenderer``.
+        The renderer id must follow the convention ``<ISettingRegistry.IPlugin.id>.<propertyName>``. This is to
+        ensure a custom renderer is not used for property with the same name but different schema.
 - ``@jupyterlab/translation`` from 3.x to 4.x
    Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
-
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
    * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
