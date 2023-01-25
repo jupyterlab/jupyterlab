@@ -1464,7 +1464,7 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
-"@jupyter/ydoc@^0.3.0", "@jupyter/ydoc@~0.3.0":
+"@jupyter/ydoc@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@jupyter/ydoc/-/ydoc-0.3.0.tgz#52c1f1bac75236e1eb9b9b6c585864a91c9f1521"
   integrity sha512-k50urcGPdGkeHrKDiXKnzS41o2LwBBgfNMaM5eTo5Jby4Etr3I4iWcI9dfunPhQrlNUc4tspu5XB57tyrfi1Nw==
