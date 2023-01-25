@@ -96,12 +96,14 @@ bumped their major version (following semver convention). We want to point out p
    * The interface ``DocumentManager.IWidgetOpener`` is now ``IDocumentWidgetOpener`` and is provided
      by a new plugin ``@jupyterlab/docmanager-extension:opener``.
      The ``IDocumentWidgetOpener`` interface also now defines an ```opened``` signal that is emitted when a widget is opened.
+   * Removed the property ``docProviderFactory`` from the interface ``DocumentManager.IOptions``.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
    * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
      ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
      ``renameAck`` is not optional anymore in ``IDocumentProvider``.
-   * ``IDocumentProviderFactory.IOptions`` is now templated with ``T extends ISharedDocument``.
-     And the ``ymodel`` attribute has been renamed ``model`` typed ``T`` (relaxing typing from ``YDocument`` to ``ISharedDocument``).
+   * Removed the token and type ``IDocumentProviderFactory``.
+   * Removed the property collaborative from the interface ``WebSocketProvider.IOptions``. It doesn't extend from
+     ``IDocumentProviderFactory.IOptions``. And the ``ymodel`` attribute has been renamed ``model``.
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
@@ -117,6 +119,9 @@ bumped their major version (following semver convention). We want to point out p
    by defining an entry point in the Python package; see ``pyproject.toml::project.entry-points."jupyterlab.extension_manager_v1"``.
 - ``@jupyterlab/fileeditor`` from 3.x to 4.x
    Remove the class ``FileEditorCodeWrapper``, instead, you can use ``CodeEditorWrapper`` from ``@jupyterlab/codeeditor``.
+- ``@jupyterlab/filebrowser`` from 3.x to 4.x
+   Remove the property ``defaultBrowser`` from the interface  ``IFileBrowserFactory``. The default browser is now provided by it own
+   plugin by requiring the token ``IDefaultFileBrowser``.
 - ``@jupyterlab/filebrowser-extension`` from 3.x to 4.x
    Remove command ``filebrowser:create-main-launcher``. You can replace by ``launcher:create`` (same behavior)
    All launcher creation actions are moved to ``@jupyterlab/launcher-extension``.
@@ -126,6 +131,11 @@ bumped their major version (following semver convention). We want to point out p
      ``galata.newContentsHelper(baseURL, page?, request?)`` -> ``galata.newContentsHelper(request?, page?)``
      you need to provide ``request`` or ``page``; they both are fixtures provided by Playwright.
    * ``galata.Mock.clearRunners(baseURL, runners, type)`` -> ``galata.Mock.clearRunners(request, runners, type)``
+- ``@jupyterlab/docregistry`` from 3.x to 4.x
+   * Removed the property ``docProviderFactory`` from the interface ``Context.IOptions``.
+   * The constructor of the class ``DocumentModel`` receives a parameter ``DocumentModel.IOptions``.
+   * The method ``IModelFactory.createNew`` receives a parameter ``DocumentRegistry.IModelOptions``.
+   * The method ``TextModelFactory.createNew`` receives a parameter ``DocumentModel.IOptions``.
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
@@ -142,6 +152,8 @@ bumped their major version (following semver convention). We want to point out p
      ``observedTopMargin`` and ``observedBottomMargin`` have been removed. Instead a ``windowingMode``
      with value of *defer*, *full* or *none* and ``overscanCount`` have been added to manage the rendering
      mode.
+   * Added the property ``sharedModel`` to the interface ``NotebookModel.IOptions``.
+   * The method ``NotebookModelFactory.createNew`` receives a parameter ``NotebookModelFactory.IModelOptions``.
 - ``@jupyterlab/rendermime`` from 3.x to 4.x
   The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
   that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
@@ -151,6 +163,7 @@ bumped their major version (following semver convention). We want to point out p
   the constructor if needed by the renderer factory.
 - ``@jupyterlab/services`` from 6.x to 7.x
    * Remove ``Contents.IDrive.modelDBFactory`` and ``Contents.IManager.getModelDBFactory``.
+   * Added ``Contents.IDrive.sharedModelFactory`` and ``Contents.IManager.getsharedModelFactory``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
    The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
 - ``@jupyterlab/statusbar`` from 3.x to 4.x

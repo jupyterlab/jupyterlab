@@ -105,7 +105,8 @@
     "@lumino/disposable": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6",
     "@types/react": "^17.0.0",
-    "react": "^17.0.1"
+    "react": "^17.0.1",
+    "yjs": "^13.5.40"
   },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "~5.28.0",
