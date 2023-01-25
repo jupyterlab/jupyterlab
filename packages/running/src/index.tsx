@@ -151,13 +151,22 @@ function Item(props: {
   const title = runningItem.labelTitle ? runningItem.labelTitle() : '';
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
+
+  // Handle shutdown requests.
+  let shutdownRequested = false;
   const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
   const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
+  const shutdown = () => {
+    shutdownRequested = true;
+    runningItem.shutdown?.();
+  };
 
-  // Manage collapsed state.
+  // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
   const [collapsed, collapse] = React.useState(false);
   const collapsible = !!runningItem.children?.length;
-  const onClick = collapsible ? () => collapse(!collapsed) : undefined;
+  const onClick = collapsible
+    ? () => !shutdownRequested && collapse(!collapsed)
+    : undefined;
 
   if (runningItem.className) {
     classList.push(runningItem.className);
@@ -191,7 +200,7 @@ function Item(props: {
           <ToolbarButtonComponent
             className={SHUTDOWN_BUTTON_CLASS}
             icon={shutdownItemIcon}
-            onClick={() => runningItem.shutdown!()}
+            onClick={shutdown}
             tooltip={shutdownLabel}
           />
         )}

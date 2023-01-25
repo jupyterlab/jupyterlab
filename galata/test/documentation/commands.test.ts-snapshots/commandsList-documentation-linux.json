@@ -1978,7 +1978,7 @@
     "shortcuts": []
   },
   {
-    "id": "running:kernel-shutdown",
+    "id": "running:kernel-shut-down",
     "label": "Shut Down Kernel",
     "caption": "",
     "shortcuts": []
