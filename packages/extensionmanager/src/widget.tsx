@@ -243,7 +243,7 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
           <ReactPaginate
             previousLabel={'<'}
             nextLabel={'>'}
-            breakLabel='...'
+            breakLabel="..."
             breakClassName={'break-me'}
             initialPage={(props.initialPage ?? 1) - 1}
             pageCount={props.numPages}
