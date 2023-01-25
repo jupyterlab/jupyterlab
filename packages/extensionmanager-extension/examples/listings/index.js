@@ -29,7 +29,7 @@ window.addEventListener('load', async function () {
     require('@jupyterlab/launcher-extension'),
     require('@jupyterlab/mainmenu-extension'),
     require('@jupyterlab/markdownviewer-extension'),
-    require('@jupyterlab/mathjax2-extension'),
+    require('@jupyterlab/mathjax-extension'),
     require('@jupyterlab/notebook-extension'),
     require('@jupyterlab/rendermime-extension'),
     require('@jupyterlab/running-extension'),

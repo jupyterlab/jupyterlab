@@ -1,4 +1,4 @@
 {
-  "out": "../../docs/api/mathjax2",
+  "out": "../../docs/api/mathjax",
   "theme": "../../typedoc-theme"
 }

@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/mathjax2-extension",
+  "name": "@jupyterlab/mathjax-extension",
   "version": "4.0.0-alpha.17",
   "description": "A JupyterLab extension providing MathJax 2 Typesetting",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
@@ -35,7 +35,7 @@
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.17",
     "@jupyterlab/coreutils": "^6.0.0-alpha.17",
-    "@jupyterlab/mathjax2": "^4.0.0-alpha.17",
+    "@jupyterlab/mathjax": "^4.0.0-alpha.17",
     "@jupyterlab/rendermime": "^4.0.0-alpha.17"
   },
   "devDependencies": {

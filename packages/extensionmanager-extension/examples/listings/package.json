@@ -26,7 +26,7 @@
     "@jupyterlab/launcher-extension": "^2.0.2",
     "@jupyterlab/mainmenu-extension": "^2.0.2",
     "@jupyterlab/markdownviewer-extension": "^2.0.2",
-    "@jupyterlab/mathjax2-extension": "^2.0.2",
+    "@jupyterlab/mathjax-extension": "^2.0.2",
     "@jupyterlab/notebook-extension": "^2.0.2",
     "@jupyterlab/rendermime-extension": "^2.0.2",
     "@jupyterlab/running-extension": "^2.0.2",

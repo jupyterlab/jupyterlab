@@ -178,10 +178,10 @@
       "path": "../markedparser-extension"
     },
     {
-      "path": "../mathjax2"
+      "path": "../mathjax"
     },
     {
-      "path": "../mathjax2-extension"
+      "path": "../mathjax-extension"
     },
     {
       "path": "../metadataform"

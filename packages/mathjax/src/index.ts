@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 /**
  * @packageDocumentation
- * @module mathjax2
+ * @module mathjax
  */
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';

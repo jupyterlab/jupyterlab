@@ -36,7 +36,7 @@ const extensions = [
   import('@jupyterlab/mainmenu-extension'),
   import('@jupyterlab/markdownviewer-extension'),
   import('@jupyterlab/markedparser-extension'),
-  import('@jupyterlab/mathjax2-extension'),
+  import('@jupyterlab/mathjax-extension'),
   import('@jupyterlab/notebook-extension').then(plugins =>
     plugins.default.filter(({ id }) => !id.includes(':language-server'))
   ),
