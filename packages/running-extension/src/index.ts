@@ -24,7 +24,11 @@ import { addOpenTabsSessionManager } from './opentabs';
 /**
  * The command IDs used by the running plugin.
  */
-namespace CommandIDs {
+export namespace CommandIDs {
+  export const kernelNewConsole = 'running:kernel-new-console';
+  export const kernelNewNotebook = 'running:kernel-new-notebook';
+  export const kernelOpenSession = 'running:kernel-open-session';
+  export const kernelShutDown = 'running:kernel-shut-down';
   export const showPanel = 'running:show-panel';
 }
 

@@ -18,6 +18,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
+import { CommandIDs } from '.';
 
 const ITEM_CLASS = 'jp-mod-kernel';
 
@@ -70,7 +71,7 @@ export async function addKernelRunningSessionManager(
 
   // Add running kernels commands to the registry.
   const test = (node: HTMLElement) => node.classList.contains(ITEM_CLASS);
-  commands.addCommand('running:kernel-new-console', {
+  commands.addCommand(CommandIDs.kernelNewConsole, {
     icon: consoleIcon,
     label: trans.__('New Console for Kernel'),
     execute: args => {
@@ -81,7 +82,7 @@ export async function addKernelRunningSessionManager(
       }
     }
   });
-  commands.addCommand('running:kernel-new-notebook', {
+  commands.addCommand(CommandIDs.kernelNewNotebook, {
     icon: notebookIcon,
     label: trans.__('New Notebook for Kernel'),
     execute: args => {
@@ -92,7 +93,7 @@ export async function addKernelRunningSessionManager(
       }
     }
   });
-  commands.addCommand('running:kernel-open-session', {
+  commands.addCommand(CommandIDs.kernelOpenSession, {
     icon: args =>
       args.type === 'console'
         ? consoleIcon
@@ -109,7 +110,7 @@ export async function addKernelRunningSessionManager(
       return commands.execute(command, { path });
     }
   });
-  commands.addCommand('running:kernel-shutdown', {
+  commands.addCommand(CommandIDs.kernelShutDown, {
     icon: closeIcon,
     label: trans.__('Shut Down Kernel'),
     execute: args => {
@@ -124,12 +125,12 @@ export async function addKernelRunningSessionManager(
   // Add "new" options to the running kernels context menu.
   let rank = 0;
   contextMenu.addItem({
-    command: 'running:kernel-new-console',
+    command: CommandIDs.kernelNewConsole,
     rank: rank++,
     selector: `.jp-RunningSessions-item.${ITEM_CLASS}`
   });
   contextMenu.addItem({
-    command: 'running:kernel-new-notebook',
+    command: CommandIDs.kernelNewNotebook,
     rank: rank++,
     selector: `.jp-RunningSessions-item.${ITEM_CLASS}`
   });
@@ -161,7 +162,7 @@ export async function addKernelRunningSessionManager(
     }
 
     // Populate the submenu with sessions connected to this kernel.
-    const command = 'running:kernel-open-session';
+    const command = CommandIDs.kernelOpenSession;
     for (const session of sessions.running()) {
       if (id === session.kernel?.id) {
         const { name, path, type } = session;
@@ -177,7 +178,7 @@ export async function addKernelRunningSessionManager(
     type: 'separator'
   });
   contextMenu.addItem({
-    command: 'running:kernel-shutdown',
+    command: CommandIDs.kernelShutDown,
     rank: rank++,
     selector: `.jp-RunningSessions-item.${ITEM_CLASS}`
   });
@@ -215,7 +216,7 @@ namespace Private {
 
     get children(): IRunningSessions.IRunningItem[] {
       const children: IRunningSessions.IRunningItem[] = [];
-      const open = 'running:kernel-open-session';
+      const open = CommandIDs.kernelOpenSession;
       const { commands } = this;
       for (const session of this.sessions.running()) {
         if (this.kernel.id === session.kernel?.id) {
