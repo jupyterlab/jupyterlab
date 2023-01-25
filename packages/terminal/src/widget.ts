@@ -125,6 +125,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       });
   }
 
+  /**
+   * A promise that is fulfilled when the terminal is ready.
+   */
   get ready(): Promise<void> {
     return this._ready.promise;
   }
