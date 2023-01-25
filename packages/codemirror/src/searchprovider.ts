@@ -31,7 +31,9 @@
 */
 
 import {
+  GenericSearchProvider,
   IBaseSearchProvider,
+  IReplaceOptions,
   ISearchMatch,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
@@ -272,7 +274,11 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  async replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean> {
+  async replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
     // If the current selection exactly matches the current match,
     // replace it.  Otherwise, just select the next match after the cursor.
     let replaceOccurred = false;
@@ -288,8 +294,14 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
       }
       const value = cursor.value;
       replaceOccurred = true;
+      const insertText = options?.preserveCase
+        ? GenericSearchProvider.preserveCase(
+            this.editor.doc.sliceString(cursor.value.from, cursor.value.to),
+            newText
+          )
+        : newText;
       this.editor.editor.dispatch({
-        changes: { from: value.from, to: value.to, insert: newText }
+        changes: { from: value.from, to: value.to, insert: insertText }
       });
     }
     await this.highlightNext();
@@ -303,7 +315,10 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  async replaceAllMatches(newText: string): Promise<boolean> {
+  async replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
     let replaceOccurred = false;
     return new Promise((resolve, _) => {
       let cursor = new RegExpCursor(this.editor.doc, this._query.source, {
@@ -312,10 +327,16 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
       let changeSpec: ChangeSpec[] = [];
       while (!cursor.done) {
         replaceOccurred = true;
+        const insertText = options?.preserveCase
+          ? GenericSearchProvider.preserveCase(
+              this.editor.doc.sliceString(cursor.value.from, cursor.value.to),
+              newText
+            )
+          : newText;
         changeSpec.push({
           from: cursor.value.from,
           to: cursor.value.to,
-          insert: newText
+          insert: insertText
         });
         cursor = cursor.next();
       }
