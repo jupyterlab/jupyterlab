@@ -284,7 +284,7 @@ for another example of an extension that uses settings.
 
 Please ensure that the schema files are included in the ``files`` metadata in ``package.json``.
 
-When declaring dependencies on JupyterLab packages, use the ``^`` operator before a package version so that the build system installs the newest patch version for a given major and minor version. For example, ``^4.0.0`` will install version 4.0.0, 4.0.1, 4.0.2, etc.
+When declaring dependencies on JupyterLab packages, use the ``^`` operator before a package version so that the build system installs the newest patch or minor version for a given major version. For example, ``^4.0.0`` will install version 4.0.0, 4.0.1, 4.1.0, etc.
 
 A system administrator or user can override default values provided in a plugin's settings schema file with the :ref:`overrides.json <overridesjson>` file.
 
@@ -682,8 +682,8 @@ detect the changes, this can be related to `the number of available watches <htt
 
 Note that the application is built against **released** versions of the
 core JupyterLab extensions. You should specify the version using the ``^``
-operator, such as ``^4.0.0``, so that the build system can use patch
-versions of a package with a particular major and minor version.
+operator, such as ``^4.0.0``, so that the build system can use newer minor and patch
+versions of a package with a particular major version.
 If your extension depends on JupyterLab
 packages, it should be compatible with the dependencies in the
 ``jupyterlab/static/package.json`` file.  Note that building will always use the latest JavaScript packages that meet the dependency requirements of JupyterLab itself and any installed extensions.  If you wish to test against a
