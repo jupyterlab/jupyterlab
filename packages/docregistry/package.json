@@ -41,7 +41,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter/ydoc": "^0.3.0",
+    "@jupyter/ydoc": "^0.3.1",
     "@jupyterlab/apputils": "^4.0.0-alpha.17",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.17",
     "@jupyterlab/codemirror": "^4.0.0-alpha.17",
