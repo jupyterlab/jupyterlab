@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "@jupyterlab/rendermime": "^4.0.0-alpha.17",
-    "@lumino/coreutils": "^2.0.0-alpha.6",
     "mathjax-full": "^3.2.2"
   },
   "devDependencies": {
