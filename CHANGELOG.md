@@ -14,7 +14,7 @@
 
 ### Enhancements made
 
-- Backport #13652 on branch 3.6.x (Expose contentVisibility widget hiding mode) [#13860](https://github.com/jupyterlab/jupyterlab/pull/13860) ([@fcollonval](https://github.com/fcollonval))
+- Expose contentVisibility widget hiding mode [#13860](https://github.com/jupyterlab/jupyterlab/pull/13860) ([@fcollonval](https://github.com/fcollonval))
 - `default` locale will use OS default locale [#13721](https://github.com/jupyterlab/jupyterlab/pull/13721) ([@fcollonval](https://github.com/fcollonval))
 - Enable strict CSS containment for `MainAreaWidget` [#13811](https://github.com/jupyterlab/jupyterlab/pull/13811) ([@krassowski](https://github.com/krassowski))
 - Turn terminal links into anchors using xterm addon [#13645](https://github.com/jupyterlab/jupyterlab/pull/13645) ([@mgcth](https://github.com/mgcth))
