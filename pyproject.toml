@@ -44,7 +44,7 @@ dependencies = [
     "jupyter_server>=2.0.1,<3",
     "jupyterlab_server>=2.19.0,<3",
     "jupyter_ydoc>=0.3.0,<0.4.0",
-    "jupyter_server_ydoc>=0.6.2,<0.7.0",
+    "jupyter_server_ydoc>=0.7.0,<0.8.0",
     "notebook_shim>=0.2",
     "packaging",
     "traitlets",
