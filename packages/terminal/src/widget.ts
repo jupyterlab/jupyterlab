@@ -492,7 +492,8 @@ namespace Private {
     background: '#fff',
     cursor: '#616161', // md-grey-700
     cursorAccent: '#F5F5F5', // md-grey-100
-    selectionBackground: 'rgba(97, 97, 97, 0.3)' // md-grey-700
+    selectionBackground: 'rgba(97, 97, 97, 0.3)', // md-grey-700
+    selectionInactiveBackground: 'rgba(189, 189, 189, 0.3)' // md-grey-400
   };
 
   /**
@@ -503,7 +504,8 @@ namespace Private {
     background: '#000',
     cursor: '#fff',
     cursorAccent: '#000',
-    selectionBackground: 'rgba(255, 255, 255, 0.3)'
+    selectionBackground: 'rgba(255, 255, 255, 0.3)',
+    selectionInactiveBackground: 'rgba(238, 238, 238, 0.3)' // md-grey-200
   };
 
   /**
@@ -523,7 +525,10 @@ namespace Private {
       .getPropertyValue('--jp-ui-inverse-font-color0')
       .trim(),
     selectionBackground: getComputedStyle(document.body)
-      .getPropertyValue('--jp-ui-font-color3')
+      .getPropertyValue('--jp-layout-color3')
+      .trim(),
+    selectionInactiveBackground: getComputedStyle(document.body)
+      .getPropertyValue('--jp-layout-color2')
       .trim()
   });
 
