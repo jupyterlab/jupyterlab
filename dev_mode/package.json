@@ -419,6 +419,5 @@
       "@jupyterlab/vega5-extension": "../packages/vega5-extension",
       "@jupyterlab/testutils": "../testutils"
     }
-  },
-  "packageManager": "yarn@3.3.1"
+  }
 }

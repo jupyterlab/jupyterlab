@@ -699,7 +699,7 @@ class _AppHandler:
         staging = pjoin(app_dir, "staging")
 
         # Make sure packages are installed.
-        ret = self._run(["node", YARN_PATH, "install", "--non-interactive"], cwd=staging)
+        ret = self._run(["node", YARN_PATH, "install"], cwd=staging)
         if ret != 0:
             msg = "npm dependencies failed to install"
             self.logger.debug(msg)
