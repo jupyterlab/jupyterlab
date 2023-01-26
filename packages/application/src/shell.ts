@@ -111,12 +111,14 @@ export namespace ILabShell {
     /**
      * The method for hiding widgets in the dock panel.
      *
-     * The default is `scale`.
+     * The default is `display`.
      *
      * Using `scale` will often increase performance as most browsers will not trigger style computation
      * for the transform action.
+     *
+     * `contentVisibility` is only available in Chromium-based browsers.
      */
-    hiddenMode: 'display' | 'scale';
+    hiddenMode: 'display' | 'scale' | 'contentVisibility';
   }
 
   /**
@@ -256,7 +258,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const hboxPanel = new BoxPanel();
     const vsplitPanel = (this._vsplitPanel = new Private.RestorableSplitPanel());
     const dockPanel = (this._dockPanel = new DockPanelSvg({
-      hiddenMode: Widget.HiddenMode.Scale,
+      hiddenMode: Widget.HiddenMode.Display,
       translator: options?.translator
     }));
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
@@ -1034,10 +1036,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   updateConfig(config: Partial<ILabShell.IConfig>): void {
     if (config.hiddenMode) {
-      this._dockPanel.hiddenMode =
-        config.hiddenMode === 'display'
-          ? Widget.HiddenMode.Display
-          : Widget.HiddenMode.Scale;
+      switch (config.hiddenMode) {
+        case 'display':
+          this._dockPanel.hiddenMode = Widget.HiddenMode.Display;
+          break;
+        case 'scale':
+          this._dockPanel.hiddenMode = Widget.HiddenMode.Scale;
+          break;
+        case 'contentVisibility':
+          this._dockPanel.hiddenMode = Widget.HiddenMode.ContentVisibility;
+          break;
+      }
     }
   }
 
