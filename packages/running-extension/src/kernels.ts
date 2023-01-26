@@ -237,10 +237,6 @@ namespace Private {
       return children;
     }
 
-    open() {
-      /* no-op */
-    }
-
     shutdown() {
       return this.kernels.shutdown(this.kernel.id);
     }

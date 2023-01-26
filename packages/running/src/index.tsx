@@ -197,7 +197,7 @@ function Item(props: {
         <span
           className={ITEM_LABEL_CLASS}
           title={title}
-          onClick={() => runningItem.open()}
+          onClick={runningItem.open && (() => runningItem.open!())}
         >
           {runningItem.label()}
         </span>
@@ -486,7 +486,7 @@ export namespace IRunningSessions {
     /**
      * Called when the running item is clicked.
      */
-    open: () => void;
+    open?: () => void;
 
     /**
      * Called when the shutdown button is pressed on a particular item.
