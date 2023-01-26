@@ -145,7 +145,7 @@ async def run_browser(url):
         if not osp.exists(target):
             os.makedirs(osp.join(target))
         await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(["jlpm", "add", "playwright@^1.9.2"], cwd=target)
+        await run_async_process(["npm", "install", "playwright@^1.9.2"], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
@@ -156,7 +156,7 @@ def run_browser_sync(url):
     if not osp.exists(osp.join(target, "node_modules")):
         os.makedirs(target)
         subprocess.call(["jlpm", "init", "-y"], cwd=target)
-        subprocess.call(["jlpm", "add", "playwright@^1.9.2"], cwd=target)
+        subprocess.call(["npm", "install", "playwright@^1.9.2"], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     return subprocess.check_call(["node", "browser-test.js", url], cwd=target)
 
