@@ -63,7 +63,7 @@
       },
       {
         "command": "filebrowser:copy",
-        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 8
       },
       {
@@ -138,37 +138,51 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "filebrowser:go-up",
-      "keys": ["Backspace"],
+      "keys": [
+        "Backspace"
+      ],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:delete",
-      "keys": ["Delete"],
+      "keys": [
+        "Delete"
+      ],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:cut",
-      "keys": ["Accel X"],
+      "keys": [
+        "Accel X"
+      ],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:copy",
-      "keys": ["Accel C"],
+      "keys": [
+        "Accel C"
+      ],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:paste",
-      "keys": ["Accel V"],
+      "keys": [
+        "Accel V"
+      ],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:rename",
-      "keys": ["F2"],
+      "keys": [
+        "F2"
+      ],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:duplicate",
-      "keys": ["Accel D"],
+      "keys": [
+        "Accel D"
+      ],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
     }
   ],
