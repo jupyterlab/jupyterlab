@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+@import './fonts.css';
+
 /* Left-justify the MathJax preview in cell outputs. */
 .jp-OutputArea-output.jp-RenderedLatex .MathJax_Preview .MJXp-display {
   padding: var(--jp-code-padding);
@@ -12,4 +14,9 @@
 /* Left-justify the MathJax display equation in cell outputs. */
 .jp-OutputArea-output.jp-RenderedLatex .MathJax_Display {
   text-align: left !important;
+}
+
+.jp-OutputArea-output.jp-RenderedLatex .MJX-DISPLAY {
+  margin: 0;
+  text-align: left;
 }

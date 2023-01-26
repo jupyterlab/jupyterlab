@@ -7,140 +7,59 @@
  * @module mathjax
  */
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { PromiseDelegate } from '@lumino/coreutils';
+import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
-// Stub for window MathJax.
-declare let MathJax: any;
+import { mathjax } from 'mathjax-full/js/mathjax';
+import { TeX } from 'mathjax-full/js/input/tex';
+import { CHTML } from 'mathjax-full/js/output/chtml';
+import { TeXFont } from 'mathjax-full/js/output/chtml/fonts/tex';
+import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages';
+import { SafeHandler } from 'mathjax-full/js/ui/safe/SafeHandler';
+import { HTMLHandler } from 'mathjax-full/js/handlers/html/HTMLHandler';
+import { browserAdaptor } from 'mathjax-full/js/adaptors/browserAdaptor';
+
+mathjax.handlers.register(SafeHandler(new HTMLHandler(browserAdaptor())));
+
+// Override dynamically generated fonts in favor
+// of our font css that is picked up by webpack.
+class emptyFont extends TeXFont {}
+(emptyFont as any).defaultFonts = {};
 
 /**
  * The MathJax Typesetter.
  */
-export class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
-  /**
-   * Create a new MathJax typesetter.
-   */
-  constructor(options: MathJaxTypesetter.IOptions) {
-    this._url = options.url;
-    this._config = options.config;
+export class MathJaxTypesetter implements ILatexTypesetter {
+  constructor() {
+    const chtml = new CHTML({
+      font: new emptyFont()
+    });
+    const tex = new TeX({
+      packages: AllPackages,
+      inlineMath: [
+        ['$', '$'],
+        ['\\(', '\\)']
+      ],
+      displayMath: [
+        ['$$', '$$'],
+        ['\\[', '\\]']
+      ],
+      processEscapes: true,
+      processEnvironments: true
+    });
+    this._mathDocument = mathjax.document(window.document, {
+      InputJax: tex,
+      OutputJax: chtml
+    });
   }
 
   /**
    * Typeset the math in a node.
-   *
-   * #### Notes
-   * MathJax schedules the typesetting asynchronously,
-   * but there are not currently any callbacks or Promises
-   * firing when it is done.
    */
   typeset(node: HTMLElement): void {
-    if (!this._initialized) {
-      this._init();
-    }
-    void this._initPromise.promise.then(() => {
-      MathJax.Hub.Queue(['Typeset', MathJax.Hub, node]);
-      try {
-        MathJax.Hub.Queue(
-          ['Require', MathJax.Ajax, '[MathJax]/extensions/TeX/AMSmath.js'],
-          () => {
-            MathJax.InputJax.TeX.resetEquationNumbers();
-          }
-        );
-      } catch (e) {
-        console.error('Error queueing resetEquationNumbers:', e);
-      }
-    });
+    this._mathDocument.options.elements = [node];
+    this._mathDocument.clear().render();
+    delete this._mathDocument.options.elements;
   }
 
-  /**
-   * Initialize MathJax.
-   */
-  private _init(): void {
-    const head = document.getElementsByTagName('head')[0];
-    const script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = `${this._url}?config=${this._config}&amp;delayStartupUntil=configured`;
-    script.charset = 'utf-8';
-    head.appendChild(script);
-    script.addEventListener('load', () => {
-      this._onLoad();
-    });
-    this._initialized = true;
-  }
-
-  /**
-   * Handle MathJax loading.
-   */
-  private _onLoad(): void {
-    MathJax.Hub.Config({
-      tex2jax: {
-        inlineMath: [
-          ['$', '$'],
-          ['\\(', '\\)']
-        ],
-        displayMath: [
-          ['$$', '$$'],
-          ['\\[', '\\]']
-        ],
-        processEscapes: true,
-        processEnvironments: true
-      },
-      // Center justify equations in code and markdown cells. Elsewhere
-      // we use CSS to left justify single line equations in code cells.
-      displayAlign: 'center',
-      CommonHTML: {
-        linebreaks: { automatic: true }
-      },
-      'HTML-CSS': {
-        availableFonts: [],
-        imageFont: null,
-        preferredFont: null,
-        webFont: 'STIX-Web',
-        styles: { '.MathJax_Display': { margin: 0 } },
-        linebreaks: { automatic: true }
-      },
-      skipStartupTypeset: true,
-      messageStyle: 'none'
-    });
-
-    MathJax.Hub.Register.StartupHook('End Config', () => {
-      // Disable `:hover span` styles which cause performance issues in Chromium browsers
-      // c-f https://github.com/jupyterlab/jupyterlab/issues/9757
-      // Note that we cannot overwrite them in config earlier due to how `CombineConfig`
-      // is implemented in MathJax 2 (it does not allow removing styles, just expanding).
-      delete MathJax.Hub?.config?.MathEvents?.styles[
-        '.MathJax_Hover_Arrow:hover span'
-      ];
-      delete MathJax.Hub?.config?.MathMenu?.styles[
-        '.MathJax_MenuClose:hover span'
-      ];
-    });
-    MathJax.Hub.Configured();
-    this._initPromise.resolve(void 0);
-  }
-
-  private _initPromise = new PromiseDelegate<void>();
-  private _initialized = false;
-  private _url: string;
-  private _config: string;
-}
-
-/**
- * Namespace for MathJaxTypesetter.
- */
-export namespace MathJaxTypesetter {
-  /**
-   * MathJaxTypesetter constructor options.
-   */
-  export interface IOptions {
-    /**
-     * The url to load MathJax from.
-     */
-    url: string;
-
-    /**
-     * A configuration string to compose into the MathJax URL.
-     */
-    config: string;
-  }
+  private _mathDocument: ReturnType<typeof mathjax.document>;
 }

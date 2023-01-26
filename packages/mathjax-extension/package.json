@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.17",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.17",
     "@jupyterlab/mathjax": "^4.0.0-alpha.17",
     "@jupyterlab/rendermime": "^4.0.0-alpha.17"
   },
