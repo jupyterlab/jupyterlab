@@ -425,7 +425,8 @@ test.describe('General', () => {
     await page.click('ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
 
-    await page.waitForSelector('.jp-Terminal');
+    // Wait for the xterm.js element to be added in the DOM
+    await page.waitForSelector('.jp-Terminal-body');
 
     await page.keyboard.type('cd $JUPYTERLAB_GALATA_ROOT_DIR');
     await page.keyboard.press('Enter');
