@@ -99,8 +99,10 @@ export async function addKernelRunningSessionManager(
         : args.type === 'notebook'
         ? notebookIcon
         : undefined,
+    isEnabled: ({ path, type }) => !!type || path !== undefined,
     label: ({ name, path }) =>
-      (name as string) || PathExt.basename((path as string) || ''),
+      (name as string) ||
+      PathExt.basename((path as string) || trans.__('Unknown Session')),
     execute: ({ path, type }) => {
       if (!type || path === undefined) {
         return;

@@ -182,11 +182,12 @@ function Item(props: {
         className={classList.join(' ')}
         data-context={runningItem.context || ''}
       >
-        {collapsible && (collapsed ? (
-          <caretRightIcon.react tag="span" stylesheet="runningItem" />
-        ) : (
-          <caretDownIcon.react tag="span" stylesheet="runningItem" />
-        ) }
+        {collapsible &&
+          (collapsed ? (
+            <caretRightIcon.react tag="span" stylesheet="runningItem" />
+          ) : (
+            <caretDownIcon.react tag="span" stylesheet="runningItem" />
+          ))}
         {typeof icon === 'string' ? (
           icon ? (
             <img src={icon} />
