@@ -117,7 +117,7 @@ def develop_labextension(
         path = os.path.abspath(path)
         if not os.path.exists(full_dest):
             if logger:
-                logger.info("Symlinking: %s -> %s" % (full_dest, path))
+                logger.info(f"Symlinking: {full_dest} -> {path}")
             try:
                 os.symlink(path, full_dest)
             except OSError as e:
@@ -174,7 +174,7 @@ def develop_labextension_py(
         src = os.path.join(base_path, labext["src"])
         dest = labext["dest"]
         if logger:
-            logger.info("Installing %s -> %s" % (src, dest))
+            logger.info(f"Installing {src} -> {dest}")
 
         if not os.path.exists(src):
             build_labextension(base_path, logger=logger)
@@ -361,7 +361,7 @@ def _maybe_copy(src, dest, logger=None):
     """
     if _should_copy(src, dest, logger=logger):
         if logger:
-            logger.info("Copying: %s -> %s" % (src, dest))
+            logger.info(f"Copying: {src} -> {dest}")
         shutil.copy2(src, dest)
 
 

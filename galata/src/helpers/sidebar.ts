@@ -213,6 +213,18 @@ export class SidebarHelper {
   }
 
   /**
+   * Get the tab bar of the sidebar
+   *
+   * @param side Position
+   * @returns Tab bar handle
+   */
+  async getTabBar(
+    side: galata.SidebarPosition = 'left'
+  ): Promise<ElementHandle<Element> | null> {
+    return await this.page.$(`.jp-SideBar.jp-mod-${side}`);
+  }
+
+  /**
    * Open a given sidebar
    *
    * @param side Position

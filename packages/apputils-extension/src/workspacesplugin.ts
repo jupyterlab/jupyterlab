@@ -14,7 +14,7 @@ import {
   DocumentWidget,
   IDocumentWidget
 } from '@jupyterlab/docregistry';
-import { FileBrowser, IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { Contents, Workspace, WorkspaceManager } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -38,7 +38,7 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:workspaces',
   autoStart: true,
   requires: [
-    IFileBrowserFactory,
+    IDefaultFileBrowser,
     IWindowResolver,
     IStateDB,
     ITranslator,
@@ -47,7 +47,7 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   optional: [IRouter],
   activate: (
     app: JupyterFrontEnd,
-    fbf: IFileBrowserFactory,
+    fileBrowser: IDefaultFileBrowser,
     resolver: IWindowResolver,
     state: IStateDB,
     translator: ITranslator,
@@ -79,7 +79,7 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
       execute: async () => {
         const data = app.serviceManager.workspaces.fetch(resolver.name);
         await Private.saveAs(
-          fbf.defaultBrowser,
+          fileBrowser,
           app.serviceManager.contents,
           data,
           state,
@@ -95,13 +95,7 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
         const data = app.serviceManager.workspaces.fetch(resolver.name);
         const lastSave = (await state.fetch(LAST_SAVE_ID)) as string;
         if (lastSave === undefined) {
-          await Private.saveAs(
-            fbf.defaultBrowser,
-            contents,
-            data,
-            state,
-            translator
-          );
+          await Private.saveAs(fileBrowser, contents, data, state, translator);
         } else {
           await Private.save(lastSave, contents, data, state);
         }
@@ -146,7 +140,7 @@ namespace Private {
    * Default location is the current directory in the file browser
    */
   export async function saveAs(
-    browser: FileBrowser,
+    browser: IDefaultFileBrowser,
     contents: Contents.IManager,
     data: Promise<Workspace.IWorkspace>,
     state: IStateDB,

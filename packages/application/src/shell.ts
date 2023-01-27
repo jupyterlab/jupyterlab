@@ -8,6 +8,7 @@ import {
   DockPanelSvg,
   LabIcon,
   TabBarSvg,
+  tabIcon,
   TabPanelSvg
 } from '@jupyterlab/ui-components';
 import { ArrayExt, find, map } from '@lumino/algorithm';
@@ -1947,9 +1948,14 @@ namespace Private {
         title.icon = title.icon.bindprops({
           stylesheet: 'sideBar'
         });
-      } else if (typeof title.icon === 'string' || !title.icon) {
+      } else if (typeof title.icon === 'string' && title.icon != '') {
         // add some classes to help with displaying css background imgs
         title.iconClass = classes(title.iconClass, 'jp-Icon', 'jp-Icon-20');
+      } else if (!title.icon && !title.label) {
+        // add a fallback icon if there is no title label nor icon
+        title.icon = tabIcon.bindprops({
+          stylesheet: 'sideBar'
+        });
       }
 
       this._refreshVisibility();

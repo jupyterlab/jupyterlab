@@ -72,7 +72,7 @@ function activate(
   if (labShell) {
     addOpenTabsSessionManager(runningSessionManagers, translator, labShell);
   }
-  addKernelRunningSessionManager(runningSessionManagers, translator, app);
+  void addKernelRunningSessionManager(runningSessionManagers, translator, app);
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.add(running, 'left', { rank: 200, type: 'Sessions and Tabs' });

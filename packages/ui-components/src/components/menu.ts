@@ -160,7 +160,7 @@ export class RankedMenu extends Menu implements IRankedMenu {
     const added: IDisposableMenuItem[] = [];
 
     // Insert a separator before the group.
-    // Phosphor takes care of superfluous leading,
+    // Lumino takes care of superfluous leading,
     // trailing, and duplicate separators.
     if (this._includeSeparators) {
       added.push(
