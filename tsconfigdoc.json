@@ -194,10 +194,7 @@
       "path": "./packages/markedparser-extension"
     },
     {
-      "path": "./packages/mathjax2"
-    },
-    {
-      "path": "./packages/mathjax2-extension"
+      "path": "./packages/mathjax-extension"
     },
     {
       "path": "./packages/metadataform"
