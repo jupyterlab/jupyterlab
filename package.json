@@ -104,8 +104,8 @@
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/disposable": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6",
-    "@types/react": "^17.0.0",
-    "react": "^17.0.1",
+    "@types/react": "^18.0.26",
+    "react": "^18.2.0",
     "yjs": "^13.5.40"
   },
   "dependencies": {
