@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/mathjax3-extension",
+  "name": "@jupyterlab/mathjax-extension",
   "version": "4.0.0-alpha.18",
   "description": "MathJax 3 math renderer for JupyterLab",
   "keywords": [
@@ -68,7 +68,7 @@
     "extension": true,
     "outputDir": "jupyterlab-mathjax3/labextension",
     "disabledExtensions": [
-      "@jupyterlab/mathjax2-extension:plugin"
+      "@jupyterlab/mathjax-extension:plugin"
     ],
     "schemaDir": "schema"
   },

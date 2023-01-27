@@ -1,6 +1,6 @@
 {
-  "title": "MathJax 3 Plugin",
-  "description": "MathJax 3 math renderer for JupyterLab",
+  "title": "MathJax Plugin",
+  "description": "MathJax math renderer for JupyterLab",
   "jupyter.lab.menus": {
     "context": [
       {
