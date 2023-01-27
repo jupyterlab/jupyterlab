@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/mathjax-extension",
   "version": "4.0.0-alpha.18",
-  "description": "MathJax 3 math renderer for JupyterLab",
+  "description": "MathJax math renderer for JupyterLab",
   "keywords": [
     "jupyter",
     "jupyterlab",
@@ -20,6 +20,9 @@
     "name": "Project Jupyter",
     "email": "jupyter@googlegroups.com"
   },
+  "sideEffects": [
+    "style/**/*"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "style": "style/index.css",
