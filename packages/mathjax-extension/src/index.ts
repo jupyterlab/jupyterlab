@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  JupyterFrontEndPlugin,
   JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
@@ -37,29 +37,29 @@ class emptyFont extends TeXFont {}
 (emptyFont as any).defaultFonts = {};
 
 /**
- * The MathJax 3 Typesetter.
+ * The MathJax Typesetter.
  */
-export class MathJax3Typesetter implements ILatexTypesetter {
+export class MathJaxTypesetter implements ILatexTypesetter {
   constructor(app: JupyterFrontEnd) {
     const chtml = new CHTML({
-      font: new emptyFont(),
+      font: new emptyFont()
     });
     const tex = new TeX({
       packages: AllPackages.concat('require'),
       inlineMath: [
         ['$', '$'],
-        ['\\(', '\\)'],
+        ['\\(', '\\)']
       ],
       displayMath: [
         ['$$', '$$'],
-        ['\\[', '\\]'],
+        ['\\[', '\\]']
       ],
       processEscapes: true,
-      processEnvironments: true,
+      processEnvironments: true
     });
     this._mathDocument = mathjax.document(window.document, {
       InputJax: tex,
-      OutputJax: chtml,
+      OutputJax: chtml
     });
 
     const mjclipboard = 'mathjax:clipboard';
@@ -71,7 +71,7 @@ export class MathJax3Typesetter implements ILatexTypesetter {
         const oJax: any = md.outputJax;
         navigator.clipboard.writeText(oJax.math.math);
       },
-      label: 'MathJax Copy Latex',
+      label: 'MathJax Copy Latex'
     });
 
     app.commands.addCommand(mjscale, {
@@ -81,8 +81,8 @@ export class MathJax3Typesetter implements ILatexTypesetter {
         md.outputJax.options.scale = scale;
         md.rerender();
       },
-      label: (args) =>
-        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset'),
+      label: args =>
+        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset')
     });
   }
 
@@ -99,14 +99,14 @@ export class MathJax3Typesetter implements ILatexTypesetter {
 }
 
 /**
- * The MathJax 3 extension.
+ * The MathJax extension.
  */
-const mathJax3Plugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
-  id: '@jupyterlab/mathjax3-extension:plugin',
+const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
+  id: '@jupyterlab/mathjax-extension:plugin',
   requires: [],
   provides: ILatexTypesetter,
-  activate: (app: JupyterFrontEnd) => new MathJax3Typesetter(app),
-  autoStart: true,
+  activate: (app: JupyterFrontEnd) => new MathJaxTypesetter(app),
+  autoStart: true
 };
 
-export default mathJax3Plugin;
+export default mathJaxPlugin;

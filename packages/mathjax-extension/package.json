@@ -34,24 +34,10 @@
     "schema/**/*.json"
   ],
   "scripts": {
-    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
-    "build:labextension": "jupyter labextension build .",
-    "build:labextension:dev": "jupyter labextension build --development True .",
-    "build:lib": "tsc",
-    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
-    "clean": "jlpm run clean:lib",
-    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension && jlpm run clean:dist",
-    "clean:dist": "rimraf dist",
-    "clean:labextension": "rimraf ./jupyterlab-mathjax3/labextension",
-    "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "eslint": "eslint . --ext .ts,.tsx --fix",
-    "eslint:check": "eslint . --ext .ts,.tsx",
-    "install:extension": "jupyter labextension develop --overwrite .",
-    "prepack": "npm run clean && npm run build",
-    "prepare": "jlpm run clean && jlpm run build:prod",
-    "watch": "run-p watch:src watch:labextension",
-    "watch:labextension": "jupyter labextension watch .",
-    "watch:src": "tsc -w"
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.4.5",
@@ -66,7 +52,7 @@
   },
   "jupyterlab": {
     "extension": true,
-    "outputDir": "jupyterlab-mathjax3/labextension",
+    "outputDir": "jupyterlab-mathjax/labextension",
     "disabledExtensions": [
       "@jupyterlab/mathjax-extension:plugin"
     ],
