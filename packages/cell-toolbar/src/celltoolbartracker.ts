@@ -205,7 +205,7 @@ export class CellToolbarTracker implements IDisposable {
     const toolbarLeft = this._cellToolbarLeft(activeCell);
 
     if (toolbarLeft === null) {
-      return true; // If we don't know where the toolbar is, assume it overlaps
+      return false;
     }
 
     // The toolbar should not take up more than 50% of the cell.
