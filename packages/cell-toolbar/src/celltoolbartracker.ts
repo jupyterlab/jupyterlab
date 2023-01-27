@@ -50,7 +50,10 @@ export class CellToolbarTracker implements IDisposable {
     this._toolbar.changed.connect(this._onToolbarChanged, this);
 
     // Only add the toolbar to the notebook's active cell (if any) once it has fully rendered and been revealed.
-    void panel.revealed.then(() => this._onActiveCellChanged(panel.content));
+    void panel.revealed.then(() => {
+      console.log('Panel is revealed; making initial onActiveCellChanged call');
+      this._onActiveCellChanged(panel.content)
+    });
 
     // Check whether the toolbar should be rendered upon a layout change
     panel.content.renderingLayoutChanged.connect(
@@ -200,7 +203,7 @@ export class CellToolbarTracker implements IDisposable {
     const toolbarLeft = this._cellToolbarLeft(activeCell);
 
     if (toolbarLeft === null) {
-      return false;
+      return true; // If we don't know where the toolbar is, assume it overlaps
     }
 
     // The toolbar should not take up more than 50% of the cell.
