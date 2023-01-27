@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mathjax3-extension",
-  "version": "4.3.0",
+  "version": "4.0.0-alpha.18",
   "description": "MathJax 3 math renderer for JupyterLab",
   "keywords": [
     "jupyter",
