@@ -8,6 +8,115 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.0a33
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a32...bd8ef2d398e0612aad334e4feafb853836b05a07))
+
+### Enhancements made
+
+- Improves translator API [#13834](https://github.com/jupyterlab/jupyterlab/pull/13834) ([@hbcarlos](https://github.com/hbcarlos))
+- Rework sidebar styles to allow adoption of css `contain:strict` [#13831](https://github.com/jupyterlab/jupyterlab/pull/13831) ([@krassowski](https://github.com/krassowski))
+- Improve form renderer registry [#13823](https://github.com/jupyterlab/jupyterlab/pull/13823) ([@fcollonval](https://github.com/fcollonval))
+- Updates jupyter_ydoc, removes the docprovider and uses drives as providers [#13786](https://github.com/jupyterlab/jupyterlab/pull/13786) ([@hbcarlos](https://github.com/hbcarlos))
+- Reduces the context of the form used in metadataform [#13781](https://github.com/jupyterlab/jupyterlab/pull/13781) ([@brichet](https://github.com/brichet))
+- Add support for replace preserving case [#13778](https://github.com/jupyterlab/jupyterlab/pull/13778) ([@krassowski](https://github.com/krassowski))
+- Add whole-word matching option in search bar [#13777](https://github.com/jupyterlab/jupyterlab/pull/13777) ([@krassowski](https://github.com/krassowski))
+- Merge Component registries [#13769](https://github.com/jupyterlab/jupyterlab/pull/13769) ([@brichet](https://github.com/brichet))
+- `default` locale will use OS default locale [#13721](https://github.com/jupyterlab/jupyterlab/pull/13721) ([@fcollonval](https://github.com/fcollonval))
+- Upgrades Xterm to v. 5 [#13685](https://github.com/jupyterlab/jupyterlab/pull/13685) ([@JasonWeill](https://github.com/JasonWeill))
+- Accessibility: role and aria-label [#13682](https://github.com/jupyterlab/jupyterlab/pull/13682) ([@brichet](https://github.com/brichet))
+- Improve completer rendering performance [#13663](https://github.com/jupyterlab/jupyterlab/pull/13663) ([@krassowski](https://github.com/krassowski))
+- Filtering breakpoints on exception in debugger [#13601](https://github.com/jupyterlab/jupyterlab/pull/13601) ([@brichet](https://github.com/brichet))
+
+### Bugs fixed
+
+- Fixes notebook's metadata in collaborative mode [#13868](https://github.com/jupyterlab/jupyterlab/pull/13868) ([@hbcarlos](https://github.com/hbcarlos))
+- Use local paths instead of driveName:path in the shared model [#13866](https://github.com/jupyterlab/jupyterlab/pull/13866) ([@hbcarlos](https://github.com/hbcarlos))
+- Updates jupyter_server_ydoc [#13854](https://github.com/jupyterlab/jupyterlab/pull/13854) ([@hbcarlos](https://github.com/hbcarlos))
+- Fix undefined css variables [#13852](https://github.com/jupyterlab/jupyterlab/pull/13852) ([@HaudinFlorence](https://github.com/HaudinFlorence))
+- Suppresses cell toolbar on collapsed input cells [#13847](https://github.com/jupyterlab/jupyterlab/pull/13847) ([@JasonWeill](https://github.com/JasonWeill))
+- Removes nested A tag from extensionmanager code [#13845](https://github.com/jupyterlab/jupyterlab/pull/13845) ([@JasonWeill](https://github.com/JasonWeill))
+- Fix starting search with selected text (if any) [#13802](https://github.com/jupyterlab/jupyterlab/pull/13802) ([@krassowski](https://github.com/krassowski))
+- Updates to the kernel panel of the "running" sidebar [#13792](https://github.com/jupyterlab/jupyterlab/pull/13792) ([@afshin](https://github.com/afshin))
+- Fix `preferred_dir` for examples [#13788](https://github.com/jupyterlab/jupyterlab/pull/13788) ([@fcollonval](https://github.com/fcollonval))
+- Bump canvas to version with nodejs 18 binaries [#13783](https://github.com/jupyterlab/jupyterlab/pull/13783) ([@fcollonval](https://github.com/fcollonval))
+- Explain why cell model may be missing in cell toolbar [#13763](https://github.com/jupyterlab/jupyterlab/pull/13763) ([@krassowski](https://github.com/krassowski))
+- Fix handling of `settingEditorType` [#13761](https://github.com/jupyterlab/jupyterlab/pull/13761) ([@jtpio](https://github.com/jtpio))
+- Updates jupyter_ydoc [#13735](https://github.com/jupyterlab/jupyterlab/pull/13735) ([@hbcarlos](https://github.com/hbcarlos))
+- Wrap kernel message binary buffers in DataView [#13730](https://github.com/jupyterlab/jupyterlab/pull/13730) ([@davidbrochart](https://github.com/davidbrochart))
+- Upgrades Python to 3.10, Node to 18 [#13722](https://github.com/jupyterlab/jupyterlab/pull/13722) ([@JasonWeill](https://github.com/JasonWeill))
+- Faster rendering of the debugger tree [#13707](https://github.com/jupyterlab/jupyterlab/pull/13707) ([@krassowski](https://github.com/krassowski))
+- Fix execution indicator in RTC mode [#13693](https://github.com/jupyterlab/jupyterlab/pull/13693) ([@trungleduc](https://github.com/trungleduc))
+- Fix issue #13569: `source_hidden` not effective. [#13611](https://github.com/jupyterlab/jupyterlab/pull/13611) ([@yczhangsjtu](https://github.com/yczhangsjtu))
+
+### Maintenance and upkeep improvements
+
+- Update to Playwright 1.30 [#13871](https://github.com/jupyterlab/jupyterlab/pull/13871) ([@jtpio](https://github.com/jtpio))
+- Update `jupyter_server_ydoc` as 0.6.2 is yanked [#13864](https://github.com/jupyterlab/jupyterlab/pull/13864) ([@fcollonval](https://github.com/fcollonval))
+- Bump jupyterlab-language-pack-zh-cn from 3.2.post7 to 3.5.post4 [#13843](https://github.com/jupyterlab/jupyterlab/pull/13843) ([@dependabot](https://github.com/dependabot))
+- Bump ruff from 0.0.226 to 0.0.230 [#13842](https://github.com/jupyterlab/jupyterlab/pull/13842) ([@dependabot](https://github.com/dependabot))
+- Bump tj-actions/changed-files from 35.4.3 to 35.4.4 [#13840](https://github.com/jupyterlab/jupyterlab/pull/13840) ([@dependabot](https://github.com/dependabot))
+- Bump matplotlib from 3.5.1 to 3.6.3 [#13821](https://github.com/jupyterlab/jupyterlab/pull/13821) ([@dependabot](https://github.com/dependabot))
+- Bump ruff from 0.0.177 to 0.0.226 [#13819](https://github.com/jupyterlab/jupyterlab/pull/13819) ([@dependabot](https://github.com/dependabot))
+- Bump scipy from 1.7.3 to 1.10.0 [#13818](https://github.com/jupyterlab/jupyterlab/pull/13818) ([@dependabot](https://github.com/dependabot))
+- Bump pandas from 1.3.5 to 1.5.3 [#13817](https://github.com/jupyterlab/jupyterlab/pull/13817) ([@dependabot](https://github.com/dependabot))
+- Bump tj-actions/changed-files from 35.4.1 to 35.4.3 [#13816](https://github.com/jupyterlab/jupyterlab/pull/13816) ([@dependabot](https://github.com/dependabot))
+- Remove debug print in test [#13814](https://github.com/jupyterlab/jupyterlab/pull/13814) ([@fcollonval](https://github.com/fcollonval))
+- Clean examples [#13812](https://github.com/jupyterlab/jupyterlab/pull/13812) ([@fcollonval](https://github.com/fcollonval))
+- Dependabot alert on json5 [#13808](https://github.com/jupyterlab/jupyterlab/pull/13808) ([@fcollonval](https://github.com/fcollonval))
+- Dependabot alert on jsonwebtoken [#13807](https://github.com/jupyterlab/jupyterlab/pull/13807) ([@fcollonval](https://github.com/fcollonval))
+- Fix `preferred_dir` for examples [#13788](https://github.com/jupyterlab/jupyterlab/pull/13788) ([@fcollonval](https://github.com/fcollonval))
+- Bump tj-actions/changed-files from 35.4.0 to 35.4.1 [#13785](https://github.com/jupyterlab/jupyterlab/pull/13785) ([@dependabot](https://github.com/dependabot))
+- Bump canvas to version with nodejs 18 binaries [#13783](https://github.com/jupyterlab/jupyterlab/pull/13783) ([@fcollonval](https://github.com/fcollonval))
+- Added config to link ts source maps [#13765](https://github.com/jupyterlab/jupyterlab/pull/13765) ([@3coins](https://github.com/3coins))
+- Drop support for Python 3.7 [#13745](https://github.com/jupyterlab/jupyterlab/pull/13745) ([@jtpio](https://github.com/jtpio))
+- Drop the dependency on `@jupyterlab/buildutils` in `@jupyterlab/builder` [#13741](https://github.com/jupyterlab/jupyterlab/pull/13741) ([@jtpio](https://github.com/jtpio))
+- Bump toshimaru/auto-author-assign from 1.6.1 to 1.6.2 [#13738](https://github.com/jupyterlab/jupyterlab/pull/13738) ([@dependabot](https://github.com/dependabot))
+- Bump tj-actions/changed-files from 35.2.1 to 35.4.0 [#13737](https://github.com/jupyterlab/jupyterlab/pull/13737) ([@dependabot](https://github.com/dependabot))
+- Upgrades Python to 3.10, Node to 18 [#13722](https://github.com/jupyterlab/jupyterlab/pull/13722) ([@JasonWeill](https://github.com/JasonWeill))
+- Require `jupyter_server>=2.0.1,<3` [#13718](https://github.com/jupyterlab/jupyterlab/pull/13718) ([@jtpio](https://github.com/jtpio))
+- Remove empty button in the notebook toolbar [#13691](https://github.com/jupyterlab/jupyterlab/pull/13691) ([@trungleduc](https://github.com/trungleduc))
+- Bump react 18 [#13607](https://github.com/jupyterlab/jupyterlab/pull/13607) ([@brichet](https://github.com/brichet))
+- Adopt ruff and clean up pre-commit [#13562](https://github.com/jupyterlab/jupyterlab/pull/13562) ([@blink1073](https://github.com/blink1073))
+- Drop the `moment` dependency [#13469](https://github.com/jupyterlab/jupyterlab/pull/13469) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Bump ruff from 0.0.226 to 0.0.230 [#13842](https://github.com/jupyterlab/jupyterlab/pull/13842) ([@dependabot](https://github.com/dependabot))
+- Improves translator API [#13834](https://github.com/jupyterlab/jupyterlab/pull/13834) ([@hbcarlos](https://github.com/hbcarlos))
+- link nbclassic docs, note Lab 4 drop notebook dependency [#13830](https://github.com/jupyterlab/jupyterlab/pull/13830) ([@RRosio](https://github.com/RRosio))
+- Improve form renderer registry [#13823](https://github.com/jupyterlab/jupyterlab/pull/13823) ([@fcollonval](https://github.com/fcollonval))
+- Bump ruff from 0.0.177 to 0.0.226 [#13819](https://github.com/jupyterlab/jupyterlab/pull/13819) ([@dependabot](https://github.com/dependabot))
+- Bug fixes/revisions for the Lab extension tutorial [#13813](https://github.com/jupyterlab/jupyterlab/pull/13813) ([@fcollonval](https://github.com/fcollonval))
+- Updates jupyter_ydoc, removes the docprovider and uses drives as providers [#13786](https://github.com/jupyterlab/jupyterlab/pull/13786) ([@hbcarlos](https://github.com/hbcarlos))
+- Merge Component registries [#13769](https://github.com/jupyterlab/jupyterlab/pull/13769) ([@brichet](https://github.com/brichet))
+- Remove deprecated `window.jupyterlab` [#13767](https://github.com/jupyterlab/jupyterlab/pull/13767) ([@jtpio](https://github.com/jtpio))
+- Minor improvements to update the tutorial [#13766](https://github.com/jupyterlab/jupyterlab/pull/13766) ([@fcollonval](https://github.com/fcollonval))
+- Fix typo in release instructions [#13754](https://github.com/jupyterlab/jupyterlab/pull/13754) ([@jasongrout](https://github.com/jasongrout))
+- Upgrades Python to 3.10, Node to 18 [#13722](https://github.com/jupyterlab/jupyterlab/pull/13722) ([@JasonWeill](https://github.com/JasonWeill))
+- Upgrades Xterm to v. 5 [#13685](https://github.com/jupyterlab/jupyterlab/pull/13685) ([@JasonWeill](https://github.com/JasonWeill))
+- Improve completer rendering performance [#13663](https://github.com/jupyterlab/jupyterlab/pull/13663) ([@krassowski](https://github.com/krassowski))
+- Bump react 18 [#13607](https://github.com/jupyterlab/jupyterlab/pull/13607) ([@brichet](https://github.com/brichet))
+- Adopt ruff and clean up pre-commit [#13562](https://github.com/jupyterlab/jupyterlab/pull/13562) ([@blink1073](https://github.com/blink1073))
+- Drop the `moment` dependency [#13469](https://github.com/jupyterlab/jupyterlab/pull/13469) ([@jtpio](https://github.com/jtpio))
+
+### API and Breaking Changes
+
+- Improve form renderer registry [#13823](https://github.com/jupyterlab/jupyterlab/pull/13823) ([@fcollonval](https://github.com/fcollonval))
+- Reduces the context of the form used in metadataform [#13781](https://github.com/jupyterlab/jupyterlab/pull/13781) ([@brichet](https://github.com/brichet))
+- Merge Component registries [#13769](https://github.com/jupyterlab/jupyterlab/pull/13769) ([@brichet](https://github.com/brichet))
+- Remove deprecated `window.jupyterlab` [#13767](https://github.com/jupyterlab/jupyterlab/pull/13767) ([@jtpio](https://github.com/jtpio))
+- Upgrades Python to 3.10, Node to 18 [#13722](https://github.com/jupyterlab/jupyterlab/pull/13722) ([@JasonWeill](https://github.com/JasonWeill))
+- Drop the `moment` dependency [#13469](https://github.com/jupyterlab/jupyterlab/pull/13469) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-01-05&to=2023-01-27&type=c))
+
+[@3coins](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3A3coins+updated%3A2023-01-05..2023-01-27&type=Issues) | [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2023-01-05..2023-01-27&type=Issues) | [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2023-01-05..2023-01-27&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2023-01-05..2023-01-27&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2023-01-05..2023-01-27&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2023-01-05..2023-01-27&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2023-01-05..2023-01-27&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2023-01-05..2023-01-27&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2023-01-05..2023-01-27&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-01-05..2023-01-27&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-01-05..2023-01-27&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2023-01-05..2023-01-27&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2023-01-05..2023-01-27&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2023-01-05..2023-01-27&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2023-01-05..2023-01-27&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-01-05..2023-01-27&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-01-05..2023-01-27&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-01-05..2023-01-27&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2023-01-05..2023-01-27&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2023-01-05..2023-01-27&type=Issues) | [@psychemedia](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apsychemedia+updated%3A2023-01-05..2023-01-27&type=Issues) | [@RRosio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARRosio+updated%3A2023-01-05..2023-01-27&type=Issues) | [@SylvainCorlay](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2023-01-05..2023-01-27&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2023-01-05..2023-01-27&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-01-05..2023-01-27&type=Issues) | [@yczhangsjtu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ayczhangsjtu+updated%3A2023-01-05..2023-01-27&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.0a32
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a31...21edbd433af0e7da0791cc24d550eaca3bd14dee))
@@ -141,8 +250,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2022-11-18&to=2023-01-05&type=c))
 
 [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2022-11-18..2023-01-05&type=Issues) | [@akhmerov](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aakhmerov+updated%3A2022-11-18..2023-01-05&type=Issues) | [@alec-kr](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aalec-kr+updated%3A2022-11-18..2023-01-05&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2022-11-18..2023-01-05&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2022-11-18..2023-01-05&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2022-11-18..2023-01-05&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2022-11-18..2023-01-05&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2022-11-18..2023-01-05&type=Issues) | [@dlqqq](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adlqqq+updated%3A2022-11-18..2023-01-05&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2022-11-18..2023-01-05&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2022-11-18..2023-01-05&type=Issues) | [@gabalafou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agabalafou+updated%3A2022-11-18..2023-01-05&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2022-11-18..2023-01-05&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2022-11-18..2023-01-05&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2022-11-18..2023-01-05&type=Issues) | [@hsuanxyz](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahsuanxyz+updated%3A2022-11-18..2023-01-05&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2022-11-18..2023-01-05&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2022-11-18..2023-01-05&type=Issues) | [@jmk89](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajmk89+updated%3A2022-11-18..2023-01-05&type=Issues) | [@joaopalmeiro](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajoaopalmeiro+updated%3A2022-11-18..2023-01-05&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2022-11-18..2023-01-05&type=Issues) | [@jupyterlab-dev-mode](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-dev-mode+updated%3A2022-11-18..2023-01-05&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2022-11-18..2023-01-05&type=Issues) | [@kostyafarber](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akostyafarber+updated%3A2022-11-18..2023-01-05&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2022-11-18..2023-01-05&type=Issues) | [@martinRenou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AmartinRenou+updated%3A2022-11-18..2023-01-05&type=Issues) | [@mctoohey](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amctoohey+updated%3A2022-11-18..2023-01-05&type=Issues) | [@meeseeksdev](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksdev+updated%3A2022-11-18..2023-01-05&type=Issues) | [@mgcth](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amgcth+updated%3A2022-11-18..2023-01-05&type=Issues) | [@minrk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aminrk+updated%3A2022-11-18..2023-01-05&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2022-11-18..2023-01-05&type=Issues) | [@vidartf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Avidartf+updated%3A2022-11-18..2023-01-05&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2022-11-18..2023-01-05&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.0a31
 

@@ -6,7 +6,7 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 
 type ReactRenderElement =
   | Array<React.ReactElement<any>>
@@ -16,6 +16,9 @@ type ReactRenderElement =
  * An abstract class for a Lumino widget which renders a React component.
  */
 export abstract class ReactWidget extends Widget {
+  constructor() {
+    super();
+  }
   /**
    * Creates a new `ReactWidget` that renders a constant element.
    * @param element React element to render.
@@ -61,7 +64,10 @@ export abstract class ReactWidget extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     // Unmount the component so it can tear down.
-    ReactDOM.unmountComponentAtNode(this.node);
+    if (this._rootDOM !== null) {
+      this._rootDOM.unmount();
+      this._rootDOM = null;
+    }
   }
 
   /**
@@ -72,22 +78,33 @@ export abstract class ReactWidget extends Widget {
   private renderDOM(): Promise<void> {
     return new Promise<void>(resolve => {
       const vnode = this.render();
+      if (this._rootDOM === null) {
+        this._rootDOM = createRoot(this.node);
+      }
       // Split up the array/element cases so type inference chooses the right
       // signature.
       if (Array.isArray(vnode)) {
-        ReactDOM.render(vnode, this.node, resolve);
+        this._rootDOM.render(vnode);
+        // Resolves after the widget has been rendered.
+        // https://github.com/reactwg/react-18/discussions/5#discussioncomment-798304
+        requestIdleCallback(() => resolve());
       } else if (vnode) {
-        ReactDOM.render(vnode, this.node, resolve);
+        this._rootDOM.render(vnode);
+        // Resolves after the widget has been rendered.
+        // https://github.com/reactwg/react-18/discussions/5#discussioncomment-798304
+        requestIdleCallback(() => resolve());
       } else {
         // If the virtual node is null, unmount the node content
-        ReactDOM.unmountComponentAtNode(this.node);
-        resolve();
+        this._rootDOM.unmount();
+        this._rootDOM = null;
+        requestIdleCallback(() => resolve());
       }
     });
   }
 
   // Set whenever a new render is triggered and resolved when it is finished.
   renderPromise?: Promise<void>;
+  private _rootDOM: Root | null = null;
 }
 
 /**

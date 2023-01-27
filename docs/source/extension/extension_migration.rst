@@ -173,6 +173,9 @@ bumped their major version (following semver convention). We want to point out p
   Plugin ``@jupyterlab/statusbar-extension:running-sessions-status`` renamed to ``@jupyterlab/apputils-extension:running-sessions-status``
   Plugin ``@jupyterlab/statusbar-extension:line-col-status`` renamed to ``@jupyterlab/codemirror-extension:line-col-status``
   ``HoverBox`` component moved from ``@jupyterlab/apputils`` to ``@jupyterlab/ui-components``.
+- ``@jupyterlab/terminal`` from 3.x to 4.x
+  Xterm.js upgraded from 4.x to 5.x
+  ``IThemeObject.selection`` renamed to ``selectionBackground``
 - ``@jupyterlab/toc`` from 3.x to 4.x
    ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).
@@ -207,6 +210,9 @@ bumped their major version (following semver convention). We want to point out p
    As a result of the update to TypeScript 4.7, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+- React 18.2.0 update
+  The update to React 18.2.0 (from 17.0.1) should be propagated to extensions as well.
+  Here is the documentation about the `migration to react 18 <https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html>`_.
 
 Testing with Jest
 ^^^^^^^^^^^^^^^^^
