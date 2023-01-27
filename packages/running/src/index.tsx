@@ -153,11 +153,11 @@ function Item(props: {
   const trans = translator.load('jupyterlab');
 
   // Handle shutdown requests.
-  let shutdownRequested = false;
+  let stopPropagation = false;
   const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
   const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
   const shutdown = () => {
-    shutdownRequested = true;
+    stopPropagation = true;
     runningItem.shutdown?.();
   };
 
@@ -165,7 +165,7 @@ function Item(props: {
   const [collapsed, collapse] = React.useState(false);
   const collapsible = !!runningItem.children?.length;
   const onClick = collapsible
-    ? () => !shutdownRequested && collapse(!collapsed)
+    ? () => !stopPropagation && collapse(!collapsed)
     : undefined;
 
   if (runningItem.className) {
