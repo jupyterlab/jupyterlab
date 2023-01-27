@@ -1,5 +1,4 @@
 // This file is auto-generated from the corresponding file in /dev_mode
-// This file is auto-generated from the corresponding file in /dev_mode
 /* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
@@ -301,7 +300,8 @@ module.exports = [
     output: {
       path: path.resolve(buildDir),
       publicPath: '{{page_config.fullStaticUrl}}/',
-      filename: '[name].[contenthash].js'
+      filename: '[name].[contenthash].js',
+      hashFunction: 'sha256'
     },
     optimization: {
       splitChunks: {
