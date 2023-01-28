@@ -50,11 +50,11 @@
     "@jupyterlab/nbformat": "^4.0.0-alpha.18",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.18",
     "@jupyterlab/statedb": "^4.0.0-alpha.18",
-    "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/disposable": "^2.0.0-alpha.6",
-    "@lumino/polling": "^2.0.0-alpha.6",
-    "@lumino/properties": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6",
+    "@lumino/coreutils": "^2.0.0-beta.0",
+    "@lumino/disposable": "^2.0.0-beta.0",
+    "@lumino/polling": "^2.0.0-beta.0",
+    "@lumino/properties": "^2.0.0-beta.0",
+    "@lumino/signaling": "^2.0.0-beta.0",
     "ws": "^8.11.0"
   },
   "devDependencies": {
