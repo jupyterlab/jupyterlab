@@ -7,9 +7,9 @@
     "jupyterlab",
     "mathjax"
   ],
-  "homepage": "https://github.com/jupyterlab/jupyter-renderers",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
-    "url": "https://github.com/jupyterlab/jupyter-renderers/issues"
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
   },
   "repository": {
     "type": "git",
@@ -30,14 +30,13 @@
     "lib": "lib/"
   },
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js",
-    "style/*.css",
-    "style/index.js",
-    "schema/**/*.json"
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "schema/*.json",
+    "style/index.js"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "watch": "tsc -b --watch"
@@ -58,10 +57,6 @@
   },
   "jupyterlab": {
     "extension": true,
-    "outputDir": "jupyterlab-mathjax/labextension",
-    "disabledExtensions": [
-      "@jupyterlab/mathjax-extension:plugin"
-    ],
     "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
