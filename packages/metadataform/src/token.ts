@@ -7,12 +7,11 @@
 
 import { CellType } from '@jupyterlab/nbformat';
 import { NotebookTools } from '@jupyterlab/notebook';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { BaseSettings, ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   PartialJSONObject,
-  PartialJSONValue,
-  ReadonlyPartialJSONObject,
+  ReadonlyJSONObject,
   Token
 } from '@lumino/coreutils';
 import { MetadataFormWidget } from './metadataform';
@@ -22,22 +21,6 @@ export namespace MetadataForm {
    * The metadata schema as defined in JSON schema.
    */
   export type IMetadataSchema = ISettingRegistry.IMetadataSchema;
-
-  /**
-   * The settings to send to RJSF templates in formContext.
-   */
-  export interface ISettings {
-    /**
-     * Returns the default value for a specific key.
-     * @param metadataKey - the key for which we expect default value.
-     */
-    default(metadataKey: string): PartialJSONValue | undefined;
-
-    /**
-     * The meta information associated to all properties.
-     */
-    metaInformation: IMetaInformation;
-  }
 
   /**
    * The meta information associated to all properties.
@@ -132,12 +115,12 @@ export namespace MetadataForm {
     /**
      * Meta information associated to properties.
      */
-    settings: ISettings;
+    settings: BaseSettings;
 
     /**
      * Current data of the form.
      */
-    formData: ReadonlyPartialJSONObject | null;
+    formData: ReadonlyJSONObject;
 
     /**
      * Translator object.
@@ -178,7 +161,7 @@ export namespace MetadataForm {
      * The list contains also the conditional fields, which are not necessary
      * displayed and filled.
      */
-    get metadataKeys(): string[];
+    readonly metadataKeys: string[];
 
     /**
      * Get the properties of a MetadataKey.
@@ -205,7 +188,7 @@ export namespace MetadataForm {
      * This function build an object with all the root object to update
      * in metadata before performing update.
      */
-    updateMetadata(formData: ReadonlyPartialJSONObject, reload?: boolean): void;
+    updateMetadata(formData: ReadonlyJSONObject, reload?: boolean): void;
   }
 }
 

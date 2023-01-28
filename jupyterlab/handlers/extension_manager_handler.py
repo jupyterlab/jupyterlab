@@ -10,7 +10,7 @@ from urllib.parse import urlencode, urlunparse
 from jupyter_server.base.handlers import APIHandler
 from tornado import web
 
-from ..extensions.manager import ExtensionManager
+from jupyterlab.extensions.manager import ExtensionManager
 
 
 class ExtensionHandler(APIHandler):
@@ -39,54 +39,54 @@ class ExtensionHandler(APIHandler):
         self.set_status(200)
         if last_page is not None:
             links = []
-            queryArgs = {"page": last_page, "per_page": per_page}
+            query_args = {"page": last_page, "per_page": per_page}
             if query is not None:
-                queryArgs["query"] = query
+                query_args["query"] = query
             last = urlunparse(
                 (
                     self.request.protocol,
                     self.request.host,
                     self.request.path,
                     "",
-                    urlencode(queryArgs, doseq=True),
+                    urlencode(query_args, doseq=True),
                     "",
                 )
             )
             links.append(f'<{last}>; rel="last"')
             if page > 1:
-                queryArgs["page"] = max(1, page - 1)
+                query_args["page"] = max(1, page - 1)
                 prev = urlunparse(
                     (
                         self.request.protocol,
                         self.request.host,
                         self.request.path,
                         "",
-                        urlencode(queryArgs, doseq=True),
+                        urlencode(query_args, doseq=True),
                         "",
                     )
                 )
                 links.append(f'<{prev}>; rel="prev"')
             if page < last_page:
-                queryArgs["page"] = min(page + 1, last_page)
-                next = urlunparse(
+                query_args["page"] = min(page + 1, last_page)
+                next_ = urlunparse(
                     (
                         self.request.protocol,
                         self.request.host,
                         self.request.path,
                         "",
-                        urlencode(queryArgs, doseq=True),
+                        urlencode(query_args, doseq=True),
                         "",
                     )
                 )
-                links.append(f'<{next}>; rel="next"')
-            queryArgs["page"] = 1
+                links.append(f'<{next_}>; rel="next"')
+            query_args["page"] = 1
             first = urlunparse(
                 (
                     self.request.protocol,
                     self.request.host,
                     self.request.path,
                     "",
-                    urlencode(queryArgs, doseq=True),
+                    urlencode(query_args, doseq=True),
                     "",
                 )
             )
@@ -113,7 +113,7 @@ class ExtensionHandler(APIHandler):
         if cmd not in ("install", "uninstall", "enable", "disable") or not name:
             raise web.HTTPError(
                 422,
-                "Could not process instruction %r with extension name %r" % (cmd, name),
+                f"Could not process instruction {cmd!r} with extension name {name!r}",
             )
 
         ret_value = None

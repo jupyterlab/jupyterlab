@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "7.0.0-alpha.17",
+  "version": "7.0.0-alpha.18",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -19,7 +19,6 @@
   "author": "Project Jupyter",
   "main": "lib/index.js",
   "browser": {
-    "node-fetch": false,
     "ws": "./lib/shim/ws.js"
   },
   "typings": "lib/index.d.ts",
@@ -46,22 +45,21 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.17",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.17",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.17",
-    "@jupyterlab/statedb": "^4.0.0-alpha.17",
+    "@jupyter/ydoc": "^0.3.1",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.18",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.18",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.18",
+    "@jupyterlab/statedb": "^4.0.0-alpha.18",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/disposable": "^2.0.0-alpha.6",
     "@lumino/polling": "^2.0.0-alpha.6",
     "@lumino/properties": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6",
-    "node-fetch": "^2.6.0",
     "ws": "^8.11.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.17",
+    "@jupyterlab/testing": "^4.0.0-alpha.18",
     "@types/jest": "^29.2.0",
-    "@types/node-fetch": "^2.5.4",
     "@types/ws": "^8.5.3",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",

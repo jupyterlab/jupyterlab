@@ -264,7 +264,7 @@ Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Building JupyterLab from its GitHub source code requires Node.js. The
-development version requires Node.js version 12+, as defined in the
+development version requires Node.js version 18+, as defined in the
 ``engines`` specification in
 `dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/master/dev_mode/package.json>`__.
 

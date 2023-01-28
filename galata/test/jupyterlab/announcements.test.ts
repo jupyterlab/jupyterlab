@@ -21,7 +21,6 @@ test('Announcements requires user agreement', async ({ page }) => {
   expect(notifications[0].message).toEqual(
     'Would you like to receive official Jupyter news?\nPlease read the privacy policy.'
   );
-  console.log(notifications[0]);
   expect(notifications[0].options.actions).toHaveLength(3);
   expect(notifications[0].options.actions[0].label).toEqual(
     'Open privacy policy'

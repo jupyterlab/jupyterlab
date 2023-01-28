@@ -43,7 +43,7 @@ You can look at different level of nested unordered list ljbakjn arsvlasc asc as
 1. level 1
    some Horizontal line
 
-______________________________________________________________________
+---
 
 ## and another one
 

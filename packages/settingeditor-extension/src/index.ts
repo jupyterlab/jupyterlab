@@ -21,7 +21,7 @@ import {
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import {
   CommandToolbarButton,
-  IFormComponentRegistry,
+  IFormRendererRegistry,
   launchIcon,
   Toolbar
 } from '@jupyterlab/ui-components';
@@ -64,7 +64,7 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     ISettingRegistry,
     IStateDB,
     ITranslator,
-    IFormComponentRegistry,
+    IFormRendererRegistry,
     ILabStatus
   ],
   optional: [ILayoutRestorer, ICommandPalette, IJSONSettingEditorTracker],
@@ -81,7 +81,7 @@ function activate(
   registry: ISettingRegistry,
   state: IStateDB,
   translator: ITranslator,
-  editorRegistry: IFormComponentRegistry,
+  editorRegistry: IFormRendererRegistry,
   status: ILabStatus,
   restorer: ILayoutRestorer | null,
   palette: ICommandPalette | null,

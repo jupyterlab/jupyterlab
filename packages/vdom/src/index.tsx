@@ -14,7 +14,7 @@ import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import VDOM, { SerializedEvent } from '@nteract/transform-vdom';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 
 /**
  * The CSS class to add to the VDOM Widget.
@@ -70,7 +70,10 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
    */
   protected onBeforeDetach(msg: Message): void {
     // Dispose of React component(s).
-    ReactDOM.unmountComponentAtNode(this.node);
+    if (this._rootDOM !== null) {
+      this._rootDOM.unmount();
+      this._rootDOM = null;
+    }
   }
 
   /**
@@ -79,12 +82,15 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     return new Promise((resolve, reject) => {
       const data = model.data[this._mimeType] as any;
-      ReactDOM.render(
-        <VDOM data={data} onVDOMEvent={this.handleVDOMEvent} />,
-        this.node,
-        () => {
-          resolve();
-        }
+      if (this._rootDOM === null) {
+        this._rootDOM = createRoot(this.node);
+      }
+      this._rootDOM.render(
+        <VDOM
+          ref={() => resolve()}
+          data={data}
+          onVDOMEvent={this.handleVDOMEvent}
+        />
       );
     });
   }
@@ -115,4 +121,5 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   private _sessionContext?: ISessionContext;
   private _comms: { [targetName: string]: Kernel.IComm } = {};
   private _timer: number;
+  private _rootDOM: Root | null = null;
 }

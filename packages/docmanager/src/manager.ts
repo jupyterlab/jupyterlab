@@ -3,7 +3,6 @@
 
 import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
-import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 import {
   Context,
   DocumentRegistry,
@@ -40,7 +39,6 @@ export class DocumentManager implements IDocumentManager {
     this.registry = options.registry;
     this.services = options.manager;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
-    this._docProviderFactory = options.docProviderFactory;
     this._isConnectedCallback = options.isConnectedCallback || (() => true);
 
     this._opener = options.opener;
@@ -570,7 +568,6 @@ export class DocumentManager implements IDocumentManager {
       kernelPreference,
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs,
-      docProviderFactory: this._docProviderFactory,
       lastModifiedCheckMargin: this._lastModifiedCheckMargin,
       translator: this.translator
     });
@@ -715,7 +712,6 @@ export class DocumentManager implements IDocumentManager {
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
-  private _docProviderFactory: IDocumentProviderFactory | undefined;
   private _isConnectedCallback: () => boolean;
   private _stateChanged = new Signal<DocumentManager, IChangedArgs<any>>(this);
 }
@@ -762,11 +758,6 @@ export namespace DocumentManager {
      * The application language translator.
      */
     translator?: ITranslator;
-
-    /**
-     * A factory method for the document provider.
-     */
-    docProviderFactory?: IDocumentProviderFactory;
 
     /**
      * Autosaving should be paused while this callback function returns `false`.

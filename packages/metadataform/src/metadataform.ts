@@ -6,6 +6,7 @@
  */
 
 import { NotebookTools } from '@jupyterlab/notebook';
+import { BaseSettings } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
@@ -13,6 +14,8 @@ import {
 } from '@jupyterlab/translation';
 import {
   JSONExt,
+  JSONObject,
+  JSONValue,
   PartialJSONObject,
   PartialJSONValue,
   ReadonlyPartialJSONObject,
@@ -142,7 +145,10 @@ export class MetadataFormWidget
    * in metadata before performing update.
    * It uses an arrow function to allow using 'this' properly when called from a custom field.
    */
-  updateMetadata = (formData: ReadonlyPartialJSONObject, reload?: boolean) => {
+  updateMetadata = (
+    formData: ReadonlyPartialJSONObject,
+    reload?: boolean
+  ): void => {
     if (this.notebookTools == undefined) return;
 
     const notebook = this.notebookTools.activeNotebookPanel;
@@ -365,7 +371,7 @@ export class MetadataFormWidget
       this._metadataSchema
     );
 
-    const formData = {} as PartialJSONObject;
+    const formData = {} as JSONObject;
 
     for (let metadataKey of Object.keys(this._metadataSchema.properties)) {
       // Do not display the field if it's Notebook metadata and the notebook model is null.
@@ -416,12 +422,14 @@ export class MetadataFormWidget
       }
 
       // Fill the formData with the current metadata value.
-      if (hasValue) formData[metadataKey] = workingObject as PartialJSONValue;
+      if (hasValue) formData[metadataKey] = workingObject as JSONValue;
     }
 
     this.buildWidget({
       properties: formProperties,
-      settings: new Private.Settings(this._metaInformation),
+      settings: new BaseSettings({
+        schema: this._metadataSchema as PartialJSONObject
+      }),
       uiSchema: this._uiSchema,
       translator: this.translator || null,
       formData: formData,
@@ -432,7 +440,7 @@ export class MetadataFormWidget
   }
 
   protected translator: ITranslator;
-  private _form: FormWidget | undefined = undefined;
+  private _form: FormWidget | undefined;
   private _metadataSchema: MetadataForm.IMetadataSchema;
   private _metaInformation: MetadataForm.IMetaInformation;
   private _uiSchema: MetadataForm.IUiSchema;
@@ -452,24 +460,6 @@ namespace Private {
     [metadata: string]: PartialJSONObject | PartialJSONValue | undefined;
   }
 
-  /**
-   * The settings to send to RJSF templates in formContext.
-   */
-  export class Settings implements MetadataForm.ISettings {
-    constructor(metaInformation: MetadataForm.IMetaInformation) {
-      this.metaInformation = metaInformation;
-    }
-
-    /**
-     * Returns the default value for a specific key.
-     * @param metadataKey - the key for which we expect default value.
-     */
-    default(metadataKey: string) {
-      return this.metaInformation[metadataKey]?.default;
-    }
-
-    metaInformation: MetadataForm.IMetaInformation;
-  }
   /**
    * Recursive function to clean the empty nested metadata before updating real metadata.
    * this function is called when a nested metadata is undefined (or default), so maybe some

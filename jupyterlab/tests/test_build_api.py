@@ -112,7 +112,6 @@ class TestBuildAPI:
         while True:
             r = await build_api_tester.getStatus()
             res = r.body.decode()
-            print(res)
             resp = json.loads(res)
             if resp["status"] == "building":
                 break

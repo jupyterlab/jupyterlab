@@ -98,8 +98,8 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
-  '@jupyterlab/galata': ['node-fetch', 'http-server'],
-  '@jupyterlab/services': ['node-fetch', 'ws'],
+  '@jupyterlab/galata': ['http-server'],
+  '@jupyterlab/services': ['ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testing': [
     '@babel/core',
@@ -196,7 +196,6 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/debugger',
     '@jupyterlab/debugger-extension',
     '@jupyterlab/docmanager-extension',
-    '@jupyterlab/docprovider-extension',
     '@jupyterlab/documentsearch-extension',
     '@jupyterlab/extensionmanager',
     '@jupyterlab/extensionmanager-extension',

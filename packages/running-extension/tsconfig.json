@@ -10,10 +10,10 @@
       "path": "../application"
     },
     {
-      "path": "../coreutils"
+      "path": "../docregistry"
     },
     {
-      "path": "../docregistry"
+      "path": "../rendermime-interfaces"
     },
     {
       "path": "../running"

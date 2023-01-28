@@ -314,6 +314,8 @@ describe('@jupyterlab/ui-components', () => {
         enabled = true;
         visible = true;
         commands.notifyCommandChanged(testLogCommandId);
+        await framePromise();
+        await button.renderPromise;
         expect(buttonNode.disabled).toBe(false);
         expect(buttonNode.classList.contains('lm-mod-toggled')).toBe(true);
         expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(false);
@@ -555,6 +557,7 @@ describe('@jupyterlab/ui-components', () => {
         expect(icon[0].getAttribute('data-icon')).toEqual('ui-components:bug');
         widget.pressed = true;
         await framePromise();
+        await widget.renderPromise;
         expect(widget.pressed).toBe(true);
         expect(button.title).toBe('pressed tooltip');
         expect(button.getAttribute('aria-pressed')).toEqual('true');
@@ -613,6 +616,7 @@ describe('@jupyterlab/ui-components', () => {
 
         widget.enabled = false;
         await framePromise();
+        await widget.renderPromise;
         expect(widget.enabled).toBe(false);
         expect(widget.pressed).toBe(false);
         expect(button.getAttribute('aria-disabled')).toEqual('true');
@@ -643,6 +647,7 @@ describe('@jupyterlab/ui-components', () => {
         };
         widget.onClick = mockOnClickUpdated;
         await framePromise();
+        await widget.renderPromise;
         simulate(widget.node.firstChild as HTMLElement, 'mousedown');
         expect(mockCalled).toBe(false);
         expect(mockUpdatedCalled).toBe(true);

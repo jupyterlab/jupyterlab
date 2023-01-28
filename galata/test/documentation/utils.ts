@@ -18,7 +18,7 @@ export function generateArrow(
   position: { x: number; y: number },
   rotation: number = 0
 ): string {
-  return `<svg style="position: absolute;top: ${position.y}px;left: ${position.x}px;transform: rotate(${rotation}deg);" width="28.579" height="162.02" version="1.1" viewBox="0 0 28.579 62.619" xmlns="http://www.w3.org/2000/svg">
+  return `<svg style="position: absolute;top: ${position.y}px;left: ${position.x}px;transform: rotate(${rotation}deg);z-index: 100000" width="28.579" height="162.02" version="1.1" viewBox="0 0 28.579 62.619" xmlns="http://www.w3.org/2000/svg">
   <defs>
    <marker id="a" overflow="visible" orient="auto">
     <path transform="matrix(-1.1,0,0,-1.1,-1.1,0)" d="m8.7186 4.0337-10.926-4.0177 10.926-4.0177c-1.7455 2.3721-1.7354 5.6175-6e-7 8.0354z" fill="#ff0000" fill-rule="evenodd" stroke="#ff0000" stroke-linejoin="round" stroke-width=".625"/>

@@ -1,10 +1,8 @@
-# coding: utf-8
 """Utilities for installing Javascript extensions for the notebook"""
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from __future__ import print_function
 
 import importlib
 import json
@@ -21,9 +19,8 @@ try:
 except ImportError:
     from importlib_metadata import PackageNotFoundError, version
 
-from os.path import basename
+from os.path import basename, normpath
 from os.path import join as pjoin
-from os.path import normpath
 
 from jupyter_core.paths import ENV_JUPYTER_PATH, SYSTEM_JUPYTER_PATH, jupyter_data_dir
 from jupyter_core.utils import ensure_dir_exists
@@ -120,7 +117,7 @@ def develop_labextension(
         path = os.path.abspath(path)
         if not os.path.exists(full_dest):
             if logger:
-                logger.info("Symlinking: %s -> %s" % (full_dest, path))
+                logger.info(f"Symlinking: {full_dest} -> {path}")
             try:
                 os.symlink(path, full_dest)
             except OSError as e:
@@ -177,7 +174,7 @@ def develop_labextension_py(
         src = os.path.join(base_path, labext["src"])
         dest = labext["dest"]
         if logger:
-            logger.info("Installing %s -> %s" % (src, dest))
+            logger.info(f"Installing {src} -> {dest}")
 
         if not os.path.exists(src):
             build_labextension(base_path, logger=logger)
@@ -274,19 +271,19 @@ def _ensure_builder(ext_path, core_path):
         core_data = json.load(fid)
     with open(osp.join(ext_path, "package.json")) as fid:
         ext_data = json.load(fid)
-    depVersion1 = core_data["devDependencies"]["@jupyterlab/builder"]
-    depVersion2 = ext_data.get("devDependencies", dict()).get("@jupyterlab/builder")
-    depVersion2 = depVersion2 or ext_data.get("dependencies", dict()).get("@jupyterlab/builder")
-    if depVersion2 is None:
+    dep_version1 = core_data["devDependencies"]["@jupyterlab/builder"]
+    dep_version2 = ext_data.get("devDependencies", dict()).get("@jupyterlab/builder")
+    dep_version2 = dep_version2 or ext_data.get("dependencies", dict()).get("@jupyterlab/builder")
+    if dep_version2 is None:
         raise ValueError(
-            "Extensions require a devDependency on @jupyterlab/builder@%s" % depVersion1
+            "Extensions require a devDependency on @jupyterlab/builder@%s" % dep_version1
         )
 
     # if we have installed from disk (version is a path), assume we know what
     # we are doing and do not check versions.
-    if "/" in depVersion2:
-        with open(osp.join(ext_path, depVersion2, "package.json")) as fid:
-            depVersion2 = json.load(fid).get("version")
+    if "/" in dep_version2:
+        with open(osp.join(ext_path, dep_version2, "package.json")) as fid:
+            dep_version2 = json.load(fid).get("version")
     if not osp.exists(osp.join(ext_path, "node_modules")):
         subprocess.check_call(["jlpm"], cwd=ext_path)
 
@@ -298,20 +295,22 @@ def _ensure_builder(ext_path, core_path):
             raise ValueError("Could not find @jupyterlab/builder")
         target = osp.dirname(target)
 
-    overlap = _test_overlap(depVersion1, depVersion2, drop_prerelease1=True, drop_prerelease2=True)
+    overlap = _test_overlap(
+        dep_version1, dep_version2, drop_prerelease1=True, drop_prerelease2=True
+    )
     if not overlap:
         with open(
             osp.join(target, "node_modules", "@jupyterlab", "builder", "package.json")
         ) as fid:
-            depVersion2 = json.load(fid).get("version")
+            dep_version2 = json.load(fid).get("version")
         overlap = _test_overlap(
-            depVersion1, depVersion2, drop_prerelease1=True, drop_prerelease2=True
+            dep_version1, dep_version2, drop_prerelease1=True, drop_prerelease2=True
         )
 
     if not overlap:
         raise ValueError(
             "Extensions require a devDependency on @jupyterlab/builder@%s, you have a dependency on %s"
-            % (depVersion1, depVersion2)
+            % (dep_version1, dep_version2)
         )
 
     return osp.join(
@@ -362,7 +361,7 @@ def _maybe_copy(src, dest, logger=None):
     """
     if _should_copy(src, dest, logger=logger):
         if logger:
-            logger.info("Copying: %s -> %s" % (src, dest))
+            logger.info(f"Copying: {src} -> {dest}")
         shutil.copy2(src, dest)
 
 
@@ -387,7 +386,7 @@ def _get_labextension_dir(user=False, sys_prefix=False, prefix=None, labextensio
         ("labextensions_dir", labextensions_dir),
         ("sys_prefix", sys_prefix),
     ]
-    conflicting_set = ["{}={!r}".format(n, v) for n, v in conflicting if v]
+    conflicting_set = [f"{n}={v!r}" for n, v in conflicting if v]
     if len(conflicting_set) > 1:
         raise ArgumentConflict(
             "cannot specify more than one of user, sys_prefix, prefix, or labextensions_dir, but got: {}".format(
@@ -424,7 +423,7 @@ def _get_labextension_metadata(module):
     """
     mod_path = osp.abspath(module)
     if not osp.exists(mod_path):
-        raise FileNotFoundError("The path `{}` does not exist.".format(mod_path))
+        raise FileNotFoundError(f"The path `{mod_path}` does not exist.")
 
     errors = []
 
@@ -457,7 +456,7 @@ def _get_labextension_metadata(module):
             raise FileNotFoundError(
                 "The Python package `{}` is not a valid package, "
                 "it is missing the `setup.py` file.".format(module)
-            )
+            ) from None
 
     # Make sure the package is installed
     try:
@@ -484,6 +483,4 @@ def _get_labextension_metadata(module):
         except Exception as exc:
             errors.append(exc)
 
-    raise ModuleNotFoundError(
-        "There is no labextension at {}. Errors encountered: {}".format(module, errors)
-    )
+    raise ModuleNotFoundError(f"There is no labextension at {module}. Errors encountered: {errors}")

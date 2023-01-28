@@ -5,12 +5,12 @@
  * @module metadataform
  */
 
-import React from 'react';
-import Form, { IChangeEvent } from '@rjsf/core';
-import { JSONSchema7 } from 'json-schema';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { ReactWidget } from '@jupyterlab/apputils';
-import { RJSFTemplatesFactory } from '@jupyterlab/ui-components';
+import { FormComponent } from '@jupyterlab/ui-components';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { IChangeEvent } from '@rjsf/core';
+import { JSONSchema7 } from 'json-schema';
+import React from 'react';
 
 import { MetadataForm } from './token';
 
@@ -25,11 +25,6 @@ export class FormWidget extends ReactWidget {
     super();
     this.addClass('jp-FormWidget');
     this._props = props;
-    this._templateFactory = new RJSFTemplatesFactory({
-      translator: this._props.translator,
-      compact: true,
-      showModifiedFromDefault: props.showModified
-    });
   }
 
   /**
@@ -38,27 +33,26 @@ export class FormWidget extends ReactWidget {
    */
   render(): JSX.Element {
     const formContext = {
-      settings: this._props.settings,
+      defaultFormData: this._props.settings.default(),
       updateMetadata: this._props.metadataFormWidget.updateMetadata
     };
     return (
-      <Form
+      <FormComponent
         schema={this._props.properties as JSONSchema7}
-        formData={this._props.formData}
+        formData={this._props.formData as Record<string, any>}
         formContext={formContext}
-        FieldTemplate={this._templateFactory.fieldTemplate}
-        ArrayFieldTemplate={this._templateFactory.arrayTemplate}
-        ObjectFieldTemplate={this._templateFactory.objectTemplate}
         uiSchema={this._props.uiSchema}
         liveValidate
         idPrefix={`jp-MetadataForm-${this._props.pluginId}`}
         onChange={(e: IChangeEvent<ReadonlyPartialJSONObject>) => {
           this._props.metadataFormWidget.updateMetadata(e.formData);
         }}
+        compact={true}
+        showModifiedFromDefault={this._props.showModified}
+        translator={this._props.translator}
       />
     );
   }
 
   private _props: MetadataForm.IProps;
-  private _templateFactory: RJSFTemplatesFactory;
 }

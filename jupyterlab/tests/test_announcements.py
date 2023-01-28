@@ -66,7 +66,7 @@ async def test_CheckForUpdateHandler_get_pypi_success(mock_client, labserverapp,
         "https://github.com/jupyterlab/jupyterlab/releases/tag/v1000.0.0",
     ]
     assert payload["notification"]["options"] == {
-        "data": {"id": hashlib.sha1(message.encode()).hexdigest(), "tags": ["update"]}
+        "data": {"id": hashlib.sha1(message.encode()).hexdigest(), "tags": ["update"]}  # noqa: S324
     }
 
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
@@ -22,8 +21,8 @@ here = osp.abspath(osp.dirname(__file__))
 
 def header(path):
     test_name = osp.basename(path)
-    print(
-        "\n".join(("\n", "*" * 40, "Starting %s test in %s" % (test_name, path), "*" * 40)),
+    print(  # noqa
+        "\n".join(("\n", "*" * 40, f"Starting {test_name} test in {path}", "*" * 40)),
         flush=True,
     )
 
@@ -40,8 +39,7 @@ def main():
     if args.testPath:
         paths = [p for p in paths if args.testPath in p]
 
-    print("Testing %s" % paths)
-
+    print("Testing %s" % paths)  # noqa
     count = 0
     for path in sorted(paths):
         if osp.basename(path) == "node":
@@ -57,7 +55,7 @@ def main():
                 subprocess.check_call([sys.executable, runner, path], cwd=cwd)
                 count += 1
 
-    print("\n\n%s tests complete!" % count)
+    print("\n\n%s tests complete!" % count)  # noqa
 
 
 if __name__ == "__main__":
