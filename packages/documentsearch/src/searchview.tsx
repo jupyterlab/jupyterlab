@@ -569,15 +569,19 @@ class SearchOverlay extends React.Component<
             </button>
           )}
           <SearchEntry
-            inputRef={this.props.searchTextAreaRef}
+            inputRef={this.props.searchInputRef}
             useRegex={this.props.useRegex}
             caseSensitive={this.props.caseSensitive}
             wholeWords={this.props.wholeWords}
             onCaseSensitiveToggled={this.props.onCaseSensitiveToggled}
             onRegexToggled={this.props.onRegexToggled}
             onWordToggled={this.props.onWordToggled}
-            onKeydown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => this._onSearchKeydown(e)}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => this._onSearchChange(e)}
+            onKeydown={(e: React.KeyboardEvent<HTMLTextAreaElement>) =>
+              this._onSearchKeydown(e)
+            }
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              this._onSearchChange(e)
+            }
             searchText={this.props.searchText}
             translator={this.translator}
           />
@@ -734,7 +738,9 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         replaceOptionsSupport={this.model.replaceOptionsSupport}
         replaceText={this.model.replaceText}
         searchText={this.model.searchExpression}
-        searchInputRef={this._searchInput as React.RefObject<HTMLTextAreaElement>}
+        searchInputRef={
+          this._searchInput as React.RefObject<HTMLTextAreaElement>
+        }
         totalMatches={this.model.totalMatches}
         translator={this.translator}
         useRegex={this.model.useRegex}

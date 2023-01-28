@@ -73,5 +73,6 @@ export class FileEditorSearchProvider
       cm.state.selection.main.from,
       cm.state.selection.main.to
     );
+    return selection;
   }
 }
