@@ -35,25 +35,25 @@
 }
 
 @font-face /* 6 */ {
-  font-family: MJXTEX-S1;
+  font-family: 'MJXTEX-S1';
   src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Size1-Regular.woff')
     format('woff');
 }
 
 @font-face /* 7 */ {
-  font-family: MJXTEX-S2;
+  font-family: 'MJXTEX-S2';
   src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Size2-Regular.woff')
     format('woff');
 }
 
 @font-face /* 8 */ {
-  font-family: MJXTEX-S3;
+  font-family: 'MJXTEX-S3';
   src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Size3-Regular.woff')
     format('woff');
 }
 
 @font-face /* 9 */ {
-  font-family: MJXTEX-S4;
+  font-family: 'MJXTEX-S4';
   src: url('~mathjax-full/es5/output/chtml/fonts/woff-v2/MathJax_Size4-Regular.woff')
     format('woff');
 }

@@ -14,7 +14,7 @@ myFont.defaultVariantClasses = {};
 myFont.defaultStyles = {};
 
 const font = new myFont({
-  fontURL: '~mathjax-full/es5/output/chtml/fonts/woff-v2', // Path to fonts.
+  fontURL: '~mathjax-full/es5/output/chtml/fonts/woff-v2' // Path to fonts.
 });
 
 const styles = new CssStyles.CssStyles();
