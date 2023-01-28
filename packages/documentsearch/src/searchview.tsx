@@ -22,6 +22,7 @@ import {
 import { ISignal, Signal } from '@lumino/signaling';
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
+import { useState } from 'react';
 import { SearchDocumentModel } from './searchmodel';
 import { IFilter, IFilters, IReplaceOptionsSupport } from './tokens';
 
@@ -50,6 +51,39 @@ const TOGGLE_PLACEHOLDER = 'jp-DocumentSearch-toggle-placeholder';
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
 const SPACER_CLASS = 'jp-DocumentSearch-spacer';
+
+interface ISearchInputProps {
+  placeholder: string;
+  value: string;
+  title: string;
+  inputRef?: React.RefObject<HTMLTextAreaElement>;
+  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+}
+
+function SearchInput(props: ISearchInputProps): JSX.Element {
+  const [rows, setRows] = useState<number>(1);
+
+  return (
+    <textarea
+      placeholder={props.placeholder}
+      className={INPUT_CLASS}
+      rows={rows}
+      value={props.value}
+      onChange={e => {
+        props.onChange(e);
+        setRows((e.target as HTMLTextAreaElement).value.split(/\n/).length);
+      }}
+      onKeyDown={e => {
+        props.onKeyDown(e);
+        setRows((e.target as HTMLTextAreaElement).value.split(/\n/).length);
+      }}
+      tabIndex={0}
+      ref={props.inputRef}
+      title={props.title}
+    />
+  );
+}
 
 interface ISearchEntryProps {
   inputRef: React.RefObject<HTMLTextAreaElement>;
@@ -85,14 +119,12 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
 
   return (
     <div className={wrapperClass}>
-      <textarea
+      <SearchInput
         placeholder={trans.__('Find')}
-        className={INPUT_CLASS}
         value={props.searchText}
         onChange={e => props.onChange(e)}
         onKeyDown={e => props.onKeydown(e)}
-        tabIndex={0}
-        ref={props.inputRef}
+        inputRef={props.inputRef}
         title={trans.__('Find')}
       />
       <button
@@ -148,13 +180,11 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
   return (
     <div className={REPLACE_WRAPPER_CLASS}>
       <div className={INPUT_WRAPPER_CLASS}>
-        <textarea
+        <SearchInput
           placeholder={trans.__('Replace')}
-          className={INPUT_CLASS}
           value={props.replaceText ?? ''}
           onKeyDown={e => props.onReplaceKeydown(e)}
           onChange={e => props.onChange(e)}
-          tabIndex={0}
           title={trans.__('Replace')}
         />
         {props.replaceOptionsSupport?.preserveCase ? (
@@ -460,21 +490,36 @@ class SearchOverlay extends React.Component<
   private _onSearchKeydown(event: React.KeyboardEvent) {
     if (event.keyCode === 13) {
       // Enter pressed
-      event.preventDefault();
       event.stopPropagation();
-      event.shiftKey
-        ? this.props.onHighlightPrevious()
-        : this.props.onHighlightNext();
+      event.preventDefault();
+      if (event.ctrlKey) {
+        const textarea = event.target as HTMLTextAreaElement;
+        this._insertNewLine(textarea);
+        this.props.onSearchChanged(textarea.value);
+      } else {
+        event.shiftKey
+          ? this.props.onHighlightPrevious()
+          : this.props.onHighlightNext();
+      }
     }
   }
 
   private _onReplaceKeydown(event: React.KeyboardEvent) {
     if (event.keyCode === 13) {
       // Enter pressed
-      event.preventDefault();
       event.stopPropagation();
-      this.props.onReplaceCurrent();
+      event.preventDefault();
+      if (event.ctrlKey) {
+        this._insertNewLine(event.target as HTMLTextAreaElement);
+      } else {
+        this.props.onReplaceCurrent();
+      }
     }
+  }
+
+  private _insertNewLine(textarea: HTMLTextAreaElement) {
+    const [start, end] = [textarea.selectionStart, textarea.selectionEnd];
+    textarea.setRangeText('\n', start, end, 'end');
   }
 
   private _onClose() {
@@ -622,7 +667,7 @@ class SearchOverlay extends React.Component<
                 }
                 onChange={(e: React.ChangeEvent) =>
                   this.props.onReplaceChanged(
-                    (e.target as HTMLInputElement).value
+                    (e.target as HTMLTextAreaElement).value
                   )
                 }
                 onReplaceCurrent={() => this.props.onReplaceCurrent()}

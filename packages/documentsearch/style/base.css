@@ -7,6 +7,9 @@
   outline: none;
   font-size: var(--jp-ui-font-size1);
   background-color: var(--jp-layout-color0);
+  font-family: var(--jp-ui-font-family);
+  padding: 2px 1px;
+  resize: none;
 }
 
 .jp-DocumentSearch-overlay {
@@ -208,8 +211,9 @@
   display: inline-block;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color0);
-  margin: 2px;
+  margin: auto 2px;
   padding: 1px 4px;
+  height: calc(var(--jp-private-document-search-button-height) + 2px);
 }
 
 .jp-DocumentSearch-replace-button-wrapper:focus {
