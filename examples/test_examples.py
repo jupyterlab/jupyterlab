@@ -35,7 +35,7 @@ def main():
     paths = [i for i in glob.glob("%s/*" % here) if osp.isdir(i)]
 
     services_dir = osp.abspath(osp.join(here, "../packages/services/examples"))
-    paths += [i for i in glob.glob("%s/*" % services_dir)]
+    paths += list(glob.glob("%s/*" % services_dir))
     if args.testPath:
         paths = [p for p in paths if args.testPath in p]
 
