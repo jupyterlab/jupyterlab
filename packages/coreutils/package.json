@@ -40,8 +40,8 @@
   },
   "dependencies": {
     "@lumino/coreutils": "^2.0.0-beta.0",
-    "@lumino/disposable": "^2.0.0-beta.0",
-    "@lumino/signaling": "^2.0.0-beta.0",
+    "@lumino/disposable": "^2.0.0-beta.1",
+    "@lumino/signaling": "^2.0.0-beta.1",
     "minimist": "~1.2.0",
     "path-browserify": "^1.0.0",
     "url-parse": "~1.5.4"

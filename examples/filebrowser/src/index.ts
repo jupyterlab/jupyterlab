@@ -85,9 +85,6 @@ function createApp(
         },
         disconnect: () => {
           return false;
-        },
-        block: () => {
-          return;
         }
       };
     }

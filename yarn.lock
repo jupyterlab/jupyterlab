@@ -2270,7 +2270,7 @@
   resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-2.0.0-beta.0.tgz#97c13c7b62ed3c86a3b40c34ac9b1e61c9cb1742"
   integrity sha512-Uh2luxjC8L80Z1lTHUzRWp/2fc3ZaWy+db0SvqYU61xrp73nyUpwp237E/s4IaLSGP3TVkp5WFcUagt6Ehy+5w==
 
-"@lumino/application@^2.0.0-beta.0":
+"@lumino/application@^2.0.0-beta.1":
   version "2.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/@lumino/application/-/application-2.0.0-beta.1.tgz#e92ef42008c437d353120e87784d1597868a0f71"
   integrity sha512-QBEHd0KbAP4eQIy12bxxuoIGyvWd1awgdFF1nOY2wjKN9V6qhi7OROXR+6WubXGIlK4AC0L6iBi+9TOev9cI5Q==
@@ -2286,7 +2286,7 @@
   dependencies:
     "@lumino/algorithm" "^2.0.0-beta.0"
 
-"@lumino/commands@^2.0.0-beta.0", "@lumino/commands@^2.0.0-beta.1":
+"@lumino/commands@^2.0.0-beta.1":
   version "2.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/@lumino/commands/-/commands-2.0.0-beta.1.tgz#1cb4f00180d5fd501d0fee361727076c291d1e1f"
   integrity sha512-1VhFwJGuGaUMUdoUbWW0zhiVw8D8VhXtTdy3c8nUi3+D0iaI+PgWutZh/BmIC9/uCYeYttQiIm2lcEZrjoCS9w==
@@ -2331,7 +2331,7 @@
   resolved "https://registry.yarnpkg.com/@lumino/domutils/-/domutils-2.0.0-beta.0.tgz#9d6d0ccc2f878dbf229ed9e6865f677fbbebf123"
   integrity sha512-fuht6bEWEuoTxQPtrEwKb2dIe8MLS5clXEg1ERVdPiALkwQZyQjcqv0hj2izE+g+qca8uZ/IWe4cXu96uOgTzA==
 
-"@lumino/dragdrop@^2.0.0-beta.0", "@lumino/dragdrop@^2.0.0-beta.1":
+"@lumino/dragdrop@^2.0.0-beta.1":
   version "2.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/@lumino/dragdrop/-/dragdrop-2.0.0-beta.1.tgz#9563acac5156377a7038374e88a53f5a60f559fb"
   integrity sha512-IF2v17h38PwkMQw0xb2wl8QvM4viC1NkYaMI7VRU9yprH+9kuJ23IfxcBvVYJgONxLDvUMARlsAHXwQEhkVFKw==
@@ -2381,7 +2381,7 @@
   dependencies:
     "@lumino/algorithm" "^2.0.0-beta.0"
 
-"@lumino/widgets@^2.0.0-beta.0", "@lumino/widgets@^2.0.0-beta.1":
+"@lumino/widgets@^2.0.0-beta.1":
   version "2.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/@lumino/widgets/-/widgets-2.0.0-beta.1.tgz#d4cf14b216dccc3e9d2a5b30ce5d4069c64730bd"
   integrity sha512-YjSA0yUA+8CfzkpX4PXlp0PfEEbKBHBqtwe+GvkWmY8k3Sqbjtkpmf2L+N1QA2Z5EW6d6vct4mqV3NlHd9qrLg==

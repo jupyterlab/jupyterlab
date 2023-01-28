@@ -89,9 +89,6 @@ function createApp(manager: ServiceManager.IManager): void {
         },
         disconnect: () => {
           return false;
-        },
-        block: () => {
-          return;
         }
       };
     }
