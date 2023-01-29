@@ -2,10 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import {
-  CodeMirrorEditor,
-  CodeMirrorSearchProvider
-} from '@jupyterlab/codemirror';
+import { CodeMirrorEditor, EditorSearchProvider } from '@jupyterlab/codemirror';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ISearchProvider } from '@jupyterlab/documentsearch';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
@@ -20,15 +18,25 @@ export type FileEditorPanel = MainAreaWidget<FileEditor>;
  * File editor search provider
  */
 export class FileEditorSearchProvider
-  extends CodeMirrorSearchProvider
+  extends EditorSearchProvider<CodeEditor.IModel>
   implements ISearchProvider
 {
   /**
    * Constructor
    * @param widget File editor panel
    */
-  constructor(widget: FileEditorPanel) {
-    super(widget.content.editor as CodeMirrorEditor);
+  constructor(protected widget: FileEditorPanel) {
+    super();
+  }
+
+  isReadOnly = false;
+
+  get editor() {
+    return this.widget.content.editor as CodeMirrorEditor;
+  }
+
+  get model(): CodeEditor.IModel {
+    return this.widget.content.model;
   }
 
   /**
