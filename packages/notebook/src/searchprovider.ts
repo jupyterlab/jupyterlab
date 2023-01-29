@@ -495,6 +495,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       if (this.widget.content.activeCellIndex !== this._currentProviderIndex!) {
         this.widget.content.activeCellIndex = this._currentProviderIndex!;
       }
+      if (this.widget.content.activeCellIndex === -1) {
+        console.warn('No active cell (no cells or no model), aborting search');
+        return;
+      }
       const activeCell = this.widget.content.activeCell!;
 
       if (!activeCell.inViewport) {

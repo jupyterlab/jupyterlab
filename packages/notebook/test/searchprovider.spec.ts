@@ -69,6 +69,16 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.currentMatchIndex).toBe(0);
         await provider.endQuery();
       });
+
+      it('should do nothing if there are no cells', async () => {
+        await provider.startQuery(/test/, undefined);
+        for (let _ of panel.model!.sharedModel.cells) {
+          panel.model!.sharedModel.deleteCell(0);
+        }
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(null);
+        await provider.endQuery();
+      });
     });
 
     describe('#highlightPrevious()', () => {
