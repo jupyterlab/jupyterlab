@@ -431,7 +431,8 @@ export class CodeMirrorSearchHighlighter {
                     m.position,
                     m.position + m.text.length
                   )
-                )
+                ),
+                filter: () => false
               });
             } else {
               highlights = Decoration.none;
