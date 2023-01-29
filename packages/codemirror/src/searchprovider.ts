@@ -189,7 +189,7 @@ export abstract class EditorSearchProvider<
    *
    * @returns The next match if there is one.
    */
-  async highlightNext(): Promise<ISearchMatch | undefined> {
+  async highlightNext(loop = true): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
@@ -203,7 +203,7 @@ export abstract class EditorSearchProvider<
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
-        this.currentIndex = null;
+        this.currentIndex = loop ? 0 : null;
       }
       return match;
     }
@@ -216,7 +216,7 @@ export abstract class EditorSearchProvider<
    *
    * @returns The previous match if there is one.
    */
-  async highlightPrevious(): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(loop = true): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
@@ -225,7 +225,7 @@ export abstract class EditorSearchProvider<
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
-        this.currentIndex = null;
+        this.currentIndex = loop ? this.matchesCount - 1 : null;
       }
       return match;
     }

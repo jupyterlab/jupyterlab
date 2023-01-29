@@ -529,8 +529,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
       const match = reverse
-        ? await searchEngine.highlightPrevious()
-        : await searchEngine.highlightNext();
+        ? await searchEngine.highlightPrevious(false)
+        : await searchEngine.highlightNext(false);
 
       if (match) {
         await activateNewMatch();
@@ -560,8 +560,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // than one matches
       const searchEngine = this._searchProviders[this._currentProviderIndex];
       const match = reverse
-        ? await searchEngine.highlightPrevious()
-        : await searchEngine.highlightNext();
+        ? await searchEngine.highlightPrevious(false)
+        : await searchEngine.highlightNext(false);
 
       if (match) {
         await activateNewMatch();

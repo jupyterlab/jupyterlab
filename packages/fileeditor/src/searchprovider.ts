@@ -4,7 +4,10 @@
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeMirrorEditor, EditorSearchProvider } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ISearchProvider } from '@jupyterlab/documentsearch';
+import {
+  IReplaceOptionsSupport,
+  ISearchProvider
+} from '@jupyterlab/documentsearch';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from './widget';
@@ -30,6 +33,15 @@ export class FileEditorSearchProvider
   }
 
   isReadOnly = false;
+
+  /**
+   * Support for options adjusting replacement behavior.
+   */
+  get replaceOptionsSupport(): IReplaceOptionsSupport {
+    return {
+      preserveCase: true
+    };
+  }
 
   get editor() {
     return this.widget.content.editor as CodeMirrorEditor;
