@@ -149,7 +149,8 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
     def start(self):
         if self.app_dir and self.app_dir.startswith(HERE):
-            raise ValueError("Cannot run lab extension commands in core app")
+            msg = "Cannot run lab extension commands in core app"
+            raise ValueError(msg)
         with self.debug_logging():
             ans = self.run_task()
             if ans and self.should_build:
@@ -507,20 +508,20 @@ class LabExtensionApp(JupyterApp):
     description = "Work with JupyterLab extensions"
     examples = _EXAMPLES
 
-    subcommands = dict(
-        install=(InstallLabExtensionApp, "Install labextension(s)"),
-        update=(UpdateLabExtensionApp, "Update labextension(s)"),
-        uninstall=(UninstallLabExtensionApp, "Uninstall labextension(s)"),
-        list=(ListLabExtensionsApp, "List labextensions"),
-        link=(LinkLabExtensionApp, "Link labextension(s)"),
-        unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
-        enable=(EnableLabExtensionsApp, "Enable labextension(s)"),
-        disable=(DisableLabExtensionsApp, "Disable labextension(s)"),
-        check=(CheckLabExtensionsApp, "Check labextension(s)"),
-        develop=(DevelopLabExtensionApp, "(developer) Develop labextension(s)"),
-        build=(BuildLabExtensionApp, "(developer) Build labextension"),
-        watch=(WatchLabExtensionApp, "(developer) Watch labextension"),
-    )
+    subcommands = {
+        "install": (InstallLabExtensionApp, "Install labextension(s)"),
+        "update": (UpdateLabExtensionApp, "Update labextension(s)"),
+        "uninstall": (UninstallLabExtensionApp, "Uninstall labextension(s)"),
+        "list": (ListLabExtensionsApp, "List labextensions"),
+        "link": (LinkLabExtensionApp, "Link labextension(s)"),
+        "unlink": (UnlinkLabExtensionApp, "Unlink labextension(s)"),
+        "enable": (EnableLabExtensionsApp, "Enable labextension(s)"),
+        "disable": (DisableLabExtensionsApp, "Disable labextension(s)"),
+        "check": (CheckLabExtensionsApp, "Check labextension(s)"),
+        "develop": (DevelopLabExtensionApp, "(developer) Develop labextension(s)"),
+        "build": (BuildLabExtensionApp, "(developer) Build labextension"),
+        "watch": (WatchLabExtensionApp, "(developer) Watch labextension"),
+    }
 
     def start(self):
         """Perform the App's functions as configured"""

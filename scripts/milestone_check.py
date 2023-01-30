@@ -35,11 +35,11 @@ except KeyError:
     print(
         "Error: set the environment variable GITHUB_TOKEN to a GitHub authentication token (see https://github.com/settings/tokens)"
     )
-    exit(1)
+    sys.exit(1)
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 2:  # noqa
     print("Error: exactly one argument expected, the milestone.")
-    exit(1)
+    sys.exit(1)
 
 MILESTONE = sys.argv[1]
 
@@ -48,7 +48,7 @@ if MILESTONE not in ranges:
         "Error: I do not know about milestone %r. Possible milestones are %r"
         % (MILESTONE, list(ranges.keys()))
     )
-    exit(1)
+    sys.exit(1)
 
 
 out = subprocess.run(
@@ -108,13 +108,13 @@ while True:
 
     pr_list = results["nodes"]
     for pr in pr_list:
-        if pr["commits"]["totalCount"] > 100:
+        if pr["commits"]["totalCount"] > 100:  # noqa
             large_prs.append(pr["number"])
             continue
             # TODO fetch commits
         prs[pr["number"]] = {
             "mergeCommit": pr["mergeCommit"]["oid"],
-            "commits": set(i["commit"]["oid"] for i in pr["commits"]["nodes"]),
+            "commits": {i["commit"]["oid"] for i in pr["commits"]["nodes"]},
         }
 
     has_next_page = results["pageInfo"]["hasNextPage"]

@@ -15,7 +15,7 @@ lab_path = path.join(HERE, module_name, "labextension")
 
 data_files_spec = [("share/jupyter/labextensions/" + lab_ext_name, lab_path, "**")]
 
-setup_args = dict(name=name, version=version, packages=[module_name])
+setup_args = {"name": name, "version": version, "packages": [module_name]}
 
 
 try:
@@ -23,7 +23,7 @@ try:
 
     post_develop = npm_builder(build_cmd="build:labextension", build_dir=lab_path, npm=["jlpm"])
     cmdclass = wrap_installers(post_develop=post_develop)
-    setup_args.update(dict(cmdclass=cmdclass, data_files=get_data_files(data_files_spec)))
+    setup_args.update({"cmdclass": cmdclass, "data_files": get_data_files(data_files_spec)})
 except ImportError:
     pass
 

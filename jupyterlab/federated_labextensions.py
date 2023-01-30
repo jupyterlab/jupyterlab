@@ -44,7 +44,7 @@ HERE = osp.abspath(osp.dirname(__file__))
 # ------------------------------------------------------------------------------
 
 
-def develop_labextension(
+def develop_labextension(  # noqa
     path,
     symlink=True,
     overwrite=False,
@@ -94,9 +94,8 @@ def develop_labextension(
     ensure_dir_exists(labext)
 
     if isinstance(path, (list, tuple)):
-        raise TypeError(
-            "path must be a string pointing to a single extension to install; call this function multiple times to install multiple extensions"
-        )
+        msg = "path must be a string pointing to a single extension to install; call this function multiple times to install multiple extensions"
+        raise TypeError(msg)
 
     if not destination:
         destination = basename(normpath(path))
@@ -122,11 +121,12 @@ def develop_labextension(
                 os.symlink(path, full_dest)
             except OSError as e:
                 if platform.platform().startswith("Windows"):
-                    raise OSError(
+                    msg = (
                         "Symlinks can be activated on Windows 10 for Python version 3.8 or higher"
                         " by activating the 'Developer Mode'. That may not be allowed by your administrators.\n"
                         "See https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development"
-                    ) from e
+                    )
+                    raise OSError(msg) from e
                 raise
 
         elif not os.path.islink(full_dest):
@@ -198,10 +198,7 @@ def build_labextension(
     path, logger=None, development=False, static_url=None, source_map=False, core_path=None
 ):
     """Build a labextension in the given path"""
-    if core_path is None:
-        core_path = osp.join(HERE, "staging")
-    else:
-        core_path = str(Path(core_path).resolve())
+    core_path = osp.join(HERE, "staging") if core_path is None else str(Path(core_path).resolve())
 
     ext_path = str(Path(path).resolve())
 
@@ -225,10 +222,7 @@ def watch_labextension(
     path, labextensions_path, logger=None, development=False, source_map=False, core_path=None
 ):
     """Watch a labextension in a given path"""
-    if core_path is None:
-        core_path = osp.join(HERE, "staging")
-    else:
-        core_path = str(Path(core_path).resolve())
+    core_path = osp.join(HERE, "staging") if core_path is None else str(Path(core_path).resolve())
     ext_path = str(Path(path).resolve())
 
     if logger:
@@ -272,8 +266,8 @@ def _ensure_builder(ext_path, core_path):
     with open(osp.join(ext_path, "package.json")) as fid:
         ext_data = json.load(fid)
     dep_version1 = core_data["devDependencies"]["@jupyterlab/builder"]
-    dep_version2 = ext_data.get("devDependencies", dict()).get("@jupyterlab/builder")
-    dep_version2 = dep_version2 or ext_data.get("dependencies", dict()).get("@jupyterlab/builder")
+    dep_version2 = ext_data.get("devDependencies", {}).get("@jupyterlab/builder")
+    dep_version2 = dep_version2 or ext_data.get("dependencies", {}).get("@jupyterlab/builder")
     if dep_version2 is None:
         raise ValueError(
             "Extensions require a devDependency on @jupyterlab/builder@%s" % dep_version1
@@ -292,7 +286,8 @@ def _ensure_builder(ext_path, core_path):
     target = ext_path
     while not osp.exists(osp.join(target, "node_modules", "@jupyterlab", "builder")):
         if osp.dirname(target) == target:
-            raise ValueError("Could not find @jupyterlab/builder")
+            msg = "Could not find @jupyterlab/builder"
+            raise ValueError(msg)
         target = osp.dirname(target)
 
     overlap = _test_overlap(
@@ -335,7 +330,7 @@ def _should_copy(src, dest, logger=None):
     """
     if not os.path.exists(dest):
         return True
-    if os.stat(src).st_mtime - os.stat(dest).st_mtime > 1e-6:
+    if os.stat(src).st_mtime - os.stat(dest).st_mtime > 1e-6:  # noqa
         # we add a fudge factor to work around a bug in python 2.x
         # that was fixed in python 3.x: https://bugs.python.org/issue12904
         if logger:
@@ -388,11 +383,10 @@ def _get_labextension_dir(user=False, sys_prefix=False, prefix=None, labextensio
     ]
     conflicting_set = [f"{n}={v!r}" for n, v in conflicting if v]
     if len(conflicting_set) > 1:
-        raise ArgumentConflict(
-            "cannot specify more than one of user, sys_prefix, prefix, or labextensions_dir, but got: {}".format(
-                ", ".join(conflicting_set)
-            )
+        msg = "cannot specify more than one of user, sys_prefix, prefix, or labextensions_dir, but got: {}".format(
+            ", ".join(conflicting_set)
         )
+        raise ArgumentConflict(msg)
     if user:
         labext = pjoin(jupyter_data_dir(), "labextensions")
     elif sys_prefix:
@@ -406,7 +400,7 @@ def _get_labextension_dir(user=False, sys_prefix=False, prefix=None, labextensio
     return labext
 
 
-def _get_labextension_metadata(module):
+def _get_labextension_metadata(module):  # noqa
     """Get the list of labextension paths associated with a Python module.
 
     Returns a tuple of (the module path,             [{
@@ -423,7 +417,8 @@ def _get_labextension_metadata(module):
     """
     mod_path = osp.abspath(module)
     if not osp.exists(mod_path):
-        raise FileNotFoundError(f"The path `{mod_path}` does not exist.")
+        msg = f"The path `{mod_path}` does not exist."
+        raise FileNotFoundError(msg)
 
     errors = []
 
@@ -453,10 +448,11 @@ def _get_labextension_metadata(module):
                 .strip()
             )
         except subprocess.CalledProcessError:
-            raise FileNotFoundError(
+            msg = (
                 "The Python package `{}` is not a valid package, "
                 "it is missing the `setup.py` file.".format(module)
-            ) from None
+            )
+            raise FileNotFoundError(msg) from None
 
     # Make sure the package is installed
     try:
@@ -483,4 +479,5 @@ def _get_labextension_metadata(module):
         except Exception as exc:
             errors.append(exc)
 
-    raise ModuleNotFoundError(f"There is no labextension at {module}. Errors encountered: {errors}")
+    msg = f"There is no labextension at {module}. Errors encountered: {errors}"
+    raise ModuleNotFoundError(msg)
