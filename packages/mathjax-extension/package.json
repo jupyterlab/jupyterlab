@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/mathjax-extension",
   "version": "4.0.0-alpha.18",
-  "description": "MathJax math renderer for JupyterLab",
+  "description": "A JupyterLab extension providing MathJax Typesetting",
   "keywords": [
     "jupyter",
     "jupyterlab",
