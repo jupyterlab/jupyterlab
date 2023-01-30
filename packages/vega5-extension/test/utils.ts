@@ -19,7 +19,7 @@ export const SCALE_FACTOR_PROP: string[] = [
   'scaleFactor'
 ];
 
-export const VEGALITE4_RENDERER = new RenderedVega({
+export const VEGALITE5_RENDERER = new RenderedVega({
   latexTypesetter: null,
   linkHandler: null,
   mimeType: VEGALITE5_MIME_TYPE,
