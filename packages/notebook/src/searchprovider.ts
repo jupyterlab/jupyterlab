@@ -495,6 +495,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       if (this.widget.content.activeCellIndex !== this._currentProviderIndex!) {
         this.widget.content.activeCellIndex = this._currentProviderIndex!;
       }
+      if (this.widget.content.activeCellIndex === -1) {
+        console.warn('No active cell (no cells or no model), aborting search');
+        return;
+      }
       const activeCell = this.widget.content.activeCell!;
 
       if (!activeCell.inViewport) {
@@ -540,34 +544,18 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this._currentProviderIndex + (reverse ? -1 : 1);
 
         if (loop) {
-          // We loop on all cells, not hit found
-          if (this._currentProviderIndex === startIndex) {
-            break;
-          }
-
           this._currentProviderIndex =
             (this._currentProviderIndex + this._searchProviders.length) %
             this._searchProviders.length;
         }
       }
     } while (
-      0 <= this._currentProviderIndex &&
-      this._currentProviderIndex < this._searchProviders.length
+      loop
+        ? // We looped on all cells, no hit found
+          this._currentProviderIndex !== startIndex
+        : 0 <= this._currentProviderIndex &&
+          this._currentProviderIndex < this._searchProviders.length
     );
-
-    if (loop) {
-      // Search a last time in the first provider as it may contain more
-      // than one matches
-      const searchEngine = this._searchProviders[this._currentProviderIndex];
-      const match = reverse
-        ? await searchEngine.highlightPrevious()
-        : await searchEngine.highlightNext();
-
-      if (match) {
-        await activateNewMatch();
-        return match;
-      }
-    }
 
     this._currentProviderIndex = null;
     return null;
