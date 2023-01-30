@@ -50,6 +50,8 @@ afterAll(async () => {
   await server.shutdown();
 });
 
+const SESSION_SETUP_TIMEOUT = 30000;
+
 describe('@jupyterlab/notebook', () => {
   let rendermime: IRenderMimeRegistry;
 
@@ -58,20 +60,26 @@ describe('@jupyterlab/notebook', () => {
     let sessionContext: ISessionContext;
     let ipySessionContext: ISessionContext;
     let indicator: ExecutionIndicator;
-    beforeAll(async function () {
-      rendermime = utils.defaultRenderMime();
 
-      async function createContext(options?: Partial<SessionContext.IOptions>) {
-        const context = await createSessionContext(options);
-        await context.initialize();
-        await context.session?.kernel?.info;
-        return context;
-      }
+    async function createContext(options?: Partial<SessionContext.IOptions>) {
+      const context = await createSessionContext(options);
+      await context.initialize();
+      await context.session?.kernel?.info;
+      return context;
+    }
+
+    async function setupSessions() {
       [sessionContext, ipySessionContext] = await Promise.all([
         createContext(),
         createContext({ kernelPreference: { name: 'ipython' } })
       ]);
-    }, 30000);
+    }
+
+    beforeAll(async () => {
+      rendermime = utils.defaultRenderMime();
+
+      await setupSessions();
+    }, SESSION_SETUP_TIMEOUT);
 
     beforeEach(async () => {
       widget = new Notebook({
@@ -166,31 +174,38 @@ describe('@jupyterlab/notebook', () => {
         expect(executed).toEqual(expect.arrayContaining([3, 3, 3, 2, 2, 2, 0]));
       });
 
-      it('should reset to idle when kernel gets abruptly terminated', async () => {
-        const model = new NotebookModel();
-        const modelJson = {
-          ...utils.DEFAULT_CONTENT,
-          cells: [killerCellModel, slowCellModel]
-        };
+      it(
+        'should reset to idle when kernel gets abruptly terminated',
+        async () => {
+          const model = new NotebookModel();
+          const modelJson = {
+            ...utils.DEFAULT_CONTENT,
+            cells: [killerCellModel, slowCellModel]
+          };
 
-        model.fromJSON(modelJson);
-        widget.model = model;
+          model.fromJSON(modelJson);
+          widget.model = model;
 
-        widget.activeCellIndex = 0;
-        for (let idx = 0; idx < widget.widgets.length; idx++) {
-          widget.select(widget.widgets[idx]);
-        }
-        let scheduledTally: Array<number> = [];
+          widget.activeCellIndex = 0;
+          for (let idx = 0; idx < widget.widgets.length; idx++) {
+            widget.select(widget.widgets[idx]);
+          }
+          let scheduledTally: Array<number> = [];
 
-        indicator.model.stateChanged.connect(state => {
-          scheduledTally.push(state.executionState(widget)!.scheduledCell.size);
-        });
+          indicator.model.stateChanged.connect(state => {
+            scheduledTally.push(
+              state.executionState(widget)!.scheduledCell.size
+            );
+          });
 
-        let completed = await NotebookActions.run(widget, ipySessionContext);
-        expect(completed).toBe(false);
+          let completed = await NotebookActions.run(widget, ipySessionContext);
+          expect(completed).toBe(false);
 
-        expect(scheduledTally).toEqual(expect.arrayContaining([2, 0]));
-      });
+          expect(scheduledTally).toEqual(expect.arrayContaining([2, 0]));
+          await setupSessions();
+        },
+        SESSION_SETUP_TIMEOUT
+      );
     });
   });
   describe('testProgressCircle', () => {
