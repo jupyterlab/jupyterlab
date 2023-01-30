@@ -32,7 +32,9 @@ export class FileEditorSearchProvider
     super();
   }
 
-  isReadOnly = false;
+  get isReadOnly(): boolean {
+    return this.editor.getOption('readOnly');
+  }
 
   /**
    * Support for options adjusting replacement behavior.
@@ -43,10 +45,16 @@ export class FileEditorSearchProvider
     };
   }
 
+  /**
+   * Text editor
+   */
   get editor() {
     return this.widget.content.editor as CodeMirrorEditor;
   }
 
+  /**
+   * Editor content model
+   */
   get model(): CodeEditor.IModel {
     return this.widget.content.model;
   }

@@ -37,10 +37,16 @@ export class CellSearchProvider
     }
   }
 
+  /**
+   * Text editor
+   */
   protected get editor(): CodeEditor.IEditor | null {
     return this.cell.editor;
   }
 
+  /**
+   * Editor content model
+   */
   protected get model() {
     return this.cell.model;
   }

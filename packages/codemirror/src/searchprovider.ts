@@ -72,7 +72,13 @@ export abstract class EditorSearchProvider<
     return this._cmHandler;
   }
 
+  /**
+   * Text editor
+   */
   protected abstract get editor(): CodeEditor.IEditor | null;
+  /**
+   * Editor content model
+   */
   protected abstract get model(): T;
 
   /**
@@ -355,6 +361,9 @@ export abstract class EditorSearchProvider<
     }
   }
 
+  /**
+   * Update matches
+   */
   protected async updateCodeMirror(content: string) {
     if (this.query !== null) {
       if (this.isActive) {
