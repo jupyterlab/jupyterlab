@@ -8,7 +8,7 @@ import hashlib
 import json
 import xml.etree.ElementTree as ET  # noqa
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Awaitable, Optional, Tuple, Union
 
 from jupyter_server.base.handlers import APIHandler
@@ -67,7 +67,8 @@ class CheckForUpdateABC(abc.ABC):
             or the notification message
             or the notification message and a tuple(label, URL link) for the user to get more information
         """
-        raise NotImplementedError("CheckForUpdateABC.__call__ is not implemented")
+        msg = "CheckForUpdateABC.__call__ is not implemented"
+        raise NotImplementedError(msg)
 
 
 class CheckForUpdate(CheckForUpdateABC):
@@ -165,7 +166,7 @@ class CheckForUpdateHandler(APIHandler):
         out = await self.update_checker()
         if out:
             message, link = (out, ()) if isinstance(out, str) else out
-            now = datetime.now().timestamp() * 1000.0
+            now = datetime.now(tz=timezone.utc).timestamp() * 1000.0
             hash_ = hashlib.sha1(message.encode()).hexdigest()  # noqa: S324
             notification = Notification(
                 message=message,

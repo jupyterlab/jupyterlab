@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/testutils",
-  "version": "4.0.0-alpha.17",
+  "version": "4.0.0-alpha.18",
   "description": "JupyterLab - Test Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -31,11 +31,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.17",
-    "@jupyterlab/apputils": "^4.0.0-alpha.17",
-    "@jupyterlab/notebook": "^4.0.0-alpha.17",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.17",
-    "@jupyterlab/testing": "^4.0.0-alpha.17"
+    "@jupyterlab/application": "^4.0.0-alpha.18",
+    "@jupyterlab/apputils": "^4.0.0-alpha.18",
+    "@jupyterlab/notebook": "^4.0.0-alpha.18",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.18",
+    "@jupyterlab/testing": "^4.0.0-alpha.18"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
