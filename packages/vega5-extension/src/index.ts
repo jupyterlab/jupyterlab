@@ -189,10 +189,10 @@ const extension: IRenderMime.IExtension = {
       defaultFor: ['vega5']
     },
     {
-      name: 'Vega-Lite4',
-      primaryFileType: 'vega-lite4',
-      fileTypes: ['vega-lite3', 'vega-lite4', 'json'],
-      defaultFor: ['vega-lite3', 'vega-lite4']
+      name: 'Vega-Lite5',
+      primaryFileType: 'vega-lite5',
+      fileTypes: ['vega-lite3', 'vega-lite4', 'vega-lite5', 'json'],
+      defaultFor: ['vega-lite3', 'vega-lite4', 'vega-lite5']
     }
   ],
   fileTypes: [
