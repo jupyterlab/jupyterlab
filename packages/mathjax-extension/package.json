@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jupyterlab/jupyter-renderers.git"
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
   "author": {
