@@ -10,11 +10,13 @@ import { ITranslator } from '@jupyterlab/translation';
 import {
   closeIcon,
   consoleIcon,
+  IDisposableMenuItem,
   jupyterIcon,
-  notebookIcon
+  LabIcon,
+  notebookIcon,
+  RankedMenu
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-import { Menu } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 import { CommandIDs } from '.';
@@ -123,43 +125,31 @@ export async function addKernelRunningSessionManager(
     }
   });
 
-  // Add "new" options to the running kernels context menu.
-  let rank = 0;
-  contextMenu.addItem({
-    command: CommandIDs.kernelNewConsole,
-    rank: rank++,
-    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`
-  });
-  contextMenu.addItem({
-    command: CommandIDs.kernelNewNotebook,
-    rank: rank++,
-    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`
-  });
-  contextMenu.addItem({
-    rank: rank++,
-    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`,
-    type: 'separator'
-  });
+  const sessionsItems: IDisposableMenuItem[] = [];
 
-  // Create and populate connected sessions submenu when context menu is opened.
-  const submenu = new Menu({ commands: app.commands });
-  submenu.title.label = trans.__('Connected Sessions…');
-  contextMenu.addItem({
-    rank: rank++,
-    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`,
-    type: 'submenu',
-    submenu
-  });
+  // Populate connected sessions submenu when context menu is opened.
   contextMenu.opened.connect(async () => {
-    const node = app.contextMenuHitTest(test);
-    const id = node?.dataset['context'];
-    if (!id) {
+    const submenu =
+      (contextMenu.menu.items.find(
+        item =>
+          item.type === 'submenu' &&
+          item.submenu?.id === 'jp-contextmenu-connected-sessions'
+      )?.submenu as RankedMenu) ?? null;
+
+    if (!submenu) {
+      // Bail early if the connected session menu is not found
       return;
     }
 
     // Empty the connected sessions submenu.
-    while (submenu.items.length) {
-      submenu.removeItemAt(0);
+    sessionsItems.forEach(item => item.dispose());
+    sessionsItems.length = 0;
+    submenu.clearItems();
+
+    const node = app.contextMenuHitTest(test);
+    const id = node?.dataset['context'];
+    if (!id) {
+      return;
     }
 
     // Populate the submenu with sessions connected to this kernel.
@@ -167,21 +157,11 @@ export async function addKernelRunningSessionManager(
     for (const session of sessions.running()) {
       if (id === session.kernel?.id) {
         const { name, path, type } = session;
-        submenu.addItem({ command, args: { name, path, type } });
+        sessionsItems.push(
+          submenu.addItem({ command, args: { name, path, type } })
+        );
       }
     }
-  });
-
-  // Add shut down option at the bottom.
-  contextMenu.addItem({
-    rank: rank++,
-    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`,
-    type: 'separator'
-  });
-  contextMenu.addItem({
-    command: CommandIDs.kernelShutDown,
-    rank: rank++,
-    selector: `.jp-RunningSessions-item.${ITEM_CLASS}`
   });
 }
 
@@ -239,11 +219,11 @@ namespace Private {
       return children;
     }
 
-    shutdown() {
+    shutdown(): Promise<void> {
       return this.kernels.shutdown(this.kernel.id);
     }
 
-    icon() {
+    icon(): LabIcon | string {
       const { spec } = this;
       if (!spec || !spec.resources) {
         return jupyterIcon;
@@ -255,12 +235,12 @@ namespace Private {
       );
     }
 
-    label() {
+    label(): string {
       const { kernel, spec } = this;
       return spec?.display_name || kernel.name;
     }
 
-    labelTitle() {
+    labelTitle(): string {
       const { trans } = this;
       const { id } = this.kernel;
       const title = [`${this.label()}: ${id}`];
