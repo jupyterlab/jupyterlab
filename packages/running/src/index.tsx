@@ -177,49 +177,51 @@ function Item(props: {
 
   return (
     <>
-      <li
-        onClick={onClick}
-        className={classList.join(' ')}
-        data-context={runningItem.context || ''}
-      >
-        {collapsible &&
-          (collapsed ? (
-            <caretRightIcon.react tag="span" stylesheet="runningItem" />
-          ) : (
-            <caretDownIcon.react tag="span" stylesheet="runningItem" />
-          ))}
-        {typeof icon === 'string' ? (
-          icon ? (
-            <img src={icon} />
-          ) : undefined
-        ) : (
-          <icon.react tag="span" stylesheet="runningItem" />
-        )}
-        <span
-          className={ITEM_LABEL_CLASS}
-          title={title}
-          onClick={runningItem.open && (() => runningItem.open!())}
+      <li>
+        <div
+          className={classList.join(' ')}
+          onClick={onClick}
+          data-context={runningItem.context || ''}
         >
-          {runningItem.label()}
-        </span>
-        {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
-        {runningItem.shutdown && (
-          <ToolbarButtonComponent
-            className={SHUTDOWN_BUTTON_CLASS}
-            icon={shutdownItemIcon}
-            onClick={shutdown}
-            tooltip={shutdownLabel}
+          {collapsible &&
+            (collapsed ? (
+              <caretRightIcon.react tag="span" stylesheet="runningItem" />
+            ) : (
+              <caretDownIcon.react tag="span" stylesheet="runningItem" />
+            ))}
+          {typeof icon === 'string' ? (
+            icon ? (
+              <img src={icon} />
+            ) : undefined
+          ) : (
+            <icon.react tag="span" stylesheet="runningItem" />
+          )}
+          <span
+            className={ITEM_LABEL_CLASS}
+            title={title}
+            onClick={runningItem.open && (() => runningItem.open!())}
+          >
+            {runningItem.label()}
+          </span>
+          {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
+          {runningItem.shutdown && (
+            <ToolbarButtonComponent
+              className={SHUTDOWN_BUTTON_CLASS}
+              icon={shutdownItemIcon}
+              onClick={shutdown}
+              tooltip={shutdownLabel}
+            />
+          )}
+        </div>
+        {collapsible && !collapsed && (
+          <List
+            child={true}
+            runningItems={runningItem.children!}
+            shutdownItemIcon={shutdownItemIcon}
+            translator={translator}
           />
         )}
       </li>
-      {collapsible && !collapsed && (
-        <List
-          child={true}
-          runningItems={runningItem.children!}
-          shutdownItemIcon={shutdownItemIcon}
-          translator={translator}
-        />
-      )}
     </>
   );
 }
