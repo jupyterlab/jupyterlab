@@ -38,7 +38,6 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "docs": "typedoc src",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "watch": "tsc -b --watch"
   },
@@ -49,7 +48,6 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-alpha.18",
-    "npm-run-all": "^4.1.5",
     "rimraf": "~3.0.0",
     "typescript": "~4.7.3"
   },
