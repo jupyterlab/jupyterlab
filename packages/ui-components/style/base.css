@@ -51,6 +51,13 @@ a:hover {
   color: unset;
 }
 
+/* Override Blueprint's _accessibility.scss styles */
+:focus {
+  outline: unset;
+  outline-offset: unset;
+  -moz-outline-radius: unset;
+}
+
 /* Styles for ui-components */
 .jp-Button {
   border-radius: var(--jp-border-radius);
