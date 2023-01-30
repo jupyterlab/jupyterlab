@@ -38,6 +38,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "docs": "typedoc src",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "watch": "tsc -b --watch"
   },
