@@ -25,7 +25,7 @@ repos:
         exclude: .bumpversion.cfg
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.20.0
+    rev: 0.21.0
     hooks:
       - id: check-github-workflows
 
@@ -35,7 +35,7 @@ repos:
       - id: black
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.237
+    rev: v0.0.238
     hooks:
       - id: ruff
         args: ["--fix"]

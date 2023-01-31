@@ -118,7 +118,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.237",
+    "ruff==0.0.238",
     "black[jupyter]==22.12.0"
 ]
 
@@ -257,6 +257,8 @@ ignore = [
 "FBT001", "FBT002", "FBT003",
 # E501 Line too long (158 > 100 characters)
 "E501",
+# PLR0913 Too many arguments to function call
+"PLR0913",
 # SIM105 Use `contextlib.suppress(...)`
 "SIM105",
 ]
