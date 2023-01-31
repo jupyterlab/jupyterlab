@@ -1310,12 +1310,17 @@ export class Notebook extends StaticNotebook {
 
     this._activeCellIndex = newValue;
     const cell = this.widgets[newValue] ?? null;
-    if (cell !== this._activeCell) {
+    const cellChanged = cell !== this._activeCell;
+    if (cellChanged) {
       // Post an update request.
       this.update();
       this._activeCell = cell;
+    }
+
+    if (cellChanged || newValue != oldValue) {
       this._activeCellChanged.emit(cell);
     }
+
     if (this.mode === 'edit' && cell instanceof MarkdownCell) {
       cell.rendered = false;
     }
