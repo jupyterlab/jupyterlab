@@ -1642,16 +1642,20 @@ function activateNotebookHandler(
   }
 
   // Utility function to create a new notebook.
-  const createNew = async (cwd: string, kernelName?: string) => {
+  const createNew = async (
+    cwd: string,
+    kernelId: string,
+    kernelName: string
+  ) => {
     const model = await commands.execute('docmanager:new-untitled', {
       path: cwd,
       type: 'notebook'
     });
-    if (model != undefined) {
+    if (model !== undefined) {
       const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
-        kernel: { name: kernelName }
+        kernel: { id: kernelId, name: kernelName }
       })) as unknown as IDocumentWidget;
       widget.isUntitled = true;
       return widget;
@@ -1677,8 +1681,9 @@ function activateNotebookHandler(
     icon: args => (args['isPalette'] ? undefined : notebookIcon),
     execute: args => {
       const cwd = (args['cwd'] as string) || (defaultBrowser?.model.path ?? '');
+      const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
-      return createNew(cwd, kernelName);
+      return createNew(cwd, kernelId, kernelName);
     }
   });
 
