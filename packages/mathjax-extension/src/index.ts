@@ -12,42 +12,71 @@ import {
 
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
-// MathJax core
-import { mathjax } from 'mathjax-full/js/mathjax';
+import type { MathDocument } from 'mathjax-full/js/core/MathDocument';
 
-// TeX input
-import { TeX } from 'mathjax-full/js/input/tex';
-
-// HTML output
-import { CHTML } from 'mathjax-full/js/output/chtml';
-
-import { TeXFont } from 'mathjax-full/js/output/chtml/fonts/tex';
-
-import { AllPackages } from 'mathjax-full/js/input/tex/AllPackages';
-
-import { SafeHandler } from 'mathjax-full/js/ui/safe/SafeHandler';
-
-import { HTMLHandler } from 'mathjax-full/js/handlers/html/HTMLHandler';
-
-import { browserAdaptor } from 'mathjax-full/js/adaptors/browserAdaptor';
-
-import 'mathjax-full/js/input/tex/require/RequireConfiguration';
-
-mathjax.handlers.register(SafeHandler(new HTMLHandler(browserAdaptor())));
-
-// Override dynamically generated fonts in favor
-// of our font css that is picked up by webpack.
-class emptyFont extends TeXFont {}
-(emptyFont as any).defaultFonts = {};
+enum CommandIDs {
+  copy = 'mathjax:clipboard',
+  scale = 'mathjax:scale'
+}
 
 /**
  * The MathJax Typesetter.
  */
 export class MathJaxTypesetter implements ILatexTypesetter {
   constructor(app: JupyterFrontEnd) {
-    const chtml = new CHTML({
-      font: new emptyFont()
+    app.commands.addCommand(CommandIDs.copy, {
+      execute: (args: any) => {
+        const md = this._mathDocument;
+        const oJax: any = md.outputJax;
+        navigator.clipboard.writeText(oJax.math.math);
+      },
+      label: 'MathJax Copy Latex'
     });
+
+    app.commands.addCommand(CommandIDs.scale, {
+      execute: (args: any) => {
+        const scale = args['scale'] || 1.0;
+        const md = this._mathDocument;
+        md.outputJax.options.scale = scale;
+        md.rerender();
+      },
+      label: args =>
+        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset')
+    });
+  }
+
+  protected async _ensureInitialized() {
+    if (this._initialized) {
+      return;
+    }
+
+    await import('mathjax-full/js/input/tex/require/RequireConfiguration');
+    const { mathjax } = await import('mathjax-full/js/mathjax');
+    const { CHTML } = await import('mathjax-full/js/output/chtml');
+    const { TeX } = await import('mathjax-full/js/input/tex');
+    const { TeXFont } = await import('mathjax-full/js/output/chtml/fonts/tex');
+    const { AllPackages } = await import(
+      'mathjax-full/js/input/tex/AllPackages'
+    );
+    const { SafeHandler } = await import('mathjax-full/js/ui/safe/SafeHandler');
+    const { HTMLHandler } = await import(
+      'mathjax-full/js/handlers/html/HTMLHandler'
+    );
+    const { browserAdaptor } = await import(
+      'mathjax-full/js/adaptors/browserAdaptor'
+    );
+
+    mathjax.handlers.register(SafeHandler(new HTMLHandler(browserAdaptor())));
+
+    class EmptyFont extends TeXFont {
+      defaultFonts = {};
+    }
+
+    const chtml = new CHTML({
+      // Override dynamically generated fonts in favor of our font css
+      font: new EmptyFont()
+    });
+
     const tex = new TeX({
       packages: AllPackages.concat('require'),
       inlineMath: [
@@ -61,45 +90,32 @@ export class MathJaxTypesetter implements ILatexTypesetter {
       processEscapes: true,
       processEnvironments: true
     });
+
     this._mathDocument = mathjax.document(window.document, {
       InputJax: tex,
       OutputJax: chtml
     });
-
-    const mjclipboard = 'mathjax:clipboard';
-    const mjscale = 'mathjax:scale';
-
-    app.commands.addCommand(mjclipboard, {
-      execute: (args: any) => {
-        const md = this._mathDocument;
-        const oJax: any = md.outputJax;
-        navigator.clipboard.writeText(oJax.math.math);
-      },
-      label: 'MathJax Copy Latex'
-    });
-
-    app.commands.addCommand(mjscale, {
-      execute: (args: any) => {
-        const scale = args['scale'] || 1.0;
-        const md = this._mathDocument;
-        md.outputJax.options.scale = scale;
-        md.rerender();
-      },
-      label: args =>
-        'Mathjax Scale ' + (args['scale'] ? `x${args['scale']}` : 'Reset')
-    });
+    this._initialized = true;
   }
 
   /**
    * Typeset the math in a node.
    */
-  typeset(node: HTMLElement): void {
+  async typeset(node: HTMLElement): Promise<void> {
+    try {
+      await this._ensureInitialized();
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+
     this._mathDocument.options.elements = [node];
     this._mathDocument.clear().render();
     delete this._mathDocument.options.elements;
   }
 
-  private _mathDocument: ReturnType<typeof mathjax.document>;
+  protected _initialized: boolean = false;
+  protected _mathDocument: MathDocument<any, any, any>;
 }
 
 /**
