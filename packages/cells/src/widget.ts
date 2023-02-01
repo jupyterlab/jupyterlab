@@ -1961,9 +1961,9 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   }
 
   /**
-   * Renderer
+   * Markdown rendered container
    */
-  get renderer(): IRenderMime.IRenderer {
+  get renderer(): Widget {
     return this._renderer;
   }
 
@@ -2092,11 +2092,20 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   /**
    * Render an input instead of the text editor.
    */
-  protected renderInput(widget: Widget): void {
-    this.addClass(RENDERED_CLASS);
+  protected renderInput(): void {
     if (!this.placeholder && !this.isDisposed) {
-      this.renderCollapseButtons(widget);
-      this.inputArea!.renderInput(widget);
+      // If you customize this method, you will need to update the
+      // content of this_renderer when updating it. You should not
+      // replace it by a new widget.
+      // Something like `this._renderer.node.innerHTML = '';`
+      this._updateRenderedInput()
+        .then(() => {
+          this.renderCollapseButtons(this._renderer);
+          this.inputArea!.renderInput(this._renderer);
+        })
+        .catch(reason => {
+          console.error('Failed to render the markdown input:\n', reason);
+        });
     }
   }
 
@@ -2104,7 +2113,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Show the text editor instead of rendered input.
    */
   protected showEditor(): void {
-    this.removeClass(RENDERED_CLASS);
     if (!this.placeholder && !this.isDisposed) {
       this.inputArea!.showEditor();
       // if this is going to be a heading, place the cursor accordingly
@@ -2150,12 +2158,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    */
   private async _handleRendered(): Promise<void> {
     if (!this._rendered) {
+      this.removeClass(RENDERED_CLASS);
       this.showEditor();
     } else {
+      this.addClass(RENDERED_CLASS);
       // TODO: It would be nice for the cell to provide a way for
       // its consumers to hook into when the rendering is done.
-      await this._updateRenderedInput();
-      this.renderInput(this._renderer);
+      this.renderInput();
     }
   }
 
@@ -2174,7 +2183,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     if (text !== this._prevText) {
       const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
       this._prevText = text;
-      return this._renderer.renderModel(mimeModel);
+      return (this._renderer as IRenderMime.IRenderer).renderModel(mimeModel);
     }
     return Promise.resolve();
   }
@@ -2193,13 +2202,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
     });
   }
 
+  protected _renderer: Widget;
   private _headingsCache: Cell.IHeading[] | null = null;
   private _headingCollapsed: boolean;
   private _headingCollapsedChanged = new Signal<MarkdownCell, boolean>(this);
   private _monitor: ActivityMonitor<ICellModel, void>;
   private _numberChildNodes: number;
   private _prevText = '';
-  private _renderer: IRenderMime.IRenderer;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _renderedChanged = new Signal<this, boolean>(this);
@@ -2223,6 +2232,7 @@ export namespace MarkdownCell {
      * Show editor for read-only Markdown cells.
      */
     showEditorForReadOnlyMarkdown?: boolean;
+
   }
 
   /**
