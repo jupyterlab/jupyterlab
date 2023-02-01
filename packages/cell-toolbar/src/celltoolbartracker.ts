@@ -54,7 +54,7 @@ export class CellToolbarTracker implements IDisposable {
       // Wait one frame (at 60 fps) for the panel to render the first cell, then display the cell toolbar on it if possible.
       setTimeout(() => {
         this._onActiveCellChanged(panel.content);
-      }, 1000/60);
+      }, 1000 / 60);
     });
 
     // Check whether the toolbar should be rendered upon a layout change
