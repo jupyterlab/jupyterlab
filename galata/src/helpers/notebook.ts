@@ -1,15 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { INotebookRunCallback } from '@jupyterlab/galata/lib/extension';
 import * as nbformat from '@jupyterlab/nbformat';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { ElementHandle, Page } from '@playwright/test';
 import * as path from 'path';
+import { ContentsHelper } from '../contents';
 import { galata } from '../galata';
-import { INotebookRunCallback } from '../inpage/tokens';
 import * as Utils from '../utils';
 import { ActivityHelper } from './activity';
-import { ContentsHelper } from '../contents';
 import { FileBrowserHelper } from './filebrowser';
 import { MenuHelper } from './menu';
 
@@ -169,7 +169,7 @@ export class NotebookHelper {
 
     if (toolbar) {
       const itemIndex = await this.page.evaluate(async (itemId: string) => {
-        return window.galataip.getNotebookToolbarItemIndex(itemId);
+        return window.galata.getNotebookToolbarItemIndex(itemId);
       }, itemId);
 
       return this.getToolbarItemByIndex(itemIndex);
@@ -209,12 +209,12 @@ export class NotebookHelper {
   async activate(name: string): Promise<boolean> {
     if (await this.activity.activateTab(name)) {
       await this.page.evaluate(async () => {
-        const galataip = window.galataip;
-        const nbPanel = galataip.app.shell.currentWidget as NotebookPanel;
+        const galata = window.galata;
+        const nbPanel = galata.app.shell.currentWidget as NotebookPanel;
         await nbPanel.sessionContext.ready;
         // Assuming that if the session is ready, the kernel is ready also for now and commenting out this line
         // await nbPanel.session.kernel.ready;
-        galataip.app.shell.activateById(nbPanel.id);
+        galata.app.shell.activateById(nbPanel.id);
       });
 
       return true;
@@ -234,7 +234,7 @@ export class NotebookHelper {
     }
 
     await this.page.evaluate(async () => {
-      await window.galataip.saveActiveNotebook();
+      await window.galata.saveActiveNotebook();
     });
 
     return true;
@@ -251,7 +251,7 @@ export class NotebookHelper {
     }
 
     await this.page.evaluate(async () => {
-      const app = window.galataip.app;
+      const app = window.galata.app;
       const nbPanel = app.shell.currentWidget as NotebookPanel;
       await nbPanel.context.revert();
     });
@@ -270,7 +270,7 @@ export class NotebookHelper {
     }
 
     await this.page.evaluate(() => {
-      window.galataip.resetExecutionCount();
+      window.galata.resetExecutionCount();
     });
     await this.menu.clickMenuItem('Run>Run All Cells');
     await this.waitForRun();
@@ -342,7 +342,7 @@ export class NotebookHelper {
               }
             } as INotebookRunCallback);
 
-      await window.galataip.runActiveNotebookCellByCell(callbacks);
+      await window.galata.runActiveNotebookCellByCell(callbacks);
     }, callbackName);
 
     return true;
@@ -362,7 +362,7 @@ export class NotebookHelper {
     do {
       await this.page.waitForTimeout(20);
       done = await this.page.evaluate(cellIdx => {
-        return window.galataip.haveBeenExecuted(cellIdx);
+        return window.galata.haveBeenExecuted(cellIdx);
       }, cellIndex);
     } while (!done);
   }
@@ -979,7 +979,7 @@ export class NotebookHelper {
    */
   async isCellSelected(cellIndex: number): Promise<boolean> {
     return await this.page.evaluate((cellIndex: number) => {
-      return window.galataip.isNotebookCellSelected(cellIndex);
+      return window.galata.isNotebookCellSelected(cellIndex);
     }, cellIndex);
   }
 
@@ -994,7 +994,7 @@ export class NotebookHelper {
     }
 
     await this.page.evaluate(() => {
-      return window.galataip.deleteNotebookCells();
+      return window.galata.deleteNotebookCells();
     });
 
     return true;
@@ -1021,6 +1021,25 @@ export class NotebookHelper {
     });
 
     return await this.setCell(numCells, cellType, source);
+  }
+
+  /**
+   * Insert a new cell to the currently active notebook
+   *
+   * @returns Action success status
+   */
+  async newCell(): Promise<boolean> {
+    if (!(await this.isAnyActive())) {
+      return false;
+    }
+
+    const numCells = await this.getCellCount();
+    await this.clickToolbarItem('insert');
+    await Utils.waitForCondition(async (): Promise<boolean> => {
+      return (await this.getCellCount()) === numCells + 1;
+    });
+
+    return true;
   }
 
   /**
@@ -1162,12 +1181,50 @@ export class NotebookHelper {
     }
 
     await this.page.evaluate(cellIdx => {
-      window.galataip.resetExecutionCount(cellIdx);
+      window.galata.resetExecutionCount(cellIdx);
     }, cellIndex);
     await this.page.keyboard.press(
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );
     await this.waitForRun(cellIndex);
+
+    return true;
+  }
+
+  /**
+   * Set the input source of a cell
+   *
+   * @param cellIndex Cell index
+   * @param source Source
+   * @returns Action success status
+   */
+  async writeCell(cellIndex: number, source: string): Promise<boolean> {
+    if (!(await this.isAnyActive())) {
+      return false;
+    }
+
+    const cellType = await this.getCellType(cellIndex);
+
+    if (
+      !(await this.isCellSelected(cellIndex)) &&
+      !(await this.selectCells(cellIndex))
+    ) {
+      return false;
+    }
+
+    await this.enterCellEditingMode(cellIndex);
+
+    const keyboard = this.page.keyboard;
+    await keyboard.press('Control+A');
+    // give CodeMirror time to style properly
+    await keyboard.type(source, { delay: 0 });
+
+    await this.leaveCellEditingMode(cellIndex);
+
+    // give CodeMirror time to style properly
+    if (cellType === 'code') {
+      await this.page.waitForTimeout(500);
+    }
 
     return true;
   }

@@ -11,9 +11,16 @@
  */
 export { expect } from '@playwright/test';
 
+export type {
+  IGalataHelpers,
+  IGalataInpage,
+  INotebookRunCallback,
+  IPluginNameToInterfaceMap,
+  IWaitForSelectorOptions
+} from '@jupyterlab/galata/lib/extension';
+
 export * from './benchmarkReporter';
 export * from './galata';
 export * from './global';
-export * from './inpage/tokens';
 export * from './fixtures';
 export * from './jupyterlabpage';

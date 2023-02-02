@@ -15,6 +15,7 @@
     "examples/**/*",
     "galata/.eslintrc.js",
     "galata/*.config.js",
+    "galata/extension/**/*",
     "galata/src/**/*",
     "galata/test/**/*",
     "galata/style/**/*",

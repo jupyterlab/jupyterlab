@@ -655,8 +655,18 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
             if not self.extensions_in_dev_mode:
-                self.labextensions_path = []
-                self.extra_labextensions_path = []
+                # Add an exception for @jupyterlab/galata-extension
+                galata_extension = pjoin(HERE, "galata")
+                self.labextensions_path = (
+                    [galata_extension]
+                    if galata_extension in map(os.path.abspath, self.labextensions_path)
+                    else []
+                )
+                self.extra_labextensions_path = (
+                    [galata_extension]
+                    if galata_extension in map(os.path.abspath, self.extra_labextensions_path)
+                    else []
+                )
         elif self.core_mode:
             dev_static_dir = ujoin(HERE, "static")
             self.static_paths = [dev_static_dir]

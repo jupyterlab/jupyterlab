@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata/lib/extension';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ElementHandle, Page, Response } from '@playwright/test';
-import * as path from 'path';
 import { ContentsHelper } from './contents';
 import {
   ActivityHelper,
@@ -19,7 +19,6 @@ import {
   StyleHelper,
   ThemeHelper
 } from './helpers';
-import { IPluginNameToInterfaceMap, PLUGIN_ID_SETTINGS } from './inpage/tokens';
 import * as Utils from './utils';
 
 /**
@@ -175,8 +174,9 @@ export interface IJupyterLabPage {
        * - `'domcontentloaded'` - consider operation to be finished when the `DOMContentLoaded` event is fired.
        * - `'load'` - consider operation to be finished when the `load` event is fired.
        * - `'networkidle'` - consider operation to be finished when there are no network connections for at least `500` ms.
+       * - `'commit'` - consider operation to be finished when network response is received and the document started loading.
        */
-      waitUntil?: 'load' | 'domcontentloaded' | 'networkidle';
+      waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' | 'commit';
     }
   ): Promise<Response | null>;
 
@@ -542,13 +542,16 @@ export class JupyterLabPage implements IJupyterLabPage {
     // Reset the layout
     await this.page.evaluate(
       async ({ pluginId }) => {
-        const settingRegistry = (await window.galataip.getPlugin(
+        const settingRegistry = (await window.galata.getPlugin(
           pluginId
         )) as ISettingRegistry;
         const SHELL_ID = '@jupyterlab/application-extension:shell';
         await settingRegistry.remove(SHELL_ID, 'layout');
       },
-      { pluginId: PLUGIN_ID_SETTINGS as keyof IPluginNameToInterfaceMap }
+      {
+        pluginId:
+          '@jupyterlab/apputils-extension:settings' as keyof IPluginNameToInterfaceMap
+      }
     );
     // show Files tab on sidebar
     await this.sidebar.openTab('filebrowser');
@@ -645,20 +648,20 @@ export class JupyterLabPage implements IJupyterLabPage {
    */
   protected async hookHelpersUp(): Promise<void> {
     // Insert Galata in page helpers
-    await this.page.addScriptTag({
-      path: path.resolve(__dirname, './lib-inpage/inpage.js')
-    });
+    // await this.page.addScriptTag({
+    //   path: path.resolve(__dirname, './lib-inpage/inpage.js')
+    // });
 
     const galataipDefined = await this.page.evaluate(() => {
-      return Promise.resolve(typeof window.galataip === 'object');
+      return Promise.resolve(typeof window.galata === 'object');
     });
 
     if (!galataipDefined) {
-      throw new Error('Failed to inject galataip object into browser context');
+      throw new Error('Failed to activate galata extension');
     }
 
     const jlabAccessible = await this.page.evaluate(() => {
-      return Promise.resolve(typeof window.galataip.app === 'object');
+      return Promise.resolve(typeof window.galata.app === 'object');
     });
 
     if (!jlabAccessible) {
