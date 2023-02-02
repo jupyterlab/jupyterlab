@@ -1436,13 +1436,6 @@
     y-protocols "^1.0.5"
     yjs "^13.5.40"
 
-"@jupyterlab/nbformat@^3.0.0 || ^4.0.0-alpha.15":
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/nbformat/-/nbformat-3.5.0.tgz#ea3d926b90db9ff2da988db1ea3c8ac1dc3ba9fa"
-  integrity sha512-tQ0MCJ2NSlGTYM7auiL2vdqirIv39Pd2/gfFd4XdHClJgvT65b7XkNDOwBv6mqIuhNdHo3Mc3RXiODTo1tle7Q==
-  dependencies:
-    "@lumino/coreutils" "^1.11.0"
-
 "@lerna/add@4.0.0":
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/@lerna/add/-/add-4.0.0.tgz#c36f57d132502a57b9e7058d1548b7a565ef183f"
