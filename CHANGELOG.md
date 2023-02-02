@@ -4578,19 +4578,6 @@ closed.
 
 #### Key Features:
 
-- [No longer in beta](#no-longer-in-beta)
-- [Workspaces](#workspaces)
-- [Menu items](#menu-items)
-- [Keyboard shortcuts](#keyboard-shortcuts)
-- [Command palette items](#command-palette-items)
-- [Settings](#settings)
-- [Larger file uploads](#larger-file-uploads)
-- [Extension management and installation](#extension-management-and-installation)
-- [Interface changes](#interface-changes)
-- [Renderers](#renderers)
-- [Changes for developers](#changes-for-developers)
-- [Other fixes](#other-fixes)
-
 #### No longer in beta
 
 In JupyterLab 0.33, we removed the "Beta" label to better signal that
