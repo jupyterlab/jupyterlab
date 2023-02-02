@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/running-extension",
-  "version": "3.6.0-rc.1",
+  "version": "3.6.0",
   "description": "JupyterLab - Running Sessions Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,13 +36,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.6.0-rc.1",
-    "@jupyterlab/coreutils": "^5.6.0-rc.1",
-    "@jupyterlab/docregistry": "^3.6.0-rc.1",
-    "@jupyterlab/running": "^3.6.0-rc.1",
-    "@jupyterlab/services": "^6.6.0-rc.1",
-    "@jupyterlab/translation": "^3.6.0-rc.1",
-    "@jupyterlab/ui-components": "^3.6.0-rc.1",
+    "@jupyterlab/application": "^3.6.0",
+    "@jupyterlab/coreutils": "^5.6.0",
+    "@jupyterlab/docregistry": "^3.6.0",
+    "@jupyterlab/running": "^3.6.0",
+    "@jupyterlab/services": "^6.6.0",
+    "@jupyterlab/translation": "^3.6.0",
+    "@jupyterlab/ui-components": "^3.6.0",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/signaling": "^1.10.0",
     "@lumino/widgets": "^1.37.1"

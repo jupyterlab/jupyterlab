@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/cell-toolbar-extension",
-  "version": "3.6.0-rc.1",
+  "version": "3.6.0",
   "description": "Extension for cell toolbar adapted from jlab-enhanced-cell-toolbar",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -39,14 +39,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.6.0-rc.1",
-    "@jupyterlab/apputils": "^3.6.0-rc.1",
-    "@jupyterlab/cell-toolbar": "^3.6.0-rc.1",
-    "@jupyterlab/settingregistry": "^3.6.0-rc.1",
-    "@jupyterlab/translation": "^3.6.0-rc.1"
+    "@jupyterlab/application": "^3.6.0",
+    "@jupyterlab/apputils": "^3.6.0",
+    "@jupyterlab/cell-toolbar": "^3.6.0",
+    "@jupyterlab/settingregistry": "^3.6.0",
+    "@jupyterlab/translation": "^3.6.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.6.0-rc.1",
+    "@jupyterlab/testutils": "^3.6.0",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
