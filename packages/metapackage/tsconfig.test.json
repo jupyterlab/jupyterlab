@@ -42,12 +42,6 @@
       "path": "../codemirror-extension"
     },
     {
-      "path": "../collaboration"
-    },
-    {
-      "path": "../collaboration-extension"
-    },
-    {
       "path": "../completer"
     },
     {
@@ -79,9 +73,6 @@
     },
     {
       "path": "../docmanager-extension"
-    },
-    {
-      "path": "../docprovider"
     },
     {
       "path": "../docregistry"
