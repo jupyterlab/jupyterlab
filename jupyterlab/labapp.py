@@ -479,10 +479,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         {"LabApp": {"extensions_in_dev_mode": True}},
         "Load prebuilt extensions in dev-mode.",
     )
-    flags["collaborative"] = (
-        {"LabApp": {"collaborative": True}},
-        "Whether to enable collaborative mode.",
-    )
 
     subcommands = {
         "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -561,8 +557,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         config=True,
         help="Whether to expose the global app instance to browser via window.jupyterapp",
     )
-
-    collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
     news_url = Unicode(
         "https://jupyterlab.github.io/assets/feed.xml",
@@ -688,7 +682,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         page_config["token"] = self.serverapp.token
         page_config["exposeAppInBrowser"] = self.expose_app_in_browser
         page_config["quitButton"] = self.serverapp.quit_button
-        page_config["collaborative"] = self.collaborative
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
 
         # Client-side code assumes notebookVersion is a JSON-encoded string

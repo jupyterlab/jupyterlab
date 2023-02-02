@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig } from '@jupyterlab/coreutils';
 import {
   Dialog,
   ISessionContext,
@@ -67,7 +66,7 @@ export class Context<
     this._model = this._factory.createNew({
       languagePreference: lang,
       sharedModel,
-      collaborationEnabled: PageConfig.getOption('collaborative') === 'true'
+      collaborationEnabled: sharedFactory === null ? false : true
     });
 
     this._readyPromise = manager.ready.then(() => {
