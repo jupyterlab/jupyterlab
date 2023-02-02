@@ -115,7 +115,8 @@ export class GalataInpage implements IGalataInpage {
    *
    * @param event Event type
    * @param listener Event listener
-   */ on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+   */
+  on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   on(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
@@ -171,7 +172,7 @@ export class GalataInpage implements IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  once(even: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  once(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   /**
    * Connect a listener to the next new or updated Jupyter notification event.
    *

@@ -134,7 +134,7 @@ test.describe('listeners', () => {
   test('should listen to JupyterLab notification', async ({ page }) => {
     await page.evaluate(() => {
       window.galata.on('notification', n => {
-        // We need to slightly wait before dimissing otherwise
+        // We need to slightly wait before dismissing otherwise
         // the toast is not yet displayed and won't be removed when the notification
         // is dismissed.
         setTimeout(() => {
@@ -160,7 +160,7 @@ test.describe('listeners', () => {
   test('should stop listening to JupyterLab notification', async ({ page }) => {
     await page.evaluate(() => {
       const callback = n => {
-        // We need to slightly wait before dimissing otherwise
+        // We need to slightly wait before dismissing otherwise
         // the toast is not yet displayed and won't be removed when the notification
         // is dismissed.
         setTimeout(() => {
@@ -203,7 +203,7 @@ test.describe('listeners', () => {
   }) => {
     await page.evaluate(() => {
       const callback = n => {
-        // We need to slightly wait before dimissing otherwise
+        // We need to slightly wait before dismissing otherwise
         // the toast is not yet displayed and won't be removed when the notification
         // is dismissed.
         setTimeout(() => {

@@ -211,6 +211,70 @@ steps were successful. Its content will look like that:
 > This will only work if the authentication is stored in a cookie and you can access the Jupyter
 > app directly when that cookie is set.
 
+## Helpers
+
+### Listen to dialogs
+
+You can add a listener that will be triggered when a JupyterLab dialog is shown:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.on('dialog', (dialog: Dialog<unknown> | null) => {
+    // Use the dialog
+    // You can for instance reject it
+    // dialog.reject()
+  });
+});
+```
+
+The listener will be called when a dialog is started and when it is closed (in that case `dialog == null`).
+
+You can stop listening to the event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.off('dialog', listener);
+});
+```
+
+Or you can listen to a single event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.once('dialog', listener);
+});
+```
+
+### Listen to notification
+
+You can add a listener that will be triggered when a JupyterLab dialog is shown:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.on('notification', (notification: Notification.INotification) => {
+    // Use the notification
+  });
+});
+```
+
+The listener will be called when a notification is created or updated.
+
+You can stop listening to the event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.off('notification', listener);
+});
+```
+
+Or you can listen to a single event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.once('notification', listener);
+});
+```
+
 ## Fixtures
 
 Here are the new test fixture introduced by Galata on top of [Playwright fixtures](https://playwright.dev/docs/api/class-fixtures).
