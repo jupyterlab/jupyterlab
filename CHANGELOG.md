@@ -166,6 +166,7 @@
 <!-- <END NEW CHANGELOG ENTRY> -->
 
 ## v3.5
+
 ### 3.5.3
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.5.2...38557b9cc49aca310264476c9c9d9f003891dcb2))
