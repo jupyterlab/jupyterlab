@@ -6,6 +6,7 @@
 import dataclasses
 import json
 import os
+import sys
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
@@ -479,6 +480,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         {"LabApp": {"extensions_in_dev_mode": True}},
         "Load prebuilt extensions in dev-mode.",
     )
+    flags["collaborative"] = (
+        {"LabApp": {"collaborative": True}},
+        "Whether to enable collaborative mode.",
+    )
 
     subcommands = {
         "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -557,6 +562,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         config=True,
         help="Whether to expose the global app instance to browser via window.jupyterapp",
     )
+
+    collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
 
     news_url = Unicode(
         "https://jupyterlab.github.io/assets/feed.xml",
@@ -833,6 +840,26 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     def initialize(self, argv=None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""
         super().initialize()
+        if self.collaborative:
+            try:
+                pass
+            except Exception:
+                self.log.critical("")
+                self.log.critical(
+                    "*********************************************************************************"
+                )
+                self.log.critical(
+                    "To enable real-time collaboration, you must install the extension jupyterlab_rtc."
+                )
+                self.log.critical("You can install it using pip for example:")
+                self.log.critical("")
+                self.log.critical("\tpython -m pip install jupyterlab_rtc")
+                self.log.critical("")
+                self.log.critical(
+                    "*********************************************************************************"
+                )
+                self.log.critical("")
+                sys.exit(1)
 
 
 # -----------------------------------------------------------------------------
