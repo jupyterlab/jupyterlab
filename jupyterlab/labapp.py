@@ -842,7 +842,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         super().initialize()
         if self.collaborative:
             try:
-                pass
+                import jupyterlab_rtc  # noqa
             except Exception:
                 self.log.critical("")
                 self.log.critical(

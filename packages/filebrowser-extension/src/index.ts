@@ -307,7 +307,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     // Manually restore and load the default file browser.
     const defaultBrowser = fileBrowserFactory.createFileBrowser('filebrowser', {
       auto: false,
-      restore: false,
+      restore: false
     });
     void Private.restoreBrowser(
       defaultBrowser,
