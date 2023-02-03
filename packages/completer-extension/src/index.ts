@@ -24,7 +24,7 @@ import type { FieldProps } from '@rjsf/core';
 
 import { renderAvailableProviders } from './renderer';
 
-const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:tracker';
+const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:manager';
 
 const defaultProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/completer-extension:base-service',
