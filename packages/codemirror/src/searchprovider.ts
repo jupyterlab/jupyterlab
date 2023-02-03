@@ -365,15 +365,13 @@ export abstract class EditorSearchProvider<
    * Update matches
    */
   protected async updateCodeMirror(content: string) {
-    if (this.query !== null) {
-      if (this.isActive) {
-        this.cmHandler.matches = await TextSearchEngine.search(
-          this.query,
-          content
-        );
-      } else {
-        this.cmHandler.matches = [];
-      }
+    if (this.query !== null && this.isActive) {
+      this.cmHandler.matches = await TextSearchEngine.search(
+        this.query,
+        content
+      );
+    } else {
+      this.cmHandler.matches = [];
     }
   }
 
@@ -441,6 +439,7 @@ export class CodeMirrorSearchHighlighter {
                     m.position + m.text.length
                   )
                 ),
+                // filter out old marks
                 filter: () => false
               });
             } else {
