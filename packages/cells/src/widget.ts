@@ -1646,7 +1646,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         } cell${this._numberChildNodes > 1 ? 's' : ''} hidden`;
         // If the heading isn't collapsed, remove the button
       } else {
-        for (const el of expandButton) {
+        for (const el of Array.from(expandButton)) {
           this.node.removeChild(el);
         }
       }

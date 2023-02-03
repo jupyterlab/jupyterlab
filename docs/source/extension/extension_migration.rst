@@ -1,12 +1,24 @@
 .. _extension_migration:
 
 Extension Migration Guide
-================================================
+=========================
 
 .. _extension_migration_3.5_3.6:
 
 JupyterLab 3.5 to 3.6
 ---------------------
+
+AsyncIterable Support
+^^^^^^^^^^^^^^^^^^^^^
+
+For the events service, we are using a JavaScript feature introduced in ES2018. If your code is
+using TypeScript with ES2017 target (as JupyterLab 3.6), you will have either to update your
+target to ES2018 or to add ``"ES2018"`` to `TypeScript lib option <https://www.typescriptlang.org/tsconfig#lib>`_.
+
+.. note::
+
+    JupyterLab 3.6.0 was released with an updated target "ES2018". We strongly advice updating to 3.6.1
+    that revert the target to "ES2017".
 
 Real-Time Collaboration
 ^^^^^^^^^^^^^^^^^^^^^^^

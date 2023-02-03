@@ -51,7 +51,7 @@ function getRenderedHTMLHeadings(
     );
   }
   let headings: INotebookHeading[] = [];
-  for (const el of nodes) {
+  for (const el of Array.from(nodes)) {
     if (el.classList.contains('jp-toc-ignore')) {
       // skip this element if a special class name is included
       continue;
