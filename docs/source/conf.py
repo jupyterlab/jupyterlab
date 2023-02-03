@@ -383,7 +383,7 @@ def setup(app):
         try:
             shutil.rmtree(str(Path(app.srcdir) / SNIPPETS_FOLDER))
         except Exception:
-            pass
+            pass  # noqa
 
         for f in tmp_files:
             f.unlink()

@@ -484,15 +484,15 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         "Whether to enable collaborative mode.",
     )
 
-    subcommands = dict(
-        build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
-        clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
-        path=(LabPathApp, LabPathApp.description.splitlines()[0]),
-        paths=(LabPathApp, LabPathApp.description.splitlines()[0]),
-        workspace=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
-        workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
-        licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0]),
-    )
+    subcommands = {
+        "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
+        "clean": (LabCleanApp, LabCleanApp.description.splitlines()[0]),
+        "path": (LabPathApp, LabPathApp.description.splitlines()[0]),
+        "paths": (LabPathApp, LabPathApp.description.splitlines()[0]),
+        "workspace": (LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        "workspaces": (LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        "licenses": (LabLicensesApp, LabLicensesApp.description.splitlines()[0]),
+    }
 
     default_url = Unicode("/lab", config=True, help="The default URL to redirect to from `/`")
 
@@ -667,7 +667,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
-    def initialize_handlers(self):
+    def initialize_handlers(self):  # noqa
 
         handlers = []
 

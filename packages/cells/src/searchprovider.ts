@@ -658,7 +658,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     if (cell.rendered && this.matchesCount > 0) {
       // Unrender the cell if there are matches within the cell
       this._unrenderedByHighligh = true;
+      const waitForRendered = signalToPromise(cell.renderedChanged);
       cell.rendered = false;
+      await waitForRendered;
     }
 
     match = await super.highlightPrevious();
