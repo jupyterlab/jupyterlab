@@ -618,6 +618,40 @@
     y-protocols "^1.0.5"
     yjs "^13.5.40"
 
+"@jupyterlab/collaboration-extension@^4.0.0-alpha.18", "@jupyterlab/collaboration-extension@~4.0.0-alpha.18":
+  version "4.0.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/@jupyterlab%2fcollaboration-extension/-/collaboration-extension-4.0.0-alpha.18.tgz#ed065ea9ff1d7b0ecdf292640dd9634f7c70e4c1"
+  integrity sha512-OG0rzHijiCszDMiVEcWmIGKLdZqUnGw0KEtcLd6AocJW3dQ9AlVN4p+r1ml9kkLF2BXnEPlMtJu4hQk9G3kXVw==
+  dependencies:
+    "@jupyterlab/application" "^4.0.0-alpha.18"
+    "@jupyterlab/apputils" "^4.0.0-alpha.18"
+    "@jupyterlab/collaboration" "^4.0.0-alpha.18"
+    "@jupyterlab/coreutils" "^6.0.0-alpha.18"
+    "@jupyterlab/services" "^7.0.0-alpha.18"
+    "@jupyterlab/statedb" "^4.0.0-alpha.18"
+    "@jupyterlab/translation" "^4.0.0-alpha.18"
+    "@jupyterlab/ui-components" "^4.0.0-alpha.33"
+    "@lumino/widgets" "^2.0.0-alpha.6"
+    y-protocols "^1.0.5"
+    y-websocket "^1.3.15"
+    yjs "^13.5.40"
+
+"@jupyterlab/collaboration@^4.0.0-alpha.18", "@jupyterlab/collaboration@~4.0.0-alpha.18":
+  version "4.0.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/@jupyterlab%2fcollaboration/-/collaboration-4.0.0-alpha.18.tgz#c3c487dae1322f96ec19dcf587d2d91efce674df"
+  integrity sha512-aQxBApzt5xyEgAp6X74l2bplgyGUpUKXDYA+nH7v2zxsFz8dRD7fzVB7i5dBsVLBgqcV6DIj5S/4PE5diM1Q6Q==
+  dependencies:
+    "@jupyterlab/apputils" "^4.0.0-alpha.18"
+    "@jupyterlab/coreutils" "^6.0.0-alpha.18"
+    "@jupyterlab/services" "^7.0.0-alpha.18"
+    "@jupyterlab/ui-components" "^4.0.0-alpha.33"
+    "@lumino/coreutils" "^2.0.0-alpha.6"
+    "@lumino/virtualdom" "^2.0.0-alpha.6"
+    "@lumino/widgets" "^2.0.0-alpha.6"
+    react "^18.2.0"
+    y-protocols "^1.0.5"
+    yjs "^13.5.40"
+
 "@jupyterlab/completer-extension@^4.0.0-alpha.18", "@jupyterlab/completer-extension@~4.0.0-alpha.18":
   version "4.0.0-alpha.18"
   resolved "https://registry.yarnpkg.com/@jupyterlab%2fcompleter-extension/-/completer-extension-4.0.0-alpha.18.tgz#feeceb6ae6dad465e11ae4c2ab8b4c13569ac882"
@@ -842,6 +876,20 @@
     "@lumino/widgets" "^2.0.0-alpha.6"
     react "^18.2.0"
 
+"@jupyterlab/docprovider@^4.0.0-alpha.18", "@jupyterlab/docprovider@~4.0.0-alpha.18":
+  version "4.0.0-alpha.18"
+  resolved "https://registry.yarnpkg.com/@jupyterlab%2fdocprovider/-/docprovider-4.0.0-alpha.18.tgz#f8d2ec35e9b2d105fe1b1ce5b26edbc2939dae74"
+  integrity sha512-krcQJhOG9p8jJrpiRn+hNLUz3vv94Jt/g82mnvHWd6vPPPd8qg6viYSHPZDTgpMWRV07yT+ePWJuBhhqhCirbg==
+  dependencies:
+    "@jupyter/ydoc" "^0.3.1"
+    "@jupyterlab/coreutils" "^6.0.0-alpha.18"
+    "@jupyterlab/services" "^7.0.0-alpha.18"
+    "@lumino/coreutils" "^2.0.0-alpha.6"
+    "@lumino/disposable" "^2.0.0-alpha.6"
+    "@lumino/signaling" "^2.0.0-alpha.6"
+    y-protocols "^1.0.5"
+    y-websocket "^1.3.15"
+    yjs "^13.5.40"
 
 "@jupyterlab/docregistry@^4.0.0-alpha.18", "@jupyterlab/docregistry@~4.0.0-alpha.18":
   version "4.0.0-alpha.18"
@@ -932,6 +980,7 @@
     "@jupyterlab/apputils" "^4.0.0-alpha.18"
     "@jupyterlab/coreutils" "^6.0.0-alpha.18"
     "@jupyterlab/docmanager" "^4.0.0-alpha.18"
+    "@jupyterlab/docprovider" "^4.0.0-alpha.18"
     "@jupyterlab/docregistry" "^4.0.0-alpha.18"
     "@jupyterlab/filebrowser" "^4.0.0-alpha.18"
     "@jupyterlab/services" "^7.0.0-alpha.18"
@@ -1406,6 +1455,8 @@
     "@jupyterlab/codeeditor" "^4.0.0-alpha.18"
     "@jupyterlab/codemirror" "^4.0.0-alpha.18"
     "@jupyterlab/codemirror-extension" "^4.0.0-alpha.18"
+    "@jupyterlab/collaboration" "^4.0.0-alpha.18"
+    "@jupyterlab/collaboration-extension" "^4.0.0-alpha.18"
     "@jupyterlab/completer" "^4.0.0-alpha.18"
     "@jupyterlab/completer-extension" "^4.0.0-alpha.18"
     "@jupyterlab/console" "^4.0.0-alpha.18"
@@ -1417,6 +1468,7 @@
     "@jupyterlab/debugger-extension" "^4.0.0-alpha.18"
     "@jupyterlab/docmanager" "^4.0.0-alpha.18"
     "@jupyterlab/docmanager-extension" "^4.0.0-alpha.18"
+    "@jupyterlab/docprovider" "^4.0.0-alpha.18"
     "@jupyterlab/docregistry" "^4.0.0-alpha.18"
     "@jupyterlab/documentsearch" "^4.0.0-alpha.18"
     "@jupyterlab/documentsearch-extension" "^4.0.0-alpha.18"
