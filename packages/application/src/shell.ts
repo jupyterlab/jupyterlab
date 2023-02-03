@@ -108,7 +108,7 @@ export namespace ILabShell {
   };
 
   /**
-   * An arguments object for the changed signals.
+   * An arguments object for the chan-ged signals.
    */
   export type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
 
@@ -1618,6 +1618,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     sender: any,
     args: FocusTracker.IChangedArgs<Widget>
   ): void {
+    console.log('active changed');
+    console.log(sender);
+    console.log(args);
     if (args.newValue) {
       args.newValue.title.className += ` ${ACTIVE_CLASS}`;
     }
@@ -1639,6 +1642,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   ): void {
     if (args.newValue) {
       args.newValue.title.className += ` ${CURRENT_CLASS}`;
+      args.newValue.title.className += ` ${ACTIVE_CLASS}`;
+      args.newValue.activate();
+      this._activeChanged.emit(args);
     }
     if (args.oldValue) {
       args.oldValue.title.className = args.oldValue.title.className.replace(
