@@ -211,7 +211,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
 
     // connect the document, but do not open it as the adapter will handle this
     // after registering all features
-    await this.connectDocument(this.virtualDocument, false);
+    await this.connectDocument(this.virtualDocument!, false);
 
     this.editor.model.mimeTypeChanged.connect(this.reloadConnection, this);
   }

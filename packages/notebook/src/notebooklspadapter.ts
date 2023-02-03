@@ -352,7 +352,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
 
     // connect the document, but do not open it as the adapter will handle this
     // after registering all features
-    this.connectDocument(this.virtualDocument, false).catch(console.warn);
+    this.connectDocument(this.virtualDocument!, false).catch(console.warn);
 
     this.widget.context.sessionContext.kernelChanged.connect(
       this.onKernelChanged,
@@ -427,7 +427,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
    * @param  pos - Position in the virtual document.
    */
   private _getCellAt(pos: IVirtualPosition): Cell {
-    let editor = this.virtualDocument.getEditorAtVirtualLine(pos);
+    let editor = this.virtualDocument!.getEditorAtVirtualLine(pos);
     return this._editorToCell.get(editor)!;
   }
 
