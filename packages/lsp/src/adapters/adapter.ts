@@ -362,7 +362,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   // but also reloads the connection; used during file rename (or when it was moved)
   protected reloadConnection(): void {
     // ignore premature calls (before the editor was initialized)
-    if (this.virtualDocument == null) {
+    if (this.virtualDocument === null) {
       return;
     }
 
@@ -387,7 +387,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     state: DocumentRegistry.SaveState
   ): void {
     // ignore premature calls (before the editor was initialized)
-    if (this.virtualDocument == null) {
+    if (this.virtualDocument === null) {
       return;
     }
 

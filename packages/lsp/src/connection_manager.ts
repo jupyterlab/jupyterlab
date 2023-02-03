@@ -210,12 +210,10 @@ export class DocumentConnectionManager
   ): void {
     this.adapters.set(path, adapter);
     adapter.disposed.connect(() => {
-      // If the virtual document has not yet been initialized or
-      // if it has been disposed, bail.
       if (adapter.virtualDocument) {
         this.documents.delete(adapter.virtualDocument.uri);
-        this.adapters.delete(path);
       }
+      this.adapters.delete(path);
     });
   }
 
@@ -654,7 +652,7 @@ namespace Private {
     capabilities: ClientCapabilities
   ): Promise<LSPConnection> {
     let connection = _connections.get(languageServerId);
-    if (connection == null) {
+    if (connection === undefined) {
       const socket = new WebSocket(uris.socket);
       const connection = new LSPConnection({
         languageId: language,
