@@ -652,7 +652,7 @@ namespace Private {
     capabilities: ClientCapabilities
   ): Promise<LSPConnection> {
     let connection = _connections.get(languageServerId);
-    if (connection === undefined) {
+    if (!connection) {
       const socket = new WebSocket(uris.socket);
       const connection = new LSPConnection({
         languageId: language,
