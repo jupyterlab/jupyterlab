@@ -1588,7 +1588,7 @@ namespace Private {
       let selectedIndex = 0;
       if (currentKernelDisplayName) {
         // Select current kernel by default.
-        selectedIndex = [...node.options].findIndex(
+        selectedIndex = Array.from(node.options).findIndex(
           option => option.text === currentKernelDisplayName
         );
         selectedIndex = Math.max(selectedIndex, 0);
