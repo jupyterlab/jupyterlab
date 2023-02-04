@@ -325,10 +325,7 @@ for i in range(R.value()):
 
 
 def parse(version, loose):
-    if loose:
-        r = regexp[LOOSE]
-    else:
-        r = regexp[FULL]
+    r = regexp[LOOSE] if loose else regexp[FULL]
     m = r.search(version)
     if m:
         return semver(version, loose)
@@ -712,10 +709,7 @@ class Comparator:
             self.value = self.operator + self.semver.version
 
     def parse(self, comp):
-        if self.loose:
-            r = regexp[COMPARATORLOOSE]
-        else:
-            r = regexp[COMPARATOR]
+        r = regexp[COMPARATORLOOSE] if self.loose else regexp[COMPARATOR]
         logger.debug("parse comp=%s", comp)
         m = r.search(comp)
 
@@ -782,10 +776,7 @@ class Range:
         loose = self.loose
         logger.debug("range %s %s", range_, loose)
         #  `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
-        if loose:
-            hr = regexp[HYPHENRANGELOOSE]
-        else:
-            hr = regexp[HYPHENRANGE]
+        hr = regexp[HYPHENRANGELOOSE] if loose else regexp[HYPHENRANGE]
 
         range_ = hr.sub(
             hyphen_replace,
@@ -808,10 +799,7 @@ class Range:
 
         #  At this point, the range is completely trimmed and
         #  ready to be split into comparators.
-        if loose:
-            comp_re = regexp[COMPARATORLOOSE]
-        else:
-            comp_re = regexp[COMPARATOR]
+        comp_re = regexp[COMPARATORLOOSE] if loose else regexp[COMPARATOR]
         set_ = re.split(
             r"\s+", " ".join([parse_comparator(comp, loose) for comp in range_.split(" ")])
         )
@@ -828,10 +816,7 @@ class Range:
         if isinstance(version, string_type):
             version = make_semver(version, loose=self.loose)
 
-        for e in self.set:
-            if test_set(e, version):
-                return True
-        return False
+        return any(test_set(e, version) for e in self.set)
 
 
 #  Mostly just for testing and legacy API reasons
@@ -877,10 +862,7 @@ def replace_tildes(comp, loose):
 
 
 def replace_tilde(comp, loose):
-    if loose:
-        r = regexp[TILDELOOSE]
-    else:
-        r = regexp[TILDE]
+    r = regexp[TILDELOOSE] if loose else regexp[TILDE]
 
     def repl(mob):
         _ = mob.group(0)
@@ -918,10 +900,7 @@ def replace_carets(comp, loose):
 
 
 def replace_caret(comp, loose):
-    if loose:
-        r = regexp[CARETLOOSE]
-    else:
-        r = regexp[CARET]
+    r = regexp[CARETLOOSE] if loose else regexp[CARET]
 
     def repl(mob):
         m0 = mob.group(0)
@@ -1021,10 +1000,7 @@ def replace_xranges(comp, loose):
 
 def replace_xrange(comp, loose):
     comp = comp.strip()
-    if loose:
-        r = regexp[XRANGELOOSE]
-    else:
-        r = regexp[XRANGE]
+    r = regexp[XRANGELOOSE] if loose else regexp[XRANGE]
 
     def repl(mob):
         ret = mob.group(0)
@@ -1166,7 +1142,7 @@ def max_satisfying(versions, range_, loose=False):
     max_ = None
     max_sv = None
     for v in versions:
-        if range_ob.test(v):  # satisfies(v, range_, loose=loose)
+        if range_ob.test(v):  # noqa  # satisfies(v, range_, loose=loose)
             if max_ is None or max_sv.compare(v) == -1:  # compare(max, v, true)
                 max_ = v
                 max_sv = make_semver(max_, loose=loose)
