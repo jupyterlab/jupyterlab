@@ -37,7 +37,7 @@ import { Signal } from '@lumino/signaling';
 
 import { renderServerSetting } from './renderer';
 
-import type { FieldProps } from '@rjsf/core';
+import type { FieldProps } from '@rjsf/utils';
 const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
   activate,
   id: '@jupyterlab/lsp-extension:plugin',

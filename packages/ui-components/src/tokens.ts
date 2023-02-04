@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@lumino/coreutils';
-import type { Field, Widget } from '@rjsf/core';
+import type { Field, Widget } from '@rjsf/utils';
 
 /**
  * Form renderer interface.

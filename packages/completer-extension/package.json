@@ -42,7 +42,7 @@
     "@jupyterlab/settingregistry": "^4.0.0-alpha.18",
     "@jupyterlab/ui-components": "^4.0.0-alpha.33",
     "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@rjsf/core": "^4.2.0",
+    "@rjsf/utils": "^5.0.2",
     "react": "^18.2.0"
   },
   "devDependencies": {

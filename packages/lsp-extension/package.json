@@ -44,7 +44,7 @@
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/polling": "^2.0.0-alpha.6",
     "@lumino/signaling": "^2.0.0-alpha.6",
-    "@rjsf/core": "^4.2.0",
+    "@rjsf/utils": "^5.0.2",
     "react": "^18.2.0"
   },
   "devDependencies": {

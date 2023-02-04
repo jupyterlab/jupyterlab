@@ -6,7 +6,7 @@
  */
 
 import { NotebookTools } from '@jupyterlab/notebook';
-import { BaseSettings } from '@jupyterlab/settingregistry';
+import { BaseSettings, ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
@@ -77,7 +77,9 @@ export class MetadataFormWidget
     const metadataKeys: string[] = [];
 
     // MetadataKey from schema.
-    for (let metadataKey of Object.keys(this._metadataSchema.properties)) {
+    for (let metadataKey of Object.keys(
+      this._metadataSchema.properties || JSONExt.emptyObject
+    )) {
       metadataKeys.push(metadataKey);
     }
 
@@ -367,19 +369,21 @@ export class MetadataFormWidget
     const cell = this.notebookTools.activeCell;
     if (cell == undefined) return;
 
-    const formProperties: MetadataForm.IMetadataSchema = JSONExt.deepCopy(
+    const formProperties: ISettingRegistry.IMetadataSchema = JSONExt.deepCopy(
       this._metadataSchema
     );
 
     const formData = {} as JSONObject;
 
-    for (let metadataKey of Object.keys(this._metadataSchema.properties)) {
+    for (let metadataKey of Object.keys(
+      this._metadataSchema.properties || JSONExt.emptyObject
+    )) {
       // Do not display the field if it's Notebook metadata and the notebook model is null.
       if (
         this._metaInformation[metadataKey]?.level === 'notebook' &&
         this._notebookModelNull
       ) {
-        delete formProperties.properties[metadataKey];
+        delete formProperties.properties![metadataKey];
         continue;
       }
 
@@ -390,7 +394,7 @@ export class MetadataFormWidget
           cell.model.type
         )
       ) {
-        delete formProperties.properties[metadataKey];
+        delete formProperties.properties![metadataKey];
         continue;
       }
 
@@ -441,7 +445,7 @@ export class MetadataFormWidget
 
   protected translator: ITranslator;
   private _form: FormWidget | undefined;
-  private _metadataSchema: MetadataForm.IMetadataSchema;
+  private _metadataSchema: ISettingRegistry.IMetadataSchema;
   private _metaInformation: MetadataForm.IMetaInformation;
   private _uiSchema: MetadataForm.IUiSchema;
   private _trans: TranslationBundle;

@@ -20,7 +20,7 @@ import {
   IFormRenderer,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
-import type { FieldProps } from '@rjsf/core';
+import type { FieldProps } from '@rjsf/utils';
 
 import { renderAvailableProviders } from './renderer';
 
