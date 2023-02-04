@@ -1638,25 +1638,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     args: FocusTracker.IChangedArgs<Widget>
   ): void {
     if (args.newValue) {
-      const additionalClasses = `${
-        args.newValue.title.className.includes(CURRENT_CLASS)
-          ? ''
-          : ` ${CURRENT_CLASS}`
-      }${
-        args.newValue.title.className.includes(ACTIVE_CLASS)
-          ? ''
-          : ` ${ACTIVE_CLASS}`
-      }`;
-      console.log(additionalClasses);
-      args.newValue.title.className = `${args.newValue.title.className}${additionalClasses}`;
+      args.newValue.title.className = `${args.newValue.title.className} ${CURRENT_CLASS} ${ACTIVE_CLASS}`;
       args.newValue.activate();
       this._activeChanged.emit(args);
     }
     if (args.oldValue) {
-      args.oldValue.title.className = args.oldValue.title.className.replace(
-        CURRENT_CLASS,
-        ''
-      );
+      args.oldValue.title.className = args.oldValue.title.className
+        .replace(CURRENT_CLASS, '')
+        .replace(ACTIVE_CLASS, '');
     }
     this._currentChanged.emit(args);
     this._onLayoutModified();
