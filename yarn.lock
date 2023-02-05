@@ -11686,10 +11686,20 @@ typedoc@~0.22.10:
     minimatch "^5.1.0"
     shiki "^0.10.1"
 
-"typescript@^3 || ^4", typescript@~4.7.3:
+"typescript@^3 || ^4":
+  version "4.9.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.4.tgz#a2a3d2756c079abda241d75f149df9d561091e78"
+  integrity sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==
+
+typescript@~4.7.3:
   version "4.7.4"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.7.4.tgz#1a88596d1cf47d59507a1bcdfb5b9dfe4d488235"
   integrity sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==
+
+typescript@~5.0.0-beta:
+  version "5.0.0-dev.20230204"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.0.0-dev.20230204.tgz#ed40e18638c4d6e539f37361b0d49d39fe040650"
+  integrity sha512-+7FKfJ6M6n0mveLqxFzi6z1ZJfqUX5QDJFBJqS0r1WP76v32AwGoZRBaYalyd7l8ph4k5qXoMmDCexrF/sVnyQ==
 
 typestyle@^2.0.4:
   version "2.4.0"
