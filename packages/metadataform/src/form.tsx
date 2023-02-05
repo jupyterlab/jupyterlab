@@ -9,7 +9,6 @@ import { ReactWidget } from '@jupyterlab/apputils';
 import { FormComponent } from '@jupyterlab/ui-components';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { IChangeEvent } from '@rjsf/core';
-import validatorAjv8 from '@rjsf/validator-ajv8';
 import { JSONSchema7 } from 'json-schema';
 import React from 'react';
 
@@ -39,7 +38,7 @@ export class FormWidget extends ReactWidget {
     };
     return (
       <FormComponent
-        validator={validatorAjv8}
+        validator={this._props.validator}
         schema={this._props.properties as JSONSchema7}
         formData={this._props.formData as Record<string, any>}
         formContext={formContext}

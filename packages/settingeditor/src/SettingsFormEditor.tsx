@@ -14,8 +14,7 @@ import {
 import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
 import { IChangeEvent } from '@rjsf/core';
-import validatorAjv8 from '@rjsf/validator-ajv8';
-import { Field, UiSchema } from '@rjsf/utils';
+import type { Field, UiSchema, ValidatorType } from '@rjsf/utils';
 import { JSONSchema7 } from 'json-schema';
 import React from 'react';
 
@@ -78,6 +77,11 @@ export namespace SettingsFormEditor {
      * List of strings that match search value.
      */
     filteredValues: string[] | null;
+
+    /**
+     * The form validator.
+     */
+    validator: ValidatorType;
   }
 
   export interface IState {
@@ -116,7 +120,7 @@ export class SettingsFormEditor extends React.Component<
 > {
   constructor(props: SettingsFormEditor.IProps) {
     super(props);
-    const { settings } = props;
+    const { settings, validator } = props;
     this._formData = settings.composite;
     this.state = {
       isModified: settings.isModified,
@@ -129,6 +133,7 @@ export class SettingsFormEditor extends React.Component<
     };
     this.handleChange = this.handleChange.bind(this);
     this._debouncer = new Debouncer(this.handleChange);
+    this._validator = validator;
   }
 
   componentDidMount(): void {
@@ -226,7 +231,7 @@ export class SettingsFormEditor extends React.Component<
         </div>
         {!this.props.isCollapsed && (
           <FormComponent
-            validator={validatorAjv8}
+            validator={this._validator}
             schema={this.state.filteredSchema as JSONSchema7}
             formData={this._formData}
             uiSchema={this.state.uiSchema}
@@ -304,4 +309,5 @@ export class SettingsFormEditor extends React.Component<
 
   private _debouncer: Debouncer<void, any>;
   private _formData: any;
+  private _validator: ValidatorType;
 }

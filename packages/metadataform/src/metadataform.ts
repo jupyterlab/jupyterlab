@@ -23,6 +23,7 @@ import {
 } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { SingletonLayout, Widget } from '@lumino/widgets';
+import type { ValidatorType } from '@rjsf/utils';
 
 import { MetadataForm } from './token';
 import { FormWidget } from './form';
@@ -47,6 +48,7 @@ export class MetadataFormWidget
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._updatingMetadata = false;
+    this._validator = options.validator;
     const layout = (this.layout = new SingletonLayout());
 
     const node = document.createElement('div');
@@ -437,7 +439,8 @@ export class MetadataFormWidget
       formData: formData,
       metadataFormWidget: this,
       showModified: this._showModified,
-      pluginId: this._pluginId
+      pluginId: this._pluginId,
+      validator: this._validator
     });
   }
 
@@ -450,6 +453,7 @@ export class MetadataFormWidget
   private _placeholder: Widget;
   private _updatingMetadata: boolean;
   private _pluginId: string | undefined;
+  private _validator: ValidatorType;
   private _showModified: boolean;
   private _notebookModelNull: boolean = false;
 }

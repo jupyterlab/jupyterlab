@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@lumino/coreutils';
-import type { Field, Widget } from '@rjsf/utils';
+import type { Field, ValidatorType, Widget } from '@rjsf/utils';
 
 /**
  * Form renderer interface.
@@ -52,6 +52,29 @@ export interface IFormRendererRegistry {
  */
 export const IFormRendererRegistry = new Token<IFormRendererRegistry>(
   '@jupyterlab/ui-components:IFormRendererRegistry'
+);
+
+/**
+ * A provider for form validators.
+ */
+export interface IFormValidator {
+  /**
+   * Get a promise for the currently-configured form validator.
+   */
+  getValidator(): Promise<ValidatorType>;
+}
+
+export namespace IFormValidator {
+  export interface IFactory {
+    (): Promise<ValidatorType>;
+  }
+}
+
+/**
+ * The token for the form validator.
+ */
+export const IFormValidator = new Token<IFormValidator>(
+  '@jupyterlab/ui-components:IFormValidator'
 );
 
 /**

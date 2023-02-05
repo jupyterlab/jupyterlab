@@ -1,0 +1,4 @@
+{
+  "out": "../../docs/api/validator-ajv8-extension",
+  "theme": "../../typedoc-theme"
+}

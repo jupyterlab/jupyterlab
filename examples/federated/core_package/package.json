@@ -79,6 +79,7 @@
     "@jupyterlab/translation-extension": "~4.0.0-alpha.18",
     "@jupyterlab/ui-components": "^4.0.0-alpha.17",
     "@jupyterlab/ui-components-extension": "~4.0.0-alpha.18",
+    "@jupyterlab/validator-ajv8-extension": "~4.0.0-alpha.33",
     "@jupyterlab/vdom-extension": "~4.0.0-alpha.18",
     "@jupyterlab/vega5-extension": "~4.0.0-alpha.18",
     "@lumino/algorithm": "^2.0.0-alpha.6",
@@ -137,6 +138,7 @@
     "@jupyterlab/translation": "^4.0.0-alpha.18",
     "@jupyterlab/translation-extension": "^4.0.0-alpha.18",
     "@jupyterlab/ui-components-extension": "^4.0.0-alpha.18",
+    "@jupyterlab/validator-ajv8-extension": "^4.0.0-alpha.33",
     "@jupyterlab/vdom-extension": "^4.0.0-alpha.18",
     "@jupyterlab/vega5-extension": "^4.0.0-alpha.18"
   },
@@ -246,6 +248,7 @@
       "@jupyterlab/tooltip-extension",
       "@jupyterlab/translation-extension",
       "@jupyterlab/ui-components-extension",
+      "@jupyterlab/validator-ajv8-extension",
       "@jupyterlab/vdom-extension",
       "@jupyterlab/vega5-extension"
     ]

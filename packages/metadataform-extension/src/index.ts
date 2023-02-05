@@ -12,7 +12,10 @@ import {
 import { INotebookTools } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import { IFormRendererRegistry } from '@jupyterlab/ui-components';
+import {
+  IFormRendererRegistry,
+  IFormValidator
+} from '@jupyterlab/ui-components';
 import { JSONExt, PartialJSONArray } from '@lumino/coreutils';
 
 import {
@@ -30,7 +33,8 @@ namespace Private {
     registry: ISettingRegistry,
     notebookTools: INotebookTools,
     translator: ITranslator,
-    formComponentRegistry: IFormRendererRegistry
+    formComponentRegistry: IFormRendererRegistry,
+    formValidator: IFormValidator
   ): Promise<IMetadataFormProvider> {
     let canonical: ISettingRegistry.ISchema | null;
     let loaded: { [name: string]: ISettingRegistry.IMetadataForm[] } = {};
@@ -246,18 +250,22 @@ namespace Private {
         label: schema.label ?? schema.id
       });
 
+      // load the validator
+      const validator = await formValidator.getValidator();
+
       // Creates the tool.
       const tool = new MetadataFormWidget({
-        metadataSchema: metadataSchema,
-        metaInformation: metaInformation,
-        uiSchema: uiSchema,
+        metadataSchema,
+        metaInformation,
+        uiSchema,
         pluginId: schema._origin,
-        translator: translator,
-        showModified: schema.showModified
+        translator,
+        showModified: schema.showModified,
+        validator
       });
 
       // Adds the form to the section.
-      notebookTools.addItem({ section: schema.id, tool: tool });
+      notebookTools.addItem({ section: schema.id, tool });
 
       metadataForms.add(schema.id, tool);
     }
@@ -274,6 +282,7 @@ const metadataForm: JupyterFrontEndPlugin<IMetadataFormProvider> = {
   requires: [
     INotebookTools,
     ITranslator,
+    IFormValidator,
     IFormRendererRegistry,
     ISettingRegistry
   ],
@@ -282,6 +291,7 @@ const metadataForm: JupyterFrontEndPlugin<IMetadataFormProvider> = {
     app: JupyterFrontEnd,
     notebookTools: INotebookTools,
     translator: ITranslator,
+    formValidator: IFormValidator,
     componentsRegistry: IFormRendererRegistry,
     settings: ISettingRegistry
   ): Promise<IMetadataFormProvider> => {
@@ -290,7 +300,8 @@ const metadataForm: JupyterFrontEndPlugin<IMetadataFormProvider> = {
       settings,
       notebookTools,
       translator,
-      componentsRegistry
+      componentsRegistry,
+      formValidator
     );
   }
 };

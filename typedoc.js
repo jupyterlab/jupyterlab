@@ -95,6 +95,7 @@ const packages = [
   'translation',
   'ui-components-extension',
   'ui-components',
+  'validator-ajv8-extension',
   'vdom-extension',
   'vdom',
   'vega5-extension'

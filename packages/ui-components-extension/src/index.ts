@@ -42,3 +42,5 @@ const rendererRegistryPlugin: JupyterFrontEndPlugin<IFormRendererRegistry> = {
 };
 
 export default [labiconManager, rendererRegistryPlugin];
+
+/** Provides */

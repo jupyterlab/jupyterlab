@@ -4,6 +4,7 @@
  */
 
 import { JSONExt } from '@lumino/coreutils';
+import validatorAjv8 from '@rjsf/validator-ajv8';
 import { Context } from '@jupyterlab/docregistry';
 import {
   INotebookModel,
@@ -80,7 +81,8 @@ describe('metadataform/form simple', () => {
     const metadataForm = new MetadataFormWidget({
       metadataSchema: JSONExt.deepCopy(schema),
       metaInformation: metaInformation,
-      pluginId: 'test-plugin'
+      pluginId: 'test-plugin',
+      validator: validatorAjv8
     });
     // add the metadataForm in a section of the notebookTools.
     notebookTools.addSection({ sectionName: 'testSchema', tool: metadataForm });
@@ -102,7 +104,8 @@ describe('metadataform/form simple', () => {
     const metadataForm = new MetadataFormWidget({
       metadataSchema: schema,
       metaInformation: metaInformation,
-      pluginId: 'test-plugin'
+      pluginId: 'test-plugin',
+      validator: validatorAjv8
     });
     metadataForm.updateMetadata({}, true);
     const node = metadataForm.node as HTMLElement;
@@ -307,7 +310,8 @@ describe('metadataform/form conditional', () => {
     const metadataForm = new MetadataFormWidget({
       metadataSchema: JSONExt.deepCopy(schema),
       metaInformation: metaInformation,
-      pluginId: 'test-plugin'
+      pluginId: 'test-plugin',
+      validator: validatorAjv8
     });
     // add the metadataForm in a section of the notebookTools.
     notebookTools.addSection({ sectionName: 'testSchema', tool: metadataForm });

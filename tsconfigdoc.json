@@ -302,6 +302,9 @@
       "path": "./packages/ui-components-extension"
     },
     {
+      "path": "./packages/validator-ajv8-extension"
+    },
+    {
       "path": "./packages/vdom"
     },
     {

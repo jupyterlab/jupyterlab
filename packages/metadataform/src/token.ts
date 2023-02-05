@@ -14,6 +14,7 @@ import {
   ReadonlyJSONObject,
   Token
 } from '@lumino/coreutils';
+import type { ValidatorType } from '@rjsf/utils';
 import { MetadataFormWidget } from './metadataform';
 
 export namespace MetadataForm {
@@ -83,6 +84,11 @@ export namespace MetadataForm {
     metaInformation: IMetaInformation;
 
     /**
+     * The form validator.
+     */
+    validator: ValidatorType;
+
+    /**
      * The uiSchema built when loading schemas.
      */
     uiSchema?: IUiSchema;
@@ -141,6 +147,10 @@ export namespace MetadataForm {
      * Whether to show the modified field from default value.
      */
     showModified: boolean;
+    /**
+     * The validator for the form.
+     */
+    validator: ValidatorType;
 
     /**
      * The plugin ID.

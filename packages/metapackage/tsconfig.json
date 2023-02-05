@@ -286,6 +286,9 @@
       "path": "../ui-components-extension"
     },
     {
+      "path": "../validator-ajv8-extension"
+    },
+    {
       "path": "../vdom"
     },
     {

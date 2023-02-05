@@ -246,6 +246,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/ui-components-extension',
     '@jupyterlab/collaboration',
     '@jupyterlab/collaboration-extension',
+    '@jupyterlab/validator-ajv8-extension',
     '@jupyterlab/vdom',
     '@jupyterlab/vdom-extension',
     '@jupyterlab/vega5-extension'
@@ -267,6 +268,10 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/theme-dark-extension': [
     '@jupyterlab/application',
     '@jupyterlab/apputils'
+  ],
+  '@jupyterlab/validator-ajv8-extension': [
+    '@jupyterlab/ui-components',
+    '@jupyterlab/application'
   ]
 };
 

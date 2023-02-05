@@ -22,6 +22,7 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 import {
   CommandToolbarButton,
   IFormRendererRegistry,
+  IFormValidator,
   launchIcon,
   Toolbar
 } from '@jupyterlab/ui-components';
@@ -64,6 +65,7 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     ISettingRegistry,
     IStateDB,
     ITranslator,
+    IFormValidator,
     IFormRendererRegistry,
     ILabStatus
   ],
@@ -81,6 +83,7 @@ function activate(
   registry: ISettingRegistry,
   state: IStateDB,
   translator: ITranslator,
+  formValidator: IFormValidator,
   editorRegistry: IFormRendererRegistry,
   status: ILabStatus,
   restorer: ILayoutRestorer | null,
@@ -112,6 +115,8 @@ function activate(
       return;
     }
 
+    const validator = await formValidator.getValidator();
+
     const key = plugin.id;
 
     const { SettingsEditor } = await import('@jupyterlab/settingeditor');
@@ -128,6 +133,7 @@ function activate(
           '@jupyterlab/mainmenu-extension:plugin'
         ],
         translator,
+        validator,
         status,
         query: args.query as string
       })

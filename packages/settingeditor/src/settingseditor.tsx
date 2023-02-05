@@ -14,6 +14,7 @@ import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { SplitPanel } from '@lumino/widgets';
+import type { ValidatorType } from '@rjsf/utils';
 import React from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsPanel } from './settingspanel';
@@ -29,6 +30,7 @@ export class SettingsEditor extends SplitPanel {
       spacing: 1
     });
     this.translator = options.translator || nullTranslator;
+    this.validator = options.validator;
     this._status = options.status;
     const list = (this._list = new PluginList({
       registry: options.registry,
@@ -70,6 +72,7 @@ export class SettingsEditor extends SplitPanel {
             updateFilterSignal={this._list.updateFilterSignal}
             updateDirtyState={this.setDirtyState}
             translator={this.translator}
+            validator={this.validator}
             initialFilter={this._list.filter}
           />
         );
@@ -148,6 +151,7 @@ export class SettingsEditor extends SplitPanel {
   }
 
   protected translator: ITranslator;
+  protected validator: ValidatorType;
   private _clearDirty: IDisposable | null = null;
   private _status: ILabStatus;
   private _dirty: boolean = false;
@@ -169,6 +173,11 @@ export namespace SettingsEditor {
      * Form component registry
      */
     editorRegistry: IFormRendererRegistry;
+
+    /**
+     * Form validator
+     */
+    validator: ValidatorType;
 
     /**
      * The state database key for the editor's state management.

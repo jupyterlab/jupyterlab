@@ -7,7 +7,7 @@ import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
-import type { Field } from '@rjsf/utils';
+import type { Field, ValidatorType } from '@rjsf/utils';
 import React, { useEffect, useState } from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
@@ -40,6 +40,11 @@ export interface ISettingsPanelProps {
    * Translator object
    */
   translator: ITranslator;
+
+  /**
+   * The form validator.
+   */
+  validator: ValidatorType;
 
   /**
    * Callback to update the plugin list to display plugins with
@@ -80,6 +85,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   updateDirtyState,
   updateFilterSignal,
   translator,
+  validator,
   initialFilter
 }: ISettingsPanelProps): JSX.Element => {
   const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
@@ -209,6 +215,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
               }}
               onSelect={onSelect}
               translator={translator}
+              validator={validator}
             />
           </div>
         );
