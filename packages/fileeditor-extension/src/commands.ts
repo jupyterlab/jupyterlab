@@ -274,7 +274,13 @@ export namespace Commands {
           });
       },
       label: args => {
-        if ((args.delta ?? 0) > 0) {
+        const delta = Number(args['delta']);
+        if (Number.isNaN(delta)) {
+          throw new Error(
+            `${CommandIDs.changeFontSize}: delta arg must be a number`
+          );
+        }
+        if (delta > 0) {
           return args.isMenu
             ? trans.__('Increase Text Editor Font Size')
             : trans.__('Increase Font Size');
