@@ -6,7 +6,7 @@
  */
 
 import { NotebookTools } from '@jupyterlab/notebook';
-import { BaseSettings, ISettingRegistry } from '@jupyterlab/settingregistry';
+import { BaseSettings } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
@@ -77,9 +77,7 @@ export class MetadataFormWidget
     const metadataKeys: string[] = [];
 
     // MetadataKey from schema.
-    for (let metadataKey of Object.keys(
-      this._metadataSchema.properties || JSONExt.emptyObject
-    )) {
+    for (let metadataKey of Object.keys(this._metadataSchema.properties)) {
       metadataKeys.push(metadataKey);
     }
 
@@ -369,7 +367,7 @@ export class MetadataFormWidget
     const cell = this.notebookTools.activeCell;
     if (cell == undefined) return;
 
-    const formProperties: ISettingRegistry.IMetadataSchema = JSONExt.deepCopy(
+    const formProperties: MetadataForm.IMetadataSchema = JSONExt.deepCopy(
       this._metadataSchema
     );
 
@@ -445,7 +443,7 @@ export class MetadataFormWidget
 
   protected translator: ITranslator;
   private _form: FormWidget | undefined;
-  private _metadataSchema: ISettingRegistry.IMetadataSchema;
+  private _metadataSchema: MetadataForm.IMetadataSchema;
   private _metaInformation: MetadataForm.IMetaInformation;
   private _uiSchema: MetadataForm.IUiSchema;
   private _trans: TranslationBundle;
