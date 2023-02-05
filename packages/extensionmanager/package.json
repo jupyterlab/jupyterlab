@@ -54,7 +54,7 @@
     "@types/semver": "^7.3.3",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",
-    "typescript": "~4.7.3"
+    "typescript": "~5.0.0-beta"
   },
   "publishConfig": {
     "access": "public"
