@@ -2,8 +2,8 @@
 // Copyright (c) Bloomberg Finance LP.
 // Distributed under the terms of the Modified BSD License.
 
-// This export the type only from extension/token.ts
-//  Required for typedoc to be happy
+// This export the types (and only the types) from extension/token.ts
+// Required for typedoc to be happy otherwise we could have used `from '@jupyterlab/extension/lib/token';`
 
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type { IRouter } from '@jupyterlab/application';
@@ -16,10 +16,28 @@ import type {
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-/**
- * Galata in-page extension helpers.
- */
-export const PLUGIN_ID_GALATA_HELPERS = '@jupyterlab/galata-extension:helpers';
+declare global {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  interface Window {
+    /**
+     * Access Jupyter Application object
+     */
+    jupyterapp: JupyterFrontEnd;
+    /**
+     * Access to Galata In-Page helpers
+     *
+     * Those helpers are injected through a JupyterLab extension
+     */
+    galata: IGalataInpage;
+    /**
+     * Access to Galata In-Page helpers
+     *
+     * @deprecated since v4
+     * Those helpers are injected through a JupyterLab extension
+     */
+    galataip: IGalataInpage;
+  }
+}
 
 /**
  * Static objects exposed.
