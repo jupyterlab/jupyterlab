@@ -430,6 +430,19 @@ test('should return mocked settings', async ({ page }) => {
 });
 ```
 
+### mockUser
+
+- type: boolean | Partial\<User.IUser>
+
+Mock JupyterLab user in-memory or not.
+
+Possible values are:
+   - true (default): JupyterLab user will be mocked on a per test basis
+   - false: JupyterLab user won't be mocked (It will be a random user so snapshots won't match)
+   - Record<string, unknown>: Initial JupyterLab user - Mapping (user attribute, value).
+
+By default the user is stored in-memory.
+
 ### sessions
 
 - type: \<Map\<string, Session.IModel> | null>

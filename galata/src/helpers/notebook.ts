@@ -1024,25 +1024,6 @@ export class NotebookHelper {
   }
 
   /**
-   * Insert a new cell to the currently active notebook
-   *
-   * @returns Action success status
-   */
-  async newCell(): Promise<boolean> {
-    if (!(await this.isAnyActive())) {
-      return false;
-    }
-
-    const numCells = await this.getCellCount();
-    await this.clickToolbarItem('insert');
-    await Utils.waitForCondition(async (): Promise<boolean> => {
-      return (await this.getCellCount()) === numCells + 1;
-    });
-
-    return true;
-  }
-
-  /**
    * Set the input source of a cell
    *
    * @param cellIndex Cell index
@@ -1187,44 +1168,6 @@ export class NotebookHelper {
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );
     await this.waitForRun(cellIndex);
-
-    return true;
-  }
-
-  /**
-   * Set the input source of a cell
-   *
-   * @param cellIndex Cell index
-   * @param source Source
-   * @returns Action success status
-   */
-  async writeCell(cellIndex: number, source: string): Promise<boolean> {
-    if (!(await this.isAnyActive())) {
-      return false;
-    }
-
-    const cellType = await this.getCellType(cellIndex);
-
-    if (
-      !(await this.isCellSelected(cellIndex)) &&
-      !(await this.selectCells(cellIndex))
-    ) {
-      return false;
-    }
-
-    await this.enterCellEditingMode(cellIndex);
-
-    const keyboard = this.page.keyboard;
-    await keyboard.press('Control+A');
-    // give CodeMirror time to style properly
-    await keyboard.type(source, { delay: 0 });
-
-    await this.leaveCellEditingMode(cellIndex);
-
-    // give CodeMirror time to style properly
-    if (cellType === 'code') {
-      await this.page.waitForTimeout(500);
-    }
 
     return true;
   }

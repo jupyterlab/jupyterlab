@@ -332,15 +332,7 @@ export class JupyterLabPage implements IJupyterLabPage {
    * JupyterLab notifications
    */
   get notifications(): Promise<Notification.INotification[]> {
-    return this.page.evaluate(async () => {
-      return (
-        (
-          await window.galata.getPlugin<'@jupyterlab/galata-extension:helpers'>(
-            '@jupyterlab/galata-extension:helpers'
-          )
-        )?.notifications.notifications ?? []
-      );
-    });
+    return this.page.evaluate(async () => window.galata.getNotifications());
   }
 
   /**
@@ -668,11 +660,7 @@ export class JupyterLabPage implements IJupyterLabPage {
    * Inject the galata in-page helpers
    */
   protected async hookHelpersUp(): Promise<void> {
-    // Insert Galata in page helpers
-    // await this.page.addScriptTag({
-    //   path: path.resolve(__dirname, './lib-inpage/inpage.js')
-    // });
-
+    // Check galata helpers are loaded
     const galataipDefined = await this.page.evaluate(() => {
       return Promise.resolve(typeof window.galata === 'object');
     });
