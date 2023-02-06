@@ -400,7 +400,6 @@ class SemVer:
             if not m.group(4):
                 self.prerelease = []
             else:
-
                 self.prerelease = [
                     (int(id_) if NUMERIC.search(id_) else id_) for id_ in m.group(4).split(".")
                 ]

@@ -668,7 +668,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.template_paths = [self.templates_dir]
 
     def initialize_handlers(self):  # noqa
-
         handlers = []
 
         # Set config for Jupyterlab
