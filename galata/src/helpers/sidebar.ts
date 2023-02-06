@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata/lib/extension';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ElementHandle, Page } from '@playwright/test';
+import type { IPluginNameToInterfaceMap } from '../extension';
 import { galata } from '../galata';
 import * as Utils from '../utils';
 import { MenuHelper } from './menu';

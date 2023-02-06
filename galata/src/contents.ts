@@ -3,11 +3,11 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
-import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata/lib/extension';
 import type { Contents } from '@jupyterlab/services';
 import type { APIRequestContext, APIResponse, Page } from '@playwright/test';
 import type { ReadStream } from 'fs-extra';
 import * as path from 'path';
+import type { IPluginNameToInterfaceMap } from './extension';
 import * as Utils from './utils';
 
 /**

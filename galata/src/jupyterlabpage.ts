@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { Notification } from '@jupyterlab/apputils';
-import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata/lib/extension';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ElementHandle, Page, Response } from '@playwright/test';
 import { ContentsHelper } from './contents';
+import type { IPluginNameToInterfaceMap } from './extension';
 import {
   ActivityHelper,
   DebuggerHelper,
