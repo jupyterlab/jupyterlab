@@ -102,10 +102,6 @@
     "jupyter.lab.transform": {
       "type": "boolean",
       "default": false
-    },
-    "version": {
-      "description": "The effective version of this schema",
-      "type": "string"
     }
   },
   "definitions": {
