@@ -472,7 +472,7 @@ class SemVer:
             else:
                 return compare_identifiers(str(a), str(b))
 
-    def inc(self, release, identifier=None):
+    def inc(self, release, identifier=None):  # noqa PLR0915
         logger.debug("inc release %s %s", self.prerelease, release)
         if release == "premajor":
             self.prerelease = []
@@ -604,7 +604,7 @@ def make_key_function(loose):
     def key_function(version):
         v = make_semver(version, loose)
         key = (v.major, v.minor, v.patch)
-        if v.prerelease:
+        if v.prerelease:  # noqa SIM108
             key = key + tuple(v.prerelease)
         else:
             #  NOT having a prerelease is > having one
@@ -1017,7 +1017,7 @@ def replace_xrange(comp, loose):
 
         logger.debug("xrange gtlt=%s any_x=%s", gtlt, any_x)
         if xM:
-            if gtlt == ">" or gtlt == "<":
+            if gtlt == ">" or gtlt == "<":  # noqa SIM108
                 # nothing is allowed
                 ret = "<0.0.0"
             else:
