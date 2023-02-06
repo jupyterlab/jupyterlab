@@ -819,7 +819,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             # $JUPYTERHUB_API_TOKEN identifies the server, not the client
             # but at least make sure we don't use the token
             # if the serverapp set one
-            page_config["token"] = ""  # noqa
+            page_config["token"] = ""
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings["page_config_data"] = page_config
