@@ -961,7 +961,7 @@ class _AppHandler:
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         should_rebuild = False
-        for (extname, _) in self.info["extensions"].items():
+        for extname, _ in self.info["extensions"].items():
             if extname in self.info["local_extensions"]:
                 continue
             updated = self._update_extension(extname)
