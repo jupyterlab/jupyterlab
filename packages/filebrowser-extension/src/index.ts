@@ -292,7 +292,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
  * The default file browser factory provider.
  */
 const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
-  id: '@jupyterlab/filebrowser-extension:defaultFileBrowser',
+  id: '@jupyterlab/filebrowser-extension:default-file-browser',
   provides: IDefaultFileBrowser,
   requires: [IFileBrowserFactory],
   optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
