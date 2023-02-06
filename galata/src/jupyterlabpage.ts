@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { Notification } from '@jupyterlab/apputils';
 import type { IPluginNameToInterfaceMap } from '@jupyterlab/galata/lib/extension';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ElementHandle, Page, Response } from '@playwright/test';
@@ -64,6 +65,11 @@ export interface IJupyterLabPage {
    * JupyterLab notebook helpers
    */
   readonly notebook: NotebookHelper;
+
+  /**
+   * JupyterLab notifications
+   */
+  readonly notifications: Promise<Notification.INotification[]>;
 
   /**
    * Webbrowser performance helpers
@@ -321,6 +327,21 @@ export class JupyterLabPage implements IJupyterLabPage {
    * JupyterLab notebook helpers
    */
   readonly notebook: NotebookHelper;
+
+  /**
+   * JupyterLab notifications
+   */
+  get notifications(): Promise<Notification.INotification[]> {
+    return this.page.evaluate(async () => {
+      return (
+        (
+          await window.galata.getPlugin<'@jupyterlab/galata-extension:helpers'>(
+            '@jupyterlab/galata-extension:helpers'
+          )
+        )?.notifications.notifications ?? []
+      );
+    });
+  }
 
   /**
    * Webbrowser performance helpers

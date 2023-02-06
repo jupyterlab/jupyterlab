@@ -157,6 +157,7 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
   '@jupyterlab/galata': [
     '@jupyterlab/application',
+    '@jupyterlab/apputils',
     '@jupyterlab/docmanager',
     '@jupyterlab/notebook'
   ],

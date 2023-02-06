@@ -19,10 +19,11 @@ export type {
 export { IGalataHelpers } from './tokens';
 
 /**
- * Add Galata in-page object
+ * Galata in-page object
  */
 window.galata = new GalataInpage();
 /**
+ * Galata in-page object
  * @deprecated
  */
 window.galataip = window.galata;
