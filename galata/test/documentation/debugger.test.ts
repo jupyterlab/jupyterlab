@@ -22,9 +22,9 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     // Wait for kernel to settle on idle
-    await page.waitForSelector('#jp-main-statusbar >> text=Idle');
-    await page.waitForSelector('#jp-main-statusbar >> text=Busy');
-    await page.waitForSelector('#jp-main-statusbar >> text=Idle');
+    await page
+      .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
+      .waitFor();
 
     expect(
       await page.screenshot({
