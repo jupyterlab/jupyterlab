@@ -908,11 +908,18 @@ export interface IStdin extends Widget {
  */
 export class Stdin extends Widget implements IStdin {
   private static _history: string[] = [];
+  private static _placeholder =
+    '↑↓ for history. Search reverse/forward with c-r/c-s';
+
+  private static _historyIx(ix: number): number {
+    const len = Stdin._history.length;
+    // interpret negative ix exactly like Array.at
+    return ix < 0 ? len + ix : ix;
+  }
 
   private static _historyAt(ix: number): string | undefined {
     const len = Stdin._history.length;
-    // interpret negative ix exactly like Array.at
-    ix = ix < 0 ? len + ix : ix;
+    ix = this._historyIx(ix);
 
     if (ix < len) {
       return Stdin._history[ix];
@@ -928,6 +935,34 @@ export class Stdin extends Widget implements IStdin {
     }
   }
 
+  private static _historySearch(
+    pat: string,
+    ix: number,
+    reverse = true
+  ): number {
+    const len = Stdin._history.length;
+    ix = this._historyIx(ix);
+    const substrFound = (x: string) => x.search(pat) !== -1;
+
+    if (reverse) {
+      if (ix === 0) {
+        // reverse search fails if already at start of history
+        return -1;
+      }
+
+      return (Stdin._history.slice(0, ix) as any).findLastIndex(
+        substrFound
+      ) as number;
+    } else {
+      if (ix >= len - 1) {
+        // forward search fails if already at end of history
+        return -1;
+      }
+
+      return Stdin._history.slice(ix + 1).findIndex(substrFound);
+    }
+  }
+
   /**
    * Construct a new input widget.
    */
@@ -936,15 +971,17 @@ export class Stdin extends Widget implements IStdin {
       node: Private.createInputWidgetNode(options.prompt, options.password)
     });
     this.addClass(STDIN_CLASS);
-    this._historyIndex = 0;
-    this._input = this.node.getElementsByTagName('input')[0];
-    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
-    // make users aware of the line history feature
-    this._input.placeholder = this._trans.__('↑↓ for history');
     this._future = options.future;
+    this._historyIndex = 0;
+    this._historyPat = '';
     this._parentHeader = options.parent_header;
-    this._value = options.prompt + ' ';
     this._password = options.password;
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    this._value = options.prompt + ' ';
+
+    this._input = this.node.getElementsByTagName('input')[0];
+    // make users aware of the line history feature
+    this._input.placeholder = this._trans.__(Stdin._placeholder);
   }
 
   /**
@@ -966,8 +1003,11 @@ export class Stdin extends Widget implements IStdin {
    */
   handleEvent(event: KeyboardEvent): void {
     const input = this._input;
+
     if (event.type === 'keydown') {
       if (event.key === 'ArrowUp') {
+        this.resetSearch();
+
         const historyLine = Stdin._historyAt(this._historyIndex - 1);
         if (historyLine) {
           if (this._historyIndex === 0) {
@@ -977,6 +1017,8 @@ export class Stdin extends Widget implements IStdin {
           --this._historyIndex;
         }
       } else if (event.key === 'ArrowDown') {
+        this.resetSearch();
+
         if (this._historyIndex === 0) {
           // do nothing
         } else if (this._historyIndex === -1) {
@@ -990,6 +1032,8 @@ export class Stdin extends Widget implements IStdin {
           }
         }
       } else if (event.key === 'Enter') {
+        this.resetSearch();
+
         this._future.sendInputReply(
           {
             status: 'ok',
@@ -1004,8 +1048,39 @@ export class Stdin extends Widget implements IStdin {
           Stdin._historyPush(input.value);
         }
         this._promise.resolve(void 0);
+      } else if (event.ctrlKey && (event.key === 'r' || event.key === 's')) {
+        // if _historyPat is blank, use input as search pattern. Otherwise, reuse the current search pattern
+        if (this._historyPat === '') {
+          this._historyPat = input.value;
+        }
+
+        const reverse = event.key === 'r';
+        const searchHistoryIx = Stdin._historySearch(
+          this._historyPat,
+          this._historyIndex,
+          reverse
+        );
+
+        if (searchHistoryIx != -1) {
+          const historyLine = Stdin._historyAt(searchHistoryIx);
+          if (historyLine) {
+            input.value = historyLine;
+            this._historyIndex = searchHistoryIx;
+          }
+        } else {
+          input.placeholder = reverse
+            ? this._trans.__('reverse search failed')
+            : this._trans.__('forward search failed');
+        }
+      } else if (!event.ctrlKey) {
+        this.resetSearch();
       }
     }
+  }
+
+  protected resetSearch(): void {
+    this._historyPat = '';
+    this._input.placeholder = this._trans.__(Stdin._placeholder);
   }
 
   /**
@@ -1029,6 +1104,7 @@ export class Stdin extends Widget implements IStdin {
   private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
   private _password: boolean;
   private _promise = new PromiseDelegate<void>();
+  private _historyPat: string;
   private _trans: TranslationBundle;
   private _value: string;
   private _valueCache: string;
@@ -1120,7 +1196,7 @@ namespace Private {
       iframe.scrolling = 'auto';
 
       iframe.addEventListener('load', () => {
-        // Workaround needed by Firefox, to properly render svg inside
+        // Workaround needed by Firefox, to properly render svg insidehistory
         // iframes, see https://stackoverflow.com/questions/10177190/
         // svg-dynamically-added-to-iframe-does-not-render-correctly
         iframe.contentDocument!.open();
