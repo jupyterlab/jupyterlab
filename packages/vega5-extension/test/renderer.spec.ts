@@ -2,13 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MimeModel } from '@jupyterlab/rendermime';
-import { VEGALITE4_MIME_TYPE } from '@jupyterlab/vega5-extension';
+import { VEGALITE5_MIME_TYPE } from '@jupyterlab/vega5-extension';
 import {
   DEFAULT_SIZE,
   getPNGSize,
   SCALE_FACTOR_PROP,
-  VEGALITE4_RENDERER,
-  VEGALITE4_SPEC
+  VEGALITE5_RENDERER,
+  VEGALITE5_SPEC
 } from './utils';
 
 describe('@jupyterlab/vega5-extension', () => {
@@ -16,10 +16,10 @@ describe('@jupyterlab/vega5-extension', () => {
     it('should attach a default sized PNG', async () => {
       const model = new MimeModel({
         data: {
-          [VEGALITE4_MIME_TYPE]: VEGALITE4_SPEC
+          [VEGALITE5_MIME_TYPE]: VEGALITE5_SPEC
         }
       });
-      await VEGALITE4_RENDERER.renderModel(model);
+      await VEGALITE5_RENDERER.renderModel(model);
 
       expect(model).toHaveProperty('data.image/png');
       expect(model).not.toHaveProperty(SCALE_FACTOR_PROP);
@@ -35,17 +35,17 @@ describe('@jupyterlab/vega5-extension', () => {
 
       const model = new MimeModel({
         data: {
-          [VEGALITE4_MIME_TYPE]: VEGALITE4_SPEC
+          [VEGALITE5_MIME_TYPE]: VEGALITE5_SPEC
         },
         metadata: {
-          [VEGALITE4_MIME_TYPE]: {
+          [VEGALITE5_MIME_TYPE]: {
             embed_options: {
               scaleFactor
             }
           }
         }
       });
-      await VEGALITE4_RENDERER.renderModel(model);
+      await VEGALITE5_RENDERER.renderModel(model);
 
       expect(model).toHaveProperty('data.image/png');
       expect(model).toHaveProperty(SCALE_FACTOR_PROP, scaleFactor);
