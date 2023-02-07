@@ -908,8 +908,7 @@ export interface IStdin extends Widget {
  */
 export class Stdin extends Widget implements IStdin {
   private static _history: string[] = [];
-  private static _placeholder =
-    '↑↓ for history. Search reverse/forward with c-r/c-s';
+  private static _placeholder = '↑↓ for history. Search history with c-↑/c-↓';
 
   private static _historyIx(ix: number): number | undefined {
     const len = Stdin._history.length;
@@ -956,18 +955,24 @@ export class Stdin extends Widget implements IStdin {
         return;
       }
 
-      return (
-        ((Stdin._history.slice(0, ixpos) as any).findLastIndex(
-          substrFound
-        ) as number) - len
+      const ixFound = (Stdin._history.slice(0, ixpos) as any).findLastIndex(
+        substrFound
       );
+      if (ixFound !== -1) {
+        // wrap ix to negative
+        return ixFound - len;
+      }
     } else {
       if (ixpos >= len - 1) {
         // forward search fails if already at end of history
         return;
       }
 
-      return Stdin._history.slice(ixpos + 1).findIndex(substrFound) - len;
+      const ixFound = Stdin._history.slice(ixpos + 1).findIndex(substrFound);
+      if (ixFound !== -1) {
+        // wrap ix to negative and adjust for slice
+        return ixFound - len + ixpos + 1;
+      }
     }
   }
 
@@ -1013,7 +1018,61 @@ export class Stdin extends Widget implements IStdin {
     const input = this._input;
 
     if (event.type === 'keydown') {
-      if (event.key === 'ArrowUp') {
+      if (event.key === 'Enter') {
+        this.resetSearch();
+
+        this._future.sendInputReply(
+          {
+            status: 'ok',
+            value: input.value
+          },
+          this._parentHeader
+        );
+        if (this._password) {
+          this._value += '········';
+        } else {
+          this._value += input.value;
+          Stdin._historyPush(input.value);
+        }
+        this._promise.resolve(void 0);
+      } else if (event.key === 'Escape') {
+        // currently this gets clobbered by the documentsearch:end command at the notebook level
+        this.resetSearch();
+        input.blur();
+      } else if (
+        event.ctrlKey &&
+        (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+      ) {
+        // if _historyPat is blank, use input as search pattern. Otherwise, reuse the current search pattern
+        if (this._historyPat === '') {
+          this._historyPat = input.value;
+        }
+
+        const reverse = event.key === 'ArrowUp';
+        const searchHistoryIx = Stdin._historySearch(
+          this._historyPat,
+          this._historyIndex,
+          reverse
+        );
+
+        if (searchHistoryIx !== undefined) {
+          const historyLine = Stdin._historyAt(searchHistoryIx);
+          if (historyLine !== undefined) {
+            if (this._historyIndex === 0) {
+              this._valueCache = input.value;
+            }
+
+            console.log(`historyLine: ${historyLine}`);
+            input.value = historyLine;
+            this._historyIndex = searchHistoryIx;
+          }
+        }
+        // else {
+        //   input.placeholder = reverse
+        //     ? this._trans.__('reverse search failed')
+        //     : this._trans.__('forward search failed');
+        // }
+      } else if (event.key === 'ArrowUp') {
         this.resetSearch();
 
         const historyLine = Stdin._historyAt(this._historyIndex - 1);
@@ -1039,60 +1098,12 @@ export class Stdin extends Widget implements IStdin {
             ++this._historyIndex;
           }
         }
-      } else if (event.key === 'Enter') {
-        this.resetSearch();
-
-        this._future.sendInputReply(
-          {
-            status: 'ok',
-            value: input.value
-          },
-          this._parentHeader
-        );
-        if (this._password) {
-          this._value += '········';
-        } else {
-          this._value += input.value;
-          Stdin._historyPush(input.value);
-        }
-        this._promise.resolve(void 0);
-      } else if (event.ctrlKey && (event.key === 'y' || event.key === 'u')) {
-        // if _historyPat is blank, use input as search pattern. Otherwise, reuse the current search pattern
-        if (this._historyPat === '') {
-          this._historyPat = input.value;
-        }
-
-        const reverse = event.key === 'y';
-        const searchHistoryIx = Stdin._historySearch(
-          this._historyPat,
-          this._historyIndex,
-          reverse
-        );
-
-        if (searchHistoryIx !== undefined) {
-          const historyLine = Stdin._historyAt(searchHistoryIx);
-          if (historyLine) {
-            if (this._historyIndex === 0) {
-              this._valueCache = input.value;
-            }
-
-            input.value = historyLine;
-            this._historyIndex = searchHistoryIx;
-          }
-        } else {
-          input.placeholder = reverse
-            ? this._trans.__('reverse search failed')
-            : this._trans.__('forward search failed');
-        }
-      } else if (!event.ctrlKey) {
-        this.resetSearch();
       }
     }
   }
 
   protected resetSearch(): void {
     this._historyPat = '';
-    this._input.placeholder = this._trans.__(Stdin._placeholder);
   }
 
   /**
