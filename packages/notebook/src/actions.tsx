@@ -2395,6 +2395,16 @@ namespace Private {
         (child as MarkdownCell).rendered = false;
       }
     });
+
+    // Put focus on the active cell whose type was changed. Otherwise, focus
+    // will fall back to the document body.
+    const { activeCell } = notebook;
+    activeCell?.ready.then(() => {
+      if (!notebook.isDisposed && !activeCell.isDisposed) {
+        activeCell.node.focus();
+      }
+    });
+
     notebook.deselectAll();
   }
 
