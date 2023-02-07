@@ -1067,11 +1067,6 @@ export class Stdin extends Widget implements IStdin {
             this._historyIndex = searchHistoryIx;
           }
         }
-        // else {
-        //   input.placeholder = reverse
-        //     ? this._trans.__('reverse search failed')
-        //     : this._trans.__('forward search failed');
-        // }
       } else if (event.key === 'ArrowUp') {
         this.resetSearch();
 
