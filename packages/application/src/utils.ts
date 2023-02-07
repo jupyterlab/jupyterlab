@@ -125,10 +125,13 @@ export function createSemanticCommand(
     attribute: 'label' | 'caption'
   ): string | CommandRegistry.CommandFunc<string> | undefined {
     return () => {
-      const texts = reduceAttribute(attribute);
+      // If a command has constituent commands with no defined label/caption,
+      // fall back to the default label/caption.
+      const texts = reduceAttribute(attribute).filter(text => text !== '');
+
       switch (texts.length) {
         case 0:
-          return defaultValues.label ?? '';
+          return defaultValues[attribute] ?? '';
         case 1:
           return texts[0];
         default: {
