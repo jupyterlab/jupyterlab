@@ -41,7 +41,6 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
 
 
 class ExampleApp(LabServerApp):
-
     extension_url = "/example"
     app_url = "/example"
     default_url = "/example"

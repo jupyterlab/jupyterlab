@@ -21,7 +21,6 @@ def _jupyter_server_extension_points():
 
 
 class ExampleApp(LabServerApp):
-
     extension_url = "/lab"
     default_url = "/lab"
     name = __name__

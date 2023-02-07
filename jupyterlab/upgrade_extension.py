@@ -98,7 +98,7 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
         temp_data = json.load(fid)
 
     if data.get("devDependencies"):
-        for (key, value) in temp_data["devDependencies"].items():
+        for key, value in temp_data["devDependencies"].items():
             data["devDependencies"][key] = value
     else:
         data["devDependencies"] = temp_data["devDependencies"].copy()
@@ -109,7 +109,7 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
     if choice.upper().startswith("Y"):
         warnings.append("Updated scripts in package.json")
         data.setdefault("scripts", {})
-        for (key, value) in temp_data["scripts"].items():
+        for key, value in temp_data["scripts"].items():
             data["scripts"][key] = value
         if "install-ext" in data["scripts"]:
             del data["scripts"]["install-ext"]
@@ -126,7 +126,7 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
 
     data.setdefault("dependencies", {})
     data.setdefault("devDependencies", {})
-    for (key, value) in root_jlab_data["resolutions"].items():
+    for key, value in root_jlab_data["resolutions"].items():
         if key in data["dependencies"]:
             data["dependencies"][key] = value.replace("~", "^")
         if key in data["devDependencies"]:

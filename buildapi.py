@@ -13,7 +13,6 @@ from packaging.version import Version
 
 
 def builder(target_name, version, *args, **kwargs):
-
     # Allow building from sdist without node.
     if target_name == "wheel" and not os.path.exists("dev_mode"):
         return
