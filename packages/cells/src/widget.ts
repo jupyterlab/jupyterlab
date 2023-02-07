@@ -1011,7 +1011,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
 
     // Insert the output before the cell footer.
     const outputWrapper = (this._outputWrapper = new Panel());
-    outputWrapper.dataset.lmSuppressShortcuts = 'true';
     outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
     const outputCollapser = new OutputCollapser();
     outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
