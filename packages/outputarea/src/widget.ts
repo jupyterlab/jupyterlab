@@ -911,18 +911,20 @@ export class Stdin extends Widget implements IStdin {
   private static _placeholder =
     '↑↓ for history. Search reverse/forward with c-r/c-s';
 
-  private static _historyIx(ix: number): number {
+  private static _historyIx(ix: number): number | undefined {
     const len = Stdin._history.length;
-    // interpret negative ix exactly like Array.at
-    return ix < 0 ? len + ix : ix;
+    // wrap nonpositive ix to nonnegative ix
+    if (ix <= 0) {
+      return len + ix;
+    }
   }
 
   private static _historyAt(ix: number): string | undefined {
     const len = Stdin._history.length;
-    ix = this._historyIx(ix);
+    const ixpos = Stdin._historyIx(ix);
 
-    if (ix < len) {
-      return Stdin._history[ix];
+    if (ixpos !== undefined && ixpos < len) {
+      return Stdin._history[ixpos];
     }
     // return undefined if ix is out of bounds
   }
@@ -939,27 +941,33 @@ export class Stdin extends Widget implements IStdin {
     pat: string,
     ix: number,
     reverse = true
-  ): number {
+  ): number | undefined {
     const len = Stdin._history.length;
-    ix = this._historyIx(ix);
+    const ixpos = Stdin._historyIx(ix);
     const substrFound = (x: string) => x.search(pat) !== -1;
 
+    if (ixpos === undefined) {
+      return;
+    }
+
     if (reverse) {
-      if (ix === 0) {
+      if (ixpos === 0) {
         // reverse search fails if already at start of history
-        return -1;
+        return;
       }
 
-      return (Stdin._history.slice(0, ix) as any).findLastIndex(
-        substrFound
-      ) as number;
+      return (
+        ((Stdin._history.slice(0, ixpos) as any).findLastIndex(
+          substrFound
+        ) as number) - len
+      );
     } else {
-      if (ix >= len - 1) {
+      if (ixpos >= len - 1) {
         // forward search fails if already at end of history
-        return -1;
+        return;
       }
 
-      return Stdin._history.slice(ix + 1).findIndex(substrFound);
+      return Stdin._history.slice(ixpos + 1).findIndex(substrFound) - len;
     }
   }
 
@@ -1048,22 +1056,26 @@ export class Stdin extends Widget implements IStdin {
           Stdin._historyPush(input.value);
         }
         this._promise.resolve(void 0);
-      } else if (event.ctrlKey && (event.key === 'r' || event.key === 's')) {
+      } else if (event.ctrlKey && (event.key === 'y' || event.key === 'u')) {
         // if _historyPat is blank, use input as search pattern. Otherwise, reuse the current search pattern
         if (this._historyPat === '') {
           this._historyPat = input.value;
         }
 
-        const reverse = event.key === 'r';
+        const reverse = event.key === 'y';
         const searchHistoryIx = Stdin._historySearch(
           this._historyPat,
           this._historyIndex,
           reverse
         );
 
-        if (searchHistoryIx != -1) {
+        if (searchHistoryIx !== undefined) {
           const historyLine = Stdin._historyAt(searchHistoryIx);
           if (historyLine) {
+            if (this._historyIndex === 0) {
+              this._valueCache = input.value;
+            }
+
             input.value = historyLine;
             this._historyIndex = searchHistoryIx;
           }
