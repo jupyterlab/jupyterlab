@@ -2749,20 +2749,20 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@rjsf/core@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@rjsf/core/-/core-5.0.2.tgz#1283cbdcfa8ed5ab2fb77609056e759d80fee7bc"
-  integrity sha512-uSb8PI08m2vFDlO86yuxdQd54MeTkgZUPzAFarL08j0QlAqiYLrTPqTkzbsldZ+pAPu+IRdOcQlBQ24gxztmsg==
+"@rjsf/core@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@rjsf/core/-/core-5.1.0.tgz#431e45c273f51badbffe4359ff294d927852ff58"
+  integrity sha512-n2FeSk9iDuCF+Zo6nMLPuWsGsHCRiWnfohLNoyl1ll/tv6Ac5Oh0W3cwClIUEmJwaUFPaU/2O4ihFvSCdXwHlw==
   dependencies:
     lodash "^4.17.15"
     lodash-es "^4.17.15"
     nanoid "^3.3.4"
     prop-types "^15.7.2"
 
-"@rjsf/utils@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@rjsf/utils/-/utils-5.0.2.tgz#1b5b4cc7532e524ec902111d4df0bc21fa1c8311"
-  integrity sha512-dOT6tiTdMwLueBhoT7s0HwF+D/CKlk3W6KBIaOyjezODeHgv+WKJ/F7GXvwXwdf9uJcizQ88HJJaG6PShiRNmQ==
+"@rjsf/utils@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@rjsf/utils/-/utils-5.1.0.tgz#d96dea755a17f8d5758c49b87ad125e0cb0a7426"
+  integrity sha512-b6ZPl5H+1trBitFUfNY9eBClfxsHqsRDtw6fwxSwdVgseAnb33kGxO+/0KLzDfSY2L0b2yOwKGY4kyHmpBUThQ==
   dependencies:
     json-schema-merge-allof "^0.8.1"
     jsonpointer "^5.0.1"
@@ -2770,12 +2770,12 @@
     lodash-es "^4.17.15"
     react-is "^18.2.0"
 
-"@rjsf/validator-ajv8@^5.0.2":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@rjsf/validator-ajv8/-/validator-ajv8-5.0.2.tgz#4ff3cd0a8c445a59a876cecd4dcdf7865b848367"
-  integrity sha512-YmPW1+/O2VIq2hOnNyhh0cS1tVt6l/fdf7EpsnQhOcf69skF3PtjkpJJt0UHAG8Wt7Q2WSJ4SaDdH++D5BC6GQ==
+"@rjsf/validator-ajv8@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@rjsf/validator-ajv8/-/validator-ajv8-5.1.0.tgz#e9c2cfa9c4aeec7df4ece7981701a31df4684a86"
+  integrity sha512-J3+cPT+saU2i4nOe8EDIMAWfrM4T48J8kgFL5O2mAObzlOI6O1UOSc0Rt82ag5zHhyAON0B6t0nG54/eDiCWfA==
   dependencies:
-    ajv "^8.11.0"
+    ajv "^8.12.0"
     ajv-formats "^2.1.1"
     lodash "^4.17.15"
     lodash-es "^4.17.15"
@@ -3933,7 +3933,7 @@ ajv@^6.10.0, ajv@^6.12.3, ajv@^6.12.4, ajv@^6.12.5:
     json-schema-traverse "^0.4.1"
     uri-js "^4.2.2"
 
-ajv@^8.0.0, ajv@^8.0.1, ajv@^8.11.0, ajv@^8.12.0, ajv@^8.8.0:
+ajv@^8.0.0, ajv@^8.0.1, ajv@^8.12.0, ajv@^8.8.0:
   version "8.12.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-8.12.0.tgz#d1a0527323e22f53562c567c00991577dfbe19d1"
   integrity sha512-sRu1kpcO9yLtYxBKvqfTeh9KzZEwO3STyX1HT+4CaDzC6HpTGYhIhPIzj9XuKU7KYDwnaeh5hcOwjy1QuJzBPA==
