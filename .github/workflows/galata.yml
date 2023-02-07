@@ -96,7 +96,7 @@ jobs:
     strategy:
       matrix:
         # Freeze Python version because it appears in console header
-        python-version: ['3.9.9']
+        python-version: ['3.10.6']
     steps:
       - name: Checkout JupyterLab
         uses: actions/checkout@v3
