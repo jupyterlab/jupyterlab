@@ -141,5 +141,46 @@ describe('@jupyterlab/application', () => {
 
       expect(contextualCommand.isVisible?.call({})).toEqual(expected);
     });
+
+    // Command IDs, labels, defaultLabel, expected
+    it.each([
+      [[], [], undefined, ''],
+      [[], [], 'default', 'default'],
+      [['a'], [''], 'default', ''],
+      [['a'], ['label a'], 'default', 'label a'],
+      [['a', 'b'], ['label a', 'label b'], 'default', 'label a and label b'],
+      [['a', 'b'], ['label a', 'label b…'], 'default', 'label a and label b…'],
+      [['a', 'b'], ['label a…', 'label b'], 'default', 'label a and label b…'],
+      [['a', 'b'], ['label a…', 'label b…'], 'default', 'label a and label b…'],
+      [['a', 'b', 'c'], ['label a', 'label b', 'label c'], 'default', 'label a, label b and label c'],
+      [['a', 'b', 'c'], ['label a…', 'label b…', 'label c'], 'default', 'label a, label b and label c…'],
+      [['a', 'b', 'c'], ['label a…', 'label b', 'label c…'], 'default', 'label a, label b and label c…'],
+      [['a', 'b', 'c'], ['label a…', 'label b…', 'label c…'], 'default', 'label a, label b and label c…'],
+      [['a', 'b', 'c'], ['label a', 'label b…', 'label c'], 'default', 'label a, label b and label c…'],
+      [['a', 'b', 'c'], ['label a', 'label b…', 'label c…'], 'default', 'label a, label b and label c…'],
+      [['a', 'b', 'c'], ['label a', 'label b', 'label c…'], 'default', 'label a, label b and label c…']
+    ])('commands %j, labels %j, and default %s has label %s', (subCommands, labels, defaultLabel, expectedLabel) => {
+      for (let i = 0; i < subCommands.length; i++) {
+        const id = subCommands[i];
+        const label = labels[i];
+        commands.addCommand(id, {
+          execute: () => null,
+          label: label
+        });
+
+        semanticCmd.add({ id });
+      }
+
+      const contextualCommand = createSemanticCommand(
+        app,
+        semanticCmd,
+        {
+          label: defaultLabel
+        },
+        translator.load('jupyterlab')
+      );
+
+      expect(contextualCommand.label).toEqual(expectedLabel);
+    });
   });
 });
