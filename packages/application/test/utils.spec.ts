@@ -142,82 +142,85 @@ describe('@jupyterlab/application', () => {
       expect(contextualCommand.isVisible?.call({})).toEqual(expected);
     });
 
-    // Command IDs, labels, defaultLabel, expected
+    // Labels/captions, defaultLabel/defaultCaption, expected
     it.each([
-      [[], [], undefined, ''],
-      [[], [], 'default', 'default'],
-      [['a'], [''], 'default', ''],
-      [['a'], ['label a'], 'default', 'label a'],
-      [['a', 'b'], ['label a', 'label b'], 'default', 'label a and label b'],
-      [['a', 'b'], ['label a', 'label b…'], 'default', 'label a and label b…'],
-      [['a', 'b'], ['label a…', 'label b'], 'default', 'label a and label b…'],
-      [['a', 'b'], ['label a…', 'label b…'], 'default', 'label a and label b…'],
+      [[], undefined, ''],
+      [[], 'default', 'default'],
+      [[''], 'default', ''],
+      [['label a'], 'default', 'label a'],
+      [['label a', 'label b'], 'default', 'label a and label b'],
+      [['label a', 'label b…'], 'default', 'label a and label b…'],
+      [['label a…', 'label b'], 'default', 'label a and label b…'],
+      [['label a…', 'label b…'], 'default', 'label a and label b…'],
       [
-        ['a', 'b', 'c'],
         ['label a', 'label b', 'label c'],
         'default',
         'label a, label b and label c'
       ],
       [
-        ['a', 'b', 'c'],
         ['label a…', 'label b…', 'label c'],
         'default',
         'label a, label b and label c…'
       ],
       [
-        ['a', 'b', 'c'],
         ['label a…', 'label b', 'label c…'],
         'default',
         'label a, label b and label c…'
       ],
       [
-        ['a', 'b', 'c'],
         ['label a…', 'label b…', 'label c…'],
         'default',
         'label a, label b and label c…'
       ],
       [
-        ['a', 'b', 'c'],
         ['label a', 'label b…', 'label c'],
         'default',
         'label a, label b and label c…'
       ],
       [
-        ['a', 'b', 'c'],
         ['label a', 'label b…', 'label c…'],
         'default',
         'label a, label b and label c…'
       ],
       [
-        ['a', 'b', 'c'],
         ['label a', 'label b', 'label c…'],
         'default',
         'label a, label b and label c…'
       ]
     ])(
-      'commands %j, labels %j, and default %s has label %s',
-      (subCommands, labels, defaultLabel, expectedLabel) => {
-        for (let i = 0; i < subCommands.length; i++) {
-          const id = subCommands[i];
-          const label = labels[i];
+      'labels/captions %j, and default %s has label/caption %s',
+      (values, defaultValue, expected) => {
+        for (let i = 0; i < values.length; i++) {
+          const id = `command-${i}`;
+          const label = values[i];
+          const caption = label.replace('label', 'caption');
           commands.addCommand(id, {
             execute: () => null,
-            label: label
+            label: label,
+            caption: caption
           });
 
           semanticCmd.add({ id });
         }
 
-        const contextualCommand = createSemanticCommand(
-          app,
-          semanticCmd,
-          {
-            label: defaultLabel
-          },
-          translator.load('jupyterlab')
+        const semanticCommandId = 'my-semantic-command';
+        commands.addCommand(
+          semanticCommandId,
+          createSemanticCommand(
+            app,
+            semanticCmd,
+            {
+              label: defaultValue,
+              caption: defaultValue?.replace('label', 'caption')
+            },
+            translator.load('jupyterlab')
+          )
         );
 
-        expect(contextualCommand.label).toEqual(expectedLabel);
+        expect(commands.label(semanticCommandId)).toEqual(expected);
+        expect(commands.caption(semanticCommandId)).toEqual(
+          expected.replace('label', 'caption')
+        );
       }
     );
   });
