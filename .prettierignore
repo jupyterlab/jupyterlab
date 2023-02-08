@@ -12,6 +12,7 @@ CHANGELOG.md
 dev_mode/index.js
 dev_mode/schemas
 dev_mode/static
+dev_mode/stats.json
 dev_mode/themes
 dev_mode/workspaces
 docs/_build

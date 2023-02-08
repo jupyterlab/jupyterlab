@@ -425,10 +425,7 @@ export class VirtualDocument implements IDisposable {
    * Get the root document of current virtual document.
    */
   get root(): VirtualDocument {
-    if (this.parent == null) {
-      return this;
-    }
-    return this.parent.root;
+    return this.parent ? this.parent.root : this;
   }
 
   /**
@@ -489,7 +486,7 @@ export class VirtualDocument implements IDisposable {
   documentAtSourcePosition(position: ISourcePosition): VirtualDocument {
     let sourceLine = this.sourceLines.get(position.line);
 
-    if (sourceLine == null) {
+    if (!sourceLine) {
       return this;
     }
 

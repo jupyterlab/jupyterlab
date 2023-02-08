@@ -29,7 +29,7 @@
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.18",
     "@jupyterlab/ui-components": "^4.0.0-alpha.33",
-    "@rjsf/validator-ajv8": "^5.0.2"
+    "@rjsf/validator-ajv8": "^5.1.0"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^4.0.0-alpha.18",
