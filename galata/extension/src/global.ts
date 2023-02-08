@@ -93,20 +93,27 @@ export class GalataInpage implements IGalataInpage {
   off(event: 'dialog' | 'notification', listener: (arg: any) => void): void {
     const callback = this.listeners.get(listener);
     if (callback) {
-      this.getPlugin(PLUGIN_ID_GALATA_HELPERS).then(plugin => {
-        if (!plugin) {
-          return;
-        }
-        switch (event) {
-          case 'dialog':
-            plugin.dialogs.currentChanged.disconnect(callback);
-            break;
-          case 'notification':
-            plugin.notifications.changed.disconnect(callback);
-            break;
-        }
-        this.listeners.delete(listener);
-      });
+      this.getPlugin(PLUGIN_ID_GALATA_HELPERS)
+        .then(plugin => {
+          if (!plugin) {
+            return;
+          }
+          switch (event) {
+            case 'dialog':
+              plugin.dialogs.currentChanged.disconnect(callback);
+              break;
+            case 'notification':
+              plugin.notifications.changed.disconnect(callback);
+              break;
+          }
+          this.listeners.delete(listener);
+        })
+        .catch(reason => {
+          console.log(
+            `Failed to disconnect listener for '${event}' event.`,
+            reason
+          );
+        });
     }
   }
 

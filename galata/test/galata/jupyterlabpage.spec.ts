@@ -138,9 +138,12 @@ test.describe('listeners', () => {
         // the toast is not yet displayed and won't be removed when the notification
         // is dismissed.
         setTimeout(() => {
-          window.jupyterapp.commands.execute('apputils:dismiss-notification', {
-            id: n.id
-          });
+          void window.jupyterapp.commands.execute(
+            'apputils:dismiss-notification',
+            {
+              id: n.id
+            }
+          );
         }, 100);
       });
     });
@@ -148,7 +151,7 @@ test.describe('listeners', () => {
     await Promise.all([
       page.locator('.Toastify__toast').waitFor(),
       page.evaluate(() => {
-        window.jupyterapp.commands.execute('apputils:notify', {
+        void window.jupyterapp.commands.execute('apputils:notify', {
           message: 'This is a test message',
           options: { autoClose: false }
         });
@@ -164,9 +167,12 @@ test.describe('listeners', () => {
         // the toast is not yet displayed and won't be removed when the notification
         // is dismissed.
         setTimeout(() => {
-          window.jupyterapp.commands.execute('apputils:dismiss-notification', {
-            id: n.id
-          });
+          void window.jupyterapp.commands.execute(
+            'apputils:dismiss-notification',
+            {
+              id: n.id
+            }
+          );
         }, 100);
         window.galata.off('notification', callback);
       };
@@ -207,9 +213,12 @@ test.describe('listeners', () => {
         // the toast is not yet displayed and won't be removed when the notification
         // is dismissed.
         setTimeout(() => {
-          window.jupyterapp.commands.execute('apputils:dismiss-notification', {
-            id: n.id
-          });
+          void window.jupyterapp.commands.execute(
+            'apputils:dismiss-notification',
+            {
+              id: n.id
+            }
+          );
         }, 100);
       };
       window.galata.once('notification', callback);
