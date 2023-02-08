@@ -2667,10 +2667,8 @@ namespace Private {
       }
       notebook.deselectAll();
       Private.handleState(notebook, state, true);
-      setTimeout(() => {
-        notebook.mode = 'edit';
-        notebook.widgets[cellIndex].setHidden(false);
-      }, 0);
+      notebook.mode = 'edit';
+      notebook.widgets[cellIndex].setHidden(false);
     }
   }
 }
