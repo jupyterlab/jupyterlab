@@ -440,7 +440,7 @@ class SemVer:
             or compare_identifiers(str(self.patch), str(other.patch))
         )
 
-    def compare_pre(self, other):
+    def compare_pre(self, other):  # noqa PLR0911
         if not isinstance(other, SemVer):
             other = make_semver(other, self.loose)
 
@@ -655,7 +655,7 @@ def lte(a, b, loose):
     return compare(a, b, loose) <= 0
 
 
-def cmp(a, op, b, loose):
+def cmp(a, op, b, loose):  # noqa PLR0911
     logger.debug("cmp: %s", op)
     if op == "===":
         return a == b
@@ -901,7 +901,7 @@ def replace_carets(comp, loose):
 def replace_caret(comp, loose):
     r = regexp[CARETLOOSE] if loose else regexp[CARET]
 
-    def repl(mob):
+    def repl(mob):  # noqa PLR0911
         m0 = mob.group(0)
         M, m, p, pr, _ = mob.groups()
         logger.debug("caret %s %s %s %s %s %s", comp, m0, M, m, p, pr)
@@ -1001,7 +1001,7 @@ def replace_xrange(comp, loose):
     comp = comp.strip()
     r = regexp[XRANGELOOSE] if loose else regexp[XRANGE]
 
-    def repl(mob):
+    def repl(mob):  # noqa PLR0911
         ret = mob.group(0)
         gtlt, M, m, p, pr, _ = mob.groups()
 
