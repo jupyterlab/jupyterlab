@@ -1762,7 +1762,7 @@
   {
     "id": "notebook:restart-run-all",
     "label": "Restart Kernel and Run All Cells…",
-    "caption": "",
+    "caption": "Restart the kernel and run all cells",
     "shortcuts": []
   },
   {

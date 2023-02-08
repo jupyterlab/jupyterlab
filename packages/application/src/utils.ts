@@ -125,9 +125,7 @@ export function createSemanticCommand(
     attribute: 'label' | 'caption'
   ): string | CommandRegistry.CommandFunc<string> | undefined {
     return () => {
-      // If a command has constituent commands with no defined label/caption,
-      // fall back to the default label/caption.
-      const texts = reduceAttribute(attribute).filter(text => text !== '');
+      const texts = reduceAttribute(attribute);
 
       switch (texts.length) {
         case 0:

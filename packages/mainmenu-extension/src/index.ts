@@ -35,7 +35,6 @@ import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
-  fastForwardIcon,
   refreshIcon,
   runIcon,
   stopIcon
@@ -645,8 +644,7 @@ export function createRunMenu(
         caption: trans.__('Restart Kernel and Run All')
       },
       trans
-    ),
-    icon: args => (args.toolbar ? fastForwardIcon : undefined)
+    )
   });
 }
 

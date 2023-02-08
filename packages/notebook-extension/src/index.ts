@@ -85,6 +85,7 @@ import {
   copyIcon,
   cutIcon,
   duplicateIcon,
+  fastForwardIcon,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
@@ -1912,6 +1913,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: trans.__('Run Selected Cells'),
+    caption: trans.__('Run the selected cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1925,6 +1927,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.run, {
     label: trans.__('Run Selected Cells and Do not Advance'),
+    caption: trans.__('Run the selected cells and do not advance'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1951,6 +1954,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.runAll, {
     label: trans.__('Run All Cells'),
+    caption: trans.__('Run all cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2019,6 +2023,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Kernel…'),
+    caption: trans.__('Restart the kernel'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2112,6 +2117,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: trans.__('Restart Kernel and Run All Cells…'),
+    caption: trans.__('Restart the kernel and run all cells'),
     execute: async () => {
       const restarted: boolean = await commands.execute(CommandIDs.restart, {
         activate: false
@@ -2120,7 +2126,8 @@ function addCommands(
         await commands.execute(CommandIDs.runAll);
       }
     },
-    isEnabled
+    isEnabled,
+    icon: fastForwardIcon
   });
   commands.addCommand(CommandIDs.clearAllOutputs, {
     label: trans.__('Clear Outputs of All Cells'),
@@ -2148,6 +2155,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.interrupt, {
     label: trans.__('Interrupt Kernel'),
+    caption: trans.__('Interrupt the kernel'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 

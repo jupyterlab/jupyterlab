@@ -869,7 +869,7 @@ mapping. For example for the notebook panel:
        { "name": "restart", "command": "kernelmenu:restart", "rank": 32 },
        {
          "name": "restart-and-run",
-         "command": "runmenu:restart-and-run-all",
+         "command": "notebook:restart-run-all",
          "rank": 33 // The default rank is 50
        },
        { "name": "cellType", "rank": 40 },
