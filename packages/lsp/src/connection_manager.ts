@@ -194,7 +194,7 @@ export class DocumentConnectionManager
     context: Document.IForeignContext
   ): void {
     const { foreignDocument } = context;
-    this.unregisterDocument(foreignDocument, false);
+    this.unregisterDocument(foreignDocument.uri, false);
     this.disconnectDocumentSignals(foreignDocument);
   }
 
@@ -210,7 +210,9 @@ export class DocumentConnectionManager
   ): void {
     this.adapters.set(path, adapter);
     adapter.disposed.connect(() => {
-      this.documents.delete(adapter.virtualDocument.uri);
+      if (adapter.virtualDocument) {
+        this.documents.delete(adapter.virtualDocument.uri);
+      }
       this.adapters.delete(path);
     });
   }
@@ -402,15 +404,12 @@ export class DocumentConnectionManager
   }
 
   /**
-   * Disconnect the signals of requested virtual document.
+   * Disconnect the signals of requested virtual document uri.
    */
-  unregisterDocument(
-    virtualDocument: VirtualDocument,
-    emit: boolean = true
-  ): void {
-    const connection = this.connections.get(virtualDocument.uri);
+  unregisterDocument(uri: string, emit: boolean = true): void {
+    const connection = this.connections.get(uri);
     if (connection) {
-      this.connections.delete(virtualDocument.uri);
+      this.connections.delete(uri);
       const allConnection = new Set(this.connections.values());
 
       if (!allConnection.has(connection)) {
@@ -653,7 +652,7 @@ namespace Private {
     capabilities: ClientCapabilities
   ): Promise<LSPConnection> {
     let connection = _connections.get(languageServerId);
-    if (connection == null) {
+    if (!connection) {
       const socket = new WebSocket(uris.socket);
       const connection = new LSPConnection({
         languageId: language,
