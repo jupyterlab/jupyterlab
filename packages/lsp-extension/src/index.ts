@@ -223,8 +223,8 @@ export class RunningLanguageServer implements IRunningSessions.IRunningItem {
   shutdown(): void {
     for (const [key, value] of this._manager.connections.entries()) {
       if (this._connection.has(value)) {
-        const document = this._manager.documents.get(key)!;
-        this._manager.unregisterDocument(document);
+        const { uri } = this._manager.documents.get(key)!;
+        this._manager.unregisterDocument(uri);
       }
     }
     this._manager.disconnect(this._serverIdentifier as TLanguageServerId);
