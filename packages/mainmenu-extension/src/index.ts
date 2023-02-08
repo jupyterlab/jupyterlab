@@ -34,11 +34,7 @@ import {
 import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import {
-  refreshIcon,
-  runIcon,
-  stopIcon
-} from '@jupyterlab/ui-components';
+import { refreshIcon, runIcon, stopIcon } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
