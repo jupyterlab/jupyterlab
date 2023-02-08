@@ -13,7 +13,9 @@ import {
 } from '@jupyterlab/ui-components';
 import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
-import { Field, IChangeEvent, UiSchema } from '@rjsf/core';
+import { IChangeEvent } from '@rjsf/core';
+import validatorAjv8 from '@rjsf/validator-ajv8';
+import { Field, UiSchema } from '@rjsf/utils';
 import { JSONSchema7 } from 'json-schema';
 import React from 'react';
 
@@ -224,6 +226,7 @@ export class SettingsFormEditor extends React.Component<
         </div>
         {!this.props.isCollapsed && (
           <FormComponent
+            validator={validatorAjv8}
             schema={this.state.filteredSchema as JSONSchema7}
             formData={this._formData}
             uiSchema={this.state.uiSchema}
