@@ -98,12 +98,8 @@ bumped their major version (following semver convention). We want to point out p
      The ``IDocumentWidgetOpener`` interface also now defines an ```opened``` signal that is emitted when a widget is opened.
    * Removed the property ``docProviderFactory`` from the interface ``DocumentManager.IOptions``.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
-   * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
-     ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
-     ``renameAck`` is not optional anymore in ``IDocumentProvider``.
-   * Removed the token and type ``IDocumentProviderFactory``.
-   * Removed the property collaborative from the interface ``WebSocketProvider.IOptions``. It doesn't extend from
-     ``IDocumentProviderFactory.IOptions``. And the ``ymodel`` attribute has been renamed ``model``.
+   This package is no longer present in JupyterLab. For documentation related to Real-Time Collaboration, please check out
+   `jupyterlab_rtc's documentation <https://jupyterlab.readthedocs.io/en/latest/user/rtc.html>`_
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
@@ -159,7 +155,8 @@ bumped their major version (following semver convention). We want to point out p
    * Remove ``Contents.IDrive.modelDBFactory`` and ``Contents.IManager.getModelDBFactory``.
    * Added ``Contents.IDrive.sharedModelFactory`` and ``Contents.IManager.getsharedModelFactory``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
-   The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
+   This package is no longer present in JupyterLab. For documentation related to the shared models,
+   please check out `@jupyter/ydoc documentation <https://jupyter-ydoc.readthedocs.io/en/latest>`_.
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
   Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
   Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
