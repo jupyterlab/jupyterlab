@@ -444,7 +444,7 @@ appropriate package folder:
     We advice to use it as some tests are spinning a Jupyter Server that does not
     like to be executed in parallel.
 
-If you see a test run fail with ``Library not loaded: '@rpath/libpixman-1.0.dylib'`` (or different library, for example ``libcairo.2.dylib`` for ``cairo``) while running the
+If you see a test run fail with ``Library not loaded: '@rpath/libpixman-1.0.dylib'`` (or different library, for example ``libcairo.2.dylib`` for ``cairo`` for Mac computers with Apple silicon) while running the
 ``jlpm test`` command above, you may be missing packages required
 by ``canvas``. On macOS with Homebrew, you can add these packages by
 running
