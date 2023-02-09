@@ -132,6 +132,11 @@
   "description": "File Browser settings.",
   "jupyter.lab.shortcuts": [
     {
+      "command": "filebrowser:go-up",
+      "keys": ["Backspace"],
+      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+    },
+    {
       "command": "filebrowser:delete",
       "keys": ["Delete"],
       "selector": ".jp-DirListing-content .jp-DirListing-itemText"
