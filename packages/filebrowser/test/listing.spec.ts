@@ -183,21 +183,25 @@ describe('filebrowser/listing', () => {
           const nameNodes = itemNodes.map(node =>
             dirListing.renderer.getNameNode!(node)
           ) as HTMLElement[];
-          checkboxes.map((checkbox, index) => {
-            expect(checkbox.checked).toBe(false);
-            expect(checkbox.getAttribute('aria-label')).toBe(
-              ariaSelectFile(nameNodes[index].textContent)
-            );
-          });
+          expect(checkboxes[0].checked).toBe(false);
+          expect(checkboxes[1].checked).toBe(false);
+          expect(checkboxes[0].getAttribute('aria-label')).toBe(
+            ariaSelectFile(nameNodes[0].textContent)
+          );
+          expect(checkboxes[1].getAttribute('aria-label')).toBe(
+            ariaSelectFile(nameNodes[1].textContent)
+          );
           dirListing.selectNext();
           dirListing.selectNext(true); // true = keep existing selection
           await signalToPromise(dirListing.updated);
-          checkboxes.map((checkbox, index) => {
-            expect(checkbox.checked).toBe(true);
-            expect(checkbox.getAttribute('aria-label')).toBe(
-              ariaDeselectFile(nameNodes[index].textContent)
-            );
-          });
+          expect(checkboxes[0].checked).toBe(true);
+          expect(checkboxes[1].checked).toBe(true);
+          expect(checkboxes[0].getAttribute('aria-label')).toBe(
+            ariaDeselectFile(nameNodes[0].textContent)
+          );
+          expect(checkboxes[1].getAttribute('aria-label')).toBe(
+            ariaDeselectFile(nameNodes[1].textContent)
+          );
         });
 
         // A double click on the item should open the item; however, a double
