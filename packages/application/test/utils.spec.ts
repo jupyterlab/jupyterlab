@@ -190,7 +190,10 @@ describe('@jupyterlab/application', () => {
     ])(
       'labels/captions %j, and default %s has label/caption %s',
       (values, defaultValue, expected) => {
+        let myCommands: SemanticCommand[] = [];
+
         for (let i = 0; i < values.length; i++) {
+          semanticCmd = new SemanticCommand();
           const id = `command-${i}`;
           const label = values[i];
           const caption = label.replace('label', 'caption');
@@ -201,6 +204,7 @@ describe('@jupyterlab/application', () => {
           });
 
           semanticCmd.add({ id });
+          myCommands.push(semanticCmd);
         }
 
         const semanticCommandId = 'my-semantic-command';
@@ -208,7 +212,7 @@ describe('@jupyterlab/application', () => {
           semanticCommandId,
           createSemanticCommand(
             app,
-            semanticCmd,
+            myCommands,
             {
               label: defaultValue,
               caption: defaultValue?.replace('label', 'caption')
