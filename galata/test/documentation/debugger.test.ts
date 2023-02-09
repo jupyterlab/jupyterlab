@@ -23,6 +23,9 @@ test.describe('Debugger', () => {
 
     // Wait for kernel to settle on idle
     await page
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
+    await page
       .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
       .waitFor();
 
