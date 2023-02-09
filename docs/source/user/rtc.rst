@@ -11,7 +11,7 @@ Real Time Collaboration
     To activate Real-Time Collaboration in JupyterLab, is necessary to install
     `jupyterlab_rtc <https://github.com/jupyterlab/jupyterlab_rtc>`_.
 
-From JupyterLab v4, is possible to activate Real-Time Collaboration by installing
+From JupyterLab v4, it is possible to activate Real-Time Collaboration by installing
 the extension `jupyterlab_rtc <https://github.com/jupyterlab/jupyterlab_rtc>`_.
 
 For more information about Real-Time Collaboration in JupyterLab, please check out
