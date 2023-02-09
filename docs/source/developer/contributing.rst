@@ -354,7 +354,7 @@ Notes:
    running
    ``brew install pkg-config cairo pango libpng jpeg giflib librsvg``.
    If you are using mamba or conda, you can install the necessary packages
-   with `conda install -c conda-forge pkg-config glib pango pixman`.
+   with ``conda install -c conda-forge pkg-config glib pango pixman``.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
    ``yarn`` installed already, you can use the ``yarn`` command when
