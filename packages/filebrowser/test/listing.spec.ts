@@ -84,6 +84,13 @@ describe('filebrowser/listing', () => {
     });
 
     describe('checkboxes', () => {
+      const ariaSelectAll = 'Select all files and directories';
+      const ariaDeselectAll = 'Deselect all files and directories';
+      const ariaSelectFile = (filename: string | null) =>
+        `Select file "${filename}"`;
+      const ariaDeselectFile = (filename: string | null) =>
+        `Deselect file "${filename}"`;
+
       describe('file/item checkbox', () => {
         it('should be checked after item is selected', async () => {
           const itemNode = dirListing.contentNode.children[0] as HTMLElement;
@@ -91,9 +98,18 @@ describe('filebrowser/listing', () => {
             itemNode
           ) as HTMLInputElement;
           expect(checkbox.checked).toBe(false);
+          const nameNode = dirListing.renderer.getNameNode!(
+            itemNode
+          ) as HTMLElement;
+          expect(checkbox.getAttribute('aria-label')).toBe(
+            ariaSelectFile(nameNode.textContent)
+          );
           dirListing.selectNext();
           await signalToPromise(dirListing.updated);
           expect(checkbox.checked).toBe(true);
+          expect(checkbox.getAttribute('aria-label')).toBe(
+            ariaDeselectFile(nameNode.textContent)
+          );
         });
 
         it('should be unchecked after item is unselected', async () => {
@@ -101,13 +117,22 @@ describe('filebrowser/listing', () => {
           const checkbox = dirListing.renderer.getCheckboxNode!(
             itemNode
           ) as HTMLInputElement;
+          const nameNode = dirListing.renderer.getNameNode!(
+            itemNode
+          ) as HTMLElement;
           dirListing.selectNext();
           await signalToPromise(dirListing.updated);
           expect(checkbox.checked).toBe(true);
+          expect(checkbox.getAttribute('aria-label')).toBe(
+            ariaDeselectFile(nameNode.textContent)
+          );
           // Selecting the next item unselects the first.
           dirListing.selectNext();
           await signalToPromise(dirListing.updated);
           expect(checkbox.checked).toBe(false);
+          expect(checkbox.getAttribute('aria-label')).toBe(
+            ariaSelectFile(nameNode.textContent)
+          );
         });
 
         it('should allow selecting multiple items', async () => {
@@ -155,13 +180,24 @@ describe('filebrowser/listing', () => {
           const checkboxes = itemNodes.map(node =>
             dirListing.renderer.getCheckboxNode!(node)
           ) as HTMLInputElement[];
-          expect(checkboxes[0].checked).toBe(false);
-          expect(checkboxes[1].checked).toBe(false);
+          const nameNodes = itemNodes.map(node =>
+            dirListing.renderer.getNameNode!(node)
+          ) as HTMLElement[];
+          checkboxes.map((checkbox, index) => {
+            expect(checkbox.checked).toBe(false);
+            expect(checkbox.getAttribute('aria-label')).toBe(
+              ariaSelectFile(nameNodes[index].textContent)
+            );
+          });
           dirListing.selectNext();
           dirListing.selectNext(true); // true = keep existing selection
           await signalToPromise(dirListing.updated);
-          expect(checkboxes[0].checked).toBe(true);
-          expect(checkboxes[1].checked).toBe(true);
+          checkboxes.map((checkbox, index) => {
+            expect(checkbox.checked).toBe(true);
+            expect(checkbox.getAttribute('aria-label')).toBe(
+              ariaDeselectFile(nameNodes[index].textContent)
+            );
+          });
         });
 
         // A double click on the item should open the item; however, a double
@@ -243,6 +279,9 @@ describe('filebrowser/listing', () => {
             expect(headerCheckbox.checked).toBe(false);
             expect(headerCheckbox!.indeterminate).toBe(false);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
+            expect(headerCheckbox.getAttribute('aria-label')).toBe(
+              ariaSelectAll
+            );
           };
           it('should check all', async () => {
             expectInitialConditions();
@@ -252,6 +291,9 @@ describe('filebrowser/listing', () => {
             simulate(headerCheckbox, 'click');
             await signalToPromise(dirListing.updated);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(4);
+            expect(headerCheckbox.getAttribute('aria-label')).toBe(
+              ariaDeselectAll
+            );
           });
         });
 
@@ -266,6 +308,9 @@ describe('filebrowser/listing', () => {
             ) as HTMLInputElement;
             expect(headerCheckbox.indeterminate).toBe(true);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(1);
+            expect(headerCheckbox.getAttribute('aria-label')).toBe(
+              ariaDeselectAll
+            );
           };
           it('should uncheck all', async () => {
             expectInitialConditions();
@@ -275,6 +320,9 @@ describe('filebrowser/listing', () => {
             simulate(headerCheckbox, 'click');
             await signalToPromise(dirListing.updated);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
+            expect(headerCheckbox.getAttribute('aria-label')).toBe(
+              ariaSelectAll
+            );
           });
         });
 
