@@ -444,6 +444,14 @@ appropriate package folder:
     We advice to use it as some tests are spinning a Jupyter Server that does not
     like to be executed in parallel.
 
+If you see a test run fail with ``Library not loaded: '@rpath/libpixman-1.0.dylib'`` (or different library, for example ``libcairo.2.dylib`` for ``cairo``) while running the
+``jlpm test`` command above, you may be missing packages required
+by ``canvas``. On macOS with Homebrew, you can add these packages by
+running
+``brew install pkg-config cairo pango libpng jpeg giflib librsvg``.
+If you are using mamba or conda, you can install the necessary packages
+with ``conda install -c conda-forge pkg-config glib pango pixman``.
+
 We use ``jest`` for all tests, so standard ``jest`` workflows apply.
 Tests can be debugged in either VSCode or Chrome. It can help to add an
 ``it.only`` to a specific test when debugging. All of the ``test*``
