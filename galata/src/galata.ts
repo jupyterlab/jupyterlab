@@ -3,9 +3,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type * as nbformat from '@jupyterlab/nbformat';
-import type { Session, TerminalAPI, Workspace } from '@jupyterlab/services';
+import type {
+  Session,
+  TerminalAPI,
+  User,
+  Workspace
+} from '@jupyterlab/services';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { JSONObject } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 import type { APIRequestContext, Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
 import { ContentsHelper } from './contents';
@@ -91,6 +97,78 @@ export namespace galata {
   export type NotebookToolbarItemId = DefaultNotebookToolbarItemId | string;
 
   /**
+   * Options to create a new page
+   */
+  export interface INewPageOption {
+    /**
+     * Application base URL
+     */
+    baseURL: string;
+    /**
+     * Playwright browser model
+     */
+    browser: Browser;
+    /**
+     * Callback that resolved when the application page is ready
+     */
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>;
+    /**
+     * Application URL path fragment
+     *
+     * Default: /lab
+     */
+    appPath?: string;
+    /**
+     * Whether to go to JupyterLab page within the fixture or not.
+     *
+     * Default: true
+     */
+    autoGoto?: boolean;
+    /**
+     * Mock Jupyter Server configuration in-memory or not.
+     *
+     * Default true
+     */
+    mockConfig?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab state in-memory or not.
+     *
+     * Default galata.DEFAULT_SETTINGS
+     */
+    mockSettings?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab settings in-memory or not.
+     *
+     * Default true
+     */
+    mockState?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab user in-memory or not.
+     *
+     * Default true
+     */
+    mockUser?: boolean | Partial<User.IUser>;
+    /**
+     * Whether to store sessions in memory or not.
+     *
+     * Default true
+     */
+    mockSessions?: boolean;
+    /**
+     * Whether to store terminals in memory or not.
+     *
+     * Default true
+     */
+    mockTerminals?: boolean;
+    /**
+     * Create and delete a temporary path during the page existence
+     *
+     * Default ''
+     */
+    tmpPath?: string;
+  }
+
+  /**
    * Add the Galata helpers to the page model
    *
    * @param page Playwright page model
@@ -131,6 +209,7 @@ export namespace galata {
     mockConfig: boolean | Record<string, unknown>,
     mockSettings: boolean | Record<string, unknown>,
     mockState: boolean | Record<string, unknown>,
+    mockUser: boolean | Partial<User.IUser>,
     page: Page,
     sessions: Map<string, Session.IModel> | null,
     terminals: Map<string, TerminalAPI.IModel> | null,
@@ -174,6 +253,24 @@ export namespace galata {
       await Mock.mockState(page, workspace);
     }
 
+    let user: User.IUser = {
+      identity: {
+        username: UUID.uuid4(),
+        name: 'jovyan',
+        display_name: 'jovyan',
+        initials: 'JP',
+        color: 'var(--jp-collaborator-color1)'
+      },
+      permissions: {}
+    };
+    if (mockUser) {
+      if (typeof mockUser !== 'boolean') {
+        user = { ...mockUser } as any;
+      }
+      // The user will be stored in-memory
+      await Mock.mockUser(page, user);
+    }
+
     // Add sessions and terminals trackers
     if (sessions) {
       await Mock.mockRunners(page, sessions, 'sessions');
@@ -205,43 +302,66 @@ export namespace galata {
   }
 
   /**
-   * Create a page with Galata helpers for the given browser
+   * Create a page with Galata helpers for the given browser in a new context.
    *
-   * @param browser Playwright browser model
-   * @param baseURL Application base URL
-   * @param waitForApplication Callback that resolved when the application page is ready
-   * @param appPath Application URL path fragment
    * @returns Playwright page model with Galata helpers
    */
-  export async function newPage(
-    appPath: string,
-    autoGoto: boolean,
-    baseURL: string,
-    browser: Browser,
-    mockConfig: boolean | Record<string, unknown>,
-    mockSettings: boolean | Record<string, unknown>,
-    mockState: boolean | Record<string, unknown>,
-    sessions: Map<string, Session.IModel> | null,
-    terminals: Map<string, TerminalAPI.IModel> | null,
-    tmpPath: string,
-    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>
-  ): Promise<IJupyterLabPageFixture> {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
-    return initTestPage(
+  export async function newPage(options: INewPageOption): Promise<{
+    page: IJupyterLabPageFixture;
+    sessions: Map<string, Session.IModel> | null;
+    terminals: Map<string, TerminalAPI.IModel> | null;
+  }> {
+    const {
       appPath,
       autoGoto,
       baseURL,
+      browser,
+      waitForApplication,
       mockConfig,
+      mockSessions,
       mockSettings,
       mockState,
-      page,
+      mockTerminals,
+      mockUser,
+      tmpPath
+    } = {
+      appPath: '/lab',
+      autoGoto: true,
+      mockConfig: true,
+      mockSessions: true,
+      mockSettings: galata.DEFAULT_SETTINGS,
+      mockState: true,
+      mockTerminals: true,
+      mockUser: true,
+      tmpPath: '',
+      ...options
+    };
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    const sessions = mockSessions ? new Map<string, Session.IModel>() : null;
+    const terminals = mockTerminals
+      ? new Map<string, TerminalAPI.IModel>()
+      : null;
+
+    return {
+      page: await initTestPage(
+        appPath,
+        autoGoto,
+        baseURL,
+        mockConfig,
+        mockSettings,
+        mockState,
+        mockUser,
+        page,
+        sessions,
+        terminals,
+        tmpPath,
+        waitForApplication
+      ),
       sessions,
-      terminals,
-      tmpPath,
-      waitForApplication
-    );
+      terminals
+    };
   }
 
   /**
@@ -324,6 +444,11 @@ export namespace galata {
      * The id will be prefixed by '/'.
      */
     export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)/;
+
+    /**
+     * User API
+     */
+    export const user = /.*\/api\/me.*/;
   }
 
   /**
@@ -450,10 +575,10 @@ export namespace galata {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
-      ctxt.on('close', () => {
+      ctxt.once('close', () => {
         isClosed = true;
       });
-      ctxt.browser()?.on('disconnected', () => {
+      ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
 
@@ -582,10 +707,10 @@ export namespace galata {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
-      ctxt.on('close', () => {
+      ctxt.once('close', () => {
         isClosed = true;
       });
-      ctxt.browser()?.on('disconnected', () => {
+      ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
       return page.route(routeRegex, async (route, request) => {
@@ -785,10 +910,10 @@ export namespace galata {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
-      ctxt.on('close', () => {
+      ctxt.once('close', () => {
         isClosed = true;
       });
-      ctxt.browser()?.on('disconnected', () => {
+      ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
 
@@ -882,6 +1007,26 @@ export namespace galata {
               status: 204
             });
           }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Mock user route.
+     *
+     * @param page Page model object
+     * @param user In-memory user
+     */
+    export function mockUser(page: Page, user: User.IUser): Promise<void> {
+      return page.route(Routes.user, (route, request) => {
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              body: JSON.stringify(user)
+            });
           default:
             return route.continue();
         }

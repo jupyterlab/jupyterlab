@@ -125,7 +125,6 @@ test.describe('Filtered Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
-    await page.pause();
     expect(
       await page.screenshot({
         clip: { x: 33, y: 100, width: 250, height: 280 }

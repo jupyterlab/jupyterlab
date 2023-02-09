@@ -8,6 +8,9 @@ on:
       - master
   pull_request:
 
+env:
+  PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
+
 jobs:
   test:
     name: Visual Regression Tests
@@ -20,6 +23,13 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Set up browser cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
       - name: Install dependencies
         run: |
@@ -48,7 +58,7 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test
+          jlpm run test --project galata jupyterlab
           mv galata/test-results galata/test-jupyterlab-results || true
           # Run once benchmark tests to ensure they have no regression
           BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
@@ -107,6 +117,13 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Set up browser cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
       - name: Install dependencies
         run: |

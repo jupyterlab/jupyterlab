@@ -125,12 +125,6 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/filebrowser-extension`` from 3.x to 4.x
    Remove command ``filebrowser:create-main-launcher``. You can replace by ``launcher:create`` (same behavior)
    All launcher creation actions are moved to ``@jupyterlab/launcher-extension``.
-- ``@jupyterlab/galata`` from 4.x to 5.x
-   * ``ContentsHelper`` and ``galata.newContentsHelper`` have new constructor arguments to use Playwright API request object:
-     ``new ContentsHelper(baseURL, page?, request?)`` -> ``new ContentsHelper(request?, page?)``
-     ``galata.newContentsHelper(baseURL, page?, request?)`` -> ``galata.newContentsHelper(request?, page?)``
-     you need to provide ``request`` or ``page``; they both are fixtures provided by Playwright.
-   * ``galata.Mock.clearRunners(baseURL, runners, type)`` -> ``galata.Mock.clearRunners(request, runners, type)``
 - ``@jupyterlab/docregistry`` from 3.x to 4.x
    * Removed the property ``docProviderFactory`` from the interface ``Context.IOptions``.
    * The constructor of the class ``DocumentModel`` receives a parameter ``DocumentModel.IOptions``.
@@ -228,6 +222,33 @@ helpers from various core packages. The exported helpers are the same as before 
 
 - ``NBTestUtils.DEFAULT_CONTENT``: Removed - you could imported from ``@jupyterlab/notebook/lib/testutils`` but we strongly advice not to and to use your own test data.
 - ``NBTestUtils.DEFAULT_CONTENT_45``: Removed
+
+Testing with Galata
+^^^^^^^^^^^^^^^^^^^
+
+The in-page helpers are now in an JupyterLab extension to live in the common Webpack shared scoped. That new extension
+is contained in the JupyterLab python package at ``jupyterlab.galata``. It requires to update your Jupyter server
+configuration by adding the following line:
+
+.. code-block:: python
+
+    import jupyterlab
+    c.LabApp.extra_labextensions_path = str(Path(jupyterlab.__file__).parent / "galata")
+
+.. note::
+
+    To ease configuration, we have introduce a new helper function ``jupyterlab.galata.configure_jupyter_server``. So you can
+    simplify the server configuration to be ``jupyterlab.galata.configure_jupyter_server(c)``.
+
+Here are the changes in the Javascript package ``@jupyterlab/galata`` from 4.x to 5.x:
+   * ``ContentsHelper`` and ``galata.newContentsHelper`` have new constructor arguments to use Playwright API request object:
+     ``new ContentsHelper(baseURL, page?, request?)`` -> ``new ContentsHelper(request?, page?)``
+     ``galata.newContentsHelper(baseURL, page?, request?)`` -> ``galata.newContentsHelper(request?, page?)``
+     you need to provide ``request`` or ``page``; they both are fixtures provided by Playwright.
+   * ``galata.Mock.clearRunners(baseURL, runners, type)`` -> ``galata.Mock.clearRunners(request, runners, type)``
+   * In-pages helpers are now in an extension define in ``jupyterlab/galata/extension`` and
+     store in ``@jupyterlab/galata/lib/extension``. And the global object has been renamed ``window.galata`` instead
+     of ``window.galataip`` (it still exists but it is deprecated).
 
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
