@@ -79,7 +79,6 @@
     "@jupyterlab/translation-extension": "~4.0.0-alpha.18",
     "@jupyterlab/ui-components": "^4.0.0-alpha.17",
     "@jupyterlab/ui-components-extension": "~4.0.0-alpha.18",
-    "@jupyterlab/vdom-extension": "~4.0.0-alpha.18",
     "@jupyterlab/vega5-extension": "~4.0.0-alpha.18",
     "@lumino/algorithm": "^2.0.0-beta.0",
     "@lumino/application": "^2.0.0-beta.1",
@@ -137,7 +136,6 @@
     "@jupyterlab/translation": "^4.0.0-alpha.18",
     "@jupyterlab/translation-extension": "^4.0.0-alpha.18",
     "@jupyterlab/ui-components-extension": "^4.0.0-alpha.18",
-    "@jupyterlab/vdom-extension": "^4.0.0-alpha.18",
     "@jupyterlab/vega5-extension": "^4.0.0-alpha.18"
   },
   "devDependencies": {
@@ -246,7 +244,6 @@
       "@jupyterlab/tooltip-extension",
       "@jupyterlab/translation-extension",
       "@jupyterlab/ui-components-extension",
-      "@jupyterlab/vdom-extension",
       "@jupyterlab/vega5-extension"
     ]
   }

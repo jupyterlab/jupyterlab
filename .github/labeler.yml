@@ -314,12 +314,6 @@ pkg:ui-components:
   - packages/ui-components-extension/**/*
   - packages/ui-components-extension/*
 
-pkg:vdom:
-  - packages/vdom/**/*
-  - packages/vdom/*
-  - packages/vdom-extension/**/*
-  - packages/vdom-extension/*
-
 pkg:vega:
   - packages/vega5-extension/**/*
   - packages/vega5-extension/*
