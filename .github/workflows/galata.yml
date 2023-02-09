@@ -16,7 +16,7 @@ jobs:
     name: Visual Regression Tests
     if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Galata snapshots updated.'))) }}
     timeout-minutes: 80
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -92,11 +92,11 @@ jobs:
     # Python dependencies are frozen in the installation step
     # Note: IPython is among the frozen package
     timeout-minutes: 80
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         # Freeze Python version because it appears in console header
-        python-version: ['3.9.9']
+        python-version: ['3.10.6']
     steps:
       - name: Checkout JupyterLab
         uses: actions/checkout@v3
