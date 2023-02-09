@@ -45,15 +45,15 @@ export class ServiceManager implements ServiceManager.IManager {
     const standby = options.standby ?? 'when-hidden';
     const normalized = { defaultDrive, serverSettings, standby };
 
-    const kernelManager = options.kernels || new KernelManager(normalized);
     this.serverSettings = serverSettings;
     this.contents = options.contents || new ContentsManager(normalized);
     this.events = options.events || new EventManager(normalized);
+    this.kernels = options.kernels || new KernelManager(normalized);
     this.sessions =
       options.sessions ||
       new SessionManager({
         ...normalized,
-        kernelManager: kernelManager
+        kernelManager: this.kernels
       });
     this.settings = options.settings || new SettingManager(normalized);
     this.terminals = options.terminals || new TerminalManager(normalized);
@@ -120,7 +120,12 @@ export class ServiceManager implements ServiceManager.IManager {
   readonly sessions: Session.IManager;
 
   /**
-   * Get the session manager instance.
+   * Get the kernel manager instance.
+   */
+  readonly kernels: Kernel.IManager;
+
+  /**
+   * Get the kernelspec manager instance.
    */
   readonly kernelspecs: KernelSpec.IManager;
 
@@ -217,11 +222,6 @@ export namespace ServiceManager {
    */
   export interface IOptions extends IManagers {
     /**
-     * Kernel manager of the manager.
-     */
-    readonly kernels: Kernel.IManager;
-
-    /**
      * The default drive for the contents manager.
      */
     readonly defaultDrive: Contents.IDrive;
@@ -269,7 +269,12 @@ export namespace ServiceManager {
     readonly sessions: Session.IManager;
 
     /**
-     * The session manager for the manager.
+     * The kernel manager of the manager.
+     */
+    readonly kernels: Kernel.IManager;
+
+    /**
+     * The kernelspec manager for the manager.
      */
     readonly kernelspecs: KernelSpec.IManager;
 

@@ -128,6 +128,8 @@ jobs:
       - name: Launch JupyterLab
         env:
           JUPYTERLAB_GALATA_ROOT_DIR: ${{ env.DEMO_DIR }}
+          # Ignore Python warning for cleaner documentation snapshots
+          PYTHONWARNINGS: ignore
         run: |
           set -ex
           cd galata

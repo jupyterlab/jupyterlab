@@ -21,7 +21,7 @@ import {
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import {
   CommandToolbarButton,
-  IFormComponentRegistry,
+  IFormRendererRegistry,
   launchIcon,
   Toolbar
 } from '@jupyterlab/ui-components';
@@ -64,7 +64,7 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     ISettingRegistry,
     IStateDB,
     ITranslator,
-    IFormComponentRegistry,
+    IFormRendererRegistry,
     ILabStatus
   ],
   optional: [ILayoutRestorer, ICommandPalette, IJSONSettingEditorTracker],
@@ -81,7 +81,7 @@ function activate(
   registry: ISettingRegistry,
   state: IStateDB,
   translator: ITranslator,
-  editorRegistry: IFormComponentRegistry,
+  editorRegistry: IFormRendererRegistry,
   status: ILabStatus,
   restorer: ILayoutRestorer | null,
   palette: ICommandPalette | null,
@@ -160,13 +160,18 @@ function activate(
       query?: string;
       settingEditorType?: SettingEditorType;
     }) => {
-      void registry.load(plugin.id).then(settings => {
-        args.settingEditorType ??
-        (settings.get('settingEditorType').composite as SettingEditorType) ===
+      if (args.settingEditorType === 'ui') {
+        void commands.execute(CommandIDs.open, { query: args.query ?? '' });
+      } else if (args.settingEditorType === 'json') {
+        void commands.execute(CommandIDs.openJSON);
+      } else {
+        void registry.load(plugin.id).then(settings => {
+          (settings.get('settingEditorType').composite as SettingEditorType) ===
           'json'
-          ? void commands.execute(CommandIDs.openJSON)
-          : void openUi({ query: args.query ?? '' });
-      });
+            ? void commands.execute(CommandIDs.openJSON)
+            : void openUi({ query: args.query ?? '' });
+        });
+      }
     },
     label: args => {
       if (args.label) {

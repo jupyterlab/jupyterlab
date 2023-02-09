@@ -3,93 +3,80 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import React from 'react';
-import {
-  ArrayFieldTemplateProps,
-  FieldTemplateProps,
-  ObjectFieldTemplateProps,
-  utils
-} from '@rjsf/core';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
 
+import Form, { FormProps, IChangeEvent } from '@rjsf/core';
+
+import {
+  ADDITIONAL_PROPERTY_FLAG,
+  ArrayFieldTemplateProps,
+  canExpand,
+  FieldTemplateProps,
+  getTemplate,
+  ObjectFieldTemplateProps,
+  Registry,
+  UiSchema
+} from '@rjsf/utils';
+
+import React from 'react';
 import {
   addIcon,
   caretDownIcon,
   caretUpIcon,
   closeIcon,
   LabIcon
-} from './icon';
-import { ITranslator } from '@jupyterlab/translation';
-import { JSONExt } from '@lumino/coreutils';
-import { reduce } from '@lumino/algorithm';
+} from '../icon';
 
 /**
- * React JSON schema form templates namespace.
+ * Default `ui:options` for the UiSchema.
  */
-export namespace RJSFTemplates {
+export const DEFAULT_UI_OPTIONS = {
   /**
-   * Properties for React JSON schema form's templates factory.
+   * This prevents the submit button from being rendered, by default, as it is
+   * almost never what is wanted.
+   *
+   * Provide any `uiSchema#/ui:options/submitButtonOptions` to override this.
    */
-  export interface IProps {
-    /**
-     * Whether the form is compact or not.
-     * Currently the compact mode is used for metadata-form,
-     * and the normal mode for settings-editor.
-     */
-    compact?: boolean;
-    /**
-     * Whether to display if the current value is not the default one.
-     */
-    showModifiedFromDefault?: boolean;
-    /**
-     * Translator for button text.
-     */
-    translator?: ITranslator;
+  submitButtonOptions: {
+    norender: true
   }
+};
 
-  /**
-   * Properties for React JSON schema form's field template.
-   */
-  export interface IFieldProps {
+/**
+ * Form component namespace.
+ */
+export namespace FormComponent {
+  export interface IButtonProps {
     /**
-     * Whether to display if the current value is not the default one.
+     * Button style.
      */
-    showModifiedFromDefault?: boolean;
+    buttonStyle?: 'icons' | 'text';
     /**
      * Translator for button text.
      */
     translator?: ITranslator;
-    /**
-     * Whether the field is in compact mode or not.
-     * In compact mode :
-     *    - the title and description are displayed together
-     *    - the input field is 100% wide (supposed to be in a tight container)
-     */
-    compact?: boolean;
   }
 
   /**
    * Properties for React JSON schema form's container template (array and object).
    */
-  export interface IContainerProps {
-    /**
-     * Translator for button text.
-     */
-    translator?: ITranslator;
-    /**
-     * Array operation button style.
-     */
-    buttonStyle?: 'icons' | 'text';
+  export interface ILabCustomizerProps extends IButtonProps {
     /**
      * Whether the container is in compact mode or not.
      * In compact mode the title and description are displayed more compactness.
      */
     compact?: boolean;
+    /**
+     * Whether to display if the current value is not the default one.
+     */
+    showModifiedFromDefault?: boolean;
   }
 
   /**
    * Properties of the button to move an item.
    */
-  export interface IMoveButtonProps {
+  export interface IMoveButtonProps extends IButtonProps {
     /**
      * Item index to move with this button.
      */
@@ -98,62 +85,37 @@ export namespace RJSFTemplates {
      * Direction in which to move the item.
      */
     direction: 'up' | 'down';
-    /**
-     * Button style.
-     */
-    buttonStyle?: 'icons' | 'text';
-    /**
-     * Translator for button text.
-     */
-    translator?: ITranslator;
   }
 
   /**
    * Properties of the button to drop an item.
    */
-  export interface IDropButtonProps {
+  export interface IDropButtonProps extends IButtonProps {
     /**
      * Item index to drop with this button.
      */
     item: ArrayFieldTemplateProps['items'][number];
-    /**
-     * Button style.
-     */
-    buttonStyle?: 'icons' | 'text';
-    /**
-     * Translator for button text.
-     */
-    translator?: ITranslator;
   }
 
   /**
    * Properties of the button to add an item.
    */
-  export interface IAddButtonProps {
+  export interface IAddButtonProps extends IButtonProps {
     /**
      * Function to call to add an item.
      */
     onAddClick: ArrayFieldTemplateProps['onAddClick'];
-    /**
-     * Button style.
-     */
-    buttonStyle?: 'icons' | 'text';
-    /**
-     * Translator for button text.
-     */
-    translator?: ITranslator;
   }
 }
-
 /**
  * Button to move an item.
  *
  * @returns - the button as a react element.
  */
 export const MoveButton = (
-  props: RJSFTemplates.IMoveButtonProps
+  props: FormComponent.IMoveButtonProps
 ): JSX.Element => {
-  const trans = props.translator?.load('jupyterlab');
+  const trans = (props.translator ?? nullTranslator).load('jupyterlab');
   let buttonContent: JSX.Element | string;
 
   /**
@@ -168,25 +130,26 @@ export const MoveButton = (
   };
 
   if (props.buttonStyle === 'icons') {
-    buttonContent = (
-      <LabIcon.resolveReact
-        icon={props.direction === 'up' ? caretUpIcon : caretDownIcon}
-        tag="span"
-        elementSize="xlarge"
-        elementPosition="center"
-      />
-    );
+    const iconProps: LabIcon.IReactProps = {
+      tag: 'span',
+      elementSize: 'xlarge',
+      elementPosition: 'center'
+    };
+    buttonContent =
+      props.direction === 'up' ? (
+        <caretUpIcon.react {...iconProps}></caretUpIcon.react>
+      ) : (
+        <caretDownIcon.react {...iconProps}></caretDownIcon.react>
+      );
   } else {
     buttonContent =
-      props.direction === 'up'
-        ? trans?.__('Move up') || 'Move up'
-        : trans?.__('Move down') || 'Move down';
+      props.direction === 'up' ? trans.__('Move up') : trans.__('Move down');
   }
 
   const moveTo =
     props.direction === 'up' ? props.item.index - 1 : props.item.index + 1;
 
-  const button = (
+  return (
     <button
       className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
       onClick={props.item.onReorderClick(props.item.index, moveTo)}
@@ -195,8 +158,6 @@ export const MoveButton = (
       {buttonContent}
     </button>
   );
-
-  return button;
 };
 
 /**
@@ -205,25 +166,24 @@ export const MoveButton = (
  * @returns - the button as a react element.
  */
 export const DropButton = (
-  props: RJSFTemplates.IDropButtonProps
+  props: FormComponent.IDropButtonProps
 ): JSX.Element => {
-  const trans = props.translator?.load('jupyterlab');
+  const trans = (props.translator ?? nullTranslator).load('jupyterlab');
   let buttonContent: JSX.Element | string;
 
   if (props.buttonStyle === 'icons') {
     buttonContent = (
-      <LabIcon.resolveReact
-        icon={closeIcon}
+      <closeIcon.react
         tag="span"
         elementSize="xlarge"
         elementPosition="center"
       />
     );
   } else {
-    buttonContent = trans?.__('Remove') || 'Remove';
+    buttonContent = trans.__('Remove');
   }
 
-  const button = (
+  return (
     <button
       className="jp-mod-styled jp-mod-warn jp-ArrayOperationsButton"
       onClick={props.item.onDropIndexClick(props.item.index)}
@@ -231,8 +191,6 @@ export const DropButton = (
       {buttonContent}
     </button>
   );
-
-  return button;
 };
 
 /**
@@ -241,25 +199,20 @@ export const DropButton = (
  * @returns - the button as a react element.
  */
 export const AddButton = (
-  props: RJSFTemplates.IAddButtonProps
+  props: FormComponent.IAddButtonProps
 ): JSX.Element => {
-  const trans = props.translator?.load('jupyterlab');
+  const trans = (props.translator ?? nullTranslator).load('jupyterlab');
   let buttonContent: JSX.Element | string;
 
   if (props.buttonStyle === 'icons') {
     buttonContent = (
-      <LabIcon.resolveReact
-        icon={addIcon}
-        tag="span"
-        elementSize="xlarge"
-        elementPosition="center"
-      />
+      <addIcon.react tag="span" elementSize="xlarge" elementPosition="center" />
     );
   } else {
-    buttonContent = trans?.__('Add') || 'Add';
+    buttonContent = trans.__('Add');
   }
 
-  const button = (
+  return (
     <button
       className="jp-mod-styled jp-mod-reject jp-ArrayOperationsButton"
       onClick={props.onAddClick}
@@ -267,30 +220,82 @@ export const AddButton = (
       {buttonContent}
     </button>
   );
-
-  return button;
 };
 
-/**
- * React JSON schema form's array template.
- */
-export class RJSFArrayTemplate {
-  /**
-   * Create a new array template object.
-   *
-   * @param options - the container template options.
-   */
-  constructor(options: RJSFTemplates.IContainerProps = {}) {
-    this._translator = options.translator;
-    this._buttonStyle = options.buttonStyle || 'text';
-    this._compact = options.compact || false;
-  }
+export interface ILabCustomizerOptions<P>
+  extends FormComponent.ILabCustomizerProps {
+  name?: string;
+  component: React.FunctionComponent<
+    P & Required<FormComponent.ILabCustomizerProps>
+  >;
+}
 
-  get template(): React.FC<ArrayFieldTemplateProps> {
-    const factory = (props: ArrayFieldTemplateProps) => {
+function customizeForLab<P = any>(
+  options: ILabCustomizerOptions<P>
+): React.FunctionComponent<P> {
+  const {
+    component,
+    name,
+    buttonStyle,
+    compact,
+    showModifiedFromDefault,
+    translator
+  } = options;
+
+  const isCompact = compact ?? false;
+  const button = buttonStyle ?? (isCompact ? 'icons' : 'text');
+
+  const factory = (props: P) =>
+    component({
+      ...props,
+      buttonStyle: button,
+      compact: isCompact,
+      showModifiedFromDefault: showModifiedFromDefault ?? true,
+      translator: translator ?? nullTranslator
+    });
+  if (name) {
+    factory.displayName = name;
+  }
+  return factory;
+}
+
+/**
+ * Fetch field templates from RJSF.
+ */
+function getTemplates(registry: Registry, uiSchema: UiSchema | undefined) {
+  const TitleField = getTemplate<'TitleFieldTemplate'>(
+    'TitleFieldTemplate',
+    registry,
+    uiSchema
+  );
+
+  const DescriptionField = getTemplate<'DescriptionFieldTemplate'>(
+    'DescriptionFieldTemplate',
+    registry,
+    uiSchema
+  );
+
+  return { TitleField, DescriptionField };
+}
+
+/**
+ * Template to allow for custom buttons to re-order/remove entries in an array.
+ * Necessary to create accessible buttons.
+ */
+const CustomArrayTemplateFactory = (
+  options: FormComponent.ILabCustomizerProps
+) =>
+  customizeForLab<ArrayFieldTemplateProps>({
+    ...options,
+    name: 'JupyterLabArrayTemplate',
+    component: props => {
+      const { schema, registry, uiSchema, required } = props;
+      const commonProps = { schema, registry, uiSchema, required };
+      const { TitleField, DescriptionField } = getTemplates(registry, uiSchema);
+
       return (
         <div className={props.className}>
-          {this._compact ? (
+          {props.compact ? (
             <div className="jp-FormGroup-compactTitle">
               <div
                 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem"
@@ -308,13 +313,14 @@ export class RJSFArrayTemplate {
           ) : (
             <>
               {props.title && (
-                <props.TitleField
+                <TitleField
+                  {...commonProps}
                   title={props.title}
-                  required={props.required}
                   id={`${props.idSchema.$id}-title`}
                 />
               )}
-              <props.DescriptionField
+              <DescriptionField
+                {...commonProps}
                 id={`${props.idSchema.$id}-description`}
                 description={props.schema.description ?? ''}
               />
@@ -326,20 +332,20 @@ export class RJSFArrayTemplate {
                 {item.children}
                 <div className="jp-ArrayOperations">
                   <MoveButton
-                    buttonStyle={this._buttonStyle}
-                    translator={this._translator}
+                    buttonStyle={props.buttonStyle}
+                    translator={props.translator}
                     item={item}
                     direction="up"
                   />
                   <MoveButton
-                    buttonStyle={this._buttonStyle}
-                    translator={this._translator}
+                    buttonStyle={props.buttonStyle}
+                    translator={props.translator}
                     item={item}
                     direction="down"
                   />
                   <DropButton
-                    buttonStyle={this._buttonStyle}
-                    translator={this._translator}
+                    buttonStyle={props.buttonStyle}
+                    translator={props.translator}
                     item={item}
                   />
                 </div>
@@ -349,42 +355,32 @@ export class RJSFArrayTemplate {
           {props.canAdd && (
             <AddButton
               onAddClick={props.onAddClick}
-              buttonStyle={this._buttonStyle}
-              translator={this._translator}
+              buttonStyle={props.buttonStyle}
+              translator={props.translator}
             />
           )}
         </div>
       );
-    };
-    factory.displayName = 'JupyterLabArrayTemplate';
-    return factory;
-  }
-
-  private _translator: ITranslator | undefined;
-  private _buttonStyle: 'icons' | 'text';
-  private _compact: boolean;
-}
+    }
+  });
 
 /**
- * React JSON schema form's object template.
+ * Template with custom add button, necessary for accessibility and internationalization.
  */
-export class RJSFObjectTemplate {
-  /**
-   * Create a new object template object.
-   *
-   * @param options - the container template options.
-   */
-  constructor(options: RJSFTemplates.IContainerProps = {}) {
-    this._translator = options.translator;
-    this._buttonStyle = options.buttonStyle || 'text';
-    this._compact = options.compact || false;
-  }
+const CustomObjectTemplateFactory = (
+  options: FormComponent.ILabCustomizerProps
+) =>
+  customizeForLab<ObjectFieldTemplateProps>({
+    ...options,
+    name: 'JupyterLabObjectTemplate',
+    component: props => {
+      const { schema, registry, uiSchema, required } = props;
+      const commonProps = { schema, registry, uiSchema, required };
+      const { TitleField, DescriptionField } = getTemplates(registry, uiSchema);
 
-  get template(): React.FC<ObjectFieldTemplateProps> {
-    const factory = (props: ObjectFieldTemplateProps) => {
       return (
         <fieldset id={props.idSchema.$id}>
-          {this._compact ? (
+          {props.compact ? (
             <div className="jp-FormGroup-compactTitle">
               <div
                 className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem"
@@ -401,59 +397,49 @@ export class RJSFObjectTemplate {
             </div>
           ) : (
             <>
-              {(props.title || props.uiSchema['ui:title']) && (
-                <props.TitleField
+              {(props.title ||
+                (props.uiSchema || JSONExt.emptyObject)['ui:title']) && (
+                <TitleField
+                  {...commonProps}
                   id={`${props.idSchema.$id}__title`}
-                  title={props.title || props.uiSchema['ui:title'] || ''}
-                  required={props.required}
+                  title={
+                    props.title ||
+                    `${(props.uiSchema || JSONExt.emptyObject)['ui:title']}` ||
+                    ''
+                  }
                 />
               )}
-              <props.DescriptionField
+              <DescriptionField
+                {...commonProps}
                 id={`${props.idSchema.$id}__description`}
                 description={props.schema.description ?? ''}
               />
             </>
           )}
           {props.properties.map(property => property.content)}
-          {utils.canExpand(props.schema, props.uiSchema, props.formData) && (
+          {canExpand(props.schema, props.uiSchema, props.formData) && (
             <AddButton
               onAddClick={props.onAddClick(props.schema)}
-              buttonStyle={this._buttonStyle}
-              translator={this._translator}
+              buttonStyle={props.buttonStyle}
+              translator={props.translator}
             />
           )}
         </fieldset>
       );
-    };
-    factory.displayName = 'JupyterLabObjectTemplate';
-    return factory;
-  }
-
-  private _translator: ITranslator | undefined;
-  private _buttonStyle: 'icons' | 'text';
-  private _compact: boolean;
-}
+    }
+  });
 
 /**
- * Custom field template for React JSON-schema form.
- *
+ * Renders the modified indicator and errors
  */
-export class RJSFFieldTemplate {
-  /**
-   * Create a new field template object.
-   *
-   * @param options - the field template options.
-   */
-  constructor(options: RJSFTemplates.IFieldProps = {}) {
-    this._showModifiedFromDefault = options.showModifiedFromDefault ?? false;
-    this._translator = options.translator;
-    this._compact = options.compact ?? false;
-  }
-
-  get template(): React.FC<FieldTemplateProps> {
-    const factory = (props: FieldTemplateProps) => {
-      const trans = this._translator?.load('jupyterlab');
+const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
+  customizeForLab<FieldTemplateProps>({
+    ...options,
+    name: 'JupyterLabFieldTemplate',
+    component: props => {
+      const trans = (props.translator ?? nullTranslator).load('jupyterlab');
       let isModified = false;
+      let defaultValue: any;
       const {
         formData,
         schema,
@@ -468,44 +454,36 @@ export class RJSFFieldTemplate {
         onDropPropertyClick
       } = props;
 
+      const { defaultFormData } = formContext;
       const schemaIds = id.split('_');
       schemaIds.shift();
       const schemaId = schemaIds.join('.');
 
-      if (this._showModifiedFromDefault) {
+      const isRoot = schemaId === '';
+
+      const hasCustomField =
+        schemaId === (props.uiSchema || JSONExt.emptyObject)['ui:field'];
+
+      if (props.showModifiedFromDefault) {
         /**
          * Determine if the field has been modified.
-         * Schema Id is formatted as 'root_<field name>.<nexted field name>'
+         * Schema Id is formatted as 'root_<field name>.<nested field name>'
          * This logic parses out the field name to find the default value
          * before determining if the field has been modified.
          */
 
-        let defaultValue;
-        if (schemaIds.length === 1) {
-          defaultValue = formContext.settings.default(schemaId);
-        } else if (schemaIds.length > 1) {
-          const allDefaultsForObject: any = {};
-          allDefaultsForObject[schemaIds[0]] = formContext.settings.default(
-            schemaIds[0]
-          );
-          defaultValue = reduce(
-            schemaIds,
-            (acc, val, i) => {
-              return acc?.[val];
-            },
-            allDefaultsForObject
-          );
-        }
+        defaultValue = schemaIds.reduce(
+          (acc, key) => acc?.[key],
+          defaultFormData
+        );
         isModified =
-          schemaId !== '' &&
+          !isRoot &&
           formData !== undefined &&
           defaultValue !== undefined &&
           !schema.properties &&
           schema.type !== 'array' &&
           !JSONExt.deepEqual(formData, defaultValue);
       }
-
-      const isRoot = schemaId === '';
 
       const needsDescription =
         !isRoot &&
@@ -514,11 +492,9 @@ export class RJSFFieldTemplate {
           'jp-SettingsEditor-@jupyterlab/shortcuts-extension:shortcuts_shortcuts';
 
       // While we can implement "remove" button for array items in array template,
-      // object templates do not provide a way to do this; instead we need to add
+      // object templates do not provide a way to do this instead we need to add
       // buttons here (and first check if the field can be removed = is additional).
-      const isAdditional = schema.hasOwnProperty(
-        utils.ADDITIONAL_PROPERTY_FLAG
-      );
+      const isAdditional = schema.hasOwnProperty(ADDITIONAL_PROPERTY_FLAG);
 
       const isItem: boolean = !(
         schema.type === 'object' || schema.type === 'array'
@@ -530,25 +506,23 @@ export class RJSFFieldTemplate {
             displayLabel || schema.type === 'boolean' ? 'small-field' : ''
           }`}
         >
-          {
-            // Only show the modified indicator if there are no errors
-            isModified && !rawErrors && <div className="jp-modifiedIndicator" />
-          }
-          {
-            // Shows a red indicator for fields that have validation errors
-            rawErrors && (
+          {!hasCustomField &&
+            (rawErrors ? (
+              // Shows a red indicator for fields that have validation errors
               <div className="jp-modifiedIndicator jp-errorIndicator" />
-            )
-          }
+            ) : (
+              // Only show the modified indicator if there are no errors
+              isModified && <div className="jp-modifiedIndicator" />
+            ))}
           <div
             className={`jp-FormGroup-content ${
-              this._compact
+              props.compact
                 ? 'jp-FormGroup-contentCompact'
                 : 'jp-FormGroup-contentNormal'
             }`}
           >
             {isItem && displayLabel && !isRoot && label && !isAdditional ? (
-              this._compact ? (
+              props.compact ? (
                 <div className="jp-FormGroup-compactTitle">
                   <div className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
                     {label}
@@ -593,72 +567,109 @@ export class RJSFFieldTemplate {
                 className="jp-FormGroup-contentItem jp-mod-styled jp-mod-warn jp-FormGroup-removeButton"
                 onClick={onDropPropertyClick(label)}
               >
-                {trans?.__('Remove') || 'Remove'}
+                {trans.__('Remove')}
               </button>
             )}
-            {!this._compact && schema.description && needsDescription && (
+            {!props.compact && schema.description && needsDescription && (
               <div className="jp-FormGroup-description">
                 {schema.description}
               </div>
             )}
-            {isModified && schema.default !== undefined && (
+            {isModified && defaultValue !== undefined && (
               <div className="jp-FormGroup-default">
-                {trans?.__('Default: %1', schema.default?.toLocaleString()) ||
-                  `Default: ${schema.default?.toLocaleString()}`}
+                {trans.__('Default: %1', defaultValue.toLocaleString())}
               </div>
             )}
             <div className="validationErrors">{errors}</div>
           </div>
         </div>
       );
-    };
-    factory.displayName = 'JupyterLabFieldTemplate';
-    return factory;
-  }
+    }
+  });
 
-  private _showModifiedFromDefault: boolean;
-  private _translator: ITranslator | undefined;
-  private _compact: boolean;
+/**
+ * FormComponent properties
+ */
+export interface IFormComponentProps<T = ReadonlyJSONObject>
+  extends FormProps<T>,
+    FormComponent.ILabCustomizerProps {
+  /**
+   *
+   */
+  formData: T;
+  /**
+   *
+   */
+  onChange: (e: IChangeEvent<T>) => any;
+  /**
+   *
+   */
+  formContext?: unknown;
 }
 
 /**
- * A templates factory for react JSON schema form.
- * It includes a field template, an array template and an object template.
+ * Generic rjsf form component for JupyterLab UI.
  */
-export class RJSFTemplatesFactory {
-  constructor(options: RJSFTemplates.IProps) {
-    this._fieldTemplate = new RJSFFieldTemplate({
-      showModifiedFromDefault: options.showModifiedFromDefault ?? false,
-      compact: options.compact ?? false,
-      translator: options.translator
-    });
+export function FormComponent(props: IFormComponentProps): JSX.Element {
+  const {
+    buttonStyle,
+    compact,
+    showModifiedFromDefault,
+    translator,
+    formContext,
+    ...others
+  } = props;
 
-    this._arrayTemplate = new RJSFArrayTemplate({
-      compact: options.compact ?? false,
-      buttonStyle: options.compact ? 'icons' : 'text',
-      translator: options.translator
-    });
+  const uiSchema = { ...(others.uiSchema || JSONExt.emptyObject) } as UiSchema;
 
-    this._objectTemplate = new RJSFObjectTemplate({
-      compact: options.compact ?? false,
-      buttonStyle: options.compact ? 'icons' : 'text',
-      translator: options.translator
-    });
-  }
+  uiSchema['ui:options'] = { ...DEFAULT_UI_OPTIONS, ...uiSchema['ui:options'] };
 
-  get fieldTemplate(): React.FC<FieldTemplateProps> {
-    return this._fieldTemplate.template;
-  }
+  others.uiSchema = uiSchema;
 
-  get arrayTemplate(): React.FC<ArrayFieldTemplateProps> {
-    return this._arrayTemplate.template;
-  }
+  const { FieldTemplate, ArrayFieldTemplate, ObjectFieldTemplate } =
+    props.templates || JSONExt.emptyObject;
 
-  get objectTemplate(): React.FC<ObjectFieldTemplateProps> {
-    return this._objectTemplate.template;
-  }
+  const customization = {
+    buttonStyle,
+    compact,
+    showModifiedFromDefault,
+    translator
+  };
 
-  private _fieldTemplate: RJSFFieldTemplate;
-  private _arrayTemplate: RJSFArrayTemplate;
-  private _objectTemplate: RJSFObjectTemplate;
+  const fieldTemplate = React.useMemo(
+    () => FieldTemplate ?? CustomTemplateFactory(customization),
+    [FieldTemplate, buttonStyle, compact, showModifiedFromDefault, translator]
+  ) as React.FunctionComponent;
+
+  const arrayTemplate = React.useMemo(
+    () => ArrayFieldTemplate ?? CustomArrayTemplateFactory(customization),
+    [
+      ArrayFieldTemplate,
+      buttonStyle,
+      compact,
+      showModifiedFromDefault,
+      translator
+    ]
+  ) as React.FunctionComponent;
+
+  const objectTemplate = React.useMemo(
+    () => ObjectFieldTemplate ?? CustomObjectTemplateFactory(customization),
+    [
+      ObjectFieldTemplate,
+      buttonStyle,
+      compact,
+      showModifiedFromDefault,
+      translator
+    ]
+  ) as React.FunctionComponent;
+
+  const templates: Record<string, React.FunctionComponent> = {
+    FieldTemplate: fieldTemplate,
+    ArrayFieldTemplate: arrayTemplate,
+    ObjectFieldTemplate: objectTemplate
+  };
+
+  return (
+    <Form templates={templates} formContext={formContext as any} {...others} />
+  );
 }

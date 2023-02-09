@@ -117,16 +117,13 @@ test('Terminal web link', async ({ page, tmpPath }) => {
   await page.keyboard.press('Enter');
   await page.waitForTimeout(1000);
   await Promise.all([
-    terminal.locator('.jp-Terminal-body.xterm-cursor-pointer').waitFor(),
-    terminal
-      .locator('canvas')
-      .last()
-      .hover({
-        position: {
-          x: 60,
-          y: 23
-        }
-      })
+    terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor(),
+    terminal.locator('canvas.xterm-cursor-layer').hover({
+      position: {
+        x: 60,
+        y: 23
+      }
+    })
   ]);
   expect(await terminal.screenshot()).toMatchSnapshot('web-links-term.png');
 });

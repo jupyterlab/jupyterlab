@@ -599,6 +599,11 @@ export namespace IRenderMime {
    */
   export interface ITranslator {
     /**
+     * The code of the language in use.
+     */
+    readonly languageCode: string;
+
+    /**
      * Load translation bundles for a given domain.
      *
      * @param domain The translation domain to use for translations.

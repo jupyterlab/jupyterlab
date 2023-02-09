@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/json-extension",
-  "version": "4.0.0-alpha.17",
+  "version": "4.0.0-alpha.18",
   "description": "JupyterLab - JSON Renderer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,24 +32,24 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.17",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.17",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.17",
-    "@jupyterlab/translation": "^4.0.0-alpha.17",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.32",
+    "@jupyterlab/apputils": "^4.0.0-alpha.18",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.18",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.18",
+    "@jupyterlab/translation": "^4.0.0-alpha.18",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.33",
     "@lezer/highlight": "^1.0.0",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/messaging": "^2.0.0-alpha.6",
     "@lumino/widgets": "^2.0.0-alpha.6",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-highlighter": "^0.4.3",
     "react-json-tree": "^0.16.1",
     "style-mod": "^4.0.0"
   },
   "devDependencies": {
-    "@types/react": "^17.0.0",
-    "@types/react-dom": "^17.0.0",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
     "@types/react-highlighter": "^0.3.4",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",

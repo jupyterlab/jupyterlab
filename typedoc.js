@@ -28,7 +28,6 @@ const packages = [
   'csvviewer',
   'debugger-extension',
   'debugger',
-  'docprovider-extension',
   'docprovider',
   'docmanager-extension',
   'docmanager',

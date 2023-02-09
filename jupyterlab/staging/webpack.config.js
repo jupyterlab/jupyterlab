@@ -310,7 +310,7 @@ module.exports = [
       ]
     },
     devtool: 'inline-source-map',
-    externals: ['node-fetch', 'ws'],
+    externals: ['ws'],
     plugins
   })
 ].concat(extensionAssetConfig);

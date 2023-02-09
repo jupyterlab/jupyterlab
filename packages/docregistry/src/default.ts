@@ -24,11 +24,12 @@ export class DocumentModel
   /**
    * Construct a new document model.
    */
-  constructor(languagePreference?: string, collaborationEnabled?: boolean) {
-    super();
-    this._defaultLang = languagePreference || '';
+  constructor(options: DocumentRegistry.IModelOptions<ISharedFile> = {}) {
+    super({ sharedModel: options.sharedModel });
+    this._defaultLang = options.languagePreference ?? '';
+    this._collaborationEnabled = !!options.collaborationEnabled;
+
     this.sharedModel.changed.connect(this._onStateChanged, this);
-    this._collaborationEnabled = !!collaborationEnabled;
   }
 
   /**
@@ -267,11 +268,13 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * @returns A new document model.
    */
   createNew(
-    languagePreference?: string,
-    collaborationEnabled?: boolean
+    options: DocumentRegistry.IModelOptions<ISharedFile> = {}
   ): DocumentRegistry.ICodeModel {
-    const collaborative = collaborationEnabled && this.collaborative;
-    return new DocumentModel(languagePreference, collaborative);
+    const collaborative = options.collaborationEnabled && this.collaborative;
+    return new DocumentModel({
+      ...options,
+      collaborationEnabled: collaborative
+    });
   }
 
   /**

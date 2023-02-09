@@ -96,6 +96,6 @@ The About Plugin will feature an interactive guide for the user to scroll throug
 
 Motion will also be implemented in our animations for each feature, using a moving image format (\_.gif or \_.gifv file) of a UX demonstration of a real screen, to show users not only where and what each feature looks like, but also how to actually use each feature in real time.
 
-______________________________________________________________________
+---
 
 Please let our team know if you have any questions, suggestions, or comments about the design of the About plugin. Thank you!

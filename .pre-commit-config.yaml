@@ -1,6 +1,6 @@
 ci:
   # skip any check that needs internet access
-  skip: [check-jsonschema, prettier, eslint, stylelint, integrity]
+  skip: [prettier, eslint, stylelint]
 
 default_language_version:
   node: system
@@ -24,44 +24,21 @@ repos:
       - id: trailing-whitespace
         exclude: .bumpversion.cfg
 
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.21.0
+    hooks:
+      - id: check-github-workflows
+
   - repo: https://github.com/psf/black
-    rev: 22.12.0
+    rev: 23.1.0
     hooks:
       - id: black
-        args: ['--line-length', '100']
 
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.11.4
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.242
     hooks:
-      - id: isort
-        files: \.py$
-        args: [--profile=black]
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
-    hooks:
-      - id: flake8
-        additional_dependencies:
-          [
-            'flake8-bugbear==22.6.22',
-            'flake8-implicit-str-concat==0.2.0'
-          ]
-
-  - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.16
-    hooks:
-      - id: mdformat
-        additional_dependencies:
-          [mdformat-gfm, mdformat-frontmatter, mdformat-footnote]
-
-  - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.20.0
-    hooks:
-      - id: check-jsonschema
-        name: 'Check GitHub Workflows'
-        files: ^\.github/workflows/
-        types: [yaml]
-        args: ['--schemafile', 'https://json.schemastore.org/github-workflow']
+      - id: ruff
+        args: ["--fix"]
 
   - repo: local
     hooks:

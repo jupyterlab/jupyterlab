@@ -66,13 +66,12 @@ async def test_CheckForUpdateHandler_get_pypi_success(mock_client, labserverapp,
         "https://github.com/jupyterlab/jupyterlab/releases/tag/v1000.0.0",
     ]
     assert payload["notification"]["options"] == {
-        "data": {"id": hashlib.sha1(message.encode()).hexdigest(), "tags": ["update"]}
+        "data": {"id": hashlib.sha1(message.encode()).hexdigest(), "tags": ["update"]}  # noqa: S324
     }
 
 
 @patch("tornado.httpclient.AsyncHTTPClient", new_callable=fake_client_factory)
 async def test_CheckForUpdateHandler_get_failure(mock_client, labserverapp, jp_fetch):
-
     response = await jp_fetch("lab", "api", "update", method="GET")
 
     assert response.code == 200

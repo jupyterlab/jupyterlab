@@ -81,8 +81,8 @@ test.describe('Debugger Tests', () => {
     await page.waitForCondition(() => page.debugger.isOpen());
 
     await page.notebook.waitForCellGutter(0);
-    await page.notebook.clickCellGutter(0, 5);
-    await page.notebook.clickCellGutter(0, 6);
+    await page.notebook.clickCellGutter(0, 8);
+    await page.notebook.clickCellGutter(0, 11);
 
     // don't add await, run will be blocked by the breakpoint
     void page.notebook.run().then();

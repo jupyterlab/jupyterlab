@@ -7,7 +7,7 @@ import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
-import { Toolbar } from '@jupyterlab/ui-components';
+import { ReactWidget, Toolbar } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
@@ -50,7 +50,12 @@ export class CellToolbarTracker implements IDisposable {
     this._toolbar.changed.connect(this._onToolbarChanged, this);
 
     // Only add the toolbar to the notebook's active cell (if any) once it has fully rendered and been revealed.
-    void panel.revealed.then(() => this._onActiveCellChanged(panel.content));
+    void panel.revealed.then(() => {
+      // Wait one frame (at 60 fps) for the panel to render the first cell, then display the cell toolbar on it if possible.
+      setTimeout(() => {
+        this._onActiveCellChanged(panel.content);
+      }, 1000 / 60);
+    });
 
     // Check whether the toolbar should be rendered upon a layout change
     panel.content.renderingLayoutChanged.connect(
@@ -63,12 +68,13 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   _onActiveCellChanged(notebook: Notebook): void {
-    if (this._previousActiveCell?.model) {
+    if (this._previousActiveCell && !this._previousActiveCell.isDisposed) {
+      // Disposed cells do not have a model anymore.
       this._removeToolbar(this._previousActiveCell.model);
     }
 
     const activeCell = notebook.activeCell;
-    if (!activeCell) {
+    if (activeCell === null || activeCell.inputHidden) {
       return;
     }
 
@@ -109,18 +115,32 @@ export class CellToolbarTracker implements IDisposable {
       const toolbarWidget = new Toolbar();
       toolbarWidget.addClass(CELL_MENU_CLASS);
 
+      const promises: Promise<void>[] = [];
       for (const { name, widget } of this._toolbar) {
         toolbarWidget.addItem(name, widget);
+        if (
+          widget instanceof ReactWidget &&
+          (widget as ReactWidget).renderPromise !== undefined
+        ) {
+          promises.push((widget as ReactWidget).renderPromise!);
+        }
       }
 
-      toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
-      (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
+      // Wait for all the buttons to be rendered before attaching the toolbar.
+      Promise.all(promises)
+        .then(() => {
+          toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
+          (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
 
-      // For rendered markdown, watch for resize events.
-      cell.displayChanged.connect(this._resizeEventCallback, this);
+          // For rendered markdown, watch for resize events.
+          cell.displayChanged.connect(this._resizeEventCallback, this);
 
-      // Watch for changes in the cell's contents.
-      cell.model.contentChanged.connect(this._changedEventCallback, this);
+          // Watch for changes in the cell's contents.
+          cell.model.contentChanged.connect(this._changedEventCallback, this);
+        })
+        .catch(() => {
+          console.error('Error rendering buttons of the cell toolbar');
+        });
     }
   }
 

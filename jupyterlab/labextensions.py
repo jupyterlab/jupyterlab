@@ -1,4 +1,3 @@
-# coding: utf-8
 """Jupyter LabExtension Entry Points."""
 
 # Copyright (c) Jupyter Development Team.
@@ -29,11 +28,7 @@ from .commands import (
     unlink_package,
     update_extension,
 )
-from .federated_labextensions import (
-    build_labextension,
-    develop_labextension_py,
-    watch_labextension,
-)
+from .federated_labextensions import build_labextension, develop_labextension_py, watch_labextension
 from .labapp import LabApp
 
 flags = dict(base_flags)
@@ -154,7 +149,8 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
     def start(self):
         if self.app_dir and self.app_dir.startswith(HERE):
-            raise ValueError("Cannot run lab extension commands in core app")
+            msg = "Cannot run lab extension commands in core app"
+            raise ValueError(msg)
         with self.debug_logging():
             ans = self.run_task()
             if ans and self.should_build:
@@ -244,7 +240,7 @@ class DevelopLabExtensionApp(BaseExtensionApp):
     )
 
     def run_task(self):
-        "Add config for this labextension"
+        """Add config for this labextension"""
         self.extra_args = self.extra_args or [os.getcwd()]
         for arg in self.extra_args:
             develop_labextension_py(
@@ -328,7 +324,7 @@ class UpdateLabExtensionApp(BaseExtensionApp):
     description = "Update labextension(s)"
     flags = update_flags
 
-    all = Bool(False, config=True, help="Whether to update all extensions")
+    all = Bool(False, config=True, help="Whether to update all extensions")  # noqa
 
     def run_task(self):
         self.deprecation_warning(
@@ -389,7 +385,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s) by name"
     flags = uninstall_flags
 
-    all = Bool(False, config=True, help="Whether to uninstall all extensions")
+    all = Bool(False, config=True, help="Whether to uninstall all extensions")  # noqa
 
     def run_task(self):
         self.deprecation_warning(
@@ -512,24 +508,24 @@ class LabExtensionApp(JupyterApp):
     description = "Work with JupyterLab extensions"
     examples = _EXAMPLES
 
-    subcommands = dict(
-        install=(InstallLabExtensionApp, "Install labextension(s)"),
-        update=(UpdateLabExtensionApp, "Update labextension(s)"),
-        uninstall=(UninstallLabExtensionApp, "Uninstall labextension(s)"),
-        list=(ListLabExtensionsApp, "List labextensions"),
-        link=(LinkLabExtensionApp, "Link labextension(s)"),
-        unlink=(UnlinkLabExtensionApp, "Unlink labextension(s)"),
-        enable=(EnableLabExtensionsApp, "Enable labextension(s)"),
-        disable=(DisableLabExtensionsApp, "Disable labextension(s)"),
-        check=(CheckLabExtensionsApp, "Check labextension(s)"),
-        develop=(DevelopLabExtensionApp, "(developer) Develop labextension(s)"),
-        build=(BuildLabExtensionApp, "(developer) Build labextension"),
-        watch=(WatchLabExtensionApp, "(developer) Watch labextension"),
-    )
+    subcommands = {
+        "install": (InstallLabExtensionApp, "Install labextension(s)"),
+        "update": (UpdateLabExtensionApp, "Update labextension(s)"),
+        "uninstall": (UninstallLabExtensionApp, "Uninstall labextension(s)"),
+        "list": (ListLabExtensionsApp, "List labextensions"),
+        "link": (LinkLabExtensionApp, "Link labextension(s)"),
+        "unlink": (UnlinkLabExtensionApp, "Unlink labextension(s)"),
+        "enable": (EnableLabExtensionsApp, "Enable labextension(s)"),
+        "disable": (DisableLabExtensionsApp, "Disable labextension(s)"),
+        "check": (CheckLabExtensionsApp, "Check labextension(s)"),
+        "develop": (DevelopLabExtensionApp, "(developer) Develop labextension(s)"),
+        "build": (BuildLabExtensionApp, "(developer) Build labextension"),
+        "watch": (WatchLabExtensionApp, "(developer) Watch labextension"),
+    }
 
     def start(self):
         """Perform the App's functions as configured"""
-        super(LabExtensionApp, self).start()
+        super().start()
 
         # The above should have called a subcommand and raised NoStart; if we
         # get here, it didn't, so we should self.log.info a message.

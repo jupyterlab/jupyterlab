@@ -1,4 +1,3 @@
-# coding: utf-8
 """A JupyterHub EntryPoint that defaults to use JupyterLab"""
 
 # Copyright (c) Jupyter Development Team.

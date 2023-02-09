@@ -16,12 +16,15 @@ import {
   KernelCompleterProvider
 } from '@jupyterlab/completer';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { IFormComponentRegistry } from '@jupyterlab/ui-components';
-import type { FieldProps } from '@rjsf/core';
+import {
+  IFormRenderer,
+  IFormRendererRegistry
+} from '@jupyterlab/ui-components';
+import type { FieldProps } from '@rjsf/utils';
 
 import { renderAvailableProviders } from './renderer';
 
-const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:tracker';
+const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:manager';
 
 const defaultProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/completer-extension:base-service',
@@ -39,13 +42,13 @@ const defaultProvider: JupyterFrontEndPlugin<void> = {
 const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
   id: COMPLETION_MANAGER_PLUGIN,
   requires: [ISettingRegistry],
-  optional: [IFormComponentRegistry],
+  optional: [IFormRendererRegistry],
   provides: ICompletionProviderManager,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     settings: ISettingRegistry,
-    editorRegistry: IFormComponentRegistry | null
+    editorRegistry: IFormRendererRegistry | null
   ): ICompletionProviderManager => {
     const AVAILABLE_PROVIDERS = 'availableProviders';
     const PROVIDER_TIMEOUT = 'providerTimeout';
@@ -98,9 +101,15 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
       .catch(console.error);
 
     if (editorRegistry) {
-      editorRegistry.addRenderer('availableProviders', (props: FieldProps) => {
-        return renderAvailableProviders(props);
-      });
+      const renderer: IFormRenderer = {
+        fieldRenderer: (props: FieldProps) => {
+          return renderAvailableProviders(props);
+        }
+      };
+      editorRegistry.addRenderer(
+        `${COMPLETION_MANAGER_PLUGIN}.availableProviders`,
+        renderer
+      );
     }
 
     return manager;

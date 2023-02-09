@@ -35,6 +35,30 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
   });
 
+  test('Search selected', async ({ page }) => {
+    // Enter first cell
+    await page.notebook.enterCellEditingMode(0);
+
+    // Go to first line
+    await page.keyboard.press('PageUp');
+
+    // Select first line
+    await page.keyboard.press('Shift+End');
+
+    // Open search box
+    await page.keyboard.press('Control+f');
+
+    // Expect it to be populated with first line
+    await page.waitForSelector(
+      '[placeholder="Find"][value="Test with one notebook withr"]'
+    );
+
+    // Expect both matches to be found (xfail)
+    // await page.waitForSelector('text=1/2');
+
+    await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
+  });
+
   test('Close with Escape', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');

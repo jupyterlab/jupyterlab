@@ -6,9 +6,9 @@
 import abc
 import hashlib
 import json
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # noqa
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Awaitable, Optional, Tuple, Union
 
 from jupyter_server.base.handlers import APIHandler
@@ -16,7 +16,7 @@ from jupyterlab_server.translation_utils import translator
 from packaging.version import parse
 from tornado import httpclient, web
 
-from .._version import __version__
+from jupyterlab._version import __version__
 
 ISO8601_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 JUPYTERLAB_LAST_RELEASE_URL = "https://pypi.org/pypi/jupyterlab/json"
@@ -36,10 +36,10 @@ class Notification:
         options: Notification options
     """
 
-    createdAt: float
+    createdAt: float  # noqa
     message: str
-    modifiedAt: float
-    type: str = "default"
+    modifiedAt: float  # noqa
+    type: str = "default"  # noqa
     link: Tuple[str, str] = field(default_factory=tuple)
     options: dict = field(default_factory=dict)
 
@@ -67,7 +67,8 @@ class CheckForUpdateABC(abc.ABC):
             or the notification message
             or the notification message and a tuple(label, URL link) for the user to get more information
         """
-        raise NotImplementedError("CheckForUpdateABC.__call__ is not implemented")
+        msg = "CheckForUpdateABC.__call__ is not implemented"
+        raise NotImplementedError(msg)
 
 
 class CheckForUpdate(CheckForUpdateABC):
@@ -165,15 +166,15 @@ class CheckForUpdateHandler(APIHandler):
         out = await self.update_checker()
         if out:
             message, link = (out, ()) if isinstance(out, str) else out
-            now = datetime.now().timestamp() * 1000.0
-            hash = hashlib.sha1(message.encode()).hexdigest()
+            now = datetime.now(tz=timezone.utc).timestamp() * 1000.0
+            hash_ = hashlib.sha1(message.encode()).hexdigest()  # noqa: S324
             notification = Notification(
                 message=message,
                 createdAt=now,
                 modifiedAt=now,
                 type="info",
                 link=link,
-                options={"data": {"id": hash, "tags": ["update"]}},
+                options={"data": {"id": hash_, "tags": ["update"]}},
             )
 
         self.set_status(200)

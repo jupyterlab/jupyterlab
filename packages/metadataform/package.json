@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/metadataform",
-  "version": "4.0.0-alpha.17",
+  "version": "4.0.0-alpha.18",
   "description": "A helper to build form for metadata",
   "keywords": [
     "jupyter",
@@ -44,23 +44,24 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.17",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.17",
-    "@jupyterlab/notebook": "^4.0.0-alpha.17",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.17",
-    "@jupyterlab/translation": "^4.0.0-alpha.17",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.32",
+    "@jupyterlab/apputils": "^4.0.0-alpha.18",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.18",
+    "@jupyterlab/notebook": "^4.0.0-alpha.18",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.18",
+    "@jupyterlab/translation": "^4.0.0-alpha.18",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.33",
     "@lumino/coreutils": "^2.0.0-alpha.6",
     "@lumino/messaging": "^2.0.0-alpha.6",
     "@lumino/widgets": "^2.0.0-alpha.6",
-    "@rjsf/core": "^4.2.0",
+    "@rjsf/core": "^5.1.0",
+    "@rjsf/validator-ajv8": "^5.1.0",
     "json-schema": "^0.4.0",
-    "react": "^17.0.1"
+    "react": "^18.2.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.17",
+    "@jupyterlab/testing": "^4.0.0-alpha.18",
     "@types/jest": "^29.2.0",
-    "@types/react": "^17.0.0",
+    "@types/react": "^18.0.26",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",
     "typescript": "~4.7.3"

@@ -5,7 +5,7 @@ import functools
 import warnings
 
 
-class jupyterlab_deprecation(Warning):
+class jupyterlab_deprecation(Warning):  # noqa
     """Create our own deprecation class, since Python >= 2.7
     silences deprecations by default.
     """
@@ -13,7 +13,7 @@ class jupyterlab_deprecation(Warning):
     pass
 
 
-class deprecated(object):
+class deprecated:  # noqa
     """Decorator to mark deprecated functions with warning.
     Adapted from `scikit-image/skimage/_shared/utils.py`.
 
@@ -34,7 +34,6 @@ class deprecated(object):
         self.removed_version = removed_version
 
     def __call__(self, func):
-
         alt_msg = ""
         if self.alt_func is not None:
             alt_msg = " Use ``%s`` instead." % self.alt_func

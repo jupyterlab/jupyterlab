@@ -32,7 +32,7 @@ function generateConfig({
 }: IOptions = {}): webpack.Configuration[] {
   const data = require(path.join(packagePath, 'package.json'));
 
-  const ajv = new Ajv({ useDefaults: true });
+  const ajv = new Ajv({ useDefaults: true, strict: false });
   const validate = ajv.compile(require('../metadata_schema.json'));
   let valid = validate(data.jupyterlab ?? {});
   if (!valid) {
@@ -251,6 +251,16 @@ function generateConfig({
     filename += '?v=[contenthash]';
   }
 
+  const rules: any = [{ test: /\.html$/, type: 'asset/resource' }];
+
+  if (mode === 'development') {
+    rules.push({
+      test: /\.js$/,
+      enforce: 'pre',
+      use: ['source-map-loader']
+    });
+  }
+
   const config = [
     merge(
       baseConfig,
@@ -268,7 +278,7 @@ function generateConfig({
       webpackConfig,
       {
         module: {
-          rules: [{ test: /\.html$/, type: 'asset/resource' }]
+          rules
         }
       }
     )
