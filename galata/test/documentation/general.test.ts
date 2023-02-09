@@ -41,11 +41,11 @@ test.describe('General', () => {
     await page.dblclick('text=Lorenz.ipynb');
 
     await page.click('text=File');
-    await page.click('ul[role="menu"] >> text=New');
+    await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
 
     await page.click('text=File');
-    await page.click('ul[role="menu"] >> text=New');
+    await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Console');
     await page.click('button:has-text("Select")');
 
@@ -200,7 +200,7 @@ test.describe('General', () => {
     await page.click('text=File');
     await page.mouse.move(70, 40);
     const fileMenuNewItem = await page.waitForSelector(
-      'ul[role="menu"] >> text=New'
+      '.lm-Menu ul[role="menu"] >> text=New'
     );
     await fileMenuNewItem.click();
 
@@ -269,8 +269,8 @@ test.describe('General', () => {
 
     await page.click('text=File');
     await page.mouse.move(70, 40);
-    await page.click('ul[role="menu"] >> text=New');
-    await page.hover('ul[role="menu"] >> text=Text File');
+    await page.click('.lm-Menu ul[role="menu"] >> text=New');
+    await page.hover('.lm-Menu ul[role="menu"] >> text=Text File');
 
     // Inject mouse
     await page.evaluate(
@@ -322,7 +322,7 @@ test.describe('General', () => {
     await page.dblclick('text=jupyterlab.md');
 
     await page.click('text=Settings');
-    await page.click('ul[role="menu"] >> text=Text Editor Key Map');
+    await page.click('.lm-Menu ul[role="menu"] >> text=Text Editor Key Map');
 
     expect(
       await page.screenshot({ clip: { y: 0, x: 260, width: 600, height: 450 } })
@@ -426,7 +426,7 @@ test.describe('General', () => {
 
     // Open a terminal
     await page.click('text=File');
-    await page.click('ul[role="menu"] >> text=New');
+    await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
 
     // Wait for the xterm.js element to be added in the DOM
@@ -455,7 +455,7 @@ test.describe('General', () => {
 
     // Open a terminal
     await page.click('text=File');
-    await page.click('ul[role="menu"] >> text=New');
+    await page.click('.lm-Menu ul[role="menu"] >> text=New');
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
 
     await page.dblclick(
@@ -529,7 +529,9 @@ test.describe('General', () => {
     await page.notebook.run();
 
     await page.click('text=File');
-    await page.click('ul[role="menu"] >> text=New Console for Notebook');
+    await page.click(
+      '.lm-Menu ul[role="menu"] >> text=New Console for Notebook'
+    );
 
     await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(

@@ -80,7 +80,7 @@ class LogCodeCell extends CodeCell {
   }
 
   protected onUpdateRequest(msg: Message): void {
-    super.onAfterAttach(msg);
+    super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
   }
 
@@ -94,7 +94,7 @@ class LogMarkdownCell extends MarkdownCell {
   methods: string[] = [];
 
   protected onUpdateRequest(msg: Message): void {
-    super.onAfterAttach(msg);
+    super.onUpdateRequest(msg);
     this.methods.push('onUpdateRequest');
   }
 }

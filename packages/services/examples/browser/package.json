@@ -12,7 +12,7 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^6.0.0-alpha.18",
     "@jupyterlab/services": "^7.0.0-alpha.18",
-    "@lumino/coreutils": "^2.0.0-alpha.6"
+    "@lumino/coreutils": "^2.0.0-beta.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

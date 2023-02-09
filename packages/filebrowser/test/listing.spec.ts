@@ -215,16 +215,18 @@ describe('filebrowser/listing', () => {
           itemNode
         ) as HTMLInputElement;
         const item = dirListing.sortedItems().next();
+        const waitForUpdate = signalToPromise(dirListing.updated);
         await dirListing.selectItemByName(item.value.name);
-        await signalToPromise(dirListing.updated);
+        await waitForUpdate;
         expect(checkbox.checked).toBe(true);
         expect(dirListing.isSelected(item.value.name)).toBe(true);
+        const waitForUpdate2 = signalToPromise(dirListing.updated);
         simulate(checkbox, 'mousedown', {
           clientX: 1,
           clientY: 1,
           button: 2
         });
-        await signalToPromise(dirListing.updated);
+        await waitForUpdate2;
         // Item is still selected and checkbox is still checked after
         // right-click.
         expect(dirListing.isSelected(item.value.name)).toBe(true);
