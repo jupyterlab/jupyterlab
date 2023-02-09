@@ -197,6 +197,9 @@ bumped their major version (following semver convention). We want to point out p
         ensure a custom renderer is not used for property with the same name but different schema.
 - ``@jupyterlab/translation`` from 3.x to 4.x
    Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
+- ``@jupyterlab/vdom`` and ``@jupyterlab/vdom-extension`` have been removed.
+   The underlying [vdom](https://github.com/nteract/vdom) Python package is unmaintained.
+   So it was decided to drop it from core packages.
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
    * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
@@ -217,7 +220,7 @@ Jest has been updated to 29.2.0 (and *ts-jest* to 29.0.0). And therefore the jes
 - The unmaintained reporter ``jest-summary-reporter`` has been replaced by the new default ``github-actions`` reporter.
 - The helper ``flakyIt`` has been removed. You can use the new `jest.retryTimes <https://jestjs.io/docs/jest-object#jestretrytimesnumretries-options>`_ instead.
 
-With JupyterLab 4, we fixed circular dependencies due to the testutils package. So it is now only a facade to export
+With JupyterLab 4, we fixed circular dependencies due to the ``testutils`` package. So it is now only a facade to export
 helpers from various core packages. The exported helpers are the same as before expect for:
 
 - ``NBTestUtils.DEFAULT_CONTENT``: Removed - you could imported from ``@jupyterlab/notebook/lib/testutils`` but we strongly advice not to and to use your own test data.
