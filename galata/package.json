@@ -12,56 +12,49 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "sideEffects": [
-    "style/*.css",
-    "style/index.js"
-  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
   "files": [
     "lib/**/*.{js,ts,map}",
-    "!lib/inpage/index.*",
     "style/index.css",
     "style/index.js"
   ],
   "scripts": {
-    "build": "npm run clean && npm run build:galata && npm run build:inpage",
-    "build:all": "npm run build",
+    "build": "npm run build:extension && npm run build:galata",
+    "build:extension": "cd extension && npm run build && cd ..",
     "build:galata": "tsc -b",
-    "build:inpage": "webpack --mode=production",
-    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "clean": "npm run clean:extension && rimraf lib tsconfig.tsbuildinfo",
+    "clean:extension": "cd extension && npm run clean && cd ..",
     "start": "jupyter lab --config ./jupyter_server_test_config.py",
     "start:detached": "(npm run start&)",
     "start:doc": "PYTHONWARNINGS=ignore jupyter lab --config ./jupyter_server_test_config.py --extensions-in-dev-mode",
     "test": "playwright test",
+    "test:base": "playwright test --project galata jupyterlab",
+    "test:base:update": "playwright test --project galata jupyterlab --update-snapshots",
     "test:benchmark": "jlpm run test -c playwright-benchmark.config.js",
     "test:benchmark:update": "BENCHMARK_NUMBER_SAMPLES=1 jlpm run test -c playwright-benchmark.config.js --update-snapshots",
     "test:debug": "PWDEBUG=1 playwright test",
-    "test:doc": "jlpm run test -c playwright-documentation.config.js",
-    "test:doc:update": "jlpm run test -c playwright-documentation.config.js --update-snapshots",
+    "test:doc": "jlpm run test --project documentation",
+    "test:doc:update": "jlpm run test --project documentation --update-snapshots",
     "test:report": "playwright show-report",
     "test:update": "playwright test --update-snapshots && jlpm test:benchmark:update"
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.18",
-    "@jupyterlab/cells": "^4.0.0-alpha.18",
+    "@jupyterlab/apputils": "^4.0.0-alpha.18",
     "@jupyterlab/coreutils": "^6.0.0-alpha.18",
     "@jupyterlab/docmanager": "^4.0.0-alpha.18",
     "@jupyterlab/nbformat": "^4.0.0-alpha.18",
     "@jupyterlab/notebook": "^4.0.0-alpha.18",
     "@jupyterlab/services": "^7.0.0-alpha.18",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.18",
-    "@lumino/algorithm": "^2.0.0-alpha.6",
     "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6",
     "@playwright/test": "^1.30.0",
     "@stdlib/stats": "~0.0.13",
     "fs-extra": "^10.1.0",
-    "http-server": "^13.0.0",
     "json5": "^2.2.3",
     "path": "~0.12.7",
     "systeminformation": "^5.8.6",
@@ -70,18 +63,10 @@
     "vega-statistics": "^1.7.9"
   },
   "devDependencies": {
-    "css-loader": "^6.7.1",
-    "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~3.0.0",
-    "source-map-loader": "~1.0.2",
-    "style-loader": "~3.3.1",
-    "ts-loader": "^9.3.0",
-    "typescript": "~4.7.3",
-    "webpack": "^5.72.0",
-    "webpack-cli": "^5.0.0"
+    "typescript": "~4.7.3"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "styleModule": "style/index.js"
+  }
 }

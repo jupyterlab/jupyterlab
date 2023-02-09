@@ -23,6 +23,7 @@ examples/federated/labextensions
 
 junit.xml
 
+jupyterlab/galata/@jupyterlab
 jupyterlab/geckodriver
 jupyterlab/static
 jupyterlab/schemas

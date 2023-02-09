@@ -1,10 +1,57 @@
+// Copyright (c) Jupyter Development Team.
 // Copyright (c) Bloomberg Finance LP.
 // Distributed under the terms of the Modified BSD License.
 
+// This export the types (and only the types) from extension/token.ts
+// Required for typedoc to be happy otherwise we could have used `from '@jupyterlab/extension/lib/token';`
+
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type { IRouter } from '@jupyterlab/application';
+import type {
+  Dialog,
+  Notification,
+  NotificationManager,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  interface Window {
+    /**
+     * Access Jupyter Application object
+     */
+    jupyterapp: JupyterFrontEnd;
+    /**
+     * Access to Galata In-Page helpers
+     *
+     * Those helpers are injected through a JupyterLab extension
+     */
+    galata: IGalataInpage;
+    /**
+     * Access to Galata In-Page helpers
+     *
+     * @deprecated since v4
+     * Those helpers are injected through a JupyterLab extension
+     */
+    galataip: IGalataInpage;
+  }
+}
+
+/**
+ * Static objects exposed.
+ */
+export interface IGalataHelpers {
+  /**
+   * JupyterLab dialogs tracker.
+   */
+  readonly dialogs: WidgetTracker<Dialog<any>>;
+  /**
+   * JupyterLab notifications manager.
+   */
+  readonly notifications: NotificationManager;
+}
 
 /**
  * Cell execution callbacks interface
@@ -34,14 +81,11 @@ export interface IWaitForSelectorOptions {
   hidden?: boolean;
 }
 
-export const PLUGIN_ID_ROUTER = '@jupyterlab/application-extension:router';
-export const PLUGIN_ID_DOC_MANAGER = '@jupyterlab/docmanager-extension:manager';
-export const PLUGIN_ID_SETTINGS = '@jupyterlab/apputils-extension:settings';
-
 export interface IPluginNameToInterfaceMap {
-  [PLUGIN_ID_ROUTER]: IRouter;
-  [PLUGIN_ID_DOC_MANAGER]: IDocumentManager;
-  [PLUGIN_ID_SETTINGS]: ISettingRegistry;
+  '@jupyterlab/galata-extension:helpers': IGalataHelpers;
+  '@jupyterlab/application-extension:router': IRouter;
+  '@jupyterlab/docmanager-extension:manager': IDocumentManager;
+  '@jupyterlab/apputils-extension:settings': ISettingRegistry;
 }
 
 /**
@@ -72,6 +116,13 @@ export interface IGalataInpage {
   ): Promise<IPluginNameToInterfaceMap[K] | undefined>;
 
   /**
+   * Get the Jupyter notifications.
+   *
+   * @returns Jupyter Notifications
+   */
+  getNotifications(): Promise<Notification.INotification[]>;
+
+  /**
    * Test if one or all cells have an execution number.
    *
    * @param cellIndex Cell index
@@ -97,6 +148,62 @@ export interface IGalataInpage {
    * @returns Test result
    */
   isElementVisible(el: HTMLElement): boolean;
+
+  /**
+   * Disconnect a listener to new Jupyter dialog events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
+  off(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  /**
+   * Disconnect a listener to new or updated Jupyter notification events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
+  off(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
+
+  /**
+   * Connect a listener to new Jupyter dialog events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
+  on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+
+  /**
+   * Connect a listener to new or updated Jupyter notification events.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
+  on(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
+
+  /**
+   * Connect a listener to the next new Jupyter dialog event.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
+  once(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+
+  /**
+   * Connect a listener to the next new or updated Jupyter notification event.
+   *
+   * @param event Event type
+   * @param listener Event listener
+   */
+  once(
+    event: 'notification',
+    listener: (notification: Notification.INotification) => void
+  ): void;
 
   /**
    * Save the active notebook
