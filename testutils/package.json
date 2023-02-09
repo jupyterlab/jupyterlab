@@ -26,7 +26,6 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:all": "npm run build",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "watch": "tsc -b --watch"
   },

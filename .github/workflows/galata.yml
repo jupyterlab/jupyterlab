@@ -8,18 +8,28 @@ on:
       - master
   pull_request:
 
+env:
+  PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/pw-browsers
+
 jobs:
   test:
     name: Visual Regression Tests
     if: ${{ (github.event_name != 'issue_comment') || (github.event.issue.pull_request && (contains(github.event.comment.body, 'Galata snapshots updated.'))) }}
     timeout-minutes: 80
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Set up browser cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
       - name: Install dependencies
         run: |
@@ -48,7 +58,7 @@ jobs:
       - name: Test
         run: |
           cd galata
-          jlpm run test
+          jlpm run test --project galata jupyterlab
           mv galata/test-results galata/test-jupyterlab-results || true
           # Run once benchmark tests to ensure they have no regression
           BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
@@ -82,11 +92,11 @@ jobs:
     # Python dependencies are frozen in the installation step
     # Note: IPython is among the frozen package
     timeout-minutes: 80
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         # Freeze Python version because it appears in console header
-        python-version: ['3.9.9']
+        python-version: ['3.10.6']
     steps:
       - name: Checkout JupyterLab
         uses: actions/checkout@v3
@@ -107,6 +117,13 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Set up browser cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}/pw-browsers
+          key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
       - name: Install dependencies
         run: |

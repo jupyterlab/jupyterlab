@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Notification, NotificationManager } from '@jupyterlab/apputils';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { Base64ModelFactory } from '@jupyterlab/docregistry';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
@@ -126,19 +125,6 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    */
   get info(): JupyterLab.IInfo {
     return this._info;
-  }
-
-  /**
-   * Get a handle on the notification manager.
-   *
-   * ### Notes
-   * You should use stable API `Notification.manager` from `@jupyterlab/apputils`.
-   *
-   * @deprecated This is an experimental feature used for integration testing.
-   * @private
-   */
-  get notificationManager(): NotificationManager {
-    return Notification.manager;
   }
 
   /**
