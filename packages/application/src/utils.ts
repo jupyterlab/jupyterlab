@@ -138,7 +138,7 @@ export function createSemanticCommand(
             .slice(undefined, -1)
             .map(l => l.replace(/…$/, ''))
             .join(', ');
-          const end = texts.slice(-1)[0] + (hasEllipsis ? '…' : '');
+          const end = texts.slice(-1)[0].replace(/…$/, '') + (hasEllipsis ? '…' : '');
           return trans.__('%1 and %2', main, end);
         }
       }

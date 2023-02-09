@@ -223,7 +223,7 @@ describe('@jupyterlab/application', () => {
 
         expect(commands.label(semanticCommandId)).toEqual(expected);
         expect(commands.caption(semanticCommandId)).toEqual(
-          expected.replace('label', 'caption')
+          expected.replace(/label/g, 'caption')
         );
       }
     );
