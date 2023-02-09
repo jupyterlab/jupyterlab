@@ -66,7 +66,7 @@ export class Context<
     this._model = this._factory.createNew({
       languagePreference: lang,
       sharedModel,
-      collaborationEnabled: sharedFactory === null ? false : true
+      collaborationEnabled: sharedFactory?.collaborative ?? false
     });
 
     this._readyPromise = manager.ready.then(() => {
