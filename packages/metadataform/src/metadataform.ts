@@ -373,13 +373,15 @@ export class MetadataFormWidget
 
     const formData = {} as JSONObject;
 
-    for (let metadataKey of Object.keys(this._metadataSchema.properties)) {
+    for (let metadataKey of Object.keys(
+      this._metadataSchema.properties || JSONExt.emptyObject
+    )) {
       // Do not display the field if it's Notebook metadata and the notebook model is null.
       if (
         this._metaInformation[metadataKey]?.level === 'notebook' &&
         this._notebookModelNull
       ) {
-        delete formProperties.properties[metadataKey];
+        delete formProperties.properties![metadataKey];
         continue;
       }
 
@@ -390,7 +392,7 @@ export class MetadataFormWidget
           cell.model.type
         )
       ) {
-        delete formProperties.properties[metadataKey];
+        delete formProperties.properties![metadataKey];
         continue;
       }
 

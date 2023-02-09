@@ -79,7 +79,7 @@
     "patch:release": "node buildutils/lib/patch-release.js",
     "prepare:python-release": "node buildutils/lib/prepare-python-release.js",
     "prepublish:check": "node buildutils/lib/prepublish-check.js",
-    "prettier": "prettier --write \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
+    "prettier": "prettier --list-different --write \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
     "prettier:check": "prettier --check \"**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}\"",
     "prettier:files": "prettier --write",
     "publish:js": "node buildutils/lib/publish.js",

@@ -400,7 +400,6 @@ class SemVer:
             if not m.group(4):
                 self.prerelease = []
             else:
-
                 self.prerelease = [
                     (int(id_) if NUMERIC.search(id_) else id_) for id_ in m.group(4).split(".")
                 ]
@@ -441,7 +440,7 @@ class SemVer:
             or compare_identifiers(str(self.patch), str(other.patch))
         )
 
-    def compare_pre(self, other):
+    def compare_pre(self, other):  # noqa PLR0911
         if not isinstance(other, SemVer):
             other = make_semver(other, self.loose)
 
@@ -473,7 +472,7 @@ class SemVer:
             else:
                 return compare_identifiers(str(a), str(b))
 
-    def inc(self, release, identifier=None):
+    def inc(self, release, identifier=None):  # noqa PLR0915
         logger.debug("inc release %s %s", self.prerelease, release)
         if release == "premajor":
             self.prerelease = []
@@ -605,7 +604,7 @@ def make_key_function(loose):
     def key_function(version):
         v = make_semver(version, loose)
         key = (v.major, v.minor, v.patch)
-        if v.prerelease:
+        if v.prerelease:  # noqa SIM108
             key = key + tuple(v.prerelease)
         else:
             #  NOT having a prerelease is > having one
@@ -656,7 +655,7 @@ def lte(a, b, loose):
     return compare(a, b, loose) <= 0
 
 
-def cmp(a, op, b, loose):
+def cmp(a, op, b, loose):  # noqa PLR0911
     logger.debug("cmp: %s", op)
     if op == "===":
         return a == b
@@ -902,7 +901,7 @@ def replace_carets(comp, loose):
 def replace_caret(comp, loose):
     r = regexp[CARETLOOSE] if loose else regexp[CARET]
 
-    def repl(mob):
+    def repl(mob):  # noqa PLR0911
         m0 = mob.group(0)
         M, m, p, pr, _ = mob.groups()
         logger.debug("caret %s %s %s %s %s %s", comp, m0, M, m, p, pr)
@@ -1002,7 +1001,7 @@ def replace_xrange(comp, loose):
     comp = comp.strip()
     r = regexp[XRANGELOOSE] if loose else regexp[XRANGE]
 
-    def repl(mob):
+    def repl(mob):  # noqa PLR0911
         ret = mob.group(0)
         gtlt, M, m, p, pr, _ = mob.groups()
 
@@ -1018,7 +1017,7 @@ def replace_xrange(comp, loose):
 
         logger.debug("xrange gtlt=%s any_x=%s", gtlt, any_x)
         if xM:
-            if gtlt == ">" or gtlt == "<":
+            if gtlt == ">" or gtlt == "<":  # noqa SIM108
                 # nothing is allowed
                 ret = "<0.0.0"
             else:

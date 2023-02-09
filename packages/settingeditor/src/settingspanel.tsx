@@ -7,7 +7,7 @@ import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
-import type { Field } from '@rjsf/core';
+import type { Field } from '@rjsf/utils';
 import React, { useEffect, useState } from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';

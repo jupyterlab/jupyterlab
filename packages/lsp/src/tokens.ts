@@ -450,9 +450,9 @@ export interface ILSPDocumentConnectionManager {
   disconnect(languageId: TLanguageServerId): void;
 
   /**
-   * Disconnect the signals of requested virtual document.
+   * Disconnect the signals of requested virtual document uri.
    */
-  unregisterDocument(virtualDocument: VirtualDocument): void;
+  unregisterDocument(uri: string): void;
 
   /**
    * Register a widget adapter.
