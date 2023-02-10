@@ -302,12 +302,6 @@
       "path": "./packages/ui-components-extension"
     },
     {
-      "path": "./packages/vdom"
-    },
-    {
-      "path": "./packages/vdom-extension"
-    },
-    {
       "path": "./packages/vega5-extension"
     }
   ]
