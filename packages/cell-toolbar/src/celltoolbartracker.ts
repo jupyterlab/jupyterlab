@@ -74,13 +74,20 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   _onMetadataChanged(model: CellModel, args: IMapChange) {
-    console.log("metadata changed!", model, args);
-    if (args.key === 'jupyter' && typeof args.newValue === 'object') {
-      if (args.newValue.source_hidden === true && (args.type === 'add' || args.type === 'change')) {
+    if (args.key === 'jupyter') {
+      if (
+        typeof args.newValue === 'object' &&
+        args.newValue.source_hidden === true &&
+        (args.type === 'add' || args.type === 'change')
+      ) {
         // Cell just became hidden; remove toolbar
         this._removeToolbar(model);
       }
-      else {
+      // Check whether input visibility changed
+      else if (
+        typeof args.oldValue === 'object' &&
+        args.oldValue.source_hidden === true
+      ) {
         // Cell just became visible; add toolbar
         this._addToolbar(model);
         // TODO: this._updateCellForToolbarOverlap(activeCell);
