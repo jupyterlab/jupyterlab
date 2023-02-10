@@ -655,7 +655,6 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       model.collapseChanged.connect(onHeadingCollapsed);
       widget.content.cellCollapsed.connect(onCellCollapsed);
       widget.content.cellInViewportChanged.connect(onCellInViewportChanged);
-      // widget.content.
       widget.disposed.connect(() => {
         model.activeHeadingChanged.disconnect(onActiveHeadingChanged);
         model.headingsChanged.disconnect(onHeadingsChanged);
