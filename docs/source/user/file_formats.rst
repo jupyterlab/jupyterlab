@@ -288,36 +288,3 @@ vegalite R package, or Vegas (Scala/Spark).
 
 A JupyterLab extension that supports Vega 3.x and Vega-Lite 2.x can be
 found `here <https://github.com/jupyterlab/jupyter-renderers>`__.
-
-Virtual DOM
------------
-
--  File extensions: ``.vdom``, ``.json``
--  MIME type: ``application/vdom.v1+json``
-
-Virtual DOM libraries such as `react.js <https://reactjs.org/>`__ have
-greatly improved the experience of rendering interactive content in
-HTML. The nteract project, which collaborates closely with Project
-Jupyter, has created a `declarative JSON
-format <https://github.com/nteract/vdom>`__ for virtual DOM data.
-JupyterLab can render this data using react.js. This works for both VDOM
-files with the ``.vdom`` extension, or within notebook output.
-
-.. _edit-vdom:
-
-Here is an example of a ``.vdom`` file being edited and rendered
-interactively:
-
-.. raw:: html
-
-  <div class="jp-youtube-video">
-    <iframe src="https://www.youtube-nocookie.com/embed/fObR8xeKCJU?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-  </div>
-
-The `nteract/vdom <https://github.com/nteract/vdom>`__ library provides
-a Python API for creating VDOM output that is rendered in nteract and
-JupyterLab:
-
-.. image:: ../images/file-formats-nteract-vdom.png
-   :align: center
-   :class: jp-screenshot

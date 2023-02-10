@@ -572,36 +572,6 @@ test.describe('General', () => {
       threshold: 0.3
     });
   });
-
-  test('VDOM', async ({ page, tmpPath }) => {
-    await page.goto(`tree/${tmpPath}`);
-    await page.addStyleTag({
-      content: `.jp-LabShell.jp-mod-devMode {
-        border-top: none;
-      }`
-    });
-
-    // Hide file browser
-    await page.click('[title^="File Browser"]');
-
-    await page.notebook.createNew();
-    await page.notebook.setCell(
-      0,
-      'code',
-      "from IPython.display import display\nfrom vdom.helpers import h1, p, img, div, b\n\ndisplay(\ndiv(\nh1('Our Incredibly Declarative Example'),\np('Can you believe we wrote this ', b('in Python'), '?'),\nimg(src='https://turnoff.us/image/en/death-and-the-programmer.png', style={'height': '268px'}),\np('What will ', b('you'), ' create next?')))"
-    );
-
-    await Promise.all([
-      page.waitForResponse(
-        'https://turnoff.us/image/en/death-and-the-programmer.png'
-      ),
-      page.notebook.run()
-    ]);
-
-    expect(await page.screenshot()).toMatchSnapshot(
-      'file_formats_nteract_vdom.png'
-    );
-  });
 });
 
 async function openOverview(page) {

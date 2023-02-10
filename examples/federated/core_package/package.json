@@ -18,8 +18,6 @@
     "@jupyterlab/celltags-extension": "~4.0.0-alpha.18",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.15",
     "@jupyterlab/codemirror-extension": "~4.0.0-alpha.18",
-    "@jupyterlab/collaboration": "^4.0.0-alpha.11",
-    "@jupyterlab/collaboration-extension": "~4.0.0-alpha.11",
     "@jupyterlab/completer": "^4.0.0-alpha.15",
     "@jupyterlab/completer-extension": "~4.0.0-alpha.18",
     "@jupyterlab/console": "^4.0.0-alpha.15",
@@ -79,7 +77,6 @@
     "@jupyterlab/translation-extension": "~4.0.0-alpha.18",
     "@jupyterlab/ui-components": "^4.0.0-alpha.17",
     "@jupyterlab/ui-components-extension": "~4.0.0-alpha.18",
-    "@jupyterlab/vdom-extension": "~4.0.0-alpha.18",
     "@jupyterlab/vega5-extension": "~4.0.0-alpha.18",
     "@lumino/algorithm": "^2.0.0-beta.0",
     "@lumino/application": "^2.0.0-beta.1",
@@ -137,7 +134,6 @@
     "@jupyterlab/translation": "^4.0.0-alpha.18",
     "@jupyterlab/translation-extension": "^4.0.0-alpha.18",
     "@jupyterlab/ui-components-extension": "^4.0.0-alpha.18",
-    "@jupyterlab/vdom-extension": "^4.0.0-alpha.18",
     "@jupyterlab/vega5-extension": "^4.0.0-alpha.18"
   },
   "devDependencies": {
@@ -166,7 +162,6 @@
       "@jupyterlab/apputils",
       "@jupyterlab/attachments",
       "@jupyterlab/codeeditor",
-      "@jupyterlab/collaboration",
       "@jupyterlab/completer",
       "@jupyterlab/console",
       "@jupyterlab/coreutils",
@@ -246,7 +241,6 @@
       "@jupyterlab/tooltip-extension",
       "@jupyterlab/translation-extension",
       "@jupyterlab/ui-components-extension",
-      "@jupyterlab/vdom-extension",
       "@jupyterlab/vega5-extension"
     ]
   }
