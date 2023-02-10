@@ -225,6 +225,12 @@ export namespace Contents {
    */
   export interface ISharedFactory {
     /**
+     * Whether the IDrive supports real-time collaboration or not.
+     * Note: If it is not provided, it is false by default.
+     */
+    readonly collaborative?: boolean;
+
+    /**
      * Create a new `ISharedDocument` instance.
      *
      * It should return `undefined` if the factory is not able to create a `ISharedDocument`.

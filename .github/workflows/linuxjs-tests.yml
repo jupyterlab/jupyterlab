@@ -31,7 +31,6 @@ jobs:
             js-csvviewer,
             js-debugger,
             js-docmanager,
-            js-docprovider,
             js-docregistry,
             js-documentsearch,
             js-filebrowser,
