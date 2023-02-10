@@ -289,6 +289,8 @@ To check which version of Node.js is installed:
 
    node -v
 
+.. _Installing Node.js and jlpm section:
+
 The canvas node package is not properly packaged for macOS with ARM architectures (M1 and M2).
 To build JupyterLab on such platforms, you need a few additional packages:
 
@@ -357,10 +359,8 @@ Notes:
 -  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
    returned exit status 127 while in binding.gyp`` while running the
    ``pip install`` command above, you may be missing packages required
-   by ``canvas``. Please see "The canvas node package is not properly
-   packaged for macOS with ARM architectures" paragraph of
-   `Installing Node.js and jlpm <https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html#installing-node-js-and-jlpm>`__
-   section of this guide for instructions on how to install these packages.
+   by ``canvas``. Please see `Installing Node.js and jlpm section`_
+   of this guide for instructions on how to install these packages.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
    ``yarn`` installed already, you can use the ``yarn`` command when
@@ -454,12 +454,12 @@ If you see a test run fail with ``Library not loaded: '@rpath/libpixman-1.0.dyli
 (or a different library, such as ``libcairo.2.dylib`` for Mac computers with Apple
 Silicon chips) while running the
 ``jlpm test`` command above, you may be missing packages required
-by ``canvas``. Please see "The canvas node package is not properly
-packaged for macOS with ARM architectures" paragraph of
-`Installing Node.js and jlpm <https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html#installing-node-js-and-jlpm>`__
-section of this guide for instructions on how to install these packages.
+by ``canvas``. Please see
+`Installing Node.js and jlpm section`_
+of this guide for instructions on how to install these packages.
 
-We use ``jest`` for all tests, so standard ``jest`` workflows apply.
+We use ``jest`` for all tests, so standard ``j
+est`` workflows apply.
 Tests can be debugged in either VSCode or Chrome. It can help to add an
 ``it.only`` to a specific test when debugging. All of the ``test*``
 scripts in each package accept ``jest`` `cli
