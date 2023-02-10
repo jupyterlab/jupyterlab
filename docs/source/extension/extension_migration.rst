@@ -144,6 +144,8 @@ bumped their major version (following semver convention). We want to point out p
      mode.
    * Added the property ``sharedModel`` to the interface ``NotebookModel.IOptions``.
    * The method ``NotebookModelFactory.createNew`` receives a parameter ``NotebookModelFactory.IModelOptions``.
+   * The default Notebook toolbar's ``restart-and-run`` button now refers to the command
+     ``notebook:restart-run-all`` instead of ``runmenu:restart-and-run-all``.
 - ``@jupyterlab/rendermime`` from 3.x to 4.x
   The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
   that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
