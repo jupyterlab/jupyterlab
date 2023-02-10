@@ -7,10 +7,7 @@ import type { Contents } from '@jupyterlab/services';
 import type { APIRequestContext, APIResponse, Page } from '@playwright/test';
 import type { ReadStream } from 'fs-extra';
 import * as path from 'path';
-import {
-  IPluginNameToInterfaceMap,
-  PLUGIN_ID_DOC_MANAGER
-} from './inpage/tokens';
+import type { IPluginNameToInterfaceMap } from './extension';
 import * as Utils from './utils';
 
 /**
@@ -296,14 +293,15 @@ export class ContentsHelper {
       // => Use galata in-page if page is available
       return await this.page.evaluate(
         async ({ pluginId, oldName, newName }) => {
-          const docManager = (await window.galataip.getPlugin(
+          const docManager = (await window.galata.getPlugin(
             pluginId
           )) as IDocumentManager;
           const result = await docManager.rename(oldName, newName);
           return result !== null;
         },
         {
-          pluginId: PLUGIN_ID_DOC_MANAGER as keyof IPluginNameToInterfaceMap,
+          pluginId:
+            '@jupyterlab/docmanager-extension:manager' as keyof IPluginNameToInterfaceMap,
           oldName: oldName,
           newName: newName
         }

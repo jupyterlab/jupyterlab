@@ -34,7 +34,11 @@ import {
   UseSignal,
   VDomModel
 } from '@jupyterlab/ui-components';
-import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
+import {
+  PromiseDelegate,
+  ReadonlyJSONObject,
+  ReadonlyJSONValue
+} from '@lumino/coreutils';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import type {
@@ -711,12 +715,20 @@ namespace Private {
     onChange(callback: (toast: ToastItem) => void): () => void;
   }
 
+  let waitForToastify: PromiseDelegate<void> | null = null;
+
   /**
    * Asynchronously load the toast container
    *
    * @returns The toast object
    */
   export async function toast(): Promise<IToast> {
+    if (waitForToastify === null) {
+      waitForToastify = new PromiseDelegate();
+    } else {
+      await waitForToastify.promise;
+    }
+
     if (toastify === null) {
       toastify = await import('react-toastify');
 
@@ -740,6 +752,8 @@ namespace Private {
           closeButton={CloseButton}
         ></toastify.ToastContainer>
       );
+
+      waitForToastify.resolve();
     }
 
     return toastify.toast;

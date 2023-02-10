@@ -35,7 +35,6 @@
   ],
   "scripts": {
     "build": "tsc && cd template && npm run build",
-    "build:all": "npm run build",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "watch": "tsc -w --listEmittedFiles"
   },

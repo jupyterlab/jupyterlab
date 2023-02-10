@@ -18,6 +18,7 @@
       "buildutils/template",
       "buildutils/test-template",
       "galata",
+      "galata/extension",
       "tests",
       "tests/test-*",
       "testutils",
@@ -32,7 +33,9 @@
     "analyze:prod": "cd dev_mode && npm run build:prod --analyze",
     "before:build:python": "node buildutils/lib/local-repository.js publish-dists --path ./dist && node buildutils/lib/update-core-mode.js",
     "build": "npm run build:dev",
+    "prebuild:all": "npm run build:utils && npm run build:builder",
     "build:all": "lerna run build:all",
+    "postbuild:all": "npm run build:testutils && npm run build:galata",
     "build:builder": "cd builder && npm run build",
     "build:core": "cd jupyterlab/staging && jlpm && (jlpm deduplicate || jlpm) && npm run build",
     "build:dev": "npm run integrity && npm run build:all && cd dev_mode && npm run build",
@@ -101,9 +104,9 @@
     "watch:packages": "python scripts/watch_packages.py"
   },
   "resolutions": {
-    "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/disposable": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6",
+    "@lumino/coreutils": "^2.0.0-beta.0",
+    "@lumino/disposable": "^2.0.0-beta.0",
+    "@lumino/signaling": "^2.0.0-beta.0",
     "@types/react": "^18.0.26",
     "react": "^18.2.0",
     "yjs": "^13.5.40"
