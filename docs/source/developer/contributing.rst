@@ -293,12 +293,14 @@ The canvas node package is not properly packaged for macOS with ARM architecture
 To build JupyterLab on such platforms, you need a few additional packages:
 
 With conda:
+
 .. code:: bash
 
    conda install -c conda-forge pkg-config pango libpng cairo jpeg giflib librsvg glib pixman
    export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
 
 With Homebrew:
+
 .. code:: bash
 
    brew install pkg-config cairo pango libpng jpeg giflib librsvg
