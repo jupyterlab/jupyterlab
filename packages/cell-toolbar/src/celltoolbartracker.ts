@@ -3,7 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { createDefaultFactory, ToolbarRegistry } from '@jupyterlab/apputils';
-import { Cell, CellModel, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
+import {
+  Cell,
+  CellModel,
+  CodeCell,
+  ICellModel,
+  MarkdownCell
+} from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
@@ -66,10 +72,15 @@ export class CellToolbarTracker implements IDisposable {
 
     // Handle subsequent changes of active cell.
     panel.content.activeCellChanged.connect(this._onActiveCellChanged, this);
-    panel.content.activeCell?.model.metadataChanged.connect(this._onMetadataChanged, this);
+    panel.content.activeCell?.model.metadataChanged.connect(
+      this._onMetadataChanged,
+      this
+    );
     panel.disposed.connect(() => {
       panel.content.activeCellChanged.disconnect(this._onActiveCellChanged);
-      panel.content.activeCell?.model.metadataChanged.disconnect(this._onMetadataChanged);
+      panel.content.activeCell?.model.metadataChanged.disconnect(
+        this._onMetadataChanged
+      );
     });
   }
 
@@ -98,7 +109,9 @@ export class CellToolbarTracker implements IDisposable {
     if (this._previousActiveCell && !this._previousActiveCell.isDisposed) {
       // Disposed cells do not have a model anymore.
       this._removeToolbar(this._previousActiveCell.model);
-      this._previousActiveCell.model.metadataChanged.disconnect(this._onMetadataChanged);
+      this._previousActiveCell.model.metadataChanged.disconnect(
+        this._onMetadataChanged
+      );
     }
 
     const activeCell = notebook.activeCell;
