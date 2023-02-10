@@ -127,8 +127,6 @@
     "@jupyterlab/translation-extension": "^4.0.0-alpha.18",
     "@jupyterlab/ui-components": "^4.0.0-alpha.33",
     "@jupyterlab/ui-components-extension": "^4.0.0-alpha.18",
-    "@jupyterlab/vdom": "^4.0.0-alpha.18",
-    "@jupyterlab/vdom-extension": "^4.0.0-alpha.18",
     "@jupyterlab/vega5-extension": "^4.0.0-alpha.18"
   },
   "devDependencies": {

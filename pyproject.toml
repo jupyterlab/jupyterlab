@@ -93,7 +93,6 @@ docs-screenshots = [
     "nbconvert>=7.0.0",
     "pandas==1.5.3",
     "scipy==1.10.0",
-    "vdom==0.6",
     "vega_datasets==0.9.0",
 ]
 test = [

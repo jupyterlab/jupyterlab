@@ -98,12 +98,8 @@ bumped their major version (following semver convention). We want to point out p
      The ``IDocumentWidgetOpener`` interface also now defines an ```opened``` signal that is emitted when a widget is opened.
    * Removed the property ``docProviderFactory`` from the interface ``DocumentManager.IOptions``.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
-   * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
-     ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
-     ``renameAck`` is not optional anymore in ``IDocumentProvider``.
-   * Removed the token and type ``IDocumentProviderFactory``.
-   * Removed the property collaborative from the interface ``WebSocketProvider.IOptions``. It doesn't extend from
-     ``IDocumentProviderFactory.IOptions``. And the ``ymodel`` attribute has been renamed ``model``.
+   This package is no longer present in JupyterLab. For documentation related to Real-Time Collaboration, please check out
+   `jupyterlab_rtc's documentation <https://jupyterlab.readthedocs.io/en/latest/user/rtc.html>`_
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
@@ -159,7 +155,8 @@ bumped their major version (following semver convention). We want to point out p
    * Remove ``Contents.IDrive.modelDBFactory`` and ``Contents.IManager.getModelDBFactory``.
    * Added ``Contents.IDrive.sharedModelFactory`` and ``Contents.IManager.getsharedModelFactory``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
-   The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
+   This package is no longer present in JupyterLab. For documentation related to the shared models,
+   please check out `@jupyter/ydoc documentation <https://jupyter-ydoc.readthedocs.io/en/latest>`_.
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
   Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
   Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
@@ -197,6 +194,9 @@ bumped their major version (following semver convention). We want to point out p
         ensure a custom renderer is not used for property with the same name but different schema.
 - ``@jupyterlab/translation`` from 3.x to 4.x
    Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
+- ``@jupyterlab/vdom`` and ``@jupyterlab/vdom-extension`` have been removed.
+   The underlying [vdom](https://github.com/nteract/vdom) Python package is unmaintained.
+   So it was decided to drop it from core packages.
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
    * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
@@ -217,7 +217,7 @@ Jest has been updated to 29.2.0 (and *ts-jest* to 29.0.0). And therefore the jes
 - The unmaintained reporter ``jest-summary-reporter`` has been replaced by the new default ``github-actions`` reporter.
 - The helper ``flakyIt`` has been removed. You can use the new `jest.retryTimes <https://jestjs.io/docs/jest-object#jestretrytimesnumretries-options>`_ instead.
 
-With JupyterLab 4, we fixed circular dependencies due to the testutils package. So it is now only a facade to export
+With JupyterLab 4, we fixed circular dependencies due to the ``testutils`` package. So it is now only a facade to export
 helpers from various core packages. The exported helpers are the same as before expect for:
 
 - ``NBTestUtils.DEFAULT_CONTENT``: Removed - you could imported from ``@jupyterlab/notebook/lib/testutils`` but we strongly advice not to and to use your own test data.

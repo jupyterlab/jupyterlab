@@ -255,8 +255,6 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/tooltip-extension',
     '@jupyterlab/translation-extension',
     '@jupyterlab/ui-components-extension',
-    '@jupyterlab/vdom',
-    '@jupyterlab/vdom-extension',
     '@jupyterlab/vega5-extension'
   ],
   '@jupyterlab/notebook': ['@jupyterlab/application'],
