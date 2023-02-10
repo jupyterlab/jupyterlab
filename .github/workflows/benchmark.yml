@@ -12,6 +12,11 @@ jobs:
 
     runs-on: ubuntu-22.04
 
+    strategy:
+      matrix:
+        # FIXME Workaround for https://github.com/iterative/setup-cml/issues/85
+        node-version: ['16.x']
+
     env:
       BENCHMARK_NUMBER_SAMPLES: 100
 
