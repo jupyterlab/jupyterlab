@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { createDefaultFactory, ToolbarRegistry } from '@jupyterlab/apputils';
-import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
+import { Cell, CellModel, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
@@ -13,6 +13,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
+import { IMapChange } from '@jupyter/ydoc';
 
 /*
  * Text mime types
@@ -65,18 +66,40 @@ export class CellToolbarTracker implements IDisposable {
 
     // Handle subsequent changes of active cell.
     panel.content.activeCellChanged.connect(this._onActiveCellChanged, this);
+    panel.content.activeCell?.model.metadataChanged.connect(this._onMetadataChanged, this);
+    panel.disposed.connect(() => {
+      panel.content.activeCellChanged.disconnect(this._onActiveCellChanged);
+      panel.content.activeCell?.model.metadataChanged.disconnect(this._onMetadataChanged);
+    });
   }
 
+  _onMetadataChanged(model: CellModel, args: IMapChange) {
+    console.log("metadata changed!", model, args);
+    if (args.key === 'jupyter' && typeof args.newValue === 'object') {
+      if (args.newValue.source_hidden === true && (args.type === 'add' || args.type === 'change')) {
+        // Cell just became hidden; remove toolbar
+        this._removeToolbar(model);
+      }
+      else {
+        // Cell just became visible; add toolbar
+        this._addToolbar(model);
+        // TODO: this._updateCellForToolbarOverlap(activeCell);
+      }
+    }
+  }
   _onActiveCellChanged(notebook: Notebook): void {
     if (this._previousActiveCell && !this._previousActiveCell.isDisposed) {
       // Disposed cells do not have a model anymore.
       this._removeToolbar(this._previousActiveCell.model);
+      this._previousActiveCell.model.metadataChanged.disconnect(this._onMetadataChanged);
     }
 
     const activeCell = notebook.activeCell;
     if (activeCell === null || activeCell.inputHidden) {
       return;
     }
+
+    activeCell.model.metadataChanged.connect(this._onMetadataChanged, this);
 
     this._addToolbar(activeCell.model);
     this._previousActiveCell = activeCell;
