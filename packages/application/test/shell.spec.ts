@@ -76,9 +76,7 @@ describe('LabShell', () => {
       widget.parent = null;
       expect(shell.currentWidget).toBe(null);
     });
-  });
 
-  describe('#onCurrentChanged', () => {
     it('should test if current, active class names are cleared when current widget changes', () => {
       const foo = new Widget();
       foo.id = 'foo';
