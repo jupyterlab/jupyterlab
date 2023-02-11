@@ -224,7 +224,6 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _changedEventCallback(): void {
-    console.log('_changedEventCallback called');
     const activeCell = this._panel?.content.activeCell;
     if (activeCell === null || activeCell === undefined) {
       return;
