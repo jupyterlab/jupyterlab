@@ -85,6 +85,7 @@ import {
   copyIcon,
   cutIcon,
   duplicateIcon,
+  fastForwardIcon,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
@@ -1642,16 +1643,20 @@ function activateNotebookHandler(
   }
 
   // Utility function to create a new notebook.
-  const createNew = async (cwd: string, kernelName?: string) => {
+  const createNew = async (
+    cwd: string,
+    kernelId: string,
+    kernelName: string
+  ) => {
     const model = await commands.execute('docmanager:new-untitled', {
       path: cwd,
       type: 'notebook'
     });
-    if (model != undefined) {
+    if (model !== undefined) {
       const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
-        kernel: { name: kernelName }
+        kernel: { id: kernelId, name: kernelName }
       })) as unknown as IDocumentWidget;
       widget.isUntitled = true;
       return widget;
@@ -1677,8 +1682,9 @@ function activateNotebookHandler(
     icon: args => (args['isPalette'] ? undefined : notebookIcon),
     execute: args => {
       const cwd = (args['cwd'] as string) || (defaultBrowser?.model.path ?? '');
+      const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
-      return createNew(cwd, kernelName);
+      return createNew(cwd, kernelId, kernelName);
     }
   });
 
@@ -1907,6 +1913,7 @@ function addCommands(
 
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: trans.__('Run Selected Cells'),
+    caption: trans.__('Run the selected cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1920,6 +1927,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.run, {
     label: trans.__('Run Selected Cells and Do not Advance'),
+    caption: trans.__('Run the selected cells and do not advance'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -1946,6 +1954,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.runAll, {
     label: trans.__('Run All Cells'),
+    caption: trans.__('Run all cells'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2014,6 +2023,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.restart, {
     label: trans.__('Restart Kernel…'),
+    caption: trans.__('Restart the kernel'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2107,6 +2117,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: trans.__('Restart Kernel and Run All Cells…'),
+    caption: trans.__('Restart the kernel and run all cells'),
     execute: async () => {
       const restarted: boolean = await commands.execute(CommandIDs.restart, {
         activate: false
@@ -2115,7 +2126,8 @@ function addCommands(
         await commands.execute(CommandIDs.runAll);
       }
     },
-    isEnabled
+    isEnabled,
+    icon: fastForwardIcon
   });
   commands.addCommand(CommandIDs.clearAllOutputs, {
     label: trans.__('Clear Outputs of All Cells'),
@@ -2143,6 +2155,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.interrupt, {
     label: trans.__('Interrupt Kernel'),
+    caption: trans.__('Interrupt the kernel'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 

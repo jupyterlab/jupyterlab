@@ -49,8 +49,6 @@
     "@jupyterlab/codeeditor": "^4.0.0-alpha.18",
     "@jupyterlab/codemirror": "^4.0.0-alpha.18",
     "@jupyterlab/codemirror-extension": "^4.0.0-alpha.18",
-    "@jupyterlab/collaboration": "^4.0.0-alpha.18",
-    "@jupyterlab/collaboration-extension": "^4.0.0-alpha.18",
     "@jupyterlab/completer": "^4.0.0-alpha.18",
     "@jupyterlab/completer-extension": "^4.0.0-alpha.18",
     "@jupyterlab/console": "^4.0.0-alpha.18",
@@ -62,7 +60,6 @@
     "@jupyterlab/debugger-extension": "^4.0.0-alpha.18",
     "@jupyterlab/docmanager": "^4.0.0-alpha.18",
     "@jupyterlab/docmanager-extension": "^4.0.0-alpha.18",
-    "@jupyterlab/docprovider": "^4.0.0-alpha.18",
     "@jupyterlab/docregistry": "^4.0.0-alpha.18",
     "@jupyterlab/documentsearch": "^4.0.0-alpha.18",
     "@jupyterlab/documentsearch-extension": "^4.0.0-alpha.18",
@@ -130,8 +127,6 @@
     "@jupyterlab/translation-extension": "^4.0.0-alpha.18",
     "@jupyterlab/ui-components": "^4.0.0-alpha.33",
     "@jupyterlab/ui-components-extension": "^4.0.0-alpha.18",
-    "@jupyterlab/vdom": "^4.0.0-alpha.18",
-    "@jupyterlab/vdom-extension": "^4.0.0-alpha.18",
     "@jupyterlab/vega5-extension": "^4.0.0-alpha.18"
   },
   "devDependencies": {

@@ -20,6 +20,7 @@ module.exports = {
     viewport: { width: 1024, height: 768 },
 
     // Artifacts
+    // trace: 'on-first-retry',
     video: 'retain-on-failure'
   }
 } as PlaywrightTestConfig;

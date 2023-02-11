@@ -3,8 +3,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+from jupyter_server.base.handlers import JupyterHandler
 from jupyter_server.extension.handler import ExtensionHandlerMixin
-from jupyterlab_server.server import JupyterHandler
 from tornado import web
 
 TEMPLATE = """

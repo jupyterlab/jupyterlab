@@ -2,7 +2,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import type { Session, TerminalAPI } from '@jupyterlab/services';
+import type { Session, TerminalAPI, User } from '@jupyterlab/services';
 import {
   test as base,
   Page,
@@ -92,6 +92,17 @@ export type GalataOptions = {
    * they are still initialized with the hard drive values.
    */
   mockSettings: boolean | Record<string, unknown>;
+  /**
+   * Mock JupyterLab user in-memory or not.
+   *
+   * Possible values are:
+   * - true (default): JupyterLab user will be mocked on a per test basis
+   * - false: JupyterLab user won't be mocked (It will be a random user so snapshots won't match)
+   * - Record<string, unknown>: Initial JupyterLab user - Mapping (user attribute, value).
+   *
+   * By default the user is stored in-memory.
+   */
+  mockUser: boolean | Partial<User.IUser>;
   /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
    * the server root for debugging purpose. By default the files are
@@ -206,6 +217,17 @@ export const test: TestType<
    */
   mockSettings: [galata.DEFAULT_SETTINGS, { option: true }],
   /**
+   * Mock JupyterLab user in-memory or not.
+   *
+   * Possible values are:
+   * - true (default): JupyterLab user will be mocked on a per test basis
+   * - false: JupyterLab user won't be mocked (It will be a random user so snapshots won't match)
+   * - Record<string, unknown>: Initial JupyterLab user - Mapping (user attribute, value).
+   *
+   * By default the user is stored in-memory.
+   */
+  mockUser: [true, { option: true }],
+  /**
    * Galata can keep the uploaded and created files in ``tmpPath`` on
    * the server root for debugging purpose. By default the files are
    * always deleted.
@@ -238,7 +260,7 @@ export const test: TestType<
    *
    * Possible values are:
    * - null: The Terminals API won't be mocked
-   * - Map<string, TerminalsAPI.IModel>: The Terminals created during a test.
+   * - Map<string, TerminalAPI.IModel>: The Terminals created during a test.
    *
    * By default the Terminals created during a test will be tracked and disposed at the end.
    */
@@ -305,7 +327,6 @@ export const test: TestType<
       await helpers.waitForCondition(() => {
         return helpers.activity.isTabActive('Launcher');
       });
-
       // Oddly current tab is not always set to active
       if (!(await helpers.isInSimpleMode())) {
         await helpers.activity.activateTab('Launcher');
@@ -337,6 +358,7 @@ export const test: TestType<
       mockConfig,
       mockSettings,
       mockState,
+      mockUser,
       page,
       sessions,
       terminals,
@@ -353,6 +375,7 @@ export const test: TestType<
         mockConfig,
         mockSettings,
         mockState,
+        mockUser,
         page,
         sessions,
         terminals,

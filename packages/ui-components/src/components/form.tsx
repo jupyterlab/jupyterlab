@@ -5,15 +5,20 @@
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
-import Form, {
+
+import Form, { FormProps, IChangeEvent } from '@rjsf/core';
+
+import {
+  ADDITIONAL_PROPERTY_FLAG,
   ArrayFieldTemplateProps,
-  ErrorSchema,
+  canExpand,
   FieldTemplateProps,
-  FormProps,
-  IChangeEvent,
+  getTemplate,
   ObjectFieldTemplateProps,
-  utils
-} from '@rjsf/core';
+  Registry,
+  UiSchema
+} from '@rjsf/utils';
+
 import React from 'react';
 import {
   addIcon,
@@ -22,6 +27,21 @@ import {
   closeIcon,
   LabIcon
 } from '../icon';
+
+/**
+ * Default `ui:options` for the UiSchema.
+ */
+export const DEFAULT_UI_OPTIONS = {
+  /**
+   * This prevents the submit button from being rendered, by default, as it is
+   * almost never what is wanted.
+   *
+   * Provide any `uiSchema#/ui:options/submitButtonOptions` to override this.
+   */
+  submitButtonOptions: {
+    norender: true
+  }
+};
 
 /**
  * Form component namespace.
@@ -240,6 +260,25 @@ function customizeForLab<P = any>(
 }
 
 /**
+ * Fetch field templates from RJSF.
+ */
+function getTemplates(registry: Registry, uiSchema: UiSchema | undefined) {
+  const TitleField = getTemplate<'TitleFieldTemplate'>(
+    'TitleFieldTemplate',
+    registry,
+    uiSchema
+  );
+
+  const DescriptionField = getTemplate<'DescriptionFieldTemplate'>(
+    'DescriptionFieldTemplate',
+    registry,
+    uiSchema
+  );
+
+  return { TitleField, DescriptionField };
+}
+
+/**
  * Template to allow for custom buttons to re-order/remove entries in an array.
  * Necessary to create accessible buttons.
  */
@@ -250,6 +289,10 @@ const CustomArrayTemplateFactory = (
     ...options,
     name: 'JupyterLabArrayTemplate',
     component: props => {
+      const { schema, registry, uiSchema, required } = props;
+      const commonProps = { schema, registry, uiSchema, required };
+      const { TitleField, DescriptionField } = getTemplates(registry, uiSchema);
+
       return (
         <div className={props.className}>
           {props.compact ? (
@@ -270,13 +313,14 @@ const CustomArrayTemplateFactory = (
           ) : (
             <>
               {props.title && (
-                <props.TitleField
+                <TitleField
+                  {...commonProps}
                   title={props.title}
-                  required={props.required}
                   id={`${props.idSchema.$id}-title`}
                 />
               )}
-              <props.DescriptionField
+              <DescriptionField
+                {...commonProps}
                 id={`${props.idSchema.$id}-description`}
                 description={props.schema.description ?? ''}
               />
@@ -330,6 +374,10 @@ const CustomObjectTemplateFactory = (
     ...options,
     name: 'JupyterLabObjectTemplate',
     component: props => {
+      const { schema, registry, uiSchema, required } = props;
+      const commonProps = { schema, registry, uiSchema, required };
+      const { TitleField, DescriptionField } = getTemplates(registry, uiSchema);
+
       return (
         <fieldset id={props.idSchema.$id}>
           {props.compact ? (
@@ -349,21 +397,27 @@ const CustomObjectTemplateFactory = (
             </div>
           ) : (
             <>
-              {(props.title || props.uiSchema['ui:title']) && (
-                <props.TitleField
+              {(props.title ||
+                (props.uiSchema || JSONExt.emptyObject)['ui:title']) && (
+                <TitleField
+                  {...commonProps}
                   id={`${props.idSchema.$id}__title`}
-                  title={props.title || props.uiSchema['ui:title'] || ''}
-                  required={props.required}
+                  title={
+                    props.title ||
+                    `${(props.uiSchema || JSONExt.emptyObject)['ui:title']}` ||
+                    ''
+                  }
                 />
               )}
-              <props.DescriptionField
+              <DescriptionField
+                {...commonProps}
                 id={`${props.idSchema.$id}__description`}
                 description={props.schema.description ?? ''}
               />
             </>
           )}
           {props.properties.map(property => property.content)}
-          {utils.canExpand(props.schema, props.uiSchema, props.formData) && (
+          {canExpand(props.schema, props.uiSchema, props.formData) && (
             <AddButton
               onAddClick={props.onAddClick(props.schema)}
               buttonStyle={props.buttonStyle}
@@ -407,7 +461,8 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
 
       const isRoot = schemaId === '';
 
-      const hasCustomField = schemaId === props.uiSchema['ui:field'];
+      const hasCustomField =
+        schemaId === (props.uiSchema || JSONExt.emptyObject)['ui:field'];
 
       if (props.showModifiedFromDefault) {
         /**
@@ -439,9 +494,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
       // While we can implement "remove" button for array items in array template,
       // object templates do not provide a way to do this instead we need to add
       // buttons here (and first check if the field can be removed = is additional).
-      const isAdditional = schema.hasOwnProperty(
-        utils.ADDITIONAL_PROPERTY_FLAG
-      );
+      const isAdditional = schema.hasOwnProperty(ADDITIONAL_PROPERTY_FLAG);
 
       const isItem: boolean = !(
         schema.type === 'object' || schema.type === 'array'
@@ -547,7 +600,7 @@ export interface IFormComponentProps<T = ReadonlyJSONObject>
   /**
    *
    */
-  onChange: (e: IChangeEvent<T>, es?: ErrorSchema) => any;
+  onChange: (e: IChangeEvent<T>) => any;
   /**
    *
    */
@@ -559,15 +612,22 @@ export interface IFormComponentProps<T = ReadonlyJSONObject>
  */
 export function FormComponent(props: IFormComponentProps): JSX.Element {
   const {
-    FieldTemplate,
-    ArrayFieldTemplate,
-    ObjectFieldTemplate,
     buttonStyle,
     compact,
     showModifiedFromDefault,
     translator,
+    formContext,
     ...others
   } = props;
+
+  const uiSchema = { ...(others.uiSchema || JSONExt.emptyObject) } as UiSchema;
+
+  uiSchema['ui:options'] = { ...DEFAULT_UI_OPTIONS, ...uiSchema['ui:options'] };
+
+  others.uiSchema = uiSchema;
+
+  const { FieldTemplate, ArrayFieldTemplate, ObjectFieldTemplate } =
+    props.templates || JSONExt.emptyObject;
 
   const customization = {
     buttonStyle,
@@ -579,7 +639,8 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
   const fieldTemplate = React.useMemo(
     () => FieldTemplate ?? CustomTemplateFactory(customization),
     [FieldTemplate, buttonStyle, compact, showModifiedFromDefault, translator]
-  );
+  ) as React.FunctionComponent;
+
   const arrayTemplate = React.useMemo(
     () => ArrayFieldTemplate ?? CustomArrayTemplateFactory(customization),
     [
@@ -589,7 +650,8 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
       showModifiedFromDefault,
       translator
     ]
-  );
+  ) as React.FunctionComponent;
+
   const objectTemplate = React.useMemo(
     () => ObjectFieldTemplate ?? CustomObjectTemplateFactory(customization),
     [
@@ -599,13 +661,15 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
       showModifiedFromDefault,
       translator
     ]
-  );
+  ) as React.FunctionComponent;
+
+  const templates: Record<string, React.FunctionComponent> = {
+    FieldTemplate: fieldTemplate,
+    ArrayFieldTemplate: arrayTemplate,
+    ObjectFieldTemplate: objectTemplate
+  };
+
   return (
-    <Form
-      FieldTemplate={fieldTemplate}
-      ArrayFieldTemplate={arrayTemplate}
-      ObjectFieldTemplate={objectTemplate}
-      {...others}
-    />
+    <Form templates={templates} formContext={formContext as any} {...others} />
   );
 }

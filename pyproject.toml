@@ -43,8 +43,6 @@ dependencies = [
     "jupyter-lsp>=1.5.1",
     "jupyter_server>=2.0.1,<3",
     "jupyterlab_server>=2.19.0,<3",
-    "jupyter_ydoc>=0.3.0,<0.4.0",
-    "jupyter_server_ydoc>=0.7.0,<0.8.0",
     "notebook_shim>=0.2",
     "packaging",
     "traitlets",
@@ -87,7 +85,7 @@ docs = [
 ]
 docs-screenshots = [
     "altair==4.2.2",
-    "ipython==8.0.0",
+    "ipython==8.9.0",
     "ipywidgets==7.6.6",
     "jupyterlab-geojson==3.3.1",
     "jupyterlab-language-pack-zh-CN==3.5.post4",
@@ -95,7 +93,6 @@ docs-screenshots = [
     "nbconvert>=7.0.0",
     "pandas==1.5.3",
     "scipy==1.10.0",
-    "vdom==0.6",
     "vega_datasets==0.9.0",
 ]
 test = [
@@ -118,8 +115,8 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.237",
-    "black[jupyter]==22.12.0"
+    "ruff==0.0.242",
+    "black[jupyter]==23.1.0"
 ]
 
 [tool.check-wheel-contents]
@@ -257,6 +254,8 @@ ignore = [
 "FBT001", "FBT002", "FBT003",
 # E501 Line too long (158 > 100 characters)
 "E501",
+# PLR0913 Too many arguments to function call
+"PLR0913",
 # SIM105 Use `contextlib.suppress(...)`
 "SIM105",
 ]

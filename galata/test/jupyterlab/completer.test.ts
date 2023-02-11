@@ -46,7 +46,7 @@ test.describe('Completer', () => {
       );
       await galata.Mock.mockSettings(page, [], {
         ...galata.DEFAULT_SETTINGS,
-        '@jupyterlab/completer-extension:tracker': {
+        '@jupyterlab/completer-extension:manager': {
           showDocumentationPanel: true
         }
       });

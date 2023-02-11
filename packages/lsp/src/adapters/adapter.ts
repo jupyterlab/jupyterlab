@@ -237,7 +237,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   /**
    * Internal virtual document of the adapter.
    */
-  get virtualDocument(): VirtualDocument {
+  get virtualDocument(): VirtualDocument | null {
     return this._virtualDocument;
   }
 
@@ -261,14 +261,8 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
       return;
     }
     this._isDisposed = true;
-
-    this.virtualDocument?.dispose();
-
-    this.widget.context.saveState.disconnect(this.onSaveState, this);
-    this.connectionManager.closed.disconnect(this.onConnectionClosed, this);
-    this.widget.disposed.disconnect(this.dispose, this);
-    this.virtualDocument.changed.disconnect(this.documentChanged);
     this.disconnect();
+    this._virtualDocument = null;
     this._disposed.emit();
     Signal.clearData(this);
   }
@@ -277,8 +271,12 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    * Disconnect virtual document from the language server.
    */
   disconnect(): void {
-    this.connectionManager.unregisterDocument(this.virtualDocument);
-    this.widget.context.model.contentChanged.disconnect(this._onContentChanged);
+    const uri = this.virtualDocument?.uri;
+    const { model } = this.widget.context;
+    if (uri) {
+      this.connectionManager.unregisterDocument(uri);
+    }
+    model.contentChanged.disconnect(this._onContentChanged, this);
 
     // pretend that all editors were removed to trigger the disconnection of even handlers
     // they will be connected again on new connection
@@ -288,7 +286,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
       });
     }
 
-    this.virtualDocument.dispose();
+    this.virtualDocument?.dispose();
   }
 
   /**
@@ -299,7 +297,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
       console.warn('Cannot update documents: adapter disposed');
       return Promise.reject('Cannot update documents: adapter disposed');
     }
-    return this.virtualDocument.updateManager.updateDocuments(this.editors);
+    return this.virtualDocument!.updateManager.updateDocuments(this.editors);
   }
 
   /**
@@ -364,7 +362,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   // but also reloads the connection; used during file rename (or when it was moved)
   protected reloadConnection(): void {
     // ignore premature calls (before the editor was initialized)
-    if (this.virtualDocument == null) {
+    if (this.virtualDocument === null) {
       return;
     }
 
@@ -389,7 +387,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     state: DocumentRegistry.SaveState
   ): void {
     // ignore premature calls (before the editor was initialized)
-    if (this.virtualDocument == null) {
+    if (this.virtualDocument === null) {
       return;
     }
 
@@ -522,19 +520,10 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    * Create the virtual document using current path and language.
    */
   protected initVirtual(): void {
-    let virtualDocument = this.createVirtualDocument();
-    if (virtualDocument == null) {
-      console.error(
-        'Could not initialize a VirtualDocument for adapter: ',
-        this
-      );
-      return;
-    }
-    if (this._virtualDocument) {
-      this._virtualDocument.dispose();
-    }
-    this._virtualDocument = virtualDocument;
-    this._connectContentChangedSignal();
+    const { model } = this.widget.context;
+    this._virtualDocument?.dispose();
+    this._virtualDocument = this.createVirtualDocument();
+    model.contentChanged.connect(this._onContentChanged, this);
   }
 
   /**
@@ -599,7 +588,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
 
   private _isConnected: boolean;
   private _updateFinished: Promise<void>;
-  private _virtualDocument: VirtualDocument;
+  private _virtualDocument: VirtualDocument | null = null;
 
   /**
    * Callback called when a foreign document is closed,
@@ -671,28 +660,21 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   }
 
   /**
-   * Connect the change signal in order to update all virtual documents after a change.
+   * Handle content changes and update all virtual documents after a change.
    *
-   * Update to the state of a notebook may be done without a notice on the CodeMirror level,
-   * e.g. when a cell is deleted. Therefore a JupyterLab-specific signals are watched instead.
+   * #### Notes
+   * Update to the state of a notebook may be done without a notice on the
+   * CodeMirror level, e.g. when a cell is deleted. Therefore a
+   * JupyterLab-specific signal is watched instead.
    *
-   * While by not using the change event of CodeMirror editors we loose an easy way to send selective,
-   * (range) updates this can be still implemented by comparison of before/after states of the
-   * virtual documents, which is even more resilient and -obviously - editor-independent.
+   * While by not using the change event of CodeMirror editors we lose an easy
+   * way to send selective (range) updates this can be still implemented by
+   * comparison of before/after states of the virtual documents, which is
+   * more resilient and editor-independent.
    */
-  private _connectContentChangedSignal(): void {
-    this.widget.context.model.contentChanged.connect(
-      this._onContentChanged,
-      this
-    );
-  }
-
-  /**
-   * Callback called when the content of the document have changed.
-   */
-  private async _onContentChanged(_slot: any) {
-    // update the virtual documents (sending the updates to LSP is out of scope here)
-
+  private async _onContentChanged(_: unknown) {
+    // Update the virtual documents.
+    // Sending the updates to LSP is out of scope here.
     const promise = this.updateDocuments();
     if (!promise) {
       console.warn('Could not update documents');

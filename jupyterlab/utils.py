@@ -34,7 +34,6 @@ class deprecated:  # noqa
         self.removed_version = removed_version
 
     def __call__(self, func):
-
         alt_msg = ""
         if self.alt_func is not None:
             alt_msg = " Use ``%s`` instead." % self.alt_func

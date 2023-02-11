@@ -141,5 +141,91 @@ describe('@jupyterlab/application', () => {
 
       expect(contextualCommand.isVisible?.call({})).toEqual(expected);
     });
+
+    // Labels/captions, defaultLabel/defaultCaption, expected
+    it.each([
+      [[], undefined, ''],
+      [[], 'default', 'default'],
+      [[''], 'default', ''],
+      [['label a'], 'default', 'label a'],
+      [['label a', 'label b'], 'default', 'label a and label b'],
+      [['label a', 'label b…'], 'default', 'label a and label b…'],
+      [['label a…', 'label b'], 'default', 'label a and label b…'],
+      [['label a…', 'label b…'], 'default', 'label a and label b…'],
+      [
+        ['label a', 'label b', 'label c'],
+        'default',
+        'label a, label b and label c'
+      ],
+      [
+        ['label a…', 'label b…', 'label c'],
+        'default',
+        'label a, label b and label c…'
+      ],
+      [
+        ['label a…', 'label b', 'label c…'],
+        'default',
+        'label a, label b and label c…'
+      ],
+      [
+        ['label a…', 'label b…', 'label c…'],
+        'default',
+        'label a, label b and label c…'
+      ],
+      [
+        ['label a', 'label b…', 'label c'],
+        'default',
+        'label a, label b and label c…'
+      ],
+      [
+        ['label a', 'label b…', 'label c…'],
+        'default',
+        'label a, label b and label c…'
+      ],
+      [
+        ['label a', 'label b', 'label c…'],
+        'default',
+        'label a, label b and label c…'
+      ]
+    ])(
+      'labels/captions %j, and default %s has label/caption %s',
+      (values, defaultValue, expected) => {
+        let myCommands: SemanticCommand[] = [];
+
+        for (let i = 0; i < values.length; i++) {
+          semanticCmd = new SemanticCommand();
+          const id = `command-${i}`;
+          const label = values[i];
+          const caption = label.replace('label', 'caption');
+          commands.addCommand(id, {
+            execute: () => null,
+            label: label,
+            caption: caption
+          });
+
+          semanticCmd.add({ id });
+          myCommands.push(semanticCmd);
+        }
+
+        const semanticCommandId = 'my-semantic-command';
+        commands.addCommand(
+          semanticCommandId,
+          createSemanticCommand(
+            app,
+            myCommands,
+            {
+              label: defaultValue,
+              caption: defaultValue?.replace('label', 'caption')
+            },
+            translator.load('jupyterlab')
+          )
+        );
+
+        expect(commands.label(semanticCommandId)).toEqual(expected);
+        expect(commands.caption(semanticCommandId)).toEqual(
+          expected.replace(/label/g, 'caption')
+        );
+      }
+    );
   });
 });
