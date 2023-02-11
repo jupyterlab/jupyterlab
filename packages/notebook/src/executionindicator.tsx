@@ -64,7 +64,12 @@ export function ExecutionIndicatorComponent(
   }
 
   const progressBar = (percentage: number) => (
-    <ProgressCircle progress={percentage} width={16} height={24} />
+    <ProgressCircle
+      progress={percentage}
+      width={16}
+      height={24}
+      label={trans.__('Kernel status')}
+    />
   );
   const titleFactory = (translatedStatus: string) =>
     trans.__('Kernel status: %1', translatedStatus);
@@ -357,6 +362,11 @@ export namespace ExecutionIndicator {
               const parentId = (message.parent_header as KernelMessage.IHeader)
                 .msg_id;
               this._cellExecutedCallback(nb, parentId);
+            } else if (
+              KernelMessage.isStatusMsg(message) &&
+              message.content.execution_state === 'restarting'
+            ) {
+              this._restartHandler(nb);
             } else if (message.header.msg_type === 'execute_input') {
               // A cell code starts executing.
               this._startTimer(nb);
@@ -426,13 +436,7 @@ export namespace ExecutionIndicator {
     }
 
     /**
-     * The function is called on kernel's idle status message.
-     * It is used to keep track number of executed
-     * cell or Comm custom messages and the status of kernel.
-     *
-     * @param  nb - The notebook which contains the executed code
-     * cell.
-     * @param  msg_id - The id of message.
+     * Schedule switch to idle status and clearing of the timer.
      *
      * ### Note
      *
@@ -441,20 +445,47 @@ export namespace ExecutionIndicator {
      * these cells. This `Timeout` will be cleared if there is any cell
      * scheduled after that.
      */
+    private _scheduleSwitchToIdle(state: IExecutionState) {
+      window.setTimeout(() => {
+        state.executionStatus = 'idle';
+        clearInterval(state.interval);
+        this.stateChanged.emit(void 0);
+      }, 150);
+      state.timeout = window.setTimeout(() => {
+        state.needReset = true;
+      }, 1000);
+    }
+
+    /**
+     * The function is called on kernel's idle status message.
+     * It is used to keep track of number of executed
+     * cells or Comm custom messages and the status of kernel.
+     *
+     * @param nb - The notebook which contains the executed code cell.
+     * @param msg_id - The id of message.
+     */
     private _cellExecutedCallback(nb: Notebook, msg_id: string): void {
       const state = this._notebookExecutionProgress.get(nb);
       if (state && state.scheduledCell.has(msg_id)) {
         state.scheduledCell.delete(msg_id);
         if (state.scheduledCell.size === 0) {
-          window.setTimeout(() => {
-            state.executionStatus = 'idle';
-            clearInterval(state.interval);
-            this.stateChanged.emit(void 0);
-          }, 150);
-          state.timeout = window.setTimeout(() => {
-            state.needReset = true;
-          }, 1000);
+          this._scheduleSwitchToIdle(state);
         }
+      }
+    }
+
+    /**
+     * The function is called on kernel's restarting status message.
+     * It is used to clear the state tracking the number of executed
+     * cells.
+     *
+     * @param nb - The notebook which contains the executed code cell.
+     */
+    private _restartHandler(nb: Notebook): void {
+      const state = this._notebookExecutionProgress.get(nb);
+      if (state) {
+        state.scheduledCell.clear();
+        this._scheduleSwitchToIdle(state);
       }
     }
 

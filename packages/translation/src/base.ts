@@ -13,12 +13,10 @@ class NullTranslator implements ITranslator {
     this._languageBundle = bundle;
   }
 
+  readonly languageCode: string = 'en';
+
   load(domain: string): TranslationBundle {
     return this._languageBundle;
-  }
-
-  locale(): string {
-    return 'en';
   }
 
   private _languageBundle: TranslationBundle;

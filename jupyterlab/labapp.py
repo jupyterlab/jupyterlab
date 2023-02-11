@@ -1,4 +1,3 @@
-# coding: utf-8
 """A tornado based Jupyter lab server."""
 
 # Copyright (c) Jupyter Development Team.
@@ -7,6 +6,7 @@
 import dataclasses
 import json
 import os
+import sys
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
@@ -54,10 +54,7 @@ from .handlers.announcements import (
 )
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
-from .handlers.extension_manager_handler import (
-    ExtensionHandler,
-    extensions_handler_path,
-)
+from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -101,9 +98,9 @@ build_flags["splice-source"] = (
 version = __version__
 app_version = get_app_version()
 if version != app_version:
-    version = "%s (dev), %s (app)" % (__version__, app_version)
+    version = f"{__version__} (dev), {app_version} (app)"
 
-buildFailureMsg = """Build failed.
+build_failure_msg = """Build failed.
 Troubleshooting: If the build failed due to an out-of-memory error, you
 may be able to fix it by disabling the `dev_build` and/or `minimize` options.
 
@@ -205,7 +202,7 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
                     minimize=self.minimize,
                 )
             except Exception as e:
-                print(buildFailureMsg)
+                self.log.error(build_failure_msg)
                 raise e
 
 
@@ -238,7 +235,7 @@ class LabCleanAppOptions(AppOptions):
     settings = Bool(False)
     staging = Bool(True)
     static = Bool(False)
-    all = Bool(False)
+    all = Bool(False)  # noqa
 
 
 class LabCleanApp(JupyterApp):
@@ -266,7 +263,7 @@ class LabCleanApp(JupyterApp):
 
     static = Bool(False, config=True, help="Also delete <app-dir>/static")
 
-    all = Bool(
+    all = Bool(  # noqa
         False,
         config=True,
         help="Delete the entire contents of the app directory.\n%s" % ext_warn_msg,
@@ -301,9 +298,9 @@ class LabPathApp(JupyterApp):
     """
 
     def start(self):
-        print("Application directory:   %s" % get_app_dir())
-        print("User Settings directory: %s" % get_user_settings_dir())
-        print("Workspaces directory: %s" % get_workspaces_dir())
+        print("Application directory:   %s" % get_app_dir())  # noqa
+        print("User Settings directory: %s" % get_user_settings_dir())  # noqa
+        print("Workspaces directory: %s" % get_workspaces_dir())  # noqa
 
 
 class LabWorkspaceExportApp(WorkspaceExportApp):
@@ -355,7 +352,7 @@ class LabWorkspaceApp(JupyterApp):
     def start(self):
         try:
             super().start()
-            print("One of `export`, `import` or `list` must be specified.")
+            self.log.error("One of `export`, `import` or `list` must be specified.")
             self.exit(1)
         except NoStart:
             pass
@@ -477,8 +474,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
     flags["expose-app-in-browser"] = (
         {"LabApp": {"expose_app_in_browser": True}},
-        """Expose the global app instance to browser via window.jupyterapp.
-        It is also available via the deprecated window.jupyterlab name.""",
+        "Expose the global app instance to browser via window.jupyterapp.",
     )
     flags["extensions-in-dev-mode"] = (
         {"LabApp": {"extensions_in_dev_mode": True}},
@@ -489,15 +485,15 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         "Whether to enable collaborative mode.",
     )
 
-    subcommands = dict(
-        build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
-        clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
-        path=(LabPathApp, LabPathApp.description.splitlines()[0]),
-        paths=(LabPathApp, LabPathApp.description.splitlines()[0]),
-        workspace=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
-        workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
-        licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0]),
-    )
+    subcommands = {
+        "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
+        "clean": (LabCleanApp, LabCleanApp.description.splitlines()[0]),
+        "path": (LabPathApp, LabPathApp.description.splitlines()[0]),
+        "paths": (LabPathApp, LabPathApp.description.splitlines()[0]),
+        "workspace": (LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        "workspaces": (LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        "licenses": (LabLicensesApp, LabLicensesApp.description.splitlines()[0]),
+    }
 
     default_url = Unicode("/lab", config=True, help="The default URL to redirect to from `/`")
 
@@ -564,7 +560,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     expose_app_in_browser = Bool(
         False,
         config=True,
-        help="Whether to expose the global app instance to browser via window.jupyterlab",
+        help="Whether to expose the global app instance to browser via window.jupyterapp",
     )
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
@@ -627,7 +623,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         if self.override_static_url:
             return self.override_static_url
         else:
-            static_url = "/static/{name}/".format(name=self.name)
+            static_url = f"/static/{self.name}/"
             return ujoin(self.serverapp.base_url, static_url)
 
     @default("theme_url")
@@ -660,8 +656,18 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
             if not self.extensions_in_dev_mode:
-                self.labextensions_path = []
-                self.extra_labextensions_path = []
+                # Add an exception for @jupyterlab/galata-extension
+                galata_extension = pjoin(HERE, "galata")
+                self.labextensions_path = (
+                    [galata_extension]
+                    if galata_extension in map(os.path.abspath, self.labextensions_path)
+                    else []
+                )
+                self.extra_labextensions_path = (
+                    [galata_extension]
+                    if galata_extension in map(os.path.abspath, self.extra_labextensions_path)
+                    else []
+                )
         elif self.core_mode:
             dev_static_dir = ujoin(HERE, "static")
             self.static_paths = [dev_static_dir]
@@ -672,8 +678,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
-    def initialize_handlers(self):
-
+    def initialize_handlers(self):  # noqa
         handlers = []
 
         # Set config for Jupyterlab
@@ -684,7 +689,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         page_config["token"] = self.serverapp.token
         page_config["exposeAppInBrowser"] = self.expose_app_in_browser
         page_config["quitButton"] = self.serverapp.quit_button
-        page_config["collaborative"] = self.collaborative
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
@@ -836,6 +840,19 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     def initialize(self, argv=None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""
         super().initialize()
+        if self.collaborative:
+            try:
+                import jupyterlab_rtc  # noqa
+            except ImportError:
+                self.log.critical(
+                    """
+To enable real-time collaboration, you must install the extension `jupyterlab_rtc`.
+You can install it using pip for example:
+
+  python -m pip install jupyterlab_rtc
+"""
+                )
+                sys.exit(1)
 
 
 # -----------------------------------------------------------------------------

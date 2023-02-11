@@ -449,8 +449,7 @@
   },
   {
     "id": "debugger:pause-on-exceptions",
-    "label": "Enable / Disable pausing on exceptions",
-    "caption": "Enable / Disable pausing on exceptions",
+    "label": "Breakpoints on exception",
     "shortcuts": []
   },
   {
@@ -1763,7 +1762,7 @@
   {
     "id": "notebook:restart-run-all",
     "label": "Restart Kernel and Run All Cells…",
-    "caption": "",
+    "caption": "Restart the kernel and run all cells",
     "shortcuts": []
   },
   {
@@ -1958,6 +1957,30 @@
     "id": "runmenu:run-all",
     "label": "Run All",
     "caption": "Run All",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-new-console",
+    "label": "New Console for Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-new-notebook",
+    "label": "New Notebook for Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-open-session",
+    "label": "Unknown Session",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-shut-down",
+    "label": "Shut Down Kernel",
+    "caption": "",
     "shortcuts": []
   },
   {

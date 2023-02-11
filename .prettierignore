@@ -6,6 +6,7 @@
 **/static
 **/.ipynb_checkpoints
 tests/**/coverage
+CHANGELOG.md
 
 .eggs
 dev_mode/index.js
@@ -23,6 +24,7 @@ examples/federated/core_package/index.template.js
 examples/federated/core_package/index.js
 examples/federated/labextensions
 galata/playwright-report
+jupyterlab/galata
 jupyterlab/schemas
 jupyterlab/themes
 jupyterlab/geckodriver

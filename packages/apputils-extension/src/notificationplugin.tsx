@@ -34,9 +34,13 @@ import {
   UseSignal,
   VDomModel
 } from '@jupyterlab/ui-components';
-import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
+import {
+  PromiseDelegate,
+  ReadonlyJSONObject,
+  ReadonlyJSONValue
+} from '@lumino/coreutils';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type {
   ClearWaitingQueueParams,
   CloseButtonProps,
@@ -711,12 +715,20 @@ namespace Private {
     onChange(callback: (toast: ToastItem) => void): () => void;
   }
 
+  let waitForToastify: PromiseDelegate<void> | null = null;
+
   /**
    * Asynchronously load the toast container
    *
    * @returns The toast object
    */
   export async function toast(): Promise<IToast> {
+    if (waitForToastify === null) {
+      waitForToastify = new PromiseDelegate();
+    } else {
+      await waitForToastify.promise;
+    }
+
     if (toastify === null) {
       toastify = await import('react-toastify');
 
@@ -724,8 +736,9 @@ namespace Private {
         document.createElement('div')
       );
       container.id = 'react-toastify-container';
+      const root = createRoot(container);
 
-      ReactDOM.render(
+      root.render(
         <toastify.ToastContainer
           draggable={false}
           closeOnClick={false}
@@ -737,9 +750,10 @@ namespace Private {
           className="jp-toastContainer"
           transition={toastify.Slide}
           closeButton={CloseButton}
-        ></toastify.ToastContainer>,
-        container
+        ></toastify.ToastContainer>
       );
+
+      waitForToastify.resolve();
     }
 
     return toastify.toast;
@@ -873,11 +887,11 @@ namespace Private {
     } as any;
 
     return t(
-      ({ closeToast }: { closeToast: () => void }) =>
+      ({ closeToast }: { closeToast?: () => void }) =>
         createContent(
           message,
           () => {
-            closeToast();
+            if (closeToast) closeToast();
             Notification.manager.dismiss(toastId);
           },
           actions

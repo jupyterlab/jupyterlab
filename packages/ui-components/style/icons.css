@@ -230,15 +230,18 @@
 }
 
 .jp-terminal-icon-background-color[fill] {
-  fill: var(--jp-terminal-icon-background-color, var(--jp-inverse-layout2));
+  fill: var(
+    --jp-terminal-icon-background-color,
+    var(--jp-inverse-layout-color2)
+  );
 }
 
 .jp-text-editor-icon-color[fill] {
-  fill: var(--jp-text-editor-icon-color, var(--jp-inverse-layout3));
+  fill: var(--jp-text-editor-icon-color, var(--jp-inverse-layout-color3));
 }
 
 .jp-inspector-icon-color[fill] {
-  fill: var(--jp-inspector-icon-color, var(--jp-inverse-layout3));
+  fill: var(--jp-inspector-icon-color, var(--jp-inverse-layout-color3));
 }
 
 /* CSS for icons in selected filebrowser listing items */

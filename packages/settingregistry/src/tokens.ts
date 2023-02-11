@@ -15,6 +15,7 @@ import {
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
 import { ISchemaValidator } from './settingregistry';
+import type { RJSFSchema, UiSchema } from '@rjsf/utils';
 
 /**
  * The setting registry token.
@@ -625,19 +626,13 @@ export namespace ISettingRegistry {
 
     /**
      * The metadata schema.
-     *
-     * ## Notes:
-     * To change to type @rjsf/utils -> RJSFSchema when upgrading rjsf to v5.
      */
     metadataSchema: IMetadataSchema;
 
     /**
      * The ui schema as used by react-JSON-schema-form.
-     *
-     * ## Notes:
-     * To change to type @rjsf/utils -> UiSchema when upgrading rjsf to v5.
      */
-    uiSchema?: { [metadataKey: string]: PartialJSONObject };
+    uiSchema?: { [metadataKey: string]: UiSchema };
 
     /**
      * The jupyter properties.
@@ -667,16 +662,8 @@ export namespace ISettingRegistry {
 
   /**
    * The metadata schema as defined in JSON schema.
-   *
-   * ## Notes:
-   * To remove in favour of @rjsf/utils -> RJSFSchema when upgrading rjsf to v5.
    */
-  export interface IMetadataSchema extends PartialJSONObject {
-    /**
-     * The type of data (should be object at first level).
-     */
-    type: string;
-
+  export interface IMetadataSchema extends RJSFSchema {
     /**
      * The properties as defined in JSON schema, and interpretable by react-JSON-schema-form.
      */

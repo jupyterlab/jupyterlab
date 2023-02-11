@@ -2,9 +2,9 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-import sys
-import shutil
 import os
+import shutil
+import sys
 
 argv = sys.argv[1:] + [
     "--debug",
@@ -17,7 +17,7 @@ argv = sys.argv[1:] + [
     "--config",
     "binder/jupyter_notebook_config.py",
 ]
-print(argv)
+print(argv)  # noqa
 
 
 # Convert from jupyter-notebook based to jupyter-lab based start-up
@@ -26,7 +26,7 @@ def nb2jps(s):
 
 
 new_argv = list(map(nb2jps, argv.copy()))
-print(new_argv)
+print(new_argv)  # noqa
 
 with open(".startup_args.txt", "w") as fid:
     fid.write(str(new_argv))

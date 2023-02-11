@@ -4,26 +4,20 @@
 |----------------------------------------------------------------------------*/
 
 import { showErrorMessage } from '@jupyterlab/apputils';
+import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import { ITranslator } from '@jupyterlab/translation';
 import {
   caretDownIcon,
   caretRightIcon,
-  RJSFTemplatesFactory
+  FormComponent
 } from '@jupyterlab/ui-components';
-import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
 import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
-import Form, {
-  ArrayFieldTemplateProps,
-  Field,
-  FieldTemplateProps,
-  IChangeEvent,
-  ObjectFieldTemplateProps,
-  UiSchema
-} from '@rjsf/core';
+import { IChangeEvent } from '@rjsf/core';
+import validatorAjv8 from '@rjsf/validator-ajv8';
+import { Field, UiSchema } from '@rjsf/utils';
 import { JSONSchema7 } from 'json-schema';
 import React from 'react';
-import { PluginList } from './pluginlist';
 
 /**
  * Indentation to use when saving the settings as JSON document.
@@ -47,7 +41,7 @@ export namespace SettingsFormEditor {
     /**
      * Dictionary used for custom field renderers in the form.
      */
-    renderers: { [id: string]: Field };
+    renderers: { [id: string]: { [property: string]: Field } };
 
     /**
      * Whether the form is collapsed or not.
@@ -106,20 +100,6 @@ export namespace SettingsFormEditor {
      */
     filteredSchema?: ISettingRegistry.ISchema;
     /**
-     * Field template
-     */
-    fieldTemplate?: React.StatelessComponent<FieldTemplateProps<any>>;
-    /**
-     * Array Field template
-     */
-    arrayFieldTemplate?: React.StatelessComponent<ArrayFieldTemplateProps<any>>;
-    /**
-     * Object Field template
-     */
-    objectFieldTemplate?: React.StatelessComponent<
-      ObjectFieldTemplateProps<any>
-    >;
-    /**
      * Form context
      */
     formContext?: any;
@@ -138,18 +118,14 @@ export class SettingsFormEditor extends React.Component<
     super(props);
     const { settings } = props;
     this._formData = settings.composite;
-    this._templateFactory = new RJSFTemplatesFactory({
-      translator: this.props.translator,
-      showModifiedFromDefault: true
-    });
     this.state = {
       isModified: settings.isModified,
       uiSchema: {},
       filteredSchema: this.props.settings.schema,
-      fieldTemplate: this._templateFactory.fieldTemplate,
-      arrayFieldTemplate: this._templateFactory.arrayTemplate,
-      objectFieldTemplate: this._templateFactory.objectTemplate,
-      formContext: { settings: this.props.settings }
+      formContext: {
+        defaultFormData: this.props.settings.default(),
+        settings: this.props.settings
+      }
     };
     this.handleChange = this.handleChange.bind(this);
     this._debouncer = new Debouncer(this.handleChange);
@@ -161,19 +137,16 @@ export class SettingsFormEditor extends React.Component<
   }
 
   componentDidUpdate(prevProps: SettingsFormEditor.IProps): void {
-    this._setUiSchema(prevProps.renderers);
+    this._setUiSchema(prevProps.renderers[prevProps.settings.id]);
     this._setFilteredSchema(prevProps.filteredValues);
 
-    if (prevProps.translator !== this.props.translator) {
-      this.setState({
-        fieldTemplate: this._templateFactory.fieldTemplate,
-        arrayFieldTemplate: this._templateFactory.arrayTemplate,
-        objectFieldTemplate: this._templateFactory.objectTemplate
-      });
-    }
-
     if (prevProps.settings !== this.props.settings) {
-      this.setState({ formContext: { settings: this.props.settings } });
+      this.setState({
+        formContext: {
+          settings: this.props.settings,
+          defaultFormData: this.props.settings.default()
+        }
+      });
     }
   }
 
@@ -252,34 +225,22 @@ export class SettingsFormEditor extends React.Component<
           )}
         </div>
         {!this.props.isCollapsed && (
-          <Form
+          <FormComponent
+            validator={validatorAjv8}
             schema={this.state.filteredSchema as JSONSchema7}
             formData={this._formData}
-            FieldTemplate={this.state.fieldTemplate}
-            ArrayFieldTemplate={this.state.arrayFieldTemplate}
-            ObjectFieldTemplate={this.state.objectFieldTemplate}
             uiSchema={this.state.uiSchema}
-            fields={this.props.renderers}
+            fields={this.props.renderers[this.props.settings.id]}
             formContext={this.state.formContext}
             liveValidate
             idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
             onChange={this._onChange}
+            translator={this.props.translator}
           />
         )}
       </div>
     );
   }
-
-  /**
-   * Callback on plugin selection
-   * @param list Plugin list
-   * @param id Plugin id
-   */
-  protected onSelect = (list: PluginList, id: string): void => {
-    if (id === this.props.settings.id) {
-      this.props.onCollapseChange(false);
-    }
-  };
 
   private _onChange = (e: IChangeEvent<ReadonlyPartialJSONObject>): void => {
     this.props.hasError(e.errors.length !== 0);
@@ -292,18 +253,18 @@ export class SettingsFormEditor extends React.Component<
   };
 
   private _setUiSchema(prevRenderers?: { [id: string]: Field }) {
+    const renderers = this.props.renderers[this.props.settings.id];
     if (
-      !prevRenderers ||
       !JSONExt.deepEqual(
-        Object.keys(prevRenderers).sort(),
-        Object.keys(this.props.renderers).sort()
+        Object.keys(prevRenderers ?? {}).sort(),
+        Object.keys(renderers ?? {}).sort()
       )
     ) {
       /**
        * Construct uiSchema to pass any custom renderers to the form editor.
        */
       const uiSchema: UiSchema = {};
-      for (const id in this.props.renderers) {
+      for (const id in this.props.renderers[this.props.settings.id]) {
         if (
           Object.keys(this.props.settings.schema.properties ?? {}).includes(id)
         ) {
@@ -343,5 +304,4 @@ export class SettingsFormEditor extends React.Component<
 
   private _debouncer: Debouncer<void, any>;
   private _formData: any;
-  private _templateFactory: RJSFTemplatesFactory;
 }

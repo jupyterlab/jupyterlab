@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
@@ -703,13 +703,13 @@ export function ToolbarButtonComponent(
  * Adds the toolbar button class to the toolbar widget.
  * @param w Toolbar button widget.
  */
-export function addToolbarButtonClass(w: Widget): Widget {
+export function addToolbarButtonClass<T extends Widget = Widget>(w: T): T {
   w.addClass('jp-ToolbarButton');
   return w;
 }
 
 /**
- * Phosphor Widget version of static ToolbarButtonComponent.
+ * Lumino Widget version of static ToolbarButtonComponent.
  */
 export class ToolbarButton extends ReactWidget {
   /**
@@ -961,14 +961,17 @@ class ToolbarPopupOpener extends ToolbarButton {
   /**
    *  Create a new popup opener
    */
-  constructor() {
+  constructor(props: ToolbarButtonComponent.IProps = {}) {
+    const trans = (props.translator || nullTranslator).load('jupyterlab');
     super({
       icon: ellipsesIcon,
       onClick: () => {
         this.handleClick();
-      }
+      },
+      tooltip: trans.__('More commands')
     });
     this.addClass('jp-Toolbar-responsive-opener');
+
     this.popup = new ToolbarPopup();
   }
 

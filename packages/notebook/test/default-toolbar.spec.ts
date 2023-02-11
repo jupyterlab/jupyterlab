@@ -47,6 +47,7 @@ describe('@jupyterlab/notebook', () => {
           Widget.attach(button, document.body);
           const promise = signalToPromise(context.fileChanged);
           await framePromise();
+          await button.renderPromise;
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await expect(promise).resolves.not.toThrow();
           button.dispose();
@@ -67,6 +68,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createInsertButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
+          await button.renderPromise;
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           expect(panel.content.activeCellIndex).toBe(1);
           expect(panel.content.activeCell).toBeInstanceOf(CodeCell);
@@ -88,6 +90,7 @@ describe('@jupyterlab/notebook', () => {
           const count = panel.content.widgets.length;
           Widget.attach(button, document.body);
           await framePromise();
+          await button.renderPromise;
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           expect(panel.content.widgets.length).toBe(count - 1);
           expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
@@ -109,6 +112,7 @@ describe('@jupyterlab/notebook', () => {
           const count = panel.content.widgets.length;
           Widget.attach(button, document.body);
           await framePromise();
+          await button.renderPromise;
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           expect(panel.content.widgets.length).toBe(count);
           expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
@@ -132,6 +136,7 @@ describe('@jupyterlab/notebook', () => {
           const count = panel.content.widgets.length;
           Widget.attach(button, document.body);
           await framePromise();
+          await button.renderPromise;
           NotebookActions.copy(panel.content);
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await sleep();
@@ -155,12 +160,14 @@ describe('@jupyterlab/notebook', () => {
           const item = ToolbarItems.createCellTypeItem(panel);
           Widget.attach(item, document.body);
           await framePromise();
+          await item.renderPromise;
           const node = item.node.getElementsByTagName(
             'select'
           )[0] as HTMLSelectElement;
           expect(node.value).toBe('code');
           panel.content.activeCellIndex++;
           await framePromise();
+          await item.renderPromise;
           expect(node.value).toBe('markdown');
           item.dispose();
         });
@@ -169,12 +176,14 @@ describe('@jupyterlab/notebook', () => {
           const item = ToolbarItems.createCellTypeItem(panel);
           Widget.attach(item, document.body);
           await framePromise();
+          await item.renderPromise;
           const node = item.node.getElementsByTagName(
             'select'
           )[0] as HTMLSelectElement;
           expect(node.value).toBe('code');
           panel.content.select(panel.content.widgets[1]);
           await framePromise();
+          await item.renderPromise;
           expect(node.value).toBe('-');
           item.dispose();
         });
@@ -183,6 +192,7 @@ describe('@jupyterlab/notebook', () => {
           const item = ToolbarItems.createCellTypeItem(panel);
           Widget.attach(item, document.body);
           await framePromise();
+          await item.renderPromise;
           const node = item.node.getElementsByTagName(
             'select'
           )[0] as HTMLSelectElement;
@@ -190,6 +200,7 @@ describe('@jupyterlab/notebook', () => {
           panel.model!.sharedModel.insertCell(0, { cell_type: 'code' });
           panel.content.select(panel.content.widgets[1]);
           await framePromise();
+          await item.renderPromise;
           expect(node.value).toBe('code');
           item.dispose();
         });
@@ -250,6 +261,7 @@ describe('@jupyterlab/notebook', () => {
           widget.select(mdCell);
 
           Widget.attach(button, document.body);
+          await button.renderPromise;
           await context.sessionContext.session!.kernel!.info;
 
           const delegate = new PromiseDelegate();
@@ -283,6 +295,7 @@ describe('@jupyterlab/notebook', () => {
           mdCell.rendered = false;
 
           Widget.attach(button, document.body);
+          await button.renderPromise;
           await panel.sessionContext.ready;
           const delegate = new PromiseDelegate();
           panel.sessionContext.iopubMessage.connect((_, msg) => {

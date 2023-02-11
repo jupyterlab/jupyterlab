@@ -1,4 +1,3 @@
-# coding: utf-8
 """Test installation of JupyterLab extensions"""
 
 # Copyright (c) Jupyter Development Team.
@@ -53,7 +52,7 @@ def touch(file, mtime=None):
     dirname = os.path.dirname(file)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-    open(file, "a").close()
+    open(file, "a").close()  # noqa
     # set explicit mtime
     if mtime:
         atime = os.stat(file).st_atime
@@ -74,11 +73,11 @@ class AppHandlerTest(TestCase):
         self.tempdirs.append(td)
         return td.name
 
-    def setUp(self):
+    def setUp(self):  # noqa
         # Any TemporaryDirectory objects appended to this list will be cleaned
         # up at the end of the test run.
         self.tempdirs = []
-        self.devnull = open(os.devnull, "w")
+        self.devnull = open(os.devnull, "w")  # noqa
 
         @self.addCleanup
         def cleanup_tempdirs():
@@ -261,7 +260,7 @@ class TestExtension(AppHandlerTest):
         You should be able to install different versions of the same extension with different
         pinned names and uninstall them with those names.
         """
-        NAMES = ["test-1", "test-2"]
+        NAMES = ["test-1", "test-2"]  # noqa
         assert install_extension(self.pinned_packages[0], pin=NAMES[0])
         assert install_extension(self.pinned_packages[1], pin=NAMES[1])
 
@@ -296,7 +295,7 @@ class TestExtension(AppHandlerTest):
             subprocess.run(
                 ["npm", "pack", name],
                 stdout=subprocess.PIPE,
-                universal_newlines=True,
+                text=True,
                 check=True,
                 cwd=str(base_dir),
             ).stdout.strip()
@@ -680,25 +679,25 @@ class TestExtension(AppHandlerTest):
             }
 
         def _mock_extract(self, source, tempdir, *args, **kwargs):
-            data = dict(
-                name=source,
-                version="2.1.0",
-                jupyterlab=dict(extension=True),
-                jupyterlab_extracted_files=["index.js"],
-            )
+            data = {
+                "name": source,
+                "version": "2.1.0",
+                "jupyterlab": {"extension": True},
+                "jupyterlab_extracted_files": ["index.js"],
+            }
             data.update(_gen_dep("^2000.0.0"))
-            info = dict(
-                source=source,
-                is_dir=False,
-                data=data,
-                name=source,
-                version=data["version"],
-                filename="mockextension.tgz",
-                path=pjoin(tempdir, "mockextension.tgz"),
-            )
+            info = {
+                "source": source,
+                "is_dir": False,
+                "data": data,
+                "name": source,
+                "version": data["version"],
+                "filename": "mockextension.tgz",
+                "path": pjoin(tempdir, "mockextension.tgz"),
+            }
             return info
 
-        class Success(Exception):
+        class Success(Exception):  # noqa
             pass
 
         def _mock_install(self, name, *args, **kwargs):
@@ -720,7 +719,7 @@ class TestExtension(AppHandlerTest):
 
         def _mock_install(self, name, *args, **kwargs):
             installed.append(name[0] + name[1:].split("@")[0])
-            return dict(name=name, is_dir=False, path="foo/bar/" + name)
+            return {"name": name, "is_dir": False, "path": "foo/bar/" + name}
 
         def _mock_latest(self, name):
             return "10000.0.0"
@@ -743,7 +742,7 @@ class TestExtension(AppHandlerTest):
 
         def _mock_install(self, name, *args, **kwargs):
             installed.append(name[0] + name[1:].split("@")[0])
-            return dict(name=name, is_dir=False, path="foo/bar/" + name)
+            return {"name": name, "is_dir": False, "path": "foo/bar/" + name}
 
         def _mock_latest(self, name):
             return "10000.0.0"

@@ -17,8 +17,6 @@ const packages = [
   'codeeditor',
   'codemirror-extension',
   'codemirror',
-  'collaboration',
-  'collaboration-extension',
   'completer-extension',
   'completer',
   'console-extension',
@@ -28,8 +26,6 @@ const packages = [
   'csvviewer',
   'debugger-extension',
   'debugger',
-  'docprovider-extension',
-  'docprovider',
   'docmanager-extension',
   'docmanager',
   'docregistry',
@@ -96,8 +92,6 @@ const packages = [
   'translation',
   'ui-components-extension',
   'ui-components',
-  'vdom-extension',
-  'vdom',
   'vega5-extension'
 ];
 

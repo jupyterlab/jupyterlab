@@ -110,7 +110,9 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     await page.hover('text=Open With');
-    await page.waitForSelector('li[role="menuitem"]:has-text("Editor")');
+    await page.waitForSelector(
+      '.lm-Menu li[role="menuitem"]:has-text("Editor")'
+    );
 
     const imageName = `file-openwith.png`;
     // Get the last menu -> will be submenu

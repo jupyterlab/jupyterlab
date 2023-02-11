@@ -250,4 +250,4 @@ It will run the `docmanager:open` with the `{ "path": "package.json", "factory":
       `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
   });
 
-Not that the part of the data key after the first `:`, `package.json:JSON` is dropped and is irrelevant.
+Note the part of the data key after the first `:` (`package.json:JSON`) is dropped and is irrelevant.

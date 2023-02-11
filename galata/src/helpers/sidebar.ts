@@ -1,15 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ElementHandle, Page } from '@playwright/test';
-import {
-  IPluginNameToInterfaceMap,
-  PLUGIN_ID_SETTINGS
-} from '../inpage/tokens';
-import { MenuHelper } from './menu';
-import * as Utils from '../utils';
+import type { IPluginNameToInterfaceMap } from '../extension';
 import { galata } from '../galata';
+import * as Utils from '../utils';
+import { MenuHelper } from './menu';
 
 /**
  * Sidebar helpers
@@ -137,7 +134,7 @@ export class SidebarHelper {
   async moveAllTabsToLeft(): Promise<void> {
     await this.page.evaluate(
       async ({ pluginId }) => {
-        const settingRegistry = (await window.galataip.getPlugin(
+        const settingRegistry = (await window.galata.getPlugin(
           pluginId
         )) as ISettingRegistry;
         const SHELL_ID = '@jupyterlab/application-extension:shell';
@@ -158,7 +155,10 @@ export class SidebarHelper {
           multiple: { ...currentLayout.multiple, ...sidebars }
         });
       },
-      { pluginId: PLUGIN_ID_SETTINGS as keyof IPluginNameToInterfaceMap }
+      {
+        pluginId:
+          '@jupyterlab/apputils-extension:settings' as keyof IPluginNameToInterfaceMap
+      }
     );
 
     await this.page.waitForFunction(() => {
@@ -210,6 +210,18 @@ export class SidebarHelper {
     return await this.page.$(
       `#jp-${side}-stack .lm-StackedPanel-child:not(.lm-mod-hidden)`
     );
+  }
+
+  /**
+   * Get the tab bar of the sidebar
+   *
+   * @param side Position
+   * @returns Tab bar handle
+   */
+  async getTabBar(
+    side: galata.SidebarPosition = 'left'
+  ): Promise<ElementHandle<Element> | null> {
+    return await this.page.$(`.jp-SideBar.jp-mod-${side}`);
   }
 
   /**

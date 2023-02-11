@@ -11,6 +11,7 @@ import {
   GenericSearchProvider,
   IBaseSearchProvider,
   IFilters,
+  IReplaceOptions,
   ISearchMatch,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
@@ -218,7 +219,11 @@ export class CellSearchProvider implements IBaseSearchProvider {
    * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
-  replaceCurrentMatch(newText: string): Promise<boolean> {
+  replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
     if (!this.isActive) {
       return Promise.resolve(false);
     }
@@ -244,10 +249,13 @@ export class CellSearchProvider implements IBaseSearchProvider {
         this.currentIndex = null;
         // Store the current position to highlight properly the next search hit
         this._lastReplacementPosition = editor.getCursorPosition();
+        const insertText = options?.preserveCase
+          ? GenericSearchProvider.preserveCase(match.text, newText)
+          : newText;
         this.cell.model.sharedModel.updateSource(
           match!.position,
           match!.position + match!.text.length,
-          newText
+          insertText
         );
         occurred = true;
       }
@@ -262,7 +270,10 @@ export class CellSearchProvider implements IBaseSearchProvider {
    * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
-  replaceAllMatches(newText: string): Promise<boolean> {
+  replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
     if (!this.isActive) {
       return Promise.resolve(false);
     }
@@ -273,7 +284,10 @@ export class CellSearchProvider implements IBaseSearchProvider {
     const finalSrc = this.cmHandler.matches.reduce((agg, match) => {
       const start = match.position as number;
       const end = start + match.text.length;
-      const newStep = `${agg}${src.slice(lastEnd, start)}${newText}`;
+      const insertText = options?.preserveCase
+        ? GenericSearchProvider.preserveCase(match.text, newText)
+        : newText;
+      const newStep = `${agg}${src.slice(lastEnd, start)}${insertText}`;
       lastEnd = end;
       return newStep;
     }, '');
@@ -644,7 +658,9 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     if (cell.rendered && this.matchesCount > 0) {
       // Unrender the cell if there are matches within the cell
       this._unrenderedByHighligh = true;
+      const waitForRendered = signalToPromise(cell.renderedChanged);
       cell.rendered = false;
+      await waitForRendered;
     }
 
     match = await super.highlightPrevious();

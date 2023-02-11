@@ -548,13 +548,12 @@ export async function ensurePackage(
     delete data.scripts.prepublishOnly;
   }
 
-  // If the package is not in `packages` or does not use `tsc` in its
+  // If the package does not use `tsc` in its
   // build script, add a `build:all` target
   const buildScript = data.scripts?.build || '';
   if (
-    buildScript &&
-    ((pkgPath.indexOf('packages') == -1 && pkgPath.indexOf('template') == -1) ||
-      buildScript.indexOf('tsc') == -1) &&
+    path.basename(pkgPath) != 'galata' &&
+    buildScript?.indexOf('tsc') === -1 &&
     !isPrivate
   ) {
     data.scripts['build:all'] = 'npm run build';

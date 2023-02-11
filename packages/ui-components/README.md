@@ -85,20 +85,20 @@ Alternatively, you can just render the icon directly into any existing
 DOM node `elem` by using the `ReactDOM` module:
 
 ```typescript
-ReactDOM.render(jupyterIcon.react, elem);
+const root = createRoot(elem);
+root.render(jupyterIcon.react);
 ```
 
 If do you use `ReactDOM` to render, and if the `elem` node is ever
 removed from the DOM, you’ll first need to clean it up:
 
 ```typescript
-ReactDOM.unmountComponentAtNode(elem);
+root.unmount();
 ```
 
 This cleanup step is not a special property of `LabIcon`, but is instead
 needed for any React component that is rendered directly at the top
-level by `ReactDOM`: failure to call `unmountComponentAtNode` can result
-in a [memory leak](https://stackoverflow.com/a/48198011/425458).
+level by `ReactDOM`.
 
 ## How to create your own custom `LabIcon`
 

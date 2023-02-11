@@ -66,7 +66,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should accept a language preference', () => {
         const factory = new NotebookModelFactory({});
-        const model = factory.createNew('foo');
+        const model = factory.createNew({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).toBe('foo');
       });
     });

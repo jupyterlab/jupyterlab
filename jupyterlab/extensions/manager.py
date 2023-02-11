@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Set, Tuple
 import tornado
 from traitlets.config import Configurable, LoggingConfigurable
 
-from ..commands import (
+from jupyterlab.commands import (
     _AppHandler,
     _ensure_options,
     disable_extension,
@@ -92,7 +92,7 @@ class ExtensionPackage:
     latest_version: str = ""
     status: str = "ok"
     author: Optional[str] = None
-    license: Optional[str] = None
+    license: Optional[str] = None  # noqa
     bug_tracker_url: Optional[str] = None
     documentation_url: Optional[str] = None
     package_manager_url: Optional[str] = None
@@ -195,7 +195,7 @@ class ExtensionManager(LoggingConfigurable):
         ext_options: Optional[dict] = None,
         parent: Optional[Configurable] = None,
     ) -> None:
-        super(ExtensionManager, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         app_options = _ensure_options(app_options)
         self.log = app_options.logger
         self.app_dir = Path(app_options.app_dir)
@@ -349,7 +349,7 @@ class ExtensionManager(LoggingConfigurable):
         """
         return extension.name
 
-    async def list_extensions(
+    async def list_extensions(  # noqa
         self, query: Optional[str] = None, page: int = 1, per_page: int = 30
     ) -> Tuple[List[ExtensionPackage], Optional[int]]:
         """List extensions for a given ``query`` search term.
@@ -429,9 +429,9 @@ class ExtensionManager(LoggingConfigurable):
                 j = json.loads(r.body)
                 rules.extend(j.get("allowed_extensions", []))
 
-        self._listings_cache = dict([(r["name"], r) for r in rules])
+        self._listings_cache = {r["name"]: r for r in rules}
 
-    async def _get_installed_extensions(
+    async def _get_installed_extensions(  # noqa
         self, get_latest_version=True
     ) -> Dict[str, ExtensionPackage]:
         """Get the installed extensions.

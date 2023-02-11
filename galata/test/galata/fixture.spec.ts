@@ -37,7 +37,7 @@ test.describe('mockSettings', () => {
 
   test('should not return mocked settings after save', async ({ page }) => {
     await page.click('text=Settings');
-    await page.click('ul[role="menu"] >> text=Theme');
+    await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
     const [response] = await Promise.all([
       page.waitForResponse(
         response =>
@@ -45,7 +45,7 @@ test.describe('mockSettings', () => {
             response.url()
           ) && response.request().method() === 'GET'
       ),
-      page.click('ul[role="menu"] >> text=JupyterLab Light')
+      page.click('.lm-Menu ul[role="menu"] >> text=JupyterLab Light')
     ]);
 
     await page.waitForSelector('#jupyterlab-splash', { state: 'detached' });

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
@@ -41,7 +40,11 @@ def main():
         name = __name__
         open_browser = False
 
-        serverapp_config = {"base_url": "/foo/", "root_dir": str(example_dir.resolve())}
+        serverapp_config = {
+            "base_url": "/foo/",
+            "root_dir": str(example_dir.resolve()),
+            "preferred_dir": str(example_dir.resolve()),
+        }
         ip = "127.0.0.1"
 
         def initialize_settings(self):

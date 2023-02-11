@@ -6,9 +6,9 @@ dependencies:
   - jupyter_server_fileid
   - jupyter-server-proxy
   - matplotlib-base
-  - nodejs=14
+  - nodejs=18
   - numpy
   - pip
-  - python=3.8
+  - python=3.10
   - vega_datasets
   - xeus-python

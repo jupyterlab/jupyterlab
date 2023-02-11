@@ -282,6 +282,8 @@
   flex: 1 0 64px;
   outline: none;
   border: none;
+  color: var(--jp-ui-font-color1);
+  background-color: var(--jp-layout-color1);
 }
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon::before {

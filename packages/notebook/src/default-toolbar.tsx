@@ -32,7 +32,6 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/ui-components';
-import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
@@ -61,7 +60,7 @@ export namespace ToolbarItems {
   export function createSaveButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     function onClick() {
       if (panel.context.model.readOnly) {
@@ -77,7 +76,8 @@ export namespace ToolbarItems {
         }
       });
     }
-    return addToolbarButtonClass(
+
+    return addToolbarButtonClass<ReactWidget>(
       ReactWidget.create(
         <UseSignal signal={panel.context.fileChanged}>
           {() => (
@@ -111,7 +111,7 @@ export namespace ToolbarItems {
   export function createInsertButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: addIcon,
@@ -131,7 +131,7 @@ export namespace ToolbarItems {
   export function createCutButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: cutIcon,
@@ -151,7 +151,7 @@ export namespace ToolbarItems {
   export function createCopyButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: copyIcon,
@@ -171,7 +171,7 @@ export namespace ToolbarItems {
   export function createPasteButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: pasteIcon,
@@ -191,7 +191,7 @@ export namespace ToolbarItems {
   export function createRunButton(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: runIcon,
@@ -211,7 +211,7 @@ export namespace ToolbarItems {
     panel: NotebookPanel,
     dialogs?: ISessionContext.IDialogs,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: fastForwardIcon,
@@ -243,7 +243,7 @@ export namespace ToolbarItems {
   export function createCellTypeItem(
     panel: NotebookPanel,
     translator?: ITranslator
-  ): Widget {
+  ): ReactWidget {
     return new CellTypeSwitcher(panel.content, translator);
   }
 

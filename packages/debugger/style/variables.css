@@ -2,7 +2,6 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-
 .jp-DebuggerVariables {
   display: flex;
   flex-direction: column;
@@ -16,56 +15,96 @@
   flex: 1 1 auto;
   min-height: 24px;
   overflow: auto;
+
+  /* For absolute positioning of jp-DebuggerVariables-buttons. */
+  position: relative;
 }
 
-.jp-DebuggerVariables-body ul {
+.jp-DebuggerVariables-branch {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.jp-DebuggerVariables-body > ul {
+.jp-DebuggerVariables-body
+  .jp-DebuggerVariables-branch
+  .jp-DebuggerVariables-branch {
+  grid-area: nested;
+}
+
+.jp-DebuggerVariables-body > .jp-DebuggerVariables-branch {
   padding-top: 0.1em;
 }
 
-.jp-DebuggerVariables-body ul li {
-  padding: 5px 0 0;
+.jp-DebuggerVariables-branch li {
+  padding: 3px 0;
   cursor: pointer;
   color: var(--jp-content-font-color1);
-  align-items: center;
+  display: grid;
+  grid-template:
+    'collapser name detail'
+    'nested nested nested';
+  grid-template-columns: max-content max-content 1fr;
 }
 
-.jp-DebuggerVariables-body ul li:hover .jp-DebuggerVariables-renderVariable {
-  display: inline-block;
+.jp-DebuggerVariables-branch li:not(:has(li:hover)):hover {
+  background: var(--jp-layout-color2);
 }
 
-.jp-DebuggerVariables-body .jp-DebuggerVariables-hspacer {
-  flex: 1 1 auto;
+.jp-DebuggerVariables-collapser {
+  width: 16px;
+  grid-area: collapser;
+  transform: rotate(-90deg);
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.jp-DebuggerVariables-body .jp-DebuggerVariables-renderVariable {
-  flex: 0 0 auto;
+.jp-DebuggerVariables-collapser.jp-mod-expanded {
+  transform: rotate(0);
+}
+
+.jp-DebuggerVariables-buttons {
+  position: absolute;
+  top: 0;
+  right: 8px;
+  margin-top: 1px;
+}
+
+.jp-DebuggerVariables-name {
+  color: var(--jp-mirror-editor-attribute-color);
+  grid-area: name;
+}
+
+.jp-DebuggerVariables-name::after {
+  content: ':';
+  margin-right: 5px;
+}
+
+.jp-DebuggerVariables-detail {
+  /* detail contains value for primitive types or name of the type otherwise */
+  color: var(--jp-mirror-editor-string-color);
+}
+
+.jp-DebuggerVariables-renderVariable {
   border: none;
   background: none;
   cursor: pointer;
-  display: none;
-  padding: 0 8px;
+  transform-origin: center center;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 1, 1);
 }
 
-.jp-DebuggerVariables-body .jp-DebuggerVariables-renderVariable:active {
-  transform: scale(1.272) translateX(-4px);
-  overflow: hidden;
+.jp-DebuggerVariables-renderVariable:active {
+  transform: scale(1.35);
 }
 
-.jp-DebuggerVariables-body .jp-DebuggerVariables-renderVariable:hover {
+.jp-DebuggerVariables-renderVariable:hover {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DebuggerVariables-body .jp-DebuggerVariables-renderVariable:disabled {
+.jp-DebuggerVariables-renderVariable:disabled {
   cursor: default;
 }
 
-.jp-DebuggerVariables-body ul li > ul {
+.jp-DebuggerVariables-branch li > .jp-DebuggerVariables-branch {
   margin-left: 12px;
 }
 

@@ -20,7 +20,10 @@ import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -240,6 +243,7 @@ export namespace Commands {
     id: string,
     isEnabled: () => boolean,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    defaultBrowser: IDefaultFileBrowser,
     browserFactory: IFileBrowserFactory,
     consoleTracker: IConsoleTracker | null,
     sessionDialogs: ISessionContextDialogs | null
@@ -672,7 +676,7 @@ export namespace Commands {
               icon: (args.iconName as string) ?? textEditorIcon
             }),
       execute: args => {
-        const cwd = args.cwd || browserFactory.defaultBrowser.model.path;
+        const cwd = args.cwd || defaultBrowser.model.path;
         return createNew(
           commands,
           cwd as string,
@@ -692,7 +696,7 @@ export namespace Commands {
       caption: trans.__('Create a new markdown file'),
       icon: args => (args['isPalette'] ? undefined : markdownIcon),
       execute: args => {
-        const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
+        const cwd = args['cwd'] || defaultBrowser.model.path;
         return createNew(commands, cwd as string, 'md');
       }
     });

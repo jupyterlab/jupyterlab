@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig } from '@jupyterlab/coreutils';
 import {
   Dialog,
   ISessionContext,
@@ -11,11 +10,6 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
-import {
-  IDocumentProvider,
-  IDocumentProviderFactory,
-  ProviderMock
-} from '@jupyterlab/docprovider';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
@@ -58,20 +52,22 @@ export class Context<
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
     const localPath = this._manager.contents.localPath(this._path);
     const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
-    this._model = this._factory.createNew(
-      lang,
-      PageConfig.getOption('collaborative') === 'true'
+
+    const sharedFactory = this._manager.contents.getSharedModelFactory(
+      this._path
     );
-    const docProviderFactory = options.docProviderFactory;
-    this._provider = docProviderFactory
-      ? docProviderFactory({
-          path: this._path,
-          contentType: this._factory.contentType,
-          format: this._factory.fileFormat!,
-          model: this._model.sharedModel,
-          collaborative: this._model.collaborative
-        })
-      : new ProviderMock();
+    const sharedModel = sharedFactory?.createNew({
+      path: localPath,
+      format: this._factory.fileFormat,
+      contentType: this._factory.contentType,
+      collaborative: this._factory.collaborative
+    });
+
+    this._model = this._factory.createNew({
+      languagePreference: lang,
+      sharedModel,
+      collaborationEnabled: sharedFactory?.collaborative ?? false
+    });
 
     this._readyPromise = manager.ready.then(() => {
       return this._populatedPromise.promise;
@@ -94,7 +90,6 @@ export class Context<
       path: this._path,
       contents: manager.contents
     });
-    this.model.sharedModel.setState('path', this._path);
     this.model.sharedModel.changed.connect(this.onStateChanged, this);
   }
 
@@ -203,7 +198,8 @@ export class Context<
     this._isDisposed = true;
     this.sessionContext.dispose();
     this._model.dispose();
-    this._provider.dispose();
+    // Ensure we dispose the `sharedModel` as it may have been generated in the context
+    // through the shared model factory.
     this._model.sharedModel.dispose();
     this._disposed.emit(void 0);
     Signal.clearData(this);
@@ -243,14 +239,10 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean) {
-    if (this._model.collaborative) {
-      await this._loadContext();
+    if (isNew) {
+      await this._save();
     } else {
-      if (isNew) {
-        await this._save();
-      } else {
-        await this._revert();
-      }
+      await this._revert();
     }
     this.model.sharedModel.clearUndoHistory();
   }
@@ -414,12 +406,30 @@ export class Context<
   protected onStateChanged(sender: ISharedDocument, changes: DocumentChange) {
     if (changes.stateChange) {
       changes.stateChange.forEach(change => {
-        if (change.name === 'path' && change.newValue !== change.oldValue) {
-          (this.urlResolver as RenderMimeRegistry.UrlResolver).path =
-            change.newValue;
-          this._path = change.newValue;
-          this.sessionContext.session?.setPath(change.newValue) as any;
-          this._pathChanged.emit(this.path);
+        if (change.name === 'path') {
+          const driveName = this._manager.contents.driveName(this._path);
+          let newPath = change.newValue;
+          if (driveName) {
+            newPath = `${driveName}:${change.newValue}`;
+          }
+
+          if (this._path !== newPath) {
+            this._path = newPath;
+            const localPath = this._manager.contents.localPath(newPath);
+            const name = PathExt.basename(localPath);
+            this.sessionContext.session?.setPath(newPath) as any;
+            void this.sessionContext.session?.setName(name);
+            (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+            if (this._contentsModel) {
+              const contentsModel = {
+                ...this._contentsModel,
+                name: name,
+                path: newPath
+              };
+              this._updateContentsModel(contentsModel);
+            }
+            this._pathChanged.emit(newPath);
+          }
         }
       });
     }
@@ -454,15 +464,18 @@ export class Context<
         };
       }
       this._path = newPath;
-      void this.sessionContext.session?.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
         ...changeModel
       };
+
       const localPath = this._manager.contents.localPath(newPath);
+      void this.sessionContext.session?.setPath(newPath);
       void this.sessionContext.session?.setName(PathExt.basename(localPath));
+      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
       this._updateContentsModel(updateModel as Contents.IModel);
-      this._model.sharedModel.setState('path', this._path);
+      this._model.sharedModel.setState('path', localPath);
+      this._pathChanged.emit(newPath);
     }
   }
 
@@ -476,7 +489,19 @@ export class Context<
     const path = this.sessionContext.session!.path;
     if (path !== this._path) {
       this._path = path;
-      this._model.sharedModel.setState('path', this._path);
+      const localPath = this._manager.contents.localPath(path);
+      const name = PathExt.basename(localPath);
+      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = path;
+      if (this._contentsModel) {
+        const contentsModel = {
+          ...this._contentsModel,
+          name: name,
+          path: path
+        };
+        this._updateContentsModel(contentsModel);
+      }
+      this._model.sharedModel.setState('path', localPath);
+      this._pathChanged.emit(path);
     }
   }
 
@@ -508,8 +533,6 @@ export class Context<
    * Handle an initial population.
    */
   private async _populate(): Promise<void> {
-    await this._provider.ready;
-
     this._isPopulated = true;
     this._isReady = true;
     this._populatedPromise.resolve(void 0);
@@ -552,23 +575,22 @@ export class Context<
       newPath = `${driveName}:${newPath}`;
     }
 
+    // rename triggers a fileChanged which updates the contents model
     await this._manager.contents.rename(this.path, newPath);
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newName);
 
     this._path = newPath;
-    this._model.sharedModel.setState('path', this._path);
+    const localPath = this._manager.contents.localPath(this._path);
+    (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+    this._model.sharedModel.setState('path', localPath);
+    this._pathChanged.emit(newPath);
   }
 
   /**
    * Save the document contents to disk.
    */
   private async _save(): Promise<void> {
-    // if collaborative mode is enabled, saving happens in the back-end
-    // after each change to the document
-    if (this._model.collaborative) {
-      return;
-    }
     this._saveState.emit('started');
     const model = this._model;
     let content: PartialJSONValue = null;
@@ -626,47 +648,6 @@ export class Context<
   }
 
   /**
-   * Load the metadata of the document without the content.
-   */
-  private _loadContext(): Promise<void> {
-    const opts: Contents.IFetchOptions = {
-      type: this._factory.contentType,
-      content: false,
-      ...(this._factory.fileFormat !== null
-        ? { format: this._factory.fileFormat }
-        : {})
-    };
-    const path = this._path;
-    return this._manager.ready
-      .then(() => {
-        return this._manager.contents.get(path, opts);
-      })
-      .then(contents => {
-        if (this.isDisposed) {
-          return;
-        }
-        const model = {
-          ...contents,
-          format: this._factory.fileFormat
-        };
-        this._updateContentsModel(model);
-        this._model.dirty = false;
-        if (!this._isPopulated) {
-          return this._populate();
-        }
-      })
-      .catch(async err => {
-        const localPath = this._manager.contents.localPath(this._path);
-        const name = PathExt.basename(localPath);
-        void this._handleError(
-          err,
-          this._trans.__('File Load Error for %1', name)
-        );
-        throw err;
-      });
-  }
-
-  /**
    * Revert the document contents to disk contents.
    *
    * @param initializeModel - call the model's initialization function after
@@ -690,23 +671,26 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
-        if (contents.format === 'json') {
-          model.fromJSON(contents.content);
-        } else {
-          let content = contents.content;
-          // Convert line endings if necessary, marking the file
-          // as dirty.
-          if (content.indexOf('\r\n') !== -1) {
-            this._lineEnding = '\r\n';
-            content = content.replace(/\r\n/g, '\n');
-          } else if (content.indexOf('\r') !== -1) {
-            this._lineEnding = '\r';
-            content = content.replace(/\r/g, '\n');
+        if (contents.content) {
+          if (contents.format === 'json') {
+            model.fromJSON(contents.content);
           } else {
-            this._lineEnding = null;
+            let content = contents.content;
+            // Convert line endings if necessary, marking the file
+            // as dirty.
+            if (content.indexOf('\r\n') !== -1) {
+              this._lineEnding = '\r\n';
+              content = content.replace(/\r\n/g, '\n');
+            } else if (content.indexOf('\r') !== -1) {
+              this._lineEnding = '\r';
+              content = content.replace(/\r/g, '\n');
+            } else {
+              this._lineEnding = null;
+            }
+            model.fromString(content);
           }
-          model.fromString(content);
         }
+
         this._updateContentsModel(contents);
         model.dirty = false;
         if (!this._isPopulated) {
@@ -896,34 +880,41 @@ or load the version on disk (revert)?`,
     await this.sessionContext.session?.setPath(newPath);
     await this.sessionContext.session?.setName(newPath.split('/').pop()!);
     // we must rename the document before saving with the new path
-    this._model.sharedModel.setState('path', this._path);
+    const localPath = this._manager.contents.localPath(this._path);
+    (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+    this._model.sharedModel.setState('path', localPath);
+    this._pathChanged.emit(newPath);
+
+    // save triggers a fileChanged which updates the contents model
     await this.save();
     await this._maybeCheckpoint(true);
   }
 
   protected translator: ITranslator;
+
+  private _isReady = false;
+  private _isDisposed = false;
+  private _isPopulated = false;
   private _trans: TranslationBundle;
   private _manager: ServiceManager.IManager;
   private _opener: (
     widget: Widget,
     options?: DocumentRegistry.IOpenOptions
   ) => void;
+
   private _model: T;
   private _path = '';
   private _lineEnding: string | null = null;
   private _factory: DocumentRegistry.IModelFactory<T>;
   private _contentsModel: Contents.IModel | null = null;
+
   private _readyPromise: Promise<void>;
   private _populatedPromise = new PromiseDelegate<void>();
-  private _isPopulated = false;
-  private _isReady = false;
-  private _isDisposed = false;
   private _pathChanged = new Signal<this, string>(this);
   private _fileChanged = new Signal<this, Contents.IModel>(this);
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
-  private _provider: IDocumentProvider;
   private _lastModifiedCheckMargin = 500;
   private _timeConflictModalIsOpen = false;
 }
@@ -955,11 +946,6 @@ export namespace Context {
      * The kernel preference associated with the context.
      */
     kernelPreference?: ISessionContext.IKernelPreference;
-
-    /**
-     * An factory method for the document provider.
-     */
-    docProviderFactory?: IDocumentProviderFactory<ISharedDocument>;
 
     /**
      * An optional callback for opening sibling widgets.

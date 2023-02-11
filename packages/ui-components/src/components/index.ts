@@ -3,6 +3,7 @@
 
 export * from './button';
 export * from './collapser';
+export * from './form';
 export * from './htmlselect';
 export * from './iframe';
 export * from './inputgroup';

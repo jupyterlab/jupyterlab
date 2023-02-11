@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/observables",
-  "version": "5.0.0-alpha.17",
+  "version": "5.0.0-alpha.18",
   "description": "Data structures which may be observed for changes.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,14 +36,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@lumino/algorithm": "^2.0.0-alpha.6",
-    "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/disposable": "^2.0.0-alpha.6",
-    "@lumino/messaging": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6"
+    "@lumino/algorithm": "^2.0.0-beta.0",
+    "@lumino/coreutils": "^2.0.0-beta.0",
+    "@lumino/disposable": "^2.0.0-beta.1",
+    "@lumino/messaging": "^2.0.0-beta.0",
+    "@lumino/signaling": "^2.0.0-beta.1"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.17",
+    "@jupyterlab/testing": "^4.0.0-alpha.18",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",

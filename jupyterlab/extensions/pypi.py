@@ -10,7 +10,7 @@ import math
 import re
 import sys
 import xmlrpc.client
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import partial
 from itertools import groupby
 from pathlib import Path
@@ -81,14 +81,14 @@ class PyPIExtensionManager(ExtensionManager):
         ext_options: Optional[dict] = None,
         parent: Optional[config.Configurable] = None,
     ) -> None:
-        super(PyPIExtensionManager, self).__init__(app_options, ext_options, parent)
+        super().__init__(app_options, ext_options, parent)
         # Set configurable cache size to fetch function
         self._fetch_package_metadata = _fetch_package_metadata
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
         self._http_client = tornado.httpclient.AsyncHTTPClient()
         self._rpc_client = xmlrpc.client.ServerProxy(self.base_url)
-        self.__last_all_packages_request_time = datetime.now() - timedelta(
+        self.__last_all_packages_request_time = datetime.now(tz=timezone.utc) - timedelta(
             seconds=self.cache_timeout * 1.01
         )
         self.__all_packages_cache = None
@@ -139,7 +139,7 @@ class PyPIExtensionManager(ExtensionManager):
                 return self._normalize_name(install_metadata["packageName"])
         return self._normalize_name(extension.name)
 
-    async def __throttleRequest(self, recursive: bool, fn: Callable, *args) -> Any:
+    async def __throttleRequest(self, recursive: bool, fn: Callable, *args) -> Any:  # noqa
         """Throttle XMLRPC API request
 
         Args:
@@ -246,22 +246,20 @@ class PyPIExtensionManager(ExtensionManager):
         return extensions, math.ceil((counter + 1) / per_page)
 
     async def __get_all_extensions(self) -> List[Tuple[str, str]]:
-        if (
-            self.__all_packages_cache is None
-            or datetime.now()
-            > self.__last_all_packages_request_time + timedelta(seconds=self.cache_timeout)
-        ):
+        if self.__all_packages_cache is None or datetime.now(
+            tz=timezone.utc
+        ) > self.__last_all_packages_request_time + timedelta(seconds=self.cache_timeout):
             self.log.debug("Requesting PyPI.org RPC API for prebuilt JupyterLab extensions.")
             self.__all_packages_cache = await self.__throttleRequest(
                 True,
                 self._rpc_client.browse,
                 ["Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt"],
             )
-            self.__last_all_packages_request_time = datetime.now()
+            self.__last_all_packages_request_time = datetime.now(tz=timezone.utc)
 
         return self.__all_packages_cache
 
-    async def install(self, name: str, version: Optional[str] = None) -> ActionResult:
+    async def install(self, name: str, version: Optional[str] = None) -> ActionResult:  # noqa
         """Install the required extension.
 
         Note:
@@ -405,7 +403,7 @@ class PyPIExtensionManager(ExtensionManager):
             )
             lines = filter(
                 lambda line: line.endswith("package.json"),
-                map(lambda line: line.strip(), result.stdout.decode("utf-8").splitlines()),
+                map(lambda line: line.strip(), result.stdout.decode("utf-8").splitlines()),  # noqa
             )
             for filepath in filter(
                 lambda f: f.name == "package.json",

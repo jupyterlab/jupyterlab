@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { ISharedDocument } from '@jupyter/ydoc';
+
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
 import { PartialJSONObject } from '@lumino/coreutils';
@@ -219,6 +221,49 @@ export namespace Contents {
   }
 
   /**
+   * A factory interface for creating `ISharedDocument` objects.
+   */
+  export interface ISharedFactory {
+    /**
+     * Whether the IDrive supports real-time collaboration or not.
+     * Note: If it is not provided, it is false by default.
+     */
+    readonly collaborative?: boolean;
+
+    /**
+     * Create a new `ISharedDocument` instance.
+     *
+     * It should return `undefined` if the factory is not able to create a `ISharedDocument`.
+     */
+    createNew(options: ISharedFactoryOptions): ISharedDocument | undefined;
+  }
+
+  /**
+   * The options used to instantiate a ISharedDocument
+   */
+  export interface ISharedFactoryOptions {
+    /**
+     * The path of the file.
+     */
+    path: string;
+    /**
+     * The format of the document. If null, the document won't be
+     * collaborative.
+     */
+    format: FileFormat;
+    /**
+     * The content type of the document.
+     */
+    contentType: ContentType;
+    /**
+     * Wether the document is collaborative or not.
+     *
+     * The default value is `true`.
+     */
+    collaborative?: boolean;
+  }
+
+  /**
    * The interface for a contents manager.
    */
   export interface IManager extends IDisposable {
@@ -281,6 +326,13 @@ export namespace Contents {
      * @returns The drive name for the path, or the empty string.
      */
     driveName(path: string): string;
+
+    /**
+     * Given a path, get a shared model IFactory from the
+     * relevant backend. Returns `null` if the backend
+     * does not provide one.
+     */
+    getSharedModelFactory(path: string): ISharedFactory | null;
 
     /**
      * Get a file or directory.
@@ -417,6 +469,12 @@ export namespace Contents {
      * The server settings of the manager.
      */
     readonly serverSettings: ServerConnection.ISettings;
+
+    /**
+     * An optional shared model factory instance for the
+     * drive.
+     */
+    readonly sharedModelFactory?: ISharedFactory;
 
     /**
      * A signal emitted when a file operation takes place.
@@ -601,6 +659,16 @@ export class ContentsManager implements Contents.IManager {
   addDrive(drive: Contents.IDrive): void {
     this._additionalDrives.set(drive.name, drive);
     drive.fileChanged.connect(this._onFileChanged, this);
+  }
+
+  /**
+   * Given a path, get a shared model factory from the
+   * relevant backend. Returns `null` if the backend
+   * does not provide one.
+   */
+  getSharedModelFactory(path: string): Contents.ISharedFactory | null {
+    const [drive] = this._driveForPath(path);
+    return drive?.sharedModelFactory ?? null;
   }
 
   /**

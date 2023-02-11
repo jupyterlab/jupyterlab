@@ -49,6 +49,26 @@ export interface IFilters {
 }
 
 /**
+ * Options adjusting replacement behavior.
+ */
+export interface IReplaceOptions {
+  /**
+   * Should the letter case be preserved?
+   */
+  preserveCase: boolean;
+}
+
+/**
+ * Support for options adjusting replacement behavior.
+ */
+export interface IReplaceOptionsSupport {
+  /**
+   * Support for preserving letter case.
+   */
+  preserveCase?: boolean;
+}
+
+/**
  * React search component state
  */
 export interface IDisplayState {
@@ -263,7 +283,11 @@ export interface IBaseSearchProvider extends IDisposable {
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean>;
+  replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean>;
 
   /**
    * Replace all matches in the widget with the provided text
@@ -272,7 +296,10 @@ export interface IBaseSearchProvider extends IDisposable {
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  replaceAllMatches(newText: string): Promise<boolean>;
+  replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean>;
 
   /**
    * Signal indicating that something in the search has changed, so the UI should update
@@ -304,10 +331,15 @@ export interface ISearchProvider extends IBaseSearchProvider {
 
   /**
    * Set to true if the widget under search is read-only, false
-   * if it is editable.  Will be used to determine whether to show
+   * if it is editable. Will be used to determine whether to show
    * the replace option.
    */
   readonly isReadOnly: boolean;
+
+  /**
+   * Specifies which replace options are supported by provider.
+   */
+  readonly replaceOptionsSupport?: IReplaceOptionsSupport;
 
   /**
    * Get the filters definition for the given provider.

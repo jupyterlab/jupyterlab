@@ -11,7 +11,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
-import { FileBrowserModel, IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import {
+  FileBrowserModel,
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { ILauncher, Launcher, LauncherModel } from '@jupyterlab/launcher';
 import { ITranslator } from '@jupyterlab/translation';
 import { addIcon, launcherIcon } from '@jupyterlab/ui-components';
@@ -33,7 +37,12 @@ const plugin: JupyterFrontEndPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
   requires: [ITranslator],
-  optional: [ILabShell, ICommandPalette, IFileBrowserFactory],
+  optional: [
+    ILabShell,
+    ICommandPalette,
+    IDefaultFileBrowser,
+    IFileBrowserFactory
+  ],
   provides: ILauncher,
   autoStart: true
 };
@@ -51,6 +60,7 @@ function activate(
   translator: ITranslator,
   labShell: ILabShell | null,
   palette: ICommandPalette | null,
+  defaultBrowser: IDefaultFileBrowser | null,
   factory: IFileBrowserFactory | null
 ): ILauncher {
   const { commands, shell } = app;
@@ -61,8 +71,7 @@ function activate(
     label: trans.__('New Launcher'),
     icon: args => (args.toolbar ? addIcon : undefined),
     execute: (args: JSONObject) => {
-      const cwd =
-        (args['cwd'] as string) ?? factory?.defaultBrowser.model.path ?? '';
+      const cwd = (args['cwd'] as string) ?? defaultBrowser?.model.path ?? '';
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {
         // If widget is attached to the main area replace the launcher
@@ -101,13 +110,13 @@ function activate(
         }, main);
       }
 
-      if (factory) {
+      if (defaultBrowser) {
         const onPathChanged = (model: FileBrowserModel) => {
           launcher.cwd = model.path;
         };
-        factory.defaultBrowser.model.pathChanged.connect(onPathChanged);
+        defaultBrowser.model.pathChanged.connect(onPathChanged);
         launcher.disposed.connect(() => {
-          factory.defaultBrowser.model.pathChanged.disconnect(onPathChanged);
+          defaultBrowser.model.pathChanged.disconnect(onPathChanged);
         });
       }
 
@@ -116,21 +125,20 @@ function activate(
   });
 
   if (labShell) {
-    void Promise.all([
-      app.restored,
-      factory?.defaultBrowser.model.restored
-    ]).then(() => {
-      function maybeCreate() {
-        // Create a launcher if there are no open items.
-        if (labShell!.isEmpty('main')) {
-          void commands.execute(CommandIDs.create);
+    void Promise.all([app.restored, defaultBrowser?.model.restored]).then(
+      () => {
+        function maybeCreate() {
+          // Create a launcher if there are no open items.
+          if (labShell!.isEmpty('main')) {
+            void commands.execute(CommandIDs.create);
+          }
         }
+        // When layout is modified, create a launcher if there are no open items.
+        labShell.layoutModified.connect(() => {
+          maybeCreate();
+        });
       }
-      // When layout is modified, create a launcher if there are no open items.
-      labShell.layoutModified.connect(() => {
-        maybeCreate();
-      });
-    });
+    );
   }
 
   if (palette) {

@@ -33,7 +33,6 @@ import {
   renameDialog,
   SavingStatus
 } from '@jupyterlab/docmanager';
-import { IDocumentProviderFactory } from '@jupyterlab/docprovider';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { Contents, Kernel } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -164,20 +163,13 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   id: '@jupyterlab/docmanager-extension:manager',
   provides: IDocumentManager,
   requires: [IDocumentWidgetOpener],
-  optional: [
-    ITranslator,
-    ILabStatus,
-    ISessionContextDialogs,
-    IDocumentProviderFactory,
-    JupyterLab.IInfo
-  ],
+  optional: [ITranslator, ILabStatus, ISessionContextDialogs, JupyterLab.IInfo],
   activate: (
     app: JupyterFrontEnd,
     widgetOpener: IDocumentWidgetOpener,
     translator: ITranslator | null,
     status: ILabStatus | null,
     sessionDialogs: ISessionContextDialogs | null,
-    docProviderFactory: IDocumentProviderFactory | null,
     info: JupyterLab.IInfo | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
@@ -191,7 +183,6 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       sessionDialogs: sessionDialogs || undefined,
       translator: translator ?? nullTranslator,
-      docProviderFactory: docProviderFactory ?? undefined,
       isConnectedCallback: () => {
         if (info) {
           return info.isConnected;
@@ -1197,10 +1188,7 @@ namespace Private {
     const date = new Date(checkpoint.last_modified);
     lastCheckpointDate.style.textAlign = 'center';
     lastCheckpointDate.textContent =
-      Time.format(date, 'dddd, MMMM Do YYYY, h:mm:ss a') +
-      ' (' +
-      Time.formatHuman(date) +
-      ')';
+      Time.format(date) + ' (' + Time.formatHuman(date) + ')';
 
     lastCheckpointMessage.appendChild(lastCheckpointText);
     lastCheckpointMessage.appendChild(lastCheckpointDate);

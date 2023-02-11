@@ -46,7 +46,7 @@ jobs:
             python-version: "3.8"
       fail-fast: false
     timeout-minutes: 45
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -149,14 +149,3 @@ jobs:
         with:
           ignore_glob: "packages/ui-components/docs/source/ui_components.rst images"
           ignore_links: "../api/*.* .*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io"
-
-  pre-commit:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v3
-      - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
-      - name: Install Jupyterlab
-        run: pip install -e .
-      - uses: pre-commit/action@v3.0.0

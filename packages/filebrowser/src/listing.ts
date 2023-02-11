@@ -808,6 +808,14 @@ export class DirListing extends Widget {
       // next value).
       checkAllCheckbox.dataset.checked = String(allSelected);
       checkAllCheckbox.dataset.indeterminate = String(someSelected);
+
+      const trans = this.translator.load('jupyterlab');
+      checkAllCheckbox?.setAttribute(
+        'aria-label',
+        allSelected || someSelected
+          ? trans.__('Deselect all files and directories')
+          : trans.__('Select all files and directories')
+      );
     }
 
     // Add extra classes to item nodes based on widget state.
@@ -819,19 +827,15 @@ export class DirListing extends Widget {
         item,
         ft,
         this.translator,
-        this._hiddenColumns
+        this._hiddenColumns,
+        this.selection[item.path]
       );
-      if (this.selection[item.path]) {
-        node.classList.add(SELECTED_CLASS);
-
-        if (this._isCut && this._model.path === this._prevPath) {
-          node.classList.add(CUT_CLASS);
-        }
-
-        const checkbox = renderer.getCheckboxNode(node);
-        if (checkbox) {
-          checkbox.checked = true;
-        }
+      if (
+        this.selection[item.path] &&
+        this._isCut &&
+        this._model.path === this._prevPath
+      ) {
+        node.classList.add(CUT_CLASS);
       }
 
       // add metadata to the node
@@ -1889,7 +1893,8 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
-      hiddenColumns?: Set<DirListing.ToggleableColumn>
+      hiddenColumns?: Set<DirListing.ToggleableColumn>,
+      selected?: boolean
     ): void;
 
     /**
@@ -2156,9 +2161,12 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
-      hiddenColumns?: Set<DirListing.ToggleableColumn>
+      hiddenColumns?: Set<DirListing.ToggleableColumn>,
+      selected?: boolean
     ): void {
-      translator = translator || nullTranslator;
+      if (selected) {
+        node.classList.add(SELECTED_CLASS);
+      }
 
       fileType =
         fileType || DocumentRegistry.getDefaultTextFileType(translator);
@@ -2218,13 +2226,13 @@ export namespace DirListing {
       if (model.created) {
         hoverText += trans.__(
           '\nCreated: %1',
-          Time.format(new Date(model.created), 'YYYY-MM-DD HH:mm:ss')
+          Time.format(new Date(model.created))
         );
       }
       if (model.last_modified) {
         hoverText += trans.__(
           '\nModified: %1',
-          Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss')
+          Time.format(new Date(model.last_modified))
         );
       }
       hoverText += trans.__('\nWritable: %1', model.writable);
@@ -2237,17 +2245,37 @@ export namespace DirListing {
         node.removeAttribute('data-is-dot');
       }
       // If an item is being edited currently, its text node is unavailable.
+      const indices = !model.indices ? [] : model.indices;
+      let highlightedName = StringExt.highlight(model.name, indices, h.mark);
       if (text) {
-        const indices = !model.indices ? [] : model.indices;
-        let highlightedName = StringExt.highlight(model.name, indices, h.mark);
         VirtualDOM.render(h.span(highlightedName), text);
+      }
+
+      // Adds an aria-label to the checkbox element.
+      const checkbox = checkboxWrapper?.querySelector(
+        'input[type="checkbox"]'
+      ) as HTMLInputElement;
+
+      if (checkbox) {
+        let ariaLabel: string;
+        if (fileType.contentType === 'directory') {
+          ariaLabel = selected
+            ? trans.__('Deselect directory "%1"', highlightedName)
+            : trans.__('Select directory "%1"', highlightedName);
+        } else {
+          ariaLabel = selected
+            ? trans.__('Deselect file "%1"', highlightedName)
+            : trans.__('Select file "%1"', highlightedName);
+        }
+        checkbox.setAttribute('aria-label', ariaLabel);
+        checkbox.checked = selected ?? false;
       }
 
       let modText = '';
       let modTitle = '';
       if (model.last_modified) {
         modText = Time.formatHuman(new Date(model.last_modified));
-        modTitle = Time.format(new Date(model.last_modified), 'lll');
+        modTitle = Time.format(new Date(model.last_modified));
       }
       modified.textContent = modText;
       modified.title = modTitle;

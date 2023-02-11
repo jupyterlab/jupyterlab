@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/extensionmanager",
-  "version": "4.0.0-alpha.17",
+  "version": "4.0.0-alpha.18",
   "description": "JupyterLab - Extension Manager",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,20 +36,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.17",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.17",
-    "@jupyterlab/services": "^7.0.0-alpha.17",
-    "@jupyterlab/translation": "^4.0.0-alpha.17",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.32",
-    "@lumino/messaging": "^2.0.0-alpha.6",
-    "@lumino/polling": "^2.0.0-alpha.6",
-    "@lumino/widgets": "^2.0.0-alpha.6",
-    "react": "^17.0.1",
+    "@jupyterlab/apputils": "^4.0.0-alpha.18",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.18",
+    "@jupyterlab/services": "^7.0.0-alpha.18",
+    "@jupyterlab/translation": "^4.0.0-alpha.18",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.33",
+    "@lumino/messaging": "^2.0.0-beta.0",
+    "@lumino/polling": "^2.0.0-beta.0",
+    "@lumino/widgets": "^2.0.0-beta.1",
+    "react": "^18.2.0",
     "react-paginate": "^6.3.2",
     "semver": "^7.3.2"
   },
   "devDependencies": {
-    "@types/react": "^17.0.0",
+    "@types/react": "^18.0.26",
     "@types/react-paginate": "^6.2.1",
     "@types/semver": "^7.3.3",
     "rimraf": "~3.0.0",

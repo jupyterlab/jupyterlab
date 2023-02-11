@@ -17,9 +17,9 @@ test('Search with a text', async ({ page }) => {
   const searchText = 'ipsum';
   await page.menu.clickMenuItem('File>New>Text File');
 
-  await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+  await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
-  await page.type('.cm-content', TEST_FILE_CONTENT);
+  await page.locator('[role="main"] .cm-content').fill(TEST_FILE_CONTENT);
 
   await page.evaluate(async searchText => {
     await window.jupyterapp.commands.execute('documentsearch:start', {
@@ -27,9 +27,7 @@ test('Search with a text', async ({ page }) => {
     });
   }, searchText);
 
-  expect(
-    await page.locator('input.jp-DocumentSearch-input').inputValue()
-  ).toEqual(searchText);
+  await expect(page.locator('[placeholder="Find"]')).toHaveValue(searchText);
 });
 
 test('Search with a text and replacement', async ({ page }) => {
@@ -37,9 +35,9 @@ test('Search with a text and replacement', async ({ page }) => {
   const replaceText = 'banana';
   await page.menu.clickMenuItem('File>New>Text File');
 
-  await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+  await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
-  await page.type('.cm-content', TEST_FILE_CONTENT);
+  await page.locator('[role="main"] .cm-content').fill(TEST_FILE_CONTENT);
 
   await page.evaluate(
     async ([searchText, replaceText]) => {
@@ -54,10 +52,8 @@ test('Search with a text and replacement', async ({ page }) => {
     [searchText, replaceText]
   );
 
-  expect(
-    await page.locator('input.jp-DocumentSearch-input').inputValue()
-  ).toEqual(searchText);
-  expect(
-    await page.locator('input.jp-DocumentSearch-replace-entry').inputValue()
-  ).toEqual(replaceText);
+  await expect(page.locator('[placeholder="Find"]')).toHaveValue(searchText);
+  await expect(page.locator('[placeholder="Replace"]')).toHaveValue(
+    replaceText
+  );
 });
