@@ -101,7 +101,6 @@ export class CellToolbarTracker implements IDisposable {
       ) {
         // Cell just became visible; add toolbar
         this._addToolbar(model);
-        // TODO: this._updateCellForToolbarOverlap(activeCell);
       }
     }
   }
@@ -123,8 +122,6 @@ export class CellToolbarTracker implements IDisposable {
 
     this._addToolbar(activeCell.model);
     this._previousActiveCell = activeCell;
-
-    this._updateCellForToolbarOverlap(activeCell);
   }
 
   get isDisposed(): boolean {
@@ -180,6 +177,9 @@ export class CellToolbarTracker implements IDisposable {
 
           // Watch for changes in the cell's contents.
           cell.model.contentChanged.connect(this._changedEventCallback, this);
+
+          // Hide the cell toolbar if it overlaps with cell contents
+          this._updateCellForToolbarOverlap(cell);
         })
         .catch(() => {
           console.error('Error rendering buttons of the cell toolbar');
@@ -224,6 +224,7 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _changedEventCallback(): void {
+    console.log("_changedEventCallback called");
     const activeCell = this._panel?.content.activeCell;
     if (activeCell === null || activeCell === undefined) {
       return;
@@ -366,12 +367,21 @@ export class CellToolbarTracker implements IDisposable {
     }
 
     const codeMirrorLines =
-      editorWidget.node.getElementsByClassName('CodeMirror-line');
+      editorWidget.node.getElementsByClassName('cm-line');
     if (codeMirrorLines.length < 1) {
       return false; // No lines present
     }
-    const lineRight = codeMirrorLines[0].children[0] // First span under first pre
-      .getBoundingClientRect().right;
+
+    let lineRight = codeMirrorLines[0].getBoundingClientRect().left;
+    const oneChar = document.createElement('span')
+    oneChar.textContent = 'a';
+    codeMirrorLines[0].appendChild(oneChar);
+    const charWidth = oneChar.getBoundingClientRect().width;
+    codeMirrorLines[0].removeChild(oneChar);
+    // Record only the text content's length for each child node
+    codeMirrorLines[0].childNodes.forEach((childNode: ChildNode) => {
+      lineRight += (childNode.textContent?.length || 0) * charWidth;
+    });
 
     const toolbarLeft = this._cellToolbarLeft(activeCell);
 
