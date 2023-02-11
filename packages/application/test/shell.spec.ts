@@ -8,6 +8,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { DockPanel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
+import { ACTIVE_CLASS, CURRENT_CLASS } from '../src/shell';
 
 class ContentWidget extends Widget {
   activated = false;
@@ -74,6 +75,27 @@ describe('LabShell', () => {
       expect(shell.currentWidget).toBe(widget);
       widget.parent = null;
       expect(shell.currentWidget).toBe(null);
+    });
+  });
+
+  describe('#onCurrentChanged', () => {
+    it('should test if current, active class names are cleared when current widget changes', () => {
+      const foo = new Widget();
+      foo.id = 'foo';
+      shell.add(foo, 'main');
+      const bar = new Widget();
+      bar.id = 'bar';
+      shell.add(bar, 'main');
+      simulate(foo.node, 'focus');
+      expect(shell.currentWidget).toBe(foo);
+      expect(shell.currentWidget?.title.className).toContain(CURRENT_CLASS);
+      expect(shell.currentWidget?.title.className).toContain(ACTIVE_CLASS);
+      simulate(bar.node, 'focus');
+      simulate(foo.node, 'focus');
+      simulate(bar.node, 'focus');
+      expect(shell.currentWidget).toBe(bar);
+      expect(foo.title.className).not.toContain(CURRENT_CLASS);
+      expect(foo.title.className).not.toContain(ACTIVE_CLASS);
     });
   });
 
