@@ -224,7 +224,7 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _changedEventCallback(): void {
-    console.log("_changedEventCallback called");
+    console.log('_changedEventCallback called');
     const activeCell = this._panel?.content.activeCell;
     if (activeCell === null || activeCell === undefined) {
       return;
@@ -366,14 +366,13 @@ export class CellToolbarTracker implements IDisposable {
       return false; // Nothing in the editor
     }
 
-    const codeMirrorLines =
-      editorWidget.node.getElementsByClassName('cm-line');
+    const codeMirrorLines = editorWidget.node.getElementsByClassName('cm-line');
     if (codeMirrorLines.length < 1) {
       return false; // No lines present
     }
 
     let lineRight = codeMirrorLines[0].getBoundingClientRect().left;
-    const oneChar = document.createElement('span')
+    const oneChar = document.createElement('span');
     oneChar.textContent = 'a';
     codeMirrorLines[0].appendChild(oneChar);
     const charWidth = oneChar.getBoundingClientRect().width;
