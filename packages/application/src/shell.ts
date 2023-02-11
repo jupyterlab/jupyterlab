@@ -44,21 +44,21 @@ const APPLICATION_SHELL_CLASS = 'jp-LabShell';
 const SIDEBAR_CLASS = 'jp-SideBar';
 
 /**
- * The class name added to the current widget's title.
- */
-const CURRENT_CLASS = 'jp-mod-current';
-
-/**
- * The class name added to the active widget's title.
- */
-const ACTIVE_CLASS = 'jp-mod-active';
-
-/**
  * The default rank of items added to a sidebar.
  */
 const DEFAULT_RANK = 900;
 
 const ACTIVITY_CLASS = 'jp-Activity';
+
+/**
+ * The class name added to the current widget's title.
+ */
+export const CURRENT_CLASS = 'jp-mod-current';
+
+/**
+ * The class name added to the active widget's title.
+ */
+export const ACTIVE_CLASS = 'jp-mod-active';
 
 /**
  * The JupyterLab application shell token.
