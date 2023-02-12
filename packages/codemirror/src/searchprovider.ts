@@ -199,11 +199,6 @@ export abstract class EditorSearchProvider<
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
-      if (this._lastReplacementPosition) {
-        this.editor?.setCursorPosition(this._lastReplacementPosition);
-        this._lastReplacementPosition = null;
-      }
-
       // This starts from the cursor position
       let match = await this.cmHandler.highlightNext();
       if (match) {
@@ -275,8 +270,6 @@ export abstract class EditorSearchProvider<
       } else {
         this.cmHandler.matches.splice(this.currentIndex, 1);
         this.currentIndex = null;
-        // Store the current position to highlight properly the next search hit
-        this._lastReplacementPosition = editor.getCursorPosition();
         const insertText = options?.preserveCase
           ? GenericSearchProvider.preserveCase(match.text, newText)
           : newText;
@@ -391,7 +384,6 @@ export abstract class EditorSearchProvider<
   protected _stateChanged: Signal<IBaseSearchProvider, void>;
   private _isActive = true;
   private _isDisposed = false;
-  private _lastReplacementPosition: CodeEditor.IPosition | null = null;
   private _cmHandler: CodeMirrorSearchHighlighter | null = null;
 }
 

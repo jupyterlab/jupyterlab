@@ -32,8 +32,8 @@ describe('@jupyterlab/notebook', () => {
       panel = utils.createNotebookPanel(context);
       provider = new NotebookSearchProvider(panel);
       panel.model!.sharedModel.insertCells(0, [
-        { cell_type: 'markdown', source: 'test test' },
-        { cell_type: 'code', source: 'test' }
+        { cell_type: 'markdown', source: 'test1 test2' },
+        { cell_type: 'code', source: 'test3' }
       ]);
     });
 
@@ -104,6 +104,58 @@ describe('@jupyterlab/notebook', () => {
         await provider.highlightPrevious();
         expect(provider.currentMatchIndex).toBe(2);
         await provider.endQuery();
+      });
+    });
+
+    describe('#replaceCurrentMatch()', () => {
+      it('should replace with a shorter text and highlight next', async () => {
+        await provider.startQuery(/test\d/, undefined);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+        console.log('will replace');
+        let replaced = await provider.replaceCurrentMatch('bar');
+        console.log('replaced');
+        expect(replaced).toBe(true);
+        const source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('bar test2');
+        expect(provider.currentMatchIndex).toBe(0);
+      });
+
+      it('should replace with a longer text and highlight next', async () => {
+        await provider.startQuery(/test\d/, undefined);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+        let replaced = await provider.replaceCurrentMatch('rabarbar');
+        expect(replaced).toBe(true);
+        let source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('rabarbar test2');
+        expect(provider.currentMatchIndex).toBe(0);
+
+        replaced = await provider.replaceCurrentMatch('rabarbar');
+        expect(replaced).toBe(true);
+        source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('rabarbar rabarbar');
+        expect(provider.currentMatchIndex).toBe(0);
+
+        replaced = await provider.replaceCurrentMatch('rabarbar');
+        expect(replaced).toBe(true);
+        source = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source).toBe('rabarbar');
+        expect(provider.currentMatchIndex).toBe(null);
+      });
+    });
+
+    describe('#replaceAllMatches()', () => {
+      it('should replace all occurrences across cells', async () => {
+        await provider.startQuery(/test\d/, undefined);
+        await provider.highlightNext();
+        const replaced = await provider.replaceAllMatches('test0');
+        expect(replaced).toBe(true);
+        let source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test0 test0');
+        source = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source).toBe('test0');
+        expect(provider.currentMatchIndex).toBe(null);
       });
     });
   });
