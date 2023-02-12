@@ -112,9 +112,7 @@ describe('@jupyterlab/notebook', () => {
         await provider.startQuery(/test\d/, undefined);
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
-        console.log('will replace');
         let replaced = await provider.replaceCurrentMatch('bar');
-        console.log('replaced');
         expect(replaced).toBe(true);
         const source = panel.model!.cells.get(0).sharedModel.getSource();
         expect(source).toBe('bar test2');
