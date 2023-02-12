@@ -88,8 +88,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     let found = false;
     for (let idx = 0; idx < this._searchProviders.length; idx++) {
       const provider = this._searchProviders[idx];
-      const localMatch = provider.currentMatchIndex;
-      if (localMatch !== null) {
+      if (this._currentProviderIndex == idx) {
+        const localMatch = provider.currentMatchIndex;
+        if (localMatch === null) {
+          return null;
+        }
         agg += localMatch;
         found = true;
         break;
