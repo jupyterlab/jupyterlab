@@ -150,6 +150,7 @@ export class JSONEditor extends Widget {
       return;
     }
 
+    this.source?.dispose();
     this.model.dispose();
     this.editor.dispose();
 
