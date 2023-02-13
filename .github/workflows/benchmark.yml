@@ -246,7 +246,7 @@ jobs:
 
       - name: Execute memory leak tests
         id: memory_leaks
-        uses: jupyterlab/benchmarks/.github/actions/memory-leak@v1.2.4
+        uses: jupyterlab/benchmarks/.github/actions/memory-leak@v1.2.5
         with:
           server_url: localhost:8888
           artifacts_name: benchmark-assets
