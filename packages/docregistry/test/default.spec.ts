@@ -282,7 +282,7 @@ describe('docregistry/default', () => {
       });
 
       it('should accept an optional language preference', () => {
-        const model = new DocumentModel('foo');
+        const model = new DocumentModel({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).toBe('foo');
       });
     });
@@ -422,7 +422,7 @@ describe('docregistry/default', () => {
       });
 
       it('should be set by the constructor arg', () => {
-        const model = new DocumentModel('foo');
+        const model = new DocumentModel({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).toBe('foo');
       });
     });
@@ -531,7 +531,7 @@ describe('docregistry/default', () => {
 
       it('should accept a language preference', () => {
         const factory = new TextModelFactory();
-        const model = factory.createNew('foo');
+        const model = factory.createNew({ languagePreference: 'foo' });
         expect(model.defaultKernelLanguage).toBe('foo');
       });
     });

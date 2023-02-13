@@ -8,7 +8,7 @@ import { UUID } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
 import React, { useState } from 'react';
 
-import type { FieldProps } from '@rjsf/core';
+import type { FieldProps } from '@rjsf/utils';
 type TDict = { [key: string]: any };
 
 interface ISettingPropertyMap {

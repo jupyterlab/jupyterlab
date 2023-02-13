@@ -3,10 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-form.rjsf button[type='submit'] {
-  display: none;
-}
-
 .jp-FormGroup-content fieldset {
   border: none;
   padding: 0;
@@ -92,7 +88,7 @@ form.rjsf button[type='submit'] {
   color: var(--jp-ui-font-color0);
   flex-basis: 100%;
   padding: 4px 0;
-  font-weight: var(--jp-content-header-font-weight);
+  font-weight: var(--jp-content-heading-font-weight);
   border-bottom: 1px solid var(--jp-border-color2);
 }
 

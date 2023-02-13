@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/completer-extension",
-  "version": "4.0.0-alpha.17",
+  "version": "4.0.0-alpha.18",
   "description": "JupyterLab - Completer Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,13 +37,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.17",
-    "@jupyterlab/completer": "^4.0.0-alpha.17",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.17",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.32",
+    "@jupyterlab/application": "^4.0.0-alpha.18",
+    "@jupyterlab/completer": "^4.0.0-alpha.18",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.18",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.33",
     "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@rjsf/core": "^4.2.0",
-    "react": "^17.0.1"
+    "@rjsf/utils": "^5.1.0",
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

@@ -62,17 +62,12 @@ specific options.
 Create `jupyter_server_test_config.py` with the following content.
 
 ```py
-from tempfile import mkdtemp
+from jupyterlab.galata import configure_jupyter_server
 
-c.ServerApp.port = 8888
-c.ServerApp.port_retries = 0
-c.ServerApp.open_browser = False
+configure_jupyter_server(c)
 
-c.ServerApp.root_dir = mkdtemp(prefix='galata-test-')
-c.ServerApp.token = ""
-c.ServerApp.password = ""
-c.ServerApp.disable_check_xsrf = True
-c.LabApp.expose_app_in_browser = True
+# Uncomment to set server log level to debug level
+# c.ServerApp.log_level = "DEBUG"
 ```
 
 Then start the server with:
@@ -80,6 +75,8 @@ Then start the server with:
 ```bash
 jupyter lab --config jupyter_server_test_config.py
 ```
+
+> If you need to customize the set up for galata, you can look at the [`configure_jupyter_server`](https://github.com/jupyterlab/jupyterlab/tree/master/jupyterlab/galata/__init__.py) definition.
 
 ### Run test project
 
@@ -109,7 +106,7 @@ Test assets (including test videos) will be saved in a `test-results` folder and
 report will be created in `playwright-report` folder. That report can be see by running:
 
 ```bash
-http-server ./playwright-report -a localhost -o
+jlpm playwright show-report
 ```
 
 ## User advices
@@ -213,6 +210,73 @@ steps were successful. Its content will look like that:
 
 > This will only work if the authentication is stored in a cookie and you can access the Jupyter
 > app directly when that cookie is set.
+
+## Helpers
+
+### Listen to dialogs
+
+You can add a listener that will be triggered when a JupyterLab dialog is shown:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.on('dialog', (dialog: Dialog<unknown> | null) => {
+    // Use the dialog
+    // You can for instance reject it
+    // dialog.reject()
+  });
+});
+```
+
+The listener will be called when a dialog is started and when it is closed (in that case `dialog == null`).
+
+You can stop listening to the event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.off('dialog', listener);
+});
+```
+
+Or you can listen to a single event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.once('dialog', listener);
+});
+```
+
+### Listen to notification
+
+You can add a listener that will be triggered when a JupyterLab dialog is shown:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.on(
+    'notification',
+    (notification: Notification.INotification) => {
+      // Use the notification
+    }
+  );
+});
+```
+
+The listener will be called when a notification is created or updated.
+
+You can stop listening to the event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.off('notification', listener);
+});
+```
+
+Or you can listen to a single event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.once('notification', listener);
+});
+```
 
 ## Fixtures
 
@@ -368,6 +432,20 @@ test('should return mocked settings', async ({ page }) => {
   expect(await page.theme.getTheme()).toEqual('JupyterLab Dark');
 });
 ```
+
+### mockUser
+
+- type: boolean | Partial\<User.IUser>
+
+Mock JupyterLab user in-memory or not.
+
+Possible values are:
+
+- true (default): JupyterLab user will be mocked on a per test basis
+- false: JupyterLab user won't be mocked (It will be a random user so snapshots won't match)
+- Record<string, unknown>: Initial JupyterLab user - Mapping (user attribute, value).
+
+By default the user is stored in-memory.
 
 ### sessions
 

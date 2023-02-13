@@ -22,7 +22,8 @@ permissions:
 jobs:
   upload:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
+    # Carry action even on failure (happening if memory leak tests fail for example)
+    if: github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure'
     steps:
       - name: 'Download artifact'
         uses: actions/github-script@v6

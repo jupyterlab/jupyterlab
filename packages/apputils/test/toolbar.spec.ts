@@ -292,6 +292,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
+        languageCode: 'en',
         load: jest.fn()
       };
 
@@ -400,6 +401,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
+        languageCode: 'en',
         load: jest.fn()
       };
 
@@ -500,6 +502,7 @@ describe('@jupyterlab/apputils', () => {
       });
 
       const translator: ITranslator = {
+        languageCode: 'en',
         load: jest.fn()
       };
 

@@ -22,6 +22,23 @@ describe('documentsearch/genericsearchprovider', () => {
       widget.dispose();
     });
 
+    describe('#preserveCase()', () => {
+      it.each([
+        ['OLD_TEXT_1', 'new_text_1', 'NEW_TEXT_1'],
+        ['OLD_TEXT_1', 'NEW_TEXT_1', 'NEW_TEXT_1'],
+        ['old_text_1', 'new_text_1', 'new_text_1'],
+        ['old_text_1', 'NEW_TEXT_1', 'new_text_1'],
+        ['Old', 'new', 'New'],
+        ['Old', '𐐶ew', '𐐎ew']
+      ])(
+        'should copy case from %s to %s yielding %s',
+        (oldText, newText, expected) => {
+          const replace = GenericSearchProvider.preserveCase(oldText, newText);
+          expect(replace).toEqual(expected);
+        }
+      );
+    });
+
     describe('#startQuery()', () => {
       it.each([
         [/x/, '<pre>xyz</pre>', `<mark class="${MATCH_CLASSES}">x</mark>yz`],

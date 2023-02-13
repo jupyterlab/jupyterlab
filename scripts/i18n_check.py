@@ -19,12 +19,12 @@ if __name__ == "__main__":
             wrapwidth=100000,
         )
 
-    hash = sha256()
+    hash_ = sha256()
     # Use only the context and the id as the position may changed without impact
     # Sort the entry because the order in the POT file may changed (likely because code position changed)
-    for entry in sorted(map(lambda e: f"{e.msgctxt!s} {e.msgid!s}", pot)):
-        hash.update(entry.encode("utf-8"))
+    for entry in sorted(map(lambda e: f"{e.msgctxt!s} {e.msgid!s}", pot)):  # noqa
+        hash_.update(entry.encode("utf-8"))
 
-    proof = hash.hexdigest()
+    proof = hash_.hexdigest()
 
-    print(proof)
+    print(proof)  # noqa

@@ -21,7 +21,6 @@ def _jupyter_server_extension_points():
 
 
 class ExampleApp(LabServerApp):
-
     extension_url = "/lab"
     default_url = "/lab"
     name = __name__
@@ -35,6 +34,11 @@ class ExampleApp(LabServerApp):
     themes_dir = os.path.join(HERE, "build", "themes")
     user_settings_dir = os.path.join(HERE, "build", "user_settings")
     workspaces_dir = os.path.join(HERE, "build", "workspaces")
+
+    def initialize_settings(self):
+        super().initialize_settings()
+        settings = self.serverapp.web_app.settings
+        settings["terminals_available"] = False
 
 
 if __name__ == "__main__":

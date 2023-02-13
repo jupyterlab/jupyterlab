@@ -30,7 +30,10 @@ import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import {
   FileEditor,
   FileEditorAdapter,
@@ -71,6 +74,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   id: '@jupyterlab/fileeditor-extension:plugin',
   requires: [
     IEditorServices,
+    IDefaultFileBrowser,
     IFileBrowserFactory,
     ISettingRegistry,
     ITranslator
@@ -238,6 +242,7 @@ export default plugins;
 function activate(
   app: JupyterFrontEnd,
   editorServices: IEditorServices,
+  fileBrowser: IDefaultFileBrowser,
   browserFactory: IFileBrowserFactory,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
@@ -390,6 +395,7 @@ function activate(
     id,
     isEnabled,
     tracker,
+    fileBrowser,
     browserFactory,
     consoleTracker,
     sessionDialogs

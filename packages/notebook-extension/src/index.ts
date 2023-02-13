@@ -41,7 +41,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import {
   ILSPCodeExtractorsManager,
@@ -324,7 +324,7 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   requires: [INotebookWidgetFactory],
   optional: [
     ICommandPalette,
-    IFileBrowserFactory,
+    IDefaultFileBrowser,
     ILauncher,
     ILayoutRestorer,
     IMainMenu,
@@ -1405,7 +1405,7 @@ function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
   palette: ICommandPalette | null,
-  browserFactory: IFileBrowserFactory | null,
+  defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
@@ -1642,16 +1642,20 @@ function activateNotebookHandler(
   }
 
   // Utility function to create a new notebook.
-  const createNew = async (cwd: string, kernelName?: string) => {
+  const createNew = async (
+    cwd: string,
+    kernelId: string,
+    kernelName: string
+  ) => {
     const model = await commands.execute('docmanager:new-untitled', {
       path: cwd,
       type: 'notebook'
     });
-    if (model != undefined) {
+    if (model !== undefined) {
       const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
-        kernel: { name: kernelName }
+        kernel: { id: kernelId, name: kernelName }
       })) as unknown as IDocumentWidget;
       widget.isUntitled = true;
       return widget;
@@ -1676,11 +1680,10 @@ function activateNotebookHandler(
     caption: trans.__('Create a new notebook'),
     icon: args => (args['isPalette'] ? undefined : notebookIcon),
     execute: args => {
-      const cwd =
-        (args['cwd'] as string) ||
-        (browserFactory ? browserFactory.defaultBrowser.model.path : '');
+      const cwd = (args['cwd'] as string) || (defaultBrowser?.model.path ?? '');
+      const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
-      return createNew(cwd, kernelName);
+      return createNew(cwd, kernelId, kernelName);
     }
   });
 

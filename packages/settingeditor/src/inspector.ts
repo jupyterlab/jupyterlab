@@ -120,7 +120,7 @@ class InspectorConnector extends DataConnector<
         return `**\`[${this._trans.__('syntax error')}]\`** *${error.message}*`;
       case 'type':
         return `**\`[${this._trans.__('type error')}]\`**
-          \`${error.dataPath}\` ${error.message}`;
+          \`${error.instancePath}\` ${error.message}`;
       default:
         return `**\`[${this._trans.__('error')}]\`** *${error.message}*`;
     }

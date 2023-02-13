@@ -33,8 +33,8 @@
     "locale": {
       "type": "string",
       "title": "Language locale",
-      "description": "Set the interface display language. Examples: 'es_CO', 'fr'.",
-      "default": "en"
+      "description": "Set the interface display language. Examples: 'es_CO', 'fr_FR'. Set 'default' to use the server default locale. Requires corresponding language pack to be installed.",
+      "default": "default"
     },
     "stringsPrefix": {
       "type": "string",

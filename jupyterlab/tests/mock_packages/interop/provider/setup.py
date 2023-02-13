@@ -11,7 +11,7 @@ HERE = osp.abspath(osp.dirname(__file__))
 with open(osp.join(HERE, "package.json")) as fid:
     data = json.load(fid)
 
-from setuptools import setup
+from setuptools import setup  # noqa
 
 js_name = data["name"]
 

@@ -196,8 +196,6 @@ export async function main() {
   var devMode = (PageConfig.getOption('devMode') || '').toLowerCase() === 'true';
 
   if (exposeAppInBrowser || devMode) {
-    // This is deprecated in favor of more generic window.jupyterapp
-    window.jupyterlab = lab;
     window.jupyterapp = lab;
   }
 

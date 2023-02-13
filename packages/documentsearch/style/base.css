@@ -20,6 +20,8 @@
   min-width: 405px;
   padding: 2px;
   font-size: var(--jp-ui-font-size1);
+
+  --jp-private-document-search-button-height: 20px;
 }
 
 .jp-DocumentSearch-overlay button {
@@ -50,6 +52,11 @@
   display: inline-block;
   cursor: pointer;
   box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+
+.jp-DocumentSearch-button-content svg {
   width: 100%;
   height: 100%;
 }
@@ -85,8 +92,8 @@
 }
 
 .jp-DocumentSearch-button-wrapper {
-  width: 20px;
-  height: 20px;
+  width: var(--jp-private-document-search-button-height);
+  height: var(--jp-private-document-search-button-height);
 }
 
 .jp-DocumentSearch-toggle-wrapper:focus,
@@ -145,16 +152,12 @@
 .jp-DocumentSearch-up-down-wrapper button {
   outline: 0;
   border: none;
-  width: 20px;
-  height: 20px;
+  width: var(--jp-private-document-search-button-height);
+  height: var(--jp-private-document-search-button-height);
   background-repeat: no-repeat;
   background-position: center;
   vertical-align: middle;
   margin: 1px 5px 2px;
-}
-
-.jp-DocumentSearch-up-down-button {
-  border-radius: var(--jp-border-radius);
 }
 
 .jp-DocumentSearch-up-down-button:hover {
@@ -200,23 +203,15 @@
   color: var(--jp-error-color0);
 }
 
-.jp-DocumentSearch-replace-entry {
-  border: var(--jp-border-width) solid var(--jp-border-color0);
-  display: flex;
-  background-color: var(--jp-layout-color0);
-  font-size: var(--jp-ui-font-size1);
-  margin: 2px;
-}
-
 .jp-DocumentSearch-replace-button-wrapper {
   overflow: hidden;
   display: inline-block;
   box-sizing: border-box;
   border: var(--jp-border-width) solid var(--jp-border-color0);
   margin: 2px;
+  padding: 1px 4px;
 }
 
-.jp-DocumentSearch-replace-entry:focus,
 .jp-DocumentSearch-replace-button-wrapper:focus {
   border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
 }
@@ -226,7 +221,10 @@
   text-align: center;
   cursor: pointer;
   box-sizing: border-box;
-  color: var(--jp-font-color1);
+  color: var(--jp-ui-font-color1);
+
+  /* height - 2 * (padding of wrapper) */
+  line-height: calc(var(--jp-private-document-search-button-height) - 2px);
   width: 100%;
   height: 100%;
 }

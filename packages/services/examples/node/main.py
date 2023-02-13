@@ -1,8 +1,6 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from __future__ import absolute_import, print_function
-
 import json
 import os.path as osp
 
@@ -17,23 +15,24 @@ def _jupyter_server_extension_points():
 
 
 class NodeApp(ProcessApp):
-
     name = __name__
-    serverapp_config = dict(allow_origin="*")
+    serverapp_config = {"allow_origin": "*"}
 
     def get_command(self):
         """Get the command and kwargs to run."""
         # Run the node script with command arguments.
-        config = dict(
-            baseUrl="http://localhost:{}{}".format(self.serverapp.port, self.settings["base_url"]),
-            token=self.settings["token"],
-        )
+        config = {
+            "baseUrl": "http://localhost:{}{}".format(
+                self.serverapp.port, self.settings["base_url"]
+            ),
+            "token": self.settings["token"],
+        }
 
         with open(osp.join(HERE, "config.json"), "w") as fid:
             json.dump(config, fid)
 
         cmd = [which("node"), "index.js", "--jupyter-config-data=./config.json"]
-        return cmd, dict(cwd=HERE)
+        return cmd, {"cwd": HERE}
 
 
 if __name__ == "__main__":

@@ -21,6 +21,7 @@ export interface IProps {
    * The application language translator.
    */
   translator?: ITranslator;
+  forwardedRef?: React.Ref<HTMLDivElement>;
 }
 
 /**
@@ -63,13 +64,13 @@ export class Component extends React.Component<IProps, IState> {
     const translator = this.props.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
-    const { data, metadata } = this.props;
+    const { data, metadata, forwardedRef } = this.props;
     const root = metadata && metadata.root ? (metadata.root as string) : 'root';
     const keyPaths = this.state.filter
       ? filterPaths(data, this.state.filter, [root])
       : [root];
     return (
-      <div className="container">
+      <div className="container" ref={forwardedRef}>
         <InputGroup
           className="filter"
           type="text"

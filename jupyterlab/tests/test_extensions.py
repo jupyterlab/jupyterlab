@@ -75,7 +75,7 @@ async def test_ExtensionManager_list_extensions_query_allow(mock_client, monkeyp
     monkeypatch.setattr(ReadOnlyExtensionManager, "list_packages", mock_list)
 
     manager = ReadOnlyExtensionManager(
-        ext_options=dict(allowed_extensions_uris={"http://dummy-allowed-extension"}),
+        ext_options={"allowed_extensions_uris": {"http://dummy-allowed-extension"}},
     )
 
     extensions = await manager.list_extensions("ext")
@@ -96,7 +96,7 @@ async def test_ExtensionManager_list_extensions_query_block(mock_client, monkeyp
     monkeypatch.setattr(ReadOnlyExtensionManager, "list_packages", mock_list)
 
     manager = ReadOnlyExtensionManager(
-        ext_options=dict(blocked_extensions_uris={"http://dummy-blocked-extension"})
+        ext_options={"blocked_extensions_uris": {"http://dummy-blocked-extension"}}
     )
 
     extensions = await manager.list_extensions("ext")
@@ -122,10 +122,10 @@ async def test_ExtensionManager_list_extensions_query_allow_block(mock_client, m
     monkeypatch.setattr(ReadOnlyExtensionManager, "list_packages", mock_list)
 
     manager = ReadOnlyExtensionManager(
-        ext_options=dict(
-            allowed_extensions_uris={"http://dummy-allowed-extension"},
-            blocked_extensions_uris={"http://dummy-blocked-extension"},
-        )
+        ext_options={
+            "allowed_extensions_uris": {"http://dummy-allowed-extension"},
+            "blocked_extensions_uris": {"http://dummy-blocked-extension"},
+        }
     )
 
     extensions = await manager.list_extensions("ext")
@@ -335,7 +335,7 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
 
 
 async def test_PyPiExtensionManager_custom_server_url():
-    BASE_URL = "https://mylocal.pypi.server/pypi"
+    BASE_URL = "https://mylocal.pypi.server/pypi"  # noqa
 
     parent = Configurable(config=Config({"PyPIExtensionManager": {"base_url": BASE_URL}}))
 

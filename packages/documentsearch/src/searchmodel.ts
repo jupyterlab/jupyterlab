@@ -5,7 +5,12 @@ import { VDomModel } from '@jupyterlab/ui-components';
 import { IObservableDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
-import { IFilter, IFilters, ISearchProvider } from './tokens';
+import {
+  IFilter,
+  IFilters,
+  IReplaceOptionsSupport,
+  ISearchProvider
+} from './tokens';
 
 /**
  * Search in a document model.
@@ -99,10 +104,31 @@ export class SearchDocumentModel
   }
 
   /**
+   * Replace options support.
+   */
+  get replaceOptionsSupport(): IReplaceOptionsSupport | undefined {
+    return this.searchProvider.replaceOptionsSupport;
+  }
+
+  /**
    * Parsing regular expression error message.
    */
   get parsingError(): string {
     return this._parsingError;
+  }
+
+  /**
+   * Whether to preserve case when replacing.
+   */
+  get preserveCase(): boolean {
+    return this._preserveCase;
+  }
+  set preserveCase(v: boolean) {
+    if (this._preserveCase !== v) {
+      this._preserveCase = v;
+      this.stateChanged.emit();
+      this.refresh();
+    }
   }
 
   /**
@@ -148,6 +174,20 @@ export class SearchDocumentModel
   set useRegex(v: boolean) {
     if (this._useRegex !== v) {
       this._useRegex = v;
+      this.stateChanged.emit();
+      this.refresh();
+    }
+  }
+
+  /**
+   * Whether to match whole words or not.
+   */
+  get wholeWords(): boolean {
+    return this._wholeWords;
+  }
+  set wholeWords(v: boolean) {
+    if (this._wholeWords !== v) {
+      this._wholeWords = v;
       this.stateChanged.emit();
       this.refresh();
     }
@@ -215,7 +255,9 @@ export class SearchDocumentModel
    * Replace all matches.
    */
   async replaceAllMatches(): Promise<void> {
-    await this.searchProvider.replaceAllMatches(this._replaceText);
+    await this.searchProvider.replaceAllMatches(this._replaceText, {
+      preserveCase: this.preserveCase
+    });
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -224,7 +266,9 @@ export class SearchDocumentModel
    * Replace the current match.
    */
   async replaceCurrentMatch(): Promise<void> {
-    await this.searchProvider.replaceCurrentMatch(this._replaceText);
+    await this.searchProvider.replaceCurrentMatch(this._replaceText, true, {
+      preserveCase: this.preserveCase
+    });
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -262,7 +306,8 @@ export class SearchDocumentModel
         ? Private.parseQuery(
             this.searchExpression,
             this.caseSensitive,
-            this.useRegex
+            this.useRegex,
+            this.wholeWords
           )
         : null;
       if (query) {
@@ -283,11 +328,13 @@ export class SearchDocumentModel
   private _caseSensitive = false;
   private _disposed = new Signal<this, void>(this);
   private _parsingError = '';
+  private _preserveCase = false;
   private _filters: IFilters = {};
   private _replaceText: string;
   private _searchDebouncer: Debouncer;
   private _searchExpression = '';
   private _useRegex = false;
+  private _wholeWords = false;
 }
 
 namespace Private {
@@ -302,15 +349,19 @@ namespace Private {
   export function parseQuery(
     queryString: string,
     caseSensitive: boolean,
-    regex: boolean
+    regex: boolean,
+    wholeWords: boolean
   ): RegExp | null {
     const flag = caseSensitive ? 'g' : 'gi';
     // escape regex characters in query if its a string search
-    const queryText = regex
+    let queryText = regex
       ? queryString
       : queryString.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
-    let ret;
-    ret = new RegExp(queryText, flag);
+
+    if (wholeWords) {
+      queryText = '\\b' + queryText + '\\b';
+    }
+    const ret = new RegExp(queryText, flag);
 
     // If the empty string is hit, the search logic will freeze the browser tab
     //  Trying /^/ or /$/ on the codemirror search demo, does not find anything.

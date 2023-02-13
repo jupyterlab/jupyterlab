@@ -45,7 +45,7 @@ const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['path', 'webpack'],
   '@jupyterlab/builder': ['path'],
-  '@jupyterlab/galata': ['fs', 'path'],
+  '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
   '@jupyterlab/testing': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
@@ -77,7 +77,8 @@ const UNUSED: Dict<string[]> = {
     'style-loader',
     'terser-webpack-plugin',
     'webpack-cli',
-    'worker-loader'
+    'worker-loader',
+    'source-map-loader'
   ],
   '@jupyterlab/buildutils': ['verdaccio'],
   '@jupyterlab/codemirror': [
@@ -97,8 +98,7 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
-  '@jupyterlab/galata': ['node-fetch', 'http-server'],
-  '@jupyterlab/services': ['node-fetch', 'ws'],
+  '@jupyterlab/services': ['ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testing': [
     '@babel/core',
@@ -155,6 +155,19 @@ const SKIP_CSS: Dict<string[]> = {
   ],
   '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
+  '@jupyterlab/galata': [
+    '@jupyterlab/application',
+    '@jupyterlab/apputils',
+    '@jupyterlab/docmanager',
+    '@jupyterlab/notebook'
+  ],
+  '@jupyterlab/galata-extension': [
+    '@jupyterlab/application',
+    '@jupyterlab/apputils',
+    '@jupyterlab/cells',
+    '@jupyterlab/docmanager',
+    '@jupyterlab/notebook'
+  ],
   '@jupyterlab/help-extension': ['@jupyterlab/application'],
   '@jupyterlab/lsp': ['codemirror'],
   '@jupyterlab/metapackage': [
@@ -195,7 +208,6 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/debugger',
     '@jupyterlab/debugger-extension',
     '@jupyterlab/docmanager-extension',
-    '@jupyterlab/docprovider-extension',
     '@jupyterlab/documentsearch-extension',
     '@jupyterlab/extensionmanager',
     '@jupyterlab/extensionmanager-extension',

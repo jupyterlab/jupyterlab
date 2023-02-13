@@ -9,9 +9,6 @@
       "path": "../coreutils"
     },
     {
-      "path": "../docprovider"
-    },
-    {
       "path": "../docregistry"
     },
     {

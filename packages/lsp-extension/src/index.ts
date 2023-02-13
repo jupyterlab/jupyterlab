@@ -27,7 +27,8 @@ import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import {
-  IFormComponentRegistry,
+  IFormRenderer,
+  IFormRendererRegistry,
   LabIcon,
   pythonIcon
 } from '@jupyterlab/ui-components';
@@ -36,12 +37,12 @@ import { Signal } from '@lumino/signaling';
 
 import { renderServerSetting } from './renderer';
 
-import type { FieldProps } from '@rjsf/core';
+import type { FieldProps } from '@rjsf/utils';
 const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
   activate,
   id: '@jupyterlab/lsp-extension:plugin',
   requires: [ISettingRegistry, ITranslator],
-  optional: [IRunningSessionManagers, IFormComponentRegistry],
+  optional: [IRunningSessionManagers, IFormRendererRegistry],
   provides: ILSPDocumentConnectionManager,
   autoStart: true
 };
@@ -87,7 +88,7 @@ function activate(
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
   runningSessionManagers: IRunningSessionManagers | null,
-  settingRendererRegistry: IFormComponentRegistry | null
+  settingRendererRegistry: IFormRendererRegistry | null
 ): ILSPDocumentConnectionManager {
   const LANGUAGE_SERVERS = 'languageServers';
   const languageServerManager = new LanguageServerManager({});
@@ -183,11 +184,14 @@ function activate(
   }
 
   if (settingRendererRegistry) {
-    settingRendererRegistry.addRenderer(
-      LANGUAGE_SERVERS,
-      (props: FieldProps) => {
+    const renderer: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
         return renderServerSetting(props, translator);
       }
+    };
+    settingRendererRegistry.addRenderer(
+      `${plugin.id}.${LANGUAGE_SERVERS}`,
+      renderer
     );
   }
 
@@ -219,8 +223,8 @@ export class RunningLanguageServer implements IRunningSessions.IRunningItem {
   shutdown(): void {
     for (const [key, value] of this._manager.connections.entries()) {
       if (this._connection.has(value)) {
-        const document = this._manager.documents.get(key)!;
-        this._manager.unregisterDocument(document);
+        const { uri } = this._manager.documents.get(key)!;
+        this._manager.unregisterDocument(uri);
       }
     }
     this._manager.disconnect(this._serverIdentifier as TLanguageServerId);
