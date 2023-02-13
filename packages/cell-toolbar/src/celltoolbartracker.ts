@@ -181,7 +181,7 @@ export class CellToolbarTracker implements IDisposable {
           // Hide the cell toolbar if it overlaps with cell contents
           this._updateCellForToolbarOverlap(cell);
         })
-        .catch((e) => {
+        .catch(e => {
           console.error('Error rendering buttons of the cell toolbar: ', e);
         });
     }
@@ -375,7 +375,10 @@ export class CellToolbarTracker implements IDisposable {
     range.setStart(codeMirrorLines[0].childNodes[0], 0);
     const nodeLength = codeMirrorLines[0].childNodes.length;
     const lastNode = codeMirrorLines[0].childNodes[nodeLength - 1];
-    range.setEnd(lastNode, Math.max((lastNode?.textContent?.length || 0) - 1, 0));
+    range.setEnd(
+      lastNode,
+      Math.max((lastNode?.textContent?.length || 0) - 1, 0)
+    );
     const sizes = range.getClientRects();
     lineRight += [...sizes].reduce((prev, rect) => prev + rect.width, 0);
 
