@@ -8,7 +8,16 @@ import { CommandRegistry } from '@lumino/commands';
 import { Message } from '@lumino/messaging';
 import { DockPanel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
-import { ACTIVE_CLASS, CURRENT_CLASS } from '../src/shell';
+
+/**
+ * The class name added to the current widget's title.
+ */
+const CURRENT_CLASS = 'jp-mod-current';
+
+/**
+ * The class name added to the active widget's title.
+ */
+const ACTIVE_CLASS = 'jp-mod-active';
 
 class ContentWidget extends Widget {
   activated = false;
