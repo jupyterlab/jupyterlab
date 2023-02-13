@@ -181,8 +181,8 @@ export class CellToolbarTracker implements IDisposable {
           // Hide the cell toolbar if it overlaps with cell contents
           this._updateCellForToolbarOverlap(cell);
         })
-        .catch(() => {
-          console.error('Error rendering buttons of the cell toolbar');
+        .catch((e) => {
+          console.error('Error rendering buttons of the cell toolbar: ', e);
         });
     }
   }
@@ -371,15 +371,13 @@ export class CellToolbarTracker implements IDisposable {
     }
 
     let lineRight = codeMirrorLines[0].getBoundingClientRect().left;
-    const oneChar = document.createElement('span');
-    oneChar.textContent = 'a';
-    codeMirrorLines[0].appendChild(oneChar);
-    const charWidth = oneChar.getBoundingClientRect().width;
-    codeMirrorLines[0].removeChild(oneChar);
-    // Record only the text content's length for each child node
-    codeMirrorLines[0].childNodes.forEach((childNode: ChildNode) => {
-      lineRight += (childNode.textContent?.length || 0) * charWidth;
-    });
+    const range = document.createRange();
+    range.setStart(codeMirrorLines[0].childNodes[0], 0);
+    const nodeLength = codeMirrorLines[0].childNodes.length;
+    const lastNode = codeMirrorLines[0].childNodes[nodeLength - 1];
+    range.setEnd(lastNode, Math.max((lastNode?.textContent?.length || 0) - 1, 0));
+    const sizes = range.getClientRects();
+    lineRight += [...sizes].reduce((prev, rect) => prev + rect.width, 0);
 
     const toolbarLeft = this._cellToolbarLeft(activeCell);
 
