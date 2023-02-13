@@ -1343,7 +1343,7 @@ export class Notebook extends StaticNotebook {
     if (newValue === oldValue) {
       return;
     }
-    if (!cell?.node.contains(document.activeElement)) {
+    if (cell && !cell.node.contains(document.activeElement)) {
       console.log(
         '[set activeCellIndex] cell does not contain active element, so calling cell.node.focus()'
       );
