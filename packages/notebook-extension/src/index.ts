@@ -5,7 +5,7 @@
  * @module notebook-extension
  */
 
-import type { FieldProps } from '@rjsf/core';
+import type { FieldProps } from '@rjsf/utils';
 
 import {
   ILabShell,
@@ -94,6 +94,7 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
   moveUpIcon,
@@ -115,8 +116,8 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
 import {
-  CustomCellMetadata,
-  CustomNotebookMetadata
+  CellMetadataField,
+  NotebookMetadataField
 } from './metadataEditorFields';
 import { ActiveCellTool } from './activeCellToolWidget';
 
@@ -897,14 +898,24 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
           // convert exportList to palette and menu items
           const formatList = Object.keys(response);
           const formatLabels = Private.getFormatLabels(translator);
+          type enumeration = {
+            const: string;
+            title: string;
+          };
           formatList.forEach(function (key) {
-            if ((properties!.enum as Array<string>)!.indexOf(key) === -1) {
+            const mimetypeExists =
+              (properties!.oneOf as Array<enumeration>)?.filter(
+                value => value.const === key
+              ).length > 0;
+            if (!mimetypeExists) {
               const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
               const option = formatLabels[key] ? formatLabels[key] : altOption;
               const mimeTypeValue = response[key].output_mimetype;
 
-              (properties!.enum as Array<string>)!.push(mimeTypeValue);
-              (properties!.enumNames as Array<string>)!.push(option);
+              (properties!.oneOf as Array<enumeration>)!.push({
+                const: mimeTypeValue,
+                title: option
+              });
             }
           });
         }
@@ -922,33 +933,46 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
 const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:metadata-editor',
   autoStart: true,
-  requires: [INotebookTracker, IEditorServices, IFormComponentRegistry],
+  requires: [INotebookTracker, IEditorServices, IFormRendererRegistry],
   optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     editorServices: IEditorServices,
-    formRegistry: IFormComponentRegistry,
+    formRegistry: IFormRendererRegistry,
     translator?: ITranslator
   ) => {
     const editorFactory = editorServices.factoryService.newInlineEditor;
     // Register the custom fields.
-    formRegistry.addRenderer('custom-cellMetadata', (props: FieldProps) => {
-      return new CustomCellMetadata({
-        editorFactory,
-        tracker,
-        label: 'Cell metadata',
-        translator: translator
-      }).render(props);
-    });
-    formRegistry.addRenderer('custom-notebookMetadata', (props: FieldProps) => {
-      return new CustomNotebookMetadata({
-        editorFactory,
-        tracker,
-        label: 'Notebook metadata',
-        translator: translator
-      }).render(props);
-    });
+    const cellComponent: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return new CellMetadataField({
+          editorFactory,
+          tracker,
+          label: 'Cell metadata',
+          translator: translator
+        }).render(props);
+      }
+    };
+    formRegistry.addRenderer(
+      'notebook-extension:metadata-editor.cell-metadata',
+      cellComponent
+    );
+
+    const notebookComponent: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return new NotebookMetadataField({
+          editorFactory,
+          tracker,
+          label: 'Notebook metadata',
+          translator: translator
+        }).render(props);
+      }
+    };
+    formRegistry.addRenderer(
+      'notebook-extension:metadata-editor.notebook-metadata',
+      notebookComponent
+    );
   }
 };
 
@@ -958,18 +982,24 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
 const activeCellTool: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:active-cell-tool',
   autoStart: true,
-  requires: [INotebookTracker, IFormComponentRegistry],
+  requires: [INotebookTracker, IFormRendererRegistry],
   activate: (
     // Register the custom field.
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
-    formRegistry: IFormComponentRegistry
+    formRegistry: IFormRendererRegistry
   ) => {
-    formRegistry.addRenderer('activeCellTool', (props: FieldProps) => {
-      return new ActiveCellTool({
-        tracker
-      }).render(props);
-    });
+    const component: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return new ActiveCellTool({
+          tracker
+        }).render(props);
+      }
+    };
+    formRegistry.addRenderer(
+      'notebook-extension:active-cell-tool.renderer',
+      component
+    );
   }
 };
 

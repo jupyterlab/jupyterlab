@@ -24,7 +24,7 @@
       },
       "metadataOptions": {
         "/tags": {
-          "customField": "custom-cellTag"
+          "customRenderer": "celltags-extension:plugin.renderer"
         }
       }
     }

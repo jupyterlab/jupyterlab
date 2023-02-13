@@ -9,7 +9,7 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 
-export class CustomCellTag {
+export class CellTagField {
   constructor(tracker: INotebookTracker, translator?: ITranslator) {
     this._tracker = tracker;
     this._translator = translator || nullTranslator;
@@ -21,10 +21,7 @@ export class CustomCellTag {
     const data = props.formData;
     if (tag && !data.includes(tag)) {
       data.push(tag);
-      props.formContext.metadataFormWidget.updateMetadata(
-        { [props.name]: data },
-        true
-      );
+      props.formContext.updateMetadata({ [props.name]: data }, true);
     }
   }
 
@@ -105,10 +102,7 @@ export class CustomCellTag {
       data.push(tag);
     }
 
-    props.formContext.metadataFormWidget.updateMetadata(
-      { [props.name]: data },
-      true
-    );
+    props.formContext.updateMetadata({ [props.name]: data }, true);
   }
 
   render(props: FieldProps): JSX.Element {

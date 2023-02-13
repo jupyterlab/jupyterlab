@@ -17,27 +17,77 @@
             "title": "Editable",
             "type": "boolean",
             "default": true,
-            "enumNames": ["Editable", "Read-Only"]
+            "oneOf": [
+              {
+                "const": true,
+                "title": "Editable"
+              },
+              {
+                "const": false,
+                "title": "Read-Only"
+              }
+            ]
           },
           "/raw_mimetype": {
             "title": "Raw NBConvert Format",
             "type": "string",
             "default": "",
-            "enum": ["", "pdf", "slides", "script", "notebook", "custom"],
-            "enumNames": ["-", "PDF", "Slides", "Script", "Notebook", "Custom"]
+            "oneOf": [
+              {
+                "const": "",
+                "title": "-"
+              },
+              {
+                "const": "pdf",
+                "title": "PDF"
+              },
+              {
+                "const": "slides",
+                "title": "Slides"
+              },
+              {
+                "const": "script",
+                "title": "Script"
+              },
+              {
+                "const": "notebook",
+                "title": "Notebook"
+              },
+              {
+                "const": "custom",
+                "title": "Custom"
+              }
+            ]
           },
           "/slideshow/slide_type": {
             "title": "Slide Type",
             "type": "string",
             "default": "",
-            "enum": ["", "slide", "subslide", "fragment", "skip", "notes"],
-            "enumNames": [
-              "-",
-              "Slide",
-              "Sub-Slide",
-              "Fragment",
-              "Skip",
-              "Notes"
+            "oneOf": [
+              {
+                "const": "",
+                "title": "-"
+              },
+              {
+                "const": "slide",
+                "title": "Slide"
+              },
+              {
+                "const": "subslide",
+                "title": "Sub-Slide"
+              },
+              {
+                "const": "fragment",
+                "title": "Fragment"
+              },
+              {
+                "const": "skip",
+                "title": "Skip"
+              },
+              {
+                "const": "notes",
+                "title": "Notes"
+              }
             ]
           },
           "/toc/base_numbering": {
@@ -53,7 +103,7 @@
       },
       "metadataOptions": {
         "_CELL-TOOL": {
-          "customField": "activeCellTool"
+          "customRenderer": "notebook-extension:active-cell-tool.renderer"
         },
         "/raw_mimetype": {
           "cellTypes": ["raw"]
@@ -81,10 +131,10 @@
       },
       "metadataOptions": {
         "_CELL-METADATA": {
-          "customField": "custom-cellMetadata"
+          "customRenderer": "notebook-extension:metadata-editor.cell-metadata"
         },
         "_NOTEBOOK-METADATA": {
-          "customField": "custom-notebookMetadata"
+          "customRenderer": "notebook-extension:metadata-editor.notebook-metadata"
         }
       }
     }

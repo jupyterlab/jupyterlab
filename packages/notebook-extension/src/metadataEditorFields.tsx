@@ -1,5 +1,5 @@
 import React from 'react';
-import { FieldProps } from '@rjsf/core';
+import { FieldProps } from '@rjsf/utils';
 import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -41,7 +41,7 @@ namespace Private {
  * It extends the MetadataEditorTool which updates itself the metadata.
  * It only renders the node of MetadataEditorTool in a React element instead of displaying a RJSF field.
  */
-export class CustomCellMetadata extends NotebookTools.MetadataEditorTool {
+export class CellMetadataField extends NotebookTools.MetadataEditorTool {
   constructor(options: Private.IOptions) {
     super(options);
     this._tracker = options.tracker;
@@ -51,11 +51,21 @@ export class CustomCellMetadata extends NotebookTools.MetadataEditorTool {
     this.editor.headerNode.addEventListener('click', this.editor);
   }
 
+  private _onSourceChanged() {
+    if (this.editor.source) {
+      this._tracker.activeCell?.model.sharedModel.setMetadata(
+        this.editor.source.toJSON()
+      );
+    }
+  }
+
   render(props: FieldProps): JSX.Element {
     const cell = this._tracker.activeCell;
     this.editor.source = cell
       ? new ObservableJSON({ values: cell.model.metadata as JSONObject })
       : null;
+    this.editor.source?.changed.connect(this._onSourceChanged, this);
+
     return (
       <div className="cell-metadata-editor">
         <div ref={ref => ref?.appendChild(this.node)}></div>
@@ -74,7 +84,7 @@ export class CustomCellMetadata extends NotebookTools.MetadataEditorTool {
  * It extends the MetadataEditorTool which updates itself the metadata.
  * It only renders the node of MetadataEditorTool in a React element instead of displaying a RJSF field.
  */
-export class CustomNotebookMetadata extends NotebookTools.MetadataEditorTool {
+export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
   constructor(options: Private.IOptions) {
     super(options);
     this._tracker = options.tracker;
@@ -84,11 +94,21 @@ export class CustomNotebookMetadata extends NotebookTools.MetadataEditorTool {
     this.editor.headerNode.addEventListener('click', this.editor);
   }
 
+  private _onSourceChanged() {
+    if (this.editor.source) {
+      this._tracker.currentWidget?.model?.sharedModel.setMetadata(
+        this.editor.source.toJSON()
+      );
+    }
+  }
+
   render(props: FieldProps): JSX.Element {
     const notebook = this._tracker.currentWidget;
     this.editor.source = notebook
       ? new ObservableJSON({ values: notebook.model?.metadata as JSONObject })
       : null;
+    this.editor.source?.changed.connect(this._onSourceChanged, this);
+
     return (
       <div className="cell-metadata-editor">
         <div ref={ref => ref?.appendChild(this.node)}></div>

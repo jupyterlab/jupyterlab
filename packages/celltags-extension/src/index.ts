@@ -17,8 +17,11 @@ import { TagTool } from '@jupyterlab/celltags';
 
 import { ITranslator } from '@jupyterlab/translation';
 
-import { CustomCellTag } from './celltag';
-import { IFormComponentRegistry } from '@jupyterlab/ui-components';
+import { CellTagField } from './celltag';
+import {
+  IFormRenderer,
+  IFormRendererRegistry
+} from '@jupyterlab/ui-components';
 
 /**
  * Initialization data for the celltags extension.
@@ -45,17 +48,20 @@ const customCellTag: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/celltags-extension:plugin',
   autoStart: true,
   requires: [INotebookTracker],
-  optional: [IFormComponentRegistry],
+  optional: [IFormRendererRegistry],
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
-    formRegistry?: IFormComponentRegistry
+    formRegistry?: IFormRendererRegistry
   ) => {
     // Register the custom field
     if (formRegistry) {
-      formRegistry.addRenderer('custom-cellTag', (props: FieldProps) => {
-        return new CustomCellTag(tracker).render(props);
-      });
+      const component: IFormRenderer = {
+        fieldRenderer: (props: FieldProps) => {
+          return new CellTagField(tracker).render(props);
+        }
+      };
+      formRegistry.addRenderer('celltags-extension:plugin.renderer', component);
     }
   }
 };
