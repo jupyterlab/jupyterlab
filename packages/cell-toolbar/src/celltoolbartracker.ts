@@ -373,12 +373,7 @@ export class CellToolbarTracker implements IDisposable {
     let lineRight = codeMirrorLines[0].getBoundingClientRect().left;
     const range = document.createRange();
     range.setStart(codeMirrorLines[0].childNodes[0], 0);
-    const nodeLength = codeMirrorLines[0].childNodes.length;
-    const lastNode = codeMirrorLines[0].childNodes[nodeLength - 1];
-    range.setEnd(
-      lastNode,
-      Math.max((lastNode?.textContent?.length || 0) - 1, 0)
-    );
+    range.selectNodeContents(codeMirrorLines[0]);
     const sizes = range.getClientRects();
     lineRight += [...sizes].reduce((prev, rect) => prev + rect.width, 0);
 
