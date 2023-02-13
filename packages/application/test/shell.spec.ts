@@ -77,7 +77,7 @@ describe('LabShell', () => {
       expect(shell.currentWidget).toBe(null);
     });
 
-    it('should test if current, active class names are cleared when current widget changes', () => {
+    it('should add and clear active class when current widget changes', () => {
       const foo = new Widget();
       foo.id = 'foo';
       shell.add(foo, 'main');
