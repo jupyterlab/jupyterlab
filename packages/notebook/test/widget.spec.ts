@@ -1427,13 +1427,15 @@ describe('@jupyter/notebook', () => {
     describe('#onActivateRequest()', () => {
       it('should focus the node after an update', async () => {
         const widget = createActiveWidget();
+        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
+        await framePromise();
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onActivateRequest'])
         );
         await framePromise();
-        expect(document.activeElement).toBe(widget.node);
+        expect(document.activeElement).toBe(widget.activeCell!.node);
         widget.dispose();
       });
     });
