@@ -458,8 +458,7 @@ by ``canvas``. Please see
 `Installing Node.js and jlpm section`_
 of this guide for instructions on how to install these packages.
 
-We use ``jest`` for all tests, so standard ``j
-est`` workflows apply.
+We use ``jest`` for all tests, so standard ``jest`` workflows apply.
 Tests can be debugged in either VSCode or Chrome. It can help to add an
 ``it.only`` to a specific test when debugging. All of the ``test*``
 scripts in each package accept ``jest`` `cli
