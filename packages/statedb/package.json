@@ -35,11 +35,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@lumino/commands": "^2.0.0-alpha.6",
-    "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/disposable": "^2.0.0-alpha.6",
-    "@lumino/properties": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6"
+    "@lumino/commands": "^2.0.0-beta.1",
+    "@lumino/coreutils": "^2.0.0-beta.0",
+    "@lumino/disposable": "^2.0.0-beta.1",
+    "@lumino/properties": "^2.0.0-beta.0",
+    "@lumino/signaling": "^2.0.0-beta.1"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.0.0-alpha.18",

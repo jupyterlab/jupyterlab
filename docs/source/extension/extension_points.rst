@@ -134,9 +134,6 @@ might want to use the services in your extensions.
   Use this if you want to access to the identity of the current connected user.
 - ``@jupyterlab/collaboration:IUserMenu``: A service for the user menu on the application.
   Use this if you want to add new items to the user menu.
-- ``@jupyterlab/vdom:IVDOMTracker``: A widget tracker for virtual DOM (VDOM) documents.
-  Use this to iterate over and interact with VDOM document instances created by the application.
-
 
 
 Commands
@@ -869,7 +866,7 @@ mapping. For example for the notebook panel:
        { "name": "restart", "command": "kernelmenu:restart", "rank": 32 },
        {
          "name": "restart-and-run",
-         "command": "runmenu:restart-and-run-all",
+         "command": "notebook:restart-run-all",
          "rank": 33 // The default rank is 50
        },
        { "name": "cellType", "rank": 40 },
