@@ -87,9 +87,11 @@ packages:
 
   const options = { cwd: out_dir, detached: true, stdio: ['ignore', out, err] };
 
-  const bin_dir = utils.run('npm bin', { stdio: 'pipe' }, true);
-  const verdaccio_bin = path.join(bin_dir, 'verdaccio');
-  const subproc = child_process.spawn(verdaccio_bin, args.split(' '), options);
+  const subproc = child_process.spawn(
+    'npx',
+    ['verdaccio'].concat(args.split(' ')),
+    options
+  );
   subproc.unref();
 
   // Wait for Verdaccio to boot
