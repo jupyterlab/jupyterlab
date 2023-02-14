@@ -1355,7 +1355,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       title: trans.__('Select Kernel'),
       body: new Private.KernelSelector(sessionContext, translator),
       buttons,
-      checkbox: {
+      checkbox: this._settings && {
         label: trans.__('Always select the preferred kernel'),
         caption: trans.__(
           'Remember my choice and always select the preferred kernel'
