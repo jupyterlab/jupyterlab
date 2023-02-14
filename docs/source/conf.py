@@ -382,8 +382,8 @@ def setup(app):
         """Remove temporary folder."""
         try:
             shutil.rmtree(str(Path(app.srcdir) / SNIPPETS_FOLDER))
-        except Exception:
-            pass  # noqa
+        except Exception:  # noqa S110
+            pass
 
         for f in tmp_files:
             f.unlink()
