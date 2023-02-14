@@ -162,7 +162,7 @@ packages:
     loginPs.stdout.on('data', (chunk: string) => {
       const data = Buffer.from(chunk, 'utf-8').toString().trim();
       console.log('stdout:', data);
-      if (data.indexOf('Logged in as') !== -1) {
+      if (data.indexOf('Logged in ') !== -1) {
         loginPs.stdin.end();
         // do not accept here yet, the token may not have been written
       } else {
