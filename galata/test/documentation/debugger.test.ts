@@ -295,6 +295,12 @@ test.describe('Debugger', () => {
       page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
     ).toHaveCount(0);
 
+    // Close the contextual menu
+    await page.keyboard.press('Escape');
+    await expect(
+      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
+    ).toHaveCount(0);
+
     await page.click('button[title^=Continue]');
   });
 
