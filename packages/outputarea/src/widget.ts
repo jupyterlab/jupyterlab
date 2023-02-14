@@ -908,7 +908,6 @@ export interface IStdin extends Widget {
  */
 export class Stdin extends Widget implements IStdin {
   private static _history: string[] = [];
-  private static _placeholder = '↑↓ for history. Search history with c-↑/c-↓';
 
   private static _historyIx(ix: number): number | undefined {
     const len = Stdin._history.length;
@@ -994,7 +993,9 @@ export class Stdin extends Widget implements IStdin {
 
     this._input = this.node.getElementsByTagName('input')[0];
     // make users aware of the line history feature
-    this._input.placeholder = this._trans.__(Stdin._placeholder);
+    this._input.placeholder = this._trans.__(
+      '↑↓ for history. Search history with c-↑/c-↓'
+    );
   }
 
   /**
@@ -1062,7 +1063,6 @@ export class Stdin extends Widget implements IStdin {
               this._valueCache = input.value;
             }
 
-            console.log(`historyLine: ${historyLine}`);
             input.value = historyLine;
             this._historyIndex = searchHistoryIx;
           }
@@ -1214,7 +1214,7 @@ namespace Private {
       iframe.scrolling = 'auto';
 
       iframe.addEventListener('load', () => {
-        // Workaround needed by Firefox, to properly render svg insidehistory
+        // Workaround needed by Firefox, to properly render svg inside
         // iframes, see https://stackoverflow.com/questions/10177190/
         // svg-dynamically-added-to-iframe-does-not-render-correctly
         iframe.contentDocument!.open();
