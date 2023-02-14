@@ -1623,7 +1623,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
     if (args.oldValue) {
       args.oldValue.title.className = args.oldValue.title.className.replace(
-        ACTIVE_CLASS,
+        ` ${ACTIVE_CLASS}`,
         ''
       );
     }
@@ -1644,8 +1644,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
     if (args.oldValue) {
       args.oldValue.title.className = args.oldValue.title.className
-        .replace(CURRENT_CLASS, '')
-        .replace(ACTIVE_CLASS, '');
+        .replace(` ${CURRENT_CLASS}`, '')
+        .replace(` ${ACTIVE_CLASS}`, '');
     }
     this._currentChanged.emit(args);
     this._onLayoutModified();
