@@ -81,10 +81,12 @@ class ProgressProcess(Process):
             The environment for the process.
         """
         if not isinstance(cmd, (list, tuple)):
-            raise ValueError("Command must be given as a list")
+            msg = "Command must be given as a list"
+            raise ValueError(msg)
 
         if kill_event and kill_event.is_set():
-            raise ValueError("Process aborted")
+            msg = "Process aborted"
+            raise ValueError(msg)
 
         self.logger = _ensure_logger(logger)
         self._last_line = ""
@@ -114,7 +116,8 @@ class ProgressProcess(Process):
             sys.stdout.write("\b")
             if kill_event.is_set():
                 self.terminate()
-                raise ValueError("Process was aborted")
+                msg = "Process was aborted"
+                raise ValueError(msg)
             try:
                 out, _ = proc.communicate(timeout=0.1)
                 cache.append(out)
@@ -400,10 +403,7 @@ def watch(app_options=None):
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
 
-    if app_options.splice_source:
-        package_procs = watch_packages(app_options.logger)
-    else:
-        package_procs = []
+    package_procs = watch_packages(app_options.logger) if app_options.splice_source else []
 
     return package_procs + handler.watch()
 
@@ -456,9 +456,11 @@ def clean(app_options=None):
 
     logger.info("Cleaning %s...", app_dir)
     if app_dir == pjoin(HERE, "dev"):
-        raise ValueError("Cannot clean the dev app")
+        msg = "Cannot clean the dev app"
+        raise ValueError(msg)
     if app_dir == pjoin(HERE, "core"):
-        raise ValueError("Cannot clean the core app")
+        msg = "Cannot clean the core app"
+        raise ValueError(msg)
 
     if getattr(app_options, "all", False):
         logger.info("Removing everything in %s...", app_dir)
@@ -732,7 +734,7 @@ class _AppHandler:
         )
         return [proc]
 
-    def list_extensions(self):
+    def list_extensions(self):  # noqa
         """Print an output of the extensions."""
         self._ensure_disabled_info()
         logger = self.logger
@@ -803,7 +805,7 @@ class _AppHandler:
             logger.info("\nBuild recommended, please run `jupyter lab build`:")
             [logger.info("    %s" % item) for item in messages]
 
-    def build_check(self, fast=None):
+    def build_check(self, fast=None):  # noqa
         """Determine whether JupyterLab should be built.
 
         Returns a list of messages.
@@ -856,7 +858,7 @@ class _AppHandler:
 
         # Look for mismatched dependencies
         src_pkg_dir = pjoin(REPO_ROOT, "packages")
-        for (pkg, dep) in new_deps.items():
+        for pkg, dep in new_deps.items():
             if old_deps.get(pkg, "").startswith(src_pkg_dir):
                 continue
             if pkg not in old_deps:
@@ -869,7 +871,7 @@ class _AppHandler:
                 messages.append(msg % (pkg, old_deps[pkg], new_deps[pkg]))
 
         # Look for updated local extensions.
-        for (name, source) in local.items():
+        for name, source in local.items():
             if fast or name in shadowed_exts:
                 continue
             dname = pjoin(app_dir, "extensions")
@@ -877,7 +879,7 @@ class _AppHandler:
                 messages.append("%s content changed" % name)
 
         # Look for updated linked packages.
-        for (name, item) in linked.items():
+        for name, item in linked.items():
             if fast or name in shadowed_exts:
                 continue
             dname = pjoin(app_dir, "staging", "linked_packages")
@@ -925,7 +927,7 @@ class _AppHandler:
 
         local = info["local_extensions"]
 
-        for (extname, data) in info["extensions"].items():
+        for extname, data in info["extensions"].items():
             path = data["path"]
             if extname == name:
                 msg = f"Uninstalling {name} from {osp.dirname(path)}"
@@ -948,7 +950,7 @@ class _AppHandler:
         Returns `True` if a rebuild is recommended, `False` otherwise
         """
         should_rebuild = False
-        for (extname, _) in self.info["extensions"].items():
+        for extname, _ in self.info["extensions"].items():
             uninstalled = self.uninstall_extension(extname)
             should_rebuild = should_rebuild or uninstalled
         return should_rebuild
@@ -959,7 +961,7 @@ class _AppHandler:
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         should_rebuild = False
-        for (extname, _) in self.info["extensions"].items():
+        for extname, _ in self.info["extensions"].items():
             if extname in self.info["local_extensions"]:
                 continue
             updated = self._update_extension(extname)
@@ -1042,7 +1044,7 @@ class _AppHandler:
         linked = config.setdefault("linked_packages", {})
 
         found = None
-        for (name, source) in linked.items():
+        for name, source in linked.items():
             if name == path or source == path:
                 found = name
 
@@ -1050,7 +1052,7 @@ class _AppHandler:
             del linked[found]
         else:
             local = config.setdefault("local_extensions", {})
-            for (name, source) in local.items():
+            for name, source in local.items():
                 if name == path or source == path:
                     found = name
             if found:
@@ -1151,7 +1153,7 @@ class _AppHandler:
         info["linked_packages"] = self._get_linked_packages()
         info["app_extensions"] = app = []
         info["sys_extensions"] = sys = []
-        for (name, data) in extensions.items():
+        for name, data in extensions.items():
             data["is_local"] = name in info["local_extensions"]
             if data["location"] == "app":
                 app.append(name)
@@ -1203,7 +1205,7 @@ class _AppHandler:
 
         info["disabled_core"] = disabled_core
 
-    def _populate_staging(self, name=None, version=None, static_url=None, clean=False):
+    def _populate_staging(self, name=None, version=None, static_url=None, clean=False):  # noqa
         """Set up the assets in the staging directory."""
         app_dir = self.app_dir
         staging = pjoin(app_dir, "staging")
@@ -1274,7 +1276,7 @@ class _AppHandler:
         # Update the local extensions.
         extensions = self.info["extensions"]
         removed = False
-        for (key, source) in self.info["local_extensions"].items():
+        for key, source in self.info["local_extensions"].items():
             # Handle a local extension that was removed.
             if key not in extensions:
                 config = self._read_build_config()
@@ -1292,7 +1294,7 @@ class _AppHandler:
 
         # Update the linked packages.
         linked = self.info["linked_packages"]
-        for (key, item) in linked.items():
+        for key, item in linked.items():
             dname = pjoin(staging, "linked_packages")
             self._update_local(key, item["source"], dname, item, "linked_packages")
 
@@ -1352,7 +1354,7 @@ class _AppHandler:
             shutil.copy(lock_template, lock_path)
             os.chmod(lock_path, stat.S_IWRITE | stat.S_IREAD)
 
-    def _get_package_template(self, silent=False):
+    def _get_package_template(self, silent=False):  # noqa
         """Get the template the for staging package.json file."""
         logger = self.logger
         # make a deep copy of the data so we don't influence the core data
@@ -1373,14 +1375,14 @@ class _AppHandler:
         jlab["linkedPackages"] = {}
 
         # Handle local extensions.
-        for (key, source) in local.items():
+        for key, source in local.items():
             if key in shadowed_exts:
                 continue
             jlab["linkedPackages"][key] = source
             data["resolutions"][key] = "file:" + self.info["extensions"][key]["path"]
 
         # Handle linked packages.
-        for (key, item) in linked.items():
+        for key, item in linked.items():
             if key in shadowed_exts:
                 continue
             path = pjoin(self.app_dir, "staging", "linked_packages")
@@ -1393,7 +1395,7 @@ class _AppHandler:
 
         # Handle extensions
         compat_errors = self._get_extension_compat()
-        for (key, value) in extensions.items():
+        for key, value in extensions.items():
             # Reject incompatible extensions with a message.
             errors = compat_errors[key]
             if errors:
@@ -1503,19 +1505,19 @@ class _AppHandler:
             else:
                 alias = None
             url = get_package_url(data)
-            extensions[alias or name] = dict(
-                description=data.get("description", ""),
-                path=path,
-                filename=osp.basename(path),
-                url=url,
-                version=data["version"],
+            extensions[alias or name] = {
+                "description": data.get("description", ""),
+                "path": path,
+                "filename": osp.basename(path),
+                "url": url,
+                "version": data["version"],
                 # Only save the package name if the extension name is an alias
-                alias_package_source=name if alias else None,
-                jupyterlab=jlab,
-                dependencies=deps,
-                tar_dir=osp.dirname(path),
-                location=location,
-            )
+                "alias_package_source": name if alias else None,
+                "jupyterlab": jlab,
+                "dependencies": deps,
+                "tar_dir": osp.dirname(path),
+                "location": location,
+            }
         return extensions
 
     def _get_extension_compat(self):
@@ -1523,11 +1525,11 @@ class _AppHandler:
         compat = {}
         core_data = self.info["core_data"]
         seen = set()
-        for (name, data) in self.info["federated_extensions"].items():
+        for name, data in self.info["federated_extensions"].items():
             deps = data["dependencies"]
             compat[name] = _validate_compatibility(name, deps, core_data)
             seen.add(name)
-        for (name, data) in self.info["extensions"].items():
+        for name, data in self.info["extensions"].items():
             if name in seen:
                 continue
             deps = data["dependencies"]
@@ -1542,8 +1544,8 @@ class _AppHandler:
         """Get the linked packages."""
         info = self._get_local_data("linked_packages")
         dname = pjoin(self.app_dir, "staging", "linked_packages")
-        for (name, source) in info.items():
-            info[name] = dict(source=source, filename="", tar_dir=dname)
+        for name, source in info.items():
+            info[name] = {"source": source, "filename": "", "tar_dir": dname}
 
         if not osp.exists(dname):
             return info
@@ -1625,14 +1627,14 @@ class _AppHandler:
         # Write a blank line separator
         logger.info("")
 
-    def _list_federated_extensions(self):
+    def _list_federated_extensions(self):  # noqa
         self._ensure_disabled_info()
         info = self.info
         logger = self.logger
 
         error_accumulator = {}
 
-        ext_dirs = dict((p, False) for p in self.labextensions_path)
+        ext_dirs = {p: False for p in self.labextensions_path}
         for value in info["federated_extensions"].values():
             ext_dirs[value["ext_dir"]] = True
 
@@ -1692,7 +1694,7 @@ class _AppHandler:
 
         data = config.setdefault(source, {})
         dead = []
-        for (name, source) in data.items():
+        for name, source in data.items():
             if not osp.exists(source):
                 dead.append(name)
 
@@ -1707,7 +1709,7 @@ class _AppHandler:
 
         return data
 
-    def _install_extension(self, extension, tempdir, pin=None):
+    def _install_extension(self, extension, tempdir, pin=None):  # noqa
         """Install an extension with validation and return the name and path."""
         info = self._extract_package(extension, tempdir, pin=pin)
         data = info["data"]
@@ -1777,7 +1779,7 @@ class _AppHandler:
         if is_dir and not osp.exists(pjoin(source, "node_modules")):
             self._run(["node", YARN_PATH, "install"], cwd=source)
 
-        info = dict(source=source, is_dir=is_dir)
+        info = {"source": source, "is_dir": is_dir}
 
         ret = self._run([which("npm"), "pack", source], cwd=tempdir)
         if ret != 0:
@@ -1860,7 +1862,6 @@ class _AppHandler:
                 return _semver_key(key_value[0], prerelease_first=True)
 
             for version, data in sorted(versions.items(), key=sort_key, reverse=True):
-
                 # skip deprecated versions
                 if "deprecated" in data:
                     continue
@@ -1916,7 +1917,7 @@ class _AppHandler:
             core_deps = core_data["resolutions"]
             singletons = core_data["jupyterlab"]["singletonPackages"]
 
-            for (key, value) in latest_deps.items():
+            for key, value in latest_deps.items():
                 if key in singletons:
                     # Drop prereleases in comparisons to allow extension authors
                     # to not have to update their versions for each
@@ -1953,7 +1954,8 @@ class _AppHandler:
         Returns the exit code.
         """
         if self.kill_event.is_set():
-            raise ValueError("Command was killed")
+            msg = "Command was killed"
+            raise ValueError(msg)
 
         kwargs["logger"] = self.logger
         kwargs["kill_event"] = self.kill_event
@@ -1977,7 +1979,7 @@ def _node_check(logger):
         raise ValueError(msg) from None
 
 
-def _yarn_config(logger):
+def _yarn_config(logger):  # noqa
     """Get the yarn configuration.
 
     Returns
@@ -2060,7 +2062,7 @@ def _rmtree_star(path, logger):
             _rmtree(file_path, logger)
 
 
-def _validate_extension(data):
+def _validate_extension(data):  # noqa
     """Detect if a package is an extension using its metadata.
 
     Returns any problems it finds.
@@ -2149,7 +2151,7 @@ def _validate_compatibility(extension, deps, core_data):
 
     errors = []
 
-    for (key, value) in deps.items():
+    for key, value in deps.items():
         if key in singletons:
             # Drop prereleases in comparisons to allow extension authors
             # to not have to update their versions for each
@@ -2175,7 +2177,7 @@ def _test_overlap(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False):
     return cmp == 0
 
 
-def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False):
+def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False):  # noqa
     """Test whether two version specs overlap.
 
     Returns `None` if we cannot determine compatibility,
@@ -2260,7 +2262,8 @@ def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False
                 return_value = None
             continue
 
-        raise AssertionError("Unexpected case comparing version ranges")
+        msg = "Unexpected case comparing version ranges"
+        raise AssertionError(msg)
 
     if return_value is False:
         return_value = None
@@ -2301,7 +2304,7 @@ def _format_compatibility_errors(name, version, errors):
     msg += "Extension".ljust(l1)
     msg += "Package\n"
 
-    for (pkg, jlab, ext) in msgs:
+    for pkg, jlab, ext in msgs:
         msg += jlab.ljust(l0) + ext.ljust(l1) + pkg + "\n"
 
     return msg
@@ -2418,10 +2421,7 @@ def _semver_key(version, prerelease_first=False):
     (0.x -> 1.0-pre -> 1.x -> 2.0-pre -> 2.x).
     """
     v = make_semver(version, True)
-    if prerelease_first:
-        key = (0,) if v.prerelease else (1,)
-    else:
-        key = ()
+    key = ((0,) if v.prerelease else (1,)) if prerelease_first else ()
     key = (*key, v.major, v.minor, v.patch)
     if not prerelease_first:
         #  NOT having a prerelease is > having one

@@ -5,7 +5,7 @@
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
-import type { FieldProps } from '@rjsf/core';
+import type { FieldProps } from '@rjsf/utils';
 import React, { useState } from 'react';
 
 const AVAILABLE_PROVIDERS = 'availableProviders';

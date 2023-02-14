@@ -1,7 +1,7 @@
 {
   "name": "@jupyterlab/vega5-extension",
-  "version": "4.0.0-alpha.18",
-  "description": "JupyterLab - Vega 5 and Vega-Lite 3 Mime Renderer Extension",
+  "version": "4.0.0-alpha.19",
+  "description": "JupyterLab - Vega 5 and Vega-Lite 5 Mime Renderer Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -37,15 +37,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.18",
-    "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/widgets": "^2.0.0-alpha.6",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.19",
+    "@lumino/coreutils": "^2.0.0-beta.0",
+    "@lumino/widgets": "^2.0.0-beta.1",
     "vega": "^5.20.0",
     "vega-embed": "^6.2.1",
     "vega-lite": "^5.1.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.18",
+    "@jupyterlab/testutils": "^4.0.0-alpha.19",
     "@types/jest": "^29.2.0",
     "@types/webpack-env": "^1.14.1",
     "jest": "^29.2.0",

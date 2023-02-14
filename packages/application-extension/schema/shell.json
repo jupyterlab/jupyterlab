@@ -15,13 +15,13 @@
     "hiddenMode": {
       "type": "string",
       "title": "Hidden mode of main panel widgets",
-      "description": "The method for hiding widgets in the main dock panel. Using `scale` will increase performance on Firefox but don't use it with Chrome, Chromium or Edge.",
-      "enum": ["display", "scale"],
+      "description": "The method for hiding widgets in the main dock panel. Using `scale` will increase performance on Firefox but don't use it with Chrome, Chromium or Edge. Similar performance gains are seen with `contentVisibility` which is only available in Chromium-based browsers.",
+      "enum": ["display", "scale", "contentVisibility"],
       "default": "display"
     },
     "startMode": {
       "enum": ["", "single", "multiple"],
-      "title": "Start mode: ``, `single`or `multiple`",
+      "title": "Start mode: ``, `single` or `multiple`",
       "description": "The mode under which JupyterLab should start. If empty, the mode will be imposed by the URL",
       "default": ""
     },

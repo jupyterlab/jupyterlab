@@ -62,12 +62,6 @@
       "path": "./packages/codemirror-extension"
     },
     {
-      "path": "./packages/collaboration"
-    },
-    {
-      "path": "./packages/collaboration-extension"
-    },
-    {
       "path": "./packages/completer"
     },
     {
@@ -99,9 +93,6 @@
     },
     {
       "path": "./packages/docmanager-extension"
-    },
-    {
-      "path": "./packages/docprovider"
     },
     {
       "path": "./packages/docregistry"
@@ -297,12 +288,6 @@
     },
     {
       "path": "./packages/ui-components-extension"
-    },
-    {
-      "path": "./packages/vdom"
-    },
-    {
-      "path": "./packages/vdom-extension"
     },
     {
       "path": "./packages/vega5-extension"

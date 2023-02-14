@@ -6,6 +6,7 @@
 import dataclasses
 import json
 import os
+import sys
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
@@ -484,15 +485,15 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         "Whether to enable collaborative mode.",
     )
 
-    subcommands = dict(
-        build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
-        clean=(LabCleanApp, LabCleanApp.description.splitlines()[0]),
-        path=(LabPathApp, LabPathApp.description.splitlines()[0]),
-        paths=(LabPathApp, LabPathApp.description.splitlines()[0]),
-        workspace=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
-        workspaces=(LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
-        licenses=(LabLicensesApp, LabLicensesApp.description.splitlines()[0]),
-    )
+    subcommands = {
+        "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
+        "clean": (LabCleanApp, LabCleanApp.description.splitlines()[0]),
+        "path": (LabPathApp, LabPathApp.description.splitlines()[0]),
+        "paths": (LabPathApp, LabPathApp.description.splitlines()[0]),
+        "workspace": (LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        "workspaces": (LabWorkspaceApp, LabWorkspaceApp.description.splitlines()[0]),
+        "licenses": (LabLicensesApp, LabLicensesApp.description.splitlines()[0]),
+    }
 
     default_url = Unicode("/lab", config=True, help="The default URL to redirect to from `/`")
 
@@ -655,8 +656,18 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
             if not self.extensions_in_dev_mode:
-                self.labextensions_path = []
-                self.extra_labextensions_path = []
+                # Add an exception for @jupyterlab/galata-extension
+                galata_extension = pjoin(HERE, "galata")
+                self.labextensions_path = (
+                    [galata_extension]
+                    if galata_extension in map(os.path.abspath, self.labextensions_path)
+                    else []
+                )
+                self.extra_labextensions_path = (
+                    [galata_extension]
+                    if galata_extension in map(os.path.abspath, self.extra_labextensions_path)
+                    else []
+                )
         elif self.core_mode:
             dev_static_dir = ujoin(HERE, "static")
             self.static_paths = [dev_static_dir]
@@ -667,8 +678,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
-    def initialize_handlers(self):
-
+    def initialize_handlers(self):  # noqa
         handlers = []
 
         # Set config for Jupyterlab
@@ -679,7 +689,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         page_config["token"] = self.serverapp.token
         page_config["exposeAppInBrowser"] = self.expose_app_in_browser
         page_config["quitButton"] = self.serverapp.quit_button
-        page_config["collaborative"] = self.collaborative
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
@@ -819,7 +828,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             # $JUPYTERHUB_API_TOKEN identifies the server, not the client
             # but at least make sure we don't use the token
             # if the serverapp set one
-            page_config["token"] = ""  # noqa
+            page_config["token"] = ""
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings["page_config_data"] = page_config
@@ -831,6 +840,19 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     def initialize(self, argv=None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""
         super().initialize()
+        if self.collaborative:
+            try:
+                import jupyterlab_rtc  # noqa
+            except ImportError:
+                self.log.critical(
+                    """
+To enable real-time collaboration, you must install the extension `jupyterlab_rtc`.
+You can install it using pip for example:
+
+  python -m pip install jupyterlab_rtc
+"""
+                )
+                sys.exit(1)
 
 
 # -----------------------------------------------------------------------------

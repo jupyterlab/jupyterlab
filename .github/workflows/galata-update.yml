@@ -12,8 +12,8 @@ jobs:
   update-galata-snapshots:
     name: Update Galata References
     if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update galata snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
-    timeout-minutes: 80
-    runs-on: ubuntu-20.04
+    timeout-minutes: 120
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout
@@ -53,8 +53,8 @@ jobs:
   update-documentation-snapshots:
     name: Update Documentation Snapshots
     if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update documentation snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
-    timeout-minutes: 80
-    runs-on: ubuntu-20.04
+    timeout-minutes: 120
+    runs-on: ubuntu-22.04
 
     # Python version is frozen through strategy.matrix.python-version
     # Python dependencies are frozen in the installation step
@@ -62,7 +62,7 @@ jobs:
     strategy:
       matrix:
         # Freeze Python version because it appears in console header
-        python-version: ['3.9.9']
+        python-version: ['3.10.6']
 
     steps:
       - name: Checkout JupyterLab

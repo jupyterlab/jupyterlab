@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/outputarea",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.19",
   "description": "JupyterLab - Notebook Output Area",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,23 +41,23 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.18",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.18",
-    "@jupyterlab/observables": "^5.0.0-alpha.18",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.18",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.18",
-    "@jupyterlab/services": "^7.0.0-alpha.18",
-    "@jupyterlab/translation": "^4.0.0-alpha.18",
-    "@lumino/algorithm": "^2.0.0-alpha.6",
-    "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/disposable": "^2.0.0-alpha.6",
-    "@lumino/messaging": "^2.0.0-alpha.6",
-    "@lumino/properties": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6",
-    "@lumino/widgets": "^2.0.0-alpha.6"
+    "@jupyterlab/apputils": "^4.0.0-alpha.19",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.19",
+    "@jupyterlab/observables": "^5.0.0-alpha.19",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.19",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.19",
+    "@jupyterlab/services": "^7.0.0-alpha.19",
+    "@jupyterlab/translation": "^4.0.0-alpha.19",
+    "@lumino/algorithm": "^2.0.0-beta.0",
+    "@lumino/coreutils": "^2.0.0-beta.0",
+    "@lumino/disposable": "^2.0.0-beta.1",
+    "@lumino/messaging": "^2.0.0-beta.0",
+    "@lumino/properties": "^2.0.0-beta.0",
+    "@lumino/signaling": "^2.0.0-beta.1",
+    "@lumino/widgets": "^2.0.0-beta.1"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.18",
+    "@jupyterlab/testing": "^4.0.0-alpha.19",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.22.10",

@@ -27,7 +27,7 @@
 }
 
 .lm-MenuBar-menu {
-  transform: translateY(calc(-2 * var(--jp-border-width)));
+  top: calc(-2 * var(--jp-border-width));
 }
 
 .lm-MenuBar-item {
@@ -76,7 +76,6 @@
 }
 
 .lm-MenuBar-item.lm-mod-disabled {
-  /*background: var(--jp-layout-color3);*/
   color: var(--jp-ui-font-color3);
 }
 
@@ -156,7 +155,7 @@
   border-top: var(--jp-border-width) solid var(--jp-layout-color2);
 }
 
-/* gray out icon/caret for disable menu items */
+/* gray out icon/caret for disabled menu items */
 .lm-Menu-item.lm-mod-disabled > .lm-Menu-itemIcon,
 .lm-Menu-item[data-type='submenu'].lm-mod-disabled > .lm-Menu-itemSubmenuIcon {
   opacity: 0.4;

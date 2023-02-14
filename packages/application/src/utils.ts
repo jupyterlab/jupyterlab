@@ -126,9 +126,10 @@ export function createSemanticCommand(
   ): string | CommandRegistry.CommandFunc<string> | undefined {
     return () => {
       const texts = reduceAttribute(attribute);
+
       switch (texts.length) {
         case 0:
-          return defaultValues.label ?? '';
+          return defaultValues[attribute] ?? '';
         case 1:
           return texts[0];
         default: {
@@ -137,7 +138,8 @@ export function createSemanticCommand(
             .slice(undefined, -1)
             .map(l => l.replace(/…$/, ''))
             .join(', ');
-          const end = texts.slice(-1)[0] + (hasEllipsis ? '…' : '');
+          const end =
+            texts.slice(-1)[0].replace(/…$/, '') + (hasEllipsis ? '…' : '');
           return trans.__('%1 and %2', main, end);
         }
       }

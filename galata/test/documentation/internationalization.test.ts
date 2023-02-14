@@ -17,7 +17,7 @@ test.describe('Internationalization', () => {
     await setSidebarWidth(page);
 
     await page.click('text=Settings');
-    await page.click('ul[role="menu"] >> text=Language');
+    await page.click('.lm-Menu ul[role="menu"] >> text=Language');
 
     expect(
       await page.screenshot({ clip: { y: 5, x: 250, width: 800, height: 600 } })
@@ -30,7 +30,7 @@ test.describe('Internationalization', () => {
     await setSidebarWidth(page);
 
     await page.click('text=Settings');
-    await page.click('ul[role="menu"] >> text=Language');
+    await page.click('.lm-Menu ul[role="menu"] >> text=Language');
     await page.click('#jp-mainmenu-settings-language >> text=Chinese');
 
     expect(
@@ -45,7 +45,7 @@ test.describe('Internationalization', () => {
     await page.goto();
 
     await page.click('text=Settings');
-    await page.click('ul[role="menu"] >> text=Language');
+    await page.click('.lm-Menu ul[role="menu"] >> text=Language');
     await page.click('#jp-mainmenu-settings-language >> text=Chinese');
 
     await Promise.all([

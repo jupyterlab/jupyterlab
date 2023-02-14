@@ -72,7 +72,6 @@ async def test_CheckForUpdateHandler_get_pypi_success(mock_client, labserverapp,
 
 @patch("tornado.httpclient.AsyncHTTPClient", new_callable=fake_client_factory)
 async def test_CheckForUpdateHandler_get_failure(mock_client, labserverapp, jp_fetch):
-
     response = await jp_fetch("lab", "api", "update", method="GET")
 
     assert response.code == 200

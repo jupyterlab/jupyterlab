@@ -325,10 +325,7 @@ for i in range(R.value()):
 
 
 def parse(version, loose):
-    if loose:
-        r = regexp[LOOSE]
-    else:
-        r = regexp[FULL]
+    r = regexp[LOOSE] if loose else regexp[FULL]
     m = r.search(version)
     if m:
         return semver(version, loose)
@@ -403,7 +400,6 @@ class SemVer:
             if not m.group(4):
                 self.prerelease = []
             else:
-
                 self.prerelease = [
                     (int(id_) if NUMERIC.search(id_) else id_) for id_ in m.group(4).split(".")
                 ]
@@ -444,7 +440,7 @@ class SemVer:
             or compare_identifiers(str(self.patch), str(other.patch))
         )
 
-    def compare_pre(self, other):
+    def compare_pre(self, other):  # noqa PLR0911
         if not isinstance(other, SemVer):
             other = make_semver(other, self.loose)
 
@@ -476,7 +472,7 @@ class SemVer:
             else:
                 return compare_identifiers(str(a), str(b))
 
-    def inc(self, release, identifier=None):
+    def inc(self, release, identifier=None):  # noqa PLR0915
         logger.debug("inc release %s %s", self.prerelease, release)
         if release == "premajor":
             self.prerelease = []
@@ -608,7 +604,7 @@ def make_key_function(loose):
     def key_function(version):
         v = make_semver(version, loose)
         key = (v.major, v.minor, v.patch)
-        if v.prerelease:
+        if v.prerelease:  # noqa SIM108
             key = key + tuple(v.prerelease)
         else:
             #  NOT having a prerelease is > having one
@@ -659,7 +655,7 @@ def lte(a, b, loose):
     return compare(a, b, loose) <= 0
 
 
-def cmp(a, op, b, loose):
+def cmp(a, op, b, loose):  # noqa PLR0911
     logger.debug("cmp: %s", op)
     if op == "===":
         return a == b
@@ -712,10 +708,7 @@ class Comparator:
             self.value = self.operator + self.semver.version
 
     def parse(self, comp):
-        if self.loose:
-            r = regexp[COMPARATORLOOSE]
-        else:
-            r = regexp[COMPARATOR]
+        r = regexp[COMPARATORLOOSE] if self.loose else regexp[COMPARATOR]
         logger.debug("parse comp=%s", comp)
         m = r.search(comp)
 
@@ -782,10 +775,7 @@ class Range:
         loose = self.loose
         logger.debug("range %s %s", range_, loose)
         #  `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
-        if loose:
-            hr = regexp[HYPHENRANGELOOSE]
-        else:
-            hr = regexp[HYPHENRANGE]
+        hr = regexp[HYPHENRANGELOOSE] if loose else regexp[HYPHENRANGE]
 
         range_ = hr.sub(
             hyphen_replace,
@@ -808,10 +798,7 @@ class Range:
 
         #  At this point, the range is completely trimmed and
         #  ready to be split into comparators.
-        if loose:
-            comp_re = regexp[COMPARATORLOOSE]
-        else:
-            comp_re = regexp[COMPARATOR]
+        comp_re = regexp[COMPARATORLOOSE] if loose else regexp[COMPARATOR]
         set_ = re.split(
             r"\s+", " ".join([parse_comparator(comp, loose) for comp in range_.split(" ")])
         )
@@ -828,10 +815,7 @@ class Range:
         if isinstance(version, string_type):
             version = make_semver(version, loose=self.loose)
 
-        for e in self.set:
-            if test_set(e, version):
-                return True
-        return False
+        return any(test_set(e, version) for e in self.set)
 
 
 #  Mostly just for testing and legacy API reasons
@@ -877,10 +861,7 @@ def replace_tildes(comp, loose):
 
 
 def replace_tilde(comp, loose):
-    if loose:
-        r = regexp[TILDELOOSE]
-    else:
-        r = regexp[TILDE]
+    r = regexp[TILDELOOSE] if loose else regexp[TILDE]
 
     def repl(mob):
         _ = mob.group(0)
@@ -918,12 +899,9 @@ def replace_carets(comp, loose):
 
 
 def replace_caret(comp, loose):
-    if loose:
-        r = regexp[CARETLOOSE]
-    else:
-        r = regexp[CARET]
+    r = regexp[CARETLOOSE] if loose else regexp[CARET]
 
-    def repl(mob):
+    def repl(mob):  # noqa PLR0911
         m0 = mob.group(0)
         M, m, p, pr, _ = mob.groups()
         logger.debug("caret %s %s %s %s %s %s", comp, m0, M, m, p, pr)
@@ -1021,12 +999,9 @@ def replace_xranges(comp, loose):
 
 def replace_xrange(comp, loose):
     comp = comp.strip()
-    if loose:
-        r = regexp[XRANGELOOSE]
-    else:
-        r = regexp[XRANGE]
+    r = regexp[XRANGELOOSE] if loose else regexp[XRANGE]
 
-    def repl(mob):
+    def repl(mob):  # noqa PLR0911
         ret = mob.group(0)
         gtlt, M, m, p, pr, _ = mob.groups()
 
@@ -1042,7 +1017,7 @@ def replace_xrange(comp, loose):
 
         logger.debug("xrange gtlt=%s any_x=%s", gtlt, any_x)
         if xM:
-            if gtlt == ">" or gtlt == "<":
+            if gtlt == ">" or gtlt == "<":  # noqa SIM108
                 # nothing is allowed
                 ret = "<0.0.0"
             else:
@@ -1166,7 +1141,7 @@ def max_satisfying(versions, range_, loose=False):
     max_ = None
     max_sv = None
     for v in versions:
-        if range_ob.test(v):  # satisfies(v, range_, loose=loose)
+        if range_ob.test(v):  # noqa  # satisfies(v, range_, loose=loose)
             if max_ is None or max_sv.compare(v) == -1:  # compare(max, v, true)
                 max_ = v
                 max_sv = make_semver(max_, loose=loose)
@@ -1237,7 +1212,7 @@ def outside(version, range_, hilo, loose):
 
     #  If the lowest version comparator has an operator and our version
     #  is less than it then it isn't higher than the range
-    if (not low.operator or low.operator == comp) and ltefn(version, low.semver):
+    if (not low.operator or low.operator == comp) and ltefn(version, low.semver):  # noqa SIM114
         return False
     elif low.operator == ecomp and ltfn(version, low.semver):
         return False
