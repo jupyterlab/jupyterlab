@@ -151,10 +151,12 @@ packages:
   const pass = 'bar';
   const email = 'foo@bar.com';
   console.log('Logging in');
-  const loginPs = child_process.spawn(
-    'npm',
-    `login -r ${local_registry}`.split(' ')
-  );
+  const loginPs = child_process.spawn('npm', [
+    'login',
+    '--auth-type=legacy',
+    '-r',
+    local_registry
+  ]);
 
   const loggedIn = new Promise<void>((accept, reject) => {
     loginPs.stdout.on('data', (chunk: string) => {
