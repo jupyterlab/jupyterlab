@@ -90,6 +90,7 @@ describe('LabShell', () => {
       const foo = new Widget();
       foo.id = 'foo';
       shell.add(foo, 'main');
+      const fooOriginalClasses = foo.title.className;
       const bar = new Widget();
       bar.id = 'bar';
       shell.add(bar, 'main');
@@ -101,8 +102,7 @@ describe('LabShell', () => {
       simulate(foo.node, 'focus');
       simulate(bar.node, 'focus');
       expect(shell.currentWidget).toBe(bar);
-      expect(foo.title.className).not.toContain(CURRENT_CLASS);
-      expect(foo.title.className).not.toContain(ACTIVE_CLASS);
+      expect(foo.title.className).toEqual(fooOriginalClasses);
     });
   });
 
