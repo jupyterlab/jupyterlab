@@ -235,11 +235,6 @@ test.describe('Debugger', () => {
       'Locals'
     );
 
-    // Wait for the locals variables to be displayed
-    await expect(
-      page.locator('.jp-DebuggerVariables-toolbar select')
-    ).toHaveValue('Locals');
-
     expect(
       await page.screenshot({
         clip: { y: 58, x: 998, width: 280, height: 138 }
@@ -253,7 +248,7 @@ test.describe('Debugger', () => {
     await page.locator('.lm-Menu-itemLabel:text("Copy to Clipboard")').click();
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('2');
 
-    // Copy value entry is disabled for variables with empty value
+    // Copy to clipboard disabled for variables with empty value
     await page.locator('select[aria-label="Scope"]').selectOption('Globals');
     await page
       .locator('.jp-DebuggerVariables-body :text("special variables")')
@@ -262,7 +257,13 @@ test.describe('Debugger', () => {
       page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
     ).toHaveAttribute('aria-disabled', 'true');
 
-    // Expect the context menu for local variables to have the 'copy' entry
+    // Close the contextual menu
+    await page.keyboard.press('Escape');
+    await expect(
+      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
+    ).toHaveCount(0);
+
+    // Expect the context menu for local variables to have the 'copyToGlobals' entry
     await page.locator('select[aria-label="Scope"]').selectOption('Locals');
     const variable = await page
       .locator('.jp-DebuggerVariables-body li:first-child')
