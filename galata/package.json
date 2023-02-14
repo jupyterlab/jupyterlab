@@ -40,7 +40,7 @@
     "test:doc": "jlpm run test --project documentation",
     "test:doc:update": "jlpm run test --project documentation --update-snapshots",
     "test:report": "playwright show-report",
-    "test:update": "playwright test --update-snapshots && jlpm test:benchmark:update"
+    "test:update": "jlpm test:base:update && jlpm test:benchmark:update"
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.19",

@@ -12,7 +12,7 @@ jobs:
   update-galata-snapshots:
     name: Update Galata References
     if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update galata snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
-    timeout-minutes: 120
+    timeout-minutes: 80
     runs-on: ubuntu-22.04
 
     steps:
@@ -53,7 +53,7 @@ jobs:
   update-documentation-snapshots:
     name: Update Documentation Snapshots
     if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update documentation snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
-    timeout-minutes: 120
+    timeout-minutes: 80
     runs-on: ubuntu-22.04
 
     # Python version is frozen through strategy.matrix.python-version
