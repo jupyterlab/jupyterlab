@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/running-extension",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.19",
   "description": "JupyterLab - Running Sessions Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,14 +37,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.18",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.18",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.18",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.18",
-    "@jupyterlab/running": "^4.0.0-alpha.18",
-    "@jupyterlab/services": "^7.0.0-alpha.18",
-    "@jupyterlab/translation": "^4.0.0-alpha.18",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.33",
+    "@jupyterlab/application": "^4.0.0-alpha.19",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.19",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.19",
+    "@jupyterlab/running": "^4.0.0-alpha.19",
+    "@jupyterlab/services": "^7.0.0-alpha.19",
+    "@jupyterlab/translation": "^4.0.0-alpha.19",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
     "@lumino/commands": "^2.0.0-beta.1",
     "@lumino/polling": "^2.0.0-beta.0",
     "@lumino/signaling": "^2.0.0-beta.1",

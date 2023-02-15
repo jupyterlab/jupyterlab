@@ -21,7 +21,12 @@ const backSlash = /\\/g;
  *  Exit with an error code on uncaught error.
  */
 export function exitOnUncaughtException(): void {
-  process.on('uncaughtException', function (err) {
+  process.on('uncaughtException', function (err: any) {
+    if (err.status || err.stdout || err.stderr) {
+      console.error(`Status: ${err.status}`);
+      console.error(`stdout: ${err.stdout?.toString()}`);
+      console.error(`stderr: ${err.stderr?.toString()}`);
+    }
     console.error('Uncaught exception', err);
     process.exit(1);
   });

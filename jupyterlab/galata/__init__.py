@@ -25,7 +25,6 @@ def configure_jupyter_server(c):
     c.ServerApp.port = 8888
     c.ServerApp.port_retries = 0
     c.ServerApp.open_browser = False
-    c.LabApp.dev_mode = True
     # Add test helpers extension shipped with JupyterLab.
     # You can replace the following line by the two following one
     #   import jupyterlab
