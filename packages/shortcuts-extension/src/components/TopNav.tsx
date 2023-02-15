@@ -26,6 +26,7 @@ export interface ISymbolsProps {}
 /** All external actions, setting commands, getting command list ... */
 export interface IShortcutUIexternal {
   translator: ITranslator;
+  getAllCommands: () => string[];
   getAllShortCutSettings: () => Promise<ISettingRegistry.ISettings>;
   removeShortCut: (key: string) => Promise<void>;
   createMenu: () => Menu;

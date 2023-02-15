@@ -36,6 +36,7 @@ function getExternalForJupyterLab(
   const shortcutPluginLocation = '@jupyterlab/shortcuts-extension:shortcuts';
   return {
     translator,
+    getAllCommands: () => commands.listCommands(),
     getAllShortCutSettings: () =>
       settingRegistry.reload(shortcutPluginLocation),
     removeShortCut: (key: string) =>
