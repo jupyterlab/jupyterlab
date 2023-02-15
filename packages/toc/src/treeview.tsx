@@ -26,8 +26,13 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
    * includes layout triggered rendering.
    */
   render(): JSX.Element | null {
-    if (!this.model) {
-      return null;
+    if (!this.model || this.model.headings.length === 0) {
+      return (
+        <div className="jp-TableOfContents-placeholder">
+          <h1>No Headings</h1>
+          <p>The table of contents shows headers in Jupyter notebooks.</p>
+        </div>
+      );
     }
 
     return (

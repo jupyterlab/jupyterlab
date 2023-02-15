@@ -20,6 +20,11 @@
   height: 100%;
 }
 
+.jp-TableOfContents-placeholder {
+  text-align: center;
+  margin: 4px;
+}
+
 .jp-TableOfContents .jp-SidePanel-content {
   overflow-y: auto;
 }
