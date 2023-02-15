@@ -25,10 +25,10 @@ enum CommandIDs {
 export class MathJaxTypesetter implements ILatexTypesetter {
   constructor(app: JupyterFrontEnd) {
     app.commands.addCommand(CommandIDs.copy, {
-      execute: (args: any) => {
+      execute: async (args: any) => {
         const md = this._mathDocument;
         const oJax: any = md.outputJax;
-        navigator.clipboard.writeText(oJax.math.math);
+        await navigator.clipboard.writeText(oJax.math.math);
       },
       label: 'MathJax Copy Latex'
     });
