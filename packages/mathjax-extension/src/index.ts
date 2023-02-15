@@ -14,9 +14,15 @@ import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
 import type { MathDocument } from 'mathjax-full/js/core/MathDocument';
 
-enum CommandIDs {
-  copy = 'mathjax:clipboard',
-  scale = 'mathjax:scale'
+namespace CommandIDs {
+  /**
+   * Copy raw LaTeX to clipboard.
+   */
+  export const copy = 'mathjax:clipboard';
+  /**
+   * Scale MathJax elements.
+   */
+  export const scale = 'mathjax:scale';
 }
 
 /**
