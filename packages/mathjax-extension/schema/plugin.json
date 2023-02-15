@@ -5,7 +5,7 @@
     "context": [
       {
         "type": "separator",
-        "selector": ".jp-Notebook .jp-Cell",
+        "selector": ".MathJax",
         "rank": 12
       },
       {
@@ -28,7 +28,7 @@
       },
       {
         "type": "separator",
-        "selector": ".jp-Notebook .jp-Cell",
+        "selector": ".MathJax",
         "rank": 13
       }
     ]
