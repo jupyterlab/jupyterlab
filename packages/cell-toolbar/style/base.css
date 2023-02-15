@@ -31,14 +31,10 @@
   box-shadow: inherit;
 }
 
-/* Overrides for mobile view: Move cell toolbar up, don't hide it if it overlaps */
+/* Overrides for mobile view hiding cell toolbar */
 @media only screen and (max-width: 760px) {
-  .jp-toolbar-overlap .jp-cell-toolbar {
-    display: flex;
-  }
-
-  .jp-cell-toolbar {
-    top: -5px;
+  .jp-cell-menu.jp-cell-toolbar {
+    display: none;
   }
 }
 
