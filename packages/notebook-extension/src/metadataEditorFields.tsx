@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import React from 'react';
 import { FieldProps } from '@rjsf/utils';
 import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
