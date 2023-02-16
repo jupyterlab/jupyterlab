@@ -21,8 +21,15 @@
 }
 
 .jp-TableOfContents-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  margin: 4px;
+}
+
+.jp-TableOfContents-placeholderContent {
+  padding: 8px; 
 }
 
 .jp-TableOfContents .jp-SidePanel-content {

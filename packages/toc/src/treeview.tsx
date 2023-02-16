@@ -29,8 +29,10 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
     if (!this.model || this.model.headings.length === 0) {
       return (
         <div className="jp-TableOfContents-placeholder">
-          <h1>No Headings</h1>
-          <p>The table of contents shows headers in Jupyter notebooks.</p>
+          <div className="jp-TableOfContents-placeholderContent">
+            <h1>No Headings</h1>
+            <p>The table of contents shows headers in Jupyter notebooks.</p>
+          </div>
         </div>
       );
     }
