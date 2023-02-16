@@ -66,9 +66,8 @@ describe('documentsearch/searchmodel', () => {
       it('should set informative string message on invalid regex', async () => {
         model.useRegex = true;
         expect(model.parsingError).toEqual('');
-        const waitForStateChanged = signalToPromise(model.stateChanged);
         model.searchExpression = 'query\\';
-        await waitForStateChanged;
+        await signalToPromise(model.stateChanged);
         expect(model.parsingError).toEqual(
           'SyntaxError: Invalid regular expression: /query\\/: \\ at end of pattern'
         );
