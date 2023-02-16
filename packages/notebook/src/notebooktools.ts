@@ -78,8 +78,6 @@ export class NotebookTools extends Widget implements INotebookTools {
 
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
-    this._commonTools = new RankedPanel<NotebookTools.Tool>();
-    this._commonTools.title.label = this._trans.__('Common Tools');
     this._advancedTools = new RankedPanel<NotebookTools.Tool>();
     this._advancedTools.id = 'advancedToolsSection';
     this._advancedTools.title.label = this._trans.__('Advanced Tools');
@@ -87,7 +85,6 @@ export class NotebookTools extends Widget implements INotebookTools {
     this._extendedTools = [];
 
     const layout = (this.layout = new PanelLayout());
-    layout.addWidget(new Collapser({ widget: this._commonTools }));
     layout.addWidget(new Collapser({ widget: this._advancedTools }));
 
     this._tracker = options.tracker;
@@ -138,8 +135,6 @@ export class NotebookTools extends Widget implements INotebookTools {
     let section: RankedPanel<NotebookTools.Tool>;
     if (options.section === 'advanced') {
       section = this._advancedTools;
-    } else if (options.section == null || options.section === 'common') {
-      section = this._commonTools;
     } else {
       const extendedTool = this._extendedTools.find(
         extendedTool => extendedTool.section === options.section
@@ -193,14 +188,14 @@ export class NotebookTools extends Widget implements INotebookTools {
       for (let i = 0; i < layout.widgets.length; i++) {
         let w = layout.widgets[i];
         if (w instanceof Collapser) {
-          if (w.widget.id == 'advancedToolsSection') {
+          if (w.widget.id === 'advancedToolsSection') {
             advancedToolsRank = i;
             break;
           }
         }
       }
 
-      if (advancedToolsRank != null)
+      if (advancedToolsRank !== null)
         (this.layout as PanelLayout).insertWidget(
           advancedToolsRank,
           new Collapser({ widget: newSection })
@@ -306,7 +301,6 @@ export class NotebookTools extends Widget implements INotebookTools {
   }
 
   private *_toolChildren() {
-    yield* this._commonTools.children();
     yield* this._advancedTools.children();
     for (let extendedTools of this._extendedTools) {
       yield* extendedTools.panel.children();
@@ -315,7 +309,6 @@ export class NotebookTools extends Widget implements INotebookTools {
 
   translator: ITranslator;
   private _trans: TranslationBundle;
-  private _commonTools: RankedPanel<NotebookTools.Tool>;
   private _advancedTools: RankedPanel<NotebookTools.Tool>;
   private _extendedTools: Array<NotebookTools.IExtendedToolsPanel>;
   private _tracker: INotebookTracker;
@@ -385,7 +378,7 @@ export namespace NotebookTools {
     /**
      * The section to which the tool should be added.
      */
-    section?: 'common' | 'advanced' | string;
+    section: 'advanced' | string;
 
     /**
      * The rank order of the widget among its siblings.

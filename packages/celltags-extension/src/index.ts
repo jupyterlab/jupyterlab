@@ -11,35 +11,13 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { INotebookTools, INotebookTracker } from '@jupyterlab/notebook';
-
-import { TagTool } from '@jupyterlab/celltags';
-
-import { ITranslator } from '@jupyterlab/translation';
+import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { CellTagField } from './celltag';
 import {
   IFormRenderer,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
-
-/**
- * Initialization data for the celltags extension.
- */
-const celltags: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/celltags',
-  autoStart: true,
-  requires: [INotebookTools, INotebookTracker, ITranslator],
-  activate: (
-    app: JupyterFrontEnd,
-    tools: INotebookTools,
-    tracker: INotebookTracker,
-    translator: ITranslator
-  ) => {
-    const tool = new TagTool(tracker, app, translator);
-    tools.addItem({ tool: tool, rank: 1.6 });
-  }
-};
 
 /**
  * Registering cell tag field.
@@ -66,4 +44,4 @@ const customCellTag: JupyterFrontEndPlugin<void> = {
   }
 };
 
-export default [celltags, customCellTag];
+export default [customCellTag];

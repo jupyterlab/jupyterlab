@@ -1,5 +1,6 @@
 import React from 'react';
 import { FieldProps } from '@rjsf/utils';
+import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
 
 namespace Private {
@@ -11,6 +12,11 @@ namespace Private {
      * The tracker to the notebook panel.
      */
     tracker: INotebookTracker;
+
+    /**
+     * Editor languages registry
+     */
+    languages: IEditorLanguageRegistry;
   }
 }
 
@@ -24,7 +30,7 @@ namespace Private {
  */
 export class ActiveCellTool extends NotebookTools.ActiveCellTool {
   constructor(options: Private.IOptions) {
-    super();
+    super(options.languages);
     this._tracker = options.tracker;
   }
 

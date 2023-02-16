@@ -106,7 +106,6 @@ import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
   JSONObject,
-  JSONValue,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
   UUID
@@ -879,51 +878,71 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
 const updateRawMimetype: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:update-raw-mimetype',
   autoStart: true,
-  requires: [IMetadataFormProvider, ITranslator],
+  requires: [INotebookTracker, IMetadataFormProvider, ITranslator],
   activate: (
     app: JupyterFrontEnd,
+    tracker: INotebookTracker,
     metadataForms: IMetadataFormProvider,
     translator: ITranslator
   ) => {
     const trans = translator.load('jupyterlab');
-    if (metadataForms.get('commonTools')) {
+    let formatsInitialized = false;
+
+    async function maybeInitializeFormats() {
+      if (formatsInitialized) {
+        return;
+      }
+      if (!metadataForms.get('commonTools')) {
+        return;
+      }
+
       const properties = metadataForms
         .get('commonTools')!
         .getProperties('/raw_mimetype');
-      if (!properties) return;
+
+      if (!properties) {
+        return;
+      }
+
+      tracker.widgetAdded.disconnect(maybeInitializeFormats);
+
+      formatsInitialized = true;
 
       const services = app.serviceManager;
-      void services.nbconvert.getExportFormats().then(response => {
-        if (response) {
-          // convert exportList to palette and menu items
-          const formatList = Object.keys(response);
-          const formatLabels = Private.getFormatLabels(translator);
-          type enumeration = {
-            const: string;
-            title: string;
-          };
-          formatList.forEach(function (key) {
-            const mimetypeExists =
-              (properties!.oneOf as Array<enumeration>)?.filter(
-                value => value.const === key
-              ).length > 0;
-            if (!mimetypeExists) {
-              const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
-              const option = formatLabels[key] ? formatLabels[key] : altOption;
-              const mimeTypeValue = response[key].output_mimetype;
+      const response = await services.nbconvert.getExportFormats(false);
+      if (!response) {
+        return;
+      }
 
-              (properties!.oneOf as Array<enumeration>)!.push({
-                const: mimeTypeValue,
-                title: option
-              });
-            }
+      // convert exportList to palette and menu items
+      const formatList = Object.keys(response);
+      const formatLabels = Private.getFormatLabels(translator);
+      type enumeration = {
+        const: string;
+        title: string;
+      };
+      formatList.forEach(function (key) {
+        const mimetypeExists =
+          (properties!.oneOf as Array<enumeration>)?.filter(
+            value => value.const === key
+          ).length > 0;
+        if (!mimetypeExists) {
+          const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
+          const option = formatLabels[key] ? formatLabels[key] : altOption;
+          const mimeTypeValue = response[key].output_mimetype;
+
+          (properties!.oneOf as Array<enumeration>)!.push({
+            const: mimeTypeValue,
+            title: option
           });
         }
-        metadataForms
-          .get('commonTools')!
-          .setProperties('/raw_mimetype', properties);
       });
+
+      metadataForms
+        .get('commonTools')!
+        .setProperties('/raw_mimetype', properties);
     }
+    tracker.widgetAdded.connect(maybeInitializeFormats);
   }
 };
 
@@ -982,17 +1001,19 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
 const activeCellTool: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:active-cell-tool',
   autoStart: true,
-  requires: [INotebookTracker, IFormRendererRegistry],
+  requires: [INotebookTracker, IFormRendererRegistry, IEditorLanguageRegistry],
   activate: (
     // Register the custom field.
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
-    formRegistry: IFormRendererRegistry
+    formRegistry: IFormRendererRegistry,
+    languages: IEditorLanguageRegistry
   ) => {
     const component: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
         return new ActiveCellTool({
-          tracker
+          tracker,
+          languages
         }).render(props);
       }
     };
@@ -1046,10 +1067,6 @@ function activateNotebookTools(
   const trans = translator.load('jupyterlab');
   const id = 'notebook-tools';
   const notebookTools = new NotebookTools({ tracker, translator });
-  const activeCellTool = new NotebookTools.ActiveCellTool(languages);
-  const editable = NotebookTools.createEditableToggle(translator);
-  const slideShow = NotebookTools.createSlideShowSelector(translator);
-  const tocBaseNumbering = NotebookTools.createToCBaseNumbering(translator);
   const editorFactory: CodeEditor.Factory = options =>
     editorServices.factoryService.newInlineEditor(options);
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
@@ -1061,8 +1078,6 @@ function activateNotebookTools(
     editorFactory,
     translator
   });
-
-  const services = app.serviceManager;
 
   // Create message hook for triggers to save to the database.
   const hook = (sender: any, message: Message): boolean => {
@@ -1079,65 +1094,9 @@ function activateNotebookTools(
     }
     return true;
   };
-  const optionsMap: { [key: string]: JSONValue } = {};
-  optionsMap.None = null;
-
-  let formatsInitialized = false;
-
-  async function maybeInitializeFormats() {
-    if (formatsInitialized) {
-      return;
-    }
-
-    tracker.widgetAdded.disconnect(maybeInitializeFormats);
-
-    formatsInitialized = true;
-
-    const response = await services.nbconvert.getExportFormats(false);
-    if (!response) {
-      return;
-    }
-    /**
-     * The excluded Cell Inspector Raw NbConvert Formats
-     * (returned from nbconvert's export list)
-     */
-    const rawFormatExclude = ['pdf', 'slides', 'script', 'notebook', 'custom'];
-    let optionValueArray: any = [
-      [trans.__('PDF'), 'pdf'],
-      [trans.__('Slides'), 'slides'],
-      [trans.__('Script'), 'script'],
-      [trans.__('Notebook'), 'notebook'],
-      [trans.__('Custom'), 'custom']
-    ];
-
-    // convert exportList to palette and menu items
-    const formatList = Object.keys(response);
-    const formatLabels = Private.getFormatLabels(translator);
-    formatList.forEach(function (key) {
-      if (rawFormatExclude.indexOf(key) === -1) {
-        const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
-        const option = formatLabels[key] ? formatLabels[key] : altOption;
-        const mimeTypeValue = response[key].output_mimetype;
-        optionValueArray.push([option, mimeTypeValue]);
-      }
-    });
-    const nbConvert = NotebookTools.createNBConvertSelector(
-      optionValueArray,
-      translator
-    );
-    notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
-  }
-
-  tracker.widgetAdded.connect(maybeInitializeFormats);
-
   notebookTools.title.icon = buildIcon;
   notebookTools.title.caption = trans.__('Notebook Tools');
   notebookTools.id = id;
-
-  notebookTools.addItem({ tool: activeCellTool, section: 'common', rank: 1 });
-  notebookTools.addItem({ tool: editable, section: 'common', rank: 2 });
-  notebookTools.addItem({ tool: slideShow, section: 'common', rank: 3 });
-  notebookTools.addItem({ tool: tocBaseNumbering, section: 'common', rank: 4 });
 
   notebookTools.addItem({
     tool: cellMetadataEditor,

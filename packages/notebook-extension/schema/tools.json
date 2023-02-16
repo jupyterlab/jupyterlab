@@ -4,8 +4,8 @@
   "description": "Setting for the common tools",
   "jupyter.lab.metadataforms": [
     {
-      "id": "commonTools",
-      "label": "Common tools from schema",
+      "id": "common",
+      "label": "Common tools",
       "metadataSchema": {
         "type": "object",
         "properties": {
