@@ -2744,7 +2744,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return current.content.activeCell?.editor?.redo();
+        const cell = current.content.activeCell;
+        if (cell) {
+          cell.inputHidden = false;
+          return cell.editor?.redo();
+        }
       }
     }
   });
@@ -2754,7 +2758,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return current.content.activeCell?.editor?.undo();
+        const cell = current.content.activeCell;
+        if (cell) {
+          cell.inputHidden = false;
+          return cell.editor?.undo();
+        }
       }
     }
   });
