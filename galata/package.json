@@ -59,7 +59,7 @@
     "path": "~0.12.7",
     "systeminformation": "^5.8.6",
     "vega": "^5.20.0",
-    "vega-lite": "^5.6.1-next.1",
+    "vega-lite": "^5.6.1",
     "vega-statistics": "^1.7.9"
   },
   "devDependencies": {
