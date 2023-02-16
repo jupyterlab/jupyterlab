@@ -15,8 +15,10 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
    *
    * @param options Widget options
    */
-  constructor(options: TableOfContents.IOptions = {}) {
+  constructor(options: TableOfContents.IOptions) {
     super(options.model);
+    this._placeholderHeadline = options.placeholderHeadline;
+    this._placeholderText = options.placeholderText;
   }
 
   /**
@@ -30,8 +32,8 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
       return (
         <div className="jp-TableOfContents-placeholder">
           <div className="jp-TableOfContents-placeholderContent">
-            <h1>No Headings</h1>
-            <p>The table of contents shows headers in Jupyter notebooks.</p>
+            <h1>{this._placeholderHeadline}</h1>
+            <p>{this._placeholderText}</p>
           </div>
         </div>
       );
@@ -51,4 +53,7 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
       ></TableOfContentsTree>
     );
   }
+
+  readonly _placeholderHeadline: string;
+  readonly _placeholderText: string;
 }
