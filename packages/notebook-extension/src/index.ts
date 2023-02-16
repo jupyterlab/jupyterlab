@@ -892,12 +892,12 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
       if (formatsInitialized) {
         return;
       }
-      if (!metadataForms.get('commonTools')) {
+      if (!metadataForms.get('commonToolsSection')) {
         return;
       }
 
       const properties = metadataForms
-        .get('commonTools')!
+        .get('commonToolsSection')!
         .getProperties('/raw_mimetype');
 
       if (!properties) {
@@ -939,7 +939,7 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
       });
 
       metadataForms
-        .get('commonTools')!
+        .get('commonToolsSection')!
         .setProperties('/raw_mimetype', properties);
     }
     tracker.widgetAdded.connect(maybeInitializeFormats);
@@ -961,7 +961,8 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
     formRegistry: IFormRendererRegistry,
     translator?: ITranslator
   ) => {
-    const editorFactory = editorServices.factoryService.newInlineEditor;
+    const editorFactory: CodeEditor.Factory = options =>
+      editorServices.factoryService.newInlineEditor(options);
     // Register the custom fields.
     const cellComponent: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
@@ -1067,17 +1068,6 @@ function activateNotebookTools(
   const trans = translator.load('jupyterlab');
   const id = 'notebook-tools';
   const notebookTools = new NotebookTools({ tracker, translator });
-  const editorFactory: CodeEditor.Factory = options =>
-    editorServices.factoryService.newInlineEditor(options);
-  const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
-    editorFactory,
-    collapsed: false,
-    translator
-  });
-  const notebookMetadataEditor = new NotebookTools.NotebookMetadataEditorTool({
-    editorFactory,
-    translator
-  });
 
   // Create message hook for triggers to save to the database.
   const hook = (sender: any, message: Message): boolean => {
@@ -1097,17 +1087,6 @@ function activateNotebookTools(
   notebookTools.title.icon = buildIcon;
   notebookTools.title.caption = trans.__('Notebook Tools');
   notebookTools.id = id;
-
-  notebookTools.addItem({
-    tool: cellMetadataEditor,
-    section: 'advanced',
-    rank: 1
-  });
-  notebookTools.addItem({
-    tool: notebookMetadataEditor,
-    section: 'advanced',
-    rank: 2
-  });
 
   MessageLoop.installMessageHook(notebookTools, hook);
 

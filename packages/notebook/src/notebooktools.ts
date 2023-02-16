@@ -11,11 +11,7 @@ import { CodeEditor, JSONEditor } from '@jupyterlab/codeeditor';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { ObservableJSON } from '@jupyterlab/observables';
 import { IMapChange, ISharedText } from '@jupyter/ydoc';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Collapser } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { JSONObject, ReadonlyPartialJSONValue } from '@lumino/coreutils';
@@ -71,15 +67,10 @@ export class NotebookTools extends Widget implements INotebookTools {
     this.addClass('jp-NotebookTools');
 
     this.translator = options.translator || nullTranslator;
-    this._trans = this.translator.load('jupyterlab');
-    this._advancedTools = new RankedPanel<NotebookTools.Tool>();
-    this._advancedTools.id = 'advancedToolsSection';
-    this._advancedTools.title.label = this._trans.__('Advanced Tools');
 
     this._extendedTools = [];
 
-    const layout = (this.layout = new PanelLayout());
-    layout.addWidget(new Collapser({ widget: this._advancedTools }));
+    this.layout = new PanelLayout();
 
     this._tracker = options.tracker;
     this._tracker.currentChanged.connect(
@@ -127,16 +118,12 @@ export class NotebookTools extends Widget implements INotebookTools {
     const rank = options.rank ?? 100;
 
     let section: RankedPanel<NotebookTools.Tool>;
-    if (options.section === 'advanced') {
-      section = this._advancedTools;
-    } else {
-      const extendedTool = this._extendedTools.find(
-        extendedTool => extendedTool.section === options.section
-      );
-      if (extendedTool) section = extendedTool.panel;
-      else {
-        throw new Error(`The section ${options.section} does not exist`);
-      }
+    const extendedTool = this._extendedTools.find(
+      extendedTool => extendedTool.section === options.section
+    );
+    if (extendedTool) section = extendedTool.panel;
+    else {
+      throw new Error(`The section ${options.section} does not exist`);
     }
 
     tool.addClass('jp-NotebookTools-tool');
@@ -295,15 +282,12 @@ export class NotebookTools extends Widget implements INotebookTools {
   }
 
   private *_toolChildren() {
-    yield* this._advancedTools.children();
     for (let extendedTools of this._extendedTools) {
       yield* extendedTools.panel.children();
     }
   }
 
   translator: ITranslator;
-  private _trans: TranslationBundle;
-  private _advancedTools: RankedPanel<NotebookTools.Tool>;
   private _extendedTools: Array<NotebookTools.IExtendedToolsPanel>;
   private _tracker: INotebookTracker;
   private _prevActiveCell: ICellModel | null;

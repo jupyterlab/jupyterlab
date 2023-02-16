@@ -227,10 +227,6 @@
   overflow: auto;
 }
 
-.jp-NotebookTools-tool {
-  padding: 0 12px;
-}
-
 .jp-ActiveCellTool {
   padding: 12px;
   display: flex;
