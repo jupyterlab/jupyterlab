@@ -14,7 +14,6 @@
     "@jupyterlab/apputils-extension": "~4.0.0-alpha.20",
     "@jupyterlab/attachments": "^4.0.0-alpha.15",
     "@jupyterlab/cells": "~4.0.0-alpha.3",
-    "@jupyterlab/celltags": "~4.0.0-alpha.3",
     "@jupyterlab/celltags-extension": "~4.0.0-alpha.20",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.15",
     "@jupyterlab/codemirror-extension": "~4.0.0-alpha.20",

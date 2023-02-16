@@ -320,7 +320,6 @@
       "@jupyterlab/cell-toolbar": "../packages/cell-toolbar",
       "@jupyterlab/cell-toolbar-extension": "../packages/cell-toolbar-extension",
       "@jupyterlab/cells": "../packages/cells",
-      "@jupyterlab/celltags": "../packages/celltags",
       "@jupyterlab/celltags-extension": "../packages/celltags-extension",
       "@jupyterlab/codeeditor": "../packages/codeeditor",
       "@jupyterlab/codemirror": "../packages/codemirror",

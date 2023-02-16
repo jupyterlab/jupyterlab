@@ -45,7 +45,6 @@
     "@jupyterlab/cell-toolbar": "^4.0.0-alpha.20",
     "@jupyterlab/cell-toolbar-extension": "^4.0.0-alpha.20",
     "@jupyterlab/cells": "^4.0.0-alpha.20",
-    "@jupyterlab/celltags": "^4.0.0-alpha.20",
     "@jupyterlab/celltags-extension": "^4.0.0-alpha.20",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.20",
     "@jupyterlab/codemirror": "^4.0.0-alpha.20",
