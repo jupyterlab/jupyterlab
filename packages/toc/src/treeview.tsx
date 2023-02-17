@@ -33,7 +33,7 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
       return (
         <div className="jp-TableOfContents-placeholder">
           <div className="jp-TableOfContents-placeholderContent">
-            <h1>{this._placeholderHeadline}</h1>
+            <h3>{this._placeholderHeadline}</h3>
             <p>{this._placeholderText}</p>
           </div>
         </div>
