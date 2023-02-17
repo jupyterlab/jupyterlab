@@ -504,12 +504,14 @@ export async function ensurePackage(
   // Ensure source TS files are included in lib (.js, .js.map, .d.ts)
   const srcFiles = recurseDir(path.join(pkgPath, 'src'), []);
   srcFiles.forEach(fpath => {
-    const basePath = fpath.slice(pkgPath.length + 1).replace('src', 'lib');
+    const basePath = fpath
+      .slice(pkgPath.length + 1)
+      .replace('src', 'lib')
+      .split(path.sep)
+      .join('/');
     ['.js', '.js.map', '.d.ts'].forEach(ending => {
       let found = false;
-      const targetPattern = basePath
-        .replace('.tsx', ending)
-        .replace('.ts', ending);
+      const targetPattern = basePath.replace(/\.tsx?$/g, ending);
       filePatterns.forEach(fpattern => {
         if (minimatch.default(targetPattern, fpattern)) {
           found = true;
@@ -520,6 +522,35 @@ export async function ensurePackage(
       }
     });
   });
+
+  // Ensure source files are all included
+  let anySourceMatch = false;
+  const missingSourceMessages: string[] = [];
+  srcFiles.forEach(fpath => {
+    const basepath = fpath
+    .slice(pkgPath.length + 1)
+    .split(path.sep)
+    .join('/');
+    let found = false;
+    filePatterns.forEach(fpattern => {
+      if (minimatch.default(basepath, fpattern)) {
+        found = true;
+      }
+    });
+    anySourceMatch = anySourceMatch || found;
+    if (!found && !isPrivate) {
+      missingSourceMessages.push(`Source file ${basepath} not included in files`);
+    }
+  });
+  if (srcFiles.length && !anySourceMatch && !isPrivate) {
+    messages.push("Found no src file inclusion, adding src/**/*.{ts,tsx}");
+    if (!data.files) {
+      data.files = [];
+    }
+    data.files.push("src/**/*.{ts,tsx}");
+  } else {
+    messages.push(...missingSourceMessages);
+  }
 
   // Ensure dependencies and dev dependencies.
   data.dependencies = deps;
