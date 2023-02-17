@@ -25,7 +25,8 @@
     "lib/*.{d.ts,js.map,js,json}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
     "style/index.js",
-    "src/**/*.{ts,tsx}"
+    "src/**/*.{ts,tsx}",
+    "src/default.json"
   ],
   "scripts": {
     "build": "tsc -b",
