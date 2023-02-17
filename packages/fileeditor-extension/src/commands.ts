@@ -276,7 +276,7 @@ export namespace Commands {
       label: args => {
         const delta = Number(args['delta']);
         if (Number.isNaN(delta)) {
-          throw new Error(
+          console.error(
             `${CommandIDs.changeFontSize}: delta arg must be a number`
           );
         }
