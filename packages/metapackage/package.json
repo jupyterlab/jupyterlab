@@ -135,7 +135,7 @@
     "fs-extra": "^10.1.0",
     "json-to-html": "~0.1.2",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.22.10",
+    "typedoc": "~0.23.25",
     "typescript": "~5.0.0-beta"
   },
   "publishConfig": {
