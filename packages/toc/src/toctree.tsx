@@ -40,7 +40,6 @@ export class TableOfContentsTree extends React.PureComponent<ITableOfContentsTre
    */
   render(): JSX.Element {
     const { documentType } = this.props;
-
     return (
       <ol
         className="jp-TableOfContents-content"
