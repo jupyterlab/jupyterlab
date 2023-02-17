@@ -228,7 +228,7 @@
 }
 
 .jp-ActiveCellTool {
-  padding: 12px;
+  padding: 12px 0;
   display: flex;
 }
 

@@ -28,37 +28,6 @@
               }
             ]
           },
-          "/raw_mimetype": {
-            "title": "Raw NBConvert Format",
-            "type": "string",
-            "default": "",
-            "oneOf": [
-              {
-                "const": "",
-                "title": "-"
-              },
-              {
-                "const": "pdf",
-                "title": "PDF"
-              },
-              {
-                "const": "slides",
-                "title": "Slides"
-              },
-              {
-                "const": "script",
-                "title": "Script"
-              },
-              {
-                "const": "notebook",
-                "title": "Notebook"
-              },
-              {
-                "const": "custom",
-                "title": "Custom"
-              }
-            ]
-          },
           "/slideshow/slide_type": {
             "title": "Slide Type",
             "type": "string",
@@ -87,6 +56,37 @@
               {
                 "const": "notes",
                 "title": "Notes"
+              }
+            ]
+          },
+          "/raw_mimetype": {
+            "title": "Raw NBConvert Format",
+            "type": "string",
+            "default": "",
+            "oneOf": [
+              {
+                "const": "",
+                "title": "-"
+              },
+              {
+                "const": "pdf",
+                "title": "PDF"
+              },
+              {
+                "const": "slides",
+                "title": "Slides"
+              },
+              {
+                "const": "script",
+                "title": "Script"
+              },
+              {
+                "const": "notebook",
+                "title": "Notebook"
+              },
+              {
+                "const": "custom",
+                "title": "Custom"
               }
             ]
           },

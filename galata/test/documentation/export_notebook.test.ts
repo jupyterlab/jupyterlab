@@ -53,7 +53,7 @@ test.describe('Export Notebook', () => {
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
     await page.selectOption(
-      '#jp-MetadataForm-@jupyterlab/notebook-extension:tools_/slideshow/slide_type',
+      '#jp-MetadataForm-\\@jupyterlab\\/notebook-extension\\:tools_\\/slideshow\\/slide_type',
       { label: 'Slide' }
     );
     // Wait for Latex renderer
