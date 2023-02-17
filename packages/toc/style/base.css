@@ -34,6 +34,12 @@
 
 .jp-TableOfContents .jp-SidePanel-content {
   overflow-y: auto;
+  display: flex;
+  align-items: flex-start;
+}
+
+.jp-TableOfContents .jp-TableOfContents-empty.jp-SidePanel-content {
+  align-items: center;
 }
 
 .jp-TableOfContents-tree {
