@@ -880,7 +880,7 @@
   },
   {
     "id": "fileeditor:change-font-size",
-    "label": "",
+    "label": "Decrease Font Size",
     "caption": "",
     "shortcuts": []
   },
