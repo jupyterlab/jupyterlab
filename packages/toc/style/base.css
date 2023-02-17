@@ -25,6 +25,7 @@
 }
 
 .jp-TableOfContents-placeholderContent {
+  color: var(--jp-content-font-color2);
   padding: 8px;
 }
 
