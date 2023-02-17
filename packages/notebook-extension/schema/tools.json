@@ -5,7 +5,7 @@
   "jupyter.lab.metadataforms": [
     {
       "id": "commonToolsSection",
-      "label": "Common tools",
+      "label": "Common Tools",
       "metadataSchema": {
         "type": "object",
         "properties": {
@@ -115,7 +115,7 @@
     },
     {
       "id": "advancedToolsSection",
-      "label": "Advanced tools",
+      "label": "Advanced Tools",
       "metadataSchema": {
         "type": "object",
         "properties": {
