@@ -30,7 +30,9 @@ export class TableOfContentsPanel extends SidePanel {
 
     this._treeview = new TableOfContentsWidget({
       placeholderHeadline: this._trans.__('No Headings'),
-      placeholderText: this._trans.__('The table of contents shows headings in Jupyter notebooks.')
+      placeholderText: this._trans.__(
+        'The table of contents shows headings in Jupyter notebooks.'
+      )
     });
     this._treeview.addClass('jp-TableOfContents-tree');
     this.content.addWidget(this._treeview);

@@ -38,8 +38,7 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
           </div>
         </div>
       );
-    }
-    else {
+    } else {
       this.parent?.removeClass('jp-TableOfContents-empty');
     }
 
