@@ -540,15 +540,17 @@ export async function ensurePackage(
       });
       anySourceMatch = anySourceMatch || found;
       if (!found) {
-        missingSourceMessages.push(`Source file ${basepath} not included in files`);
+        missingSourceMessages.push(
+          `Source file ${basepath} not included in files`
+        );
       }
     });
     if (srcFiles.length && !anySourceMatch) {
-      messages.push("Found no src file inclusion, adding src/**/*.{ts,tsx}");
+      messages.push('Found no src file inclusion, adding src/**/*.{ts,tsx}');
       if (!data.files) {
         data.files = [];
       }
-      data.files.push("src/**/*.{ts,tsx}");
+      data.files.push('src/**/*.{ts,tsx}');
     } else {
       messages.push(...missingSourceMessages);
     }
