@@ -36,7 +36,10 @@ export class CellTagField {
    */
   pullTags(): string[] {
     const notebook = this._tracker?.currentWidget;
-    const cells = notebook?.model?.cells ?? [];
+    const cells = notebook?.model?.cells;
+    if (cells === undefined) {
+      return [];
+    }
     const allTags = reduce(
       cells,
       (allTags: string[], cell) => {

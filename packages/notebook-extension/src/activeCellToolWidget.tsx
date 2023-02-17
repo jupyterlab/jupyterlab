@@ -10,7 +10,7 @@ import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
 
 namespace Private {
   /**
-   * Custom metadata field options.
+   * Custom active cell field options.
    */
   export interface IOptions {
     /**
@@ -26,7 +26,7 @@ namespace Private {
 }
 
 /**
- * The cell metadata field.
+ * The active cell field.
  *
  * ## Note
  * This field does not work as other metadata form fields, as it does not use RJSF to update metadata.
@@ -42,7 +42,9 @@ export class ActiveCellTool extends NotebookTools.ActiveCellTool {
   render(props: FieldProps): JSX.Element {
     const activeCell = this._tracker.activeCell;
     if (activeCell) this._cellModel = activeCell?.model || null;
-    this.refresh();
+    this.refresh()
+      .then(() => undefined)
+      .catch(() => undefined);
     return (
       <div className="cell-tool">
         <div ref={ref => ref?.appendChild(this.node)}></div>
