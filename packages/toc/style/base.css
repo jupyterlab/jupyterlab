@@ -34,7 +34,7 @@
   align-items: flex-start;
 }
 
-.jp-TableOfContents-empty {
+.jp-SidePanel-content.jp-TableOfContents-empty {
   align-items: center;
 }
 
