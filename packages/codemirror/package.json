@@ -25,7 +25,8 @@
     "lib/*.js",
     "style/*.css",
     "typings/codemirror/*.d.ts",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",

@@ -29,7 +29,8 @@
     "schema/*.json",
     "listing/*.json",
     "style/*.css",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",

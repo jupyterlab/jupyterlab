@@ -25,7 +25,8 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "lib/*.json"
+    "lib/*.json",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",

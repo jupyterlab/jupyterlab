@@ -28,7 +28,8 @@
     "style/*.css",
     "style/images/*.svg",
     "schema/*.json",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
