@@ -287,6 +287,14 @@ module.exports = [
       publicPath: '{{page_config.fullStaticUrl}}/',
       filename: '[name].[contenthash].js'
     },
+    resolve: {
+      alias: {
+        lodash: 'lodash-es',
+        'lodash.mergewith': 'lodash-es/mergeWith',
+        'lodash.curry': 'lodash-es/curry',
+        'lodash.escape': 'lodash-es/escape'
+      }
+    },
     optimization: {
       splitChunks: {
         chunks: 'all',

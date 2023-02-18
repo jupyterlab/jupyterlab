@@ -10013,12 +10013,7 @@ prettier-linter-helpers@^1.0.0:
   dependencies:
     fast-diff "^1.1.2"
 
-prettier@^1.19.1:
-  version "1.19.1"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.19.1.tgz#f7d7f5ff8a9cd872a7be4ca142095956a60797cb"
-  integrity sha512-s7PoyDv/II1ObgQunCbB9PdLmUcBZcnWOcxDh7O0N/UwDEsHyqkW+Qh28jW+mVuCdx7gLB0BotYI1Y6uI9iyew==
-
-prettier@~2.6.0:
+prettier@^1.19.1, prettier@~2.6.0:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-2.6.2.tgz#e26d71a18a74c3d0f0597f55f01fb6c06c206032"
   integrity sha512-PkUpF+qoXTqhOeWL9fu7As8LXsIUZ1WYaJiY/a7McAQzxjk82OF0tibkFXVCDImZtWxbvojFjerkiLb0/q8mew==
@@ -11810,12 +11805,7 @@ typedoc@~0.23.25:
     minimatch "^6.1.6"
     shiki "^0.14.1"
 
-"typescript@^3 || ^4":
-  version "4.9.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.4.tgz#a2a3d2756c079abda241d75f149df9d561091e78"
-  integrity sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==
-
-typescript@~5.0.0-beta:
+"typescript@^3 || ^4", typescript@~5.0.0-beta:
   version "5.0.0-dev.20230204"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.0.0-dev.20230204.tgz#ed40e18638c4d6e539f37361b0d49d39fe040650"
   integrity sha512-+7FKfJ6M6n0mveLqxFzi6z1ZJfqUX5QDJFBJqS0r1WP76v32AwGoZRBaYalyd7l8ph4k5qXoMmDCexrF/sVnyQ==

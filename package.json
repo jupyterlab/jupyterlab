@@ -108,7 +108,9 @@
     "@lumino/disposable": "^2.0.0-beta.0",
     "@lumino/signaling": "^2.0.0-beta.0",
     "@types/react": "^18.0.26",
+    "prettier": "~2.6.0",
     "react": "^18.2.0",
+    "typescript": "~5.0.0-beta",
     "yjs": "^13.5.40"
   },
   "dependencies": {
