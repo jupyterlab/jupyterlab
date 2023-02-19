@@ -9,7 +9,7 @@ set -euxo pipefail
 
 yarn || yarn
 
-pip install -vv -e .[dev]
+pip install -vv -e .[dev] --no-build-isolation
 
 pushd dev_mode
     rm -rf static
