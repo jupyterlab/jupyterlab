@@ -53,6 +53,7 @@ from .handlers.announcements import (
     news_handler_path,
 )
 from .handlers.build_handler import Builder, BuildHandler, build_path
+from .handlers.compressed_static import CompressedFileFindHandler
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
 
@@ -484,6 +485,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         {"LabApp": {"collaborative": True}},
         "Whether to enable collaborative mode.",
     )
+    flags["no-brotli"] = (
+        {"LabApp": {"prefer_brotli": False}},
+        "Disable brotli support for compressed static assets.",
+    )
 
     subcommands = {
         "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -577,6 +582,12 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         klass=CheckForUpdateABC,
         config=True,
         help="""A callable class that receives the current version at instantiation and calling it must return asynchronously a string indicating which version is available and how to install or None if no update is available. The string supports Markdown format.""",
+    )
+
+    prefer_brotli = Bool(
+        True,
+        help="Whether to prefer serving brotli-encoded files (ending in `.br`) if found",
+        config=True,
     )
 
     @default("app_dir")
@@ -832,6 +843,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings["page_config_data"] = page_config
+
+        # add compressed static asssets
+        if self.prefer_brotli:
+            self.serverapp.web_app.settings["static_handler_class"] = CompressedFileFindHandler
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
