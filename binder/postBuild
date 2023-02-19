@@ -1,6 +1,39 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-set -euo pipefail
 
-pip install -e .[dev]
+source activate ${NB_PYTHON_PREFIX}
+
+set -euxo pipefail
+
+yarn || yarn
+
+pip install -vv -e .[dev]
+
+pushd dev_mode
+    rm -rf static
+    # do a prod build to generate useful metrics
+    jlpm --silent build:prod:minimize --profile --json > stats.json
+    # put the stats with their files for the analyzer
+    mv stats.json static/
+    jlpm webpack-bundle-analyzer \
+        --mode static \
+        --no-open \
+        --title "JupyterLab $(git describe)" \
+        --report ../_webpack_stats_.html \
+        static/stats.json
+popd
+
+mkdir -p ~/.jupyter/
+
+cp binder/jupyter_config.py ~/.jupyter/
+
+# until jupyter-server is the default on binder
+cp ${NB_PYTHON_PREFIX}/bin/jupyter-lab ${NB_PYTHON_PREFIX}/bin/jupyter-notebook
+
+jupyter troubleshoot
+jupyter notebook --show-config
+jupyter lab --show-config
+jupyter labextension list
+jupyter server extension list
