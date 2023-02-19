@@ -303,7 +303,7 @@ export class CSVViewer extends Widget {
       return;
     }
     this._delimiter = value;
-    this._updateGrid();
+    void this._updateGrid();
   }
 
   /**
@@ -321,7 +321,7 @@ export class CSVViewer extends Widget {
    */
   set rendererConfig(rendererConfig: TextRenderConfig) {
     this._baseRenderer = rendererConfig;
-    this._updateRenderer();
+    void this._updateRenderer();
   }
 
   /**
