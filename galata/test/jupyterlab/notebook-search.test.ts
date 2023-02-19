@@ -51,6 +51,24 @@ test.describe('Notebook Search', () => {
     );
   });
 
+  test('Multi-line search', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+
+    await page.fill(
+      '[placeholder="Find"]',
+      'one notebook withr\n\n\nThis is a multi'
+    );
+
+    await page.waitForSelector('text=1/1');
+
+    // Show replace buttons to check for visual regressions
+    await page.click('button[title="Toggle Replace"]');
+    await page.fill('[placeholder="Replace"]', 'line1\nline2');
+
+    const overlay = page.locator('.jp-DocumentSearch-overlay');
+    expect(await overlay.screenshot()).toMatchSnapshot('multi-line-search.png');
+  });
+
   test('Search selected', async ({ page }) => {
     // Enter first cell
     await page.notebook.enterCellEditingMode(0);
