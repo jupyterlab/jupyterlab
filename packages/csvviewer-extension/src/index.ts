@@ -18,20 +18,19 @@ import {
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
-  CSVDelimiter,
-  CSVViewer,
   CSVViewerFactory,
-  TextRenderConfig,
   TSVViewerFactory
-} from '@jupyterlab/csvviewer';
+} from '@jupyterlab/csvviewer/lib/widget';
+import { CSVDelimiter } from '@jupyterlab/csvviewer/lib/toolbar';
+import type { CSVViewer } from '@jupyterlab/csvviewer';
+import type { TextRenderConfig } from '@jupyterlab/csvviewer';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import { DataGrid } from '@lumino/datagrid';
-import { CSVSearchProvider } from './searchprovider';
+import type { DataGrid } from '@lumino/datagrid';
 
 /**
  * The name of the factories that creates widgets.
@@ -156,7 +155,15 @@ function activateCsv(
 
   app.docRegistry.addWidgetFactory(factory);
   const ft = app.docRegistry.getFileType('csv');
-  factory.widgetCreated.connect((sender, widget) => {
+
+  let searchProviderInitialized = false;
+
+  factory.widgetCreated.connect(async (sender, widget) => {
+    if (!searchProviderInitialized && searchRegistry) {
+      const { CSVSearchProvider } = await import('./searchprovider');
+      searchRegistry.add('csv', CSVSearchProvider);
+    }
+
     // Track the widget.
     void tracker.add(widget);
     // Notify the widget tracker if restore data needs to update.
@@ -175,7 +182,7 @@ function activateCsv(
   });
 
   // Keep the themes up-to-date.
-  const updateThemes = () => {
+  const updateThemes = async () => {
     const isLight =
       themeManager && themeManager.theme
         ? themeManager.isLight(themeManager.theme)
@@ -222,9 +229,6 @@ function activateCsv(
       id: CommandIDs.CSVGoToLine,
       isEnabled
     });
-  }
-  if (searchRegistry) {
-    searchRegistry.add('csv', CSVSearchProvider);
   }
 }
 
@@ -300,7 +304,15 @@ function activateTsv(
 
   app.docRegistry.addWidgetFactory(factory);
   const ft = app.docRegistry.getFileType('tsv');
-  factory.widgetCreated.connect((sender, widget) => {
+
+  let searchProviderInitialized = false;
+
+  factory.widgetCreated.connect(async (sender, widget) => {
+    if (!searchProviderInitialized && searchRegistry) {
+      const { CSVSearchProvider } = await import('./searchprovider');
+      searchRegistry.add('tsv', CSVSearchProvider);
+    }
+
     // Track the widget.
     void tracker.add(widget);
     // Notify the widget tracker if restore data needs to update.
@@ -319,7 +331,7 @@ function activateTsv(
   });
 
   // Keep the themes up-to-date.
-  const updateThemes = () => {
+  const updateThemes = async () => {
     const isLight =
       themeManager && themeManager.theme
         ? themeManager.isLight(themeManager.theme)
@@ -367,9 +379,6 @@ function activateTsv(
       isEnabled
     });
   }
-  if (searchRegistry) {
-    searchRegistry.add('tsv', CSVSearchProvider);
-  }
 }
 
 /**
@@ -386,7 +395,6 @@ namespace Private {
    * The light theme for the data grid.
    */
   export const LIGHT_STYLE: DataGrid.Style = {
-    ...DataGrid.defaultStyle,
     voidColor: '#F3F3F3',
     backgroundColor: 'white',
     headerBackgroundColor: '#EEEEEE',
@@ -399,7 +407,6 @@ namespace Private {
    * The dark theme for the data grid.
    */
   export const DARK_STYLE: DataGrid.Style = {
-    ...DataGrid.defaultStyle,
     voidColor: 'black',
     backgroundColor: '#111111',
     headerBackgroundColor: '#424242',
