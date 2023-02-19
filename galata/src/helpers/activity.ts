@@ -23,7 +23,7 @@ export class ActivityHelper {
   async closeAll(): Promise<void> {
     await this.page.evaluate(async (launcherSelector: string) => {
       await window.jupyterapp.commands.execute('application:close-all');
-      await window.galataip.waitForXPath(launcherSelector);
+      await window.galata.waitForXPath(launcherSelector);
     }, this.launcherSelector);
   }
 
@@ -86,7 +86,7 @@ export class ActivityHelper {
     await this.activateTab(name);
     await this.page.evaluate(async (launcherSelector: string) => {
       await window.jupyterapp.commands.execute('application:close');
-      await window.galataip.waitForXPath(launcherSelector);
+      await window.galata.waitForXPath(launcherSelector);
     }, this.launcherSelector);
   }
 

@@ -218,6 +218,7 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
+      this._selections.dispose();
       if (this.standaloneModel) {
         this.sharedModel.dispose();
       }

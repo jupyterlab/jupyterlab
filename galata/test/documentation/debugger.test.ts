@@ -22,9 +22,12 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     // Wait for kernel to settle on idle
-    await page.waitForSelector('#jp-main-statusbar >> text=Idle');
-    await page.waitForSelector('#jp-main-statusbar >> text=Busy');
-    await page.waitForSelector('#jp-main-statusbar >> text=Idle');
+    await page
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
+    await page
+      .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
+      .waitFor();
 
     expect(
       await page.screenshot({
@@ -76,7 +79,6 @@ test.describe('Debugger', () => {
     const runButton = await page.waitForSelector(
       '.jp-Toolbar-item >> [data-command="runmenu:run"]'
     );
-    await runButton.hover();
 
     // Inject mouse pointer
     await page.evaluate(
@@ -85,6 +87,8 @@ test.describe('Debugger', () => {
       },
       [await positionMouseOver(runButton)]
     );
+    await runButton.focus();
+    await runButton.hover();
 
     expect(
       await page.screenshot({ clip: { y: 62, x: 400, width: 190, height: 60 } })

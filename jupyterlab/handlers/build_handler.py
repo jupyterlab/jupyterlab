@@ -33,9 +33,9 @@ class Builder:
     @gen.coroutine
     def get_status(self):
         if self.core_mode:
-            raise gen.Return(dict(status="stable", message=""))
+            raise gen.Return({"status": "stable", "message": ""})
         if self.building:
-            raise gen.Return(dict(status="building", message=""))
+            raise gen.Return({"status": "building", "message": ""})
 
         try:
             messages = yield self._run_build_check(
@@ -52,12 +52,13 @@ class Builder:
             status = "stable"
             messages = []
 
-        raise gen.Return(dict(status=status, message="\n".join(messages)))
+        raise gen.Return({"status": status, "message": "\n".join(messages)})
 
     @gen.coroutine
     def build(self):
         if self._canceling:
-            raise ValueError("Cancel in progress")
+            msg = "Cancel in progress"
+            raise ValueError(msg)
         if not self.building:
             self.canceled = False
             self._future = future = gen.Future()
@@ -83,7 +84,8 @@ class Builder:
     @gen.coroutine
     def cancel(self):
         if not self.building:
-            raise ValueError("No current build")
+            msg = "No current build"
+            raise ValueError(msg)
         self._canceling = True
         yield self._future
         self._canceling = False

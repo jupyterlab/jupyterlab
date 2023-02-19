@@ -16,7 +16,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import Ajv from 'ajv';
+import Ajv, { Options as AjvOptions } from 'ajv';
 import * as json5 from 'json5';
 import SCHEMA from './plugin-schema.json';
 import { ISettingRegistry } from './tokens';
@@ -25,6 +25,18 @@ import { ISettingRegistry } from './tokens';
  * An alias for the JSON deep copy function.
  */
 const copy = JSONExt.deepCopy;
+
+/** Default arguments for Ajv instances.
+ *
+ * https://ajv.js.org/options.html
+ */
+const AJV_DEFAULT_OPTIONS: Partial<AjvOptions> = {
+  /**
+   * @todo the implications of enabling strict mode are beyond the scope of
+   *       the initial PR
+   */
+  strict: false
+};
 
 /**
  * The default number of milliseconds before a `load()` call to the registry
@@ -69,19 +81,14 @@ export namespace ISchemaValidator {
    */
   export interface IError {
     /**
-     * The path in the data where the error occurred.
-     */
-    dataPath: string;
-
-    /**
      * The keyword whose validation failed.
      */
-    keyword: string;
+    keyword: string | string[];
 
     /**
      * The error message.
      */
-    message: string;
+    message?: string;
 
     /**
      * Optional parameter metadata that might be included in an error.
@@ -92,6 +99,31 @@ export namespace ISchemaValidator {
      * The path in the schema where the error occurred.
      */
     schemaPath: string;
+
+    /**
+     * @todo handle new fields from ajv8
+     **/
+    schema?: unknown;
+
+    /**
+     * @todo handle new fields from ajv8
+     **/
+    instancePath: string;
+
+    /**
+     * @todo handle new fields from ajv8
+     **/
+    propertyName?: string;
+
+    /**
+     * @todo handle new fields from ajv8
+     **/
+    data?: unknown;
+
+    /**
+     * @todo handle new fields from ajv8
+     **/
+    parentSchema?: unknown;
   }
 }
 
@@ -134,7 +166,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
           `Setting registry schemas' root-level type must be ` +
           `'object', rejecting type: ${plugin.schema.type}`;
 
-        return [{ dataPath: 'type', keyword, schemaPath: '', message }];
+        return [{ instancePath: 'type', keyword, schemaPath: '', message }];
       }
 
       const errors = this._addSchema(plugin.id, plugin.schema);
@@ -150,7 +182,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
       if (error instanceof SyntaxError) {
         return [
           {
-            dataPath: '',
+            instancePath: '',
             keyword: 'syntax',
             schemaPath: '',
             message: error.message
@@ -163,7 +195,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
 
       return [
         {
-          dataPath: '',
+          instancePath: '',
           keyword: 'parse',
           schemaPath: '',
           message: `${description} (line ${line} column ${column})`
@@ -231,8 +263,11 @@ export class DefaultSchemaValidator implements ISchemaValidator {
     return null;
   }
 
-  private _composer = new Ajv({ useDefaults: true });
-  private _validator = new Ajv();
+  private _composer: Ajv = new Ajv({
+    useDefaults: true,
+    ...AJV_DEFAULT_OPTIONS
+  });
+  private _validator: Ajv = new Ajv({ ...AJV_DEFAULT_OPTIONS });
 }
 
 /**
@@ -359,7 +394,7 @@ export class SettingRegistry implements ISettingRegistry {
     if (fetched === undefined) {
       throw [
         {
-          dataPath: '',
+          instancePath: '',
           keyword: 'id',
           message: `Could not fetch settings for ${plugin}.`,
           schemaPath: ''
@@ -514,10 +549,12 @@ export class SettingRegistry implements ISettingRegistry {
       const output = [`Validating ${plugin} failed:`];
 
       (errors as ISchemaValidator.IError[]).forEach((error, index) => {
-        const { dataPath, schemaPath, keyword, message } = error;
+        const { instancePath, schemaPath, keyword, message } = error;
 
-        if (dataPath || schemaPath) {
-          output.push(`${index} - schema @ ${schemaPath}, data @ ${dataPath}`);
+        if (instancePath || schemaPath) {
+          output.push(
+            `${index} - schema @ ${schemaPath}, data @ ${instancePath}`
+          );
         }
         output.push(`{${keyword}} ${message}`);
       });
@@ -569,7 +606,7 @@ export class SettingRegistry implements ISettingRegistry {
     if (fetched === undefined) {
       throw [
         {
-          dataPath: '',
+          instancePath: '',
           keyword: 'id',
           message: `Could not fetch settings for ${plugin}.`,
           schemaPath: ''
@@ -603,7 +640,7 @@ export class SettingRegistry implements ISettingRegistry {
       if (transformed.id !== id) {
         throw [
           {
-            dataPath: '',
+            instancePath: '',
             keyword: 'id',
             message: 'Plugin transformations cannot change plugin IDs.',
             schemaPath: ''
@@ -626,7 +663,7 @@ export class SettingRegistry implements ISettingRegistry {
 
     throw [
       {
-        dataPath: '',
+        instancePath: '',
         keyword: 'timeout',
         message: `Transforming ${plugin.id} timed out.`,
         schemaPath: ''

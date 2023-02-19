@@ -35,6 +35,22 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
   });
 
+  test('RegExp parsing failure', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+
+    await page.fill('[placeholder="Find"]', 'test\\');
+
+    await page.click('button[title="Use Regular Expression"]');
+
+    await expect(page.locator('.jp-DocumentSearch-regex-error')).toBeVisible();
+
+    const overlay = page.locator('.jp-DocumentSearch-overlay');
+
+    expect(await overlay.screenshot()).toMatchSnapshot(
+      'regexp-parsing-failure.png'
+    );
+  });
+
   test('Search selected', async ({ page }) => {
     // Enter first cell
     await page.notebook.enterCellEditingMode(0);

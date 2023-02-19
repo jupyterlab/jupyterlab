@@ -2155,7 +2155,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       // TODO: It would be nice for the cell to provide a way for
       // its consumers to hook into when the rendering is done.
       await this._updateRenderedInput();
-      this.renderInput(this._renderer);
+      if (this._rendered) {
+        // The rendered flag may be updated in the mean time
+        this.renderInput(this._renderer);
+      }
     }
   }
 

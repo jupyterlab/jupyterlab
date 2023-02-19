@@ -20,8 +20,9 @@ const questions: inquirer.Question[] = [
     message: 'description: '
   }
 ];
+const prompt = inquirer.createPromptModule();
 
-void inquirer.prompt(questions).then(answers => {
+void prompt(questions).then(answers => {
   let { name, description } = answers;
   const dest = path.resolve(path.join('.', 'packages', name));
   if (fs.existsSync(dest)) {

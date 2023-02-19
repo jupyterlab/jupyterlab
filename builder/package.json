@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/builder",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.19",
   "description": "JupyterLab - Extension Builder",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -28,24 +28,23 @@
   ],
   "scripts": {
     "build": "tsc",
-    "build:all": "npm run build",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@lumino/algorithm": "^2.0.0-alpha.6",
-    "@lumino/application": "^2.0.0-alpha.6",
-    "@lumino/commands": "^2.0.0-alpha.6",
-    "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/disposable": "^2.0.0-alpha.6",
-    "@lumino/domutils": "^2.0.0-alpha.6",
-    "@lumino/dragdrop": "^2.0.0-alpha.6",
-    "@lumino/messaging": "^2.0.0-alpha.6",
-    "@lumino/properties": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6",
-    "@lumino/virtualdom": "^2.0.0-alpha.6",
-    "@lumino/widgets": "^2.0.0-alpha.6",
-    "ajv": "^6.12.3",
+    "@lumino/algorithm": "^2.0.0-beta.0",
+    "@lumino/application": "^2.0.0-beta.1",
+    "@lumino/commands": "^2.0.0-beta.1",
+    "@lumino/coreutils": "^2.0.0-beta.0",
+    "@lumino/disposable": "^2.0.0-beta.1",
+    "@lumino/domutils": "^2.0.0-beta.0",
+    "@lumino/dragdrop": "^2.0.0-beta.1",
+    "@lumino/messaging": "^2.0.0-beta.0",
+    "@lumino/properties": "^2.0.0-beta.0",
+    "@lumino/signaling": "^2.0.0-beta.1",
+    "@lumino/virtualdom": "^2.0.0-beta.0",
+    "@lumino/widgets": "^2.0.0-beta.1",
+    "ajv": "^8.12.0",
     "commander": "^9.4.1",
     "css-loader": "^6.7.1",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
@@ -71,7 +70,7 @@
     "@types/node": "^18.11.18",
     "@types/supports-color": "^5.3.0",
     "rimraf": "~3.0.0",
-    "typescript": "~4.7.3"
+    "typescript": "~5.0.0-beta"
   },
   "publishConfig": {
     "access": "public"

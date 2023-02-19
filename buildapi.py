@@ -13,7 +13,6 @@ from packaging.version import Version
 
 
 def builder(target_name, version, *args, **kwargs):
-
     # Allow building from sdist without node.
     if target_name == "wheel" and not os.path.exists("dev_mode"):
         return
@@ -35,4 +34,5 @@ def builder(target_name, version, *args, **kwargs):
     py_version = py_version.decode("utf-8").strip()
 
     if Version(npm_version) != Version(py_version):
-        raise ValueError("Version mismatch, please run `npm run prepare:python-release`")
+        msg = "Version mismatch, please run `npm run prepare:python-release`"
+        raise ValueError(msg)

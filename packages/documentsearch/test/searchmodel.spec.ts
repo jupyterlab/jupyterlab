@@ -6,6 +6,7 @@ import {
 } from '@jupyterlab/documentsearch';
 import { Widget } from '@lumino/widgets';
 import { PromiseDelegate } from '@lumino/coreutils';
+import { signalToPromise } from '@jupyterlab/testing';
 
 class LogSearchProvider extends GenericSearchProvider {
   private _queryReceived: PromiseDelegate<RegExp | null>;
@@ -58,6 +59,18 @@ describe('documentsearch/searchmodel', () => {
         query.lastIndex = 0;
         expect(query.test('test')).toEqual(false);
         query.lastIndex = 0;
+      });
+    });
+
+    describe('#parsingError', () => {
+      it('should set informative string message on invalid regex', async () => {
+        model.useRegex = true;
+        expect(model.parsingError).toEqual('');
+        model.searchExpression = 'query\\';
+        await signalToPromise(model.stateChanged);
+        expect(model.parsingError).toEqual(
+          'SyntaxError: Invalid regular expression: /query\\/: \\ at end of pattern'
+        );
       });
     });
 

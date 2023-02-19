@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation-extension",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.19",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -38,15 +38,15 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.18",
-    "@jupyterlab/apputils": "^4.0.0-alpha.18",
-    "@jupyterlab/mainmenu": "^4.0.0-alpha.18",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.18",
-    "@jupyterlab/translation": "^4.0.0-alpha.18"
+    "@jupyterlab/application": "^4.0.0-alpha.19",
+    "@jupyterlab/apputils": "^4.0.0-alpha.19",
+    "@jupyterlab/mainmenu": "^4.0.0-alpha.19",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
+    "@jupyterlab/translation": "^4.0.0-alpha.19"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~4.7.3"
+    "typescript": "~5.0.0-beta"
   },
   "publishConfig": {
     "access": "public"

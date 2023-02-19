@@ -149,7 +149,6 @@ class ProcessTestApp(ProcessApp):
         self.template_paths = [_create_template_dir()]
 
     def initialize_settings(self):
-
         self.env_patch = TestEnv()
         self.env_patch.start()
         ProcessApp.__init__(self)
