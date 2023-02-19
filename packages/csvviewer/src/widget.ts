@@ -236,6 +236,10 @@ export class CSVViewer extends Widget {
   }
 
   protected async initialize(): Promise<void> {
+    const layout = this.layout as PanelLayout;
+    if (this.isDisposed || !layout) {
+      return;
+    }
     const { BasicKeyHandler, BasicMouseHandler, DataGrid } =
       await Private.ensureDataGrid();
     this._defaultStyle = DataGrid.defaultStyle;
@@ -258,7 +262,7 @@ export class CSVViewer extends Widget {
       warningThreshold: 1e6
     };
 
-    (this.layout as PanelLayout).addWidget(this._grid);
+    layout.addWidget(this._grid);
 
     this._searchService = new GridSearchService(this._grid);
     this._searchService.changed.connect(this._updateRenderer, this);

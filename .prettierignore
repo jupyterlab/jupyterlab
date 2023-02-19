@@ -5,7 +5,7 @@
 **/package.json
 **/static
 **/.ipynb_checkpoints
-tests/**/coverage
+**/coverage
 CHANGELOG.md
 
 .eggs
