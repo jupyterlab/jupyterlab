@@ -194,7 +194,6 @@ class OpenDialog
           writable: false,
           created: 'unknown',
           last_modified: 'unknown',
-          size: 0,
           mimetype: 'text/plain',
           format: 'text'
         }
