@@ -2038,15 +2038,21 @@ export namespace DirListing {
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null {
       const name = DOMUtils.findElement(node, NAME_ID_CLASS);
       const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
+      const fileSize = DOMUtils.findElement(node, FILE_SIZE_ID_CLASS);
       const state: ISortState = { direction: 'ascending', key: 'name' };
       const target = event.target as HTMLElement;
-      if (name.contains(target)) {
-        const modifiedIcon = DOMUtils.findElement(
-          modified,
-          HEADER_ITEM_ICON_CLASS
-        );
-        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
 
+      const modifiedIcon = DOMUtils.findElement(
+        modified,
+        HEADER_ITEM_ICON_CLASS
+      );
+      const fileSizeIcon = DOMUtils.findElement(
+        fileSize,
+        HEADER_ITEM_ICON_CLASS
+      );
+      const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
+      if (name.contains(target)) {
         if (name.classList.contains(SELECTED_CLASS)) {
           if (!name.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
@@ -2063,16 +2069,13 @@ export namespace DirListing {
         name.classList.add(SELECTED_CLASS);
         modified.classList.remove(SELECTED_CLASS);
         modified.classList.remove(DESCENDING_CLASS);
+        fileSize.classList.remove(SELECTED_CLASS);
+        fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(modifiedIcon, 'left');
+        Private.updateCaret(fileSizeIcon, 'left');
         return state;
       }
       if (modified.contains(target)) {
-        const modifiedIcon = DOMUtils.findElement(
-          modified,
-          HEADER_ITEM_ICON_CLASS
-        );
-        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
-
         state.key = 'last_modified';
         if (modified.classList.contains(SELECTED_CLASS)) {
           if (!modified.classList.contains(DESCENDING_CLASS)) {
@@ -2090,7 +2093,34 @@ export namespace DirListing {
         modified.classList.add(SELECTED_CLASS);
         name.classList.remove(SELECTED_CLASS);
         name.classList.remove(DESCENDING_CLASS);
+        fileSize.classList.remove(SELECTED_CLASS);
+        fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(nameIcon, 'right');
+        Private.updateCaret(fileSizeIcon, 'right');
+        return state;
+      }
+      if (fileSize.contains(target)) {
+        state.key = 'file_size';
+        if (fileSize.classList.contains(SELECTED_CLASS)) {
+          if (!fileSize.classList.contains(DESCENDING_CLASS)) {
+            state.direction = 'descending';
+            fileSize.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(fileSizeIcon, 'left', 'down');
+          } else {
+            fileSize.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(fileSizeIcon, 'left', 'up');
+          }
+        } else {
+          fileSize.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(fileSizeIcon, 'left', 'up');
+        }
+        fileSize.classList.add(SELECTED_CLASS);
+        name.classList.remove(SELECTED_CLASS);
+        name.classList.remove(DESCENDING_CLASS);
+        modified.classList.remove(SELECTED_CLASS);
+        modified.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(nameIcon, 'right');
+        Private.updateCaret(modifiedIcon, 'right');
         return state;
       }
       return state;
@@ -2495,6 +2525,14 @@ namespace Private {
         const valB = new Date(b.last_modified).getTime();
 
         return t1 - t2 || (valA - valB) * reverse;
+      });
+    } else if (state.key === 'file_size') {
+      // Sort by size (grouping directories first)
+      copy.sort((a, b) => {
+        const t1 = a.type === 'directory' ? 0 : 1;
+        const t2 = b.type === 'directory' ? 0 : 1;
+
+        return t1 - t2 || ((a.size ?? 0) - (b.size ?? 0)) * reverse;
       });
     } else {
       // Sort by name (grouping directories first)
