@@ -2250,10 +2250,14 @@ export namespace DirListing {
 
       // add file size to pop up if its available
       if (model.size !== null && model.size !== undefined) {
+        const fileSize = Private.formatFileSize(model.size, 1, 1024);
+        size.textContent = fileSize;
         hoverText += trans.__(
           '\nSize: %1',
           Private.formatFileSize(model.size, 1, 1024)
         );
+      } else {
+        size.textContent = '';
       }
       if (model.path) {
         const dirname = PathExt.dirname(model.path);
@@ -2275,9 +2279,6 @@ export namespace DirListing {
           '\nModified: %1',
           Time.format(new Date(model.last_modified))
         );
-      }
-      if (model.size) {
-        hoverText += trans.__('\nSize: %1', model.size);
       }
       hoverText += trans.__('\nWritable: %1', model.writable);
 
@@ -2323,9 +2324,6 @@ export namespace DirListing {
       }
       modified.textContent = modText;
       modified.title = modTitle;
-
-      // TODO: handle units
-      size.textContent = model.size ? model.size.toString() : '';
     }
 
     /**
