@@ -440,7 +440,7 @@ export class FileBrowser extends SidePanel {
   private _filePending: boolean;
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
-  private _showFileSizeColumn: boolean = true;
+  private _showFileSizeColumn: boolean = false;
   private _useFuzzyFilter: boolean = true;
   private _showHiddenFiles: boolean = false;
   private _showFileCheckboxes: boolean = false;
