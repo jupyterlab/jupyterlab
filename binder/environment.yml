@@ -16,6 +16,14 @@ dependencies:
   # build
   - hatchling >=1.5.0
   - hatch-jupyter-builder >=0.3.2
+  # dev
+  - black-jupyter
+  - bump2version
+  - hatch
+  - pre-commit
+  - pytest-cov
+  - python-build
+  - ruff
   # runtime deps
   - async-lru >=1.0.0
   - ipykernel
