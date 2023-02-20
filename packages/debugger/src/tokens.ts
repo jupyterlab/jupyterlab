@@ -611,6 +611,11 @@ export namespace IDebugger {
       variables: DebugProtocol.VariablesResponse;
     };
 
+    /**
+     * Arguments for CopyToGlobals request.
+     * This is an addition to the Debug Adaptor protocol to support
+     * copying variable from Locals() to Globals() during breakpoint.
+     */
     export interface ICopyToGlobalsArguments {
       srcVariableName: string;
       dstVariableName: string;
