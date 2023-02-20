@@ -336,6 +336,12 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (!this.session) {
       throw new Error('No active debugger session');
     }
+    if (!this.model.supportCopyToGlobals) {
+      throw new Error(
+        'The "copyToGlobals" request is not supported by the kernel'
+      );
+    }
+
     const frames = this.model.callstack.frames;
     this.session
       .sendRequest('copyToGlobals', {
@@ -418,6 +424,8 @@ export class DebuggerService implements IDebugger, IDisposable {
     const stoppedThreads = new Set(body.stoppedThreads);
 
     this._model.hasRichVariableRendering = body.richRendering === true;
+    this._model.supportCopyToGlobals = body.copyToGlobals === true;
+
     this._config.setHashParams({
       kernel: this.session?.connection?.kernel?.name ?? '',
       method: body.hashMethod,

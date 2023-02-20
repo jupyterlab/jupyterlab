@@ -638,6 +638,10 @@ export namespace IDebugger {
     export interface IDebugInfoResponse extends DebugProtocol.Response {
       body: {
         breakpoints: IDebugInfoBreakpoints[];
+        /**
+         * Whether the kernel supports the 'copyToGlobals' request.
+         */
+        copyToGlobals?: boolean;
         hashMethod: string;
         hashSeed: number;
         isStarted: boolean;
@@ -907,6 +911,11 @@ export namespace IDebugger {
        * Whether the kernel support rich variable rendering based on mime type.
        */
       hasRichVariableRendering: boolean;
+
+      /**
+       * Whether the kernel supports the copyToGlobals request.
+       */
+      supportCopyToGlobals: boolean;
 
       /**
        * The variables UI model.
