@@ -228,6 +228,8 @@ export class DirListing extends Widget {
     this._renderer = options.renderer || DirListing.defaultRenderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
+    // hide the file size column by default
+    this._hiddenColumns.add('file_size');
     this._renderer.populateHeaderNode(
       headerNode,
       this.translator,
