@@ -199,7 +199,6 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
   .jp-FormGroup-description {
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color2);
-  padding-left: 3px;
 }
 
 .jp-FormGroup-contentCompact .jp-FormGroup-fieldLabel {
