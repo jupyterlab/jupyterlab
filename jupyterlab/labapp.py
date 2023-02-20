@@ -842,14 +842,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         super().initialize()
         if self.collaborative:
             try:
-                import jupyterlab_rtc  # noqa
+                import jupyter_collaboration  # noqa
             except ImportError:
                 self.log.critical(
                     """
-To enable real-time collaboration, you must install the extension `jupyterlab_rtc`.
+To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
 You can install it using pip for example:
 
-  python -m pip install jupyterlab_rtc
+  python -m pip install jupyter_collaboration
 """
                 )
                 sys.exit(1)
