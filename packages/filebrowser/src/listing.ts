@@ -2096,7 +2096,7 @@ export namespace DirListing {
         fileSize.classList.remove(SELECTED_CLASS);
         fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(nameIcon, 'right');
-        Private.updateCaret(fileSizeIcon, 'right');
+        Private.updateCaret(fileSizeIcon, 'left');
         return state;
       }
       if (fileSize.contains(target)) {
@@ -2120,7 +2120,7 @@ export namespace DirListing {
         modified.classList.remove(SELECTED_CLASS);
         modified.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(nameIcon, 'right');
-        Private.updateCaret(modifiedIcon, 'right');
+        Private.updateCaret(modifiedIcon, 'left');
         return state;
       }
       return state;
