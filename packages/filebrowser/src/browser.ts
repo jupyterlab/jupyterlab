@@ -156,14 +156,14 @@ export class FileBrowser extends SidePanel {
   /**
    * Whether to show the file size column
    */
-  get showSizeColumn(): boolean {
-    return this._showSizeColumn;
+  get showFileSizeColumn(): boolean {
+    return this._showFileSizeColumn;
   }
 
-  set showSizeColumn(value: boolean) {
+  set showFileSizeColumn(value: boolean) {
     if (this.listing.setColumnVisibility) {
-      this.listing.setColumnVisibility('size', value);
-      this._showSizeColumn = value;
+      this.listing.setColumnVisibility('file_size', value);
+      this._showFileSizeColumn = value;
     } else {
       console.warn('Listing does not support toggling column visibility');
     }
@@ -440,7 +440,7 @@ export class FileBrowser extends SidePanel {
   private _filePending: boolean;
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
-  private _showSizeColumn: boolean = true;
+  private _showFileSizeColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
   private _showHiddenFiles: boolean = false;
   private _showFileCheckboxes: boolean = false;

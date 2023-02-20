@@ -102,7 +102,7 @@
         "rank": 14
       },
       {
-        "command": "filebrowser:toggle-size",
+        "command": "filebrowser:toggle-file-size",
         "selector": ".jp-DirListing-header",
         "rank": 15
       },
@@ -197,11 +197,11 @@
       "description": "Whether to show the last modified column",
       "default": true
     },
-    "showSizeColumn": {
+    "showFileSizeColumn": {
       "type": "boolean",
-      "title": "Show size column",
-      "description": "Whether to show the size column",
-      "default": true
+      "title": "Show file size column",
+      "description": "Whether to show the file size column",
+      "default": false
     },
     "showHiddenFiles": {
       "type": "boolean",

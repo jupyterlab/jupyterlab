@@ -128,7 +128,7 @@ namespace CommandIDs {
 
   export const toggleLastModified = 'filebrowser:toggle-last-modified';
 
-  export const toggleSize = 'filebrowser:toggle-size';
+  export const toggleFileSize = 'filebrowser:toggle-file-size';
 
   export const search = 'filebrowser:search';
 
@@ -208,7 +208,7 @@ const browser: JupyterFrontEndPlugin<void> = {
           const fileBrowserConfig = {
             navigateToCurrentDirectory: false,
             showLastModifiedColumn: true,
-            showSizeColumn: true,
+            showFileSizeColumn: true,
             useFuzzyFilter: true,
             showHiddenFiles: false,
             showFileCheckboxes: false
@@ -1206,12 +1206,12 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.toggleSize, {
-    label: trans.__('Show Size Column'),
-    isToggled: () => browser.showSizeColumn,
+  commands.addCommand(CommandIDs.toggleFileSize, {
+    label: trans.__('Show File Size Column'),
+    isToggled: () => browser.showFileSizeColumn,
     execute: () => {
-      const value = !browser.showSizeColumn;
-      const key = 'showSizeColumn';
+      const value = !browser.showFileSizeColumn;
+      const key = 'showFileSizeColumn';
       if (settingRegistry) {
         return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)

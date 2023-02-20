@@ -1827,13 +1827,13 @@ export namespace DirListing {
     /**
      * The sort key.
      */
-    key: 'name' | 'last_modified' | 'size';
+    key: 'name' | 'last_modified' | 'file_size';
   }
 
   /**
    * Toggleable columns.
    */
-  export type ToggleableColumn = 'last_modified' | 'is_selected' | 'size';
+  export type ToggleableColumn = 'last_modified' | 'is_selected' | 'file_size';
 
   /**
    * A file contents model thunk.
@@ -1988,7 +1988,7 @@ export namespace DirListing {
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
       const modified = this.createHeaderItemNode(trans.__('Last Modified'));
-      const size = this.createHeaderItemNode(trans.__('Size'));
+      const size = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
@@ -2012,7 +2012,7 @@ export namespace DirListing {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
 
-      if (hiddenColumns?.has?.('size')) {
+      if (hiddenColumns?.has?.('file_size')) {
         size.classList.add(SIZE_COLUMN_HIDDEN);
       } else {
         size.classList.remove(SIZE_COLUMN_HIDDEN);
@@ -2134,7 +2134,7 @@ export namespace DirListing {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
 
-      if (hiddenColumns?.has?.('size')) {
+      if (hiddenColumns?.has?.('file_size')) {
         modified.classList.add(SIZE_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(SIZE_COLUMN_HIDDEN);
@@ -2231,7 +2231,7 @@ export namespace DirListing {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
 
-      if (hiddenColumns?.has?.('size')) {
+      if (hiddenColumns?.has?.('file_size')) {
         size.classList.add(SIZE_COLUMN_HIDDEN);
       } else {
         size.classList.remove(SIZE_COLUMN_HIDDEN);
