@@ -1,0 +1,6 @@
+{
+  "@jupyterlab/apputils-extension:notification": {
+    "fetchNews": "false",
+    "doNotDisturbMode": true
+  }
+}
