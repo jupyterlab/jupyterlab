@@ -208,7 +208,7 @@ const browser: JupyterFrontEndPlugin<void> = {
           const fileBrowserConfig = {
             navigateToCurrentDirectory: false,
             showLastModifiedColumn: true,
-            showFileSizeColumn: true,
+            showFileSizeColumn: false,
             useFuzzyFilter: true,
             showHiddenFiles: false,
             showFileCheckboxes: false
