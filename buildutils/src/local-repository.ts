@@ -90,8 +90,8 @@ packages:
 
   // Wait for Verdaccio to boot
   let content = '';
-  let delays = 0;
-  while (delays < 100) {
+  let delays = 12000;
+  while (delays > 0) {
     ps.stdout.write('.');
     if (content.indexOf('http address') !== -1) {
       break;
@@ -104,10 +104,11 @@ packages:
     if (fs.existsSync(log_file)) {
       content = fs.readFileSync(log_file, { encoding: 'utf-8' });
     }
-    delays += 1;
+    delays -= 100;
   }
-  if (delays === 100) {
-    console.error('Timed out!');
+  if (delays <= 0) {
+    console.error('Timed out!\nLOG:');
+    console.log(content);
     process.exit(1);
   }
   console.log('\nVerdaccio started');
