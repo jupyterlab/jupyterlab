@@ -6,6 +6,8 @@
 .jp-FormGroup-content fieldset {
   border: none;
   padding: 0;
+  min-width: 0;
+  width: 100%;
 }
 
 .jp-FormGroup-content fieldset .jp-inputFieldWrapper input,
@@ -33,7 +35,7 @@
 }
 
 .jp-FormGroup-content .form-group.small-field:hover {
-  background: var(--jp-border-color3);
+  background: var(--jp-border-color2);
 }
 
 .jp-FormGroup-content .checkbox label {
@@ -79,6 +81,7 @@
 
 .jp-FormGroup-content .jp-modifiedIndicator.jp-errorIndicator {
   background-color: var(--jp-error-color0);
+  margin-right: 0.5em;
 }
 
 /* RJSF ARRAY style */
@@ -188,7 +191,7 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
 
 .jp-FormGroup-contentCompact .form-group {
   display: flex;
-  padding: 4px 8px 4px 0;
+  padding: 0.5em 0.2em 0.5em 0;
 }
 
 .jp-FormGroup-contentCompact
@@ -202,10 +205,7 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
 .jp-FormGroup-contentCompact .jp-FormGroup-fieldLabel {
   font-size: var(--jp-ui-font-size2);
   font-weight: normal;
-}
-
-.jp-FormGroup-contentCompact .jp-inputFieldWrapper {
-  padding-left: 5px;
+  padding-bottom: 0.3em;
 }
 
 .jp-FormGroup-contentCompact .jp-inputFieldWrapper .form-control {
