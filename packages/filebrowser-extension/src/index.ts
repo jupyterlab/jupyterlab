@@ -174,6 +174,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     commandPalette: ICommandPalette | null
   ): Promise<void> => {
     const browser = defaultFileBrowser;
+    const trans = translator.load('jupyterlab');
 
     // Let the application restorer track the primary file browser (that is
     // automatically created) for restoration of application state (e.g. setting
@@ -191,7 +192,14 @@ const browser: JupyterFrontEndPlugin<void> = {
       await browser.model.cd(preferredPath);
     }
 
-    addCommands(app, factory, translator, settingRegistry, commandPalette);
+    addCommands(
+      app,
+      browser,
+      factory,
+      translator,
+      settingRegistry,
+      commandPalette
+    );
 
     // Show the current file browser shortcut in its title.
     const updateBrowserTitle = () => {
@@ -200,7 +208,7 @@ const browser: JupyterFrontEndPlugin<void> = {
         b => b.command === CommandIDs.toggleBrowser
       );
       if (binding) {
-        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ')
+        const ks = CommandRegistry.formatKeystroke(binding.keys);
         browser.title.caption = trans.__('File Browser (%1)', ks);
       } else {
         browser.title.caption = trans.__('File Browser');

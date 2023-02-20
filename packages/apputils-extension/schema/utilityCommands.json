@@ -1,0 +1,14 @@
+{
+  "title": "Shortcuts Help",
+  "description": "Shortcut help settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "apputils:display-shortcuts",
+      "keys": ["Accel Shift H"],
+      "selector": "body"
+    }
+  ],
+  "properties": {},
+  "type": "object",
+  "additionalProperties": false
+}

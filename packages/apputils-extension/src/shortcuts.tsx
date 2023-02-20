@@ -1,9 +1,15 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { CommandRegistry } from '@lumino/commands';
 import { Selector } from '@lumino/domutils';
 import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
+import '../style/base.css';
 
 export function displayShortcuts(
   app: JupyterFrontEnd,
@@ -33,11 +39,6 @@ export function displayShortcuts(
       if (targ.hasAttribute('data-lm-suppress-shortcuts')) {
         return -1;
       }
-      /* <DEPRECATED> */
-      if (targ.hasAttribute('data-p-suppress-shortcuts')) {
-        return -1;
-      }
-      /* </DEPRECATED> */
       if (targ.matches(selector)) {
         return dist;
       }
@@ -88,34 +89,22 @@ export function displayShortcuts(
   }
 
   // Display shortcuts by group
-  const bindingTable = [];
+  const bindingTable: any = [];
   for (let d = 0; d <= maxDistance; d++) {
     if (groupedBindings.has(d)) {
-      console.log(`Binding level ${d}:`);
       bindingTable.push(
         groupedBindings.get(d)!.map(b => (
-          <tr key={b.command}>
-            <td
-              style={{
-                whiteSpace: 'nowrap',
-                verticalAlign: 'top',
-                padding: '0px 10px',
-                fontFamily: 'monospace'
-              }}
-            >
-              {b.keys.map(CommandRegistry.formatKeystroke).join(', ')}
+          <tr className="jp-ContextualShortcut-TableRow" key={b.command}>
+            <td className="jp-ContextualShortcut-TableItem">
+              {CommandRegistry.formatKeystroke(b.keys)}
             </td>
-            <td style={{ verticalAlign: 'top' }}>
-              {commands.label(b.command, b.args)}
-            </td>
-            <td style={{ verticalAlign: 'top' }}>
-              {commands.caption(b.command, b.args)}
-            </td>
-            <td style={{ verticalAlign: 'top' }}>{b.command}</td>
+            <td>{commands.label(b.command, b.args)}</td>
           </tr>
         ))
       );
-      bindingTable.push(<tr style={{ height: '2em' }}></tr>);
+      bindingTable.push(
+        <tr className="jp-ContextualShortcut-TableLastRow"></tr>
+      );
     }
   }
 
@@ -123,10 +112,12 @@ export function displayShortcuts(
     <table>
       <thead>
         <tr>
-          <th style={{ textAlign: 'left' }}>Shortcut</th>
-          <th style={{ textAlign: 'left' }}>Label</th>
-          <th style={{ textAlign: 'left' }}>Description</th>
-          <th style={{ textAlign: 'left' }}>Command</th>
+          <th className="jp-ContextualShortcut-TableHeader">
+            {trans.__('Shortcut')}
+          </th>
+          <th className="jp-ContextualShortcut-TableHeader">
+            {trans.__('Label')}
+          </th>
         </tr>
       </thead>
       <tbody>{bindingTable}</tbody>
@@ -134,12 +125,11 @@ export function displayShortcuts(
   );
 
   return showDialog({
-    title: 'Keyboard Shortcuts',
+    title: trans.__('Keyboard Shortcuts'),
     body,
     buttons: [
-      Dialog.createButton({
-        label: trans.__('Dismiss'),
-        className: 'jp-mod-reject jp-mod-styled'
+      Dialog.cancelButton({
+        label: trans.__('Dismiss')
       })
     ]
   });
