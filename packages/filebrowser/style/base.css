@@ -153,8 +153,8 @@
   text-align: right;
 }
 
-.jp-DirListing-headerItem.jp-id-size {
-  flex: 0 0 56px;
+.jp-DirListing-headerItem.jp-id-filesize {
+  flex: 0 0 70px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
 }
@@ -289,7 +289,7 @@
 }
 
 .jp-DirListing-itemFileSize {
-  flex: 0 0 72px;
+  flex: 0 0 84px;
   text-align: right;
 }
 
