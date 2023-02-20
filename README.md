@@ -125,9 +125,6 @@ JupyterLab follows the Jupyter [Community Guides](https://jupyter.readthedocs.io
 JupyterLab uses a shared copyright model that enables all contributors to maintain the
 copyright on their contributions. All code is licensed under the terms of the revised [BSD license](https://github.com/jupyterlab/jupyterlab/blob/master/LICENSE).
 
-Semver File License
-===================
-
 The semver.py file is from https://github.com/podhmo/python-semver
 which is licensed under the "MIT" license.  See the semver.py file for details.
 
