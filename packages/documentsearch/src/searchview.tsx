@@ -69,7 +69,6 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
       placeholder={props.placeholder}
       className={INPUT_CLASS}
       rows={rows}
-      value={props.value}
       onChange={e => {
         props.onChange(e);
         setRows((e.target as HTMLTextAreaElement).value.split(/\n/).length);
@@ -81,7 +80,9 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
       tabIndex={0}
       ref={props.inputRef}
       title={props.title}
-    />
+    >
+      {props.value}
+    </textarea>
   );
 }
 
