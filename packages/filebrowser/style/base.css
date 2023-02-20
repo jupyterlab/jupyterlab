@@ -92,7 +92,7 @@
   display: none;
 }
 
-.jp-Size-hidden {
+.jp-FileSize-hidden {
   display: none;
 }
 
@@ -288,7 +288,7 @@
   text-align: right;
 }
 
-.jp-DirListing-itemSize {
+.jp-DirListing-itemFileSize {
   flex: 0 0 72px;
   text-align: right;
 }
