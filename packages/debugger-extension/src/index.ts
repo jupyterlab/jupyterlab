@@ -521,7 +521,7 @@ const variables: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.copyToGlobals, {
-      label: 'Copy Variable to Globals',
+      label: trans.__('Copy Variable to Globals'),
       caption: trans.__('Copy variable to globals scope'),
       isEnabled: () => !!service.session?.isStarted,
       isVisible: () => handler.activeWidget instanceof NotebookPanel,
