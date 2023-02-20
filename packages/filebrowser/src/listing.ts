@@ -87,6 +87,11 @@ const ITEM_ICON_CLASS = 'jp-DirListing-itemIcon';
 const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
 
 /**
+ * The class name added to the listing item size cell.
+ */
+const ITEM_SIZE_CLASS = 'jp-DirListing-itemSize';
+
+/**
  * The class name added to the label element that wraps each item's checkbox and
  * the header's check-all checkbox.
  */
@@ -108,6 +113,11 @@ const NAME_ID_CLASS = 'jp-id-name';
 const MODIFIED_ID_CLASS = 'jp-id-modified';
 
 /**
+ * The class name added to the size column header cell.
+ */
+const SIZE_ID_CLASS = 'jp-id-size';
+
+/**
  * The class name added to the narrow column header cell.
  */
 const NARROW_ID_CLASS = 'jp-id-narrow';
@@ -116,6 +126,11 @@ const NARROW_ID_CLASS = 'jp-id-narrow';
  * The class name added to the modified column header cell and modified item cell when hidden.
  */
 const MODIFIED_COLUMN_HIDDEN = 'jp-LastModified-hidden';
+
+/**
+ * The class name added to the size column header cell and size item cell when hidden.
+ */
+const SIZE_COLUMN_HIDDEN = 'jp-Size-hidden';
 
 /**
  * The mime type for a contents drag object.
@@ -1812,13 +1827,13 @@ export namespace DirListing {
     /**
      * The sort key.
      */
-    key: 'name' | 'last_modified';
+    key: 'name' | 'last_modified' | 'size';
   }
 
   /**
    * Toggleable columns.
    */
-  export type ToggleableColumn = 'last_modified' | 'is_selected';
+  export type ToggleableColumn = 'last_modified' | 'is_selected' | 'size';
 
   /**
    * A file contents model thunk.
@@ -1973,9 +1988,11 @@ export namespace DirListing {
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
       const modified = this.createHeaderItemNode(trans.__('Last Modified'));
+      const size = this.createHeaderItemNode(trans.__('Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
+      size.classList.add(SIZE_ID_CLASS);
       narrow.classList.add(NARROW_ID_CLASS);
       narrow.textContent = '...';
       if (!hiddenColumns?.has?.('is_selected')) {
@@ -1987,11 +2004,18 @@ export namespace DirListing {
       node.appendChild(name);
       node.appendChild(narrow);
       node.appendChild(modified);
+      node.appendChild(size);
 
       if (hiddenColumns?.has?.('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
+
+      if (hiddenColumns?.has?.('size')) {
+        size.classList.add(SIZE_COLUMN_HIDDEN);
+      } else {
+        size.classList.remove(SIZE_COLUMN_HIDDEN);
       }
 
       // set the initial caret icon
@@ -2084,9 +2108,11 @@ export namespace DirListing {
       const icon = document.createElement('span');
       const text = document.createElement('span');
       const modified = document.createElement('span');
+      const size = document.createElement('span');
       icon.className = ITEM_ICON_CLASS;
       text.className = ITEM_TEXT_CLASS;
       modified.className = ITEM_MODIFIED_CLASS;
+      size.className = ITEM_SIZE_CLASS;
       if (!hiddenColumns?.has?.('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode();
         node.appendChild(checkboxWrapper);
@@ -2094,6 +2120,7 @@ export namespace DirListing {
       node.appendChild(icon);
       node.appendChild(text);
       node.appendChild(modified);
+      node.appendChild(size);
 
       // Make the text note focusable so that it receives keyboard events;
       // text node was specifically chosen to receive shortcuts because
@@ -2106,6 +2133,13 @@ export namespace DirListing {
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
+
+      if (hiddenColumns?.has?.('size')) {
+        modified.classList.add(SIZE_COLUMN_HIDDEN);
+      } else {
+        modified.classList.remove(SIZE_COLUMN_HIDDEN);
+      }
+
       return node;
     }
 
@@ -2177,6 +2211,7 @@ export namespace DirListing {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+      const size = DOMUtils.findElement(node, ITEM_SIZE_CLASS);
       const checkboxWrapper = DOMUtils.findElement(
         node,
         CHECKBOX_WRAPPER_CLASS
@@ -2194,6 +2229,12 @@ export namespace DirListing {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
+
+      if (hiddenColumns?.has?.('size')) {
+        size.classList.add(SIZE_COLUMN_HIDDEN);
+      } else {
+        size.classList.remove(SIZE_COLUMN_HIDDEN);
       }
 
       // render the file item's icon
@@ -2234,6 +2275,9 @@ export namespace DirListing {
           '\nModified: %1',
           Time.format(new Date(model.last_modified))
         );
+      }
+      if (model.size) {
+        hoverText += trans.__('\nSize: %1', model.size);
       }
       hoverText += trans.__('\nWritable: %1', model.writable);
 
@@ -2279,6 +2323,9 @@ export namespace DirListing {
       }
       modified.textContent = modText;
       modified.title = modTitle;
+
+      // TODO: handle units
+      size.textContent = model.size ? model.size.toString() : '';
     }
 
     /**

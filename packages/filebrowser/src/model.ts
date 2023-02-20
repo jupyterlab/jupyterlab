@@ -68,6 +68,7 @@ export class FileBrowserModel implements IDisposable {
       writable: false,
       created: 'unknown',
       last_modified: 'unknown',
+      size: 0,
       mimetype: 'text/plain',
       format: 'text'
     };
@@ -581,6 +582,7 @@ export class FileBrowserModel implements IDisposable {
       writable: contents.writable,
       created: contents.created,
       last_modified: contents.last_modified,
+      size: contents.size,
       mimetype: contents.mimetype,
       format: contents.format
     };
