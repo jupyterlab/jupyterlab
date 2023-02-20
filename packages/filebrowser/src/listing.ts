@@ -2165,9 +2165,9 @@ export namespace DirListing {
       }
 
       if (hiddenColumns?.has?.('file_size')) {
-        modified.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
       } else {
-        modified.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
       }
 
       return node;
