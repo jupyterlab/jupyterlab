@@ -92,6 +92,10 @@
   display: none;
 }
 
+.jp-Size-hidden {
+  display: none;
+}
+
 .jp-FileBrowser-filterBox {
   padding: 0;
   flex: 0 0 auto;
@@ -285,7 +289,7 @@
 }
 
 .jp-DirListing-itemSize {
-  flex: 0 0 62px;
+  flex: 0 0 72px;
   text-align: right;
 }
 

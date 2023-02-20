@@ -102,14 +102,19 @@
         "rank": 14
       },
       {
-        "command": "filebrowser:toggle-file-checkboxes",
+        "command": "filebrowser:toggle-size",
         "selector": ".jp-DirListing-header",
         "rank": 15
       },
       {
+        "command": "filebrowser:toggle-file-checkboxes",
+        "selector": ".jp-DirListing-header",
+        "rank": 16
+      },
+      {
         "command": "filebrowser:share-main",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "rank": 16
+        "rank": 17
       },
       {
         "type": "separator",
@@ -190,6 +195,12 @@
       "type": "boolean",
       "title": "Show last modified column",
       "description": "Whether to show the last modified column",
+      "default": true
+    },
+    "showSizeColumn": {
+      "type": "boolean",
+      "title": "Show size column",
+      "description": "Whether to show the size column",
       "default": true
     },
     "showHiddenFiles": {

@@ -154,6 +154,22 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to show the file size column
+   */
+  get showSizeColumn(): boolean {
+    return this._showSizeColumn;
+  }
+
+  set showSizeColumn(value: boolean) {
+    if (this.listing.setColumnVisibility) {
+      this.listing.setColumnVisibility('size', value);
+      this._showSizeColumn = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
+  }
+
+  /**
    * Whether to use fuzzy filtering on file names.
    */
   set useFuzzyFilter(value: boolean) {
@@ -424,6 +440,7 @@ export class FileBrowser extends SidePanel {
   private _filePending: boolean;
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
+  private _showSizeColumn: boolean = true;
   private _useFuzzyFilter: boolean = true;
   private _showHiddenFiles: boolean = false;
   private _showFileCheckboxes: boolean = false;
