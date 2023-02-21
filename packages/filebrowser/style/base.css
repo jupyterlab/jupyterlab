@@ -24,6 +24,7 @@
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
   flex-wrap: wrap;
+  row-gap: 12px;
   border-bottom: none;
   height: auto;
   margin: 8px 12px 0;
