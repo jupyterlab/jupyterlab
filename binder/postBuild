@@ -23,9 +23,8 @@ mv dev_mode/static/webpack-bundle-analyzer.html _reports_/
 (time pip install -vv -e .[dev] --no-build-isolation)  2>&1 | tee _reports_/02_pip_install.txt
 
 # copy configuration to well-known location
-mkdir -p ~/.jupyter ${NB_PYTHON_PREFIX}/share/jupyter/lab/settings
+mkdir -p ~/.jupyter
 cp binder/jupyter_config.py ~/.jupyter/
-cp binder/overrides.json ${NB_PYTHON_PREFIX}/share/jupyter/lab/settings/
 
 # replace the default entry point until jupyter-server is the default on binder
 cp ${NB_PYTHON_PREFIX}/bin/jupyter-lab ${NB_PYTHON_PREFIX}/bin/jupyter-notebook
