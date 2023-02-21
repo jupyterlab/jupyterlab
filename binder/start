@@ -17,7 +17,7 @@ argv = sys.argv[1:] + [
     "--config",
     "binder/jupyter_notebook_config.py",
 ]
-print(argv)  # noqa
+print(argv)
 
 
 # Convert from jupyter-notebook based to jupyter-lab based start-up
@@ -26,7 +26,7 @@ def nb2jps(s):
 
 
 new_argv = list(map(nb2jps, argv.copy()))
-print(new_argv)  # noqa
+print(new_argv)
 
 with open(".startup_args.txt", "w") as fid:
     fid.write(str(new_argv))
