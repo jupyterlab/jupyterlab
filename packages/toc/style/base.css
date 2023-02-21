@@ -29,6 +29,10 @@
   padding: 8px;
 }
 
+.jp-TableOfContents-placeholderContent h3 {
+  margin-bottom: var(--jp-content-heading-margin-bottom);
+}
+
 .jp-TableOfContents .jp-SidePanel-content {
   overflow-y: auto;
   display: flex;
