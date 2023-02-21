@@ -5,12 +5,7 @@ import { showErrorMessage } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import {
-  FilenameSearcher,
-  IScore,
-  ReactWidget,
-  SidePanel
-} from '@jupyterlab/ui-components';
+import { SidePanel } from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
 import { BreadCrumbs } from './crumbs';
 import { DirListing } from './listing';
@@ -30,11 +25,6 @@ const FILE_BROWSER_PANEL_CLASS = 'jp-FileBrowser-Panel';
  * The class name added to the filebrowser crumbs node.
  */
 const CRUMBS_CLASS = 'jp-FileBrowser-crumbs';
-
-/**
- * The class name added to the filebrowser filterbox node.
- */
-const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
 
 /**
  * The class name added to the filebrowser toolbar node.
@@ -96,21 +86,6 @@ export class FileBrowser extends SidePanel {
     });
     this.listing.addClass(LISTING_CLASS);
 
-    this._filenameSearcher = FilenameSearcher({
-      updateFilter: (
-        filterFn: (item: string) => Partial<IScore> | null,
-        query?: string
-      ) => {
-        this.listing.model.setFilter(value => {
-          return filterFn(value.name.toLowerCase());
-        });
-      },
-      useFuzzyFilter: this._useFuzzyFilter,
-      placeholder: this._trans.__('Filter files by name')
-    });
-    this._filenameSearcher.addClass(FILTERBOX_CLASS);
-
-    this.mainPanel.addWidget(this._filenameSearcher);
     this.mainPanel.addWidget(this.crumbs);
     this.mainPanel.addWidget(this.listing);
 
@@ -167,34 +142,6 @@ export class FileBrowser extends SidePanel {
     } else {
       console.warn('Listing does not support toggling column visibility');
     }
-  }
-
-  /**
-   * Whether to use fuzzy filtering on file names.
-   */
-  set useFuzzyFilter(value: boolean) {
-    this._useFuzzyFilter = value;
-
-    // Detach and dispose the current widget
-    this._filenameSearcher.parent = null;
-    this._filenameSearcher.dispose();
-
-    this._filenameSearcher = FilenameSearcher({
-      updateFilter: (
-        filterFn: (item: string) => Partial<IScore> | null,
-        query?: string
-      ) => {
-        this.listing.model.setFilter(value => {
-          return filterFn(value.name.toLowerCase());
-        });
-      },
-      useFuzzyFilter: this._useFuzzyFilter,
-      placeholder: this._trans.__('Filter files by name'),
-      forceRefresh: true
-    });
-    this._filenameSearcher.addClass(FILTERBOX_CLASS);
-
-    this.mainPanel.insertWidget(0, this._filenameSearcher);
   }
 
   /**
@@ -434,14 +381,12 @@ export class FileBrowser extends SidePanel {
   protected crumbs: BreadCrumbs;
   protected mainPanel: Panel;
 
-  private _filenameSearcher: ReactWidget;
   private _manager: IDocumentManager;
   private _directoryPending: boolean;
   private _filePending: boolean;
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
   private _showFileSizeColumn: boolean = false;
-  private _useFuzzyFilter: boolean = true;
   private _showHiddenFiles: boolean = false;
   private _showFileCheckboxes: boolean = false;
 }

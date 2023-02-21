@@ -49,8 +49,10 @@ import {
   downloadIcon,
   editIcon,
   fileIcon,
+  FilenameSearcher,
   folderIcon,
   IDisposableMenuItem,
+  IScore,
   linkIcon,
   markdownIcon,
   newFolderIcon,
@@ -66,6 +68,11 @@ import { ContextMenu } from '@lumino/widgets';
 
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
+
+/**
+ * The class name added to the filebrowser filterbox node.
+ */
+const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
 
 /**
  * The command IDs used by the file browser plugin.
@@ -209,7 +216,6 @@ const browser: JupyterFrontEndPlugin<void> = {
             navigateToCurrentDirectory: false,
             showLastModifiedColumn: true,
             showFileSizeColumn: false,
-            useFuzzyFilter: true,
             showHiddenFiles: false,
             showFileCheckboxes: false
           };
@@ -439,6 +445,29 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
       'uploader',
       (browser: FileBrowser) =>
         new Uploader({ model: browser.model, translator })
+    );
+
+    toolbarRegistry.addFactory(
+      FILE_BROWSER_FACTORY,
+      'file-name-searcher',
+      (browser: FileBrowser) => {
+        const searcher = FilenameSearcher({
+          updateFilter: (
+            filterFn: (item: string) => Partial<IScore> | null,
+            query?: string
+          ) => {
+            browser.model.setFilter(value => {
+              return filterFn(value.name.toLowerCase());
+            });
+          },
+          useFuzzyFilter: true,
+          // TODO: handled useFuzzyFilter option from the settings
+          placeholder: trans.__('Filter files by name'),
+          forceRefresh: true
+        });
+        searcher.addClass(FILTERBOX_CLASS);
+        return searcher;
+      }
     );
 
     setToolbar(
