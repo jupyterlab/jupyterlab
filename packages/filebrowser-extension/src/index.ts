@@ -404,7 +404,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     docManager: IDocumentManager,
     browser: IDefaultFileBrowser,
     factory: IFileBrowserFactory,
-    settings: ISettingRegistry,
+    settingRegistry: ISettingRegistry,
     toolbarRegistry: IToolbarWidgetRegistry,
     translator: ITranslator,
     labShell: ILabShell,
@@ -461,7 +461,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
             });
           },
           useFuzzyFilter: true,
-          // TODO: handled useFuzzyFilter option from the settings
           placeholder: trans.__('Filter files by name'),
           forceRefresh: true
         });
@@ -474,7 +473,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
       browser,
       createToolbarFactory(
         toolbarRegistry,
-        settings,
+        settingRegistry,
         FILE_BROWSER_FACTORY,
         browserWidget.id,
         translator
@@ -542,7 +541,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
       execute: () => {
         const value = !browser.navigateToCurrentDirectory;
         const key = 'navigateToCurrentDirectory';
-        return settings
+        return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
             console.error(`Failed to set navigateToCurrentDirectory setting`);
