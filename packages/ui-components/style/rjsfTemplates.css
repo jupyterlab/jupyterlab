@@ -34,10 +34,6 @@
   cursor: pointer;
 }
 
-.jp-FormGroup-content .form-group.small-field:hover {
-  background: var(--jp-border-color2);
-}
-
 .jp-FormGroup-content .checkbox label {
   cursor: pointer;
   font-size: var(--jp-content-font-size1);
@@ -52,11 +48,17 @@
 }
 
 /** copy of `input.jp-mod-styled:focus` style */
-.jp-FormGroup-content fieldset input:focus {
+.jp-FormGroup-content fieldset input:focus,
+.jp-FormGroup-content fieldset select:focus {
   -moz-outline-radius: unset;
   outline: var(--jp-border-width) solid var(--md-blue-500);
   outline-offset: -1px;
   box-shadow: inset 0 0 4px var(--md-blue-300);
+}
+
+.jp-FormGroup-content fieldset input:hover:not(:focus),
+.jp-FormGroup-content fieldset select:hover:not(:focus) {
+  background-color: var(--jp-border-color2);
 }
 
 .jp-FormGroup-content .checkbox .field-description {
@@ -222,4 +224,10 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
   .form-group {
   padding: 2px 8px 2px var(--jp-private-settingeditor-modifier-indent);
   margin-top: 2px;
+}
+
+.jp-FormGroup-contentCompact ul.error-detail {
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  padding-inline-start: 1em;
 }
