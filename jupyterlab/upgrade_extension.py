@@ -178,9 +178,9 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
 
     # Print out all warnings
     for warning in warnings:
-        print("**", warning)  # noqa
+        print("**", warning)
 
-    print("** Remove _temp_extensions directory when finished")  # noqa
+    print("** Remove _temp_extensions directory when finished")
 
 
 if __name__ == "__main__":
