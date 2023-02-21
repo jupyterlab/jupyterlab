@@ -84,7 +84,7 @@ test.describe('Notebook Search', () => {
 
     // Expect it to be populated with first line
     await page.waitForSelector(
-      '[placeholder="Find"][value="Test with one notebook withr"]'
+      '[placeholder="Find"] >> text="Test with one notebook withr"'
     );
 
     // Expect both matches to be found (xfail)
