@@ -6,12 +6,7 @@ import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 const fileName = 'stdin.ipynb';
 
 async function populateNotebook(page: IJupyterLabPageFixture) {
-  await page.notebook.setCell(0, 'raw', 'Just a raw cell');
-  await page.notebook.addCell(
-    'markdown',
-    '## This is **bold** and *italic* [link to jupyter.org!](http://jupyter.org)'
-  );
-  await page.notebook.addCell('code', '2 ** 3');
+  await page.notebook.addCell('code', 'raise');
 }
 
 test.describe('Stdin for ipdb', () => {
