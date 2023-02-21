@@ -1997,7 +1997,7 @@ export namespace DirListing {
       fileSize.classList.add(FILE_SIZE_ID_CLASS);
       narrow.classList.add(NARROW_ID_CLASS);
       narrow.textContent = '...';
-      if (!hiddenColumns?.has?.('is_selected')) {
+      if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode({
           alwaysVisible: true
         });
@@ -2008,13 +2008,13 @@ export namespace DirListing {
       node.appendChild(modified);
       node.appendChild(fileSize);
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
 
-      if (hiddenColumns?.has?.('file_size')) {
+      if (hiddenColumns?.has('file_size')) {
         fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
       } else {
         fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
@@ -2145,7 +2145,7 @@ export namespace DirListing {
       text.className = ITEM_TEXT_CLASS;
       modified.className = ITEM_MODIFIED_CLASS;
       fileSize.className = ITEM_FILE_SIZE_CLASS;
-      if (!hiddenColumns?.has?.('is_selected')) {
+      if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode();
         node.appendChild(checkboxWrapper);
       }
@@ -2160,13 +2160,13 @@ export namespace DirListing {
       // which conveniently deactivate irrelevant shortcuts.
       text.tabIndex = 0;
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
 
-      if (hiddenColumns?.has?.('file_size')) {
+      if (hiddenColumns?.has('file_size')) {
         fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
       } else {
         fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
@@ -2249,7 +2249,7 @@ export namespace DirListing {
         CHECKBOX_WRAPPER_CLASS
       );
 
-      const showFileCheckboxes = !hiddenColumns?.has?.('is_selected');
+      const showFileCheckboxes = !hiddenColumns?.has('is_selected');
       if (checkboxWrapper && !showFileCheckboxes) {
         node.removeChild(checkboxWrapper);
       } else if (showFileCheckboxes && !checkboxWrapper) {
@@ -2257,13 +2257,13 @@ export namespace DirListing {
         node.insertBefore(checkboxWrapper, iconContainer);
       }
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
 
-      if (hiddenColumns?.has?.('file_size')) {
+      if (hiddenColumns?.has('file_size')) {
         fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
       } else {
         fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
