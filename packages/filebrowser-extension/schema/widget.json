@@ -10,7 +10,7 @@
       },
       { "name": "uploader", "rank": 20 },
       { "name": "refresh", "command": "filebrowser:refresh", "rank": 30 },
-      { "name": "file-name-searcher", "rank": 40 }
+      { "name": "fileNameSearcher", "rank": 40 }
     ]
   },
   "jupyter.lab.menus": {

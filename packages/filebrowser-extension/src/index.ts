@@ -449,7 +449,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
 
     toolbarRegistry.addFactory(
       FILE_BROWSER_FACTORY,
-      'file-name-searcher',
+      'fileNameSearcher',
       (browser: FileBrowser) => {
         const searcher = FilenameSearcher({
           updateFilter: (
