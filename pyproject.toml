@@ -262,7 +262,7 @@ ignore = [
 
 [tool.ruff.per-file-ignores]
 # F821 Undefined name `c`
-"binder/jupyter_notebook_config.py" = ["F821"]
+"binder/jupyter_config.py" = ["F821"]
 # F821 Undefined name `c`
 # S104 Possible binding to all interfaces
 # S105 Possible hardcoded password: `""`

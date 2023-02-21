@@ -131,3 +131,6 @@ junit.xml
 
 # generated LSP interfaces
 packages/lsp/src/_*
+
+# generated reports
+webpack-bundle-analyzer.html
