@@ -55,3 +55,5 @@ dependencies:
   - xeus-python
   # extra conda stuff
   - jsonschema-with-format-nongpl
+  - pip:
+    - jupyterlab-collaboration >=1.0.0a1
