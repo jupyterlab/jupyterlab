@@ -438,6 +438,7 @@ export abstract class AttachmentsCellModel extends CellModel {
     }
     this._attachments.stateChanged.disconnect(this.onGenericChange, this);
     this._attachments.changed.disconnect(this._onAttachmentsChange, this);
+    this._attachements.dispose();
     this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
     super.dispose();
   }
