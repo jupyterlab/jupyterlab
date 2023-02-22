@@ -51,24 +51,23 @@ export class CellTagField {
     return [...new Set(allTags)].filter(tag => tag !== '');
   }
 
+  private _emptyAddTag(target: HTMLInputElement) {
+    target.value = '';
+    target.style.width = '49px';
+  }
+
   private _onAddTagKeyDown(
     props: FieldProps,
     event: React.KeyboardEvent<HTMLInputElement>
   ) {
     const input = event.target as HTMLInputElement;
+
+    if (event.ctrlKey) return;
+
     if (event.key === 'Enter') {
       this.addTag(props, input.value);
     } else if (event.key === 'Escape') {
-      input.value = '';
-      input.style.width = '49px';
-    } else {
-      const tmp = document.createElement('span');
-      tmp.className = 'add-tag';
-      tmp.innerHTML = input.value;
-      // set width to the pixel length of the text
-      document.body.appendChild(tmp);
-      input.style.width = tmp.getBoundingClientRect().width + 8 + 'px';
-      document.body.removeChild(tmp);
+      this._emptyAddTag(input);
     }
   }
 
@@ -81,8 +80,21 @@ export class CellTagField {
   private _onAddTagBlur(input: HTMLInputElement) {
     if (this._editing) {
       this._editing = false;
-      input.value = '';
-      input.style.width = '49px';
+      this._emptyAddTag(input);
+    }
+  }
+
+  private _onChange(event: React.ChangeEvent<HTMLInputElement>) {
+    if (!event.target.value) {
+      this._emptyAddTag(event.target);
+    } else {
+      const tmp = document.createElement('span');
+      tmp.className = 'add-tag';
+      tmp.textContent = event.target.value;
+      // set width to the pixel length of the text
+      document.body.appendChild(tmp);
+      event.target.style.width = tmp.getBoundingClientRect().width + 8 + 'px';
+      document.body.removeChild(tmp);
     }
   }
 
@@ -118,6 +130,9 @@ export class CellTagField {
 
     return (
       <div className="cell-tags">
+        <div className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
+          Cell Tags
+        </div>
         {allTags &&
           allTags.map((tag: string, i: number) => (
             <div
@@ -164,6 +179,9 @@ export class CellTagField {
               onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
                 this._onAddTagBlur(e.target)
               }
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                this._onChange(e);
+              }}
             />
             <LabIcon.resolveReact
               icon={addIcon}
