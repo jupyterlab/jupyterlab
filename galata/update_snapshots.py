@@ -39,4 +39,4 @@ for p in data_dir.glob("*.json"):
                     actual = data_dir / Path(attachment["path"]).name
             if expected and attachment and expected in filehashes:
                 shutil.copyfile(actual, filehashes[expected])
-                print(f"{actual} -> {filehashes[expected]}")  # noqa
+                print(f"{actual} -> {filehashes[expected]}")
