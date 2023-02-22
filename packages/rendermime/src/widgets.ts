@@ -372,12 +372,18 @@ export class RenderedSVG extends RenderedCommon {
  */
 export class RenderedText extends RenderedCommon {
   /**
+   * Whether to disable URLs being replaced with links or not.
+   */
+  disableAutolink: boolean;
+
+  /**
    * Construct a new rendered text widget.
    *
    * @param options - The options for initializing the widget.
    */
-  constructor(options: IRenderMime.IRendererOptions) {
+  constructor(options: IRenderMime.ITextRendererOptions) {
     super(options);
+    this.disableAutolink = options.disableAutoLink;
     this.addClass('jp-RenderedText');
   }
 
@@ -393,6 +399,7 @@ export class RenderedText extends RenderedCommon {
       host: this.node,
       sanitizer: this.sanitizer,
       source: String(model.data[this.mimeType]),
+      disableAutolink: this.disableAutolink,
       translator: this.translator
     });
   }
@@ -426,6 +433,7 @@ export class RenderedJavaScript extends RenderedCommon {
       host: this.node,
       sanitizer: this.sanitizer,
       source: trans.__('JavaScript output is disabled in JupyterLab'),
+      disableAutolink: false,
       translator: this.translator
     });
   }

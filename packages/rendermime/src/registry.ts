@@ -8,6 +8,7 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 import { MimeModel } from './mimemodel';
 import { IRenderMimeRegistry } from './tokens';
 
@@ -136,7 +137,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
     }
 
     // Invoke the best factory for the given mime type.
-    return this._factories[mimeType].createRenderer({
+    const widget = this._factories[mimeType].createRenderer({
       mimeType,
       resolver: this.resolver,
       sanitizer: this.sanitizer,
@@ -145,6 +146,11 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
       markdownParser: this.markdownParser,
       translator: this.translator
     });
+
+    // Emit widget created signal
+    this._widgetSignals[mimeType]?.emit(widget);
+
+    return widget;
   }
 
   /**
@@ -180,6 +186,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
 
     // Clone the internal state.
     clone._factories = { ...this._factories };
+    clone._widgetSignals = { ...this._widgetSignals };
     clone._ranks = { ...this._ranks };
     clone._id = this._id;
 
@@ -196,6 +203,19 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    */
   getFactory(mimeType: string): IRenderMime.IRendererFactory | undefined {
     return this._factories[mimeType];
+  }
+
+  /**
+   * Get the widget signal for a mime type.
+   *
+   * @param mimeType - The mime type of interest.
+   *
+   * @returns The widget signal for the mime type, or `undefined`.
+   */
+  getWidgetCreated(
+    mimeType: string
+  ): Signal<IRenderMime.IRendererFactory, IRenderMime.IRenderer> | undefined {
+    return this._widgetSignals[mimeType];
   }
 
   /**
@@ -221,6 +241,10 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
     }
     for (const mt of factory.mimeTypes) {
       this._factories[mt] = factory;
+      this._widgetSignals[mt] = new Signal<
+        IRenderMime.IRendererFactory,
+        IRenderMime.IRenderer
+      >(factory);
       this._ranks[mt] = { rank, id: this._id++ };
     }
     this._types = null;
@@ -233,6 +257,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    */
   removeMimeType(mimeType: string): void {
     delete this._factories[mimeType];
+    delete this._widgetSignals[mimeType];
     delete this._ranks[mimeType];
     this._types = null;
   }
@@ -272,6 +297,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
   private _ranks: Private.RankMap = {};
   private _types: string[] | null = null;
   private _factories: Private.FactoryMap = {};
+  private _widgetSignals: Private.WidgetSignalsMap = {};
 }
 
 /**
@@ -442,6 +468,13 @@ namespace Private {
    * A type alias for a mapping of mime type -> ordered factories.
    */
   export type FactoryMap = { [key: string]: IRenderMime.IRendererFactory };
+
+  /**
+   * A type alias for a mapping of mime type -> signal.
+   */
+  export type WidgetSignalsMap = {
+    [key: string]: Signal<IRenderMime.IRendererFactory, IRenderMime.IRenderer>;
+  };
 
   /**
    * Get the mime types in the map, ordered by rank.

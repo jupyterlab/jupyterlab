@@ -496,9 +496,14 @@ export namespace renderSVG {
  *
  * @param content - The text content of a node.
  *
+ * @param skip - If URL replacement should be skipped.
+ *
  * @returns A list of text nodes and anchor elements.
  */
-function autolink(content: string): Array<HTMLAnchorElement | Text> {
+function autolink(
+  content: string,
+  skip: boolean
+): Array<HTMLAnchorElement | Text> {
   // Taken from Visual Studio Code:
   // https://github.com/microsoft/vscode/blob/9f709d170b06e991502153f281ec3c012add2e42/src/vs/workbench/contrib/debug/browser/linkDetector.ts#L17-L18
   const controlCodes = '\\u0000-\\u0020\\u007f-\\u009f';
@@ -515,7 +520,7 @@ function autolink(content: string): Array<HTMLAnchorElement | Text> {
   let lastIndex = 0;
 
   let match: RegExpExecArray | null;
-  while (null != (match = webLinkRegex.exec(content))) {
+  while (null != (match = webLinkRegex.exec(content)) && !skip) {
     if (match.index !== lastIndex) {
       nodes.push(
         document.createTextNode(content.slice(lastIndex, match.index))
@@ -665,7 +670,7 @@ function* alignedNodes<T extends Node, U extends Node>(
  */
 export function renderText(options: renderText.IRenderOptions): Promise<void> {
   // Unpack the options.
-  const { host, sanitizer, source } = options;
+  const { host, sanitizer, source, disableAutolink } = options;
 
   // Create the HTML content.
   const content = sanitizer.sanitize(Private.ansiSpan(source), {
@@ -681,7 +686,7 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
 
   if (preTextContent) {
     // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
-    const linkedNodes = autolink(preTextContent);
+    const linkedNodes = autolink(preTextContent, disableAutolink);
     let inAnchorElement = false;
 
     const combinedNodes: (HTMLAnchorElement | Text | HTMLSpanElement)[] = [];
@@ -762,6 +767,11 @@ export namespace renderText {
      * The source text to render.
      */
     source: string;
+
+    /**
+     * Whether to disable URLs being replaced with links or not.
+     */
+    disableAutolink: boolean;
 
     /**
      * The application language translator.

@@ -1201,8 +1201,11 @@ export namespace Completer {
       host.classList.add('jp-RenderedText');
       const sanitizer = { sanitize: this.sanitizer.sanitize };
       const source = activeItem.documentation || '';
+      const disableAutolink = false;
 
-      renderText({ host, sanitizer, source }).catch(console.error);
+      renderText({ host, sanitizer, source, disableAutolink }).catch(
+        console.error
+      );
       return host;
     }
 

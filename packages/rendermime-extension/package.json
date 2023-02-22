@@ -23,6 +23,7 @@
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/**/*.json",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
     "style/index.js",
     "src/**/*.{ts,tsx}"
@@ -38,6 +39,7 @@
     "@jupyterlab/apputils": "^4.0.0-alpha.20",
     "@jupyterlab/docmanager": "^4.0.0-alpha.20",
     "@jupyterlab/rendermime": "^4.0.0-alpha.20",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.20",
     "@jupyterlab/translation": "^4.0.0-alpha.20"
   },
   "devDependencies": {
@@ -49,7 +51,8 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
 }

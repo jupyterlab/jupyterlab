@@ -5,6 +5,12 @@
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import * as widgets from './widgets';
 
+export const TEXT_RENDERER_MIME_TYPES = [
+  'text/plain',
+  'application/vnd.jupyter.stdout',
+  'application/vnd.jupyter.stderr'
+];
+
 /**
  * A mime renderer factory for raw html.
  */
@@ -64,13 +70,9 @@ export const svgRendererFactory: IRenderMime.IRendererFactory = {
 /**
  * A mime renderer factory for plain and jupyter console text data.
  */
-export const textRendererFactory: IRenderMime.IRendererFactory = {
+export const textRendererFactory: IRenderMime.ITextRendererFactory = {
   safe: true,
-  mimeTypes: [
-    'text/plain',
-    'application/vnd.jupyter.stdout',
-    'application/vnd.jupyter.stderr'
-  ],
+  mimeTypes: TEXT_RENDERER_MIME_TYPES,
   defaultRank: 120,
   createRenderer: options => new widgets.RenderedText(options)
 };
