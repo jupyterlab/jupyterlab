@@ -251,9 +251,7 @@ export namespace NBTestUtils {
 namespace Private {
   let manager: ServiceManager;
 
-  export const notebookFactory = new NotebookModelFactory({
-    disableDocumentWideUndoRedo: false
-  });
+  export const notebookFactory = new NotebookModelFactory();
 
   /**
    * Get or create the service manager singleton.

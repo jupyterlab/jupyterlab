@@ -1734,8 +1734,8 @@ function activateNotebookHandler(
       showEditorForReadOnlyMarkdown: settings.get(
         'showEditorForReadOnlyMarkdown'
       ).composite as boolean,
-      disableDocumentWideUndoRedo: settings.get(
-        'experimentalDisableDocumentWideUndoRedo'
+      disableDocumentWideUndoRedo: !settings.get(
+        'experimentalEnableDocumentWideUndoRedo'
       ).composite as boolean,
       renderingLayout: settings.get('renderingLayout').composite as
         | 'default'
@@ -1768,8 +1768,8 @@ function activateNotebookHandler(
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
 
-    modelFactory.disableDocumentWideUndoRedo = settings.get(
-      'experimentalDisableDocumentWideUndoRedo'
+    modelFactory.disableDocumentWideUndoRedo = !settings.get(
+      'experimentalEnableDocumentWideUndoRedo'
     ).composite as boolean;
 
     updateTracker({
