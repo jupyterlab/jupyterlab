@@ -4,7 +4,8 @@
 import {
   ISessionContext,
   MainAreaWidget,
-  SessionContext
+  SessionContext,
+  SessionContextDialogs
 } from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt, Time, URLExt } from '@jupyterlab/coreutils';
@@ -47,7 +48,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       sessionContext,
       translator
     } = options;
-    this.translator = translator || nullTranslator;
+    this.translator = translator ?? nullTranslator;
     const trans = this.translator.load('jupyterlab');
 
     const contentFactory = (this.contentFactory = options.contentFactory);
@@ -57,9 +58,8 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     }
 
     sessionContext = this._sessionContext =
-      sessionContext ||
+      sessionContext ??
       new SessionContext({
-        dialogs: options.sessionDialogs,
         sessionManager: manager.sessions,
         specsManager: manager.kernelspecs,
         path,
@@ -87,7 +87,10 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     void sessionContext.initialize().then(async value => {
       if (value) {
-        await sessionContext?.dialogs.selectKernel(sessionContext!);
+        await (
+          options.sessionDialogs ??
+          new SessionContextDialogs(undefined, translator)
+        ).selectKernel(sessionContext!);
       }
       this._connected = new Date();
       this._updateTitlePanel();
@@ -217,6 +220,11 @@ export namespace ConsolePanel {
     sessionContext?: ISessionContext;
 
     /**
+     * Session dialogs to use.
+     */
+    sessionDialogs?: ISessionContext.IDialogs;
+
+    /**
      * The model factory for the console widget.
      */
     modelFactory?: CodeConsole.IModelFactory;
@@ -230,8 +238,6 @@ export namespace ConsolePanel {
      * The application language translator.
      */
     translator?: ITranslator;
-
-    sessionDialogs: ISessionContext.IDialogs;
 
     /**
      * A function to call when the kernel is busy.

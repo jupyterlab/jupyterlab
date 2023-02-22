@@ -5,6 +5,7 @@ import {
   Clipboard,
   Dialog,
   ISessionContext,
+  ISessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
 import {
@@ -2160,10 +2161,11 @@ namespace Private {
   /**
    * Run a cell.
    */
-  function runCell(
+  async function runCell(
     notebook: Notebook,
     cell: Cell,
     sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
     translator = translator || nullTranslator;
@@ -2177,7 +2179,7 @@ namespace Private {
       case 'code':
         if (sessionContext) {
           if (sessionContext.isTerminating) {
-            void showDialog({
+            await showDialog({
               title: trans.__('Kernel Terminating'),
               body: trans.__(
                 'The kernel for %1 appears to be terminating. You can not run any cell for now.',
@@ -2188,76 +2190,81 @@ namespace Private {
             break;
           }
           if (sessionContext.pendingInput) {
-            void showDialog({
+            await showDialog({
               title: trans.__('Cell not executed due to pending input'),
               body: trans.__(
                 'The cell has not been executed to avoid kernel deadlock as there is another pending input! Submit your pending input and try again.'
               ),
               buttons: [Dialog.okButton()]
             });
-            return Promise.resolve(false);
+            return false;
           }
-          let promise = Promise.resolve();
           if (sessionContext.hasNoKernel) {
-            promise = sessionContext.startKernel().then(shouldSelect => {
-              if (shouldSelect) {
-                return sessionContext.dialogs.selectKernel(sessionContext);
-              }
-            });
-          }
-          return promise.then(() => {
-            if (sessionContext.hasNoKernel) {
-              // Session has still no kernel, so we can't execute the cell.
-              return false;
+            const shouldSelect = await sessionContext.startKernel();
+            if (shouldSelect && sessionDialogs) {
+              await sessionDialogs.selectKernel(sessionContext);
             }
+          }
 
-            let deletedCells = notebook.model?.deletedCells ?? [];
-            executionScheduled.emit({ notebook, cell });
-            return CodeCell.execute(cell as CodeCell, sessionContext, {
-              deletedCells,
-              recordTiming: notebook.notebookConfig.recordTiming
-            })
-              .then(reply => {
-                deletedCells.splice(0, deletedCells.length);
-                if (cell.isDisposed) {
-                  return false;
+          if (sessionContext.hasNoKernel) {
+            // Session has still no kernel, so we can't execute the cell.
+            return false;
+          }
+
+          const deletedCells = notebook.model?.deletedCells ?? [];
+          executionScheduled.emit({ notebook, cell });
+
+          let ran = false;
+          try {
+            const reply = await CodeCell.execute(
+              cell as CodeCell,
+              sessionContext,
+              {
+                deletedCells,
+                recordTiming: notebook.notebookConfig.recordTiming
+              }
+            );
+            deletedCells.splice(0, deletedCells.length);
+
+            ran = (() => {
+              if (cell.isDisposed) {
+                return false;
+              }
+
+              if (!reply) {
+                return true;
+              }
+              if (reply.content.status === 'ok') {
+                const content = reply.content;
+
+                if (content.payload && content.payload.length) {
+                  handlePayload(content, notebook, cell);
                 }
 
-                if (!reply) {
-                  return true;
-                }
-                if (reply.content.status === 'ok') {
-                  const content = reply.content;
-
-                  if (content.payload && content.payload.length) {
-                    handlePayload(content, notebook, cell);
-                  }
-
-                  return true;
-                } else {
-                  throw new KernelError(reply.content);
-                }
-              })
-              .catch(reason => {
-                if (cell.isDisposed || reason.message.startsWith('Canceled')) {
-                  return false;
-                }
-                executed.emit({
-                  notebook,
-                  cell,
-                  success: false,
-                  error: reason
-                });
-                throw reason;
-              })
-              .then(ran => {
-                if (ran) {
-                  executed.emit({ notebook, cell, success: true });
-                }
-
-                return ran;
+                return true;
+              } else {
+                throw new KernelError(reply.content);
+              }
+            })();
+          } catch (reason) {
+            if (cell.isDisposed || reason.message.startsWith('Canceled')) {
+              ran = false;
+            } else {
+              executed.emit({
+                notebook,
+                cell,
+                success: false,
+                error: reason
               });
-          });
+              throw reason;
+            }
+          }
+
+          if (ran) {
+            executed.emit({ notebook, cell, success: true });
+          }
+
+          return ran;
         }
         cell.model.sharedModel.transact(() => {
           (cell.model as ICodeCellModel).clearExecution();

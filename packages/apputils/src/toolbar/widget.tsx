@@ -65,7 +65,7 @@ export namespace Toolbar {
    */
   export function createRestartButton(
     sessionContext: ISessionContext,
-    dialogs?: ISessionContext.IDialogs,
+    dialogs: ISessionContext.IDialogs,
     translator?: ITranslator
   ): Widget {
     translator = translator || nullTranslator;
@@ -73,10 +73,7 @@ export namespace Toolbar {
     return new ToolbarButton({
       icon: refreshIcon,
       onClick: () => {
-        void (dialogs ?? sessionContext.dialogs).restart(
-          sessionContext,
-          translator
-        );
+        void dialogs.restart(sessionContext, translator);
       },
       tooltip: trans.__('Restart the kernel')
     });
@@ -91,13 +88,13 @@ export namespace Toolbar {
    */
   export function createKernelNameItem(
     sessionContext: ISessionContext,
-    dialogs?: ISessionContext.IDialogs,
+    dialogs: ISessionContext.IDialogs,
     translator?: ITranslator
   ): Widget {
     const el = ReactWidget.create(
       <Private.KernelNameComponent
         sessionContext={sessionContext}
-        dialogs={dialogs ?? sessionContext.dialogs}
+        dialogs={dialogs}
         translator={translator}
       />
     );

@@ -200,11 +200,6 @@ export interface ISessionContext extends IObservableDisposable {
   readonly specsManager: KernelSpec.IManager;
 
   /**
-   * Session dialogs for selecting a kernel.
-   */
-  readonly dialogs: ISessionContext.IDialogs;
-
-  /**
    * Starts new Kernel.
    *
    * @returns Whether to ask the user to pick a kernel.
@@ -336,7 +331,6 @@ export class SessionContext implements ISessionContext {
    * Construct a new session context.
    */
   constructor(options: SessionContext.IOptions) {
-    this.dialogs = options.dialogs;
     this.sessionManager = options.sessionManager;
     this.specsManager = options.specsManager;
     this.translator = options.translator || nullTranslator;
@@ -494,11 +488,6 @@ export class SessionContext implements ISessionContext {
   get isRestarting(): boolean {
     return this._isRestarting;
   }
-
-  /**
-   * Session dialogs for selecting a kernel.
-   */
-  readonly dialogs: ISessionContext.IDialogs;
 
   /**
    * The session manager used by the session.
@@ -669,6 +658,11 @@ export class SessionContext implements ISessionContext {
     Signal.clearData(this);
   }
 
+  /**
+   * Starts new Kernel.
+   *
+   * @returns Whether to ask the user to pick a kernel.
+   */
   async startKernel(): Promise<boolean> {
     const preference = this.kernelPreference;
 
@@ -1245,11 +1239,6 @@ export namespace SessionContext {
     specsManager: KernelSpec.IManager;
 
     /**
-     * Session dialogs for selecting a kernel.
-     */
-    dialogs: ISessionContext.IDialogs;
-
-    /**
      * The initial path of the file.
      */
     path?: string;
@@ -1320,22 +1309,18 @@ export namespace SessionContext {
  */
 export class SessionContextDialogs implements ISessionContext.IDialogs {
   constructor(settings?: ISettingRegistry.ISettings, translator?: ITranslator) {
-    this._settings = settings || null;
-    this._translator = translator || nullTranslator;
+    this._settings = settings ?? null;
+    this._translator = translator ?? nullTranslator;
   }
 
   /**
    * Select a kernel for the session.
    */
-  async selectKernel(
-    sessionContext: ISessionContext,
-    translator?: ITranslator
-  ): Promise<void> {
+  async selectKernel(sessionContext: ISessionContext): Promise<void> {
     if (sessionContext.isDisposed) {
       return Promise.resolve();
     }
-    translator = translator || this._translator;
-    const trans = translator.load('jupyterlab');
+    const trans = this._translator.load('jupyterlab');
 
     // If there is no existing kernel, offer the option
     // to keep no kernel.
@@ -1353,7 +1338,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
 
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
-      body: new Private.KernelSelector(sessionContext, translator),
+      body: new Private.KernelSelector(sessionContext, this._translator),
       buttons,
       checkbox: this._settings && {
         label: trans.__('Always select the preferred kernel'),
@@ -1366,7 +1351,11 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
 
     const result = await dialog.launch();
 
-    this._settings?.set('selectPreferredKernel', result.isChecked).catch(reason => { console.error("Failed to set 'selectPreferredKernel';\n", reason) });
+    this._settings
+      ?.set('selectPreferredKernel', result.isChecked)
+      .catch(reason => {
+        console.error("Failed to set 'selectPreferredKernel';\n", reason);
+      });
 
     if (sessionContext.isDisposed || !result.button.accept) {
       return;
@@ -1390,12 +1379,8 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
    * If there is no kernel, we start a kernel with the last run
    * kernel name and resolves with `true`.
    */
-  async restart(
-    sessionContext: ISessionContext,
-    translator?: ITranslator
-  ): Promise<boolean> {
-    translator = translator || this._translator;
-    const trans = translator.load('jupyterlab');
+  async restart(sessionContext: ISessionContext): Promise<boolean> {
+    const trans = this._translator.load('jupyterlab');
 
     await sessionContext.initialize();
     if (sessionContext.isDisposed) {

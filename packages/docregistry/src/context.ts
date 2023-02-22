@@ -74,7 +74,6 @@ export class Context<
 
     const ext = PathExt.extname(this._path);
     this.sessionContext = new SessionContext({
-      dialogs: this._dialogs,
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
       path: this._path,

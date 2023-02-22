@@ -357,11 +357,11 @@ async function activateConsole(
     await manager.ready;
 
     const panel = new ConsolePanel({
-      sessionDialogs: sessionDialogs,
       manager,
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
+      sessionDialogs,
       translator,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)

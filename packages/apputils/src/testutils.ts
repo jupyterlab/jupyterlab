@@ -5,7 +5,7 @@
 
 import { ServiceManager } from '@jupyterlab/services';
 import { UUID } from '@lumino/coreutils';
-import { SessionContext, SessionContextDialogs } from './sessioncontext';
+import { SessionContext } from './sessioncontext';
 
 /**
  * Create a client session object.
@@ -18,7 +18,6 @@ export async function createSessionContext(
 
   await Promise.all([manager.ready, specsManager.ready]);
   return new SessionContext({
-    dialogs: new SessionContextDialogs(),
     sessionManager: manager,
     specsManager,
     path: options.path ?? UUID.uuid4(),

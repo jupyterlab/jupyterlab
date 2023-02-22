@@ -181,7 +181,7 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
       opener: widgetOpener,
       when,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
-      sessionDialogs: sessionDialogs,
+      sessionDialogs,
       translator: translator ?? nullTranslator,
       isConnectedCallback: () => {
         if (info) {

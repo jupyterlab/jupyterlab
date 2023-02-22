@@ -208,14 +208,14 @@ export namespace ToolbarItems {
    */
   export function createRestartRunAllButton(
     panel: NotebookPanel,
-    dialogs?: ISessionContext.IDialogs,
+    dialogs: ISessionContext.IDialogs,
     translator?: ITranslator
   ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: fastForwardIcon,
       onClick: () => {
-        void (dialogs || panel.sessionContext.dialogs)
+        void dialogs
           .restart(panel.sessionContext, translator)
           .then(restarted => {
             if (restarted) {
@@ -253,7 +253,7 @@ export namespace ToolbarItems {
    */
   export function getDefaultItems(
     panel: NotebookPanel,
-    sessionDialogs?: ISessionContextDialogs,
+    sessionDialogs: ISessionContextDialogs,
     translator?: ITranslator
   ): DocumentRegistry.IToolbarItem[] {
     return [
