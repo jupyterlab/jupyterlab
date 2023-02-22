@@ -204,8 +204,6 @@ button.jp-ArrayOperationsButton.jp-mod-styled:disabled {
 }
 
 .jp-FormGroup-contentCompact .jp-FormGroup-fieldLabel {
-  font-size: var(--jp-ui-font-size2);
-  font-weight: normal;
   padding-bottom: 0.3em;
 }
 
