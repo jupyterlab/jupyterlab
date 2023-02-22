@@ -38,7 +38,7 @@ class FooText extends RenderedText {
   }
 }
 
-const fooFactory: IRenderMime.IRendererFactory = {
+const fooFactory: IRenderMime.ITextRendererFactory = {
   mimeTypes: ['text/foo'],
   safe: true,
   createRenderer: options => new FooText(options)
