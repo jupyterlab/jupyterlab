@@ -23,7 +23,8 @@
   },
   "files": [
     "lib/*.{d.ts,js,js.map}",
-    "style/*"
+    "style/*",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",

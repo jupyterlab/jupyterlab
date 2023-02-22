@@ -23,7 +23,8 @@
     "lib": "lib/"
   },
   "files": [
-    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc",
