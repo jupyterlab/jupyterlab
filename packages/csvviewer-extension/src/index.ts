@@ -159,9 +159,10 @@ function activateCsv(
   let searchProviderInitialized = false;
 
   factory.widgetCreated.connect(async (sender, widget) => {
-    if (!searchProviderInitialized && searchRegistry) {
+    if (searchRegistry && !searchProviderInitialized) {
       const { CSVSearchProvider } = await import('./searchprovider');
       searchRegistry.add('csv', CSVSearchProvider);
+      searchProviderInitialized = true;
     }
 
     // Track the widget.
@@ -182,7 +183,7 @@ function activateCsv(
   });
 
   // Keep the themes up-to-date.
-  const updateThemes = async () => {
+  const updateThemes = () => {
     const isLight =
       themeManager && themeManager.theme
         ? themeManager.isLight(themeManager.theme)
@@ -308,9 +309,10 @@ function activateTsv(
   let searchProviderInitialized = false;
 
   factory.widgetCreated.connect(async (sender, widget) => {
-    if (!searchProviderInitialized && searchRegistry) {
+    if (searchRegistry && !searchProviderInitialized) {
       const { CSVSearchProvider } = await import('./searchprovider');
       searchRegistry.add('tsv', CSVSearchProvider);
+      searchProviderInitialized = true;
     }
 
     // Track the widget.
@@ -331,7 +333,7 @@ function activateTsv(
   });
 
   // Keep the themes up-to-date.
-  const updateThemes = async () => {
+  const updateThemes = () => {
     const isLight =
       themeManager && themeManager.theme
         ? themeManager.isLight(themeManager.theme)
