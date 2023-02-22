@@ -20,7 +20,8 @@
   "files": [
     "lib/**/*.{js,ts,map}",
     "style/index.css",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "npm run build:extension && npm run build:galata",
@@ -52,7 +53,7 @@
     "@jupyterlab/services": "^7.0.0-alpha.19",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
     "@lumino/coreutils": "^2.0.0-beta.0",
-    "@playwright/test": "^1.30.0",
+    "@playwright/test": "^1.31.0",
     "@stdlib/stats": "~0.0.13",
     "fs-extra": "^10.1.0",
     "json5": "^2.2.3",

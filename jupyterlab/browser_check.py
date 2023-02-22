@@ -57,7 +57,7 @@ class LogErrorHandler(logging.Handler):
         return super().filter(record)
 
     def emit(self, record):
-        print(record.msg, file=sys.stderr)  # noqa
+        print(record.msg, file=sys.stderr)
         self.errored = True
 
 

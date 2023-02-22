@@ -298,9 +298,9 @@ class LabPathApp(JupyterApp):
     """
 
     def start(self):
-        print("Application directory:   %s" % get_app_dir())  # noqa
-        print("User Settings directory: %s" % get_user_settings_dir())  # noqa
-        print("Workspaces directory: %s" % get_workspaces_dir())  # noqa
+        print("Application directory:   %s" % get_app_dir())
+        print("User Settings directory: %s" % get_user_settings_dir())
+        print("Workspaces directory: %s" % get_workspaces_dir())
 
 
 class LabWorkspaceExportApp(WorkspaceExportApp):
@@ -842,14 +842,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         super().initialize()
         if self.collaborative:
             try:
-                import jupyterlab_rtc  # noqa
+                import jupyter_collaboration  # noqa
             except ImportError:
                 self.log.critical(
                     """
-To enable real-time collaboration, you must install the extension `jupyterlab_rtc`.
+To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
 You can install it using pip for example:
 
-  python -m pip install jupyterlab_rtc
+  python -m pip install jupyter_collaboration
 """
                 )
                 sys.exit(1)
