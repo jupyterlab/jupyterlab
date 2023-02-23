@@ -3,17 +3,12 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ReactWidget } from '@jupyterlab/ui-components';
+import { COLLAPSER_CLASS, ReactWidget } from '@jupyterlab/ui-components';
 import { ElementExt } from '@lumino/domutils';
 
 import * as React from 'react';
 
 import { Cell, CodeCell } from './widget';
-
-/**
- * The CSS class added to all collapsers.
- */
-const COLLAPSER_CLASS = 'jp-Collapser';
 
 /**
  * The CSS class added to the collapser child.
