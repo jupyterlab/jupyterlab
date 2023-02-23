@@ -4,7 +4,7 @@
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Title, Widget } from '@lumino/widgets';
-import { caretDownIcon, caretUpIcon } from '../icon';
+import { caretDownIcon } from '../icon';
 
 /**
  * A panel that supports a collapsible header made from the widget's title.
@@ -153,12 +153,13 @@ export class Collapser<T extends Widget = Widget> extends Widget {
   }
 
   private _setHeader(): void {
-    (this._collapsed ? caretUpIcon : caretDownIcon).element({
+    this._header.node.childNodes.forEach(cn => cn.remove());
+    this._header.node.appendChild(caretDownIcon.element({
       container: this._header.node,
-      label: this._widget.title.label,
-      elementPosition: 'right',
-      height: '28px'
-    });
+      height: '28px',
+      transform: 'rotate(' + (this._collapsed ? '-90' : '0') + 'deg)'
+    }));
+    this._header.node.appendChild(new Text(this._widget.title.label));
   }
 
   private _collapseChanged = new Signal<this, void>(this);

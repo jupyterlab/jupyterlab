@@ -16,6 +16,7 @@
   color: var(--jp-ui-font-color1);
   cursor: pointer;
   display: flex;
+  align-items: center;
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
   text-transform: uppercase;
