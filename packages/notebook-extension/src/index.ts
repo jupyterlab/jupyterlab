@@ -1190,7 +1190,6 @@ function activateWidgetFactory(
     defaultFor: ['notebook'],
     preferKernel: preferKernelValue,
     canStartKernel: true,
-    autoStartDefault: true,
     rendermime,
     contentFactory,
     editorConfig: StaticNotebook.defaultEditorConfig,
