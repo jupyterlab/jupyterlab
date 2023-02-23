@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { COLLAPSER_CLASS, ReactWidget } from '@jupyterlab/ui-components';
+import { ReactWidget } from '@jupyterlab/ui-components';
 import { ElementExt } from '@lumino/domutils';
 
 import * as React from 'react';
@@ -39,7 +39,7 @@ export abstract class Collapser extends ReactWidget {
    */
   constructor() {
     super();
-    this.addClass(COLLAPSER_CLASS);
+    this.addClass(COLLAPSE_CLASS);
   }
 
   /**

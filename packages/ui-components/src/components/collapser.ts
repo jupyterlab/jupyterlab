@@ -7,10 +7,7 @@ import { Panel, PanelLayout, Title, Widget } from '@lumino/widgets';
 
 import { caretDownIcon } from '../icon';
 
-/**
- * The CSS class added to all collapsers.
- */
-export const COLLAPSER_CLASS = 'jp-Collapser';
+const COLLAPSE_CLASS = 'jp-Collapse';
 
 const CONTENTS_CLASS = 'jp-Collapse-contents';
 
@@ -31,7 +28,7 @@ export class Collapser<T extends Widget = Widget> extends Widget {
     super(options);
     const { widget, collapsed = true } = options;
 
-    this.addClass(COLLAPSER_CLASS);
+    this.addClass(COLLAPSE_CLASS);
     this._header = new Widget();
     this._header.addClass(HEADER_CLASS);
     if (collapsed) {
