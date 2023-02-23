@@ -44,6 +44,7 @@ import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { displayShortcuts } from './shortcuts';
+import { IMainMenu } from '@jupyterlab/mainmenu';
 /**
  * The interval in milliseconds before recover options appear during splash.
  */
@@ -572,6 +573,7 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
 const utilityCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:utilityCommands',
   requires: [ITranslator],
+  optional: [IMainMenu, ICommandPalette],
   autoStart: true,
   activate: (app: JupyterFrontEnd, translator: ITranslator) => {
     const trans = translator.load('jupyterlab');

@@ -9,7 +9,6 @@ import { Selector } from '@lumino/domutils';
 import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
-import '../style/base.css';
 
 export function displayShortcuts(
   app: JupyterFrontEnd,
