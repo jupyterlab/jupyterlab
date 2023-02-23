@@ -152,7 +152,7 @@ packages:
       'set',
       'unsafeHttpWhitelist',
       '--json',
-      '["localhost"]'
+      '["0.0.0.0"]'
     ]);
   } catch (e) {
     // yarn not available

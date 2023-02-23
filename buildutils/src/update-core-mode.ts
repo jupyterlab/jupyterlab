@@ -62,6 +62,7 @@ fs.copySync(
   path.join('.', 'yarn.lock'),
   path.join('.', 'jupyterlab', 'staging', 'yarn.lock')
 );
+process.env.YARN_UNSAFE_HTTP_WHITELIST = '0.0.0.0';
 utils.run('jlpm', { cwd: staging });
 utils.run('jlpm dedupe', { cwd: staging });
 
