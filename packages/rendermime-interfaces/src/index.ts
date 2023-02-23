@@ -379,6 +379,11 @@ export namespace IRenderMime {
    */
   export interface ISanitizer {
     /**
+     * @returns Whether to replace URLs.
+     */
+    getAutolink(): boolean;
+
+    /**
      * Sanitize an HTML string.
      */
     sanitize(dirty: string): string;

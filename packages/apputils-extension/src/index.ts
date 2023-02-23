@@ -625,9 +625,13 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
       const allowedSchemes = setting.get('allowedSchemes')
         .composite as Array<string>;
 
+      const autolink = setting.get('autolink').composite as boolean;
+
       if (allowedSchemes) {
         sanitizer.setAllowedSchemes(allowedSchemes);
       }
+
+      sanitizer.setAutolink(autolink);
     };
 
     // Wait for the application to be restored and

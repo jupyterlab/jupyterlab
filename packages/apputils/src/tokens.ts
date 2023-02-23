@@ -197,6 +197,11 @@ export const ISanitizer = new Token<ISanitizer>(
 
 export interface ISanitizer {
   /**
+   * @returns Whether to replace URLs.
+   */
+  getAutolink(): boolean;
+
+  /**
    * Sanitize an HTML string.
    *
    * @param dirty - The dirty text.

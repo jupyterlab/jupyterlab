@@ -1199,7 +1199,10 @@ export namespace Completer {
     ): HTMLElement {
       const host = document.createElement('div');
       host.classList.add('jp-RenderedText');
-      const sanitizer = { sanitize: this.sanitizer.sanitize };
+      const sanitizer = {
+        getAutolink: this.sanitizer.getAutolink,
+        sanitize: this.sanitizer.sanitize
+      };
       const source = activeItem.documentation || '';
 
       renderText({ host, sanitizer, source }).catch(console.error);

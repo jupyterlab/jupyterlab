@@ -448,6 +448,13 @@ export class Sanitizer implements ISanitizer {
   }
 
   /**
+   * @returns Whether to replace URLs.
+   */
+  getAutolink(): boolean {
+    return this._autolink;
+  }
+
+  /**
    * Set the allowed schemes
    *
    * @param scheme Allowed schemes
@@ -456,6 +463,17 @@ export class Sanitizer implements ISanitizer {
     // Force copy of `scheme`
     this._options.allowedSchemes = [...scheme];
   }
+
+  /**
+   * Set the URL replacement boolean.
+   *
+   * @param autolink URL replacement boolean.
+   */
+  setAutolink(autolink: boolean): void {
+    this._autolink = autolink;
+  }
+
+  private _autolink: boolean = true;
 
   private _options: sanitize.IOptions = {
     // HTML tags that are allowed to be used. Tags were extracted from Google Caja
