@@ -46,11 +46,16 @@ test.describe('Sidebars', () => {
     const contextmenu = await page.menu.openContextMenu(
       '.jp-DirListing-headerItem'
     );
-    const item = await page.menu.getMenuItemInMenu(
+    const fileCheckboxesItem = await page.menu.getMenuItemInMenu(
       contextmenu,
       'Show File Checkboxes'
     );
-    await item.click();
+    await fileCheckboxesItem.click();
+    const fileSizeColumnItem = await page.menu.getMenuItemInMenu(
+      contextmenu,
+      'Show File Size Column'
+    );
+    await fileSizeColumnItem.click();
     await page.notebook.createNew('notebook.ipynb');
 
     const unusedRules = await page.style.findUnusedStyleRules({
