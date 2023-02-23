@@ -10,27 +10,6 @@
   background: var(--jp-layout-color1);
 }
 
-.jp-PropertyInspector-content .jp-Collapse {
-  margin-top: 4px;
-  border-top: none;
-  border-bottom: none;
-}
-
-.jp-PropertyInspector-content .jp-Collapse-header {
-  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
-  color: var(--jp-ui-font-color1);
-  cursor: pointer;
-  display: flex;
-  font-size: var(--jp-ui-font-size0);
-  font-weight: 600;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.jp-PropertyInspector-content .jp-Collapse-header:hover {
-  background-color: unset;
-}
-
 .jp-PropertyInspector-content {
   flex-grow: 1;
 }
