@@ -39,10 +39,6 @@
   align-items: flex-start;
 }
 
-.jp-SidePanel-content.jp-TableOfContents-empty {
-  align-items: center;
-}
-
 .jp-TableOfContents-tree {
   margin: 4px;
 }

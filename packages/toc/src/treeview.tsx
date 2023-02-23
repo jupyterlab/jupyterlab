@@ -29,7 +29,6 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
    */
   render(): JSX.Element | null {
     if (!this.model || this.model.headings.length === 0) {
-      this.parent?.addClass('jp-TableOfContents-empty');
       return (
         <div className="jp-TableOfContents-placeholder">
           <div className="jp-TableOfContents-placeholderContent">
@@ -38,8 +37,6 @@ export class TableOfContentsWidget extends VDomRenderer<TableOfContents.IModel<T
           </div>
         </div>
       );
-    } else {
-      this.parent?.removeClass('jp-TableOfContents-empty');
     }
 
     return (
