@@ -6,7 +6,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Title, Widget } from '@lumino/widgets';
 import { caretDownIcon } from '../icon';
 
-const collapsedClass = 'jp-Collapse-header-collapsed';
+const HEADER_COLLAPSED_CLASS = 'jp-Collapse-header-collapsed';
 
 /**
  * A panel that supports a collapsible header made from the widget's title.
@@ -21,7 +21,7 @@ export class Collapser<T extends Widget = Widget> extends Widget {
     this._header = new Widget();
     this._header.addClass('jp-Collapse-header');
     if (collapsed) {
-      this._header.addClass(collapsedClass);
+      this._header.addClass(HEADER_COLLAPSED_CLASS);
     }
     this._header.node.appendChild(caretDownIcon.element({
       className: 'jp-Collapser-icon'
@@ -167,10 +167,10 @@ export class Collapser<T extends Widget = Widget> extends Widget {
 
   private _setHeader(): void {
     if (this._collapsed) {
-      this._header.addClass(collapsedClass);
+      this._header.addClass(HEADER_COLLAPSED_CLASS);
     }
     else {
-      this._header.removeClass(collapsedClass);
+      this._header.removeClass(HEADER_COLLAPSED_CLASS);
     }
   }
 
