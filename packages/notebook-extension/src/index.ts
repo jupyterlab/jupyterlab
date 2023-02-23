@@ -2108,7 +2108,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndAdvance(content, context.sessionContext);
+        return NotebookActions.runAndAdvance(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -2128,7 +2133,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.run(content, context.sessionContext);
+        return NotebookActions.run(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -2148,7 +2158,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndInsert(content, context.sessionContext);
+        return NotebookActions.runAndInsert(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -2162,7 +2177,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAll(content, context.sessionContext);
+        return NotebookActions.runAll(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -2175,7 +2195,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllAbove(content, context.sessionContext);
+        return NotebookActions.runAllAbove(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled: () => {
@@ -2195,7 +2220,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllBelow(content, context.sessionContext);
+        return NotebookActions.runAllBelow(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled: () => {
@@ -2213,11 +2243,8 @@ function addCommands(
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        const { context, content } = current;
-        return NotebookActions.renderAllMarkdown(
-          content,
-          context.sessionContext
-        );
+        const { content } = current;
+        return NotebookActions.renderAllMarkdown(content);
       }
     },
     isEnabled
@@ -3288,7 +3315,12 @@ function addCommands(
       }
 
       current.content.extendContiguousSelectionTo(lastIndex);
-      void NotebookActions.run(current.content, current.sessionContext);
+      void NotebookActions.run(
+        current.content,
+        current.sessionContext,
+        sessionDialogs,
+        translator
+      );
     }
   });
 }

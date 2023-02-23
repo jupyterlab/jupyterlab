@@ -189,13 +189,19 @@ export namespace ToolbarItems {
    */
   export function createRunButton(
     panel: NotebookPanel,
-    translator?: ITranslator
+    sessionDialogs: ISessionContextDialogs,
+    translator: ITranslator
   ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: runIcon,
       onClick: () => {
-        void NotebookActions.runAndAdvance(panel.content, panel.sessionContext);
+        void NotebookActions.runAndAdvance(
+          panel.content,
+          panel.sessionContext,
+          sessionDialogs,
+          translator
+        );
       },
       tooltip: trans.__('Run the selected cells and advance')
     });
@@ -209,7 +215,7 @@ export namespace ToolbarItems {
   export function createRestartRunAllButton(
     panel: NotebookPanel,
     dialogs: ISessionContext.IDialogs,
-    translator?: ITranslator
+    translator: ITranslator
   ): ReactWidget {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
@@ -219,7 +225,12 @@ export namespace ToolbarItems {
           .restart(panel.sessionContext, translator)
           .then(restarted => {
             if (restarted) {
-              void NotebookActions.runAll(panel.content, panel.sessionContext);
+              void NotebookActions.runAll(
+                panel.content,
+                panel.sessionContext,
+                dialogs,
+                translator
+              );
             }
             return restarted;
           });
@@ -254,7 +265,7 @@ export namespace ToolbarItems {
   export function getDefaultItems(
     panel: NotebookPanel,
     sessionDialogs: ISessionContextDialogs,
-    translator?: ITranslator
+    translator: ITranslator
   ): DocumentRegistry.IToolbarItem[] {
     return [
       { name: 'save', widget: createSaveButton(panel, translator) },
@@ -262,7 +273,10 @@ export namespace ToolbarItems {
       { name: 'cut', widget: createCutButton(panel, translator) },
       { name: 'copy', widget: createCopyButton(panel, translator) },
       { name: 'paste', widget: createPasteButton(panel, translator) },
-      { name: 'run', widget: createRunButton(panel, translator) },
+      {
+        name: 'run',
+        widget: createRunButton(panel, sessionDialogs, translator)
+      },
       {
         name: 'interrupt',
         widget: AppToolbar.createInterruptButton(

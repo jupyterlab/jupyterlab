@@ -321,6 +321,11 @@ export namespace ISessionContext {
       translator?: ITranslator
     ): Promise<boolean>;
   }
+
+  export interface IDialogsOptions {
+    settings?: ISettingRegistry.ISettings;
+    translator?: ITranslator;
+  }
 }
 
 /**
@@ -1308,9 +1313,9 @@ export namespace SessionContext {
  * The default implementation of the client session dialog provider.
  */
 export class SessionContextDialogs implements ISessionContext.IDialogs {
-  constructor(settings?: ISettingRegistry.ISettings, translator?: ITranslator) {
-    this._settings = settings ?? null;
-    this._translator = translator ?? nullTranslator;
+  constructor(options: ISessionContext.IDialogsOptions = {}) {
+    this._settings = options.settings ?? null;
+    this._translator = options.translator ?? nullTranslator;
   }
 
   /**

@@ -88,8 +88,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     void sessionContext.initialize().then(async value => {
       if (value) {
         await (
-          options.sessionDialogs ??
-          new SessionContextDialogs(undefined, translator)
+          options.sessionDialogs ?? new SessionContextDialogs({ translator })
         ).selectKernel(sessionContext!);
       }
       this._connected = new Date();

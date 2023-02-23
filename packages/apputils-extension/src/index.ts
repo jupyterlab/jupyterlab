@@ -29,7 +29,7 @@ import {
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
@@ -555,17 +555,21 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
   id: '@jupyterlab/apputils-extension:sessionDialogs',
   provides: ISessionContextDialogs,
-  requires: [ISettingRegistry, ITranslator],
+  requires: [ISettingRegistry],
+  optional: [ITranslator],
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    translator: ITranslator
+    translator: ITranslator | null
   ) => {
     const settings = await settingRegistry.load(
       '@jupyterlab/notebook-extension:tracker'
     );
-    return new SessionContextDialogs(settings, translator);
+    return new SessionContextDialogs({
+      settings,
+      translator: translator ?? nullTranslator
+    });
   }
 };
 

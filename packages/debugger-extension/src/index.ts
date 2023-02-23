@@ -220,7 +220,12 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
 
         await service.restoreDebuggerState(state);
         await handler.updateWidget(widget, sessionContext.session);
-        await NotebookActions.runAll(content, sessionContext);
+        await NotebookActions.runAll(
+          content,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     });
 

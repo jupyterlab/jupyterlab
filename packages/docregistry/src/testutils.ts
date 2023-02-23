@@ -6,11 +6,7 @@
 
 /// <reference types="jest" />
 
-import {
-  ISessionContext,
-  SessionContext,
-  SessionContextDialogs
-} from '@jupyterlab/apputils';
+import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import {
   Kernel,
   KernelMessage,
@@ -39,12 +35,7 @@ export function createFileContext(
   manager: ServiceManager.IManager = Private.getManager()
 ): Context<DocumentRegistry.IModel> {
   const factory = Private.textFactory;
-  return new Context({
-    sessionDialogs: new SessionContextDialogs(),
-    manager,
-    factory,
-    path
-  });
+  return new Context({ manager, factory, path });
 }
 
 export async function createFileContextWithKernel(
@@ -56,7 +47,6 @@ export async function createFileContextWithKernel(
   await specsManager.ready;
 
   return new Context({
-    sessionDialogs: new SessionContextDialogs(),
     manager,
     factory,
     path,
@@ -77,7 +67,6 @@ export async function createFileContextWithMockedServices(
   const factory = new TextModelFactory();
 
   const context = new Context({
-    sessionDialogs: new SessionContextDialogs(),
     manager: manager || new ServiceManagerMock(),
     factory,
     path,
