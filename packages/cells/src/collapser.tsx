@@ -11,6 +11,11 @@ import * as React from 'react';
 import { Cell, CodeCell } from './widget';
 
 /**
+ * The CSS class added to allcollapsers.
+ */
+const COLLAPSER_CLASS = 'jp-Collapser';
+
+/**
  * The CSS class added to the collapser child.
  */
 const COLLAPSER_CHILD_CLASS = 'jp-Collapser-child';
@@ -39,7 +44,7 @@ export abstract class Collapser extends ReactWidget {
    */
   constructor() {
     super();
-    this.addClass(COLLAPSE_CLASS);
+    this.addClass(COLLAPSER_CLASS);
   }
 
   /**
