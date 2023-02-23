@@ -6,6 +6,8 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Title, Widget } from '@lumino/widgets';
 import { caretDownIcon } from '../icon';
 
+const collapsedClass = 'jp-Collapse-header-collapsed';
+
 /**
  * A panel that supports a collapsible header made from the widget's title.
  * Clicking on the title expands or contracts the widget.
@@ -18,6 +20,17 @@ export class Collapser<T extends Widget = Widget> extends Widget {
     this.addClass('jp-Collapse');
     this._header = new Widget();
     this._header.addClass('jp-Collapse-header');
+    if (collapsed) {
+      this._header.addClass(collapsedClass);
+    }
+    this._header.node.appendChild(caretDownIcon.element({
+      className: 'jp-Collapser-icon'
+    }));
+    const titleSpan = document.createElement('span');
+    titleSpan.classList.add('jp-Collapser-title');
+    titleSpan.textContent = widget.title.label;
+    this._header.node.appendChild(titleSpan);
+
     this._content = new Panel();
     this._content.addClass('jp-Collapse-contents');
 
@@ -153,13 +166,12 @@ export class Collapser<T extends Widget = Widget> extends Widget {
   }
 
   private _setHeader(): void {
-    this._header.node.childNodes.forEach(cn => cn.remove());
-    this._header.node.appendChild(caretDownIcon.element({
-      container: this._header.node,
-      height: '28px',
-      transform: 'rotate(' + (this._collapsed ? '-90' : '0') + 'deg)'
-    }));
-    this._header.node.appendChild(new Text(this._widget.title.label));
+    if (this._collapsed) {
+      this._header.addClass(collapsedClass);
+    }
+    else {
+      this._header.removeClass(collapsedClass);
+    }
   }
 
   private _collapseChanged = new Signal<this, void>(this);

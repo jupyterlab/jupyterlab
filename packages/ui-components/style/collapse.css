@@ -22,6 +22,19 @@
   text-transform: uppercase;
 }
 
+.jp-Collapser-icon {
+  height: 16px;
+}
+
+.jp-Collapse-header-collapsed .jp-Collapser-icon {
+  transform: rotate(-90deg);
+  margin: auto 0;
+}
+
+.jp-Collapser-title {
+  line-height: 25px;
+}
+
 .jp-Collapse-contents {
   padding: 0 12px;
   background-color: var(--jp-layout-color1);
