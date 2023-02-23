@@ -335,18 +335,6 @@ export namespace IRenderMime {
   }
 
   /**
-   * The interface for a text renderer factory.
-   */
-  export interface ITextRendererFactory extends IRendererFactory {
-    /**
-     * Create a text renderer which displays the mime data.
-     *
-     * @param options - The options used to render the text data.
-     */
-    createRenderer(options: ITextRendererOptions): IRenderer;
-  }
-
-  /**
    * The options used to create a renderer.
    */
   export interface IRendererOptions {
@@ -384,16 +372,6 @@ export namespace IRenderMime {
      * The application language translator.
      */
     translator?: ITranslator;
-  }
-
-  /**
-   * The options used to create a text renderer.
-   */
-  export interface ITextRendererOptions extends IRendererOptions {
-    /**
-     * Whether to disable URLs being replaced with links or not.
-     */
-    disableAutoLink: boolean;
   }
 
   /**

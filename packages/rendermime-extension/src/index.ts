@@ -13,15 +13,12 @@ import {
 } from '@jupyterlab/application';
 import { ISanitizer } from '@jupyterlab/apputils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ILatexTypesetter,
   IMarkdownParser,
   IRenderMimeRegistry,
-  RenderedText,
   RenderMimeRegistry,
-  standardRendererFactories,
-  TEXT_RENDERER_MIME_TYPES
+  standardRendererFactories
 } from '@jupyterlab/rendermime';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
@@ -29,20 +26,17 @@ namespace CommandIDs {
   export const handleLink = 'rendermime:handle-local-link';
 }
 
-export const RENDERMIME_PLUGIN_ID = '@jupyterlab/rendermime-extension:plugin';
-
 /**
  * A plugin providing a rendermime registry.
  */
 const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
-  id: RENDERMIME_PLUGIN_ID,
+  id: '@jupyterlab/rendermime-extension:plugin',
   optional: [
     IDocumentManager,
     ILatexTypesetter,
     ISanitizer,
     IMarkdownParser,
-    ITranslator,
-    ISettingRegistry
+    ITranslator
   ],
   provides: IRenderMimeRegistry,
   activate: activate,
@@ -63,16 +57,9 @@ function activate(
   latexTypesetter: ILatexTypesetter | null,
   sanitizer: ISanitizer | null,
   markdownParser: IMarkdownParser | null,
-  translator: ITranslator | null,
-  settingRegistry: ISettingRegistry | null
+  translator: ITranslator | null
 ): RenderMimeRegistry {
   const trans = (translator ?? nullTranslator).load('jupyterlab');
-  let disableAutolink = false;
-
-  function onWidgetCreated(sender: any, widget: RenderedText) {
-    widget.disableAutolink = disableAutolink;
-  }
-
   if (docManager) {
     app.commands.addCommand(CommandIDs.handleLink, {
       label: trans.__('Handle Local Link'),
@@ -100,26 +87,7 @@ function activate(
       }
     });
   }
-
-  if (settingRegistry) {
-    const loadSettings = settingRegistry.load(RENDERMIME_PLUGIN_ID);
-    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-      disableAutolink = settings.get('disableAutolink').composite as boolean;
-    };
-
-    Promise.all([loadSettings, app.restored])
-      .then(([settings]) => {
-        updateSettings(settings);
-        settings.changed.connect(settings => {
-          updateSettings(settings);
-        });
-      })
-      .catch((reason: Error) => {
-        console.error(reason.message);
-      });
-  }
-
-  const renderMimeRegistry = new RenderMimeRegistry({
+  return new RenderMimeRegistry({
     initialFactories: standardRendererFactories,
     linkHandler: !docManager
       ? undefined
@@ -141,10 +109,4 @@ function activate(
     translator: translator ?? undefined,
     sanitizer: sanitizer ?? undefined
   });
-
-  TEXT_RENDERER_MIME_TYPES.forEach(mimeType => {
-    renderMimeRegistry.getWidgetCreated(mimeType)?.connect(onWidgetCreated);
-  });
-
-  return renderMimeRegistry;
 }

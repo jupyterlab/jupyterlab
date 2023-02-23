@@ -7,7 +7,6 @@ import { ISanitizer } from '@jupyterlab/apputils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
-import { Signal } from '@lumino/signaling';
 import { MimeModel } from './mimemodel';
 
 /**
@@ -103,17 +102,6 @@ export interface IRenderMimeRegistry {
    * @returns The factory for the mime type, or `undefined`.
    */
   getFactory(mimeType: string): IRenderMime.IRendererFactory | undefined;
-
-  /**
-   * Get the widget signal for a mime type.
-   *
-   * @param mimeType - The mime type of interest.
-   *
-   * @returns The widget signal for the mime type, or `undefined`.
-   */
-  getWidgetCreated(
-    mimeType: string
-  ): Signal<IRenderMime.IRendererFactory, IRenderMime.IRenderer> | undefined;
 
   /**
    * Add a renderer factory to the rendermime.
