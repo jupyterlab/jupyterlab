@@ -43,19 +43,14 @@ test.describe('Sidebars', () => {
 
   test('File Browser has no unused rules', async ({ page }) => {
     await page.sidebar.openTab('filebrowser');
-    const contextmenu = await page.menu.openContextMenu(
-      '.jp-DirListing-headerItem'
-    );
-    const fileCheckboxesItem = await page.menu.getMenuItemInMenu(
-      contextmenu,
-      'Show File Checkboxes'
-    );
-    await fileCheckboxesItem.click();
-    const fileSizeColumnItem = await page.menu.getMenuItemInMenu(
-      contextmenu,
-      'Show File Size Column'
-    );
-    await fileSizeColumnItem.click();
+    ['Show File Checkboxes', 'Show File Size Column'].forEach(async command => {
+      const contextmenu = await page.menu.openContextMenu(
+        '.jp-DirListing-headerItem'
+      );
+      const item = await page.menu.getMenuItemInMenu(contextmenu, command);
+      await item.click();
+    });
+
     await page.notebook.createNew('notebook.ipynb');
 
     const unusedRules = await page.style.findUnusedStyleRules({
