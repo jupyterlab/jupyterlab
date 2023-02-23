@@ -17,7 +17,7 @@ test.describe('Stdin for ipdb', () => {
   test('Stdin history search', async ({ page }) => {
     await populateNotebook(page);
     await page.notebook.addCell('code', '%debug');
-    await page.notebook.run();
+    await page.notebook.runCellByCell();
 
     // enter a bunch of nonsense commands into the stdin attached to ipdb
     await page.keyboard.insertText('foofoo');
