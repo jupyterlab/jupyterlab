@@ -36,7 +36,7 @@ import {
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
 
 import {
   IEditorExtensionRegistry,
@@ -309,9 +309,6 @@ namespace CommandIDs {
   export const selectCompleter = 'completer:select-notebook';
 
   export const tocRunCells = 'toc:run-cells';
-
-  export const setSelectPreferredKernel =
-    'notebook:set-select-preferred-kernel';
 }
 
 /**
@@ -1197,9 +1194,10 @@ function activateWidgetFactory(
     mimeTypeService: editorServices.mimeTypeService,
     sessionDialogs: sessionContextDialogs,
     toolbarFactory,
-    translator: translator
+    translator
   });
   app.docRegistry.addWidgetFactory(factory);
+
   return factory;
 }
 
@@ -1576,6 +1574,51 @@ function activateNotebookHandler(
       settings.changed.connect(() => {
         updateConfig(settings);
       });
+
+      const updateSessionSettings = (
+        session: ISessionContext,
+        changes: IChangedArgs<ISessionContext.IKernelPreference>
+      ) => {
+        const { newValue, oldValue } = changes;
+        const selectPreferredKernel = newValue.selectPreferredKernel;
+
+        if (
+          typeof selectPreferredKernel === 'boolean' &&
+          selectPreferredKernel !== oldValue.selectPreferredKernel
+        ) {
+          // Ensure we break the cycle
+          if (
+            selectPreferredKernel !==
+            (settings.get('selectPreferredKernel').composite as boolean)
+          )
+            // Once the settings is changed `updateConfig` will take care
+            // of the propagation to existing session context.
+            settings
+              .set('selectPreferredKernel', selectPreferredKernel)
+              .catch(reason => {
+                console.error(
+                  `Failed to set ${settings.id}.selectPreferredKernel`
+                );
+              });
+        }
+      };
+
+      const sessionContexts = new WeakSet<ISessionContext>();
+      const listenToKernelPreference = (panel: NotebookPanel): void => {
+        const session = panel.context.sessionContext;
+        if (!session.isDisposed && !sessionContexts.has(session)) {
+          sessionContexts.add(session);
+          session.kernelPreferenceChanged.connect(updateSessionSettings);
+          session.disposed.connect(() => {
+            session.kernelPreferenceChanged.disconnect(updateSessionSettings);
+          });
+        }
+      };
+      tracker.forEach(listenToKernelPreference);
+      tracker.widgetAdded.connect((tracker, panel) => {
+        listenToKernelPreference(panel);
+      });
+
       commands.addCommand(CommandIDs.autoClosingBrackets, {
         execute: args => {
           const codeConfig = settings.get('codeCellConfig')
@@ -1622,12 +1665,6 @@ function activateNotebookHandler(
               }
             })
             .catch(console.error);
-        }
-      });
-      commands.addCommand(CommandIDs.setSelectPreferredKernel, {
-        label: trans.__('Auto Select The Preferred Kernel'),
-        execute: args => {
-          void settings.set('selectPreferredKernel', true);
         }
       });
     })
@@ -1795,7 +1832,7 @@ function activateNotebookHandler(
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(mainMenu, tracker, sessionDialogs, isEnabled);
+    populateMenus(mainMenu, isEnabled);
   }
 
   // Utility function to create a new notebook.
@@ -2256,7 +2293,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs!.restart(current.sessionContext, translator);
+        return sessionDialogs!.restart(current.sessionContext);
       }
     },
     isEnabled
@@ -2995,10 +3032,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs!.selectKernel(
-          current.context.sessionContext,
-          translator
-        );
+        return sessionDialogs!.selectKernel(current.context.sessionContext);
       }
     },
     isEnabled
@@ -3431,12 +3465,7 @@ function populatePalette(
 /**
  * Populates the application menus for the notebook.
  */
-function populateMenus(
-  mainMenu: IMainMenu,
-  tracker: INotebookTracker,
-  sessionDialogs: ISessionContextDialogs,
-  isEnabled: () => boolean
-): void {
+function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   // Add undo/redo hooks to the edit menu.
   mainMenu.editMenu.undoers.redo.add({
     id: CommandIDs.redo,

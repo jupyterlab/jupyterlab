@@ -73,7 +73,7 @@ export namespace Toolbar {
     return new ToolbarButton({
       icon: refreshIcon,
       onClick: () => {
-        void dialogs.restart(sessionContext, translator);
+        void dialogs.restart(sessionContext);
       },
       tooltip: trans.__('Restart the kernel')
     });
@@ -152,7 +152,7 @@ namespace Private {
     const translator = props.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     const callback = () => {
-      void props.dialogs.selectKernel(props.sessionContext, translator);
+      void props.dialogs.selectKernel(props.sessionContext);
     };
     return (
       <UseSignal

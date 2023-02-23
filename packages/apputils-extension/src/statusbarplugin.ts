@@ -41,7 +41,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
       if (!item.model.sessionContext) {
         return;
       }
-      await sessionDialogs.selectKernel(item.model.sessionContext, translator);
+      await sessionDialogs.selectKernel(item.model.sessionContext);
     };
 
     // Create the status item.

@@ -624,10 +624,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return sessionDialogs!.restart(
-        current.console.sessionContext,
-        translator
-      );
+      return sessionDialogs!.restart(current.console.sessionContext);
     },
     isEnabled
   });
@@ -702,10 +699,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return sessionDialogs!.selectKernel(
-        current.console.sessionContext,
-        translator
-      );
+      return sessionDialogs!.selectKernel(current.console.sessionContext);
     },
     isEnabled
   });

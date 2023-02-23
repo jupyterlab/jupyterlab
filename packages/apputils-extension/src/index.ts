@@ -555,19 +555,10 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
   id: '@jupyterlab/apputils-extension:sessionDialogs',
   provides: ISessionContextDialogs,
-  requires: [ISettingRegistry],
   optional: [ITranslator],
   autoStart: true,
-  activate: async (
-    app: JupyterFrontEnd,
-    settingRegistry: ISettingRegistry,
-    translator: ITranslator | null
-  ) => {
-    const settings = await settingRegistry.load(
-      '@jupyterlab/notebook-extension:tracker'
-    );
+  activate: async (app: JupyterFrontEnd, translator: ITranslator | null) => {
     return new SessionContextDialogs({
-      settings,
       translator: translator ?? nullTranslator
     });
   }

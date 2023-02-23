@@ -9,14 +9,13 @@ import {
   ServerConnection,
   Session
 } from '@jupyterlab/services';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
-import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -95,6 +94,14 @@ export interface ISessionContext extends IObservableDisposable {
       Kernel.IKernelConnection | null,
       'kernel'
     >
+  >;
+
+  /**
+   * Signal emitted if the kernel preference changes.
+   */
+  readonly kernelPreferenceChanged: ISignal<
+    this,
+    IChangedArgs<ISessionContext.IKernelPreference>
   >;
 
   /**
@@ -300,10 +307,7 @@ export namespace ISessionContext {
     /**
      * Select a kernel for the session.
      */
-    selectKernel(
-      session: ISessionContext,
-      translator?: ITranslator
-    ): Promise<void>;
+    selectKernel(session: ISessionContext): Promise<void>;
 
     /**
      * Restart the session context.
@@ -316,14 +320,16 @@ export namespace ISessionContext {
      * kernel name and resolves with `true`. If no kernel has been started,
      * this is a no-op, and resolves with `false`.
      */
-    restart(
-      session: ISessionContext,
-      translator?: ITranslator
-    ): Promise<boolean>;
+    restart(session: ISessionContext): Promise<boolean>;
   }
 
+  /**
+   * Session context dialog options
+   */
   export interface IDialogsOptions {
-    settings?: ISettingRegistry.ISettings;
+    /**
+     * Application translator object
+     */
     translator?: ITranslator;
   }
 }
@@ -463,7 +469,25 @@ export class SessionContext implements ISessionContext {
     return this._kernelPreference;
   }
   set kernelPreference(value: ISessionContext.IKernelPreference) {
-    this._kernelPreference = value;
+    if (!JSONExt.deepEqual(value as any, this._kernelPreference as any)) {
+      const oldValue = this._kernelPreference;
+      this._kernelPreference = value;
+      this._preferenceChanged.emit({
+        name: 'kernelPreference',
+        oldValue,
+        newValue: JSONExt.deepCopy(value as any)
+      });
+    }
+  }
+
+  /**
+   * Signal emitted if the kernel preference changes.
+   */
+  get kernelPreferenceChanged(): ISignal<
+    this,
+    IChangedArgs<ISessionContext.IKernelPreference>
+  > {
+    return this._preferenceChanged;
   }
 
   /**
@@ -1200,6 +1224,10 @@ export class SessionContext implements ISessionContext {
     this,
     Session.ISessionConnection.IKernelChangedArgs
   >(this);
+  private _preferenceChanged = new Signal<
+    this,
+    IChangedArgs<ISessionContext.IKernelPreference>
+  >(this);
   private _sessionChanged = new Signal<
     this,
     IChangedArgs<
@@ -1314,7 +1342,6 @@ export namespace SessionContext {
  */
 export class SessionContextDialogs implements ISessionContext.IDialogs {
   constructor(options: ISessionContext.IDialogsOptions = {}) {
-    this._settings = options.settings ?? null;
     this._translator = options.translator ?? nullTranslator;
   }
 
@@ -1338,33 +1365,38 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       Dialog.okButton({ label: trans.__('Select') })
     ];
 
-    const selectPreferredKernel = this._settings?.get('selectPreferredKernel')
-      .composite as boolean;
+    const selectPreferredKernel =
+      sessionContext.kernelPreference.selectPreferredKernel;
+    const hasCheckbox = typeof selectPreferredKernel === 'boolean';
 
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
       body: new Private.KernelSelector(sessionContext, this._translator),
       buttons,
-      checkbox: this._settings && {
-        label: trans.__('Always select the preferred kernel'),
-        caption: trans.__(
-          'Remember my choice and always select the preferred kernel'
-        ),
-        checked: selectPreferredKernel
-      }
+      checkbox: hasCheckbox
+        ? {
+            label: trans.__('Always select the preferred kernel'),
+            caption: trans.__(
+              'Remember my choice and always select the preferred kernel'
+            ),
+            checked: selectPreferredKernel
+          }
+        : null
     });
 
     const result = await dialog.launch();
 
-    this._settings
-      ?.set('selectPreferredKernel', result.isChecked)
-      .catch(reason => {
-        console.error("Failed to set 'selectPreferredKernel';\n", reason);
-      });
-
     if (sessionContext.isDisposed || !result.button.accept) {
       return;
     }
+
+    if (hasCheckbox && result.isChecked !== null) {
+      sessionContext.kernelPreference = {
+        ...sessionContext.kernelPreference,
+        selectPreferredKernel: result.isChecked
+      };
+    }
+
     const model = result.value;
     if (model === null && !sessionContext.hasNoKernel) {
       return sessionContext.shutdown();
@@ -1423,7 +1455,6 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     return false;
   }
 
-  private _settings: ISettingRegistry.ISettings | null;
   private _translator: ITranslator;
 }
 

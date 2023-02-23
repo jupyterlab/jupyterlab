@@ -221,19 +221,17 @@ export namespace ToolbarItems {
     return new ToolbarButton({
       icon: fastForwardIcon,
       onClick: () => {
-        void dialogs
-          .restart(panel.sessionContext, translator)
-          .then(restarted => {
-            if (restarted) {
-              void NotebookActions.runAll(
-                panel.content,
-                panel.sessionContext,
-                dialogs,
-                translator
-              );
-            }
-            return restarted;
-          });
+        void dialogs.restart(panel.sessionContext).then(restarted => {
+          if (restarted) {
+            void NotebookActions.runAll(
+              panel.content,
+              panel.sessionContext,
+              dialogs,
+              translator
+            );
+          }
+          return restarted;
+        });
       },
       tooltip: trans.__('Restart the kernel, then re-run the whole notebook')
     });
