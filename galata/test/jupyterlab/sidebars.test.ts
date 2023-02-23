@@ -43,13 +43,15 @@ test.describe('Sidebars', () => {
 
   test('File Browser has no unused rules', async ({ page }) => {
     await page.sidebar.openTab('filebrowser');
-    ['Show File Checkboxes', 'Show File Size Column'].forEach(async command => {
+    const clickMenuItem = async (command): Promise<void> => {
       const contextmenu = await page.menu.openContextMenu(
         '.jp-DirListing-headerItem'
       );
       const item = await page.menu.getMenuItemInMenu(contextmenu, command);
       await item.click();
-    });
+    };
+    await clickMenuItem('Show File Checkboxes');
+    await clickMenuItem('Show File Size Column');
 
     await page.notebook.createNew('notebook.ipynb');
 
