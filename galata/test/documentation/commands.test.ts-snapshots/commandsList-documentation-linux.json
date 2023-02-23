@@ -865,6 +865,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-file-size",
+    "label": "Show File Size Column",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-main",
     "label": "File Browser",
     "caption": "",
