@@ -44,7 +44,7 @@ function createModel(data: JSONObject): IRenderMime.IMimeModel {
   return new MimeModel({ data });
 }
 
-const fooFactory: IRenderMime.ITextRendererFactory = {
+const fooFactory: IRenderMime.IRendererFactory = {
   mimeTypes: ['text/foo'],
   safe: true,
   defaultRank: 1000,
