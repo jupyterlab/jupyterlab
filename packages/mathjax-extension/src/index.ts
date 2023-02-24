@@ -129,7 +129,6 @@ export class MathJaxTypesetter implements ILatexTypesetter {
  */
 const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   id: '@jupyterlab/mathjax-extension:plugin',
-  requires: [],
   provides: ILatexTypesetter,
   activate: (app: JupyterFrontEnd) => new MathJaxTypesetter(app),
   autoStart: true
