@@ -11,9 +11,11 @@ import {
 } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import * as defaultContent45 from './default-45.json';
+import * as emptyContent from './empty.json';
 
 export { DEFAULT_CONTENT } from '@jupyterlab/notebook/lib/testutils';
 export const DEFAULT_CONTENT_45: INotebookContent = defaultContent45;
+export const EMPTY_CONTENT: INotebookContent = emptyContent;
 
 /**
  * Local versions of the NBTestUtils that import from `src` instead of `lib`.

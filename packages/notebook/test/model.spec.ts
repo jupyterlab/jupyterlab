@@ -275,6 +275,23 @@ describe('@jupyterlab/notebook', () => {
         expect(data.cells.length).toBe(7);
         expect(data.cells[0].id).toBe('cell_1');
       });
+      it('should only include `trusted` metadata in code cells', () => {
+        const model = new NotebookModel();
+        model.fromJSON(utils.DEFAULT_CONTENT_45);
+
+        [...model.cells].map(cell => (cell.trusted = true));
+        expect(model.cells.get(0).type).toBe('code');
+        expect(model.cells.get(1).type).toBe('markdown');
+        expect(model.cells.get(2).type).toBe('raw');
+
+        const data = model.toJSON();
+        // code cell trust should be preserved
+        expect(data.cells[0].metadata.trusted).toBe(true);
+        // markdown cell should have no trusted entry
+        expect(data.cells[1].metadata.trusted).toBeUndefined();
+        // raw cell should have no trusted entry
+        expect(data.cells[2].metadata.trusted).toBeUndefined();
+      });
     });
 
     describe('#fromJSON()', () => {
@@ -301,6 +318,13 @@ describe('@jupyterlab/notebook', () => {
         model.dirty = false;
         model.fromJSON(utils.DEFAULT_CONTENT);
         expect(model.dirty).toBe(true);
+      });
+
+      it('should populate empty notebook with empty trusted code cell', () => {
+        const model = new NotebookModel();
+        model.fromJSON(utils.EMPTY_CONTENT);
+        const cell = model.cells.get(0);
+        expect(cell.trusted).toBe(true);
       });
     });
 
