@@ -45,10 +45,6 @@ export function displayShortcuts(
     return -1;
   }
 
-  function formatKeybinding(keys: readonly string[]): string {
-    return keys.map(CommandRegistry.formatKeystroke).join(', ');
-  }
-
   // Find active keybindings for target element
   const activeBindings = new Map<
     string,
@@ -60,7 +56,7 @@ export function displayShortcuts(
     if (distance < 0) {
       continue;
     }
-    let formatted = formatKeybinding(kb.keys);
+    let formatted = CommandRegistry.formatKeystroke(kb.keys);
     if (activeBindings.has(formatted)) {
       let oldBinding = activeBindings.get(formatted)!;
       // if the existing binding takes precedence, ignore this binding by continuing
@@ -80,7 +76,7 @@ export function displayShortcuts(
   let maxDistance = -1;
   const groupedBindings = new Map<number, CommandRegistry.IKeyBinding[]>();
   for (let [distance, binding] of activeBindings.values()) {
-    maxDistance = distance > maxDistance ? distance : maxDistance;
+    maxDistance = Math.max(distance, maxDistance);
     if (!groupedBindings.has(distance)) {
       groupedBindings.set(distance, []);
     }
