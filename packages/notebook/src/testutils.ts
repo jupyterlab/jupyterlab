@@ -210,7 +210,6 @@ export namespace NBTestUtils {
     toolbarFactory?: (widget: NotebookPanel) => DocumentRegistry.IToolbarItem[]
   ): NotebookWidgetFactory {
     return new NotebookWidgetFactory({
-      sessionDialogs: new SessionContextDialogs(),
       name: 'notebook',
       fileTypes: ['notebook'],
       rendermime: defaultRenderMime(),

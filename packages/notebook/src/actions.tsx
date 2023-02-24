@@ -503,7 +503,7 @@ export namespace NotebookActions {
     notebook: Notebook,
     sessionContext: ISessionContext,
     sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -541,7 +541,7 @@ export namespace NotebookActions {
     notebook: Notebook,
     sessionContext: ISessionContext,
     sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -598,7 +598,7 @@ export namespace NotebookActions {
     notebook: Notebook,
     sessionContext: ISessionContext,
     sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -646,7 +646,7 @@ export namespace NotebookActions {
     notebook: Notebook,
     sessionContext: ISessionContext,
     sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -710,7 +710,7 @@ export namespace NotebookActions {
     notebook: Notebook,
     sessionContext: ISessionContext,
     sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator
+    translator?: ITranslator
   ): Promise<boolean> {
     const { activeCell, activeCellIndex, model } = notebook;
 
@@ -756,7 +756,7 @@ export namespace NotebookActions {
     notebook: Notebook,
     sessionContext: ISessionContext,
     sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
