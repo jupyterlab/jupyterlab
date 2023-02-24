@@ -448,7 +448,7 @@ export class Sanitizer implements ISanitizer {
   }
 
   /**
-   * @returns Whether to replace URLs.
+   * @returns Whether to replace URLs by HTML anchors.
    */
   getAutolink(): boolean {
     return this._autolink;
