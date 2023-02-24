@@ -33,7 +33,8 @@
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
     "schema/*.json",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -49,8 +50,8 @@
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-alpha.19",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.22.10",
-    "typescript": "~4.7.3"
+    "typedoc": "~0.23.25",
+    "typescript": "~5.0.0-beta"
   },
   "publishConfig": {
     "access": "public"

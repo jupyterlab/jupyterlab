@@ -13,7 +13,6 @@ import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { Component } from './component';
 
 /**
  * The CSS class to add to the JSON Widget.
@@ -50,7 +49,8 @@ export class RenderedJSON
   /**
    * Render JSON into this widget's node.
    */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    const { Component } = await import('./component');
     const data = (model.data[this._mimeType] || {}) as NonNullable<JSONValue>;
     const metadata = (model.metadata[this._mimeType] || {}) as JSONObject;
     if (this._rootDOM === null) {

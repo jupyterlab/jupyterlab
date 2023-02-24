@@ -27,4 +27,4 @@ if __name__ == "__main__":
 
     proof = hash_.hexdigest()
 
-    print(proof)  # noqa
+    print(proof)

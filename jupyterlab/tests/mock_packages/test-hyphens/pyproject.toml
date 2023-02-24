@@ -6,7 +6,7 @@ requires = ["jupyter_packaging~=0.10,<2", "jupyterlab~=3.0"]
 build-backend = "jupyter_packaging.build_api"
 
 [tool.jupyter-packaging.options]
-ensured-targets = ["test-hyphens/labextension/package.json"]
+ensured-targets = ["test_hyphens/labextension/package.json"]
 
 [tool.jupyter-packaging.builder]
 factory = "jupyter_packaging.npm_builder"
@@ -16,4 +16,4 @@ build_cmd = "build:labextension"
 npm = ["jlpm"]
 
 [tool.check-manifest]
-ignore = ["test-hyphens/labextension/**", "yarn.lock", ".*", "package-lock.json"]
+ignore = ["test_hyphens/labextension/**", "yarn.lock", ".*", "package-lock.json"]

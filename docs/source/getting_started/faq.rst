@@ -11,8 +11,7 @@ General
 -------
 
 -  :ref:`What is JupyterLab? <overview>`
--  :ref:`Is JupyterLab ready to use? <releases>`
--  :ref:`What will happen to the classic Jupyter Notebook? <releases>`
+-  :ref:`What will happen to the classic Jupyter Notebook? <classic>`
 -  `Where is the official online documentation for
    JupyterLab? <https://jupyterlab.readthedocs.io>`__
 -  :ref:`How can you report a bug or issue? <issue>`

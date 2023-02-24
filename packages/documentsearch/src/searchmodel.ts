@@ -316,7 +316,7 @@ export class SearchDocumentModel
         this.stateChanged.emit();
       }
     } catch (reason) {
-      this._parsingError = reason;
+      this._parsingError = reason.toString();
       this.stateChanged.emit();
       console.error(
         `Failed to parse expression ${this.searchExpression}`,

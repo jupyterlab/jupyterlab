@@ -23,7 +23,8 @@
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "schema/*.json",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -39,7 +40,7 @@
     "@jupyterlab/testing": "^4.0.0-alpha.19",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
-    "typescript": "~4.7.3"
+    "typescript": "~5.0.0-beta"
   },
   "publishConfig": {
     "access": "public"

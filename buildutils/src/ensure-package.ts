@@ -486,40 +486,75 @@ export async function ensurePackage(
     return files;
   }
 
-  // Ensure style files are included by pattern.
-  const styleFiles = recurseDir(path.join(pkgPath, 'style'), []);
-  styleFiles.forEach(fpath => {
-    const basePath = fpath.slice(pkgPath.length + 1);
-    let found = false;
-    filePatterns.forEach(fpattern => {
-      if (minimatch.default(basePath, fpattern)) {
-        found = true;
-      }
-    });
-    if (!found && !isPrivate) {
-      messages.push(`File ${basePath} not included in files`);
-    }
-  });
-
-  // Ensure source TS files are included in lib (.js, .js.map, .d.ts)
-  const srcFiles = recurseDir(path.join(pkgPath, 'src'), []);
-  srcFiles.forEach(fpath => {
-    const basePath = fpath.slice(pkgPath.length + 1).replace('src', 'lib');
-    ['.js', '.js.map', '.d.ts'].forEach(ending => {
+  if (!isPrivate) {
+    // Ensure style files are included by pattern.
+    const styleFiles = recurseDir(path.join(pkgPath, 'style'), []);
+    styleFiles.forEach(fpath => {
+      const basePath = fpath.slice(pkgPath.length + 1);
       let found = false;
-      const targetPattern = basePath
-        .replace('.tsx', ending)
-        .replace('.ts', ending);
       filePatterns.forEach(fpattern => {
-        if (minimatch.default(targetPattern, fpattern)) {
+        if (minimatch.default(basePath, fpattern)) {
           found = true;
         }
       });
-      if (!found && !isPrivate) {
-        messages.push(`File ${targetPattern} not included in files`);
+      if (!found) {
+        messages.push(`File ${basePath} not included in files`);
       }
     });
-  });
+
+    // Ensure source TS files are included in lib (.js, .js.map, .d.ts)
+    const srcFiles = recurseDir(path.join(pkgPath, 'src'), []);
+    srcFiles.forEach(fpath => {
+      const basePath = fpath
+        .slice(pkgPath.length + 1)
+        .replace('src', 'lib')
+        .split(path.sep)
+        .join('/');
+      ['.js', '.js.map', '.d.ts'].forEach(ending => {
+        let found = false;
+        const targetPattern = basePath.replace(/\.tsx?$/g, ending);
+        filePatterns.forEach(fpattern => {
+          if (minimatch.default(targetPattern, fpattern)) {
+            found = true;
+          }
+        });
+        if (!found) {
+          messages.push(`File ${targetPattern} not included in files`);
+        }
+      });
+    });
+
+    // Ensure source files are all included
+    let anySourceMatch = false;
+    const missingSourceMessages: string[] = [];
+    srcFiles.forEach(fpath => {
+      const basepath = fpath
+        .slice(pkgPath.length + 1)
+        .split(path.sep)
+        .join('/');
+      let found = false;
+      filePatterns.forEach(fpattern => {
+        if (minimatch.default(basepath, fpattern)) {
+          found = true;
+        }
+      });
+      anySourceMatch = anySourceMatch || found;
+      if (!found) {
+        missingSourceMessages.push(
+          `Source file ${basepath} not included in files`
+        );
+      }
+    });
+    if (srcFiles.length && !anySourceMatch) {
+      messages.push('Found no src file inclusion, adding src/**/*.{ts,tsx}');
+      if (!data.files) {
+        data.files = [];
+      }
+      data.files.push('src/**/*.{ts,tsx}');
+    } else {
+      messages.push(...missingSourceMessages);
+    }
+  }
 
   // Ensure dependencies and dev dependencies.
   data.dependencies = deps;

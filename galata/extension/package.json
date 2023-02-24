@@ -46,7 +46,7 @@
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-alpha.19",
     "rimraf": "~3.0.0",
-    "typescript": "~4.7.3"
+    "typescript": "~5.0.0-beta"
   },
   "jupyterlab": {
     "extension": true,
