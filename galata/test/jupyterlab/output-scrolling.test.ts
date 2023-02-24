@@ -59,14 +59,18 @@ test.describe('Output Scrolling', () => {
     expect(await cell.screenshot()).toMatchSnapshot(
       'prompt-overlay-hover-normal.png'
     );
-    page.click(`${cellSelector} >> nth=1 >> .jp-OutputArea-promptOverlay`);
+    await page.click(
+      `${cellSelector} >> nth=1 >> .jp-OutputArea-promptOverlay`
+    );
     await expect(page.locator(`${cellSelector} >> nth=1`)).toHaveClass(
       /jp-mod-outputsScrolled/
     );
     expect(await cell.screenshot()).toMatchSnapshot(
       'prompt-overlay-hover-scroll.png'
     );
-    page.click(`${cellSelector} >> nth=1 >> .jp-OutputArea-promptOverlay`);
+    await page.click(
+      `${cellSelector} >> nth=1 >> .jp-OutputArea-promptOverlay`
+    );
     await expect(page.locator(`${cellSelector} >> nth=1`)).not.toHaveClass(
       /jp-mod-outputsScrolled/
     );
