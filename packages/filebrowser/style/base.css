@@ -92,6 +92,10 @@
   display: none;
 }
 
+.jp-FileSize-hidden {
+  display: none;
+}
+
 .jp-FileBrowser-filterBox {
   padding: 0;
   flex: 0 0 auto;
@@ -145,6 +149,12 @@
 
 .jp-DirListing-headerItem.jp-id-modified {
   flex: 0 0 112px;
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+  text-align: right;
+}
+
+.jp-DirListing-headerItem.jp-id-filesize {
+  flex: 0 0 75px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
 }
@@ -278,10 +288,17 @@
   text-align: right;
 }
 
+.jp-DirListing-itemFileSize {
+  flex: 0 0 90px;
+  text-align: right;
+}
+
 .jp-DirListing-editor {
   flex: 1 0 64px;
   outline: none;
   border: none;
+  color: var(--jp-ui-font-color1);
+  background-color: var(--jp-layout-color1);
 }
 
 .jp-DirListing-item.jp-mod-running .jp-DirListing-itemIcon::before {

@@ -7,6 +7,23 @@ module.exports = {
   ...baseConfig,
   projects: [
     {
+      name: 'documentation',
+      // Try one retry as some tests are flaky
+      retries: process.env.CI ? 2 : 0,
+      testMatch: 'test/documentation/**',
+      testIgnore: '**/.ipynb_checkpoints/**',
+      timeout: 90000,
+      use: {
+        contextOptions: {
+          permissions: ['clipboard-read', 'clipboard-write']
+        },
+        launchOptions: {
+          // Force slow motion
+          slowMo: 30
+        }
+      }
+    },
+    {
       name: 'galata',
       testMatch: 'test/galata/**',
       testIgnore: '**/.ipynb_checkpoints/**'

@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { RenderedVega, VEGALITE4_MIME_TYPE } from '@jupyterlab/vega5-extension';
+import { RenderedVega, VEGALITE5_MIME_TYPE } from '@jupyterlab/vega5-extension';
 import { JSONObject } from '@lumino/coreutils';
 
 interface ISize {
@@ -14,23 +14,23 @@ interface ISize {
 export const DEFAULT_SIZE: number = 200;
 export const SCALE_FACTOR_PROP: string[] = [
   'metadata',
-  VEGALITE4_MIME_TYPE,
+  VEGALITE5_MIME_TYPE,
   'embed_options',
   'scaleFactor'
 ];
 
-export const VEGALITE4_RENDERER = new RenderedVega({
+export const VEGALITE5_RENDERER = new RenderedVega({
   latexTypesetter: null,
   linkHandler: null,
-  mimeType: VEGALITE4_MIME_TYPE,
+  mimeType: VEGALITE5_MIME_TYPE,
   resolver: null,
   sanitizer: {
     sanitize: (s: string) => s
   }
 });
 
-export const VEGALITE4_SPEC: JSONObject = {
-  $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+export const VEGALITE5_SPEC: JSONObject = {
+  $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
   description: 'A simple bar chart with embedded data.',
   width: DEFAULT_SIZE,
   height: DEFAULT_SIZE,

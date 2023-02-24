@@ -47,7 +47,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
-  const title = entry.name;
   const githubUser = canFetch ? getExtensionGitHubUser(entry) : null;
 
   if (!entry.allowed) {
@@ -57,7 +56,6 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   return (
     <li
       className={`jp-extensionmanager-entry ${flagClasses.join(' ')}`}
-      title={title}
       style={{ display: 'flex' }}
     >
       <div style={{ marginRight: '8px' }}>
@@ -80,6 +78,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 href={entry.homepage_url}
                 target="_blank"
                 rel="noopener noreferrer"
+                title={trans.__('%1 extension home page', entry.name)}
               >
                 {entry.name}
               </a>
@@ -91,7 +90,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             <ToolbarButtonComponent
               icon={infoIcon}
               iconLabel={trans.__(
-                '%1 extension is not allowed any more. Please uninstall immediately or contact your administrator.',
+                '%1 extension is not allowed anymore. Please uninstall it immediately or contact your administrator.',
                 entry.name
               )}
               onClick={() =>
@@ -126,6 +125,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       {ListModel.entryHasUpdate(entry) && (
                         <Button
                           onClick={() => props.performAction!('install', entry)}
+                          title={trans.__('Update "%1"', entry.name)}
                           minimal
                           small
                         >
@@ -134,6 +134,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       )}
                       <Button
                         onClick={() => props.performAction!('uninstall', entry)}
+                        title={trans.__('Uninstall "%1"', entry.name)}
                         minimal
                         small
                       >
@@ -144,6 +145,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                   {entry.enabled ? (
                     <Button
                       onClick={() => props.performAction!('disable', entry)}
+                      title={trans.__('Disable "%1"', entry.name)}
                       minimal
                       small
                     >
@@ -152,6 +154,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                   ) : (
                     <Button
                       onClick={() => props.performAction!('enable', entry)}
+                      title={trans.__('Enable "%1"', entry.name)}
                       minimal
                       small
                     >
@@ -163,6 +166,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 supportInstallation && (
                   <Button
                     onClick={() => props.performAction!('install', entry)}
+                    title={trans.__('Install "%1"', entry.name)}
                     minimal
                     small
                   >

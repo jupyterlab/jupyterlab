@@ -757,6 +757,7 @@ export namespace NotebookTools {
         this.editor.source.changed.disconnect(this._onSourceChanged, this);
       }
       const nb = this.notebookTools.activeNotebookPanel?.content;
+      this.editor.source?.dispose();
       this.editor.source = nb?.model?.metadata
         ? new ObservableJSON({ values: nb.model.metadata as JSONObject })
         : null;
@@ -809,6 +810,7 @@ export namespace NotebookTools {
         this.editor.source.changed.disconnect(this._onSourceChanged, this);
       }
       const cell = this.notebookTools.activeCell;
+      this.editor.source?.dispose();
       this.editor.source = cell
         ? new ObservableJSON({ values: cell.model.metadata as JSONObject })
         : null;

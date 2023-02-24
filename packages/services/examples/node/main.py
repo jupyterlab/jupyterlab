@@ -15,7 +15,6 @@ def _jupyter_server_extension_points():
 
 
 class NodeApp(ProcessApp):
-
     name = __name__
     serverapp_config = {"allow_origin": "*"}
 

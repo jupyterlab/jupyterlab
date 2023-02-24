@@ -42,7 +42,7 @@ export class ThemeHelper {
   async setTheme(themeName: string): Promise<void> {
     const page = this.page;
     await page.evaluate(async (themeName: string) => {
-      await window.galataip.setTheme(themeName);
+      await window.galata.setTheme(themeName);
     }, themeName);
 
     await page.waitForSelector('#jupyterlab-splash', { state: 'detached' });

@@ -111,7 +111,7 @@ export const SetupCommands = (
             nbWidget.activate();
           }
           // find next and previous are now disabled
-          commands.notifyCommandChanged();
+          commands.notifyCommandChanged(cmdIds.startSearch);
         });
 
         /**

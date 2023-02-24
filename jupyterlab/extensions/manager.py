@@ -349,7 +349,7 @@ class ExtensionManager(LoggingConfigurable):
         """
         return extension.name
 
-    async def list_extensions(  # noqa
+    async def list_extensions(
         self, query: Optional[str] = None, page: int = 1, per_page: int = 30
     ) -> Tuple[List[ExtensionPackage], Optional[int]]:
         """List extensions for a given ``query`` search term.
@@ -431,7 +431,7 @@ class ExtensionManager(LoggingConfigurable):
 
         self._listings_cache = {r["name"]: r for r in rules}
 
-    async def _get_installed_extensions(  # noqa
+    async def _get_installed_extensions(
         self, get_latest_version=True
     ) -> Dict[str, ExtensionPackage]:
         """Get the installed extensions.

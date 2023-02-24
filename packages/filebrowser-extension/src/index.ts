@@ -37,7 +37,6 @@ import {
   Uploader
 } from '@jupyterlab/filebrowser';
 import { Contents } from '@jupyterlab/services';
-import { YDrive } from '@jupyterlab/docprovider';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -129,6 +128,8 @@ namespace CommandIDs {
 
   export const toggleLastModified = 'filebrowser:toggle-last-modified';
 
+  export const toggleFileSize = 'filebrowser:toggle-file-size';
+
   export const search = 'filebrowser:search';
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
@@ -207,6 +208,7 @@ const browser: JupyterFrontEndPlugin<void> = {
           const fileBrowserConfig = {
             navigateToCurrentDirectory: false,
             showLastModifiedColumn: true,
+            showFileSizeColumn: false,
             useFuzzyFilter: true,
             showHiddenFiles: false,
             showFileCheckboxes: false
@@ -292,7 +294,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
  * The default file browser factory provider.
  */
 const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
-  id: '@jupyterlab/filebrowser-extension:defaultFileBrowser',
+  id: '@jupyterlab/filebrowser-extension:default-file-browser',
   provides: IDefaultFileBrowser,
   requires: [IFileBrowserFactory],
   optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
@@ -305,17 +307,10 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
 
-    const drive = new YDrive(app.serviceManager.user);
-    app.serviceManager.contents.addDrive(drive);
-
-    const driveName =
-      PageConfig.getOption('collaborative') === 'true' ? 'YDrive' : '';
-
     // Manually restore and load the default file browser.
     const defaultBrowser = fileBrowserFactory.createFileBrowser('filebrowser', {
       auto: false,
-      restore: false,
-      driveName
+      restore: false
     });
     void Private.restoreBrowser(
       defaultBrowser,
@@ -1205,7 +1200,23 @@ function addCommands(
         return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)
           .catch((reason: Error) => {
-            console.error(`Failed to set showLastModifiedColumn setting`);
+            console.error(`Failed to set ${key} setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleFileSize, {
+    label: trans.__('Show File Size Column'),
+    isToggled: () => browser.showFileSizeColumn,
+    execute: () => {
+      const value = !browser.showFileSizeColumn;
+      const key = 'showFileSizeColumn';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
           });
       }
     }

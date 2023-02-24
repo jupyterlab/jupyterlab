@@ -73,7 +73,7 @@ class AppHandlerTest(TestCase):
         self.tempdirs.append(td)
         return td.name
 
-    def setUp(self):  # noqa
+    def setUp(self):
         # Any TemporaryDirectory objects appended to this list will be cleaned
         # up at the end of the test run.
         self.tempdirs = []

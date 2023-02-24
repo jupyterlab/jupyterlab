@@ -33,7 +33,7 @@ tasks:
       source /workspace/bin/activate-env.sh
       # Set no token and allow any origin, so that you can open it in a new tab
       # Disable iframe security so can load in the editor as well
-      jupyter lab --collaborative --dev-mode --watch --LabApp.token='' --LabApp.allow_origin=* --LabApp.tornado_settings='{"headers": {"Content-Security-Policy": "frame-ancestors *"}}'
+      jupyter lab --dev-mode --watch --extensions-in-dev-mode --ServerApp.IdentityProvider.token='' --ServerApp.allow_origin=* --ServerApp.tornado_settings='{"headers": {"Content-Security-Policy": "frame-ancestors *"}}'
 
   - name: auto-activate
     command: |

@@ -980,9 +980,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
       rendermime,
       contentFactory: contentFactory,
       maxNumberOutputs: this.maxNumberOutputs,
-      translator: this.translator
+      translator: this.translator,
+      promptOverlay: true
     }));
     output.addClass(CELL_OUTPUT_AREA_CLASS);
+    output.toggleScrolling.connect(() => {
+      this.outputsScrolled = !this.outputsScrolled;
+    });
 
     // Defer setting placeholder as OutputArea must be instantiated before initializing the DOM
     this.placeholder = options.placeholder ?? true;
@@ -2155,7 +2159,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       // TODO: It would be nice for the cell to provide a way for
       // its consumers to hook into when the rendering is done.
       await this._updateRenderedInput();
-      this.renderInput(this._renderer);
+      if (this._rendered) {
+        // The rendered flag may be updated in the mean time
+        this.renderInput(this._renderer);
+      }
     }
   }
 

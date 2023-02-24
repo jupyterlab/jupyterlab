@@ -125,10 +125,16 @@ export function createSemanticCommand(
     attribute: 'label' | 'caption'
   ): string | CommandRegistry.CommandFunc<string> | undefined {
     return () => {
-      const texts = reduceAttribute(attribute);
+      const texts = (reduceAttribute(attribute) as string[]).map(
+        (text, textIndex) =>
+          attribute == 'caption' && textIndex > 0
+            ? text.toLocaleLowerCase()
+            : text
+      );
+
       switch (texts.length) {
         case 0:
-          return defaultValues.label ?? '';
+          return defaultValues[attribute] ?? '';
         case 1:
           return texts[0];
         default: {
@@ -137,7 +143,8 @@ export function createSemanticCommand(
             .slice(undefined, -1)
             .map(l => l.replace(/…$/, ''))
             .join(', ');
-          const end = texts.slice(-1)[0] + (hasEllipsis ? '…' : '');
+          const end =
+            texts.slice(-1)[0].replace(/…$/, '') + (hasEllipsis ? '…' : '');
           return trans.__('%1 and %2', main, end);
         }
       }

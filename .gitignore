@@ -23,6 +23,7 @@ examples/federated/labextensions
 
 junit.xml
 
+jupyterlab/galata/@jupyterlab
 jupyterlab/geckodriver
 jupyterlab/static
 jupyterlab/schemas
@@ -130,3 +131,6 @@ junit.xml
 
 # generated LSP interfaces
 packages/lsp/src/_*
+
+# generated reports
+webpack-bundle-analyzer.html

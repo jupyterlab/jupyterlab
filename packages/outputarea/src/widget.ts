@@ -74,6 +74,11 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
  */
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
+/**
+ * The overlay tha can be clicked to switch between output scrolling modes.
+ */
+const OUTPUT_PROMPT_OVERLAY = 'jp-OutputArea-promptOverlay';
+
 /** ****************************************************************************
  * OutputArea
  ******************************************************************************/
@@ -112,6 +117,9 @@ export class OutputArea extends Widget {
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
+    if (options.promptOverlay) {
+      this._addPromptOverlay();
+    }
   }
 
   /**
@@ -292,6 +300,27 @@ export class OutputArea extends Widget {
     this.outputLengthChanged.emit(
       Math.min(this.model.length, this._maxNumberOutputs)
     );
+  }
+
+  /**
+   * Emitted when user requests toggling of the output scrolling mode.
+   */
+  get toggleScrolling(): ISignal<OutputArea, void> {
+    return this._toggleScrolling;
+  }
+
+  /**
+   * Add overlay allowing to toggle scrolling.
+   */
+  private _addPromptOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = OUTPUT_PROMPT_OVERLAY;
+    const trans = this._translator.load('jupyterlab');
+    overlay.title = trans.__('Toggle output scrolling');
+    overlay.addEventListener('click', () => {
+      this._toggleScrolling.emit();
+    });
+    this.node.appendChild(overlay);
   }
 
   /**
@@ -693,6 +722,7 @@ export class OutputArea extends Widget {
   private _maxNumberOutputs: number;
   private _minHeightTimeout: number | null = null;
   private _inputRequested = new Signal<OutputArea, void>(this);
+  private _toggleScrolling = new Signal<OutputArea, void>(this);
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
@@ -749,6 +779,11 @@ export namespace OutputArea {
      * The maximum number of output items to display on top and bottom of cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Whether to show prompt overlay emitting `toggleScrolling` signal.
+     */
+    promptOverlay?: boolean;
 
     /**
      * Translator

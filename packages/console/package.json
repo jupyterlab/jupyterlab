@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/console",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.19",
   "description": "JupyterLab - Code Console",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -27,7 +27,8 @@
     "lib/*.js.map",
     "lib/*.js",
     "style/*.css",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -43,29 +44,29 @@
   },
   "dependencies": {
     "@jupyter/ydoc": "^0.3.1",
-    "@jupyterlab/apputils": "^4.0.0-alpha.18",
-    "@jupyterlab/cells": "^4.0.0-alpha.18",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.18",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.18",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.18",
-    "@jupyterlab/observables": "^5.0.0-alpha.18",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.18",
-    "@jupyterlab/services": "^7.0.0-alpha.18",
-    "@jupyterlab/translation": "^4.0.0-alpha.18",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.33",
-    "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/disposable": "^2.0.0-alpha.6",
-    "@lumino/dragdrop": "^2.0.0-alpha.6",
-    "@lumino/messaging": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6",
-    "@lumino/widgets": "^2.0.0-alpha.6"
+    "@jupyterlab/apputils": "^4.0.0-alpha.19",
+    "@jupyterlab/cells": "^4.0.0-alpha.19",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.19",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.19",
+    "@jupyterlab/observables": "^5.0.0-alpha.19",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.19",
+    "@jupyterlab/services": "^7.0.0-alpha.19",
+    "@jupyterlab/translation": "^4.0.0-alpha.19",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
+    "@lumino/coreutils": "^2.0.0-beta.0",
+    "@lumino/disposable": "^2.0.0-beta.1",
+    "@lumino/dragdrop": "^2.0.0-beta.1",
+    "@lumino/messaging": "^2.0.0-beta.0",
+    "@lumino/signaling": "^2.0.0-beta.1",
+    "@lumino/widgets": "^2.0.0-beta.1"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.18",
+    "@jupyterlab/testing": "^4.0.0-alpha.19",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.22.10",
-    "typescript": "~4.7.3"
+    "typedoc": "~0.23.25",
+    "typescript": "~5.0.0-beta"
   },
   "publishConfig": {
     "access": "public"

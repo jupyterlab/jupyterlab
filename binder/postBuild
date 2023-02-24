@@ -1,6 +1,45 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-set -euo pipefail
 
-pip install -e .[dev]
+# ensure no surprises from binder's "half" activation
+source activate ${NB_PYTHON_PREFIX}
+
+# use strict and verbose shell settings
+set -euxo pipefail
+
+# create log folder, named to appear at the top of the file browser
+mkdir _reports_
+
+# pre-install nodejs deps and build outside of editable python install
+(time yarn --ignore-scripts --ignore-optional)         2>&1 | tee _reports_/00_yarn.txt
+(time yarn build:dev:prod:minimize:report)             2>&1 | tee _reports_/01_build.txt
+
+# hoist report to where a reviewer might see it
+mv dev_mode/static/webpack-bundle-analyzer.html _reports_/
+
+# assume best-effort versions from conda-forge for all deps
+(time pip install -vv -e .[dev] --no-build-isolation)  2>&1 | tee _reports_/02_pip_install.txt
+
+# copy configuration to well-known location
+mkdir -p ~/.jupyter
+cp binder/jupyter_config.py ~/.jupyter/
+
+# replace the default entry point until jupyter-server is the default on binder
+cp ${NB_PYTHON_PREFIX}/bin/jupyter-lab ${NB_PYTHON_PREFIX}/bin/jupyter-notebook
+
+# capture configuration and debug information
+(time pip list)                                        2>&1 | tee _reports_/03_pip_list.txt
+(time pip check || echo FAIL)                          2>&1 | tee _reports_/04_pip_check.txt
+(time jupyter troubleshoot)                            2>&1 | tee _reports_/10_troubleshoot.txt
+(time jupyter notebook --show-config)                  2>&1 | tee _reports_/11_notebook_show_config.txt
+(time jupyter lab --show-config)                       2>&1 | tee _reports_/12_lab_show_config.txt
+(time jupyter server extension list)                   2>&1 | tee _reports_/13_server_extension_list.txt
+(time jupyter labextension list)                       2>&1 | tee _reports_/14_labextension_list.txt
+
+# clean up egregious wastes of space
+rm -rf \
+    ~/.cache \
+    dev_mode/stats.json \
+    node_modules/@stdlib
