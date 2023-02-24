@@ -125,7 +125,12 @@ export function createSemanticCommand(
     attribute: 'label' | 'caption'
   ): string | CommandRegistry.CommandFunc<string> | undefined {
     return () => {
-      const texts = reduceAttribute(attribute);
+      const texts = (reduceAttribute(attribute) as string[]).map(
+        (text, textIndex) =>
+          attribute == 'caption' && textIndex > 0
+            ? text.toLocaleLowerCase()
+            : text
+      );
 
       switch (texts.length) {
         case 0:

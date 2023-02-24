@@ -92,6 +92,10 @@
   display: none;
 }
 
+.jp-FileSize-hidden {
+  display: none;
+}
+
 .jp-FileBrowser-filterBox {
   padding: 0;
   flex: 0 0 auto;
@@ -140,6 +144,12 @@
 
 .jp-DirListing-headerItem.jp-id-modified {
   flex: 0 0 112px;
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+  text-align: right;
+}
+
+.jp-DirListing-headerItem.jp-id-filesize {
+  flex: 0 0 75px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
 }
@@ -281,6 +291,11 @@
 
 .jp-DirListing-itemModified {
   flex: 0 0 125px;
+  text-align: right;
+}
+
+.jp-DirListing-itemFileSize {
+  flex: 0 0 90px;
   text-align: right;
 }
 

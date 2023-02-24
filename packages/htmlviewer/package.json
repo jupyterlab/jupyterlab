@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/htmlviewer",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.19",
   "description": "A viewer for HTML documents.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -24,7 +24,8 @@
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -32,11 +33,11 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.18",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.18",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.18",
-    "@jupyterlab/translation": "^4.0.0-alpha.18",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.33",
+    "@jupyterlab/apputils": "^4.0.0-alpha.19",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.19",
+    "@jupyterlab/translation": "^4.0.0-alpha.19",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
     "@lumino/coreutils": "^2.0.0-beta.0",
     "@lumino/signaling": "^2.0.0-beta.1",
     "@lumino/widgets": "^2.0.0-beta.1",
@@ -44,7 +45,7 @@
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~4.7.3"
+    "typescript": "~5.0.0-beta"
   },
   "publishConfig": {
     "access": "public"

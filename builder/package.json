@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/builder",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.19",
   "description": "JupyterLab - Extension Builder",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -24,7 +24,8 @@
     "metadata_schema.json",
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js"
+    "lib/*.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc",
@@ -70,7 +71,7 @@
     "@types/node": "^18.11.18",
     "@types/supports-color": "^5.3.0",
     "rimraf": "~3.0.0",
-    "typescript": "~4.7.3"
+    "typescript": "~5.0.0-beta"
   },
   "publishConfig": {
     "access": "public"

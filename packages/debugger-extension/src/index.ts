@@ -50,7 +50,9 @@ import { ITranslator } from '@jupyterlab/translation';
 
 function notifyCommands(app: JupyterFrontEnd): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
-    app.commands.notifyCommandChanged(command);
+    if (app.commands.hasCommand(command)) {
+      app.commands.notifyCommandChanged(command);
+    }
   });
 }
 
@@ -349,9 +351,11 @@ const variables: JupyterFrontEndPlugin<void> = {
       caption: trans.__('Inspect Variable'),
       isEnabled: args =>
         !!service.session?.isStarted &&
-        (args.variableReference ??
-          service.model.variables.selectedVariable?.variablesReference ??
-          0) > 0,
+        Number(
+          args.variableReference ??
+            service.model.variables.selectedVariable?.variablesReference ??
+            0
+        ) > 0,
       execute: async args => {
         let { variableReference, name } = args as {
           variableReference?: number;

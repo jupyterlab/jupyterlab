@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/fileeditor-extension",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.19",
   "description": "JupyterLab - Editor Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -28,7 +28,8 @@
     "lib/*.js",
     "schema/*.json",
     "style/**/*.css",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -38,27 +39,27 @@
   },
   "dependencies": {
     "@codemirror/commands": "^6.0.0",
-    "@jupyterlab/application": "^4.0.0-alpha.18",
-    "@jupyterlab/apputils": "^4.0.0-alpha.18",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.18",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.18",
-    "@jupyterlab/completer": "^4.0.0-alpha.18",
-    "@jupyterlab/console": "^4.0.0-alpha.18",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.18",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.18",
-    "@jupyterlab/documentsearch": "^4.0.0-alpha.18",
-    "@jupyterlab/filebrowser": "^4.0.0-alpha.18",
-    "@jupyterlab/fileeditor": "^4.0.0-alpha.18",
-    "@jupyterlab/launcher": "^4.0.0-alpha.18",
-    "@jupyterlab/lsp": "^4.0.0-alpha.18",
-    "@jupyterlab/mainmenu": "^4.0.0-alpha.18",
-    "@jupyterlab/observables": "^5.0.0-alpha.18",
-    "@jupyterlab/services": "^7.0.0-alpha.18",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.18",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.18",
-    "@jupyterlab/toc": "^6.0.0-alpha.18",
-    "@jupyterlab/translation": "^4.0.0-alpha.18",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.33",
+    "@jupyterlab/application": "^4.0.0-alpha.19",
+    "@jupyterlab/apputils": "^4.0.0-alpha.19",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.19",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.19",
+    "@jupyterlab/completer": "^4.0.0-alpha.19",
+    "@jupyterlab/console": "^4.0.0-alpha.19",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.19",
+    "@jupyterlab/documentsearch": "^4.0.0-alpha.19",
+    "@jupyterlab/filebrowser": "^4.0.0-alpha.19",
+    "@jupyterlab/fileeditor": "^4.0.0-alpha.19",
+    "@jupyterlab/launcher": "^4.0.0-alpha.19",
+    "@jupyterlab/lsp": "^4.0.0-alpha.19",
+    "@jupyterlab/mainmenu": "^4.0.0-alpha.19",
+    "@jupyterlab/observables": "^5.0.0-alpha.19",
+    "@jupyterlab/services": "^7.0.0-alpha.19",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.19",
+    "@jupyterlab/toc": "^6.0.0-alpha.19",
+    "@jupyterlab/translation": "^4.0.0-alpha.19",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
     "@lumino/algorithm": "^2.0.0-beta.0",
     "@lumino/commands": "^2.0.0-beta.1",
     "@lumino/coreutils": "^2.0.0-beta.0",
@@ -66,8 +67,8 @@
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "~0.22.10",
-    "typescript": "~4.7.3"
+    "typedoc": "~0.23.25",
+    "typescript": "~5.0.0-beta"
   },
   "publishConfig": {
     "access": "public"

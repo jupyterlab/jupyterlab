@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/buildutils",
-  "version": "4.0.0-alpha.18",
+  "version": "4.0.0-alpha.19",
   "description": "JupyterLab - Build Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -31,7 +31,8 @@
     "template/package.json",
     "template/tsconfig.json",
     "template/src/index.ts",
-    "verdaccio.yml"
+    "verdaccio.yml",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc && cd template && npm run build",
@@ -46,7 +47,7 @@
     "dependency-graph": "^0.11.0",
     "fs-extra": "^10.1.0",
     "glob": "~7.1.6",
-    "inquirer": "^7.1.0",
+    "inquirer": "^9.1.4",
     "minimatch": "~3.0.4",
     "os": "~0.1.1",
     "package-json": "^7.0.0",
@@ -54,13 +55,13 @@
     "process": "^0.11.10",
     "semver": "^7.3.2",
     "sort-package-json": "~1.53.1",
-    "typescript": "~4.7.3",
-    "verdaccio": "^5.19.1"
+    "typescript": "~5.0.0-beta",
+    "verdaccio": "^5.20.1"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
-    "@types/inquirer": "^7.3.1",
+    "@types/inquirer": "^9.0.3",
     "@types/node": "^18.11.18",
     "@types/prettier": "~2.6.0",
     "rimraf": "~3.0.0"

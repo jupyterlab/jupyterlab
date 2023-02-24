@@ -60,6 +60,23 @@
 }
 
 /**
+ * Prompt overlay.
+ */
+
+.jp-OutputArea-promptOverlay {
+  position: absolute;
+  top: 0;
+  width: var(--jp-cell-prompt-width);
+  height: 100%;
+  opacity: 0.5;
+}
+
+.jp-OutputArea-promptOverlay:hover {
+  background: var(--jp-layout-color2);
+  box-shadow: inset 0 0 1px var(--jp-inverse-layout-color0);
+}
+
+/**
  * Isolated output.
  */
 .jp-OutputArea-output.jp-mod-isolated {
