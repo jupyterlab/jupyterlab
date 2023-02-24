@@ -853,6 +853,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-file-size",
+    "label": "Show File Size Column",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-hidden-files",
     "label": "Show Hidden Files",
     "caption": "",

@@ -980,9 +980,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
       rendermime,
       contentFactory: contentFactory,
       maxNumberOutputs: this.maxNumberOutputs,
-      translator: this.translator
+      translator: this.translator,
+      promptOverlay: true
     }));
     output.addClass(CELL_OUTPUT_AREA_CLASS);
+    output.toggleScrolling.connect(() => {
+      this.outputsScrolled = !this.outputsScrolled;
+    });
 
     // Defer setting placeholder as OutputArea must be instantiated before initializing the DOM
     this.placeholder = options.placeholder ?? true;

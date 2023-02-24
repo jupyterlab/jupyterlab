@@ -27,7 +27,8 @@
     "lib/*.js.map",
     "lib/*.js",
     "style/*.css",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -36,7 +37,6 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter/ydoc": "^0.3.1",
     "@jupyterlab/nbformat": "^4.0.0-alpha.19",
     "@jupyterlab/observables": "^5.0.0-alpha.19",
     "@jupyterlab/rendermime": "^4.0.0-alpha.19",

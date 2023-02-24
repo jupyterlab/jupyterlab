@@ -7,9 +7,10 @@ import { InputGroup } from '@jupyterlab/ui-components';
 import { Tag, tags } from '@lezer/highlight';
 import { JSONArray, JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import * as React from 'react';
-import Highlight from 'react-highlighter';
+import Highlighter from 'react-highlight-words';
 import { JSONTree } from 'react-json-tree';
 import { StyleModule } from 'style-mod';
+
 /**
  * The properties for the JSON tree component.
  */
@@ -96,7 +97,7 @@ export class Component extends React.Component<IProps, IState> {
               <span>
                 {itemType} {itemString}
               </span>
-            ) : Object.keys(data).length === 0 ? (
+            ) : Object.keys(data as object).length === 0 ? (
               // Only display object type when it's empty i.e. "{}".
               <span>{itemType}</span>
             ) : (
@@ -106,12 +107,11 @@ export class Component extends React.Component<IProps, IState> {
           labelRenderer={([label, type]) => {
             return (
               <span className={getStyle(tags.keyword)}>
-                <Highlight
-                  search={this.state.filter}
-                  matchStyle={{ backgroundColor: 'yellow' }}
-                >
-                  {`${label}: `}
-                </Highlight>
+                <Highlighter
+                  searchWords={[this.state.filter]}
+                  textToHighlight={`${label}`}
+                  highlightClassName="jp-mod-selected"
+                ></Highlighter>
               </span>
             );
           }}
@@ -125,16 +125,15 @@ export class Component extends React.Component<IProps, IState> {
             }
             return (
               <span className={className}>
-                <Highlight
-                  search={this.state.filter}
-                  matchStyle={{ backgroundColor: 'yellow' }}
-                >
-                  {`${raw}`}
-                </Highlight>
+                <Highlighter
+                  searchWords={[this.state.filter]}
+                  textToHighlight={`${raw}`}
+                  highlightClassName="jp-mod-selected"
+                ></Highlighter>
               </span>
             );
           }}
-          shouldExpandNode={(keyPath, data, level) =>
+          shouldExpandNodeInitially={(keyPath, data, level) =>
             metadata && metadata.expanded
               ? true
               : keyPaths.join(',').includes(keyPath.join(','))

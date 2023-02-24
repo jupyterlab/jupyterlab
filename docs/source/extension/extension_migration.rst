@@ -30,6 +30,8 @@ bumped their major version (following semver convention). We want to point out p
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
 - ``@jupyterlab/apputils`` from 3.x to 4.x
    Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
+- ``@jupyterlab/attachments`` from 3.x to 4.x
+   Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
    * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
      should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
@@ -99,7 +101,7 @@ bumped their major version (following semver convention). We want to point out p
    * Removed the property ``docProviderFactory`` from the interface ``DocumentManager.IOptions``.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
    This package is no longer present in JupyterLab. For documentation related to Real-Time Collaboration, please check out
-   `jupyterlab_rtc's documentation <https://jupyterlab.readthedocs.io/en/latest/user/rtc.html>`_
+   `RTC's documentation <https://jupyterlab.readthedocs.io/en/latest/user/rtc.html>`_
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
