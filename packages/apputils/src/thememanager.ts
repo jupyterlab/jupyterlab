@@ -301,7 +301,22 @@ export class ThemeManager implements IThemeManager {
     Object.keys(overidesSchema).forEach(key => {
       // override validation is against the CSS property in the description
       // field. Example: for key ui-font-family, .description is font-family
-      this._overrideProps[key] = overidesSchema[key].description;
+      let description = '';
+      switch (key) {
+        case 'code-font-size':
+          description = 'font-size';
+          break;
+        case 'content-font-size1':
+          description = 'font-size';
+          break;
+        case 'ui-font-size1':
+          description = 'font-size';
+          break;
+        default:
+          description = overidesSchema[key].description;
+          break;
+      }
+      this._overrideProps[key] = description;
     });
   }
 
