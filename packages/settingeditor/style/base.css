@@ -217,14 +217,13 @@
 }
 
 .jp-SettingsPanel .jp-SettingsHeader h2 {
-  font-size: var(--jp-content-font-size3);
-  color: var(--jp-ui-font-color0);
+  font-size: var(--jp-content-font-size1);
+  color: var(--jp-ui-font-color1);
   font-weight: 300;
-  margin: 1em;
 }
 
 .jp-SettingsPanel .jp-SettingsHeader-description {
-  font-size: var(--jp-content-font-size2);
+  font-size: var(--jp-content-font-size1);
   color: var(--jp-ui-font-color1);
   font-weight: 200;
   margin: 1em;
@@ -234,7 +233,6 @@
 .jp-SettingsPanel .jp-SettingsTitle {
   display: flex;
   align-items: center;
-  padding-left: 1em;
 }
 
 .jp-SettingsPanel .jp-SettingsTitle-caret {
@@ -326,7 +324,7 @@
   border: none;
   outline: none;
   box-shadow: none;
-  font-size: var(--jp-content-font-size2);
+  font-size: var(--jp-content-font-size1);
   color: var(--jp-brand-color1);
   cursor: pointer;
   margin-right: 5px;
