@@ -579,7 +579,7 @@ test.describe('General', () => {
     ).toMatchSnapshot('command_palette.png');
   });
 
-  test('Command Palette', async ({ page, tmpPath }) => {
+  test('Keyboard Shortcuts Help', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 
     await page.notebook.createNew();
