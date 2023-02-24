@@ -50,7 +50,9 @@ import { ITranslator } from '@jupyterlab/translation';
 
 function notifyCommands(app: JupyterFrontEnd): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
-    app.commands.notifyCommandChanged(command);
+    if (app.commands.hasCommand(command)) {
+      app.commands.notifyCommandChanged(command);
+    }
   });
 }
 
