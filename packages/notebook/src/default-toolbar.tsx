@@ -190,9 +190,9 @@ export namespace ToolbarItems {
   export function createRunButton(
     panel: NotebookPanel,
     sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator
+    translator?: ITranslator
   ): ReactWidget {
-    const trans = (translator || nullTranslator).load('jupyterlab');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: runIcon,
       onClick: () => {
@@ -215,9 +215,9 @@ export namespace ToolbarItems {
   export function createRestartRunAllButton(
     panel: NotebookPanel,
     dialogs: ISessionContext.IDialogs,
-    translator: ITranslator
+    translator?: ITranslator
   ): ReactWidget {
-    const trans = (translator || nullTranslator).load('jupyterlab');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: fastForwardIcon,
       onClick: () => {
@@ -263,7 +263,7 @@ export namespace ToolbarItems {
   export function getDefaultItems(
     panel: NotebookPanel,
     sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator
+    translator?: ITranslator
   ): DocumentRegistry.IToolbarItem[] {
     return [
       { name: 'save', widget: createSaveButton(panel, translator) },

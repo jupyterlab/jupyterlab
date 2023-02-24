@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import {
+  ISessionContext,
+  ISessionContextDialogs,
+  SessionContext,
+  SessionContextDialogs
+} from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { JupyterServer } from '@jupyterlab/testing';
@@ -54,6 +59,11 @@ const SESSION_SETUP_TIMEOUT = 30000;
 
 describe('@jupyterlab/notebook', () => {
   let rendermime: IRenderMimeRegistry;
+  let dialogs: ISessionContextDialogs;
+
+  beforeAll(() => {
+    dialogs = new SessionContextDialogs();
+  });
 
   describe('ExecutionIndicator', () => {
     let widget: Notebook;
@@ -137,7 +147,7 @@ describe('@jupyterlab/notebook', () => {
           scheduledCell = state.executionState(widget)!.scheduledCellNumber;
         });
 
-        await NotebookActions.run(widget, ipySessionContext);
+        await NotebookActions.run(widget, ipySessionContext, dialogs);
         expect(scheduledCell).toBe(4);
       });
 
@@ -148,7 +158,7 @@ describe('@jupyterlab/notebook', () => {
           elapsedTime = state.executionState(widget)!.totalTime;
         });
 
-        await NotebookActions.run(widget, ipySessionContext);
+        await NotebookActions.run(widget, ipySessionContext, dialogs);
         expect(elapsedTime).toBeGreaterThanOrEqual(6);
       });
 
@@ -159,7 +169,7 @@ describe('@jupyterlab/notebook', () => {
           tick.push(state.executionState(widget)!.totalTime);
         });
 
-        await NotebookActions.run(widget, ipySessionContext);
+        await NotebookActions.run(widget, ipySessionContext, dialogs);
         expect(tick).toEqual(expect.arrayContaining([1, 2, 3, 4, 5, 6, 6]));
       });
 
@@ -170,7 +180,7 @@ describe('@jupyterlab/notebook', () => {
           executed.push(state.executionState(widget)!.scheduledCell.size);
         });
 
-        await NotebookActions.run(widget, ipySessionContext);
+        await NotebookActions.run(widget, ipySessionContext, dialogs);
         expect(executed).toEqual(expect.arrayContaining([3, 3, 3, 2, 2, 2, 0]));
       });
 
@@ -198,7 +208,11 @@ describe('@jupyterlab/notebook', () => {
             );
           });
 
-          let completed = await NotebookActions.run(widget, ipySessionContext);
+          let completed = await NotebookActions.run(
+            widget,
+            ipySessionContext,
+            dialogs
+          );
           expect(completed).toBe(false);
 
           expect(scheduledTally).toEqual(expect.arrayContaining([2, 0]));

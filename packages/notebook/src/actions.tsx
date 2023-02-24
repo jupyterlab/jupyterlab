@@ -2261,6 +2261,9 @@ namespace Private {
           }
 
           if (sessionContext.hasNoKernel) {
+            cell.model.sharedModel.transact(() => {
+              (cell.model as ICodeCellModel).clearExecution();
+            });
             // Session has still no kernel, so we can't execute the cell.
             return false;
           }

@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import {
+  ISessionContext,
+  ISessionContextDialogs,
+  SessionContext,
+  SessionContextDialogs
+} from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -45,8 +50,10 @@ describe('@jupyterlab/notebook', () => {
     let widget: Notebook;
     let sessionContext: ISessionContext;
     let ipySessionContext: ISessionContext;
+    let sessionDialogs: ISessionContextDialogs;
 
     beforeAll(async function () {
+      sessionDialogs = new SessionContextDialogs();
       rendermime = utils.defaultRenderMime();
 
       async function createContext(options?: Partial<SessionContext.IOptions>) {
@@ -109,7 +116,7 @@ describe('@jupyterlab/notebook', () => {
           }
         });
 
-        await NotebookActions.run(widget, sessionContext);
+        await NotebookActions.run(widget, sessionContext, sessionDialogs);
         expect(emitted).toBe(2);
         expect(failed).toBe(0);
         expect(next.rendered).toBe(true);
@@ -132,7 +139,11 @@ describe('@jupyterlab/notebook', () => {
           source: ERROR_INPUT
         });
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        const result = await NotebookActions.run(widget, ipySessionContext);
+        const result = await NotebookActions.run(
+          widget,
+          ipySessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(false);
         expect(emitted).toBe(2);
         expect(failed).toBe(1);
@@ -156,7 +167,7 @@ describe('@jupyterlab/notebook', () => {
           emitted += 1;
         });
 
-        await NotebookActions.run(widget, sessionContext);
+        await NotebookActions.run(widget, sessionContext, sessionDialogs);
         expect(emitted).toBe(1);
         expect(next.rendered).toBe(true);
       });
@@ -613,7 +624,11 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        const result = await NotebookActions.run(widget, sessionContext);
+        const result = await NotebookActions.run(
+          widget,
+          sessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(true);
         expect(cell.model.outputs.length).toBeGreaterThan(0);
         expect(next.rendered).toBe(true);
@@ -627,11 +642,13 @@ describe('@jupyterlab/notebook', () => {
           emitted += 1;
         });
         cell.model.outputs.clear();
-        return NotebookActions.run(widget, sessionContext).then(result => {
-          expect(result).toBe(true);
-          expect(widget.model!.deletedCells.length).toBe(0);
-          expect(emitted).toBe(1);
-        });
+        return NotebookActions.run(widget, sessionContext, sessionDialogs).then(
+          result => {
+            expect(result).toBe(true);
+            expect(widget.model!.deletedCells.length).toBe(0);
+            expect(emitted).toBe(1);
+          }
+        );
       });
 
       it('should be a no-op if there is no model', async () => {
@@ -640,7 +657,11 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
-        const result = await NotebookActions.run(widget, sessionContext);
+        const result = await NotebookActions.run(
+          widget,
+          sessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(false);
         expect(emitted).toBe(0);
       });
@@ -653,7 +674,11 @@ describe('@jupyterlab/notebook', () => {
         });
         widget.select(other);
         other.model.sharedModel.setSource('a = 1');
-        const result = await NotebookActions.run(widget, sessionContext);
+        const result = await NotebookActions.run(
+          widget,
+          sessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(true);
         expect(widget.activeCell).toBe(other);
         expect(emitted).toBe(1);
@@ -666,7 +691,11 @@ describe('@jupyterlab/notebook', () => {
           emitted += 1;
         });
         widget.select(next);
-        const result = await NotebookActions.run(widget, sessionContext);
+        const result = await NotebookActions.run(
+          widget,
+          sessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(true);
         expect(widget.isSelected(widget.widgets[0])).toBe(false);
         expect(emitted).toBe(1);
@@ -678,7 +707,11 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
-        const result = await NotebookActions.run(widget, sessionContext);
+        const result = await NotebookActions.run(
+          widget,
+          sessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(true);
         expect(widget.mode).toBe('command');
         expect(emitted).toBe(1);
@@ -689,7 +722,16 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
-        const result = await NotebookActions.run(widget, undefined);
+        const result = await NotebookActions.run(
+          widget,
+          {
+            isTerminating: false,
+            pendingInput: false,
+            hasNoKernel: true,
+            kernelPreference: { autoStartDefault: false }
+          } as ISessionContext,
+          { selectKernel: Promise.resolve() } as any
+        );
         expect(result).toBe(true);
         const cell = widget.activeCell as CodeCell;
         expect(cell.model.executionCount).toBe(null);
@@ -711,7 +753,11 @@ describe('@jupyterlab/notebook', () => {
           { cell_type: 'code' }
         ) as ISharedCodeCell;
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        const result = await NotebookActions.run(widget, ipySessionContext);
+        const result = await NotebookActions.run(
+          widget,
+          ipySessionContext,
+          sessionDialogs
+        );
         await sleep(400);
         expect(result).toBe(false);
         expect(cell.execution_count).toBeNull();
@@ -730,7 +776,11 @@ describe('@jupyterlab/notebook', () => {
         child.rendered = false;
         widget.select(child);
         widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
-        const result = await NotebookActions.run(widget, ipySessionContext);
+        const result = await NotebookActions.run(
+          widget,
+          ipySessionContext,
+          sessionDialogs
+        );
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
@@ -750,7 +800,8 @@ describe('@jupyterlab/notebook', () => {
         next.rendered = false;
         const result = await NotebookActions.runAndAdvance(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(true);
         expect(cell.model.outputs.length).toBeGreaterThan(0);
@@ -761,7 +812,8 @@ describe('@jupyterlab/notebook', () => {
         widget.model = null;
         const result = await NotebookActions.runAndAdvance(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(false);
       });
@@ -771,7 +823,8 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         const result = await NotebookActions.runAndAdvance(
           widget,
-          ipySessionContext
+          ipySessionContext,
+          sessionDialogs
         );
         expect(result).toBe(false);
         expect(widget.isSelected(widget.widgets[0])).toBe(false);
@@ -781,7 +834,8 @@ describe('@jupyterlab/notebook', () => {
         widget.mode = 'edit';
         const result = await NotebookActions.runAndAdvance(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(true);
         expect(widget.mode).toBe('command');
@@ -792,7 +846,8 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         const result = await NotebookActions.runAndAdvance(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(true);
         expect(widget.activeCellIndex).toBe(4);
@@ -803,7 +858,8 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = count - 1;
         const result = await NotebookActions.runAndAdvance(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(true);
         expect(widget.widgets.length).toBe(count + 1);
@@ -816,7 +872,8 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = count - 1;
         const result = await NotebookActions.runAndAdvance(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(true);
         NotebookActions.undo(widget);
@@ -832,7 +889,8 @@ describe('@jupyterlab/notebook', () => {
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAndAdvance(
           widget,
-          ipySessionContext
+          ipySessionContext,
+          sessionDialogs
         );
         expect(result).toBe(false);
         expect(cell.execution_count).toBeNull();
@@ -845,7 +903,8 @@ describe('@jupyterlab/notebook', () => {
         widget.select(cell);
         const result = await NotebookActions.runAndAdvance(
           widget,
-          ipySessionContext
+          ipySessionContext,
+          sessionDialogs
         );
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
@@ -866,7 +925,8 @@ describe('@jupyterlab/notebook', () => {
         next.rendered = false;
         const result = await NotebookActions.runAndInsert(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(true);
         expect(cell.model.outputs.length).toBeGreaterThan(0);
@@ -877,7 +937,8 @@ describe('@jupyterlab/notebook', () => {
         widget.model = null;
         const result = await NotebookActions.runAndInsert(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(false);
       });
@@ -887,7 +948,8 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         const result = await NotebookActions.runAndInsert(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(true);
         expect(widget.isSelected(widget.widgets[0])).toBe(false);
@@ -900,7 +962,8 @@ describe('@jupyterlab/notebook', () => {
         const count = widget.widgets.length;
         const result = await NotebookActions.runAndInsert(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(true);
         expect(widget.activeCell).toBeInstanceOf(CodeCell);
@@ -915,7 +978,8 @@ describe('@jupyterlab/notebook', () => {
         const count = widget.widgets.length;
         const result = await NotebookActions.runAndInsert(
           widget,
-          sessionContext
+          sessionContext,
+          sessionDialogs
         );
         expect(result).toBe(true);
         NotebookActions.undo(widget);
@@ -931,7 +995,8 @@ describe('@jupyterlab/notebook', () => {
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAndInsert(
           widget,
-          ipySessionContext
+          ipySessionContext,
+          sessionDialogs
         );
         await sleep(400);
         expect(result).toBe(false);
@@ -945,7 +1010,8 @@ describe('@jupyterlab/notebook', () => {
         widget.select(cell);
         const result = await NotebookActions.runAndInsert(
           widget,
-          ipySessionContext
+          ipySessionContext,
+          sessionDialogs
         );
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
@@ -968,7 +1034,11 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         next.rendered = false;
-        const result = await NotebookActions.runAll(widget, sessionContext);
+        const result = await NotebookActions.runAll(
+          widget,
+          sessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(true);
         expect(cell.model.outputs.length).toBeGreaterThan(0);
         expect(next.rendered).toBe(true);
@@ -976,13 +1046,21 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        const result = await NotebookActions.runAll(widget, sessionContext);
+        const result = await NotebookActions.runAll(
+          widget,
+          sessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(false);
       });
 
       it('should change to command mode', async () => {
         widget.mode = 'edit';
-        const result = await NotebookActions.runAll(widget, sessionContext);
+        const result = await NotebookActions.runAll(
+          widget,
+          sessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(true);
         expect(widget.mode).toBe('command');
       });
@@ -990,13 +1068,17 @@ describe('@jupyterlab/notebook', () => {
       it('should clear the existing selection', async () => {
         const next = widget.widgets[2];
         widget.select(next);
-        const result = await NotebookActions.runAll(widget, sessionContext);
+        const result = await NotebookActions.runAll(
+          widget,
+          sessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(true);
         expect(widget.isSelected(widget.widgets[2])).toBe(false);
       });
 
       it('should activate the last cell', async () => {
-        await NotebookActions.runAll(widget, sessionContext);
+        await NotebookActions.runAll(widget, sessionContext, sessionDialogs);
         expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
       });
 
@@ -1007,7 +1089,11 @@ describe('@jupyterlab/notebook', () => {
           { cell_type: 'code' }
         ) as ISharedCodeCell;
         widget.select(widget.widgets[widget.widgets.length - 1]);
-        const result = await NotebookActions.runAll(widget, ipySessionContext);
+        const result = await NotebookActions.runAll(
+          widget,
+          ipySessionContext,
+          sessionDialogs
+        );
         expect(result).toBe(false);
         expect(cell.execution_count).toBeNull();
         expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
@@ -1017,7 +1103,11 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCell!.model.sharedModel.setSource(ERROR_INPUT);
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
-        const result = await NotebookActions.runAll(widget, ipySessionContext);
+        const result = await NotebookActions.runAll(
+          widget,
+          ipySessionContext,
+          sessionDialogs
+        );
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
