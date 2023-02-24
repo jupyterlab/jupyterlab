@@ -32,6 +32,7 @@ bumped their major version (following semver convention). We want to point out p
    * Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
    * ``ISanitizer`` and ``ISanitizer.IOptions`` are deprecated in favor of ``IRenderMime.ISanitizer`` and
      ``IRenderMime.ISanitizerOptions`` in ``@jupyterlab/rendermime-interfaces``.
+   * Global ``sessionContextDialogs`` is removed; you should request the token ``ISessionContextDialogs`` (from ``@jupyterlab/apputils``).
 - ``@jupyterlab/attachments`` from 3.x to 4.x
    Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
@@ -198,6 +199,7 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
+   * ``NotebookActions.run`` and other run commands now require ``ISessionContext`` and ``ISessionContextDialogs``.
    * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
    * Command ``Collapsible_Headings:Collapse_All`` renamed to ``notebook:collapse-all-headings``.
    * Command ``Collapsible_Headings:Expand_All`` renamed to ``notebook:expand-all-headings``.
