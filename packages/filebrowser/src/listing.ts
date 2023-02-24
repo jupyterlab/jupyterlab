@@ -87,6 +87,11 @@ const ITEM_ICON_CLASS = 'jp-DirListing-itemIcon';
 const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
 
 /**
+ * The class name added to the listing item file size cell.
+ */
+const ITEM_FILE_SIZE_CLASS = 'jp-DirListing-itemFileSize';
+
+/**
  * The class name added to the label element that wraps each item's checkbox and
  * the header's check-all checkbox.
  */
@@ -108,6 +113,11 @@ const NAME_ID_CLASS = 'jp-id-name';
 const MODIFIED_ID_CLASS = 'jp-id-modified';
 
 /**
+ * The class name added to the file size column header cell.
+ */
+const FILE_SIZE_ID_CLASS = 'jp-id-filesize';
+
+/**
  * The class name added to the narrow column header cell.
  */
 const NARROW_ID_CLASS = 'jp-id-narrow';
@@ -116,6 +126,11 @@ const NARROW_ID_CLASS = 'jp-id-narrow';
  * The class name added to the modified column header cell and modified item cell when hidden.
  */
 const MODIFIED_COLUMN_HIDDEN = 'jp-LastModified-hidden';
+
+/**
+ * The class name added to the size column header cell and size item cell when hidden.
+ */
+const FILE_SIZE_COLUMN_HIDDEN = 'jp-FileSize-hidden';
 
 /**
  * The mime type for a contents drag object.
@@ -213,6 +228,8 @@ export class DirListing extends Widget {
     this._renderer = options.renderer || DirListing.defaultRenderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
+    // hide the file size column by default
+    this._hiddenColumns.add('file_size');
     this._renderer.populateHeaderNode(
       headerNode,
       this.translator,
@@ -1812,13 +1829,13 @@ export namespace DirListing {
     /**
      * The sort key.
      */
-    key: 'name' | 'last_modified';
+    key: 'name' | 'last_modified' | 'file_size';
   }
 
   /**
    * Toggleable columns.
    */
-  export type ToggleableColumn = 'last_modified' | 'is_selected';
+  export type ToggleableColumn = 'last_modified' | 'is_selected' | 'file_size';
 
   /**
    * A file contents model thunk.
@@ -1973,12 +1990,14 @@ export namespace DirListing {
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
       const modified = this.createHeaderItemNode(trans.__('Last Modified'));
+      const fileSize = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
+      fileSize.classList.add(FILE_SIZE_ID_CLASS);
       narrow.classList.add(NARROW_ID_CLASS);
       narrow.textContent = '...';
-      if (!hiddenColumns?.has?.('is_selected')) {
+      if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode({
           alwaysVisible: true
         });
@@ -1987,11 +2006,18 @@ export namespace DirListing {
       node.appendChild(name);
       node.appendChild(narrow);
       node.appendChild(modified);
+      node.appendChild(fileSize);
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
       }
 
       // set the initial caret icon
@@ -2014,15 +2040,21 @@ export namespace DirListing {
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null {
       const name = DOMUtils.findElement(node, NAME_ID_CLASS);
       const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
+      const fileSize = DOMUtils.findElement(node, FILE_SIZE_ID_CLASS);
       const state: ISortState = { direction: 'ascending', key: 'name' };
       const target = event.target as HTMLElement;
-      if (name.contains(target)) {
-        const modifiedIcon = DOMUtils.findElement(
-          modified,
-          HEADER_ITEM_ICON_CLASS
-        );
-        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
 
+      const modifiedIcon = DOMUtils.findElement(
+        modified,
+        HEADER_ITEM_ICON_CLASS
+      );
+      const fileSizeIcon = DOMUtils.findElement(
+        fileSize,
+        HEADER_ITEM_ICON_CLASS
+      );
+      const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
+      if (name.contains(target)) {
         if (name.classList.contains(SELECTED_CLASS)) {
           if (!name.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
@@ -2039,16 +2071,13 @@ export namespace DirListing {
         name.classList.add(SELECTED_CLASS);
         modified.classList.remove(SELECTED_CLASS);
         modified.classList.remove(DESCENDING_CLASS);
+        fileSize.classList.remove(SELECTED_CLASS);
+        fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(modifiedIcon, 'left');
+        Private.updateCaret(fileSizeIcon, 'left');
         return state;
       }
       if (modified.contains(target)) {
-        const modifiedIcon = DOMUtils.findElement(
-          modified,
-          HEADER_ITEM_ICON_CLASS
-        );
-        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
-
         state.key = 'last_modified';
         if (modified.classList.contains(SELECTED_CLASS)) {
           if (!modified.classList.contains(DESCENDING_CLASS)) {
@@ -2066,7 +2095,34 @@ export namespace DirListing {
         modified.classList.add(SELECTED_CLASS);
         name.classList.remove(SELECTED_CLASS);
         name.classList.remove(DESCENDING_CLASS);
+        fileSize.classList.remove(SELECTED_CLASS);
+        fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(nameIcon, 'right');
+        Private.updateCaret(fileSizeIcon, 'left');
+        return state;
+      }
+      if (fileSize.contains(target)) {
+        state.key = 'file_size';
+        if (fileSize.classList.contains(SELECTED_CLASS)) {
+          if (!fileSize.classList.contains(DESCENDING_CLASS)) {
+            state.direction = 'descending';
+            fileSize.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(fileSizeIcon, 'left', 'down');
+          } else {
+            fileSize.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(fileSizeIcon, 'left', 'up');
+          }
+        } else {
+          fileSize.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(fileSizeIcon, 'left', 'up');
+        }
+        fileSize.classList.add(SELECTED_CLASS);
+        name.classList.remove(SELECTED_CLASS);
+        name.classList.remove(DESCENDING_CLASS);
+        modified.classList.remove(SELECTED_CLASS);
+        modified.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(nameIcon, 'right');
+        Private.updateCaret(modifiedIcon, 'left');
         return state;
       }
       return state;
@@ -2084,16 +2140,19 @@ export namespace DirListing {
       const icon = document.createElement('span');
       const text = document.createElement('span');
       const modified = document.createElement('span');
+      const fileSize = document.createElement('span');
       icon.className = ITEM_ICON_CLASS;
       text.className = ITEM_TEXT_CLASS;
       modified.className = ITEM_MODIFIED_CLASS;
-      if (!hiddenColumns?.has?.('is_selected')) {
+      fileSize.className = ITEM_FILE_SIZE_CLASS;
+      if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode();
         node.appendChild(checkboxWrapper);
       }
       node.appendChild(icon);
       node.appendChild(text);
       node.appendChild(modified);
+      node.appendChild(fileSize);
 
       // Make the text note focusable so that it receives keyboard events;
       // text node was specifically chosen to receive shortcuts because
@@ -2101,11 +2160,18 @@ export namespace DirListing {
       // which conveniently deactivate irrelevant shortcuts.
       text.tabIndex = 0;
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
+      }
+
       return node;
     }
 
@@ -2177,12 +2243,13 @@ export namespace DirListing {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+      const fileSize = DOMUtils.findElement(node, ITEM_FILE_SIZE_CLASS);
       const checkboxWrapper = DOMUtils.findElement(
         node,
         CHECKBOX_WRAPPER_CLASS
       );
 
-      const showFileCheckboxes = !hiddenColumns?.has?.('is_selected');
+      const showFileCheckboxes = !hiddenColumns?.has('is_selected');
       if (checkboxWrapper && !showFileCheckboxes) {
         node.removeChild(checkboxWrapper);
       } else if (showFileCheckboxes && !checkboxWrapper) {
@@ -2190,10 +2257,16 @@ export namespace DirListing {
         node.insertBefore(checkboxWrapper, iconContainer);
       }
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
       }
 
       // render the file item's icon
@@ -2209,10 +2282,14 @@ export namespace DirListing {
 
       // add file size to pop up if its available
       if (model.size !== null && model.size !== undefined) {
+        const fileSizeText = Private.formatFileSize(model.size, 1, 1024);
+        fileSize.textContent = fileSizeText;
         hoverText += trans.__(
           '\nSize: %1',
           Private.formatFileSize(model.size, 1, 1024)
         );
+      } else {
+        fileSize.textContent = '';
       }
       if (model.path) {
         const dirname = PathExt.dirname(model.path);
@@ -2451,6 +2528,14 @@ namespace Private {
 
         return t1 - t2 || (valA - valB) * reverse;
       });
+    } else if (state.key === 'file_size') {
+      // Sort by size (grouping directories first)
+      copy.sort((a, b) => {
+        const t1 = a.type === 'directory' ? 0 : 1;
+        const t2 = b.type === 'directory' ? 0 : 1;
+
+        return t1 - t2 || ((a.size ?? 0) - (b.size ?? 0)) * reverse;
+      });
     } else {
       // Sort by name (grouping directories first)
       copy.sort((a, b) => {
@@ -2488,10 +2573,10 @@ namespace Private {
   ): string {
     // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
     if (bytes === 0) {
-      return '0 Bytes';
+      return '0 B';
     }
     const dm = decimalPoint || 2;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     if (i >= 0 && i < sizes.length) {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
