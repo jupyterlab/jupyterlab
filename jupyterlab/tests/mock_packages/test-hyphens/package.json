@@ -11,10 +11,10 @@
     "clean": "rimraf ./test_hyphens/labextension"
   },
   "dependencies": {
-    "@jupyterlab/launcher": "^3.3.0-alpha.7"
+    "@jupyterlab/launcher": "^4.0.0-alpha.21"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^3.3.0-alpha.7",
+    "@jupyterlab/builder": "^4.0.0-alpha.21",
     "rimraf": "~3.0.0"
   },
   "jupyterlab": {
