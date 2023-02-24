@@ -212,10 +212,9 @@ export class SettingsFormEditor extends React.Component<
               elementPosition="center"
               className="jp-SettingsTitle-caret"
             />
-            <h2>{this.props.settings.schema.title}</h2>
-            <div className="jp-SettingsHeader-description">
-              {this.props.settings.schema.description}
-            </div>
+            <h2 title={this.props.settings.schema.description}>
+              {this.props.settings.schema.title}
+            </h2>
           </header>
           {this.state.isModified && (
             <button className="jp-RestoreButton" onClick={this.reset}>

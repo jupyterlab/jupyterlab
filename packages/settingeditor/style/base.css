@@ -222,14 +222,6 @@
   font-weight: 300;
 }
 
-.jp-SettingsPanel .jp-SettingsHeader-description {
-  font-size: var(--jp-content-font-size1);
-  color: var(--jp-ui-font-color1);
-  font-weight: 200;
-  margin: 1em;
-  line-height: var(--jp-content-font-size3);
-}
-
 .jp-SettingsPanel .jp-SettingsTitle {
   display: flex;
   align-items: center;
