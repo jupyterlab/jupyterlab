@@ -682,15 +682,15 @@
       "enum": ["code", "markdown", "raw"],
       "default": "code"
     },
-    "kernelShutdown": {
-      "title": "Shut down kernel",
-      "description": "Whether to shut down or not the kernel when closing a notebook.",
+    "autoStartDefaultKernel": {
+      "title": "Automatically Start Preferred Kernel",
+      "description": "Whether to automatically start the preferred kernel.",
       "type": "boolean",
       "default": false
     },
-    "selectPreferredKernel": {
-      "title": "Select Preferred Kernel",
-      "description": "Whether to automatically select the preferred kernel during a kernel start.",
+    "kernelShutdown": {
+      "title": "Shut down kernel",
+      "description": "Whether to shut down or not the kernel when closing a notebook.",
       "type": "boolean",
       "default": false
     },

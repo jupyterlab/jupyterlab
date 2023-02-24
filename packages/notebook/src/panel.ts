@@ -132,7 +132,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     this.context.sessionContext.kernelPreference = {
       ...kernelPreference,
       shutdownOnDispose: config.kernelShutdown,
-      selectPreferredKernel: config.selectPreferredKernel
+      autoStartDefault: config.autoStartDefault
     };
   }
 
@@ -263,6 +263,10 @@ export namespace NotebookPanel {
    */
   export interface IConfig {
     /**
+     * Whether to automatically start the preferred kernel
+     */
+    autoStartDefault: boolean;
+    /**
      * A config object for cell editors
      */
     editorConfig: StaticNotebook.IEditorConfig;
@@ -274,10 +278,6 @@ export namespace NotebookPanel {
      * Whether to shut down the kernel when closing the panel or not
      */
     kernelShutdown: boolean;
-    /**
-     * Whether to automatically select the preferred kernel during a kernel start
-     */
-    selectPreferredKernel: boolean;
   }
 
   /**

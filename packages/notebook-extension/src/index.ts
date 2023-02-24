@@ -1580,24 +1580,24 @@ function activateNotebookHandler(
         changes: IChangedArgs<ISessionContext.IKernelPreference>
       ) => {
         const { newValue, oldValue } = changes;
-        const selectPreferredKernel = newValue.selectPreferredKernel;
+        const autoStartDefault = newValue.autoStartDefault;
 
         if (
-          typeof selectPreferredKernel === 'boolean' &&
-          selectPreferredKernel !== oldValue.selectPreferredKernel
+          typeof autoStartDefault === 'boolean' &&
+          autoStartDefault !== oldValue.autoStartDefault
         ) {
           // Ensure we break the cycle
           if (
-            selectPreferredKernel !==
-            (settings.get('selectPreferredKernel').composite as boolean)
+            autoStartDefault !==
+            (settings.get('autoStartDefaultKernel').composite as boolean)
           )
             // Once the settings is changed `updateConfig` will take care
             // of the propagation to existing session context.
             settings
-              .set('selectPreferredKernel', selectPreferredKernel)
+              .set('autoStartDefaultKernel', autoStartDefault)
               .catch(reason => {
                 console.error(
-                  `Failed to set ${settings.id}.selectPreferredKernel`
+                  `Failed to set ${settings.id}.autoStartDefaultKernel`
                 );
               });
         }
@@ -1674,7 +1674,7 @@ function activateNotebookHandler(
         editorConfig: factory.editorConfig,
         notebookConfig: factory.notebookConfig,
         kernelShutdown: factory.shutdownOnClose,
-        selectPreferredKernel: factory.selectPreferredKernel
+        autoStartDefault: factory.autoStartDefault
       });
     });
 
@@ -1813,9 +1813,9 @@ function activateNotebookHandler(
         `<style id="${SIDE_BY_SIDE_STYLE_ID}">${sideBySideMarginStyle}}</style>`
       );
     }
-    factory.shutdownOnClose = settings.get('kernelShutdown')
+    factory.autoStartDefault = settings.get('autoStartDefaultKernel')
       .composite as boolean;
-    factory.selectPreferredKernel = settings.get('selectPreferredKernel')
+    factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
 
     modelFactory.disableDocumentWideUndoRedo = !settings.get(
@@ -1826,7 +1826,7 @@ function activateNotebookHandler(
       editorConfig: factory.editorConfig,
       notebookConfig: factory.notebookConfig,
       kernelShutdown: factory.shutdownOnClose,
-      selectPreferredKernel: factory.selectPreferredKernel
+      autoStartDefault: factory.autoStartDefault
     });
   }
 

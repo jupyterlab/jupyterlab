@@ -342,7 +342,7 @@ export abstract class ABCWidgetFactory<
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
     this._shutdownOnClose = !!options.shutdownOnClose;
-    this._selectPreferredKernel = !!options.selectPreferredKernel;
+    this._autoStartDefault = !!options.autoStartDefault;
     this._toolbarFactory = options.toolbarFactory;
   }
 
@@ -457,12 +457,13 @@ export abstract class ABCWidgetFactory<
   /**
    * Whether to automatically select the preferred kernel during a kernel start
    */
-  get selectPreferredKernel(): boolean {
-    return this._selectPreferredKernel;
+  get autoStartDefault(): boolean {
+    return this._autoStartDefault;
   }
-  set selectPreferredKernel(value: boolean) {
-    this._selectPreferredKernel = value;
+  set autoStartDefault(value: boolean) {
+    this._autoStartDefault = value;
   }
+
   /**
    * Create a new widget given a document model and a context.
    *
@@ -511,10 +512,10 @@ export abstract class ABCWidgetFactory<
   private _translator: ITranslator;
   private _name: string;
   private _label: string;
+  private _autoStartDefault: boolean;
   private _readOnly: boolean;
   private _canStartKernel: boolean;
   private _shutdownOnClose: boolean;
-  private _selectPreferredKernel: boolean;
   private _preferKernel: boolean;
   private _modelName: string;
   private _fileTypes: string[];

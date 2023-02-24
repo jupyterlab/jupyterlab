@@ -284,14 +284,9 @@ export namespace ISessionContext {
 
     /**
      * Automatically start the default kernel if no other matching kernel is
-     * found (default `true`).
+     * found (default `false`).
      */
     readonly autoStartDefault?: boolean;
-
-    /**
-     * Automatically select the preferred kernel during a kernel start (default `false`).
-     */
-    readonly selectPreferredKernel?: boolean;
   }
 
   export type KernelDisplayStatus =
@@ -550,26 +545,7 @@ export class SessionContext implements ISessionContext {
     if (this._pendingKernelName === this.noKernelName) {
       return this.noKernelName;
     }
-    if (
-      !kernel &&
-      !this.isReady &&
-      this.kernelPreference.canStart !== false &&
-      this.kernelPreference.shouldStart !== false
-    ) {
-      let name =
-        this._pendingKernelName ||
-        SessionContext.getDefaultKernel({
-          specs: this.specsManager.specs,
-          sessions: this.sessionManager.running(),
-          preference: this.kernelPreference
-        }) ||
-        '';
-      if (name) {
-        name = this.specsManager.specs?.kernelspecs[name]?.display_name ?? name;
-        return name;
-      }
-      return this.noKernelName;
-    }
+
     if (this._pendingKernelName) {
       return (
         this.specsManager.specs?.kernelspecs[this._pendingKernelName]
@@ -695,7 +671,7 @@ export class SessionContext implements ISessionContext {
   async startKernel(): Promise<boolean> {
     const preference = this.kernelPreference;
 
-    if (!preference.selectPreferredKernel) {
+    if (!preference.autoStartDefault) {
       return true;
     }
 
@@ -1365,9 +1341,8 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       Dialog.okButton({ label: trans.__('Select') })
     ];
 
-    const selectPreferredKernel =
-      sessionContext.kernelPreference.selectPreferredKernel;
-    const hasCheckbox = typeof selectPreferredKernel === 'boolean';
+    const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
+    const hasCheckbox = typeof autoStartDefault === 'boolean';
 
     const dialog = new Dialog({
       title: trans.__('Select Kernel'),
@@ -1375,11 +1350,11 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       buttons,
       checkbox: hasCheckbox
         ? {
-            label: trans.__('Always select the preferred kernel'),
+            label: trans.__('Always start the preferred kernel'),
             caption: trans.__(
-              'Remember my choice and always select the preferred kernel'
+              'Remember my choice and always start the preferred kernel'
             ),
-            checked: selectPreferredKernel
+            checked: autoStartDefault
           }
         : null
     });
@@ -1393,7 +1368,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     if (hasCheckbox && result.isChecked !== null) {
       sessionContext.kernelPreference = {
         ...sessionContext.kernelPreference,
-        selectPreferredKernel: result.isChecked
+        autoStartDefault: result.isChecked
       };
     }
 

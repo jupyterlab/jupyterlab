@@ -151,6 +151,11 @@ export namespace NotebookWidgetFactory {
   export interface IFactory
     extends DocumentRegistry.IWidgetFactory<NotebookPanel, INotebookModel> {
     /**
+     * Whether to automatically start the preferred kernel.
+     */
+    autoStartDefault: boolean;
+
+    /**
      * A configuration object for cell editor settings.
      */
     editorConfig: StaticNotebook.IEditorConfig;
@@ -164,9 +169,5 @@ export namespace NotebookWidgetFactory {
      * Whether the kernel should be shutdown when the widget is closed.
      */
     shutdownOnClose: boolean;
-    /**
-     * Whether to automatically select the preferred kernel during a kernel start
-     */
-    selectPreferredKernel: boolean;
   }
 }
