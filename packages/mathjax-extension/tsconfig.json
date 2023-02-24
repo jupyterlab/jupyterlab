@@ -1,25 +1,9 @@
 {
+  "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "composite": true,
-    "declaration": true,
-    "esModuleInterop": true,
-    "incremental": true,
-    "jsx": "react",
-    "module": "esnext",
-    "moduleResolution": "node",
-    "noEmitOnError": true,
-    "noImplicitAny": true,
-    "noUnusedLocals": false,
-    "preserveWatchOutput": true,
-    "resolveJsonModule": true,
     "outDir": "lib",
     "rootDir": "src",
-    "skipLibCheck": true,
-    "strict": true,
-    "strictNullChecks": false,
-    "target": "es2017",
-    "types": []
+    "skipLibCheck": true
   },
   "include": ["src/*"],
   "references": [
@@ -29,6 +13,5 @@
     {
       "path": "../rendermime"
     }
-  ],
-  "extends": "../../tsconfigbase"
+  ]
 }
