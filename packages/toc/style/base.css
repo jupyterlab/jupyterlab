@@ -35,8 +35,6 @@
 
 .jp-TableOfContents .jp-SidePanel-content {
   overflow-y: auto;
-  display: flex;
-  align-items: flex-start;
 }
 
 .jp-TableOfContents-tree {
