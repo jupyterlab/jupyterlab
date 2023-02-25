@@ -200,12 +200,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   getInitialQuery(): string {
     const activeCell = this.widget.content.activeCell;
     const editor = activeCell?.editor as CodeMirrorEditor | undefined;
-    const selection = editor?.state.sliceDoc(
-      editor?.state.selection.main.from,
-      editor?.state.selection.main.to
+    if (!editor) {
+      return '';
+    }
+    const selection = editor.state.sliceDoc(
+      editor.state.selection.main.from,
+      editor.state.selection.main.to
     );
-    // if there are newlines, just return empty string
-    return selection?.search(/\r?\n|\r/g) === -1 ? selection : '';
+    return selection;
   }
 
   /**
