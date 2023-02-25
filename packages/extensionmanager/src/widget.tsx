@@ -426,6 +426,7 @@ activate this feature?`)}
               {this.trans.__('Yes')}
             </Button>
             <Button
+              className="jp-extensionmanager-disclaimer-disable"
               onClick={() => {
                 this.model.isEnabled = false;
               }}
