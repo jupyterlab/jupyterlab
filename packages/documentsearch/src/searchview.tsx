@@ -80,9 +80,8 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
       tabIndex={0}
       ref={props.inputRef}
       title={props.title}
-    >
-      {props.value}
-    </textarea>
+      defaultValue={props.value}
+    ></textarea>
   );
 }
 
