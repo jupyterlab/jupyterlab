@@ -76,8 +76,8 @@ export class NbConvertManager {
     return this._exportFormats;
   }
 
-  private _requestingFormats: PromiseDelegate<NbConvertManager.IExportFormats> | null;
-  private _exportFormats: NbConvertManager.IExportFormats | null = null;
+  protected _requestingFormats: PromiseDelegate<NbConvertManager.IExportFormats> | null;
+  protected _exportFormats: NbConvertManager.IExportFormats | null = null;
 }
 
 /**
