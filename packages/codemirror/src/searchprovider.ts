@@ -405,6 +405,14 @@ export abstract class EditorSearchProvider<
 }
 
 /**
+ * Matches to be highlighted.
+ */
+interface IEffectValue {
+  matches: ISearchMatch[];
+  currentMatch: ISearchMatch | null;
+}
+
+/**
  * Helper class to highlight texts in a code mirror editor.
  *
  * Highlighted texts (aka `matches`) must be provided through
@@ -421,15 +429,22 @@ export class CodeMirrorSearchHighlighter {
     this._matches = new Array<ISearchMatch>();
     this._currentIndex = null;
 
-    this._highlightEffect = StateEffect.define<{ matches: ISearchMatch[] }>({
-      map: (value, mapping) => ({
-        matches: value.matches.map(v => ({
+    this._highlightEffect = StateEffect.define<IEffectValue>({
+      map: (value, mapping) => {
+        const transform = (v: ISearchMatch) => ({
           text: v.text,
           position: mapping.mapPos(v.position)
-        }))
-      })
+        });
+        return {
+          matches: value.matches.map(transform),
+          currentMatch: value.currentMatch
+            ? transform(value.currentMatch)
+            : null
+        };
+      }
     });
     this._highlightMark = Decoration.mark({ class: 'cm-searching' });
+    this._currentMark = Decoration.mark({ class: 'jp-current-match' });
 
     this._highlightField = StateField.define<DecorationSet>({
       create: () => {
@@ -439,7 +454,7 @@ export class CodeMirrorSearchHighlighter {
         highlights = highlights.map(transaction.changes);
         for (let ef of transaction.effects) {
           if (ef.is(this._highlightEffect)) {
-            const e = ef as StateEffect<{ matches: ISearchMatch[] }>;
+            const e = ef as StateEffect<IEffectValue>;
             if (e.value.matches.length) {
               highlights = highlights.update({
                 add: e.value.matches.map(m =>
@@ -450,6 +465,17 @@ export class CodeMirrorSearchHighlighter {
                 ),
                 // filter out old marks
                 filter: () => false
+              });
+              highlights = highlights.update({
+                add: e.value.currentMatch
+                  ? [
+                      this._currentMark.range(
+                        e.value.currentMatch.position,
+                        e.value.currentMatch.position +
+                          e.value.currentMatch.text.length
+                      )
+                    ]
+                  : []
               });
             } else {
               highlights = Decoration.none;
@@ -482,6 +508,8 @@ export class CodeMirrorSearchHighlighter {
     this._refresh();
   }
 
+  private _current: ISearchMatch | null = null;
+
   /**
    * Clear all highlighted matches
    */
@@ -499,7 +527,7 @@ export class CodeMirrorSearchHighlighter {
 
     if (this._cm) {
       this._cm.editor.dispatch({
-        effects: this._highlightEffect.of({ matches: [] })
+        effects: this._highlightEffect.of({ matches: [], currentMatch: null })
       });
 
       const selection = this._cm.state.selection.main;
@@ -555,10 +583,10 @@ export class CodeMirrorSearchHighlighter {
       throw new Error('CodeMirrorEditor already set.');
     } else {
       this._cm = editor;
-      this._refresh();
       if (this._currentIndex !== null) {
         this._highlightCurrentMatch();
       }
+      this._refresh();
     }
   }
 
@@ -571,7 +599,6 @@ export class CodeMirrorSearchHighlighter {
     // Highlight the current index
     if (this._currentIndex !== null) {
       const match = this.matches[this._currentIndex];
-      this._cm.editor.focus();
       this._cm.editor.dispatch({
         selection: {
           anchor: match.position,
@@ -579,10 +606,13 @@ export class CodeMirrorSearchHighlighter {
         },
         scrollIntoView: true
       });
+      this._current = match;
     } else {
+      this._current = null;
       // Set cursor to remove any selection
       this._cm.editor.dispatch({ selection: { anchor: 0 } });
     }
+    this._refresh();
   }
 
   private _refresh(): void {
@@ -592,7 +622,10 @@ export class CodeMirrorSearchHighlighter {
     }
 
     let effects: StateEffect<unknown>[] = [
-      this._highlightEffect.of({ matches: this.matches })
+      this._highlightEffect.of({
+        matches: this.matches,
+        currentMatch: this._current
+      })
     ];
     if (!this._cm!.state.field(this._highlightField, false)) {
       effects.push(StateEffect.appendConfig.of([this._highlightField]));
@@ -652,8 +685,9 @@ export class CodeMirrorSearchHighlighter {
   private _cm: CodeMirrorEditor | null;
   private _currentIndex: number | null;
   private _matches: ISearchMatch[];
-  private _highlightEffect: StateEffectType<{ matches: ISearchMatch[] }>;
+  private _highlightEffect: StateEffectType<IEffectValue>;
   private _highlightMark: Decoration;
+  private _currentMark: Decoration;
   private _highlightField: StateField<DecorationSet>;
 }
 

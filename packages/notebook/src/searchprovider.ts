@@ -303,7 +303,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * @returns The next match if available.
    */
   async highlightNext(loop: boolean = true): Promise<ISearchMatch | undefined> {
+    const wasFocused = this.widget.content.mode === 'edit';
     const match = await this._stepNext(false, loop);
+    if (match && wasFocused) {
+      this.widget.content.activeCell?.editor?.focus();
+    }
     return match ?? undefined;
   }
 
@@ -317,7 +321,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   async highlightPrevious(
     loop: boolean = true
   ): Promise<ISearchMatch | undefined> {
+    const wasFocused = this.widget.content.mode === 'edit';
     const match = await this._stepNext(true, loop);
+    if (match && wasFocused) {
+      this.widget.content.activeCell?.editor?.focus();
+    }
     return match ?? undefined;
   }
 

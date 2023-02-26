@@ -163,6 +163,23 @@ test.describe('Notebook Search', () => {
     );
   });
 
+  test('Highlight are visible when text is selected', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'with');
+    await page.waitForSelector('text=1/21');
+
+    const cell = await page.notebook.getCell(0);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Select text (to see if the highlights will still be visible)
+    await page.keyboard.press('Control+A');
+
+    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
+      'highlight-visible-under-selection.png'
+    );
+  });
+
   test('Highlight next hit same editor', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
