@@ -104,6 +104,10 @@
   );
 }
 
+.jp-CodeCell.jp-mod-outputsScrolled .jp-OutputArea-promptOverlay {
+  left: calc(-1 * var(--jp-private-cell-scrolling-output-offset));
+}
+
 /*-----------------------------------------------------------------------------
 | CodeCell
 |----------------------------------------------------------------------------*/
