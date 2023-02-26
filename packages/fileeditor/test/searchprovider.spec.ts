@@ -74,6 +74,13 @@ describe('@jupyterlab/fileeditor', () => {
         await provider.endQuery();
       });
 
+      it('should find multi-line matches', async () => {
+        await provider.startQuery(/est\nte/, undefined);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.endQuery();
+      });
+
       it('should not focus the editor', async () => {
         await provider.startQuery(/test/, undefined);
         await provider.highlightNext();
