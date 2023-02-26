@@ -32,7 +32,7 @@ export class NbConvertManager {
   /**
    * Fetch and cache the export formats from the expensive nbconvert handler.
    */
-  async fetchExportFormats(): Promise<NbConvertManager.IExportFormats> {
+  protected async fetchExportFormats(): Promise<NbConvertManager.IExportFormats> {
     this._requestingFormats = new PromiseDelegate();
     this._exportFormats = null;
     const base = this.serverSettings.baseUrl;
