@@ -205,6 +205,10 @@
   stroke: var(--jp-icon-contrast-color3);
 }
 
+.jp-icon-dot[fill] {
+  fill: var(--jp-warn-color0);
+}
+
 .jp-jupyter-icon-color[fill] {
   fill: var(--jp-jupyter-icon-color, var(--jp-warn-color0));
 }

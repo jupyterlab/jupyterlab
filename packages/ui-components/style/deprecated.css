@@ -50,7 +50,9 @@
   --jp-icon-fast-forward: url('icons/toolbar/fast-forward.svg');
   --jp-icon-file-upload: url('icons/toolbar/file-upload.svg');
   --jp-icon-file: url('icons/filetype/file.svg');
+  --jp-icon-filter-dot: url('icons/search/filter-dot.svg');
   --jp-icon-filter-list: url('icons/toolbar/filter-list.svg');
+  --jp-icon-filter: url('icons/search/filter.svg');
   --jp-icon-folder-favorite: url('icons/filetype/folder-favorite.svg');
   --jp-icon-folder: url('icons/filetype/folder.svg');
   --jp-icon-home: url('icons/filetype/home.svg');
@@ -263,6 +265,14 @@
 
 .jp-FileUploadIcon {
   background-image: var(--jp-icon-file-upload);
+}
+
+.jp-FilterDotIcon {
+  background-image: var(--jp-icon-filter-dot);
+}
+
+.jp-FilterIcon {
+  background-image: var(--jp-icon-filter);
 }
 
 .jp-FilterListIcon {

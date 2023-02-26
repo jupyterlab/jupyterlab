@@ -128,7 +128,7 @@
   padding-left: 10px;
   padding-right: 10px;
   user-select: none;
-  min-width: 43px;
+  min-width: 35px;
   display: inline-block;
 }
 
@@ -160,35 +160,41 @@
   background-color: var(--jp-layout-color3);
 }
 
-.jp-DocumentSearch-ellipses-button {
+.jp-DocumentSearch-filter-button {
   border-radius: var(--jp-border-radius);
 }
 
-.jp-DocumentSearch-ellipses-button:hover {
+.jp-DocumentSearch-filter-button:hover {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DocumentSearch-ellipses-button-enabled {
+.jp-DocumentSearch-filter-button-enabled {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DocumentSearch-filter-button-enabled:hover {
   background-color: var(--jp-layout-color3);
-}
-
-.jp-DocumentSearch-ellipses-button-enabled:hover {
-  background-color: var(--jp-layout-color2);
 }
 
 .jp-DocumentSearch-search-options {
   padding: 0 8px;
   margin-left: 3px;
-  width: 200px;
+  width: 100%;
   display: grid;
+  justify-content: start;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  justify-items: stretch;
 }
 
-.jp-DocumentSearch-search-options-disabled {
+.jp-DocumentSearch-search-filter-disabled {
   color: var(--jp-ui-font-color2);
 }
 
-.jp-DocumentSearch-search-options input {
-  float: right;
+.jp-DocumentSearch-search-filter {
+  display: flex;
+  align-items: center;
+  user-select: none;
 }
 
 .jp-DocumentSearch-regex-error {

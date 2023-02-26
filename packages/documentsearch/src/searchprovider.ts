@@ -24,6 +24,7 @@ export abstract class SearchProvider<T extends Widget = Widget>
    */
   constructor(protected widget: T) {
     this._stateChanged = new Signal<this, void>(this);
+    this._filtersChanged = new Signal<this, void>(this);
     this._disposed = false;
   }
 
@@ -32,6 +33,13 @@ export abstract class SearchProvider<T extends Widget = Widget>
    */
   get stateChanged(): ISignal<this, void> {
     return this._stateChanged;
+  }
+
+  /**
+   * Signal indicating that filter definition changed.
+   */
+  get filtersChanged(): ISignal<this, void> {
+    return this._filtersChanged;
   }
 
   /**
@@ -179,6 +187,7 @@ export abstract class SearchProvider<T extends Widget = Widget>
 
   // Needs to be protected so subclass can emit the signal too.
   protected _stateChanged: Signal<this, void>;
+  protected _filtersChanged: Signal<this, void>;
   private _disposed: boolean;
 }
 

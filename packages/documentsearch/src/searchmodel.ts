@@ -90,6 +90,13 @@ export class SearchDocumentModel
   }
 
   /**
+   * Filter definitions changed.
+   */
+  get filtersDefinitionChanged(): ISignal<ISearchProvider, void> | null {
+    return this.searchProvider.filtersChanged || null;
+  }
+
+  /**
    * The initial query string.
    */
   get initialQuery(): string {

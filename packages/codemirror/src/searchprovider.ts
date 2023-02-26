@@ -166,6 +166,14 @@ export abstract class EditorSearchProvider<
   }
 
   /**
+   * Set whether search should be limitted to active selection.
+   */
+  async setSearchSelection(v: boolean): Promise<void> {
+    this._inSelection = v;
+    await this.updateCodeMirror(this.model.sharedModel.getSource());
+  }
+
+  /**
    * Initialize the search using the provided options. Should update the UI
    * to highlight all matches and "select" the first match.
    *
@@ -359,10 +367,18 @@ export abstract class EditorSearchProvider<
    */
   protected async updateCodeMirror(content: string) {
     if (this.query !== null && this.isActive) {
-      this.cmHandler.matches = await TextSearchEngine.search(
-        this.query,
-        content
-      );
+      const allMatches = await TextSearchEngine.search(this.query, content);
+      if (this._inSelection) {
+        const editor = this.editor!;
+        const selection = editor.getSelection();
+        const start = editor.getOffsetAt(selection.start);
+        const end = editor.getOffsetAt(selection.end);
+        this.cmHandler.matches = allMatches.filter(
+          match => match.position >= start && match.position <= end
+        );
+      } else {
+        this.cmHandler.matches = allMatches;
+      }
     } else {
       this.cmHandler.matches = [];
     }
@@ -383,6 +399,7 @@ export abstract class EditorSearchProvider<
   // Needs to be protected so subclass can emit the signal too.
   protected _stateChanged: Signal<IBaseSearchProvider, void>;
   private _isActive = true;
+  private _inSelection = false;
   private _isDisposed = false;
   private _cmHandler: CodeMirrorSearchHighlighter | null = null;
 }
