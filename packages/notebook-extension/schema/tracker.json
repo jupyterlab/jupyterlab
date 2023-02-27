@@ -734,6 +734,12 @@
           "type": "boolean",
           "default": false,
           "title": "Show Trailing Space"
+        },
+        "splitStdinHistoryBySession": {
+          "type": "boolean",
+          "default": false,
+          "title": "Split Stdin History by Kernel",
+          "description": "When enabled, line history for stdin (eg the ipdb prompt) is kept separately for different kernel sessions."
         }
       },
       "additionalProperties": false,
@@ -778,7 +784,8 @@
         "rulers": [],
         "codeFolding": false,
         "lineWiseCopyCut": true,
-        "showTrailingSpace": false
+        "showTrailingSpace": false,
+        "splitStdinHistoryBySession": false
       }
     },
     "defaultCell": {
@@ -814,7 +821,8 @@
         "rulers": [],
         "codeFolding": false,
         "lineWiseCopyCut": true,
-        "showTrailingSpace": false
+        "showTrailingSpace": false,
+        "splitStdinHistoryBySession": false
       }
     },
     "rawCellConfig": {
@@ -837,7 +845,8 @@
         "rulers": [],
         "codeFolding": false,
         "lineWiseCopyCut": true,
-        "showTrailingSpace": false
+        "showTrailingSpace": false,
+        "splitStdinHistoryBySession": false
       }
     },
     "scrollPastEnd": {
