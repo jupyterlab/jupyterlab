@@ -59,7 +59,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this
     );
     this._observeActiveCell();
-    this._filtersChanged.connect(this._onFiltersChanged, this);
+    this._filtersChanged.connect(this._setEnginesSelectionSearchMode, this);
   }
 
   private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<any>) {
@@ -192,12 +192,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._onCellSelectionChanged,
       this
     );
-    if (this._editorSelectionsObservable) {
-      this._editorSelectionsObservable.changed.disconnect(
-        this._setSelectedLines,
-        this
-      );
-    }
+    this._stopObservingLastCell();
 
     super.dispose();
 
@@ -257,11 +252,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * mode) nor when search highlights a match (switching notebook to edit mode).
    */
   private _updateSelectionMode() {
-    if (this._selectionModeLock) {
+    if (this._selectionLock) {
       return;
     }
     this._selectionSearchMode =
-      this._selectedCells === 1 && this.widget.content.mode === 'edit'
+      this._selectedCells === 1 &&
+      this.widget.content.mode === 'edit' &&
+      this._selectedLines !== 0
         ? 'text'
         : 'cells';
   }
@@ -289,10 +286,12 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * Clear currently highlighted match.
    */
   async clearHighlight(): Promise<void> {
+    this._selectionLock = true;
     if (this._currentProviderIndex !== null) {
       await this._searchProviders[this._currentProviderIndex].clearHighlight();
       this._currentProviderIndex = null;
     }
+    this._selectionLock = false;
   }
 
   /**
@@ -343,7 +342,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (!this.widget) {
       return;
     }
+    this._selectionLock = true;
     await this.endQuery();
+    this._selectionLock = false;
     let cells = this.widget.content.widgets;
 
     this._query = query;
@@ -355,31 +356,38 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     this._onSelection = this._filters.selection;
 
+    const currentProviderIndex = this.widget.content.activeCellIndex;
+
     // For each cell, create a search provider
     this._searchProviders = await Promise.all(
-      cells.map(async cell => {
+      cells.map(async (cell, index) => {
         const cellSearchProvider = createCellSearchProvider(cell);
-        cellSearchProvider.stateChanged.connect(
-          this._onSearchProviderChanged,
-          this
-        );
 
         await cellSearchProvider.setIsActive(
           !this._filters!.selection ||
             this.widget.content.isSelectedOrActive(cell)
         );
+
+        if (
+          this._onSelection &&
+          this._selectionSearchMode === 'text' &&
+          index === currentProviderIndex
+        ) {
+          if (this._textSelection) {
+            await cellSearchProvider.setSearchSelection(this._textSelection);
+          }
+        }
+
         await cellSearchProvider.startQuery(query, this._filters);
 
         return cellSearchProvider;
       })
     );
+    this._currentProviderIndex = currentProviderIndex;
 
-    this._currentProviderIndex = this.widget.content.activeCellIndex;
-
-    if (!this._documentHasChanged) {
-      await this.highlightNext(false);
-    }
-    this._documentHasChanged = false;
+    this._selectionLock = true;
+    await this.highlightNext(false);
+    this._selectionLock = false;
 
     return Promise.resolve();
   }
@@ -390,8 +398,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   async endQuery(): Promise<void> {
     await Promise.all(
       this._searchProviders.map(provider => {
-        provider.stateChanged.disconnect(this._onSearchProviderChanged, this);
-
         return provider.endQuery().then(() => {
           provider.dispose();
         });
@@ -511,10 +517,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private _addCellProvider(index: number) {
     const cell = this.widget.content.widgets[index];
     const cellSearchProvider = createCellSearchProvider(cell);
-    cellSearchProvider.stateChanged.connect(
-      this._onSearchProviderChanged,
-      this
-    );
 
     ArrayExt.insert(this._searchProviders, index, cellSearchProvider);
 
@@ -530,7 +532,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
   private _removeCellProvider(index: number) {
     const provider = ArrayExt.removeAt(this._searchProviders, index);
-    provider?.stateChanged.disconnect(this._onSearchProviderChanged, this);
     provider?.dispose();
   }
 
@@ -538,8 +539,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     cells: CellList,
     changes: IObservableList.IChangedArgs<ICellModel>
   ): Promise<void> {
-    await this.clearHighlight();
-
     switch (changes.type) {
       case 'add':
         changes.newValues.forEach((model, index) => {
@@ -566,7 +565,6 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
         break;
     }
-    this._onSearchProviderChanged();
   }
 
   private async _stepNext(
@@ -574,13 +572,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     loop = false
   ): Promise<ISearchMatch | null> {
     const activateNewMatch = async () => {
-      this._selectionModeLock = true;
+      this._selectionLock = true;
       if (this.widget.content.activeCellIndex !== this._currentProviderIndex!) {
         this.widget.content.activeCellIndex = this._currentProviderIndex!;
       }
       if (this.widget.content.activeCellIndex === -1) {
         console.warn('No active cell (no cells or no model), aborting search');
-        this._selectionModeLock = false;
+        this._selectionLock = false;
         return;
       }
       const activeCell = this.widget.content.activeCell!;
@@ -599,7 +597,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
 
       if (!activeCell.inViewport) {
-        this._selectionModeLock = false;
+        this._selectionLock = false;
         // It will not be possible the cell is not in the view
         return;
       }
@@ -607,7 +605,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       await activeCell.ready;
       const editor = activeCell.editor!;
       editor.revealSelection(editor.getSelection());
-      this._selectionModeLock = false;
+      this._selectionLock = false;
     };
 
     if (this._currentProviderIndex === null) {
@@ -652,6 +650,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     if (this.widget.content.activeCellIndex !== this._currentProviderIndex) {
       await this.clearHighlight();
+      this._currentProviderIndex = this.widget.content.activeCellIndex;
     }
     this._observeActiveCell();
   }
@@ -661,15 +660,19 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (!editor) {
       return;
     }
+    this._stopObservingLastCell();
 
+    editor.model.selections.changed.connect(this._setSelectedLines, this);
+    this._editorSelectionsObservable = editor.model.selections;
+  }
+
+  private _stopObservingLastCell() {
     if (this._editorSelectionsObservable) {
       this._editorSelectionsObservable.changed.disconnect(
         this._setSelectedLines,
         this
       );
     }
-    editor.model.selections.changed.connect(this._setSelectedLines, this);
-    this._editorSelectionsObservable = editor.model.selections;
   }
 
   private _setSelectedLines() {
@@ -678,41 +681,54 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       return;
     }
 
-    const { start, end } = editor.getSelection();
+    const selection = editor.getSelection();
+    const { start, end } = selection;
 
-    const newLines = end.line - start.line + 1;
+    const newLines =
+      end.line === start.line && end.column === start.column
+        ? 0
+        : end.line - start.line + 1;
+
+    this._textSelection = selection;
+
     if (newLines !== this._selectedLines) {
       this._selectedLines = newLines;
-      this._filtersChanged.emit();
+      this._updateSelectionMode();
     }
+    this._filtersChanged.emit();
   }
 
-  private _onSearchProviderChanged() {
-    // Don't highlight the next occurrence when the query
-    // follows a document change
-    this._documentHasChanged = true;
-    this._stateChanged.emit();
-  }
-
-  private async _onFiltersChanged() {
-    if (!this._onSelection) {
-      // When search in selection is off we always search full text
-      this._setEnginesSelectionSearchMode(false);
-    } else {
-      // When search in selection is off we either search in full cells
-      // (toggling off isActive flag on search enginges of non-selected cells)
-      // or in selected text of the active cell.
-      const withinTextSelection = this._selectionSearchMode === 'text';
-      this._setEnginesSelectionSearchMode(withinTextSelection);
-    }
-  }
+  private _textSelection: CodeEditor.IRange | null = null;
 
   /**
    * Set whether the engines should search within selection only or full text.
    */
-  private async _setEnginesSelectionSearchMode(v: boolean) {
+  private async _setEnginesSelectionSearchMode() {
+    let textMode: boolean;
+
+    if (!this._onSelection) {
+      // When search in selection is off we always search full text
+      textMode = false;
+    } else {
+      // When search in selection is off we either search in full cells
+      // (toggling off isActive flag on search enginges of non-selected cells)
+      // or in selected text of the active cell.
+      textMode = this._selectionSearchMode === 'text';
+    }
+
+    if (this._selectionLock) {
+      return;
+    }
+
+    // Clear old selection restrictions or if relevant, set current restrictions for active provider.
     await Promise.all(
-      this._searchProviders.map(provider => provider.setSearchSelection(v))
+      this._searchProviders.map((provider, index) =>
+        provider.setSearchSelection(
+          this._currentProviderIndex === index && textMode
+            ? this._textSelection
+            : null
+        )
+      )
     );
   }
 
@@ -726,7 +742,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         if (isSelected) {
           selectedCells += 1;
         }
-        if (this._onSelection) {
+        if (provider && this._onSelection) {
           provider.setIsActive(isSelected);
         }
       })
@@ -738,22 +754,18 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     }
 
     this._filtersChanged.emit();
-    if (this._onSelection) {
-      this._onSearchProviderChanged();
-    }
   }
 
   private _currentProviderIndex: number | null = null;
   private _filters: IFilters | undefined;
   private _onSelection = false;
   private _selectedCells: number = 1;
-  private _selectedLines: number = 1;
+  private _selectedLines: number = 0;
   private _query: RegExp | null = null;
   private _searchProviders: CellSearchProvider[] = [];
-  private _documentHasChanged = false;
   private _editorSelectionsObservable: IObservableMap<
     CodeEditor.ITextSelection[]
   > | null = null;
   private _selectionSearchMode: 'cells' | 'text' = 'cells';
-  private _selectionModeLock: boolean = false;
+  private _selectionLock: boolean = false;
 }

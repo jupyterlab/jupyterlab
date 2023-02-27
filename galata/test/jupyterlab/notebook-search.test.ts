@@ -163,6 +163,36 @@ test.describe('Notebook Search', () => {
     );
   });
 
+  test('Search in selected text', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+
+    await page.fill('[placeholder="Find"]', 'text/');
+    await page.waitForSelector('text=1/3');
+
+    // Activete third cell
+    const cell = await page.notebook.getCell(2);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Select 7 lines
+    await page.keyboard.press('Control+Home');
+    for (let i = 0; i < 6; i++) {
+      await page.keyboard.press('Shift+ArrowDown');
+    }
+
+    // Switch to selection search mode
+    await page.click('button[title="Show Search Filters"]');
+    await page.click('text=Search in 7 Selected Lines');
+
+    await page.waitForSelector('text=1/2');
+
+    const nbPanel = await page.notebook.getNotebookInPanel();
+
+    expect(await nbPanel.screenshot()).toMatchSnapshot(
+      'search-in-selected-text.png'
+    );
+  });
+
   test('Highlights are visible when text is selected', async ({ page }) => {
     await page.keyboard.press('Control+f');
     await page.fill('[placeholder="Find"]', 'with');

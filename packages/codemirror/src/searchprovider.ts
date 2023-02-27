@@ -153,9 +153,10 @@ export abstract class EditorSearchProvider<
    * @param v New value
    */
   async setIsActive(v: boolean): Promise<void> {
-    if (this._isActive !== v) {
-      this._isActive = v;
+    if (this._isActive === v) {
+      return;
     }
+    this._isActive = v;
     if (this._isActive) {
       if (this.query !== null) {
         await this.startQuery(this.query, this.filters);
@@ -166,10 +167,10 @@ export abstract class EditorSearchProvider<
   }
 
   /**
-   * Set whether search should be limitted to active selection.
+   * Set whether search should be limitted to specified selection.
    */
-  async setSearchSelection(v: boolean): Promise<void> {
-    this._inSelection = v;
+  async setSearchSelection(selection: CodeEditor.IRange | null): Promise<void> {
+    this._inSelection = selection;
     await this.updateCodeMirror(this.model.sharedModel.getSource());
   }
 
@@ -194,6 +195,7 @@ export abstract class EditorSearchProvider<
    * Stop the search and clean any UI elements.
    */
   async endQuery(): Promise<void> {
+    await this.clearHighlight();
     await this.cmHandler.endQuery();
     this.currentIndex = null;
   }
@@ -370,9 +372,8 @@ export abstract class EditorSearchProvider<
       const allMatches = await TextSearchEngine.search(this.query, content);
       if (this._inSelection) {
         const editor = this.editor!;
-        const selection = editor.getSelection();
-        const start = editor.getOffsetAt(selection.start);
-        const end = editor.getOffsetAt(selection.end);
+        const start = editor.getOffsetAt(this._inSelection.start);
+        const end = editor.getOffsetAt(this._inSelection.end);
         this.cmHandler.matches = allMatches.filter(
           match => match.position >= start && match.position <= end
         );
@@ -399,7 +400,7 @@ export abstract class EditorSearchProvider<
   // Needs to be protected so subclass can emit the signal too.
   protected _stateChanged: Signal<IBaseSearchProvider, void>;
   private _isActive = true;
-  private _inSelection = false;
+  private _inSelection: CodeEditor.IRange | null = null;
   private _isDisposed = false;
   private _cmHandler: CodeMirrorSearchHighlighter | null = null;
 }
@@ -609,8 +610,6 @@ export class CodeMirrorSearchHighlighter {
       this._current = match;
     } else {
       this._current = null;
-      // Set cursor to remove any selection
-      this._cm.editor.dispatch({ selection: { anchor: 0 } });
     }
     this._refresh();
   }
@@ -638,6 +637,10 @@ export class CodeMirrorSearchHighlighter {
       // No-op
       return null;
     }
+    // TODO: refactor this to avoid storing any state in the selection/cursor
+    // as this prevents correct behaviour when we want to use selection as
+    // limiting the boundary of search.
+
     // In order to support search-as-you-type, we needed a way to allow the first
     // match to be selected when a search is started, but prevent the selected
     // search to move for each new keypress.  To do this, when a search is ended,
