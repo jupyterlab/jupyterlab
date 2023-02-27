@@ -593,44 +593,61 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       )?.submenu;
     }
 
-    void services.nbconvert.getExportFormats().then(response => {
-      if (response) {
-        const formatLabels: any = Private.getFormatLabels(translator);
+    let formatsInitialized = false;
 
-        // Convert export list to palette and menu items.
-        const formatList = Object.keys(response);
-        formatList.forEach(function (key) {
-          const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
-          const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
-          let args = {
-            format: key,
-            label: labelStr,
-            isPalette: false
-          };
-          if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-            if (exportTo) {
-              exportTo.addItem({
-                command: CommandIDs.exportToFormat,
-                args: args
-              });
-            }
-            if (palette) {
-              args = {
-                format: key,
-                label: labelStr,
-                isPalette: true
-              };
-              const category = trans.__('Notebook Operations');
-              palette.addItem({
-                command: CommandIDs.exportToFormat,
-                category,
-                args
-              });
-            }
-          }
-        });
+    /** Request formats only when a notebook might use them. */
+    const maybeInitializeFormats = async () => {
+      if (formatsInitialized) {
+        return;
       }
-    });
+
+      tracker.widgetAdded.disconnect(maybeInitializeFormats);
+
+      formatsInitialized = true;
+
+      const response = await services.nbconvert.getExportFormats(false);
+
+      if (!response) {
+        return;
+      }
+
+      const formatLabels: any = Private.getFormatLabels(translator);
+
+      // Convert export list to palette and menu items.
+      const formatList = Object.keys(response);
+      formatList.forEach(function (key) {
+        const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+        const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
+        let args = {
+          format: key,
+          label: labelStr,
+          isPalette: false
+        };
+        if (FORMAT_EXCLUDE.indexOf(key) === -1) {
+          if (exportTo) {
+            exportTo.addItem({
+              command: CommandIDs.exportToFormat,
+              args: args
+            });
+          }
+          if (palette) {
+            args = {
+              format: key,
+              label: labelStr,
+              isPalette: true
+            };
+            const category = trans.__('Notebook Operations');
+            palette.addItem({
+              command: CommandIDs.exportToFormat,
+              category,
+              args
+            });
+          }
+        }
+      });
+    };
+
+    tracker.widgetAdded.connect(maybeInitializeFormats);
   }
 };
 
@@ -925,45 +942,55 @@ function activateNotebookTools(
   };
   const optionsMap: { [key: string]: JSONValue } = {};
   optionsMap.None = null;
-  void services.nbconvert.getExportFormats().then(response => {
-    if (response) {
-      /**
-       * The excluded Cell Inspector Raw NbConvert Formats
-       * (returned from nbconvert's export list)
-       */
-      const rawFormatExclude = [
-        'pdf',
-        'slides',
-        'script',
-        'notebook',
-        'custom'
-      ];
-      let optionValueArray: any = [
-        [trans.__('PDF'), 'pdf'],
-        [trans.__('Slides'), 'slides'],
-        [trans.__('Script'), 'script'],
-        [trans.__('Notebook'), 'notebook'],
-        [trans.__('Custom'), 'custom']
-      ];
 
-      // convert exportList to palette and menu items
-      const formatList = Object.keys(response);
-      const formatLabels = Private.getFormatLabels(translator);
-      formatList.forEach(function (key) {
-        if (rawFormatExclude.indexOf(key) === -1) {
-          const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
-          const option = formatLabels[key] ? formatLabels[key] : altOption;
-          const mimeTypeValue = response[key].output_mimetype;
-          optionValueArray.push([option, mimeTypeValue]);
-        }
-      });
-      const nbConvert = NotebookTools.createNBConvertSelector(
-        optionValueArray,
-        translator
-      );
-      notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
+  let formatsInitialized = false;
+
+  async function maybeInitializeFormats() {
+    if (formatsInitialized) {
+      return;
     }
-  });
+
+    tracker.widgetAdded.disconnect(maybeInitializeFormats);
+
+    formatsInitialized = true;
+
+    const response = await services.nbconvert.getExportFormats(false);
+    if (!response) {
+      return;
+    }
+    /**
+     * The excluded Cell Inspector Raw NbConvert Formats
+     * (returned from nbconvert's export list)
+     */
+    const rawFormatExclude = ['pdf', 'slides', 'script', 'notebook', 'custom'];
+    let optionValueArray: any = [
+      [trans.__('PDF'), 'pdf'],
+      [trans.__('Slides'), 'slides'],
+      [trans.__('Script'), 'script'],
+      [trans.__('Notebook'), 'notebook'],
+      [trans.__('Custom'), 'custom']
+    ];
+
+    // convert exportList to palette and menu items
+    const formatList = Object.keys(response);
+    const formatLabels = Private.getFormatLabels(translator);
+    formatList.forEach(function (key) {
+      if (rawFormatExclude.indexOf(key) === -1) {
+        const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
+        const option = formatLabels[key] ? formatLabels[key] : altOption;
+        const mimeTypeValue = response[key].output_mimetype;
+        optionValueArray.push([option, mimeTypeValue]);
+      }
+    });
+    const nbConvert = NotebookTools.createNBConvertSelector(
+      optionValueArray,
+      translator
+    );
+    notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
+  }
+
+  tracker.widgetAdded.connect(maybeInitializeFormats);
+
   notebookTools.title.icon = buildIcon;
   notebookTools.title.caption = trans.__('Notebook Tools');
   notebookTools.id = id;
