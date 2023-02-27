@@ -942,41 +942,42 @@ export interface IStdin extends Widget {
  * The default stdin widget.
  */
 export class Stdin extends Widget implements IStdin {
-  private static _history: string[] = [];
+  private static _history: { [key: string]: string[] } = {};
 
-  private static _historyIx(ix: number): number | undefined {
-    const len = Stdin._history.length;
+  private static _historyIx(key: string, ix: number): number | undefined {
+    const len = Stdin._history[key].length;
     // wrap nonpositive ix to nonnegative ix
     if (ix <= 0) {
       return len + ix;
     }
   }
 
-  private static _historyAt(ix: number): string | undefined {
-    const len = Stdin._history.length;
-    const ixpos = Stdin._historyIx(ix);
+  private static _historyAt(key: string, ix: number): string | undefined {
+    const len = Stdin._history[key].length;
+    const ixpos = Stdin._historyIx(key, ix);
 
     if (ixpos !== undefined && ixpos < len) {
-      return Stdin._history[ixpos];
+      return Stdin._history[key][ixpos];
     }
     // return undefined if ix is out of bounds
   }
 
-  private static _historyPush(line: string): void {
-    Stdin._history.push(line);
-    if (Stdin._history.length > 1000) {
+  private static _historyPush(key: string, line: string): void {
+    Stdin._history[key].push(line);
+    if (Stdin._history[key].length > 1000) {
       // truncate line history if it's too long
-      Stdin._history.shift();
+      Stdin._history[key].shift();
     }
   }
 
   private static _historySearch(
+    key: string,
     pat: string,
     ix: number,
     reverse = true
   ): number | undefined {
-    const len = Stdin._history.length;
-    const ixpos = Stdin._historyIx(ix);
+    const len = Stdin._history[key].length;
+    const ixpos = Stdin._historyIx(key, ix);
     const substrFound = (x: string) => x.search(pat) !== -1;
 
     if (ixpos === undefined) {
@@ -989,9 +990,9 @@ export class Stdin extends Widget implements IStdin {
         return;
       }
 
-      const ixFound = (Stdin._history.slice(0, ixpos) as any).findLastIndex(
-        substrFound
-      );
+      const ixFound = (
+        Stdin._history[key].slice(0, ixpos) as any
+      ).findLastIndex(substrFound);
       if (ixFound !== -1) {
         // wrap ix to negative
         return ixFound - len;
@@ -1002,7 +1003,9 @@ export class Stdin extends Widget implements IStdin {
         return;
       }
 
-      const ixFound = Stdin._history.slice(ixpos + 1).findIndex(substrFound);
+      const ixFound = Stdin._history[key]
+        .slice(ixpos + 1)
+        .findIndex(substrFound);
       if (ixFound !== -1) {
         // wrap ix to negative and adjust for slice
         return ixFound - len + ixpos + 1;
@@ -1020,6 +1023,9 @@ export class Stdin extends Widget implements IStdin {
     this.addClass(STDIN_CLASS);
     this._future = options.future;
     this._historyIndex = 0;
+    this._historyKey = options.splitHistoryBySession
+      ? options.parent_header.session
+      : '';
     this._historyPat = '';
     this._parentHeader = options.parent_header;
     this._password = options.password;
@@ -1031,6 +1037,11 @@ export class Stdin extends Widget implements IStdin {
     this._input.placeholder = this._trans.__(
       '↑↓ for history. Search history with c-↑/c-↓'
     );
+
+    // initialize line history
+    if (Stdin._history[this._historyKey] === undefined) {
+      Stdin._history[this._historyKey] = [];
+    }
   }
 
   /**
@@ -1068,7 +1079,7 @@ export class Stdin extends Widget implements IStdin {
           this._value += '········';
         } else {
           this._value += input.value;
-          Stdin._historyPush(input.value);
+          Stdin._historyPush(this._historyKey, input.value);
         }
         this._promise.resolve(void 0);
       } else if (event.key === 'Escape') {
@@ -1086,13 +1097,17 @@ export class Stdin extends Widget implements IStdin {
 
         const reverse = event.key === 'ArrowUp';
         const searchHistoryIx = Stdin._historySearch(
+          this._historyKey,
           this._historyPat,
           this._historyIndex,
           reverse
         );
 
         if (searchHistoryIx !== undefined) {
-          const historyLine = Stdin._historyAt(searchHistoryIx);
+          const historyLine = Stdin._historyAt(
+            this._historyKey,
+            searchHistoryIx
+          );
           if (historyLine !== undefined) {
             if (this._historyIndex === 0) {
               this._valueCache = input.value;
@@ -1105,7 +1120,10 @@ export class Stdin extends Widget implements IStdin {
       } else if (event.key === 'ArrowUp') {
         this.resetSearch();
 
-        const historyLine = Stdin._historyAt(this._historyIndex - 1);
+        const historyLine = Stdin._historyAt(
+          this._historyKey,
+          this._historyIndex - 1
+        );
         if (historyLine) {
           if (this._historyIndex === 0) {
             this._valueCache = input.value;
@@ -1122,7 +1140,10 @@ export class Stdin extends Widget implements IStdin {
           input.value = this._valueCache;
           ++this._historyIndex;
         } else {
-          const historyLine = Stdin._historyAt(this._historyIndex + 1);
+          const historyLine = Stdin._historyAt(
+            this._historyKey,
+            this._historyIndex + 1
+          );
           if (historyLine) {
             input.value = historyLine;
             ++this._historyIndex;
@@ -1153,11 +1174,12 @@ export class Stdin extends Widget implements IStdin {
 
   private _future: Kernel.IShellFuture;
   private _historyIndex: number;
+  private _historyKey: string;
+  private _historyPat: string;
   private _input: HTMLInputElement;
   private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
   private _password: boolean;
   private _promise = new PromiseDelegate<void>();
-  private _historyPat: string;
   private _trans: TranslationBundle;
   private _value: string;
   private _valueCache: string;
@@ -1192,6 +1214,11 @@ export namespace Stdin {
      * Translator
      */
     readonly translator?: ITranslator;
+
+    /**
+     * Split stdin line history by kernel session
+     */
+    splitHistoryBySession?: boolean;
   }
 }
 
