@@ -114,11 +114,11 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
+import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
   CellMetadataField,
   NotebookMetadataField
-} from './metadataEditorFields';
-import { ActiveCellTool } from './activeCellToolWidget';
+} from './tool-widgets/metadataEditorFields';
 
 /**
  * The command IDs used by the notebook plugin.
