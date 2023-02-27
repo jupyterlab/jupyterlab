@@ -38,7 +38,7 @@ namespace Private {
 export class ActiveCellTool extends NotebookTools.Tool {
   constructor(options: Private.IOptions) {
     super();
-    const { languages } = options
+    const { languages } = options;
     this._tracker = options.tracker;
 
     this.addClass('jp-ActiveCellTool');
