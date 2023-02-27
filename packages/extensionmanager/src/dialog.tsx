@@ -20,7 +20,7 @@ export function reportInstallError(
   const trans = translator.load('jupyterlab');
   const entries = [];
   entries.push(
-    <p>{trans.__('An error occurred installing <code>%1</code>.', name)}</p>
+    <p>{trans.__(`An error occured installing "${name}."`)}</p>
   );
   if (errorMessage) {
     entries.push(
