@@ -577,7 +577,10 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
             )}
             {isModified && defaultValue !== undefined && (
               <div className="jp-FormGroup-default">
-                {trans.__('Default: %1', defaultValue.toLocaleString())}
+                {trans.__(
+                  'Default: %1',
+                  defaultValue !== null ? defaultValue.toLocaleString() : 'null'
+                )}
               </div>
             )}
             <div className="validationErrors">{errors}</div>

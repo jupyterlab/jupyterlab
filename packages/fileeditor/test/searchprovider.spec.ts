@@ -4,7 +4,10 @@
 import { FileEditorSearchProvider } from '@jupyterlab/fileeditor';
 import {
   CodeMirrorEditorFactory,
-  CodeMirrorMimeTypeService
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  ybinding
 } from '@jupyterlab/codemirror';
 import {
   Context,
@@ -18,9 +21,31 @@ import { UUID } from '@lumino/coreutils';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 
 describe('@jupyterlab/fileeditor', () => {
-  const factoryService = new CodeMirrorEditorFactory();
   const modelFactory = new TextModelFactory();
-  const mimeTypeService = new CodeMirrorMimeTypeService();
+  const languages = (() => {
+    const registry = new EditorLanguageRegistry();
+    EditorLanguageRegistry.getDefaultLanguages()
+      .filter(language => ['Python'].includes(language.name))
+      .forEach(language => {
+        registry.addLanguage(language);
+      });
+    return registry;
+  })();
+  const extensions = (() => {
+    const registry = new EditorExtensionRegistry();
+    registry.addExtension({
+      name: 'binding',
+      factory: ({ model }) => {
+        return EditorExtensionRegistry.createImmutableExtension(
+          ybinding((model.sharedModel as any).ysource)
+        );
+      }
+    });
+
+    return registry;
+  })();
+  const factoryService = new CodeMirrorEditorFactory({ extensions, languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
   let context: Context<DocumentRegistry.ICodeModel>;
   let manager: ServiceManager.IManager;
 

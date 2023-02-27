@@ -45,7 +45,6 @@
     "@jupyter/ydoc": "^0.3.1",
     "@jupyterlab/apputils": "^4.0.0-alpha.19",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.19",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.19",
     "@jupyterlab/coreutils": "^6.0.0-alpha.19",
     "@jupyterlab/observables": "^5.0.0-alpha.19",
     "@jupyterlab/rendermime": "^4.0.0-alpha.19",

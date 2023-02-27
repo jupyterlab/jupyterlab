@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": ["src/*", "test/*"],
+  "include": ["src/**/*", "test/*"],
   "references": [
     {
       "path": "../codeeditor"
@@ -15,13 +15,7 @@
       "path": "../nbformat"
     },
     {
-      "path": "../statusbar"
-    },
-    {
       "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
     },
     {
       "path": "."

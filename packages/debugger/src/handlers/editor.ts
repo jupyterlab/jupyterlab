@@ -184,7 +184,7 @@ export class EditorHandler implements IDisposable {
    * Setup the editor.
    */
   private _setupEditor(): void {
-    const editor = this.editor as CodeMirrorEditor | null;
+    const editor = this.editor;
     if (!editor || editor.isDisposed) {
       return;
     }

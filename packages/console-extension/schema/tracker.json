@@ -98,82 +98,6 @@
       "selector": ".jp-CodeConsole[data-jp-interaction-mode='terminal'] .jp-CodeConsole-promptCell"
     }
   ],
-  "definitions": {
-    "editorConfig": {
-      "properties": {
-        "autoClosingBrackets": {
-          "type": "boolean",
-          "title": "Auto Closing Brackets"
-        },
-        "cursorBlinkRate": {
-          "type": "number",
-          "title": "Cursor Blinking Rate",
-          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely."
-        },
-        "fontFamily": {
-          "type": ["string", "null"],
-          "title": "Font Family"
-        },
-        "fontSize": {
-          "type": ["integer", "null"],
-          "title": "Font Size",
-          "minimum": 1,
-          "maximum": 100
-        },
-        "lineHeight": {
-          "title": "Line Height",
-          "type": ["number", "null"]
-        },
-        "lineNumbers": {
-          "type": "boolean",
-          "title": "Show Line Numbers"
-        },
-        "lineWrap": {
-          "type": "string",
-          "enum": ["off", "on", "wordWrapColumn", "bounded"],
-          "title": "Line Wrap"
-        },
-        "matchBrackets": {
-          "type": "boolean",
-          "title": "Match Brackets"
-        },
-        "readOnly": {
-          "type": "boolean",
-          "title": "Read Only"
-        },
-        "insertSpaces": {
-          "type": "boolean",
-          "title": "Insert Spaces"
-        },
-        "tabSize": {
-          "type": "number",
-          "title": "Tab Size"
-        },
-        "wordWrapColumn": {
-          "type": "integer",
-          "title": "Word Wrap Column"
-        },
-        "rulers": {
-          "type": "array",
-          "title": "Rulers",
-          "items": {
-            "type": "number"
-          }
-        },
-        "codeFolding": {
-          "type": "boolean",
-          "title": "Code Folding"
-        },
-        "lineWiseCopyCut": {
-          "type": "boolean",
-          "title": "Line-wise Ctrl-C",
-          "description": "When enabled, which is the default, doing copy or cut when there is no selection will copy or cut the whole lines that have cursors on them."
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    }
-  },
   "properties": {
     "interactionMode": {
       "title": "Interaction mode",
@@ -190,24 +114,11 @@
     },
     "promptCellConfig": {
       "title": "Prompt Cell Configuration",
-      "description": "The configuration for all prompt cells.",
-      "$ref": "#/definitions/editorConfig",
+      "description": "The configuration for all prompt cells; it will override the CodeMirror default configuration.",
+      "type": "object",
       "default": {
-        "autoClosingBrackets": false,
-        "cursorBlinkRate": 530,
-        "fontFamily": null,
-        "fontSize": null,
-        "lineHeight": null,
-        "lineNumbers": false,
-        "lineWrap": "off",
-        "matchBrackets": true,
-        "readOnly": false,
-        "insertSpaces": true,
-        "tabSize": 4,
-        "wordWrapColumn": 80,
-        "rulers": [],
         "codeFolding": false,
-        "lineWiseCopyCut": true
+        "lineNumbers": false
       }
     }
   },

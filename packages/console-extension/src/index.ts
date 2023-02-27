@@ -36,7 +36,7 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { consoleIcon } from '@jupyterlab/ui-components';
+import { consoleIcon, IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import {
   JSONExt,
@@ -114,7 +114,8 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ICommandPalette,
     ILauncher,
     ILabStatus,
-    ISessionContextDialogs
+    ISessionContextDialogs,
+    IFormRendererRegistry
   ],
   activate: activateConsole,
   autoStart: true
@@ -246,7 +247,8 @@ async function activateConsole(
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   status: ILabStatus | null,
-  sessionDialogs: ISessionContextDialogs | null
+  sessionDialogs: ISessionContextDialogs | null,
+  formRegistry: IFormRendererRegistry | null
 ): Promise<IConsoleTracker> {
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager;
@@ -390,94 +392,9 @@ async function activateConsole(
     return panel;
   }
 
-  type lineWrap_type = 'off' | 'on' | 'wordWrapColumn' | 'bounded';
-
-  const mapOption = (
-    editor: CodeEditor.IEditor,
-    config: JSONObject,
-    option: string
-  ) => {
-    if (config[option] === undefined) {
-      return;
-    }
-    switch (option) {
-      case 'autoClosingBrackets':
-        editor.setOption(
-          'autoClosingBrackets',
-          config['autoClosingBrackets'] as boolean
-        );
-        break;
-      case 'cursorBlinkRate':
-        editor.setOption(
-          'cursorBlinkRate',
-          config['cursorBlinkRate'] as number
-        );
-        break;
-      case 'fontFamily':
-        editor.setOption('fontFamily', config['fontFamily'] as string | null);
-        break;
-      case 'fontSize':
-        editor.setOption('fontSize', config['fontSize'] as number | null);
-        break;
-      case 'lineHeight':
-        editor.setOption('lineHeight', config['lineHeight'] as number | null);
-        break;
-      case 'lineNumbers':
-        editor.setOption('lineNumbers', config['lineNumbers'] as boolean);
-        break;
-      case 'lineWrap':
-        editor.setOption('lineWrap', config['lineWrap'] as lineWrap_type);
-        break;
-      case 'matchBrackets':
-        editor.setOption('matchBrackets', config['matchBrackets'] as boolean);
-        break;
-      case 'readOnly':
-        editor.setOption('readOnly', config['readOnly'] as boolean);
-        break;
-      case 'insertSpaces':
-        editor.setOption('insertSpaces', config['insertSpaces'] as boolean);
-        break;
-      case 'tabSize':
-        editor.setOption('tabSize', config['tabSize'] as number);
-        break;
-      case 'wordWrapColumn':
-        editor.setOption('wordWrapColumn', config['wordWrapColumn'] as number);
-        break;
-      case 'rulers':
-        editor.setOption('rulers', config['rulers'] as number[]);
-        break;
-      case 'codeFolding':
-        editor.setOption('codeFolding', config['codeFolding'] as boolean);
-        break;
-    }
-  };
-
-  const setOption = (
-    editor: CodeEditor.IEditor | undefined,
-    config: JSONObject
-  ) => {
-    if (editor === undefined) {
-      return;
-    }
-    mapOption(editor, config, 'autoClosingBrackets');
-    mapOption(editor, config, 'cursorBlinkRate');
-    mapOption(editor, config, 'fontFamily');
-    mapOption(editor, config, 'fontSize');
-    mapOption(editor, config, 'lineHeight');
-    mapOption(editor, config, 'lineNumbers');
-    mapOption(editor, config, 'lineWrap');
-    mapOption(editor, config, 'matchBrackets');
-    mapOption(editor, config, 'readOnly');
-    mapOption(editor, config, 'insertSpaces');
-    mapOption(editor, config, 'tabSize');
-    mapOption(editor, config, 'wordWrapColumn');
-    mapOption(editor, config, 'rulers');
-    mapOption(editor, config, 'codeFolding');
-  };
-
   const pluginId = '@jupyterlab/console-extension:tracker';
   let interactionMode: string;
-  let promptCellConfig: JSONObject;
+  let promptCellConfig: JSONObject = {};
 
   /**
    * Update settings for one console or all consoles.
@@ -495,10 +412,7 @@ async function activateConsole(
       // Update future promptCells
       widget.console.editorConfig = promptCellConfig;
       // Update promptCell already on screen
-      setOption(
-        widget.console.promptCell?.editor ?? undefined,
-        promptCellConfig
-      );
+      widget.console.promptCell?.editor?.setOptions(promptCellConfig);
     };
 
     if (panel) {
@@ -514,6 +428,18 @@ async function activateConsole(
     }
   });
   await updateSettings();
+
+  if (formRegistry) {
+    const CMRenderer = formRegistry.getRenderer(
+      '@jupyterlab/codemirror-extension:plugin.defaultConfig'
+    );
+    if (CMRenderer) {
+      formRegistry.addRenderer(
+        '@jupyterlab/console-extension:tracker.promptCellConfig',
+        CMRenderer
+      );
+    }
+  }
 
   // Apply settings when a console is created.
   tracker.widgetAdded.connect((sender, panel) => {

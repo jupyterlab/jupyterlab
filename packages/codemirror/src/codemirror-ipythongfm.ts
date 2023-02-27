@@ -1,18 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Mode } from './mode';
-
-Mode.registerModeInfo({
-  name: 'ipythongfm',
-  mime: 'text/x-ipythongfm',
-  load: () => {
-    return import('@codemirror/lang-markdown').then(m =>
-      m.markdown({ codeLanguages: Mode.getModeInfo() as any })
-    );
-  }
-});
-
 // TODO: add support for LaTeX
 // This should be coded as an extension for https://github.com/lezer-parser/markdown
 // see https://github.com/lezer-parser/markdown/blob/main/src/extension.ts for examples
