@@ -209,6 +209,9 @@ bumped their major version (following semver convention). We want to point out p
    * ``StaticNotebook.defaultContentFactory`` has been removed. If you need it, you can request the token
      ``IEditorServices`` from ``@jupyterlab/codeeditor``. You can obtain it by requested
      ``new NotebookPanel.ContentFactory({ editorFactory: token.factoryService.newInlineEditor });``
+- ``@jupyterlab/mainmenu`` from 3.x to 4.x
+   - ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
+     to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
 - ``@jupyterlab/rendermime`` from 3.x to 4.x
   The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
   that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
