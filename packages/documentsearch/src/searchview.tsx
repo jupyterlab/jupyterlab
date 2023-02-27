@@ -476,9 +476,6 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
   constructor(props: ISearchOverlayProps) {
     super(props);
     this.translator = props.translator || nullTranslator;
-    this.state = {
-      filtersOpen: false
-    };
   }
 
   private _onSearchChange(event: React.ChangeEvent) {
@@ -544,7 +541,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
     this.props.onReplaceEntryShown(!this.props.replaceEntryVisible);
   }
 
-  private _toggleFiltersOpen() {
+  private _toggleFiltersVisibility() {
     this.props.onFiltersVisibilityChanged(!this.props.filtersVisible);
   }
 
@@ -562,7 +559,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
           const filter = filters[name];
           return this.props.filters[name] ?? filter.default;
         })}
-        toggleVisible={() => this._toggleFiltersOpen()}
+        toggleVisible={() => this._toggleFiltersVisibility()}
         trans={trans}
       />
     ) : null;

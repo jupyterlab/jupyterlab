@@ -69,7 +69,7 @@ test.describe('Notebook Search', () => {
     expect(await overlay.screenshot()).toMatchSnapshot('multi-line-search.png');
   });
 
-  test('Search selected', async ({ page }) => {
+  test('Populate search box with selected text', async ({ page }) => {
     // Enter first cell
     await page.notebook.enterCellEditingMode(0);
 
@@ -152,7 +152,7 @@ test.describe('Notebook Search', () => {
 
     await page.click('button[title="Show Search Filters"]');
 
-    await page.click('text=Search Selected Cell(s)');
+    await page.click('text=Search in 1 Selected Cell');
 
     await page.waitForSelector('text=1/4');
 
@@ -163,7 +163,7 @@ test.describe('Notebook Search', () => {
     );
   });
 
-  test('Highlight are visible when text is selected', async ({ page }) => {
+  test('Highlights are visible when text is selected', async ({ page }) => {
     await page.keyboard.press('Control+f');
     await page.fill('[placeholder="Find"]', 'with');
     await page.waitForSelector('text=1/21');
