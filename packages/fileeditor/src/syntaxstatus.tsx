@@ -3,7 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeEditor, IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { Popup, showPopup, TextItem } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -12,7 +13,6 @@ import { CommandRegistry } from '@lumino/commands';
 import { JSONObject } from '@lumino/coreutils';
 import { Menu } from '@lumino/widgets';
 import React from 'react';
-import { Mode } from '.';
 
 /**
  * A namespace for `EditorSyntaxComponentStatics`.
@@ -23,14 +23,14 @@ namespace EditorSyntaxComponent {
    */
   export interface IProps {
     /**
-     * The current CodeMirror mode for an editor.
+     * The current CodeMirror language for an editor.
      */
-    mode: string;
+    language: string;
 
     /**
      * A function to execute on clicking the component.
      * By default we provide a function that opens a menu
-     * for CodeMirror mode selection.
+     * for CodeMirror language selection.
      */
     handleClick: () => void;
   }
@@ -46,7 +46,7 @@ namespace EditorSyntaxComponent {
 function EditorSyntaxComponent(
   props: EditorSyntaxComponent.IProps
 ): React.ReactElement<EditorSyntaxComponent.IProps> {
-  return <TextItem source={props.mode} onClick={props.handleClick} />;
+  return <TextItem source={props.language} onClick={props.handleClick} />;
 }
 
 /**
@@ -56,10 +56,10 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
   /**
    * Construct a new VDomRenderer for the status item.
    */
-  constructor(opts: EditorSyntaxStatus.IOptions) {
-    super(new EditorSyntaxStatus.Model());
-    this._commands = opts.commands;
-    this.translator = opts.translator || nullTranslator;
+  constructor(options: EditorSyntaxStatus.IOptions) {
+    super(new EditorSyntaxStatus.Model(options.languages));
+    this._commands = options.commands;
+    this.translator = options.translator ?? nullTranslator;
     const trans = this.translator.load('jupyterlab');
 
     this.addClass('jp-mod-highlighted');
@@ -75,25 +75,26 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
     }
     return (
       <EditorSyntaxComponent
-        mode={this.model.mode}
+        language={this.model.language}
         handleClick={this._handleClick}
       />
     );
   }
 
   /**
-   * Create a menu for selecting the mode of the editor.
+   * Create a menu for selecting the language of the editor.
    */
   private _handleClick = () => {
-    const modeMenu = new Menu({ commands: this._commands });
-    const command = 'codemirror:change-mode';
+    const languageMenu = new Menu({ commands: this._commands });
+    const command = 'fileeditor:change-language';
     if (this._popup) {
       this._popup.dispose();
     }
-    Mode.getModeInfo()
+    this.model.languages
+      .getLanguages()
       .sort((a, b) => {
-        const aName = a.name || '';
-        const bName = b.name || '';
+        const aName = a.displayName ?? a.name;
+        const bName = b.displayName ?? b.name;
         return aName.localeCompare(bName);
       })
       .forEach(spec => {
@@ -102,17 +103,17 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
         }
 
         const args: JSONObject = {
-          insertSpaces: true,
-          name: spec.name!
+          name: spec.name,
+          displayName: spec.displayName ?? spec.name
         };
 
-        modeMenu.addItem({
+        languageMenu.addItem({
           command,
           args
         });
       });
     this._popup = showPopup({
-      body: modeMenu,
+      body: languageMenu,
       anchor: this,
       align: 'left'
     });
@@ -131,12 +132,15 @@ export namespace EditorSyntaxStatus {
    * A VDomModel for the current editor/mode combination.
    */
   export class Model extends VDomModel {
+    constructor(public languages: IEditorLanguageRegistry) {
+      super();
+    }
     /**
-     * The current mode for the editor. If no editor is present,
+     * The current editor language. If no editor is present,
      * returns the empty string.
      */
-    get mode(): string {
-      return this._mode;
+    get language(): string {
+      return this._language;
     }
 
     /**
@@ -150,18 +154,18 @@ export namespace EditorSyntaxStatus {
       if (oldEditor !== null) {
         oldEditor.model.mimeTypeChanged.disconnect(this._onMIMETypeChange);
       }
-      const oldMode = this._mode;
+      const oldLanguage = this._language;
       this._editor = editor;
       if (this._editor === null) {
-        this._mode = '';
+        this._language = '';
       } else {
-        const spec = Mode.findByMIME(this._editor.model.mimeType);
-        this._mode = spec?.name ?? 'text/plain';
+        const spec = this.languages.findByMIME(this._editor.model.mimeType);
+        this._language = spec?.name ?? IEditorMimeTypeService.defaultMimeType;
 
         this._editor.model.mimeTypeChanged.connect(this._onMIMETypeChange);
       }
 
-      this._triggerChange(oldMode, this._mode);
+      this._triggerChange(oldLanguage, this._language);
     }
 
     /**
@@ -171,11 +175,11 @@ export namespace EditorSyntaxStatus {
       mode: CodeEditor.IModel,
       change: IChangedArgs<string>
     ) => {
-      const oldMode = this._mode;
-      const spec = Mode.findByMIME(change.newValue);
-      this._mode = spec?.name ?? 'text/plain';
+      const oldLanguage = this._language;
+      const spec = this.languages.findByMIME(change.newValue);
+      this._language = spec?.name ?? IEditorMimeTypeService.defaultMimeType;
 
-      this._triggerChange(oldMode, this._mode);
+      this._triggerChange(oldLanguage, this._language);
     };
 
     /**
@@ -187,7 +191,7 @@ export namespace EditorSyntaxStatus {
       }
     }
 
-    private _mode: string = '';
+    private _language: string = '';
     private _editor: CodeEditor.IEditor | null = null;
   }
 
@@ -199,6 +203,11 @@ export namespace EditorSyntaxStatus {
      * The application command registry.
      */
     commands: CommandRegistry;
+
+    /**
+     * Editor languages.
+     */
+    languages: IEditorLanguageRegistry;
 
     /**
      * The language translator.

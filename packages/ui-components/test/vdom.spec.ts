@@ -100,6 +100,7 @@ describe('@jupyterlab/ui-components', () => {
         model.value = 'foo';
         await framePromise();
         await widget.renderPromise;
+        await framePromise();
         const span = widget.node.firstChild as HTMLElement;
         expect(span.textContent).toBe('foo');
       });

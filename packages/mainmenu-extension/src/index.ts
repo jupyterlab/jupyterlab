@@ -155,11 +155,14 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       await Private.loadSettingsMenu(
         registry,
         (aMenu: JupyterLabMenu) => {
-          menu.addMenu(aMenu, { rank: aMenu.rank });
+          menu.addMenu(aMenu, false, { rank: aMenu.rank });
         },
         options => MainMenu.generateMenu(commands, options, trans),
         translator
       );
+
+      // Trigger single update
+      menu.update();
     }
 
     // Only add quit button if the back-end supports it by checking page config.

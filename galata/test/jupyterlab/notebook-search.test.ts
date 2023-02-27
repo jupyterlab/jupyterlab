@@ -35,6 +35,18 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
   });
 
+  test('Typing in search box', async ({ page }) => {
+    // Check against React being too eager with controling state of input box
+    await page.keyboard.press('Control+f');
+
+    await page.fill('[placeholder="Find"]', '14');
+    await page.press('[placeholder="Find"]', 'ArrowLeft');
+    await page.type('[placeholder="Find"]', '2');
+    await page.type('[placeholder="Find"]', '3');
+
+    await expect(page.locator('[placeholder="Find"]')).toHaveValue('1234');
+  });
+
   test('RegExp parsing failure', async ({ page }) => {
     await page.keyboard.press('Control+f');
 

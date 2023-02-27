@@ -119,6 +119,36 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.currentMatchIndex).toBe(0);
       });
 
+      it('should substitute groups in regular expressions', async () => {
+        await provider.startQuery(/test(\d)/, undefined);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(1);
+        let replaced = await provider.replaceCurrentMatch(
+          '$1st_bar (was $&)',
+          false,
+          { regularExpression: true }
+        );
+        expect(replaced).toBe(true);
+        const source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test1 2st_bar (was test2)');
+      });
+
+      it('should not substitute if regular expression toggle is off', async () => {
+        await provider.startQuery(/test(\d)/, undefined);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+        let replaced = await provider.replaceCurrentMatch(
+          '$1st_bar (was $&)',
+          false,
+          { regularExpression: false }
+        );
+        expect(replaced).toBe(true);
+        const source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('$1st_bar (was $&) test2');
+      });
+
       it('should replace with a longer text and highlight next', async () => {
         await provider.startQuery(/test\d/, undefined);
         await provider.highlightNext();

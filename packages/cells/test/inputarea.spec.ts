@@ -7,57 +7,83 @@ import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { CodeCellModel, InputArea, InputPrompt } from '@jupyterlab/cells';
 
+import { NBTestUtils } from '@jupyterlab/cells/lib/testutils';
+
 const PROMPT_CLASS = 'jp-InputArea-prompt';
 
 describe('@jupyterlab/cells', () => {
+  const contentFactory = new InputArea.ContentFactory({
+    editorFactory: NBTestUtils.editorFactory
+  });
   const model = new CodeCellModel();
 
   describe('InputArea', () => {
     describe('#constructor()', () => {
       it('should create an input area widget', () => {
-        const widget = new InputArea({ model });
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
         expect(widget).toBeInstanceOf(InputArea);
       });
     });
 
     describe('#model', () => {
       it('should be the model used by the input area', () => {
-        const widget = new InputArea({ model });
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
         expect(widget.model).toBe(model);
       });
     });
 
     describe('#contentFactory', () => {
       it('should be the content factory used by the input area', () => {
-        const widget = new InputArea({ model });
-        expect(widget.contentFactory).toBe(InputArea.defaultContentFactory);
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
+        expect(widget.contentFactory).toBe(contentFactory);
       });
     });
 
     describe('#editorWidget', () => {
       it('should be the editor widget used by the input area', () => {
-        const widget = new InputArea({ model });
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
         expect(widget.editorWidget).toBeInstanceOf(CodeEditorWrapper);
       });
     });
 
     describe('#editor', () => {
       it('should be the code editor used by the cell', () => {
-        const widget = new InputArea({ model });
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
         expect(widget.editor.host).toBe(widget.editorWidget.node);
       });
     });
 
     describe('#promptNode', () => {
       it('should be the prompt node used by the cell', () => {
-        const widget = new InputArea({ model });
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
         expect(widget.promptNode.className).toContain('jp-InputPrompt');
       });
     });
 
     describe('#renderInput()', () => {
       it('should render the widget', () => {
-        const widget = new InputArea({ model });
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
         const rendered = new Widget();
         Widget.attach(widget, document.body);
         widget.renderInput(rendered);
@@ -68,7 +94,10 @@ describe('@jupyterlab/cells', () => {
 
     describe('#showEditor()', () => {
       it('should be called to show the editor', () => {
-        const widget = new InputArea({ model });
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
         const rendered = new Widget();
         Widget.attach(widget, document.body);
         widget.renderInput(rendered);
@@ -80,7 +109,10 @@ describe('@jupyterlab/cells', () => {
 
     describe('#setPrompt()', () => {
       it('should change the value of the input prompt', () => {
-        const widget = new InputArea({ model });
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
         const prompt = widget.node.querySelector(`.${PROMPT_CLASS}`)!;
         expect(prompt.textContent).toHaveLength(0);
         widget.setPrompt('foo');
@@ -90,7 +122,10 @@ describe('@jupyterlab/cells', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the widget', () => {
-        const widget = new InputArea({ model });
+        const widget = new InputArea({
+          contentFactory,
+          model
+        });
         widget.dispose();
         expect(widget.isDisposed).toBe(true);
         widget.dispose();
@@ -101,39 +136,29 @@ describe('@jupyterlab/cells', () => {
     describe('.ContentFactory', () => {
       describe('#constructor()', () => {
         it('should create a new content factory', () => {
-          const factory = new InputArea.ContentFactory();
+          const factory = new InputArea.ContentFactory({
+            editorFactory: NBTestUtils.editorFactory
+          });
           expect(factory).toBeInstanceOf(InputArea.ContentFactory);
         });
       });
 
       describe('#editorFactory', () => {
         it('should be the code editor factory being used', () => {
-          const factory = new InputArea.ContentFactory();
-          expect(factory.editorFactory).toBe(InputArea.defaultEditorFactory);
+          const factory = new InputArea.ContentFactory({
+            editorFactory: NBTestUtils.editorFactory
+          });
+          expect(factory.editorFactory).toBe(NBTestUtils.editorFactory);
         });
       });
 
       describe('#createInputPrompt()', () => {
         it('should create an input prompt', () => {
-          const factory = new InputArea.ContentFactory();
+          const factory = new InputArea.ContentFactory({
+            editorFactory: NBTestUtils.editorFactory
+          });
           expect(factory.createInputPrompt()).toBeInstanceOf(InputPrompt);
         });
-      });
-    });
-
-    describe('.defaultContentFactory', () => {
-      it('should be an instance of the content factory', () => {
-        expect(InputArea.defaultContentFactory).toBeInstanceOf(
-          InputArea.ContentFactory
-        );
-      });
-    });
-
-    describe('.defaultEditorFactory', () => {
-      it('should be an editor factory', () => {
-        const factory = InputArea.defaultEditorFactory;
-        const host = document.createElement('div');
-        expect(factory({ host, model }).host).toBe(host);
       });
     });
   });
