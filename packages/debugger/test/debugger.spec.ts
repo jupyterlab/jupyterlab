@@ -7,7 +7,10 @@ import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditorFactory,
-  CodeMirrorMimeTypeService
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  ybinding
 } from '@jupyterlab/codemirror';
 
 import { KernelSpecManager, Session } from '@jupyterlab/services';
@@ -32,6 +35,7 @@ import { DebuggerModel } from '../src/model';
 
 import { SourcesBody } from '../src/panels/sources/body';
 
+import { IYText } from '@jupyter/ydoc';
 import { IDebugger } from '../src/tokens';
 
 const server = new JupyterServer();
@@ -49,8 +53,27 @@ describe('Debugger', () => {
   const config = new Debugger.Config();
   const service = new DebuggerService({ specsManager, config });
   const registry = new CommandRegistry();
-  const factoryService = new CodeMirrorEditorFactory();
-  const mimeTypeService = new CodeMirrorMimeTypeService();
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(lang => ['Python'].includes(lang.name))
+    .forEach(lang => {
+      languages.addLanguage(lang);
+    });
+  const extensions = new EditorExtensionRegistry();
+  EditorExtensionRegistry.getDefaultExtensions()
+    .filter(ext => ['lineNumbers'].includes(ext.name))
+    .forEach(ext => extensions.addExtension(ext));
+  extensions.addExtension({
+    name: 'binding',
+    factory: ({ model }) => {
+      const m = model.sharedModel as IYText;
+      return EditorExtensionRegistry.createImmutableExtension(
+        ybinding(m.ysource)
+      );
+    }
+  });
+  const factoryService = new CodeMirrorEditorFactory({ extensions, languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
   const lines = [3, 5];
   const code = [
     'i = 0',

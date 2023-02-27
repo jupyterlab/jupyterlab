@@ -206,6 +206,10 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
   text-align: right;
 }
 
+.jp-SettingsRawEditor .cm-editor {
+  height: 100%;
+}
+
 .jp-SettingsPanel .checkbox p {
   font-size: var(--jp-content-font-size1);
 }

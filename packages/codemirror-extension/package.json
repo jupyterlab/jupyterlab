@@ -38,19 +38,22 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@codemirror/search": "^6.0.0",
+    "@jupyter/ydoc": "^0.3.1",
     "@jupyterlab/application": "^4.0.0-alpha.19",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.19",
     "@jupyterlab/codemirror": "^4.0.0-alpha.19",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/fileeditor": "^4.0.0-alpha.19",
-    "@jupyterlab/mainmenu": "^4.0.0-alpha.19",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
     "@jupyterlab/statusbar": "^4.0.0-alpha.19",
     "@jupyterlab/translation": "^4.0.0-alpha.19",
-    "@lumino/widgets": "^2.0.0-beta.1"
+    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
+    "@lumino/coreutils": "^2.0.0-beta.0",
+    "@lumino/widgets": "^2.0.0-beta.1",
+    "@rjsf/utils": "^5.1.0",
+    "@rjsf/validator-ajv8": "^5.1.0",
+    "react": "^18.2.0"
   },
   "devDependencies": {
+    "@types/react": "^18.0.26",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
     "typescript": "~5.0.0-beta"

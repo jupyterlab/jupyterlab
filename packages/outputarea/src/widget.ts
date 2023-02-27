@@ -101,7 +101,7 @@ export class OutputArea extends Widget {
     super.layout = new PanelLayout();
     this.addClass(OUTPUT_AREA_CLASS);
     this.contentFactory =
-      options.contentFactory || OutputArea.defaultContentFactory;
+      options.contentFactory ?? OutputArea.defaultContentFactory;
     this.rendermime = options.rendermime;
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
