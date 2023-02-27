@@ -586,7 +586,7 @@ test.describe('General', () => {
 
     await page.keyboard.press('Control+Shift+H');
 
-    await expect(page.locator('.jp-Dialog')).toHaveScreenshot(
+    expect(await page.locator('.jp-Notebook').screenshot()).toMatchSnapshot(
       'shortcuts_help.png'
     );
   });

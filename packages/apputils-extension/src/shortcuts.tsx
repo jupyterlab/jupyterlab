@@ -12,10 +12,11 @@ import { TranslationBundle } from '@jupyterlab/translation';
 
 export function displayShortcuts(
   app: JupyterFrontEnd,
-  trans: TranslationBundle
+  trans: TranslationBundle,
+  activeElement?: Element
 ) {
   const { commands } = app;
-  const elt = document.activeElement;
+  const elt = activeElement ?? document.activeElement;
 
   /**
    * Find the distance from the target node to the first matching node.
