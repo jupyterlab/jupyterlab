@@ -10,7 +10,6 @@ import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
 import { ISharedText } from '@jupyter/ydoc';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { CodeCellModel, ICellModel, InputPrompt } from '@jupyterlab/cells';
-import { Mode } from '@jupyterlab/codemirror';
 import { Debouncer } from '@lumino/polling';
 
 namespace Private {
@@ -38,7 +37,8 @@ namespace Private {
  */
 export class ActiveCellTool extends NotebookTools.Tool {
   constructor(options: Private.IOptions) {
-    super(options.languages);
+    super();
+    const { languages } = options
     this._tracker = options.tracker;
 
     this.addClass('jp-ActiveCellTool');
@@ -69,12 +69,9 @@ export class ActiveCellTool extends NotebookTools.Tool {
       }
 
       if (this._cellModel) {
-        const spec = await Mode.ensure(
-          Mode.findByMIME(this._cellModel.mimeType) ?? 'text/plain'
-        );
-        Mode.run(
+        await languages.highlight(
           this._cellModel.sharedModel.getSource().split('\n')[0],
-          spec,
+          languages.findByMIME(this._cellModel.mimeType),
           this._editorEl
         );
       }
