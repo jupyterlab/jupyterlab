@@ -589,6 +589,11 @@ export namespace CodeEditor {
      * Whether to highlight trailing whitespace
      */
     showTrailingSpace: boolean;
+
+    /**
+     * Whether to split stdin line history by kernel session
+     */
+    splitStdinHistoryBySession: boolean;
   }
 
   /**
@@ -611,7 +616,8 @@ export namespace CodeEditor {
     rulers: [],
     showTrailingSpace: false,
     wordWrapColumn: 80,
-    codeFolding: false
+    codeFolding: false,
+    splitStdinHistoryBySession: false
   };
 
   /**

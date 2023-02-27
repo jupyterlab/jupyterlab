@@ -981,7 +981,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       contentFactory: contentFactory,
       maxNumberOutputs: this.maxNumberOutputs,
       translator: this.translator,
-      promptOverlay: true
+      promptOverlay: true,
+      splitStdinHistoryBySession: this.editorConfig.splitStdinHistoryBySession
     }));
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
