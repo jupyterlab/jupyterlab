@@ -7,6 +7,11 @@ import React from 'react';
 import { FieldProps } from '@rjsf/utils';
 import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { INotebookTracker, NotebookTools } from '@jupyterlab/notebook';
+import { ISharedText } from '@jupyter/ydoc';
+import { PanelLayout, Widget } from '@lumino/widgets';
+import { CodeCellModel, ICellModel, InputPrompt } from '@jupyterlab/cells';
+import { Mode } from '@jupyterlab/codemirror';
+import { Debouncer } from '@lumino/polling';
 
 namespace Private {
   /**
@@ -26,22 +31,66 @@ namespace Private {
 }
 
 /**
- * The active cell field.
+ * The active cell field, displaying the first line and execution count of the active cell.
  *
  * ## Note
- * This field does not work as other metadata form fields, as it does not use RJSF to update metadata.
- * It extends the MetadataEditorTool which updates itself the metadata.
- * It only renders the node of MetadataEditorTool in a React element instead of displaying a RJSF field.
+ * This field does not work as other metadata form fields, as it does not update metadata.
  */
-export class ActiveCellTool extends NotebookTools.ActiveCellTool {
+export class ActiveCellTool extends NotebookTools.Tool {
   constructor(options: Private.IOptions) {
     super(options.languages);
     this._tracker = options.tracker;
+
+    this.addClass('jp-ActiveCellTool');
+    this.layout = new PanelLayout();
+
+    this._inputPrompt = new InputPrompt();
+    (this.layout as PanelLayout).addWidget(this._inputPrompt);
+
+    // First code line container
+    const node = document.createElement('div');
+    node.classList.add('jp-ActiveCell-Content');
+    const container = node.appendChild(document.createElement('div'));
+    const editor = container.appendChild(document.createElement('pre'));
+    container.className = 'jp-Cell-Content';
+    this._editorEl = editor;
+    (this.layout as PanelLayout).addWidget(new Widget({ node }));
+
+    const update = async () => {
+      this._editorEl.innerHTML = '';
+      if (this._cellModel?.type === 'code') {
+        this._inputPrompt.executionCount = `${
+          (this._cellModel as CodeCellModel).executionCount ?? ''
+        }`;
+        this._inputPrompt.show();
+      } else {
+        this._inputPrompt.executionCount = null;
+        this._inputPrompt.hide();
+      }
+
+      if (this._cellModel) {
+        const spec = await Mode.ensure(
+          Mode.findByMIME(this._cellModel.mimeType) ?? 'text/plain'
+        );
+        Mode.run(
+          this._cellModel.sharedModel.getSource().split('\n')[0],
+          spec,
+          this._editorEl
+        );
+      }
+    };
+
+    this._refreshDebouncer = new Debouncer(update, 150);
   }
 
   render(props: FieldProps): JSX.Element {
     const activeCell = this._tracker.activeCell;
     if (activeCell) this._cellModel = activeCell?.model || null;
+    (this._cellModel?.sharedModel as ISharedText).changed.connect(
+      this.refresh,
+      this
+    );
+    this._cellModel?.mimeTypeChanged.connect(this.refresh, this);
     this.refresh()
       .then(() => undefined)
       .catch(() => undefined);
@@ -52,5 +101,13 @@ export class ActiveCellTool extends NotebookTools.ActiveCellTool {
     );
   }
 
+  private async refresh(): Promise<void> {
+    await this._refreshDebouncer.invoke();
+  }
+
   private _tracker: INotebookTracker;
+  private _cellModel: ICellModel | null;
+  private _refreshDebouncer: Debouncer<void, void, null[]>;
+  private _editorEl: HTMLPreElement;
+  private _inputPrompt: InputPrompt;
 }

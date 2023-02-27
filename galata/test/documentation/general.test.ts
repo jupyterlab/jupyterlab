@@ -129,6 +129,10 @@ test.describe('General', () => {
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
+    ).not.toBeEmpty();
+
     expect(
       await page.screenshot({
         clip: { y: 32, x: 997, width: 283, height: 400 }
