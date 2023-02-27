@@ -18,8 +18,7 @@ import {
 import {
   CodeMirrorEditor,
   IEditorExtensionRegistry,
-  IEditorLanguageRegistry,
-  IEditorThemeRegistry
+  IEditorLanguageRegistry
 } from '@jupyterlab/codemirror';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
@@ -237,7 +236,6 @@ export namespace Commands {
     defaultBrowser: IDefaultFileBrowser,
     extensions: IEditorExtensionRegistry,
     languages: IEditorLanguageRegistry,
-    themes: IEditorThemeRegistry,
     consoleTracker: IConsoleTracker | null,
     sessionDialogs: ISessionContextDialogs
   ): void {

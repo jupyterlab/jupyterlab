@@ -480,7 +480,6 @@ function activate(
     fileBrowser,
     extensions,
     languages,
-    themes,
     consoleTracker,
     sessionDialogs
   );
