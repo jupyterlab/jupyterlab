@@ -671,7 +671,7 @@ export class SessionContext implements ISessionContext {
   async startKernel(): Promise<boolean> {
     const preference = this.kernelPreference;
 
-    if (!preference.autoStartDefault && !preference.shouldStart) {
+    if (!preference.autoStartDefault && preference.shouldStart === false) {
       return true;
     }
 
