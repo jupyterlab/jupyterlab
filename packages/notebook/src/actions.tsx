@@ -2264,8 +2264,7 @@ namespace Private {
             cell.model.sharedModel.transact(() => {
               (cell.model as ICodeCellModel).clearExecution();
             });
-            // Session has still no kernel, so we can't execute the cell.
-            return false;
+            return true;
           }
 
           const deletedCells = notebook.model?.deletedCells ?? [];

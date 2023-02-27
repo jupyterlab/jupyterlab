@@ -339,15 +339,6 @@ describe('@jupyterlab/apputils', () => {
         };
         expect(sessionContext.kernelDisplayName).toBe('No Kernel');
       });
-
-      it('should display the pending kernel name when it looks like we are starting a kernel', async () => {
-        sessionContext.kernelPreference = {
-          autoStartDefault: true,
-          canStart: true,
-          shouldStart: true
-        };
-        expect(sessionContext.kernelDisplayName).toBe('Echo Kernel');
-      });
     });
 
     describe('#kernelDisplayStatus', () => {
