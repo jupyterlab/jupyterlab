@@ -34,9 +34,11 @@ export class Collapser<T extends Widget = Widget> extends Widget {
     if (collapsed) {
       this._header.addClass(HEADER_COLLAPSED_CLASS);
     }
-    this._header.node.appendChild(caretDownIcon.element({
-      className: ICON_CLASS
-    }));
+    this._header.node.appendChild(
+      caretDownIcon.element({
+        className: ICON_CLASS
+      })
+    );
     const titleSpan = document.createElement('span');
     titleSpan.classList.add(TITLE_CLASS);
     titleSpan.textContent = widget.title.label;
@@ -179,8 +181,7 @@ export class Collapser<T extends Widget = Widget> extends Widget {
   private _setHeader(): void {
     if (this._collapsed) {
       this._header.addClass(HEADER_COLLAPSED_CLASS);
-    }
-    else {
+    } else {
       this._header.removeClass(HEADER_COLLAPSED_CLASS);
     }
   }
