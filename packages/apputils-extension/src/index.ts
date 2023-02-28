@@ -626,8 +626,17 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       caption: trans.__(
         'Display relevant keyboard shortcuts for the current active element'
       ),
-      execute: args => { 
-        displayShortcuts(app, trans, !app.shell.activeWidget ? app.shell.currentWidget?.node : undefined);
+      execute: args => {
+        const included = app.shell.currentWidget?.node.contains(
+          document.activeElement
+        );
+        let value;
+        if (!included) {
+          value = app.shell.currentWidget?.node;
+        } else {
+          value = undefined;
+        }
+        displayShortcuts(app, trans, value);
       }
     });
 
