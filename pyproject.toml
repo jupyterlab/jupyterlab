@@ -76,7 +76,7 @@ Pypi = "https://pypi.org/project/jupyterlab"
 docs = [
     "sphinx>=1.8",
     "sphinx-copybutton",
-    "pydata-sphinx-theme",
+    "pydata-sphinx-theme>=0.13.0",
     "pytest",
     "pytest-tornasync",
     "pytest-check-links",
