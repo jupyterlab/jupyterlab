@@ -1,22 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  Cell,
-  CodeCellModel,
-  ICellModel,
-  InputPrompt
-} from '@jupyterlab/cells';
+import { Cell, ICellModel } from '@jupyterlab/cells';
 import { CodeEditor, JSONEditor } from '@jupyterlab/codeeditor';
-import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { ObservableJSON } from '@jupyterlab/observables';
-import { IMapChange, ISharedText } from '@jupyter/ydoc';
+import { IMapChange } from '@jupyter/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Collapser } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
-import { JSONObject, ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 import { ConflatableMessage, Message, MessageLoop } from '@lumino/messaging';
-import { Debouncer } from '@lumino/polling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
@@ -508,100 +501,6 @@ export namespace NotebookTools {
   }
 
   /**
-   * A cell tool displaying the active cell contents.
-   */
-  export class ActiveCellTool extends Tool {
-    /**
-     * Construct a new active cell tool.
-     */
-    constructor(languages: IEditorLanguageRegistry) {
-      super();
-      this.addClass('jp-ActiveCellTool');
-      this.layout = new PanelLayout();
-
-      this._inputPrompt = new InputPrompt();
-      (this.layout as PanelLayout).addWidget(this._inputPrompt);
-
-      // First code line container
-      const node = document.createElement('div');
-      node.classList.add('jp-ActiveCell-Content');
-      const container = node.appendChild(document.createElement('div'));
-      const editor = container.appendChild(document.createElement('pre'));
-      container.className = 'jp-Cell-Content';
-      this._editorEl = editor;
-      (this.layout as PanelLayout).addWidget(new Widget({ node }));
-
-      const update = async () => {
-        this._editorEl.innerHTML = '';
-        if (this._cellModel?.type === 'code') {
-          this._inputPrompt.executionCount = `${
-            (this._cellModel as CodeCellModel).executionCount ?? ''
-          }`;
-          this._inputPrompt.show();
-        } else {
-          this._inputPrompt.executionCount = null;
-          this._inputPrompt.hide();
-        }
-
-        if (this._cellModel) {
-          await languages.highlight(
-            this._cellModel.sharedModel.getSource().split('\n')[0],
-            languages.findByMIME(this._cellModel.mimeType),
-            this._editorEl
-          );
-        }
-      };
-
-      this._refreshDebouncer = new Debouncer(update, 150);
-    }
-
-    /**
-     * Handle a change to the active cell.
-     */
-    protected async onActiveCellChanged(): Promise<void> {
-      const activeCell = this.notebookTools.activeCell;
-
-      if (this._cellModel && !this._cellModel.isDisposed) {
-        this._cellModel.sharedModel.changed.disconnect(this.refresh, this);
-        this._cellModel.mimeTypeChanged.disconnect(this.refresh, this);
-      }
-      if (!activeCell) {
-        this._cellModel = null;
-        return;
-      }
-      const cellModel = (this._cellModel = activeCell.model);
-      (cellModel.sharedModel as ISharedText).changed.connect(
-        this.refresh,
-        this
-      );
-      cellModel.mimeTypeChanged.connect(this.refresh, this);
-      await this.refresh();
-    }
-
-    /**
-     * Handle a change to the notebook panel.
-     *
-     * #### Notes
-     * The default implementation is a no-op.
-     */
-    protected onActiveNotebookPanelChanged(msg: Message): void {
-      if (!this.notebookTools.activeNotebookPanel) {
-        // Force cleaning up the signal
-        void this.onActiveCellChanged();
-      }
-    }
-
-    protected async refresh(): Promise<void> {
-      await this._refreshDebouncer.invoke();
-    }
-
-    protected _cellModel: ICellModel | null;
-    private _editorEl: HTMLPreElement;
-    private _inputPrompt: InputPrompt;
-    private _refreshDebouncer: Debouncer<void, void, null[]>;
-  }
-
-  /**
    * A raw metadata editor.
    */
   export class MetadataEditorTool extends Tool {
@@ -681,110 +580,6 @@ export namespace NotebookTools {
        * Language translator.
        */
       translator?: ITranslator;
-    }
-  }
-
-  /**
-   * A notebook metadata editor
-   */
-  export class NotebookMetadataEditorTool extends MetadataEditorTool {
-    constructor(options: MetadataEditorTool.IOptions) {
-      const translator = options.translator || nullTranslator;
-      const trans = translator.load('jupyterlab');
-      options.label = options.label || trans.__('Notebook Metadata');
-      super(options);
-    }
-
-    /**
-     * Handle a change to the notebook.
-     */
-    protected onActiveNotebookPanelChanged(msg: Message): void {
-      super.onActiveNotebookPanelChanged(msg);
-      if (this.notebookTools.activeNotebookPanel) {
-        this._update();
-      }
-    }
-
-    /**
-     * Handle a change to the notebook metadata.
-     */
-    protected onActiveNotebookPanelMetadataChanged(msg: Message): void {
-      this._update();
-    }
-
-    private _onSourceChanged() {
-      if (this.editor.source) {
-        this.notebookTools.activeNotebookPanel?.content.model?.sharedModel.setMetadata(
-          this.editor.source.toJSON()
-        );
-      }
-    }
-
-    private _update() {
-      if (this.editor.source) {
-        this.editor.source.changed.disconnect(this._onSourceChanged, this);
-      }
-      const nb = this.notebookTools.activeNotebookPanel?.content;
-      this.editor.source?.dispose();
-      this.editor.source = nb?.model?.metadata
-        ? new ObservableJSON({ values: nb.model.metadata as JSONObject })
-        : null;
-
-      if (this.editor.source) {
-        this.editor.source.changed.connect(this._onSourceChanged, this);
-      }
-    }
-  }
-
-  /**
-   * A cell metadata editor
-   */
-  export class CellMetadataEditorTool extends MetadataEditorTool {
-    constructor(options: MetadataEditorTool.IOptions) {
-      const translator = options.translator || nullTranslator;
-      const trans = translator.load('jupyterlab');
-      options.label = options.label || trans.__('Cell Metadata');
-      super(options);
-    }
-
-    /**
-     * Handle a change to the active cell.
-     */
-    protected onActiveCellChanged(msg: Message): void {
-      this.editor.dispose();
-      if (this.notebookTools.activeCell) {
-        this.createEditor();
-        this._update();
-      }
-    }
-
-    /**
-     * Handle a change to the active cell metadata.
-     */
-    protected onActiveCellMetadataChanged(msg: Message): void {
-      this._update();
-    }
-
-    private _onSourceChanged() {
-      if (this.editor.source) {
-        this.notebookTools.activeCell?.model?.sharedModel.setMetadata(
-          this.editor.source.toJSON()
-        );
-      }
-    }
-
-    private _update() {
-      if (this.editor.source) {
-        this.editor.source.changed.disconnect(this._onSourceChanged, this);
-      }
-      const cell = this.notebookTools.activeCell;
-      this.editor.source?.dispose();
-      this.editor.source = cell
-        ? new ObservableJSON({ values: cell.model.metadata as JSONObject })
-        : null;
-      if (this.editor.source) {
-        this.editor.source.changed.connect(this._onSourceChanged, this);
-      }
     }
   }
 }

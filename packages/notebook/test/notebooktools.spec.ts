@@ -1,10 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  CodeMirrorEditorFactory,
-  EditorLanguageRegistry
-} from '@jupyterlab/codemirror';
 import { Context } from '@jupyterlab/docregistry';
 import {
   INotebookModel,
@@ -273,122 +269,6 @@ describe('@jupyterlab/notebook', () => {
             'onActiveNotebookPanelMetadataChanged'
           );
         });
-      });
-    });
-
-    describe('NotebookTools.ActiveCellTool', () => {
-      it('should create a new active cell tool', () => {
-        const tool = new NotebookTools.ActiveCellTool(
-          new EditorLanguageRegistry()
-        );
-        notebookTools.addItem({ tool, section: sectionName });
-        expect(tool).toBeInstanceOf(NotebookTools.ActiveCellTool);
-      });
-
-      it('should handle a change to the active cell', () => {
-        const tool = new NotebookTools.ActiveCellTool(
-          new EditorLanguageRegistry()
-        );
-        notebookTools.addItem({ tool, section: sectionName });
-        const widget = tracker.currentWidget!;
-        widget.content.activeCellIndex++;
-        widget.content.activeCell!.model.setMetadata('bar', 1);
-        expect(tool.node.querySelector('pre')).toBeTruthy();
-      });
-    });
-
-    describe('NotebookTools.CellMetadataEditorTool', () => {
-      const editorServices = new CodeMirrorEditorFactory();
-      const editorFactory = editorServices.newInlineEditor.bind(editorServices);
-
-      it('should create a new metadata editor tool', () => {
-        const tool = new NotebookTools.CellMetadataEditorTool({
-          editorFactory
-        });
-        expect(tool).toBeInstanceOf(NotebookTools.CellMetadataEditorTool);
-      });
-
-      it('should handle a change to the active cell', () => {
-        const tool = new NotebookTools.CellMetadataEditorTool({
-          editorFactory
-        });
-        notebookTools.addItem({ tool, section: sectionName });
-        const model = tool.editor.model;
-        expect(JSON.stringify(model.sharedModel.getSource())).toBeTruthy();
-        const widget = tracker.currentWidget!;
-        widget.content.activeCellIndex++;
-        widget.content.activeCell!.model.setMetadata('bar', 1);
-        expect(
-          JSON.stringify(tool.editor.model.sharedModel.getSource())
-        ).toContain('bar');
-      });
-
-      it('should handle a change to the metadata', () => {
-        const tool = new NotebookTools.CellMetadataEditorTool({
-          editorFactory
-        });
-        notebookTools.addItem({ tool, section: sectionName });
-        const model = tool.editor.model;
-        const previous = model.sharedModel.getSource();
-        const cellModel = notebookTools.activeCell!.model;
-        cellModel.setMetadata('foo', 1);
-        expect(tool.editor.model.sharedModel.getSource()).not.toBe(previous);
-      });
-    });
-
-    describe('NotebookTools.NotebookMetadataEditorTool', () => {
-      const editorServices = new CodeMirrorEditorFactory();
-      const editorFactory = editorServices.newInlineEditor.bind(editorServices);
-
-      it('should create a new metadata editor tool', () => {
-        const tool = new NotebookTools.NotebookMetadataEditorTool({
-          editorFactory
-        });
-        expect(tool).toBeInstanceOf(NotebookTools.NotebookMetadataEditorTool);
-      });
-
-      it('should handle a change to the active notebook', () => {
-        panel0.model!.setMetadata('panel0', 1);
-        panel1.model!.setMetadata('panel1', 1);
-        const tool = new NotebookTools.NotebookMetadataEditorTool({
-          editorFactory
-        });
-        notebookTools.addItem({ tool, section: sectionName });
-        expect(
-          JSON.stringify(tool.editor.model.sharedModel.getSource())
-        ).toBeTruthy();
-
-        simulate(panel0.node, 'focus');
-        expect(
-          JSON.stringify(tool.editor.model.sharedModel.getSource())
-        ).toContain('panel0');
-        expect(
-          JSON.stringify(tool.editor.model.sharedModel.getSource())
-        ).not.toContain('panel1');
-
-        simulate(panel1.node, 'focus');
-        expect(
-          JSON.stringify(tool.editor.model.sharedModel.getSource())
-        ).not.toContain('panel0');
-        expect(
-          JSON.stringify(tool.editor.model.sharedModel.getSource())
-        ).toContain('panel1');
-      });
-
-      it('should handle a change to the metadata', () => {
-        const tool = new NotebookTools.NotebookMetadataEditorTool({
-          editorFactory
-        });
-        notebookTools.addItem({ tool, section: sectionName });
-        const model = tool.editor.model;
-        const widget = tracker.currentWidget!;
-        expect(JSON.stringify(model.sharedModel.getSource())).not.toContain(
-          'newvalue'
-        );
-        widget.content.model!.setMetadata('newvalue', 1);
-        expect(JSON.stringify(model.sharedModel.getSource())).toContain(
-          'newvalue'
-        );
       });
     });
   });

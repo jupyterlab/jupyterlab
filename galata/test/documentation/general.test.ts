@@ -145,7 +145,7 @@ test.describe('General', () => {
         '.jp-NotebookTools-tool .jp-FormGroup-fieldLabel:text("Raw NBConvert Format")'
       )
     ).toHaveCount(0);
-    await page.notebook.addCell('raw', '');
+    await page.notebook.addCell('raw', 'Raw cell');
     await expect(
       page.locator(
         '.jp-NotebookTools-tool .jp-FormGroup-fieldLabel:text("Raw NBConvert Format")'
@@ -195,6 +195,35 @@ test.describe('General', () => {
         .textContent()
     )?.replace(/\s/g, '');
     expect(newNotebookMetadata).toContain('"base_numbering":3');
+
+    // Test the active cell widget
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-ActiveCell-Content pre')
+    ).toHaveText('Raw cell');
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
+    ).toHaveClass(/lm-mod-hidden/);
+    await (await page.notebook.getCellInput(1))?.click();
+    await page.keyboard.type(' content');
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-ActiveCell-Content pre')
+    ).toHaveText('Raw cell content');
+
+    await page.notebook.addCell('code', 'print("test")');
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-ActiveCell-Content pre')
+    ).toHaveText('print("test")');
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
+    ).not.toHaveClass(/lm-mod-hidden/);
+    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
+      '[ ]:'
+    );
+
+    await page.notebook.runCell(2, true);
+    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
+      '[1]:'
+    );
   });
 
   test('Open tabs', async ({ page }) => {
