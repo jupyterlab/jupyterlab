@@ -22,6 +22,8 @@ import type mermaid from 'mermaid';
 
 const FENCE = '```~~~';
 const MAX_CACHE = 256;
+const MERMAID_CLASS = 'jp-RenderedMermaid';
+const ERROR_CLASS = 'jp-mod-error';
 
 /**
  * The markdown parser plugin.
@@ -195,16 +197,19 @@ namespace Private {
 
     let html: string;
 
-    // Create temporary element to render into
+    // create temporary element into which to render
     const el = document.createElement('div');
     document.body.appendChild(el);
 
     try {
       const id = `jp-mermaid-${_nextMermaidId++}`;
       const { svg } = await _mermaid.mermaidAPI.render(id, token.text, el);
-      html = `<img src="data:image/svg+xml,${encodeURIComponent(svg)}" />`;
+      const uri = `data:image/svg+xml,${encodeURIComponent(svg)}`;
+      html = `<img class="${MERMAID_CLASS}" src="${uri}" />`;
     } catch (err) {
-      html = `<blockquote><code>${err.message}</code></blockquote>`;
+      html = `<div class="${MERMAID_CLASS} ${ERROR_CLASS}">
+        <code>${err.message}</code>
+      </div>`;
     } finally {
       // always remove the element
       el.remove();
