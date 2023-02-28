@@ -36,12 +36,17 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.19",
+    "@jupyterlab/apputils": "^4.0.0-alpha.19",
     "@jupyterlab/codemirror": "^4.0.0-alpha.19",
     "@jupyterlab/rendermime": "^4.0.0-alpha.19",
-    "marked": "^4.0.17"
+    "@lumino/coreutils": "^2.0.0-rc.0",
+    "marked": "^4.2.12",
+    "mermaid": "^10.0.0"
   },
   "devDependencies": {
-    "@types/marked": "^4.0.3",
+    "@types/d3": "^7.4.0",
+    "@types/dompurify": "^2.4.0",
+    "@types/marked": "^4.0.8",
     "rimraf": "~3.0.0",
     "typescript": "~5.0.0-beta"
   },
