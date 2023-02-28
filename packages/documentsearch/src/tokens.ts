@@ -55,7 +55,13 @@ export interface IReplaceOptions {
   /**
    * Should the letter case be preserved?
    */
-  preserveCase: boolean;
+  preserveCase?: boolean;
+  /**
+   * Did user request regular expressions?
+   *
+   * This has impact on how `$` is interpreted in replacement text.
+   */
+  regularExpression?: boolean;
 }
 
 /**

@@ -8,7 +8,9 @@ import {
 } from '@codemirror/language';
 import { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { tags as t } from '@lezer/highlight';
+import { IEditorTheme, IEditorThemeRegistry } from './token';
 
 export const jupyterEditorTheme = EditorView.theme({
   /**
@@ -86,7 +88,10 @@ export const jupyterHighlightStyle = HighlightStyle.define([
     tag: [t.definition(t.name), t.function(t.definition(t.variableName))],
     color: 'var(--jp-mirror-editor-def-color)'
   },
-  { tag: t.variableName, color: 'var(--jp-mirror-editor-variable-color)' },
+  {
+    tag: t.standard(t.variableName),
+    color: 'var(--jp-mirror-editor-builtin-color)'
+  },
   {
     tag: [t.special(t.variableName), t.self],
     color: 'var(--jp-mirror-editor-variable-2-color)'
@@ -132,41 +137,42 @@ export const jupyterTheme: Extension = [
 ];
 
 /**
- * A namespace to handle CodeMirror 6 theme
- *
- * @alpha
+ * CodeMirror 6 theme registry
  */
-export namespace Theme {
+export class EditorThemeRegistry implements IEditorThemeRegistry {
   /**
    * CodeMirror 6 themes
    */
-  const themeMap: Map<string, Extension> = new Map([
-    [
-      'codemirror',
-      [EditorView.baseTheme({}), syntaxHighlighting(defaultHighlightStyle)]
-    ],
-    ['jupyter', jupyterTheme]
+  private _themeMap: Map<string, IEditorTheme> = new Map([
+    ['jupyter', Object.freeze({ name: 'jupyter', theme: jupyterTheme })]
   ]);
+
+  /**
+   * Get all themes
+   */
+  get themes(): IEditorTheme[] {
+    return Array.from(this._themeMap.values());
+  }
 
   /**
    * Get the default CodeMirror 6 theme for JupyterLab
    *
-   * @alpha
    * @returns Default theme
    */
-  export function defaultTheme(): Extension {
-    return themeMap.get('jupyter')!;
+  defaultTheme(): Extension {
+    return this._themeMap.get('jupyter')!.theme;
   }
 
   /**
    * Register a new theme.
    *
-   * @alpha
-   * @param name Theme name
-   * @param theme Codemirror 6 theme extension
+   * @param theme Codemirror 6 theme
    */
-  export function registerTheme(name: string, theme: Extension) {
-    themeMap.set(name, theme);
+  addTheme(theme: IEditorTheme) {
+    if (this._themeMap.has(theme.name)) {
+      throw new Error(`A theme named '${theme.name}' is already registered.`);
+    }
+    this._themeMap.set(theme.name, { displayName: theme.name, ...theme });
   }
 
   /**
@@ -175,13 +181,39 @@ export namespace Theme {
    * #### Notes
    * It falls back to the default theme
    *
-   * @alpha
    * @param name Theme name
    * @returns Theme extension
    */
-  export function getTheme(name: string): Extension {
-    let ext = themeMap.get(name);
+  getTheme(name: string): Extension {
+    const ext = this._themeMap.get(name)?.theme;
 
     return ext ?? this.defaultTheme();
+  }
+}
+
+/**
+ * EditorThemeRegistry namespace
+ */
+export namespace EditorThemeRegistry {
+  /**
+   * Get the default editor themes.
+   *
+   * @param translator Application translator
+   * @returns Default CodeMirror 6 themes
+   */
+  export function getDefaultThemes(
+    translator?: ITranslator | null
+  ): ReadonlyArray<Readonly<IEditorTheme>> {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+    return [
+      Object.freeze({
+        name: 'codemirror',
+        displayName: trans.__('codemirror'),
+        theme: [
+          EditorView.baseTheme({}),
+          syntaxHighlighting(defaultHighlightStyle)
+        ]
+      })
+    ];
   }
 }

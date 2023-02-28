@@ -280,9 +280,12 @@ export abstract class EditorSearchProvider<
       } else {
         this.cmHandler.matches.splice(this.currentIndex, 1);
         this.currentIndex = null;
-        const insertText = options?.preserveCase
-          ? GenericSearchProvider.preserveCase(match.text, newText)
+        const substitutedText = options?.regularExpression
+          ? match!.text.replace(this.query!, newText)
           : newText;
+        const insertText = options?.preserveCase
+          ? GenericSearchProvider.preserveCase(match.text, substitutedText)
+          : substitutedText;
         this.model.sharedModel.updateSource(
           match!.position,
           match!.position + match!.text.length,
@@ -315,9 +318,12 @@ export abstract class EditorSearchProvider<
     const finalSrc = this.cmHandler.matches.reduce((agg, match) => {
       const start = match.position as number;
       const end = start + match.text.length;
-      const insertText = options?.preserveCase
-        ? GenericSearchProvider.preserveCase(match.text, newText)
+      const substitutedText = options?.regularExpression
+        ? match!.text.replace(this.query!, newText)
         : newText;
+      const insertText = options?.preserveCase
+        ? GenericSearchProvider.preserveCase(match.text, substitutedText)
+        : substitutedText;
       const newStep = `${agg}${src.slice(lastEnd, start)}${insertText}`;
       lastEnd = end;
       return newStep;

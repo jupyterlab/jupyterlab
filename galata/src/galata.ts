@@ -34,14 +34,8 @@ export namespace galata {
     '@jupyterlab/apputils-extension:notification': {
       fetchNews: 'false'
     },
-    '@jupyterlab/fileeditor-extension:plugin': {
-      editorConfig: { cursorBlinkRate: 0 }
-    },
-    '@jupyterlab/notebook-extension:tracker': {
-      codeCellConfig: { cursorBlinkRate: 0 },
-      markdownCellConfig: { cursorBlinkRate: 0 },
-      rawCellConfig: { cursorBlinkRate: 0 }
-    }
+    '@jupyterlab/fileeditor-extension:plugin': {},
+    '@jupyterlab/notebook-extension:tracker': {}
   };
 
   export const DEFAULT_DOCUMENTATION_STATE: Record<string, any> = {

@@ -263,7 +263,8 @@ export class SearchDocumentModel
    */
   async replaceAllMatches(): Promise<void> {
     await this.searchProvider.replaceAllMatches(this._replaceText, {
-      preserveCase: this.preserveCase
+      preserveCase: this.preserveCase,
+      regularExpression: this.useRegex
     });
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
@@ -274,7 +275,8 @@ export class SearchDocumentModel
    */
   async replaceCurrentMatch(): Promise<void> {
     await this.searchProvider.replaceCurrentMatch(this._replaceText, true, {
-      preserveCase: this.preserveCase
+      preserveCase: this.preserveCase,
+      regularExpression: this.useRegex
     });
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();

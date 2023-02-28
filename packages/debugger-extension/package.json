@@ -46,6 +46,7 @@
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.19",
     "@jupyterlab/apputils": "^4.0.0-alpha.19",
+    "@jupyterlab/cells": "^4.0.0-alpha.19",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.19",
     "@jupyterlab/console": "^4.0.0-alpha.19",
     "@jupyterlab/coreutils": "^6.0.0-alpha.19",

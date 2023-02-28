@@ -35,12 +35,14 @@ export class ReadOnlyEditorFactory {
     });
     model.sharedModel.source = content;
     const editor = new CodeEditorWrapper({
+      editorOptions: {
+        config: {
+          readOnly: true,
+          lineNumbers: true
+        }
+      },
       model,
-      factory,
-      config: {
-        readOnly: true,
-        lineNumbers: true
-      }
+      factory
     });
     editor.node.setAttribute('data-jp-debugger', 'true');
 
