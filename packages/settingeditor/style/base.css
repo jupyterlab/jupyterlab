@@ -217,7 +217,7 @@
 }
 
 .jp-SettingsPanel .jp-SettingsHeader h2 {
-  font-size: var(--jp-content-font-size1);
+  font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
   font-weight: 300;
 }
@@ -289,7 +289,7 @@
 
 .jp-SettingsPanel .jp-SettingsHeader-Name {
   text-transform: inherit;
-  font-size: var(--jp-content-font-size3);
+  font-size: var(--jp-ui-font-size1);
 }
 
 .jp-SettingsPanel .jp-SettingsEditor {
@@ -315,7 +315,7 @@
   border: none;
   outline: none;
   box-shadow: none;
-  font-size: var(--jp-content-font-size1);
+  font-size: var(--jp-ui-font-size1);
   color: var(--jp-brand-color1);
   cursor: pointer;
   margin-right: 5px;
