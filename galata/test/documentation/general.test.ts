@@ -140,7 +140,7 @@ test.describe('General', () => {
     ).toMatchSnapshot('interface_right_common.png');
 
     // Expect the 'Raw NbConvert Format' field to be displayed only on raw cells
-    expect(
+    await expect(
       page.locator(
         '.jp-NotebookTools-tool .jp-FormGroup-fieldLabel:text("Raw NBConvert Format")'
       )
