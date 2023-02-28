@@ -76,7 +76,7 @@ Pypi = "https://pypi.org/project/jupyterlab"
 docs = [
     "sphinx>=1.8",
     "sphinx-copybutton",
-    "pydata-sphinx-theme",
+    "pydata-sphinx-theme>=0.13.0",
     "pytest",
     "pytest-tornasync",
     "pytest-check-links",
@@ -115,7 +115,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.249",
+    "ruff==0.0.252",
     "black[jupyter]==23.1.0"
 ]
 
