@@ -12,6 +12,7 @@ import {
 import { MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
+import { NotebookFooter } from './notebookfooter';
 
 /**
  * Notebook view model for the windowed list.
@@ -72,6 +73,7 @@ export class NotebookViewModel extends WindowedListModel {
  */
 export class NotebookWindowedLayout extends WindowedLayout {
   private _header: Widget | null = null;
+  private _footer: NotebookFooter | null = null;
 
   /**
    * Returns Notebook's header
@@ -97,6 +99,30 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
   }
 
+  /**
+   * Returns Notebook's footer
+   *
+   * @return NotebookFooter | null
+   */
+
+  get footer(): NotebookFooter | null {
+    return this._footer;
+  }
+
+  /**
+   * Set Notebook's footer
+   *
+   * @param v: Widget | null
+   */
+  set footer(v: NotebookFooter | null) {
+    if (this._footer && this._footer.isAttached) {
+      NotebookFooter.detach(this._footer);
+    }
+    this._footer = v;
+    if (this._footer && this.parent?.isAttached) {
+      NotebookFooter.attach(this._footer, this.parent!.node);
+    }
+  }
   /**
    * Remove a widget from the layout.
    *

@@ -27,6 +27,21 @@
 /*-----------------------------------------------------------------------------
 | Notebook
 |----------------------------------------------------------------------------*/
+.jp-Notebook-footer {
+  height: 10%;
+  width: calc(100%);
+  padding: 0;
+  color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.jp-Notebook-footer:hover {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border-radius: 0;
+  color: var(--jp-layout-color3);
+}
 
 /* stylelint-disable selector-max-class */
 

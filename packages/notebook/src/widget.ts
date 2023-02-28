@@ -34,6 +34,7 @@ import { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
+import { NotebookFooter } from './notebookfooter';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -1213,6 +1214,16 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Adds a footer to the notebook.
+   */
+  protected addFooter(): void {
+    const trans = this.translator.load('jupyterlab');
+    const info = new NotebookFooter(this);
+    info.node.textContent = trans.__('Double-click here to add a new cell.');
+    (this.layout as NotebookWindowedLayout).footer = info;
+  }
+
+  /**
    * Handle a change cells event.
    */
   protected _onCellsChanged(
@@ -1229,6 +1240,7 @@ export class Notebook extends StaticNotebook {
         this.activeCellIndex = newActiveCellIndex;
       }
     }
+    this.addFooter();
   }
 
   /**
