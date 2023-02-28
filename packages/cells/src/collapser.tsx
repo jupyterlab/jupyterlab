@@ -11,7 +11,7 @@ import * as React from 'react';
 import { Cell, CodeCell } from './widget';
 
 /**
- * The CSS class added to allcollapsers.
+ * The CSS class added to all collapsers.
  */
 const COLLAPSER_CLASS = 'jp-Collapser';
 
