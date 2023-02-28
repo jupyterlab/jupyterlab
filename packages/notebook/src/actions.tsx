@@ -436,7 +436,6 @@ export namespace NotebookActions {
     } else {
       notebook.moveCell(firstIndex, firstIndex + shift, lastIndex - firstIndex);
     }
-
     Private.handleState(notebook, state, true);
   }
 
@@ -1099,6 +1098,8 @@ export namespace NotebookActions {
     const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
 
     addCells(notebook, mode, values, true);
+
+    focusActiveCell(notebook);
   }
 
   /**
@@ -1659,12 +1660,15 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    */
   export function collapseAllHeadings(notebook: Notebook): any {
+    const state = Private.getState(notebook);
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
         NotebookActions.setHeadingCollapse(cell, true, notebook);
         NotebookActions.setCellCollapse(cell, true);
       }
     }
+    notebook.activeCellIndex = 0;
+    Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1986,6 +1990,30 @@ export namespace NotebookActions {
       }
     });
   }
+
+  /**
+   * If the notebook has an active cell, wait until it has been attached to the
+   * DOM, then focus it.
+   *
+   * @param notebook - The target notebook widget.
+   *
+   * @returns a promise that resolves when focus has been called on the active
+   * cell's node.
+   *
+   * #### Notes
+   * Waits until the active cell has been attached.
+   */
+  export async function focusActiveCell(notebook: Notebook): Promise<void> {
+    const { activeCell } = notebook;
+    if (!activeCell) {
+      return;
+    }
+    await activeCell.attached;
+    if (notebook.isDisposed || activeCell.isDisposed) {
+      return;
+    }
+    activeCell.node.focus();
+  }
 }
 
 /**
@@ -2052,11 +2080,11 @@ namespace Private {
   /**
    * Handle the state of a widget after running an action.
    */
-  export function handleState(
+  export async function handleState(
     notebook: Notebook,
     state: IState,
     scrollIfNeeded = false
-  ): void {
+  ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
 
     if (state.wasFocused || notebook.mode === 'edit') {
@@ -2064,9 +2092,12 @@ namespace Private {
     }
 
     if (scrollIfNeeded && activeCell) {
-      notebook.scrollToItem(activeCellIndex).catch(reason => {
+      try {
+        await notebook.scrollToItem(activeCellIndex);
+      } catch {
         // no-op
-      });
+      }
+      await NotebookActions.focusActiveCell(notebook);
     }
   }
 
@@ -2395,16 +2426,6 @@ namespace Private {
         (child as MarkdownCell).rendered = false;
       }
     });
-
-    // Put focus on the active cell whose type was changed. Otherwise, focus
-    // will fall back to the document body.
-    const { activeCell } = notebook;
-    activeCell?.ready.then(() => {
-      if (!notebook.isDisposed && !activeCell.isDisposed) {
-        activeCell.node.focus();
-      }
-    });
-
     notebook.deselectAll();
   }
 

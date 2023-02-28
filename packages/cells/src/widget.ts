@@ -399,6 +399,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     return this._ready.promise;
   }
 
+  get attached(): Promise<void> {
+    return this._attached.promise;
+  }
+
   /**
    * Set the prompt for the widget.
    */
@@ -604,6 +608,11 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.update();
+    this._attached.resolve();
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    this._attached = new PromiseDelegate<void>();
   }
 
   /**
@@ -671,6 +680,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _placeholder: boolean;
   private _readOnly = false;
   private _ready = new PromiseDelegate<void>();
+  private _attached = new PromiseDelegate<void>();
   private _resizeDebouncer = new Debouncer(() => {
     this._displayChanged.emit();
   }, 0);

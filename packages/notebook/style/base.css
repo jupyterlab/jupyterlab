@@ -134,6 +134,14 @@
   background: transparent;
 }
 
+.jp-Notebook.jp-mod-commandMode .jp-Cell:focus {
+  outline: none;
+}
+
+.jp-Notebook.jp-mod-commandMode .jp-Cell:focus-visible {
+  outline: auto 1px;
+}
+
 /* Edit mode */
 
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {

@@ -439,7 +439,7 @@
     {
       "command": "notebook:enter-edit-mode",
       "keys": ["Enter"],
-      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(input):not(div[contenteditable=\"true\"])"
+      "selector": ".jp-Notebook.jp-mod-commandMode .jp-Cell:focus"
     },
     {
       "command": "notebook:extend-marked-cells-above",
@@ -504,7 +504,7 @@
     {
       "command": "notebook:move-cursor-down",
       "keys": ["J"],
-      "selector": ".jp-Notebook.jp-mod-commandMode"
+      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(input):not(div[contenteditable=\"true\"])"
     },
     {
       "command": "notebook:move-cursor-up",
@@ -519,12 +519,12 @@
     {
       "command": "notebook:move-cursor-heading-above-or-collapse",
       "keys": ["ArrowLeft"],
-      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(input):not(div[contenteditable=\"true\"]).jp-mod-commandMode"
+      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(input):not(div[contenteditable=\"true\"])"
     },
     {
       "command": "notebook:move-cursor-heading-below-or-expand",
       "keys": ["ArrowRight"],
-      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(input):not(div[contenteditable=\"true\"]).jp-mod-commandMode"
+      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(input):not(div[contenteditable=\"true\"])"
     },
     {
       "command": "notebook:insert-heading-above",
@@ -539,12 +539,12 @@
     {
       "command": "notebook:collapse-all-headings",
       "keys": ["Ctrl Shift ArrowLeft"],
-      "selector": ".jp-Notebook.jp-mod-commandMode"
+      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(input):not(div[contenteditable=\"true\"])"
     },
     {
       "command": "notebook:expand-all-headings",
       "keys": ["Ctrl Shift ArrowRight"],
-      "selector": ".jp-Notebook.jp-mod-commandMode"
+      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(input):not(div[contenteditable=\"true\"])"
     },
     {
       "command": "notebook:paste-cell-below",
