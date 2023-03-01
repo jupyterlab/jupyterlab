@@ -204,7 +204,7 @@ namespace Private {
     document.body.appendChild(el);
 
     try {
-      const { svg } = await _mermaid.mermaidAPI.render(id, token.text, el);
+      const { svg } = await _mermaid.render(id, token.text, el);
       html = `<img src="data:image/svg+xml,${encodeURIComponent(svg)}" />`;
     } catch (err) {
       className = `${className} ${ERROR_CLASS}`;
