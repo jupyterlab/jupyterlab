@@ -20,10 +20,16 @@ import { IMarkdownParser } from '@jupyterlab/rendermime';
 import type { marked, Renderer } from 'marked';
 import type mermaid from 'mermaid';
 
-const FENCE = '```~~~';
-const MAX_CACHE = 256;
 const MERMAID_CLASS = 'jp-RenderedMermaid';
 const ERROR_CLASS = 'jp-mod-error';
+
+// values for highlight/diagram cache key and size
+const FENCE = '```~~~';
+const MAX_CACHE = 256;
+
+// themes
+const DEFAULT_THEME = 'default';
+const DARK_THEME = 'dark';
 
 /**
  * The markdown parser plugin.
@@ -32,7 +38,8 @@ const plugin: JupyterFrontEndPlugin<IMarkdownParser> = {
   id: '@jupyterlab/markedparser-extension:plugin',
   autoStart: true,
   provides: IMarkdownParser,
-  requires: [IEditorLanguageRegistry, IThemeManager],
+  requires: [IEditorLanguageRegistry],
+  optional: [IThemeManager],
   activate: (
     app: JupyterFrontEnd,
     languages: IEditorLanguageRegistry,
@@ -65,7 +72,7 @@ namespace Private {
   export async function render(
     content: string,
     languages: IEditorLanguageRegistry,
-    themes: IThemeManager
+    themes: IThemeManager | null
   ): Promise<string> {
     if (!_marked) {
       _marked = await initializeMarked(languages, themes);
@@ -78,7 +85,7 @@ namespace Private {
    */
   export async function initializeMarked(
     languages: IEditorLanguageRegistry,
-    themes: IThemeManager
+    themes: IThemeManager | null
   ): Promise<typeof marked> {
     if (_marked) {
       return _marked;
@@ -109,8 +116,10 @@ namespace Private {
       renderer: makeRenderer(Renderer)
     };
 
-    // handle changes to theme (e.g. for mermaid theme)
-    themes.themeChanged.connect(initTheme);
+    if (themes) {
+      // handle changes to theme (e.g. for mermaid theme)
+      themes.themeChanged.connect(initMermaid);
+    }
 
     // complete initialization
     _marked = marked;
@@ -187,7 +196,7 @@ namespace Private {
   async function handleMermaid(token: marked.Tokens.Code): Promise<void> {
     if (!_mermaid) {
       _mermaid = (await import('mermaid')).default;
-      initTheme();
+      initMermaid();
     }
 
     // bail if already cached
@@ -221,11 +230,18 @@ namespace Private {
   /**
    * Clear the diagram cache and reconfigure mermaid if loaded.
    */
-  function initTheme() {
-    if (_mermaid && _themes && _themes.theme) {
+  function initMermaid() {
+    let theme = DEFAULT_THEME;
+
+    if (_themes && _themes.theme) {
+      theme = _themes.isLight(_themes.theme) ? DEFAULT_THEME : DARK_THEME;
+    }
+
+    if (_mermaid) {
       _diagrams.clear();
       _mermaid.mermaidAPI.initialize({
-        theme: _themes.isLight(_themes.theme) ? 'default' : 'dark',
+        theme,
+        maxTextSize: 100000,
         startOnLoad: false,
         fontFamily: window
           .getComputedStyle(document.body)
