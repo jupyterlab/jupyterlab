@@ -954,7 +954,7 @@ def replace_caret(comp, loose):
             else:
                 ret = ">=" + M + "." + m + "." + (p or "") + pr + " <" + str(int(M) + 1) + ".0.0"
         else:
-            if M == "0":
+            if M == "0":  # noqa PLR5501
                 if m == "0":
                     ret = (
                         ">="
