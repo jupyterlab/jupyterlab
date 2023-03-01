@@ -91,10 +91,10 @@ export function displayShortcuts(
       bindingTable.push(
         groupedBindings.get(d)!.map(b => (
           <tr className="jp-ContextualShortcut-TableRow" key={b.command}>
+            <td>{commands.label(b.command, b.args)}</td>
             <td className="jp-ContextualShortcut-TableItem">
               {CommandRegistry.formatKeystroke(b.keys)}
             </td>
-            <td>{commands.label(b.command, b.args)}</td>
           </tr>
         ))
       );
@@ -106,16 +106,6 @@ export function displayShortcuts(
 
   const body = (
     <table>
-      <thead>
-        <tr>
-          <th className="jp-ContextualShortcut-TableHeader">
-            {trans.__('Shortcut')}
-          </th>
-          <th className="jp-ContextualShortcut-TableHeader">
-            {trans.__('Label')}
-          </th>
-        </tr>
-      </thead>
       <tbody>{bindingTable}</tbody>
     </table>
   );
@@ -125,7 +115,7 @@ export function displayShortcuts(
     body,
     buttons: [
       Dialog.cancelButton({
-        label: trans.__('Dismiss')
+        label: trans.__('Close')
       })
     ]
   });
