@@ -196,27 +196,26 @@ namespace Private {
     }
 
     let html: string;
+    let className = MERMAID_CLASS;
+    const id = `jp-mermaid-${_nextMermaidId++}`;
 
     // create temporary element into which to render
     const el = document.createElement('div');
     document.body.appendChild(el);
 
     try {
-      const id = `jp-mermaid-${_nextMermaidId++}`;
       const { svg } = await _mermaid.mermaidAPI.render(id, token.text, el);
-      const uri = `data:image/svg+xml,${encodeURIComponent(svg)}`;
-      html = `<img class="${MERMAID_CLASS}" src="${uri}" />`;
+      html = `<img src="data:image/svg+xml,${encodeURIComponent(svg)}" />`;
     } catch (err) {
-      html = `<div class="${MERMAID_CLASS} ${ERROR_CLASS}">
-        <code>${err.message}</code>
-      </div>`;
+      className = `${className} ${ERROR_CLASS}`;
+      html = `<code>${err.message}</code>`;
     } finally {
       // always remove the element
       el.remove();
     }
 
     // update the cache for use when rendering
-    cacheSet(_diagrams, token.text, html);
+    cacheSet(_diagrams, token.text, `<div class="${className}">${html}</div>`);
   }
 
   /**
