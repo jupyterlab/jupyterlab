@@ -86,6 +86,11 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               <div>{entry.name}</div>
             )}
           </div>
+          <div className="jp-extensionmanager-entry-version">
+            <div title={trans.__('Version: %1', entry.installed_version)}>
+              {entry.installed_version}
+            </div>
+          </div>
           {entry.installed && !entry.allowed && (
             <ToolbarButtonComponent
               icon={infoIcon}
@@ -125,11 +130,15 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       {ListModel.entryHasUpdate(entry) && (
                         <Button
                           onClick={() => props.performAction!('install', entry)}
-                          title={trans.__('Update "%1"', entry.name)}
+                          title={trans.__(
+                            'Update "%1" to "%2"',
+                            entry.name,
+                            entry.latest_version
+                          )}
                           minimal
                           small
                         >
-                          {trans.__('Update')}
+                          {trans.__('Update to %1', entry.latest_version)}
                         </Button>
                       )}
                       <Button
@@ -426,6 +435,7 @@ activate this feature?`)}
               {this.trans.__('Yes')}
             </Button>
             <Button
+              className="jp-extensionmanager-disclaimer-disable"
               onClick={() => {
                 this.model.isEnabled = false;
               }}

@@ -41,6 +41,7 @@
     "@jupyterlab/apputils": "^4.0.0-alpha.19",
     "@jupyterlab/cells": "^4.0.0-alpha.19",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.19",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.19",
     "@jupyterlab/completer": "^4.0.0-alpha.19",
     "@jupyterlab/coreutils": "^6.0.0-alpha.19",
     "@jupyterlab/docmanager": "^4.0.0-alpha.19",
@@ -64,12 +65,12 @@
     "@jupyterlab/toc": "^6.0.0-alpha.19",
     "@jupyterlab/translation": "^4.0.0-alpha.19",
     "@jupyterlab/ui-components": "^4.0.0-alpha.34",
-    "@lumino/algorithm": "^2.0.0-beta.0",
-    "@lumino/commands": "^2.0.0-beta.1",
-    "@lumino/coreutils": "^2.0.0-beta.0",
-    "@lumino/disposable": "^2.0.0-beta.1",
-    "@lumino/messaging": "^2.0.0-beta.0",
-    "@lumino/widgets": "^2.0.0-beta.1"
+    "@lumino/algorithm": "^2.0.0-rc.0",
+    "@lumino/commands": "^2.0.0-rc.0",
+    "@lumino/coreutils": "^2.0.0-rc.0",
+    "@lumino/disposable": "^2.0.0-rc.0",
+    "@lumino/messaging": "^2.0.0-rc.0",
+    "@lumino/widgets": "^2.0.0-rc.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

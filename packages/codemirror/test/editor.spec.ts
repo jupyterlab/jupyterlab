@@ -1,16 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { YFile } from '@jupyter/ydoc';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import {
+  CodeMirrorEditor,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
+import { sleep } from '@jupyterlab/testutils';
 import { generate, simulate } from 'simulate-event';
 
 const UP_ARROW = 38;
 
 const DOWN_ARROW = 40;
-
-const ENTER = 13;
 
 class LogFileEditor extends CodeMirrorEditor {
   methods: string[] = [];
@@ -27,12 +33,38 @@ describe('CodeMirrorEditor', () => {
   let host: HTMLElement;
   let model: CodeEditor.IModel;
   const TEXT = new Array(100).join('foo bar baz\n');
+  let languages: IEditorLanguageRegistry;
+  let extensionsRegistry: IEditorExtensionRegistry;
+
+  beforeAll(async () => {
+    languages = new EditorLanguageRegistry();
+    extensionsRegistry = new EditorExtensionRegistry();
+    EditorExtensionRegistry.getDefaultExtensions()
+      .filter(ext => ['lineNumbers', 'lineWrap', 'readOnly'].includes(ext.name))
+      .forEach(ext => {
+        extensionsRegistry.addExtension(ext);
+      });
+    for (const language of EditorLanguageRegistry.getDefaultLanguages().filter(
+      spec => spec.name === 'Python'
+    )) {
+      languages.addLanguage(language);
+      await languages.getLanguage(language.name);
+    }
+  });
 
   beforeEach(() => {
     host = document.createElement('div');
     document.body.appendChild(host);
-    model = new CodeEditor.Model({ sharedModel: new YFile() });
-    editor = new LogFileEditor({ host, model });
+    const sharedModel = new YFile();
+    model = new CodeEditor.Model({ sharedModel });
+    editor = new LogFileEditor({
+      extensionsRegistry,
+      host,
+      model,
+      languages,
+      // Binding between the editor and the Yjs model
+      extensions: [ybinding(sharedModel.ysource)]
+    });
   });
 
   afterEach(() => {
@@ -76,7 +108,13 @@ describe('CodeMirrorEditor', () => {
     it('should be the unique id of the editor', () => {
       expect(editor.uuid).toBeTruthy();
       const uuid = 'foo';
-      editor = new LogFileEditor({ model, host, uuid });
+      editor = new LogFileEditor({
+        extensionsRegistry,
+        model,
+        host,
+        uuid,
+        languages
+      });
       expect(editor.uuid).toBe('foo');
     });
   });
@@ -98,11 +136,11 @@ describe('CodeMirrorEditor', () => {
 
   describe('#getOption()', () => {
     it('should get whether line numbers should be shown', () => {
-      expect(editor.getOption('lineNumbers')).toBe(false);
+      expect(editor.getOption('lineNumbers')).toBe(true);
     });
 
     it('should get whether horizontally scrolling should be used', () => {
-      expect(editor.getOption('lineWrap')).toBe('on');
+      expect(editor.getOption('lineWrap')).toBe(true);
     });
 
     it('should get whether the editor is readonly', () => {
@@ -112,13 +150,13 @@ describe('CodeMirrorEditor', () => {
 
   describe('#setOption()', () => {
     it('should set whether line numbers should be shown', () => {
-      editor.setOption('lineNumbers', true);
-      expect(editor.getOption('lineNumbers')).toBe(true);
+      editor.setOption('lineNumbers', false);
+      expect(editor.getOption('lineNumbers')).toBe(false);
     });
 
     it('should set whether horizontally scrolling should be used', () => {
-      editor.setOption('lineWrap', 'off');
-      expect(editor.getOption('lineWrap')).toBe('off');
+      editor.setOption('lineWrap', false);
+      expect(editor.getOption('lineWrap')).toBe(false);
     });
 
     it('should set whether the editor is readonly', () => {
@@ -271,26 +309,6 @@ describe('CodeMirrorEditor', () => {
     });
   });
 
-  describe('#addKeydownHandler()', () => {
-    it('should add a keydown handler to the editor', () => {
-      let called = 0;
-      const handler = () => {
-        called++;
-        return true;
-      };
-      const disposable = editor.addKeydownHandler(handler);
-      let evt = generate('keydown', { keyCode: ENTER });
-      editor.editor.contentDOM.dispatchEvent(evt);
-      expect(called).toBe(1);
-      disposable.dispose();
-      expect(disposable.isDisposed).toBe(true);
-
-      evt = generate('keydown', { keyCode: ENTER });
-      editor.editor.contentDOM.dispatchEvent(evt);
-      expect(called).toBe(1);
-    });
-  });
-
   describe('#revealPosition()', () => {
     it('should reveal the given position in the editor', () => {
       model.sharedModel.setSource(TEXT);
@@ -387,7 +405,7 @@ describe('CodeMirrorEditor', () => {
   });
 
   describe('#setSelections()', () => {
-    it('should set the selections for all the cursors', () => {
+    it('should set the selections for all the cursors', async () => {
       model.sharedModel.setSource(TEXT);
       const range0 = {
         start: { line: 50, column: 0 },
@@ -422,9 +440,11 @@ describe('CodeMirrorEditor', () => {
   });
 
   describe('#getTokenAt()', () => {
-    it('should return innermost token', () => {
-      editor.setOption('mode', 'text/x-python');
+    it('should return innermost token', async () => {
+      model.mimeType = 'text/x-python';
       model.sharedModel.setSource('foo = "a"\nbar = 1');
+      // Needed to have the sharedModel content transferred to the editor document
+      await sleep(0.01);
       expect(editor.getTokenAt(1)).toStrictEqual({
         offset: 0,
         type: 'VariableName',
@@ -440,9 +460,11 @@ describe('CodeMirrorEditor', () => {
   });
 
   describe('#getTokens()', () => {
-    it('should get a list of tokens', () => {
-      editor.setOption('mode', 'text/x-python');
+    it('should get a list of tokens', async () => {
+      model.mimeType = 'text/x-python';
       model.sharedModel.setSource('foo = "a"\nbar = 1');
+      // Needed to have the sharedModel content transferred to the editor document
+      await sleep(0.01);
       expect(editor.getTokens()).toStrictEqual([
         {
           offset: 0,

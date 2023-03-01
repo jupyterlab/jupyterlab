@@ -50,8 +50,8 @@ describe('@jupyterlab/mainmenu', () => {
       it('should take a rank as an option', () => {
         const menu1 = new Menu({ commands });
         const menu2 = new Menu({ commands });
-        mainMenu.addMenu(menu1, { rank: 300 });
-        mainMenu.addMenu(menu2, { rank: 200 });
+        mainMenu.addMenu(menu1, false, { rank: 300 });
+        mainMenu.addMenu(menu2, false, { rank: 200 });
         expect(
           ArrayExt.firstIndexOf(mainMenu.menus, menu1) >
             ArrayExt.firstIndexOf(mainMenu.menus, menu2)

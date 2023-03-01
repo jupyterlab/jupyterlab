@@ -20,6 +20,7 @@ import {
   sessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { CodeCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
@@ -639,7 +640,7 @@ const main: JupyterFrontEndPlugin<void> = {
       const info = (await kernel.info).language_info;
       const name = info.name;
       const mimeType =
-        editorServices?.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
+        editorServices.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
       return mimeType;
     };
 
@@ -657,6 +658,10 @@ const main: JupyterFrontEndPlugin<void> = {
           okLabel: trans.__('Evaluate'),
           cancelLabel: trans.__('Cancel'),
           mimeType,
+          contentFactory: new CodeCell.ContentFactory({
+            editorFactory: options =>
+              editorServices.factoryService.newInlineEditor(options)
+          }),
           rendermime
         });
         const code = result.value;

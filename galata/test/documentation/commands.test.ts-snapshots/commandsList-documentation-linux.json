@@ -222,36 +222,6 @@
     "shortcuts": []
   },
   {
-    "id": "codemirror:change-keymap",
-    "label": "default",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:change-mode",
-    "label": "Change editor mode to the provided `name`.",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:change-theme",
-    "label": "jupyter",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:find",
-    "label": "Find…",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:go-to-line",
-    "label": "Go to Line…",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
     "id": "completer:invoke-console",
     "label": "Display the completion helper.",
     "caption": "",
@@ -891,8 +861,20 @@
     "shortcuts": []
   },
   {
+    "id": "fileeditor:change-language",
+    "label": "Change editor language.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "fileeditor:change-tabs",
     "label": "Indent with Tab",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:change-theme",
+    "label": "jupyter",
     "caption": "",
     "shortcuts": []
   },
@@ -923,6 +905,18 @@
   {
     "id": "fileeditor:cut",
     "label": "Cut",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:find",
+    "label": "Find…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:go-to-line",
+    "label": "Go to Line…",
     "caption": "",
     "shortcuts": []
   },
@@ -989,24 +983,24 @@
   {
     "id": "fileeditor:toggle-current-line-numbers",
     "label": "Show Line Numbers",
-    "caption": "",
+    "caption": "Show the line numbers for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-current-line-wrap",
     "label": "Wrap Words",
-    "caption": "",
+    "caption": "Wrap words for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-current-match-brackets",
     "label": "Match Brackets",
-    "caption": "",
+    "caption": "Change match brackets for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-line-numbers",
-    "label": "Line Numbers",
+    "label": "Show Line Numbers",
     "caption": "",
     "shortcuts": []
   },

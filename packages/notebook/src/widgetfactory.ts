@@ -29,8 +29,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
   constructor(options: NotebookWidgetFactory.IOptions<NotebookPanel>) {
     super(options);
     this.rendermime = options.rendermime;
-    this.contentFactory =
-      options.contentFactory || NotebookPanel.defaultContentFactory;
+    this.contentFactory = options.contentFactory;
     this.mimeTypeService = options.mimeTypeService;
     this._editorConfig =
       options.editorConfig || StaticNotebook.defaultEditorConfig;

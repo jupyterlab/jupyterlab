@@ -3,33 +3,42 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Theme } from '@jupyterlab/codemirror';
+import {
+  EditorThemeRegistry,
+  IEditorThemeRegistry
+} from '@jupyterlab/codemirror';
 import { oneDark } from './onedarktheme';
 
-describe('Theme', () => {
+describe('themes', () => {
+  let themes: IEditorThemeRegistry;
+
+  beforeEach(() => {
+    themes = new EditorThemeRegistry();
+  });
+
   describe('#defaultTheme', () => {
     it('should return the `jupyter` theme', () => {
-      expect(Theme.defaultTheme()).toBe(Theme.getTheme('jupyter'));
+      expect(themes.defaultTheme()).toBe(themes.getTheme('jupyter'));
     });
   });
 
-  describe('#registerTheme', () => {
+  describe('#addTheme', () => {
     it('should add a new theme', () => {
-      Theme.registerTheme('one dark', oneDark);
+      themes.addTheme({ name: 'one dark', theme: oneDark });
 
-      expect(Theme.getTheme('one dark')).toBe(oneDark);
+      expect(themes.getTheme('one dark')).toBe(oneDark);
     });
   });
 
   describe('#getTheme', () => {
     it('should return the given theme', () => {
-      Theme.registerTheme('one dark', oneDark);
+      themes.addTheme({ name: 'one dark', theme: oneDark });
 
-      expect(Theme.getTheme('one dark')).toBe(oneDark);
+      expect(themes.getTheme('one dark')).toBe(oneDark);
     });
 
     it('should return the default theme if the name does not exist', () => {
-      expect(Theme.getTheme('bar')).toBe(Theme.defaultTheme());
+      expect(themes.getTheme('bar')).toBe(themes.defaultTheme());
     });
   });
 });

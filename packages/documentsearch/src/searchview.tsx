@@ -22,6 +22,7 @@ import {
 import { ISignal, Signal } from '@lumino/signaling';
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
+import { useState } from 'react';
 import { SearchDocumentModel } from './searchmodel';
 import { IFilter, IFilters, IReplaceOptionsSupport } from './tokens';
 
@@ -51,13 +52,46 @@ const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
 const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
+interface ISearchInputProps {
+  placeholder: string;
+  value: string;
+  title: string;
+  inputRef?: React.RefObject<HTMLTextAreaElement>;
+  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+}
+
+function SearchInput(props: ISearchInputProps): JSX.Element {
+  const [rows, setRows] = useState<number>(1);
+
+  return (
+    <textarea
+      placeholder={props.placeholder}
+      className={INPUT_CLASS}
+      rows={rows}
+      onChange={e => {
+        props.onChange(e);
+        setRows((e.target as HTMLTextAreaElement).value.split(/\n/).length);
+      }}
+      onKeyDown={e => {
+        props.onKeyDown(e);
+        setRows((e.target as HTMLTextAreaElement).value.split(/\n/).length);
+      }}
+      tabIndex={0}
+      ref={props.inputRef}
+      title={props.title}
+      defaultValue={props.value}
+    ></textarea>
+  );
+}
+
 interface ISearchEntryProps {
-  inputRef: React.RefObject<HTMLInputElement>;
+  inputRef: React.RefObject<HTMLTextAreaElement>;
   onCaseSensitiveToggled: () => void;
   onRegexToggled: () => void;
   onWordToggled: () => void;
-  onKeydown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeydown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   caseSensitive: boolean;
   useRegex: boolean;
   wholeWords: boolean;
@@ -85,14 +119,12 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
 
   return (
     <div className={wrapperClass}>
-      <input
+      <SearchInput
         placeholder={trans.__('Find')}
-        className={INPUT_CLASS}
         value={props.searchText}
         onChange={e => props.onChange(e)}
         onKeyDown={e => props.onKeydown(e)}
-        tabIndex={0}
-        ref={props.inputRef}
+        inputRef={props.inputRef}
         title={trans.__('Find')}
       />
       <button
@@ -129,8 +161,8 @@ interface IReplaceEntryProps {
   onPreserveCaseToggled: () => void;
   onReplaceCurrent: () => void;
   onReplaceAll: () => void;
-  onReplaceKeydown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onReplaceKeydown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   preserveCase: boolean;
   replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
@@ -148,13 +180,11 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
   return (
     <div className={REPLACE_WRAPPER_CLASS}>
       <div className={INPUT_WRAPPER_CLASS}>
-        <input
+        <SearchInput
           placeholder={trans.__('Replace')}
-          className={INPUT_CLASS}
           value={props.replaceText ?? ''}
           onKeyDown={e => props.onReplaceKeydown(e)}
           onChange={e => props.onChange(e)}
-          tabIndex={0}
           title={trans.__('Replace')}
         />
         {props.replaceOptionsSupport?.preserveCase ? (
@@ -367,7 +397,7 @@ interface ISearchOverlayProps {
   /**
    * Search input reference.
    */
-  searchInputRef: React.RefObject<HTMLInputElement>;
+  searchInputRef: React.RefObject<HTMLTextAreaElement>;
   /**
    * Total number of search matches.
    */
@@ -453,28 +483,43 @@ class SearchOverlay extends React.Component<
   }
 
   private _onSearchChange(event: React.ChangeEvent) {
-    const searchText = (event.target as HTMLInputElement).value;
+    const searchText = (event.target as HTMLTextAreaElement).value;
     this.props.onSearchChanged(searchText);
   }
 
   private _onSearchKeydown(event: React.KeyboardEvent) {
     if (event.keyCode === 13) {
       // Enter pressed
-      event.preventDefault();
       event.stopPropagation();
-      event.shiftKey
-        ? this.props.onHighlightPrevious()
-        : this.props.onHighlightNext();
+      event.preventDefault();
+      if (event.ctrlKey) {
+        const textarea = event.target as HTMLTextAreaElement;
+        this._insertNewLine(textarea);
+        this.props.onSearchChanged(textarea.value);
+      } else {
+        event.shiftKey
+          ? this.props.onHighlightPrevious()
+          : this.props.onHighlightNext();
+      }
     }
   }
 
   private _onReplaceKeydown(event: React.KeyboardEvent) {
     if (event.keyCode === 13) {
       // Enter pressed
-      event.preventDefault();
       event.stopPropagation();
-      this.props.onReplaceCurrent();
+      event.preventDefault();
+      if (event.ctrlKey) {
+        this._insertNewLine(event.target as HTMLTextAreaElement);
+      } else {
+        this.props.onReplaceCurrent();
+      }
     }
+  }
+
+  private _insertNewLine(textarea: HTMLTextAreaElement) {
+    const [start, end] = [textarea.selectionStart, textarea.selectionEnd];
+    textarea.setRangeText('\n', start, end, 'end');
   }
 
   private _onClose() {
@@ -576,10 +621,12 @@ class SearchOverlay extends React.Component<
             onCaseSensitiveToggled={this.props.onCaseSensitiveToggled}
             onRegexToggled={this.props.onRegexToggled}
             onWordToggled={this.props.onWordToggled}
-            onKeydown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+            onKeydown={(e: React.KeyboardEvent<HTMLTextAreaElement>) =>
               this._onSearchKeydown(e)
             }
-            onChange={(e: React.ChangeEvent) => this._onSearchChange(e)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              this._onSearchChange(e)
+            }
             searchText={this.props.searchText}
             translator={this.translator}
           />
@@ -620,7 +667,7 @@ class SearchOverlay extends React.Component<
                 }
                 onChange={(e: React.ChangeEvent) =>
                   this.props.onReplaceChanged(
-                    (e.target as HTMLInputElement).value
+                    (e.target as HTMLTextAreaElement).value
                   )
                 }
                 onReplaceCurrent={() => this.props.onReplaceCurrent()}
@@ -659,7 +706,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
   constructor(model: SearchDocumentModel, protected translator?: ITranslator) {
     super(model);
     this.addClass(OVERLAY_CLASS);
-    this._searchInput = React.createRef<HTMLInputElement>();
+    this._searchInput = React.createRef<HTMLTextAreaElement>();
   }
 
   /**
@@ -736,7 +783,9 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         replaceOptionsSupport={this.model.replaceOptionsSupport}
         replaceText={this.model.replaceText}
         searchText={this.model.searchExpression}
-        searchInputRef={this._searchInput}
+        searchInputRef={
+          this._searchInput as React.RefObject<HTMLTextAreaElement>
+        }
         totalMatches={this.model.totalMatches}
         translator={this.translator}
         useRegex={this.model.useRegex}
@@ -784,7 +833,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
     );
   }
 
-  private _searchInput: React.RefObject<HTMLInputElement>;
+  private _searchInput: React.RefObject<HTMLTextAreaElement>;
   private _showReplace = false;
   private _closed = new Signal<this, void>(this);
 }
