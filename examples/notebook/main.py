@@ -36,12 +36,6 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
 
     def get(self):
         """Get the main page for the application's interface."""
-        # Options set here can be read with PageConfig.getOption
-        mathjax_config = self.settings.get("mathjax_config", "TeX-AMS_HTML-full,Safe")
-        mathjax_url = self.settings.get(
-            "mathjax_url", "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js"
-        )
-
         config_data = {
             # Use camelCase here, since that's what the lab components expect
             "baseUrl": self.base_url,
@@ -49,8 +43,6 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
             "notebookPath": "test.ipynb",
             "fullStaticUrl": ujoin(self.base_url, "static", self.name),
             "frontendUrl": ujoin(self.base_url, "example/"),
-            "mathjaxUrl": mathjax_url,
-            "mathjaxConfig": mathjax_config,
         }
         return self.write(
             self.render_template(
