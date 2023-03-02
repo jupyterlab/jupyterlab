@@ -270,7 +270,9 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 
       // Listen for active cell changes.
       parent.content.activeCellChanged.connect((sender, cell) => {
-        handler.editor = cell && cell.editor;
+        cell?.ready.then(() => {
+          handler.editor = cell && cell.editor;
+        });
       });
 
       // Listen for parent disposal.
