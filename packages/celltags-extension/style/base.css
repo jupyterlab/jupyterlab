@@ -3,6 +3,10 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+:root {
+  --jp-add-tag-extra-width: 8px;
+}
+
 .jp-CellTags-Tag {
   height: 20px;
   border-radius: 10px;

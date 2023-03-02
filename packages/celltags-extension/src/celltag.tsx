@@ -124,7 +124,12 @@ export class CellTagField {
       tmp.textContent = event.target.value;
       // set width to the pixel length of the text
       document.body.appendChild(tmp);
-      event.target.style.width = tmp.getBoundingClientRect().width + 8 + 'px';
+      event.target.style.setProperty(
+        'width',
+        `calc(${
+          tmp.getBoundingClientRect().width
+        }px + var(--jp-add-tag-extra-width))`
+      );
       document.body.removeChild(tmp);
     }
   }
