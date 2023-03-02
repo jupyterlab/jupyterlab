@@ -64,7 +64,7 @@
     "@types/lodash.mergewith": "^4.6.1",
     "json-schema-to-typescript": "^8.0.0",
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.1-rc"
   },
   "publishConfig": {
     "access": "public"

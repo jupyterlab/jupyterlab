@@ -64,7 +64,7 @@
     "@types/ws": "^8.5.3",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.0-beta",
+    "typescript": "~5.0.1-rc",
     "webpack": "^5.72.0",
     "webpack-cli": "^5.0.0"
   },
