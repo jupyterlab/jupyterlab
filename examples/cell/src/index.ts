@@ -16,9 +16,13 @@ import '../index.css';
 import { Toolbar as AppToolbar, SessionContext } from '@jupyterlab/apputils';
 import { Toolbar } from '@jupyterlab/ui-components';
 
-import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell, CodeCellModel } from '@jupyterlab/cells';
 
-import { CodeMirrorMimeTypeService } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 
 import {
   Completer,
@@ -52,7 +56,16 @@ function main(): void {
     specsManager,
     name: 'Example'
   });
-  const mimeService = new CodeMirrorMimeTypeService();
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(language =>
+      ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
+    )
+    .forEach(language => {
+      languages.addLanguage(language);
+    });
+  const factoryService = new CodeMirrorEditorFactory({ languages });
+  const mimeService = new CodeMirrorMimeTypeService(languages);
 
   // Initialize the command registry with the bindings.
   const commands = new CommandRegistry();
@@ -71,6 +84,9 @@ function main(): void {
   const rendermime = new RenderMimeRegistry({ initialFactories });
 
   const cellWidget = new CodeCell({
+    contentFactory: new Cell.ContentFactory({
+      editorFactory: factoryService.newInlineEditor.bind(factoryService)
+    }),
     rendermime,
     model: new CodeCellModel()
   }).initializeState();

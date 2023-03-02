@@ -94,7 +94,8 @@ const UNUSED: Dict<string[]> = {
     '@codemirror/lang-rust',
     '@codemirror/lang-sql',
     '@codemirror/lang-wast',
-    '@codemirror/lang-xml'
+    '@codemirror/lang-xml',
+    '@codemirror/legacy-modes'
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],

@@ -322,7 +322,9 @@ test.describe('General', () => {
     await page.dblclick('text=jupyterlab.md');
 
     await page.click('text=Settings');
-    await page.click('.lm-Menu ul[role="menu"] >> text=Text Editor Key Map');
+    await page.click(
+      '.lm-Menu ul[role="menu"] >> text=Text Editor Indentation'
+    );
 
     expect(
       await page.screenshot({ clip: { y: 0, x: 260, width: 600, height: 450 } })

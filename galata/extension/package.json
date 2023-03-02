@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/galata-extension",
-  "version": "5.0.0-alpha.17",
+  "version": "5.0.0-alpha.18",
   "private": true,
   "description": "JupyterLab UI Testing Framework Extension.",
   "keywords": [
@@ -32,19 +32,19 @@
     "clean:lib": "rimraf ../lib/extension tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/apputils": "^4.0.0-alpha.19",
-    "@jupyterlab/cells": "^4.0.0-alpha.19",
-    "@jupyterlab/docmanager": "^4.0.0-alpha.19",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.19",
-    "@jupyterlab/notebook": "^4.0.0-alpha.19",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
-    "@lumino/algorithm": "^2.0.0-beta.0",
-    "@lumino/coreutils": "^2.0.0-beta.0",
-    "@lumino/signaling": "^2.0.0-beta.1"
+    "@jupyterlab/application": "^4.0.0-alpha.20",
+    "@jupyterlab/apputils": "^4.0.0-alpha.20",
+    "@jupyterlab/cells": "^4.0.0-alpha.20",
+    "@jupyterlab/docmanager": "^4.0.0-alpha.20",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.20",
+    "@jupyterlab/notebook": "^4.0.0-alpha.20",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.20",
+    "@lumino/algorithm": "^2.0.0-rc.0",
+    "@lumino/coreutils": "^2.0.0-rc.0",
+    "@lumino/signaling": "^2.0.0-rc.0"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0-alpha.19",
+    "@jupyterlab/builder": "^4.0.0-alpha.20",
     "rimraf": "~3.0.0",
     "typescript": "~5.0.0-beta"
   },

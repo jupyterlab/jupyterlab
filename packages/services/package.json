@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "7.0.0-alpha.19",
+  "version": "7.0.0-alpha.20",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -47,19 +47,19 @@
   },
   "dependencies": {
     "@jupyter/ydoc": "^0.3.1",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.19",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/statedb": "^4.0.0-alpha.19",
-    "@lumino/coreutils": "^2.0.0-beta.0",
-    "@lumino/disposable": "^2.0.0-beta.1",
-    "@lumino/polling": "^2.0.0-beta.0",
-    "@lumino/properties": "^2.0.0-beta.0",
-    "@lumino/signaling": "^2.0.0-beta.1",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.20",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.20",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.20",
+    "@jupyterlab/statedb": "^4.0.0-alpha.20",
+    "@lumino/coreutils": "^2.0.0-rc.0",
+    "@lumino/disposable": "^2.0.0-rc.0",
+    "@lumino/polling": "^2.0.0-rc.0",
+    "@lumino/properties": "^2.0.0-rc.0",
+    "@lumino/signaling": "^2.0.0-rc.0",
     "ws": "^8.11.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.19",
+    "@jupyterlab/testing": "^4.0.0-alpha.20",
     "@types/jest": "^29.2.0",
     "@types/ws": "^8.5.3",
     "rimraf": "~3.0.0",

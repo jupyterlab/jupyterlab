@@ -1,26 +1,26 @@
 {
   "name": "@jupyterlab/example-filebrowser",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-alpha.20",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/apputils": "^4.0.0-alpha.19",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.19",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/docmanager": "^4.0.0-alpha.19",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/filebrowser": "^4.0.0-alpha.19",
-    "@jupyterlab/fileeditor": "^4.0.0-alpha.19",
-    "@jupyterlab/services": "^7.0.0-alpha.19",
-    "@jupyterlab/theme-light-extension": "^4.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
-    "@lumino/commands": "^2.0.0-beta.1",
-    "@lumino/widgets": "^2.0.0-beta.1"
+    "@jupyterlab/application": "^4.0.0-alpha.20",
+    "@jupyterlab/apputils": "^4.0.0-alpha.20",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.20",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.20",
+    "@jupyterlab/docmanager": "^4.0.0-alpha.20",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.20",
+    "@jupyterlab/filebrowser": "^4.0.0-alpha.20",
+    "@jupyterlab/fileeditor": "^4.0.0-alpha.20",
+    "@jupyterlab/services": "^7.0.0-alpha.20",
+    "@jupyterlab/theme-light-extension": "^4.0.0-alpha.20",
+    "@jupyterlab/translation": "^4.0.0-alpha.20",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.35",
+    "@lumino/commands": "^2.0.0-rc.0",
+    "@lumino/widgets": "^2.0.0-rc.0"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",

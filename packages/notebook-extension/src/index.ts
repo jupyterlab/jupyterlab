@@ -37,6 +37,11 @@ import {
 } from '@jupyterlab/codeeditor';
 import { PageConfig } from '@jupyterlab/coreutils';
 
+import {
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
@@ -86,12 +91,12 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  IFormRendererRegistry,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
   pasteIcon
 } from '@jupyterlab/ui-components';
-import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
@@ -322,7 +327,7 @@ const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory],
+  requires: [INotebookWidgetFactory, IEditorExtensionRegistry],
   optional: [
     ICommandPalette,
     IDefaultFileBrowser,
@@ -332,7 +337,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     IRouter,
     ISettingRegistry,
     ISessionContextDialogs,
-    ITranslator
+    ITranslator,
+    IFormRendererRegistry
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -360,7 +366,13 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
   provides: INotebookTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
-  requires: [INotebookTracker, IEditorServices, IStateDB, ITranslator],
+  requires: [
+    INotebookTracker,
+    IEditorServices,
+    IEditorLanguageRegistry,
+    IStateDB,
+    ITranslator
+  ],
   optional: [IPropertyInspectorProvider]
 };
 
@@ -581,44 +593,61 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       )?.submenu;
     }
 
-    void services.nbconvert.getExportFormats().then(response => {
-      if (response) {
-        const formatLabels: any = Private.getFormatLabels(translator);
+    let formatsInitialized = false;
 
-        // Convert export list to palette and menu items.
-        const formatList = Object.keys(response);
-        formatList.forEach(function (key) {
-          const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
-          const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
-          let args = {
-            format: key,
-            label: labelStr,
-            isPalette: false
-          };
-          if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-            if (exportTo) {
-              exportTo.addItem({
-                command: CommandIDs.exportToFormat,
-                args: args
-              });
-            }
-            if (palette) {
-              args = {
-                format: key,
-                label: labelStr,
-                isPalette: true
-              };
-              const category = trans.__('Notebook Operations');
-              palette.addItem({
-                command: CommandIDs.exportToFormat,
-                category,
-                args
-              });
-            }
-          }
-        });
+    /** Request formats only when a notebook might use them. */
+    const maybeInitializeFormats = async () => {
+      if (formatsInitialized) {
+        return;
       }
-    });
+
+      tracker.widgetAdded.disconnect(maybeInitializeFormats);
+
+      formatsInitialized = true;
+
+      const response = await services.nbconvert.getExportFormats(false);
+
+      if (!response) {
+        return;
+      }
+
+      const formatLabels: any = Private.getFormatLabels(translator);
+
+      // Convert export list to palette and menu items.
+      const formatList = Object.keys(response);
+      formatList.forEach(function (key) {
+        const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+        const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
+        let args = {
+          format: key,
+          label: labelStr,
+          isPalette: false
+        };
+        if (FORMAT_EXCLUDE.indexOf(key) === -1) {
+          if (exportTo) {
+            exportTo.addItem({
+              command: CommandIDs.exportToFormat,
+              args: args
+            });
+          }
+          if (palette) {
+            args = {
+              format: key,
+              label: labelStr,
+              isPalette: true
+            };
+            const category = trans.__('Notebook Operations');
+            palette.addItem({
+              command: CommandIDs.exportToFormat,
+              category,
+              args
+            });
+          }
+        }
+      });
+    };
+
+    tracker.widgetAdded.connect(maybeInitializeFormats);
   }
 };
 
@@ -870,6 +899,7 @@ function activateNotebookTools(
   app: JupyterFrontEnd,
   tracker: INotebookTracker,
   editorServices: IEditorServices,
+  languages: IEditorLanguageRegistry,
   state: IStateDB,
   translator: ITranslator,
   inspectorProvider: IPropertyInspectorProvider | null
@@ -877,11 +907,12 @@ function activateNotebookTools(
   const trans = translator.load('jupyterlab');
   const id = 'notebook-tools';
   const notebookTools = new NotebookTools({ tracker, translator });
-  const activeCellTool = new NotebookTools.ActiveCellTool();
+  const activeCellTool = new NotebookTools.ActiveCellTool(languages);
   const editable = NotebookTools.createEditableToggle(translator);
   const slideShow = NotebookTools.createSlideShowSelector(translator);
   const tocBaseNumbering = NotebookTools.createToCBaseNumbering(translator);
-  const editorFactory = editorServices.factoryService.newInlineEditor;
+  const editorFactory: CodeEditor.Factory = options =>
+    editorServices.factoryService.newInlineEditor(options);
   const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
     editorFactory,
     collapsed: false,
@@ -911,45 +942,55 @@ function activateNotebookTools(
   };
   const optionsMap: { [key: string]: JSONValue } = {};
   optionsMap.None = null;
-  void services.nbconvert.getExportFormats().then(response => {
-    if (response) {
-      /**
-       * The excluded Cell Inspector Raw NbConvert Formats
-       * (returned from nbconvert's export list)
-       */
-      const rawFormatExclude = [
-        'pdf',
-        'slides',
-        'script',
-        'notebook',
-        'custom'
-      ];
-      let optionValueArray: any = [
-        [trans.__('PDF'), 'pdf'],
-        [trans.__('Slides'), 'slides'],
-        [trans.__('Script'), 'script'],
-        [trans.__('Notebook'), 'notebook'],
-        [trans.__('Custom'), 'custom']
-      ];
 
-      // convert exportList to palette and menu items
-      const formatList = Object.keys(response);
-      const formatLabels = Private.getFormatLabels(translator);
-      formatList.forEach(function (key) {
-        if (rawFormatExclude.indexOf(key) === -1) {
-          const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
-          const option = formatLabels[key] ? formatLabels[key] : altOption;
-          const mimeTypeValue = response[key].output_mimetype;
-          optionValueArray.push([option, mimeTypeValue]);
-        }
-      });
-      const nbConvert = NotebookTools.createNBConvertSelector(
-        optionValueArray,
-        translator
-      );
-      notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
+  let formatsInitialized = false;
+
+  async function maybeInitializeFormats() {
+    if (formatsInitialized) {
+      return;
     }
-  });
+
+    tracker.widgetAdded.disconnect(maybeInitializeFormats);
+
+    formatsInitialized = true;
+
+    const response = await services.nbconvert.getExportFormats(false);
+    if (!response) {
+      return;
+    }
+    /**
+     * The excluded Cell Inspector Raw NbConvert Formats
+     * (returned from nbconvert's export list)
+     */
+    const rawFormatExclude = ['pdf', 'slides', 'script', 'notebook', 'custom'];
+    let optionValueArray: any = [
+      [trans.__('PDF'), 'pdf'],
+      [trans.__('Slides'), 'slides'],
+      [trans.__('Script'), 'script'],
+      [trans.__('Notebook'), 'notebook'],
+      [trans.__('Custom'), 'custom']
+    ];
+
+    // convert exportList to palette and menu items
+    const formatList = Object.keys(response);
+    const formatLabels = Private.getFormatLabels(translator);
+    formatList.forEach(function (key) {
+      if (rawFormatExclude.indexOf(key) === -1) {
+        const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
+        const option = formatLabels[key] ? formatLabels[key] : altOption;
+        const mimeTypeValue = response[key].output_mimetype;
+        optionValueArray.push([option, mimeTypeValue]);
+      }
+    });
+    const nbConvert = NotebookTools.createNBConvertSelector(
+      optionValueArray,
+      translator
+    );
+    notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
+  }
+
+  tracker.widgetAdded.connect(maybeInitializeFormats);
+
   notebookTools.title.icon = buildIcon;
   notebookTools.title.caption = trans.__('Notebook Tools');
   notebookTools.id = id;
@@ -1405,6 +1446,7 @@ function activateCopyOutput(
 function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
+  extensions: IEditorExtensionRegistry,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
@@ -1413,7 +1455,8 @@ function activateNotebookHandler(
   router: IRouter | null,
   settingRegistry: ISettingRegistry | null,
   sessionDialogs: ISessionContextDialogs | null,
-  translator: ITranslator | null
+  translator: ITranslator | null,
+  formRegistry: IFormRendererRegistry | null
 ): INotebookTracker {
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab');
@@ -1478,7 +1521,9 @@ function activateNotebookHandler(
         label: trans.__('Auto Close Brackets for All Notebook Cell Types'),
         isToggled: () =>
           ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
-            x => (settings.get(x).composite as JSONObject).autoClosingBrackets
+            x =>
+              ((settings.get(x).composite as JSONObject).autoClosingBrackets ??
+                extensions.baseConfiguration['autoClosingBrackets']) === true
           )
       });
       commands.addCommand(CommandIDs.setSideBySideRatio, {
@@ -1506,6 +1551,26 @@ function activateNotebookHandler(
         kernelShutdown: factory.shutdownOnClose
       });
     });
+
+  if (formRegistry) {
+    const CMRenderer = formRegistry.getRenderer(
+      '@jupyterlab/codemirror-extension:plugin.defaultConfig'
+    );
+    if (CMRenderer) {
+      formRegistry.addRenderer(
+        '@jupyterlab/notebook-extension:tracker.codeCellConfig',
+        CMRenderer
+      );
+      formRegistry.addRenderer(
+        '@jupyterlab/notebook-extension:tracker.markdownCellConfig',
+        CMRenderer
+      );
+      formRegistry.addRenderer(
+        '@jupyterlab/notebook-extension:tracker.rawCellConfig',
+        CMRenderer
+      );
+    }
+  }
 
   // Handle state restoration.
   if (restorer) {

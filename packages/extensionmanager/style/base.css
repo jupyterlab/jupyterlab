@@ -153,6 +153,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-should-be-uninstalled {
@@ -267,7 +268,7 @@
 */
 
 .jp-extensionmanager-disclaimer-disable {
-  background-color: var(--jp-brand-color1) !important;
+  background-color: var(--jp-reject-color-normal) !important;
   color: white !important;
   border: 0;
   background-image: none !important;

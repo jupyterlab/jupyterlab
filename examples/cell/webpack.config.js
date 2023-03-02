@@ -46,7 +46,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       // Needed for various packages using cwd(), like the path polyfill
-      process: { cwd: () => '/' }
+      process: { cwd: () => '/', env: {} }
     })
   ]
 };

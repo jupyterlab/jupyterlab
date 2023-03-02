@@ -2,7 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditor,
+  EditorExtensionRegistry
+} from '@jupyterlab/codemirror';
 import { YFile } from '@jupyter/ydoc';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -49,14 +52,26 @@ class LogWidget extends CodeEditorWrapper {
 
 describe('CodeEditorWrapper', () => {
   let widget: LogWidget;
+  const extensionsRegistry = (() => {
+    const registry = new EditorExtensionRegistry();
+    EditorExtensionRegistry.getDefaultExtensions()
+      .filter(ext => ['lineNumbers'].includes(ext.name))
+      .forEach(ext => {
+        registry.addExtension(ext);
+      });
+    return registry;
+  })();
   const editorFactory = (options: CodeEditor.IOptions) => {
     options.uuid = 'foo';
-    return new LogEditor(options);
+    return new LogEditor({ ...options, extensionsRegistry });
   };
 
   beforeEach(() => {
     const model = new CodeEditor.Model({ sharedModel: new YFile() });
-    widget = new LogWidget({ factory: editorFactory, model });
+    widget = new LogWidget({
+      factory: editorFactory,
+      model
+    });
   });
 
   afterEach(() => {
@@ -78,7 +93,7 @@ describe('CodeEditorWrapper', () => {
 
   describe('#editor', () => {
     it('should be a a code editor', () => {
-      expect(widget.editor.getOption('lineNumbers')).toBe(false);
+      expect(widget.editor.getOption('lineNumbers')).toBe(true);
     });
   });
 
