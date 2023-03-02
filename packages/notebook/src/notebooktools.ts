@@ -61,7 +61,7 @@ export class NotebookTools extends Widget implements INotebookTools {
 
     this.translator = options.translator || nullTranslator;
 
-    this._extendedTools = [];
+    this._tools = [];
 
     this.layout = new PanelLayout();
 
@@ -111,7 +111,7 @@ export class NotebookTools extends Widget implements INotebookTools {
     const rank = options.rank ?? 100;
 
     let section: RankedPanel<NotebookTools.Tool>;
-    const extendedTool = this._extendedTools.find(
+    const extendedTool = this._tools.find(
       extendedTool => extendedTool.section === options.section
     );
     if (extendedTool) section = extendedTool.panel;
@@ -144,7 +144,7 @@ export class NotebookTools extends Widget implements INotebookTools {
 
     if (widget) newSection.addWidget(widget, 0);
 
-    this._extendedTools.push({
+    this._tools.push({
       section: sectionName,
       panel: newSection,
       rank: rank
@@ -275,13 +275,13 @@ export class NotebookTools extends Widget implements INotebookTools {
   }
 
   private *_toolChildren() {
-    for (let extendedTools of this._extendedTools) {
-      yield* extendedTools.panel.children();
+    for (let tool of this._tools) {
+      yield* tool.panel.children();
     }
   }
 
   translator: ITranslator;
-  private _extendedTools: Array<NotebookTools.IExtendedToolsPanel>;
+  private _tools: Array<NotebookTools.IToolPanel>;
   private _tracker: INotebookTracker;
   private _prevActiveCell: ICellModel | null;
   private _prevActiveNotebookModel: INotebookModel | null;
@@ -305,7 +305,7 @@ export namespace NotebookTools {
   /**
    * Interface for an extended panel section.
    */
-  export interface IExtendedToolsPanel {
+  export interface IToolPanel {
     /**
      * The name of the section.
      */
@@ -349,7 +349,7 @@ export namespace NotebookTools {
     /**
      * The section to which the tool should be added.
      */
-    section: 'advanced' | string;
+    section: string;
 
     /**
      * The rank order of the widget among its siblings.
