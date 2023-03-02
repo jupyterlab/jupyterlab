@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingregistry",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-alpha.20",
   "description": "Settings registry for Jupyterlab",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,8 +37,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/nbformat": "^4.0.0-alpha.19",
-    "@jupyterlab/statedb": "^4.0.0-alpha.19",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.20",
+    "@jupyterlab/statedb": "^4.0.0-alpha.20",
     "@lumino/commands": "^2.0.0-rc.0",
     "@lumino/coreutils": "^2.0.0-rc.0",
     "@lumino/disposable": "^2.0.0-rc.0",
@@ -48,7 +48,7 @@
     "json5": "^2.2.3"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.19",
+    "@jupyterlab/testing": "^4.0.0-alpha.20",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typescript": "~5.0.0-beta"
