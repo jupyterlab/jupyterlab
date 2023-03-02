@@ -1,0 +1,19 @@
+.jp-Notebook-footer {
+  height: 10%;
+  color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: var(--jp-cell-padding);
+  margin-left: calc(
+    var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) +
+      var(--jp-cell-padding)
+  );
+  border: var(--jp-border-width);
+}
+
+.jp-Notebook-footer:hover {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border-radius: 0;
+  color: var(--jp-layout-color3);
+}

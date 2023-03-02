@@ -11,22 +11,22 @@ export class NotebookFooter extends Widget {
 
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'dblclick':
-        this.onDblClick(event);
+      case 'click':
+        this.onClick(event);
         break;
     }
   }
 
-  onDblClick(event: any): void {
+  onClick(event: any): void {
     NotebookActions.insertBelow(this.notebook);
   }
 
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this.node.addEventListener('dblclick', this);
+    this.node.addEventListener('click', this);
   }
   protected onBeforeDetach(msg: Message): void {
-    this.node.removeEventListener('dblclick', this);
+    this.node.removeEventListener('click', this);
     super.onBeforeDetach(msg);
   }
 }

@@ -112,13 +112,13 @@ export class NotebookWindowedLayout extends WindowedLayout {
   /**
    * Set Notebook's footer
    *
-   * @param v: Widget | null
+   * @param footer: Widget | null
    */
-  set footer(v: NotebookFooter | null) {
+  set footer(footer: NotebookFooter | null) {
     if (this._footer && this._footer.isAttached) {
       NotebookFooter.detach(this._footer);
     }
-    this._footer = v;
+    this._footer = footer;
     if (this._footer && this.parent?.isAttached) {
       NotebookFooter.attach(this._footer, this.parent!.node);
     }
