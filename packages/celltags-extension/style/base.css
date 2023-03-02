@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-.tag {
+.jp-CellTags-Tag {
   height: 20px;
   border-radius: 10px;
   margin-right: 5px;
@@ -24,15 +24,15 @@
   user-select: none;
 }
 
-.unapplied-tag {
+.jp-CellTags-Unapplied {
   background-color: var(--jp-layout-color2);
 }
 
-.applied-tag {
+.jp-CellTags-Applied {
   background-color: var(--jp-layout-color3);
 }
 
-.add-tag {
+.jp-CellTags-Add {
   white-space: nowrap;
   overflow: hidden;
   border: none;
@@ -43,25 +43,12 @@
   background: var(--jp-layout-color2);
 }
 
-.tag-holder {
+.jp-CellTags-Holder {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.tag-label {
-  flex: 0 0 auto;
-  font-size: var(--jp-ui-font-size1);
-  color: var(--jp-ui-font-color1);
-  padding: 0 12px;
-}
-
-/* Need a more specific selector to override another rule on .jp-NotebookTools children. */
-.jp-NotebookTools .tag-label {
-  margin: 0;
-}
-
-/* Need a more specific selector to override another rule .jp-NotebookTools children. */
-.jp-NotebookTools div.jp-TagTool {
-  margin-top: 4px;
+.jp-CellTags-Empty {
+  width: 4em;
 }

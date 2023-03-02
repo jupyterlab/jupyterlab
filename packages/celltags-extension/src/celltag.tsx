@@ -14,6 +14,35 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 
+/**
+ * The class name added to the cell-tags field.
+ */
+const CELL_TAGS_WIDGET_CLASS = 'jp-CellTags';
+/**
+ * The class name added to each tag element.
+ */
+const CELL_TAGS_ELEMENT_CLASS = 'jp-CellTags-Tag';
+/**
+ * The class name added to each applied tag element.
+ */
+const CELL_TAGS_ELEMENT_APPLIED_CLASS = 'jp-CellTags-Applied';
+/**
+ * The class name added to each unapplied tag element.
+ */
+const CELL_TAGS_ELEMENT_UNAPPLIED_CLASS = 'jp-CellTags-Unapplied';
+/**
+ * The class name added to the tag holder.
+ */
+const CELL_TAGS_HOLDER_CLASS = 'jp-CellTags-Holder';
+/**
+ * The class name added to the add-tag input.
+ */
+const CELL_TAGS_ADD_CLASS = 'jp-CellTags-Add';
+/**
+ * The class name added to an empty input.
+ */
+const CELL_TAGS_EMPTY_CLASS = 'jp-CellTags-Empty';
+
 export class CellTagField {
   constructor(tracker: INotebookTracker, translator?: ITranslator) {
     this._tracker = tracker;
@@ -53,7 +82,8 @@ export class CellTagField {
 
   private _emptyAddTag(target: HTMLInputElement) {
     target.value = '';
-    target.style.width = '49px';
+    target.style.width = '';
+    target.classList.add(CELL_TAGS_EMPTY_CLASS);
   }
 
   private _onAddTagKeyDown(
@@ -88,8 +118,9 @@ export class CellTagField {
     if (!event.target.value) {
       this._emptyAddTag(event.target);
     } else {
+      event.target.classList.remove(CELL_TAGS_EMPTY_CLASS);
       const tmp = document.createElement('span');
-      tmp.className = 'add-tag';
+      tmp.className = CELL_TAGS_ADD_CLASS;
       tmp.textContent = event.target.value;
       // set width to the pixel length of the text
       document.body.appendChild(tmp);
@@ -129,7 +160,7 @@ export class CellTagField {
     const allTags: string[] = this.pullTags();
 
     return (
-      <div className="cell-tags">
+      <div className={CELL_TAGS_WIDGET_CLASS}>
         <div className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem">
           Cell Tags
         </div>
@@ -137,12 +168,14 @@ export class CellTagField {
           allTags.map((tag: string, i: number) => (
             <div
               key={i}
-              className={`tag ${
-                props.formData.includes(tag) ? 'applied-tag' : 'unapplied-tag'
+              className={`${CELL_TAGS_ELEMENT_CLASS} ${
+                props.formData.includes(tag)
+                  ? CELL_TAGS_ELEMENT_APPLIED_CLASS
+                  : CELL_TAGS_ELEMENT_UNAPPLIED_CLASS
               }`}
               onClick={() => this._onTagClick(props, tag)}
             >
-              <div className="tag-holder">
+              <div className={CELL_TAGS_HOLDER_CLASS}>
                 <span>{tag}</span>
                 {props.formData.includes(tag) && (
                   <LabIcon.resolveReact
@@ -158,17 +191,18 @@ export class CellTagField {
               </div>
             </div>
           ))}
-        <div className="tag unapplied-tag">
+        <div
+          className={`${CELL_TAGS_ELEMENT_CLASS} ${CELL_TAGS_ELEMENT_UNAPPLIED_CLASS}`}
+        >
           <div
-            className="tag-holder"
+            className={CELL_TAGS_HOLDER_CLASS}
             onMouseDown={(e: React.MouseEvent<HTMLElement>) =>
               this._onAddTagClick(props, e)
             }
           >
             <input
-              className="add-tag"
+              className={`${CELL_TAGS_ADD_CLASS} ${CELL_TAGS_EMPTY_CLASS}`}
               type="text"
-              style={{ width: '49px' }}
               placeholder={this._trans.__('Add Tag')}
               onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
                 this._onAddTagKeyDown(props, e)

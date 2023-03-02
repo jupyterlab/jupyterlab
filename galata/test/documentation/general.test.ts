@@ -169,11 +169,11 @@ test.describe('General', () => {
     expect(notebookMetadata).not.toContain('"base_numbering"');
 
     // Expect adding tag is reflected in CellMetadataEditor
-    await page.click('.cell-tags .add-tag');
+    await page.click('.jp-CellTags .jp-CellTags-Add');
     await page.keyboard.type('test-tag');
     await page.keyboard.press('Enter');
     await expect(
-      page.locator('.cell-tags .tag-holder span').first()
+      page.locator('.jp-CellTags .jp-CellTags-Holder span').first()
     ).toHaveText('test-tag');
 
     const newCellMetadata = (
@@ -198,7 +198,7 @@ test.describe('General', () => {
 
     // Test the active cell widget
     await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCell-Content pre')
+      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
     ).toHaveText('Raw cell');
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
@@ -206,12 +206,12 @@ test.describe('General', () => {
     await (await page.notebook.getCellInput(1))?.click();
     await page.keyboard.type(' content');
     await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCell-Content pre')
+      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
     ).toHaveText('Raw cell content');
 
     await page.notebook.addCell('code', 'print("test")');
     await expect(
-      page.locator('.jp-ActiveCellTool .jp-ActiveCell-Content pre')
+      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
     ).toHaveText('print("test")');
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')

@@ -12,6 +12,19 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { CodeCellModel, ICellModel, InputPrompt } from '@jupyterlab/cells';
 import { Debouncer } from '@lumino/polling';
 
+/**
+ * The class name added to the ActiveCellTool.
+ */
+const ACTIVE_CELL_TOOL_CLASS = 'jp-ActiveCellTool';
+/**
+ * The class name added to the ActiveCellTool content.
+ */
+const ACTIVE_CELL_TOOL_CONTENT_CLASS = 'jp-ActiveCellTool-Content';
+/**
+ * The class name added to the ActiveCellTool cell content.
+ */
+const ACTIVE_CELL_TOOL_CELL_CONTENT_CLASS = 'jp-ActiveCellTool-CellContent';
+
 namespace Private {
   /**
    * Custom active cell field options.
@@ -41,7 +54,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
     const { languages } = options;
     this._tracker = options.tracker;
 
-    this.addClass('jp-ActiveCellTool');
+    this.addClass(ACTIVE_CELL_TOOL_CLASS);
     this.layout = new PanelLayout();
 
     this._inputPrompt = new InputPrompt();
@@ -49,10 +62,10 @@ export class ActiveCellTool extends NotebookTools.Tool {
 
     // First code line container
     const node = document.createElement('div');
-    node.classList.add('jp-ActiveCell-Content');
+    node.classList.add(ACTIVE_CELL_TOOL_CONTENT_CLASS);
     const container = node.appendChild(document.createElement('div'));
     const editor = container.appendChild(document.createElement('pre'));
-    container.className = 'jp-Cell-Content';
+    container.className = ACTIVE_CELL_TOOL_CELL_CONTENT_CLASS;
     this._editorEl = editor;
     (this.layout as PanelLayout).addWidget(new Widget({ node }));
 
@@ -91,11 +104,7 @@ export class ActiveCellTool extends NotebookTools.Tool {
     this.refresh()
       .then(() => undefined)
       .catch(() => undefined);
-    return (
-      <div className="cell-tool">
-        <div ref={ref => ref?.appendChild(this.node)}></div>
-      </div>
-    );
+    return <div ref={ref => ref?.appendChild(this.node)}></div>;
   }
 
   private async refresh(): Promise<void> {

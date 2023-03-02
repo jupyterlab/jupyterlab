@@ -11,6 +11,9 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ObservableJSON } from '@jupyterlab/observables';
 import { JSONObject } from '@lumino/coreutils';
 
+const CELL_METADATA_EDITOR_CLASS = 'jp-CellMetadataEditor';
+const NOTEBOOK_METADATA_EDITOR_CLASS = 'jp-NotebookMetadataEditor';
+
 namespace Private {
   /**
    * Custom metadata field options.
@@ -72,7 +75,7 @@ export class CellMetadataField extends NotebookTools.MetadataEditorTool {
     this.editor.source?.changed.connect(this._onSourceChanged, this);
 
     return (
-      <div className="cell-metadata-editor">
+      <div className={CELL_METADATA_EDITOR_CLASS}>
         <div ref={ref => ref?.appendChild(this.node)}></div>
       </div>
     );
@@ -115,7 +118,7 @@ export class NotebookMetadataField extends NotebookTools.MetadataEditorTool {
     this.editor.source?.changed.connect(this._onSourceChanged, this);
 
     return (
-      <div className="cell-metadata-editor">
+      <div className={NOTEBOOK_METADATA_EDITOR_CLASS}>
         <div ref={ref => ref?.appendChild(this.node)}></div>
       </div>
     );
