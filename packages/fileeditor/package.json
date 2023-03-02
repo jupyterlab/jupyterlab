@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/fileeditor",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-alpha.20",
   "description": "JupyterLab - Editor Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,17 +40,17 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.19",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.19",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.19",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/documentsearch": "^4.0.0-alpha.19",
-    "@jupyterlab/lsp": "^4.0.0-alpha.19",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.19",
-    "@jupyterlab/toc": "^6.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
+    "@jupyterlab/apputils": "^4.0.0-alpha.20",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.20",
+    "@jupyterlab/codemirror": "^4.0.0-alpha.20",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.20",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.20",
+    "@jupyterlab/documentsearch": "^4.0.0-alpha.20",
+    "@jupyterlab/lsp": "^4.0.0-alpha.20",
+    "@jupyterlab/statusbar": "^4.0.0-alpha.20",
+    "@jupyterlab/toc": "^6.0.0-alpha.20",
+    "@jupyterlab/translation": "^4.0.0-alpha.20",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.35",
     "@lumino/commands": "^2.0.0-rc.0",
     "@lumino/coreutils": "^2.0.0-rc.0",
     "@lumino/messaging": "^2.0.0-rc.0",
@@ -59,7 +59,7 @@
     "regexp-match-indices": "^1.0.2"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.19",
+    "@jupyterlab/testing": "^4.0.0-alpha.20",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
