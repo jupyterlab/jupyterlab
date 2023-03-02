@@ -48,41 +48,18 @@ Vega, Vega-Lite, etc.) and can also display rich kernel output in these formats.
 See :ref:`file-and-output-formats` for more information.
 
 To navigate the user interface, JupyterLab offers :ref:`customizable keyboard
-shortcuts <shortcuts>` and the ability to use :ref:`key maps <editor-keymaps>`
-from vim, emacs, and Sublime Text in the text editor.
+shortcuts <shortcuts>`.
 
 JupyterLab :ref:`extensions <user_extensions>` can customize or enhance any part
 of JupyterLab, including new themes, file editors, and custom components.
 
-JupyterLab is served from the same `server
-<https://jupyter-notebook.readthedocs.io/en/stable/>`__ and uses the same
-`notebook document format <https://nbformat.readthedocs.io/en/latest/>`__ as the
-classic Jupyter Notebook.
+JupyterLab uses the same `notebook document format <https://nbformat.readthedocs.io/en/latest/>`__
+as the classic Jupyter Notebook.
 
-.. toctree::
-   :maxdepth: 2
+.. _classic:
 
-   installation
-   starting
-   issue
-   faq
-   changelog
-
-.. _releases:
-
-JupyterLab Releases
--------------------
-
-Since JupyterLab 0.32 (February 2018), the releases of JupyterLab are suitable
-for general daily use by both Jupyter novices and users experienced with the
-Classic Notebook interface. As of the 1.0 release (June 2019), it is
-additionally ready for extension writers who wish to further customize the
-JupyterLab experience for others. Please review the :ref:`changelog` for
-detailed descriptions of each release.
-
-The extension developer API is evolving, and we also are currently iterating on UI/UX improvements.
-We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`__
-as we evolve towards a stable extension development API.
+What will happen to the Classic Notebook?
+-----------------------------------------
 
 As JupyterLab 4 development continues, and Notebook 7 development follows,
 Notebook 7 will eventually replace the classic Jupyter Notebook.
@@ -92,4 +69,14 @@ As of JupyterLab 4, the Notebook web application, will no longer
 be installed alongside JupyterLab as it is no longer a JupyterLab
 dependency. To find out more about the future of the classic
 Jupyter Notebook in the ecosystem, visit the
-`NbClassic documentation <https://nbclassic.readthedocs.io/en/latest/nbclassic.html#nbclassic-in-the-jupyter-ecosystem>`__.
+`Jupyter Notebook 7 documentation <https://jupyter-notebook.readthedocs.io/en/latest/migrate_to_notebook7.html>`__.
+
+
+.. toctree::
+   :maxdepth: 2
+
+   installation
+   starting
+   issue
+   faq
+   changelog

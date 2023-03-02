@@ -24,7 +24,9 @@ test.describe('Export Notebook', () => {
     await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
 
     await page.click('text=File');
-    await page.click('ul[role="menu"] >> text=Save and Export Notebook As');
+    await page.click(
+      '.lm-Menu ul[role="menu"] >> text=Save and Export Notebook As'
+    );
 
     // Wait for Latex renderer
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');

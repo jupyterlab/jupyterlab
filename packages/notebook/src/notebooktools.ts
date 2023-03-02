@@ -8,7 +8,6 @@ import {
   InputPrompt
 } from '@jupyterlab/cells';
 import { CodeEditor, JSONEditor } from '@jupyterlab/codeeditor';
-import { Mode } from '@jupyterlab/codemirror';
 import * as nbformat from '@jupyterlab/nbformat';
 import { ObservableJSON } from '@jupyterlab/observables';
 import { IMapChange, ISharedText } from '@jupyter/ydoc';
@@ -31,6 +30,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { INotebookTools, INotebookTracker } from './tokens';
+import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 
 class RankedPanel<T extends Widget = Widget> extends Widget {
   constructor() {
@@ -543,7 +543,7 @@ export namespace NotebookTools {
     /**
      * Construct a new active cell tool.
      */
-    constructor() {
+    constructor(languages: IEditorLanguageRegistry) {
       super();
       this.addClass('jp-ActiveCellTool');
       this.layout = new PanelLayout();
@@ -573,12 +573,9 @@ export namespace NotebookTools {
         }
 
         if (this._cellModel) {
-          const spec = await Mode.ensure(
-            Mode.findByMIME(this._cellModel.mimeType) ?? 'text/plain'
-          );
-          Mode.run(
+          await languages.highlight(
             this._cellModel.sharedModel.getSource().split('\n')[0],
-            spec,
+            languages.findByMIME(this._cellModel.mimeType),
             this._editorEl
           );
         }
@@ -757,6 +754,7 @@ export namespace NotebookTools {
         this.editor.source.changed.disconnect(this._onSourceChanged, this);
       }
       const nb = this.notebookTools.activeNotebookPanel?.content;
+      this.editor.source?.dispose();
       this.editor.source = nb?.model?.metadata
         ? new ObservableJSON({ values: nb.model.metadata as JSONObject })
         : null;
@@ -809,6 +807,7 @@ export namespace NotebookTools {
         this.editor.source.changed.disconnect(this._onSourceChanged, this);
       }
       const cell = this.notebookTools.activeCell;
+      this.editor.source?.dispose();
       this.editor.source = cell
         ? new ObservableJSON({ values: cell.model.metadata as JSONObject })
         : null;

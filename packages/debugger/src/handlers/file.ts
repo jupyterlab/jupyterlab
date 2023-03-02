@@ -26,7 +26,10 @@ export class FileHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._fileEditor = options.widget.content;
 
-    this._hasLineNumber = this._fileEditor.editor.getOption('lineNumbers');
+    this._hasLineNumber =
+      (this._fileEditor.editor.getOption('lineNumbers') as
+        | boolean
+        | undefined) ?? false;
     this._editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,
       editorReady: () => Promise.resolve(this._fileEditor.editor),

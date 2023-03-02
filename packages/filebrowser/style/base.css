@@ -23,6 +23,8 @@
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
+  flex-wrap: wrap;
+  row-gap: 12px;
   border-bottom: none;
   height: auto;
   margin: 8px 12px 0;
@@ -70,6 +72,8 @@
   flex: 0 0 auto;
   padding-left: 0;
   padding-right: 2px;
+  align-items: center;
+  height: unset;
 }
 
 .jp-FileBrowser-toolbar > .jp-Toolbar-item .jp-ToolbarButtonComponent {
@@ -92,10 +96,8 @@
   display: none;
 }
 
-.jp-FileBrowser-filterBox {
-  padding: 0;
-  flex: 0 0 auto;
-  margin: 8px 12px 0;
+.jp-FileSize-hidden {
+  display: none;
 }
 
 .jp-FileBrowser .lm-AccordionPanel > h3:first-child {
@@ -145,6 +147,12 @@
 
 .jp-DirListing-headerItem.jp-id-modified {
   flex: 0 0 112px;
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+  text-align: right;
+}
+
+.jp-DirListing-headerItem.jp-id-filesize {
+  flex: 0 0 75px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
 }
@@ -275,6 +283,11 @@
 
 .jp-DirListing-itemModified {
   flex: 0 0 125px;
+  text-align: right;
+}
+
+.jp-DirListing-itemFileSize {
+  flex: 0 0 90px;
   text-align: right;
 }
 

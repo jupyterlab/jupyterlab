@@ -533,7 +533,9 @@ describe('@jupyter/notebook', () => {
 
       describe('#createCodeCell({})', () => {
         it('should create a `CodeCell`', () => {
-          const contentFactory = new StaticNotebook.ContentFactory();
+          const contentFactory = new StaticNotebook.ContentFactory({
+            editorFactory: utils.editorFactory
+          });
           const model = new CodeCellModel();
           const codeOptions = { model, rendermime, contentFactory };
           const widget = contentFactory.createCodeCell(codeOptions);
@@ -543,7 +545,9 @@ describe('@jupyter/notebook', () => {
 
       describe('#createMarkdownCell({})', () => {
         it('should create a `MarkdownCell`', () => {
-          const contentFactory = new StaticNotebook.ContentFactory();
+          const contentFactory = new StaticNotebook.ContentFactory({
+            editorFactory: utils.editorFactory
+          });
           const model = new MarkdownCellModel();
           const mdOptions = { model, rendermime, contentFactory };
           const widget = contentFactory.createMarkdownCell(mdOptions);
@@ -553,7 +557,9 @@ describe('@jupyter/notebook', () => {
 
       describe('#createRawCell()', () => {
         it('should create a `RawCell`', () => {
-          const contentFactory = new StaticNotebook.ContentFactory();
+          const contentFactory = new StaticNotebook.ContentFactory({
+            editorFactory: utils.editorFactory
+          });
           const model = new RawCellModel();
           const rawOptions = { model, contentFactory };
           const widget = contentFactory.createRawCell(rawOptions);

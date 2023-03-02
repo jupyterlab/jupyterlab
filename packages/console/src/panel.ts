@@ -51,8 +51,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     this.translator = translator || nullTranslator;
     const trans = this.translator.load('jupyterlab');
 
-    const contentFactory = (this.contentFactory =
-      options.contentFactory || ConsolePanel.defaultContentFactory);
+    const contentFactory = (this.contentFactory = options.contentFactory);
     const count = Private.count++;
     if (!path) {
       path = URLExt.join(basePath || '', `console-${count}-${UUID.uuid4()}`);
@@ -272,11 +271,6 @@ export namespace ConsolePanel {
      */
     export interface IOptions extends CodeConsole.ContentFactory.IOptions {}
   }
-
-  /**
-   * A default code console content factory.
-   */
-  export const defaultContentFactory: IContentFactory = new ContentFactory();
 
   /**
    * The console renderer token.

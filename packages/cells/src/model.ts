@@ -22,6 +22,7 @@ import {
   createMutex,
   createStandaloneCell,
   IMapChange,
+  ISharedAttachmentsCell,
   ISharedCell,
   ISharedCodeCell,
   ISharedMarkdownCell,
@@ -290,6 +291,18 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
   }
 
   /**
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.sharedModel.changed.disconnect(this.onGenericChange, this);
+    this.sharedModel.metadataChanged.disconnect(this._onMetadataChanged, this);
+    super.dispose();
+  }
+
+  /**
    * Handle a change to the trusted state.
    *
    * The default implementation is a no-op.
@@ -398,11 +411,15 @@ export abstract class AttachmentsCellModel extends CellModel {
   constructor(options: AttachmentsCellModel.IOptions<ISharedCell>) {
     super(options);
     const factory =
-      options.contentFactory || AttachmentsCellModel.defaultContentFactory;
-    this._attachments = factory.createAttachmentsModel({
-      sharedModel: this.sharedModel as ISharedMarkdownCell | ISharedRawCell
-    });
+      options.contentFactory ?? AttachmentsCellModel.defaultContentFactory;
+    const values = (
+      this.sharedModel as ISharedAttachmentsCell
+    ).getAttachments();
+    this._attachments = factory.createAttachmentsModel({ values });
     this._attachments.stateChanged.connect(this.onGenericChange, this);
+    this._attachments.changed.connect(this._onAttachmentsChange, this);
+
+    this.sharedModel.changed.connect(this._onSharedModelChanged, this);
   }
 
   /**
@@ -413,10 +430,50 @@ export abstract class AttachmentsCellModel extends CellModel {
   }
 
   /**
+   * Dispose of the resources held by the model.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._attachments.stateChanged.disconnect(this.onGenericChange, this);
+    this._attachments.changed.disconnect(this._onAttachmentsChange, this);
+    this._attachments.dispose();
+    this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
+    super.dispose();
+  }
+
+  /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IRawCell | nbformat.IMarkdownCell {
     return super.toJSON() as nbformat.IRawCell | nbformat.IMarkdownCell;
+  }
+
+  /**
+   * Handle a change to the cell outputs modelDB and reflect it in the shared model.
+   */
+  private _onAttachmentsChange(
+    sender: IAttachmentsModel,
+    event: IAttachmentsModel.ChangedArgs
+  ): void {
+    const cell = this.sharedModel as ISharedAttachmentsCell;
+    globalModelDBMutex(() => cell.setAttachments(sender.toJSON()));
+  }
+
+  /**
+   * Handle a change to the code cell value.
+   */
+  private _onSharedModelChanged(
+    slot: ISharedAttachmentsCell,
+    change: CellChange
+  ): void {
+    if (change.attachmentsChange) {
+      const cell = this.sharedModel as ISharedAttachmentsCell;
+      globalModelDBMutex(() =>
+        this._attachments.fromJSON(cell.getAttachments() ?? {})
+      );
+    }
   }
 
   private _attachments: IAttachmentsModel;
@@ -615,6 +672,9 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     if (this.isDisposed) {
       return;
     }
+    this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
+    this._outputs.changed.disconnect(this.onGenericChange, this);
+    this._outputs.changed.disconnect(this.onOutputsChange, this);
     this._outputs.dispose();
     this._outputs = null!;
     super.dispose();

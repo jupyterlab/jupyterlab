@@ -258,7 +258,7 @@ about 7 minutes again.
 Setting up a local development environment
 ------------------------------------------
 This section explains how to set up a local development environment. We assume you use GNU/Linux,
-Mac OS X, or Windows Subsystem for Linux.
+macOS, or Windows Subsystem for Linux.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -268,22 +268,13 @@ development version requires Node.js version 18+, as defined in the
 ``engines`` specification in
 `dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/master/dev_mode/package.json>`__.
 
-If you use ``conda``, you can get it with:
+If you use `conda <https://conda.io>`__, you can get it with:
 
 .. code:: bash
 
    conda install -c conda-forge nodejs
 
-The canvas node package is not properly packaged for Mac OS X with ARM architectures (M1 and M2).
-To build JupyterLab on such platforms, you need a few additional packages, and to specify the pkg-config
-path:
-
-.. code:: bash
-
-   conda install -c conda-forge pkg-config pango libpng cairo jpeg giflib librsvg glib
-   export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
-
-If you use `Homebrew <https://brew.sh>`__ on Mac OS X:
+If you use `Homebrew <https://brew.sh>`__ on macOS:
 
 .. code:: bash
 
@@ -297,6 +288,24 @@ To check which version of Node.js is installed:
 .. code:: bash
 
    node -v
+
+.. _Installing Node.js and jlpm section:
+
+The canvas node package is not properly packaged for macOS with ARM architectures (M1 and M2).
+To build JupyterLab on such platforms, you need a few additional packages:
+
+With conda:
+
+.. code:: bash
+
+   conda install -c conda-forge pkg-config pango libpng cairo jpeg giflib librsvg glib pixman
+   export PKG_CONFIG_PATH=$CONDA_PREFIX/lib/pkgconfig
+
+With Homebrew:
+
+.. code:: bash
+
+   brew install pkg-config cairo pango libpng jpeg giflib librsvg
 
 Using automation to set up a local development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -350,11 +359,8 @@ Notes:
 -  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
    returned exit status 127 while in binding.gyp`` while running the
    ``pip install`` command above, you may be missing packages required
-   by ``canvas``. On macOS with Homebrew, you can add these packages by
-   running
-   ``brew install pkg-config cairo pango libpng jpeg giflib librsvg``.
-   If you are using mamba or conda, you can install the necessary packages
-   with `conda install -c conda-forge pkg-config glib pango pixman`.
+   by ``canvas``. Please see `Installing Node.js and jlpm section`_
+   of this guide for instructions on how to install these packages.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
    ``yarn`` installed already, you can use the ``yarn`` command when
@@ -443,6 +449,14 @@ appropriate package folder:
     ``--runInBand`` option will run all tests serially in the current process.
     We advice to use it as some tests are spinning a Jupyter Server that does not
     like to be executed in parallel.
+
+If you see a test run fail with ``Library not loaded: '@rpath/libpixman-1.0.dylib'``
+(or a different library, such as ``libcairo.2.dylib`` for Mac computers with Apple
+Silicon chips) while running the
+``jlpm test`` command above, you may be missing packages required
+by ``canvas``. Please see
+`Installing Node.js and jlpm section`_
+of this guide for instructions on how to install these packages.
 
 We use ``jest`` for all tests, so standard ``jest`` workflows apply.
 Tests can be debugged in either VSCode or Chrome. It can help to add an

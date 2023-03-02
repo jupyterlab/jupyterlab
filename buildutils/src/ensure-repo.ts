@@ -94,7 +94,8 @@ const UNUSED: Dict<string[]> = {
     '@codemirror/lang-rust',
     '@codemirror/lang-sql',
     '@codemirror/lang-wast',
-    '@codemirror/lang-xml'
+    '@codemirror/lang-xml',
+    '@codemirror/legacy-modes'
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
@@ -203,7 +204,6 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/console-extension',
     '@jupyterlab/csvviewer',
     '@jupyterlab/documentsearch',
-    '@jupyterlab/docprovider',
     '@jupyterlab/csvviewer-extension',
     '@jupyterlab/debugger',
     '@jupyterlab/debugger-extension',
@@ -256,10 +256,6 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/tooltip-extension',
     '@jupyterlab/translation-extension',
     '@jupyterlab/ui-components-extension',
-    '@jupyterlab/collaboration',
-    '@jupyterlab/collaboration-extension',
-    '@jupyterlab/vdom',
-    '@jupyterlab/vdom-extension',
     '@jupyterlab/vega5-extension'
   ],
   '@jupyterlab/notebook': ['@jupyterlab/application'],

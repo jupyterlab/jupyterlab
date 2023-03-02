@@ -4,7 +4,7 @@
 import { ISessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 import { ConsoleHistory } from '@jupyterlab/console';
 import { KernelMessage } from '@jupyterlab/services';
 import { createStandaloneCell } from '@jupyter/ydoc';
@@ -167,7 +167,11 @@ describe('console/history', () => {
           sharedModel: createStandaloneCell({ cell_type: 'code' })
         });
         const host = document.createElement('div');
-        const editor = new CodeMirrorEditor({ model, host });
+        const editor = new CodeMirrorEditor({
+          model,
+          host,
+          extensions: [ybinding((model.sharedModel as any).ysource)]
+        });
         history.editor = editor;
         model.sharedModel.setSource('foo');
         expect(history.methods).toEqual(
@@ -186,7 +190,11 @@ describe('console/history', () => {
         const model = new CodeEditor.Model({
           sharedModel: createStandaloneCell({ cell_type: 'code' })
         });
-        const editor = new CodeMirrorEditor({ model, host });
+        const editor = new CodeMirrorEditor({
+          model,
+          host,
+          extensions: [ybinding((model.sharedModel as any).ysource)]
+        });
         history.editor = editor;
         history.push('foo');
         const promise = signalToPromise(editor.model.sharedModel.changed);

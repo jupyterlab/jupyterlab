@@ -35,6 +35,52 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
   });
 
+  test('Typing in search box', async ({ page }) => {
+    // Check against React being too eager with controling state of input box
+    await page.keyboard.press('Control+f');
+
+    await page.fill('[placeholder="Find"]', '14');
+    await page.press('[placeholder="Find"]', 'ArrowLeft');
+    await page.type('[placeholder="Find"]', '2');
+    await page.type('[placeholder="Find"]', '3');
+
+    await expect(page.locator('[placeholder="Find"]')).toHaveValue('1234');
+  });
+
+  test('RegExp parsing failure', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+
+    await page.fill('[placeholder="Find"]', 'test\\');
+
+    await page.click('button[title="Use Regular Expression"]');
+
+    await expect(page.locator('.jp-DocumentSearch-regex-error')).toBeVisible();
+
+    const overlay = page.locator('.jp-DocumentSearch-overlay');
+
+    expect(await overlay.screenshot()).toMatchSnapshot(
+      'regexp-parsing-failure.png'
+    );
+  });
+
+  test('Multi-line search', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+
+    await page.fill(
+      '[placeholder="Find"]',
+      'one notebook withr\n\n\nThis is a multi'
+    );
+
+    await page.waitForSelector('text=1/1');
+
+    // Show replace buttons to check for visual regressions
+    await page.click('button[title="Toggle Replace"]');
+    await page.fill('[placeholder="Replace"]', 'line1\nline2');
+
+    const overlay = page.locator('.jp-DocumentSearch-overlay');
+    expect(await overlay.screenshot()).toMatchSnapshot('multi-line-search.png');
+  });
+
   test('Search selected', async ({ page }) => {
     // Enter first cell
     await page.notebook.enterCellEditingMode(0);
@@ -50,7 +96,7 @@ test.describe('Notebook Search', () => {
 
     // Expect it to be populated with first line
     await page.waitForSelector(
-      '[placeholder="Find"][value="Test with one notebook withr"]'
+      '[placeholder="Find"] >> text="Test with one notebook withr"'
     );
 
     // Expect both matches to be found (xfail)

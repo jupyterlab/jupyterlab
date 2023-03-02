@@ -48,22 +48,23 @@ export class RawEditor extends SplitPanel {
 
     // Create read-only defaults editor.
     const defaults = (this._defaults = new CodeEditorWrapper({
-      model: new CodeEditor.Model(),
+      editorOptions: {
+        config: { readOnly: true }
+      },
+      model: new CodeEditor.Model({ mimeType: 'text/javascript' }),
       factory: editorFactory
     }));
 
-    defaults.editor.model.mimeType = 'text/javascript';
-    defaults.editor.setOption('readOnly', true);
-
     // Create read-write user settings editor.
     const user = (this._user = new CodeEditorWrapper({
-      model: new CodeEditor.Model(),
-      factory: editorFactory,
-      config: { lineNumbers: true }
+      editorOptions: {
+        config: { lineNumbers: true }
+      },
+      model: new CodeEditor.Model({ mimeType: 'text/javascript' }),
+      factory: editorFactory
     }));
 
     user.addClass(USER_CLASS);
-    user.editor.model.mimeType = 'text/javascript';
     user.editor.model.sharedModel.changed.connect(this._onTextChanged, this);
 
     // Create and set up an inspector.

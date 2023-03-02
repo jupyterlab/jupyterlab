@@ -74,6 +74,11 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
  */
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
+/**
+ * The overlay tha can be clicked to switch between output scrolling modes.
+ */
+const OUTPUT_PROMPT_OVERLAY = 'jp-OutputArea-promptOverlay';
+
 /** ****************************************************************************
  * OutputArea
  ******************************************************************************/
@@ -96,7 +101,7 @@ export class OutputArea extends Widget {
     super.layout = new PanelLayout();
     this.addClass(OUTPUT_AREA_CLASS);
     this.contentFactory =
-      options.contentFactory || OutputArea.defaultContentFactory;
+      options.contentFactory ?? OutputArea.defaultContentFactory;
     this.rendermime = options.rendermime;
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
@@ -112,6 +117,9 @@ export class OutputArea extends Widget {
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
+    if (options.promptOverlay) {
+      this._addPromptOverlay();
+    }
   }
 
   /**
@@ -292,6 +300,27 @@ export class OutputArea extends Widget {
     this.outputLengthChanged.emit(
       Math.min(this.model.length, this._maxNumberOutputs)
     );
+  }
+
+  /**
+   * Emitted when user requests toggling of the output scrolling mode.
+   */
+  get toggleScrolling(): ISignal<OutputArea, void> {
+    return this._toggleScrolling;
+  }
+
+  /**
+   * Add overlay allowing to toggle scrolling.
+   */
+  private _addPromptOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = OUTPUT_PROMPT_OVERLAY;
+    const trans = this._translator.load('jupyterlab');
+    overlay.title = trans.__('Toggle output scrolling');
+    overlay.addEventListener('click', () => {
+      this._toggleScrolling.emit();
+    });
+    this.node.appendChild(overlay);
   }
 
   /**
@@ -693,6 +722,7 @@ export class OutputArea extends Widget {
   private _maxNumberOutputs: number;
   private _minHeightTimeout: number | null = null;
   private _inputRequested = new Signal<OutputArea, void>(this);
+  private _toggleScrolling = new Signal<OutputArea, void>(this);
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
@@ -749,6 +779,11 @@ export namespace OutputArea {
      * The maximum number of output items to display on top and bottom of cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Whether to show prompt overlay emitting `toggleScrolling` signal.
+     */
+    promptOverlay?: boolean;
 
     /**
      * Translator
@@ -909,13 +944,20 @@ export interface IStdin extends Widget {
 export class Stdin extends Widget implements IStdin {
   private static _history: string[] = [];
 
+  private static _historyIx(ix: number): number | undefined {
+    const len = Stdin._history.length;
+    // wrap nonpositive ix to nonnegative ix
+    if (ix <= 0) {
+      return len + ix;
+    }
+  }
+
   private static _historyAt(ix: number): string | undefined {
     const len = Stdin._history.length;
-    // interpret negative ix exactly like Array.at
-    ix = ix < 0 ? len + ix : ix;
+    const ixpos = Stdin._historyIx(ix);
 
-    if (ix < len) {
-      return Stdin._history[ix];
+    if (ixpos !== undefined && ixpos < len) {
+      return Stdin._history[ixpos];
     }
     // return undefined if ix is out of bounds
   }
@@ -928,6 +970,46 @@ export class Stdin extends Widget implements IStdin {
     }
   }
 
+  private static _historySearch(
+    pat: string,
+    ix: number,
+    reverse = true
+  ): number | undefined {
+    const len = Stdin._history.length;
+    const ixpos = Stdin._historyIx(ix);
+    const substrFound = (x: string) => x.search(pat) !== -1;
+
+    if (ixpos === undefined) {
+      return;
+    }
+
+    if (reverse) {
+      if (ixpos === 0) {
+        // reverse search fails if already at start of history
+        return;
+      }
+
+      const ixFound = (Stdin._history.slice(0, ixpos) as any).findLastIndex(
+        substrFound
+      );
+      if (ixFound !== -1) {
+        // wrap ix to negative
+        return ixFound - len;
+      }
+    } else {
+      if (ixpos >= len - 1) {
+        // forward search fails if already at end of history
+        return;
+      }
+
+      const ixFound = Stdin._history.slice(ixpos + 1).findIndex(substrFound);
+      if (ixFound !== -1) {
+        // wrap ix to negative and adjust for slice
+        return ixFound - len + ixpos + 1;
+      }
+    }
+  }
+
   /**
    * Construct a new input widget.
    */
@@ -936,15 +1018,19 @@ export class Stdin extends Widget implements IStdin {
       node: Private.createInputWidgetNode(options.prompt, options.password)
     });
     this.addClass(STDIN_CLASS);
-    this._historyIndex = 0;
-    this._input = this.node.getElementsByTagName('input')[0];
-    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
-    // make users aware of the line history feature
-    this._input.placeholder = this._trans.__('↑↓ for history');
     this._future = options.future;
+    this._historyIndex = 0;
+    this._historyPat = '';
     this._parentHeader = options.parent_header;
-    this._value = options.prompt + ' ';
     this._password = options.password;
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    this._value = options.prompt + ' ';
+
+    this._input = this.node.getElementsByTagName('input')[0];
+    // make users aware of the line history feature
+    this._input.placeholder = this._trans.__(
+      '↑↓ for history. Search history with c-↑/c-↓'
+    );
   }
 
   /**
@@ -966,30 +1052,11 @@ export class Stdin extends Widget implements IStdin {
    */
   handleEvent(event: KeyboardEvent): void {
     const input = this._input;
+
     if (event.type === 'keydown') {
-      if (event.key === 'ArrowUp') {
-        const historyLine = Stdin._historyAt(this._historyIndex - 1);
-        if (historyLine) {
-          if (this._historyIndex === 0) {
-            this._valueCache = input.value;
-          }
-          input.value = historyLine;
-          --this._historyIndex;
-        }
-      } else if (event.key === 'ArrowDown') {
-        if (this._historyIndex === 0) {
-          // do nothing
-        } else if (this._historyIndex === -1) {
-          input.value = this._valueCache;
-          ++this._historyIndex;
-        } else {
-          const historyLine = Stdin._historyAt(this._historyIndex + 1);
-          if (historyLine) {
-            input.value = historyLine;
-            ++this._historyIndex;
-          }
-        }
-      } else if (event.key === 'Enter') {
+      if (event.key === 'Enter') {
+        this.resetSearch();
+
         this._future.sendInputReply(
           {
             status: 'ok',
@@ -1004,8 +1071,69 @@ export class Stdin extends Widget implements IStdin {
           Stdin._historyPush(input.value);
         }
         this._promise.resolve(void 0);
+      } else if (event.key === 'Escape') {
+        // currently this gets clobbered by the documentsearch:end command at the notebook level
+        this.resetSearch();
+        input.blur();
+      } else if (
+        event.ctrlKey &&
+        (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+      ) {
+        // if _historyPat is blank, use input as search pattern. Otherwise, reuse the current search pattern
+        if (this._historyPat === '') {
+          this._historyPat = input.value;
+        }
+
+        const reverse = event.key === 'ArrowUp';
+        const searchHistoryIx = Stdin._historySearch(
+          this._historyPat,
+          this._historyIndex,
+          reverse
+        );
+
+        if (searchHistoryIx !== undefined) {
+          const historyLine = Stdin._historyAt(searchHistoryIx);
+          if (historyLine !== undefined) {
+            if (this._historyIndex === 0) {
+              this._valueCache = input.value;
+            }
+
+            input.value = historyLine;
+            this._historyIndex = searchHistoryIx;
+          }
+        }
+      } else if (event.key === 'ArrowUp') {
+        this.resetSearch();
+
+        const historyLine = Stdin._historyAt(this._historyIndex - 1);
+        if (historyLine) {
+          if (this._historyIndex === 0) {
+            this._valueCache = input.value;
+          }
+          input.value = historyLine;
+          --this._historyIndex;
+        }
+      } else if (event.key === 'ArrowDown') {
+        this.resetSearch();
+
+        if (this._historyIndex === 0) {
+          // do nothing
+        } else if (this._historyIndex === -1) {
+          input.value = this._valueCache;
+          ++this._historyIndex;
+        } else {
+          const historyLine = Stdin._historyAt(this._historyIndex + 1);
+          if (historyLine) {
+            input.value = historyLine;
+            ++this._historyIndex;
+          }
+        }
       }
     }
+  }
+
+  protected resetSearch(): void {
+    this._historyPat = '';
   }
 
   /**
@@ -1029,6 +1157,7 @@ export class Stdin extends Widget implements IStdin {
   private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
   private _password: boolean;
   private _promise = new PromiseDelegate<void>();
+  private _historyPat: string;
   private _trans: TranslationBundle;
   private _value: string;
   private _valueCache: string;

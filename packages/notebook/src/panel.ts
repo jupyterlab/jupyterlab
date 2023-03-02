@@ -301,11 +301,6 @@ export namespace NotebookPanel {
   }
 
   /**
-   * Default content factory for the notebook panel.
-   */
-  export const defaultContentFactory: ContentFactory = new ContentFactory();
-
-  /**
    * The notebook renderer token.
    */
   export const IContentFactory = new Token<IContentFactory>(

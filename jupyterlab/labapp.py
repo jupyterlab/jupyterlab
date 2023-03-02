@@ -6,6 +6,7 @@
 import dataclasses
 import json
 import os
+import sys
 
 from jupyter_core.application import JupyterApp, NoStart, base_aliases, base_flags
 from jupyter_server._version import version_info as jpserver_version_info
@@ -297,9 +298,9 @@ class LabPathApp(JupyterApp):
     """
 
     def start(self):
-        print("Application directory:   %s" % get_app_dir())  # noqa
-        print("User Settings directory: %s" % get_user_settings_dir())  # noqa
-        print("Workspaces directory: %s" % get_workspaces_dir())  # noqa
+        print("Application directory:   %s" % get_app_dir())
+        print("User Settings directory: %s" % get_user_settings_dir())
+        print("Workspaces directory: %s" % get_workspaces_dir())
 
 
 class LabWorkspaceExportApp(WorkspaceExportApp):
@@ -688,7 +689,6 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         page_config["token"] = self.serverapp.token
         page_config["exposeAppInBrowser"] = self.expose_app_in_browser
         page_config["quitButton"] = self.serverapp.quit_button
-        page_config["collaborative"] = self.collaborative
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
@@ -840,6 +840,19 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     def initialize(self, argv=None):
         """Subclass because the ExtensionApp.initialize() method does not take arguments"""
         super().initialize()
+        if self.collaborative:
+            try:
+                import jupyter_collaboration  # noqa
+            except ImportError:
+                self.log.critical(
+                    """
+To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
+You can install it using pip for example:
+
+  python -m pip install jupyter_collaboration
+"""
+                )
+                sys.exit(1)
 
 
 # -----------------------------------------------------------------------------

@@ -256,7 +256,8 @@ export class SearchDocumentModel
    */
   async replaceAllMatches(): Promise<void> {
     await this.searchProvider.replaceAllMatches(this._replaceText, {
-      preserveCase: this.preserveCase
+      preserveCase: this.preserveCase,
+      regularExpression: this.useRegex
     });
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
@@ -267,7 +268,8 @@ export class SearchDocumentModel
    */
   async replaceCurrentMatch(): Promise<void> {
     await this.searchProvider.replaceCurrentMatch(this._replaceText, true, {
-      preserveCase: this.preserveCase
+      preserveCase: this.preserveCase,
+      regularExpression: this.useRegex
     });
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
@@ -316,7 +318,7 @@ export class SearchDocumentModel
         this.stateChanged.emit();
       }
     } catch (reason) {
-      this._parsingError = reason;
+      this._parsingError = reason.toString();
       this.stateChanged.emit();
       console.error(
         `Failed to parse expression ${this.searchExpression}`,
@@ -352,7 +354,7 @@ namespace Private {
     regex: boolean,
     wholeWords: boolean
   ): RegExp | null {
-    const flag = caseSensitive ? 'g' : 'gi';
+    const flag = caseSensitive ? 'gm' : 'gim';
     // escape regex characters in query if its a string search
     let queryText = regex
       ? queryString

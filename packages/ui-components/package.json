@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/ui-components",
-  "version": "4.0.0-alpha.33",
+  "version": "4.0.0-alpha.34",
   "description": "JupyterLab - UI components written in React",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -24,7 +24,8 @@
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -40,20 +41,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.18",
-    "@jupyterlab/observables": "^5.0.0-alpha.18",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.18",
-    "@jupyterlab/translation": "^4.0.0-alpha.18",
-    "@lumino/algorithm": "^2.0.0-alpha.6",
-    "@lumino/commands": "^2.0.0-alpha.6",
-    "@lumino/coreutils": "^2.0.0-alpha.6",
-    "@lumino/disposable": "^2.0.0-alpha.6",
-    "@lumino/messaging": "^2.0.0-alpha.6",
-    "@lumino/polling": "^2.0.0-alpha.6",
-    "@lumino/properties": "^2.0.0-alpha.6",
-    "@lumino/signaling": "^2.0.0-alpha.6",
-    "@lumino/virtualdom": "^2.0.0-alpha.6",
-    "@lumino/widgets": "^2.0.0-alpha.6",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
+    "@jupyterlab/observables": "^5.0.0-alpha.19",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.19",
+    "@jupyterlab/translation": "^4.0.0-alpha.19",
+    "@lumino/algorithm": "^2.0.0-rc.0",
+    "@lumino/commands": "^2.0.0-rc.0",
+    "@lumino/coreutils": "^2.0.0-rc.0",
+    "@lumino/disposable": "^2.0.0-rc.0",
+    "@lumino/messaging": "^2.0.0-rc.0",
+    "@lumino/polling": "^2.0.0-rc.0",
+    "@lumino/properties": "^2.0.0-rc.0",
+    "@lumino/signaling": "^2.0.0-rc.0",
+    "@lumino/virtualdom": "^2.0.0-rc.0",
+    "@lumino/widgets": "^2.0.0-rc.0",
     "@rjsf/core": "^5.1.0",
     "@rjsf/utils": "^5.1.0",
     "react": "^18.2.0",
@@ -61,13 +62,13 @@
     "typestyle": "^2.0.4"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.18",
+    "@jupyterlab/testing": "^4.0.0-alpha.19",
     "@types/jest": "^29.2.0",
     "@types/react": "^18.0.26",
     "rimraf": "~3.0.0",
     "svgo": "^3.0.1",
-    "typedoc": "~0.22.10",
-    "typescript": "~4.7.3"
+    "typedoc": "~0.23.25",
+    "typescript": "~5.0.0-beta"
   },
   "peerDependencies": {
     "react": "^18.2.0"

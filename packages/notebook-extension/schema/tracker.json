@@ -647,98 +647,6 @@
   "title": "Notebook",
   "description": "Notebook settings.",
   "definitions": {
-    "editorConfig": {
-      "properties": {
-        "autoClosingBrackets": {
-          "type": "boolean",
-          "default": false,
-          "title": "Auto Closing Brackets"
-        },
-        "cursorBlinkRate": {
-          "type": "number",
-          "title": "Cursor Blinking Rate",
-          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely.",
-          "default": 530
-        },
-        "fontFamily": {
-          "type": ["string", "null"],
-          "default": null,
-          "title": "Font Family"
-        },
-        "fontSize": {
-          "type": ["integer", "null"],
-          "minimum": 1,
-          "maximum": 100,
-          "default": null,
-          "title": "Font Size"
-        },
-        "lineHeight": {
-          "type": ["number", "null"],
-          "default": null,
-          "title": "Line Height"
-        },
-        "lineNumbers": {
-          "type": "boolean",
-          "default": false,
-          "title": "Show Line Numbers"
-        },
-        "lineWrap": {
-          "type": "string",
-          "enum": ["off", "on", "wordWrapColumn", "bounded"],
-          "title": "Line Wrap"
-        },
-        "matchBrackets": {
-          "type": "boolean",
-          "title": "Match Brackets"
-        },
-        "readOnly": {
-          "type": "boolean",
-          "default": false,
-          "title": "Read Only"
-        },
-        "insertSpaces": {
-          "type": "boolean",
-          "default": true,
-          "title": "Insert Spaces"
-        },
-        "tabSize": {
-          "type": "number",
-          "default": 4,
-          "title": "Tab Size"
-        },
-        "wordWrapColumn": {
-          "type": "integer",
-          "default": 80,
-          "title": "Word Wrap Column"
-        },
-        "rulers": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "title": "Rulers",
-          "default": []
-        },
-        "codeFolding": {
-          "type": "boolean",
-          "default": false,
-          "title": "Code Folding"
-        },
-        "lineWiseCopyCut": {
-          "type": "boolean",
-          "default": true,
-          "title": "Line-wise Ctrl-C",
-          "description": "When enabled, which is the default, doing copy or cut when there is no selection will copy or cut the whole lines that have cursors on them."
-        },
-        "showTrailingSpace": {
-          "type": "boolean",
-          "default": false,
-          "title": "Show Trailing Space"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "kernelStatusConfig": {
       "type": "object",
       "additionalProperties": false,
@@ -760,25 +668,11 @@
   "properties": {
     "codeCellConfig": {
       "title": "Code Cell Configuration",
-      "description": "The configuration for all code cells.",
-      "$ref": "#/definitions/editorConfig",
+      "description": "The configuration for all code cells; it will override the CodeMirror default configuration.",
+      "type": "object",
       "default": {
-        "autoClosingBrackets": false,
-        "cursorBlinkRate": 530,
-        "fontFamily": null,
-        "fontSize": null,
-        "lineHeight": null,
         "lineNumbers": false,
-        "lineWrap": "off",
-        "matchBrackets": true,
-        "readOnly": false,
-        "insertSpaces": true,
-        "tabSize": 4,
-        "wordWrapColumn": 80,
-        "rulers": [],
-        "codeFolding": false,
-        "lineWiseCopyCut": true,
-        "showTrailingSpace": false
+        "lineWrap": false
       }
     },
     "defaultCell": {
@@ -796,48 +690,20 @@
     },
     "markdownCellConfig": {
       "title": "Markdown Cell Configuration",
-      "description": "The configuration for all markdown cells.",
-      "$ref": "#/definitions/editorConfig",
+      "description": "The configuration for all markdown cells; it will override the CodeMirror default configuration.",
+      "type": "object",
       "default": {
-        "autoClosingBrackets": false,
-        "cursorBlinkRate": 530,
-        "fontFamily": null,
-        "fontSize": null,
-        "lineHeight": null,
         "lineNumbers": false,
-        "lineWrap": "on",
-        "matchBrackets": false,
-        "readOnly": false,
-        "insertSpaces": true,
-        "tabSize": 4,
-        "wordWrapColumn": 80,
-        "rulers": [],
-        "codeFolding": false,
-        "lineWiseCopyCut": true,
-        "showTrailingSpace": false
+        "matchBrackets": false
       }
     },
     "rawCellConfig": {
       "title": "Raw Cell Configuration",
-      "description": "The configuration for all raw cells.",
-      "$ref": "#/definitions/editorConfig",
+      "description": "The configuration for all raw cells; it will override the CodeMirror default configuration.",
+      "type": "object",
       "default": {
-        "autoClosingBrackets": false,
-        "cursorBlinkRate": 530,
-        "fontFamily": null,
-        "fontSize": null,
-        "lineHeight": null,
         "lineNumbers": false,
-        "lineWrap": "on",
-        "matchBrackets": false,
-        "readOnly": false,
-        "insertSpaces": true,
-        "tabSize": 4,
-        "wordWrapColumn": 80,
-        "rulers": [],
-        "codeFolding": false,
-        "lineWiseCopyCut": true,
-        "showTrailingSpace": false
+        "matchBrackets": false
       }
     },
     "scrollPastEnd": {

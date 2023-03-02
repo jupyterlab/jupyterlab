@@ -783,7 +783,7 @@ class _AppHandler:
             for item in sorted(disabled):
                 # Show that all plugins will be disabled if the whole extension matches
                 if item in all_exts:
-                    item += " (all plugins)"
+                    item += " (all plugins)"  # noqa PLW2901
                 logger.info("    %s" % item)
 
         # Here check if modules are improperly shadowed
@@ -936,7 +936,7 @@ class _AppHandler:
                 # Handle local extensions.
                 if extname in local:
                     config = self._read_build_config()
-                    data = config.setdefault("local_extensions", {})
+                    data = config.setdefault("local_extensions", {})  # noqa PLW2901
                     del data[extname]
                     self._write_build_config(config)
                 return True
@@ -1551,7 +1551,7 @@ class _AppHandler:
             return info
 
         for path in glob(pjoin(dname, "*.tgz")):
-            path = osp.abspath(path)
+            path = osp.abspath(path)  # noqa PLW2901
             data = read_package(path)
             name = data["name"]
             if name not in info:
@@ -1627,7 +1627,7 @@ class _AppHandler:
         # Write a blank line separator
         logger.info("")
 
-    def _list_federated_extensions(self):  # noqa
+    def _list_federated_extensions(self):
         self._ensure_disabled_info()
         info = self.info
         logger = self.logger
@@ -1709,7 +1709,7 @@ class _AppHandler:
 
         return data
 
-    def _install_extension(self, extension, tempdir, pin=None):  # noqa
+    def _install_extension(self, extension, tempdir, pin=None):
         """Install an extension with validation and return the name and path."""
         info = self._extract_package(extension, tempdir, pin=pin)
         data = info["data"]
@@ -1979,7 +1979,7 @@ def _node_check(logger):
         raise ValueError(msg) from None
 
 
-def _yarn_config(logger):  # noqa
+def _yarn_config(logger):
     """Get the yarn configuration.
 
     Returns

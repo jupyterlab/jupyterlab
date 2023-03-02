@@ -43,6 +43,25 @@ test.describe('Notebook Search and Replace', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('replace-in-cell.png');
   });
 
+  test('Substitute groups of regular expressions', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+
+    await page.click('button[title="Use Regular Expression"]');
+    await page.fill('[placeholder="Find"]', 'text/(\\w+)');
+    await page.waitForSelector('text=1/3');
+
+    await page.click('button[title="Toggle Replace"]');
+    await page.fill('[placeholder="Replace"]', 'script/$1');
+    const cell = await page.notebook.getCell(2);
+    await expect(page.locator('body')).not.toContainText('script/plain');
+
+    await page.click('button:has-text("Replace")');
+    await page.waitForSelector('text=1/2');
+
+    await cell.waitForSelector('text=script/plain');
+    await expect(page.locator('body')).toContainText('script/plain');
+  });
+
   test('Replace on markdown rendered cell', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');

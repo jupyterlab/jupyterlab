@@ -88,8 +88,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     let found = false;
     for (let idx = 0; idx < this._searchProviders.length; idx++) {
       const provider = this._searchProviders[idx];
-      const localMatch = provider.currentMatchIndex;
-      if (localMatch !== null) {
+      if (this._currentProviderIndex == idx) {
+        const localMatch = provider.currentMatchIndex;
+        if (localMatch === null) {
+          return null;
+        }
         agg += localMatch;
         found = true;
         break;
@@ -197,12 +200,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   getInitialQuery(): string {
     const activeCell = this.widget.content.activeCell;
     const editor = activeCell?.editor as CodeMirrorEditor | undefined;
-    const selection = editor?.state.sliceDoc(
-      editor?.state.selection.main.from,
-      editor?.state.selection.main.to
+    if (!editor) {
+      return '';
+    }
+    const selection = editor.state.sliceDoc(
+      editor.state.selection.main.from,
+      editor.state.selection.main.to
     );
-    // if there are newlines, just return empty string
-    return selection?.search(/\r?\n|\r/g) === -1 ? selection : '';
+    return selection;
   }
 
   /**
@@ -533,8 +538,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
       const match = reverse
-        ? await searchEngine.highlightPrevious()
-        : await searchEngine.highlightNext();
+        ? await searchEngine.highlightPrevious(false)
+        : await searchEngine.highlightNext(false);
 
       if (match) {
         await activateNewMatch();

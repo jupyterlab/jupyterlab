@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig } from '@jupyterlab/coreutils';
 import {
   Dialog,
   ISessionContext,
@@ -67,7 +66,7 @@ export class Context<
     this._model = this._factory.createNew({
       languagePreference: lang,
       sharedModel,
-      collaborationEnabled: PageConfig.getOption('collaborative') === 'true'
+      collaborationEnabled: sharedFactory?.collaborative ?? false
     });
 
     this._readyPromise = manager.ready.then(() => {
@@ -240,14 +239,10 @@ export class Context<
    * @returns a promise that resolves upon initialization.
    */
   async initialize(isNew: boolean) {
-    if (this._model.collaborative) {
-      await this._loadContext();
+    if (isNew) {
+      await this._save();
     } else {
-      if (isNew) {
-        await this._save();
-      } else {
-        await this._revert();
-      }
+      await this._revert();
     }
     this.model.sharedModel.clearUndoHistory();
   }
@@ -596,11 +591,6 @@ export class Context<
    * Save the document contents to disk.
    */
   private async _save(): Promise<void> {
-    // if collaborative mode is enabled, saving happens in the back-end
-    // after each change to the document
-    if (this._model.collaborative) {
-      return;
-    }
     this._saveState.emit('started');
     const model = this._model;
     let content: PartialJSONValue = null;
@@ -658,47 +648,6 @@ export class Context<
   }
 
   /**
-   * Load the metadata of the document without the content.
-   */
-  private _loadContext(): Promise<void> {
-    const opts: Contents.IFetchOptions = {
-      type: this._factory.contentType,
-      content: false,
-      ...(this._factory.fileFormat !== null
-        ? { format: this._factory.fileFormat }
-        : {})
-    };
-    const path = this._path;
-    return this._manager.ready
-      .then(() => {
-        return this._manager.contents.get(path, opts);
-      })
-      .then(contents => {
-        if (this.isDisposed) {
-          return;
-        }
-        const model = {
-          ...contents,
-          format: this._factory.fileFormat
-        };
-        this._updateContentsModel(model);
-        this._model.dirty = false;
-        if (!this._isPopulated) {
-          return this._populate();
-        }
-      })
-      .catch(async err => {
-        const localPath = this._manager.contents.localPath(this._path);
-        const name = PathExt.basename(localPath);
-        void this._handleError(
-          err,
-          this._trans.__('File Load Error for %1', name)
-        );
-        throw err;
-      });
-  }
-
-  /**
    * Revert the document contents to disk contents.
    *
    * @param initializeModel - call the model's initialization function after
@@ -722,23 +671,26 @@ export class Context<
         if (this.isDisposed) {
           return;
         }
-        if (contents.format === 'json') {
-          model.fromJSON(contents.content);
-        } else {
-          let content = contents.content;
-          // Convert line endings if necessary, marking the file
-          // as dirty.
-          if (content.indexOf('\r\n') !== -1) {
-            this._lineEnding = '\r\n';
-            content = content.replace(/\r\n/g, '\n');
-          } else if (content.indexOf('\r') !== -1) {
-            this._lineEnding = '\r';
-            content = content.replace(/\r/g, '\n');
+        if (contents.content) {
+          if (contents.format === 'json') {
+            model.fromJSON(contents.content);
           } else {
-            this._lineEnding = null;
+            let content = contents.content;
+            // Convert line endings if necessary, marking the file
+            // as dirty.
+            if (content.indexOf('\r\n') !== -1) {
+              this._lineEnding = '\r\n';
+              content = content.replace(/\r\n/g, '\n');
+            } else if (content.indexOf('\r') !== -1) {
+              this._lineEnding = '\r';
+              content = content.replace(/\r/g, '\n');
+            } else {
+              this._lineEnding = null;
+            }
+            model.fromString(content);
           }
-          model.fromString(content);
         }
+
         this._updateContentsModel(contents);
         model.dirty = false;
         if (!this._isPopulated) {

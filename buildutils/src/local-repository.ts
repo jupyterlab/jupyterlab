@@ -87,15 +87,17 @@ packages:
 
   const options = { cwd: out_dir, detached: true, stdio: ['ignore', out, err] };
 
-  const bin_dir = utils.run('npm bin', { stdio: 'pipe' }, true);
-  const verdaccio_bin = path.join(bin_dir, 'verdaccio');
-  const subproc = child_process.spawn(verdaccio_bin, args.split(' '), options);
+  const subproc = child_process.spawn(
+    'npx',
+    ['verdaccio'].concat(args.split(' ')),
+    options
+  );
   subproc.unref();
 
   // Wait for Verdaccio to boot
   let content = '';
-  let delays = 0;
-  while (delays < 100) {
+  let delays = 12000;
+  while (delays > 0) {
     ps.stdout.write('.');
     if (content.indexOf('http address') !== -1) {
       break;
@@ -108,10 +110,11 @@ packages:
     if (fs.existsSync(log_file)) {
       content = fs.readFileSync(log_file, { encoding: 'utf-8' });
     }
-    delays += 1;
+    delays -= 100;
   }
-  if (delays === 100) {
-    console.error('Timed out!');
+  if (delays <= 0) {
+    console.error('Timed out!\nLOG:');
+    console.log(content);
     process.exit(1);
   }
   console.log('\nVerdaccio started');
@@ -149,16 +152,18 @@ packages:
   const pass = 'bar';
   const email = 'foo@bar.com';
   console.log('Logging in');
-  const loginPs = child_process.spawn(
-    'npm',
-    `login -r ${local_registry}`.split(' ')
-  );
+  const loginPs = child_process.spawn('npm', [
+    'login',
+    '--auth-type=legacy',
+    '-r',
+    local_registry
+  ]);
 
   const loggedIn = new Promise<void>((accept, reject) => {
     loginPs.stdout.on('data', (chunk: string) => {
       const data = Buffer.from(chunk, 'utf-8').toString().trim();
       console.log('stdout:', data);
-      if (data.indexOf('Logged in as') !== -1) {
+      if (data.indexOf('Logged in ') !== -1) {
         loginPs.stdin.end();
         // do not accept here yet, the token may not have been written
       } else {

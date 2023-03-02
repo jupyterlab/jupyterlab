@@ -222,36 +222,6 @@
     "shortcuts": []
   },
   {
-    "id": "codemirror:change-keymap",
-    "label": "default",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:change-mode",
-    "label": "Change editor mode to the provided `name`.",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:change-theme",
-    "label": "jupyter",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:find",
-    "label": "Find…",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:go-to-line",
-    "label": "Go to Line…",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
     "id": "completer:invoke-console",
     "label": "Display the completion helper.",
     "caption": "",
@@ -637,19 +607,19 @@
   {
     "id": "editmenu:clear-all",
     "label": "Clear All",
-    "caption": "Clear All",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "editmenu:clear-current",
     "label": "Clear",
-    "caption": "Clear",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "editmenu:go-to-line",
     "label": "Go to Line…",
-    "caption": "Go to Line…",
+    "caption": "",
     "shortcuts": []
   },
   {
@@ -661,7 +631,7 @@
   {
     "id": "editmenu:redo",
     "label": "Redo",
-    "caption": "Redo",
+    "caption": "",
     "shortcuts": [
       "Ctrl Shift Z"
     ]
@@ -669,7 +639,7 @@
   {
     "id": "editmenu:undo",
     "label": "Undo",
-    "caption": "Undo",
+    "caption": "",
     "shortcuts": [
       "Ctrl Z"
     ]
@@ -853,6 +823,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-file-size",
+    "label": "Show File Size Column",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-hidden-files",
     "label": "Show Hidden Files",
     "caption": "",
@@ -885,8 +861,20 @@
     "shortcuts": []
   },
   {
+    "id": "fileeditor:change-language",
+    "label": "Change editor language.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "fileeditor:change-tabs",
     "label": "Indent with Tab",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:change-theme",
+    "label": "jupyter",
     "caption": "",
     "shortcuts": []
   },
@@ -917,6 +905,18 @@
   {
     "id": "fileeditor:cut",
     "label": "Cut",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:find",
+    "label": "Find…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:go-to-line",
+    "label": "Go to Line…",
     "caption": "",
     "shortcuts": []
   },
@@ -983,24 +983,24 @@
   {
     "id": "fileeditor:toggle-current-line-numbers",
     "label": "Show Line Numbers",
-    "caption": "",
+    "caption": "Show the line numbers for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-current-line-wrap",
     "label": "Wrap Words",
-    "caption": "",
+    "caption": "Wrap words for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-current-match-brackets",
     "label": "Match Brackets",
-    "caption": "",
+    "caption": "Change match brackets for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-line-numbers",
-    "label": "Line Numbers",
+    "label": "Show Line Numbers",
     "caption": "",
     "shortcuts": []
   },
@@ -1025,7 +1025,7 @@
   {
     "id": "filemenu:close-and-cleanup",
     "label": "Close and Shut Down",
-    "caption": "Close and Shut Down",
+    "caption": "",
     "shortcuts": [
       "Ctrl Shift Q"
     ]
@@ -1033,7 +1033,7 @@
   {
     "id": "filemenu:create-console",
     "label": "New Console for Activity",
-    "caption": "New Console for Activity",
+    "caption": "",
     "shortcuts": []
   },
   {
@@ -1093,7 +1093,7 @@
   {
     "id": "helpmenu:get-kernel",
     "label": "Get Kernel",
-    "caption": "Get Kernel",
+    "caption": "",
     "shortcuts": []
   },
   {
@@ -1209,13 +1209,13 @@
   {
     "id": "kernelmenu:change",
     "label": "Change Kernel…",
-    "caption": "Change Kernel…",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "kernelmenu:interrupt",
     "label": "Interrupt Kernel",
-    "caption": "Interrupt Kernel",
+    "caption": "Interrupt the kernel",
     "shortcuts": [
       "I",
       "I"
@@ -1230,13 +1230,13 @@
   {
     "id": "kernelmenu:reconnect-to-kernel",
     "label": "Reconnect to Kernel",
-    "caption": "Reconnect to Kernel",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "kernelmenu:restart",
     "label": "Restart Kernel…",
-    "caption": "Restart Kernel…",
+    "caption": "Restart the kernel",
     "shortcuts": [
       "0",
       "0"
@@ -1245,13 +1245,13 @@
   {
     "id": "kernelmenu:restart-and-clear",
     "label": "Restart Kernel and Clear…",
-    "caption": "Restart Kernel and Clear…",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "kernelmenu:shutdown",
     "label": "Shut Down Kernel",
-    "caption": "Shut Down Kernel",
+    "caption": "Shut down kernel",
     "shortcuts": []
   },
   {
@@ -1614,7 +1614,7 @@
   {
     "id": "notebook:interrupt-kernel",
     "label": "Interrupt Kernel",
-    "caption": "",
+    "caption": "Interrupt the kernel",
     "shortcuts": []
   },
   {
@@ -1756,13 +1756,13 @@
   {
     "id": "notebook:restart-kernel",
     "label": "Restart Kernel…",
-    "caption": "",
+    "caption": "Restart the kernel",
     "shortcuts": []
   },
   {
     "id": "notebook:restart-run-all",
     "label": "Restart Kernel and Run All Cells…",
-    "caption": "",
+    "caption": "Restart the kernel and run all cells",
     "shortcuts": []
   },
   {
@@ -1780,13 +1780,13 @@
   {
     "id": "notebook:run-all-cells",
     "label": "Run All Cells",
-    "caption": "",
+    "caption": "Run all cells",
     "shortcuts": []
   },
   {
     "id": "notebook:run-cell",
     "label": "Run Selected Cells and Do not Advance",
-    "caption": "",
+    "caption": "Run the selected cells and do not advance",
     "shortcuts": [
       "Ctrl Enter"
     ]
@@ -1802,7 +1802,7 @@
   {
     "id": "notebook:run-cell-and-select-next",
     "label": "Run Selected Cells",
-    "caption": "",
+    "caption": "Run the selected cells",
     "shortcuts": [
       "Shift Enter"
     ]
@@ -2190,13 +2190,13 @@
   {
     "id": "viewmenu:line-numbering",
     "label": "Show Line Numbers",
-    "caption": "Show Line Numbers",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "viewmenu:match-brackets",
     "label": "Match Brackets",
-    "caption": "Match Brackets",
+    "caption": "",
     "shortcuts": []
   },
   {
@@ -2208,7 +2208,7 @@
   {
     "id": "viewmenu:word-wrap",
     "label": "Wrap Words",
-    "caption": "Wrap Words",
+    "caption": "",
     "shortcuts": []
   },
   {

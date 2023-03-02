@@ -18,7 +18,11 @@ import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { editorServices } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 
 import { ConsolePanel } from '@jupyterlab/console';
 
@@ -84,14 +88,25 @@ function startApp(
 
   const rendermime = new RenderMimeRegistry({ initialFactories });
 
-  const editorFactory = editorServices.factoryService.newInlineEditor;
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(language =>
+      ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
+    )
+    .forEach(language => {
+      languages.addLanguage(language);
+    });
+  const factoryService = new CodeMirrorEditorFactory({ languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+  const editorFactory = factoryService.newInlineEditor;
   const contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
+
   const consolePanel = new ConsolePanel({
     rendermime,
     manager,
     path,
     contentFactory,
-    mimeTypeService: editorServices.mimeTypeService
+    mimeTypeService
   });
   consolePanel.title.label = trans.__('Console');
 

@@ -625,12 +625,10 @@ describe('docregistry/registry', () => {
           })
         );
         let pref = registry.getKernelPreference('.c', 'global');
-        expect(pref!.language).toBe('C');
         expect(pref!.shouldStart).toBe(false);
         expect(pref!.canStart).toBe(false);
 
         pref = registry.getKernelPreference('.py', 'python');
-        expect(pref!.language).toBe('Python');
         expect(pref!.shouldStart).toBe(true);
         expect(pref!.canStart).toBe(true);
 

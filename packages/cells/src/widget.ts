@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import { Extension } from '@codemirror/state';
+
+import { EditorView } from '@codemirror/view';
+
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { ISessionContext } from '@jupyterlab/apputils';
@@ -125,11 +129,6 @@ const CELL_INPUT_COLLAPSER_CLASS = 'jp-Cell-inputCollapser';
 const CELL_OUTPUT_COLLAPSER_CLASS = 'jp-Cell-outputCollapser';
 
 /**
- * The class name added to the cell when readonly.
- */
-const READONLY_CLASS = 'jp-mod-readOnly';
-
-/**
  * The class name added to the cell when dirty.
  */
 const DIRTY_CLASS = 'jp-mod-dirty';
@@ -198,7 +197,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this.addClass(CELL_CLASS);
     const model = (this._model = options.model);
 
-    this.contentFactory = options.contentFactory || Cell.defaultContentFactory;
+    this.contentFactory = options.contentFactory;
     this.layout = options.layout ?? new PanelLayout();
     // Set up translator for aria labels
     this.translator = options.translator ?? nullTranslator;
@@ -304,14 +303,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Editor configuration
    */
-  get editorConfig(): Partial<CodeEditor.IConfig> {
+  get editorConfig(): Record<string, any> {
     return this._editorConfig;
-  }
-  setEditorConfig(v: Partial<CodeEditor.IConfig>): void {
-    this._editorConfig = { ...this._editorConfig, ...v };
-    if (this.editor) {
-      this.editor.setOptions(this._editorConfig);
-    }
   }
 
   /**
@@ -545,6 +538,18 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
+   * Update the editor configuration with the partial provided dictionary.
+   *
+   * @param v Partial editor configuration
+   */
+  updateEditorConfig(v: Record<string, any>): void {
+    this._editorConfig = { ...this._editorConfig, ...v };
+    if (this.editor) {
+      this.editor.setOptions(this._editorConfig);
+    }
+  }
+
+  /**
    * Create children widgets.
    */
   protected initializeDOM(): void {
@@ -567,7 +572,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     inputCollapser.addClass(CELL_INPUT_COLLAPSER_CLASS);
     const input = (this._input = new InputArea({
       model,
-      contentFactory
+      contentFactory,
+      editorOptions: this.getEditorOptions()
     }));
     input.addClass(CELL_INPUT_AREA_CLASS);
     inputWrapper.addWidget(inputCollapser);
@@ -587,11 +593,15 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     const footer = this.contentFactory.createCellFooter();
     footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
+  }
 
-    // Editor settings
-    if (this.editorConfig) {
-      this.editor!.setOptions({ ...this.editorConfig });
-    }
+  /**
+   * Get the editor options at initialization.
+   *
+   * @returns Editor options
+   */
+  protected getEditorOptions(): InputArea.IOptions['editorOptions'] {
+    return { config: this.editorConfig };
   }
 
   /**
@@ -639,7 +649,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     // Handle read only state.
     if (this.editor?.getOption('readOnly') !== this._readOnly) {
       this.editor?.setOption('readOnly', this._readOnly);
-      this.toggleClass(READONLY_CLASS, this._readOnly);
     }
   }
 
@@ -667,7 +676,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   protected translator: ITranslator;
   protected _displayChanged = new Signal<this, void>(this);
 
-  private _editorConfig: Partial<CodeEditor.IConfig> = {};
+  private _editorConfig: Record<string, any> = {};
   private _input: InputArea | null;
   private _inputHidden = false;
   private _inputWrapper: Widget | null;
@@ -704,12 +713,17 @@ export namespace Cell {
     /**
      * The factory object for customizable cell children.
      */
-    contentFactory?: IContentFactory;
+    contentFactory: IContentFactory;
 
     /**
      * The configuration options for the text editor widget.
      */
-    editorConfig?: Partial<CodeEditor.IConfig>;
+    editorConfig?: Record<string, any>;
+
+    /**
+     * Editor extensions to be added.
+     */
+    editorExtensions?: Extension[];
 
     /**
      * Cell widget layout.
@@ -803,9 +817,8 @@ export namespace Cell {
     /**
      * Create a content factory for a cell.
      */
-    constructor(options: ContentFactory.IOptions = {}) {
-      this._editorFactory =
-        options.editorFactory || InputArea.defaultEditorFactory;
+    constructor(options: ContentFactory.IOptions) {
+      this._editorFactory = options.editorFactory;
     }
 
     /**
@@ -863,18 +876,10 @@ export namespace Cell {
     export interface IOptions {
       /**
        * The editor factory used by the content factory.
-       *
-       * If this is not passed, a default CodeMirror editor factory
-       * will be used.
        */
-      editorFactory?: CodeEditor.Factory;
+      editorFactory: CodeEditor.Factory;
     }
   }
-
-  /**
-   * The default content factory for cells.
-   */
-  export const defaultContentFactory = new ContentFactory();
 }
 
 /** ****************************************************************************
@@ -990,9 +995,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
       rendermime,
       contentFactory: contentFactory,
       maxNumberOutputs: this.maxNumberOutputs,
-      translator: this.translator
+      translator: this.translator,
+      promptOverlay: true
     }));
     output.addClass(CELL_OUTPUT_AREA_CLASS);
+    output.toggleScrolling.connect(() => {
+      this.outputsScrolled = !this.outputsScrolled;
+    });
 
     // Defer setting placeholder as OutputArea must be instantiated before initializing the DOM
     this.placeholder = options.placeholder ?? true;
@@ -1549,18 +1558,6 @@ export abstract class AttachmentsCell<
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'paste':
-        this._evtPaste(event as ClipboardEvent);
-        break;
-      case 'dragenter':
-        event.preventDefault();
-        break;
-      case 'dragover':
-        event.preventDefault();
-        break;
-      case 'drop':
-        this._evtNativeDrop(event as DragEvent);
-        break;
       case 'lm-dragover':
         this._evtDragOver(event as Drag.Event);
         break;
@@ -1570,6 +1567,33 @@ export abstract class AttachmentsCell<
       default:
         break;
     }
+  }
+
+  /**
+   * Get the editor options at initialization.
+   *
+   * @returns Editor options
+   */
+  protected getEditorOptions(): InputArea.IOptions['editorOptions'] {
+    const base = super.getEditorOptions() ?? {};
+    base.extensions = [
+      ...(base.extensions ?? []),
+      EditorView.domEventHandlers({
+        dragenter: (event: DragEvent) => {
+          event.preventDefault();
+        },
+        dragover: (event: DragEvent) => {
+          event.preventDefault();
+        },
+        drop: (event: DragEvent) => {
+          this._evtNativeDrop(event);
+        },
+        paste: (event: ClipboardEvent) => {
+          this._evtPaste(event);
+        }
+      })
+    ];
+    return base;
   }
 
   /**
@@ -1589,10 +1613,6 @@ export abstract class AttachmentsCell<
     const node = this.node;
     node.addEventListener('lm-dragover', this);
     node.addEventListener('lm-drop', this);
-    node.addEventListener('dragenter', this);
-    node.addEventListener('dragover', this);
-    node.addEventListener('drop', this);
-    node.addEventListener('paste', this);
   }
 
   /**
@@ -1601,10 +1621,6 @@ export abstract class AttachmentsCell<
    */
   protected onBeforeDetach(msg: Message): void {
     const node = this.node;
-    node.removeEventListener('drop', this);
-    node.removeEventListener('dragover', this);
-    node.removeEventListener('dragenter', this);
-    node.removeEventListener('paste', this);
     node.removeEventListener('lm-dragover', this);
     node.removeEventListener('lm-drop', this);
 
@@ -1998,9 +2014,6 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
 
     super.initializeDOM();
 
-    // Stop codemirror handling paste
-    this.editor!.setOption('handlePaste', false);
-
     this.renderCollapseButtons(this._renderer!);
 
     this._handleRendered().catch(reason => {
@@ -2165,7 +2178,10 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
       // TODO: It would be nice for the cell to provide a way for
       // its consumers to hook into when the rendering is done.
       await this._updateRenderedInput();
-      this.renderInput(this._renderer);
+      if (this._rendered) {
+        // The rendered flag may be updated in the mean time
+        this.renderInput(this._renderer);
+      }
     }
   }
 

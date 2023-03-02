@@ -30,19 +30,75 @@ bumped their major version (following semver convention). We want to point out p
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
 - ``@jupyterlab/apputils`` from 3.x to 4.x
    Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
+- ``@jupyterlab/attachments`` from 3.x to 4.x
+   Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
    * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
      should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
    * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
    * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
 - ``@jupyterlab/cells`` from 3.x to 4.x
-   ``MarkdownCell.toggleCollapsedSignal`` renamed ``MarkdownCell.headingCollapsedChanged``
-   To support notebook windowing, cell widget children (e.g. the editor or the output area) are not instantiated
-   when the cell is attached to the notebook. You can test for ``isPlaceholder()`` to see if the cell has been
-   fully instantiated or wait for the promise ``ready`` to be resolved. Additionally an attribute ``inViewport``
-   and a signal ``inViewportChanged`` are available to test if the cell is attached to the DOM.
-   If you instantiate standalone cells outside of a notebook, you will probably need to set the constructor option
-   ``placeholder`` to ``false`` to ensure direct rendering of the cell.
+   * ``MarkdownCell.toggleCollapsedSignal`` renamed ``MarkdownCell.headingCollapsedChanged``
+     To support notebook windowing, cell widget children (e.g. the editor or the output area) are not instantiated
+     when the cell is attached to the notebook. You can test for ``isPlaceholder()`` to see if the cell has been
+     fully instantiated or wait for the promise ``ready`` to be resolved. Additionally an attribute ``inViewport``
+     and a signal ``inViewportChanged`` are available to test if the cell is attached to the DOM.
+     If you instantiate standalone cells outside of a notebook, you will probably need to set the constructor option
+     ``placeholder`` to ``false`` to ensure direct rendering of the cell.
+   * ``InputArea.defaultContentFactory`` and ``Cell.defaultContentFactory`` have been removed. If you need it, you
+     can request the token ``IEditorServices`` from ``@jupyterlab/codeeditor``. Then you can use
+     ``new Cell.ContentFactory({ editorFactory: token.factoryService.newInlineEditor });``.
+- ``@jupyterlab/codeeditor`` from 3.x to 4.0
+   * ``CodeEditor.IEditor`` has changed:
+      - ``resizeToFit()`` is removed
+      - ``addKeydownHandler()`` is removed - you should add a CodeMirror extension ``EditorView.domEventHandlers`` with
+         ``Prec.high`` (to ensure it is not captured by keyboard shortcuts).
+      - ``injectExtension()`` added as experimental to inject a CodeMirror extension - you should prefer registering
+         new extensions with ``IEditorExtensionRegistry``.
+   * ``CodeEditor.IOptions`` has two new optional attributes:
+      - ``extensions?: Extensions[]`` to provide custom extensions at editor instantiation
+      - ``inline?: boolean`` whether the editor is a subpart of a document (like the notebook) or not.
+   * ``CodeEditorWrapper.IOptions`` has changed to ``{ factory, model, editorOptions }``.
+   * ``CodeViewerWidget.IOptions`` has changed to ``{ factory, model, editorOptions }``.
+- ``@jupyterlab/codemirror`` from 3.x to 4.0
+   * Configuration parameters changes:
+      - ``fontFamily``, ``fontSize`` and ``lineHeight``: grouped in a subdictionnary ``customStyles``.
+      - ``insertSpaces``: changed for ``indentUnit`` that can take a value within ['Tab', '1', '2', '4', '8']
+      - ``lineWrap``: changed - it is now a boolean.
+      - ``showTrailingSpace``: renamed ``highlightTrailingWhitespace``
+      - ``coverGutterNextToScrollbar``: removed
+      - ``electricChars``: removed
+      - ``extraKeys``: removed - you should register new keymap using the CodeMirror extension ``keymap.of(KeyBinding[])``
+      - ``handlePaste``: removed
+      - ``keymap``: removed
+      - ``lineSeparator``: removed - Line separator are normalized to ``\n``
+      - ``lineWiseCopyCut``: removed - this is the default behavior
+      - ``scrollbarStyle``: removed
+      - ``styleSelectedText``: removed
+      - ``selectionPointer``: removed
+      - ``wordWrapColumn``: removed
+   * ``Mode`` has been removed. You can instead request the token ``IEditorLanguageHandler``. That provides
+     similar API:
+     - ``Mode.registerModeInfo`` -> ``IEditorLanguageHandler.addLanguage``
+     - ``Mode.ensure()`` -> ``IEditorLanguageHandler.getLanguage()``
+     - ``Mode.modeList`` -> ``IEditorLanguageHandler.getLanguages()``
+     - ``Mode.run()`` -> ``IEditorLanguageHandler.highlight()``
+     - ``Mode.findBest()`` -> ``IEditorLanguageHandler.findBest()``
+     - ``Mode.findByName()`` -> ``IEditorLanguageHandler.findByName()``
+     - ``Mode.findByMIME()`` -> ``IEditorLanguageHandler.findByMIME()``
+     - ``Mode.findByExtension()`` -> ``IEditorLanguageHandler.findByExtension()``
+   * ``EditorSyntaxStatus`` moved to ``@jupyterlab/fileeditor``
+- ``@jupyterlab/codemirror-extension`` from 3.x to 4.0
+   * Moved commands:
+     - ``codemirror:change-theme`` -> ``fileeditor:change-theme`` (moved to ``@juptyerlab/fileeditor-extension``)
+     - ``codemirror:change-mode`` -> ``fileeditor:change-language`` (moved to ``@juptyerlab/fileeditor-extension``)
+     - ``codemirror:find`` -> ``fileeditor:find`` (moved to ``@juptyerlab/fileeditor-extension``)
+     - ``codemirror:go-to-line`` -> ``fileeditor:go-to-line`` (moved to ``@juptyerlab/fileeditor-extension``)
+   * Removed command: ``codemirror:change-keymap``
+   * Moved plugins:
+     - ``@jupyterlab/codemirror-extension:commands`` integrated within ``@jupyterlab/fileeditor-extension:plugin``
+     - ``@jupyterlab/codemirror-extension:editor-syntax-status`` -> ``@jupyterlab/fileeditor-extension:editor-syntax-status``
+     - ``@jupyterlab/codemirror-extension:editor-syntax-status`` -> ``@jupyterlab/fileeditor-extension:editor-syntax-status``
 - ``@jupyterlab/completer`` from 3.x to 4.x
    Major version was bumped following major refactor aimed at performance improvements and enabling easier third-party integration.
 
@@ -97,13 +153,13 @@ bumped their major version (following semver convention). We want to point out p
      by a new plugin ``@jupyterlab/docmanager-extension:opener``.
      The ``IDocumentWidgetOpener`` interface also now defines an ```opened``` signal that is emitted when a widget is opened.
    * Removed the property ``docProviderFactory`` from the interface ``DocumentManager.IOptions``.
+- ``@jupyterlab/docregister`` from 3.x to 4.x
+   * ``TextModelFactory.preferredLanguage(path: string)`` will always return ``''``. The editor languages is not available globally to provided it.
+     You can recover the feature if needed, by requesting the token ``IEditorLanguageHandler`` from ``@jupyterlab/codemirror``. Then you can use
+     ``token.findByFileName(widget.context.path)?.name ?? ''``.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
-   * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
-     ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
-     ``renameAck`` is not optional anymore in ``IDocumentProvider``.
-   * Removed the token and type ``IDocumentProviderFactory``.
-   * Removed the property collaborative from the interface ``WebSocketProvider.IOptions``. It doesn't extend from
-     ``IDocumentProviderFactory.IOptions``. And the ``ymodel`` attribute has been renamed ``model``.
+   This package is no longer present in JupyterLab. For documentation related to Real-Time Collaboration, please check out
+   `RTC's documentation <https://jupyterlab.readthedocs.io/en/latest/user/rtc.html>`_
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
@@ -120,8 +176,9 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/fileeditor`` from 3.x to 4.x
    Remove the class ``FileEditorCodeWrapper``, instead, you can use ``CodeEditorWrapper`` from ``@jupyterlab/codeeditor``.
 - ``@jupyterlab/filebrowser`` from 3.x to 4.x
-   Remove the property ``defaultBrowser`` from the interface  ``IFileBrowserFactory``. The default browser is now provided by it own
-   plugin by requiring the token ``IDefaultFileBrowser``.
+   * Remove the property ``defaultBrowser`` from the interface  ``IFileBrowserFactory``. The default browser is now provided by it own
+     plugin by requiring the token ``IDefaultFileBrowser``.
+   * Remove the ``useFuzzyFilter`` setter from the ``FileBrowser`` class.
 - ``@jupyterlab/filebrowser-extension`` from 3.x to 4.x
    Remove command ``filebrowser:create-main-launcher``. You can replace by ``launcher:create`` (same behavior)
    All launcher creation actions are moved to ``@jupyterlab/launcher-extension``.
@@ -148,6 +205,14 @@ bumped their major version (following semver convention). We want to point out p
      mode.
    * Added the property ``sharedModel`` to the interface ``NotebookModel.IOptions``.
    * The method ``NotebookModelFactory.createNew`` receives a parameter ``NotebookModelFactory.IModelOptions``.
+   * The default Notebook toolbar's ``restart-and-run`` button now refers to the command
+     ``notebook:restart-run-all`` instead of ``runmenu:restart-and-run-all``.
+   * ``StaticNotebook.defaultContentFactory`` has been removed. If you need it, you can request the token
+     ``IEditorServices`` from ``@jupyterlab/codeeditor``. You can obtain it by requested
+     ``new NotebookPanel.ContentFactory({ editorFactory: token.factoryService.newInlineEditor });``
+- ``@jupyterlab/mainmenu`` from 3.x to 4.x
+   - ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
+     to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
 - ``@jupyterlab/rendermime`` from 3.x to 4.x
   The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
   that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
@@ -159,7 +224,8 @@ bumped their major version (following semver convention). We want to point out p
    * Remove ``Contents.IDrive.modelDBFactory`` and ``Contents.IManager.getModelDBFactory``.
    * Added ``Contents.IDrive.sharedModelFactory`` and ``Contents.IManager.getsharedModelFactory``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
-   The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
+   This package is no longer present in JupyterLab. For documentation related to the shared models,
+   please check out `@jupyter/ydoc documentation <https://jupyter-ydoc.readthedocs.io/en/latest>`_.
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
   Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
   Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
@@ -197,6 +263,9 @@ bumped their major version (following semver convention). We want to point out p
         ensure a custom renderer is not used for property with the same name but different schema.
 - ``@jupyterlab/translation`` from 3.x to 4.x
    Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
+- ``@jupyterlab/vdom`` and ``@jupyterlab/vdom-extension`` have been removed.
+   The underlying [vdom](https://github.com/nteract/vdom) Python package is unmaintained.
+   So it was decided to drop it from core packages.
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
    * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
@@ -217,7 +286,7 @@ Jest has been updated to 29.2.0 (and *ts-jest* to 29.0.0). And therefore the jes
 - The unmaintained reporter ``jest-summary-reporter`` has been replaced by the new default ``github-actions`` reporter.
 - The helper ``flakyIt`` has been removed. You can use the new `jest.retryTimes <https://jestjs.io/docs/jest-object#jestretrytimesnumretries-options>`_ instead.
 
-With JupyterLab 4, we fixed circular dependencies due to the testutils package. So it is now only a facade to export
+With JupyterLab 4, we fixed circular dependencies due to the ``testutils`` package. So it is now only a facade to export
 helpers from various core packages. The exported helpers are the same as before expect for:
 
 - ``NBTestUtils.DEFAULT_CONTENT``: Removed - you could imported from ``@jupyterlab/notebook/lib/testutils`` but we strongly advice not to and to use your own test data.

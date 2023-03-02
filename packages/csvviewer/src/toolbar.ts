@@ -6,7 +6,7 @@ import { Styling } from '@jupyterlab/ui-components';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { CSVViewer } from './widget';
+import type { CSVViewer } from './widget';
 
 /**
  * The class name added to a csv toolbar widget.

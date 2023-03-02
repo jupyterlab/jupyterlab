@@ -30,521 +30,367 @@
   THE SOFTWARE.
 */
 
+import { ISearchMatch } from '@jupyterlab/documentsearch';
+import { JSONExt } from '@lumino/coreutils';
+import { CodeMirrorEditor } from './editor';
+import { StateEffect, StateEffectType, StateField } from '@codemirror/state';
+import { Decoration, DecorationSet, EditorView } from '@codemirror/view';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   GenericSearchProvider,
   IBaseSearchProvider,
+  IFilters,
   IReplaceOptions,
-  ISearchMatch,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
-import { JSONExt } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { CodeMirrorEditor } from './editor';
-import { RegExpCursor } from '@codemirror/search';
-import {
-  ChangeSpec,
-  Compartment,
-  StateEffect,
-  StateEffectType,
-  StateField
-} from '@codemirror/state';
-import {
-  Decoration,
-  DecorationSet,
-  EditorView,
-  ViewUpdate
-} from '@codemirror/view';
-
-type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
+import { ISharedText, SourceChange } from '@jupyter/ydoc';
 
 /**
- * CodeMirror search provider for file editor
+ * Search provider for editors.
  */
-export class CodeMirrorSearchProvider implements IBaseSearchProvider {
-  constructor(editor: CodeMirrorEditor) {
-    this.editor = editor;
-    this._highlightEffect = StateEffect.define<{ matches: ISearchMatch[] }>({
-      map: (value, mapping) => ({
-        matches: value.matches.map(v => ({
-          text: v.text,
-          position: mapping.mapPos(v.position)
-        }))
-      })
-    });
-    this._highlightMark = Decoration.mark({ class: 'cm-searching' });
+export abstract class EditorSearchProvider<
+  T extends CodeEditor.IModel = CodeEditor.IModel
+> implements IBaseSearchProvider
+{
+  /**
+   * Constructor
+   */
+  constructor() {
+    this.currentIndex = null;
+    this._stateChanged = new Signal<IBaseSearchProvider, void>(this);
+  }
+  /**
+   * CodeMirror search highlighter
+   */
+  protected get cmHandler(): CodeMirrorSearchHighlighter {
+    if (!this._cmHandler) {
+      this._cmHandler = new CodeMirrorSearchHighlighter(
+        this.editor as CodeMirrorEditor
+      );
+    }
+    return this._cmHandler;
+  }
 
-    this._highlightField = StateField.define<DecorationSet>({
-      create: () => {
-        return Decoration.none;
-      },
-      update: (highlights, transaction) => {
-        highlights = highlights.map(transaction.changes);
-        for (let ef of transaction.effects) {
-          if (ef.is(this._highlightEffect)) {
-            const e = ef as StateEffect<{ matches: ISearchMatch[] }>;
-            if (e.value.matches.length) {
-              highlights = highlights.update({
-                add: e.value.matches.map(m =>
-                  this._highlightMark.range(
-                    m.position,
-                    m.position + m.text.length
-                  )
-                )
-              });
-            } else {
-              highlights = Decoration.none;
-            }
-          }
-        }
-        return highlights;
-      },
-      provide: f => EditorView.decorations.from(f)
-    });
+  /**
+   * Text editor
+   */
+  protected abstract get editor(): CodeEditor.IEditor | null;
+  /**
+   * Editor content model
+   */
+  protected abstract get model(): T;
 
-    this._listener = new Compartment();
-    this.editor.injectExtension(this._listener.of([]));
+  /**
+   * Changed signal to be emitted when search matches change.
+   */
+  get stateChanged(): ISignal<IBaseSearchProvider, void> {
+    return this._stateChanged;
+  }
+
+  /**
+   * Current match index
+   */
+  get currentMatchIndex(): number | null {
+    return this.isActive ? this.currentIndex : null;
+  }
+
+  /**
+   * Whether the cell search is active.
+   *
+   * This is used when applying search only on selected cells.
+   */
+  get isActive(): boolean {
+    return this._isActive;
   }
 
   /**
    * Whether the search provider is disposed or not.
    */
   get isDisposed(): boolean {
-    return this._disposed;
+    return this._isDisposed;
+  }
+
+  /**
+   * Number of matches in the cell.
+   */
+  get matchesCount(): number {
+    return this.isActive ? this.cmHandler.matches.length : 0;
+  }
+
+  /**
+   * Clear currently highlighted match
+   */
+  clearHighlight(): Promise<void> {
+    this.currentIndex = null;
+    this.cmHandler.clearHighlight();
+
+    return Promise.resolve();
   }
 
   /**
    * Dispose the search provider
    */
   dispose(): void {
-    if (this._disposed) {
+    if (this._isDisposed) {
       return;
     }
-    this._disposed = true;
-
+    this._isDisposed = true;
     Signal.clearData(this);
-  }
-
-  /**
-   * Initialize the search using a CodeMirrorEditor object.
-   *
-   * @param query the search regular expression
-   */
-  async startQuery(query: RegExp): Promise<void> {
-    if (!this.editor) {
-      return Promise.resolve();
-    }
-    return this._startQuery(query);
-  }
-
-  /**
-   * Refresh the search highlight overlay
-   */
-  refreshOverlay(): void {
-    this._refreshOverlay();
-  }
-
-  private async _startQuery(
-    query: RegExp,
-    refreshOverlay: boolean = true
-  ): Promise<void> {
-    // no point in removing overlay in the middle of the search
-    await this.endQuery(false);
-
-    this._query = query;
-
-    this.editor.editor.dispatch({
-      effects: this._listener.reconfigure(
-        EditorView.updateListener.of((v: ViewUpdate) => {
-          if (v.docChanged) {
-            this._onDocChanged(v);
-          }
-        })
-      )
-    });
-
-    await this._setInitialMatches(query);
-
-    if (refreshOverlay) {
-      this._refreshOverlay();
-    }
-
-    const matches = this._parseMatchesFromState();
-    if (matches.length === 0) {
-      return Promise.resolve();
-    }
-    const cursorMatch = this._findNext(false);
-    const match =
-      cursorMatch &&
-      this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._currentMatch = match;
-
-    await this._highlightCurrentMatch(cursorMatch);
-    return Promise.resolve();
-  }
-
-  /**
-   * Clears state of a search provider to prepare for startQuery to be called
-   * in order to start a new query or refresh an existing one.
-   *
-   * @param removeOverlay Whether to remove the search highlight overlay or not.
-   */
-  async endQuery(removeOverlay = true): Promise<void> {
-    this._matchState = {};
-    this._currentMatch = null;
-
-    const from = this.editor.getPositionAt(
-      this.editor.state.selection.main.from
-    );
-    const to = this.editor.getPositionAt(this.editor.state.selection.main.to);
-    // Setting a reverse selection to allow search-as-you-type to maintain the
-    // current selected match.  See comment in _findNext for more details.
-    if (from !== to) {
-      this.editor.setSelection({
-        start: to,
-        end: from
+    if (this.isActive) {
+      this.endQuery().catch(reason => {
+        console.error(`Failed to end search query on cells.`, reason);
       });
     }
-    this.editor.editor.dispatch({
-      effects: this._listener.reconfigure([])
-    });
   }
 
   /**
-   * Clear currently highlighted match.
+   * Set `isActive` status.
+   *
+   * #### Notes
+   * It will start or end the search
+   *
+   * @param v New value
    */
-  clearHighlight(): Promise<void> {
-    this._currentMatch = null;
-    const cursor = this.editor.getCursorPosition();
-    // Reset cursor position to remove any selection
-    this.editor.setCursorPosition(cursor);
-
-    return Promise.resolve();
+  async setIsActive(v: boolean): Promise<void> {
+    if (this._isActive !== v) {
+      this._isActive = v;
+    }
+    if (this._isActive) {
+      if (this.query !== null) {
+        await this.startQuery(this.query, this.filters);
+      }
+    } else {
+      await this.endQuery();
+    }
   }
 
   /**
-   * Move the current match indicator to the next match.
+   * Initialize the search using the provided options. Should update the UI
+   * to highlight all matches and "select" the first match.
    *
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves once the action has completed.
+   * @param query A RegExp to be use to perform the search
+   * @param filters Filter parameters to pass to provider
    */
-  async highlightNext(loop?: boolean): Promise<ISearchMatch | undefined> {
-    return this._highlightCurrentMatch(this._findNext(false));
+  async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
+    this.query = query;
+    this.filters = filters;
+
+    // Search input
+    const content = this.model.sharedModel.getSource();
+    await this.updateCodeMirror(content);
+    this.model.sharedModel.changed.connect(this.onSharedModelChanged, this);
   }
 
   /**
-   * Move the current match indicator to the previous match.
-   *
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves once the action has completed.
+   * Stop the search and clean any UI elements.
    */
-  async highlightPrevious(loop?: boolean): Promise<ISearchMatch | undefined> {
-    return this._highlightCurrentMatch(this._findNext(true));
+  async endQuery(): Promise<void> {
+    await this.cmHandler.endQuery();
+    this.currentIndex = null;
   }
 
-  private async _highlightCurrentMatch(
-    cursorMatch: Private.ICodeMirrorMatch | null
-  ): Promise<ISearchMatch | undefined> {
-    // Highlight the current index
-    if (!cursorMatch) {
-      // Set cursor to remove any selection
-      this.editor.editor.dispatch({ selection: { anchor: 0 } });
-      return;
+  /**
+   * Highlight the next match.
+   *
+   * @returns The next match if there is one.
+   */
+  async highlightNext(loop = true): Promise<ISearchMatch | undefined> {
+    if (this.matchesCount === 0 || !this.isActive) {
+      this.currentIndex = null;
+    } else {
+      // This starts from the cursor position
+      let match = await this.cmHandler.highlightNext();
+      if (match) {
+        this.currentIndex = this.cmHandler.currentIndex;
+      } else {
+        this.currentIndex = loop ? 0 : null;
+      }
+      return match;
     }
 
-    const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._currentMatch = match;
-    this.editor.editor.focus();
-    this.editor.editor.dispatch({
-      selection: {
-        anchor: match.position,
-        head: match.position + match.text.length
-      },
-      scrollIntoView: true
-    });
-    return match;
+    return Promise.resolve(this.getCurrentMatch());
   }
 
   /**
-   * Replace the currently selected match with the provided text
+   * Highlight the previous match.
    *
-   * @param newText The replacement text
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   * @returns The previous match if there is one.
    */
-  async replaceCurrentMatch(
+  async highlightPrevious(loop = true): Promise<ISearchMatch | undefined> {
+    if (this.matchesCount === 0 || !this.isActive) {
+      this.currentIndex = null;
+    } else {
+      // This starts from the cursor position
+      let match = await this.cmHandler.highlightPrevious();
+      if (match) {
+        this.currentIndex = this.cmHandler.currentIndex;
+      } else {
+        this.currentIndex = loop ? this.matchesCount - 1 : null;
+      }
+      return match;
+    }
+
+    return Promise.resolve(this.getCurrentMatch());
+  }
+
+  /**
+   * Replace the currently selected match with the provided text.
+   *
+   * If no match is selected, it won't do anything.
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  replaceCurrentMatch(
     newText: string,
     loop?: boolean,
     options?: IReplaceOptions
   ): Promise<boolean> {
-    // If the current selection exactly matches the current match,
-    // replace it.  Otherwise, just select the next match after the cursor.
-    let replaceOccurred = false;
-    if (this._currentMatchIsSelected()) {
-      const cursor = new RegExpCursor(
-        this.editor.doc,
-        this._query.source,
-        { ignoreCase: !this._query.ignoreCase },
-        this.editor.state.selection.main.from
-      ).next();
-      if (cursor.done) {
-        return replaceOccurred;
-      }
-      const value = cursor.value;
-      replaceOccurred = true;
-      const insertText = options?.preserveCase
-        ? GenericSearchProvider.preserveCase(
-            this.editor.doc.sliceString(cursor.value.from, cursor.value.to),
-            newText
-          )
-        : newText;
-      this.editor.editor.dispatch({
-        changes: { from: value.from, to: value.to, insert: insertText }
-      });
+    if (!this.isActive) {
+      return Promise.resolve(false);
     }
-    await this.highlightNext();
-    return replaceOccurred;
+
+    let occurred = false;
+
+    if (
+      this.currentIndex !== null &&
+      this.currentIndex < this.cmHandler.matches.length
+    ) {
+      const editor = this.editor as CodeMirrorEditor;
+      const selection = editor.state.sliceDoc(
+        editor.state.selection.main.from,
+        editor.state.selection.main.to
+      );
+      const match = this.getCurrentMatch();
+      // If cursor is not on a selection, highlight the next match
+      if (selection !== match?.text) {
+        this.currentIndex = null;
+        // The next will be highlighted as a consequence of this returning false
+      } else {
+        this.cmHandler.matches.splice(this.currentIndex, 1);
+        this.currentIndex = null;
+        const substitutedText = options?.regularExpression
+          ? match!.text.replace(this.query!, newText)
+          : newText;
+        const insertText = options?.preserveCase
+          ? GenericSearchProvider.preserveCase(match.text, substitutedText)
+          : substitutedText;
+        this.model.sharedModel.updateSource(
+          match!.position,
+          match!.position + match!.text.length,
+          insertText
+        );
+        occurred = true;
+      }
+    }
+
+    return Promise.resolve(occurred);
   }
 
   /**
-   * Replace all matches in the notebook with the provided text
+   * Replace all matches in the cell source with the provided text
    *
-   * @param newText The replacement text
-   *
-   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
    */
-  async replaceAllMatches(
+  replaceAllMatches(
     newText: string,
     options?: IReplaceOptions
   ): Promise<boolean> {
-    let replaceOccurred = false;
-    return new Promise((resolve, _) => {
-      let cursor = new RegExpCursor(this.editor.doc, this._query.source, {
-        ignoreCase: !this._query.ignoreCase
-      }).next();
-      let changeSpec: ChangeSpec[] = [];
-      while (!cursor.done) {
-        replaceOccurred = true;
-        const insertText = options?.preserveCase
-          ? GenericSearchProvider.preserveCase(
-              this.editor.doc.sliceString(cursor.value.from, cursor.value.to),
-              newText
-            )
-          : newText;
-        changeSpec.push({
-          from: cursor.value.from,
-          to: cursor.value.to,
-          insert: insertText
-        });
-        cursor = cursor.next();
-      }
-      this.editor.editor.dispatch({ changes: changeSpec });
-      this._matchState = {};
-      this._currentMatch = null;
-      resolve(replaceOccurred);
-    });
-  }
-
-  /**
-   * The list of matches
-   */
-  get matches(): ISearchMatch[] {
-    return this._parseMatchesFromState();
-  }
-
-  /**
-   * The number of matches.
-   */
-  get matchesCount(): number | null {
-    let size = 0;
-    for (const line in this._matchState) {
-      size += Object.keys(this._matchState[line]).length;
-    }
-    return size;
-  }
-
-  /**
-   * The current match
-   */
-  get currentMatch(): ISearchMatch | null {
-    return this._currentMatch;
-  }
-
-  /**
-   * Signal indicating that something in the search has changed, so the UI should update
-   */
-  get stateChanged(): ISignal<this, void> {
-    return this._changed;
-  }
-
-  /**
-   * The current index of the selected match.
-   */
-  get currentMatchIndex(): number | null {
-    if (!this._currentMatch) {
-      return null;
+    if (!this.isActive) {
+      return Promise.resolve(false);
     }
 
-    // TODO make it more efficient
-    return this.matches.indexOf(this._currentMatch);
+    let occurred = this.cmHandler.matches.length > 0;
+    let src = this.model.sharedModel.getSource();
+    let lastEnd = 0;
+    const finalSrc = this.cmHandler.matches.reduce((agg, match) => {
+      const start = match.position as number;
+      const end = start + match.text.length;
+      const substitutedText = options?.regularExpression
+        ? match!.text.replace(this.query!, newText)
+        : newText;
+      const insertText = options?.preserveCase
+        ? GenericSearchProvider.preserveCase(match.text, substitutedText)
+        : substitutedText;
+      const newStep = `${agg}${src.slice(lastEnd, start)}${insertText}`;
+      lastEnd = end;
+      return newStep;
+    }, '');
+
+    if (occurred) {
+      this.cmHandler.matches = [];
+      this.currentIndex = null;
+      this.model.sharedModel.setSource(`${finalSrc}${src.slice(lastEnd)}`);
+    }
+    return Promise.resolve(occurred);
   }
 
   /**
-   * Set to true if the widget under search is read-only, false
-   * if it is editable.  Will be used to determine whether to show
-   * the replace option.
-   */
-  readonly isReadOnly = false;
-
-  private _onDocChanged(update: ViewUpdate): void {
-    // TODO: CM6 migration
-    if (update.changes.length) {
-      this._setInitialMatches(this._query)
-        .then(() => {
-          this._changed.emit(undefined);
-        })
-        .catch(reason => {
-          console.error(
-            `Fail to reapply search on CodeMirror document change:\n${reason}`
-          );
-        });
-    }
-  }
-
-  private _refreshOverlay() {
-    let effects: StateEffect<unknown>[] = [
-      this._highlightEffect.of({ matches: this.matches })
-    ];
-    if (!this.editor.state.field(this._highlightField, false)) {
-      effects.push(StateEffect.appendConfig.of([this._highlightField]));
-    }
-    this.editor.editor.dispatch({ effects });
-    this._changed.emit(undefined);
-  }
-
-  /**
-   * Do a full search on the entire document.
+   * Get the current match if it exists.
    *
-   * This manually constructs the initial match state across the whole
-   * document. This must be done manually because the codemirror overlay
-   * is lazy-loaded, so it will only tokenize lines that are in or near
-   * the viewport.  This is sufficient for efficiently maintaining the
-   * state when changes are made to the document, as changes occur in or
-   * near the viewport, but to scan the whole document, a manual search
-   * across the entire content is required.
-   *
-   * @param query The search term
+   * @returns The current match
    */
-  private async _setInitialMatches(query: RegExp) {
-    this._matchState = {};
-
-    const content = this.editor.doc.toString();
-    const matches = await TextSearchEngine.search(query, content);
-
-    matches.forEach(match => {
-      const { line, ch } = this._getPosition(match.position);
-      if (!this._matchState[line]) {
-        this._matchState[line] = {};
+  protected getCurrentMatch(): ISearchMatch | undefined {
+    if (this.currentIndex === null) {
+      return undefined;
+    } else {
+      let match: ISearchMatch | undefined = undefined;
+      if (this.currentIndex < this.cmHandler.matches.length) {
+        match = this.cmHandler.matches[this.currentIndex];
       }
-      this._matchState[line][ch] = match;
-    });
-  }
-
-  private _findNext(reverse: boolean): Private.ICodeMirrorMatch | null {
-    const caseSensitive = this._query.ignoreCase;
-    const state = this.editor.state;
-
-    // In order to support search-as-you-type, we needed a way to allow the first
-    // match to be selected when a search is started, but prevent the selected
-    // search to move for each new keypress.  To do this, when a search is ended,
-    // the cursor is reversed, putting the head at the 'from' position.  When a new
-    // search is started, the cursor we want is at the 'from' position, so that the same
-    // match is selected when the next key is entered (if it is still a match).
-    //
-    // When toggling through a search normally, the cursor is always set in the forward
-    // direction, so head is always at the 'to' position.  That way, if reverse = false,
-    // the search proceeds from the 'to' position during normal toggling.  If reverse = true,
-    // the search always proceeds from the 'anchor' position, which is at the 'from'.
-
-    const lastPosition = reverse
-      ? state.selection.main.anchor
-      : state.selection.main.head;
-    let cursor = new RegExpCursor(
-      this.editor.doc,
-      this._query.source,
-      { ignoreCase: !caseSensitive },
-      lastPosition
-    ).next();
-    if (cursor.done) {
-      const startOrEnd = reverse ? this.editor.doc.length : 0;
-      cursor = new RegExpCursor(
-        this.editor.doc,
-        this._query.source,
-        { ignoreCase: !caseSensitive },
-        startOrEnd
-      ).next();
-      if (cursor.done) {
-        return null;
-      }
+      return match;
     }
-    return {
-      from: this._getPosition(cursor.value.from),
-      to: this._getPosition(cursor.value.to)
-    };
   }
 
-  // TODO: remove this when Position API are removed and we work with
-  // offsets only. Contrary to the functions in CodeMirrorEditor,
-  // these functions work with CM6 position (i.e. line number starting at 1).
-  private _getPosition(offset: number): { line: number; ch: number } {
-    const line = this.editor.doc.lineAt(offset);
-    return { line: line.number, ch: offset - line.from };
-  }
-
-  private _parseMatchesFromState(): ISearchMatch[] {
-    // Flatten state map
-    const matches = new Array<ISearchMatch>();
-
-    for (const lineKey in this._matchState) {
-      const lineMatches = this._matchState[lineKey];
-      for (const posKey in lineMatches) {
-        matches.push(lineMatches[posKey]);
-      }
+  /**
+   * Callback on source change
+   *
+   * @param emitter Source of the change
+   * @param changes Source change
+   */
+  protected async onSharedModelChanged(
+    emitter: ISharedText,
+    changes: SourceChange
+  ): Promise<void> {
+    if (changes.sourceChange) {
+      await this.updateCodeMirror(emitter.getSource());
+      this._stateChanged.emit();
     }
-
-    return matches;
   }
 
-  private _currentMatchIsSelected(): boolean {
-    if (!this._currentMatch) {
-      return false;
+  /**
+   * Update matches
+   */
+  protected async updateCodeMirror(content: string) {
+    if (this.query !== null && this.isActive) {
+      this.cmHandler.matches = await TextSearchEngine.search(
+        this.query,
+        content
+      );
+    } else {
+      this.cmHandler.matches = [];
     }
-    const currentSelection = this.editor.getSelection();
-    const currentSelectionLength =
-      currentSelection.end.column - currentSelection.start.column;
-    const selectionIsOneLine =
-      currentSelection.start.line === currentSelection.end.line;
-    return (
-      selectionIsOneLine &&
-      this._currentMatch.text.length === currentSelectionLength &&
-      this._currentMatch.position ===
-        this.editor.doc.line(currentSelection.start.line).from +
-          currentSelection.start.column
-    );
   }
 
-  protected editor: CodeMirrorEditor;
-  private _query: RegExp;
-  private _currentMatch: ISearchMatch | null;
-  private _matchState: MatchMap = {};
-  private _changed = new Signal<this, void>(this);
-  private _disposed = false;
-  private _highlightEffect: StateEffectType<{ matches: ISearchMatch[] }>;
-  private _highlightMark: Decoration;
-  private _highlightField: StateField<DecorationSet>;
-  private _listener: Compartment;
+  /**
+   * Current match index
+   */
+  protected currentIndex: number | null = null;
+  /**
+   * Current search filters
+   */
+  protected filters: IFilters | undefined;
+  /**
+   * Current search query
+   */
+  protected query: RegExp | null = null;
+  // Needs to be protected so subclass can emit the signal too.
+  protected _stateChanged: Signal<IBaseSearchProvider, void>;
+  private _isActive = true;
+  private _isDisposed = false;
+  private _cmHandler: CodeMirrorSearchHighlighter | null = null;
 }
 
 /**
@@ -590,7 +436,9 @@ export class CodeMirrorSearchHighlighter {
                     m.position,
                     m.position + m.text.length
                   )
-                )
+                ),
+                // filter out old marks
+                filter: () => false
               });
             } else {
               highlights = Decoration.none;
@@ -796,13 +644,6 @@ export class CodeMirrorSearchHighlighter {
   private _highlightEffect: StateEffectType<{ matches: ISearchMatch[] }>;
   private _highlightMark: Decoration;
   private _highlightField: StateField<DecorationSet>;
-}
-
-namespace Private {
-  export interface ICodeMirrorMatch {
-    from: { line: number; ch: number };
-    to: { line: number; ch: number };
-  }
 }
 
 /**
