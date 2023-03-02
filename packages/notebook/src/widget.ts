@@ -1274,7 +1274,7 @@ export class Notebook extends StaticNotebook {
       activeCell!.inputHidden = false;
     } else {
       // Focus on the active cell node, which blurs the editor node.
-      this.activeCell?.node.focus();
+      NotebookActions.focusActiveCell(this);
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
     this._ensureFocus();
@@ -1891,7 +1891,7 @@ export class Notebook extends StaticNotebook {
     for (const widget of this.widgets) {
       // Set tabIndex to -1 to allow calling .focus() on cell without allowing
       // focus via tab key. This allows focus (document.activeElement) to move
-      // down/up the document, cell by cell, when the user presses J/K or
+      // up and down the document, cell by cell, when the user presses J/K or
       // ArrowDown/ArrowUp, but (unlike tabIndex = 0) does not add the notebook
       // cells (which could be numerous) to the set of nodes that the user would
       // have to visit when pressing the tab key to move about the UI.
@@ -2302,7 +2302,7 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex = index;
       // Focus notebook if active cell changes but does not have focus.
       if (!this.activeCell!.node.contains(document.activeElement)) {
-        this.activeCell?.node.focus();
+        NotebookActions.focusActiveCell(this);
       }
     }
 

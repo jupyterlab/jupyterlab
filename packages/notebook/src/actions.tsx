@@ -1992,8 +1992,7 @@ export namespace NotebookActions {
   }
 
   /**
-   * If the notebook has an active cell, wait until it has been attached to the
-   * DOM, then focus it.
+   * If the notebook has an active cell, focus it.
    *
    * @param notebook - The target notebook widget.
    *
@@ -2001,7 +2000,7 @@ export namespace NotebookActions {
    * cell's node.
    *
    * #### Notes
-   * Waits until the active cell has been attached.
+   * Waits until after the active cell has been attached.
    */
   export async function focusActiveCell(notebook: Notebook): Promise<void> {
     const { activeCell } = notebook;
