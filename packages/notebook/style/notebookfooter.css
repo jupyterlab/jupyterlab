@@ -12,8 +12,12 @@
   border: var(--jp-border-width);
 }
 
-.jp-Notebook-footer:hover {
-  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
-  border-radius: 0;
-  color: var(--jp-layout-color3);
+/* For devices that support hovering, hide checkboxes until hovered, selected...*/
+
+@media (hover: hover) {
+  .jp-Notebook-footer:hover {
+    border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+    border-radius: 0;
+    color: var(--jp-layout-color3);
+  }
 }

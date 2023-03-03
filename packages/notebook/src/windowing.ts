@@ -100,20 +100,12 @@ export class NotebookWindowedLayout extends WindowedLayout {
   }
 
   /**
-   * Returns Notebook's footer
-   *
-   * @return NotebookFooter | null
+   * Notebook widget's footer
    */
 
   get footer(): NotebookFooter | null {
     return this._footer;
   }
-
-  /**
-   * Set Notebook's footer
-   *
-   * @param footer: Widget | null
-   */
   set footer(footer: NotebookFooter | null) {
     if (this._footer && this._footer.isAttached) {
       NotebookFooter.detach(this._footer);

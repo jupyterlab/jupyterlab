@@ -1204,6 +1204,7 @@ export class Notebook extends StaticNotebook {
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.selectionChanged.connect(this._updateSelectedCells, this);
+    this.addFooter();
   }
 
   /**
@@ -1240,7 +1241,6 @@ export class Notebook extends StaticNotebook {
         this.activeCellIndex = newActiveCellIndex;
       }
     }
-    this.addFooter();
   }
 
   /**
