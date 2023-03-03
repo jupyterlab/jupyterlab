@@ -129,11 +129,101 @@ test.describe('General', () => {
 
     await page.click('.jp-PropertyInspector >> text=Common Tools');
 
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
+    ).not.toBeEmpty();
+
     expect(
       await page.screenshot({
         clip: { y: 32, x: 997, width: 283, height: 400 }
       })
     ).toMatchSnapshot('interface_right_common.png');
+
+    // Expect the 'Raw NbConvert Format' field to be displayed only on raw cells
+    await expect(
+      page.locator(
+        '.jp-NotebookTools-tool .jp-FormGroup-fieldLabel:text("Raw NBConvert Format")'
+      )
+    ).toHaveCount(0);
+    await page.notebook.addCell('raw', 'Raw cell');
+    await expect(
+      page.locator(
+        '.jp-NotebookTools-tool .jp-FormGroup-fieldLabel:text("Raw NBConvert Format")'
+      )
+    ).toHaveCount(1);
+
+    // Open Advanced tools and get metadata content
+    await page.click('.jp-PropertyInspector >> text=Advanced Tools');
+    await expect(
+      page.locator('.jp-MetadataForm .jp-MetadataEditorTool')
+    ).toHaveCount(2);
+    const cellMetadata = await page
+      .locator('.jp-MetadataForm .jp-MetadataEditorTool')
+      .first()
+      .textContent();
+    const notebookMetadata = await page
+      .locator('.jp-MetadataForm .jp-MetadataEditorTool')
+      .last()
+      .textContent();
+    expect(cellMetadata).toContain('"tags": []');
+    expect(notebookMetadata).not.toContain('"base_numbering"');
+
+    // Expect adding tag is reflected in CellMetadataEditor
+    await page.click('.jp-CellTags .jp-CellTags-Add');
+    await page.keyboard.type('test-tag');
+    await page.keyboard.press('Enter');
+    await expect(
+      page.locator('.jp-CellTags .jp-CellTags-Holder span').first()
+    ).toHaveText('test-tag');
+
+    const newCellMetadata = (
+      await page
+        .locator('.jp-MetadataForm .jp-MetadataEditorTool')
+        .first()
+        .textContent()
+    )?.replace(/\s/g, '');
+    expect(newCellMetadata).toContain('"tags":["test-tag"]');
+
+    // Expect modifying 'toc base number' value is reflected in NotebookMetadataEditor
+    await page
+      .locator('.jp-MetadataForm input[label="Table of content - Base number"]')
+      .fill('3');
+    const newNotebookMetadata = (
+      await page
+        .locator('.jp-MetadataForm .jp-MetadataEditorTool')
+        .last()
+        .textContent()
+    )?.replace(/\s/g, '');
+    expect(newNotebookMetadata).toContain('"base_numbering":3');
+
+    // Test the active cell widget
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
+    ).toHaveText('Raw cell');
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
+    ).toHaveClass(/lm-mod-hidden/);
+    await (await page.notebook.getCellInput(1))?.click();
+    await page.keyboard.type(' content');
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
+    ).toHaveText('Raw cell content');
+
+    await page.notebook.addCell('code', 'print("test")');
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
+    ).toHaveText('print("test")');
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
+    ).not.toHaveClass(/lm-mod-hidden/);
+    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
+      '[ ]:'
+    );
+
+    await page.notebook.runCell(2, true);
+    await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
+      '[1]:'
+    );
   });
 
   test('Open tabs', async ({ page }) => {

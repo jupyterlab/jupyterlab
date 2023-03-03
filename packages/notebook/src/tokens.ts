@@ -51,7 +51,7 @@ export namespace INotebookTools {
     /**
      * The section to which the tool should be added.
      */
-    section?: 'common' | 'advanced' | string;
+    section: 'advanced' | string;
 
     /**
      * The rank order of the widget among its siblings.

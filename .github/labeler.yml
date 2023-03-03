@@ -57,8 +57,6 @@ pkg:cells:
   - packages/cells/*
 
 pkg:celltags:
-  - packages/celltags/**/*
-  - packages/celltags/*
   - packages/celltags-extension/**/*
   - packages/celltags-extension/*
 

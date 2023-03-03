@@ -10,13 +10,13 @@
       "path": "../application"
     },
     {
-      "path": "../celltags"
-    },
-    {
       "path": "../notebook"
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     }
   ],
   "extends": "../../tsconfigbase"
