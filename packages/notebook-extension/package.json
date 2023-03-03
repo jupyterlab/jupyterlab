@@ -22,9 +22,9 @@
     "lib": "lib/"
   },
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
+    "lib/**/*.d.ts",
+    "lib/**/*.js.map",
+    "lib/**/*.js",
     "schema/*.json",
     "style/*.css",
     "style/index.js",
@@ -37,6 +37,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@jupyter/ydoc": "^0.3.1",
     "@jupyterlab/application": "^4.0.0-alpha.20",
     "@jupyterlab/apputils": "^4.0.0-alpha.20",
     "@jupyterlab/cells": "^4.0.0-alpha.20",
@@ -53,6 +54,7 @@
     "@jupyterlab/logconsole": "^4.0.0-alpha.20",
     "@jupyterlab/lsp": "^4.0.0-alpha.20",
     "@jupyterlab/mainmenu": "^4.0.0-alpha.20",
+    "@jupyterlab/metadataform": "^4.0.0-alpha.20",
     "@jupyterlab/nbformat": "^4.0.0-alpha.20",
     "@jupyterlab/notebook": "^4.0.0-alpha.20",
     "@jupyterlab/observables": "^5.0.0-alpha.20",
@@ -70,7 +72,10 @@
     "@lumino/coreutils": "^2.0.0-rc.0",
     "@lumino/disposable": "^2.0.0-rc.0",
     "@lumino/messaging": "^2.0.0-rc.0",
-    "@lumino/widgets": "^2.0.0-rc.0"
+    "@lumino/polling": "^2.0.0-rc.0",
+    "@lumino/widgets": "^2.0.0-rc.0",
+    "@rjsf/utils": "^5.1.0",
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

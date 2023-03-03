@@ -31,7 +31,8 @@
     "lib/*.{d.ts,js,js.map}",
     "style/*.css",
     "style/index.js",
-    "src/**/*.{ts,tsx}"
+    "src/**/*.{ts,tsx}",
+    "schema/*.json"
   ],
   "scripts": {
     "build": "tsc",
@@ -40,9 +41,12 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.20",
-    "@jupyterlab/celltags": "^4.0.0-alpha.20",
     "@jupyterlab/notebook": "^4.0.0-alpha.20",
-    "@jupyterlab/translation": "^4.0.0-alpha.20"
+    "@jupyterlab/translation": "^4.0.0-alpha.20",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.35",
+    "@lumino/algorithm": "^2.0.0-rc.0",
+    "@rjsf/utils": "^5.1.0",
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
@@ -52,7 +56,8 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
 }
