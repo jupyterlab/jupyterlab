@@ -149,8 +149,8 @@
   },
   {
     "id": "apputils:display-shortcuts",
-    "label": "Display Keyboard Shortcuts",
-    "caption": "Display relevant keyboard shortcuts for the current active element",
+    "label": "Show Keyboard Shortcuts",
+    "caption": "Show relevant keyboard shortcuts for the current active widget",
     "shortcuts": [
       "Ctrl Shift H"
     ]

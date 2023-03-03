@@ -622,21 +622,22 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.displayShortcuts, {
-      label: trans.__('Display Keyboard Shortcuts'),
+      label: trans.__('Show Keyboard Shortcuts'),
       caption: trans.__(
-        'Display relevant keyboard shortcuts for the current active element'
+        'Show relevant keyboard shortcuts for the current active widget'
       ),
       execute: args => {
         const included = app.shell.currentWidget?.node.contains(
           document.activeElement
         );
-        let value;
+
         if (!included) {
-          value = app.shell.currentWidget?.node;
-        } else {
-          value = undefined;
+          const currentNode =
+            (app.shell.currentWidget as MainAreaWidget)?.content.node ??
+            app.shell.currentWidget?.node;
+          currentNode?.focus();
         }
-        displayShortcuts(app, trans, value);
+        displayShortcuts(app, trans);
       }
     });
 

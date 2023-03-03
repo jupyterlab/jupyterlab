@@ -3,26 +3,23 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+.jp-ContextualShortcut-TableRow {
+  --jp-private-shortcuts-row-padding-vertical: 0.692em;
+  --jp-private-shortcuts-row-padding-right: 1.077em;
+
+  padding-top: var(--jp-private-shortcuts-row-padding-vertical);
+  padding-bottom: var(--jp-private-shortcuts-row-padding-vertical);
+  font-size: var(--jp-ui-font-size1);
+  padding-right: var(--jp-private-shortcuts-row-padding-right);
+  font-family: var(--jp-ui-font-family);
+}
+
 .jp-ContextualShortcut-TableItem {
   margin-left: auto;
   margin-right: auto;
-  background-color: white;
-  vertical-align: top;
-  padding-left: 2px;
-  padding-right: 2px;
-  padding-top: 1px;
-  padding-bottom: 1px;
-  color: #888;
-  border-style: solid;
-  border-width: 1px;
-  font-size: 11.7px;
-  font-family: monospace;
-}
-
-.jp-ContextualShortcut-TableRow {
-  vertical-align: top;
-  font-size: 13px;
-  font-family: Arial, Helvetica, sans-serif;
+  vertical-align: center;
+  color: var(--jp-inverse-layout-color0);
+  font-size: var(--jp-ui-font-size0);
 }
 
 .jp-ContextualShortcut-TableHeader {
@@ -31,4 +28,22 @@
 
 .jp-ContextualShortcut-TableLastRow {
   height: '2em';
+}
+
+.jp-ContextualShortcut-Key {
+  font-family: var(--jp-code-font-family);
+
+  --jp-private-shortcuts-key-padding-horizontal: 0.47em;
+  --jp-private-shortcuts-key-padding-vertical: 0.28em;
+
+  border-width: var(--jp-border-width);
+  border-radius: var(--jp-border-radius);
+  border-style: solid;
+  border-color: var(--jp-border-color1);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  padding-left: var(--jp-private-shortcuts-key-padding-horizontal);
+  padding-right: var(--jp-private-shortcuts-key-padding-horizontal);
+  padding-top: var(--jp-private-shortcuts-key-padding-vertical);
+  padding-bottom: var(--jp-private-shortcuts-key-padding-vertical);
 }

@@ -9,6 +9,26 @@ import { Selector } from '@lumino/domutils';
 import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
+/**
+ * The class name for each row of ContextShortcutTable
+ */
+const SHORTCUT_TABLE_ROW_CLASS = 'jp-ContextualShortcut-TableRow';
+/**
+ * The class name for the last row of ContextShortcutTable
+ */
+const SHORTCUT_TABLE_LAST_ROW_CLASS = 'jp-ContextualShortcut-TableLastRow';
+/**
+ * The class name for each item of ContextShortcutTable
+ */
+const SHORTCUT_TABLE_ITEM_CLASS = 'jp-ContextualShortcut-TableItem';
+/**
+ * The class name for each button-like symbol representing a key used in a shortcut in the ContextShortcutTable
+ */
+const SHORTCUT_KEY_CLASS = 'jp-ContextualShortcut-Key';
+/**
+ * The class name for each button-like symbol representing a key used in a shortcut in the ContextShortcutTable
+ */
+const SHORTCUT_TABLE_HEADER = 'jp-ContextualShortcut-TableHeader';
 
 export function displayShortcuts(
   app: JupyterFrontEnd,
@@ -29,6 +49,25 @@ export function displayShortcuts(
    * It also stops traversal if the `data-lm-suppress-shortcuts` or
    * `data-p-suppress-shortcuts` attributes are found.
    */
+
+  function formatKeys(keys: string[]): JSX.Element {
+    const topContainer: JSX.Element[] = [];
+    for (const key of keys) {
+      const container: JSX.Element[] = [];
+      for (const ch of key.split(' ')) {
+        container.push(
+          <span className={SHORTCUT_KEY_CLASS}>
+            <kbd>{ch}</kbd>
+          </span>,
+          <> + </>
+        );
+      }
+      /*topContainer.push(<span>{container.slice(0, -1)}</span>, <>,</>);*/
+      topContainer.push(<span>{container.slice(0, -1)}</span>, <> + </>);
+    }
+    return <span>{topContainer.slice(0, -1)}</span>;
+  }
+
   function matchDistance(selector: string, elt: Element | null): number {
     let targ = elt;
     for (
@@ -90,22 +129,28 @@ export function displayShortcuts(
     if (groupedBindings.has(d)) {
       bindingTable.push(
         groupedBindings.get(d)!.map(b => (
-          <tr className="jp-ContextualShortcut-TableRow" key={b.command}>
+          <tr className={SHORTCUT_TABLE_ROW_CLASS} key={b.command}>
             <td>{commands.label(b.command, b.args)}</td>
-            <td className="jp-ContextualShortcut-TableItem">
-              {CommandRegistry.formatKeystroke(b.keys)}
+            <td>{b.command.split(':')[0]}</td>
+            <td className={SHORTCUT_TABLE_ITEM_CLASS}>
+              {formatKeys([...b.keys])}
             </td>
           </tr>
         ))
       );
-      bindingTable.push(
-        <tr className="jp-ContextualShortcut-TableLastRow"></tr>
-      );
+      bindingTable.push(<tr className={SHORTCUT_TABLE_LAST_ROW_CLASS}></tr>);
     }
   }
 
   const body = (
     <table>
+      <thead>
+        <tr>
+          <th className={SHORTCUT_TABLE_HEADER}>Label</th>
+          <th className={SHORTCUT_TABLE_HEADER}>Category</th>
+          <th className={SHORTCUT_TABLE_HEADER}>Shortcut</th>
+        </tr>
+      </thead>
       <tbody>{bindingTable}</tbody>
     </table>
   );
