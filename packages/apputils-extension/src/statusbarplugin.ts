@@ -13,10 +13,11 @@ import {
   ISessionContext,
   ISessionContextDialogs,
   KernelStatus,
-  RunningSessions
+  RunningSessions,
+  SessionContextDialogs
 } from '@jupyterlab/apputils';
 import { IStatusBar } from '@jupyterlab/statusbar';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Title, Widget } from '@lumino/widgets';
 
 /**
@@ -25,23 +26,26 @@ import { Title, Widget } from '@lumino/widgets';
 export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
   id: '@jupyterlab/apputils-extension:kernel-status',
   autoStart: true,
-  requires: [IStatusBar, ISessionContextDialogs, ITranslator],
+  requires: [IStatusBar],
   provides: IKernelStatusModel,
-  optional: [ILabShell],
+  optional: [ISessionContextDialogs, ITranslator, ILabShell],
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
-    sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator,
+    sessionDialogs: ISessionContextDialogs | null,
+    translator: ITranslator | null,
     labShell: ILabShell | null
   ): IKernelStatusModel => {
+    translator = translator ?? nullTranslator;
+    sessionDialogs =
+      sessionDialogs ?? new SessionContextDialogs({ translator });
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
     const changeKernel = async () => {
       if (!item.model.sessionContext) {
         return;
       }
-      await sessionDialogs.selectKernel(item.model.sessionContext);
+      await sessionDialogs!.selectKernel(item.model.sessionContext);
     };
 
     // Create the status item.

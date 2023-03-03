@@ -18,6 +18,7 @@ import {
   ISessionContextDialogs,
   IThemeManager,
   MainAreaWidget,
+  SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { CodeCell } from '@jupyterlab/cells';
@@ -47,7 +48,7 @@ import {
 } from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 function notifyCommands(app: JupyterFrontEnd): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -180,18 +181,21 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
   id: '@jupyterlab/debugger-extension:notebooks',
   autoStart: true,
-  requires: [IDebugger, INotebookTracker, ISessionContextDialogs, ITranslator],
-  optional: [ILabShell, ICommandPalette],
+  requires: [IDebugger, INotebookTracker],
+  optional: [ILabShell, ICommandPalette, ISessionContextDialogs, ITranslator],
   provides: IDebuggerHandler,
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
-    sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator,
     labShell: ILabShell | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    sessionDialogs: ISessionContextDialogs | null,
+    translator: ITranslator | null
   ): Debugger.Handler => {
+    translator = translator ?? nullTranslator;
+    sessionDialogs =
+      sessionDialogs ?? new SessionContextDialogs({ translator });
     const handler = new Debugger.Handler({
       type: 'notebook',
       shell: app.shell,
@@ -213,7 +217,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionDialogs.restart(sessionContext);
+        const restarted = await sessionDialogs!.restart(sessionContext);
         if (!restarted) {
           return;
         }
@@ -223,8 +227,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         await NotebookActions.runAll(
           content,
           sessionContext,
-          sessionDialogs,
-          translator
+          sessionDialogs!,
+          translator!
         );
       }
     });

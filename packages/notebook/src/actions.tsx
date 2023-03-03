@@ -502,7 +502,7 @@ export namespace NotebookActions {
   export function run(
     notebook: Notebook,
     sessionContext: ISessionContext,
-    sessionDialogs: ISessionContextDialogs,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
@@ -540,7 +540,7 @@ export namespace NotebookActions {
   export async function runAndAdvance(
     notebook: Notebook,
     sessionContext: ISessionContext,
-    sessionDialogs: ISessionContextDialogs,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
@@ -597,7 +597,7 @@ export namespace NotebookActions {
   export async function runAndInsert(
     notebook: Notebook,
     sessionContext: ISessionContext,
-    sessionDialogs: ISessionContextDialogs,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
@@ -645,7 +645,7 @@ export namespace NotebookActions {
   export function runAll(
     notebook: Notebook,
     sessionContext: ISessionContext,
-    sessionDialogs: ISessionContextDialogs,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
@@ -709,7 +709,7 @@ export namespace NotebookActions {
   export function runAllAbove(
     notebook: Notebook,
     sessionContext: ISessionContext,
-    sessionDialogs: ISessionContextDialogs,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
     const { activeCell, activeCellIndex, model } = notebook;
@@ -755,7 +755,7 @@ export namespace NotebookActions {
   export function runAllBelow(
     notebook: Notebook,
     sessionContext: ISessionContext,
-    sessionDialogs: ISessionContextDialogs,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
