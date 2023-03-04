@@ -15,7 +15,7 @@ export class MetadataFormProvider implements IMetadataFormProvider {
   }
 
   get(id: string): MetadataForm.IMetadataForm | undefined {
-    if (!this._items[id]) {
+    if (this._items[id]) {
       return this._items[id];
     } else {
       console.warn(`There is no MetadataformWidget registered with id ${id}`);

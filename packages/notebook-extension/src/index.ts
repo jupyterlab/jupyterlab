@@ -5,6 +5,8 @@
  * @module notebook-extension
  */
 
+import type { FieldProps } from '@rjsf/utils';
+
 import {
   ILabShell,
   ILayoutRestorer,
@@ -54,6 +56,7 @@ import {
   ILSPFeatureManager
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IMetadataFormProvider } from '@jupyterlab/metadataform';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
   CommandEditStatus,
@@ -91,6 +94,7 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
   moveUpIcon,
@@ -102,7 +106,6 @@ import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
   JSONObject,
-  JSONValue,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
   UUID
@@ -111,6 +114,11 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
+import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
+import {
+  CellMetadataField,
+  NotebookMetadataField
+} from './tool-widgets/metadataEditorFields';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -867,6 +875,156 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
+const updateRawMimetype: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:update-raw-mimetype',
+  autoStart: true,
+  requires: [INotebookTracker, IMetadataFormProvider, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    metadataForms: IMetadataFormProvider,
+    translator: ITranslator
+  ) => {
+    const trans = translator.load('jupyterlab');
+    let formatsInitialized = false;
+
+    async function maybeInitializeFormats() {
+      if (formatsInitialized) {
+        return;
+      }
+      if (!metadataForms.get('commonToolsSection')) {
+        return;
+      }
+
+      const properties = metadataForms
+        .get('commonToolsSection')!
+        .getProperties('/raw_mimetype');
+
+      if (!properties) {
+        return;
+      }
+
+      tracker.widgetAdded.disconnect(maybeInitializeFormats);
+
+      formatsInitialized = true;
+
+      const services = app.serviceManager;
+      const response = await services.nbconvert.getExportFormats(false);
+      if (!response) {
+        return;
+      }
+
+      // convert exportList to palette and menu items
+      const formatList = Object.keys(response);
+      const formatLabels = Private.getFormatLabels(translator);
+      type enumeration = {
+        const: string;
+        title: string;
+      };
+      formatList.forEach(function (key) {
+        const mimetypeExists =
+          (properties!.oneOf as Array<enumeration>)?.filter(
+            value => value.const === key
+          ).length > 0;
+        if (!mimetypeExists) {
+          const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
+          const option = formatLabels[key] ? formatLabels[key] : altOption;
+          const mimeTypeValue = response[key].output_mimetype;
+
+          (properties!.oneOf as Array<enumeration>)!.push({
+            const: mimeTypeValue,
+            title: option
+          });
+        }
+      });
+
+      metadataForms
+        .get('commonToolsSection')!
+        .setProperties('/raw_mimetype', properties);
+    }
+    tracker.widgetAdded.connect(maybeInitializeFormats);
+  }
+};
+
+/**
+ * Registering metadata editor fields.
+ */
+const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:metadata-editor',
+  autoStart: true,
+  requires: [INotebookTracker, IEditorServices, IFormRendererRegistry],
+  optional: [ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    editorServices: IEditorServices,
+    formRegistry: IFormRendererRegistry,
+    translator?: ITranslator
+  ) => {
+    const editorFactory: CodeEditor.Factory = options =>
+      editorServices.factoryService.newInlineEditor(options);
+    // Register the custom fields.
+    const cellComponent: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return new CellMetadataField({
+          editorFactory,
+          tracker,
+          label: 'Cell metadata',
+          translator: translator
+        }).render(props);
+      }
+    };
+    formRegistry.addRenderer(
+      'notebook-extension:metadata-editor.cell-metadata',
+      cellComponent
+    );
+
+    const notebookComponent: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return new NotebookMetadataField({
+          editorFactory,
+          tracker,
+          label: 'Notebook metadata',
+          translator: translator
+        }).render(props);
+      }
+    };
+    formRegistry.addRenderer(
+      'notebook-extension:metadata-editor.notebook-metadata',
+      notebookComponent
+    );
+  }
+};
+
+/**
+ * Registering active cell field.
+ */
+const activeCellTool: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:active-cell-tool',
+  autoStart: true,
+  requires: [INotebookTracker, IFormRendererRegistry, IEditorLanguageRegistry],
+  activate: (
+    // Register the custom field.
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    formRegistry: IFormRendererRegistry,
+    languages: IEditorLanguageRegistry
+  ) => {
+    const component: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return new ActiveCellTool({
+          tracker,
+          languages
+        }).render(props);
+      }
+    };
+    formRegistry.addRenderer(
+      'notebook-extension:active-cell-tool.renderer',
+      component
+    );
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -888,7 +1046,10 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   completerPlugin,
   searchProvider,
   tocPlugin,
-  languageServerPlugin
+  languageServerPlugin,
+  updateRawMimetype,
+  customMetadataEditorFields,
+  activeCellTool
 ];
 export default plugins;
 
@@ -907,23 +1068,6 @@ function activateNotebookTools(
   const trans = translator.load('jupyterlab');
   const id = 'notebook-tools';
   const notebookTools = new NotebookTools({ tracker, translator });
-  const activeCellTool = new NotebookTools.ActiveCellTool(languages);
-  const editable = NotebookTools.createEditableToggle(translator);
-  const slideShow = NotebookTools.createSlideShowSelector(translator);
-  const tocBaseNumbering = NotebookTools.createToCBaseNumbering(translator);
-  const editorFactory: CodeEditor.Factory = options =>
-    editorServices.factoryService.newInlineEditor(options);
-  const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
-    editorFactory,
-    collapsed: false,
-    translator
-  });
-  const notebookMetadataEditor = new NotebookTools.NotebookMetadataEditorTool({
-    editorFactory,
-    translator
-  });
-
-  const services = app.serviceManager;
 
   // Create message hook for triggers to save to the database.
   const hook = (sender: any, message: Message): boolean => {
@@ -940,76 +1084,9 @@ function activateNotebookTools(
     }
     return true;
   };
-  const optionsMap: { [key: string]: JSONValue } = {};
-  optionsMap.None = null;
-
-  let formatsInitialized = false;
-
-  async function maybeInitializeFormats() {
-    if (formatsInitialized) {
-      return;
-    }
-
-    tracker.widgetAdded.disconnect(maybeInitializeFormats);
-
-    formatsInitialized = true;
-
-    const response = await services.nbconvert.getExportFormats(false);
-    if (!response) {
-      return;
-    }
-    /**
-     * The excluded Cell Inspector Raw NbConvert Formats
-     * (returned from nbconvert's export list)
-     */
-    const rawFormatExclude = ['pdf', 'slides', 'script', 'notebook', 'custom'];
-    let optionValueArray: any = [
-      [trans.__('PDF'), 'pdf'],
-      [trans.__('Slides'), 'slides'],
-      [trans.__('Script'), 'script'],
-      [trans.__('Notebook'), 'notebook'],
-      [trans.__('Custom'), 'custom']
-    ];
-
-    // convert exportList to palette and menu items
-    const formatList = Object.keys(response);
-    const formatLabels = Private.getFormatLabels(translator);
-    formatList.forEach(function (key) {
-      if (rawFormatExclude.indexOf(key) === -1) {
-        const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
-        const option = formatLabels[key] ? formatLabels[key] : altOption;
-        const mimeTypeValue = response[key].output_mimetype;
-        optionValueArray.push([option, mimeTypeValue]);
-      }
-    });
-    const nbConvert = NotebookTools.createNBConvertSelector(
-      optionValueArray,
-      translator
-    );
-    notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
-  }
-
-  tracker.widgetAdded.connect(maybeInitializeFormats);
-
   notebookTools.title.icon = buildIcon;
   notebookTools.title.caption = trans.__('Notebook Tools');
   notebookTools.id = id;
-
-  notebookTools.addItem({ tool: activeCellTool, section: 'common', rank: 1 });
-  notebookTools.addItem({ tool: editable, section: 'common', rank: 2 });
-  notebookTools.addItem({ tool: slideShow, section: 'common', rank: 3 });
-  notebookTools.addItem({ tool: tocBaseNumbering, section: 'common', rank: 4 });
-
-  notebookTools.addItem({
-    tool: cellMetadataEditor,
-    section: 'advanced',
-    rank: 1
-  });
-  notebookTools.addItem({
-    tool: notebookMetadataEditor,
-    section: 'advanced',
-    rank: 2
-  });
 
   MessageLoop.installMessageHook(notebookTools, hook);
 

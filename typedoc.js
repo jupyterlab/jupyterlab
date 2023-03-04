@@ -13,7 +13,6 @@ const packages = [
   'attachments',
   'cells',
   'celltags-extension',
-  'celltags',
   'codeeditor',
   'codemirror-extension',
   'codemirror',
