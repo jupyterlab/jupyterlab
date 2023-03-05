@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/statusbar",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-alpha.20",
   "description": "JupyterLab statusbar package.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,7 +37,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.35",
     "@lumino/algorithm": "^2.0.0-rc.0",
     "@lumino/coreutils": "^2.0.0-rc.0",
     "@lumino/disposable": "^2.0.0-rc.0",
@@ -47,7 +47,7 @@
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.19",
+    "@jupyterlab/testing": "^4.0.0-alpha.20",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typescript": "~5.0.0-beta"

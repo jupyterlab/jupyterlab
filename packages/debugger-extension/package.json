@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/debugger-extension",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-alpha.20",
   "description": "JupyterLab - Debugger Extension",
   "keywords": [
     "jupyter",
@@ -44,24 +44,24 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/apputils": "^4.0.0-alpha.19",
-    "@jupyterlab/cells": "^4.0.0-alpha.19",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.19",
-    "@jupyterlab/console": "^4.0.0-alpha.19",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/debugger": "^4.0.0-alpha.19",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/fileeditor": "^4.0.0-alpha.19",
-    "@jupyterlab/logconsole": "^4.0.0-alpha.19",
-    "@jupyterlab/notebook": "^4.0.0-alpha.19",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.19",
-    "@jupyterlab/services": "^7.0.0-alpha.19",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19"
+    "@jupyterlab/application": "^4.0.0-alpha.20",
+    "@jupyterlab/apputils": "^4.0.0-alpha.20",
+    "@jupyterlab/cells": "^4.0.0-alpha.20",
+    "@jupyterlab/codeeditor": "^4.0.0-alpha.20",
+    "@jupyterlab/console": "^4.0.0-alpha.20",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.20",
+    "@jupyterlab/debugger": "^4.0.0-alpha.20",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.20",
+    "@jupyterlab/fileeditor": "^4.0.0-alpha.20",
+    "@jupyterlab/logconsole": "^4.0.0-alpha.20",
+    "@jupyterlab/notebook": "^4.0.0-alpha.20",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.20",
+    "@jupyterlab/services": "^7.0.0-alpha.20",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.20",
+    "@jupyterlab/translation": "^4.0.0-alpha.20"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.19",
+    "@jupyterlab/testing": "^4.0.0-alpha.20",
     "@types/jest": "^29.2.0",
     "@types/react-dom": "^18.0.9",
     "rimraf": "~3.0.0",
