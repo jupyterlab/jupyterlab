@@ -162,6 +162,7 @@ export class CellToolbarTracker implements IDisposable {
           widget instanceof ReactWidget &&
           (widget as ReactWidget).renderPromise !== undefined
         ) {
+          (widget as ReactWidget).update();
           promises.push((widget as ReactWidget).renderPromise!);
         }
       }
