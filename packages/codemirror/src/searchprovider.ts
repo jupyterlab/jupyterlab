@@ -33,7 +33,12 @@
 import { ISearchMatch } from '@jupyterlab/documentsearch';
 import { JSONExt } from '@lumino/coreutils';
 import { CodeMirrorEditor } from './editor';
-import { StateEffect, StateEffectType, StateField } from '@codemirror/state';
+import {
+  SelectionRange,
+  StateEffect,
+  StateEffectType,
+  StateField
+} from '@codemirror/state';
 import { Decoration, DecorationSet, EditorView } from '@codemirror/view';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
@@ -440,8 +445,12 @@ interface IEffectValue {
  * Highlighted texts (aka `matches`) must be provided through
  * the `matches` attributes.
  *
- * NOTES: to retain the selection visibility `drawSelection` extension needs
- * to be enabled.
+ * **NOTES:**
+ * - to retain the selection visibility `drawSelection` extension is needed.
+ * - highlighting starts from the cursor (if editor is focused, cursor moved,
+ *   or `fromCursor` argument is set to `true`), or from last "current" match
+ *   otherwise.
+ * - `currentIndex` is the (readonly) source of truth for the current match.
  */
 export class CodeMirrorSearchHighlighter {
   /**
@@ -697,8 +706,12 @@ export class CodeMirrorSearchHighlighter {
     }
 
     let lastPosition = 0;
-    if (this._cm!.hasFocus() || fromCursor) {
-      const cursor = this._cm!.state.selection.main;
+    const cursor = this._cm!.state.selection.main;
+    const cursorMoved =
+      this._previousCursor.anchor !== cursor.anchor ||
+      this._previousCursor.head !== cursor.head;
+    this._previousCursor = cursor;
+    if (this._cm!.hasFocus() || fromCursor || cursorMoved) {
       lastPosition = reverse ? cursor.anchor : cursor.head;
     } else if (this._current) {
       lastPosition = reverse
@@ -742,6 +755,10 @@ export class CodeMirrorSearchHighlighter {
   private _highlightMark: Decoration;
   private _currentMark: Decoration;
   private _highlightField: StateField<DecorationSet>;
+  private _previousCursor: Pick<SelectionRange, 'anchor' | 'head'> = {
+    anchor: 0,
+    head: 0
+  };
 }
 
 /**
