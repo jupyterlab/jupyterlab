@@ -113,7 +113,6 @@ describe('@jupyterlab/fileeditor', () => {
 
       it('should loop back to first match', async () => {
         widget.editor.setCursorPosition({ line: 1, column: 0 });
-        //widget.editor.focus();
         await provider.startQuery(/test/, undefined);
         expect(provider.currentMatchIndex).toBe(2);
         await provider.highlightNext();
@@ -148,6 +147,43 @@ describe('@jupyterlab/fileeditor', () => {
         expect(provider.currentMatchIndex).toBe(0);
         await provider.highlightPrevious();
         expect(provider.currentMatchIndex).toBe(2);
+        await provider.endQuery();
+      });
+    });
+
+    describe('#replaceCurrentMatch()', () => {
+      it('should replace highlighted match when editor is blurred', async () => {
+        widget.editor.setCursorPosition({ line: 1, column: 0 });
+        await provider.startQuery(/tes/, undefined);
+        expect(provider.currentMatchIndex).toBe(2);
+        await provider.replaceCurrentMatch('bar');
+        expect(widget.context.model.toString()).toBe('test test\nbart');
+        await provider.endQuery();
+      });
+
+      it('should replace first match when editor is blurred', async () => {
+        await provider.startQuery(/tes/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.replaceCurrentMatch('bar');
+        expect(widget.context.model.toString()).toBe('bart test\ntest');
+        await provider.endQuery();
+      });
+
+      it('should replace first match when editor is focused', async () => {
+        widget.editor.focus();
+        await provider.startQuery(/tes/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.replaceCurrentMatch('bar');
+        expect(widget.context.model.toString()).toBe('bart test\ntest');
+        await provider.endQuery();
+      });
+    });
+
+    describe('#replaceAllMatches()', () => {
+      it('should replace all matches', async () => {
+        await provider.startQuery(/test/, undefined);
+        await provider.replaceAllMatches('bar');
+        expect(widget.context.model.toString()).toBe('bar bar\nbar');
         await provider.endQuery();
       });
     });

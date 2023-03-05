@@ -277,14 +277,9 @@ export abstract class EditorSearchProvider<
       this.currentIndex !== null &&
       this.currentIndex < this.cmHandler.matches.length
     ) {
-      const editor = this.editor as CodeMirrorEditor;
-      const selection = editor.state.sliceDoc(
-        editor.state.selection.main.from,
-        editor.state.selection.main.to
-      );
       const match = this.getCurrentMatch();
-      // If cursor is not on a selection, highlight the next match
-      if (selection !== match?.text) {
+      // If cursor there is no match selected, highlight the next match
+      if (!match) {
         this.currentIndex = null;
         // The next will be highlighted as a consequence of this returning false
       } else {
