@@ -287,7 +287,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    */
   async clearHighlight(): Promise<void> {
     this._selectionLock = true;
-    if (this._currentProviderIndex !== null) {
+    if (
+      this._currentProviderIndex !== null &&
+      this._currentProviderIndex < this._searchProviders.length
+    ) {
       await this._searchProviders[this._currentProviderIndex].clearHighlight();
       this._currentProviderIndex = null;
     }
@@ -342,9 +345,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     if (!this.widget) {
       return;
     }
-    this._selectionLock = true;
     await this.endQuery();
-    this._selectionLock = false;
     let cells = this.widget.content.widgets;
 
     this._query = query;
@@ -385,9 +386,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
     this._currentProviderIndex = currentProviderIndex;
 
-    this._selectionLock = true;
     await this.highlightNext(false);
-    this._selectionLock = false;
 
     return Promise.resolve();
   }
@@ -571,7 +570,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     reverse = false,
     loop = false
   ): Promise<ISearchMatch | null> {
-    const activateNewMatch = async () => {
+    const activateNewMatch = async (match: ISearchMatch) => {
       this._selectionLock = true;
       if (this.widget.content.activeCellIndex !== this._currentProviderIndex!) {
         this.widget.content.activeCellIndex = this._currentProviderIndex!;
@@ -604,7 +603,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
       await activeCell.ready;
       const editor = activeCell.editor!;
-      editor.revealSelection(editor.getSelection());
+      editor.revealPosition(editor.getPositionAt(match.position)!);
       this._selectionLock = false;
     };
 
@@ -621,7 +620,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         : await searchEngine.highlightNext(false);
 
       if (match) {
-        await activateNewMatch();
+        await activateNewMatch(match);
         return match;
       } else {
         this._currentProviderIndex =
@@ -722,13 +721,12 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
     // Clear old selection restrictions or if relevant, set current restrictions for active provider.
     await Promise.all(
-      this._searchProviders.map((provider, index) =>
-        provider.setSearchSelection(
-          this._currentProviderIndex === index && textMode
-            ? this._textSelection
-            : null
-        )
-      )
+      this._searchProviders.map((provider, index) => {
+        const isCurrent = this.widget.content.activeCellIndex === index;
+        return provider.setSearchSelection(
+          isCurrent && textMode ? this._textSelection : null
+        );
+      })
     );
   }
 

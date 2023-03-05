@@ -170,8 +170,12 @@ export abstract class EditorSearchProvider<
    * Set whether search should be limitted to specified selection.
    */
   async setSearchSelection(selection: CodeEditor.IRange | null): Promise<void> {
+    if (this._inSelection === selection) {
+      return;
+    }
     this._inSelection = selection;
     await this.updateCodeMirror(this.model.sharedModel.getSource());
+    this._stateChanged.emit();
   }
 
   /**
@@ -383,6 +387,7 @@ export abstract class EditorSearchProvider<
         this.cmHandler.matches = allMatches.filter(
           match => match.position >= start && match.position <= end
         );
+        this.currentIndex = this.cmHandler.currentIndex;
       } else {
         this.cmHandler.matches = allMatches;
       }
@@ -424,6 +429,9 @@ interface IEffectValue {
  *
  * Highlighted texts (aka `matches`) must be provided through
  * the `matches` attributes.
+ *
+ * NOTES: to retain the selection visibility `drawSelection` extension needs
+ * to be enabled.
  */
 export class CodeMirrorSearchHighlighter {
   /**
@@ -512,7 +520,13 @@ export class CodeMirrorSearchHighlighter {
     if (!JSONExt.deepEqual(this._matches as any, v as any)) {
       this._matches = v;
     }
-    this._refresh();
+    if (
+      this._currentIndex !== null &&
+      this._currentIndex > this._matches.length
+    ) {
+      this._currentIndex = this._matches.length > 0 ? 0 : null;
+    }
+    this._highlightCurrentMatch(true);
   }
 
   private _current: ISearchMatch | null = null;
@@ -536,15 +550,6 @@ export class CodeMirrorSearchHighlighter {
       this._cm.editor.dispatch({
         effects: this._highlightEffect.of({ matches: [], currentMatch: null })
       });
-
-      const selection = this._cm.state.selection.main;
-      const from = selection.from;
-      const to = selection.to;
-      // Setting a reverse selection to allow search-as-you-type to maintain the
-      // current selected match. See comment in _findNext for more details.
-      if (from !== to) {
-        this._cm.editor.dispatch({ selection: { anchor: to, head: from } });
-      }
     }
 
     return Promise.resolve();
@@ -597,7 +602,31 @@ export class CodeMirrorSearchHighlighter {
     }
   }
 
-  private _highlightCurrentMatch(): void {
+  private _selectCurrentMatch(): void {
+    const match = this._current;
+    if (!match) {
+      return;
+    }
+    if (!this._cm) {
+      return;
+    }
+    const selection = this._cm.editor.state.selection.main;
+    if (
+      selection.from === match.position &&
+      selection.to === match.position + match.text.length
+    ) {
+      return;
+    }
+    this._cm.editor.dispatch({
+      selection: {
+        anchor: match.position,
+        head: match.position + match.text.length
+      },
+      scrollIntoView: true
+    });
+  }
+
+  private _highlightCurrentMatch(doNotModifySelection = false): void {
     if (!this._cm) {
       // no-op
       return;
@@ -606,14 +635,19 @@ export class CodeMirrorSearchHighlighter {
     // Highlight the current index
     if (this._currentIndex !== null) {
       const match = this.matches[this._currentIndex];
-      this._cm.editor.dispatch({
-        selection: {
-          anchor: match.position,
-          head: match.position + match.text.length
-        },
-        scrollIntoView: true
-      });
       this._current = match;
+      // Do not change selection/scroll if user is selecting
+      if (!doNotModifySelection) {
+        if (this._cm.hasFocus()) {
+          // If editor is focused we actually set the cursor on the match.
+          this._selectCurrentMatch();
+        } else {
+          // otherwise we just scroll to preserve the selection.
+          this._cm.editor.dispatch({
+            effects: EditorView.scrollIntoView(match.position)
+          });
+        }
+      }
     } else {
       this._current = null;
     }
@@ -625,15 +659,22 @@ export class CodeMirrorSearchHighlighter {
       // no-op
       return;
     }
-
     let effects: StateEffect<unknown>[] = [
       this._highlightEffect.of({
         matches: this.matches,
         currentMatch: this._current
       })
     ];
+
     if (!this._cm!.state.field(this._highlightField, false)) {
       effects.push(StateEffect.appendConfig.of([this._highlightField]));
+      // set cursor on active match when editor gets focused
+      const focusExtension = EditorView.domEventHandlers({
+        focus: () => {
+          this._selectCurrentMatch();
+        }
+      });
+      effects.push(StateEffect.appendConfig.of([focusExtension]));
     }
     this._cm!.editor.dispatch({ effects });
   }
@@ -643,24 +684,16 @@ export class CodeMirrorSearchHighlighter {
       // No-op
       return null;
     }
-    // TODO: refactor this to avoid storing any state in the selection/cursor
-    // as this prevents correct behaviour when we want to use selection as
-    // limiting the boundary of search.
 
-    // In order to support search-as-you-type, we needed a way to allow the first
-    // match to be selected when a search is started, but prevent the selected
-    // search to move for each new keypress.  To do this, when a search is ended,
-    // the cursor is reversed, putting the head at the 'from' position.  When a new
-    // search is started, the cursor we want is at the 'from' position, so that the same
-    // match is selected when the next key is entered (if it is still a match).
-    //
-    // When toggling through a search normally, the cursor is always set in the forward
-    // direction, so head is always at the 'to' position.  That way, if reverse = false,
-    // the search proceeds from the 'to' position during normal toggling.  If reverse = true,
-    // the search always proceeds from the 'anchor' position, which is at the 'from'.
-
-    const cursor = this._cm!.state.selection.main;
-    let lastPosition = reverse ? cursor.anchor : cursor.head;
+    let lastPosition = 0;
+    if (this._cm!.hasFocus()) {
+      const cursor = this._cm!.state.selection.main;
+      lastPosition = reverse ? cursor.anchor : cursor.head;
+    } else if (this._current) {
+      lastPosition = reverse
+        ? this._current.position
+        : this._current.position + this._current.text.length;
+    }
     if (lastPosition === 0 && reverse && this.currentIndex === null) {
       // The default position is (0, 0) but we want to start from the end in that case
       lastPosition = this._cm!.doc.length;
