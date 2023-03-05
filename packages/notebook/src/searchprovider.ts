@@ -450,9 +450,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         false,
         options
       );
+      if (searchEngine.currentMatchIndex === null) {
+        // switch to next cell
+        await this.highlightNext(loop);
+      }
     }
 
-    await this.highlightNext(loop);
+    // TODO: markdown undrendering/highlighting sequence is likely incorrect
     // Force highlighting the first hit in the unrendered cell
     await unrenderMarkdownCell(true);
     return replaceOccurred;
@@ -738,14 +742,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     const cells = this.widget.content.widgets;
     let selectedCells = 0;
     await Promise.all(
-      cells.map((cell, index) => {
+      cells.map(async (cell, index) => {
         const provider = this._searchProviders[index];
         const isSelected = this.widget.content.isSelectedOrActive(cell);
         if (isSelected) {
           selectedCells += 1;
         }
         if (provider && this._onSelection) {
-          provider.setIsActive(isSelected);
+          await provider.setIsActive(isSelected);
         }
       })
     );

@@ -259,6 +259,13 @@ export abstract class EditorSearchProvider<
    *
    * If no match is selected, it won't do anything.
    *
+   * The caller of this method is expected to call `highlightNext` if after
+   * calling `replaceCurrentMatch()` attribute `this.currentIndex` is null.
+   * It is necesary to let the caller handle highlighting because this
+   * method is used in composition pattern (search engine of notebook cells)
+   * and highligthing on the composer (notebook) level needs to switch to next
+   * engine (cell) with matches.
+   *
    * @param newText The replacement text.
    * @returns Whether a replace occurred.
    */
@@ -281,10 +288,12 @@ export abstract class EditorSearchProvider<
       // If cursor there is no match selected, highlight the next match
       if (!match) {
         this.currentIndex = null;
-        // The next will be highlighted as a consequence of this returning false
       } else {
         this.cmHandler.matches.splice(this.currentIndex, 1);
-        this.currentIndex = null;
+        this.currentIndex =
+          this.currentIndex < this.cmHandler.matches.length
+            ? Math.max(this.currentIndex - 1, 0)
+            : null;
         const substitutedText = options?.regularExpression
           ? match!.text.replace(this.query!, newText)
           : newText;
@@ -518,9 +527,10 @@ export class CodeMirrorSearchHighlighter {
     return this._matches;
   }
   set matches(v: ISearchMatch[]) {
-    if (!JSONExt.deepEqual(this._matches as any, v as any)) {
-      this._matches = v;
+    if (JSONExt.deepEqual(this._matches as any, v as any)) {
+      return;
     }
+    this._matches = v;
     if (
       this._currentIndex !== null &&
       this._currentIndex > this._matches.length

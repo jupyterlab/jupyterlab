@@ -63,7 +63,6 @@ describe('@jupyterlab/notebook', () => {
       it('should loop back to first match', async () => {
         panel.content.activeCellIndex = 1;
         await provider.startQuery(/test/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(2);
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
@@ -85,7 +84,6 @@ describe('@jupyterlab/notebook', () => {
       it('should highlight previous match', async () => {
         panel.content.activeCellIndex = 1;
         await provider.startQuery(/tes/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(2);
         expect(panel.content.activeCellIndex).toBe(1);
         await provider.highlightPrevious();
