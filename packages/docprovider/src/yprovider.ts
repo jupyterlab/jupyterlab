@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { showErrorMessage, Dialog } from '@jupyterlab/apputils';
+import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ServerConnection, User } from '@jupyterlab/services';
 
 import { DocumentChange, YDocument } from '@jupyter/ydoc';
