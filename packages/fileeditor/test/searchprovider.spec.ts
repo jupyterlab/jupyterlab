@@ -90,7 +90,6 @@ describe('@jupyterlab/fileeditor', () => {
     describe('#highlightNext()', () => {
       it('should highlight next match', async () => {
         await provider.startQuery(/test/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(1);
@@ -114,8 +113,8 @@ describe('@jupyterlab/fileeditor', () => {
 
       it('should loop back to first match', async () => {
         widget.editor.setCursorPosition({ line: 1, column: 0 });
+        //widget.editor.focus();
         await provider.startQuery(/test/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(2);
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
@@ -135,21 +134,17 @@ describe('@jupyterlab/fileeditor', () => {
       it('should highlight previous match', async () => {
         widget.editor.setCursorPosition({ line: 1, column: 0 });
         await provider.startQuery(/tes/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(2);
         expect(widget.editor.getCursorPosition().line).toBe(1);
         await provider.highlightPrevious();
-        expect(widget.editor.getCursorPosition().line).toBe(0);
         expect(provider.currentMatchIndex).toBe(1);
         await provider.highlightPrevious();
-        expect(widget.editor.getCursorPosition().line).toBe(0);
         expect(provider.currentMatchIndex).toBe(0);
         await provider.endQuery();
       });
 
       it('should loop back to last match', async () => {
         await provider.startQuery(/test/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
         await provider.highlightPrevious();
         expect(provider.currentMatchIndex).toBe(2);

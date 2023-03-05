@@ -60,6 +60,7 @@ interface ISearchInputProps {
   inputRef?: React.RefObject<HTMLTextAreaElement>;
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  autoFocus: boolean;
 }
 
 function SearchInput(props: ISearchInputProps): JSX.Element {
@@ -82,6 +83,7 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
       ref={props.inputRef}
       title={props.title}
       defaultValue={props.value}
+      autoFocus={props.autoFocus}
     ></textarea>
   );
 }
@@ -127,6 +129,7 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
         onKeyDown={e => props.onKeydown(e)}
         inputRef={props.inputRef}
         title={trans.__('Find')}
+        autoFocus={true}
       />
       <button
         className={BUTTON_WRAPPER_CLASS}
@@ -187,6 +190,7 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
           onKeyDown={e => props.onReplaceKeydown(e)}
           onChange={e => props.onChange(e)}
           title={trans.__('Replace')}
+          autoFocus={false}
         />
         {props.replaceOptionsSupport?.preserveCase ? (
           <button

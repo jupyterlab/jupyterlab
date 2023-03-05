@@ -304,9 +304,12 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    *
    * @returns The next match if available.
    */
-  async highlightNext(loop: boolean = true): Promise<ISearchMatch | undefined> {
+  async highlightNext(
+    loop: boolean = true,
+    fromCursor = false
+  ): Promise<ISearchMatch | undefined> {
     const wasFocused = this.widget.content.mode === 'edit';
-    const match = await this._stepNext(false, loop);
+    const match = await this._stepNext(false, loop, fromCursor);
     if (match && wasFocused) {
       this.widget.content.activeCell?.editor?.focus();
     }
@@ -386,7 +389,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
     this._currentProviderIndex = currentProviderIndex;
 
-    await this.highlightNext(false);
+    await this.highlightNext(false, true);
 
     return Promise.resolve();
   }
@@ -568,7 +571,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
   private async _stepNext(
     reverse = false,
-    loop = false
+    loop = false,
+    fromCursor = false
   ): Promise<ISearchMatch | null> {
     const activateNewMatch = async (match: ISearchMatch) => {
       this._selectionLock = true;
@@ -616,8 +620,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
       const match = reverse
-        ? await searchEngine.highlightPrevious(false)
-        : await searchEngine.highlightNext(false);
+        ? await searchEngine.highlightPrevious(false, fromCursor)
+        : await searchEngine.highlightNext(false, fromCursor);
 
       if (match) {
         await activateNewMatch(match);

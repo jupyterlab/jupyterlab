@@ -209,12 +209,15 @@ export abstract class EditorSearchProvider<
    *
    * @returns The next match if there is one.
    */
-  async highlightNext(loop = true): Promise<ISearchMatch | undefined> {
+  async highlightNext(
+    loop = true,
+    fromCursor = false
+  ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
-      // This starts from the cursor position
-      let match = await this.cmHandler.highlightNext();
+      // This starts from the cursor position if `fromCursor` is true
+      let match = await this.cmHandler.highlightNext(fromCursor);
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
@@ -231,12 +234,15 @@ export abstract class EditorSearchProvider<
    *
    * @returns The previous match if there is one.
    */
-  async highlightPrevious(loop = true): Promise<ISearchMatch | undefined> {
+  async highlightPrevious(
+    loop = true,
+    fromCursor = false
+  ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
-      // This starts from the cursor position
-      let match = await this.cmHandler.highlightPrevious();
+      // This starts from the cursor position if `fromCursor` is true
+      let match = await this.cmHandler.highlightPrevious(fromCursor);
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
@@ -560,8 +566,8 @@ export class CodeMirrorSearchHighlighter {
    *
    * @returns The next match if available
    */
-  highlightNext(): Promise<ISearchMatch | undefined> {
-    this._currentIndex = this._findNext(false);
+  highlightNext(fromCursor = false): Promise<ISearchMatch | undefined> {
+    this._currentIndex = this._findNext(false, fromCursor);
     this._highlightCurrentMatch();
     return Promise.resolve(
       this._currentIndex !== null
@@ -575,8 +581,8 @@ export class CodeMirrorSearchHighlighter {
    *
    * @returns The previous match if available
    */
-  highlightPrevious(): Promise<ISearchMatch | undefined> {
-    this._currentIndex = this._findNext(true);
+  highlightPrevious(fromCursor = false): Promise<ISearchMatch | undefined> {
+    this._currentIndex = this._findNext(true, fromCursor);
     this._highlightCurrentMatch();
     return Promise.resolve(
       this._currentIndex !== null
@@ -679,14 +685,14 @@ export class CodeMirrorSearchHighlighter {
     this._cm!.editor.dispatch({ effects });
   }
 
-  private _findNext(reverse: boolean): number | null {
+  private _findNext(reverse: boolean, fromCursor = false): number | null {
     if (this._matches.length === 0) {
       // No-op
       return null;
     }
 
     let lastPosition = 0;
-    if (this._cm!.hasFocus()) {
+    if (this._cm!.hasFocus() || fromCursor) {
       const cursor = this._cm!.state.selection.main;
       lastPosition = reverse ? cursor.anchor : cursor.head;
     } else if (this._current) {
