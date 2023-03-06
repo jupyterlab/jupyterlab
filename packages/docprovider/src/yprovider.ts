@@ -44,7 +44,7 @@ export class WebSocketProvider implements IDocumentProvider {
     this._serverUrl = options.url;
     this._sharedModel = options.model;
     this._awareness = options.model.awareness;
-    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    this._trans = options.translator ?? nullTranslator.load('jupyterlab');
 
     const user = options.user;
 
