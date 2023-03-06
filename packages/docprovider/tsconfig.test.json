@@ -3,10 +3,16 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../coreutils"
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "."
@@ -15,10 +21,16 @@
       "path": "../../testutils"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../coreutils"
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }
