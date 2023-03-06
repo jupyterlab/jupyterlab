@@ -436,6 +436,7 @@ export namespace NotebookActions {
     } else {
       notebook.moveCell(firstIndex, firstIndex + shift, lastIndex - firstIndex);
     }
+
     Private.handleState(notebook, state, true);
   }
 
@@ -1098,7 +1099,6 @@ export namespace NotebookActions {
     const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
 
     addCells(notebook, mode, values, true);
-
     focusActiveCell(notebook);
   }
 
