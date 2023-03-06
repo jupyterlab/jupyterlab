@@ -70,13 +70,14 @@ export class Placeholder extends Widget {
     const node = document.createElement('div');
 
     super({ node });
-    this._node = node;
     const innerNode = document.createElement('div');
     innerNode.className = options.promptClass ?? '';
     node.insertAdjacentHTML('afterbegin', innerNode.outerHTML);
     this._button = document.createElement('div');
     this._button.classList.add(CONTENT_CLASS);
-    node.innerText = options.text ?? '';
+    this._textContent = document.createElement('div');
+    this._textContent.innerText = options.text ?? '';
+    node.appendChild(this._textContent);
     node.appendChild(this._button);
     ellipsesIcon.element({
       container: this._button.appendChild(document.createElement('div')),
@@ -91,7 +92,7 @@ export class Placeholder extends Widget {
   }
 
   set text(t: string) {
-    this._node.innerText = t;
+    this._textContent.innerText = t;
   }
 
   protected onAfterAttach(msg: Message): void {
@@ -106,7 +107,7 @@ export class Placeholder extends Widget {
 
   private _callback: (e: MouseEvent) => void;
   private _button: HTMLElement;
-  private _node: HTMLDivElement;
+  private _textContent: HTMLDivElement;
 }
 
 /**

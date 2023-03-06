@@ -1055,16 +1055,17 @@ export class CodeCell extends Cell<ICodeCellModel> {
       callback: () => {
         this.outputHidden = !this.outputHidden;
       },
-      text: ((this.model.toJSON().outputs?.[0].text as string) ?? '').split(
-        '\n'
-      )[0]
+      text: (
+        ((this.model.toJSON().outputs as nbformat.IOutput[])[0]
+          ?.text as string) ?? ''
+      ).split('\n')[0]
     });
 
     this.model.contentChanged.connect((sender, args) => {
       if (this._outputPlaceholder) {
         this._outputPlaceholder.text = (
-          ((sender.toJSON().outputs as nbformat.IOutput[])[0].text as string) ??
-          ''
+          ((sender.toJSON().outputs as nbformat.IOutput[])[0]
+            ?.text as string) ?? ''
         ).split('\n')[0];
       }
     });
