@@ -123,7 +123,8 @@ test.describe('Notebook Search and Replace', () => {
     await page.click('button[title="Toggle Replace"]');
     await page.fill('[placeholder="Replace"]', 'egg');
 
-    // TODO: remove Next Match press, it should not be necessary.
+    // TODO: Next Match press count should be one less
+    // (the -/4 state should not be necessary).
     await page.waitForSelector('text=-/4');
     await page.click('button[title="Next Match"]', {
       clickCount: 3

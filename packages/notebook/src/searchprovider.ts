@@ -308,11 +308,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     loop: boolean = true,
     fromCursor = false
   ): Promise<ISearchMatch | undefined> {
-    const wasFocused = this.widget.content.mode === 'edit';
     const match = await this._stepNext(false, loop, fromCursor);
-    if (match && wasFocused) {
-      this.widget.content.activeCell?.editor?.focus();
-    }
     return match ?? undefined;
   }
 
@@ -326,11 +322,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   async highlightPrevious(
     loop: boolean = true
   ): Promise<ISearchMatch | undefined> {
-    const wasFocused = this.widget.content.mode === 'edit';
     const match = await this._stepNext(true, loop);
-    if (match && wasFocused) {
-      this.widget.content.activeCell?.editor?.focus();
-    }
     return match ?? undefined;
   }
 
@@ -389,7 +381,13 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
     this._currentProviderIndex = currentProviderIndex;
 
-    await this.highlightNext(false, true);
+    // If we are searching in selection we do not want to show the first
+    // "current" closest to cursor as depending on which way the user
+    // dragged the selection it would be the first or last match.
+    const firstMatchAfterCursor = !(
+      this._onSelection && this._selectionSearchMode === 'text'
+    );
+    await this.highlightNext(false, firstMatchAfterCursor);
 
     return Promise.resolve();
   }
@@ -619,6 +617,22 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       this._currentProviderIndex = this.widget.content.activeCellIndex;
     }
 
+    // When going to previous match in cell mode and there is no current we
+    // want to skip the active cell and go to the previous cell; in edit mode
+    // the appropriate behaviour is induced by searching from nearest cursor.
+    if (reverse && this.widget.content.mode === 'command') {
+      const searchEngine = this._searchProviders[this._currentProviderIndex];
+      const currentMatch = searchEngine.getCurrentMatch();
+      if (!currentMatch) {
+        this._currentProviderIndex -= 1;
+      }
+      if (loop) {
+        this._currentProviderIndex =
+          (this._currentProviderIndex + this._searchProviders.length) %
+          this._searchProviders.length;
+      }
+    }
+
     const startIndex = this._currentProviderIndex;
     do {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
@@ -647,6 +661,18 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         : 0 <= this._currentProviderIndex &&
           this._currentProviderIndex < this._searchProviders.length
     );
+
+    if (loop) {
+      // try the first provider again
+      const searchEngine = this._searchProviders[startIndex];
+      const match = reverse
+        ? await searchEngine.highlightPrevious(false, fromCursor)
+        : await searchEngine.highlightNext(false, fromCursor);
+      if (match) {
+        await activateNewMatch(match);
+        return match;
+      }
+    }
 
     this._currentProviderIndex = null;
     return null;

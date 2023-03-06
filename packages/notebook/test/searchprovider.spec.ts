@@ -98,6 +98,49 @@ describe('@jupyterlab/notebook', () => {
       it('should loop back to first match', async () => {
         panel.content.activeCellIndex = 1;
         await provider.startQuery(/test/, undefined);
+        expect(panel.content.activeCellIndex).toBe(1);
+        expect(provider.currentMatchIndex).toBe(2);
+        await provider.highlightNext();
+        expect(panel.content.activeCellIndex).toBe(0);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.endQuery();
+      });
+
+      it('should loop back to first match when limited to single cell', async () => {
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'command';
+        await provider.startQuery(/test/, { selection: true });
+        expect(panel.content.activeCellIndex).toBe(0);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(1);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(panel.content.activeCellIndex).toBe(0);
+        await provider.endQuery();
+      });
+
+      it('should loop back to first match in selected lines', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, 2);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1\ntest2\ntest3\ntest4\ntest5' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'edit';
+
+        await provider.startQuery(/test/, { selection: true });
+        await setSelections(panel.content.activeCell!.editor!, [
+          {
+            uuid: 'main-selection',
+            start: { line: 1, column: 0 },
+            end: { line: 2, column: 6 }
+          }
+        ]);
+        expect(panel.content.activeCellIndex).toBe(0);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(1);
+        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(2);
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
@@ -136,6 +179,15 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.currentMatchIndex).toBe(0);
         await provider.highlightPrevious();
         expect(provider.currentMatchIndex).toBe(2);
+        await provider.endQuery();
+      });
+
+      it('should go to previous cell if there is no current match in active cell', async () => {
+        await provider.startQuery(/test/, undefined);
+        panel.content.activeCellIndex = 1;
+        expect(panel.content.activeCellIndex).toBe(1);
+        await provider.highlightPrevious();
+        expect(panel.content.activeCellIndex).toBe(0);
         await provider.endQuery();
       });
     });

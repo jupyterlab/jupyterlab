@@ -31,14 +31,8 @@
 */
 
 import { ISearchMatch } from '@jupyterlab/documentsearch';
-import { JSONExt } from '@lumino/coreutils';
 import { CodeMirrorEditor } from './editor';
-import {
-  SelectionRange,
-  StateEffect,
-  StateEffectType,
-  StateField
-} from '@codemirror/state';
+import { StateEffect, StateEffectType, StateField } from '@codemirror/state';
 import { Decoration, DecorationSet, EditorView } from '@codemirror/view';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
@@ -65,6 +59,7 @@ export abstract class EditorSearchProvider<
     this.currentIndex = null;
     this._stateChanged = new Signal<IBaseSearchProvider, void>(this);
   }
+
   /**
    * CodeMirror search highlighter
    */
@@ -226,6 +221,9 @@ export abstract class EditorSearchProvider<
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
+        // Note: the loop logic is only used in single-editor (e.g. file editor)
+        // provider sub-classes, notebook has it's own loop logic and ignores
+        // `currentIndex` as set here.
         this.currentIndex = loop ? 0 : null;
       }
       return match;
@@ -361,7 +359,7 @@ export abstract class EditorSearchProvider<
    *
    * @returns The current match
    */
-  protected getCurrentMatch(): ISearchMatch | undefined {
+  getCurrentMatch(): ISearchMatch | undefined {
     if (this.currentIndex === null) {
       return undefined;
     } else {
@@ -402,6 +400,13 @@ export abstract class EditorSearchProvider<
         this.cmHandler.matches = allMatches.filter(
           match => match.position >= start && match.position <= end
         );
+        // A special case to always have a current match when in line selection mode.
+        if (
+          this.cmHandler.currentIndex === null &&
+          this.cmHandler.matches.length > 0
+        ) {
+          await this.cmHandler.highlightNext(true, false);
+        }
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
         this.cmHandler.matches = allMatches;
@@ -536,9 +541,6 @@ export class CodeMirrorSearchHighlighter {
     return this._matches;
   }
   set matches(v: ISearchMatch[]) {
-    if (JSONExt.deepEqual(this._matches as any, v as any)) {
-      return;
-    }
     this._matches = v;
     if (
       this._currentIndex !== null &&
@@ -580,9 +582,12 @@ export class CodeMirrorSearchHighlighter {
    *
    * @returns The next match if available
    */
-  highlightNext(fromCursor = false): Promise<ISearchMatch | undefined> {
+  highlightNext(
+    fromCursor = false,
+    doNotModifySelection = false
+  ): Promise<ISearchMatch | undefined> {
     this._currentIndex = this._findNext(false, fromCursor);
-    this._highlightCurrentMatch();
+    this._highlightCurrentMatch(doNotModifySelection);
     return Promise.resolve(
       this._currentIndex !== null
         ? this._matches[this._currentIndex]
@@ -637,11 +642,12 @@ export class CodeMirrorSearchHighlighter {
     ) {
       return;
     }
+    const cursor = {
+      anchor: match.position,
+      head: match.position + match.text.length
+    };
     this._cm.editor.dispatch({
-      selection: {
-        anchor: match.position,
-        head: match.position + match.text.length
-      },
+      selection: cursor,
       scrollIntoView: true
     });
   }
@@ -706,12 +712,8 @@ export class CodeMirrorSearchHighlighter {
     }
 
     let lastPosition = 0;
-    const cursor = this._cm!.state.selection.main;
-    const cursorMoved =
-      this._previousCursor.anchor !== cursor.anchor ||
-      this._previousCursor.head !== cursor.head;
-    this._previousCursor = cursor;
-    if (this._cm!.hasFocus() || fromCursor || cursorMoved) {
+    if (this._cm!.hasFocus() || fromCursor) {
+      const cursor = this._cm!.state.selection.main;
       lastPosition = reverse ? cursor.anchor : cursor.head;
     } else if (this._current) {
       lastPosition = reverse
@@ -755,10 +757,6 @@ export class CodeMirrorSearchHighlighter {
   private _highlightMark: Decoration;
   private _currentMark: Decoration;
   private _highlightField: StateField<DecorationSet>;
-  private _previousCursor: Pick<SelectionRange, 'anchor' | 'head'> = {
-    anchor: 0,
-    head: 0
-  };
 }
 
 /**
