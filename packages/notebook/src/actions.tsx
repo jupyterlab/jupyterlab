@@ -2007,7 +2007,7 @@ export namespace NotebookActions {
     if (!activeCell) {
       return;
     }
-    await activeCell.attached;
+    await activeCell.ready;
     if (notebook.isDisposed || activeCell.isDisposed) {
       return;
     }

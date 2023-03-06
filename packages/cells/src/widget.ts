@@ -393,13 +393,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
-   * A promise that resolves after the widget has been attached to the DOM.
-   */
-  get attached(): Promise<void> {
-    return this._attached.promise;
-  }
-
-  /**
    * Set the prompt for the widget.
    */
   setPrompt(value: string): void {
@@ -621,15 +614,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     this.update();
-    this._attached.resolve();
-  }
-
-  /**
-   * Handle `after-detach` messages.
-   */
-  protected onAfterDetach(msg: Message): void {
-    // Reset the promise if the widget is detached.
-    this._attached = new PromiseDelegate<void>();
   }
 
   /**
@@ -696,8 +680,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _placeholder: boolean;
   private _readOnly = false;
   private _ready = new PromiseDelegate<void>();
-  // Resolves after the widget has been attached to the DOM.
-  private _attached = new PromiseDelegate<void>();
   private _resizeDebouncer = new Debouncer(() => {
     this._displayChanged.emit();
   }, 0);
