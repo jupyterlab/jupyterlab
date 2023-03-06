@@ -1908,6 +1908,9 @@ export class Notebook extends StaticNotebook {
 
     if (activeCell) {
       activeCell.addClass(ACTIVE_CLASS);
+      // Set tab index to 0 on the active cell so that if the user tabs away from
+      // the notebook then tabs back, they will return to the cell where they
+      // left off.
       activeCell.node.tabIndex = 0;
       if (count > 1) {
         activeCell.addClass(OTHER_SELECTED_CLASS);
