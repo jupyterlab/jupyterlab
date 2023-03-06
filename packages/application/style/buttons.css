@@ -94,7 +94,7 @@ button.jp-mod-styled.jp-mod-warn:focus-visible {
 
 .jp-Button-flat:hover {
   background-color: var(--jp-warn-color-hover, rgba(153, 153, 153, 0.1));
-  color: rgb(255,255,255) !important;
+  color: rgb(255, 255, 255) !important;
 }
 
 .jp-Button-flat:focus {
