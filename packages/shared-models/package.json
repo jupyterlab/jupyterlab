@@ -22,8 +22,8 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:all": "npm run build",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "docs": "typedoc src --tsconfig typedoc-tsconfig.json",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
