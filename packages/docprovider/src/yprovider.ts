@@ -6,6 +6,7 @@
 import { URLExt } from '@jupyterlab/coreutils';
 import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ServerConnection, User } from '@jupyterlab/services';
+import { TranslationBundle, nullTranslator } from '@jupyterlab/translation';
 
 import { DocumentChange, YDocument } from '@jupyter/ydoc';
 
@@ -43,6 +44,7 @@ export class WebSocketProvider implements IDocumentProvider {
     this._serverUrl = options.url;
     this._sharedModel = options.model;
     this._awareness = options.model.awareness;
+    this._trans = options.translator ?? nullTranslator.load('jupyterlab');
 
     const user = options.user;
 
@@ -126,11 +128,17 @@ export class WebSocketProvider implements IDocumentProvider {
       console.error('Document provider closed:', event.reason);
 
       showErrorMessage(
-        'Session expired',
-        'The document session expired. You need to reload this browser tab.',
-        [Dialog.okButton({ label: 'Reload' })]
+        this._trans.__('Session expired'),
+        this._trans.__(
+          'The document session expired. You need to reload this browser tab.'
+        ),
+        [Dialog.okButton({ label: this._trans.__('Reload') })]
       )
-        .then(r => window.location.reload())
+        .then((r: any) => { 
+          if (r.button.accept) {
+            window.location.reload();
+          }
+        })
         .catch(e => window.location.reload());
 
       // Dispose shared model immediately. Better break the document model,
@@ -148,6 +156,7 @@ export class WebSocketProvider implements IDocumentProvider {
   private _serverUrl: string;
   private _sharedModel: YDocument<DocumentChange>;
   private _yWebsocketProvider: YWebsocketProvider;
+  private _trans: TranslationBundle;
 }
 
 /**
@@ -168,5 +177,10 @@ export namespace WebSocketProvider {
      * The user data
      */
     user?: User.IManager;
+
+     /**
+     * The jupyterlab translator
+     */
+    translator?: TranslationBundle;
   }
 }

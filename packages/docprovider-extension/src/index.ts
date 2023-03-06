@@ -17,6 +17,7 @@ import {
   WebSocketProvider
 } from '@jupyterlab/docprovider';
 import { ServerConnection } from '@jupyterlab/services';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { DocumentChange, YDocument } from '@jupyter/ydoc';
 
 /**
@@ -25,7 +26,9 @@ import { DocumentChange, YDocument } from '@jupyter/ydoc';
 const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   id: '@jupyterlab/docprovider-extension:plugin',
   provides: IDocumentProviderFactory,
-  activate: (app: JupyterFrontEnd): IDocumentProviderFactory => {
+  optional: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator | null): IDocumentProviderFactory => {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
     const factory = (
@@ -35,7 +38,8 @@ const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
         ? new WebSocketProvider({
             ...options,
             url,
-            user: app.serviceManager.user
+            user: app.serviceManager.user,
+            translator: trans
           })
         : new ProviderMock();
     };

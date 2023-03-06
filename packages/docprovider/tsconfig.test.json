@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfigbase.test",
-  "include": ["src/*", "test/*"],
+  "include": [
+    "src/*",
+    "test/*"
+  ],
   "references": [
     {
       "path": "../apputils"
@@ -10,6 +13,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "."
@@ -25,6 +31,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }
