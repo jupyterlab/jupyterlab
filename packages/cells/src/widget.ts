@@ -584,7 +584,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     });
 
     input.model.contentChanged.connect((sender, args) => {
-      console.log(this._inputPlaceholder);
       if (this._inputPlaceholder) {
         this._inputPlaceholder.text = (sender.toJSON().source as string)?.split(
           '\n'
@@ -1059,6 +1058,15 @@ export class CodeCell extends Cell<ICodeCellModel> {
       text: ((this.model.toJSON().outputs?.[0].text as string) ?? '').split(
         '\n'
       )[0]
+    });
+
+    this.model.contentChanged.connect((sender, args) => {
+      if (this._outputPlaceholder) {
+        this._outputPlaceholder.text = (
+          ((sender.toJSON().outputs as nbformat.IOutput[])[0].text as string) ??
+          ''
+        ).split('\n')[0];
+      }
     });
 
     const layoutWrapper = outputWrapper.layout as PanelLayout;
