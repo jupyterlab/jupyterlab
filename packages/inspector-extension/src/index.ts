@@ -271,7 +271,9 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       // Listen for active cell changes.
       parent.content.activeCellChanged.connect((sender, cell) => {
         cell?.ready.then(() => {
-          handler.editor = cell && cell.editor;
+          if (cell === parent.content.activeCell) {
+            handler.editor = cell!.editor;
+          }
         });
       });
 
