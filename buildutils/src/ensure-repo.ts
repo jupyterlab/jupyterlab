@@ -89,6 +89,7 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/galata': ['node-fetch', 'http-server'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
+  '@jupyterlab/shared-models': ['@jupyter/ydoc'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testutils': [
     'node-fetch',
