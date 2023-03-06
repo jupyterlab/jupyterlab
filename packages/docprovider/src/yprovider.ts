@@ -6,7 +6,7 @@
 import { URLExt } from '@jupyterlab/coreutils';
 import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ServerConnection, User } from '@jupyterlab/services';
-import { TranslationBundle, nullTranslator } from '@jupyterlab/translation';
+import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 
 import { DocumentChange, YDocument } from '@jupyter/ydoc';
 
@@ -134,7 +134,7 @@ export class WebSocketProvider implements IDocumentProvider {
         ),
         [Dialog.okButton({ label: this._trans.__('Reload') })]
       )
-        .then((r: any) => { 
+        .then((r: any) => {
           if (r.button.accept) {
             window.location.reload();
           }
@@ -178,7 +178,7 @@ export namespace WebSocketProvider {
      */
     user?: User.IManager;
 
-     /**
+    /**
      * The jupyterlab translator
      */
     translator?: TranslationBundle;

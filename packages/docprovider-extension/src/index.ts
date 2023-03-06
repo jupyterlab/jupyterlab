@@ -27,7 +27,10 @@ const docProviderPlugin: JupyterFrontEndPlugin<IDocumentProviderFactory> = {
   id: '@jupyterlab/docprovider-extension:plugin',
   provides: IDocumentProviderFactory,
   optional: [ITranslator],
-  activate: (app: JupyterFrontEnd, translator: ITranslator | null): IDocumentProviderFactory => {
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator | null
+  ): IDocumentProviderFactory => {
     const trans = (translator || nullTranslator).load('jupyterlab');
     const server = ServerConnection.makeSettings();
     const url = URLExt.join(server.wsUrl, 'api/yjs');
