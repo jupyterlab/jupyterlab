@@ -626,22 +626,8 @@ export class Context<
       return;
     }
     this._saveState.emit('started');
-    const model = this._model;
-    let content: PartialJSONValue = null;
-    if (this._factory.fileFormat === 'json') {
-      content = model.toJSON();
-    } else {
-      content = model.toString();
-      if (this._lineEnding) {
-        content = content.replace(/\n/g, this._lineEnding);
-      }
-    }
+    const options = this._createSaveOptions();
 
-    const options = {
-      type: this._factory.contentType,
-      format: this._factory.fileFormat,
-      content
-    };
     try {
       let value: Contents.IModel;
       await this._manager.ready;
@@ -650,7 +636,7 @@ export class Context<
         return;
       }
 
-      model.dirty = false;
+      this._model.dirty = false;
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {
@@ -943,18 +929,68 @@ or load the version on disk (revert)?`,
    * Finish a saveAs operation given a new path.
    */
   private async _finishSaveAs(newPath: string): Promise<void> {
-    this._path = newPath;
-    await this.sessionContext.session?.setPath(newPath);
-    await this.sessionContext.session?.setName(newPath.split('/').pop()!);
-    // we must rename the document before saving with the new path
-    const localPath = this._manager.contents.localPath(this._path);
-    (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
-    this._model.sharedModel.setState('path', localPath);
-    this._pathChanged.emit(newPath);
-
     // save triggers a fileChanged which updates the contents model
-    await this.save();
-    await this._maybeCheckpoint(true);
+    this._saveState.emit('started');
+    try {
+      await this._manager.ready;
+      const options = this._createSaveOptions();
+      await this._manager.contents.save(newPath, options);
+
+      // we must rename the document after saving, otherwise in collaborative mode
+      // the backend will throw an error because the file doesn't exist.
+      this._path = newPath;
+      await this.sessionContext.session?.setPath(newPath);
+      await this.sessionContext.session?.setName(newPath.split('/').pop()!);
+      const localPath = this._manager.contents.localPath(this._path);
+      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+      this._model.sharedModel.setState('path', localPath);
+      this._pathChanged.emit(newPath);
+
+      await this._maybeCheckpoint(true);
+
+      // Emit completion.
+      this._saveState.emit('completed');
+    } catch (err) {
+      // If the save has been canceled by the user,
+      // throw the error so that whoever called save()
+      // can decide what to do.
+      if (
+        err.message === 'Cancel' ||
+        err.message === 'Modal is already displayed'
+      ) {
+        throw err;
+      }
+
+      // Otherwise show an error message and throw the error.
+      const localPath = this._manager.contents.localPath(this._path);
+      const name = PathExt.basename(localPath);
+      void this._handleError(
+        err,
+        this._trans.__('File Save Error for %1', name)
+      );
+
+      // Emit failure.
+      this._saveState.emit('failed');
+      return;
+    }
+  }
+
+  private _createSaveOptions(): Partial<Contents.IModel> {
+    let content: PartialJSONValue = null;
+    if (this._factory.fileFormat === 'json') {
+      content = this._model.toJSON();
+    } else {
+      content = this._model.toString();
+      if (this._lineEnding) {
+        content = content.replace(/\n/g, this._lineEnding);
+      }
+    }
+
+    return {
+      type: this._factory.contentType,
+      format: this._factory.fileFormat,
+      content
+    };
   }
 
   protected translator: ITranslator;
