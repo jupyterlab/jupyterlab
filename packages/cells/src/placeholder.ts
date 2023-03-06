@@ -44,11 +44,15 @@ export interface IPlaceholderOptions {
   /**
    * Prompt element CSS class
    */
-  promptClass: string;
+  promptClass?: string;
   /**
    * Ellipsis button callback
    */
   callback: (e: MouseEvent) => void;
+  /**
+   * Text to include with the placeholder
+   */
+  text?: string;
 }
 
 /**
@@ -66,11 +70,13 @@ export class Placeholder extends Widget {
     const node = document.createElement('div');
 
     super({ node });
+    this._node = node;
     const innerNode = document.createElement('div');
-    innerNode.className = options.promptClass;
+    innerNode.className = options.promptClass ?? '';
     node.insertAdjacentHTML('afterbegin', innerNode.outerHTML);
     this._button = document.createElement('div');
     this._button.classList.add(CONTENT_CLASS);
+    node.innerText = options.text ?? '';
     node.appendChild(this._button);
     ellipsesIcon.element({
       container: this._button.appendChild(document.createElement('div')),
@@ -82,6 +88,10 @@ export class Placeholder extends Widget {
 
     this.addClass(PLACEHOLDER_CLASS);
     this._callback = options.callback;
+  }
+
+  set text(t: string) {
+    this._node.innerText = t;
   }
 
   protected onAfterAttach(msg: Message): void {
@@ -96,6 +106,7 @@ export class Placeholder extends Widget {
 
   private _callback: (e: MouseEvent) => void;
   private _button: HTMLElement;
+  private _node: HTMLDivElement;
 }
 
 /**
@@ -105,8 +116,8 @@ export class InputPlaceholder extends Placeholder {
   /**
    * Construct a new input placeholder.
    */
-  constructor(callback: (e: MouseEvent) => void) {
-    super({ callback, promptClass: INPUT_PROMPT_CLASS });
+  constructor(options: IPlaceholderOptions) {
+    super({ ...options, promptClass: INPUT_PROMPT_CLASS });
     this.addClass(INPUT_PLACEHOLDER_CLASS);
   }
 }
@@ -118,8 +129,8 @@ export class OutputPlaceholder extends Placeholder {
   /**
    * Construct a new output placeholder.
    */
-  constructor(callback: (e: MouseEvent) => void) {
-    super({ callback, promptClass: OUTPUT_PROMPT_CLASS });
+  constructor(options: IPlaceholderOptions) {
+    super({ ...options, promptClass: OUTPUT_PROMPT_CLASS });
     this.addClass(OUTPUT_PLACEHOLDER_CLASS);
   }
 }

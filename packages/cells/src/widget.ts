@@ -576,8 +576,20 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
-    this._inputPlaceholder = new InputPlaceholder(() => {
-      this.inputHidden = !this.inputHidden;
+    this._inputPlaceholder = new InputPlaceholder({
+      callback: () => {
+        this.inputHidden = !this.inputHidden;
+      },
+      text: ((input.model.toJSON().source as string) ?? '')?.split('\n')?.[0]
+    });
+
+    input.model.contentChanged.connect((sender, args) => {
+      console.log(this._inputPlaceholder);
+      if (this._inputPlaceholder) {
+        this._inputPlaceholder.text = (sender.toJSON().source as string)?.split(
+          '\n'
+        )?.[0];
+      }
     });
 
     if (this.inputHidden) {
@@ -1040,8 +1052,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
       this.addClass(DIRTY_CLASS);
     }
 
-    this._outputPlaceholder = new OutputPlaceholder(() => {
-      this.outputHidden = !this.outputHidden;
+    this._outputPlaceholder = new OutputPlaceholder({
+      callback: () => {
+        this.outputHidden = !this.outputHidden;
+      },
+      text: ((this.model.toJSON().outputs?.[0].text as string) ?? '').split(
+        '\n'
+      )[0]
     });
 
     const layoutWrapper = outputWrapper.layout as PanelLayout;
