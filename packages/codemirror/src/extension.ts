@@ -760,9 +760,32 @@ export namespace EditorExtensionRegistry {
           title: trans.__('Smart Indentation')
         }
       }),
+      /**
+       * tabFocusable
+       *
+       * Can the user use the tab key to focus on / enter the CodeMirror editor?
+       * If this is false, the CodeMirror editor can still be focused (via
+       * mouse-click, for example), just not via tab key navigation.
+       *
+       * It can be useful to set tabFocusable to false when the editor is
+       * embedded in a context that provides an alternative to the tab key for
+       * navigation. For example, the Notebook widget allows the user to move
+       * from one cell to another using the up and down arrow keys and to enter
+       * and exit the CodeMirror editor associated with that cell by pressing
+       * the enter and escape keys, respectively.
+       */
       Object.freeze({
         name: 'tabFocusable',
-        default: false,
+        // The default for this needs to be true because the CodeMirror editor
+        // is used in lots of different places. By default, a user should be
+        // able to tab into a CodeMirror editor on the page, and by default, the
+        // user should be able to get out of the editor by pressing the escape
+        // key then immediately pressing the tab key (or shift+tab to go
+        // backwards on the page). If there are places in the app where this
+        // model of user interaction doesn't make sense or is broken, those
+        // places should be remedied on a case-by-case basis, **not** by making
+        // `tabFocusable` false by default.
+        default: true,
         factory: () =>
           createConditionalExtension(
             EditorView.contentAttributes.of({
