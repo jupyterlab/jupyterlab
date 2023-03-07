@@ -54,7 +54,7 @@
     "@types/node": "^18.11.18",
     "@types/node-fetch": "^2.6.2",
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.1-rc"
   },
   "publishConfig": {
     "access": "public"
