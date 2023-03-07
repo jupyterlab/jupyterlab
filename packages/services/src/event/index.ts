@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { URLExt } from '@jupyterlab/coreutils';
-
+import { JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
 import { IStream, Signal, Stream } from '@lumino/signaling';
@@ -144,8 +144,7 @@ export namespace Event {
   /**
    * The event emission type.
    */
-  export type Emission = {
-    [key: string]: any;
+  export type Emission = ReadonlyJSONObject & {
     schema_id: string;
   };
 
@@ -153,7 +152,7 @@ export namespace Event {
    * The event request type.
    */
   export type Request = {
-    data: { [key: string]: any };
+    data: JSONObject;
     schema_id: string;
     version: string;
   };
