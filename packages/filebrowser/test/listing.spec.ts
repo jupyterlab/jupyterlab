@@ -107,6 +107,7 @@ describe('filebrowser/listing', () => {
       it('should focus item after rename', async () => {
         dirListing.selectNext();
         const newNamePromise = dirListing.rename();
+        const directoryUpdated = signalToPromise(dirListing.updated);
         const editNode = dirListing['_editNode'];
         // Give it a name that should put it at the bottom
         editNode.value = 'z.txt';
@@ -119,7 +120,7 @@ describe('filebrowser/listing', () => {
         const lastIndex = sortedItems.length - 1;
         expect(sortedItems[lastIndex].name).toBe('z.txt');
         const itemNode = dirListing['_items'][lastIndex];
-        await signalToPromise(dirListing.updated);
+        await directoryUpdated;
         expect(itemNode.contains(document.activeElement)).toBe(true);
       });
 
@@ -604,12 +605,12 @@ describe('filebrowser/listing', () => {
             itemNode
           ) as HTMLInputElement;
           const item = dirListing.sortedItems().next();
-          const waitForUpdate = await signalToPromise(dirListing.updated);
+          const waitForUpdate = signalToPromise(dirListing.updated);
           await dirListing.selectItemByName(item.value.name);
           await waitForUpdate;
           expect(checkbox.checked).toBe(true);
           expect(dirListing.isSelected(item.value.name)).toBe(true);
-          const waitForUpdate2 = await signalToPromise(dirListing.updated);
+          const waitForUpdate2 = signalToPromise(dirListing.updated);
           simulate(checkbox, 'mousedown', {
             clientX: 1,
             clientY: 1,
