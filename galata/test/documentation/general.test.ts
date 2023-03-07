@@ -132,6 +132,9 @@ test.describe('General', () => {
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toBeEmpty();
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
+    ).not.toHaveClass(/lm-mod-hidden/);
 
     expect(
       await page.screenshot({
@@ -625,7 +628,7 @@ test.describe('General', () => {
       '.lm-Menu ul[role="menu"] >> text=New Console for Notebook'
     );
 
-    await page.click('.jp-CodeConsole-input >> .cm-content');
+    await page.click('.jp-CodeConsole-input .jp-InputArea-editor');
     await page.keyboard.type(
       "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))"
     );
@@ -679,6 +682,7 @@ async function openOverview(page) {
   // Open Data.ipynb
   await page.dblclick('[aria-label="File Browser Section"] >> text=notebooks');
   await page.dblclick('text=Data.ipynb');
+  await page.$('div[role="main"] >> text=Data.ipynb');
 
   // Back home
   await page.click('.jp-BreadCrumbs-home svg');
@@ -690,6 +694,7 @@ async function openOverview(page) {
   });
   await page.click('text=Open With');
   await page.click('text=Markdown Preview');
+  await page.$('div[role="main"] >> text=jupyterlab.md');
 
   // Back home
   await page.click('.jp-BreadCrumbs-home svg');
@@ -697,12 +702,20 @@ async function openOverview(page) {
   // Open bar.vl.json
   await page.dblclick('[aria-label="File Browser Section"] >> text=data');
   await page.dblclick('text=bar.vl.json');
+  await page.$('div[role="main"] >> text=bar.vl.json');
+
+  // Open Hubble picture
   await page.dblclick(
     'text=1024px-Hubble_Interacting_Galaxy_AM_0500-620_(2008-04-24).jpg'
   );
+  await page.$(
+    'div[role="main"] >> text=1024px-Hubble_Interacting_Galaxy_AM_0500-620_(2008-04-24).jpg'
+  );
 
   // Move notebook panel
-  const notebookHandle = await page.$('div[role="main"] >> text=Data.ipynb');
+  const notebookHandle = await page.locator(
+    'div[role="main"] >> text=Data.ipynb'
+  );
   await notebookHandle.click();
   const notebookBBox = await notebookHandle.boundingBox();
 
@@ -728,4 +741,7 @@ async function openOverview(page) {
   await page.mouse.down();
   await page.mouse.move(panelBBox.x + 0.5 * panelBBox.width, 200);
   await page.mouse.up();
+
+  // Focus notebook
+  await notebookHandle.click();
 }
