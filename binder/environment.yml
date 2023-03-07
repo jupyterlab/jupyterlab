@@ -56,4 +56,4 @@ dependencies:
   # extra conda stuff
   - jsonschema-with-format-nongpl
   - pip:
-    - jupyter-collaboration >=1.0.0a1
+    - jupyter-collaboration >=1.0.0a3
