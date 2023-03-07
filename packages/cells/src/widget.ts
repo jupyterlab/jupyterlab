@@ -580,14 +580,14 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       callback: () => {
         this.inputHidden = !this.inputHidden;
       },
-      text: ((input.model.toJSON().source as string) ?? '')?.split('\n')?.[0]
+      text: input.model.sharedModel.getSource().split('\n')[0]
     });
 
     input.model.contentChanged.connect((sender, args) => {
       if (this._inputPlaceholder) {
-        this._inputPlaceholder.text = (sender.toJSON().source as string)?.split(
-          '\n'
-        )?.[0];
+        this._inputPlaceholder.text = sender.sharedModel
+          .getSource()
+          .split('\n')?.[0];
       }
     });
 
@@ -1055,16 +1055,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
       callback: () => {
         this.outputHidden = !this.outputHidden;
       },
-      text: (
-        ((this.model.toJSON().outputs as nbformat.IOutput[])[0]
-          ?.text as string) ?? ''
-      ).split('\n')[0]
+      text: (this.model.outputs.get(0)?.data['text/plain'] as string) ?? ''
     });
 
-    this.model.contentChanged.connect((sender, args) => {
+    this.model.outputs.changed.connect((sender, args) => {
       if (this._outputPlaceholder) {
         this._outputPlaceholder.text = (
-          ((sender.toJSON().outputs as nbformat.IOutput[])[0]
+          ((this.model.toJSON().outputs as nbformat.IOutput[])[0]
             ?.text as string) ?? ''
         ).split('\n')[0];
       }

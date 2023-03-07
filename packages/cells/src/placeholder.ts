@@ -75,7 +75,7 @@ export class Placeholder extends Widget {
     node.insertAdjacentHTML('afterbegin', innerNode.outerHTML);
     this._button = document.createElement('div');
     this._button.classList.add(CONTENT_CLASS);
-    this._textContent = document.createElement('div');
+    this._textContent = document.createElement('span');
     this._textContent.innerText = options.text ?? '';
     node.appendChild(this._textContent);
     node.appendChild(this._button);
@@ -91,8 +91,14 @@ export class Placeholder extends Widget {
     this._callback = options.callback;
   }
 
+  /**
+   * The text displayed in the placeholder.
+   */
   set text(t: string) {
     this._textContent.innerText = t;
+  }
+  get text(): string {
+    return this._textContent.innerText;
   }
 
   protected onAfterAttach(msg: Message): void {
@@ -107,7 +113,7 @@ export class Placeholder extends Widget {
 
   private _callback: (e: MouseEvent) => void;
   private _button: HTMLElement;
-  private _textContent: HTMLDivElement;
+  private _textContent: HTMLSpanElement;
 }
 
 /**
