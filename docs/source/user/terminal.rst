@@ -3,7 +3,7 @@
 Terminals
 ==========
 
-JupyterLab terminals provide full support for system shells (bash, tsch,
+JupyterLab terminals provide full support for system shells (bash, tsch, xonsh,
 etc.) on Mac/Linux and PowerShell on Windows. You can run anything in
 your system shell with a terminal, including programs such as vim or
 emacs. The terminals run on the system where the Jupyter server is
