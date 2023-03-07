@@ -629,6 +629,7 @@ test.describe('General', () => {
     );
 
     await page.click('.jp-CodeConsole-input .jp-InputArea-editor');
+    await page.$('.jp-CodeConsole-input .jp-InputArea-editor.jp-mod-focused');
     await page.keyboard.type(
       "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))"
     );
