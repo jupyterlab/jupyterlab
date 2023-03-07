@@ -414,6 +414,11 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       const layout = this._inputWrapper!.layout as PanelLayout;
       if (value) {
         this._input!.parent = null;
+        if (this._inputPlaceholder) {
+          this._inputPlaceholder.text = this.model.sharedModel
+            .getSource()
+            .split('\n')?.[0];
+        }
         layout.addWidget(this._inputPlaceholder!);
       } else {
         this._inputPlaceholder!.parent = null;
@@ -581,14 +586,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
         this.inputHidden = !this.inputHidden;
       },
       text: input.model.sharedModel.getSource().split('\n')[0]
-    });
-
-    input.model.contentChanged.connect((sender, args) => {
-      if (this._inputPlaceholder) {
-        this._inputPlaceholder.text = sender.sharedModel
-          .getSource()
-          .split('\n')?.[0];
-      }
     });
 
     if (this.inputHidden) {
