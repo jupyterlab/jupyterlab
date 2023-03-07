@@ -1194,6 +1194,15 @@ export class Notebook extends StaticNotebook {
     this.node.tabIndex = 0; // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-lm-dragscroll', 'true');
+    this.activeCellChanged.connect(this._updateSelectedCells, this);
+    this.selectionChanged.connect(this._updateSelectedCells, this);
+  }
+
+  /**
+   * List of selected and active cells
+   */
+  get selectedCells(): Cell[] {
+    return this._selectedCells;
   }
 
   /**
@@ -2670,6 +2679,12 @@ export class Notebook extends StaticNotebook {
   private _checkCacheOnNextResize = false;
 
   private _lastClipboardInteraction: 'copy' | 'cut' | 'paste' | null = null;
+  private _updateSelectedCells(): void {
+    this._selectedCells = this.widgets.filter(cell =>
+      this.isSelectedOrActive(cell)
+    );
+  }
+  private _selectedCells: Cell[] = [];
 }
 
 /**
