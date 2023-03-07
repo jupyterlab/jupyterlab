@@ -2103,7 +2103,7 @@ function addCommands(
       return trans._n(
         'Run Selected Cell and Do not Advance',
         'Run Selected Cells and Do not Advance',
-        current?.content.select.length ?? 1
+        current?.content.selectedCells.length ?? 1
       );
     },
     execute: args => {
@@ -2123,7 +2123,7 @@ function addCommands(
       return trans._n(
         'Run Selected Cell and Insert Below',
         'Run Selected Cells and Insert Below',
-        current?.content.select.length ?? 1
+        current?.content.selectedCells.length ?? 1
       );
     },
     execute: args => {
@@ -2395,7 +2395,7 @@ function addCommands(
       return trans._n(
         'Cut Cell',
         'Cut Cells',
-        current?.content.select.length ?? 1
+        current?.content.selectedCells.length ?? 1
       );
     },
     caption: args => {
@@ -2780,7 +2780,7 @@ function addCommands(
       return trans._n(
         'Move Cell Up',
         'Move Cells Up',
-        current?.content.select.length ?? 1
+        current?.content.selectedCells.length ?? 1
       );
     },
     caption: args => {
@@ -2811,7 +2811,7 @@ function addCommands(
       return trans._n(
         'Move Cell Down',
         'Move Cells Down',
-        current?.content.select.length ?? 1
+        current?.content.selectedCells.length ?? 1
       );
     },
     caption: args => {

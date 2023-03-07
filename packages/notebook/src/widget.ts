@@ -1189,7 +1189,6 @@ export class Notebook extends StaticNotebook {
   /**
    * Construct a notebook widget.
    */
-
   constructor(options: Notebook.IOptions) {
     super(options);
     this.node.tabIndex = 0; // Allow the widget to take focus.
