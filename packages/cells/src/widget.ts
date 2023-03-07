@@ -1055,15 +1055,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
       text: (this.model.outputs.get(0)?.data['text/plain'] as string) ?? ''
     });
 
-    this.model.outputs.changed.connect((sender, args) => {
-      if (this._outputPlaceholder) {
-        this._outputPlaceholder.text = (
-          ((this.model.toJSON().outputs as nbformat.IOutput[])[0]
-            ?.text as string) ?? ''
-        ).split('\n')[0];
-      }
-    });
-
     const layoutWrapper = outputWrapper.layout as PanelLayout;
     if (this.outputHidden) {
       layoutWrapper.removeWidget(this._output);
@@ -1175,6 +1166,12 @@ export class CodeCell extends Cell<ICodeCellModel> {
         layout.addWidget(this._outputPlaceholder!);
         if (this.inputHidden && !this._outputWrapper!.isHidden) {
           this._outputWrapper!.hide();
+        }
+        if (this._outputPlaceholder) {
+          this._outputPlaceholder.text = (
+            ((this.model.toJSON().outputs as nbformat.IOutput[])[0]
+              ?.text as string) ?? ''
+          ).split('\n')[0];
         }
       } else {
         if (this._outputWrapper!.isHidden) {
