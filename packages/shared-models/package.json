@@ -27,7 +27,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter/ydoc": "~0.2.0"
+    "@jupyter/ydoc": "~0.2.0",
+    "@jupyterlab/nbformat": "^3.6.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
