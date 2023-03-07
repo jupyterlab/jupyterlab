@@ -87,7 +87,7 @@ application environment.
 
 The following configurations may be present in this file:
 
-1. ``terminalsAvailable`` identifies whether a terminal (i.e. ``bash/tsch``
+1. ``terminalsAvailable`` identifies whether a terminal (i.e. ``bash/tsch/xonsh``
    on Mac/Linux OR ``PowerShell`` on Windows) is available to be launched
    via the Launcher. (This configuration was predominantly required for
    Windows prior to PowerShell access being enabled in Jupyter Lab.) The
