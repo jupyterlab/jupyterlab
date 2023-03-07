@@ -45,7 +45,6 @@
     "@jupyterlab/cell-toolbar": "^4.0.0-alpha.20",
     "@jupyterlab/cell-toolbar-extension": "^4.0.0-alpha.20",
     "@jupyterlab/cells": "^4.0.0-alpha.20",
-    "@jupyterlab/celltags": "^4.0.0-alpha.20",
     "@jupyterlab/celltags-extension": "^4.0.0-alpha.20",
     "@jupyterlab/codeeditor": "^4.0.0-alpha.20",
     "@jupyterlab/codemirror": "^4.0.0-alpha.20",
@@ -137,7 +136,7 @@
     "json-to-html": "~0.1.2",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.1-rc"
   },
   "publishConfig": {
     "access": "public"

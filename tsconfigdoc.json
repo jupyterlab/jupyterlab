@@ -47,9 +47,6 @@
       "path": "./packages/cells"
     },
     {
-      "path": "./packages/celltags"
-    },
-    {
       "path": "./packages/celltags-extension"
     },
     {
