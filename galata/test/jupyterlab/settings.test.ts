@@ -40,7 +40,7 @@ test.describe('change font-size', () => {
   };
   const getCodeCellFontSize = async page => {
     const cellElement = await page.$(
-      'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
+      'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .CodeMirror-line'
     );
     const computedStyle = await page.evaluate(
       el => getComputedStyle(el),
@@ -85,7 +85,7 @@ test.describe('change font-size', () => {
     await page.waitForSelector('.jp-Notebook-cell');
 
     const cellElement = await page.$(
-      'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
+      'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .CodeMirror-line'
     );
     const computedStyle = await page.evaluate(
       el => getComputedStyle(el),
@@ -103,7 +103,7 @@ test.describe('change font-size', () => {
     await page.waitForSelector('.jp-Notebook-cell');
 
     const cellElement = await page.$(
-      'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
+      'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .CodeMirror-line'
     );
     const computedStyle = await page.evaluate(
       el => getComputedStyle(el),
@@ -116,7 +116,7 @@ test.describe('change font-size', () => {
     const markdownFile = await createMarkdownFile(page);
     await inputMarkdownFile(page, markdownFile);
     await page.evaluate(() => {
-      return window.galata.app.commands.execute('fileeditor:markdown-preview');
+      return window.jupyterapp.commands.execute('fileeditor:markdown-preview');
     });
     const fontSize = await getMarkdownFontSize(page);
 
@@ -135,7 +135,7 @@ test.describe('change font-size', () => {
     const markdownFile = await createMarkdownFile(page);
     await inputMarkdownFile(page, markdownFile);
     await page.evaluate(() => {
-      return window.galata.app.commands.execute('fileeditor:markdown-preview');
+      return window.jupyterapp.commands.execute('fileeditor:markdown-preview');
     });
     const fontSize = await getMarkdownFontSize(page);
 
