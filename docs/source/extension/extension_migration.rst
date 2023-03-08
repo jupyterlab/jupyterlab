@@ -199,7 +199,7 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
-   * ``NotebookActions.run`` and other run commands now require ``ISessionContext`` and ``ISessionContextDialogs``.
+   * ``NotebookActions.run`` and other run commands now require ``ISessionContext``.
    * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
    * Command ``Collapsible_Headings:Collapse_All`` renamed to ``notebook:collapse-all-headings``.
    * Command ``Collapsible_Headings:Expand_All`` renamed to ``notebook:expand-all-headings``.
