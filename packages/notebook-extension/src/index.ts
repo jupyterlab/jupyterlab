@@ -26,6 +26,7 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
+  SessionContextDialogs,
   showDialog,
   Toolbar,
   WidgetTracker
@@ -718,11 +719,9 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
       NotebookPanel.IContentFactory,
       IEditorServices,
       IRenderMimeRegistry,
-      ISessionContextDialogs,
-      IToolbarWidgetRegistry,
-      ITranslator
+      IToolbarWidgetRegistry
     ],
-    optional: [ISettingRegistry],
+    optional: [ISettingRegistry, ISessionContextDialogs, ITranslator],
     activate: activateWidgetFactory,
     autoStart: true
   };
@@ -1114,11 +1113,14 @@ function activateWidgetFactory(
   contentFactory: NotebookPanel.IContentFactory,
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
-  sessionContextDialogs: ISessionContextDialogs,
   toolbarRegistry: IToolbarWidgetRegistry,
-  translator: ITranslator,
-  settingRegistry: ISettingRegistry | null
+  settingRegistry: ISettingRegistry | null,
+  sessionContextDialogs_: ISessionContextDialogs | null,
+  translator_: ITranslator | null
 ): NotebookWidgetFactory.IFactory {
+  const translator = translator_ ?? nullTranslator;
+  const sessionContextDialogs =
+    sessionContextDialogs_ ?? new SessionContextDialogs({ translator });
   const preferKernelOption = PageConfig.getOption('notebookStartsKernel');
 
   // If the option is not set, assume `true`
@@ -1530,7 +1532,6 @@ function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
   extensions: IEditorExtensionRegistry,
-  sessionDialogs: ISessionContextDialogs,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
@@ -1538,10 +1539,13 @@ function activateNotebookHandler(
   mainMenu: IMainMenu | null,
   router: IRouter | null,
   settingRegistry: ISettingRegistry | null,
-  translator: ITranslator | null,
+  sessionDialogs_: ISessionContextDialogs | null,
+  translator_: ITranslator | null,
   formRegistry: IFormRendererRegistry | null
 ): INotebookTracker {
-  translator = translator ?? nullTranslator;
+  const translator = translator_ ?? nullTranslator;
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const services = app.serviceManager;
 
@@ -2296,7 +2300,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs!.restart(current.sessionContext);
+        return sessionDialogs.restart(current.sessionContext);
       }
     },
     isEnabled
@@ -3035,7 +3039,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs!.selectKernel(current.context.sessionContext);
+        return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
     isEnabled
@@ -3673,7 +3677,7 @@ namespace Private {
   export function raiseSilentNotification(
     message: string,
     notebookNode: HTMLElement
-  ) {
+  ): void {
     const hiddenAlertContainerId = `sr-message-container-${notebookNode.id}`;
 
     const hiddenAlertContainer =

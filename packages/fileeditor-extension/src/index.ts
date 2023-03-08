@@ -18,6 +18,7 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
+  SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
@@ -82,8 +83,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     IEditorLanguageRegistry,
     IEditorThemeRegistry,
     IDefaultFileBrowser,
-    ISettingRegistry,
-    ISessionContextDialogs
+    ISettingRegistry
   ],
   optional: [
     IConsoleTracker,
@@ -91,6 +91,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     ILauncher,
     IMainMenu,
     ILayoutRestorer,
+    ISessionContextDialogs,
     ITableOfContentsRegistry,
     IToolbarWidgetRegistry,
     ITranslator,
@@ -259,19 +260,21 @@ function activate(
   themes: IEditorThemeRegistry,
   fileBrowser: IDefaultFileBrowser,
   settingRegistry: ISettingRegistry,
-  sessionDialogs: ISessionContextDialogs,
   consoleTracker: IConsoleTracker | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
+  sessionDialogs_: ISessionContextDialogs | null,
   tocRegistry: ITableOfContentsRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null,
-  translator: ITranslator | null,
+  translator_: ITranslator | null,
   formRegistry: IFormRendererRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
-  translator = translator ?? nullTranslator;
+  const translator = translator_ ?? nullTranslator;
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
   let toolbarFactory:

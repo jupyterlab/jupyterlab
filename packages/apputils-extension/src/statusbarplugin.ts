@@ -32,20 +32,20 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
-    sessionDialogs: ISessionContextDialogs | null,
-    translator: ITranslator | null,
+    sessionDialogs_: ISessionContextDialogs | null,
+    translator_: ITranslator | null,
     labShell: ILabShell | null
   ): IKernelStatusModel => {
-    translator = translator ?? nullTranslator;
-    sessionDialogs =
-      sessionDialogs ?? new SessionContextDialogs({ translator });
+    const translator = translator_ ?? nullTranslator;
+    const sessionDialogs =
+      sessionDialogs_ ?? new SessionContextDialogs({ translator });
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
     const changeKernel = async () => {
       if (!item.model.sessionContext) {
         return;
       }
-      await sessionDialogs!.selectKernel(item.model.sessionContext);
+      await sessionDialogs.selectKernel(item.model.sessionContext);
     };
 
     // Create the status item.

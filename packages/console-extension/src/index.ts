@@ -19,6 +19,7 @@ import {
   ISessionContext,
   ISessionContextDialogs,
   Sanitizer,
+  SessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -103,9 +104,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ConsolePanel.IContentFactory,
     IEditorServices,
     IRenderMimeRegistry,
-    ISettingRegistry,
-    ISessionContextDialogs,
-    ITranslator
+    ISettingRegistry
   ],
   optional: [
     ILayoutRestorer,
@@ -114,7 +113,9 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ICommandPalette,
     ILauncher,
     ILabStatus,
-    IFormRendererRegistry
+    ISessionContextDialogs,
+    IFormRendererRegistry,
+    ITranslator
   ],
   activate: activateConsole,
   autoStart: true
@@ -239,20 +240,23 @@ async function activateConsole(
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  sessionDialogs: ISessionContextDialogs,
-  translator: ITranslator,
   restorer: ILayoutRestorer | null,
   filebrowser: IDefaultFileBrowser | null,
   mainMenu: IMainMenu | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   status: ILabStatus | null,
-  formRegistry: IFormRendererRegistry | null
+  sessionDialogs_: ISessionContextDialogs | null,
+  formRegistry: IFormRendererRegistry | null,
+  translator_: ITranslator | null
 ): Promise<IConsoleTracker> {
+  const translator = translator_ ?? nullTranslator;
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = trans.__('Console');
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
 
   // Create a widget tracker for all console panels.
   const tracker = new WidgetTracker<ConsolePanel>({
@@ -624,7 +628,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return sessionDialogs!.restart(current.console.sessionContext);
+      return sessionDialogs.restart(current.console.sessionContext);
     },
     isEnabled
   });
@@ -699,7 +703,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return sessionDialogs!.selectKernel(current.console.sessionContext);
+      return sessionDialogs.selectKernel(current.console.sessionContext);
     },
     isEnabled
   });

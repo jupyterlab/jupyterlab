@@ -20,6 +20,7 @@ import {
   InputDialog,
   ISessionContextDialogs,
   ReactWidget,
+  SessionContextDialogs,
   showDialog,
   showErrorMessage,
   UseSignal
@@ -162,17 +163,20 @@ const contextsPlugin: JupyterFrontEndPlugin<void> = {
 const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   id: '@jupyterlab/docmanager-extension:manager',
   provides: IDocumentManager,
-  requires: [IDocumentWidgetOpener, ISessionContextDialogs],
-  optional: [ITranslator, ILabStatus, JupyterLab.IInfo],
+  requires: [IDocumentWidgetOpener],
+  optional: [ITranslator, ILabStatus, ISessionContextDialogs, JupyterLab.IInfo],
   activate: (
     app: JupyterFrontEnd,
     widgetOpener: IDocumentWidgetOpener,
-    sessionDialogs: ISessionContextDialogs,
-    translator: ITranslator | null,
+    translator_: ITranslator | null,
     status: ILabStatus | null,
+    sessionDialogs_: ISessionContextDialogs | null,
     info: JupyterLab.IInfo | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
+    const translator = translator_ ?? nullTranslator;
+    const sessionDialogs =
+      sessionDialogs_ ?? new SessionContextDialogs({ translator });
     const when = app.restored.then(() => void 0);
 
     const docManager = new DocumentManager({
