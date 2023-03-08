@@ -2391,7 +2391,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.cut, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Cut Cell',
         'Cut Cells',
@@ -2399,7 +2399,7 @@ function addCommands(
       );
     },
     caption: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Cut this cell',
         'Cut these %1 cells',
