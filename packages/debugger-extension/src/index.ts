@@ -190,12 +190,12 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
     notebookTracker: INotebookTracker,
     labShell: ILabShell | null,
     palette: ICommandPalette | null,
-    sessionDialogs: ISessionContextDialogs | null,
-    translator: ITranslator | null
+    sessionDialogs_: ISessionContextDialogs | null,
+    translator_: ITranslator | null
   ): Debugger.Handler => {
-    translator = translator ?? nullTranslator;
-    sessionDialogs =
-      sessionDialogs ?? new SessionContextDialogs({ translator });
+    const translator = translator_ ?? nullTranslator;
+    const sessionDialogs =
+      sessionDialogs_ ?? new SessionContextDialogs({ translator });
     const handler = new Debugger.Handler({
       type: 'notebook',
       shell: app.shell,
@@ -217,7 +217,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionDialogs!.restart(sessionContext);
+        const restarted = await sessionDialogs.restart(sessionContext);
         if (!restarted) {
           return;
         }
@@ -227,8 +227,8 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         await NotebookActions.runAll(
           content,
           sessionContext,
-          sessionDialogs!,
-          translator!
+          sessionDialogs,
+          translator
         );
       }
     });
