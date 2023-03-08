@@ -30,7 +30,7 @@ test.describe('change font-size', () => {
   const createMarkdownFile = async page => {
     await page.waitForSelector('div[role="main"] >> text=Launcher');
     await page.click('.jp-LauncherCard[title="Create a new markdown file"]');
-    return await page.waitForSelector('.jp-FileEditor .cm-content');
+    return await page.waitForSelector('.jp-FileEditor .CodeMirror-code');
   };
   const inputMarkdownFile = async (page, markdownFile) => {
     await markdownFile.focus();
@@ -122,7 +122,7 @@ test.describe('change font-size', () => {
 
     await changeCodeFontSize(page, 'Increase Content Font Size');
 
-    await page.waitForSelector('.jp-FileEditor .cm-content');
+    await page.waitForSelector('.jp-FileEditor .CodeMirror-code');
     const fileElement = await page.$('.jp-RenderedHTMLCommon');
     const computedStyle = await page.evaluate(
       el => getComputedStyle(el),
@@ -141,7 +141,7 @@ test.describe('change font-size', () => {
 
     await changeCodeFontSize(page, 'Decrease Content Font Size');
 
-    await page.waitForSelector('.jp-FileEditor .cm-content');
+    await page.waitForSelector('.jp-FileEditor .CodeMirror-code');
     const fileElement = await page.$('.jp-RenderedHTMLCommon');
     const computedStyle = await page.evaluate(
       el => getComputedStyle(el),
