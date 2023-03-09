@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/mathjax2-extension",
+  "name": "@jupyterlab/mathjax-extension",
   "version": "4.0.0-alpha.20",
-  "description": "A JupyterLab extension providing MathJax 2 Typesetting",
+  "description": "A MathJax Typesetting provider for JupyterLab",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -36,8 +36,10 @@
   "dependencies": {
     "@jupyterlab/application": "^4.0.0-alpha.20",
     "@jupyterlab/coreutils": "^6.0.0-alpha.20",
-    "@jupyterlab/mathjax2": "^4.0.0-alpha.20",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.20"
+    "@jupyterlab/rendermime": "^4.0.0-alpha.20",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.20",
+    "@jupyterlab/translation": "^4.0.0-alpha.20",
+    "@lumino/coreutils": "^2.0.0-rc.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

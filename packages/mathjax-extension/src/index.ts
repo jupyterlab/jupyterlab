@@ -4,30 +4,45 @@
 |----------------------------------------------------------------------------*/
 /**
  * @packageDocumentation
- * @module mathjax2-extension
+ * @module mathjax-extension
  */
 
-import { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { MathJaxTypesetter } from './typesetter';
+export { MathJaxTypesetter } from './typesetter';
 
 /**
  * The MathJax latexTypesetter plugin.
  */
 const plugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
-  id: '@jupyterlab/mathjax2-extension:plugin',
+  id: '@jupyterlab/mathjax-extension:plugin',
   autoStart: true,
   provides: ILatexTypesetter,
-  activate: () => {
+  optional: [ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator | null
+  ): ILatexTypesetter => {
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
+
     const [urlParam, configParam] = ['fullMathjaxUrl', 'mathjaxConfig'];
     const url = PageConfig.getOption(urlParam);
     const config = PageConfig.getOption(configParam);
 
     if (!url) {
-      const message =
-        `${plugin.id} uses '${urlParam}' and '${configParam}' in PageConfig ` +
-        `to operate but '${urlParam}' was not found.`;
+      const message = trans.__(
+        "%1 uses '%2' and '%3' in PageConfig to operate but '%4' was not found.",
+        plugin.id,
+        urlParam,
+        configParam,
+        urlParam
+      );
 
       throw new Error(message);
     }

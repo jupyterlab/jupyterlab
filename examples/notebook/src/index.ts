@@ -16,7 +16,7 @@ import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
 import { ServiceManager } from '@jupyterlab/services';
-import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
 
 import {
   NotebookModelFactory,

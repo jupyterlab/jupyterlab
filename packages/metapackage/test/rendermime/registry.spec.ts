@@ -3,7 +3,7 @@
 
 import { SessionContext } from '@jupyterlab/apputils';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
 import {
   IRenderMime,
   MimeModel,

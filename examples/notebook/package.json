@@ -15,7 +15,7 @@
     "@jupyterlab/docmanager": "^4.0.0-alpha.20",
     "@jupyterlab/docregistry": "^4.0.0-alpha.20",
     "@jupyterlab/documentsearch": "^4.0.0-alpha.20",
-    "@jupyterlab/mathjax2": "^4.0.0-alpha.20",
+    "@jupyterlab/mathjax-extension": "^4.0.0-alpha.20",
     "@jupyterlab/notebook": "^4.0.0-alpha.20",
     "@jupyterlab/rendermime": "^4.0.0-alpha.20",
     "@jupyterlab/services": "^7.0.0-alpha.20",

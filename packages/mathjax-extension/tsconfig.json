@@ -13,10 +13,13 @@
       "path": "../coreutils"
     },
     {
-      "path": "../mathjax2"
+      "path": "../rendermime"
     },
     {
-      "path": "../rendermime"
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }
