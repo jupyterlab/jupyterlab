@@ -1052,7 +1052,12 @@ export class CodeCell extends Cell<ICodeCellModel> {
       callback: () => {
         this.outputHidden = !this.outputHidden;
       },
-      text: (this.model.outputs.get(0)?.data['text/plain'] as string) ?? ''
+      text:
+        (
+          this.model.outputs.get(0)?.data[
+            'application/vnd.jupyter.stdout'
+          ] as string
+        ).split('\n')?.[0] ?? ''
     });
 
     const layoutWrapper = outputWrapper.layout as PanelLayout;
@@ -1168,10 +1173,12 @@ export class CodeCell extends Cell<ICodeCellModel> {
           this._outputWrapper!.hide();
         }
         if (this._outputPlaceholder) {
-          this._outputPlaceholder.text = (
-            ((this.model.toJSON().outputs as nbformat.IOutput[])[0]
-              ?.text as string) ?? ''
-          ).split('\n')[0];
+          this._outputPlaceholder.text =
+            (
+              this.model.outputs.get(0)?.data[
+                'application/vnd.jupyter.stdout'
+              ] as string
+            ).split('\n')?.[0] ?? '';
         }
       } else {
         if (this._outputWrapper!.isHidden) {
