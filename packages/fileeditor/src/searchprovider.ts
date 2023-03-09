@@ -64,9 +64,8 @@ export class FileEditorSearchProvider
     query: RegExp,
     filters: IFilters | undefined
   ): Promise<void> {
-    const promise = await super.startQuery(query, filters);
+    await super.startQuery(query, filters);
     await this.highlightNext(false, true);
-    return promise;
   }
 
   /**
