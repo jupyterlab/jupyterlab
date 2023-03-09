@@ -32,7 +32,8 @@ import {
   imageRendererFactory,
   IRenderMime,
   IRenderMimeRegistry,
-  MimeModel
+  MimeModel,
+  textRendererFactory
 } from '@jupyterlab/rendermime';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
@@ -1052,12 +1053,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       callback: () => {
         this.outputHidden = !this.outputHidden;
       },
-      text:
-        (
-          this.model.outputs.get(0)?.data[
-            'application/vnd.jupyter.stdout'
-          ] as string
-        ).split('\n')?.[0] ?? ''
+      text: this.getOutputPlaceholderText()
     });
 
     const layoutWrapper = outputWrapper.layout as PanelLayout;
@@ -1075,6 +1071,16 @@ export class CodeCell extends Cell<ICodeCellModel> {
         ? trans.__('Code Cell Content')
         : trans.__('Code Cell Content with Output');
     this.node.setAttribute('aria-label', ariaLabel);
+  }
+
+  getOutputPlaceholderText(): string {
+    const outputData = this.model.outputs.get(0)?.data;
+    for (const type of textRendererFactory.mimeTypes) {
+      if (outputData[type] !== undefined) {
+        return (outputData[type] as string).split('\n')[0] ?? '';
+      }
+    }
+    return '';
   }
 
   /**
@@ -1173,12 +1179,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
           this._outputWrapper!.hide();
         }
         if (this._outputPlaceholder) {
-          this._outputPlaceholder.text =
-            (
-              this.model.outputs.get(0)?.data[
-                'application/vnd.jupyter.stdout'
-              ] as string
-            ).split('\n')?.[0] ?? '';
+          this._outputPlaceholder.text = this.getOutputPlaceholderText();
         }
       } else {
         if (this._outputWrapper!.isHidden) {
