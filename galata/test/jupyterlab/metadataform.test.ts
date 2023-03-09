@@ -160,10 +160,9 @@ test.describe('Required metadata', () => {
     await activatePropertyInspector(page);
 
     // Retrieves the form from its header's text, it should be collapsed.
-    const form = page.locator(
-      '.jp-NotebookTools .jp-Collapse',
-      { hasText: 'Extension metadata' }
-    );
+    const form = page.locator('.jp-NotebookTools .jp-Collapse', {
+      hasText: 'Extension metadata'
+    });
     expect(await form.screenshot()).toMatchSnapshot(
       'metadata-collapsed-form.png'
     );
