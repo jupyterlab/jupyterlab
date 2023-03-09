@@ -193,6 +193,8 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/mainmenu`` from 3.x to 4.x
    * ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
      to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
+- ``@jupyterlab/mathjax2`` and ``@jupyterlab/mathjax2-extension`` have been merged into a new package ``@jupyterlab/mathjax-extension`` from 3.x to 4.x
+   The plugin has been renamed from ``@jupyterlab/mathjax2-extension:plugin`` to ``@jupyterlab/mathjax-extension:plugin``
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
