@@ -339,11 +339,7 @@ const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [
-    INotebookWidgetFactory,
-    IEditorExtensionRegistry,
-    ISessionContextDialogs
-  ],
+  requires: [INotebookWidgetFactory, IEditorExtensionRegistry],
   optional: [
     ICommandPalette,
     IDefaultFileBrowser,
@@ -352,6 +348,7 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     IMainMenu,
     IRouter,
     ISettingRegistry,
+    ISessionContextDialogs,
     ITranslator,
     IFormRendererRegistry
   ],
