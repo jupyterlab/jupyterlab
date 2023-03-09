@@ -2017,8 +2017,16 @@ export class Notebook extends StaticNotebook {
         }
       }
     }
-    if (force && !this.node.contains(document.activeElement)) {
-      NotebookActions.focusActiveCell(this);
+    if (force) {
+      const { activeElement } = document;
+      // Reminder - `this.node.contains(this.node)` returns `true`, so we have
+      // to do two checks to determine if a descendant node, and not
+      // `this.node`, has focus:
+      const descendantHasFocus =
+        this.node !== activeElement && this.node.contains(activeElement);
+      if (!descendantHasFocus) {
+        NotebookActions.focusActiveCell(this);
+      }
     }
   }
 
