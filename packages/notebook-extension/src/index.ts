@@ -2807,7 +2807,7 @@ function addCommands(
       }
     },
     isEnabled: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (!current) {
         return false;
       }
@@ -2844,7 +2844,7 @@ function addCommands(
       }
     },
     isEnabled: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       if (!current || !current.content.model) {
         return false;
       }
