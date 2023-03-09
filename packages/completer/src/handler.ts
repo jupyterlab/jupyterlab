@@ -476,7 +476,7 @@ export namespace CompletionHandler {
   /**
    * Connector for completion items.
    *
-   * @deprecated to add a new source of completions, register a completion provider;
+   * @deprecated since v4 to add a new source of completions, register a completion provider;
    *   to customise how completions get merged, provide a custom reconciliator.
    */
   export type ICompletionItemsConnector = IDataConnector<

@@ -327,6 +327,19 @@ Here are the changes in the Javascript package ``@jupyterlab/galata`` from 4.x t
      store in ``@jupyterlab/galata/lib/extension``. And the global object has been renamed ``window.galata`` instead
      of ``window.galataip`` (it still exists but it is deprecated).
 
+Deprecated code removed
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The following deprecated API's have been removed:
+
+- ``@jupyterlab/csvviewer``: ``CSVDelimiter.delimiterChanged`` has been removed - dead code. You can directly access the delimiter from the ``CSVViewer`` widget.
+- ``@jupyterlab/mainmenu``: ``IJupyterLabMenu`` and ``JupyterLabMenu`` have been removed. You can use directly ``IRankedMenu`` and ``RankedMenu`` from ``@jupyterlab/ui-components``
+- ``@jupyterlab/notebook``: ``NotebookWidgetFactory`` default toolbar is now empty as the button helpers are deprecated.
+- ``@jupyterlab/rendermime``: ``RenderMimeRegistry.IUrlResolverOptions`` does not accept ``session``; you must set the ``path`` (accessible through ``session.path``).
+- ``@jupyterlab/ui-components``:
+   * ``RankedMenu.menu : Menu`` has been removed as ``RankedMenu`` inherits from ``Menu``.
+   * ``LabIconStyle.IProps`` does not accept ``kind`` nor ``justify``. You should use ``stylesheet`` or ``elementPosition`` respectively.
+
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
