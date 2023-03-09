@@ -161,7 +161,7 @@ test.describe('Required metadata', () => {
 
     // Retrieves the form from its header's text, it should be collapsed.
     const form = page.locator(
-      '.jp-NotebookTools .jp-Collapse .jp-Collapse-header',
+      '.jp-NotebookTools .jp-Collapse',
       { hasText: 'Extension metadata' }
     );
     expect(await form.screenshot()).toMatchSnapshot(
