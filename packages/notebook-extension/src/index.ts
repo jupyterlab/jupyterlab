@@ -2053,9 +2053,39 @@ function addCommands(
     }
   );
 
+  tracker.selectionChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.duplicateBelow);
+    commands.notifyCommandChanged(CommandIDs.deleteCell);
+    commands.notifyCommandChanged(CommandIDs.copy);
+    commands.notifyCommandChanged(CommandIDs.cut);
+    commands.notifyCommandChanged(CommandIDs.pasteBelow);
+    commands.notifyCommandChanged(CommandIDs.pasteAbove);
+    commands.notifyCommandChanged(CommandIDs.pasteAndReplace);
+    commands.notifyCommandChanged(CommandIDs.moveUp);
+    commands.notifyCommandChanged(CommandIDs.moveDown);
+    commands.notifyCommandChanged(CommandIDs.run);
+    commands.notifyCommandChanged(CommandIDs.runAll);
+    commands.notifyCommandChanged(CommandIDs.runAndAdvance);
+    commands.notifyCommandChanged(CommandIDs.runAndInsert);
+  });
+
   commands.addCommand(CommandIDs.runAndAdvance, {
-    label: trans.__('Run Selected Cells'),
-    caption: trans.__('Run the selected cells'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Run Selected Cell',
+        'Run Selected Cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Run this cell and advance',
+        'Run these %1 cells and advance',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2068,8 +2098,14 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.run, {
-    label: trans.__('Run Selected Cells and Do not Advance'),
-    caption: trans.__('Run the selected cells and do not advance'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Run Selected Cell and Do not Advance',
+        'Run Selected Cells and Do not Advance',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2082,7 +2118,14 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.runAndInsert, {
-    label: trans.__('Run Selected Cells and Insert Below'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Run Selected Cell and Insert Below',
+        'Run Selected Cells and Insert Below',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2347,8 +2390,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.cut, {
-    label: trans.__('Cut Cells'),
-    caption: trans.__('Cut the selected cells'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Cut Cell',
+        'Cut Cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Cut this cell',
+        'Cut these %1 cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2360,8 +2417,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.copy, {
-    label: trans.__('Copy Cells'),
-    caption: trans.__('Copy the selected cells'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Copy Cell',
+        'Copy Cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Copy this cell',
+        'Copy these %1 cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2373,8 +2444,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteBelow, {
-    label: trans.__('Paste Cells Below'),
-    caption: trans.__('Paste cells from the clipboard'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Paste Cell Below',
+        'Paste Cells Below',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Paste this cell from the clipboard',
+        'Paste these %1 cells from the clipboard',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2386,7 +2471,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAbove, {
-    label: trans.__('Paste Cells Above'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Paste Cell Above',
+        'Paste Cells Above',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Paste this cell from the clipboard',
+        'Paste these %1 cells from the clipboard',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2397,10 +2497,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.duplicateBelow, {
-    label: trans.__('Duplicate Cells Below'),
-    caption: trans.__(
-      'Copy the selected cells and paste them below the selection'
-    ),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Duplicate Cell Below',
+        'Duplicate Cells Below',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Create a duplicate of this cell below',
+        'Create duplicates of %1 cells below',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2412,7 +2524,14 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAndReplace, {
-    label: trans.__('Paste Cells and Replace'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Paste Cell and Replace',
+        'Paste Cells and Replace',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2423,7 +2542,23 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.deleteCell, {
-    label: trans.__('Delete Cells'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Delete Cell',
+        'Delete Cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Delete this cell',
+        'Delete these %1 cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2479,6 +2614,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.insertAbove, {
     label: trans.__('Insert Cell Above'),
+    caption: trans.__('Insert a cell above'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2639,7 +2775,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.moveUp, {
-    label: trans.__('Move Cells Up'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Move Cell Up',
+        'Move Cells Up',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Move this cell up',
+        'Move these %1 cells up',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2655,7 +2806,22 @@ function addCommands(
     icon: args => (args.toolbar ? moveUpIcon : undefined)
   });
   commands.addCommand(CommandIDs.moveDown, {
-    label: trans.__('Move Cells Down'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Move Cell Down',
+        'Move Cells Down',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Move this cell down',
+        'Move these %1 cells down',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
