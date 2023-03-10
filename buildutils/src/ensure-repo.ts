@@ -80,7 +80,7 @@ const UNUSED: Dict<string[]> = {
     'worker-loader',
     'source-map-loader'
   ],
-  '@jupyterlab/buildutils': ['verdaccio'],
+  '@jupyterlab/buildutils': ['inquirer', 'verdaccio'],
   '@jupyterlab/codemirror': [
     '@codemirror/lang-cpp',
     '@codemirror/lang-css',
