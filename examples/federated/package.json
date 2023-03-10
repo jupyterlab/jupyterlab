@@ -3,13 +3,13 @@
   "version": "3.0.0-alpha.21",
   "private": true,
   "scripts": {
-    "build": "$npm_execpath run build:core && $npm_execpath run build:middle && $npm_execpath run build:md",
-    "build:core": "cd core_package && $npm_execpath run build",
-    "build:md": "cd md_package && $npm_execpath run build",
-    "build:middle": "cd middle_package && $npm_execpath run build",
-    "install:all": "$npm_execpath run install:core && $npm_execpath run install:middle && $npm_execpath run install:md",
-    "install:core": "cd core_package && $npm_execpath install",
-    "install:md": "cd md_package && $npm_execpath install",
-    "install:middle": "cd middle_package && $npm_execpath install"
+    "build": "npm run build:core && npm run build:middle && npm run build:md",
+    "build:core": "cd core_package && npm run build",
+    "build:md": "cd md_package && npm run build",
+    "build:middle": "cd middle_package && npm run build",
+    "install:all": "npm run install:core && npm run install:middle && npm run install:md",
+    "install:core": "cd core_package && npm install",
+    "install:md": "cd md_package && npm install",
+    "install:middle": "cd middle_package && npm install"
   }
 }

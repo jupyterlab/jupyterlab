@@ -52,13 +52,13 @@ function ensurePackage(p) {
   }
 
   if (!current) {
-    // this script gets called as part of the dev install of the `jupyterlab` py pkg.
-    // These cmds use `$npm_execpath` instead of `jlpm` as `jlpm` may not be properly installed yet
-    childProcess.execSync(`${process.env.npm_execpath} run clean`, {
+    // This must be "npm" because it is run during `pip install -e .` before
+    // jlpm is installed.
+    childProcess.execSync('npm run clean', {
       stdio: [0, 1, 2],
       cwd: path.resolve('./' + p)
     });
-    childProcess.execSync(`${process.env.npm_execpath} run build`, {
+    childProcess.execSync('npm run build', {
       stdio: [0, 1, 2],
       cwd: path.resolve('./' + p)
     });

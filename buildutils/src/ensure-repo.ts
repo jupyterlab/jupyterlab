@@ -417,7 +417,7 @@ function ensureMetaPackage(): string[] {
   });
 
   // Add to build:all target
-  mpData.scripts['build:all'] = '$npm_execpath run build';
+  mpData.scripts['build:all'] = 'npm run build';
 
   // Write the files.
   if (messages.length > 0) {

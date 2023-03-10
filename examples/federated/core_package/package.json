@@ -3,9 +3,9 @@
   "version": "3.0.0-alpha.21",
   "private": true,
   "scripts": {
-    "build": "$npm_execpath run clean && webpack",
+    "build": "npm run clean && webpack",
     "clean": "rimraf static",
-    "watch": "$npm_execpath run clean && webpack --watch"
+    "watch": "npm run clean && webpack --watch"
   },
   "resolutions": {
     "@jupyterlab/application": "~4.0.0-alpha.21",

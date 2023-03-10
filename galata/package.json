@@ -24,13 +24,13 @@
     "src/**/*.{ts,tsx}"
   ],
   "scripts": {
-    "build": "$npm_execpath run build:extension && $npm_execpath run build:galata",
-    "build:extension": "cd extension && $npm_execpath run build && cd ..",
+    "build": "npm run build:extension && npm run build:galata",
+    "build:extension": "cd extension && npm run build && cd ..",
     "build:galata": "tsc -b",
-    "clean": "$npm_execpath run clean:extension && rimraf lib tsconfig.tsbuildinfo",
-    "clean:extension": "cd extension && $npm_execpath run clean && cd ..",
+    "clean": "npm run clean:extension && rimraf lib tsconfig.tsbuildinfo",
+    "clean:extension": "cd extension && npm run clean && cd ..",
     "start": "jupyter lab --config ./jupyter_server_test_config.py",
-    "start:detached": "($npm_execpath run start&)",
+    "start:detached": "(npm run start&)",
     "start:doc": "PYTHONWARNINGS=ignore jupyter lab --config ./jupyter_server_test_config.py --extensions-in-dev-mode",
     "test": "playwright test",
     "test:base": "playwright test --project galata jupyterlab",
