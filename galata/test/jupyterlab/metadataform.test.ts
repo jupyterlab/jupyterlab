@@ -75,10 +75,9 @@ async function openForm(
 ) {
   await activatePropertyInspector(page);
 
-  const form = page.locator(
-    '.jp-NotebookTools .jp-Collapse',
-    { hasText: label }
-  );
+  const form = page.locator('.jp-NotebookTools .jp-Collapse', {
+    hasText: label
+  });
   if (form.locator('.jp-Collapse-contents.lm-mod-hidden')) {
     await form.click();
     await expect(
