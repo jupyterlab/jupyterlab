@@ -510,7 +510,9 @@ export class AttachmentsCellModel extends CellModel {
     reinitialize?: boolean
   ): void {
     if (reinitialize) {
-      const attachments = ((sharedModel as unknown) as models.YRawCell).getAttachments();
+      const attachments = (
+        sharedModel as unknown as models.YRawCell
+      ).getAttachments();
       this._attachments.fromJSON(attachments ?? {});
     }
     super.switchSharedModel(sharedModel, reinitialize);
@@ -936,9 +938,11 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
   ): void {
     const codeCell = this.sharedModel as models.YCodeCell;
     globalModelDBMutex(() => {
-      codeCell.execution_count = args.newValue
-        ? (args.newValue as number)
-        : null;
+      codeCell.transact(() => {
+        codeCell.execution_count = args.newValue
+          ? (args.newValue as number)
+          : null;
+      }, false);
     });
     this.contentChanged.emit(void 0);
     this.stateChanged.emit({

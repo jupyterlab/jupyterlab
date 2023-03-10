@@ -1179,7 +1179,7 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    *
    * #### Notes
-   * This is a no-op if if there are no cell actions to undo.
+   * This is a no-op if there are no cell actions to undo.
    */
   export function undo(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
@@ -1836,9 +1836,7 @@ export namespace NotebookActions {
    *
    * @param cell - The target cell widget.
    */
-  export function getHeadingInfo(
-    cell: Cell
-  ): {
+  export function getHeadingInfo(cell: Cell): {
     isHeading: boolean;
     headingLevel: number;
     collapsed?: boolean;

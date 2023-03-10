@@ -686,8 +686,8 @@ export class StaticNotebook extends Widget {
       contentFactory,
       updateEditorOnShow: false,
       placeholder: false,
-      showEditorForReadOnlyMarkdown: this._notebookConfig
-        .showEditorForReadOnlyMarkdown
+      showEditorForReadOnlyMarkdown:
+        this._notebookConfig.showEditorForReadOnlyMarkdown
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
@@ -833,12 +833,13 @@ export class StaticNotebook extends Widget {
     );
 
     // Control editor visibility for read-only Markdown cells
-    const showEditorForReadOnlyMarkdown = this._notebookConfig
-      .showEditorForReadOnlyMarkdown;
+    const showEditorForReadOnlyMarkdown =
+      this._notebookConfig.showEditorForReadOnlyMarkdown;
     if (showEditorForReadOnlyMarkdown !== undefined) {
       for (const cell of this.widgets) {
         if (cell.model.type === 'markdown') {
-          (cell as MarkdownCell).showEditorForReadOnly = showEditorForReadOnlyMarkdown;
+          (cell as MarkdownCell).showEditorForReadOnly =
+            showEditorForReadOnlyMarkdown;
         }
       }
     }
@@ -1090,7 +1091,7 @@ export namespace StaticNotebook {
     observedBottomMargin: '1000px',
     maxNumberOutputs: 50,
     showEditorForReadOnlyMarkdown: true,
-    disableDocumentWideUndoRedo: false,
+    disableDocumentWideUndoRedo: true,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
     sideBySideRightMarginOverride: '10px',
@@ -1102,7 +1103,8 @@ export namespace StaticNotebook {
    */
   export class ContentFactory
     extends Cell.ContentFactory
-    implements IContentFactory {
+    implements IContentFactory
+  {
     /**
      * Create a new code cell widget.
      *

@@ -628,21 +628,22 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
 /**
  * The notebook widget factory provider.
  */
-const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> = {
-  id: '@jupyterlab/notebook-extension:widget-factory',
-  provides: INotebookWidgetFactory,
-  requires: [
-    NotebookPanel.IContentFactory,
-    IEditorServices,
-    IRenderMimeRegistry,
-    ISessionContextDialogs,
-    IToolbarWidgetRegistry,
-    ITranslator
-  ],
-  optional: [ISettingRegistry],
-  activate: activateWidgetFactory,
-  autoStart: true
-};
+const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> =
+  {
+    id: '@jupyterlab/notebook-extension:widget-factory',
+    provides: INotebookWidgetFactory,
+    requires: [
+      NotebookPanel.IContentFactory,
+      IEditorServices,
+      IRenderMimeRegistry,
+      ISessionContextDialogs,
+      IToolbarWidgetRegistry,
+      ITranslator
+    ],
+    optional: [ISettingRegistry],
+    activate: activateWidgetFactory,
+    autoStart: true
+  };
 
 /**
  * The cloned output provider.
@@ -1076,12 +1077,13 @@ function activateCodeConsole(
         // eslint-disable-next-line
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
-          const reply = await current.context.sessionContext.session?.kernel?.requestIsComplete(
-            {
-              // ipython needs an empty line at the end to correctly identify completeness of indented code
-              code: code + '\n\n'
-            }
-          );
+          const reply =
+            await current.context.sessionContext.session?.kernel?.requestIsComplete(
+              {
+                // ipython needs an empty line at the end to correctly identify completeness of indented code
+                code: code + '\n\n'
+              }
+            );
           if (reply?.content.status === 'complete') {
             if (curLine < lastLine) {
               // we find a block of complete statement containing the current line, great!
@@ -1433,8 +1435,8 @@ function activateNotebookHandler(
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
 
-    modelFactory.disableDocumentWideUndoRedo = settings.get(
-      'experimentalDisableDocumentWideUndoRedo'
+    modelFactory.disableDocumentWideUndoRedo = !settings.get(
+      'documentWideUndoRedo'
     ).composite as boolean;
 
     updateTracker({
@@ -1456,11 +1458,11 @@ function activateNotebookHandler(
       type: 'notebook'
     });
     if (model != undefined) {
-      const widget = ((await commands.execute('docmanager:open', {
+      const widget = (await commands.execute('docmanager:open', {
         path: model.path,
         factory: FACTORY,
         kernel: { name: kernelName }
-      })) as unknown) as IDocumentWidget;
+      })) as unknown as IDocumentWidget;
       widget.isUntitled = true;
       return widget;
     }
@@ -2856,9 +2858,7 @@ namespace Private {
   /**
    * The default Export To ... formats and their human readable labels.
    */
-  export function getFormatLabels(
-    translator: ITranslator
-  ): {
+  export function getFormatLabels(translator: ITranslator): {
     [k: string]: string;
   } {
     translator = translator || nullTranslator;
