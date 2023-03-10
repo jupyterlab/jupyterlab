@@ -123,12 +123,15 @@ class CodeCellSearchProvider extends CellSearchProvider {
    *
    * @returns The next match if there is one.
    */
-  async highlightNext(): Promise<ISearchMatch | undefined> {
+  async highlightNext(
+    loop?: boolean,
+    fromCursor = false
+  ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       if (this.currentProviderIndex === -1) {
-        const match = await super.highlightNext();
+        const match = await super.highlightNext(true, fromCursor);
         if (match) {
           this.currentIndex = this.cmHandler.currentIndex;
           return match;
