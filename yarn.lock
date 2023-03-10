@@ -4278,7 +4278,6 @@ __metadata:
     stylelint-config-standard: ^26.0.0
     stylelint-prettier: ^2.0.0
     typedoc: ~0.23.25
-    yarn: 1.22.19
   languageName: unknown
   linkType: soft
 
@@ -20019,16 +20018,6 @@ __metadata:
   bin:
     yarn-deduplicate: dist/cli.js
   checksum: 68ee8b9ce8389a248f65111e188fe4e94fa582e771ef885a1ff599f5fbc5f0e39db4cb63da283c53cb256d7b0afd274de532c967c7f76b921276bea17ccacd3a
-  languageName: node
-  linkType: hard
-
-"yarn@npm:1.22.19":
-  version: 1.22.19
-  resolution: "yarn@npm:1.22.19"
-  bin:
-    yarn: bin/yarn.js
-    yarnpkg: bin/yarn.js
-  checksum: b43d2cc5fee7e933beb12a8aee7dfceca9e9ef2dd17c5d04d15a12ab7bec5f5744ea34a07b86e013da7f291a18c4e1ad8f70e150f5ed2f4666e6723c7f0a8452
   languageName: node
   linkType: hard
 
