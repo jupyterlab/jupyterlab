@@ -90,9 +90,8 @@ application environment.
 
 The following configurations may be present in this file:
 
-1. ``terminalsAvailable`` identifies whether a terminal (i.e. ``bash/tsch``
-   on Mac/Linux OR ``PowerShell`` on Windows) is available to be launched
-   via the Launcher. (This configuration was predominantly required for
+1. ``terminalsAvailable`` identifies whether a terminal can be launched
+   via the Launcher. (This configuration was mostly required for
    Windows prior to PowerShell access being enabled in Jupyter Lab.) The
    value for this field is a Boolean: ``true`` or ``false``.
 2. ``disabledExtensions`` controls which extensions should not load at all.
