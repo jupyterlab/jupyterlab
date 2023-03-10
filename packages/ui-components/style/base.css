@@ -40,7 +40,7 @@ a:hover {
 /* Accessibility for links inside dialog box text */
 .jp-Dialog-content a {
   text-decoration: revert;
-  color: revert;
+  color: var(--jp-content-link-color);
 }
 
 .jp-Dialog-content a:hover {
