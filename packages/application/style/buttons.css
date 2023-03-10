@@ -101,3 +101,7 @@ button.jp-mod-styled.jp-mod-warn:focus-visible {
   box-shadow: none;
   background-color: var(--jp-warn-color-active, rgba(153, 153, 153, 0.2));
 }
+
+a.jp-Button-flat:hover {
+  color: var(--jp-ui-inverse-font-color0);
+}
