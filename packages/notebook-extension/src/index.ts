@@ -2068,6 +2068,10 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndAdvance);
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
+  tracker.activeCellChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.moveUp);
+    commands.notifyCommandChanged(CommandIDs.moveDown);
+  });
 
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: args => {
@@ -2802,7 +2806,13 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+      return current.content.activeCellIndex >= 1;
+    },
     icon: args => (args.toolbar ? moveUpIcon : undefined)
   });
   commands.addCommand(CommandIDs.moveDown, {
@@ -2833,7 +2843,15 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current || !current.content.model) {
+        return false;
+      }
+
+      const length = current.content.model.cells.length;
+      return current.content.activeCellIndex < length - 1;
+    },
     icon: args => (args.toolbar ? moveDownIcon : undefined)
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
