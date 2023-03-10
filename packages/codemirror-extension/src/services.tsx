@@ -212,7 +212,10 @@ export const bindingPlugin: JupyterFrontEndPlugin<void> = {
       factory: options => {
         const sharedModel = options.model.sharedModel as IYText;
         return EditorExtensionRegistry.createImmutableExtension(
-          ybinding(sharedModel.ysource)
+          ybinding({
+            ytext: sharedModel.ysource,
+            undoManager: sharedModel.undoManager ?? undefined
+          })
         );
       }
     });
