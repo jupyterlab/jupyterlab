@@ -20,6 +20,7 @@
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
   text-transform: uppercase;
+  user-select: none;
 }
 
 .jp-Collapser-icon {
