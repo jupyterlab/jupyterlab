@@ -7,19 +7,33 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  border-top: 1px solid var(--jp-border-color2);
-  border-bottom: 1px solid var(--jp-border-color2);
 }
 
 .jp-Collapse-header {
   padding: 1px 12px;
-  color: var(--jp-ui-font-color1);
   background-color: var(--jp-layout-color1);
-  font-size: var(--jp-ui-font-size2);
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
+  color: var(--jp-ui-font-color1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
+  text-transform: uppercase;
+  user-select: none;
 }
 
-.jp-Collapse-header:hover {
-  background-color: var(--jp-layout-color2);
+.jp-Collapser-icon {
+  height: 16px;
+}
+
+.jp-Collapse-header-collapsed .jp-Collapser-icon {
+  transform: rotate(-90deg);
+  margin: auto 0;
+}
+
+.jp-Collapser-title {
+  line-height: 25px;
 }
 
 .jp-Collapse-contents {
