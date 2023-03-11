@@ -45,7 +45,6 @@ a:hover {
 
 .jp-Dialog-content a:hover {
   text-decoration: revert;
-  color: revert;
 }
 
 /* Styles for ui-components */
