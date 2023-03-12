@@ -740,7 +740,6 @@ export class ExtensionsPanel extends SidePanel {
       (this.content as AccordionPanel).collapse(0);
       (this.content as AccordionPanel).expand(1);
       (this.content as AccordionPanel).expand(2);
-      (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
     }
   }
 
