@@ -736,17 +736,11 @@ export class ExtensionsPanel extends SidePanel {
   }
 
   private _onDisclaimedChanged(): void {
-    console.log('_onDisclaimedChanged===================');
     if (!this._wasDisclaimed && this.model.isDisclaimed) {
       (this.content as AccordionPanel).collapse(0);
       (this.content as AccordionPanel).expand(1);
       (this.content as AccordionPanel).expand(2);
-      console.log('setRelativeSizes===================');
-      // todo  回退高度
-      (this.content.layout as AccordionLayout).setRelativeSizes(
-        [0, 1, 1],
-        false
-      );
+      (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
     }
   }
 
