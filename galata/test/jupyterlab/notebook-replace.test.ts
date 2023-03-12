@@ -110,4 +110,39 @@ test.describe('Notebook Search and Replace', () => {
 
     expect(await nbPanel.screenshot()).toMatchSnapshot('replace-all.png');
   });
+
+  test('Replace step-by-step across cell boundaries', async ({ page }) => {
+    // Create a small test notebook
+    await page.notebook.createNew();
+    await page.notebook.setCell(0, 'code', 'test\ntest');
+    await page.notebook.addCell('code', 'test\ntest');
+
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'test');
+
+    await page.click('button[title="Toggle Replace"]');
+    await page.fill('[placeholder="Replace"]', 'egg');
+
+    // TODO: Next Match press count should be one less
+    // (the -/4 state should not be necessary).
+    await page.waitForSelector('text=-/4');
+    await page.click('button[title="Next Match"]', {
+      clickCount: 3
+    });
+
+    await page.waitForSelector('text=1/4');
+    await page.click('button:has-text("Replace")');
+
+    await page.waitForSelector('text=1/3');
+    await page.click('button:has-text("Replace")');
+
+    // At this point we should be in the second cell
+    await page.waitForSelector('text=1/2');
+    await page.click('button:has-text("Replace")');
+
+    await page.waitForSelector('text=1/1');
+
+    await page.click('button:has-text("Replace")');
+    await page.waitForSelector('text=-/-');
+  });
 });

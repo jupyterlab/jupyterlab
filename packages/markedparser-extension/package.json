@@ -43,7 +43,7 @@
   "devDependencies": {
     "@types/marked": "^4.0.3",
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.1-rc"
   },
   "publishConfig": {
     "access": "public"

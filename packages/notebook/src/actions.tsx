@@ -1243,7 +1243,7 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    *
    * #### Notes
-   * This is a no-op if if there are no cell actions to undo.
+   * This is a no-op if there are no cell actions to undo.
    */
   export function undo(notebook: Notebook): void {
     if (!notebook.model) {
@@ -1332,7 +1332,7 @@ export namespace NotebookActions {
         cell.sharedModel.transact(() => {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
-        });
+        }, false);
       }
     }
     Private.handleState(notebook, state, true);
@@ -1360,7 +1360,7 @@ export namespace NotebookActions {
         cell.sharedModel.transact(() => {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
-        });
+        }, false);
       }
     }
     Private.handleState(notebook, state, true);
@@ -2246,7 +2246,7 @@ namespace Private {
         }
         cell.model.sharedModel.transact(() => {
           (cell.model as ICodeCellModel).clearExecution();
-        });
+        }, false);
         break;
       default:
         break;

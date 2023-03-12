@@ -170,7 +170,7 @@ describe('console/history', () => {
         const editor = new CodeMirrorEditor({
           model,
           host,
-          extensions: [ybinding((model.sharedModel as any).ysource)]
+          extensions: [ybinding({ ytext: (model.sharedModel as any).ysource })]
         });
         history.editor = editor;
         model.sharedModel.setSource('foo');
@@ -193,7 +193,7 @@ describe('console/history', () => {
         const editor = new CodeMirrorEditor({
           model,
           host,
-          extensions: [ybinding((model.sharedModel as any).ysource)]
+          extensions: [ybinding({ ytext: (model.sharedModel as any).ysource })]
         });
         history.editor = editor;
         history.push('foo');

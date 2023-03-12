@@ -39,14 +39,14 @@
     "@jupyterlab/nbformat": "^4.0.0-alpha.20",
     "@jupyterlab/notebook": "^4.0.0-alpha.20",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.20",
-    "@lumino/algorithm": "^2.0.0-rc.0",
-    "@lumino/coreutils": "^2.0.0-rc.0",
-    "@lumino/signaling": "^2.0.0-rc.0"
+    "@lumino/algorithm": "^2.0.0-rc.1",
+    "@lumino/coreutils": "^2.0.0-rc.1",
+    "@lumino/signaling": "^2.0.0-rc.1"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-alpha.20",
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.1-rc"
   },
   "jupyterlab": {
     "extension": true,

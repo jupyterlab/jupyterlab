@@ -15,15 +15,21 @@ export class NotebookModelFactory
   /**
    * Construct a new notebook model factory.
    */
-  constructor(options: NotebookModelFactory.IOptions) {
+  constructor(options: NotebookModelFactory.IOptions = {}) {
     this._disableDocumentWideUndoRedo =
-      options.disableDocumentWideUndoRedo || false;
+      options.disableDocumentWideUndoRedo ?? true;
     this._collaborative = options.collaborative ?? true;
   }
 
   /**
    * Define the disableDocumentWideUndoRedo property.
+   *
+   * @experimental
+   * @alpha
    */
+  get disableDocumentWideUndoRedo(): boolean {
+    return this._disableDocumentWideUndoRedo;
+  }
   set disableDocumentWideUndoRedo(disableDocumentWideUndoRedo: boolean) {
     this._disableDocumentWideUndoRedo = disableDocumentWideUndoRedo;
   }
@@ -118,6 +124,11 @@ export namespace NotebookModelFactory {
 
     /**
      * Defines if the document can be undo/redo.
+     *
+     * Default: true
+     *
+     * @experimental
+     * @alpha
      */
     disableDocumentWideUndoRedo?: boolean;
   }
