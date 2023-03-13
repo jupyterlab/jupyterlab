@@ -510,9 +510,7 @@ export class AttachmentsCellModel extends CellModel {
     reinitialize?: boolean
   ): void {
     if (reinitialize) {
-      const attachments = (
-        sharedModel as unknown as models.YRawCell
-      ).getAttachments();
+      const attachments = ((sharedModel as unknown) as models.YRawCell).getAttachments();
       this._attachments.fromJSON(attachments ?? {});
     }
     super.switchSharedModel(sharedModel, reinitialize);
