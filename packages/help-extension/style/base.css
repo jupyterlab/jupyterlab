@@ -65,8 +65,8 @@
   color: var(--jp-warn-color1);
 }
 
-[data-jp-theme-light='true'] .jp-About-externalLinks .jp-Button-flat,
-[data-jp-theme-light='true'] .jp-About-externalLinks .jp-Button-flat:hover {
+.jp-About-externalLinks > .jp-Button-flat,
+.jp-About-externalLinks > .jp-Button-flat:hover {
   color: var(--jp-brand-color0);
 }
 
