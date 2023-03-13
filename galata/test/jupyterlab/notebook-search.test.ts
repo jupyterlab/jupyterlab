@@ -81,7 +81,7 @@ test.describe('Notebook Search', () => {
     expect(await overlay.screenshot()).toMatchSnapshot('multi-line-search.png');
   });
 
-  test('Search selected', async ({ page }) => {
+  test('Populate search box with selected text', async ({ page }) => {
     // Enter first cell
     await page.notebook.enterCellEditingMode(0);
 
@@ -164,7 +164,7 @@ test.describe('Notebook Search', () => {
 
     await page.click('button[title="Show Search Filters"]');
 
-    await page.click('text=Search Selected Cell(s)');
+    await page.click('text=Search in 1 Selected Cell');
 
     await page.waitForSelector('text=1/4');
 
@@ -172,6 +172,53 @@ test.describe('Notebook Search', () => {
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(
       'search-in-selected-cells.png'
+    );
+  });
+
+  test('Search in selected text', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+
+    await page.fill('[placeholder="Find"]', 'text/');
+    await page.waitForSelector('text=1/3');
+
+    // Activete third cell
+    const cell = await page.notebook.getCell(2);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Select 7 lines
+    await page.keyboard.press('Control+Home');
+    for (let i = 0; i < 6; i++) {
+      await page.keyboard.press('Shift+ArrowDown');
+    }
+
+    // Switch to selection search mode
+    await page.click('button[title="Show Search Filters"]');
+    await page.click('text=Search in 7 Selected Lines');
+
+    await page.waitForSelector('text=1/2');
+
+    const nbPanel = await page.notebook.getNotebookInPanel();
+
+    expect(await nbPanel.screenshot()).toMatchSnapshot(
+      'search-in-selected-text.png'
+    );
+  });
+
+  test('Highlights are visible when text is selected', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'with');
+    await page.waitForSelector('text=1/21');
+
+    const cell = await page.notebook.getCell(0);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Select text (to see if the highlights will still be visible)
+    await page.keyboard.press('Control+A');
+
+    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
+      'highlight-visible-under-selection.png'
     );
   });
 

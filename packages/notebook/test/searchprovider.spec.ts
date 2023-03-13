@@ -1,25 +1,31 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { signalToPromise } from '@jupyterlab/coreutils';
 import {
   INotebookModel,
   NotebookPanel,
   NotebookSearchProvider
 } from '@jupyterlab/notebook';
 import { Context } from '@jupyterlab/docregistry';
-import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
-import { JupyterServer } from '@jupyterlab/testing';
+import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import * as utils from './utils';
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-}, 30000);
-
-afterAll(async () => {
-  await server.shutdown();
-});
+/**
+ * To avoid relying on ydoc passing the selections via server
+ * (this test runs without a server for efficiency) we also set
+ * selections on the model directly.
+ */
+async function setSelections(
+  editor: CodeEditor.IEditor,
+  selections: CodeEditor.ITextSelection[]
+) {
+  const promise = signalToPromise(editor.model.selections.changed);
+  editor.setSelections(selections);
+  editor.model.selections.set('main-selection', selections);
+  await promise;
+}
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookSearchProvider', () => {
@@ -28,7 +34,7 @@ describe('@jupyterlab/notebook', () => {
     let provider: NotebookSearchProvider;
 
     beforeEach(async () => {
-      context = await initNotebookContext();
+      context = await NBTestUtils.createMockContext(false);
       panel = utils.createNotebookPanel(context);
       provider = new NotebookSearchProvider(panel);
       panel.model!.sharedModel.insertCells(0, [
@@ -45,6 +51,35 @@ describe('@jupyterlab/notebook', () => {
       it('should return number of matches', async () => {
         await provider.startQuery(/test/, undefined);
         expect(provider.matchesCount).toBe(3);
+      });
+
+      it('should return number of matches in selected lines', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, 2);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1\ntest2\ntest3\ntest4\ntest5' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'edit';
+
+        await provider.startQuery(/test/, { selection: true });
+        expect(provider.matchesCount).toBe(5);
+        await setSelections(panel.content.activeCell!.editor!, [
+          {
+            uuid: 'main-selection',
+            start: { line: 1, column: 0 },
+            end: { line: 2, column: 6 }
+          }
+        ]);
+        expect(provider.matchesCount).toBe(3);
+        await setSelections(panel.content.activeCell!.editor!, [
+          {
+            uuid: 'main-selection',
+            start: { line: 1, column: 0 },
+            end: { line: 1, column: 6 }
+          }
+        ]);
+        expect(provider.matchesCount).toBe(2);
+        await provider.endQuery();
       });
     });
 
@@ -63,6 +98,48 @@ describe('@jupyterlab/notebook', () => {
       it('should loop back to first match', async () => {
         panel.content.activeCellIndex = 1;
         await provider.startQuery(/test/, undefined);
+        expect(panel.content.activeCellIndex).toBe(1);
+        expect(provider.currentMatchIndex).toBe(2);
+        await provider.highlightNext();
+        expect(panel.content.activeCellIndex).toBe(0);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.endQuery();
+      });
+
+      it('should loop back to first match when limited to single cell', async () => {
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'command';
+        await provider.startQuery(/test/, { selection: true });
+        expect(panel.content.activeCellIndex).toBe(0);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(1);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(0);
+        expect(panel.content.activeCellIndex).toBe(0);
+        await provider.endQuery();
+      });
+
+      it('should loop back to first match in selected lines', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, 2);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1\ntest2\ntest3\ntest4\ntest5' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'edit';
+
+        await provider.startQuery(/test/, { selection: true });
+        await setSelections(panel.content.activeCell!.editor!, [
+          {
+            uuid: 'main-selection',
+            start: { line: 1, column: 0 },
+            end: { line: 2, column: 6 }
+          }
+        ]);
+        expect(panel.content.activeCellIndex).toBe(0);
+        expect(provider.currentMatchIndex).toBe(0);
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(1);
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(2);
         await provider.highlightNext();
@@ -85,7 +162,6 @@ describe('@jupyterlab/notebook', () => {
       it('should highlight previous match', async () => {
         panel.content.activeCellIndex = 1;
         await provider.startQuery(/tes/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(2);
         expect(panel.content.activeCellIndex).toBe(1);
         await provider.highlightPrevious();
@@ -103,6 +179,15 @@ describe('@jupyterlab/notebook', () => {
         expect(provider.currentMatchIndex).toBe(0);
         await provider.highlightPrevious();
         expect(provider.currentMatchIndex).toBe(2);
+        await provider.endQuery();
+      });
+
+      it('should go to previous cell if there is no current match in active cell', async () => {
+        await provider.startQuery(/test/, undefined);
+        panel.content.activeCellIndex = 1;
+        expect(panel.content.activeCellIndex).toBe(1);
+        await provider.highlightPrevious();
+        expect(panel.content.activeCellIndex).toBe(0);
         await provider.endQuery();
       });
     });
@@ -184,6 +269,57 @@ describe('@jupyterlab/notebook', () => {
         source = panel.model!.cells.get(1).sharedModel.getSource();
         expect(source).toBe('test0');
         expect(provider.currentMatchIndex).toBe(null);
+      });
+
+      it('should only replace within first cell', async () => {
+        await provider.startQuery(/test/, { selection: true });
+        panel.content.mode = 'command';
+        panel.content.activeCellIndex = 0;
+        await provider.highlightNext();
+        const replaced = await provider.replaceAllMatches('bar');
+        expect(replaced).toBe(true);
+        let source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('bar1 bar2');
+        source = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source).toBe('test3');
+        await provider.endQuery();
+      });
+
+      it('should only replace within second cell', async () => {
+        await provider.startQuery(/test/, { selection: true });
+        panel.content.mode = 'command';
+        panel.content.activeCellIndex = 1;
+        await provider.highlightNext();
+        const replaced = await provider.replaceAllMatches('bar');
+        expect(replaced).toBe(true);
+        let source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test1 test2');
+        source = panel.model!.cells.get(1).sharedModel.getSource();
+        expect(source).toBe('bar3');
+        await provider.endQuery();
+      });
+
+      it('should only replace within selected lines', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, 2);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1\ntest2\ntest3\ntest4\ntest5' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'edit';
+
+        await provider.startQuery(/test/, { selection: true });
+        await setSelections(panel.content.activeCell!.editor!, [
+          {
+            uuid: 'main-selection',
+            start: { line: 1, column: 0 },
+            end: { line: 2, column: 6 }
+          }
+        ]);
+        const replaced = await provider.replaceAllMatches('bar');
+        expect(replaced).toBe(true);
+        let source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test1\nbar2\nbar3\nbar4\ntest5');
+        await provider.endQuery();
       });
     });
   });

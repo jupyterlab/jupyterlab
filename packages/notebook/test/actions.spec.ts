@@ -71,9 +71,7 @@ describe('@jupyterlab/notebook', () => {
           windowingMode: 'none'
         }
       });
-      const model = new NotebookModel({
-        disableDocumentWideUndoRedo: true
-      });
+      const model = new NotebookModel();
       model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
       model.sharedModel.clearUndoHistory();

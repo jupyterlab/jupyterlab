@@ -70,7 +70,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       });
 
     const resolver = new RenderMimeRegistry.UrlResolver({
-      session: sessionContext,
+      path,
       contents: manager.contents
     });
     rendermime = rendermime.clone({ resolver });
