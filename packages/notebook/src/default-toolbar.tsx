@@ -249,6 +249,8 @@ export namespace ToolbarItems {
 
   /**
    * Get the default toolbar items for panel
+   *
+   * @deprecated since v4
    */
   export function getDefaultItems(
     panel: NotebookPanel,
