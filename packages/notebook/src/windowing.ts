@@ -89,23 +89,30 @@ export class NotebookWindowedLayout extends WindowedLayout {
    *
    * @param v: Widget | null
    */
-  set header(v: Widget | null) {
+  set header(header: Widget | null) {
     if (this._header && this._header.isAttached) {
       Widget.detach(this._header);
     }
-    this._header = v;
+    this._header = header;
     if (this._header && this.parent?.isAttached) {
       Widget.attach(this._header, this.parent!.node);
     }
   }
 
   /**
-   * Notebook widget's footer
+   * Returns Notebook's footer
+   *
+   * @return NotebookFooter | null
    */
 
   get footer(): NotebookFooter | null {
     return this._footer;
   }
+  /**
+   * Set Notebook's footer
+   *
+   * @param footer: NotebookFooter | null
+   */
   set footer(footer: NotebookFooter | null) {
     if (this._footer && this._footer.isAttached) {
       NotebookFooter.detach(this._footer);

@@ -5,7 +5,8 @@
 
 .jp-Notebook-footer {
   height: 10%;
-  color: transparent;
+
+  /*color: transparent;*/
   display: flex;
   justify-content: center;
   align-items: center;
@@ -14,15 +15,25 @@
     var(--jp-cell-prompt-width) + var(--jp-cell-collapser-width) +
       var(--jp-cell-padding)
   );
-  border: var(--jp-border-width);
+
+  /*border: var(--jp-border-width);*/
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border-radius: 0;
+  color: var(--jp-layout-color3);
 }
 
 /* For devices that support hovering, hide checkboxes until hovered, selected...*/
 
-@media (hover: hover) {
+/* @media (hover: hover) {
   .jp-Notebook-footer:hover {
     border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
     border-radius: 0;
     color: var(--jp-layout-color3);
   }
-}
+}*/
+
+/* .jp-Notebook-footer:hover {
+  border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
+  border-radius: 0;
+  color: var(--jp-layout-color3);
+} */
