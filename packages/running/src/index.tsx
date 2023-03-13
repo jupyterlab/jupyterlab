@@ -265,15 +265,16 @@ class ListWidget extends ReactWidget {
   }
 
   dispose() {
-    super.dispose();
     this._options.manager.runningChanged.disconnect(this._emitUpdate, this);
+    super.dispose();
   }
 
-  onBeforeShow() {
+  protected onBeforeShow(msg: Message): void {
+    super.onBeforeShow(msg);
     this._update.emit();
   }
 
-  render() {
+  render(): JSX.Element {
     const options = this._options;
     let cached = true;
     return (
