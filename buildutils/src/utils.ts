@@ -242,7 +242,7 @@ export function prebump(): void {
     encoding: 'utf8'
   });
   if (status.length > 0) {
-    run('git diff', {
+    const diff = run('git diff', {
       stdio: 'pipe',
       encoding: 'utf8'
     });
@@ -250,7 +250,9 @@ export function prebump(): void {
       `Must be in a clean git state with no untracked files.
 Run "git status" to see the issues.
 
-${status}`
+${status}
+
+${diff}`
     );
   }
 }
