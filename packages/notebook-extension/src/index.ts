@@ -1433,8 +1433,8 @@ function activateNotebookHandler(
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
 
-    modelFactory.disableDocumentWideUndoRedo = settings.get(
-      'experimentalDisableDocumentWideUndoRedo'
+    modelFactory.disableDocumentWideUndoRedo = !settings.get(
+      'documentWideUndoRedo'
     ).composite as boolean;
 
     updateTracker({

@@ -72,9 +72,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should allow undoing a change', () => {
-        const model = new NotebookModel({
-          disableDocumentWideUndoRedo: true
-        });
+        const model = new NotebookModel();
         const cell = model.contentFactory.createCodeCell({});
         cell.value.text = 'foo';
         const cellJSON = cell.toJSON();

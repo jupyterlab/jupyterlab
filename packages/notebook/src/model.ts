@@ -88,7 +88,7 @@ export class NotebookModel implements INotebookModel {
       this.modelDB = new ModelDB();
     }
     this.sharedModel = new models.YNotebook({
-      disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? false
+      disableDocumentWideUndoRedo: options.disableDocumentWideUndoRedo ?? true
     }) as models.ISharedNotebook;
     this._isInitialized = options.isInitialized === false ? false : true;
     const factory =
@@ -592,6 +592,11 @@ export namespace NotebookModel {
 
     /**
      * Defines if the document can be undo/redo.
+     *
+     * Default: true
+     *
+     * @experimental
+     * @alpha
      */
     disableDocumentWideUndoRedo?: boolean;
 

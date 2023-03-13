@@ -877,7 +877,7 @@
       "title": "Experimental settings to enable the undo/redo on the notebook document level.",
       "description": "Disable the undo/redo on the notebook document level, so actions independent cells can have their own history. The undo/redo never applies on the outputs, in other words, outputs don't have history. A moved cell completely looses history capability for now.",
       "type": "boolean",
-      "default": false
+      "default": true
     },
     "renderingLayout": {
       "title": "Rendering Layout",

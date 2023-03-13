@@ -1179,7 +1179,7 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    *
    * #### Notes
-   * This is a no-op if if there are no cell actions to undo.
+   * This is a no-op if there are no cell actions to undo.
    */
   export function undo(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
