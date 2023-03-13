@@ -17,6 +17,8 @@
     "watch": "webpack --watch"
   },
   "resolutions": {
+    "@codemirror/state": "^6.2.0",
+    "@codemirror/view": "^6.7.0",
     "@jupyter/ydoc": "~0.3.4",
     "@jupyterlab/application": "~4.0.0-alpha.20",
     "@jupyterlab/application-extension": "~4.0.0-alpha.20",
@@ -259,6 +261,8 @@
     "buildDir": "./static",
     "outputDir": ".",
     "singletonPackages": [
+      "@codemirror/state",
+      "@codemirror/view",
       "@jupyter/ydoc",
       "@jupyterlab/application",
       "@jupyterlab/apputils",
