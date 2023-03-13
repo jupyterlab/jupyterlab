@@ -955,7 +955,24 @@ function addCommands(
             buttons: [Dialog.okButton()]
           });
         }
-        return context.saveAs();
+
+        const onChange = (
+          sender: Contents.IManager,
+          args: Contents.IChangedArgs
+        ) => {
+          console.debug('[CommandIDs.saveAs] fileChanged:', args);
+          if (args.type === 'save' && args.newValue?.path !== context.path) {
+            commands.execute(CommandIDs.open, {
+              path: args.newValue?.path
+            });
+          }
+        };
+        docManager.services.contents.fileChanged.connect(onChange);
+        context.saveAs().finally(() => {
+          console.debug('[CommandIDs.saveAs] finally');
+          docManager.services.contents.fileChanged.disconnect(onChange);
+          docManager.closeFile(context.path);
+        });
       }
     }
   });
