@@ -29,7 +29,9 @@ bumped their major version (following semver convention). We want to point out p
    As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
 - ``@jupyterlab/apputils`` from 3.x to 4.x
-   Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
+   * Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
+   * ``ISanitizer`` and ``ISanitizer.IOptions`` are deprecated in favor of ``IRenderMime.ISanitizer`` and
+     ``IRenderMime.ISanitizerOptions`` in ``@jupyterlab/rendermime-interfaces``.
 - ``@jupyterlab/attachments`` from 3.x to 4.x
    Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x

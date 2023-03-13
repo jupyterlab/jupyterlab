@@ -80,7 +80,11 @@ import {
 } from '@jupyterlab/notebook';
 import { IObservableList } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  IMarkdownParser,
+  IRenderMime,
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -856,7 +860,7 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     tocRegistry: ITableOfContentsRegistry,
-    sanitizer: ISanitizer,
+    sanitizer: IRenderMime.ISanitizer,
     mdParser: IMarkdownParser | null
   ): void => {
     tocRegistry.add(new NotebookToCFactory(tracker, mdParser, sanitizer));
@@ -1881,7 +1885,7 @@ function activateNotebookCompleterService(
   notebooks: INotebookTracker,
   manager: ICompletionProviderManager | null,
   translator: ITranslator | null,
-  appSanitizer: ISanitizer | null
+  appSanitizer: IRenderMime.ISanitizer | null
 ): void {
   if (!manager) {
     return;

@@ -3,7 +3,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import sanitize from 'sanitize-html';
-import { ISanitizer } from './tokens';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
  * Helper class that contains regular expressions for inline CSS style validation.
@@ -433,7 +433,7 @@ class CssProp {
 /**
  * A class to sanitize HTML strings.
  */
-export class Sanitizer implements ISanitizer {
+export class Sanitizer implements IRenderMime.ISanitizer {
   /**
    * Sanitize an HTML string.
    *
@@ -443,7 +443,7 @@ export class Sanitizer implements ISanitizer {
    *
    * @returns The sanitized string.
    */
-  sanitize(dirty: string, options?: ISanitizer.IOptions): string {
+  sanitize(dirty: string, options?: IRenderMime.ISanitizerOptions): string {
     return sanitize(dirty, { ...this._options, ...(options || {}) });
   }
 

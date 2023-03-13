@@ -2,7 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { ISanitizer, Sanitizer } from '@jupyterlab/apputils';
+import { Sanitizer } from '@jupyterlab/apputils';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents } from '@jupyterlab/services';
@@ -47,7 +47,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
   /**
    * The sanitizer used by the rendermime instance.
    */
-  readonly sanitizer: ISanitizer;
+  readonly sanitizer: IRenderMime.ISanitizer;
 
   /**
    * The object used to resolve relative urls for the rendermime instance.
