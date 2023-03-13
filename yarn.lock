@@ -2817,6 +2817,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/documentsearch@workspace:packages/documentsearch"
   dependencies:
+    "@jupyterlab/apputils": ^4.0.0-alpha.20
     "@jupyterlab/testing": ^4.0.0-alpha.20
     "@jupyterlab/translation": ^4.0.0-alpha.20
     "@jupyterlab/ui-components": ^4.0.0-alpha.35
