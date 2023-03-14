@@ -363,7 +363,10 @@ export class SettingRegistry implements ISettingRegistry {
    * @returns A promise that resolves with a plugin settings object or rejects
    * if the plugin is not found.
    */
-  async load(plugin: string): Promise<ISettingRegistry.ISettings> {
+  async load(
+    plugin: string,
+    forceTransform: boolean = false
+  ): Promise<ISettingRegistry.ISettings> {
     // Wait for data preload before allowing normal operation.
     await this._ready;
 
@@ -372,6 +375,9 @@ export class SettingRegistry implements ISettingRegistry {
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
+      if (forceTransform) {
+        await this._load(await this._transform('fetch', plugins[plugin]));
+      }
       return new Settings({ plugin: plugins[plugin], registry });
     }
     if (plugin in this._unloadedPlugins && plugin in this._transformers) {
