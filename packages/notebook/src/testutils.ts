@@ -101,7 +101,7 @@ export namespace NBTestUtils {
       name: 'binding',
       factory: ({ model }) =>
         EditorExtensionRegistry.createImmutableExtension(
-          ybinding((model.sharedModel as any).ysource)
+          ybinding({ ytext: (model.sharedModel as any).ysource })
         )
     });
     const factoryService = new CodeMirrorEditorFactory({
@@ -251,9 +251,7 @@ export namespace NBTestUtils {
 namespace Private {
   let manager: ServiceManager;
 
-  export const notebookFactory = new NotebookModelFactory({
-    disableDocumentWideUndoRedo: false
-  });
+  export const notebookFactory = new NotebookModelFactory();
 
   /**
    * Get or create the service manager singleton.

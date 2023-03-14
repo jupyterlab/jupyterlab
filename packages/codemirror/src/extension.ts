@@ -620,13 +620,13 @@ export namespace EditorExtensionRegistry {
         default: 1200,
         factory: () =>
           createConfigurableExtension((value: number) =>
-            value !== 1200 ? drawSelection({ cursorBlinkRate: value }) : []
+            drawSelection({ cursorBlinkRate: value })
           ),
         schema: {
           type: 'number',
           title: trans.__('Cursor blinking rate'),
           description: trans.__(
-            'Half-period in milliseconds used for cursor blinking. The default blink rate is 1200ms. By setting this to zero, blinking can be disabled. Using a non-default value has a performance cost.'
+            'Half-period in milliseconds used for cursor blinking. The default blink rate is 1200ms. By setting this to zero, blinking can be disabled.'
           )
         }
       }),
@@ -770,6 +770,18 @@ export namespace EditorExtensionRegistry {
         schema: {
           type: 'number',
           title: trans.__('Tab size')
+        }
+      }),
+      Object.freeze({
+        name: 'allowMultipleSelections',
+        default: true,
+        factory: () =>
+          createConfigurableExtension((value: boolean) =>
+            EditorState.allowMultipleSelections.of(value)
+          ),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Multiple selections')
         }
       }),
       Object.freeze({

@@ -1198,7 +1198,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       } else {
         this.model.deleteMetadata('collapsed');
       }
-    });
+    }, false);
   }
 
   /**
@@ -1437,7 +1437,7 @@ export namespace CodeCell {
     if (!code.trim() || !sessionContext.session?.kernel) {
       model.sharedModel.transact(() => {
         model.clearExecution();
-      });
+      }, false);
       return;
     }
     const cellId = { cellId: model.sharedModel.getId() };
@@ -1450,7 +1450,7 @@ export namespace CodeCell {
     model.sharedModel.transact(() => {
       model.clearExecution();
       cell.outputHidden = false;
-    });
+    }, false);
     cell.setPrompt('*');
     model.trusted = true;
     let future:

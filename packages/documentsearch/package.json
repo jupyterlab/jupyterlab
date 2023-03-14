@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/documentsearch",
-  "version": "4.0.0-alpha.20",
+  "version": "4.0.0-alpha.21",
   "description": "JupyterLab - Document Search",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,21 +38,22 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/translation": "^4.0.0-alpha.20",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.35",
-    "@lumino/coreutils": "^2.0.0-rc.0",
-    "@lumino/disposable": "^2.0.0-rc.0",
-    "@lumino/messaging": "^2.0.0-rc.0",
-    "@lumino/polling": "^2.0.0-rc.0",
-    "@lumino/signaling": "^2.0.0-rc.0",
-    "@lumino/widgets": "^2.0.0-rc.0",
+    "@jupyterlab/apputils": "^4.0.0-alpha.21",
+    "@jupyterlab/translation": "^4.0.0-alpha.21",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.36",
+    "@lumino/coreutils": "^2.0.0-rc.1",
+    "@lumino/disposable": "^2.0.0-rc.1",
+    "@lumino/messaging": "^2.0.0-rc.1",
+    "@lumino/polling": "^2.0.0-rc.1",
+    "@lumino/signaling": "^2.0.0-rc.1",
+    "@lumino/widgets": "^2.0.0-rc.1",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.20",
+    "@jupyterlab/testing": "^4.0.0-alpha.21",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.1-rc"
   },
   "publishConfig": {
     "access": "public"

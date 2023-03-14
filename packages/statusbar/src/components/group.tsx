@@ -13,7 +13,7 @@ export function GroupItem(
   const numChildren = React.Children.count(children);
 
   return (
-    <div className={`jp-StatusBar-GroupItem ${className}`} {...rest}>
+    <div className={`jp-StatusBar-GroupItem ${className || ''}`} {...rest}>
       {React.Children.map(children, (child, i) => {
         if (i === 0) {
           return <div style={{ marginRight: `${spacing}px` }}>{child}</div>;

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-services-browser",
-  "version": "4.0.0-alpha.20",
+  "version": "4.0.0-alpha.21",
   "private": true,
   "files": [
     "lib/*.{d.ts,js,js.map}"
@@ -10,14 +10,14 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.20",
-    "@jupyterlab/services": "^7.0.0-alpha.20",
-    "@lumino/coreutils": "^2.0.0-rc.0"
+    "@jupyterlab/coreutils": "^6.0.0-alpha.21",
+    "@jupyterlab/services": "^7.0.0-alpha.21",
+    "@lumino/coreutils": "^2.0.0-rc.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta",
-    "webpack": "^5.72.0",
-    "webpack-cli": "^5.0.0"
+    "typescript": "~5.0.1-rc",
+    "webpack": "^5.76.1",
+    "webpack-cli": "^5.0.1"
   }
 }

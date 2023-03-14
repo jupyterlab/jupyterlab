@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/htmlviewer-extension",
-  "version": "4.0.0-alpha.20",
+  "version": "4.0.0-alpha.21",
   "description": "JupyterLab extension to render HTML files",
   "keywords": [
     "jupyter",
@@ -35,18 +35,18 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.20",
-    "@jupyterlab/apputils": "^4.0.0-alpha.20",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.20",
-    "@jupyterlab/htmlviewer": "^4.0.0-alpha.20",
-    "@jupyterlab/observables": "^5.0.0-alpha.20",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.20",
-    "@jupyterlab/translation": "^4.0.0-alpha.20",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.35"
+    "@jupyterlab/application": "^4.0.0-alpha.21",
+    "@jupyterlab/apputils": "^4.0.0-alpha.21",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.21",
+    "@jupyterlab/htmlviewer": "^4.0.0-alpha.21",
+    "@jupyterlab/observables": "^5.0.0-alpha.21",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.21",
+    "@jupyterlab/translation": "^4.0.0-alpha.21",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.36"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.1-rc"
   },
   "publishConfig": {
     "access": "public"

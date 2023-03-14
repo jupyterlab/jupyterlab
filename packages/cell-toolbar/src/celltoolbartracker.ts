@@ -3,7 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { createDefaultFactory, ToolbarRegistry } from '@jupyterlab/apputils';
-import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
+import {
+  Cell,
+  CellModel,
+  CodeCell,
+  ICellModel,
+  MarkdownCell
+} from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
@@ -13,6 +19,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
+import { IMapChange } from '@jupyter/ydoc';
 
 /*
  * Text mime types
@@ -65,12 +72,45 @@ export class CellToolbarTracker implements IDisposable {
 
     // Handle subsequent changes of active cell.
     panel.content.activeCellChanged.connect(this._onActiveCellChanged, this);
+    panel.content.activeCell?.model.metadataChanged.connect(
+      this._onMetadataChanged,
+      this
+    );
+    panel.disposed.connect(() => {
+      panel.content.activeCellChanged.disconnect(this._onActiveCellChanged);
+      panel.content.activeCell?.model.metadataChanged.disconnect(
+        this._onMetadataChanged
+      );
+    });
   }
 
+  _onMetadataChanged(model: CellModel, args: IMapChange) {
+    if (args.key === 'jupyter') {
+      if (
+        typeof args.newValue === 'object' &&
+        args.newValue.source_hidden === true &&
+        (args.type === 'add' || args.type === 'change')
+      ) {
+        // Cell just became hidden; remove toolbar
+        this._removeToolbar(model);
+      }
+      // Check whether input visibility changed
+      else if (
+        typeof args.oldValue === 'object' &&
+        args.oldValue.source_hidden === true
+      ) {
+        // Cell just became visible; add toolbar
+        this._addToolbar(model);
+      }
+    }
+  }
   _onActiveCellChanged(notebook: Notebook): void {
     if (this._previousActiveCell && !this._previousActiveCell.isDisposed) {
       // Disposed cells do not have a model anymore.
       this._removeToolbar(this._previousActiveCell.model);
+      this._previousActiveCell.model.metadataChanged.disconnect(
+        this._onMetadataChanged
+      );
     }
 
     const activeCell = notebook.activeCell;
@@ -78,10 +118,10 @@ export class CellToolbarTracker implements IDisposable {
       return;
     }
 
+    activeCell.model.metadataChanged.connect(this._onMetadataChanged, this);
+
     this._addToolbar(activeCell.model);
     this._previousActiveCell = activeCell;
-
-    this._updateCellForToolbarOverlap(activeCell);
   }
 
   get isDisposed(): boolean {
@@ -122,6 +162,7 @@ export class CellToolbarTracker implements IDisposable {
           widget instanceof ReactWidget &&
           (widget as ReactWidget).renderPromise !== undefined
         ) {
+          (widget as ReactWidget).update();
           promises.push((widget as ReactWidget).renderPromise!);
         }
       }
@@ -137,9 +178,12 @@ export class CellToolbarTracker implements IDisposable {
 
           // Watch for changes in the cell's contents.
           cell.model.contentChanged.connect(this._changedEventCallback, this);
+
+          // Hide the cell toolbar if it overlaps with cell contents
+          this._updateCellForToolbarOverlap(cell);
         })
-        .catch(() => {
-          console.error('Error rendering buttons of the cell toolbar');
+        .catch(e => {
+          console.error('Error rendering buttons of the cell toolbar: ', e);
         });
     }
   }
@@ -322,13 +366,15 @@ export class CellToolbarTracker implements IDisposable {
       return false; // Nothing in the editor
     }
 
-    const codeMirrorLines =
-      editorWidget.node.getElementsByClassName('CodeMirror-line');
+    const codeMirrorLines = editorWidget.node.getElementsByClassName('cm-line');
     if (codeMirrorLines.length < 1) {
       return false; // No lines present
     }
-    const lineRight = codeMirrorLines[0].children[0] // First span under first pre
-      .getBoundingClientRect().right;
+
+    let lineRight = codeMirrorLines[0].getBoundingClientRect().left;
+    const range = document.createRange();
+    range.selectNodeContents(codeMirrorLines[0]);
+    lineRight += range.getBoundingClientRect().width;
 
     const toolbarLeft = this._cellToolbarLeft(activeCell);
 

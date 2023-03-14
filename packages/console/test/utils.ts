@@ -20,7 +20,7 @@ const extensions = (() => {
     factory: ({ model }) => {
       const sharedModel = model.sharedModel as IYText;
       return EditorExtensionRegistry.createImmutableExtension([
-        ybinding(sharedModel.ysource)
+        ybinding({ ytext: sharedModel.ysource })
       ]);
     }
   });
