@@ -960,17 +960,23 @@ function addCommands(
           sender: Contents.IManager,
           args: Contents.IChangedArgs
         ) => {
-          if (args.type === 'save' && args.newValue?.path !== context.path) {
+          if (
+            args.type === 'save' &&
+            args.newValue &&
+            args.newValue.path !== context.path
+          ) {
             void commands.execute(CommandIDs.open, {
-              path: args.newValue?.path
+              path: args.newValue.path
             });
           }
         };
         docManager.services.contents.fileChanged.connect(onChange);
-        context.saveAs().finally(() => {
-          docManager.services.contents.fileChanged.disconnect(onChange);
-          void docManager.closeFile(context.path);
-        });
+        context
+          .saveAs()
+          .then(() => void docManager.closeFile(context.path))
+          .finally(() =>
+            docManager.services.contents.fileChanged.disconnect(onChange)
+          );
       }
     }
   });
