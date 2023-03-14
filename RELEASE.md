@@ -90,11 +90,11 @@ The version spec follows the specification documented below in the [Bump Version
 
 We can use `next` when making a `patch` release or a `build` pre-release.
 
-Click on "Run workflow", then wait for:
+Click on "Run workflow", then once completed:
 
-1. the PR to be created on the repo. Example: https://github.com/jupyterlab/jupyterlab/pull/11422
-1. Tests to pass
-1. Merge the changelog PR
+1. Go to the Releases: https://github.com/jupyterlab/jupyterlab/releases
+1. Check the draft GitHub Release has been created
+1. Make edits to the changelog if needed. ⚠️ If you make edits to the content of the GitHub Release, then don't forget to click on "Save Draft" and not "Publish Release".
 
 ### 2. Publish Release
 
