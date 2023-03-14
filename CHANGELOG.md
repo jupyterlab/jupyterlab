@@ -8,6 +8,72 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.0a36
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a35...c4d6addb38d7175292d49e8e0e695fa306498549))
+
+### Enhancements made
+
+- Add CellList as exported type [#14185](https://github.com/jupyterlab/jupyterlab/pull/14185) ([@peytondmurray](https://github.com/peytondmurray))
+- Rework search in selection in notebook [#14090](https://github.com/jupyterlab/jupyterlab/pull/14090) ([@krassowski](https://github.com/krassowski))
+- Option to disable the autolink feature [#14068](https://github.com/jupyterlab/jupyterlab/pull/14068) ([@cccs-nik](https://github.com/cccs-nik))
+- Using metadataform for default notebooktools [#14026](https://github.com/jupyterlab/jupyterlab/pull/14026) ([@brichet](https://github.com/brichet))
+- Introduce disabled states for the cell move up/move down icons [#13898](https://github.com/jupyterlab/jupyterlab/pull/13898) ([@HaudinFlorence](https://github.com/HaudinFlorence))
+- Make changes to the tooltips of the toolbar actions. [#13861](https://github.com/jupyterlab/jupyterlab/pull/13861) ([@HaudinFlorence](https://github.com/HaudinFlorence))
+
+### Bugs fixed
+
+- Make codemirror state and view packages singleton [#14183](https://github.com/jupyterlab/jupyterlab/pull/14183) ([@fcollonval](https://github.com/fcollonval))
+- Decodes URI before adding it to the tab title [#14178](https://github.com/jupyterlab/jupyterlab/pull/14178) ([@hbcarlos](https://github.com/hbcarlos))
+- Do not update running list when hidden [#14172](https://github.com/jupyterlab/jupyterlab/pull/14172) ([@krassowski](https://github.com/krassowski))
+- Keep extension manager panel sizes when pagination changes [#14171](https://github.com/jupyterlab/jupyterlab/pull/14171) ([@FoSuCloud](https://github.com/FoSuCloud))
+- Fix create-package [#14156](https://github.com/jupyterlab/jupyterlab/pull/14156) ([@fcollonval](https://github.com/fcollonval))
+- Fix getting current without activation for labels and captions [#14152](https://github.com/jupyterlab/jupyterlab/pull/14152) ([@fcollonval](https://github.com/fcollonval))
+- bug: Add fallback value for undefined className prop in GroupItem component [#14140](https://github.com/jupyterlab/jupyterlab/pull/14140) ([@zrottman](https://github.com/zrottman))
+- Fixes contextual help attachment logic [#14120](https://github.com/jupyterlab/jupyterlab/pull/14120) ([@JasonWeill](https://github.com/JasonWeill))
+- Fix code/content/ui font-size change [#14077](https://github.com/jupyterlab/jupyterlab/pull/14077) ([@FoSuCloud](https://github.com/FoSuCloud))
+- Property inspector styling fixes [#14069](https://github.com/jupyterlab/jupyterlab/pull/14069) ([@JasonWeill](https://github.com/JasonWeill))
+- Fix non-document wide undo stack [#14063](https://github.com/jupyterlab/jupyterlab/pull/14063) ([@fcollonval](https://github.com/fcollonval))
+- Adds placeholder when TOC is empty [#14024](https://github.com/jupyterlab/jupyterlab/pull/14024) ([@JasonWeill](https://github.com/JasonWeill))
+- Hides cell toolbar when cell is collapsed [#13964](https://github.com/jupyterlab/jupyterlab/pull/13964) ([@JasonWeill](https://github.com/JasonWeill))
+
+### Maintenance and upkeep improvements
+
+- Update `webpack` dependencies [#14189](https://github.com/jupyterlab/jupyterlab/pull/14189) ([@jtpio](https://github.com/jtpio))
+- Remove shebang from non-executable script node-version-check.js [#14181](https://github.com/jupyterlab/jupyterlab/pull/14181) ([@frenzymadness](https://github.com/frenzymadness))
+- Remove deprecated code [#14160](https://github.com/jupyterlab/jupyterlab/pull/14160) ([@fcollonval](https://github.com/fcollonval))
+- Clean up events service types in preparation for release [#14149](https://github.com/jupyterlab/jupyterlab/pull/14149) ([@afshin](https://github.com/afshin))
+- Update to Lumino 2 RC 1 [#14146](https://github.com/jupyterlab/jupyterlab/pull/14146) ([@jtpio](https://github.com/jtpio))
+- Switch to monthly dependabot update [#14144](https://github.com/jupyterlab/jupyterlab/pull/14144) ([@fcollonval](https://github.com/fcollonval))
+- Bump ruff from 0.0.253 to 0.0.254 [#14137](https://github.com/jupyterlab/jupyterlab/pull/14137) ([@dependabot](https://github.com/dependabot))
+- Bump ipython from 8.10.0 to 8.11.0 [#14136](https://github.com/jupyterlab/jupyterlab/pull/14136) ([@dependabot](https://github.com/dependabot))
+- Bump matplotlib from 3.7.0 to 3.7.1 [#14135](https://github.com/jupyterlab/jupyterlab/pull/14135) ([@dependabot](https://github.com/dependabot))
+- Bump tj-actions/changed-files from 35.6.0 to 35.6.1 [#14134](https://github.com/jupyterlab/jupyterlab/pull/14134) ([@dependabot](https://github.com/dependabot))
+- Use upstream `Stream` instead of downstream stream [#14123](https://github.com/jupyterlab/jupyterlab/pull/14123) ([@afshin](https://github.com/afshin))
+- Bump vega from 5.22.1 to 5.23.0 [#14119](https://github.com/jupyterlab/jupyterlab/pull/14119) ([@dependabot](https://github.com/dependabot))
+- Update to TypeScript 5.0 RC [#14114](https://github.com/jupyterlab/jupyterlab/pull/14114) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Update RELEASE.md to mention the draft GitHub release [#14188](https://github.com/jupyterlab/jupyterlab/pull/14188) ([@jtpio](https://github.com/jtpio))
+- Add the releaser workflows to the repo [#14176](https://github.com/jupyterlab/jupyterlab/pull/14176) ([@jtpio](https://github.com/jtpio))
+- Remove deprecated code [#14160](https://github.com/jupyterlab/jupyterlab/pull/14160) ([@fcollonval](https://github.com/fcollonval))
+- Option to disable the autolink feature [#14068](https://github.com/jupyterlab/jupyterlab/pull/14068) ([@cccs-nik](https://github.com/cccs-nik))
+- Using metadataform for default notebooktools [#14026](https://github.com/jupyterlab/jupyterlab/pull/14026) ([@brichet](https://github.com/brichet))
+
+### API and Breaking Changes
+
+- Remove deprecated code [#14160](https://github.com/jupyterlab/jupyterlab/pull/14160) ([@fcollonval](https://github.com/fcollonval))
+- Using metadataform for default notebooktools [#14026](https://github.com/jupyterlab/jupyterlab/pull/14026) ([@brichet](https://github.com/brichet))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-03-02&to=2023-03-14&type=c))
+
+[@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2023-03-02..2023-03-14&type=Issues) | [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2023-03-02..2023-03-14&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2023-03-02..2023-03-14&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2023-03-02..2023-03-14&type=Issues) | [@cccs-nik](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Acccs-nik+updated%3A2023-03-02..2023-03-14&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2023-03-02..2023-03-14&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-03-02..2023-03-14&type=Issues) | [@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2023-03-02..2023-03-14&type=Issues) | [@frenzymadness](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afrenzymadness+updated%3A2023-03-02..2023-03-14&type=Issues) | [@GabrielaVives](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AGabrielaVives+updated%3A2023-03-02..2023-03-14&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-03-02..2023-03-14&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2023-03-02..2023-03-14&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2023-03-02..2023-03-14&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2023-03-02..2023-03-14&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-03-02..2023-03-14&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-03-02..2023-03-14&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-03-02..2023-03-14&type=Issues) | [@peytondmurray](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apeytondmurray+updated%3A2023-03-02..2023-03-14&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2023-03-02..2023-03-14&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-03-02..2023-03-14&type=Issues) | [@zrottman](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Azrottman+updated%3A2023-03-02..2023-03-14&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.0a35
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.0a34...d4a9710eb102ce3a44c2bd4209035f1d504b0f92))
@@ -87,8 +153,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-02-14&to=2023-03-02&type=c))
 
 [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2023-02-14..2023-03-02&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2023-02-14..2023-03-02&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2023-02-14..2023-03-02&type=Issues) | [@c00kie123](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ac00kie123+updated%3A2023-02-14..2023-03-02&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2023-02-14..2023-03-02&type=Issues) | [@doesnots](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adoesnots+updated%3A2023-02-14..2023-03-02&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-02-14..2023-03-02&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-02-14..2023-03-02&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2023-02-14..2023-03-02&type=Issues) | [@jasongrout](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajasongrout+updated%3A2023-02-14..2023-03-02&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2023-02-14..2023-03-02&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-02-14..2023-03-02&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-02-14..2023-03-02&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-02-14..2023-03-02&type=Issues) | [@mlucool](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amlucool+updated%3A2023-02-14..2023-03-02&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2023-02-14..2023-03-02&type=Issues) | [@telamonian](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atelamonian+updated%3A2023-02-14..2023-03-02&type=Issues) | [@vidartf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Avidartf+updated%3A2023-02-14..2023-03-02&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-02-14..2023-03-02&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.0a34
 
