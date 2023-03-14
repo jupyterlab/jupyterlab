@@ -44,6 +44,7 @@
     "@jupyterlab/docregistry": "^4.0.0-alpha.20",
     "@jupyterlab/filebrowser": "^4.0.0-alpha.20",
     "@jupyterlab/mainmenu": "^4.0.0-alpha.20",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.20",
     "@jupyterlab/services": "^7.0.0-alpha.20",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.20",
     "@jupyterlab/statedb": "^4.0.0-alpha.20",

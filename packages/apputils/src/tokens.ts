@@ -191,22 +191,14 @@ export namespace IThemeManager {
 /**
  * The sanitizer token.
  */
-export const ISanitizer = new Token<ISanitizer>(
+export const ISanitizer = new Token<IRenderMime.ISanitizer>(
   '@jupyterlab/apputils:ISanitizer'
 );
 
-export interface ISanitizer {
-  /**
-   * Sanitize an HTML string.
-   *
-   * @param dirty - The dirty text.
-   *
-   * @param options - The optional sanitization options.
-   *
-   * @returns The sanitized string.
-   */
-  sanitize(dirty: string, options?: ISanitizer.IOptions): string;
-}
+/**
+ * @deprecated since v4 use {@link IRenderMime.ISanitizer}
+ */
+export type ISanitizer = IRenderMime.ISanitizer;
 
 /**
  * The namespace for `ISanitizer` related interfaces.
@@ -214,23 +206,10 @@ export interface ISanitizer {
 export namespace ISanitizer {
   /**
    * The options used to sanitize.
+   *
+   * @deprecated in v4 use {@link IRenderMime.ISanitizerOptions}
    */
-  export interface IOptions {
-    /**
-     * The allowed tags.
-     */
-    allowedTags?: string[];
-
-    /**
-     * The allowed attributes for a given tag.
-     */
-    allowedAttributes?: { [key: string]: string[] };
-
-    /**
-     * The allowed style values for a given tag.
-     */
-    allowedStyles?: { [key: string]: { [key: string]: RegExp[] } };
-  }
+  export type IOptions = IRenderMime.ISanitizerOptions;
 }
 
 /**

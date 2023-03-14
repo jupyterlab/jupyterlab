@@ -172,6 +172,32 @@ describe('rendermime/factories', () => {
         );
       });
 
+      it('should not skip autolink', async () => {
+        const source = 'www.example.com';
+        const expected =
+          '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a></pre>';
+        const f = textRendererFactory;
+        const mimeType = 'text/plain';
+        const model = createModel(mimeType, source);
+        sanitizer.setAutolink(true);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(expected);
+      });
+
+      it('should skip autolink', async () => {
+        const source = 'www.example.com';
+        const expected = '<pre>www.example.com</pre>';
+        const f = textRendererFactory;
+        const mimeType = 'text/plain';
+        const model = createModel(mimeType, source);
+        sanitizer.setAutolink(false);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(expected);
+        sanitizer.setAutolink(true);
+      });
+
       it('should autolink multiple URLs', async () => {
         const source = 'www.example.com\nwww.python.org';
         const expected =
