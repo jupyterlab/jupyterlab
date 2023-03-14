@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/cell-toolbar",
-  "version": "4.0.0-alpha.20",
+  "version": "4.0.0-alpha.21",
   "description": "Contextual cell toolbar adapted from jlab-enhanced-cell-toolbar",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,12 +41,12 @@
   },
   "dependencies": {
     "@jupyter/ydoc": "^0.3.4",
-    "@jupyterlab/apputils": "^4.0.0-alpha.20",
-    "@jupyterlab/cells": "^4.0.0-alpha.20",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.20",
-    "@jupyterlab/notebook": "^4.0.0-alpha.20",
-    "@jupyterlab/observables": "^5.0.0-alpha.20",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.35",
+    "@jupyterlab/apputils": "^4.0.0-alpha.21",
+    "@jupyterlab/cells": "^4.0.0-alpha.21",
+    "@jupyterlab/docregistry": "^4.0.0-alpha.21",
+    "@jupyterlab/notebook": "^4.0.0-alpha.21",
+    "@jupyterlab/observables": "^5.0.0-alpha.21",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.36",
     "@lumino/algorithm": "^2.0.0-rc.1",
     "@lumino/commands": "^2.0.0-rc.1",
     "@lumino/disposable": "^2.0.0-rc.1",
@@ -54,7 +54,7 @@
     "@lumino/widgets": "^2.0.0-rc.1"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.20",
+    "@jupyterlab/testing": "^4.0.0-alpha.21",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typescript": "~5.0.1-rc"

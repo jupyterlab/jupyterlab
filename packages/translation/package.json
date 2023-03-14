@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation",
-  "version": "4.0.0-alpha.20",
+  "version": "4.0.0-alpha.21",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -40,14 +40,14 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.20",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.20",
-    "@jupyterlab/services": "^7.0.0-alpha.20",
-    "@jupyterlab/statedb": "^4.0.0-alpha.20",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.21",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.21",
+    "@jupyterlab/services": "^7.0.0-alpha.21",
+    "@jupyterlab/statedb": "^4.0.0-alpha.21",
     "@lumino/coreutils": "^2.0.0-rc.1"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.20",
+    "@jupyterlab/testing": "^4.0.0-alpha.21",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typescript": "~5.0.1-rc"
