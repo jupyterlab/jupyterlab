@@ -115,7 +115,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.254",
+    "ruff==0.0.255",
     "black[jupyter]==23.1.0"
 ]
 
@@ -271,6 +271,8 @@ ignore = [
 # S104 Possible binding to all interfaces
 # S105 Possible hardcoded password: `""`
 "galata/jupyter_server_test_config.py" = ["F821", "S104", "S105"]
+# T201 `print` found
+"jupyterlab/browser_check.py" = ["T201"]
 # C901 method is too complex
 "jupyterlab/commands.py" = ["C901"]
 "jupyterlab/extensions/manager.py" = ["C901"]

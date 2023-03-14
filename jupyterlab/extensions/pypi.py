@@ -155,9 +155,9 @@ class PyPIExtensionManager(ExtensionManager):
         try:
             data = await current_loop.run_in_executor(None, fn, *args)
         except xmlrpc.client.Fault as err:
-            if err.faultCode == -32500 and err.faultString.startswith(
+            if err.faultCode == -32500 and err.faultString.startswith(  # noqa PLR2004
                 "HTTPTooManyRequests:"
-            ):  # noqa PLR2004
+            ):
                 delay = 1.01
                 match = re.search(r"Limit may reset in (\d+) seconds.", err.faultString)
                 if match is not None:
