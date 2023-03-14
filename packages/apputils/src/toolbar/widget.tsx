@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ISessionContext } from '../sessioncontext';
+import { ISessionContext, SessionContextDialogs } from '../sessioncontext';
 import { translateKernelStatuses } from '../kernelstatuses';
 /**
  * The class name added to toolbar kernel name text.
@@ -65,15 +65,17 @@ export namespace Toolbar {
    */
   export function createRestartButton(
     sessionContext: ISessionContext,
-    dialogs: ISessionContext.IDialogs,
+    dialogs?: ISessionContext.IDialogs,
     translator?: ITranslator
   ): Widget {
-    translator = translator || nullTranslator;
+    translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
     return new ToolbarButton({
       icon: refreshIcon,
       onClick: () => {
-        void dialogs.restart(sessionContext);
+        void (dialogs ?? new SessionContextDialogs({ translator })).restart(
+          sessionContext
+        );
       },
       tooltip: trans.__('Restart the kernel')
     });
@@ -88,13 +90,13 @@ export namespace Toolbar {
    */
   export function createKernelNameItem(
     sessionContext: ISessionContext,
-    dialogs: ISessionContext.IDialogs,
+    dialogs?: ISessionContext.IDialogs,
     translator?: ITranslator
   ): Widget {
     const el = ReactWidget.create(
       <Private.KernelNameComponent
         sessionContext={sessionContext}
-        dialogs={dialogs}
+        dialogs={dialogs ?? new SessionContextDialogs({ translator })}
         translator={translator}
       />
     );

@@ -20,21 +20,11 @@ import {
   ToolbarItems
 } from '@jupyterlab/notebook';
 import * as utils from './utils';
-import {
-  ISessionContextDialogs,
-  SessionContextDialogs
-} from '@jupyterlab/apputils';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 describe('@jupyterlab/notebook', () => {
   describe('ToolbarItems', () => {
-    let dialogs: ISessionContextDialogs;
-
-    beforeAll(() => {
-      dialogs = new SessionContextDialogs();
-    });
-
     describe('noKernel', () => {
       let context: Context<INotebookModel>;
       let panel: NotebookPanel;
@@ -218,13 +208,11 @@ describe('@jupyterlab/notebook', () => {
 
       describe('#getDefaultItems()', () => {
         it('should return the default items of the panel toolbar', () => {
-          const names = ToolbarItems.getDefaultItems(panel, dialogs).map(
-            item => {
-              const name = item.name;
-              item.widget.dispose();
-              return name;
-            }
-          );
+          const names = ToolbarItems.getDefaultItems(panel).map(item => {
+            const name = item.name;
+            item.widget.dispose();
+            return name;
+          });
           expect(names).toEqual([
             'save',
             'insert',
@@ -261,7 +249,7 @@ describe('@jupyterlab/notebook', () => {
 
       describe('#createRunButton()', () => {
         it('should run and advance when clicked', async () => {
-          const button = ToolbarItems.createRunButton(panel, dialogs);
+          const button = ToolbarItems.createRunButton(panel);
           const widget = panel.content;
 
           // Clear and select the first two cells.
@@ -288,7 +276,7 @@ describe('@jupyterlab/notebook', () => {
         });
 
         it("should add an inline svg node with the 'run' icon", async () => {
-          const button = ToolbarItems.createRunButton(panel, dialogs);
+          const button = ToolbarItems.createRunButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
           expect(button.node.querySelector("[data-icon$='run']")).toBeDefined();
@@ -297,7 +285,7 @@ describe('@jupyterlab/notebook', () => {
 
       describe('#createRestartRunAllButton()', () => {
         it('should restart and run all when clicked', async () => {
-          const button = ToolbarItems.createRestartRunAllButton(panel, dialogs);
+          const button = ToolbarItems.createRestartRunAllButton(panel);
           const widget = panel.content;
 
           // Clear the first two cells.
@@ -322,7 +310,7 @@ describe('@jupyterlab/notebook', () => {
         });
 
         it("should add an inline svg node with the 'fast-forward' icon", async () => {
-          const button = ToolbarItems.createRestartRunAllButton(panel, dialogs);
+          const button = ToolbarItems.createRestartRunAllButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
           expect(

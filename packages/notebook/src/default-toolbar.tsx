@@ -6,6 +6,7 @@ import {
   Dialog,
   ISessionContext,
   ISessionContextDialogs,
+  SessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -189,7 +190,7 @@ export namespace ToolbarItems {
    */
   export function createRunButton(
     panel: NotebookPanel,
-    sessionDialogs: ISessionContextDialogs,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): ReactWidget {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
@@ -214,19 +215,20 @@ export namespace ToolbarItems {
    */
   export function createRestartRunAllButton(
     panel: NotebookPanel,
-    dialogs: ISessionContext.IDialogs,
+    dialogs?: ISessionContext.IDialogs,
     translator?: ITranslator
   ): ReactWidget {
     const trans = (translator ?? nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: fastForwardIcon,
       onClick: () => {
-        void dialogs.restart(panel.sessionContext).then(restarted => {
+        const dialogs_ = dialogs ?? new SessionContextDialogs({ translator });
+        void dialogs_.restart(panel.sessionContext).then(restarted => {
           if (restarted) {
             void NotebookActions.runAll(
               panel.content,
               panel.sessionContext,
-              dialogs,
+              dialogs_,
               translator
             );
           }
@@ -262,7 +264,7 @@ export namespace ToolbarItems {
    */
   export function getDefaultItems(
     panel: NotebookPanel,
-    sessionDialogs: ISessionContextDialogs,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): DocumentRegistry.IToolbarItem[] {
     return [

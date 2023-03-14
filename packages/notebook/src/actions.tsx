@@ -501,7 +501,7 @@ export namespace NotebookActions {
    */
   export function run(
     notebook: Notebook,
-    sessionContext: ISessionContext,
+    sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
@@ -539,7 +539,7 @@ export namespace NotebookActions {
    */
   export async function runAndAdvance(
     notebook: Notebook,
-    sessionContext: ISessionContext,
+    sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
@@ -596,7 +596,7 @@ export namespace NotebookActions {
    */
   export async function runAndInsert(
     notebook: Notebook,
-    sessionContext: ISessionContext,
+    sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
@@ -644,7 +644,7 @@ export namespace NotebookActions {
    */
   export function runAll(
     notebook: Notebook,
-    sessionContext: ISessionContext,
+    sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
@@ -708,7 +708,7 @@ export namespace NotebookActions {
    */
   export function runAllAbove(
     notebook: Notebook,
-    sessionContext: ISessionContext,
+    sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
@@ -754,7 +754,7 @@ export namespace NotebookActions {
    */
   export function runAllBelow(
     notebook: Notebook,
-    sessionContext: ISessionContext,
+    sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
