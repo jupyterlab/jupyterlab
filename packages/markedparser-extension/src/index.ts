@@ -214,7 +214,10 @@ namespace Private {
 
     try {
       const { svg } = await _mermaid.render(id, token.text, el);
-      html = `<img src="data:image/svg+xml,${encodeURIComponent(svg)}" />`;
+      const attr = getMermaidImgAttributes(svg);
+      html = `<img ${attr}src="data:image/svg+xml,${encodeURIComponent(
+        svg
+      )}" />`;
     } catch (err) {
       className = `${className} ${ERROR_CLASS}`;
       html = `<code>${err.message}</code>`;
@@ -225,6 +228,15 @@ namespace Private {
 
     // update the cache for use when rendering
     cacheSet(_diagrams, token.text, `<div class="${className}">${html}</div>`);
+  }
+
+  /** Extract extra attributes to add to a generated image.  */
+  function getMermaidImgAttributes(svg: string): string {
+    const maxWidth = svg.match(/max-width: (\d+)/);
+    if (maxWidth && maxWidth[1]) {
+      return `width="${maxWidth[1]}" `;
+    }
+    return '';
   }
 
   /**
