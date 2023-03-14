@@ -284,6 +284,10 @@ export class SettingRegistry implements ISettingRegistry {
 
     // Preload with any available data at instantiation-time.
     if (options.plugins) {
+      options.plugins
+        .filter(plugin => plugin.schema['jupyter.lab.transform'])
+        .forEach(plugin => (this._unloadedPlugins[plugin.id] = plugin));
+
       this._ready = this._preload(options.plugins);
     }
   }
@@ -369,6 +373,15 @@ export class SettingRegistry implements ISettingRegistry {
     // If the plugin exists, resolve.
     if (plugin in plugins) {
       return new Settings({ plugin: plugins[plugin], registry });
+    }
+    if (plugin in this._unloadedPlugins && plugin in this._transformers) {
+      await this._load(
+        await this._transform('fetch', this._unloadedPlugins[plugin])
+      );
+      if (plugin in plugins) {
+        delete this._unloadedPlugins[plugin];
+        return new Settings({ plugin: plugins[plugin], registry });
+      }
     }
 
     // If the plugin needs to be loaded from the data connector, fetch.
@@ -694,6 +707,8 @@ export class SettingRegistry implements ISettingRegistry {
       [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform;
     };
   } = Object.create(null);
+  private _unloadedPlugins: { [name: string]: ISettingRegistry.IPlugin } =
+    Object.create(null);
 }
 
 /**
