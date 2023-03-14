@@ -1218,9 +1218,7 @@ export class Notebook extends StaticNotebook {
    * Adds a footer to the notebook.
    */
   protected addFooter(): void {
-    const trans = this.translator.load('jupyterlab');
     const info = new NotebookFooter(this);
-    info.node.textContent = trans.__('Click to add a cell.');
     (this.layout as NotebookWindowedLayout).footer = info;
   }
 

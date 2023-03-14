@@ -9,7 +9,7 @@ import {
   WindowedList,
   WindowedListModel
 } from '@jupyterlab/ui-components';
-import { MessageLoop } from '@lumino/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { NotebookFooter } from './notebookfooter';
@@ -76,7 +76,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
   private _footer: NotebookFooter | null = null;
 
   /**
-   * Returns Notebook's header
+   * Notebook's header
    *
    * @return Widget | null
    */
@@ -87,7 +87,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
   /**
    * Set Notebook's header
    *
-   * @param v: Widget | null
+   * @param header: Widget | null
    */
   set header(header: Widget | null) {
     if (this._header && this._header.isAttached) {
@@ -100,19 +100,14 @@ export class NotebookWindowedLayout extends WindowedLayout {
   }
 
   /**
-   * Returns Notebook's footer
+   ** Notebook widget's footer
    *
-   * @return NotebookFooter | null
-   */
+   **/
 
   get footer(): NotebookFooter | null {
     return this._footer;
   }
-  /**
-   * Set Notebook's footer
-   *
-   * @param footer: NotebookFooter | null
-   */
+
   set footer(footer: NotebookFooter | null) {
     if (this._footer && this._footer.isAttached) {
       NotebookFooter.detach(this._footer);
@@ -122,9 +117,35 @@ export class NotebookWindowedLayout extends WindowedLayout {
       NotebookFooter.attach(this._footer, this.parent!.node);
     }
   }
+
   /**
-   * Remove a widget from the layout.
-   *
+   * Dispose the layout
+   * */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._header?.dispose();
+    this._footer?.dispose();
+    super.dispose();
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    if (this._header && !this._header.isAttached) {
+      Widget.attach(
+        this._header,
+        this.parent!.node,
+        this.parent!.node.firstElementChild as HTMLElement | null
+      );
+    }
+    if (this._footer && !this._footer.isAttached) {
+      Widget.attach(this._footer, this.parent!.node);
+    }
+  }
+
+  /**
+   * * A message handler invoked on a `'child-removed'` message.
+   * *
    * @param widget - The widget to remove from the layout.
    *
    * #### Notes

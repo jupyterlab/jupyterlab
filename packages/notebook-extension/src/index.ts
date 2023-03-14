@@ -2740,7 +2740,6 @@ function addCommands(
     label: trans.__('Select Cell Below'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
-
       if (current) {
         return NotebookActions.selectBelow(current.content);
       }
