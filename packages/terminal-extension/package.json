@@ -51,7 +51,7 @@
     "@lumino/widgets": "^2.0.0-rc.1"
   },
   "devDependencies": {
-    "@types/webpack-env": "^1.14.1",
+    "@types/webpack-env": "^1.18.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
     "typescript": "~5.0.1-rc"
