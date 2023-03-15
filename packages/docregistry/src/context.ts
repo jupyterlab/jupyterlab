@@ -275,16 +275,19 @@ export class Context<
    */
   async saveAs(): Promise<void> {
     await this.ready;
+    const localPath = this._manager.contents.localPath(this.path);
+    const newLocalPath = await Private.getSavePath(localPath);
 
-    const newPath = await Private.getSavePath(this._path);
-
-    if (!newPath) {
+    if (!newLocalPath) {
       return Promise.reject('Save as cancelled by user.');
     }
-
     if (this.isDisposed) {
       return;
     }
+
+    const drive = this._manager.contents.driveName(this.path);
+    const newPath = drive == '' ? newLocalPath : `${drive}:${newLocalPath}`;
+
     if (newPath === this._path) {
       return this.save();
     }
