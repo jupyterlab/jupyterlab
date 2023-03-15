@@ -39,9 +39,9 @@
     "@jupyterlab/nbformat": "^4.0.0-alpha.21",
     "@jupyterlab/notebook": "^4.0.0-alpha.21",
     "@jupyterlab/settingregistry": "^4.0.0-alpha.21",
-    "@lumino/algorithm": "^2.0.0-rc.1",
-    "@lumino/coreutils": "^2.0.0-rc.1",
-    "@lumino/signaling": "^2.0.0-rc.1"
+    "@lumino/algorithm": "^2.0.0",
+    "@lumino/coreutils": "^2.0.0",
+    "@lumino/signaling": "^2.0.0"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-alpha.21",

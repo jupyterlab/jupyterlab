@@ -44,7 +44,7 @@
     "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.21",
     "@jupyterlab/services": "^7.0.0-alpha.21",
     "@jupyterlab/statedb": "^4.0.0-alpha.21",
-    "@lumino/coreutils": "^2.0.0-rc.1"
+    "@lumino/coreutils": "^2.0.0"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.0.0-alpha.21",
