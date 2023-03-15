@@ -222,7 +222,7 @@ async function setToolbarItems(
         if (newItems.length > 0) {
           canonical = null;
           // This will trigger a settings.changed signal that will update the items
-          await registry.load(pluginId, true);
+          await registry.reload(pluginId);
         }
       }
     }
