@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DocumentChange, ISharedDocument } from '@jupyter/ydoc';
 import {
   Dialog,
   ISessionContext,
@@ -17,7 +18,6 @@ import {
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import { DocumentChange, ISharedDocument } from '@jupyter/ydoc';
 import {
   ITranslator,
   nullTranslator,
@@ -270,34 +270,36 @@ export class Context<
 
   /**
    * Save the document to a different path chosen by the user.
+   *
+   * It will be rejected if the user abort providing a new path.
    */
-  saveAs(): Promise<void> {
-    return this.ready
-      .then(() => {
-        return Private.getSavePath(this._path);
-      })
-      .then(newPath => {
-        if (this.isDisposed || !newPath) {
-          return;
-        }
-        if (newPath === this._path) {
-          return this.save();
-        }
-        // Make sure the path does not exist.
-        return this._manager.ready
-          .then(() => {
-            return this._manager.contents.get(newPath);
-          })
-          .then(() => {
-            return this._maybeOverWrite(newPath);
-          })
-          .catch(err => {
-            if (!err.response || err.response.status !== 404) {
-              throw err;
-            }
-            return this._finishSaveAs(newPath);
-          });
-      });
+  async saveAs(): Promise<void> {
+    await this.ready;
+
+    const newPath = await Private.getSavePath(this._path);
+
+    if (!newPath) {
+      return Promise.reject('Save as cancelled by user.');
+    }
+
+    if (this.isDisposed) {
+      return;
+    }
+    if (newPath === this._path) {
+      return this.save();
+    }
+
+    // Make sure the path does not exist.
+    try {
+      await this._manager.ready;
+      await this._manager.contents.get(newPath);
+      await this._maybeOverWrite(newPath);
+    } catch (err) {
+      if (!err.response || err.response.status !== 404) {
+        throw err;
+      }
+      await this._finishSaveAs(newPath);
+    }
   }
 
   /**

@@ -79,7 +79,7 @@ test.describe('listeners', () => {
       const callback = d => {
         // We need to slightly wait before rejecting otherwise
         // the `locator('.jp-Dialog').waitFor()` is not resolved.
-        setTimeout(() => d?.reject(), 200);
+        setTimeout(() => d?.reject(), 100);
         window.galata.off('dialog', callback);
       };
       window.galata.on('dialog', callback);
@@ -108,7 +108,7 @@ test.describe('listeners', () => {
       const callback = d => {
         // We need to slightly wait before rejecting otherwise
         // the `locator('.jp-Dialog').waitFor()` is not resolved.
-        setTimeout(() => d?.reject(), 200);
+        setTimeout(() => d?.reject(), 100);
       };
       window.galata.once('dialog', callback);
     });

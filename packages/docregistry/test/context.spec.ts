@@ -456,6 +456,15 @@ describe('docregistry/context', () => {
         await promise;
         expect(context.path).toBe(path);
       });
+
+      it('should be rejected if the user cancel the dialog', async () => {
+        await context.initialize(true);
+
+        const promise = context.saveAs();
+        await dismissDialog();
+
+        await expect(promise).rejects.toEqual('Save as cancelled by user.');
+      });
     });
 
     describe('#revert()', () => {
