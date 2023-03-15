@@ -377,6 +377,7 @@ export class SettingRegistry implements ISettingRegistry {
     if (plugin in plugins) {
       if (forceTransform) {
         await this._load(await this._transform('fetch', plugins[plugin]));
+        this._pluginChanged.emit(plugin);
       }
       return new Settings({ plugin: plugins[plugin], registry });
     }
@@ -385,6 +386,7 @@ export class SettingRegistry implements ISettingRegistry {
         await this._transform('fetch', this._unloadedPlugins[plugin])
       );
       if (plugin in plugins) {
+        this._pluginChanged.emit(plugin);
         delete this._unloadedPlugins[plugin];
         return new Settings({ plugin: plugins[plugin], registry });
       }
