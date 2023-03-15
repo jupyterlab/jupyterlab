@@ -30,7 +30,7 @@ test.describe('Export Notebook', () => {
 
     // Wait for Latex renderer
     // note: requires the a11y/assistive-mml MathJax extension
-    await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
+    await page.waitForSelector('text=(σ, β, ρ)');
 
     expect(
       await page.screenshot({ clip: { y: 5, x: 0, width: 700, height: 700 } })
@@ -68,7 +68,7 @@ test.describe('Export Notebook', () => {
       )
       .selectOption({ label: 'Slide' });
     // Wait for Latex renderer
-    await page.getByText('(𝜎σ, 𝛽β, 𝜌ρ)').waitFor();
+    await page.getByText('(σ, β, ρ)').waitFor();
 
     expect(
       await page.screenshot({ clip: { y: 5, x: 283, width: 997, height: 400 } })
