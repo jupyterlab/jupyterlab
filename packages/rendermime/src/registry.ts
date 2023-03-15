@@ -2,10 +2,10 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { ISanitizer, ISessionContext, Sanitizer } from '@jupyterlab/apputils';
+import { Sanitizer } from '@jupyterlab/apputils';
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import { Contents, Session } from '@jupyterlab/services';
+import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { MimeModel } from './mimemodel';
@@ -47,7 +47,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
   /**
    * The sanitizer used by the rendermime instance.
    */
-  readonly sanitizer: ISanitizer;
+  readonly sanitizer: IRenderMime.ISanitizer;
 
   /**
    * The object used to resolve relative urls for the rendermime instance.
@@ -330,15 +330,7 @@ export namespace RenderMimeRegistry {
      * Create a new url resolver.
      */
     constructor(options: IUrlResolverOptions) {
-      if (options.path) {
-        this._path = options.path;
-      } else if (options.session) {
-        this._session = options.session;
-      } else {
-        throw new Error(
-          "Either 'path' or 'session' must be given as a constructor option"
-        );
-      }
+      this._path = options.path;
       this._contents = options.contents;
     }
 
@@ -346,7 +338,7 @@ export namespace RenderMimeRegistry {
      * The path of the object, from which local urls can be derived.
      */
     get path(): string {
-      return this._path ?? this._session.path;
+      return this._path;
     }
     set path(value: string) {
       this._path = value;
@@ -410,7 +402,6 @@ export namespace RenderMimeRegistry {
     }
 
     private _path: string;
-    private _session: ISessionContext | Session.ISessionConnection;
     private _contents: Contents.IManager;
   }
 
@@ -424,20 +415,7 @@ export namespace RenderMimeRegistry {
      * #### Notes
      * Either session or path must be given, and path takes precedence.
      */
-    path?: string;
-
-    /**
-     * The session used by the resolver.
-     *
-     * @deprecated use the `path` option instead and update it as needed.
-     *
-     * #### Notes
-     * For convenience, this can be a session context as well. Either session
-     * or path must be given, and path takes precedence.
-     *
-     * TODO: remove this option and make `path` required.
-     */
-    session?: ISessionContext | Session.ISessionConnection;
+    path: string;
 
     /**
      * The contents manager used by the resolver.
@@ -477,13 +455,5 @@ namespace Private {
       }
       return p1.id - p2.id;
     });
-  }
-
-  export function sessionConnection(
-    s: Session.ISessionConnection | ISessionContext
-  ): Session.ISessionConnection | null {
-    return (s as any).sessionChanged
-      ? (s as ISessionContext).session
-      : (s as Session.ISessionConnection);
   }
 }

@@ -22,7 +22,9 @@ import {
 } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
@@ -250,6 +252,91 @@ function List(props: {
   );
 }
 
+class ListWidget extends ReactWidget {
+  constructor(
+    private _options: {
+      manager: IRunningSessions.IManager;
+      runningItems: IRunningSessions.IRunningItem[];
+      shutdownAllLabel: string;
+      translator?: ITranslator;
+    }
+  ) {
+    super();
+    _options.manager.runningChanged.connect(this._emitUpdate, this);
+  }
+
+  dispose() {
+    this._options.manager.runningChanged.disconnect(this._emitUpdate, this);
+    super.dispose();
+  }
+
+  protected onBeforeShow(msg: Message): void {
+    super.onBeforeShow(msg);
+    this._update.emit();
+  }
+
+  render(): JSX.Element {
+    const options = this._options;
+    let cached = true;
+    return (
+      <UseSignal signal={this._update}>
+        {() => {
+          // Cache the running items for the intial load and request from
+          // the service every subsequent load.
+          if (cached) {
+            cached = false;
+          } else {
+            options.runningItems = options.manager.running();
+          }
+          return (
+            <div className={CONTAINER_CLASS}>
+              <List
+                runningItems={options.runningItems}
+                shutdownLabel={options.manager.shutdownLabel}
+                shutdownAllLabel={options.shutdownAllLabel}
+                shutdownItemIcon={options.manager.shutdownItemIcon}
+                translator={options.translator}
+              />
+            </div>
+          );
+        }}
+      </UseSignal>
+    );
+  }
+
+  /**
+   * Check if the widget or any of it's parents is hidden.
+   *
+   * Checking parents is necessary as lumino does not propagate visibility
+   * changes from parents down to children (although it does notify parents
+   * about changes to children visibility).
+   */
+  private _isAnyHidden() {
+    let isHidden = this.isHidden;
+    if (isHidden) {
+      return isHidden;
+    }
+    let parent: Widget | null = this.parent;
+    while (parent != null) {
+      if (parent.isHidden) {
+        isHidden = true;
+        break;
+      }
+      parent = parent.parent;
+    }
+    return isHidden;
+  }
+
+  private _emitUpdate() {
+    if (this._isAnyHidden()) {
+      return;
+    }
+    this._update.emit();
+  }
+
+  private _update: Signal<ListWidget, void> = new Signal(this);
+}
+
 /**
  * The Section component contains the shared look and feel for an interactive
  * list of kernels and sessions.
@@ -291,7 +378,6 @@ class Section extends PanelWithToolbar {
     }
 
     let runningItems = options.manager.running();
-    let cached = true;
     const enabled = runningItems.length > 0;
     this._button = new ToolbarButton({
       label: shutdownAllLabel,
@@ -306,30 +392,7 @@ class Section extends PanelWithToolbar {
     this.toolbar.addItem('shutdown-all', this._button);
 
     this.addWidget(
-      ReactWidget.create(
-        <UseSignal signal={options.manager.runningChanged}>
-          {() => {
-            // Cache the running items for the intial load and request from
-            // the service every subsequent load.
-            if (cached) {
-              cached = false;
-            } else {
-              runningItems = options.manager.running();
-            }
-            return (
-              <div className={CONTAINER_CLASS}>
-                <List
-                  runningItems={runningItems}
-                  shutdownLabel={options.manager.shutdownLabel}
-                  shutdownAllLabel={shutdownAllLabel}
-                  shutdownItemIcon={options.manager.shutdownItemIcon}
-                  translator={options.translator}
-                />
-              </div>
-            );
-          }}
-        </UseSignal>
-      )
+      new ListWidget({ runningItems, shutdownAllLabel, ...options })
     );
   }
 

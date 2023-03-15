@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IRenderMime } from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
 import { SourceChange } from '@jupyter/ydoc';
 import { Token } from '@lumino/coreutils';
@@ -35,7 +35,7 @@ export interface ICompletionContext {
   /**
    * The sanitizer used to sanitize untrusted html inputs.
    */
-  sanitizer?: ISanitizer;
+  sanitizer?: IRenderMime.ISanitizer;
 }
 
 /**

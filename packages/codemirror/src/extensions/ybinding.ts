@@ -15,7 +15,13 @@ import {
   SelectionRange
 } from '@codemirror/state';
 import { EditorView, ViewPlugin, ViewUpdate } from '@codemirror/view';
-import type { RelativePosition, Text, Transaction, YTextEvent } from 'yjs';
+import type {
+  RelativePosition,
+  Text,
+  Transaction,
+  UndoManager,
+  YTextEvent
+} from 'yjs';
 import {
   createAbsolutePositionFromRelativePosition,
   createRelativePositionFromJSON,
@@ -257,11 +263,33 @@ export const ySync = ViewPlugin.fromClass(
  * and the editor state.
  *
  * @param ytext Yjs text to bind
+ * @param undoManager Yjs text undo manager
  * @returns CodeMirror 6 extension
  */
-export function ybinding(ytext: Text): Extension {
+export function ybinding({
+  ytext,
+  undoManager
+}: {
+  ytext: Text;
+  undoManager?: UndoManager;
+}): Extension {
   const ySyncConfig = new YSyncConfig(ytext);
   // We don't need the undo manager extension as in y-codemirror.next
   // because we deal with undo/redo with our own keyboard shortcut mechanism.
-  return [ySyncFacet.of(ySyncConfig), ySync];
+  return [
+    ySyncFacet.of(ySyncConfig),
+    ySync,
+    // We need to add a new origin to the undo manager to ensure text updates
+    // are tracked.
+    undoManager
+      ? ViewPlugin.define(() => {
+          undoManager.addTrackedOrigin(ySyncConfig);
+          return {
+            destroy: () => {
+              undoManager.removeTrackedOrigin(ySyncConfig);
+            }
+          };
+        })
+      : []
+  ];
 }

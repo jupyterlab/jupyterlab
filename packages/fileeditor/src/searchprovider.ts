@@ -5,6 +5,7 @@ import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeMirrorEditor, EditorSearchProvider } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
+  IFilters,
   IReplaceOptionsSupport,
   ISearchProvider
 } from '@jupyterlab/documentsearch';
@@ -57,6 +58,14 @@ export class FileEditorSearchProvider
    */
   get model(): CodeEditor.IModel {
     return this.widget.content.model;
+  }
+
+  async startQuery(
+    query: RegExp,
+    filters: IFilters | undefined
+  ): Promise<void> {
+    await super.startQuery(query, filters);
+    await this.highlightNext(false, true);
   }
 
   /**

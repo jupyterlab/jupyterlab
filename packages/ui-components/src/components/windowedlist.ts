@@ -720,7 +720,7 @@ export class WindowedList<
    *
    * @param scrollOffset Offset to scroll
    *
-   * @deprecated This is an internal helper. Prefer calling `scrollToItem`.
+   * @deprecated since v4 This is an internal helper. Prefer calling `scrollToItem`.
    */
   scrollTo(scrollOffset: number): void {
     if (!this.viewModel.windowingActive) {

@@ -29,7 +29,9 @@ bumped their major version (following semver convention). We want to point out p
    As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
 - ``@jupyterlab/apputils`` from 3.x to 4.x
-   Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
+   * Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
+   * ``ISanitizer`` and ``ISanitizer.IOptions`` are deprecated in favor of ``IRenderMime.ISanitizer`` and
+     ``IRenderMime.ISanitizerOptions`` in ``@jupyterlab/rendermime-interfaces``.
 - ``@jupyterlab/attachments`` from 3.x to 4.x
    Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
@@ -48,6 +50,9 @@ bumped their major version (following semver convention). We want to point out p
    * ``InputArea.defaultContentFactory`` and ``Cell.defaultContentFactory`` have been removed. If you need it, you
      can request the token ``IEditorServices`` from ``@jupyterlab/codeeditor``. Then you can use
      ``new Cell.ContentFactory({ editorFactory: token.factoryService.newInlineEditor });``.
+- ``@jupyterlab/celltags`` from 3.x to 4.0
+  The ``@jupyterlab/celltags`` package has been removed and replaced by a widget in ``@jupyterlab/celltags-extension``.
+  This widget is now rendered using ``@jupyterlab/metadataform``.
 - ``@jupyterlab/codeeditor`` from 3.x to 4.0
    * ``CodeEditor.IEditor`` has changed:
       - ``resizeToFit()`` is removed
@@ -160,6 +165,11 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
    This package is no longer present in JupyterLab. For documentation related to Real-Time Collaboration, please check out
    `RTC's documentation <https://jupyterlab.readthedocs.io/en/latest/user/rtc.html>`_
+- ``@jupyterlab/docregistry`` from 3.x to 4.x
+   * Removed the property ``docProviderFactory`` from the interface ``Context.IOptions``.
+   * The constructor of the class ``DocumentModel`` receives a parameter ``DocumentModel.IOptions``.
+   * The method ``IModelFactory.createNew`` receives a parameter ``DocumentRegistry.IModelOptions``.
+   * The method ``TextModelFactory.createNew`` receives a parameter ``DocumentModel.IOptions``.
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
@@ -182,11 +192,9 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/filebrowser-extension`` from 3.x to 4.x
    Remove command ``filebrowser:create-main-launcher``. You can replace by ``launcher:create`` (same behavior)
    All launcher creation actions are moved to ``@jupyterlab/launcher-extension``.
-- ``@jupyterlab/docregistry`` from 3.x to 4.x
-   * Removed the property ``docProviderFactory`` from the interface ``Context.IOptions``.
-   * The constructor of the class ``DocumentModel`` receives a parameter ``DocumentModel.IOptions``.
-   * The method ``IModelFactory.createNew`` receives a parameter ``DocumentRegistry.IModelOptions``.
-   * The method ``TextModelFactory.createNew`` receives a parameter ``DocumentModel.IOptions``.
+- ``@jupyterlab/mainmenu`` from 3.x to 4.x
+   * ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
+     to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
@@ -210,9 +218,11 @@ bumped their major version (following semver convention). We want to point out p
    * ``StaticNotebook.defaultContentFactory`` has been removed. If you need it, you can request the token
      ``IEditorServices`` from ``@jupyterlab/codeeditor``. You can obtain it by requested
      ``new NotebookPanel.ContentFactory({ editorFactory: token.factoryService.newInlineEditor });``
-- ``@jupyterlab/mainmenu`` from 3.x to 4.x
-   - ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
-     to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
+   * ``notebooktools`` module does not provides anymore the ``ActiveCellTool``, the ``NotebookMetadataEditorTool``
+     and the ``CellMetadataEditorTool``. All these widget are replaced by widgets in ``@jupyterlab/notebook-extension``,
+     and are rendered using ``@jupyterlab/metadataform``.
+     The ``KeySelector`` has also been removed as not used anymore, replaced by the use of ``@jupyterlab/metadataform``
+     to provides selection for metadata keys.
 - ``@jupyterlab/rendermime`` from 3.x to 4.x
   The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
   that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
@@ -318,6 +328,19 @@ Here are the changes in the Javascript package ``@jupyterlab/galata`` from 4.x t
    * In-pages helpers are now in an extension define in ``jupyterlab/galata/extension`` and
      store in ``@jupyterlab/galata/lib/extension``. And the global object has been renamed ``window.galata`` instead
      of ``window.galataip`` (it still exists but it is deprecated).
+
+Deprecated code removed
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The following deprecated API's have been removed:
+
+- ``@jupyterlab/csvviewer``: ``CSVDelimiter.delimiterChanged`` has been removed - dead code. You can directly access the delimiter from the ``CSVViewer`` widget.
+- ``@jupyterlab/mainmenu``: ``IJupyterLabMenu`` and ``JupyterLabMenu`` have been removed. You can use directly ``IRankedMenu`` and ``RankedMenu`` from ``@jupyterlab/ui-components``
+- ``@jupyterlab/notebook``: ``NotebookWidgetFactory`` default toolbar is now empty as the button helpers are deprecated.
+- ``@jupyterlab/rendermime``: ``RenderMimeRegistry.IUrlResolverOptions`` does not accept ``session``; you must set the ``path`` (accessible through ``session.path``).
+- ``@jupyterlab/ui-components``:
+   * ``RankedMenu.menu : Menu`` has been removed as ``RankedMenu`` inherits from ``Menu``.
+   * ``LabIconStyle.IProps`` does not accept ``kind`` nor ``justify``. You should use ``stylesheet`` or ``elementPosition`` respectively.
 
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

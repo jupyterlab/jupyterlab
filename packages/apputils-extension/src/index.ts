@@ -42,6 +42,7 @@ import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -345,7 +346,9 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
     }`;
   } else {
     // File name from current path
-    let currentFile: string = PathExt.basename(window.location.href);
+    let currentFile: string = PathExt.basename(
+      decodeURIComponent(window.location.href)
+    );
     // Truncate to first 12 characters of current document name + ... if length > 15
     currentFile =
       currentFile.length > 15
@@ -612,20 +615,27 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
 /**
  * The default HTML sanitizer.
  */
-const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
+const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
   id: '@jupyterlab/apputils-extension:sanitizer',
   autoStart: true,
   provides: ISanitizer,
   requires: [ISettingRegistry],
-  activate: (app: JupyterFrontEnd, settings: ISettingRegistry): ISanitizer => {
+  activate: (
+    app: JupyterFrontEnd,
+    settings: ISettingRegistry
+  ): IRenderMime.ISanitizer => {
     const sanitizer = new Sanitizer();
     const loadSetting = (setting: ISettingRegistry.ISettings): void => {
       const allowedSchemes = setting.get('allowedSchemes')
         .composite as Array<string>;
 
+      const autolink = setting.get('autolink').composite as boolean;
+
       if (allowedSchemes) {
         sanitizer.setAllowedSchemes(allowedSchemes);
       }
+
+      sanitizer.setAutolink(autolink);
     };
 
     // Wait for the application to be restored and

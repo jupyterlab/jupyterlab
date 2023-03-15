@@ -108,7 +108,7 @@ export class NotebookModel implements INotebookModel {
     } else {
       this.sharedModel = YNotebook.create({
         disableDocumentWideUndoRedo:
-          options.disableDocumentWideUndoRedo ?? false,
+          options.disableDocumentWideUndoRedo ?? true,
         data: {
           nbformat: nbformat.MAJOR_VERSION,
           nbformat_minor: nbformat.MINOR_VERSION,
@@ -527,6 +527,11 @@ export namespace NotebookModel {
 
     /**
      * Defines if the document can be undo/redo.
+     *
+     * Default: true
+     *
+     * @experimental
+     * @alpha
      */
     disableDocumentWideUndoRedo?: boolean;
   }

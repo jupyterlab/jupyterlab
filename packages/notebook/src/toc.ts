@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISanitizer } from '@jupyterlab/apputils';
 import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
 import { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
 import {
@@ -76,7 +75,7 @@ export class NotebookToCModel extends TableOfContentsModel<
   constructor(
     widget: NotebookPanel,
     protected parser: IMarkdownParser | null,
-    protected sanitizer: ISanitizer,
+    protected sanitizer: IRenderMime.ISanitizer,
     configuration?: TableOfContents.IConfig
   ) {
     super(widget, configuration);
@@ -481,7 +480,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
   constructor(
     tracker: INotebookTracker,
     protected parser: IMarkdownParser | null,
-    protected sanitizer: ISanitizer
+    protected sanitizer: IRenderMime.ISanitizer
   ) {
     super(tracker);
   }
@@ -655,7 +654,6 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       model.collapseChanged.connect(onHeadingCollapsed);
       widget.content.cellCollapsed.connect(onCellCollapsed);
       widget.content.cellInViewportChanged.connect(onCellInViewportChanged);
-      // widget.content.
       widget.disposed.connect(() => {
         model.activeHeadingChanged.disconnect(onActiveHeadingChanged);
         model.headingsChanged.disconnect(onHeadingsChanged);

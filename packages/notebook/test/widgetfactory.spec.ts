@@ -103,9 +103,8 @@ describe('@jupyterlab/notebook', () => {
       it('should populate the default toolbar items', () => {
         const factory = utils.createNotebookWidgetFactory();
         const panel = factory.createNew(context);
-        const items = Array.from(panel.toolbar.names());
-        expect(items).toEqual(expect.arrayContaining(['save']));
-        expect(items).toEqual(expect.arrayContaining(['restart']));
+        // It will only contain the popup opener
+        expect(Array.from(panel.toolbar.names())).toHaveLength(1);
       });
 
       it('should populate the customized toolbar items', () => {
