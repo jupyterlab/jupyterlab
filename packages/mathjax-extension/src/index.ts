@@ -55,8 +55,13 @@ export class MathJaxTypesetter implements ILatexTypesetter {
     const { browserAdaptor } = await import(
       'mathjax-full/js/adaptors/browserAdaptor'
     );
+    const { AssistiveMmlHandler } = await import(
+      'mathjax-full/js/a11y/assistive-mml'
+    );
 
-    mathjax.handlers.register(SafeHandler(new HTMLHandler(browserAdaptor())));
+    mathjax.handlers.register(
+      AssistiveMmlHandler(SafeHandler(new HTMLHandler(browserAdaptor())))
+    );
 
     class EmptyFont extends TeXFont {
       defaultFonts = {};

@@ -29,6 +29,7 @@ test.describe('Export Notebook', () => {
     );
 
     // Wait for Latex renderer
+    // note: requires the a11y/assistive-mml MathJax extension
     await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
 
     expect(
