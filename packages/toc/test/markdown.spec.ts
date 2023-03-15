@@ -193,7 +193,22 @@ describe('TableOfContentsUtils', () => {
         ['\nTitle\n\n--', []],
         ['```\n# Title\n```', []],
         ['```\nTitle\n--\n```', []],
-        ['```\n<h1>Title</h1>\n```', []]
+        ['```\n<h1>Title</h1>\n```', []],
+        ['---\n<h1>Title</h1>\n---', []],
+        ['---\n# Title\n---', []],
+        [
+          '---\n<h1>Ignored</h1>\n---\n# Title',
+          [
+            {
+              text: 'Title',
+              level: 1,
+              line: 3,
+              raw: '# Title',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ]
       ])('should extract headings from %s', (src, headers) => {
         const headings = TableOfContentsUtils.filterHeadings(
           TableOfContentsUtils.Markdown.getHeadings(src),
