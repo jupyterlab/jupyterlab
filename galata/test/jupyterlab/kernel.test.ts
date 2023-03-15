@@ -4,72 +4,129 @@
 import { expect, test } from '@jupyterlab/galata';
 
 test.describe('Kernel', () => {
-  test('Should remember kernel auto start for notebook', async ({ page }) => {
-    await page.menu.clickMenuItem('File>New>Notebook');
+  test.describe('Notebook', () => {
+    test('Should not ask kernel when creating notebook from launcher', async ({
+      page
+    }) => {
+      await Promise.all([
+        page
+          .getByRole('tabpanel', { name: 'Launcher' })
+          .waitFor({ state: 'detached' }),
+        page.getByTitle('Python 3 (ipykernel)').nth(1).click()
+      ]);
 
-    // Open a notebook without selecting a kernel
-    await page
-      .locator('.jp-Dialog')
-      .getByRole('button', { name: 'No Kernel' })
-      .click();
+      await expect.soft(page.locator('.jp-Dialog')).toHaveCount(0);
 
-    await expect.soft(page.getByTitle('Switch kernel')).toHaveText('No Kernel');
+      await expect(page.getByTitle('Switch kernel')).toHaveText(
+        'Python 3 (ipykernel)'
+      );
+    });
 
-    await page.menu.clickMenuItem('File>Close Tab');
+    test('Should remember kernel auto start for notebook', async ({ page }) => {
+      await page.menu.clickMenuItem('File>New>Notebook');
 
-    // Open the same notebook selecting and turning on auto start
-    await page.filebrowser.open('Untitled.ipynb');
+      // Open a notebook without selecting a kernel
+      await page
+        .locator('.jp-Dialog')
+        .getByRole('button', { name: 'No Kernel' })
+        .click();
 
-    await page
-      .locator('.jp-Dialog')
-      .getByText('Always start the preferred kernel')
-      .click();
-    await page
-      .locator('.jp-Dialog')
-      .getByRole('button', { name: 'Select' })
-      .click();
+      await expect
+        .soft(page.getByTitle('Switch kernel'))
+        .toHaveText('No Kernel');
 
-    await expect
-      .soft(page.getByTitle('Switch kernel'))
-      .toHaveText('Python 3 (ipykernel)');
+      await page.menu.clickMenuItem('File>Close Tab');
 
-    await page.menu.clickMenuItem('File>Close and Shut Down Notebook');
-    await page
-      .locator('.jp-Dialog')
-      .getByRole('button', { name: 'Ok' })
-      .click();
+      // Open the same notebook selecting and turning on auto start
+      await page.filebrowser.open('Untitled.ipynb');
 
-    // Open the same notebook and check it turns on the kernel
-    await page.filebrowser.open('Untitled.ipynb');
+      await page
+        .locator('.jp-Dialog')
+        .getByText('Always start the preferred kernel')
+        .click();
+      await page
+        .locator('.jp-Dialog')
+        .getByRole('button', { name: 'Select' })
+        .click();
 
-    await expect(page.getByTitle('Switch kernel')).toHaveText(
-      'Python 3 (ipykernel)'
-    );
+      await expect
+        .soft(page.getByTitle('Switch kernel'))
+        .toHaveText('Python 3 (ipykernel)');
+
+      await page.menu.clickMenuItem('File>Close and Shut Down Notebook');
+      await page
+        .locator('.jp-Dialog')
+        .getByRole('button', { name: 'Ok' })
+        .click();
+
+      // Open the same notebook and check it turns on the kernel
+      await page.filebrowser.open('Untitled.ipynb');
+
+      await expect(page.getByTitle('Switch kernel')).toHaveText(
+        'Python 3 (ipykernel)'
+      );
+    });
+
+    test('Should request kernel selection when executing a cell for notebook without kernel', async ({
+      page
+    }) => {
+      await page.menu.clickMenuItem('File>New>Notebook');
+
+      // Open a notebook without selecting a kernel
+      await page
+        .locator('.jp-Dialog')
+        .getByRole('button', { name: 'No Kernel' })
+        .click();
+
+      await expect
+        .soft(page.getByTitle('Switch kernel'))
+        .toHaveText('No Kernel');
+
+      // Request cell execution
+      await page.menu.clickMenuItem('Run>Run Selected Cell');
+
+      await page
+        .locator('.jp-Dialog')
+        .getByRole('button', { name: 'Select' })
+        .click();
+
+      await expect(page.getByTitle('Switch kernel')).toHaveText(
+        'Python 3 (ipykernel)'
+      );
+    });
   });
 
-  test('Should request kernel selection when executing a cell for notebook without kernel', async ({
-    page
-  }) => {
-    await page.menu.clickMenuItem('File>New>Notebook');
+  test.describe('Console', () => {
+    test('Should not ask kernel when creating console from launcher', async ({
+      page
+    }) => {
+      await Promise.all([
+        page
+          .getByRole('tabpanel', { name: 'Launcher' })
+          .waitFor({ state: 'detached' }),
+        page.getByTitle('Python 3 (ipykernel)').nth(2).click()
+      ]);
 
-    // Open a notebook without selecting a kernel
-    await page
-      .locator('.jp-Dialog')
-      .getByRole('button', { name: 'No Kernel' })
-      .click();
+      await expect.soft(page.locator('.jp-Dialog')).toHaveCount(0);
 
-    await expect.soft(page.getByTitle('Switch kernel')).toHaveText('No Kernel');
+      await expect(page.getByTitle('Change kernel for Console 1')).toHaveText(
+        'Python 3 (ipykernel) | Idle'
+      );
+    });
 
-    // Request cell execution
-    await page.menu.clickMenuItem('Run>Run Selected Cells');
+    test('Should ask for kernel when creating console from menu', async ({
+      page
+    }) => {
+      await page.menu.clickMenuItem('File>New>Console');
 
-    await page
-      .locator('.jp-Dialog')
-      .getByRole('button', { name: 'Select' })
-      .click();
+      await page
+        .locator('.jp-Dialog')
+        .getByRole('button', { name: 'Select' })
+        .click();
 
-    await expect(page.getByTitle('Switch kernel')).toHaveText(
-      'Python 3 (ipykernel)'
-    );
+      await expect(page.getByTitle('Change kernel for Console 1')).toHaveText(
+        'Python 3 (ipykernel) | Idle'
+      );
+    });
   });
 });
