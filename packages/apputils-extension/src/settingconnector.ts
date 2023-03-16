@@ -39,12 +39,14 @@ export class SettingConnector extends DataConnector<
   }
 
   async list(
-    query: 'active' | 'all' = 'all'
+    query: 'active' | 'all' | 'ids' = 'all'
   ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
     const { isDeferred, isDisabled } = PageConfig.Extension;
-    const { ids, values } = await this._connector.list();
+    const { ids, values } = await this._connector.list(
+      query === 'ids' ? 'ids' : undefined
+    );
 
-    if (query === 'all') {
+    if (['all', 'ids'].includes(query)) {
       return { ids, values };
     }
 

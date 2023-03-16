@@ -38,7 +38,7 @@ export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
     // because otherwise, its settings will never become available in the
     // setting registry.
     void app.restored.then(async () => {
-      const plugins = await connector.list('all');
+      const plugins = await connector.list('ids');
       plugins.ids.forEach(async (id, index) => {
         if (!app.hasPlugin(id) || isDisabled(id) || id in registry.plugins) {
           return;
