@@ -1311,6 +1311,18 @@
     "shortcuts": []
   },
   {
+    "id": "mathjax:clipboard",
+    "label": "MathJax Copy Latex",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "mathjax:scale",
+    "label": "Mathjax Scale Reset",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:change-cell-to-code",
     "label": "Change to Code Cell Type",
     "caption": "",

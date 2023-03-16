@@ -1,8 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig } from '@jupyterlab/coreutils';
-import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
 import {
   IRenderMime,
   MimeModel,
@@ -100,14 +99,10 @@ describe('rendermime/registry', () => {
       });
 
       it('should be clonable', () => {
-        const args = {
-          url: PageConfig.getOption('mathjaxUrl'),
-          config: PageConfig.getOption('mathjaxConfig')
-        };
-        const typesetter1 = new MathJaxTypesetter(args);
+        const typesetter1 = new MathJaxTypesetter();
         const clone1 = r.clone({ latexTypesetter: typesetter1 });
         expect(clone1.latexTypesetter).toBe(typesetter1);
-        const typesetter2 = new MathJaxTypesetter(args);
+        const typesetter2 = new MathJaxTypesetter();
         const clone2 = r.clone({ latexTypesetter: typesetter2 });
         expect(clone2.latexTypesetter).toBe(typesetter2);
       });
