@@ -51,7 +51,7 @@ describe('@jupyterlab/ui-components', () => {
 
       expect(button.hasClass('jp-CommandToolbarButton')).toBe(true);
       simulate(button.node.firstElementChild!, 'mousedown');
-      expect(options.execute).toBeCalledTimes(1);
+      expect(options.execute).toHaveBeenCalledTimes(1);
     });
 
     it('should render the label command', async () => {

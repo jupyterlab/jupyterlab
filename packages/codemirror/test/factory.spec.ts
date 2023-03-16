@@ -56,7 +56,7 @@ describe('CodeMirrorEditorFactory', () => {
       const factory = new CodeMirrorEditorFactory({ languages });
       expect(factory).toBeInstanceOf(CodeMirrorEditorFactory);
       factory.newInlineEditor({ host, model });
-      expect(findBest).toBeCalled();
+      expect(findBest).toHaveBeenCalled();
     });
   });
 

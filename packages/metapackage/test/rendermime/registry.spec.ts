@@ -117,7 +117,7 @@ describe('rendermime/registry', () => {
       it('should raise an error for an unregistered mime type', () => {
         expect(() => {
           r.createRenderer('text/fizz');
-        }).toThrowError();
+        }).toThrow();
       });
 
       it('should render json data', async () => {
