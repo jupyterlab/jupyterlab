@@ -379,7 +379,7 @@ Jest configuration update
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab 3.6.
-They need to be ignore when transforming the code with Jest. You will need to update the 
+They need to be ignore when transforming the code with Jest. You will need to update the
 ``transformIgnorePatterns`` to match:
 
 .. code-block:: javascript
