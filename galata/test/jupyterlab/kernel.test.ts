@@ -35,7 +35,12 @@ test.describe('Kernel', () => {
         .soft(page.getByTitle('Switch kernel'))
         .toHaveText('No Kernel');
 
-      await page.menu.clickMenuItem('File>Close Tab');
+      await Promise.all([
+        page
+          .getByRole('tab', { name: 'Untitled.ipynb' })
+          .waitFor({ state: 'detached' }),
+        page.menu.clickMenuItem('File>Close Tab')
+      ]);
 
       // Open the same notebook selecting and turning on auto start
       await page.filebrowser.open('Untitled.ipynb');
@@ -54,10 +59,13 @@ test.describe('Kernel', () => {
         .toHaveText('Python 3 (ipykernel)');
 
       await page.menu.clickMenuItem('File>Close and Shut Down Notebook');
-      await page
-        .locator('.jp-Dialog')
-        .getByRole('button', { name: 'Ok' })
-        .click();
+
+      await Promise.all([
+        page
+          .getByRole('tab', { name: 'Untitled.ipynb' })
+          .waitFor({ state: 'detached' }),
+        page.locator('.jp-Dialog').getByRole('button', { name: 'Ok' }).click()
+      ]);
 
       // Open the same notebook and check it turns on the kernel
       await page.filebrowser.open('Untitled.ipynb');
