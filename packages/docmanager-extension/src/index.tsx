@@ -965,6 +965,7 @@ function addCommands(
             args.newValue &&
             args.newValue.path !== context.path
           ) {
+            void docManager.closeFile(context.path);
             void commands.execute(CommandIDs.open, {
               path: args.newValue.path
             });
@@ -973,7 +974,6 @@ function addCommands(
         docManager.services.contents.fileChanged.connect(onChange);
         context
           .saveAs()
-          .then(() => void docManager.closeFile(context.path))
           .finally(() =>
             docManager.services.contents.fileChanged.disconnect(onChange)
           );
