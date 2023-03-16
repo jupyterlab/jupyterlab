@@ -7,8 +7,6 @@ import {
   PromiseDelegate,
   UUID
 } from '@lumino/coreutils';
-import { Response } from 'node-fetch';
-import encoding from 'text-encoding';
 import WebSocket from 'ws';
 import {
   Contents,
@@ -21,23 +19,6 @@ import {
   Terminal
 } from '../src';
 import { deserialize, serialize } from '../src/kernel/serialize';
-
-// stub for node global
-declare let global: any;
-
-/**
- * This can be used by test modules that wouldn't otherwise import
- * this file.
- */
-export function init(): void {
-  if (typeof global !== 'undefined') {
-    global.TextEncoder = encoding.TextEncoder;
-    global.TextDecoder = encoding.TextDecoder;
-  }
-}
-
-// Call init.
-init();
 
 /**
  * Create a set of server settings.

@@ -8,7 +8,7 @@ import {
   Settings
 } from '@jupyterlab/settingregistry';
 import { StateDB } from '@jupyterlab/statedb';
-import { signalToPromise } from '@jupyterlab/testutils';
+import { signalToPromise } from '@jupyterlab/testing';
 import { JSONObject } from '@lumino/coreutils';
 
 class TestConnector extends StateDB {
@@ -902,6 +902,44 @@ describe('@jupyterlab/settingregistry', () => {
         expect(settings.default('bar')).toBe(defaults.bar);
         expect(settings.default('baz')).toEqual(defaults.baz);
         expect(settings.default('nonexistent-default')).toBeUndefined();
+      });
+
+      it('should use definition at top of the schema', async () => {
+        const id = 'omicron';
+        const defaults = {
+          foo: [
+            { bar: 2, baz: 'zip' },
+            { bar: 0, baz: 'zip' }
+          ]
+        };
+
+        connector.schemas[id] = {
+          type: 'object',
+          properties: {
+            foo: {
+              type: 'array',
+              items: { $ref: '#/definitions/fooItem' },
+              default: [{ bar: 2 }, {}]
+            }
+          },
+          definitions: {
+            fooItem: {
+              type: 'object',
+              properties: {
+                bar: {
+                  type: 'number',
+                  default: 0
+                },
+                baz: {
+                  type: 'string',
+                  default: 'zip'
+                }
+              }
+            }
+          }
+        };
+        settings = (await registry.load(id)) as Settings;
+        expect(settings.default()).toStrictEqual(defaults);
       });
     });
 

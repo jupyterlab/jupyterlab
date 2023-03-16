@@ -16,7 +16,6 @@ const menuPaths = [
   'Settings',
   'Settings>Theme',
   'Settings>Console Run Keystroke',
-  'Settings>Text Editor Key Map',
   'Settings>Text Editor Theme',
   'Settings>Text Editor Indentation',
   'Settings>Terminal Theme',
@@ -72,7 +71,7 @@ const EXPECTED_MISSING_COMMANDS_MAINMENU = ['hub:control-panel', 'hub:logout'];
 
 test('Main menu definition must target an valid command', async ({ page }) => {
   const [menus, commands] = await page.evaluate(async () => {
-    const settings = await window.galataip.getPlugin(
+    const settings = await window.galata.getPlugin(
       '@jupyterlab/apputils-extension:settings'
     );
     const menus = await settings.get(
@@ -114,7 +113,7 @@ test('Context menu definition must target an valid command', async ({
   page
 }) => {
   const [items, commands] = await page.evaluate(async () => {
-    const settings = await window.galataip.getPlugin(
+    const settings = await window.galata.getPlugin(
       '@jupyterlab/apputils-extension:settings'
     );
     const items = await settings.get(

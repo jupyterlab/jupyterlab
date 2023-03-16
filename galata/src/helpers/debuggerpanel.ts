@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { ElementHandle, Page } from '@playwright/test';
 import { SidebarHelper } from './sidebar';
 import { NotebookHelper } from './notebook';
@@ -79,6 +84,19 @@ export class DebuggerHelper {
    */
   async waitForVariables(): Promise<void> {
     await this.page.waitForSelector('.jp-DebuggerVariables-body ul');
+  }
+
+  /**
+   * render variable
+   */
+  async renderVariable(name: string): Promise<void> {
+    await this.page
+      .locator(`.jp-DebuggerVariables :text("${name}")`)
+      .click({ button: 'right' });
+    await this.page
+      .locator('.lm-Menu-itemLabel:text("Render Variable")')
+      .click();
+    await this.page.waitForSelector('.jp-VariableRendererPanel-renderer');
   }
 
   /**

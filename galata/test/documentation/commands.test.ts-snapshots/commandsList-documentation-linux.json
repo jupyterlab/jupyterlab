@@ -136,6 +136,18 @@
     "shortcuts": []
   },
   {
+    "id": "apputils:dismiss-notification",
+    "label": "Dismiss a notification",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:display-notifications",
+    "label": "Show Notifications",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "apputils:incr-font-size",
     "label": "Increase Font Size",
     "caption": "",
@@ -145,6 +157,12 @@
     "id": "apputils:load-statedb",
     "label": "Load state for the current workspace.",
     "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:notify",
+    "label": "Emit a notification",
+    "caption": "Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
     "shortcuts": []
   },
   {
@@ -192,38 +210,14 @@
     "shortcuts": []
   },
   {
+    "id": "apputils:update-notification",
+    "label": "Update a notification",
+    "caption": "Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.",
+    "shortcuts": []
+  },
+  {
     "id": "code-viewer:open",
     "label": "Open Code Viewer",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:change-keymap",
-    "label": "default",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:change-mode",
-    "label": "Change editor mode to the provided `name`.",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:change-theme",
-    "label": "jupyter",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:find",
-    "label": "Find…",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:go-to-line",
-    "label": "Go to Line…",
     "caption": "",
     "shortcuts": []
   },
@@ -391,11 +385,17 @@
   },
   {
     "id": "debugger:continue",
-    "label": "Continue",
-    "caption": "Continue",
+    "label": "Pause",
+    "caption": "Pause",
     "shortcuts": [
       "F9"
     ]
+  },
+  {
+    "id": "debugger:copy-to-clipboard",
+    "label": "Copy to Clipboard",
+    "caption": "Copy text representation of the value to clipboard",
+    "shortcuts": []
   },
   {
     "id": "debugger:evaluate",
@@ -418,9 +418,8 @@
     ]
   },
   {
-    "id": "debugger:pause",
-    "label": "Enable / Disable pausing on exceptions",
-    "caption": "Enable / Disable pausing on exceptions",
+    "id": "debugger:pause-on-exceptions",
+    "label": "Breakpoints on exception",
     "shortcuts": []
   },
   {
@@ -489,6 +488,12 @@
     "id": "docmanager:download",
     "label": "Download",
     "caption": "Download the file to your computer",
+    "shortcuts": []
+  },
+  {
+    "id": "docmanager:duplicate",
+    "label": "Duplicate ",
+    "caption": "",
     "shortcuts": []
   },
   {
@@ -562,6 +567,14 @@
     "shortcuts": []
   },
   {
+    "id": "documentsearch:end",
+    "label": "End Search",
+    "caption": "",
+    "shortcuts": [
+      "Escape"
+    ]
+  },
+  {
     "id": "documentsearch:highlightNext",
     "label": "Find Next",
     "caption": "",
@@ -594,19 +607,19 @@
   {
     "id": "editmenu:clear-all",
     "label": "Clear All",
-    "caption": "Clear All",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "editmenu:clear-current",
     "label": "Clear",
-    "caption": "Clear",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "editmenu:go-to-line",
     "label": "Go to Line…",
-    "caption": "Go to Line…",
+    "caption": "",
     "shortcuts": []
   },
   {
@@ -618,7 +631,7 @@
   {
     "id": "editmenu:redo",
     "label": "Redo",
-    "caption": "Redo",
+    "caption": "",
     "shortcuts": [
       "Ctrl Shift Z"
     ]
@@ -626,7 +639,7 @@
   {
     "id": "editmenu:undo",
     "label": "Undo",
-    "caption": "Undo",
+    "caption": "",
     "shortcuts": [
       "Ctrl Z"
     ]
@@ -810,6 +823,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-file-size",
+    "label": "Show File Size Column",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-hidden-files",
     "label": "Show Hidden Files",
     "caption": "",
@@ -842,8 +861,20 @@
     "shortcuts": []
   },
   {
+    "id": "fileeditor:change-language",
+    "label": "Change editor language.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "fileeditor:change-tabs",
     "label": "Indent with Tab",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:change-theme",
+    "label": "jupyter",
     "caption": "",
     "shortcuts": []
   },
@@ -874,6 +905,18 @@
   {
     "id": "fileeditor:cut",
     "label": "Cut",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:find",
+    "label": "Find…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:go-to-line",
+    "label": "Go to Line…",
     "caption": "",
     "shortcuts": []
   },
@@ -927,7 +970,7 @@
   },
   {
     "id": "fileeditor:toggle-autoclosing-brackets",
-    "label": "Auto Close Brackets for Text Editor",
+    "label": "Auto Close Brackets in Text Editor",
     "caption": "",
     "shortcuts": []
   },
@@ -940,24 +983,24 @@
   {
     "id": "fileeditor:toggle-current-line-numbers",
     "label": "Show Line Numbers",
-    "caption": "",
+    "caption": "Show the line numbers for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-current-line-wrap",
     "label": "Wrap Words",
-    "caption": "",
+    "caption": "Wrap words for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-current-match-brackets",
     "label": "Match Brackets",
-    "caption": "",
+    "caption": "Change match brackets for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-line-numbers",
-    "label": "Line Numbers",
+    "label": "Show Line Numbers",
     "caption": "",
     "shortcuts": []
   },
@@ -982,7 +1025,7 @@
   {
     "id": "filemenu:close-and-cleanup",
     "label": "Close and Shut Down",
-    "caption": "Close and Shut Down",
+    "caption": "",
     "shortcuts": [
       "Ctrl Shift Q"
     ]
@@ -990,7 +1033,7 @@
   {
     "id": "filemenu:create-console",
     "label": "New Console for Activity",
-    "caption": "New Console for Activity",
+    "caption": "",
     "shortcuts": []
   },
   {
@@ -1050,7 +1093,7 @@
   {
     "id": "helpmenu:get-kernel",
     "label": "Get Kernel",
-    "caption": "Get Kernel",
+    "caption": "",
     "shortcuts": []
   },
   {
@@ -1166,13 +1209,13 @@
   {
     "id": "kernelmenu:change",
     "label": "Change Kernel…",
-    "caption": "Change Kernel…",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "kernelmenu:interrupt",
     "label": "Interrupt Kernel",
-    "caption": "Interrupt Kernel",
+    "caption": "Interrupt the kernel",
     "shortcuts": [
       "I",
       "I"
@@ -1187,13 +1230,13 @@
   {
     "id": "kernelmenu:reconnect-to-kernel",
     "label": "Reconnect to Kernel",
-    "caption": "Reconnect to Kernel",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "kernelmenu:restart",
     "label": "Restart Kernel…",
-    "caption": "Restart Kernel…",
+    "caption": "Restart the kernel",
     "shortcuts": [
       "0",
       "0"
@@ -1202,13 +1245,13 @@
   {
     "id": "kernelmenu:restart-and-clear",
     "label": "Restart Kernel and Clear…",
-    "caption": "Restart Kernel and Clear…",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "kernelmenu:shutdown",
     "label": "Shut Down Kernel",
-    "caption": "Shut Down Kernel",
+    "caption": "Shut down kernel",
     "shortcuts": []
   },
   {
@@ -1264,6 +1307,18 @@
   {
     "id": "markdownviewer:open",
     "label": "Markdown Preview",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "mathjax:clipboard",
+    "label": "MathJax Copy Latex",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "mathjax:scale",
+    "label": "Mathjax Scale Reset",
     "caption": "",
     "shortcuts": []
   },
@@ -1373,8 +1428,8 @@
   },
   {
     "id": "notebook:copy-cell",
-    "label": "Copy Cells",
-    "caption": "Copy the selected cells",
+    "label": "Copy Cell",
+    "caption": "Copy this cell",
     "shortcuts": [
       "C"
     ]
@@ -1405,16 +1460,16 @@
   },
   {
     "id": "notebook:cut-cell",
-    "label": "Cut Cells",
-    "caption": "Cut the selected cells",
+    "label": "Cut Cell",
+    "caption": "Cut this cell",
     "shortcuts": [
       "X"
     ]
   },
   {
     "id": "notebook:delete-cell",
-    "label": "Delete Cells",
-    "caption": "",
+    "label": "Delete Cell",
+    "caption": "Delete this cell",
     "shortcuts": [
       "D",
       "D"
@@ -1434,8 +1489,8 @@
   },
   {
     "id": "notebook:duplicate-below",
-    "label": "Duplicate Cells Below",
-    "caption": "Copy the selected cells and paste them below the selection",
+    "label": "Duplicate Cell Below",
+    "caption": "Create a duplicate of this cell below",
     "shortcuts": []
   },
   {
@@ -1539,7 +1594,7 @@
   {
     "id": "notebook:insert-cell-above",
     "label": "Insert Cell Above",
-    "caption": "",
+    "caption": "Insert a cell above",
     "shortcuts": [
       "A"
     ]
@@ -1571,7 +1626,7 @@
   {
     "id": "notebook:interrupt-kernel",
     "label": "Interrupt Kernel",
-    "caption": "",
+    "caption": "Interrupt the kernel",
     "shortcuts": []
   },
   {
@@ -1600,15 +1655,19 @@
   },
   {
     "id": "notebook:move-cell-down",
-    "label": "Move Cells Down",
-    "caption": "",
-    "shortcuts": []
+    "label": "Move Cell Down",
+    "caption": "Move this cell down",
+    "shortcuts": [
+      "Ctrl Shift ArrowDown"
+    ]
   },
   {
     "id": "notebook:move-cell-up",
-    "label": "Move Cells Up",
-    "caption": "",
-    "shortcuts": []
+    "label": "Move Cell Up",
+    "caption": "Move this cell up",
+    "shortcuts": [
+      "Ctrl Shift ArrowUp"
+    ]
   },
   {
     "id": "notebook:move-cursor-down",
@@ -1644,20 +1703,20 @@
   },
   {
     "id": "notebook:paste-and-replace-cell",
-    "label": "Paste Cells and Replace",
+    "label": "Paste Cell and Replace",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "notebook:paste-cell-above",
-    "label": "Paste Cells Above",
-    "caption": "",
+    "label": "Paste Cell Above",
+    "caption": "Paste this cell from the clipboard",
     "shortcuts": []
   },
   {
     "id": "notebook:paste-cell-below",
-    "label": "Paste Cells Below",
-    "caption": "Paste cells from the clipboard",
+    "label": "Paste Cell Below",
+    "caption": "Paste this cell from the clipboard",
     "shortcuts": [
       "V"
     ]
@@ -1709,13 +1768,13 @@
   {
     "id": "notebook:restart-kernel",
     "label": "Restart Kernel…",
-    "caption": "",
+    "caption": "Restart the kernel",
     "shortcuts": []
   },
   {
     "id": "notebook:restart-run-all",
     "label": "Restart Kernel and Run All Cells…",
-    "caption": "",
+    "caption": "Restart the kernel and run all cells",
     "shortcuts": []
   },
   {
@@ -1733,12 +1792,12 @@
   {
     "id": "notebook:run-all-cells",
     "label": "Run All Cells",
-    "caption": "",
+    "caption": "Run all cells",
     "shortcuts": []
   },
   {
     "id": "notebook:run-cell",
-    "label": "Run Selected Cells and Don't Advance",
+    "label": "Run Selected Cell and Do not Advance",
     "caption": "",
     "shortcuts": [
       "Ctrl Enter"
@@ -1746,7 +1805,7 @@
   },
   {
     "id": "notebook:run-cell-and-insert-below",
-    "label": "Run Selected Cells and Insert Below",
+    "label": "Run Selected Cell and Insert Below",
     "caption": "",
     "shortcuts": [
       "Alt Enter"
@@ -1754,8 +1813,8 @@
   },
   {
     "id": "notebook:run-cell-and-select-next",
-    "label": "Run Selected Cells",
-    "caption": "",
+    "label": "Run Selected Cell",
+    "caption": "Run this cell and advance",
     "shortcuts": [
       "Shift Enter"
     ]
@@ -1913,6 +1972,30 @@
     "shortcuts": []
   },
   {
+    "id": "running:kernel-new-console",
+    "label": "New Console for Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-new-notebook",
+    "label": "New Notebook for Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-open-session",
+    "label": "Unknown Session",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "running:kernel-shut-down",
+    "label": "Shut Down Kernel",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "running:show-panel",
     "label": "Sessions and Tabs",
     "caption": "",
@@ -1987,6 +2070,12 @@
     "shortcuts": []
   },
   {
+    "id": "terminal:copy",
+    "label": "Copy",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "terminal:create-new",
     "label": "Terminal",
     "caption": "Start a new terminal session",
@@ -2007,6 +2096,12 @@
   {
     "id": "terminal:open",
     "label": "Open a terminal by its `name`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "terminal:paste",
+    "label": "Paste",
     "caption": "",
     "shortcuts": []
   },
@@ -2107,13 +2202,13 @@
   {
     "id": "viewmenu:line-numbering",
     "label": "Show Line Numbers",
-    "caption": "Show Line Numbers",
+    "caption": "",
     "shortcuts": []
   },
   {
     "id": "viewmenu:match-brackets",
     "label": "Match Brackets",
-    "caption": "Match Brackets",
+    "caption": "",
     "shortcuts": []
   },
   {
@@ -2125,7 +2220,7 @@
   {
     "id": "viewmenu:word-wrap",
     "label": "Wrap Words",
-    "caption": "Wrap Words",
+    "caption": "",
     "shortcuts": []
   },
   {

@@ -36,7 +36,10 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
+      "path": "../codemirror"
+    },
+    {
+      "path": "../testing"
     }
   ]
 }

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import { JupyterServer } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
 import { ServerConnection } from '../src';
 import { getRequestHandler } from './utils';
 
@@ -10,7 +10,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

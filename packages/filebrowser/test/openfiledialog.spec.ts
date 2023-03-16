@@ -3,6 +3,7 @@
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
+import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { Contents, ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
@@ -10,9 +11,8 @@ import {
   framePromise,
   sleep,
   waitForDialog
-} from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
-import { toArray } from '@lumino/algorithm';
+} from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import expect from 'expect';
 import { simulate } from 'simulate-event';
 import { FileBrowserModel, FileDialog, FilterFileBrowserModel } from '../src';
@@ -23,16 +23,12 @@ describe('@jupyterlab/filebrowser', () => {
   let registry: DocumentRegistry;
 
   beforeAll(async () => {
-    const opener: DocumentManager.IWidgetOpener = {
-      open: widget => {
-        /* no op */
-      }
-    };
+    const opener = new DocumentWidgetOpenerMock();
 
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new Mock.ServiceManagerMock();
+    serviceManager = new ServiceManagerMock();
     manager = new DocumentManager({
       registry,
       opener,
@@ -70,8 +66,8 @@ describe('@jupyterlab/filebrowser', () => {
         const model = new FileBrowserModel({ manager });
         await model.cd();
 
-        const filteredItems = toArray(filteredModel.items());
-        const items = toArray(model.items());
+        const filteredItems = Array.from(filteredModel.items());
+        const items = Array.from(model.items());
         expect(filteredItems.length).toBe(items.length);
       });
 
@@ -85,8 +81,8 @@ describe('@jupyterlab/filebrowser', () => {
         const model = new FileBrowserModel({ manager });
         await model.cd();
 
-        const filteredItems = toArray(filteredModel.items());
-        const items = toArray(model.items());
+        const filteredItems = Array.from(filteredModel.items());
+        const items = Array.from(model.items());
         const folders = items.filter(item => item.type === 'directory');
         expect(filteredItems.length).toBe(folders.length);
       });
@@ -101,7 +97,7 @@ describe('@jupyterlab/filebrowser', () => {
         const model = new FileBrowserModel({ manager });
         await model.cd();
 
-        const filteredItems = toArray(filteredModel.items());
+        const filteredItems = Array.from(filteredModel.items());
         expect(filteredItems.length).toBe(0);
       });
 
@@ -115,10 +111,10 @@ describe('@jupyterlab/filebrowser', () => {
         const model = new FileBrowserModel({ manager });
         await model.cd();
 
-        const filteredItems = toArray(
+        const filteredItems = Array.from(
           filteredModel.items()
         ) as Contents.IModel[];
-        const items = toArray(model.items());
+        const items = Array.from(model.items());
         const shownItems = items.filter(item => item.type === 'notebook');
         expect(filteredItems.length).toBe(shownItems.length);
         const notebooks = filteredItems.filter(

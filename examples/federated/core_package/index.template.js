@@ -6,6 +6,12 @@ import { PageConfig } from '@jupyterlab/coreutils';
 
 import('./style.js');
 
+const TO_DISABLE = [
+  '@jupyterlab/lsp-extension',
+  '@jupyterlab/fileeditor-extension:language-server',
+  '@jupyterlab/notebook-extension:language-server'
+];
+
 async function createModule(scope, module) {
   try {
     const factory = await window._JUPYTERLAB[scope].get(module);
@@ -52,6 +58,11 @@ export async function main() {
     }
   });
 
+
+  function manuallyDisabled(id) {
+    return TO_DISABLE.includes(id) || TO_DISABLE.includes(id.split(":")[0])
+  }
+
   /**
    * Iterate over active plugins in an extension.
    *
@@ -70,7 +81,10 @@ export async function main() {
 
     let plugins = Array.isArray(exports) ? exports : [exports];
     for (let plugin of plugins) {
-      if (PageConfig.Extension.isDisabled(plugin.id)) {
+      if (
+        PageConfig.Extension.isDisabled(plugin.id) ||
+        manuallyDisabled(plugin.id)
+      ) {
         disabled.push(plugin.id);
         continue;
       }

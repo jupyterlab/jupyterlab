@@ -20,6 +20,9 @@
   display: flex;
   flex-direction: row;
 
+  /* Needed to avoid scrollbar issues when using cached width. */
+  box-sizing: content-box;
+
   /* Position the completer relative to the text editor, align the '.' */
   margin: 4px 0 0 -30px;
   z-index: 10001;
@@ -28,7 +31,8 @@
 .jp-Completer-docpanel {
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   width: 400px;
-  overflow: scroll;
+  overflow-y: scroll;
+  overflow-x: auto;
   padding: 8px;
   max-height: calc((10 * var(--jp-private-completer-item-height)) - 16px);
 }
@@ -48,19 +52,20 @@
   overflow-x: auto;
   max-height: calc((10 * var(--jp-private-completer-item-height)));
   min-height: calc(var(--jp-private-completer-item-height));
+  width: 100%;
 }
 
 .jp-Completer-item {
-  display: table-row;
   box-sizing: border-box;
   margin: 0;
   padding: 0;
   height: var(--jp-private-completer-item-height);
   min-width: 150px;
+  display: grid;
+  grid-template-columns: min-content 1fr min-content;
 }
 
 .jp-Completer-item .jp-Completer-match {
-  display: table-cell;
   box-sizing: border-box;
   margin: 0;
   padding: 0 8px 0 6px;
@@ -68,7 +73,6 @@
   font-family: var(--jp-code-font-family);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
-  vertical-align: middle;
 }
 
 .jp-Completer-deprecated .jp-Completer-match {
@@ -77,7 +81,6 @@
 }
 
 .jp-Completer-item .jp-Completer-type {
-  display: table-cell;
   box-sizing: border-box;
   height: var(--jp-private-completer-item-height);
   background: transparent;
@@ -85,8 +88,6 @@
 }
 
 .jp-Completer-item .jp-Completer-icon {
-  vertical-align: middle;
-
   /* Normal element size from LabIconStyle.ISheetOptions */
   height: 16px;
   width: 16px;
@@ -96,7 +97,6 @@
   text-align: center;
   color: white;
   width: var(--jp-private-completer-item-height);
-  min-width: var(--jp-private-completer-item-height);
   font-family: var(--jp-ui-font-family);
   font-size: var(--jp-ui-font-size1);
   line-height: calc(
@@ -107,7 +107,6 @@
 }
 
 .jp-Completer-item .jp-Completer-typeExtended {
-  display: table-cell;
   box-sizing: border-box;
   height: var(--jp-private-completer-item-height);
   text-align: right;
@@ -117,7 +116,6 @@
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
   padding-right: 8px;
-  vertical-align: middle;
 }
 
 .jp-Completer-item:hover {

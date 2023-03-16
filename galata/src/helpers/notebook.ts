@@ -1,17 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as nbformat from '@jupyterlab/nbformat';
-import { NotebookPanel } from '@jupyterlab/notebook';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type { NotebookPanel } from '@jupyterlab/notebook';
 import { ElementHandle, Page } from '@playwright/test';
 import * as path from 'path';
+import { ContentsHelper } from '../contents';
+import type { INotebookRunCallback } from '../extension';
 import { galata } from '../galata';
-import { INotebookRunCallback } from '../inpage/tokens';
 import * as Utils from '../utils';
 import { ActivityHelper } from './activity';
-import { ContentsHelper } from '../contents';
 import { FileBrowserHelper } from './filebrowser';
 import { MenuHelper } from './menu';
+
+/**
+ * Maximal number of retries to get a cell
+ */
+const MAX_RETRIES = 3;
 
 /**
  * Notebook helpers
@@ -164,7 +169,7 @@ export class NotebookHelper {
 
     if (toolbar) {
       const itemIndex = await this.page.evaluate(async (itemId: string) => {
-        return window.galataip.getNotebookToolbarItemIndex(itemId);
+        return window.galata.getNotebookToolbarItemIndex(itemId);
       }, itemId);
 
       return this.getToolbarItemByIndex(itemIndex);
@@ -204,12 +209,12 @@ export class NotebookHelper {
   async activate(name: string): Promise<boolean> {
     if (await this.activity.activateTab(name)) {
       await this.page.evaluate(async () => {
-        const galataip = window.galataip;
-        const nbPanel = galataip.app.shell.currentWidget as NotebookPanel;
+        const galata = window.galata;
+        const nbPanel = galata.app.shell.currentWidget as NotebookPanel;
         await nbPanel.sessionContext.ready;
         // Assuming that if the session is ready, the kernel is ready also for now and commenting out this line
         // await nbPanel.session.kernel.ready;
-        galataip.app.shell.activateById(nbPanel.id);
+        galata.app.shell.activateById(nbPanel.id);
       });
 
       return true;
@@ -229,7 +234,7 @@ export class NotebookHelper {
     }
 
     await this.page.evaluate(async () => {
-      await window.galataip.saveActiveNotebook();
+      await window.galata.saveActiveNotebook();
     });
 
     return true;
@@ -246,7 +251,7 @@ export class NotebookHelper {
     }
 
     await this.page.evaluate(async () => {
-      const app = window.galataip.app;
+      const app = window.galata.app;
       const nbPanel = app.shell.currentWidget as NotebookPanel;
       await nbPanel.context.revert();
     });
@@ -264,6 +269,9 @@ export class NotebookHelper {
       return false;
     }
 
+    await this.page.evaluate(() => {
+      window.galata.resetExecutionCount();
+    });
     await this.menu.clickMenuItem('Run>Run All Cells');
     await this.waitForRun();
 
@@ -334,7 +342,7 @@ export class NotebookHelper {
               }
             } as INotebookRunCallback);
 
-      await window.galataip.runActiveNotebookCellByCell(callbacks);
+      await window.galata.runActiveNotebookCellByCell(callbacks);
     }, callbackName);
 
     return true;
@@ -342,11 +350,21 @@ export class NotebookHelper {
 
   /**
    * Wait for notebook cells execution to finish
+   *
+   * @param cellIndex Cell index
    */
-  async waitForRun(): Promise<void> {
-    await this.page.evaluate(async () => {
-      await window.galataip.waitForNotebookRun();
-    });
+  async waitForRun(cellIndex?: number): Promise<void> {
+    const idleLocator = this.page.locator('#jp-main-statusbar >> text=Idle');
+    await idleLocator.waitFor();
+
+    // Wait for all cells to have an execution count
+    let done = false;
+    do {
+      await this.page.waitForTimeout(20);
+      done = await this.page.evaluate(cellIdx => {
+        return window.galata.haveBeenExecuted(cellIdx);
+      }, cellIndex);
+    } while (!done);
   }
 
   /**
@@ -409,9 +427,37 @@ export class NotebookHelper {
       return -1;
     }
 
-    const cells = await notebook.$$('div.jp-Cell');
+    const scrollTop = await notebook.evaluate(node => node.scrollTop);
 
-    return cells.length;
+    // Scroll to bottom
+    let previousScrollHeight = scrollTop;
+    let scrollHeight =
+      previousScrollHeight +
+      (await notebook.evaluate(node => node.clientHeight));
+    do {
+      await notebook.evaluate((node, scrollTarget) => {
+        node.scrollTo({ top: scrollTarget });
+      }, scrollHeight);
+      await this.page.waitForTimeout(50);
+      previousScrollHeight = scrollHeight;
+      scrollHeight = await notebook.evaluate(
+        node => node.scrollHeight - node.clientHeight
+      );
+    } while (scrollHeight > previousScrollHeight);
+
+    const lastCell = await notebook.$$('div.jp-Cell >> nth=-1');
+    const count =
+      parseInt(
+        (await lastCell[0].getAttribute('data-windowed-list-index')) ?? '0',
+        10
+      ) + 1;
+
+    // Scroll back to original position
+    await notebook.evaluate((node, scrollTarget) => {
+      node.scrollTo({ top: scrollTarget });
+    }, scrollTop);
+
+    return count;
   };
 
   /**
@@ -426,13 +472,94 @@ export class NotebookHelper {
       return null;
     }
 
-    const cells = await notebook.$$('div.jp-Cell');
+    const allCells = await notebook.$$('div.jp-Cell');
+    const filters = await Promise.all(allCells.map(c => c.isVisible()));
+    const cells = allCells.filter((c, i) => filters[i]);
 
-    if (cellIndex < 0 || cellIndex >= cells.length) {
-      return null;
+    const firstCell = cells[0];
+    const lastCell = cells[cells.length - 1];
+
+    let firstIndex = parseInt(
+      (await firstCell.getAttribute('data-windowed-list-index')) ?? '0',
+      10
+    );
+    let lastIndex = parseInt(
+      (await lastCell.getAttribute('data-windowed-list-index')) ?? '0',
+      10
+    );
+
+    if (cellIndex < firstIndex) {
+      // Scroll up
+      let scrollTop =
+        (await firstCell.boundingBox())?.y ??
+        (await notebook.evaluate(node => node.scrollTop - node.clientHeight));
+
+      do {
+        await notebook.evaluate((node, scrollTarget) => {
+          node.scrollTo({ top: scrollTarget });
+        }, scrollTop);
+        await this.page.waitForTimeout(50);
+
+        const cells = await notebook.$$('div.jp-Cell');
+        const isVisible = await Promise.all(cells.map(c => c.isVisible()));
+        const firstCell = isVisible.findIndex(visibility => visibility);
+
+        firstIndex = parseInt(
+          (await cells[firstCell].getAttribute('data-windowed-list-index')) ??
+            '0',
+          10
+        );
+        scrollTop =
+          (await cells[firstCell].boundingBox())?.y ??
+          (await notebook.evaluate(node => node.scrollTop - node.clientHeight));
+      } while (scrollTop > 0 && firstIndex > cellIndex);
+    } else if (cellIndex > lastIndex) {
+      const clientHeight = await notebook.evaluate(node => node.clientHeight);
+      // Scroll down
+      const viewport = await (
+        await notebook.$$('.jp-WindowedPanel-window')
+      )[0].boundingBox();
+      let scrollHeight = viewport!.y + viewport!.height;
+      let previousScrollHeight = 0;
+
+      do {
+        previousScrollHeight = scrollHeight;
+        await notebook.evaluate((node, scrollTarget) => {
+          node.scrollTo({ top: scrollTarget });
+        }, scrollHeight);
+        await this.page.waitForTimeout(50);
+
+        const cells = await notebook.$$('div.jp-Cell');
+        const isVisible = await Promise.all(cells.map(c => c.isVisible()));
+        const lastCell = isVisible.lastIndexOf(true);
+
+        lastIndex = parseInt(
+          (await cells[lastCell].getAttribute('data-windowed-list-index')) ??
+            '0',
+          10
+        );
+
+        const viewport = await (
+          await notebook.$$('.jp-WindowedPanel-window')
+        )[0].boundingBox();
+        scrollHeight = viewport!.y + viewport!.height;
+        // Avoid jitter
+        scrollHeight = Math.max(
+          previousScrollHeight + clientHeight,
+          scrollHeight
+        );
+      } while (scrollHeight > previousScrollHeight && lastIndex < cellIndex);
     }
 
-    return cells[cellIndex];
+    if (firstIndex <= cellIndex && cellIndex <= lastIndex) {
+      return (
+        await notebook.$$(
+          `div.jp-Cell[data-windowed-list-index="${cellIndex}"]`
+        )
+      )[0];
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -724,12 +851,12 @@ export class NotebookHelper {
 
     const cell = await this.getCell(cellIndex);
     const gutters = await cell!.$$(
-      '.CodeMirror-gutter-wrapper > .CodeMirror-linenumber'
+      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
     );
     if (gutters.length < lineNumber) {
       return false;
     }
-    await gutters[lineNumber - 1].click();
+    await gutters[lineNumber].click();
     return true;
   }
 
@@ -743,7 +870,7 @@ export class NotebookHelper {
     if (!cell) {
       return false;
     }
-    return (await cell.$('.CodeMirror-gutter-wrapper')) !== null;
+    return (await cell.$('.cm-gutters')) !== null;
   }
 
   /**
@@ -754,7 +881,7 @@ export class NotebookHelper {
   async waitForCellGutter(cellIndex: number): Promise<void> {
     const cell = await this.getCell(cellIndex);
     if (cell) {
-      await this.page.waitForSelector('.CodeMirror-gutter-wrapper', {
+      await this.page.waitForSelector('.cm-gutters', {
         state: 'attached'
       });
     }
@@ -775,13 +902,17 @@ export class NotebookHelper {
     }
 
     const panel = await this.activity.getPanel();
+    await panel!.waitForSelector(
+      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement',
+      { state: 'attached' }
+    );
     const gutters = await panel!.$$(
-      '.CodeMirror-gutter-wrapper > .CodeMirror-linenumber'
+      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
     );
     if (gutters.length < lineNumber) {
       return false;
     }
-    await gutters[lineNumber - 1].click();
+    await gutters[lineNumber].click();
     return true;
   }
 
@@ -794,7 +925,7 @@ export class NotebookHelper {
     if (!panel) {
       return false;
     }
-    return (await panel.$('.CodeMirror-gutter-wrapper')) !== null;
+    return (await panel.$('.cm-gutters')) !== null;
   }
 
   /**
@@ -805,7 +936,7 @@ export class NotebookHelper {
   async waitForCodeGutter(): Promise<void> {
     const panel = await this.activity.getPanel();
     if (panel) {
-      await this.page.waitForSelector('.CodeMirror-gutter-wrapper', {
+      await this.page.waitForSelector('.cm-gutters', {
         state: 'attached'
       });
     }
@@ -848,7 +979,7 @@ export class NotebookHelper {
    */
   async isCellSelected(cellIndex: number): Promise<boolean> {
     return await this.page.evaluate((cellIndex: number) => {
-      return window.galataip.isNotebookCellSelected(cellIndex);
+      return window.galata.isNotebookCellSelected(cellIndex);
     }, cellIndex);
   }
 
@@ -863,7 +994,7 @@ export class NotebookHelper {
     }
 
     await this.page.evaluate(() => {
-      return window.galataip.deleteNotebookCells();
+      return window.galata.deleteNotebookCells();
     });
 
     return true;
@@ -969,6 +1100,14 @@ export class NotebookHelper {
 
     await selectInput.selectOption(cellType);
 
+    // Wait for the new cell to be rendered
+    let cell: ElementHandle | null;
+    let counter = 1;
+    do {
+      await this.page.waitForTimeout(50);
+      cell = await this.getCell(cellIndex);
+    } while (cell === null && counter++ < MAX_RETRIES);
+
     return true;
   }
 
@@ -983,13 +1122,12 @@ export class NotebookHelper {
     if (!notebook) {
       return null;
     }
-    const cells = await notebook.$$('div.jp-Cell');
 
-    if (cellIndex < 0 || cellIndex >= cells.length) {
+    const cell = await this.getCell(cellIndex);
+
+    if (!cell) {
       return null;
     }
-
-    const cell = cells[cellIndex];
 
     const classList = await Utils.getElementClassList(cell);
 
@@ -1023,10 +1161,13 @@ export class NotebookHelper {
       return false;
     }
 
+    await this.page.evaluate(cellIdx => {
+      window.galata.resetExecutionCount(cellIdx);
+    }, cellIndex);
     await this.page.keyboard.press(
       inplace === true ? 'Control+Enter' : 'Shift+Enter'
     );
-    await this.waitForRun();
+    await this.waitForRun(cellIndex);
 
     return true;
   }

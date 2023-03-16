@@ -437,7 +437,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Interrupt a kernel.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
+   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    *
@@ -458,7 +458,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Request a kernel restart.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels)
+   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels)
    * and validates the response model.
    *
    * Any existing Future or Comm objects are cleared once the kernel has
@@ -526,7 +526,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Shutdown a kernel.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
+   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    *
@@ -1514,8 +1514,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
           timeout / 1000
         )} seconds.`
       );
-      // Try reconnection without subprotocols.
-      this._reconnectTimeout = setTimeout(this._createSocket, timeout, false);
+      // Try reconnection with subprotocols if the server had supported them.
+      // Otherwise, try reconnection without subprotocols.
+      const useProtocols = this._selectedProtocol !== '' ? true : false;
+      this._reconnectTimeout = setTimeout(
+        this._createSocket,
+        timeout,
+        useProtocols
+      );
       this._reconnectAttempt += 1;
     } else {
       this._updateConnectionStatus('disconnected');
@@ -1551,6 +1557,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this._updateStatus('dead');
       throw new Error(`Unknown kernel wire protocol:  ${this._ws!.protocol}`);
     }
+    // Remember the kernel wire protocol selected by the server.
+    this._selectedProtocol = this._ws!.protocol;
     this._ws!.onclose = this._onWSClose;
     this._ws!.onerror = this._onWSClose;
     this._updateConnectionStatus('connected');
@@ -1630,6 +1638,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _supportedProtocols: string[] = Object.values(
     KernelMessage.supportedKernelWebSocketProtocols
   );
+  private _selectedProtocol: string = '';
 
   private _futures = new Map<
     string,

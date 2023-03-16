@@ -12,8 +12,7 @@ import { JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { Component } from './component';
+import { createRoot, Root } from 'react-dom/client';
 
 /**
  * The CSS class to add to the JSON Widget.
@@ -39,7 +38,6 @@ export class RenderedJSON
     super();
     this.addClass(CSS_CLASS);
     this.addClass('CodeMirror');
-    this.addClass('cm-s-jupyter');
     this._mimeType = options.mimeType;
     this.translator = options.translator || nullTranslator;
   }
@@ -51,20 +49,21 @@ export class RenderedJSON
   /**
    * Render JSON into this widget's node.
    */
-  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    const { Component } = await import('./component');
     const data = (model.data[this._mimeType] || {}) as NonNullable<JSONValue>;
     const metadata = (model.metadata[this._mimeType] || {}) as JSONObject;
+    if (this._rootDOM === null) {
+      this._rootDOM = createRoot(this.node);
+    }
     return new Promise<void>((resolve, reject) => {
-      ReactDOM.render(
+      this._rootDOM!.render(
         <Component
           data={data}
           metadata={metadata}
           translator={this.translator}
-        />,
-        this.node,
-        () => {
-          resolve();
-        }
+          forwardedRef={() => resolve()}
+        />
       );
     });
   }
@@ -74,11 +73,15 @@ export class RenderedJSON
    */
   protected onBeforeDetach(msg: Message): void {
     // Unmount the component so it can tear down.
-    ReactDOM.unmountComponentAtNode(this.node);
+    if (this._rootDOM) {
+      this._rootDOM.unmount();
+      this._rootDOM = null;
+    }
   }
 
   translator: ITranslator;
   private _mimeType: string;
+  private _rootDOM: Root | null = null;
 }
 
 /**

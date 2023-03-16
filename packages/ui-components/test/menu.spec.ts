@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IRankedMenu, RankedMenu } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { Menu } from '@lumino/widgets';
-import { IRankedMenu, RankedMenu } from '../lib';
 
 describe('@jupyterlab/ui-components', () => {
   describe('IRankedMenu', () => {

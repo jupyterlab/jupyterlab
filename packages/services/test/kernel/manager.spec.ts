@@ -1,32 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  flakyIt as it,
-  JupyterServer,
-  sleep,
-  testEmission
-} from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
+import { JupyterServer, sleep, testEmission } from '@jupyterlab/testing';
 import { Kernel, KernelAPI, KernelManager } from '../../src';
 import { makeSettings } from '../utils';
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('kernel/manager', () => {
   let kernel: Kernel.IModel;
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
 
   beforeAll(async () => {
-    jest.setTimeout(20000);
+    server = new JupyterServer();
+    await server.start();
     kernel = await KernelAPI.startNew();
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
   });
 
   describe('KernelManager', () => {
@@ -73,7 +65,7 @@ describe('kernel/manager', () => {
     describe('#running()', () => {
       it('should get the running sessions', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toBeGreaterThan(0);
+        expect(Array.from(manager.running()).length).toBeGreaterThan(0);
       });
     });
     describe('#runningChanged', () => {
@@ -81,7 +73,7 @@ describe('kernel/manager', () => {
         let called = false;
         manager.runningChanged.connect((sender, args) => {
           expect(sender).toBe(manager);
-          expect(toArray(args).length).toBeGreaterThan(0);
+          expect(Array.from(args).length).toBeGreaterThan(0);
           called = true;
         });
         await KernelAPI.startNew();
@@ -121,14 +113,14 @@ describe('kernel/manager', () => {
     describe('#refreshRunning()', () => {
       it('should update the running kernels', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toBeGreaterThan(0);
+        expect(Array.from(manager.running()).length).toBeGreaterThan(0);
       });
 
       it('should update the running kernels when one is shut down', async () => {
-        const old = toArray(manager.running()).length;
+        const old = Array.from(manager.running()).length;
         await KernelAPI.startNew();
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toBeGreaterThan(old);
+        expect(Array.from(manager.running()).length).toBeGreaterThan(old);
       });
     });
 
@@ -241,14 +233,14 @@ describe('kernel/manager', () => {
     describe('#running()', () => {
       it('should get the running sessions', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toEqual(0);
+        expect(Array.from(manager.running()).length).toEqual(0);
       });
     });
 
     describe('#refreshRunning()', () => {
       it('should update the running kernels', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toEqual(0);
+        expect(Array.from(manager.running()).length).toEqual(0);
       });
     });
 

@@ -3,28 +3,13 @@
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
-/**
- * Handle the default `fetch` and `WebSocket` providers.
- */
-declare let global: any;
-
-let FETCH: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
-let HEADERS: typeof Headers;
-let REQUEST: typeof Request;
 let WEBSOCKET: typeof WebSocket;
 
 if (typeof window === 'undefined') {
   // Mangle the require statements so it does not get picked up in the
   // browser assets.
-  const fetchMod = require('node-fetch');
-  FETCH = global.fetch ?? fetchMod;
-  REQUEST = global.Request ?? fetchMod.Request;
-  HEADERS = global.Headers ?? fetchMod.Headers;
   WEBSOCKET = require('ws');
 } else {
-  FETCH = fetch;
-  REQUEST = Request;
-  HEADERS = Headers;
   WEBSOCKET = WebSocket;
 }
 
@@ -236,9 +221,9 @@ namespace Private {
 
     return {
       init: { cache: 'no-store', credentials: 'same-origin' },
-      fetch: FETCH,
-      Headers: HEADERS,
-      Request: REQUEST,
+      fetch,
+      Headers,
+      Request,
       WebSocket: WEBSOCKET,
       token: PageConfig.getToken(),
       appUrl: PageConfig.getOption('appUrl'),

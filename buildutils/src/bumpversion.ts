@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import commander from 'commander';
+import { program as commander } from 'commander';
 import * as utils from './utils';
 
 // Specify the program signature.

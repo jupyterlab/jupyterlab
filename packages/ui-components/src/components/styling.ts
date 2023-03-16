@@ -39,7 +39,8 @@ export namespace Styling {
       node.classList.add('jp-mod-styled');
     }
     if (node.localName === 'select') {
-      wrapSelect(node as HTMLSelectElement);
+      const multiple = node.hasAttribute('multiple');
+      wrapSelect(node as HTMLSelectElement, multiple);
     }
     const nodes = node.getElementsByTagName(tagName);
     for (let i = 0; i < nodes.length; i++) {
@@ -49,7 +50,8 @@ export namespace Styling {
         child.classList.add(className);
       }
       if (tagName === 'select') {
-        wrapSelect(child as HTMLSelectElement);
+        const multiple = child.hasAttribute('multiple');
+        wrapSelect(child as HTMLSelectElement, multiple);
       }
     }
   }
@@ -57,7 +59,10 @@ export namespace Styling {
   /**
    * Wrap a select node.
    */
-  export function wrapSelect(node: HTMLSelectElement): HTMLElement {
+  export function wrapSelect(
+    node: HTMLSelectElement,
+    multiple?: boolean
+  ): HTMLElement {
     const wrapper = document.createElement('div');
     wrapper.classList.add('jp-select-wrapper');
     node.addEventListener('focus', Private.onFocus);
@@ -68,16 +73,20 @@ export namespace Styling {
     }
     wrapper.appendChild(node);
 
-    // add the icon node
-    wrapper.appendChild(
-      caretDownEmptyIcon.element({
-        tag: 'span',
-        stylesheet: 'select',
-        right: '8px',
-        top: '5px',
-        width: '18px'
-      })
-    );
+    if (multiple) {
+      wrapper.classList.add('multiple');
+    } else {
+      // add the icon node
+      wrapper.appendChild(
+        caretDownEmptyIcon.element({
+          tag: 'span',
+          stylesheet: 'select',
+          right: '8px',
+          top: '5px',
+          width: '18px'
+        })
+      );
+    }
 
     return wrapper;
   }

@@ -54,11 +54,11 @@ The recommended time period for the Release Candidate phase is a minimum of 1 we
 
 ## Automated Releases with the Jupyter Releaser
 
-The recommended way to make a release is to use [`jupyter_releaser`](https://github.com/jupyter-server/jupyter_releaser#checklist-for-adoption).
+The recommended way to make a release is to use [`jupyter_releaser`](https://jupyter-releaser.readthedocs.io/en/latest/how_to_guides/convert_repo_from_repo.html).
 
 ### Workflow
 
-The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#making-your-first-release. There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
+The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_repo.html. There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
 
 Here is a quick summary of the different steps.
 
@@ -69,11 +69,13 @@ It is good practice to let other maintainers and users know when starting a new 
 For this we usually leave a small message in the `jupyterlab` room on Gitter: https://gitter.im/jupyterlab/jupyterlab.
 Once the release is done, we also post a message with a link to the release notes, which include the changelog.
 
-#### Draft Changelog
+#### 1. Prep Release
 
 The first step is to generate a new changelog entry for the upcoming release.
 
-We use the "Draft Changelog" workflow as documented here: https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#draft-changelog
+We use the "Prep Release" workflow as documented here: https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_repo.html#prep-release
+
+Go the Actions tab of the JupyterLab Repo and click on the `1. Prep Release` workflow: https://github.com/jupyterlab/jupyterlab/actions
 
 The workflow takes a couple of input parameters. Here is an overview with example values:
 
@@ -88,37 +90,36 @@ The version spec follows the specification documented below in the [Bump Version
 
 We can use `next` when making a `patch` release or a `build` pre-release.
 
-Click on "Run workflow", then wait for:
+Click on "Run workflow", then once completed:
 
-1. the PR to be created on the repo. Example: https://github.com/jupyterlab/jupyterlab/pull/11422
-2. Tests to pass
-3. Merge the changelog PR
+1. Go to the Releases: https://github.com/jupyterlab/jupyterlab/releases
+1. Check the draft GitHub Release has been created
+1. Make edits to the changelog if needed. ⚠️ If you make edits to the content of the GitHub Release, then don't forget to click on "Save Draft" and not "Publish Release".
 
-### Full Release
+### 2. Publish Release
 
 #### PyPI and npm tokens
 
-Before running the "Full Release" workflow, make sure you have been added to:
+Before running the "Publish Release" workflow, make sure you have been added to:
 
 - the `jupyterlab` project on PyPI: https://pypi.org/project/jupyterlab/
 - the `@jupyterlab` organization on npm: https://www.npmjs.com/settings/jupyterlab/packages
 
-Then create the PyPI and npm tokens. Check out the links in the [Jupyter Releaser Setup Documentation](https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_first_release.html#set-up) for more information.
+Then create the PyPI and npm tokens. Check out the links in the [Jupyter Releaser Setup Documentation](https://jupyter-releaser.readthedocs.io/en/stable/get_started/making_release_from_releaser.html#set-up) for more information.
 
 #### Running the workflow
 
-On the `jupyter_releaser` fork, select the "Full Release" workflow.
+On the [Actions](https://github.com/jupyterlab/jupyterlab/actions) page, select the "2. Publish Release" workflow.
 
 Fill in the information as mentioned in the body of the changelog PR, for example:
 
-| Input        | Value                 |
-| ------------ | --------------------- |
-| Target       | jupyterlab/jupyterlab |
-| Branch       | master                |
-| Version Spec | next                  |
-| Since        | v4.0.0a15             |
+| Input                                 | Value      |
+| ------------------------------------- | ---------- |
+| The target branch                     | master     |
+| The URL of the draft GitHub release   |            |
+| Comma separated list of steps to skip | ensure-sha |
 
-The "Full Release" workflow:
+The "Publish Release" workflow:
 
 - builds and uploads the `jupyterlab` Python package to PyPI
 - builds the `@jupyterlab/*` packages and uploads them to `npm`
@@ -341,34 +342,39 @@ rm -rf initial
 
 #### Publishing extension tutorial changes
 
-- Tag commits in the branch with the appropriate `branch-step` tag. If you are at the final commit, you can tag all commits with the below, replacing `BRANCH` with the branch name (e.g., `1.0-01-show-a-panel`) ```bash
-  git tag BRANCH-01-show-a-panel HEAD~4
-  git tag BRANCH-02-show-an-image HEAD~3
-  git tag BRANCH-03-style-and-attribute HEAD~2
-  git tag BRANCH-04-refactor-and-refresh HEAD~1
-  git tag BRANCH-05-restore-panel-state HEAD
+- Tag commits in the branch with the appropriate `branch-step` tag. If you are at the final commit, you can tag all commits with the below, setting `BRANCH` with the branch name (e.g., `1.0-01-show-a-panel`)
 
-  ```
-
+  ```bash
+  export BRANCH=<branch-name>
+  git tag ${BRANCH}-01-show-a-panel HEAD~4
+  git tag ${BRANCH}-02-show-an-image HEAD~3
+  git tag ${BRANCH}-03-style-and-attribute HEAD~2
+  git tag ${BRANCH}-04-refactor-and-refresh HEAD~1
+  git tag ${BRANCH}-05-restore-panel-state HEAD
   ```
 
 - Push the branch with the new tags
+
   ```bash
-  git push origin BRANCH --tags
+  git push origin ${BRANCH} --tags
   ```
+
   Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_apod/settings/branches`).
+
 - If there were changes to the example in the documentation, submit a PR to JupyterLab
+
 - Publish the new `jupyterlab_apod` python package. Make sure to update the version
   number in the last commit of the branch.
+
   ```bash
   twine upload dist/*
   ```
 
 If you make a mistake and need to start over, clear the tags using the
-following pattern (replacing `BRANCH` with the branch name):
+following pattern:
 
 ```bash
-git tag | grep BRANCH | xargs git tag -d
+git tag | grep ${BRANCH} | xargs git tag -d
 ```
 
 ### Publishing to conda-forge
@@ -383,7 +389,7 @@ shasum -a 256 dist/*.tar.gz
 
 - Fork https://github.com/conda-forge/jupyterlab-feedstock
 - Create a PR with the version bump
-- Update `recipe/meta.yaml` with the new version and md5 and reset the build number to 0.
+- Update `recipe/meta.yaml` with the new version and sha256 and reset the build number to 0.
 
 ## Updating API Docs
 

@@ -6,7 +6,7 @@ import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
@@ -91,7 +91,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * @param iconClass - optional, if the icon arg is not set, the iconClass arg
    * should be a CSS class associated with an existing CSS background-image
    *
-   * @deprecated fallback - don't use, optional, a LabIcon instance that will
+   * @param fallback - DEPRECATED, optional, a LabIcon instance that will
    * be used if neither icon nor iconClass are defined
    *
    * @param props - any additional args are passed though to the element method
@@ -133,7 +133,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * @param iconClass - optional, if the icon arg is not set, the iconClass arg
    * should be a CSS class associated with an existing CSS background-image
    *
-   * @deprecated fallback - don't use, optional, a LabIcon instance that will
+   * @param fallback - DEPRECATED, optional, a LabIcon instance that will
    * be used if neither icon nor iconClass are defined
    *
    * @param props - any additional args are passed though to the React component
@@ -496,10 +496,12 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         } else {
           return (
             <Tag
-              className={classes(
-                className,
-                LabIconStyle.styleClass(styleProps)
-              )}
+              className={
+                className || styleProps
+                  ? classes(className, LabIconStyle.styleClass(styleProps))
+                  : undefined
+              }
+              title={title}
             >
               {svgComponent}
               {label}
@@ -918,19 +920,27 @@ namespace Private {
 
       const icon = this._icon;
 
-      ReactDOM.render(
+      if (this._rootDOM !== null) {
+        this._rootDOM.unmount();
+      }
+      this._rootDOM = createRoot(container);
+      this._rootDOM.render(
         <icon.react
           container={container}
           label={label}
           {...{ ...this._rendererOptions?.props, ...options?.props }}
-        />,
-        container
+        />
       );
     }
 
     unrender(container: HTMLElement): void {
-      ReactDOM.unmountComponentAtNode(container);
+      if (this._rootDOM !== null) {
+        this._rootDOM.unmount();
+        this._rootDOM = null;
+      }
     }
+
+    private _rootDOM: Root | null = null;
   }
 }
 

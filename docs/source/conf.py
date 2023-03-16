@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 #
 # JupyterLab documentation build configuration file, created by
 # sphinx-quickstart on Thu Jan  4 15:10:23 2018.
@@ -64,7 +66,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "JupyterLab"
-copyright = f"2018-{time.localtime().tm_year}, Project Jupyter"
+copyright = f"2018-{time.localtime().tm_year}, Project Jupyter"  # noqa
 author = "Project Jupyter"
 
 
@@ -75,10 +77,10 @@ author = "Project Jupyter"
 _version_py = HERE.parent.parent / "jupyterlab" / "_version.py"
 version_ns = {}
 
-exec(_version_py.read_text(), version_ns)
+exec(_version_py.read_text(), version_ns)  # noqa
 
 # The short X.Y version.
-version = "{0:d}.{1:d}".format(*version_ns["version_info"])
+version = "{0:d}.{1:d}".format(*version_ns["version_info"])  # noqa
 # The full version, including alpha/beta/rc tags.
 release = version_ns["__version__"]
 
@@ -87,7 +89,7 @@ release = version_ns["__version__"]
 # for a list of supported languages.
 #
 # This is also used if you do content translation via gettext catalogs.
-# language = None # Must be set from the command line to generate various languages
+language = "en"  # Must be set from the command line to generate various languages
 
 locale_dirs = ["locale/"]
 gettext_compact = False
@@ -115,15 +117,13 @@ def build_api_docs(out_dir: Path):
     if api_index.exists():
         # avoid rebuilding docs because it takes forever
         # `make clean` to force a rebuild
-        print(f"already have {api_index!s}")
+        pass
     else:
-        print("Building jupyterlab API docs")
         check_call(jlpm, cwd=str(root))
-        check_call(jlpm + ["build:packages"], cwd=str(root))
-        check_call(jlpm + ["docs"], cwd=str(root))
+        check_call([*jlpm, "build:packages"], cwd=str(root))
+        check_call([*jlpm, "docs"], cwd=str(root))
 
     dest_dir = out_dir / "api"
-    print(f"Copying {docs_api!s} -> {dest_dir!s}")
     if dest_dir.exists():
         shutil.rmtree(str(dest_dir))
     shutil.copytree(str(docs_api), str(dest_dir))
@@ -170,7 +170,6 @@ def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
     Returns:
         List of copied files
     """
-    print(f"\n\n{temp_folder}\n")
     docs = HERE.parent
     root = docs.parent
 
@@ -254,7 +253,7 @@ html_theme_options = {
     "use_edit_page_button": True,
     "navbar_align": "left",
     "navbar_end": ["navbar-icon-links.html", "search-field.html"],
-    "footer_items": ["copyright.html"],
+    "footer_start": ["copyright.html"],
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -383,8 +382,8 @@ def setup(app):
         """Remove temporary folder."""
         try:
             shutil.rmtree(str(Path(app.srcdir) / SNIPPETS_FOLDER))
-        except Exception as e:
-            print(f"Fail to remove temporary snippet folder: {e}")
+        except Exception:  # noqa S110
+            pass
 
         for f in tmp_files:
             f.unlink()

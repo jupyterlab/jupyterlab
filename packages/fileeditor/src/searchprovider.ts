@@ -2,11 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
+import { CodeMirrorEditor, EditorSearchProvider } from '@jupyterlab/codemirror';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
-  CodeMirrorEditor,
-  CodeMirrorSearchProvider
-} from '@jupyterlab/codemirror';
-import { ISearchProvider } from '@jupyterlab/documentsearch';
+  IFilters,
+  IReplaceOptionsSupport,
+  ISearchProvider
+} from '@jupyterlab/documentsearch';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from './widget';
@@ -20,16 +22,50 @@ export type FileEditorPanel = MainAreaWidget<FileEditor>;
  * File editor search provider
  */
 export class FileEditorSearchProvider
-  extends CodeMirrorSearchProvider
+  extends EditorSearchProvider<CodeEditor.IModel>
   implements ISearchProvider
 {
   /**
    * Constructor
    * @param widget File editor panel
    */
-  constructor(widget: FileEditorPanel) {
+  constructor(protected widget: FileEditorPanel) {
     super();
-    this.editor = widget.content.editor as CodeMirrorEditor;
+  }
+
+  get isReadOnly(): boolean {
+    return this.editor.getOption('readOnly') as boolean;
+  }
+
+  /**
+   * Support for options adjusting replacement behavior.
+   */
+  get replaceOptionsSupport(): IReplaceOptionsSupport {
+    return {
+      preserveCase: true
+    };
+  }
+
+  /**
+   * Text editor
+   */
+  get editor() {
+    return this.widget.content.editor as CodeMirrorEditor;
+  }
+
+  /**
+   * Editor content model
+   */
+  get model(): CodeEditor.IModel {
+    return this.widget.content.model;
+  }
+
+  async startQuery(
+    query: RegExp,
+    filters: IFilters | undefined
+  ): Promise<void> {
+    await super.startQuery(query, filters);
+    await this.highlightNext(false, true);
   }
 
   /**
@@ -70,8 +106,10 @@ export class FileEditorSearchProvider
    */
   getInitialQuery(): string {
     const cm = this.editor as CodeMirrorEditor;
-    const selection = cm.doc.getSelection();
-    // if there are newlines, just return empty string
-    return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
+    const selection = cm.state.sliceDoc(
+      cm.state.selection.main.from,
+      cm.state.selection.main.to
+    );
+    return selection;
   }
 }

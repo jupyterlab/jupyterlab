@@ -44,6 +44,21 @@ export namespace ITerminal {
      * Refresh the terminal session.
      */
     refresh(): Promise<void>;
+
+    /**
+     * Check if terminal has any text selected.
+     */
+    hasSelection(): boolean;
+
+    /**
+     * Paste text into terminal.
+     */
+    paste(data: string): void;
+
+    /**
+     * Get selected text from terminal.
+     */
+    getSelection(): string | null;
   }
   /**
    * Options for the terminal widget.
@@ -150,6 +165,7 @@ export namespace ITerminal {
     background: string;
     cursor: string;
     cursorAccent: string;
-    selection: string;
+    selectionBackground: string;
+    selectionInactiveBackground: string;
   }
 }

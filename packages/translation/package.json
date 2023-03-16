@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation",
-  "version": "4.0.0-alpha.11",
+  "version": "4.0.0-alpha.21",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -23,7 +23,8 @@
     "lib": "lib/"
   },
   "files": [
-    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc",
@@ -39,18 +40,17 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.11",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.11",
-    "@jupyterlab/services": "^7.0.0-alpha.11",
-    "@jupyterlab/statedb": "^4.0.0-alpha.11",
-    "@lumino/coreutils": "^1.12.0"
+    "@jupyterlab/coreutils": "^6.0.0-alpha.21",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.21",
+    "@jupyterlab/services": "^7.0.0-alpha.21",
+    "@jupyterlab/statedb": "^4.0.0-alpha.21",
+    "@lumino/coreutils": "^2.0.0-rc.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.11",
-    "@types/jest": "^26.0.10",
-    "jest": "^26.4.2",
+    "@jupyterlab/testing": "^4.0.0-alpha.21",
+    "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
-    "typescript": "~4.7.3"
+    "typescript": "~5.0.1-rc"
   },
   "publishConfig": {
     "access": "public"

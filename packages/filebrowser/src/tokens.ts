@@ -1,17 +1,29 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { WidgetTracker } from '@jupyterlab/apputils';
-import { IStateDB } from '@jupyterlab/statedb';
+import type { WidgetTracker } from '@jupyterlab/apputils';
+import type { IStateDB } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
-import { FileBrowser } from './browser';
+import type { FileBrowser } from './browser';
 
 /**
- * The path tracker token.
+ * The file browser factory token.
  */
 export const IFileBrowserFactory = new Token<IFileBrowserFactory>(
   '@jupyterlab/filebrowser:IFileBrowserFactory'
 );
+
+/**
+ * The default file browser token.
+ */
+export const IDefaultFileBrowser = new Token<IDefaultFileBrowser>(
+  '@jupyterlab/filebrowser:IDefaultFileBrowser'
+);
+
+/**
+ * Default file browser type.
+ */
+export type IDefaultFileBrowser = FileBrowser;
 
 /**
  * The file browser factory interface.
@@ -44,11 +56,6 @@ export interface IFileBrowserFactory {
    * The widget tracker used by the factory to track file browsers.
    */
   readonly tracker: WidgetTracker<FileBrowser>;
-
-  /**
-   * The default file browser for the application.
-   */
-  defaultBrowser: FileBrowser;
 }
 
 /**

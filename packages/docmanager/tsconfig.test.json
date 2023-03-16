@@ -9,9 +9,6 @@
       "path": "../coreutils"
     },
     {
-      "path": "../docprovider"
-    },
-    {
       "path": "../docregistry"
     },
     {
@@ -30,7 +27,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
+      "path": "../testing"
     }
   ]
 }

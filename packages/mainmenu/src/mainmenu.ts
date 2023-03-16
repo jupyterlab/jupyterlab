@@ -24,7 +24,8 @@ export class MainMenu extends MenuBar implements IMainMenu {
    * Construct the main menu bar.
    */
   constructor(commands: CommandRegistry) {
-    super();
+    let options = { forceItemsPosition: { forceX: false, forceY: true } };
+    super(options);
     this._commands = commands;
   }
 
@@ -143,7 +144,11 @@ export class MainMenu extends MenuBar implements IMainMenu {
   /**
    * Add a new menu to the main menu bar.
    */
-  addMenu(menu: Menu, options: IMainMenu.IAddOptions = {}): void {
+  addMenu(
+    menu: Menu,
+    update: boolean = true,
+    options: IMainMenu.IAddOptions = {}
+  ): void {
     if (ArrayExt.firstIndexOf(this.menus, menu) > -1) {
       return;
     }

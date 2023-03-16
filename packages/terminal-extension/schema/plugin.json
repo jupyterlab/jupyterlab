@@ -4,9 +4,19 @@
   "jupyter.lab.menus": {
     "context": [
       {
-        "command": "terminal:refresh",
+        "command": "terminal:copy",
         "selector": ".jp-Terminal",
         "rank": 1
+      },
+      {
+        "command": "terminal:paste",
+        "selector": ".jp-Terminal",
+        "rank": 2
+      },
+      {
+        "command": "terminal:refresh",
+        "selector": ".jp-Terminal",
+        "rank": 3
       }
     ]
   },

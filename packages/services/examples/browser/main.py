@@ -7,10 +7,7 @@ import os
 import os.path as osp
 
 from jupyter_server.base.handlers import JupyterHandler
-from jupyter_server.extension.handler import (
-    ExtensionHandlerJinjaMixin,
-    ExtensionHandlerMixin,
-)
+from jupyter_server.extension.handler import ExtensionHandlerJinjaMixin, ExtensionHandlerMixin
 from jupyter_server.utils import url_path_join as ujoin
 from jupyterlab_server import LabServerApp
 
@@ -49,12 +46,12 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
 
 
 class ExampleApp(LabServerApp):
-
     extension_url = "/example"
     default_url = "/example"
     app_url = "/example"
     name = __name__
-    load_other_extensions = False
+    # In jupyter-server v2 terminals are an extension
+    load_other_extensions = True
     app_name = "JupyterLab Example Service"
     app_settings_dir = os.path.join(HERE, "build", "application_settings")
     app_version = version

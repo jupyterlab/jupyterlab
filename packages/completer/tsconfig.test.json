@@ -12,9 +12,6 @@
       "path": "../coreutils"
     },
     {
-      "path": "../observables"
-    },
-    {
       "path": "../rendermime"
     },
     {
@@ -30,7 +27,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
+      "path": "../testing"
     }
   ]
 }

@@ -3,9 +3,13 @@
 
 import { Cell } from '@jupyterlab/cells';
 import { Context } from '@jupyterlab/docregistry';
-import { initNotebookContext } from '@jupyterlab/testutils';
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-import { INotebookModel, NotebookPanel, NotebookTracker } from '..';
+import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
+import {
+  INotebookModel,
+  NotebookPanel,
+  NotebookTracker
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const namespace = 'notebook-tracker-test';
@@ -13,9 +17,8 @@ const namespace = 'notebook-tracker-test';
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -58,7 +61,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be `null` if a tracked notebook has no active cell', () => {
         const tracker = new NotebookTracker({ namespace });
         const panel = utils.createNotebookPanel(context);
-        panel.content.model!.cells.clear();
+        panel.content.model!.sharedModel.clearUndoHistory();
         void tracker.add(panel);
         expect(tracker.activeCell).toBeNull();
       });

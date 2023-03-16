@@ -19,9 +19,7 @@ export function reportInstallError(
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
   const entries = [];
-  entries.push(
-    <p>{trans.__('An error occurred installing <code>%1</code>.', name)}</p>
-  );
+  entries.push(<p>{trans.__(`An error occurred installing "${name}".`)}</p>);
   if (errorMessage) {
     entries.push(
       <p>
@@ -36,6 +34,6 @@ export function reportInstallError(
   void showDialog({
     title: trans.__('Extension Installation Error'),
     body,
-    buttons: [Dialog.warnButton({ label: trans.__('OK') })]
+    buttons: [Dialog.warnButton({ label: trans.__('Ok') })]
   });
 }

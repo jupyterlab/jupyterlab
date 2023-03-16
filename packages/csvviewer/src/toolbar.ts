@@ -3,11 +3,9 @@
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Styling } from '@jupyterlab/ui-components';
-import { each } from '@lumino/algorithm';
 import { Message } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { CSVViewer } from './widget';
+import type { CSVViewer } from './widget';
 
 /**
  * The class name added to a csv toolbar widget.
@@ -37,16 +35,6 @@ export class CSVDelimiter extends Widget {
   }
 
   /**
-   * A signal emitted when the delimiter selection has changed.
-   *
-   * @deprecated since v3.2
-   * This is dead code now.
-   */
-  get delimiterChanged(): ISignal<this, string> {
-    return this._delimiterChanged;
-  }
-
-  /**
    * The delimiter dropdown menu.
    */
   get selectNode(): HTMLSelectElement {
@@ -66,7 +54,6 @@ export class CSVDelimiter extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'change':
-        this._delimiterChanged.emit(this.selectNode.value);
         this._widget.delimiter = this.selectNode.value;
         break;
       default:
@@ -88,7 +75,6 @@ export class CSVDelimiter extends Widget {
     this.selectNode.removeEventListener('change', this);
   }
 
-  private _delimiterChanged = new Signal<this, string>(this);
   protected _widget: CSVViewer;
 }
 
@@ -140,7 +126,7 @@ namespace Private {
     const select = document.createElement('select');
     label.textContent = trans.__('Delimiter: ');
     label.className = CSV_DELIMITER_LABEL_CLASS;
-    each(delimiters, ([delimiter, label]) => {
+    for (const [delimiter, label] of delimiters) {
       const option = document.createElement('option');
       option.value = delimiter;
       option.textContent = label;
@@ -148,7 +134,7 @@ namespace Private {
         option.selected = true;
       }
       select.appendChild(option);
-    });
+    }
     div.appendChild(label);
     const node = Styling.wrapSelect(select);
     node.classList.add(CSV_DELIMITER_DROPDOWN_CLASS);

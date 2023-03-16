@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { ITranslator } from '@jupyterlab/translation';
 import { SidePanel } from '@jupyterlab/ui-components';
 import { Panel, Widget } from '@lumino/widgets';
@@ -23,7 +28,12 @@ export class TableOfContentsPanel extends SidePanel {
     this._title = new Private.Header(this._trans.__('Table of Contents'));
     this.header.addWidget(this._title);
 
-    this._treeview = new TableOfContentsWidget();
+    this._treeview = new TableOfContentsWidget({
+      placeholderHeadline: this._trans.__('No Headings'),
+      placeholderText: this._trans.__(
+        'The table of contents shows headings in notebooks and supported files.'
+      )
+    });
     this._treeview.addClass('jp-TableOfContents-tree');
     this.content.addWidget(this._treeview);
   }

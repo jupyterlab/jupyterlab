@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _terminal:
 
 Terminals
@@ -14,6 +17,7 @@ there.
 .. image:: ../images/terminal-layout.png
    :align: center
    :class: jp-screenshot
+   :alt: JupyterLab with an open terminal in the main document area.
 
 .. _open-terminal:
 

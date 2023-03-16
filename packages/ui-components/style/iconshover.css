@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-icon-hoverShow:not(:hover) svg {
+.jp-icon-hoverShow:not(:hover) .jp-icon-hoverShow-content {
   display: none !important;
 }
 

@@ -12,7 +12,8 @@ module.exports = {
     JSX: 'readonly',
     NodeJS: 'readonly',
     RequestInit: 'readonly',
-    RequestInfo: 'readonly'
+    RequestInfo: 'readonly',
+    ScrollLogicalPosition: 'readonly'
   },
   root: true,
   extends: [
@@ -23,6 +24,10 @@ module.exports = {
     'plugin:react/recommended'
   ],
   parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 'ES2018',
+    project: ['./tsconfig.eslint.json']
+  },
   plugins: ['@typescript-eslint'],
   overrides: [
     {
@@ -81,6 +86,7 @@ module.exports = {
           'blocked_extensions_uris',
           'bundles_extension',
           'cell_type',
+          'check_update',
           'clear_output',
           'codemirror_mode',
           'comm_close',
@@ -108,6 +114,7 @@ module.exports = {
           'hist_access_type',
           'implementation_version',
           'installed_version',
+          'is_allowed',
           'jlab_core',
           'jupyterlab_extensions',
           'jupyterlab_mime_extensions',
@@ -127,6 +134,7 @@ module.exports = {
           'output_type',
           'outputs_hidden',
           'parent_header',
+          'per_page',
           'pf_re',
           'pkg_type',
           'protocol_version',

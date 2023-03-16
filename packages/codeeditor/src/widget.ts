@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { MimeData } from '@lumino/coreutils';
-import { IDragEvent } from '@lumino/dragdrop';
+import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { CodeEditor } from './';
@@ -37,15 +37,13 @@ export class CodeEditorWrapper extends Widget {
    */
   constructor(options: CodeEditorWrapper.IOptions) {
     super();
-    const editor = (this.editor = options.factory({
+    const { factory, model, editorOptions } = options;
+    const editor = (this.editor = factory({
       host: this.node,
-      model: options.model,
-      uuid: options.uuid,
-      config: options.config,
-      selectionStyle: options.selectionStyle
+      model,
+      ...editorOptions
     }));
     editor.model.selections.changed.connect(this._onSelectionsChanged, this);
-    this._updateOnShow = options.updateOnShow !== false;
   }
 
   /**
@@ -67,8 +65,8 @@ export class CodeEditorWrapper extends Widget {
     if (this.isDisposed) {
       return;
     }
-    super.dispose();
     this.editor.dispose();
+    super.dispose();
   }
 
   /**
@@ -84,16 +82,16 @@ export class CodeEditorWrapper extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'lm-dragenter':
-        this._evtDragEnter(event as IDragEvent);
+        this._evtDragEnter(event as Drag.Event);
         break;
       case 'lm-dragleave':
-        this._evtDragLeave(event as IDragEvent);
+        this._evtDragLeave(event as Drag.Event);
         break;
       case 'lm-dragover':
-        this._evtDragOver(event as IDragEvent);
+        this._evtDragOver(event as Drag.Event);
         break;
       case 'lm-drop':
-        this._evtDrop(event as IDragEvent);
+        this._evtDrop(event as Drag.Event);
         break;
       default:
         break;
@@ -117,12 +115,6 @@ export class CodeEditorWrapper extends Widget {
     node.addEventListener('lm-dragleave', this);
     node.addEventListener('lm-dragover', this);
     node.addEventListener('lm-drop', this);
-    // We have to refresh at least once after attaching,
-    // while visible.
-    this._hasRefreshedSinceAttach = false;
-    if (this.isVisible) {
-      this.update();
-    }
   }
 
   /**
@@ -134,36 +126,6 @@ export class CodeEditorWrapper extends Widget {
     node.removeEventListener('lm-dragleave', this);
     node.removeEventListener('lm-dragover', this);
     node.removeEventListener('lm-drop', this);
-  }
-
-  /**
-   * A message handler invoked on an `'after-show'` message.
-   */
-  protected onAfterShow(msg: Message): void {
-    if (this._updateOnShow || !this._hasRefreshedSinceAttach) {
-      this.update();
-    }
-  }
-
-  /**
-   * A message handler invoked on a `'resize'` message.
-   */
-  protected onResize(msg: Widget.ResizeMessage): void {
-    if (msg.width >= 0 && msg.height >= 0) {
-      this.editor.setSize(msg);
-    } else if (this.isVisible) {
-      this.editor.resizeToFit();
-    }
-  }
-
-  /**
-   * A message handler invoked on an `'update-request'` message.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    if (this.isVisible) {
-      this._hasRefreshedSinceAttach = true;
-      this.editor.refresh();
-    }
   }
 
   /**
@@ -196,7 +158,7 @@ export class CodeEditorWrapper extends Widget {
   /**
    * Handle the `'lm-dragenter'` event for the widget.
    */
-  private _evtDragEnter(event: IDragEvent): void {
+  private _evtDragEnter(event: Drag.Event): void {
     if (this.editor.getOption('readOnly') === true) {
       return;
     }
@@ -212,7 +174,7 @@ export class CodeEditorWrapper extends Widget {
   /**
    * Handle the `'lm-dragleave'` event for the widget.
    */
-  private _evtDragLeave(event: IDragEvent): void {
+  private _evtDragLeave(event: Drag.Event): void {
     this.removeClass(DROP_TARGET_CLASS);
     if (this.editor.getOption('readOnly') === true) {
       return;
@@ -228,7 +190,7 @@ export class CodeEditorWrapper extends Widget {
   /**
    * Handle the `'lm-dragover'` event for the widget.
    */
-  private _evtDragOver(event: IDragEvent): void {
+  private _evtDragOver(event: Drag.Event): void {
     this.removeClass(DROP_TARGET_CLASS);
     if (this.editor.getOption('readOnly') === true) {
       return;
@@ -246,7 +208,7 @@ export class CodeEditorWrapper extends Widget {
   /**
    * Handle the `'lm-drop'` event for the widget.
    */
-  private _evtDrop(event: IDragEvent): void {
+  private _evtDrop(event: Drag.Event): void {
     if (this.editor.getOption('readOnly') === true) {
       return;
     }
@@ -276,11 +238,8 @@ export class CodeEditorWrapper extends Widget {
       return;
     }
     const offset = this.editor.getOffsetAt(position);
-    this.model.value.insert(offset, data);
+    this.model.sharedModel.updateSource(offset, offset, data);
   }
-
-  private _updateOnShow: boolean;
-  private _hasRefreshedSinceAttach = false;
 }
 
 /**
@@ -295,35 +254,20 @@ export namespace CodeEditorWrapper {
      * A code editor factory.
      *
      * #### Notes
-     * The widget needs a factory and a model instead of a `CodeEditor.IEditor`
-     * object because it needs to provide its own node as the host.
+     * The widget needs a factory and a the editor options
+     * because it needs to provide its own node as the host.
      */
     factory: CodeEditor.Factory;
 
     /**
-     * The model used to initialize the code editor.
+     * The content model for the wrapper.
      */
     model: CodeEditor.IModel;
 
     /**
-     * The desired uuid for the editor.
+     * Code editor options
      */
-    uuid?: string;
-
-    /**
-     * The configuration options for the editor.
-     */
-    config?: Partial<CodeEditor.IConfig>;
-
-    /**
-     * The default selection style for the editor.
-     */
-    selectionStyle?: CodeEditor.ISelectionStyle;
-
-    /**
-     * Whether to send an update request to the editor when it is shown.
-     */
-    updateOnShow?: boolean;
+    editorOptions?: Omit<CodeEditor.IOptions, 'host' | 'model'>;
   }
 }
 

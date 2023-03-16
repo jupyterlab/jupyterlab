@@ -1,0 +1,28 @@
+{
+  "extends": "../../../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "build",
+    "rootDir": "src",
+    "module": "commonjs",
+    "strictNullChecks": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../../../application"
+    },
+    {
+      "path": "../../../coreutils"
+    },
+    {
+      "path": "../../../observables"
+    },
+    {
+      "path": "../../../theme-light-extension"
+    },
+    {
+      "path": "../.."
+    }
+  ]
+}

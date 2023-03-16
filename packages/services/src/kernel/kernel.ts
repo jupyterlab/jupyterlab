@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IIterator } from '@lumino/algorithm';
-
 import { JSONObject, JSONValue } from '@lumino/coreutils';
 
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
@@ -177,7 +175,7 @@ export interface IKernelConnection extends IObservableDisposable {
    * @returns A promise that resolves when the kernel has interrupted.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
+   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    *
@@ -194,7 +192,7 @@ export interface IKernelConnection extends IObservableDisposable {
    * @returns A promise that resolves when the kernel has restarted.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels) and validates the response model.
+   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels) and validates the response model.
    *
    * Any existing Future or Comm objects are cleared.
    *
@@ -520,7 +518,7 @@ export interface IKernelConnection extends IObservableDisposable {
    *
    * #### Notes
    * Uses the [Jupyter Notebook
-   * API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernels).
+   * API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
    *
    * On a valid response, closes the websocket, disposes of the kernel
    * object, and fulfills the promise.
@@ -617,7 +615,7 @@ export interface IManager extends IBaseManager {
    *
    * @returns A new iterator over the running kernels.
    */
-  running(): IIterator<IModel>;
+  running(): IterableIterator<IModel>;
 
   /**
    * Force a refresh of the running kernels.

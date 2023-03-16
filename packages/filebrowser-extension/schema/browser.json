@@ -24,29 +24,8 @@
         "id": "jp-mainmenu-view",
         "items": [
           {
-            "command": "filebrowser:toggle-main",
-            "rank": 1
-          },
-          {
             "command": "filebrowser:toggle-hidden-files",
             "rank": 9.95
-          }
-        ]
-      },
-      {
-        "id": "jp-mainmenu-settings",
-        "items": [
-          {
-            "type": "separator",
-            "rank": 5
-          },
-          {
-            "command": "filebrowser:toggle-navigate-to-current-directory",
-            "rank": 5
-          },
-          {
-            "type": "separator",
-            "rank": 5
           }
         ]
       }
@@ -104,7 +83,7 @@
       },
       {
         "command": "filebrowser:shutdown",
-        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "selector": ".jp-DirListing-item[data-isdir=\"false\"].jp-mod-running",
         "rank": 11
       },
       {
@@ -123,14 +102,19 @@
         "rank": 14
       },
       {
-        "command": "filebrowser:toggle-file-checkboxes",
+        "command": "filebrowser:toggle-file-size",
         "selector": ".jp-DirListing-header",
         "rank": 15
       },
       {
+        "command": "filebrowser:toggle-file-checkboxes",
+        "selector": ".jp-DirListing-header",
+        "rank": 16
+      },
+      {
         "command": "filebrowser:share-main",
         "selector": ".jp-DirListing-item[data-isdir]",
-        "rank": 16
+        "rank": 17
       },
       {
         "type": "separator",
@@ -152,11 +136,6 @@
   "title": "File Browser",
   "description": "File Browser settings.",
   "jupyter.lab.shortcuts": [
-    {
-      "command": "filebrowser:toggle-main",
-      "keys": ["Accel Shift F"],
-      "selector": "body"
-    },
     {
       "command": "filebrowser:go-up",
       "keys": ["Backspace"],
@@ -217,6 +196,12 @@
       "title": "Show last modified column",
       "description": "Whether to show the last modified column",
       "default": true
+    },
+    "showFileSizeColumn": {
+      "type": "boolean",
+      "title": "Show file size column",
+      "description": "Whether to show the file size column",
+      "default": false
     },
     "showHiddenFiles": {
       "type": "boolean",

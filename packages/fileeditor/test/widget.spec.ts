@@ -3,7 +3,8 @@
 
 import {
   CodeMirrorEditorFactory,
-  CodeMirrorMimeTypeService
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
 } from '@jupyterlab/codemirror';
 import {
   Context,
@@ -13,8 +14,8 @@ import {
 } from '@jupyterlab/docregistry';
 import { FileEditor, FileEditorFactory } from '@jupyterlab/fileeditor';
 import { ServiceManager } from '@jupyterlab/services';
-import { framePromise } from '@jupyterlab/testutils';
-import * as Mock from '@jupyterlab/testutils/lib/mock';
+import { framePromise } from '@jupyterlab/testing';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
@@ -49,12 +50,21 @@ class LogFileEditor extends FileEditor {
 describe('fileeditorcodewrapper', () => {
   const factoryService = new CodeMirrorEditorFactory();
   const modelFactory = new TextModelFactory();
-  const mimeTypeService = new CodeMirrorMimeTypeService();
+  const languages = (() => {
+    const registry = new EditorLanguageRegistry();
+    EditorLanguageRegistry.getDefaultLanguages()
+      .filter(language => ['Julia', 'Python'].includes(language.name))
+      .forEach(language => {
+        registry.addLanguage(language);
+      });
+    return registry;
+  })();
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
   let context: Context<DocumentRegistry.ICodeModel>;
   let manager: ServiceManager.IManager;
 
   beforeAll(() => {
-    manager = new Mock.ServiceManagerMock();
+    manager = new ServiceManagerMock();
     return manager.ready;
   });
 
@@ -84,7 +94,7 @@ describe('fileeditorcodewrapper', () => {
         await context.initialize(true);
         await context.ready;
         widget.context.model.fromString('foo');
-        expect(widget.editor.model.value.text).toBe('foo');
+        expect(widget.editor.model.sharedModel.getSource()).toBe('foo');
       });
 
       it('should set the mime type for the path', () => {
@@ -157,6 +167,13 @@ describe('fileeditorcodewrapper', () => {
         expect(widget.methods).toContain('onActivateRequest');
         await framePromise();
         expect(widget.editor.hasFocus()).toBe(true);
+      });
+    });
+
+    describe('#ready', () => {
+      it('should resolve after initialization', async () => {
+        await context.initialize(true);
+        return expect(widget.ready).resolves.toBe(undefined);
       });
     });
   });

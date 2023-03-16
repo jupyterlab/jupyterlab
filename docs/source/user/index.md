@@ -4,6 +4,7 @@ In-depth guides, tutorials, and how-tos for using JupyterLab.
 
 ```{toctree}
 :maxdepth: 2
+announcements
 interface
 urls
 files
@@ -22,6 +23,7 @@ jupyterhub
 export
 language
 rtc
+lsp
 interface_customization
 directories
 ```

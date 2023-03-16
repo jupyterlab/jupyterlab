@@ -20,7 +20,7 @@ export class StatusBarHelper {
       const statusBar = document.querySelector(
         '#jp-main-statusbar'
       ) as HTMLElement;
-      return window.galataip.isElementVisible(statusBar);
+      return window.galata.isElementVisible(statusBar);
     });
   }
 

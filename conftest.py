@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
 import pytest
 
 pytest_plugins = [
-    "jupyter_server.pytest_plugin",
+    "pytest_jupyter.jupyter_server",
     "jupyterlab_server.pytest_plugin",
     "jupyterlab.pytest_plugin",
 ]

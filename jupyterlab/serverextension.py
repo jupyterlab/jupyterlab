@@ -1,3 +1,6 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 from jupyter_server.utils import url_path_join
 from tornado.web import RedirectHandler
 

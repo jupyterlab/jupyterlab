@@ -5,6 +5,11 @@
 
 from ._version import __version__  # noqa
 from .serverextension import load_jupyter_server_extension  # noqa
+from .handlers.announcements import (
+    CheckForUpdate,  # noqa
+    CheckForUpdateABC,  # noqa
+    NeverCheckForUpdate,  # noqa
+)
 
 
 def _jupyter_server_extension_paths():

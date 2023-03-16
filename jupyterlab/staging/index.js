@@ -1,8 +1,8 @@
 // This file is auto-generated from the corresponding file in /dev_mode
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
@@ -81,7 +81,8 @@ export async function main() {
       queuedFederated.push(data.name);
       federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
-    if (data.style) {
+
+    if (data.style && !PageConfig.Extension.isDisabled(data.name)) {
       federatedStylePromises.push(createModule(data.name, data.style));
     }
   });
@@ -195,8 +196,6 @@ export async function main() {
   var devMode = (PageConfig.getOption('devMode') || '').toLowerCase() === 'true';
 
   if (exposeAppInBrowser || devMode) {
-    // This is deprecated in favor of more generic window.jupyterapp
-    window.jupyterlab = lab;
     window.jupyterapp = lab;
   }
 

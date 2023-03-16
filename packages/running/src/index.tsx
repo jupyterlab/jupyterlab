@@ -8,16 +8,23 @@
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
+  caretDownIcon,
+  caretRightIcon,
   closeIcon,
   LabIcon,
+  PanelWithToolbar,
   ReactWidget,
   refreshIcon,
+  SidePanel,
+  ToolbarButton,
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { ISignal } from '@lumino/signaling';
+import { Message } from '@lumino/messaging';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 /**
@@ -26,19 +33,9 @@ import * as React from 'react';
 const RUNNING_CLASS = 'jp-RunningSessions';
 
 /**
- * The class name added to a running widget header.
- */
-const HEADER_CLASS = 'jp-RunningSessions-header';
-
-/**
  * The class name added to the running terminal sessions section.
  */
 const SECTION_CLASS = 'jp-RunningSessions-section';
-
-/**
- * The class name added to the running sessions section header.
- */
-const SECTION_HEADER_CLASS = 'jp-RunningSessions-sectionHeader';
 
 /**
  * The class name added to a section container.
@@ -93,6 +90,12 @@ export interface IRunningSessionManagers {
    *
    */
   add(manager: IRunningSessions.IManager): IDisposable;
+
+  /**
+   * Signal emitted when a new manager is added.
+   */
+  added: ISignal<IRunningSessionManagers, IRunningSessions.IManager>;
+
   /**
    * Return an array of managers.
    */
@@ -101,6 +104,13 @@ export interface IRunningSessionManagers {
 
 export class RunningSessionManagers implements IRunningSessionManagers {
   /**
+   * Signal emitted when a new manager is added.
+   */
+  get added(): ISignal<this, IRunningSessions.IManager> {
+    return this._added;
+  }
+
+  /**
    * Add a running item manager.
    *
    * @param manager - The running item manager.
@@ -108,6 +118,7 @@ export class RunningSessionManagers implements IRunningSessionManagers {
    */
   add(manager: IRunningSessions.IManager): IDisposable {
     this._managers.push(manager);
+    this._added.emit(manager);
     return new DisposableDelegate(() => {
       const i = this._managers.indexOf(manager);
 
@@ -124,45 +135,101 @@ export class RunningSessionManagers implements IRunningSessionManagers {
     return this._managers;
   }
 
+  private _added = new Signal<this, IRunningSessions.IManager>(this);
   private _managers: IRunningSessions.IManager[] = [];
 }
 
 function Item(props: {
+  child?: boolean;
   runningItem: IRunningSessions.IRunningItem;
   shutdownLabel?: string;
   shutdownItemIcon?: LabIcon;
   translator?: ITranslator;
 }) {
   const { runningItem } = props;
-  const icon = runningItem.icon();
+  const classList = [ITEM_CLASS];
   const detail = runningItem.detail?.();
+  const icon = runningItem.icon();
+  const title = runningItem.labelTitle ? runningItem.labelTitle() : '';
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
-  const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
+
+  // Handle shutdown requests.
+  let stopPropagation = false;
   const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
+  const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
+  const shutdown = () => {
+    stopPropagation = true;
+    runningItem.shutdown?.();
+  };
+
+  // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
+  const [collapsed, collapse] = React.useState(false);
+  const collapsible = !!runningItem.children?.length;
+  const onClick = collapsible
+    ? () => !stopPropagation && collapse(!collapsed)
+    : undefined;
+
+  if (runningItem.className) {
+    classList.push(runningItem.className);
+  }
+  if (props.child) {
+    classList.push('jp-mod-running-child');
+  }
 
   return (
-    <li className={ITEM_CLASS}>
-      <icon.react tag="span" stylesheet="runningItem" />
-      <span
-        className={ITEM_LABEL_CLASS}
-        title={runningItem.labelTitle ? runningItem.labelTitle() : ''}
-        onClick={() => runningItem.open()}
-      >
-        {runningItem.label()}
-      </span>
-      {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
-      <ToolbarButtonComponent
-        className={SHUTDOWN_BUTTON_CLASS}
-        icon={shutdownItemIcon}
-        onClick={() => runningItem.shutdown()}
-        tooltip={shutdownLabel}
-      />
-    </li>
+    <>
+      <li>
+        <div
+          className={classList.join(' ')}
+          onClick={onClick}
+          data-context={runningItem.context || ''}
+        >
+          {collapsible &&
+            (collapsed ? (
+              <caretRightIcon.react tag="span" stylesheet="runningItem" />
+            ) : (
+              <caretDownIcon.react tag="span" stylesheet="runningItem" />
+            ))}
+          {typeof icon === 'string' ? (
+            icon ? (
+              <img src={icon} />
+            ) : undefined
+          ) : (
+            <icon.react tag="span" stylesheet="runningItem" />
+          )}
+          <span
+            className={ITEM_LABEL_CLASS}
+            title={title}
+            onClick={runningItem.open && (() => runningItem.open!())}
+          >
+            {runningItem.label()}
+          </span>
+          {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
+          {runningItem.shutdown && (
+            <ToolbarButtonComponent
+              className={SHUTDOWN_BUTTON_CLASS}
+              icon={shutdownItemIcon}
+              onClick={shutdown}
+              tooltip={shutdownLabel}
+            />
+          )}
+        </div>
+        {collapsible && !collapsed && (
+          <List
+            child={true}
+            runningItems={runningItem.children!}
+            shutdownItemIcon={shutdownItemIcon}
+            translator={translator}
+          />
+        )}
+      </li>
+    </>
   );
 }
 
-function ListView(props: {
+function List(props: {
+  child?: boolean;
   runningItems: IRunningSessions.IRunningItem[];
   shutdownLabel?: string;
   shutdownAllLabel?: string;
@@ -173,6 +240,7 @@ function ListView(props: {
     <ul className={LIST_CLASS}>
       {props.runningItems.map((item, i) => (
         <Item
+          child={props.child}
           key={i}
           runningItem={item}
           shutdownLabel={props.shutdownLabel}
@@ -184,25 +252,89 @@ function ListView(props: {
   );
 }
 
-function List(props: {
-  manager: IRunningSessions.IManager;
-  shutdownLabel?: string;
-  shutdownAllLabel?: string;
-  translator?: ITranslator;
-}) {
-  return (
-    <UseSignal signal={props.manager.runningChanged}>
-      {() => (
-        <ListView
-          runningItems={props.manager.running()}
-          shutdownLabel={props.shutdownLabel}
-          shutdownAllLabel={props.shutdownAllLabel}
-          shutdownItemIcon={props.manager.shutdownItemIcon}
-          translator={props.translator}
-        />
-      )}
-    </UseSignal>
-  );
+class ListWidget extends ReactWidget {
+  constructor(
+    private _options: {
+      manager: IRunningSessions.IManager;
+      runningItems: IRunningSessions.IRunningItem[];
+      shutdownAllLabel: string;
+      translator?: ITranslator;
+    }
+  ) {
+    super();
+    _options.manager.runningChanged.connect(this._emitUpdate, this);
+  }
+
+  dispose() {
+    this._options.manager.runningChanged.disconnect(this._emitUpdate, this);
+    super.dispose();
+  }
+
+  protected onBeforeShow(msg: Message): void {
+    super.onBeforeShow(msg);
+    this._update.emit();
+  }
+
+  render(): JSX.Element {
+    const options = this._options;
+    let cached = true;
+    return (
+      <UseSignal signal={this._update}>
+        {() => {
+          // Cache the running items for the intial load and request from
+          // the service every subsequent load.
+          if (cached) {
+            cached = false;
+          } else {
+            options.runningItems = options.manager.running();
+          }
+          return (
+            <div className={CONTAINER_CLASS}>
+              <List
+                runningItems={options.runningItems}
+                shutdownLabel={options.manager.shutdownLabel}
+                shutdownAllLabel={options.shutdownAllLabel}
+                shutdownItemIcon={options.manager.shutdownItemIcon}
+                translator={options.translator}
+              />
+            </div>
+          );
+        }}
+      </UseSignal>
+    );
+  }
+
+  /**
+   * Check if the widget or any of it's parents is hidden.
+   *
+   * Checking parents is necessary as lumino does not propagate visibility
+   * changes from parents down to children (although it does notify parents
+   * about changes to children visibility).
+   */
+  private _isAnyHidden() {
+    let isHidden = this.isHidden;
+    if (isHidden) {
+      return isHidden;
+    }
+    let parent: Widget | null = this.parent;
+    while (parent != null) {
+      if (parent.isHidden) {
+        isHidden = true;
+        break;
+      }
+      parent = parent.parent;
+    }
+    return isHidden;
+  }
+
+  private _emitUpdate() {
+    if (this._isAnyHidden()) {
+      return;
+    }
+    this._update.emit();
+  }
+
+  private _update: Signal<ListWidget, void> = new Signal(this);
 }
 
 /**
@@ -211,123 +343,136 @@ function List(props: {
  *
  * It is specialized for each based on its props.
  */
-function Section(props: {
-  manager: IRunningSessions.IManager;
-  translator?: ITranslator;
-}) {
-  const translator = props.translator || nullTranslator;
-  const trans = translator.load('jupyterlab');
-  const shutdownAllLabel =
-    props.manager.shutdownAllLabel || trans.__('Shut Down All');
-  const shutdownTitle = `${shutdownAllLabel}?`;
-  const shutdownAllConfirmationText =
-    props.manager.shutdownAllConfirmationText ||
-    `${shutdownAllLabel} ${props.manager.name}`;
-  function onShutdown() {
-    void showDialog({
-      title: shutdownTitle,
-      body: shutdownAllConfirmationText,
-      buttons: [
-        Dialog.cancelButton({ label: trans.__('Cancel') }),
-        Dialog.warnButton({ label: shutdownAllLabel })
-      ]
-    }).then(result => {
-      if (result.button.accept) {
-        props.manager.shutdownAll();
-      }
+class Section extends PanelWithToolbar {
+  constructor(options: {
+    manager: IRunningSessions.IManager;
+    translator?: ITranslator;
+  }) {
+    super();
+    this._manager = options.manager;
+    const translator = options.translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    const shutdownAllLabel =
+      options.manager.shutdownAllLabel || trans.__('Shut Down All');
+    const shutdownTitle = `${shutdownAllLabel}?`;
+    const shutdownAllConfirmationText =
+      options.manager.shutdownAllConfirmationText ||
+      `${shutdownAllLabel} ${options.manager.name}`;
+
+    this.addClass(SECTION_CLASS);
+    this.title.label = options.manager.name;
+
+    function onShutdown() {
+      void showDialog({
+        title: shutdownTitle,
+        body: shutdownAllConfirmationText,
+        buttons: [
+          Dialog.cancelButton(),
+          Dialog.warnButton({ label: shutdownAllLabel })
+        ]
+      }).then(result => {
+        if (result.button.accept) {
+          options.manager.shutdownAll();
+        }
+      });
+    }
+
+    let runningItems = options.manager.running();
+    const enabled = runningItems.length > 0;
+    this._button = new ToolbarButton({
+      label: shutdownAllLabel,
+      className: `${SHUTDOWN_ALL_BUTTON_CLASS} jp-mod-styled ${
+        !enabled && 'jp-mod-disabled'
+      }`,
+      enabled,
+      onClick: onShutdown
     });
+    this._manager.runningChanged.connect(this._updateButton, this);
+
+    this.toolbar.addItem('shutdown-all', this._button);
+
+    this.addWidget(
+      new ListWidget({ runningItems, shutdownAllLabel, ...options })
+    );
   }
 
-  return (
-    <div className={SECTION_CLASS}>
-      <>
-        <div className={`${SECTION_HEADER_CLASS} jp-stack-panel-header`}>
-          <h2>{props.manager.name}</h2>
-          <UseSignal signal={props.manager.runningChanged}>
-            {() => {
-              const disabled = props.manager.running().length === 0;
-              return (
-                <button
-                  className={`${SHUTDOWN_ALL_BUTTON_CLASS} jp-mod-styled ${
-                    disabled && 'jp-mod-disabled'
-                  }`}
-                  disabled={disabled}
-                  onClick={onShutdown}
-                >
-                  {shutdownAllLabel}
-                </button>
-              );
-            }}
-          </UseSignal>
-        </div>
+  /**
+   * Dispose the resources held by the widget
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._manager.runningChanged.disconnect(this._updateButton, this);
+    super.dispose();
+  }
 
-        <div className={CONTAINER_CLASS}>
-          <List
-            manager={props.manager}
-            shutdownLabel={props.manager.shutdownLabel}
-            shutdownAllLabel={shutdownAllLabel}
-            translator={props.translator}
-          />
-        </div>
-      </>
-    </div>
-  );
-}
+  private _updateButton(): void {
+    const button = this._button;
+    button.enabled = this._manager.running().length > 0;
+    if (button.enabled) {
+      button.node.querySelector('button')?.classList.remove('jp-mod-disabled');
+    } else {
+      button.node.querySelector('button')?.classList.add('jp-mod-disabled');
+    }
+  }
 
-function RunningSessionsComponent(props: {
-  managers: IRunningSessionManagers;
-  translator?: ITranslator;
-}) {
-  const translator = props.translator || nullTranslator;
-  const trans = translator.load('jupyterlab');
-  return (
-    <>
-      <div className={HEADER_CLASS}>
-        <ToolbarButtonComponent
-          tooltip={trans.__('Refresh List')}
-          icon={refreshIcon}
-          onClick={() =>
-            props.managers.items().forEach(manager => manager.refreshRunning())
-          }
-        />
-      </div>
-      {props.managers.items().map(manager => (
-        <Section
-          key={manager.name}
-          manager={manager}
-          translator={props.translator}
-        />
-      ))}
-    </>
-  );
+  private _button: ToolbarButton;
+  private _manager: IRunningSessions.IManager;
 }
 
 /**
  * A class that exposes the running terminal and kernel sessions.
  */
-export class RunningSessions extends ReactWidget {
+export class RunningSessions extends SidePanel {
   /**
    * Construct a new running widget.
    */
   constructor(managers: IRunningSessionManagers, translator?: ITranslator) {
     super();
     this.managers = managers;
-    this.translator = translator || nullTranslator;
+    this.translator = translator ?? nullTranslator;
+    const trans = this.translator.load('jupyterlab');
 
-    // this can't be in the react element, because then it would be too nested
     this.addClass(RUNNING_CLASS);
-  }
 
-  protected render(): JSX.Element {
-    return (
-      <RunningSessionsComponent
-        managers={this.managers}
-        translator={this.translator}
-      />
+    this.toolbar.addItem(
+      'refresh',
+      new ToolbarButton({
+        tooltip: trans.__('Refresh List'),
+        icon: refreshIcon,
+        onClick: () =>
+          managers.items().forEach(manager => manager.refreshRunning())
+      })
     );
+
+    managers.items().forEach(manager => this.addSection(managers, manager));
+
+    managers.added.connect(this.addSection, this);
   }
 
-  private managers: IRunningSessionManagers;
+  /**
+   * Dispose the resources held by the widget
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.managers.added.disconnect(this.addSection, this);
+    super.dispose();
+  }
+
+  /**
+   * Add a section for a new manager.
+   *
+   * @param managers Managers
+   * @param manager New manager
+   */
+  protected addSection(_: unknown, manager: IRunningSessions.IManager) {
+    this.addWidget(new Section({ manager, translator: this.translator }));
+  }
+
+  protected managers: IRunningSessionManagers;
   protected translator: ITranslator;
 }
 
@@ -339,23 +484,49 @@ export namespace IRunningSessions {
    * A manager of running items grouped under a single section.
    */
   export interface IManager {
-    // Name that is shown to the user in plural
+    /**
+     * Name that is shown to the user in plural.
+     */
     name: string;
-    // called when the shutdown all button is pressed
+
+    /**
+     * Called when the shutdown all button is pressed.
+     */
     shutdownAll(): void;
-    // list the running models.
+
+    /**
+     * List the running models.
+     */
     running(): IRunningItem[];
-    // Force a refresh of the running models.
+
+    /**
+     * Force a refresh of the running models.
+     */
     refreshRunning(): void;
-    // A signal that should be emitted when the item list has changed.
+
+    /**
+     * A signal that should be emitted when the item list has changed.
+     */
     runningChanged: ISignal<any, any>;
-    // A string used to describe the shutdown action.
+
+    /**
+     * A string used to describe the shutdown action.
+     */
     shutdownLabel?: string;
-    // A string used to describe the shutdown all action.
+
+    /**
+     * A string used to describe the shutdown all action.
+     */
     shutdownAllLabel?: string;
-    // A string used as the body text in the shutdown all confirmation dialog.
+
+    /**
+     * A string used as the body text in the shutdown all confirmation dialog.
+     */
     shutdownAllConfirmationText?: string;
-    // The icon to show for shutting down an individual item in this section.
+
+    /**
+     * The icon to show for shutting down an individual item in this section.
+     */
     shutdownItemIcon?: LabIcon;
   }
 
@@ -363,18 +534,52 @@ export namespace IRunningSessions {
    * A running item.
    */
   export interface IRunningItem {
-    // called when the running item is clicked
-    open: () => void;
-    // called when the shutdown button is pressed on a particular item
-    shutdown: () => void;
-    // LabIcon to use as the icon
-    icon: () => LabIcon;
-    // called to determine the label for each item
+    /**
+     * Optional child nodes that belong to a top-level running item.
+     */
+    children?: IRunningItem[];
+
+    /**
+     * Optional CSS class name to add to the running item.
+     */
+    className?: string;
+
+    /**
+     * Optional context hint to add to the `data-context` attribute of an item.
+     */
+    context?: string;
+
+    /**
+     * Called when the running item is clicked.
+     */
+    open?: () => void;
+
+    /**
+     * Called when the shutdown button is pressed on a particular item.
+     */
+    shutdown?: () => void;
+
+    /**
+     * The `LabIcon` to use as the icon for the running item or the string
+     * `src` URL.
+     */
+    icon: () => LabIcon | string;
+
+    /**
+     * Called to determine the label for each item.
+     */
     label: () => string;
-    // called to determine the `title` attribute for each item, which is revealed on hover
+
+    /**
+     * Called to determine the `title` attribute for each item, which is
+     * revealed on hover.
+     */
     labelTitle?: () => string;
-    // called to determine the `detail` attribute which is shown optionally
-    // in a column after the label
+
+    /**
+     * Called to determine the `detail` attribute, which is shown optionally in
+     * a column after the label.
+     */
     detail?: () => string;
   }
 }

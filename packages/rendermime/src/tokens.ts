@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ISanitizer } from '@jupyterlab/apputils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator } from '@jupyterlab/translation';
 import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
@@ -20,7 +19,7 @@ export interface IRenderMimeRegistry {
   /**
    * The sanitizer used by the rendermime instance.
    */
-  readonly sanitizer: ISanitizer;
+  readonly sanitizer: IRenderMime.ISanitizer;
 
   /**
    * The object used to resolve relative urls for the rendermime instance.

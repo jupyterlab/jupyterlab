@@ -141,7 +141,7 @@ export function validateMimeValue(
 /**
  * A type which describes the type of cell.
  */
-export type CellType = 'code' | 'markdown' | 'raw';
+export type CellType = 'code' | 'markdown' | 'raw' | string;
 
 /**
  * The Jupyter metadata namespace.

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 
 # Test a release wheel in a fresh conda environment with and without installed
 # extensions

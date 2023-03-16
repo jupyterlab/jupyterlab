@@ -195,15 +195,15 @@ export namespace FileUploadStatus {
           this._items[idx].progress = uploads.newValue.progress * 100;
         }
       } else if (uploads.name === 'finish') {
-        const idx = ArrayExt.findFirstIndex(
+        const finishedItem = ArrayExt.findFirstValue(
           this._items,
           val => val.path === uploads.oldValue.path
         );
 
-        if (idx !== -1) {
-          this._items[idx].complete = true;
+        if (finishedItem) {
+          finishedItem.complete = true;
           setTimeout(() => {
-            ArrayExt.removeAt(this._items, idx);
+            ArrayExt.removeFirstOf(this._items, finishedItem);
             this.stateChanged.emit(void 0);
           }, UPLOAD_COMPLETE_MESSAGE_MILLIS);
         }

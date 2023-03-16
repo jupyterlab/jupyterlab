@@ -30,497 +30,418 @@
   THE SOFTWARE.
 */
 
+import { ISearchMatch } from '@jupyterlab/documentsearch';
+import { CodeMirrorEditor } from './editor';
+import { StateEffect, StateEffectType, StateField } from '@codemirror/state';
+import { Decoration, DecorationSet, EditorView } from '@codemirror/view';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
+  GenericSearchProvider,
   IBaseSearchProvider,
-  ISearchMatch,
+  IFilters,
+  IReplaceOptions,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
-import { JSONExt } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import * as CodeMirror from 'codemirror';
-import { CodeMirrorEditor } from './editor';
-
-type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
+import { ISharedText, SourceChange } from '@jupyter/ydoc';
 
 /**
- * CodeMirror search provider for file editor
+ * Search provider for editors.
  */
-export class CodeMirrorSearchProvider implements IBaseSearchProvider {
+export abstract class EditorSearchProvider<
+  T extends CodeEditor.IModel = CodeEditor.IModel
+> implements IBaseSearchProvider
+{
+  /**
+   * Constructor
+   */
+  constructor() {
+    this.currentIndex = null;
+    this._stateChanged = new Signal<IBaseSearchProvider, void>(this);
+  }
+
+  /**
+   * CodeMirror search highlighter
+   */
+  protected get cmHandler(): CodeMirrorSearchHighlighter {
+    if (!this._cmHandler) {
+      this._cmHandler = new CodeMirrorSearchHighlighter(
+        this.editor as CodeMirrorEditor
+      );
+    }
+    return this._cmHandler;
+  }
+
+  /**
+   * Text editor
+   */
+  protected abstract get editor(): CodeEditor.IEditor | null;
+  /**
+   * Editor content model
+   */
+  protected abstract get model(): T;
+
+  /**
+   * Changed signal to be emitted when search matches change.
+   */
+  get stateChanged(): ISignal<IBaseSearchProvider, void> {
+    return this._stateChanged;
+  }
+
+  /**
+   * Current match index
+   */
+  get currentMatchIndex(): number | null {
+    return this.isActive ? this.currentIndex : null;
+  }
+
+  /**
+   * Whether the cell search is active.
+   *
+   * This is used when applying search only on selected cells.
+   */
+  get isActive(): boolean {
+    return this._isActive;
+  }
+
   /**
    * Whether the search provider is disposed or not.
    */
   get isDisposed(): boolean {
-    return this._disposed;
+    return this._isDisposed;
+  }
+
+  /**
+   * Number of matches in the cell.
+   */
+  get matchesCount(): number {
+    return this.isActive ? this.cmHandler.matches.length : 0;
+  }
+
+  /**
+   * Clear currently highlighted match
+   */
+  clearHighlight(): Promise<void> {
+    this.currentIndex = null;
+    this.cmHandler.clearHighlight();
+
+    return Promise.resolve();
   }
 
   /**
    * Dispose the search provider
    */
   dispose(): void {
-    if (this._disposed) {
+    if (this._isDisposed) {
       return;
     }
-    this._disposed = true;
-
+    this._isDisposed = true;
     Signal.clearData(this);
-  }
-
-  /**
-   * Initialize the search using a CodeMirrorEditor object.
-   *
-   * @param query the search regular expression
-   */
-  async startQuery(query: RegExp): Promise<void> {
-    if (!this.editor) {
-      return Promise.resolve();
+    if (this.isActive) {
+      this.endQuery().catch(reason => {
+        console.error(`Failed to end search query on cells.`, reason);
+      });
     }
-    return this._startQuery(query);
   }
 
   /**
-   * Refresh the search highlight overlay
+   * Set `isActive` status.
+   *
+   * #### Notes
+   * It will start or end the search
+   *
+   * @param v New value
    */
-  refreshOverlay(): void {
-    this._refreshOverlay();
+  async setIsActive(v: boolean): Promise<void> {
+    if (this._isActive === v) {
+      return;
+    }
+    this._isActive = v;
+    if (this._isActive) {
+      if (this.query !== null) {
+        await this.startQuery(this.query, this.filters);
+      }
+    } else {
+      await this.endQuery();
+    }
   }
 
-  private async _startQuery(
-    query: RegExp,
-    refreshOverlay: boolean = true
+  /**
+   * Set whether search should be limitted to specified selection.
+   */
+  async setSearchSelection(selection: CodeEditor.IRange | null): Promise<void> {
+    if (this._inSelection === selection) {
+      return;
+    }
+    this._inSelection = selection;
+    await this.updateCodeMirror(this.model.sharedModel.getSource());
+    this._stateChanged.emit();
+  }
+
+  /**
+   * Initialize the search using the provided options. Should update the UI
+   * to highlight all matches and "select" the first match.
+   *
+   * @param query A RegExp to be use to perform the search
+   * @param filters Filter parameters to pass to provider
+   */
+  async startQuery(query: RegExp | null, filters?: IFilters): Promise<void> {
+    this.query = query;
+    this.filters = filters;
+
+    // Search input
+    const content = this.model.sharedModel.getSource();
+    await this.updateCodeMirror(content);
+    this.model.sharedModel.changed.connect(this.onSharedModelChanged, this);
+  }
+
+  /**
+   * Stop the search and clean any UI elements.
+   */
+  async endQuery(): Promise<void> {
+    await this.clearHighlight();
+    await this.cmHandler.endQuery();
+    this.currentIndex = null;
+  }
+
+  /**
+   * Highlight the next match.
+   *
+   * @returns The next match if there is one.
+   */
+  async highlightNext(
+    loop = true,
+    fromCursor = false
+  ): Promise<ISearchMatch | undefined> {
+    if (this.matchesCount === 0 || !this.isActive) {
+      this.currentIndex = null;
+    } else {
+      // This starts from the cursor position if `fromCursor` is true
+      let match = await this.cmHandler.highlightNext(fromCursor);
+      if (match) {
+        this.currentIndex = this.cmHandler.currentIndex;
+      } else {
+        // Note: the loop logic is only used in single-editor (e.g. file editor)
+        // provider sub-classes, notebook has it's own loop logic and ignores
+        // `currentIndex` as set here.
+        this.currentIndex = loop ? 0 : null;
+      }
+      return match;
+    }
+
+    return Promise.resolve(this.getCurrentMatch());
+  }
+
+  /**
+   * Highlight the previous match.
+   *
+   * @returns The previous match if there is one.
+   */
+  async highlightPrevious(
+    loop = true,
+    fromCursor = false
+  ): Promise<ISearchMatch | undefined> {
+    if (this.matchesCount === 0 || !this.isActive) {
+      this.currentIndex = null;
+    } else {
+      // This starts from the cursor position if `fromCursor` is true
+      let match = await this.cmHandler.highlightPrevious(fromCursor);
+      if (match) {
+        this.currentIndex = this.cmHandler.currentIndex;
+      } else {
+        this.currentIndex = loop ? this.matchesCount - 1 : null;
+      }
+      return match;
+    }
+
+    return Promise.resolve(this.getCurrentMatch());
+  }
+
+  /**
+   * Replace the currently selected match with the provided text.
+   *
+   * If no match is selected, it won't do anything.
+   *
+   * The caller of this method is expected to call `highlightNext` if after
+   * calling `replaceCurrentMatch()` attribute `this.currentIndex` is null.
+   * It is necesary to let the caller handle highlighting because this
+   * method is used in composition pattern (search engine of notebook cells)
+   * and highligthing on the composer (notebook) level needs to switch to next
+   * engine (cell) with matches.
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (!this.isActive) {
+      return Promise.resolve(false);
+    }
+
+    let occurred = false;
+
+    if (
+      this.currentIndex !== null &&
+      this.currentIndex < this.cmHandler.matches.length
+    ) {
+      const match = this.getCurrentMatch();
+      // If cursor there is no match selected, highlight the next match
+      if (!match) {
+        this.currentIndex = null;
+      } else {
+        this.cmHandler.matches.splice(this.currentIndex, 1);
+        this.currentIndex =
+          this.currentIndex < this.cmHandler.matches.length
+            ? Math.max(this.currentIndex - 1, 0)
+            : null;
+        const substitutedText = options?.regularExpression
+          ? match!.text.replace(this.query!, newText)
+          : newText;
+        const insertText = options?.preserveCase
+          ? GenericSearchProvider.preserveCase(match.text, substitutedText)
+          : substitutedText;
+        this.model.sharedModel.updateSource(
+          match!.position,
+          match!.position + match!.text.length,
+          insertText
+        );
+        occurred = true;
+      }
+    }
+
+    return Promise.resolve(occurred);
+  }
+
+  /**
+   * Replace all matches in the cell source with the provided text
+   *
+   * @param newText The replacement text.
+   * @returns Whether a replace occurred.
+   */
+  replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean> {
+    if (!this.isActive) {
+      return Promise.resolve(false);
+    }
+
+    let occurred = this.cmHandler.matches.length > 0;
+    let src = this.model.sharedModel.getSource();
+    let lastEnd = 0;
+    const finalSrc = this.cmHandler.matches.reduce((agg, match) => {
+      const start = match.position as number;
+      const end = start + match.text.length;
+      const substitutedText = options?.regularExpression
+        ? match!.text.replace(this.query!, newText)
+        : newText;
+      const insertText = options?.preserveCase
+        ? GenericSearchProvider.preserveCase(match.text, substitutedText)
+        : substitutedText;
+      const newStep = `${agg}${src.slice(lastEnd, start)}${insertText}`;
+      lastEnd = end;
+      return newStep;
+    }, '');
+
+    if (occurred) {
+      this.cmHandler.matches = [];
+      this.currentIndex = null;
+      this.model.sharedModel.setSource(`${finalSrc}${src.slice(lastEnd)}`);
+    }
+    return Promise.resolve(occurred);
+  }
+
+  /**
+   * Get the current match if it exists.
+   *
+   * @returns The current match
+   */
+  getCurrentMatch(): ISearchMatch | undefined {
+    if (this.currentIndex === null) {
+      return undefined;
+    } else {
+      let match: ISearchMatch | undefined = undefined;
+      if (this.currentIndex < this.cmHandler.matches.length) {
+        match = this.cmHandler.matches[this.currentIndex];
+      }
+      return match;
+    }
+  }
+
+  /**
+   * Callback on source change
+   *
+   * @param emitter Source of the change
+   * @param changes Source change
+   */
+  protected async onSharedModelChanged(
+    emitter: ISharedText,
+    changes: SourceChange
   ): Promise<void> {
-    // no point in removing overlay in the middle of the search
-    await this.endQuery(false);
-
-    this._query = query;
-
-    CodeMirror.on(this.editor.doc, 'change', this._onDocChanged.bind(this));
-    if (refreshOverlay) {
-      this._refreshOverlay();
+    if (changes.sourceChange) {
+      await this.updateCodeMirror(emitter.getSource());
+      this._stateChanged.emit();
     }
-    await this._setInitialMatches(query);
-
-    const matches = this._parseMatchesFromState();
-    if (matches.length === 0) {
-      return Promise.resolve();
-    }
-    const cursorMatch = this._findNext(false);
-    const match =
-      cursorMatch &&
-      this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._currentMatch = match;
-
-    return Promise.resolve();
   }
 
   /**
-   * Clears state of a search provider to prepare for startQuery to be called
-   * in order to start a new query or refresh an existing one.
-   *
-   * @param removeOverlay Whether to remove the search highlight overlay or not.
+   * Update matches
    */
-  async endQuery(removeOverlay = true): Promise<void> {
-    this._matchState = {};
-    this._currentMatch = null;
-
-    if (removeOverlay) {
-      this.editor.removeOverlay(this._overlay);
-    }
-    const from = this.editor.getCursor('from');
-    const to = this.editor.getCursor('to');
-    // Setting a reverse selection to allow search-as-you-type to maintain the
-    // current selected match.  See comment in _findNext for more details.
-    if (from !== to) {
-      this.editor.setSelection({
-        start: this._toEditorPos(to),
-        end: this._toEditorPos(from)
-      });
-    }
-    CodeMirror.off(this.editor.doc, 'change', this._onDocChanged.bind(this));
-  }
-
-  /**
-   * Clear currently highlighted match.
-   */
-  clearHighlight(): Promise<void> {
-    this._currentMatch = null;
-    const cursor = this.editor.getCursorPosition();
-    // Reset cursor position to remove any selection
-    this.editor.setCursorPosition(cursor);
-
-    return Promise.resolve();
-  }
-
-  /**
-   * Move the current match indicator to the next match.
-   *
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves once the action has completed.
-   */
-  async highlightNext(loop?: boolean): Promise<ISearchMatch | undefined> {
-    const cursorMatch = this._findNext(false);
-    if (!cursorMatch) {
-      return;
-    }
-    const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._currentMatch = match;
-    return match;
-  }
-
-  /**
-   * Move the current match indicator to the previous match.
-   *
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves once the action has completed.
-   */
-  async highlightPrevious(loop?: boolean): Promise<ISearchMatch | undefined> {
-    const cursorMatch = this._findNext(true);
-    if (!cursorMatch) {
-      return;
-    }
-    const match = this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
-    this._currentMatch = match;
-    return match;
-  }
-
-  /**
-   * Replace the currently selected match with the provided text
-   *
-   * @param newText The replacement text
-   * @param loop Whether to loop within the matches list.
-   *
-   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
-   */
-  async replaceCurrentMatch(newText: string, loop?: boolean): Promise<boolean> {
-    // If the current selection exactly matches the current match,
-    // replace it.  Otherwise, just select the next match after the cursor.
-    let replaceOccurred = false;
-    if (this._currentMatchIsSelected()) {
-      const cursor = this.editor.getSearchCursor(
-        this._query,
-        this.editor.getCursor('from'),
-        !this._query.ignoreCase
-      );
-      if (!cursor.findNext()) {
-        return replaceOccurred;
-      }
-      replaceOccurred = true;
-      cursor.replace(newText);
-    }
-    await this.highlightNext();
-    return replaceOccurred;
-  }
-
-  /**
-   * Replace all matches in the notebook with the provided text
-   *
-   * @param newText The replacement text
-   *
-   * @returns A promise that resolves with a boolean indicating whether a replace occurred.
-   */
-  async replaceAllMatches(newText: string): Promise<boolean> {
-    let replaceOccurred = false;
-    return new Promise((resolve, _) => {
-      this.editor.operation(() => {
-        const cursor = this.editor.getSearchCursor(
-          this._query,
-          undefined,
-          !this._query.ignoreCase
+  protected async updateCodeMirror(content: string) {
+    if (this.query !== null && this.isActive) {
+      const allMatches = await TextSearchEngine.search(this.query, content);
+      if (this._inSelection) {
+        const editor = this.editor!;
+        const start = editor.getOffsetAt(this._inSelection.start);
+        const end = editor.getOffsetAt(this._inSelection.end);
+        this.cmHandler.matches = allMatches.filter(
+          match => match.position >= start && match.position <= end
         );
-        while (cursor.findNext()) {
-          replaceOccurred = true;
-          cursor.replace(newText);
-        }
-        this._matchState = {};
-        this._currentMatch = null;
-        resolve(replaceOccurred);
-      });
-    });
-  }
-
-  /**
-   * The list of matches
-   */
-  get matches(): ISearchMatch[] {
-    return this._parseMatchesFromState();
-  }
-
-  /**
-   * The number of matches.
-   */
-  get matchesCount(): number | null {
-    let size = 0;
-    for (const line in this._matchState) {
-      size += Object.keys(this._matchState[line]).length;
-    }
-    return size;
-  }
-
-  /**
-   * The current match
-   */
-  get currentMatch(): ISearchMatch | null {
-    return this._currentMatch;
-  }
-
-  /**
-   * Signal indicating that something in the search has changed, so the UI should update
-   */
-  get stateChanged(): ISignal<this, void> {
-    return this._changed;
-  }
-
-  /**
-   * The current index of the selected match.
-   */
-  get currentMatchIndex(): number | null {
-    if (!this._currentMatch) {
-      return null;
-    }
-
-    // TODO make it more efficient
-    return this.matches.indexOf(this._currentMatch);
-  }
-
-  /**
-   * Set to true if the widget under search is read-only, false
-   * if it is editable.  Will be used to determine whether to show
-   * the replace option.
-   */
-  readonly isReadOnly = false;
-
-  private _onDocChanged(_: any, changeObj: CodeMirror.EditorChange): void {
-    // If we get newlines added/removed, the line numbers across the
-    // match state are all shifted, so here we need to recalculate it
-    if (changeObj.text.length > 1 || (changeObj.removed?.length ?? 0) > 1) {
-      this._setInitialMatches(this._query)
-        .then(() => {
-          this._changed.emit(undefined);
-        })
-        .catch(reason => {
-          console.error(
-            `Fail to reapply search on CodeMirror document change:\n${reason}`
-          );
-        });
-    }
-  }
-
-  private _refreshOverlay() {
-    this.editor.operation(() => {
-      // clear search first
-      this.editor.removeOverlay(this._overlay);
-      this._overlay = this._getSearchOverlay();
-      this.editor.addOverlay(this._overlay);
-      this._changed.emit(undefined);
-    });
-  }
-
-  /**
-   * Do a full search on the entire document.
-   *
-   * This manually constructs the initial match state across the whole
-   * document. This must be done manually because the codemirror overlay
-   * is lazy-loaded, so it will only tokenize lines that are in or near
-   * the viewport.  This is sufficient for efficiently maintaining the
-   * state when changes are made to the document, as changes occur in or
-   * near the viewport, but to scan the whole document, a manual search
-   * across the entire content is required.
-   *
-   * @param query The search term
-   */
-  private async _setInitialMatches(query: RegExp) {
-    this._matchState = {};
-
-    const content = this.editor.doc.getValue();
-    const matches = await TextSearchEngine.search(query, content);
-
-    matches.forEach(match => {
-      const { line, ch } = this.editor.doc.posFromIndex(match.position);
-      if (!this._matchState[line]) {
-        this._matchState[line] = {};
-      }
-      this._matchState[line][ch] = match;
-    });
-  }
-
-  private _getSearchOverlay() {
-    return {
-      /**
-       * Token function is called when a line needs to be processed -
-       * when the overlay is initially created, it's called on all lines;
-       * when a line is modified and needs to be re-evaluated, it's called
-       * on just that line.
-       *
-       * This implementation of the token function both constructs/maintains
-       * the overlay and keeps track of the match state as the document is
-       * updated while a search is active.
-       */
-      token: (stream: CodeMirror.StringStream) => {
-        const currentPos = stream.pos;
-        this._query.lastIndex = currentPos;
-        const lineText = stream.string;
-        const match = this._query.exec(lineText);
-        const line = (stream as any).lineOracle.line;
-
-        // If starting at position 0, the tokenization of this line has just started.
-        // Blow away everything on this line in the state so it can be updated.
+        // A special case to always have a current match when in line selection mode.
         if (
-          stream.start === currentPos &&
-          currentPos === 0 &&
-          !!this._matchState[line]
+          this.cmHandler.currentIndex === null &&
+          this.cmHandler.matches.length > 0
         ) {
-          this._matchState[line] = {};
+          await this.cmHandler.highlightNext(true, false);
         }
-        if (match && match.index === currentPos) {
-          // found match, add it to state
-          const matchLength = match[0].length;
-          const matchObj: ISearchMatch = {
-            text: lineText.slice(currentPos, currentPos + matchLength),
-            position: this.editor.doc.indexFromPos({
-              line,
-              ch: currentPos
-            })
-          };
-          if (!this._matchState[line]) {
-            this._matchState[line] = {};
-          }
-          this._matchState[line][currentPos] = matchObj;
-          // move the stream along and return searching style for the token
-          stream.pos += matchLength || 1;
-
-          // if the last thing on the line was a match, make sure we still
-          // emit the changed signal so the display can pick up the updates
-          if (stream.eol()) {
-            this._changed.emit(undefined);
-          }
-          return 'searching';
-        } else if (match) {
-          // there's a match in the stream, advance the stream to its position
-          stream.pos = match.index;
-        } else {
-          // no matches, consume the rest of the stream
-          this._changed.emit(undefined);
-          stream.skipToEnd();
-        }
+        this.currentIndex = this.cmHandler.currentIndex;
+      } else {
+        this.cmHandler.matches = allMatches;
       }
-    };
-  }
-
-  private _findNext(reverse: boolean): Private.ICodeMirrorMatch | null {
-    return this.editor.operation(() => {
-      const caseSensitive = this._query.ignoreCase;
-
-      // In order to support search-as-you-type, we needed a way to allow the first
-      // match to be selected when a search is started, but prevent the selected
-      // search to move for each new keypress.  To do this, when a search is ended,
-      // the cursor is reversed, putting the head at the 'from' position.  When a new
-      // search is started, the cursor we want is at the 'from' position, so that the same
-      // match is selected when the next key is entered (if it is still a match).
-      //
-      // When toggling through a search normally, the cursor is always set in the forward
-      // direction, so head is always at the 'to' position.  That way, if reverse = false,
-      // the search proceeds from the 'to' position during normal toggling.  If reverse = true,
-      // the search always proceeds from the 'anchor' position, which is at the 'from'.
-
-      const cursorToGet = reverse ? 'anchor' : 'head';
-      const lastPosition = this.editor.getCursor(cursorToGet);
-      let cursor: CodeMirror.SearchCursor = this.editor.getSearchCursor(
-        this._query,
-        lastPosition,
-        !caseSensitive
-      );
-      if (!cursor.find(reverse)) {
-        // if we do want to loop, try searching from the bottom/top
-        const startOrEnd = reverse
-          ? CodeMirror.Pos(this.editor.lastLine())
-          : CodeMirror.Pos(this.editor.firstLine(), 0);
-        cursor = this.editor.getSearchCursor(
-          this._query,
-          startOrEnd,
-          !caseSensitive
-        );
-        if (!cursor.find(reverse)) {
-          return null;
-        }
-      }
-      const fromPos: CodeMirror.Position = cursor.from();
-      const toPos: CodeMirror.Position = cursor.to();
-      const selRange: CodeEditor.IRange = {
-        start: {
-          line: fromPos.line,
-          column: fromPos.ch
-        },
-        end: {
-          line: toPos.line,
-          column: toPos.ch
-        }
-      };
-
-      this.editor.setSelection(selRange);
-      this.editor.scrollIntoView(
-        {
-          from: fromPos,
-          to: toPos
-        },
-        100
-      );
-      return {
-        from: fromPos,
-        to: toPos
-      };
-    });
-  }
-
-  private _parseMatchesFromState(): ISearchMatch[] {
-    // Flatten state map
-    const matches = new Array<ISearchMatch>();
-
-    for (const lineKey in this._matchState) {
-      const lineMatches = this._matchState[lineKey];
-      for (const posKey in lineMatches) {
-        matches.push(lineMatches[posKey]);
-      }
+    } else {
+      this.cmHandler.matches = [];
     }
-
-    return matches;
   }
 
-  private _toEditorPos(posIn: CodeMirror.Position): CodeEditor.IPosition {
-    return {
-      line: posIn.line,
-      column: posIn.ch
-    };
-  }
+  /**
+   * Current match index
+   */
+  protected currentIndex: number | null = null;
+  /**
+   * Current search filters
+   */
+  protected filters: IFilters | undefined;
+  /**
+   * Current search query
+   */
+  protected query: RegExp | null = null;
+  // Needs to be protected so subclass can emit the signal too.
+  protected _stateChanged: Signal<IBaseSearchProvider, void>;
+  private _isActive = true;
+  private _inSelection: CodeEditor.IRange | null = null;
+  private _isDisposed = false;
+  private _cmHandler: CodeMirrorSearchHighlighter | null = null;
+}
 
-  private _currentMatchIsSelected(): boolean {
-    if (!this._currentMatch) {
-      return false;
-    }
-    const currentSelection = this.editor.getSelection();
-    const currentSelectionLength =
-      currentSelection.end.column - currentSelection.start.column;
-    const selectionIsOneLine =
-      currentSelection.start.line === currentSelection.end.line;
-    return (
-      selectionIsOneLine &&
-      this._currentMatch.text.length === currentSelectionLength &&
-      this._currentMatch.position ===
-        this.editor.doc.indexFromPos({
-          line: currentSelection.start.line,
-          ch: currentSelection.start.column
-        })
-    );
-  }
-
-  protected editor: CodeMirrorEditor;
-  private _query: RegExp;
-  private _currentMatch: ISearchMatch | null;
-  private _matchState: MatchMap = {};
-  private _changed = new Signal<this, void>(this);
-  private _disposed = false;
-  private _overlay: any;
+/**
+ * Matches to be highlighted.
+ */
+interface IEffectValue {
+  matches: ISearchMatch[];
+  currentMatch: ISearchMatch | null;
 }
 
 /**
@@ -528,6 +449,13 @@ export class CodeMirrorSearchProvider implements IBaseSearchProvider {
  *
  * Highlighted texts (aka `matches`) must be provided through
  * the `matches` attributes.
+ *
+ * **NOTES:**
+ * - to retain the selection visibility `drawSelection` extension is needed.
+ * - highlighting starts from the cursor (if editor is focused, cursor moved,
+ *   or `fromCursor` argument is set to `true`), or from last "current" match
+ *   otherwise.
+ * - `currentIndex` is the (readonly) source of truth for the current match.
  */
 export class CodeMirrorSearchHighlighter {
   /**
@@ -535,10 +463,68 @@ export class CodeMirrorSearchHighlighter {
    *
    * @param editor The CodeMirror editor
    */
-  constructor(editor: CodeMirrorEditor) {
+  constructor(editor: CodeMirrorEditor | null) {
     this._cm = editor;
     this._matches = new Array<ISearchMatch>();
     this._currentIndex = null;
+
+    this._highlightEffect = StateEffect.define<IEffectValue>({
+      map: (value, mapping) => {
+        const transform = (v: ISearchMatch) => ({
+          text: v.text,
+          position: mapping.mapPos(v.position)
+        });
+        return {
+          matches: value.matches.map(transform),
+          currentMatch: value.currentMatch
+            ? transform(value.currentMatch)
+            : null
+        };
+      }
+    });
+    this._highlightMark = Decoration.mark({ class: 'cm-searching' });
+    this._currentMark = Decoration.mark({ class: 'jp-current-match' });
+
+    this._highlightField = StateField.define<DecorationSet>({
+      create: () => {
+        return Decoration.none;
+      },
+      update: (highlights, transaction) => {
+        highlights = highlights.map(transaction.changes);
+        for (let ef of transaction.effects) {
+          if (ef.is(this._highlightEffect)) {
+            const e = ef as StateEffect<IEffectValue>;
+            if (e.value.matches.length) {
+              highlights = highlights.update({
+                add: e.value.matches.map(m =>
+                  this._highlightMark.range(
+                    m.position,
+                    m.position + m.text.length
+                  )
+                ),
+                // filter out old marks
+                filter: () => false
+              });
+              highlights = highlights.update({
+                add: e.value.currentMatch
+                  ? [
+                      this._currentMark.range(
+                        e.value.currentMatch.position,
+                        e.value.currentMatch.position +
+                          e.value.currentMatch.text.length
+                      )
+                    ]
+                  : []
+              });
+            } else {
+              highlights = Decoration.none;
+            }
+          }
+        }
+        return highlights;
+      },
+      provide: f => EditorView.decorations.from(f)
+    });
   }
 
   /**
@@ -555,11 +541,17 @@ export class CodeMirrorSearchHighlighter {
     return this._matches;
   }
   set matches(v: ISearchMatch[]) {
-    if (!JSONExt.deepEqual(this._matches as any, v as any)) {
-      this._matches = v;
+    this._matches = v;
+    if (
+      this._currentIndex !== null &&
+      this._currentIndex > this._matches.length
+    ) {
+      this._currentIndex = this._matches.length > 0 ? 0 : null;
     }
-    this.refresh();
+    this._highlightCurrentMatch(true);
   }
+
+  private _current: ISearchMatch | null = null;
 
   /**
    * Clear all highlighted matches
@@ -570,30 +562,15 @@ export class CodeMirrorSearchHighlighter {
   }
 
   /**
-   * Refresh the highlight matches overlay
-   */
-  refresh(): void {
-    this._refreshOverlay();
-  }
-
-  /**
    * Clear the highlighted matches.
    */
   endQuery(): Promise<void> {
     this._currentIndex = null;
     this._matches = [];
 
-    this._cm.removeOverlay('jp-searching');
-    this._overlay = null;
-
-    const from = this._cm.getCursor('from');
-    const to = this._cm.getCursor('to');
-    // Setting a reverse selection to allow search-as-you-type to maintain the
-    // current selected match. See comment in _findNext for more details.
-    if (from !== to) {
-      this._cm.setSelection({
-        start: this._toEditorPos(to),
-        end: this._toEditorPos(from)
+    if (this._cm) {
+      this._cm.editor.dispatch({
+        effects: this._highlightEffect.of({ matches: [], currentMatch: null })
       });
     }
 
@@ -605,9 +582,12 @@ export class CodeMirrorSearchHighlighter {
    *
    * @returns The next match if available
    */
-  highlightNext(): Promise<ISearchMatch | undefined> {
-    this._currentIndex = this._findNext(false);
-    this._highlightCurrentMatch();
+  highlightNext(
+    fromCursor = false,
+    doNotModifySelection = false
+  ): Promise<ISearchMatch | undefined> {
+    this._currentIndex = this._findNext(false, fromCursor);
+    this._highlightCurrentMatch(doNotModifySelection);
     return Promise.resolve(
       this._currentIndex !== null
         ? this._matches[this._currentIndex]
@@ -620,8 +600,8 @@ export class CodeMirrorSearchHighlighter {
    *
    * @returns The previous match if available
    */
-  highlightPrevious(): Promise<ISearchMatch | undefined> {
-    this._currentIndex = this._findNext(true);
+  highlightPrevious(fromCursor = false): Promise<ISearchMatch | undefined> {
+    this._currentIndex = this._findNext(true, fromCursor);
     this._highlightCurrentMatch();
     return Promise.resolve(
       this._currentIndex !== null
@@ -630,130 +610,122 @@ export class CodeMirrorSearchHighlighter {
     );
   }
 
-  private _highlightCurrentMatch(): void {
-    // Highlight the current index
-    if (this._currentIndex !== null) {
-      const match = this.matches[this._currentIndex];
-      this._cm.operation(() => {
-        const start = this._cm.doc.posFromIndex(match.position);
-        const from = {
-          line: start.line,
-          column: start.ch
-        };
-        const to = {
-          // Matches is on the same line
-          line: start.line,
-          column: start.ch + match.text.length
-        };
-        // No need to scroll into view this is the default behavior
-        this._cm.setSelection({
-          start: from,
-          end: to
-        });
-      });
+  /**
+   * Set the editor
+   *
+   * @param editor Editor
+   */
+  setEditor(editor: CodeMirrorEditor): void {
+    if (this._cm) {
+      throw new Error('CodeMirrorEditor already set.');
     } else {
-      // Set cursor to remove any selection
-      this._cm.setCursorPosition({ line: 0, column: 0 });
+      this._cm = editor;
+      if (this._currentIndex !== null) {
+        this._highlightCurrentMatch();
+      }
+      this._refresh();
     }
   }
 
-  private _refreshOverlay() {
-    // clear search first
-    this._cm.removeOverlay('jp-searching');
-    this._overlay = this._getSearchOverlay();
-    this._cm.addOverlay(this._overlay);
+  private _selectCurrentMatch(): void {
+    const match = this._current;
+    if (!match) {
+      return;
+    }
+    if (!this._cm) {
+      return;
+    }
+    const selection = this._cm.editor.state.selection.main;
+    if (
+      selection.from === match.position &&
+      selection.to === match.position + match.text.length
+    ) {
+      return;
+    }
+    const cursor = {
+      anchor: match.position,
+      head: match.position + match.text.length
+    };
+    this._cm.editor.dispatch({
+      selection: cursor,
+      scrollIntoView: true
+    });
   }
 
-  private _getSearchOverlay() {
-    const token = (stream: CodeMirror.StringStream) => {
-      const position = this._cm.doc.indexFromPos({
-        line: stream.lineOracle.line,
-        ch: stream.pos
-      });
+  private _highlightCurrentMatch(doNotModifySelection = false): void {
+    if (!this._cm) {
+      // no-op
+      return;
+    }
 
-      let found =
-        this._matches.length > 0
-          ? Utils.findNext(
-              this._matches,
-              position,
-              0, // lastMatchIndex,
-              this._matches.length - 1
-            )
-          : null;
-
-      if (found !== null) {
-        // lastMatchIndex = found;
-        const match = this._matches[found];
-        if (match.position > position + stream.string.length) {
-          // next match not in this stream, consume the rest of the stream
-          stream.skipToEnd();
-          return null;
-        }
-
-        if (position === match.position) {
-          // move the stream along and return searching style for the token
-          stream.pos += match.text.length || 1;
-          return 'searching';
+    // Highlight the current index
+    if (this._currentIndex !== null) {
+      const match = this.matches[this._currentIndex];
+      this._current = match;
+      // Do not change selection/scroll if user is selecting
+      if (!doNotModifySelection) {
+        if (this._cm.hasFocus()) {
+          // If editor is focused we actually set the cursor on the match.
+          this._selectCurrentMatch();
         } else {
-          // Move to the next match
-          stream.pos += match.position - position;
+          // otherwise we just scroll to preserve the selection.
+          this._cm.editor.dispatch({
+            effects: EditorView.scrollIntoView(match.position)
+          });
         }
-      } else {
-        // no matches, consume the rest of the stream
-        stream.skipToEnd();
       }
-      return null;
-    };
-
-    return {
-      name: 'jp-searching',
-      /**
-       * Token function is called when a line needs to be processed -
-       * when the overlay is initially created, it's called on all lines;
-       * when a line is modified and needs to be re-evaluated, it's called
-       * on just that line.
-       *
-       * This implementation of the token function both constructs/maintains
-       * the overlay and keeps track of the match state as the document is
-       * updated while a search is active.
-       */
-      token: token.bind(this)
-    };
+    } else {
+      this._current = null;
+    }
+    this._refresh();
   }
 
-  private _findNext(reverse: boolean): number | null {
+  private _refresh(): void {
+    if (!this._cm) {
+      // no-op
+      return;
+    }
+    let effects: StateEffect<unknown>[] = [
+      this._highlightEffect.of({
+        matches: this.matches,
+        currentMatch: this._current
+      })
+    ];
+
+    if (!this._cm!.state.field(this._highlightField, false)) {
+      effects.push(StateEffect.appendConfig.of([this._highlightField]));
+      // set cursor on active match when editor gets focused
+      const focusExtension = EditorView.domEventHandlers({
+        focus: () => {
+          this._selectCurrentMatch();
+        }
+      });
+      effects.push(StateEffect.appendConfig.of([focusExtension]));
+    }
+    this._cm!.editor.dispatch({ effects });
+  }
+
+  private _findNext(reverse: boolean, fromCursor = false): number | null {
     if (this._matches.length === 0) {
       // No-op
       return null;
     }
-    // In order to support search-as-you-type, we needed a way to allow the first
-    // match to be selected when a search is started, but prevent the selected
-    // search to move for each new keypress.  To do this, when a search is ended,
-    // the cursor is reversed, putting the head at the 'from' position.  When a new
-    // search is started, the cursor we want is at the 'from' position, so that the same
-    // match is selected when the next key is entered (if it is still a match).
-    //
-    // When toggling through a search normally, the cursor is always set in the forward
-    // direction, so head is always at the 'to' position.  That way, if reverse = false,
-    // the search proceeds from the 'to' position during normal toggling.  If reverse = true,
-    // the search always proceeds from the 'anchor' position, which is at the 'from'.
 
-    const cursorToGet = reverse ? 'anchor' : 'head';
-    let lastPosition = this._cm.getCursor(cursorToGet);
-    if (
-      lastPosition.line === 0 &&
-      lastPosition.ch === 0 &&
-      reverse &&
-      this.currentIndex === null
-    ) {
-      // The default position is (0, 0) but we want to start from the end in that case
-      lastPosition = {
-        // Go to virtual next line so position got clamp to end
-        line: this._cm.lineCount,
-        ch: 0
-      };
+    let lastPosition = 0;
+    if (this._cm!.hasFocus() || fromCursor) {
+      const cursor = this._cm!.state.selection.main;
+      lastPosition = reverse ? cursor.anchor : cursor.head;
+    } else if (this._current) {
+      lastPosition = reverse
+        ? this._current.position
+        : this._current.position + this._current.text.length;
     }
-    const position = this._cm.doc.indexFromPos(lastPosition);
+    if (lastPosition === 0 && reverse && this.currentIndex === null) {
+      // The default position is (0, 0) but we want to start from the end in that case
+      lastPosition = this._cm!.doc.length;
+    }
+
+    const position = lastPosition;
 
     let found = Utils.findNext(
       this._matches,
@@ -778,24 +750,13 @@ export class CodeMirrorSearchHighlighter {
     return found;
   }
 
-  private _toEditorPos(posIn: CodeMirror.Position): CodeEditor.IPosition {
-    return {
-      line: posIn.line,
-      column: posIn.ch
-    };
-  }
-
-  private _cm: CodeMirrorEditor;
+  private _cm: CodeMirrorEditor | null;
   private _currentIndex: number | null;
   private _matches: ISearchMatch[];
-  private _overlay: any;
-}
-
-namespace Private {
-  export interface ICodeMirrorMatch {
-    from: CodeMirror.Position;
-    to: CodeMirror.Position;
-  }
+  private _highlightEffect: StateEffectType<IEffectValue>;
+  private _highlightMark: Decoration;
+  private _currentMark: Decoration;
+  private _highlightField: StateField<DecorationSet>;
 }
 
 /**

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { WidgetTracker } from '@jupyterlab/apputils';
-import { signalToPromise, testEmission } from '@jupyterlab/testutils';
+import { signalToPromise, testEmission } from '@jupyterlab/testing';
 import { Panel, Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
 

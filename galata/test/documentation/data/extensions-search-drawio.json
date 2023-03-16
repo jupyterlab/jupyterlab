@@ -1,0 +1,36 @@
+[
+  {
+    "name": "ipydrawio",
+    "description": "Draw.io Diagrams as Jupyter Widgets",
+    "homepage_url": "https://ipydrawio.rtfd.io",
+    "pkg_type": "prebuilt",
+    "companion": null,
+    "core": false,
+    "enabled": false,
+    "install": null,
+    "installed": null,
+    "installed_version": "",
+    "is_allowed": true,
+    "latest_version": "1.2.0",
+    "status": "ok",
+    "author": "ipydrawio Contributors",
+    "license": "Apache-2.0"
+  },
+  {
+    "name": "ipydrawio-export",
+    "description": "PDF export for Drawio diagrams in JupyterLab",
+    "homepage_url": "https://ipydrawio.rtfd.io",
+    "pkg_type": "prebuilt",
+    "companion": null,
+    "core": false,
+    "enabled": false,
+    "install": null,
+    "installed": null,
+    "installed_version": "",
+    "is_allowed": true,
+    "latest_version": "1.2.0",
+    "status": "ok",
+    "author": "ipydrawio Contributors",
+    "license": "Apache-2.0"
+  }
+]

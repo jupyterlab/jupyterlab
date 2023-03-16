@@ -6,13 +6,13 @@
 /* Private CSS variables */
 
 :root {
-  --jp-private-launcher-top-padding: 16px;
-  --jp-private-launcher-side-padding: 32px;
-  --jp-private-launcher-card-size: 100px;
-  --jp-private-launcher-card-label-height: 32px;
-  --jp-private-launcher-card-icon-height: 68px;
-  --jp-private-launcher-large-icon-size: 52px;
-  --jp-private-launcher-small-icon-size: 32px;
+  --jp-private-launcher-top-padding: 1.231em;
+  --jp-private-launcher-side-padding: 2.462em;
+  --jp-private-launcher-card-size: 7.692em;
+  --jp-private-launcher-card-label-height: 2.462em;
+  --jp-private-launcher-card-icon-height: 5.231em;
+  --jp-private-launcher-large-icon-size: 4em;
+  --jp-private-launcher-small-icon-size: 2.462em;
 }
 
 /* Launcher */
@@ -80,7 +80,7 @@
 .jp-Launcher-sectionTitle {
   font-size: var(--jp-ui-font-size2);
   font-weight: normal;
-  color: var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color0);
   box-sizing: border-box;
 }
 
@@ -113,6 +113,8 @@
 .jp-LauncherCard:focus:not(:active) {
   border: 1px solid var(--jp-brand-color1);
   box-shadow: var(--jp-elevation-z6);
+  outline: unset; /* if outline is not unset, then depending on which browser you use, the
+    border change is either hidden behind the outline or visually combined with it */
 }
 
 .jp-LauncherCard:hover {
@@ -142,7 +144,7 @@
 
 .jp-LauncherCard[data-category='Notebook'] .jp-LauncherCard-noKernelIcon {
   /* This color is copied from the notebook icon. */
-  color: #ef6c00;
+  color: var(--jp-jupyter-icon-color);
 }
 
 .jp-LauncherCard[data-category='Console'] .jp-LauncherCard-noKernelIcon {
@@ -159,13 +161,14 @@
 }
 
 .jp-LauncherCard-label p {
-  height: 28px;
+  height: 2.154em;
   word-break: break-word;
   text-align: center;
   color: var(--jp-ui-font-color1);
-  line-height: 14px;
-  font-size: 12px;
+  line-height: 1.077em;
+  font-size: calc(var(--jp-ui-font-size1) * 0.923);
   overflow: hidden;
+  margin: auto;
 }
 
 /* kernel icons */
@@ -175,4 +178,7 @@
   height: var(--jp-private-launcher-large-icon-size);
   margin: 0;
   padding: 0;
+
+  /* Preserve image aspect ratio */
+  object-fit: contain;
 }

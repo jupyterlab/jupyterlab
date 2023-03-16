@@ -1,12 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  flakyIt as it,
-  JupyterServer,
-  testEmission
-} from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
+import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import {
   KernelManager,
@@ -30,24 +25,20 @@ async function startNew(
   return session;
 }
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('session/manager', () => {
+  let server: JupyterServer;
+  jest.setTimeout(20000);
+  jest.retryTimes(3);
+
   beforeAll(async () => {
-    jest.setTimeout(20000);
-  });
+    server = new JupyterServer();
+    await server.start();
+  }, 30000);
 
   afterAll(async () => {
     const sessions = await SessionAPI.listRunning();
     await Promise.all(sessions.map(s => SessionAPI.shutdownSession(s.id)));
+    await server.shutdown();
   });
 
   describe('SessionManager', () => {
@@ -103,7 +94,7 @@ describe('session/manager', () => {
     describe('#running()', () => {
       it('should get the running sessions', async () => {
         await manager.refreshRunning();
-        const running = toArray(manager.running());
+        const running = Array.from(manager.running());
         expect(running.length).toBeGreaterThan(0);
       });
     });
@@ -113,7 +104,7 @@ describe('session/manager', () => {
         const promise = testEmission(manager.runningChanged, {
           test: (sender, args) => {
             expect(sender).toBe(manager);
-            expect(toArray(args).length).toBeGreaterThan(0);
+            expect(Array.from(args).length).toBeGreaterThan(0);
           }
         });
         await startNew(manager);
@@ -157,7 +148,7 @@ describe('session/manager', () => {
       // future is prematurely disposed.
       it('should refresh the list of session ids', async () => {
         await manager.refreshRunning();
-        const running = toArray(manager.running());
+        const running = Array.from(manager.running());
         expect(running.length).toBeGreaterThan(0);
       });
     });
@@ -284,14 +275,14 @@ describe('session/manager', () => {
     describe('#running()', () => {
       it('should get the running sessions', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toEqual(0);
+        expect(Array.from(manager.running()).length).toEqual(0);
       });
     });
 
     describe('#refreshRunning()', () => {
       it('should update the running kernels', async () => {
         await manager.refreshRunning();
-        expect(toArray(manager.running()).length).toEqual(0);
+        expect(Array.from(manager.running()).length).toEqual(0);
       });
     });
 

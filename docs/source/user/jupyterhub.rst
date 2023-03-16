@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _jupyterhub:
 
 JupyterLab on JupyterHub
@@ -19,7 +22,7 @@ Notebook (``/tree``) by default. To change the user's default user interface to
 JupyterLab, set the following configuration option in your
 :file:`jupyterhub_config.py` file::
 
-    c.Spawner.cmd=["jupyter-labhub"]
+    c.Spawner.default_url = "/lab"
 
 Example Configuration
 ---------------------

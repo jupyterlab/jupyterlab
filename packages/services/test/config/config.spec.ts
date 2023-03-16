@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expectFailure, JupyterServer } from '@jupyterlab/testutils';
+import { expectFailure, JupyterServer } from '@jupyterlab/testing';
 import { JSONObject, UUID } from '@lumino/coreutils';
 import { ConfigSection, ConfigWithDefaults } from '../../src';
 import { getRequestHandler, handleRequest, makeSettings } from '../utils';
@@ -22,7 +22,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();

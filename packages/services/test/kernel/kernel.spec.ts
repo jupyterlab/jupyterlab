@@ -1,12 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  flakyIt as it,
-  JupyterServer,
-  testEmission
-} from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
+import { JupyterServer, testEmission } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import { KernelAPI } from '../../src';
 import {
@@ -20,18 +15,20 @@ const PYTHON3_SPEC = JSON.parse(JSON.stringify(PYTHON_SPEC));
 PYTHON3_SPEC.name = 'Python3';
 PYTHON3_SPEC.display_name = 'python3';
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('kernel', () => {
   let tester: KernelTester;
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
+
+  beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
+  });
 
   afterEach(async () => {
     if (tester) {
@@ -44,7 +41,9 @@ describe('kernel', () => {
   describe('Kernel.listRunning()', () => {
     it('should yield a list of valid kernel ids', async () => {
       const kernel = await KernelAPI.startNew();
-      expect(toArray(await KernelAPI.listRunning()).length).toBeGreaterThan(0);
+      expect(Array.from(await KernelAPI.listRunning()).length).toBeGreaterThan(
+        0
+      );
       await KernelAPI.shutdownKernel(kernel.id);
     });
 
@@ -52,7 +51,7 @@ describe('kernel', () => {
       const serverSettings = makeSettings();
       const k = await KernelAPI.startNew({}, serverSettings);
       const response = await KernelAPI.listRunning(serverSettings);
-      expect(toArray(response).length).toBeGreaterThan(0);
+      expect(Array.from(response).length).toBeGreaterThan(0);
       await KernelAPI.shutdownKernel(k.id);
     });
 

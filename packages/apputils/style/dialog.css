@@ -94,7 +94,7 @@ button.jp-Dialog-close-button {
   padding-bottom: 12px;
   font-size: var(--jp-ui-font-size3);
   font-weight: 400;
-  color: var(--jp-ui-font-color0);
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-Dialog-body {
@@ -103,6 +103,7 @@ button.jp-Dialog-close-button {
   flex: 1 1 auto;
   font-size: var(--jp-ui-font-size1);
   background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
   overflow: auto;
 }
 
@@ -110,10 +111,24 @@ button.jp-Dialog-close-button {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
+  align-items: center;
   flex: 0 0 auto;
   margin-left: -12px;
   margin-right: -12px;
   padding: 12px;
+}
+
+.jp-Dialog-checkbox {
+  padding-right: 5px;
+}
+
+.jp-Dialog-checkbox > input:focus-visible {
+  outline: 1px solid var(--jp-input-active-border-color);
+  outline-offset: 1px;
+}
+
+.jp-Dialog-spacer {
+  flex: 1 1 auto;
 }
 
 .jp-Dialog-title {

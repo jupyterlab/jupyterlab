@@ -7,7 +7,7 @@ import * as fs from 'fs-extra';
 import * as lockfile from '@yarnpkg/lockfile';
 import * as path from 'path';
 import * as utils from './utils';
-import commander from 'commander';
+import { program as commander } from 'commander';
 
 /**
  * Flatten a nested array one level.

@@ -1,12 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeCellModel } from '@jupyterlab/cells';
 import * as nbformat from '@jupyterlab/nbformat';
-import { ModelDB } from '@jupyterlab/observables';
-import { acceptDialog } from '@jupyterlab/testutils';
-import { ArrayExt, toArray } from '@lumino/algorithm';
-import { NotebookModel } from '..';
+import { acceptDialog } from '@jupyterlab/testing';
+import { NotebookModel } from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 describe('@jupyterlab/notebook', () => {
@@ -19,18 +16,10 @@ describe('@jupyterlab/notebook', () => {
 
       it('should accept an optional language preference', () => {
         const model = new NotebookModel({ languagePreference: 'python' });
-        const lang = model.metadata.get(
+        const lang = model.getMetadata(
           'language_info'
         ) as nbformat.ILanguageInfoMetadata;
         expect(lang.name).toBe('python');
-      });
-
-      it('should accept an optional factory', () => {
-        const contentFactory = new NotebookModel.ContentFactory({});
-        const model = new NotebookModel({ contentFactory });
-        expect(model.contentFactory.codeCellContentFactory).toBe(
-          contentFactory.codeCellContentFactory
-        );
       });
     });
 
@@ -38,25 +27,25 @@ describe('@jupyterlab/notebook', () => {
       it('should be emitted when a metadata field changes', () => {
         const model = new NotebookModel();
         let called = false;
-        model.metadata.changed.connect((sender, args) => {
-          expect(sender).toBe(model.metadata);
+        model.metadataChanged.connect((sender, args) => {
+          expect(sender).toBe(model);
           expect(args.key).toBe('foo');
           expect(args.oldValue).toBeUndefined();
           expect(args.newValue).toBe(1);
           called = true;
         });
-        model.metadata.set('foo', 1);
+        model.setMetadata('foo', 1);
         expect(called).toBe(true);
       });
 
       it('should not be emitted when the value does not change', () => {
         const model = new NotebookModel();
         let called = false;
-        model.metadata.set('foo', 1);
-        model.metadata.changed.connect(() => {
+        model.setMetadata('foo', 1);
+        model.metadataChanged.connect(() => {
           called = true;
         });
-        model.metadata.set('foo', 1);
+        model.setMetadata('foo', 1);
         expect(called).toBe(false);
       });
     });
@@ -64,26 +53,23 @@ describe('@jupyterlab/notebook', () => {
     describe('#cells', () => {
       it('should be reset when loading from disk', () => {
         const model = new NotebookModel();
-        const cell = model.contentFactory.createCodeCell({});
-        model.cells.push(cell);
+        model.sharedModel.insertCell(0, { cell_type: 'code' });
         model.fromJSON(utils.DEFAULT_CONTENT);
-        expect(ArrayExt.firstIndexOf(toArray(model.cells), cell)).toBe(-1);
         expect(model.cells.length).toBe(7);
       });
 
       it('should allow undoing a change', () => {
-        const model = new NotebookModel({
-          disableDocumentWideUndoRedo: true
+        const model = new NotebookModel();
+        const cell = model.sharedModel.insertCell(0, {
+          cell_type: 'code',
+          source: 'foo'
         });
-        const cell = model.contentFactory.createCodeCell({});
-        cell.value.text = 'foo';
         const cellJSON = cell.toJSON();
-        model.cells.push(cell);
-        model.cells.clearUndo();
-        model.cells.remove(model.cells.length - 1);
-        model.cells.undo();
+        model.sharedModel.clearUndoHistory();
+        model.sharedModel.deleteCell(0);
+        model.sharedModel.undo();
         expect(model.cells.length).toBe(1);
-        expect(model.cells.get(0).value.text).toBe('foo');
+        expect(model.cells.get(0).sharedModel.getSource()).toBe('foo');
         // Previous model matches the restored model
         expect(model.cells.get(0).toJSON()).toEqual(cellJSON);
       });
@@ -91,45 +77,42 @@ describe('@jupyterlab/notebook', () => {
       describe('cells `changed` signal', () => {
         it('should emit a `contentChanged` signal upon cell addition', () => {
           const model = new NotebookModel();
-          const cell = model.contentFactory.createCodeCell({});
           let called = false;
           model.contentChanged.connect(() => {
             called = true;
           });
-          model.cells.push(cell);
+          model.sharedModel.insertCell(0, { cell_type: 'code' });
           expect(called).toBe(true);
         });
 
         it('should emit a `contentChanged` signal upon cell removal', () => {
           const model = new NotebookModel();
-          const cell = model.contentFactory.createCodeCell({});
-          model.cells.push(cell);
+          model.sharedModel.insertCell(0, { cell_type: 'code' });
           let called = false;
           model.contentChanged.connect(() => {
             called = true;
           });
-          model.cells.remove(0);
+          model.sharedModel.deleteCell(0);
           expect(called).toBe(true);
         });
 
         it('should emit a `contentChanged` signal upon cell move', () => {
           const model = new NotebookModel();
-          const cell0 = model.contentFactory.createCodeCell({});
-          const cell1 = model.contentFactory.createCodeCell({});
-          model.cells.push(cell0);
-          model.cells.push(cell1);
+          model.sharedModel.insertCells(0, [
+            { cell_type: 'code' },
+            { cell_type: 'code' }
+          ]);
           let called = false;
           model.contentChanged.connect(() => {
             called = true;
           });
-          model.cells.move(0, 1);
+          model.sharedModel.moveCell(0, 1);
           expect(called).toBe(true);
         });
 
         it('should set the dirty flag', () => {
           const model = new NotebookModel();
-          const cell = model.contentFactory.createCodeCell({});
-          model.cells.push(cell);
+          model.sharedModel.insertCell(0, { cell_type: 'code' });
           expect(model.dirty).toBe(true);
         });
       });
@@ -137,42 +120,30 @@ describe('@jupyterlab/notebook', () => {
       describe('cell `changed` signal', () => {
         it('should be called when a cell content changes', () => {
           const model = new NotebookModel();
-          const cell = model.contentFactory.createCodeCell({});
-          model.cells.push(cell);
+          const cell = model.sharedModel.insertCell(0, { cell_type: 'code' });
           expect(() => {
-            cell.value.text = 'foo';
+            cell.setSource('foo');
           }).not.toThrow();
         });
 
         it('should emit the `contentChanged` signal', () => {
           const model = new NotebookModel();
-          const cell = model.contentFactory.createCodeCell({});
-          model.cells.push(cell);
+          model.sharedModel.insertCell(0, { cell_type: 'code' });
           let called = false;
           model.contentChanged.connect(() => {
             called = true;
           });
-          model.metadata.set('foo', 'bar');
+          model.setMetadata('foo', 'bar');
           expect(called).toBe(true);
         });
 
         it('should set the dirty flag', () => {
           const model = new NotebookModel();
-          const cell = model.contentFactory.createCodeCell({});
-          model.cells.push(cell);
+          const cell = model.sharedModel.insertCell(0, { cell_type: 'code' });
           model.dirty = false;
-          cell.value.text = 'foo';
+          cell.setSource('foo');
           expect(model.dirty).toBe(true);
         });
-      });
-    });
-
-    describe('#contentFactory', () => {
-      it('should be the cell model factory used by the model', () => {
-        const model = new NotebookModel();
-        expect(model.contentFactory.codeCellContentFactory).toBe(
-          NotebookModel.defaultContentFactory.codeCellContentFactory
-        );
       });
     });
 
@@ -209,7 +180,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#defaultKernelName()', () => {
       it('should get the default kernel name of the document', () => {
         const model = new NotebookModel();
-        model.metadata.set('kernelspec', { name: 'python3' });
+        model.setMetadata('kernelspec', { name: 'python3' });
         expect(model.defaultKernelName).toBe('python3');
       });
 
@@ -222,7 +193,7 @@ describe('@jupyterlab/notebook', () => {
     describe('#defaultKernelLanguage', () => {
       it('should get the default kernel language of the document', () => {
         const model = new NotebookModel();
-        model.metadata.set('language_info', { name: 'python' });
+        model.setMetadata('language_info', { name: 'python' });
         expect(model.defaultKernelLanguage).toBe('python');
       });
 
@@ -302,6 +273,23 @@ describe('@jupyterlab/notebook', () => {
         expect(data.cells.length).toBe(7);
         expect(data.cells[0].id).toBe('cell_1');
       });
+      it('should only include `trusted` metadata in code cells', () => {
+        const model = new NotebookModel();
+        model.fromJSON(utils.DEFAULT_CONTENT_45);
+
+        [...model.cells].map(cell => (cell.trusted = true));
+        expect(model.cells.get(0).type).toBe('code');
+        expect(model.cells.get(1).type).toBe('markdown');
+        expect(model.cells.get(2).type).toBe('raw');
+
+        const data = model.toJSON();
+        // code cell trust should be preserved
+        expect(data.cells[0].metadata.trusted).toBe(true);
+        // markdown cell should have no trusted entry
+        expect(data.cells[1].metadata.trusted).toBeUndefined();
+        // raw cell should have no trusted entry
+        expect(data.cells[2].metadata.trusted).toBeUndefined();
+      });
     });
 
     describe('#fromJSON()', () => {
@@ -329,21 +317,28 @@ describe('@jupyterlab/notebook', () => {
         model.fromJSON(utils.DEFAULT_CONTENT);
         expect(model.dirty).toBe(true);
       });
+
+      it('should populate empty notebook with empty trusted code cell', () => {
+        const model = new NotebookModel();
+        model.fromJSON(utils.EMPTY_CONTENT);
+        const cell = model.cells.get(0);
+        expect(cell.trusted).toBe(true);
+      });
     });
 
     describe('#metadata', () => {
       it('should have default values', () => {
         const model = new NotebookModel();
         const metadata = model.metadata;
-        expect(metadata.has('kernelspec')).toBeTruthy();
-        expect(metadata.has('language_info')).toBeTruthy();
-        expect(metadata.size).toBe(2);
+        expect(metadata['kernelspec']).toBeTruthy();
+        expect(metadata['language_info']).toBeTruthy();
+        expect(Object.keys(metadata)).toHaveLength(2);
       });
 
       it('should set the dirty flag when changed', () => {
         const model = new NotebookModel();
         expect(model.dirty).toBe(false);
-        model.metadata.set('foo', 'bar');
+        model.setMetadata('foo', 'bar');
         expect(model.dirty).toBe(true);
       });
 
@@ -353,178 +348,29 @@ describe('@jupyterlab/notebook', () => {
         model.contentChanged.connect(() => {
           called = true;
         });
-        model.metadata.set('foo', 'bar');
+        model.setMetadata('foo', 'bar');
         expect(called).toBe(true);
       });
 
       it('should emit the `metadataChanged` signal', () => {
         const model = new NotebookModel();
         let called = false;
-        model.metadata.changed.connect((sender, args) => {
-          expect(sender).toBe(model.metadata);
+        model.metadataChanged.connect((sender, args) => {
+          expect(sender).toBe(model);
           expect(args.key).toBe('foo');
           expect(args.oldValue).toBeUndefined();
           expect(args.newValue).toBe('bar');
           called = true;
         });
-        model.metadata.set('foo', 'bar');
+        model.setMetadata('foo', 'bar');
         expect(called).toBe(true);
       });
     });
 
     describe('#initialize()', () => {
-      it('should add one code cell if the model is empty', () => {
+      it('should be an empty model', () => {
         const model = new NotebookModel();
         expect(model.cells.length).toBe(0);
-        model.initialize();
-        expect(model.cells.length).toBe(1);
-        expect(model.cells.get(0).type).toBe('code');
-      });
-
-      it('should clear undo state', () => {
-        const model = new NotebookModel({
-          disableDocumentWideUndoRedo: true
-        });
-        const cell = model.contentFactory.createCodeCell({});
-        cell.value.text = 'foo';
-        model.cells.push(cell);
-        expect(model.cells.canUndo).toBe(true);
-        model.initialize();
-        expect(model.cells.canUndo).toBe(false);
-      });
-    });
-
-    describe('.ContentFactory', () => {
-      let factory = new NotebookModel.ContentFactory({});
-
-      describe('#codeCellContentFactory', () => {
-        it('should be a code cell content factory', () => {
-          expect(factory.codeCellContentFactory).toBe(
-            CodeCellModel.defaultContentFactory
-          );
-        });
-
-        it('should be settable in the constructor', () => {
-          const codeCellContentFactory = new CodeCellModel.ContentFactory();
-          factory = new NotebookModel.ContentFactory({
-            codeCellContentFactory
-          });
-          expect(factory.codeCellContentFactory).toBe(codeCellContentFactory);
-        });
-      });
-
-      describe('#createCell()', () => {
-        it('should create a new code cell', () => {
-          const cell = factory.createCell('code', {});
-          expect(cell.type).toBe('code');
-        });
-
-        it('should create a new markdown cell', () => {
-          const cell = factory.createCell('markdown', {});
-          expect(cell.type).toBe('markdown');
-        });
-
-        it('should create a new raw cell', () => {
-          const cell = factory.createCell('raw', {});
-          expect(cell.type).toBe('raw');
-        });
-      });
-
-      describe('#createCodeCell()', () => {
-        it('should create a new code cell', () => {
-          const cell = factory.createCodeCell({});
-          expect(cell.type).toBe('code');
-        });
-
-        it('should clone an existing code cell', () => {
-          const orig = factory.createCodeCell({});
-          orig.value.text = 'foo';
-          const cell = orig.toJSON();
-          const newCell = factory.createCodeCell({ cell });
-          expect(newCell.value.text).toBe('foo');
-        });
-
-        it('should clone an existing raw cell', () => {
-          const orig = factory.createRawCell({});
-          orig.value.text = 'foo';
-          const cell = orig.toJSON();
-          const newCell = factory.createCodeCell({ cell });
-          expect(newCell.value.text).toBe('foo');
-        });
-      });
-
-      describe('#createRawCell()', () => {
-        it('should create a new raw cell', () => {
-          const cell = factory.createRawCell({});
-          expect(cell.type).toBe('raw');
-        });
-
-        it('should clone an existing raw cell', () => {
-          const orig = factory.createRawCell({});
-          orig.value.text = 'foo';
-          const cell = orig.toJSON();
-          const newCell = factory.createRawCell({ cell });
-          expect(newCell.value.text).toBe('foo');
-        });
-
-        it('should clone an existing code cell', () => {
-          const orig = factory.createCodeCell({});
-          orig.value.text = 'foo';
-          const cell = orig.toJSON();
-          const newCell = factory.createRawCell({ cell });
-          expect(newCell.value.text).toBe('foo');
-        });
-      });
-
-      describe('#createMarkdownCell()', () => {
-        it('should create a new markdown cell', () => {
-          const cell = factory.createMarkdownCell({});
-          expect(cell.type).toBe('markdown');
-        });
-
-        it('should clone an existing markdown cell', () => {
-          const orig = factory.createMarkdownCell({});
-          orig.value.text = 'foo';
-          const cell = orig.toJSON();
-          const newCell = factory.createMarkdownCell({ cell });
-          expect(newCell.value.text).toBe('foo');
-        });
-
-        it('should clone an existing raw cell', () => {
-          const orig = factory.createRawCell({});
-          orig.value.text = 'foo';
-          const cell = orig.toJSON();
-          const newCell = factory.createMarkdownCell({ cell });
-          expect(newCell.value.text).toBe('foo');
-        });
-      });
-
-      describe('#modelDB', () => {
-        it('should be undefined by default', () => {
-          expect(factory.modelDB).toBeUndefined();
-        });
-      });
-
-      describe('#clone()', () => {
-        it('should create a new content factory with a new IModelDB', () => {
-          const modelDB = new ModelDB();
-          const factory = new NotebookModel.ContentFactory({ modelDB });
-          expect(factory.modelDB).toBe(modelDB);
-          const newModelDB = new ModelDB();
-          const newFactory = factory.clone(newModelDB);
-          expect(newFactory.modelDB).toBe(newModelDB);
-          expect(newFactory.codeCellContentFactory).toBe(
-            factory.codeCellContentFactory
-          );
-        });
-      });
-    });
-
-    describe('.defaultContentFactory', () => {
-      it('should be a ContentFactory', () => {
-        expect(NotebookModel.defaultContentFactory).toBeInstanceOf(
-          NotebookModel.ContentFactory
-        );
       });
     });
   });

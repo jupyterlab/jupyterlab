@@ -1,4 +1,4 @@
-graft test-hyphens/labextension
+graft test_hyphens/labextension
 
 include index.js
 include package.json

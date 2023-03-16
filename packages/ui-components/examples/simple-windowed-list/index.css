@@ -1,0 +1,66 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+body {
+  background: white;
+  margin: 0;
+  padding: 0;
+}
+
+#main {
+  position: absolute;
+  top: 140px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.jp-WindowedPanel-outer {
+  border: solid 1px transparent;
+  height: 500px;
+  width: 250px;
+}
+
+.jp-WindowedPanel-outer:active,
+.jp-WindowedPanel-outer:focus {
+  border: solid 1px lightskyblue;
+}
+
+.content {
+  min-width: 50px;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  border: 1px solid #c0c0c0;
+  border-top: none;
+  background: white;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.content:active,
+.content:focus {
+  box-shadow: 1px 1px 2px lightseagreen;
+}
+
+.content > div {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #505050;
+  overflow: auto;
+}
+
+.content > div > textarea {
+  border: solid 1px transparent;
+  margin: 2px;
+  padding: 0;
+}
+
+.content > div > textarea:active,
+.content > div > textarea:focus {
+  border: solid 1px lightsalmon;
+}

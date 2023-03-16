@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import commander from 'commander';
+import { program as commander } from 'commander';
 import semver from 'semver';
 import path from 'path';
 import * as utils from './utils';
@@ -65,7 +65,7 @@ commander
     });
 
     // Look for dependencies of bumped packages
-    Array.from(toBump).forEach(val => {
+    toBump.forEach(val => {
       const deps = getDeps(val, lut);
       deps.forEach(dep => {
         maybeBump(dep);

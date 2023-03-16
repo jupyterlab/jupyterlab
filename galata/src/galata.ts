@@ -2,12 +2,18 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as nbformat from '@jupyterlab/nbformat';
-import { Session, TerminalAPI, Workspace } from '@jupyterlab/services';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { Browser, Page } from '@playwright/test';
+import type * as nbformat from '@jupyterlab/nbformat';
+import type {
+  Session,
+  TerminalAPI,
+  User,
+  Workspace
+} from '@jupyterlab/services';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
+import type { JSONObject } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
+import type { APIRequestContext, Browser, Page } from '@playwright/test';
 import * as json5 from 'json5';
-import fetch from 'node-fetch';
 import { ContentsHelper } from './contents';
 import { PerformanceHelper } from './helpers';
 import {
@@ -25,13 +31,15 @@ export namespace galata {
    * - Deactivate codemirror cursor blinking to avoid noise in screenshots
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
-    '@jupyterlab/fileeditor-extension:plugin': {
-      editorConfig: { cursorBlinkRate: 0 }
+    '@jupyterlab/apputils-extension:notification': {
+      fetchNews: 'false'
     },
-    '@jupyterlab/notebook-extension:tracker': {
-      codeCellConfig: { cursorBlinkRate: 0 },
-      markdownCellConfig: { cursorBlinkRate: 0 },
-      rawCellConfig: { cursorBlinkRate: 0 }
+    '@jupyterlab/fileeditor-extension:plugin': {},
+    '@jupyterlab/notebook-extension:tracker': {},
+    '@jupyterlab/codemirror-extension:plugin': {
+      defaultConfig: {
+        cursorBlinkRate: 0
+      }
     }
   };
 
@@ -88,6 +96,78 @@ export namespace galata {
   export type NotebookToolbarItemId = DefaultNotebookToolbarItemId | string;
 
   /**
+   * Options to create a new page
+   */
+  export interface INewPageOption {
+    /**
+     * Application base URL
+     */
+    baseURL: string;
+    /**
+     * Playwright browser model
+     */
+    browser: Browser;
+    /**
+     * Callback that resolved when the application page is ready
+     */
+    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>;
+    /**
+     * Application URL path fragment
+     *
+     * Default: /lab
+     */
+    appPath?: string;
+    /**
+     * Whether to go to JupyterLab page within the fixture or not.
+     *
+     * Default: true
+     */
+    autoGoto?: boolean;
+    /**
+     * Mock Jupyter Server configuration in-memory or not.
+     *
+     * Default true
+     */
+    mockConfig?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab state in-memory or not.
+     *
+     * Default galata.DEFAULT_SETTINGS
+     */
+    mockSettings?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab settings in-memory or not.
+     *
+     * Default true
+     */
+    mockState?: boolean | Record<string, unknown>;
+    /**
+     * Mock JupyterLab user in-memory or not.
+     *
+     * Default true
+     */
+    mockUser?: boolean | Partial<User.IUser>;
+    /**
+     * Whether to store sessions in memory or not.
+     *
+     * Default true
+     */
+    mockSessions?: boolean;
+    /**
+     * Whether to store terminals in memory or not.
+     *
+     * Default true
+     */
+    mockTerminals?: boolean;
+    /**
+     * Create and delete a temporary path during the page existence
+     *
+     * Default ''
+     */
+    tmpPath?: string;
+  }
+
+  /**
    * Add the Galata helpers to the page model
    *
    * @param page Playwright page model
@@ -125,8 +205,10 @@ export namespace galata {
     appPath: string,
     autoGoto: boolean,
     baseURL: string,
+    mockConfig: boolean | Record<string, unknown>,
     mockSettings: boolean | Record<string, unknown>,
     mockState: boolean | Record<string, unknown>,
+    mockUser: boolean | Partial<User.IUser>,
     page: Page,
     sessions: Map<string, Session.IModel> | null,
     terminals: Map<string, TerminalAPI.IModel> | null,
@@ -142,6 +224,12 @@ export namespace galata {
     );
 
     // Add server mocks
+    if (mockConfig) {
+      const config: Record<string, JSONObject> =
+        typeof mockConfig !== 'boolean' ? ({ ...mockConfig } as any) : {};
+      await Mock.mockConfig(page, config);
+    }
+
     const settings: ISettingRegistry.IPlugin[] = [];
     if (mockSettings) {
       // Settings will be stored in-memory (after loading the initial version from disk)
@@ -164,6 +252,24 @@ export namespace galata {
       await Mock.mockState(page, workspace);
     }
 
+    let user: User.IUser = {
+      identity: {
+        username: UUID.uuid4(),
+        name: 'jovyan',
+        display_name: 'jovyan',
+        initials: 'JP',
+        color: 'var(--jp-collaborator-color1)'
+      },
+      permissions: {}
+    };
+    if (mockUser) {
+      if (typeof mockUser !== 'boolean') {
+        user = { ...mockUser } as any;
+      }
+      // The user will be stored in-memory
+      await Mock.mockUser(page, user);
+    }
+
     // Add sessions and terminals trackers
     if (sessions) {
       await Mock.mockRunners(page, sessions, 'sessions');
@@ -183,53 +289,78 @@ export namespace galata {
   /**
    * Create a contents REST API helpers object
    *
-   * @param baseURL Application base URL
+   * @param request Playwright API request context
    * @param page Playwright page model
    * @returns Contents REST API helpers
    */
   export function newContentsHelper(
-    baseURL: string,
+    request?: APIRequestContext,
     page?: Page
   ): ContentsHelper {
-    return new ContentsHelper(baseURL, page);
+    return new ContentsHelper(request, page);
   }
 
   /**
-   * Create a page with Galata helpers for the given browser
+   * Create a page with Galata helpers for the given browser in a new context.
    *
-   * @param browser Playwright browser model
-   * @param baseURL Application base URL
-   * @param waitForApplication Callback that resolved when the application page is ready
-   * @param appPath Application URL path fragment
    * @returns Playwright page model with Galata helpers
    */
-  export async function newPage(
-    appPath: string,
-    autoGoto: boolean,
-    baseURL: string,
-    browser: Browser,
-    mockSettings: boolean | Record<string, unknown>,
-    mockState: boolean | Record<string, unknown>,
-    sessions: Map<string, Session.IModel> | null,
-    terminals: Map<string, TerminalAPI.IModel> | null,
-    tmpPath: string,
-    waitForApplication: (page: Page, helpers: IJupyterLabPage) => Promise<void>
-  ): Promise<IJupyterLabPageFixture> {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
-    return initTestPage(
+  export async function newPage(options: INewPageOption): Promise<{
+    page: IJupyterLabPageFixture;
+    sessions: Map<string, Session.IModel> | null;
+    terminals: Map<string, TerminalAPI.IModel> | null;
+  }> {
+    const {
       appPath,
       autoGoto,
       baseURL,
+      browser,
+      waitForApplication,
+      mockConfig,
+      mockSessions,
       mockSettings,
       mockState,
-      page,
+      mockTerminals,
+      mockUser,
+      tmpPath
+    } = {
+      appPath: '/lab',
+      autoGoto: true,
+      mockConfig: true,
+      mockSessions: true,
+      mockSettings: galata.DEFAULT_SETTINGS,
+      mockState: true,
+      mockTerminals: true,
+      mockUser: true,
+      tmpPath: '',
+      ...options
+    };
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    const sessions = mockSessions ? new Map<string, Session.IModel>() : null;
+    const terminals = mockTerminals
+      ? new Map<string, TerminalAPI.IModel>()
+      : null;
+
+    return {
+      page: await initTestPage(
+        appPath,
+        autoGoto,
+        baseURL,
+        mockConfig,
+        mockSettings,
+        mockState,
+        mockUser,
+        page,
+        sessions,
+        terminals,
+        tmpPath,
+        waitForApplication
+      ),
       sessions,
-      terminals,
-      tmpPath,
-      waitForApplication
-    );
+      terminals
+    };
   }
 
   /**
@@ -247,6 +378,13 @@ export namespace galata {
    */
   export namespace Routes {
     /**
+     * Config API
+     *
+     * The config section can be found in the named group `section`.
+     */
+    export const config = /.*\/api\/config\/(?<section>\w+)/;
+
+    /**
      * Contents API
      *
      * The content path can be found in the named group `path`.
@@ -259,7 +397,7 @@ export namespace galata {
     /**
      * Extensions API
      */
-    export const extensions = /.*\/lab\/api\/extensions/;
+    export const extensions = /.*\/lab\/api\/extensions.*/;
 
     /**
      * Sessions API
@@ -305,6 +443,11 @@ export namespace galata {
      * The id will be prefixed by '/'.
      */
     export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)/;
+
+    /**
+     * User API
+     */
+    export const user = /.*\/api\/me.*/;
   }
 
   /**
@@ -431,10 +574,10 @@ export namespace galata {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
-      ctxt.on('close', () => {
+      ctxt.once('close', () => {
         isClosed = true;
       });
-      ctxt.browser()?.on('disconnected', () => {
+      ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
 
@@ -442,14 +585,11 @@ export namespace galata {
         switch (request.method()) {
           case 'GET': {
             // Proxy the GET request
-            const response = await fetch(request.url(), {
-              headers: await request.allHeaders(),
-              method: request.method()
-            });
-            if (!response.ok) {
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
                 return route.fulfill({
-                  status: response.status,
+                  status: response.status(),
                   body: await response.text()
                 });
               }
@@ -490,19 +630,63 @@ export namespace galata {
      * @param baseURL Application base URL
      * @param runners Session or terminal ids to stop
      * @param type Type of runner; session or terminal
+     * @param request API request context
      * @returns Whether the runners were closed or not
      */
     export async function clearRunners(
-      baseURL: string,
+      request: APIRequestContext,
       runners: string[],
       type: 'sessions' | 'terminals'
     ): Promise<boolean> {
       const responses = await Promise.all(
         [...new Set(runners)].map(id =>
-          fetch(`${baseURL}/api/${type}/${id}`, { method: 'DELETE' })
+          request.fetch(`/api/${type}/${id}`, {
+            method: 'DELETE'
+          })
         )
       );
-      return responses.every(response => response.ok);
+      return responses.every(response => response.ok());
+    }
+
+    /**
+     * Mock config route.
+     *
+     * @param page Page model object
+     * @param config In-memory config
+     */
+    export function mockConfig(
+      page: Page,
+      config: Record<string, JSONObject>
+    ): Promise<void> {
+      return page.route(Routes.config, (route, request) => {
+        const section = Routes.config.exec(request.url())?.groups
+          ?.section as string;
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              body: JSON.stringify(config[section] ?? {})
+            });
+          case 'PATCH': {
+            const data = request.postDataJSON();
+            // FIXME jupyter-server does a recursive update
+            // We are not doing it here as @jupyterlab/services is actually not recursively
+            // updating the object.
+            config[section] = { ...(config[section] ?? {}), ...data };
+            return route.fulfill({
+              status: 200,
+              body: JSON.stringify(config[section])
+            });
+          }
+          case 'PUT': {
+            const data = request.postDataJSON();
+            config[section] = data;
+            return route.fulfill({ status: 204 });
+          }
+          default:
+            return route.continue();
+        }
+      });
     }
 
     /**
@@ -522,10 +706,10 @@ export namespace galata {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
-      ctxt.on('close', () => {
+      ctxt.once('close', () => {
         isClosed = true;
       });
-      ctxt.browser()?.on('disconnected', () => {
+      ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
       return page.route(routeRegex, async (route, request) => {
@@ -549,14 +733,11 @@ export namespace galata {
             if (id) {
               if (runners.has(id)) {
                 // Proxy the GET request
-                const response = await fetch(request.url(), {
-                  headers: await request.allHeaders(),
-                  method: request.method()
-                });
-                if (!response.ok) {
+                const response = await ctxt.request.fetch(request);
+                if (!response.ok()) {
                   if (!page.isClosed() && !isClosed) {
                     return route.fulfill({
-                      status: response.status,
+                      status: response.status(),
                       body: await response.text()
                     });
                   }
@@ -584,14 +765,11 @@ export namespace galata {
               }
             } else {
               // Proxy the GET request
-              const response = await fetch(request.url(), {
-                headers: await request.allHeaders(),
-                method: request.method()
-              });
-              if (!response.ok) {
+              const response = await ctxt.request.fetch(request);
+              if (!response.ok()) {
                 if (!page.isClosed() && !isClosed) {
                   return route.fulfill({
-                    status: response.status,
+                    status: response.status(),
                     body: await response.text()
                   });
                 }
@@ -628,15 +806,11 @@ export namespace galata {
           }
           case 'PATCH': {
             // Proxy the PATCH request
-            const response = await fetch(request.url(), {
-              body: request.postDataBuffer()!,
-              headers: await request.allHeaders(),
-              method: request.method()
-            });
-            if (!response.ok) {
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
                 return route.fulfill({
-                  status: response.status,
+                  status: response.status(),
                   body: await response.text()
                 });
               }
@@ -657,15 +831,11 @@ export namespace galata {
           }
           case 'POST': {
             // Proxy the POST request
-            const response = await fetch(request.url(), {
-              body: request.postDataBuffer()!,
-              headers: await request.allHeaders(),
-              method: request.method()
-            });
-            if (!response.ok) {
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
               if (!page.isClosed() && !isClosed) {
                 return route.fulfill({
-                  status: response.status,
+                  status: response.status(),
                   body: await response.text()
                 });
               }
@@ -739,10 +909,10 @@ export namespace galata {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
-      ctxt.on('close', () => {
+      ctxt.once('close', () => {
         isClosed = true;
       });
-      ctxt.browser()?.on('disconnected', () => {
+      ctxt.browser()?.once('disconnected', () => {
         isClosed = true;
       });
 
@@ -755,9 +925,7 @@ export namespace galata {
             if (!id) {
               // Get all settings
               if (settings.length === 0) {
-                const response = await fetch(request.url(), {
-                  headers: request.headers()
-                });
+                const response = await ctxt.request.fetch(request);
                 const loadedSettings = (await response.json())
                   .settings as ISettingRegistry.IPlugin[];
 
@@ -783,9 +951,7 @@ export namespace galata {
               // Get specific settings
               let pluginSettings = settings.find(setting => setting.id === id);
               if (!pluginSettings) {
-                const response = await fetch(request.url(), {
-                  headers: request.headers()
-                });
+                const response = await ctxt.request.fetch(request);
                 pluginSettings = await response.json();
                 if (pluginSettings) {
                   const mocked = mockedSettings[id] ?? {};
@@ -840,6 +1006,26 @@ export namespace galata {
               status: 204
             });
           }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Mock user route.
+     *
+     * @param page Page model object
+     * @param user In-memory user
+     */
+    export function mockUser(page: Page, user: User.IUser): Promise<void> {
+      return page.route(Routes.user, (route, request) => {
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              body: JSON.stringify(user)
+            });
           default:
             return route.continue();
         }

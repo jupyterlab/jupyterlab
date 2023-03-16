@@ -44,7 +44,7 @@ export class TableOfContentsItem extends React.PureComponent<
     const { children, isActive, heading, onCollapse, onMouseDown } = this.props;
 
     return (
-      <li className="jp-tocItem" key={`${heading.level}-${heading.text}`}>
+      <li className="jp-tocItem">
         <div
           className={`jp-tocItem-heading ${
             isActive ? 'jp-tocItem-active' : ''

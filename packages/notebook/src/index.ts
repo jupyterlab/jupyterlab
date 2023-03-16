@@ -6,10 +6,13 @@
  */
 
 export * from './actions';
+export * from './celllist';
 export * from './default-toolbar';
+export * from './executionindicator';
 export * from './model';
 export * from './modelfactory';
 export * from './modestatus';
+export * from './notebooklspadapter';
 export * from './notebooktools';
 export * from './panel';
 export * from './searchprovider';
@@ -19,4 +22,4 @@ export * from './tracker';
 export * from './truststatus';
 export * from './widget';
 export * from './widgetfactory';
-export * from './executionindicator';
+export * from './windowing';

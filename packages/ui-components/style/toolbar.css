@@ -98,6 +98,7 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   line-height: 100%;
   padding-left: 2px;
   color: var(--jp-ui-font-color1);
+  font-family: var(--jp-ui-font-family);
 }
 
 #jp-main-dock-panel[data-mode='single-document']

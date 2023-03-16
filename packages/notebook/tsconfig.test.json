@@ -24,6 +24,9 @@
       "path": "../documentsearch"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../nbformat"
     },
     {
@@ -37,9 +40,6 @@
     },
     {
       "path": "../settingregistry"
-    },
-    {
-      "path": "../shared-models"
     },
     {
       "path": "../statusbar"
@@ -57,7 +57,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
+      "path": "../testing"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "7.0.0-alpha.11",
+  "version": "7.0.0-alpha.21",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -19,7 +19,6 @@
   "author": "Project Jupyter",
   "main": "lib/index.js",
   "browser": {
-    "node-fetch": false,
     "ws": "./lib/shim/ws.js"
   },
   "typings": "lib/index.d.ts",
@@ -31,7 +30,8 @@
     "lib/*.js",
     "lib/*.d.ts",
     "dist/*.js",
-    "dist/**/*.js"
+    "dist/**/*.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -39,40 +39,34 @@
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "test": "jest",
-    "test:cov": "jest --collect-coverage",
+    "test": "jest -i",
+    "test:cov": "jest -i --collect-coverage",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.11",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.11",
-    "@jupyterlab/observables": "^5.0.0-alpha.11",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.11",
-    "@jupyterlab/statedb": "^4.0.0-alpha.11",
-    "@lumino/algorithm": "^1.9.1",
-    "@lumino/coreutils": "^1.12.0",
-    "@lumino/disposable": "^1.10.1",
-    "@lumino/polling": "^1.10.0",
-    "@lumino/signaling": "^1.10.1",
-    "node-fetch": "^2.6.0",
-    "ws": "^7.4.6"
+    "@jupyter/ydoc": "^0.3.4",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.21",
+    "@jupyterlab/nbformat": "^4.0.0-alpha.21",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.21",
+    "@jupyterlab/statedb": "^4.0.0-alpha.21",
+    "@lumino/coreutils": "^2.0.0-rc.1",
+    "@lumino/disposable": "^2.0.0-rc.1",
+    "@lumino/polling": "^2.0.0-rc.1",
+    "@lumino/properties": "^2.0.0-rc.1",
+    "@lumino/signaling": "^2.0.0-rc.1",
+    "ws": "^8.11.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.11",
-    "@types/jest": "^26.0.10",
-    "@types/node-fetch": "^2.5.4",
-    "@types/text-encoding": "^0.0.35",
-    "@types/ws": "^7.4.4",
-    "jest": "^26.4.2",
+    "@jupyterlab/testing": "^4.0.0-alpha.21",
+    "@types/jest": "^29.2.0",
+    "@types/ws": "^8.5.3",
     "rimraf": "~3.0.0",
-    "text-encoding": "^0.7.0",
-    "ts-jest": "^26.3.0",
-    "typedoc": "~0.22.10",
-    "typescript": "~4.7.3",
-    "webpack": "^5.72.0",
-    "webpack-cli": "^4.9.2"
+    "typedoc": "~0.23.25",
+    "typescript": "~5.0.1-rc",
+    "webpack": "^5.76.1",
+    "webpack-cli": "^5.0.1"
   },
   "publishConfig": {
     "access": "public"

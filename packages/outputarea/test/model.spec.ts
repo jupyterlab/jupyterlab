@@ -3,7 +3,7 @@
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 import { OutputModel } from '@jupyterlab/rendermime';
-import { NBTestUtils } from '@jupyterlab/testutils';
+import { DEFAULT_OUTPUTS } from '@jupyterlab/rendermime/lib/testutils';
 
 describe('outputarea/model', () => {
   let model: OutputAreaModel;
@@ -25,7 +25,7 @@ describe('outputarea/model', () => {
       it('should accept options', () => {
         const contentFactory = new OutputAreaModel.ContentFactory();
         model = new OutputAreaModel({
-          values: NBTestUtils.DEFAULT_OUTPUTS,
+          values: DEFAULT_OUTPUTS,
           contentFactory,
           trusted: true
         });
@@ -45,7 +45,7 @@ describe('outputarea/model', () => {
           expect(args.oldValues.length).toBe(0);
           called = true;
         });
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[0]);
         expect(called).toBe(true);
       });
     });
@@ -53,7 +53,7 @@ describe('outputarea/model', () => {
     describe('#stateChanged', () => {
       it('should be emitted when an item changes', () => {
         let called = false;
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[0]);
         model.stateChanged.connect((sender, args) => {
           expect(sender).toBe(model);
           expect(args).toEqual(0);
@@ -68,7 +68,7 @@ describe('outputarea/model', () => {
     describe('#length', () => {
       it('should get the length of the items in the model', () => {
         expect(model.length).toBe(0);
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[0]);
         expect(model.length).toBe(1);
       });
     });
@@ -80,8 +80,8 @@ describe('outputarea/model', () => {
 
       it('should cause all of the cells to `set`', () => {
         let called = 0;
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[1]);
+        model.add(DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[1]);
         model.changed.connect(() => {
           called++;
         });
@@ -108,7 +108,7 @@ describe('outputarea/model', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the model', () => {
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[0]);
         model.dispose();
         expect(model.isDisposed).toBe(true);
         expect(model.length).toBe(0);
@@ -123,28 +123,28 @@ describe('outputarea/model', () => {
 
     describe('#get()', () => {
       it('should get the item at the specified index', () => {
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[0]);
         const output = model.get(0);
-        expect(output.type).toBe(NBTestUtils.DEFAULT_OUTPUTS[0].output_type);
+        expect(output.type).toBe(DEFAULT_OUTPUTS[0].output_type);
       });
 
       it('should return `undefined` if out of range', () => {
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[0]);
         expect(model.get(1)).toBeUndefined();
       });
     });
 
     describe('#add()', () => {
       it('should add an output', () => {
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[0]);
         expect(model.length).toBe(1);
       });
 
       it('should consolidate consecutive stream outputs of the same kind', () => {
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[1]);
+        model.add(DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[1]);
         expect(model.length).toBe(2);
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[2]);
+        model.add(DEFAULT_OUTPUTS[2]);
         expect(model.length).toBe(2);
       });
 
@@ -172,7 +172,7 @@ describe('outputarea/model', () => {
 
     describe('#clear()', () => {
       it('should clear all of the output', () => {
-        for (const output of NBTestUtils.DEFAULT_OUTPUTS) {
+        for (const output of DEFAULT_OUTPUTS) {
           model.add(output);
         }
         model.clear();
@@ -180,10 +180,10 @@ describe('outputarea/model', () => {
       });
 
       it('should wait for next add if requested', () => {
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
+        model.add(DEFAULT_OUTPUTS[0]);
         model.clear(true);
         expect(model.length).toBe(1);
-        model.add(NBTestUtils.DEFAULT_OUTPUTS[1]);
+        model.add(DEFAULT_OUTPUTS[1]);
         expect(model.length).toBe(1);
       });
     });
@@ -191,7 +191,7 @@ describe('outputarea/model', () => {
     describe('#set', () => {
       it('should disconnect the replaced output', () => {
         const model = new OutputAreaModel({
-          values: [NBTestUtils.DEFAULT_OUTPUTS[0]]
+          values: [DEFAULT_OUTPUTS[0]]
         });
 
         const output = model.get(0);
@@ -200,7 +200,7 @@ describe('outputarea/model', () => {
           called = true;
         });
 
-        model.set(0, NBTestUtils.DEFAULT_OUTPUTS[1]);
+        model.set(0, DEFAULT_OUTPUTS[1]);
 
         output.setData({ ...output.data });
 
@@ -211,7 +211,7 @@ describe('outputarea/model', () => {
     describe('#fromJSON()', () => {
       it('should deserialize the model from JSON', () => {
         model.clear();
-        model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
+        model.fromJSON(DEFAULT_OUTPUTS);
         expect(model.toJSON().length).toBe(5);
       });
     });
@@ -219,7 +219,7 @@ describe('outputarea/model', () => {
     describe('#toJSON()', () => {
       it('should serialize the model to JSON', () => {
         expect(model.toJSON()).toEqual([]);
-        model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
+        model.fromJSON(DEFAULT_OUTPUTS);
         expect(model.toJSON().length).toBe(5);
       });
     });
@@ -230,7 +230,7 @@ describe('outputarea/model', () => {
       it('should create an output model', () => {
         const factory = new OutputAreaModel.ContentFactory();
         const model = factory.createOutputModel({
-          value: NBTestUtils.DEFAULT_OUTPUTS[0]
+          value: DEFAULT_OUTPUTS[0]
         });
         expect(model).toBeInstanceOf(OutputModel);
       });

@@ -1,0 +1,62 @@
+name: Fix License Headers
+
+on:
+  pull_request_target:
+
+jobs:
+  header-license-fix:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git to use https
+        run: git config --global hub.protocol https
+
+      - name: Checkout the branch from the PR that triggered the job
+        run: hub pr checkout ${{ github.event.pull_request.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Fix License Header
+        uses: apache/skywalking-eyes/header@v0.4.0
+        with:
+          mode: fix
+
+      - name: List files changed
+        id: files-changed
+        shell: bash -l {0}
+        run: |
+          set -ex
+          export CHANGES=$(git status --porcelain | tee modified.log | wc -l)
+          cat modified.log
+          # Remove the log otherwise it will be committed
+          rm modified.log
+
+          echo "N_CHANGES=${CHANGES}" >> $GITHUB_OUTPUT
+
+          git diff
+
+      - name: Commit any changes
+        if: steps.files-changed.outputs.N_CHANGES != '0'
+        shell: bash -l {0}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git pull --no-tags
+
+          git add *
+          git commit -m "Automatic application of license header"
+
+          git config push.default upstream
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

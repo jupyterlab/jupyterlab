@@ -3,7 +3,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import sanitize from 'sanitize-html';
-import { ISanitizer } from './tokens';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
  * Helper class that contains regular expressions for inline CSS style validation.
@@ -433,7 +433,7 @@ class CssProp {
 /**
  * A class to sanitize HTML strings.
  */
-export class Sanitizer implements ISanitizer {
+export class Sanitizer implements IRenderMime.ISanitizer {
   /**
    * Sanitize an HTML string.
    *
@@ -443,9 +443,37 @@ export class Sanitizer implements ISanitizer {
    *
    * @returns The sanitized string.
    */
-  sanitize(dirty: string, options?: ISanitizer.IOptions): string {
+  sanitize(dirty: string, options?: IRenderMime.ISanitizerOptions): string {
     return sanitize(dirty, { ...this._options, ...(options || {}) });
   }
+
+  /**
+   * @returns Whether to replace URLs by HTML anchors.
+   */
+  getAutolink(): boolean {
+    return this._autolink;
+  }
+
+  /**
+   * Set the allowed schemes
+   *
+   * @param scheme Allowed schemes
+   */
+  setAllowedSchemes(scheme: Array<string>): void {
+    // Force copy of `scheme`
+    this._options.allowedSchemes = [...scheme];
+  }
+
+  /**
+   * Set the URL replacement boolean.
+   *
+   * @param autolink URL replacement boolean.
+   */
+  setAutolink(autolink: boolean): void {
+    this._autolink = autolink;
+  }
+
+  private _autolink: boolean = true;
 
   private _options: sanitize.IOptions = {
     // HTML tags that are allowed to be used. Tags were extracted from Google Caja
@@ -944,6 +972,7 @@ export class Sanitizer implements ISanitizer {
       // Set the "disabled" attribute for <input> tags.
       input: sanitize.simpleTransform('input', { disabled: 'disabled' })
     },
+    allowedSchemes: [...sanitize.defaults.allowedSchemes],
     allowedSchemesByTag: {
       // Allow 'attachment:' img src (used for markdown cell attachments).
       img: sanitize.defaults.allowedSchemes.concat(['attachment'])
@@ -955,8 +984,3 @@ export class Sanitizer implements ISanitizer {
     allowedSchemesAppliedToAttributes: ['href', 'cite']
   };
 }
-
-/**
- * The default instance of an `ISanitizer` meant for use by user code.
- */
-export const defaultSanitizer: ISanitizer = new Sanitizer();

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/terminal",
-  "version": "4.0.0-alpha.11",
+  "version": "4.0.0-alpha.21",
   "description": "JupyterLab - Terminal Emulator Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -27,7 +27,8 @@
     "lib/*.js.map",
     "lib/*.js",
     "style/*.css",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -41,25 +42,26 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-alpha.11",
-    "@jupyterlab/services": "^7.0.0-alpha.11",
-    "@jupyterlab/translation": "^4.0.0-alpha.11",
-    "@lumino/coreutils": "^1.12.0",
-    "@lumino/domutils": "^1.8.1",
-    "@lumino/messaging": "^1.10.1",
-    "@lumino/widgets": "^1.32.0",
-    "xterm": "~4.8.1",
-    "xterm-addon-fit": "~0.4.0"
+    "@jupyterlab/apputils": "^4.0.0-alpha.21",
+    "@jupyterlab/services": "^7.0.0-alpha.21",
+    "@jupyterlab/translation": "^4.0.0-alpha.21",
+    "@lumino/coreutils": "^2.0.0-rc.1",
+    "@lumino/domutils": "^2.0.0-rc.1",
+    "@lumino/messaging": "^2.0.0-rc.1",
+    "@lumino/widgets": "^2.0.0-rc.1",
+    "xterm": "~5.1.0",
+    "xterm-addon-canvas": "~0.3.0",
+    "xterm-addon-fit": "~0.7.0",
+    "xterm-addon-web-links": "~0.8.0",
+    "xterm-addon-webgl": "~0.14.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^4.0.0-alpha.11",
-    "@types/jest": "^26.0.10",
+    "@jupyterlab/testing": "^4.0.0-alpha.21",
+    "@types/jest": "^29.2.0",
     "canvas": "^2.9.1",
-    "jest": "^26.4.2",
     "rimraf": "~3.0.0",
-    "ts-jest": "^26.3.0",
-    "typedoc": "~0.22.10",
-    "typescript": "~4.7.3"
+    "typedoc": "~0.23.25",
+    "typescript": "~5.0.1-rc"
   },
   "publishConfig": {
     "access": "public"

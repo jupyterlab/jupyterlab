@@ -7,13 +7,13 @@ HERE = os.path.dirname(__file__)
 
 os.environ["JUPYTERLAB_SETTINGS_DIR"] = str(os.path.join(HERE, "settings"))
 
-import json
+import json  # noqa
 
-from jupyter_server.base.handlers import FileFindHandler
-from jupyter_server.utils import url_path_join as ujoin
-from traitlets import Unicode
+from jupyter_server.base.handlers import FileFindHandler  # noqa
+from jupyter_server.utils import url_path_join as ujoin  # noqa
+from traitlets import Unicode  # noqa
 
-from jupyterlab.labapp import LabApp
+from jupyterlab.labapp import LabApp  # noqa
 
 with open(os.path.join(HERE, "package.json")) as fid:
     version = json.load(fid)["version"]
@@ -34,14 +34,6 @@ class ListingsApp(LabApp):
             )
         ]
         self.web_app.add_handlers(".*$", default_handlers)
-
-    def start(self):
-        settings = self.web_app.settings
-
-        # By default, make terminals available.
-        settings.setdefault("terminals_available", True)
-
-        super().start()
 
 
 if __name__ == "__main__":

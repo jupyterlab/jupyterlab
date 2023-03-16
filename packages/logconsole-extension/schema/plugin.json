@@ -12,11 +12,11 @@
           },
           {
             "command": "logconsole:open",
-            "rank": 9.9
+            "rank": 9.95
           },
           {
             "type": "separator",
-            "rank": 9.9
+            "rank": 9.99
           }
         ]
       }

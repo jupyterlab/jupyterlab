@@ -17,7 +17,7 @@ toolbars.forEach(([plugin, parameter]) => {
   test(`Toolbar commands for ${plugin} must exists`, async ({ page }) => {
     const [toolbarItems, commands] = await page.evaluate(
       async ([plugin, parameter]) => {
-        const settings = await window.galataip.getPlugin(
+        const settings = await window.galata.getPlugin(
           '@jupyterlab/apputils-extension:settings'
         );
         const toolbar = await settings.get(plugin, parameter);

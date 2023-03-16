@@ -57,7 +57,7 @@ export class KernelSources extends PanelWithToolbar {
         onClick: () => {
           this._model.kernelSources = [];
           void service.displayModules().catch(reason => {
-            showErrorMessage(
+            void showErrorMessage(
               trans.__('Fail to get kernel sources'),
               trans.__('Fail to get kernel sources:\n%2', reason)
             );

@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 Notebook
 ========
 
@@ -111,7 +114,7 @@ corresponding to the cell models in its cell list.
 -  Each cell widget contains an
    `InputArea <../api/classes/cells.inputarea-1.html>`__,
 
-   -  which contains n
+   -  which contains a
       `CodeEditorWrapper <../api/classes/codeeditor.codeeditorwrapper-1.html>`__,
 
       -  which contains a JavaScript CodeMirror instance.

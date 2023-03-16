@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
+import { selectAll } from '@codemirror/commands';
+import { findNext, gotoLine } from '@codemirror/search';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   Clipboard,
   ICommandPalette,
   ISessionContextDialogs,
   MainAreaWidget,
-  sessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
@@ -15,12 +15,16 @@ import {
   CodeViewerWidget,
   IEditorServices
 } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditor,
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -41,7 +45,7 @@ import {
   textEditorIcon,
   undoIcon
 } from '@jupyterlab/ui-components';
-import { toArray } from '@lumino/algorithm';
+import { find } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONObject,
@@ -51,7 +55,6 @@ import {
 
 const autoClosingBracketsNotebook = 'notebook:toggle-autoclosing-brackets';
 const autoClosingBracketsConsole = 'console:toggle-autoclosing-brackets';
-type wrappingMode = 'on' | 'off' | 'wordWrapColumn' | 'bounded';
 
 /**
  * The command IDs used by the fileeditor plugin.
@@ -112,6 +115,14 @@ export namespace CommandIDs {
   export const selectCompleter = 'completer:select-file';
 
   export const openCodeViewer = 'code-viewer:open';
+
+  export const changeTheme = 'fileeditor:change-theme';
+
+  export const changeLanguage = 'fileeditor:change-language';
+
+  export const find = 'fileeditor:find';
+
+  export const goToLine = 'fileeditor:go-to-line';
 }
 
 export interface IFileTypeData extends ReadonlyJSONObject {
@@ -127,47 +138,20 @@ export interface IFileTypeData extends ReadonlyJSONObject {
  */
 export const FACTORY = 'Editor';
 
-const userSettings = [
-  'autoClosingBrackets',
-  'codeFolding',
-  'cursorBlinkRate',
-  'fontFamily',
-  'fontSize',
-  'insertSpaces',
-  'lineHeight',
-  'lineNumbers',
-  'lineWrap',
-  'matchBrackets',
-  'readOnly',
-  'rulers',
-  'showTrailingSpace',
-  'tabSize',
-  'wordWrapColumn'
-];
-
-function filterUserSettings(config: CodeEditor.IConfig): CodeEditor.IConfig {
-  const filteredConfig = { ...config };
-  // Delete parts of the config that are not user settings (like handlePaste).
-  for (let k of Object.keys(config)) {
-    if (!userSettings.includes(k)) {
-      delete (config as any)[k];
-    }
-  }
-  return filteredConfig;
-}
-
-let config: CodeEditor.IConfig = filterUserSettings(CodeEditor.defaultConfig);
-
 /**
  * A utility class for adding commands and menu items,
  * for use by the File Editor extension or other Editor extensions.
  */
 export namespace Commands {
+  let config: Record<string, any> = {};
+  let scrollPastEnd = true;
+
   /**
    * Accessor function that returns the createConsole function for use by Create Console commands
    */
   function getCreateConsoleFunction(
-    commands: CommandRegistry
+    commands: CommandRegistry,
+    languages: IEditorLanguageRegistry
   ): (
     widget: IDocumentWidget<FileEditor>,
     args?: ReadonlyPartialJSONObject
@@ -181,7 +165,10 @@ export namespace Commands {
         activate: options['activate'],
         name: widget.context.contentsModel?.name,
         path: widget.context.path,
-        preferredLanguage: widget.context.model.defaultKernelLanguage,
+        // Default value is an empty string -> using OR operator
+        preferredLanguage:
+          widget.context.model.defaultKernelLanguage ||
+          (languages.findByFileName(widget.context.path)?.name ?? ''),
         ref: widget.id,
         insertMode: 'split-bottom'
       });
@@ -200,13 +187,20 @@ export namespace Commands {
     settings: ISettingRegistry.ISettings,
     commands: CommandRegistry
   ): void {
-    config = filterUserSettings({
-      ...CodeEditor.defaultConfig,
-      ...(settings.get('editorConfig').composite as JSONObject)
-    });
+    config =
+      (settings.get('editorConfig').composite as Record<string, any>) ?? {};
+    scrollPastEnd = settings.get('scrollPasteEnd').composite as boolean;
 
     // Trigger a refresh of the rendered commands
-    commands.notifyCommandChanged();
+    commands.notifyCommandChanged(CommandIDs.lineNumbers);
+    commands.notifyCommandChanged(CommandIDs.currentLineNumbers);
+    commands.notifyCommandChanged(CommandIDs.lineWrap);
+    commands.notifyCommandChanged(CommandIDs.currentLineWrap);
+    commands.notifyCommandChanged(CommandIDs.changeTabs);
+    commands.notifyCommandChanged(CommandIDs.matchBrackets);
+    commands.notifyCommandChanged(CommandIDs.currentMatchBrackets);
+    commands.notifyCommandChanged(CommandIDs.autoClosingBrackets);
+    commands.notifyCommandChanged(CommandIDs.changeLanguage);
   }
 
   /**
@@ -226,7 +220,7 @@ export namespace Commands {
    */
   export function updateWidget(widget: FileEditor): void {
     const editor = widget.editor;
-    editor.setOptions({ ...config });
+    editor.setOptions({ ...config, scrollPastEnd });
   }
 
   /**
@@ -239,9 +233,11 @@ export namespace Commands {
     id: string,
     isEnabled: () => boolean,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    browserFactory: IFileBrowserFactory,
+    defaultBrowser: IDefaultFileBrowser,
+    extensions: IEditorExtensionRegistry,
+    languages: IEditorLanguageRegistry,
     consoleTracker: IConsoleTracker | null,
-    sessionDialogs: ISessionContextDialogs | null
+    sessionDialogs: ISessionContextDialogs
   ): void {
     /**
      * Add a command to change font size for File Editor
@@ -260,16 +256,25 @@ export namespace Commands {
           style.getPropertyValue('--jp-code-font-size'),
           10
         );
-        const currentSize = config.fontSize || cssSize;
+        const currentSize =
+          (config['customStyles']['fontSize'] ??
+            extensions.baseConfiguration['customStyles']['fontSize']) ||
+          cssSize;
         config.fontSize = currentSize + delta;
         return settingRegistry
-          .set(id, 'editorConfig', config as unknown as JSONObject)
+          .set(id, 'editorConfig', config)
           .catch((reason: Error) => {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
       },
       label: args => {
-        if ((args.delta ?? 0) > 0) {
+        const delta = Number(args['delta']);
+        if (Number.isNaN(delta)) {
+          console.error(
+            `${CommandIDs.changeFontSize}: delta arg must be a number`
+          );
+        }
+        if (delta > 0) {
           return args.isMenu
             ? trans.__('Increase Text Editor Font Size')
             : trans.__('Increase Font Size');
@@ -285,21 +290,25 @@ export namespace Commands {
      * Add the Line Numbers command
      */
     commands.addCommand(CommandIDs.lineNumbers, {
-      execute: () => {
-        config.lineNumbers = !config.lineNumbers;
-        return settingRegistry
-          .set(id, 'editorConfig', config as unknown as JSONObject)
-          .catch((reason: Error) => {
-            console.error(`Failed to set ${id}: ${reason.message}`);
-          });
+      execute: async () => {
+        config.lineNumbers = !(
+          config.lineNumbers ?? extensions.baseConfiguration.lineNumbers
+        );
+        try {
+          return await settingRegistry.set(id, 'editorConfig', config);
+        } catch (reason) {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        }
       },
       isEnabled,
-      isToggled: () => config.lineNumbers,
-      label: trans.__('Line Numbers')
+      isToggled: () =>
+        config.lineNumbers ?? extensions.baseConfiguration.lineNumbers,
+      label: trans.__('Show Line Numbers')
     });
 
     commands.addCommand(CommandIDs.currentLineNumbers, {
       label: trans.__('Show Line Numbers'),
+      caption: trans.__('Show the line numbers for the current file.'),
       execute: () => {
         const widget = tracker.currentWidget;
         if (!widget) {
@@ -311,7 +320,11 @@ export namespace Commands {
       isEnabled,
       isToggled: () => {
         const widget = tracker.currentWidget;
-        return widget?.content.editor.getOption('lineNumbers') ?? false;
+        return (
+          (widget?.content.editor.getOption('lineNumbers') as
+            | boolean
+            | undefined) ?? false
+        );
       }
     });
 
@@ -319,37 +332,42 @@ export namespace Commands {
      * Add the Word Wrap command
      */
     commands.addCommand(CommandIDs.lineWrap, {
-      execute: args => {
-        config.lineWrap = (args['mode'] as wrappingMode) || 'off';
-        return settingRegistry
-          .set(id, 'editorConfig', config as unknown as JSONObject)
-          .catch((reason: Error) => {
-            console.error(`Failed to set ${id}: ${reason.message}`);
-          });
+      execute: async args => {
+        config.lineWrap = (args['mode'] as boolean) ?? false;
+        try {
+          return await settingRegistry.set(id, 'editorConfig', config);
+        } catch (reason) {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        }
       },
       isEnabled,
       isToggled: args => {
-        const lineWrap = (args['mode'] as wrappingMode) || 'off';
-        return config.lineWrap === lineWrap;
+        const lineWrap = args['mode'] ?? false;
+        return (
+          lineWrap ===
+          (config.lineWrap ?? extensions.baseConfiguration.lineWrap)
+        );
       },
       label: trans.__('Word Wrap')
     });
 
     commands.addCommand(CommandIDs.currentLineWrap, {
       label: trans.__('Wrap Words'),
+      caption: trans.__('Wrap words for the current file.'),
       execute: () => {
         const widget = tracker.currentWidget;
         if (!widget) {
           return;
         }
         const oldValue = widget.content.editor.getOption('lineWrap');
-        const newValue = oldValue === 'off' ? 'on' : 'off';
-        widget.content.editor.setOption('lineWrap', newValue);
+        widget.content.editor.setOption('lineWrap', !oldValue);
       },
       isEnabled,
       isToggled: () => {
         const widget = tracker.currentWidget;
-        return widget?.content.editor.getOption('lineWrap') !== 'off' ?? false;
+        return (
+          (widget?.content.editor.getOption('lineWrap') as boolean) ?? false
+        );
       }
     });
 
@@ -359,29 +377,29 @@ export namespace Commands {
 
     commands.addCommand(CommandIDs.changeTabs, {
       label: args => {
-        if (args.insertSpaces) {
-          return trans._n(
-            'Spaces: %1',
-            'Spaces: %1',
-            (args.size as number) ?? 0
-          );
+        if (args.size) {
+          return trans.__('Spaces: %1', args.size ?? '');
         } else {
           return trans.__('Indent with Tab');
         }
       },
-      execute: args => {
-        config.tabSize = (args['size'] as number) || 4;
-        config.insertSpaces = !!args['insertSpaces'];
-        return settingRegistry
-          .set(id, 'editorConfig', config as unknown as JSONObject)
-          .catch((reason: Error) => {
-            console.error(`Failed to set ${id}: ${reason.message}`);
-          });
+      execute: async args => {
+        config.indentUnit =
+          args['size'] !== undefined
+            ? ((args['size'] as string) ?? '4').toString()
+            : 'Tab';
+        try {
+          return await settingRegistry.set(id, 'editorConfig', config);
+        } catch (reason) {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        }
       },
       isToggled: args => {
-        const insertSpaces = !!args['insertSpaces'];
-        const size = (args['size'] as number) || 4;
-        return config.insertSpaces === insertSpaces && config.tabSize === size;
+        const currentIndentUnit =
+          config.indentUnit ?? extensions.baseConfiguration.indentUnit;
+        return args['size']
+          ? args['size'] === currentIndentUnit
+          : 'Tab' == currentIndentUnit;
       }
     });
 
@@ -389,21 +407,25 @@ export namespace Commands {
      * Add the Match Brackets command
      */
     commands.addCommand(CommandIDs.matchBrackets, {
-      execute: () => {
-        config.matchBrackets = !config.matchBrackets;
-        return settingRegistry
-          .set(id, 'editorConfig', config as unknown as JSONObject)
-          .catch((reason: Error) => {
-            console.error(`Failed to set ${id}: ${reason.message}`);
-          });
+      execute: async () => {
+        config.matchBrackets = !(
+          config.matchBrackets ?? extensions.baseConfiguration.matchBrackets
+        );
+        try {
+          return await settingRegistry.set(id, 'editorConfig', config);
+        } catch (reason) {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        }
       },
       label: trans.__('Match Brackets'),
       isEnabled,
-      isToggled: () => config.matchBrackets
+      isToggled: () =>
+        config.matchBrackets ?? extensions.baseConfiguration.matchBrackets
     });
 
     commands.addCommand(CommandIDs.currentMatchBrackets, {
       label: trans.__('Match Brackets'),
+      caption: trans.__('Change match brackets for the current file.'),
       execute: () => {
         const widget = tracker.currentWidget;
         if (!widget) {
@@ -415,7 +437,11 @@ export namespace Commands {
       isEnabled,
       isToggled: () => {
         const widget = tracker.currentWidget;
-        return widget?.content.editor.getOption('matchBrackets') ?? false;
+        return (
+          (widget?.content.editor.getOption('matchBrackets') as
+            | boolean
+            | undefined) ?? false
+        );
       }
     });
 
@@ -423,18 +449,24 @@ export namespace Commands {
      * Add the Auto Close Brackets for Text Editor command
      */
     commands.addCommand(CommandIDs.autoClosingBrackets, {
-      execute: args => {
+      execute: async args => {
         config.autoClosingBrackets = !!(
-          args['force'] ?? !config.autoClosingBrackets
+          args['force'] ??
+          !(
+            config.autoClosingBrackets ??
+            extensions.baseConfiguration.autoClosingBrackets
+          )
         );
-        return settingRegistry
-          .set(id, 'editorConfig', config as unknown as JSONObject)
-          .catch((reason: Error) => {
-            console.error(`Failed to set ${id}: ${reason.message}`);
-          });
+        try {
+          return await settingRegistry.set(id, 'editorConfig', config);
+        } catch (reason) {
+          console.error(`Failed to set ${id}: ${reason.message}`);
+        }
       },
-      label: trans.__('Auto Close Brackets for Text Editor'),
-      isToggled: () => config.autoClosingBrackets
+      label: trans.__('Auto Close Brackets in Text Editor'),
+      isToggled: () =>
+        config.autoClosingBrackets ??
+        extensions.baseConfiguration.autoClosingBrackets
     });
 
     commands.addCommand(CommandIDs.autoClosingBracketsUniversal, {
@@ -467,6 +499,91 @@ export namespace Commands {
     });
 
     /**
+     * Create a menu for the editor.
+     */
+    commands.addCommand(CommandIDs.changeTheme, {
+      label: args =>
+        ((args.displayName ?? args.theme) as string) ??
+        config.theme ??
+        extensions.baseConfiguration.theme ??
+        trans.__('Editor Theme'),
+      execute: async args => {
+        config.theme = (args['theme'] as string) ?? config.theme;
+
+        try {
+          return await settingRegistry.set(id, 'editorConfig', config);
+        } catch (reason) {
+          console.error(`Failed to set theme - ${reason.message}`);
+        }
+      },
+      isToggled: args =>
+        args['theme'] === (config.theme ?? extensions.baseConfiguration.theme)
+    });
+
+    commands.addCommand(CommandIDs.find, {
+      label: trans.__('Find…'),
+      execute: () => {
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+        const editor = widget.content.editor as CodeMirrorEditor;
+        editor.execCommand(findNext);
+      },
+      isEnabled
+    });
+
+    commands.addCommand(CommandIDs.goToLine, {
+      label: trans.__('Go to Line…'),
+      execute: args => {
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+        const editor = widget.content.editor as CodeMirrorEditor;
+
+        const line = args['line'] as number | undefined;
+        const column = args['column'] as number | undefined;
+        if (line !== undefined || column !== undefined) {
+          editor.setCursorPosition({
+            line: (line ?? 1) - 1,
+            column: (column ?? 1) - 1
+          });
+        } else {
+          editor.execCommand(gotoLine);
+        }
+      },
+      isEnabled
+    });
+
+    commands.addCommand(CommandIDs.changeLanguage, {
+      label: args =>
+        ((args['displayName'] ?? args['name']) as string) ??
+        trans.__('Change editor language.'),
+      execute: args => {
+        const name = args['name'] as string;
+        const widget = tracker.currentWidget;
+        if (name && widget) {
+          const spec = languages.findByName(name);
+          if (spec) {
+            widget.content.model.mimeType = spec.mime as string;
+          }
+        }
+      },
+      isEnabled,
+      isToggled: args => {
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return false;
+        }
+        const mime = widget.content.model.mimeType;
+        const spec = languages.findByMIME(mime);
+        const name = spec && spec.name;
+        return args['name'] === name;
+      }
+    });
+
+    /**
      * Add the replace selection for text editor command
      */
 
@@ -494,7 +611,7 @@ export namespace Commands {
           return;
         }
 
-        return getCreateConsoleFunction(commands)(widget, args);
+        return getCreateConsoleFunction(commands, languages)(widget, args);
       },
       isEnabled,
       icon: consoleIcon,
@@ -516,9 +633,7 @@ export namespace Commands {
           widget => widget.sessionContext.session?.path === current.context.path
         );
         if (widget) {
-          return (sessionDialogs || sessionContextDialogs).restart(
-            widget.sessionContext
-          );
+          return sessionDialogs.restart(widget.sessionContext);
         }
       },
       label: trans.__('Restart Kernel'),
@@ -550,9 +665,9 @@ export namespace Commands {
           const start = editor.getOffsetAt(selection.start);
           const end = editor.getOffsetAt(selection.end);
 
-          code = editor.model.value.text.substring(start, end);
+          code = editor.model.sharedModel.getSource().substring(start, end);
         } else if (MarkdownCodeBlocks.isMarkdown(extension)) {
-          const { text } = editor.model.value;
+          const text = editor.model.sharedModel.getSource();
           const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
 
           for (const block of blocks) {
@@ -569,8 +684,8 @@ export namespace Commands {
           code = editor.getLine(selection.start.line);
           const cursor = editor.getCursorPosition();
           if (cursor.line + 1 === editor.lineCount) {
-            const text = editor.model.value.text;
-            editor.model.value.text = text + '\n';
+            const text = editor.model.sharedModel.getSource();
+            editor.model.sharedModel.setSource(text + '\n');
           }
           editor.setCursorPosition({
             line: cursor.line + 1,
@@ -602,7 +717,7 @@ export namespace Commands {
 
         let code = '';
         const editor = widget.editor;
-        const text = editor.model.value.text;
+        const text = editor.model.sharedModel.getSource();
         const path = widget.context.path;
         const extension = PathExt.extname(path);
 
@@ -675,7 +790,7 @@ export namespace Commands {
               icon: (args.iconName as string) ?? textEditorIcon
             }),
       execute: args => {
-        const cwd = args.cwd || browserFactory.defaultBrowser.model.path;
+        const cwd = args.cwd || defaultBrowser.model.path;
         return createNew(
           commands,
           cwd as string,
@@ -695,7 +810,7 @@ export namespace Commands {
       caption: trans.__('Create a new markdown file'),
       icon: args => (args['isPalette'] ? undefined : markdownIcon),
       execute: args => {
-        const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
+        const cwd = args['cwd'] || defaultBrowser.model.path;
         return createNew(commands, cwd as string, 'md');
       }
     });
@@ -870,7 +985,7 @@ export namespace Commands {
         }
 
         const editor = widget.editor as CodeMirrorEditor;
-        editor.execCommand('selectAll');
+        editor.execCommand(selectAll);
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       label: trans.__('Select All')
@@ -932,7 +1047,7 @@ export namespace Commands {
     const selectionObj = editor.getSelection();
     const start = editor.getOffsetAt(selectionObj.start);
     const end = editor.getOffsetAt(selectionObj.end);
-    const text = editor.model.value.text.substring(start, end);
+    const text = editor.model.sharedModel.getSource().substring(start, end);
 
     return text;
   }
@@ -940,25 +1055,24 @@ export namespace Commands {
   /**
    * Function to create a new untitled text file, given the current working directory.
    */
-  function createNew(
+  async function createNew(
     commands: CommandRegistry,
     cwd: string,
     ext: string = 'txt'
   ) {
-    return commands
-      .execute('docmanager:new-untitled', {
-        path: cwd,
-        type: 'file',
-        ext
-      })
-      .then(model => {
-        if (model != undefined) {
-          return commands.execute('docmanager:open', {
-            path: model.path,
-            factory: FACTORY
-          });
-        }
-      });
+    const model = await commands.execute('docmanager:new-untitled', {
+      path: cwd,
+      type: 'file',
+      ext
+    });
+    if (model != undefined) {
+      const widget = (await commands.execute('docmanager:open', {
+        path: model.path,
+        factory: FACTORY
+      })) as unknown as IDocumentWidget;
+      widget.isUntitled = true;
+      return widget;
+    }
   }
 
   /**
@@ -1044,7 +1158,6 @@ export namespace Commands {
   ): void {
     const paletteCategory = trans.__('Text Editor');
     const args: JSONObject = {
-      insertSpaces: false,
       size: 4
     };
     const command = CommandIDs.changeTabs;
@@ -1052,7 +1165,6 @@ export namespace Commands {
 
     for (const size of [1, 2, 4, 8]) {
       const args: JSONObject = {
-        insertSpaces: true,
         size
       };
       palette.addItem({ command, args, category: paletteCategory });
@@ -1216,7 +1328,7 @@ export namespace Commands {
     editorServices: IEditorServices,
     tracker: WidgetTracker<MainAreaWidget<CodeViewerWidget>>,
     trans: TranslationBundle
-  ) {
+  ): void {
     const openCodeViewer = async (args: {
       content: string;
       label?: string;
@@ -1246,9 +1358,9 @@ export namespace Commands {
       widget.title.caption = widget.title.label;
 
       // Get the fileType based on the mimetype to determine the icon
-      const fileType = toArray(app.docRegistry.fileTypes()).find(fileType => {
-        return mimetype ? fileType.mimeTypes.includes(mimetype) : undefined;
-      });
+      const fileType = find(app.docRegistry.fileTypes(), fileType =>
+        mimetype ? fileType.mimeTypes.includes(mimetype) : false
+      );
       widget.title.icon = fileType?.icon ?? textEditorIcon;
 
       if (args.widgetId) {

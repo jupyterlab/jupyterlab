@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONEditor } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
+import { CodeEditor, JSONEditor } from '@jupyterlab/codeeditor';
 import { ObservableJSON } from '@jupyterlab/observables';
-import { framePromise } from '@jupyterlab/testutils';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { simulate } from 'simulate-event';
@@ -43,8 +41,20 @@ class LogEditor extends JSONEditor {
 describe('codeeditor', () => {
   describe('JSONEditor', () => {
     let editor: LogEditor;
-    const editorServices = new CodeMirrorEditorFactory();
-    const editorFactory = editorServices.newInlineEditor.bind(editorServices);
+    const editorFactory: CodeEditor.Factory = ({ model }) => {
+      let _hasFocus = false;
+      return {
+        dispose: jest.fn(),
+        focus: () => {
+          _hasFocus = true;
+        },
+        hasFocus: () => _hasFocus,
+        model,
+        refresh: jest.fn(),
+        setCursorPosition: jest.fn(),
+        setOption: jest.fn()
+      } as any;
+    };
 
     beforeEach(() => {
       editor = new LogEditor({ editorFactory });
@@ -106,9 +116,9 @@ describe('codeeditor', () => {
 
       it('should update the text area value', () => {
         const model = editor.model;
-        expect(model.value.text).toBe('No data!');
+        expect(model.sharedModel.getSource()).toBe('');
         editor.source = new ObservableJSON();
-        expect(model.value.text).toBe('{}');
+        expect(model.sharedModel.getSource()).toBe('{}');
       });
     });
 
@@ -116,7 +126,7 @@ describe('codeeditor', () => {
       it('should test whether the editor value is dirty', () => {
         expect(editor.isDirty).toBe(false);
         Widget.attach(editor, document.body);
-        editor.model.value.text = 'a';
+        editor.model.sharedModel.setSource('a');
         expect(editor.isDirty).toBe(true);
       });
 
@@ -140,23 +150,23 @@ describe('codeeditor', () => {
 
     describe('model.value.changed', () => {
       it('should add the error flag if invalid JSON', () => {
-        editor.model.value.text = 'foo';
+        editor.model.sharedModel.setSource('foo');
         expect(editor.hasClass('jp-mod-error')).toBe(true);
       });
 
       it('should show the commit button if the value has changed', () => {
-        editor.model.value.text = '{"foo": 2}';
-        editor.model.value.text = '{"foo": 1}';
+        editor.model.sharedModel.setSource('{"foo": 2}');
+        editor.model.sharedModel.setSource('{"foo": 1}');
         expect(editor.commitButtonNode.hidden).toBe(false);
       });
 
       it('should not show the commit button if the value is invalid', () => {
-        editor.model.value.text = 'foo';
+        editor.model.sharedModel.setSource('foo');
         expect(editor.commitButtonNode.hidden).toBe(true);
       });
 
       it('should show the revert button if the value has changed', () => {
-        editor.model.value.text = 'foo';
+        editor.model.sharedModel.setSource('foo');
         expect(editor.revertButtonNode.hidden).toBe(false);
       });
     });
@@ -178,19 +188,19 @@ describe('codeeditor', () => {
           editor.editor.focus();
           editor.source.set('foo', 1);
           const model = editor.model;
-          expect(model.value.text).toBe('{}');
+          expect(model.sharedModel.getSource()).toBe('{}');
           simulate(editor.editorHostNode, 'blur');
-          expect(model.value.text).toBe('{\n    "foo": 1\n}');
+          expect(model.sharedModel.getSource()).toBe('{\n    "foo": 1\n}');
         });
 
         it('should not revert to current data if there was a change', () => {
           editor.source = new ObservableJSON();
-          editor.model.value.text = 'foo';
+          editor.model.sharedModel.setSource('foo');
           editor.source.set('foo', 1);
           const model = editor.model;
-          expect(model.value.text).toBe('foo');
+          expect(model.sharedModel.getSource()).toBe('foo');
           simulate(editor.editorHostNode, 'blur');
-          expect(model.value.text).toBe('foo');
+          expect(model.sharedModel.getSource()).toBe('foo');
           expect(editor.commitButtonNode.hidden).toBe(true);
           expect(editor.revertButtonNode.hidden).toBe(false);
         });
@@ -204,17 +214,19 @@ describe('codeeditor', () => {
 
         it('should revert the current data', () => {
           editor.source = new ObservableJSON();
-          editor.model.value.text = 'foo';
+          editor.model.sharedModel.setSource('foo');
           simulate(editor.revertButtonNode, 'click');
-          expect(editor.model.value.text).toBe('{}');
+          expect(editor.model.sharedModel.getSource()).toBe('{}');
         });
 
         it('should handle programmatic changes', () => {
           editor.source = new ObservableJSON();
-          editor.model.value.text = 'foo';
+          editor.model.sharedModel.setSource('foo');
           editor.source.set('foo', 1);
           simulate(editor.revertButtonNode, 'click');
-          expect(editor.model.value.text).toBe('{\n    "foo": 1\n}');
+          expect(editor.model.sharedModel.getSource()).toBe(
+            '{\n    "foo": 1\n}'
+          );
         });
 
         it('should handle click events on the commit button', () => {
@@ -224,70 +236,76 @@ describe('codeeditor', () => {
 
         it('should bail if it is not valid JSON', () => {
           editor.source = new ObservableJSON();
-          editor.model.value.text = 'foo';
+          editor.model.sharedModel.setSource('foo');
           editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).toBe('foo');
+          expect(editor.model.sharedModel.getSource()).toBe('foo');
         });
 
         it('should override a key that was set programmatically', () => {
           editor.source = new ObservableJSON();
-          editor.model.value.text = '{"foo": 2}';
+          editor.model.sharedModel.setSource('{"foo": 2}');
           editor.source.set('foo', 1);
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).toBe('{\n    "foo": 2\n}');
+          expect(editor.model.sharedModel.getSource()).toBe(
+            '{\n    "foo": 2\n}'
+          );
         });
 
         it('should allow a programmatic key to update', () => {
           editor.source = new ObservableJSON();
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
-          editor.model.value.text = '{"foo":1, "bar": 2}';
+          editor.model.sharedModel.setSource('{"foo":1, "bar": 2}');
           editor.source.set('foo', 2);
           simulate(editor.commitButtonNode, 'click');
           const expected = '{\n    "foo": 2,\n    "bar": 2\n}';
-          expect(editor.model.value.text).toBe(expected);
+          expect(editor.model.sharedModel.getSource()).toBe(expected);
         });
 
         it('should allow a key to be added by the user', () => {
           editor.source = new ObservableJSON();
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
-          editor.model.value.text = '{"foo":1, "bar": 2, "baz": 3}';
+          editor.model.sharedModel.setSource('{"foo":1, "bar": 2, "baz": 3}');
           editor.source.set('foo', 2);
           simulate(editor.commitButtonNode, 'click');
           const value = '{\n    "foo": 2,\n    "bar": 2,\n    "baz": 3\n}';
-          expect(editor.model.value.text).toBe(value);
+          expect(editor.model.sharedModel.getSource()).toBe(value);
         });
 
         it('should allow a key to be removed by the user', () => {
           editor.source = new ObservableJSON();
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
-          editor.model.value.text = '{"foo": 1}';
+          editor.model.sharedModel.setSource('{"foo": 1}');
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).toBe('{\n    "foo": 1\n}');
+          expect(editor.model.sharedModel.getSource()).toBe(
+            '{\n    "foo": 1\n}'
+          );
         });
 
         it('should allow a key to be removed programmatically that was not set by the user', () => {
           editor.source = new ObservableJSON();
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
-          editor.model.value.text = '{"foo": 1, "bar": 3}';
+          editor.model.sharedModel.setSource('{"foo": 1, "bar": 3}');
           editor.source.delete('foo');
           simulate(editor.commitButtonNode, 'click');
-          expect(editor.model.value.text).toBe('{\n    "bar": 3\n}');
+          expect(editor.model.sharedModel.getSource()).toBe(
+            '{\n    "bar": 3\n}'
+          );
         });
 
         it('should keep a key that was removed programmatically that was changed by the user', () => {
           editor.source = new ObservableJSON();
           editor.source.set('foo', 1);
           editor.source.set('bar', 1);
-          editor.model.value.text = '{"foo": 2, "bar": 3}';
+          editor.model.sharedModel.setSource('{"foo": 2, "bar": 3}');
           editor.source.set('foo', null);
           simulate(editor.commitButtonNode, 'click');
           const expected = '{\n    "foo": 2,\n    "bar": 3\n}';
-          expect(editor.model.value.text).toBe(expected);
+          expect(editor.model.sharedModel.getSource()).toBe(expected);
         });
       });
     });
@@ -303,18 +321,6 @@ describe('codeeditor', () => {
         simulate(editor.revertButtonNode, 'click');
         simulate(editor.commitButtonNode, 'click');
         expect(editor.events).toEqual(['blur', 'click', 'click']);
-      });
-    });
-
-    describe('#onAfterShow()', () => {
-      it('should update the editor', async () => {
-        editor.hide();
-        Widget.attach(editor, document.body);
-        editor.show();
-        await framePromise();
-        expect(editor.methods).toEqual(
-          expect.arrayContaining(['onUpdateRequest'])
-        );
       });
     });
 
@@ -337,24 +343,24 @@ describe('codeeditor', () => {
       it('should update the value', () => {
         editor.source = new ObservableJSON();
         editor.source.set('foo', 1);
-        expect(editor.model.value.text).toBe('{\n    "foo": 1\n}');
+        expect(editor.model.sharedModel.getSource()).toBe('{\n    "foo": 1\n}');
       });
 
       it('should bail if the input is dirty', () => {
         Widget.attach(editor, document.body);
         editor.source = new ObservableJSON();
-        editor.model.value.text = 'ha';
+        editor.model.sharedModel.setSource('ha');
         editor.source.set('foo', 2);
-        expect(editor.model.value.text).toBe('ha');
+        expect(editor.model.sharedModel.getSource()).toBe('ha');
       });
 
       it('should bail if the input is focused', () => {
         Widget.attach(editor, document.body);
-        editor.model.value.text = '{}';
+        editor.model.sharedModel.setSource('{}');
         editor.source = new ObservableJSON();
         editor.editor.focus();
         editor.source.set('foo', 2);
-        expect(editor.model.value.text).toBe('{}');
+        expect(editor.model.sharedModel.getSource()).toBe('{}');
       });
     });
   });

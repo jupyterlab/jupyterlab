@@ -21,10 +21,13 @@
       "path": "../services"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "."
     },
     {
-      "path": "../../testutils"
+      "path": "../testing"
     }
   ]
 }

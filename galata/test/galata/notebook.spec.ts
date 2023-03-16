@@ -4,15 +4,13 @@
 
 import * as path from 'path';
 
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 test.describe('Notebook Tests', () => {
   test('Create New Notebook', async ({ page, tmpPath }) => {
     const fileName = 'create_test.ipynb';
     await page.notebook.createNew(fileName);
-    expect(
-      await page.waitForSelector(`[role="main"] >> text=${fileName}`)
-    ).toBeTruthy();
+    await page.getByRole('main').getByText(fileName).waitFor();
 
     expect(await page.contents.fileExists(`${tmpPath}/${fileName}`)).toEqual(
       true
@@ -27,11 +25,9 @@ test.describe('Notebook Tests', () => {
     expect(await page.notebook.getCellType(0)).toBe('markdown');
 
     // Wait for kernel to be idle
-    expect(
-      await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
-    ).toBeTruthy();
+    await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
 
-    expect(await (await page.$('[role="main"]')).screenshot()).toMatchSnapshot(
+    expect(await page.getByRole('main').screenshot()).toMatchSnapshot(
       'markdown-cell.png'
     );
   });
@@ -45,11 +41,11 @@ test.describe('Notebook Tests', () => {
 
     // Wait for kernel to be idle and the debug switch to appear
     await Promise.all([
-      page.waitForSelector(`#jp-main-statusbar >> text=Idle`),
-      page.waitForSelector('.jp-DebuggerBugButton')
+      page.locator('#jp-main-statusbar').getByText('Idle').waitFor(),
+      page.locator('.jp-DebuggerBugButton').waitFor()
     ]);
 
-    expect(await (await page.$('[role="main"]')).screenshot()).toMatchSnapshot(
+    expect(await page.getByRole('main').screenshot()).toMatchSnapshot(
       'raw-cell.png'
     );
   });
@@ -62,11 +58,9 @@ test.describe('Notebook Tests', () => {
     expect(await page.notebook.getCellType(1)).toBe('code');
 
     // Wait for kernel to be idle
-    expect(
-      await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
-    ).toBeTruthy();
+    await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
 
-    expect(await (await page.$('[role="main"]')).screenshot()).toMatchSnapshot(
+    expect(await page.getByRole('main').screenshot()).toMatchSnapshot(
       'code-cell.png'
     );
   });
@@ -83,7 +77,7 @@ test.describe('Notebook Tests', () => {
 
     expect((await page.notebook.getCellTextOutput(2))![0]).toBe('4');
 
-    expect(await (await page.$('[role="main"]')).screenshot()).toMatchSnapshot(
+    expect(await page.getByRole('main').screenshot()).toMatchSnapshot(
       'run-cells.png'
     );
   });
@@ -101,6 +95,8 @@ test.describe('Notebook Tests', () => {
     await page.notebook.activate(notebook);
     expect(await page.notebook.isActive(notebook)).toBeTruthy();
 
+    await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
+
     await page.notebook.runCellByCell();
 
     const cellOutput2 = await page.notebook.getCellTextOutput(2);
@@ -113,7 +109,7 @@ test.describe('Notebook Tests', () => {
 
     const panel = await page.activity.getPanel();
 
-    expect(await panel.screenshot()).toMatchSnapshot('example-run.png');
+    expect(await panel!.screenshot()).toMatchSnapshot('example-run.png');
   });
 
   test('Open folder of notebook and run', async ({ page, tmpPath }) => {
@@ -124,13 +120,70 @@ test.describe('Notebook Tests', () => {
     );
 
     await page.notebook.openByPath(`${tmpPath}/${filename}`);
+
+    await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
+
     await page.notebook.runCellByCell();
 
-    expect(await page.waitForSelector('text=100')).toBeTruthy();
+    expect(await page.getByText('100').count()).toBeGreaterThanOrEqual(1);
 
     await page.notebook.revertChanges();
     await page.notebook.close();
 
     expect(await page.waitForSelector(page.launcherSelector)).toBeTruthy();
+  });
+});
+
+test.describe('Access cells in windowed notebook', () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+        windowingMode: 'full'
+      }
+    }
+  });
+
+  test('get the cell count', async ({ page, tmpPath }) => {
+    const target = `${tmpPath}/windowed_notebook.ipynb`;
+    await page.contents.uploadFile(
+      path.resolve(__dirname, 'notebooks/windowed_notebook.ipynb'),
+      target
+    );
+
+    await page.filebrowser.open(target);
+    await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
+
+    expect(await page.notebook.getCellCount()).toEqual(14);
+  });
+
+  test('getCell below the viewport', async ({ page, tmpPath }) => {
+    const target = `${tmpPath}/windowed_notebook.ipynb`;
+    await page.contents.uploadFile(
+      path.resolve(__dirname, 'notebooks/windowed_notebook.ipynb'),
+      target
+    );
+
+    await page.filebrowser.open(target);
+    await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
+
+    expect(await page.notebook.getCell(12)).toBeTruthy();
+  });
+
+  test('getCell above the viewport', async ({ page, tmpPath }) => {
+    const target = `${tmpPath}/windowed_notebook.ipynb`;
+    await page.contents.uploadFile(
+      path.resolve(__dirname, 'notebooks/windowed_notebook.ipynb'),
+      target
+    );
+
+    await page.filebrowser.open(target);
+    await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
+    await page.waitForTimeout(50);
+
+    await page.notebook.getCell(12);
+
+    expect(await page.notebook.getCell(0)).toBeTruthy();
   });
 });

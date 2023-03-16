@@ -9,13 +9,7 @@
       "path": "../codeeditor"
     },
     {
-      "path": "../codemirror"
-    },
-    {
       "path": "../coreutils"
-    },
-    {
-      "path": "../docprovider"
     },
     {
       "path": "../observables"
@@ -30,9 +24,6 @@
       "path": "../services"
     },
     {
-      "path": "../shared-models"
-    },
-    {
       "path": "../translation"
     },
     {
@@ -42,7 +33,7 @@
       "path": "."
     },
     {
-      "path": "../../testutils"
+      "path": "../testing"
     }
   ]
 }

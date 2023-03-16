@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "../lib/extension",
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../../packages/application"
+    },
+    {
+      "path": "../../packages/apputils"
+    },
+    {
+      "path": "../../packages/cells"
+    },
+    {
+      "path": "../../packages/docmanager"
+    },
+    {
+      "path": "../../packages/nbformat"
+    },
+    {
+      "path": "../../packages/notebook"
+    },
+    {
+      "path": "../../packages/settingregistry"
+    }
+  ]
+}

@@ -20,13 +20,9 @@ fi
 
 if [[ $GROUP == js* ]]; then
 
-    if [[ $GROUP == "js-testutils" ]]; then
-        pushd testutils
-    else
-        # extract the group name
-        export PKG="${GROUP#*-}"
-        pushd packages/${PKG}
-    fi
+    # extract the group name
+    export PKG="${GROUP#*-}"
+    pushd packages/${PKG}
 
     jlpm run build:test; true
 
@@ -65,15 +61,17 @@ if [[ $GROUP == lint ]]; then
     jlpm run eslint:check || (echo 'Please run `jlpm run eslint` locally and push changes' && exit 1)
     jlpm run eslint:check:typed || (echo echo 'Please run `jlpm run eslint:typed` locally and push changes' && exit 1)
     jlpm run stylelint:check || (echo 'Please run `jlpm run stylelint` locally and push changes' && exit 1)
+
+    # Python checks
+    black --check --diff --color .
+    ruff .
+    pipx run 'validate-pyproject[all]' pyproject.toml
 fi
 
 
 if [[ $GROUP == integrity2 ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
-
-    # Check the manifest
-    check-manifest -v
 
     # Build the packages individually.
     jlpm run build:src
@@ -112,7 +110,7 @@ if [[ $GROUP == integrity3 ]]; then
     jlpm bumpversion release --force # switch to rc
     jlpm bumpversion build --force
     jlpm bumpversion next --force
-    VERSION=$(python setup.py --version)
+    VERSION=$(hatch version)
     if [[ $VERSION != *rc2 ]]; then exit 1; fi
 
     # make sure we can patch release
@@ -142,6 +140,7 @@ if [[ $GROUP == release_test ]]; then
     jlpm run publish:js --yes
     jlpm run prepare:python-release
     cat jupyterlab/staging/package.json
+
     ./scripts/release_test.sh
     node buildutils/lib/local-repository.js stop
 fi
@@ -280,7 +279,7 @@ if [[ $GROUP == usage2 ]]; then
 
     # Make sure we can non-dev install.
     virtualenv -p $(which python3) test_install
-    ./test_install/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
+    ./test_install/bin/pip install -q ".[dev,test]"  # this populates <sys_prefix>/share/jupyter/lab
 
     ./test_install/bin/jupyter server extension list 1>serverextensions 2>&1
     cat serverextensions

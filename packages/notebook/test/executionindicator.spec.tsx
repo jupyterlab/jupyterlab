@@ -2,19 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { createSessionContext } from '@jupyterlab/testutils';
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+import { JupyterServer } from '@jupyterlab/testing';
 import {
   ExecutionIndicator,
   ExecutionIndicatorComponent,
   Notebook,
   NotebookActions,
   NotebookModel
-} from '..';
-import * as utils from './utils';
+} from '@jupyterlab/notebook';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
+import * as utils from './utils';
 
 const fastCellModel = {
   cell_type: 'code',
@@ -29,19 +29,28 @@ const slowCellModel = {
   execution_count: 1,
   metadata: { tags: [] },
   outputs: [],
-  source: ['import time\n', 'time.sleep(3)\n']
+  source: ['import time\n', 'time.sleep(3.05)\n']
+};
+
+const killerCellModel = {
+  cell_type: 'code',
+  execution_count: 1,
+  metadata: { tags: [] },
+  outputs: [],
+  source: ['import os\n', 'os.system(f"kill {os.getpid()}")\n']
 };
 
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
 });
+
+const SESSION_SETUP_TIMEOUT = 30000;
 
 describe('@jupyterlab/notebook', () => {
   let rendermime: IRenderMimeRegistry;
@@ -51,27 +60,36 @@ describe('@jupyterlab/notebook', () => {
     let sessionContext: ISessionContext;
     let ipySessionContext: ISessionContext;
     let indicator: ExecutionIndicator;
-    beforeAll(async function () {
-      jest.setTimeout(20000);
-      rendermime = utils.defaultRenderMime();
 
-      async function createContext(options?: Partial<SessionContext.IOptions>) {
-        const context = await createSessionContext(options);
-        await context.initialize();
-        await context.session?.kernel?.info;
-        return context;
-      }
+    async function createContext(options?: Partial<SessionContext.IOptions>) {
+      const context = await createSessionContext(options);
+      await context.initialize();
+      await context.session?.kernel?.info;
+      return context;
+    }
+
+    async function setupSessions() {
       [sessionContext, ipySessionContext] = await Promise.all([
         createContext(),
         createContext({ kernelPreference: { name: 'ipython' } })
       ]);
-    });
+    }
+
+    beforeAll(async () => {
+      rendermime = utils.defaultRenderMime();
+
+      await setupSessions();
+    }, SESSION_SETUP_TIMEOUT);
 
     beforeEach(async () => {
       widget = new Notebook({
         rendermime,
         contentFactory: utils.createNotebookFactory(),
-        mimeTypeService: utils.mimeTypeService
+        mimeTypeService: utils.mimeTypeService,
+        notebookConfig: {
+          ...Notebook.defaultNotebookConfig,
+          windowingMode: 'none'
+        }
       });
       const model = new NotebookModel();
       const modelJson = {
@@ -97,8 +115,10 @@ describe('@jupyterlab/notebook', () => {
     });
 
     afterEach(() => {
+      widget.model?.dispose();
       widget.dispose();
       utils.clipboard.clear();
+      indicator.model.dispose();
       indicator.dispose();
     });
 
@@ -153,6 +173,39 @@ describe('@jupyterlab/notebook', () => {
         await NotebookActions.run(widget, ipySessionContext);
         expect(executed).toEqual(expect.arrayContaining([3, 3, 3, 2, 2, 2, 0]));
       });
+
+      it(
+        'should reset to idle when kernel gets abruptly terminated',
+        async () => {
+          const model = new NotebookModel();
+          const modelJson = {
+            ...utils.DEFAULT_CONTENT,
+            cells: [killerCellModel, slowCellModel]
+          };
+
+          model.fromJSON(modelJson);
+          widget.model = model;
+
+          widget.activeCellIndex = 0;
+          for (let idx = 0; idx < widget.widgets.length; idx++) {
+            widget.select(widget.widgets[idx]);
+          }
+          let scheduledTally: Array<number> = [];
+
+          indicator.model.stateChanged.connect(state => {
+            scheduledTally.push(
+              state.executionState(widget)!.scheduledCell.size
+            );
+          });
+
+          let completed = await NotebookActions.run(widget, ipySessionContext);
+          expect(completed).toBe(false);
+
+          expect(scheduledTally).toEqual(expect.arrayContaining([2, 0]));
+          await setupSessions();
+        },
+        SESSION_SETUP_TIMEOUT
+      );
     });
   });
   describe('testProgressCircle', () => {
@@ -194,7 +247,7 @@ describe('@jupyterlab/notebook', () => {
         />
       );
       const htmlElement = ReactDOMServer.renderToString(element);
-      expect(htmlElement).toContain('<div data-reactroot=""></div>');
+      expect(htmlElement).toContain('<div></div>');
     });
     it('Should render a filled circle with 0/2 cell executed message', () => {
       defaultState.scheduledCellNumber = 2;

@@ -49,6 +49,10 @@ body {
   display: flex;
   min-height: var(--jp-private-menubar-height);
   overflow: visible;
+
+  /* relax lumino strict CSS contaiment to allow painting the menu bar item
+  over the menu in order to create an illusion of partial border */
+  contain: style size !important;
 }
 
 #jp-menu-panel {

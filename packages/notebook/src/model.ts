@@ -2,34 +2,23 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
-import {
-  CellModel,
-  CodeCellModel,
-  ICellModel,
-  ICodeCellModel,
-  IMarkdownCellModel,
-  IRawCellModel,
-  MarkdownCellModel,
-  RawCellModel
-} from '@jupyterlab/cells';
+import { ICellModel } from '@jupyterlab/cells';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
+import { IObservableList } from '@jupyterlab/observables';
 import {
-  IModelDB,
-  IObservableJSON,
-  IObservableList,
-  IObservableMap,
-  IObservableUndoableList,
-  ModelDB
-} from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+  IMapChange,
+  ISharedNotebook,
+  NotebookChange,
+  YNotebook
+} from '@jupyter/ydoc';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
-import { JSONObject, ReadonlyPartialJSONValue, UUID } from '@lumino/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { CellList } from './celllist';
 
@@ -40,12 +29,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   /**
    * The list of cells in the notebook.
    */
-  readonly cells: IObservableUndoableList<ICellModel>;
-
-  /**
-   * The cell model factory for the notebook.
-   */
-  readonly contentFactory: NotebookModel.IContentFactory;
+  readonly cells: CellList;
 
   /**
    * The major version number of the nbformat.
@@ -59,8 +43,19 @@ export interface INotebookModel extends DocumentRegistry.IModel {
 
   /**
    * The metadata associated with the notebook.
+   *
+   * ### Notes
+   * This is a copy of the metadata. Changing a part of it
+   * won't affect the model.
+   * As this returns a copy of all metadata, it is advised to
+   * use `getMetadata` to speed up the process of getting a single key.
    */
-  readonly metadata: IObservableJSON;
+  readonly metadata: nbformat.INotebookMetadata;
+
+  /**
+   * Signal emitted when notebook metadata changes.
+   */
+  readonly metadataChanged: ISignal<INotebookModel, IMapChange>;
 
   /**
    * The array of deleted cells since the notebook was last run.
@@ -68,10 +63,34 @@ export interface INotebookModel extends DocumentRegistry.IModel {
   readonly deletedCells: string[];
 
   /**
-   * If the model is initialized or not.
+   * Shared model
    */
-  isInitialized: boolean;
-  readonly sharedModel: models.ISharedNotebook;
+  readonly sharedModel: ISharedNotebook;
+
+  /**
+   * Delete a metadata
+   *
+   * @param key Metadata key
+   */
+  deleteMetadata(key: string): void;
+
+  /**
+   * Get a metadata
+   *
+   * ### Notes
+   * This returns a copy of the key value.
+   *
+   * @param key Metadata key
+   */
+  getMetadata(key: string): any;
+
+  /**
+   * Set a metadata
+   *
+   * @param key Metadata key
+   * @param value Metadata value
+   */
+  setMetadata(key: string, value: any): void;
 }
 
 /**
@@ -82,38 +101,35 @@ export class NotebookModel implements INotebookModel {
    * Construct a new notebook model.
    */
   constructor(options: NotebookModel.IOptions = {}) {
-    if (options.modelDB) {
-      this.modelDB = options.modelDB;
+    this.standaloneModel = typeof options.sharedModel === 'undefined';
+
+    if (options.sharedModel) {
+      this.sharedModel = options.sharedModel;
     } else {
-      this.modelDB = new ModelDB();
+      this.sharedModel = YNotebook.create({
+        disableDocumentWideUndoRedo:
+          options.disableDocumentWideUndoRedo ?? true,
+        data: {
+          nbformat: nbformat.MAJOR_VERSION,
+          nbformat_minor: nbformat.MINOR_VERSION,
+          metadata: {
+            kernelspec: { name: '', display_name: '' },
+            language_info: { name: options.languagePreference ?? '' }
+          }
+        }
+      });
     }
-    this.sharedModel = models.YNotebook.create(
-      options.disableDocumentWideUndoRedo || false
-    ) as models.ISharedNotebook;
-    this._isInitialized = options.isInitialized === false ? false : true;
-    const factory =
-      options.contentFactory || NotebookModel.defaultContentFactory;
-    this.contentFactory = factory.clone(this.modelDB.view('cells'));
-    this._cells = new CellList(
-      this.modelDB,
-      this.contentFactory,
-      this.sharedModel
-    );
+
+    this._cells = new CellList(this.sharedModel);
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
-    this._cells.changed.connect(this._onCellsChanged, this);
-
-    // Handle initial metadata.
-    const metadata = this.modelDB.createMap('metadata');
-    if (!metadata.has('language_info')) {
-      const name = options.languagePreference || '';
-      metadata.set('language_info', { name });
-    }
-    this._ensureMetadata();
-    metadata.changed.connect(this._onMetadataChanged, this);
     this._deletedCells = [];
+    this._collaborationEnabled = !!options?.collaborationEnabled;
 
+    this._cells.changed.connect(this._onCellsChanged, this);
     this.sharedModel.changed.connect(this._onStateChanged, this);
+    this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
   }
+
   /**
    * A signal emitted when the document content changes.
    */
@@ -122,10 +138,24 @@ export class NotebookModel implements INotebookModel {
   }
 
   /**
+   * Signal emitted when notebook metadata changes.
+   */
+  get metadataChanged(): ISignal<INotebookModel, IMapChange<any>> {
+    return this._metadataChanged;
+  }
+
+  /**
    * A signal emitted when the document state changes.
    */
   get stateChanged(): ISignal<this, IChangedArgs<any>> {
     return this._stateChanged;
+  }
+
+  /**
+   * Get the observable list of notebook cells.
+   */
+  get cells(): CellList {
+    return this._cells;
   }
 
   /**
@@ -164,40 +194,37 @@ export class NotebookModel implements INotebookModel {
 
   /**
    * The metadata associated with the notebook.
+   *
+   * ### Notes
+   * This is a copy of the metadata. Changing a part of it
+   * won't affect the model.
+   * As this returns a copy of all metadata, it is advised to
+   * use `getMetadata` to speed up the process of getting a single key.
    */
-  get metadata(): IObservableJSON {
-    return this.modelDB.get('metadata') as IObservableJSON;
-  }
-
-  /**
-   * Get the observable list of notebook cells.
-   */
-  get cells(): IObservableUndoableList<ICellModel> {
-    return this._cells;
+  get metadata(): nbformat.INotebookMetadata {
+    return this.sharedModel.metadata;
   }
 
   /**
    * The major version number of the nbformat.
    */
   get nbformat(): number {
-    return this._nbformat;
+    return this.sharedModel.nbformat;
   }
 
   /**
    * The minor version number of the nbformat.
    */
   get nbformatMinor(): number {
-    return this._nbformatMinor;
+    return this.sharedModel.nbformat_minor;
   }
 
   /**
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    const spec = this.metadata.get(
-      'kernelspec'
-    ) as nbformat.IKernelspecMetadata;
-    return spec ? spec.name : '';
+    const spec = this.getMetadata('kernelspec');
+    return spec?.name ?? '';
   }
 
   /**
@@ -208,20 +235,18 @@ export class NotebookModel implements INotebookModel {
   }
 
   /**
-   * If the model is initialized or not.
-   */
-  get isInitialized(): boolean {
-    return this._isInitialized;
-  }
-
-  /**
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    const info = this.metadata.get(
-      'language_info'
-    ) as nbformat.ILanguageInfoMetadata;
-    return info ? info.name : '';
+    const info = this.getMetadata('language_info');
+    return info?.name ?? '';
+  }
+
+  /**
+   * Whether the model is collaborative or not.
+   */
+  get collaborative(): boolean {
+    return this._collaborationEnabled;
   }
 
   /**
@@ -232,11 +257,50 @@ export class NotebookModel implements INotebookModel {
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
+
     const cells = this.cells;
     this._cells = null!;
     cells.dispose();
-    this._isDisposed = true;
+    if (this.standaloneModel) {
+      this.sharedModel.dispose();
+    }
     Signal.clearData(this);
+  }
+
+  /**
+   * Delete a metadata
+   *
+   * @param key Metadata key
+   */
+  deleteMetadata(key: string): void {
+    return this.sharedModel.deleteMetadata(key);
+  }
+
+  /**
+   * Get a metadata
+   *
+   * ### Notes
+   * This returns a copy of the key value.
+   *
+   * @param key Metadata key
+   */
+  getMetadata(key: string): any {
+    return this.sharedModel.getMetadata(key);
+  }
+
+  /**
+   * Set a metadata
+   *
+   * @param key Metadata key
+   * @param value Metadata value
+   */
+  setMetadata(key: string, value: any): void {
+    if (typeof value === 'undefined') {
+      this.sharedModel.deleteMetadata(key);
+    } else {
+      this.sharedModel.setMetadata(key, value);
+    }
   }
 
   /**
@@ -260,26 +324,8 @@ export class NotebookModel implements INotebookModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.INotebookContent {
-    const cells: nbformat.ICell[] = [];
-    for (let i = 0; i < (this.cells?.length ?? 0); i++) {
-      const cell = this.cells.get(i).toJSON();
-      if (this._nbformat === 4 && this._nbformatMinor <= 4) {
-        // strip cell ids if we have notebook format 4.0-4.4
-        delete cell.id;
-      }
-      cells.push(cell);
-    }
     this._ensureMetadata();
-    const metadata = this.sharedModel.getMetadata();
-    for (const key of this.metadata.keys()) {
-      metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
-    }
-    return {
-      metadata,
-      nbformat_minor: this._nbformatMinor,
-      nbformat: this._nbformat,
-      cells
-    };
+    return this.sharedModel.toJSON();
   }
 
   /**
@@ -289,49 +335,19 @@ export class NotebookModel implements INotebookModel {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: nbformat.INotebookContent): void {
-    const cells: ICellModel[] = [];
-    const factory = this.contentFactory;
-    const useId = value.nbformat === 4 && value.nbformat_minor >= 5;
-    for (const cell of value.cells) {
-      const options: CellModel.IOptions = { cell };
-      if (useId) {
-        options.id = (cell as any).id;
-      }
-      switch (cell.cell_type) {
-        case 'code':
-          cells.push(factory.createCodeCell(options));
-          break;
-        case 'markdown':
-          cells.push(factory.createMarkdownCell(options));
-          break;
-        case 'raw':
-          cells.push(factory.createRawCell(options));
-          break;
-        default:
-          continue;
-      }
-    }
-    this.cells.beginCompoundOperation();
-    this.cells.clear();
-    this.cells.pushAll(cells);
-    this.cells.endCompoundOperation();
-
-    (this.sharedModel as models.YNotebook).nbformat_minor =
-      nbformat.MINOR_VERSION;
-    (this.sharedModel as models.YNotebook).nbformat = nbformat.MAJOR_VERSION;
+    const copy = JSONExt.deepCopy(value);
     const origNbformat = value.metadata.orig_nbformat;
 
-    if (value.nbformat !== this._nbformat) {
-      (this.sharedModel as models.YNotebook).nbformat = value.nbformat;
-    }
-    if (value.nbformat_minor > this._nbformatMinor) {
-      (this.sharedModel as models.YNotebook).nbformat_minor =
-        value.nbformat_minor;
-    }
-
     // Alert the user if the format changes.
-    if (origNbformat !== undefined && this._nbformat !== origNbformat) {
-      const newer = this._nbformat > origNbformat;
+    copy.nbformat = Math.max(value.nbformat, nbformat.MAJOR_VERSION);
+    if (
+      copy.nbformat !== value.nbformat ||
+      copy.nbformat_minor < nbformat.MINOR_VERSION
+    ) {
+      copy.nbformat_minor = nbformat.MINOR_VERSION;
+    }
+    if (origNbformat !== undefined && copy.nbformat !== origNbformat) {
+      const newer = copy.nbformat > origNbformat;
       let msg: string;
 
       if (newer) {
@@ -342,7 +358,7 @@ The next time you save this notebook, the current notebook format (v%2) will be 
 'Older versions of Jupyter may not be able to read the new format.' To preserve the original format version,
 close the notebook without saving it.`,
           origNbformat,
-          this._nbformat
+          copy.nbformat
         );
       } else {
         msg = this._trans.__(
@@ -352,7 +368,7 @@ The next time you save this notebook, the current notebook format (v%2) will be 
 Some features of the original notebook may not be available.' To preserve the original format version,
 close the notebook without saving it.`,
           origNbformat,
-          this._nbformat
+          copy.nbformat
         );
       }
       void showDialog({
@@ -362,41 +378,23 @@ close the notebook without saving it.`,
       });
     }
 
-    // Update the metadata.
-    this.metadata.clear();
-    const metadata = value.metadata;
-    for (const key in metadata) {
-      // orig_nbformat is not intended to be stored per spec.
-      if (key === 'orig_nbformat') {
-        continue;
-      }
-      this.metadata.set(key, metadata[key]);
+    // Ensure there is at least one cell
+    if ((copy.cells?.length ?? 0) === 0) {
+      copy['cells'] = [
+        { cell_type: 'code', source: '', metadata: { trusted: true } }
+      ];
     }
+    this.sharedModel.fromJSON(copy);
+
     this._ensureMetadata();
     this.dirty = true;
-  }
-
-  /**
-   * Initialize the model with its current state.
-   *
-   * # Notes
-   * Adds an empty code cell if the model is empty
-   * and clears undo state.
-   */
-  initialize(): void {
-    if (!this.cells.length) {
-      const factory = this.contentFactory;
-      this.cells.push(factory.createCodeCell({}));
-    }
-    this._isInitialized = true;
-    this.cells.clearUndo();
   }
 
   /**
    * Handle a change in the cells list.
    */
   private _onCellsChanged(
-    list: IObservableList<ICellModel>,
+    list: CellList,
     change: IObservableList.IChangedArgs<ICellModel>
   ): void {
     switch (change.type) {
@@ -418,59 +416,48 @@ close the notebook without saving it.`,
     this.triggerContentChange();
   }
 
+  private _onMetadataChanged(
+    sender: ISharedNotebook,
+    changes: IMapChange
+  ): void {
+    this._metadataChanged.emit(changes);
+    this.triggerContentChange();
+  }
+
   private _onStateChanged(
-    sender: models.ISharedNotebook,
-    changes: models.NotebookChange
+    sender: ISharedNotebook,
+    changes: NotebookChange
   ): void {
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        if (value.name !== 'dirty' || this._dirty !== value.newValue) {
-          this._dirty = value.newValue;
-          this.triggerStateChange(value);
+        if (value.name === 'dirty') {
+          // Setting `dirty` will trigger the state change.
+          // We always set `dirty` because the shared model state
+          // and the local attribute are synchronized one way shared model -> _dirty
+          this.dirty = value.newValue;
+        } else if (value.oldValue !== value.newValue) {
+          this.triggerStateChange({
+            newValue: undefined,
+            oldValue: undefined,
+            ...value
+          });
         }
       });
     }
-
-    if (changes.nbformatChanged) {
-      const change = changes.nbformatChanged;
-      if (change.key === 'nbformat' && change.newValue !== undefined) {
-        this._nbformat = change.newValue;
-      }
-      if (change.key === 'nbformat_minor' && change.newValue !== undefined) {
-        this._nbformatMinor = change.newValue;
-      }
-    }
-
-    if (changes.metadataChange) {
-      const metadata = changes.metadataChange.newValue as JSONObject;
-      this._modelDBMutex(() => {
-        Object.entries(metadata).forEach(([key, value]) => {
-          this.metadata.set(key, value);
-        });
-      });
-    }
-  }
-
-  private _onMetadataChanged(
-    metadata: IObservableJSON,
-    change: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue | undefined>
-  ): void {
-    this._modelDBMutex(() => {
-      this.sharedModel.updateMetadata(metadata.toJSON());
-    });
-    this.triggerContentChange();
   }
 
   /**
    * Make sure we have the required metadata fields.
    */
-  private _ensureMetadata(): void {
-    const metadata = this.metadata;
-    if (!metadata.has('language_info')) {
-      metadata.set('language_info', { name: '' });
+  private _ensureMetadata(languageName: string = ''): void {
+    if (!this.getMetadata('language_info')) {
+      this.sharedModel.setMetadata('language_info', { name: languageName });
     }
-    if (!metadata.has('kernelspec')) {
-      metadata.set('kernelspec', { name: '', display_name: '' });
+    if (!this.getMetadata('kernelspec')) {
+      this.sharedModel.setMetadata('kernelspec', {
+        name: '',
+        display_name: ''
+      });
     }
   }
 
@@ -497,25 +484,14 @@ close the notebook without saving it.`,
   }
 
   /**
-   * The cell model factory for the notebook.
-   */
-  readonly contentFactory: NotebookModel.IContentFactory;
-
-  /**
    * The shared notebook model.
    */
-  readonly sharedModel: models.ISharedNotebook;
+  readonly sharedModel: ISharedNotebook;
 
   /**
-   * A mutex to update the shared model.
+   * Whether the model should disposed the shared model on disposal or not.
    */
-  protected readonly _modelDBMutex = models.createMutex();
-
-  /**
-   * The underlying `IModelDB` instance in which model
-   * data is stored.
-   */
-  readonly modelDB: IModelDB;
+  protected standaloneModel = false;
 
   private _dirty = false;
   private _readOnly = false;
@@ -524,11 +500,10 @@ close the notebook without saving it.`,
 
   private _trans: TranslationBundle;
   private _cells: CellList;
-  private _nbformat = nbformat.MAJOR_VERSION;
-  private _nbformatMinor = nbformat.MINOR_VERSION;
   private _deletedCells: string[];
-  private _isInitialized: boolean;
   private _isDisposed = false;
+  private _metadataChanged = new Signal<NotebookModel, IMapChange>(this);
+  private _collaborationEnabled: boolean;
 }
 
 /**
@@ -538,23 +513,12 @@ export namespace NotebookModel {
   /**
    * An options object for initializing a notebook model.
    */
-  export interface IOptions {
+  export interface IOptions
+    extends DocumentRegistry.IModelOptions<ISharedNotebook> {
     /**
-     * The language preference for the model.
+     * Default cell type.
      */
-    languagePreference?: string;
-
-    /**
-     * A factory for creating cell models.
-     *
-     * The default is a shared factory instance.
-     */
-    contentFactory?: IContentFactory;
-
-    /**
-     * A modelDB for storing notebook data.
-     */
-    modelDB?: IModelDB;
+    defaultCell?: 'code' | 'markdown' | 'raw';
 
     /**
      * Language translator.
@@ -562,223 +526,13 @@ export namespace NotebookModel {
     translator?: ITranslator;
 
     /**
-     * If the model is initialized or not.
-     */
-    isInitialized?: boolean;
-
-    /**
      * Defines if the document can be undo/redo.
+     *
+     * Default: true
+     *
+     * @experimental
+     * @alpha
      */
     disableDocumentWideUndoRedo?: boolean;
   }
-
-  /**
-   * A factory for creating notebook model content.
-   */
-  export interface IContentFactory {
-    /**
-     * The factory for output area models.
-     */
-    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
-
-    /**
-     * The IModelDB in which to put data for the notebook model.
-     */
-    modelDB: IModelDB | undefined;
-
-    /**
-     * Create a new cell by cell type.
-     *
-     * @param type:  the type of the cell to create.
-     *
-     * @param options: the cell creation options.
-     *
-     * #### Notes
-     * This method is intended to be a convenience method to programmatically
-     * call the other cell creation methods in the factory.
-     */
-    createCell(
-      type: nbformat.CellType,
-      options: CellModel.IOptions
-    ): ICellModel;
-
-    /**
-     * Create a new code cell.
-     *
-     * @param options - The options used to create the cell.
-     *
-     * @returns A new code cell. If a source cell is provided, the
-     *   new cell will be initialized with the data from the source.
-     */
-    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel;
-
-    /**
-     * Create a new markdown cell.
-     *
-     * @param options - The options used to create the cell.
-     *
-     * @returns A new markdown cell. If a source cell is provided, the
-     *   new cell will be initialized with the data from the source.
-     */
-    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel;
-
-    /**
-     * Create a new raw cell.
-     *
-     * @param options - The options used to create the cell.
-     *
-     * @returns A new raw cell. If a source cell is provided, the
-     *   new cell will be initialized with the data from the source.
-     */
-    createRawCell(options: CellModel.IOptions): IRawCellModel;
-
-    /**
-     * Clone the content factory with a new IModelDB.
-     */
-    clone(modelDB: IModelDB): IContentFactory;
-  }
-
-  /**
-   * The default implementation of an `IContentFactory`.
-   */
-  export class ContentFactory {
-    /**
-     * Create a new cell model factory.
-     */
-    constructor(options: ContentFactory.IOptions) {
-      this.codeCellContentFactory =
-        options.codeCellContentFactory || CodeCellModel.defaultContentFactory;
-      this.modelDB = options.modelDB;
-    }
-
-    /**
-     * The factory for code cell content.
-     */
-    readonly codeCellContentFactory: CodeCellModel.IContentFactory;
-
-    /**
-     * The IModelDB in which to put the notebook data.
-     */
-    readonly modelDB: IModelDB | undefined;
-
-    /**
-     * Create a new cell by cell type.
-     *
-     * @param type:  the type of the cell to create.
-     *
-     * @param options: the cell creation options.
-     *
-     * #### Notes
-     * This method is intended to be a convenience method to programmatically
-     * call the other cell creation methods in the factory.
-     */
-    createCell(
-      type: nbformat.CellType,
-      options: CellModel.IOptions
-    ): ICellModel {
-      switch (type) {
-        case 'code':
-          return this.createCodeCell(options);
-        case 'markdown':
-          return this.createMarkdownCell(options);
-        case 'raw':
-        default:
-          return this.createRawCell(options);
-      }
-    }
-
-    /**
-     * Create a new code cell.
-     *
-     * @param source - The data to use for the original source data.
-     *
-     * @returns A new code cell. If a source cell is provided, the
-     *   new cell will be initialized with the data from the source.
-     *   If the contentFactory is not provided, the instance
-     *   `codeCellContentFactory` will be used.
-     */
-    createCodeCell(options: CodeCellModel.IOptions): ICodeCellModel {
-      if (options.contentFactory) {
-        options.contentFactory = this.codeCellContentFactory;
-      }
-      if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
-        options.modelDB = this.modelDB.view(options.id);
-      }
-      return new CodeCellModel(options);
-    }
-
-    /**
-     * Create a new markdown cell.
-     *
-     * @param source - The data to use for the original source data.
-     *
-     * @returns A new markdown cell. If a source cell is provided, the
-     *   new cell will be initialized with the data from the source.
-     */
-    createMarkdownCell(options: CellModel.IOptions): IMarkdownCellModel {
-      if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
-        options.modelDB = this.modelDB.view(options.id);
-      }
-      return new MarkdownCellModel(options);
-    }
-
-    /**
-     * Create a new raw cell.
-     *
-     * @param source - The data to use for the original source data.
-     *
-     * @returns A new raw cell. If a source cell is provided, the
-     *   new cell will be initialized with the data from the source.
-     */
-    createRawCell(options: CellModel.IOptions): IRawCellModel {
-      if (this.modelDB) {
-        if (!options.id) {
-          options.id = UUID.uuid4();
-        }
-        options.modelDB = this.modelDB.view(options.id);
-      }
-      return new RawCellModel(options);
-    }
-
-    /**
-     * Clone the content factory with a new IModelDB.
-     */
-    clone(modelDB: IModelDB): ContentFactory {
-      return new ContentFactory({
-        modelDB: modelDB,
-        codeCellContentFactory: this.codeCellContentFactory
-      });
-    }
-  }
-
-  /**
-   * A namespace for the notebook model content factory.
-   */
-  export namespace ContentFactory {
-    /**
-     * The options used to initialize a `ContentFactory`.
-     */
-    export interface IOptions {
-      /**
-       * The factory for code cell model content.
-       */
-      codeCellContentFactory?: CodeCellModel.IContentFactory;
-
-      /**
-       * The modelDB in which to place new content.
-       */
-      modelDB?: IModelDB;
-    }
-  }
-
-  /**
-   * The default `ContentFactory` instance.
-   */
-  export const defaultContentFactory = new ContentFactory({});
 }

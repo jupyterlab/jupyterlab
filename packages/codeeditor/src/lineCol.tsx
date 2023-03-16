@@ -1,12 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  interactiveItem,
-  Popup,
-  showPopup,
-  TextItem
-} from '@jupyterlab/statusbar';
+import { Popup, showPopup, TextItem } from '@jupyterlab/statusbar';
 import {
   ITranslator,
   nullTranslator,
@@ -246,7 +241,7 @@ export class LineCol extends VDomRenderer<LineCol.Model> {
    */
   constructor(translator?: ITranslator) {
     super(new LineCol.Model());
-    this.addClass(interactiveItem);
+    this.addClass('jp-mod-highlighted');
     this.translator = translator || nullTranslator;
   }
 
@@ -320,7 +315,7 @@ export namespace LineCol {
     }
     set editor(editor: CodeEditor.IEditor | null) {
       const oldEditor = this._editor;
-      if (oldEditor) {
+      if (oldEditor?.model?.selections) {
         oldEditor.model.selections.changed.disconnect(this._onSelectionChanged);
       }
 

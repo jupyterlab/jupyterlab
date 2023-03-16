@@ -151,6 +151,13 @@ function activateLogConsole(
       id: CommandIDs.clear
     });
 
+    const notifyCommands = () => {
+      app.commands.notifyCommandChanged(CommandIDs.addCheckpoint);
+      app.commands.notifyCommandChanged(CommandIDs.clear);
+      app.commands.notifyCommandChanged(CommandIDs.open);
+      app.commands.notifyCommandChanged(CommandIDs.setLevel);
+    };
+
     logConsoleWidget.toolbar.addItem(
       'lab-log-console-add-checkpoint',
       addCheckpointButton
@@ -163,7 +170,7 @@ function activateLogConsole(
     );
 
     logConsolePanel.sourceChanged.connect(() => {
-      app.commands.notifyCommandChanged();
+      notifyCommands();
     });
 
     logConsolePanel.sourceDisplayed.connect((panel, { source, version }) => {
@@ -173,7 +180,7 @@ function activateLogConsole(
     logConsoleWidget.disposed.connect(() => {
       logConsoleWidget = null;
       logConsolePanel = null;
-      app.commands.notifyCommandChanged();
+      notifyCommands();
     });
 
     app.shell.add(logConsoleWidget, 'down', {
@@ -185,7 +192,7 @@ function activateLogConsole(
     app.shell.activateById(logConsoleWidget.id);
 
     logConsoleWidget.update();
-    app.commands.notifyCommandChanged();
+    notifyCommands();
   };
 
   app.commands.addCommand(CommandIDs.open, {

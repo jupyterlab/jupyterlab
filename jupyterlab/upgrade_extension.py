@@ -1,3 +1,6 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 import json
 import os
 import os.path as osp
@@ -14,13 +17,14 @@ from pathlib import Path
 try:
     from cookiecutter.main import cookiecutter
 except ImportError:
-    raise RuntimeError("Please install cookiecutter")
+    msg = "Please install cookiecutter"
+    raise RuntimeError(msg) from None
 
 
 DEFAULT_COOKIECUTTER_BRANCH = "3.0"
 
 
-def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=True):
+def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=True):  # noqa
     """Update an extension to the current JupyterLab
 
     target: str
@@ -62,15 +66,15 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
         shutil.rmtree(output_dir)
 
     # Build up the cookiecutter args and run the cookiecutter
-    extra_context = dict(
-        author_name=data.get("author", "<author_name>"),
-        labextension_name=data["name"],
-        project_short_description=data.get("description", "<description>"),
-        has_server_extension="y" if osp.exists(osp.join(target, "jupyter-config")) else "n",
-        has_binder="y" if osp.exists(osp.join(target, "binder")) else "n",
-        repository=data.get("repository", {}).get("url", "<repository"),
-        python_name=python_name,
-    )
+    extra_context = {
+        "author_name": data.get("author", "<author_name>"),
+        "labextension_name": data["name"],
+        "project_short_description": data.get("description", "<description>"),
+        "has_server_extension": "y" if osp.exists(osp.join(target, "jupyter-config")) else "n",
+        "has_binder": "y" if osp.exists(osp.join(target, "binder")) else "n",
+        "repository": data.get("repository", {}).get("url", "<repository"),
+        "python_name": python_name,
+    }
 
     template = "https://github.com/jupyterlab/extension-cookiecutter-ts"
     cookiecutter(
@@ -89,41 +93,23 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
         shutil.move(osp.join(output_dir, "_temp", filename), osp.join(output_dir, filename))
     shutil.rmtree(osp.join(output_dir, "_temp"))
 
-    # Check whether there are any phosphor dependencies
-    has_phosphor = False
-    for name in ["devDependencies", "dependencies"]:
-        if name not in data:
-            continue
-
-        for (key, value) in list(data[name].items()):
-            if key.startswith("@phosphor/"):
-                has_phosphor = True
-                data[name][key.replace("@phosphor/", "@lumino/")] = value
-
-        for key in list(data[name]):
-            if key.startswith("@phosphor/"):
-                del data[name][key]
-
     # From the created package.json grab the devDependencies
     with open(osp.join(output_dir, "package.json")) as fid:
         temp_data = json.load(fid)
 
     if data.get("devDependencies"):
-        for (key, value) in temp_data["devDependencies"].items():
+        for key, value in temp_data["devDependencies"].items():
             data["devDependencies"][key] = value
     else:
         data["devDependencies"] = temp_data["devDependencies"].copy()
 
     # Ask the user whether to upgrade the scripts automatically
     warnings = []
-    if interactive:
-        choice = input("overwrite scripts in package.json? [n]: ")
-    else:
-        choice = "y"
+    choice = input("overwrite scripts in package.json? [n]: ") if interactive else "y"
     if choice.upper().startswith("Y"):
         warnings.append("Updated scripts in package.json")
-        data.setdefault("scripts", dict())
-        for (key, value) in temp_data["scripts"].items():
+        data.setdefault("scripts", {})
+        for key, value in temp_data["scripts"].items():
             data["scripts"][key] = value
         if "install-ext" in data["scripts"]:
             del data["scripts"]["install-ext"]
@@ -138,9 +124,9 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
     with root_jlab_package.open() as fid:
         root_jlab_data = json.load(fid)
 
-    data.setdefault("dependencies", dict())
-    data.setdefault("devDependencies", dict())
-    for (key, value) in root_jlab_data["resolutions"].items():
+    data.setdefault("dependencies", {})
+    data.setdefault("devDependencies", {})
+    for key, value in root_jlab_data["resolutions"].items():
         if key in data["dependencies"]:
             data["dependencies"][key] = value.replace("~", "^")
         if key in data["devDependencies"]:
@@ -184,10 +170,7 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
                 new_data = fid.read()
             if old_data == new_data:
                 continue
-            if interactive:
-                choice = input('overwrite "%s"? [n]: ' % relpath)
-            else:
-                choice = "n"
+            choice = input('overwrite "%s"? [n]: ' % relpath) if interactive else "n"
             if choice.upper().startswith("Y"):
                 shutil.copy(p, file_target)
             else:
@@ -198,11 +181,6 @@ def update_extension(target, branch=DEFAULT_COOKIECUTTER_BRANCH, interactive=Tru
         print("**", warning)
 
     print("** Remove _temp_extensions directory when finished")
-
-    if has_phosphor:
-        print(
-            "** Phosphor dependencies were upgraded to lumino dependencies, update imports as needed"
-        )
 
 
 if __name__ == "__main__":

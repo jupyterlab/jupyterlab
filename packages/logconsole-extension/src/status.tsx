@@ -6,7 +6,7 @@ import {
   ILogger,
   ILoggerRegistry
 } from '@jupyterlab/logconsole';
-import { GroupItem, interactiveItem, TextItem } from '@jupyterlab/statusbar';
+import { GroupItem, TextItem } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { listIcon, VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { Signal } from '@lumino/signaling';
@@ -92,7 +92,7 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
     super(new LogConsoleStatus.Model(options.loggerRegistry));
     this.translator = options.translator || nullTranslator;
     this._handleClick = options.handleClick;
-    this.addClass(interactiveItem);
+    this.addClass('jp-mod-highlighted');
     this.addClass('jp-LogConsoleStatusItem');
   }
 

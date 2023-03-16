@@ -11,6 +11,7 @@ import variableSvgStr from '../style/icons/variable.svg';
 import pauseSvgStr from '../style/icons/pause.svg';
 import viewBreakpointSvgStr from '../style/icons/view-breakpoint.svg';
 import openKernelSourceSvgStr from '../style/icons/open-kernel-source.svg';
+import exceptionSvgStr from '../style/icons/exceptions.svg';
 
 export {
   runIcon as continueIcon,
@@ -22,7 +23,12 @@ export const closeAllIcon = new LabIcon({
   svgstr: closeAllSvgStr
 });
 
-export const pauseOnExceptionsIcon = new LabIcon({
+export const exceptionIcon = new LabIcon({
+  name: 'debugger:pause-on-exception',
+  svgstr: exceptionSvgStr
+});
+
+export const pauseIcon = new LabIcon({
   name: 'debugger:pause',
   svgstr: pauseSvgStr
 });

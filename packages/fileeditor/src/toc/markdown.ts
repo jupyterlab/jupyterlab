@@ -39,14 +39,17 @@ export class MarkdownTableOfContentsModel extends TableOfContentsModel<
       return Promise.resolve(null);
     }
 
-    const content = this.widget.content.model.value.text;
+    const content = this.widget.content.model.sharedModel.getSource();
 
-    const headings = TableOfContentsUtils.Markdown.getHeadings(content, {
-      ...this.configuration,
-      // Force removing numbering as they cannot be displayed
-      // in the document
-      numberHeaders: false
-    });
+    const headings = TableOfContentsUtils.filterHeadings(
+      TableOfContentsUtils.Markdown.getHeadings(content),
+      {
+        ...this.configuration,
+        // Force removing numbering as they cannot be displayed
+        // in the document
+        numberHeaders: false
+      }
+    );
     return Promise.resolve(headings);
   }
 }

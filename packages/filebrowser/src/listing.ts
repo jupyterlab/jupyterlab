@@ -26,19 +26,10 @@ import {
   classes,
   LabIcon
 } from '@jupyterlab/ui-components';
-import {
-  ArrayExt,
-  ArrayIterator,
-  each,
-  filter,
-  find,
-  IIterator,
-  StringExt,
-  toArray
-} from '@lumino/algorithm';
+import { ArrayExt, filter, StringExt } from '@lumino/algorithm';
 import { MimeData, PromiseDelegate } from '@lumino/coreutils';
 import { ElementExt } from '@lumino/domutils';
-import { Drag, IDragEvent } from '@lumino/dragdrop';
+import { Drag } from '@lumino/dragdrop';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { h, VirtualDOM } from '@lumino/virtualdom';
@@ -96,6 +87,11 @@ const ITEM_ICON_CLASS = 'jp-DirListing-itemIcon';
 const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
 
 /**
+ * The class name added to the listing item file size cell.
+ */
+const ITEM_FILE_SIZE_CLASS = 'jp-DirListing-itemFileSize';
+
+/**
  * The class name added to the label element that wraps each item's checkbox and
  * the header's check-all checkbox.
  */
@@ -117,6 +113,11 @@ const NAME_ID_CLASS = 'jp-id-name';
 const MODIFIED_ID_CLASS = 'jp-id-modified';
 
 /**
+ * The class name added to the file size column header cell.
+ */
+const FILE_SIZE_ID_CLASS = 'jp-id-filesize';
+
+/**
  * The class name added to the narrow column header cell.
  */
 const NARROW_ID_CLASS = 'jp-id-narrow';
@@ -125,6 +126,11 @@ const NARROW_ID_CLASS = 'jp-id-narrow';
  * The class name added to the modified column header cell and modified item cell when hidden.
  */
 const MODIFIED_COLUMN_HIDDEN = 'jp-LastModified-hidden';
+
+/**
+ * The class name added to the size column header cell and size item cell when hidden.
+ */
+const FILE_SIZE_COLUMN_HIDDEN = 'jp-FileSize-hidden';
 
 /**
  * The mime type for a contents drag object.
@@ -222,6 +228,8 @@ export class DirListing extends Widget {
     this._renderer = options.renderer || DirListing.defaultRenderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
+    // hide the file size column by default
+    this._hiddenColumns.add('file_size');
     this._renderer.populateHeaderNode(
       headerNode,
       this.translator,
@@ -297,7 +305,7 @@ export class DirListing extends Widget {
    *
    * @returns A new iterator over the listing's selected items.
    */
-  selectedItems(): IIterator<Contents.IModel> {
+  selectedItems(): IterableIterator<Contents.IModel> {
     const items = this._sortedItems;
     return filter(items, item => this.selection[item.path]);
   }
@@ -307,8 +315,8 @@ export class DirListing extends Widget {
    *
    * @returns A new iterator over the listing's sorted items.
    */
-  sortedItems(): IIterator<Contents.IModel> {
-    return new ArrayIterator(this._sortedItems);
+  sortedItems(): IterableIterator<Contents.IModel> {
+    return this._sortedItems[Symbol.iterator]();
   }
 
   /**
@@ -359,21 +367,22 @@ export class DirListing extends Widget {
     const basePath = this._model.path;
     const promises: Promise<Contents.IModel>[] = [];
 
-    each(this._clipboard, path => {
+    for (const path of this._clipboard) {
       if (this._isCut) {
-        const parts = path.split('/');
+        const localPath = this._manager.services.contents.localPath(path);
+        const parts = localPath.split('/');
         const name = parts[parts.length - 1];
         const newPath = PathExt.join(basePath, name);
         promises.push(this._model.manager.rename(path, newPath));
       } else {
         promises.push(this._model.manager.copy(path, basePath));
       }
-    });
+    }
 
     // Remove any cut modifiers.
-    each(this._items, item => {
+    for (const item of this._items) {
       item.classList.remove(CUT_CLASS);
-    });
+    }
 
     this._clipboard.length = 0;
     this._isCut = false;
@@ -439,11 +448,11 @@ export class DirListing extends Widget {
     const basePath = this._model.path;
     const promises: Promise<Contents.IModel>[] = [];
 
-    each(this.selectedItems(), item => {
+    for (const item of this.selectedItems()) {
       if (item.type !== 'directory') {
         promises.push(this._model.manager.copy(item.path, basePath));
       }
-    });
+    }
     return Promise.all(promises)
       .then(() => {
         return undefined;
@@ -461,7 +470,7 @@ export class DirListing extends Widget {
    */
   async download(): Promise<void> {
     await Promise.all(
-      toArray(this.selectedItems())
+      Array.from(this.selectedItems())
         .filter(item => item.type !== 'directory')
         .map(item => this._model.download(item.path))
     );
@@ -477,7 +486,7 @@ export class DirListing extends Widget {
     const items = this._sortedItems;
     const paths = items.map(item => item.path);
 
-    const promises = toArray(this._model.sessions())
+    const promises = Array.from(this._model.sessions())
       .filter(session => {
         const index = ArrayExt.firstIndexOf(paths, session.path);
         return this.selection[items[index].path];
@@ -586,7 +595,7 @@ export class DirListing extends Widget {
     const items = this._sortedItems;
 
     return (
-      toArray(
+      Array.from(
         filter(items, item => item.name === name && this.selection[item.path])
       ).length !== 0
     );
@@ -687,16 +696,16 @@ export class DirListing extends Widget {
         this._evtScroll(event as MouseEvent);
         break;
       case 'lm-dragenter':
-        this.evtDragEnter(event as IDragEvent);
+        this.evtDragEnter(event as Drag.Event);
         break;
       case 'lm-dragleave':
-        this.evtDragLeave(event as IDragEvent);
+        this.evtDragLeave(event as Drag.Event);
         break;
       case 'lm-dragover':
-        this.evtDragOver(event as IDragEvent);
+        this.evtDragOver(event as Drag.Event);
         break;
       case 'lm-drop':
-        this.evtDrop(event as IDragEvent);
+        this.evtDrop(event as Drag.Event);
         break;
       default:
         break;
@@ -816,6 +825,14 @@ export class DirListing extends Widget {
       // next value).
       checkAllCheckbox.dataset.checked = String(allSelected);
       checkAllCheckbox.dataset.indeterminate = String(someSelected);
+
+      const trans = this.translator.load('jupyterlab');
+      checkAllCheckbox?.setAttribute(
+        'aria-label',
+        allSelected || someSelected
+          ? trans.__('Deselect all files and directories')
+          : trans.__('Select all files and directories')
+      );
     }
 
     // Add extra classes to item nodes based on widget state.
@@ -827,19 +844,15 @@ export class DirListing extends Widget {
         item,
         ft,
         this.translator,
-        this._hiddenColumns
+        this._hiddenColumns,
+        this.selection[item.path]
       );
-      if (this.selection[item.path]) {
-        node.classList.add(SELECTED_CLASS);
-
-        if (this._isCut && this._model.path === this._prevPath) {
-          node.classList.add(CUT_CLASS);
-        }
-
-        const checkbox = renderer.getCheckboxNode(node);
-        if (checkbox) {
-          checkbox.checked = true;
-        }
+      if (
+        this.selection[item.path] &&
+        this._isCut &&
+        this._model.path === this._prevPath
+      ) {
+        node.classList.add(CUT_CLASS);
       }
 
       // add metadata to the node
@@ -860,7 +873,7 @@ export class DirListing extends Widget {
 
     // Handle file session statuses.
     const paths = items.map(item => item.path);
-    each(this._model.sessions(), session => {
+    for (const session of this._model.sessions()) {
       const index = ArrayExt.firstIndexOf(paths, session.path);
       const node = nodes[index];
       // Node may have been filtered out.
@@ -871,11 +884,11 @@ export class DirListing extends Widget {
         node.classList.add(RUNNING_CLASS);
         if (specs && name) {
           const spec = specs.kernelspecs[name];
-          name = spec ? spec.display_name : 'unknown'; // FIXME-TRANS: Is this localizable?
+          name = spec ? spec.display_name : this._trans.__('unknown');
         }
         node.title = this._trans.__('%1\nKernel: %2', node.title, name);
       }
-    });
+    }
 
     this._prevPath = this._model.path;
   }
@@ -1224,7 +1237,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragenter'` event for the widget.
    */
-  protected evtDragEnter(event: IDragEvent): void {
+  protected evtDragEnter(event: Drag.Event): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
       const index = Private.hitTestNodes(this._items, event);
       if (index === -1) {
@@ -1244,7 +1257,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragleave'` event for the widget.
    */
-  protected evtDragLeave(event: IDragEvent): void {
+  protected evtDragLeave(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     const dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
@@ -1256,7 +1269,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-dragover'` event for the widget.
    */
-  protected evtDragOver(event: IDragEvent): void {
+  protected evtDragOver(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
@@ -1271,7 +1284,7 @@ export class DirListing extends Widget {
   /**
    * Handle the `'lm-drop'` event for the widget.
    */
-  protected evtDrop(event: IDragEvent): void {
+  protected evtDrop(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     clearTimeout(this._selectTimer);
@@ -1340,7 +1353,7 @@ export class DirListing extends Widget {
     let selectedPaths = Object.keys(this.selection);
     const source = this._items[index];
     const items = this._sortedItems;
-    let selectedItems: Contents.IModel[];
+    let selectedItems: Iterable<Contents.IModel>;
     let item: Contents.IModel | undefined;
 
     // If the source node is not selected, use just that node.
@@ -1350,8 +1363,8 @@ export class DirListing extends Widget {
       selectedItems = [item];
     } else {
       const path = selectedPaths[0];
-      item = find(items, value => value.path === path);
-      selectedItems = toArray(this.selectedItems());
+      item = items.find(value => value.path === path);
+      selectedItems = this.selectedItems();
     }
 
     if (!item) {
@@ -1563,9 +1576,9 @@ export class DirListing extends Widget {
    */
   private _copy(): void {
     this._clipboard.length = 0;
-    each(this.selectedItems(), item => {
+    for (const item of this.selectedItems()) {
       this._clipboard.push(item.path);
-    });
+    }
   }
 
   /**
@@ -1686,12 +1699,12 @@ export class DirListing extends Widget {
     // Update the selection.
     const existing = Object.keys(this.selection);
     this.clearSelectedItems();
-    each(this._model.items(), item => {
+    for (const item of this._model.items()) {
       const path = item.path;
       if (existing.indexOf(path) !== -1) {
         this.selection[path] = true;
       }
-    });
+    }
     if (this.isVisible) {
       // Update the sorted items.
       this.sort(this.sortState);
@@ -1816,13 +1829,13 @@ export namespace DirListing {
     /**
      * The sort key.
      */
-    key: 'name' | 'last_modified';
+    key: 'name' | 'last_modified' | 'file_size';
   }
 
   /**
    * Toggleable columns.
    */
-  export type ToggleableColumn = 'last_modified' | 'is_selected';
+  export type ToggleableColumn = 'last_modified' | 'is_selected' | 'file_size';
 
   /**
    * A file contents model thunk.
@@ -1897,7 +1910,8 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
-      hiddenColumns?: Set<DirListing.ToggleableColumn>
+      hiddenColumns?: Set<DirListing.ToggleableColumn>,
+      selected?: boolean
     ): void;
 
     /**
@@ -1976,12 +1990,14 @@ export namespace DirListing {
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
       const modified = this.createHeaderItemNode(trans.__('Last Modified'));
+      const fileSize = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
+      fileSize.classList.add(FILE_SIZE_ID_CLASS);
       narrow.classList.add(NARROW_ID_CLASS);
       narrow.textContent = '...';
-      if (!hiddenColumns?.has?.('is_selected')) {
+      if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode({
           alwaysVisible: true
         });
@@ -1990,11 +2006,18 @@ export namespace DirListing {
       node.appendChild(name);
       node.appendChild(narrow);
       node.appendChild(modified);
+      node.appendChild(fileSize);
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
       }
 
       // set the initial caret icon
@@ -2017,15 +2040,21 @@ export namespace DirListing {
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null {
       const name = DOMUtils.findElement(node, NAME_ID_CLASS);
       const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
+      const fileSize = DOMUtils.findElement(node, FILE_SIZE_ID_CLASS);
       const state: ISortState = { direction: 'ascending', key: 'name' };
       const target = event.target as HTMLElement;
-      if (name.contains(target)) {
-        const modifiedIcon = DOMUtils.findElement(
-          modified,
-          HEADER_ITEM_ICON_CLASS
-        );
-        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
 
+      const modifiedIcon = DOMUtils.findElement(
+        modified,
+        HEADER_ITEM_ICON_CLASS
+      );
+      const fileSizeIcon = DOMUtils.findElement(
+        fileSize,
+        HEADER_ITEM_ICON_CLASS
+      );
+      const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
+      if (name.contains(target)) {
         if (name.classList.contains(SELECTED_CLASS)) {
           if (!name.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
@@ -2042,16 +2071,13 @@ export namespace DirListing {
         name.classList.add(SELECTED_CLASS);
         modified.classList.remove(SELECTED_CLASS);
         modified.classList.remove(DESCENDING_CLASS);
+        fileSize.classList.remove(SELECTED_CLASS);
+        fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(modifiedIcon, 'left');
+        Private.updateCaret(fileSizeIcon, 'left');
         return state;
       }
       if (modified.contains(target)) {
-        const modifiedIcon = DOMUtils.findElement(
-          modified,
-          HEADER_ITEM_ICON_CLASS
-        );
-        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
-
         state.key = 'last_modified';
         if (modified.classList.contains(SELECTED_CLASS)) {
           if (!modified.classList.contains(DESCENDING_CLASS)) {
@@ -2069,7 +2095,34 @@ export namespace DirListing {
         modified.classList.add(SELECTED_CLASS);
         name.classList.remove(SELECTED_CLASS);
         name.classList.remove(DESCENDING_CLASS);
+        fileSize.classList.remove(SELECTED_CLASS);
+        fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(nameIcon, 'right');
+        Private.updateCaret(fileSizeIcon, 'left');
+        return state;
+      }
+      if (fileSize.contains(target)) {
+        state.key = 'file_size';
+        if (fileSize.classList.contains(SELECTED_CLASS)) {
+          if (!fileSize.classList.contains(DESCENDING_CLASS)) {
+            state.direction = 'descending';
+            fileSize.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(fileSizeIcon, 'left', 'down');
+          } else {
+            fileSize.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(fileSizeIcon, 'left', 'up');
+          }
+        } else {
+          fileSize.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(fileSizeIcon, 'left', 'up');
+        }
+        fileSize.classList.add(SELECTED_CLASS);
+        name.classList.remove(SELECTED_CLASS);
+        name.classList.remove(DESCENDING_CLASS);
+        modified.classList.remove(SELECTED_CLASS);
+        modified.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(nameIcon, 'right');
+        Private.updateCaret(modifiedIcon, 'left');
         return state;
       }
       return state;
@@ -2087,16 +2140,19 @@ export namespace DirListing {
       const icon = document.createElement('span');
       const text = document.createElement('span');
       const modified = document.createElement('span');
+      const fileSize = document.createElement('span');
       icon.className = ITEM_ICON_CLASS;
       text.className = ITEM_TEXT_CLASS;
       modified.className = ITEM_MODIFIED_CLASS;
-      if (!hiddenColumns?.has?.('is_selected')) {
+      fileSize.className = ITEM_FILE_SIZE_CLASS;
+      if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode();
         node.appendChild(checkboxWrapper);
       }
       node.appendChild(icon);
       node.appendChild(text);
       node.appendChild(modified);
+      node.appendChild(fileSize);
 
       // Make the text note focusable so that it receives keyboard events;
       // text node was specifically chosen to receive shortcuts because
@@ -2104,11 +2160,18 @@ export namespace DirListing {
       // which conveniently deactivate irrelevant shortcuts.
       text.tabIndex = 0;
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
+      }
+
       return node;
     }
 
@@ -2164,9 +2227,12 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
-      hiddenColumns?: Set<DirListing.ToggleableColumn>
+      hiddenColumns?: Set<DirListing.ToggleableColumn>,
+      selected?: boolean
     ): void {
-      translator = translator || nullTranslator;
+      if (selected) {
+        node.classList.add(SELECTED_CLASS);
+      }
 
       fileType =
         fileType || DocumentRegistry.getDefaultTextFileType(translator);
@@ -2177,12 +2243,13 @@ export namespace DirListing {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+      const fileSize = DOMUtils.findElement(node, ITEM_FILE_SIZE_CLASS);
       const checkboxWrapper = DOMUtils.findElement(
         node,
         CHECKBOX_WRAPPER_CLASS
       );
 
-      const showFileCheckboxes = !hiddenColumns?.has?.('is_selected');
+      const showFileCheckboxes = !hiddenColumns?.has('is_selected');
       if (checkboxWrapper && !showFileCheckboxes) {
         node.removeChild(checkboxWrapper);
       } else if (showFileCheckboxes && !checkboxWrapper) {
@@ -2190,10 +2257,16 @@ export namespace DirListing {
         node.insertBefore(checkboxWrapper, iconContainer);
       }
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
       }
 
       // render the file item's icon
@@ -2209,10 +2282,14 @@ export namespace DirListing {
 
       // add file size to pop up if its available
       if (model.size !== null && model.size !== undefined) {
+        const fileSizeText = Private.formatFileSize(model.size, 1, 1024);
+        fileSize.textContent = fileSizeText;
         hoverText += trans.__(
           '\nSize: %1',
           Private.formatFileSize(model.size, 1, 1024)
         );
+      } else {
+        fileSize.textContent = '';
       }
       if (model.path) {
         const dirname = PathExt.dirname(model.path);
@@ -2226,13 +2303,13 @@ export namespace DirListing {
       if (model.created) {
         hoverText += trans.__(
           '\nCreated: %1',
-          Time.format(new Date(model.created), 'YYYY-MM-DD HH:mm:ss')
+          Time.format(new Date(model.created))
         );
       }
       if (model.last_modified) {
         hoverText += trans.__(
           '\nModified: %1',
-          Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss')
+          Time.format(new Date(model.last_modified))
         );
       }
       hoverText += trans.__('\nWritable: %1', model.writable);
@@ -2245,17 +2322,37 @@ export namespace DirListing {
         node.removeAttribute('data-is-dot');
       }
       // If an item is being edited currently, its text node is unavailable.
+      const indices = !model.indices ? [] : model.indices;
+      let highlightedName = StringExt.highlight(model.name, indices, h.mark);
       if (text) {
-        const indices = !model.indices ? [] : model.indices;
-        let highlightedName = StringExt.highlight(model.name, indices, h.mark);
         VirtualDOM.render(h.span(highlightedName), text);
+      }
+
+      // Adds an aria-label to the checkbox element.
+      const checkbox = checkboxWrapper?.querySelector(
+        'input[type="checkbox"]'
+      ) as HTMLInputElement;
+
+      if (checkbox) {
+        let ariaLabel: string;
+        if (fileType.contentType === 'directory') {
+          ariaLabel = selected
+            ? trans.__('Deselect directory "%1"', highlightedName)
+            : trans.__('Select directory "%1"', highlightedName);
+        } else {
+          ariaLabel = selected
+            ? trans.__('Deselect file "%1"', highlightedName)
+            : trans.__('Select file "%1"', highlightedName);
+        }
+        checkbox.setAttribute('aria-label', ariaLabel);
+        checkbox.checked = selected ?? false;
       }
 
       let modText = '';
       let modTitle = '';
       if (model.last_modified) {
         modText = Time.formatHuman(new Date(model.last_modified));
-        modTitle = Time.format(new Date(model.last_modified), 'lll');
+        modTitle = Time.format(new Date(model.last_modified));
       }
       modified.textContent = modText;
       modified.title = modTitle;
@@ -2414,10 +2511,10 @@ namespace Private {
    * Sort a list of items by sort state as a new array.
    */
   export function sort(
-    items: IIterator<Contents.IModel>,
+    items: Iterable<Contents.IModel>,
     state: DirListing.ISortState
   ): Contents.IModel[] {
-    const copy = toArray(items);
+    const copy = Array.from(items);
     const reverse = state.direction === 'descending' ? 1 : -1;
 
     if (state.key === 'last_modified') {
@@ -2430,6 +2527,14 @@ namespace Private {
         const valB = new Date(b.last_modified).getTime();
 
         return t1 - t2 || (valA - valB) * reverse;
+      });
+    } else if (state.key === 'file_size') {
+      // Sort by size (grouping directories first)
+      copy.sort((a, b) => {
+        const t1 = a.type === 'directory' ? 0 : 1;
+        const t2 = b.type === 'directory' ? 0 : 1;
+
+        return t1 - t2 || ((a.size ?? 0) - (b.size ?? 0)) * reverse;
       });
     } else {
       // Sort by name (grouping directories first)
@@ -2468,10 +2573,10 @@ namespace Private {
   ): string {
     // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
     if (bytes === 0) {
-      return '0 Bytes';
+      return '0 B';
     }
     const dm = decimalPoint || 2;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     if (i >= 0 && i < sizes.length) {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];

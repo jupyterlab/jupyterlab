@@ -1,4 +1,6 @@
-# coding: utf-8
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 """A lab app that runs a sub process for a demo or a test."""
 
 import atexit
@@ -94,7 +96,7 @@ def _create_workspaces_dir():
     return root_dir
 
 
-class TestEnv(object):
+class TestEnv:
     """Set Jupyter path variables to a temporary directory
 
     Useful as a context manager or with explicit start/stop
@@ -147,7 +149,6 @@ class ProcessTestApp(ProcessApp):
         self.template_paths = [_create_template_dir()]
 
     def initialize_settings(self):
-
         self.env_patch = TestEnv()
         self.env_patch.start()
         ProcessApp.__init__(self)

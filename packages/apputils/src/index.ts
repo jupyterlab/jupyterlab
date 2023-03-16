@@ -41,6 +41,7 @@ export * from './inputdialog';
 export * from './kernelstatuses';
 export * from './mainareawidget';
 export * from './menufactory';
+export * from './notification';
 export * from './printing';
 export * from './runningSessions';
 export * from './sanitizer';

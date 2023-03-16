@@ -1,28 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { init } from './utils';
-
-init();
-
 import { act } from 'react-dom/test-utils';
 
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import {
   CodeMirrorEditorFactory,
-  CodeMirrorMimeTypeService
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  ybinding
 } from '@jupyterlab/codemirror';
 
 import { KernelSpecManager, Session } from '@jupyterlab/services';
 
-import {
-  createSession,
-  JupyterServer,
-  signalToPromise
-} from '@jupyterlab/testutils';
+import { createSession } from '@jupyterlab/docregistry/lib/testutils';
 
-import { toArray } from '@lumino/algorithm';
+import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -40,14 +35,14 @@ import { DebuggerModel } from '../src/model';
 
 import { SourcesBody } from '../src/panels/sources/body';
 
+import { IYText } from '@jupyter/ydoc';
 import { IDebugger } from '../src/tokens';
 
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -58,8 +53,27 @@ describe('Debugger', () => {
   const config = new Debugger.Config();
   const service = new DebuggerService({ specsManager, config });
   const registry = new CommandRegistry();
-  const factoryService = new CodeMirrorEditorFactory();
-  const mimeTypeService = new CodeMirrorMimeTypeService();
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(lang => ['Python'].includes(lang.name))
+    .forEach(lang => {
+      languages.addLanguage(lang);
+    });
+  const extensions = new EditorExtensionRegistry();
+  EditorExtensionRegistry.getDefaultExtensions()
+    .filter(ext => ['lineNumbers'].includes(ext.name))
+    .forEach(ext => extensions.addExtension(ext));
+  extensions.addExtension({
+    name: 'binding',
+    factory: ({ model }) => {
+      const m = model.sharedModel as IYText;
+      return EditorExtensionRegistry.createImmutableExtension(
+        ybinding({ ytext: m.ysource })
+      );
+    }
+  });
+  const factoryService = new CodeMirrorEditorFactory({ extensions, languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
   const lines = [3, 5];
   const code = [
     'i = 0',
@@ -82,9 +96,9 @@ describe('Debugger', () => {
       type: 'test',
       path: UUID.uuid4()
     });
-    await connection.changeKernel({ name: 'xpython' });
+    await connection.changeKernel({ name: 'python3' });
 
-    session = new Debugger.Session({ connection });
+    session = new Debugger.Session({ connection, config });
     service.session = session;
 
     sidebar = new Debugger.Sidebar({
@@ -100,7 +114,7 @@ describe('Debugger', () => {
       },
       breakpointsCommands: {
         registry,
-        pause: ''
+        pauseOnExceptions: ''
       },
       editorServices: {
         factoryService,
@@ -364,9 +378,9 @@ describe('Debugger', () => {
 
     it('should display the source code in the body', () => {
       const body = sidebar.sources.widgets[0] as SourcesBody;
-      const children = toArray(body.children());
+      const children = Array.from(body.children());
       const editor = children[0] as CodeEditorWrapper;
-      expect(editor.model.value.text).toEqual(code);
+      expect(editor.model.sharedModel.getSource()).toEqual(code);
     });
   });
 });

@@ -15,8 +15,8 @@ test.use({
 });
 
 test.describe('Application Context Menu', () => {
-  test.beforeAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
 
     // Create some dummy content
     await contents.uploadFile(
@@ -42,8 +42,8 @@ test.describe('Application Context Menu', () => {
     await page.filebrowser.openHomeDirectory();
   });
 
-  test.afterAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     await contents.deleteDirectory(tmpPath);
   });
 
@@ -78,6 +78,27 @@ test.describe('Application Context Menu', () => {
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
 
+  test('Open file browser context menu on notebook with kernel', async ({
+    page,
+    tmpPath
+  }) => {
+    await page.notebook.openByPath(`${tmpPath}/${testNotebook}`);
+    // Wait for kernel to be idle
+    expect(
+      await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
+    ).toBeTruthy();
+
+    await page.click(`.jp-DirListing-item span:has-text("${testNotebook}")`, {
+      button: 'right'
+    });
+    // Context menu should be available
+    expect(await page.menu.isAnyOpen()).toBe(true);
+
+    const imageName = 'running-notebook.png';
+    const menu = await page.menu.getOpenMenu();
+    expect(await menu.screenshot()).toMatchSnapshot(imageName);
+  });
+
   test('Open file browser context submenu open with', async ({ page }) => {
     await page.sidebar.openTab(filebrowserId);
     expect(await page.sidebar.isTabOpen(filebrowserId)).toBeTruthy();
@@ -89,7 +110,9 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     await page.hover('text=Open With');
-    await page.waitForSelector('li[role="menuitem"]:has-text("Editor")');
+    await page.waitForSelector(
+      '.lm-Menu li[role="menuitem"]:has-text("Editor")'
+    );
 
     const imageName = `file-openwith.png`;
     // Get the last menu -> will be submenu

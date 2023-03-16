@@ -5,9 +5,11 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
+import { ISharedText } from '@jupyter/ydoc';
+
 import { ReadonlyJSONObject, Token } from '@lumino/coreutils';
 
-import { IObservableDisposable } from '@lumino/disposable';
+import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -32,9 +34,14 @@ export interface IDebugger {
   readonly isStarted: boolean;
 
   /**
-   * Whether the session is pausing for exceptions.
+   * Get debugger config.
    */
-  readonly isPausingOnExceptions: boolean;
+  readonly config: IDebugger.IConfig;
+
+  /**
+   * A signal emitted when the pause on exception filter changes.
+   */
+  readonly pauseOnExceptionChanged: Signal<IDebugger, void>;
 
   /**
    * The debugger service's model.
@@ -62,9 +69,16 @@ export interface IDebugger {
   pauseOnExceptionsIsValid(): boolean;
 
   /**
-   * Handles enabling and disabling of Pause on Exception
+   * Add a filter to pauseOnExceptionsFilter.
+   *
+   * @param exceptionFilter - filter name.
    */
-  pauseOnExceptions(enable: boolean): Promise<void>;
+  pauseOnExceptionsFilter(exceptionFilter: string): Promise<void>;
+
+  /**
+   * Send the pauseOnExceptions' filters to the debugger.
+   */
+  pauseOnExceptions(exceptionFilter: string[]): Promise<void>;
 
   /**
    * Continues the execution of the current thread.
@@ -158,6 +172,11 @@ export interface IDebugger {
    * Precondition: !isStarted
    */
   start(): Promise<void>;
+
+  /**
+   * Makes the current thread pause if possible.
+   */
+  pause(): Promise<void>;
 
   /**
    * Makes the current thread step in a function / method if possible.
@@ -327,19 +346,14 @@ export namespace IDebugger {
     connection: Session.ISessionConnection | null;
 
     /**
-     * Returns the initialize response .
+     * Returns the initialize response.
      */
     readonly capabilities: DebugProtocol.Capabilities | undefined;
 
     /**
-     * Whether the debug session is started
+     * Whether the debug session is started.
      */
     readonly isStarted: boolean;
-
-    /**
-     * Whether the debug session is pausing on exceptions.
-     */
-    pausingOnExceptions: string[];
 
     /**
      * Whether the debug session is pausing on exceptions.
@@ -360,6 +374,18 @@ export namespace IDebugger {
       IDebugger.ISession,
       IDebugger.ISession.Event
     >;
+
+    /**
+     * Get current exception filter.
+     */
+    currentExceptionFilters: string[];
+
+    /**
+     * Whether the debugger is pausing on exception.
+     *
+     * @param filter - Specify a filter
+     */
+    isPausingOnException(filter?: string): boolean;
 
     /**
      * Restore the state of a debug session.
@@ -396,7 +422,7 @@ export namespace IDebugger {
      *
      * @param params - The editor find parameters.
      */
-    find(params: ISources.FindParams): CodeEditor.IEditor[];
+    find(params: ISources.FindParams): ISources.IEditor[];
 
     /**
      * Open a read-only editor in the main area.
@@ -670,6 +696,13 @@ export namespace IDebugger {
     export interface IInfoReply extends KernelMessage.IInfoReply {
       debugger: boolean;
     }
+
+    /**
+     * An interface for current exception filters.
+     */
+    export interface IExceptionFilter {
+      [kernels: string]: string[];
+    }
   }
 
   /**
@@ -695,6 +728,24 @@ export namespace IDebugger {
    * A utility to find text editors used by the debugger.
    */
   export namespace ISources {
+    /**
+     * Source editor interface
+     */
+    export interface IEditor {
+      /**
+       * Editor getter
+       */
+      get(): CodeEditor.IEditor | null;
+      /**
+       * Reveal editor
+       */
+      reveal(): Promise<void>;
+      /**
+       * Editor source text
+       */
+      src: ISharedText;
+    }
+
     /**
      * Unified parameters for the find method
      */
@@ -914,7 +965,7 @@ export namespace IDebugger {
     /**
      * The kernel sources UI model.
      */
-    export interface IKernelSources {
+    export interface IKernelSources extends IDisposable {
       /**
        * The kernel source.
        */

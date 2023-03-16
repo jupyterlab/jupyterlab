@@ -1,3 +1,6 @@
+rem Copyright (c) Jupyter Development Team.
+rem Distributed under the terms of the Modified BSD License.
+
 @ECHO OFF
 
 pushd %~dp0

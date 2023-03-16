@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
+import * as path from 'path';
 
 const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-Completer';
@@ -34,7 +35,81 @@ test.describe('Completer', () => {
       completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
       const imageName = 'completer.png';
-      // TODO: on first trigger types are not properly displayed, reference image will need updating
+      expect(await completer.screenshot()).toMatchSnapshot(imageName);
+    });
+
+    test('Show documentation panel', async ({ page, tmpPath }) => {
+      const scriptName = 'completer_panel.py';
+      await page.contents.uploadFile(
+        path.resolve(__dirname, `./notebooks/${scriptName}`),
+        `${tmpPath}/${scriptName}`
+      );
+      await galata.Mock.mockSettings(page, [], {
+        ...galata.DEFAULT_SETTINGS,
+        '@jupyterlab/completer-extension:manager': {
+          showDocumentationPanel: true
+        }
+      });
+      await page.notebook.save();
+      await page.goto();
+      await page.notebook.openByPath(fileName);
+
+      await page.notebook.setCell(
+        0,
+        'code',
+        'from completer_panel import option_1, option_2'
+      );
+      await page.notebook.runCell(0, true);
+      await page.notebook.addCell('code', 'option');
+      await page.notebook.enterCellEditingMode(1);
+
+      // we need to wait until the completer gets bound to the cell after entering it
+      await page.waitForTimeout(50);
+      await page.keyboard.press('Tab');
+      let completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(50);
+      await expect(completer).toBeHidden();
+      await page.keyboard.press('Tab');
+      completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+      await page.waitForSelector('.jp-Completer-loading-bar');
+      await page.waitForSelector('.jp-Completer-loading-bar', {
+        state: 'detached'
+      });
+      const imageName = 'completer-with-doc-panel.png';
+      expect(await completer.screenshot()).toMatchSnapshot(imageName);
+    });
+
+    test('Token completions show up without running the cell when in the same cell', async ({
+      page
+    }) => {
+      await page.notebook.setCell(
+        0,
+        'code',
+        'option_1 = 1\n' +
+          'option_2 = lambda x: x\n' +
+          'option_3 = int\n' +
+          'option'
+      );
+      await page.notebook.enterCellEditingMode(0);
+      // move to the end of cell
+      await page.keyboard.press('PageDown');
+      await page.keyboard.press('End');
+
+      // we need to wait until the completer gets bound to the cell after entering it
+      await page.waitForTimeout(50);
+      await page.keyboard.press('Tab');
+      let completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(50);
+      await expect(completer).toBeHidden();
+      await page.keyboard.press('Tab');
+      completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+      const imageName = 'token-completer.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
     });
 
@@ -88,7 +163,6 @@ test.describe('Completer', () => {
       await completer.waitFor();
 
       const imageName = 'completer-console.png';
-      // TODO: on first trigger types are not properly displayed, reference image will need updating
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
     });
 

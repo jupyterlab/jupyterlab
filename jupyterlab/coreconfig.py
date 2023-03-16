@@ -1,4 +1,3 @@
-# coding: utf-8
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
@@ -33,10 +32,11 @@ def _only_nonlab(collection):
     lumino and react).
     """
     if isinstance(collection, dict):
-        return dict((k, v) for (k, v) in collection.items() if not _is_lab_package(k))
+        return {k: v for (k, v) in collection.items() if not _is_lab_package(k)}
     elif isinstance(collection, (list, tuple)):
         return list(filterfalse(_is_lab_package, collection))
-    raise TypeError("collection arg should be either dict or list/tuple")
+    msg = "collection arg should be either dict or list/tuple"
+    raise TypeError(msg)
 
 
 class CoreConfig:
@@ -66,11 +66,14 @@ class CoreConfig:
         """
         data = self._data
         if not name:
-            raise ValueError("Missing package name")
+            msg = "Missing package name"
+            raise ValueError(msg)
         if not semver:
-            raise ValueError("Missing package semver")
+            msg = "Missing package semver"
+            raise ValueError(msg)
         if name in data["resolutions"]:
-            raise ValueError("Package already present: %r" % (name,))
+            msg = f"Package already present: {name!r}"
+            raise ValueError(msg)
         data["resolutions"][name] = semver
 
         # If both mimeExtension and extensions are True, treat
@@ -131,23 +134,21 @@ class CoreConfig:
     def extensions(self):
         """A dict mapping all extension names to their semver"""
         data = self._data
-        return dict((k, data["resolutions"][k]) for k in data["jupyterlab"]["extensions"].keys())
+        return {k: data["resolutions"][k] for k in data["jupyterlab"]["extensions"]}
 
     @property
     def mime_extensions(self):
         """A dict mapping all MIME extension names to their semver"""
         data = self._data
-        return dict(
-            (k, data["resolutions"][k]) for k in data["jupyterlab"]["mimeExtensions"].keys()
-        )
+        return {k: data["resolutions"][k] for k in data["jupyterlab"]["mimeExtensions"]}
 
     @property
     def singletons(self):
         """A dict mapping all singleton names to their semver"""
         data = self._data
-        return dict(
-            (k, data["resolutions"].get(k, None)) for k in data["jupyterlab"]["singletonPackages"]
-        )
+        return {
+            k: data["resolutions"].get(k, None) for k in data["jupyterlab"]["singletonPackages"]
+        }
 
     @property
     def static_dir(self):

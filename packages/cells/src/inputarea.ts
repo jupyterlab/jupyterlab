@@ -9,8 +9,6 @@ import { Widget } from '@lumino/widgets';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
-import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
-
 import { ICellModel } from './model';
 
 /**
@@ -47,28 +45,25 @@ export class InputArea extends Widget {
   constructor(options: InputArea.IOptions) {
     super();
     this.addClass(INPUT_AREA_CLASS);
-    const model = (this.model = options.model);
-    const contentFactory = (this.contentFactory =
-      options.contentFactory || InputArea.defaultContentFactory);
+    const { contentFactory, editorOptions, model } = options;
+    this.model = model;
+    this.contentFactory = contentFactory;
 
     // Prompt
     const prompt = (this._prompt = contentFactory.createInputPrompt());
     prompt.addClass(INPUT_AREA_PROMPT_CLASS);
 
     // Editor
-    const editorOptions = {
-      model,
+    const editor = (this._editor = new CodeEditorWrapper({
       factory: contentFactory.editorFactory,
-      updateOnShow: options.updateOnShow
-    };
-    const editor = (this._editor = new CodeEditorWrapper(editorOptions));
+      model,
+      editorOptions
+    }));
     editor.addClass(INPUT_AREA_EDITOR_CLASS);
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(prompt);
-    if (!options.placeholder) {
-      layout.addWidget(editor);
-    }
+    layout.addWidget(editor);
   }
 
   /**
@@ -173,20 +168,13 @@ export namespace InputArea {
 
     /**
      * The content factory used by the widget to create children.
-     *
-     * Defaults to one that uses CodeMirror.
      */
-    contentFactory?: IContentFactory;
+    contentFactory: IContentFactory;
 
     /**
-     * Whether to send an update request to the editor when it is shown.
+     * Editor options
      */
-    updateOnShow?: boolean;
-
-    /**
-     * Whether this input area is a placeholder for future rendering.
-     */
-    placeholder?: boolean;
+    editorOptions?: Omit<CodeEditor.IOptions, 'host' | 'model'>;
   }
 
   /**
@@ -219,8 +207,8 @@ export namespace InputArea {
     /**
      * Construct a `ContentFactory`.
      */
-    constructor(options: ContentFactory.IOptions = {}) {
-      this._editor = options.editorFactory || defaultEditorFactory;
+    constructor(options: ContentFactory.IOptions) {
+      this._editor = options.editorFactory;
     }
 
     /**
@@ -254,28 +242,9 @@ export namespace InputArea {
        * If this is not passed, a default CodeMirror editor factory
        * will be used.
        */
-      editorFactory?: CodeEditor.Factory;
+      editorFactory: CodeEditor.Factory;
     }
   }
-
-  /**
-   * A function to create the default CodeMirror editor factory.
-   */
-  function _createDefaultEditorFactory(): CodeEditor.Factory {
-    const editorServices = new CodeMirrorEditorFactory();
-    return editorServices.newInlineEditor;
-  }
-
-  /**
-   * The default editor factory singleton based on CodeMirror.
-   */
-  export const defaultEditorFactory: CodeEditor.Factory =
-    _createDefaultEditorFactory();
-
-  /**
-   * The default `ContentFactory` instance.
-   */
-  export const defaultContentFactory = new ContentFactory({});
 }
 
 /** ****************************************************************************

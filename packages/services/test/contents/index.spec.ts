@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expectFailure, JupyterServer } from '@jupyterlab/testutils';
+import { expectFailure, JupyterServer } from '@jupyterlab/testing';
 import { Contents, ContentsManager, Drive, ServerConnection } from '../../src';
 import { DEFAULT_FILE, handleRequest, makeSettings } from '../utils';
 
@@ -29,7 +29,7 @@ const server = new JupyterServer();
 
 beforeAll(async () => {
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -261,6 +261,24 @@ describe('contents', () => {
       handleRequest(contents, 201, DEFAULT_DIR);
       const get = contents.get('/foo');
       await expect(get).rejects.toThrow(/Invalid response: 201 Created/);
+    });
+
+    it('should store original server path for directory', async () => {
+      const drive = new Drive({ name: 'other', serverSettings });
+      contents.addDrive(drive);
+      handleRequest(drive, 200, DEFAULT_DIR);
+      const options: Contents.IFetchOptions = { type: 'directory' };
+      const model = await contents.get('other:/foo', options);
+      expect(model.serverPath).toBe('foo/bar');
+    });
+
+    it('should store original server path for a file', async () => {
+      const drive = new Drive({ name: 'other', serverSettings });
+      contents.addDrive(drive);
+      handleRequest(drive, 200, DEFAULT_FILE);
+      const options: Contents.IFetchOptions = { type: 'file' };
+      const model = await contents.get('other:/foo', options);
+      expect(model.serverPath).toBe('foo/test');
     });
   });
 

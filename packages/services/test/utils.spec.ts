@@ -1,11 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expectFailure,
-  isFulfilled,
-  testEmission
-} from '@jupyterlab/testutils';
+import { expectFailure, isFulfilled, testEmission } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 

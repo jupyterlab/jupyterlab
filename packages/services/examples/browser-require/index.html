@@ -1,7 +1,17 @@
+<!--
+  ~ Copyright (c) Jupyter Development Team.
+  ~ Distributed under the terms of the Modified BSD License.
+-->
+
 <!doctype html>
 <html lang="en">
   <head>
     <title>Jupyter Services Demo</title>
+    {% set page_config_full = {'baseUrl': base_url} %}
+
+    <script id="jupyter-config-data" type="application/json">
+      {{ page_config_full | tojson }}
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.js"></script>
     <style type="text/css">
     #cell {
@@ -10,11 +20,6 @@
     </style>
   </head>
   <body>
-    {% set page_config_full = {'baseUrl': base_url} %}
-
-    <script id="jupyter-config-data" type="application/json">
-      {{ page_config_full | tojson }}
-    </script>
 
     <h1>Run code!</h1>
     <p>
@@ -34,8 +39,9 @@
     require.config({
         paths: {
           'jquery': 'https://code.jquery.com/jquery-2.2.4.min',
-          '@jupyterlab/services': 'https://unpkg.com/@jupyterlab/services@^0.48/dist/index',
-        }
+          '@jupyterlab/services': 'https://unpkg.com/@jupyterlab/services@*/dist/dist/index',
+        },
+        waitSeconds: 60
     });
     </script>
     <script src="{{page_config['fullStaticUrl'] | e}}/index.js" main="index"></script>

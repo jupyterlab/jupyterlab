@@ -1,8 +1,7 @@
-// This file is auto-generated from the corresponding file in /dev_mode
-/* -----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
 const path = require('path');
 const fs = require('fs-extra');
@@ -293,7 +292,7 @@ module.exports = [
         chunks: 'all',
         cacheGroups: {
           jlab_core: {
-            test: /[\\/]node_modules[\\/]@(jupyterlab|lumino)[\\/]/,
+            test: /[\\/]node_modules[\\/]@(jupyterlab|lumino(?!\/datagrid))[\\/]/,
             name: 'jlab_core'
           }
         }
@@ -310,7 +309,7 @@ module.exports = [
       ]
     },
     devtool: 'inline-source-map',
-    externals: ['node-fetch', 'ws'],
+    externals: ['ws'],
     plugins
   })
 ].concat(extensionAssetConfig);

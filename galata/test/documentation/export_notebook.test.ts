@@ -24,10 +24,13 @@ test.describe('Export Notebook', () => {
     await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
 
     await page.click('text=File');
-    await page.click('ul[role="menu"] >> text=Save and Export Notebook As');
+    await page.click(
+      '.lm-Menu ul[role="menu"] >> text=Save and Export Notebook As'
+    );
 
     // Wait for Latex renderer
-    await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
+    // note: requires the a11y/assistive-mml MathJax extension
+    await page.waitForSelector('text=(σ, β, ρ)');
 
     expect(
       await page.screenshot({ clip: { y: 5, x: 0, width: 700, height: 700 } })
@@ -39,21 +42,33 @@ test.describe('Export Notebook', () => {
 
     await setSidebarWidth(page);
 
-    await page.dblclick(
-      '[aria-label="File Browser Section"] >> text=notebooks'
-    );
-    await page.dblclick('text=Lorenz.ipynb');
+    await page
+      .locator('[aria-label="File Browser Section"]')
+      .getByText('notebooks')
+      .dblclick();
+    await page.getByText('Lorenz.ipynb').dblclick();
 
-    await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
+    await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 
-    await page.click('[title="Property Inspector"]');
-    await page.pause();
-    await page.selectOption(
-      '.jp-PropertyInspector >> text=Slide Type >> select',
-      { label: 'Slide' }
-    );
+    await page.getByTitle('Property Inspector').click();
+
+    await page
+      .locator('.jp-PropertyInspector')
+      .getByText('Common Tools')
+      .click();
+
+    await page
+      .locator('.jp-ActiveCellTool')
+      .getByText(/# The Lorenz/)
+      .waitFor();
+
+    await page
+      .locator(
+        '#jp-MetadataForm-\\@jupyterlab\\/notebook-extension\\:tools_\\/slideshow\\/slide_type'
+      )
+      .selectOption({ label: 'Slide' });
     // Wait for Latex renderer
-    await page.waitForSelector('text=(𝜎σ, 𝛽β, 𝜌ρ)');
+    await page.getByText('(σ, β, ρ)').waitFor();
 
     expect(
       await page.screenshot({ clip: { y: 5, x: 283, width: 997, height: 400 } })

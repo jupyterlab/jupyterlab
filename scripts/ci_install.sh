@@ -23,7 +23,7 @@ git config --global user.email foo@bar.com
 pip install -q --upgrade pip --user
 pip --version
 # Show a verbose install if the install fails, for debugging
-pip install -e ".[test]" || pip install -v -e ".[test]"
+pip install -e ".[dev,test]" || pip install -v -e ".[dev,test]"
 jlpm versions
 jlpm config current
 
@@ -36,9 +36,4 @@ if [[ $GROUP == nonode ]]; then
     sudo rm -rf $(which node)
     sudo rm -rf $(which node)
     ! node
-fi
-
-# The debugger tests require a kernel that supports debugging
-if [[ $GROUP == js-debugger ]]; then
-    pip install xeus-python">=0.9.0,<0.10.0"
 fi

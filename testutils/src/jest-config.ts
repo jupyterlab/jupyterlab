@@ -1,40 +1,8 @@
-import path from 'path';
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 
-const esModules = ['lib0', 'y\\-protocols', 'y\\-websocket', 'yjs'].join('|');
+import func from '@jupyterlab/testing/lib/jest-config';
 
-module.exports = function (baseDir: string) {
-  return {
-    preset: 'ts-jest/presets/js-with-babel',
-    moduleNameMapper: {
-      '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
-      '\\.(gif|ttf|eot)$': '@jupyterlab/testutils/lib/jest-file-mock.js'
-    },
-    transform: {
-      '\\.svg$': 'jest-raw-loader',
-      '^.+\\.md?$': 'markdown-loader-jest'
-    },
-    testTimeout: 10000,
-    setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
-    testPathIgnorePatterns: ['/lib/', '/node_modules/'],
-    moduleFileExtensions: [
-      'ts',
-      'tsx',
-      'js',
-      'jsx',
-      'json',
-      'node',
-      'mjs',
-      'cjs'
-    ],
-    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`],
-    reporters: ['default', 'jest-junit', 'jest-summary-reporter'],
-    coverageReporters: ['json', 'lcov', 'text', 'html'],
-    coverageDirectory: path.join(baseDir, 'coverage'),
-    testRegex: '/test/.*.spec.ts[x]?$',
-    globals: {
-      'ts-jest': {
-        tsconfig: `./tsconfig.test.json`
-      }
-    }
-  };
-};
+module.exports = func;

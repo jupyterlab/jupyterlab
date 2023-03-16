@@ -1,23 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { Extension } from '@codemirror/state';
+import { ISharedText, YFile } from '@jupyter/ydoc';
 import { IChangedArgs } from '@jupyterlab/coreutils';
-import * as nbformat from '@jupyterlab/nbformat';
-import {
-  IModelDB,
-  IObservableMap,
-  IObservableString,
-  IObservableValue,
-  ModelDB,
-  ObservableValue
-} from '@jupyterlab/observables';
-import * as models from '@jupyterlab/shared-models';
+import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-
-const globalModelDBMutex = models.createMutex();
 
 /**
  * A namespace for code editors.
@@ -87,35 +78,6 @@ export namespace CodeEditor {
   }
 
   /**
-   * A selection style.
-   */
-  export interface ISelectionStyle extends JSONObject {
-    /**
-     * A class name added to a selection.
-     */
-    className: string;
-
-    /**
-     * A display name added to a selection.
-     */
-    displayName: string;
-
-    /**
-     * A color for UI elements.
-     */
-    color: string;
-  }
-
-  /**
-   * The default selection style.
-   */
-  export const defaultSelectionStyle: ISelectionStyle = {
-    className: '',
-    displayName: '',
-    color: 'black'
-  };
-
-  /**
    * A text selection.
    */
   export interface ITextSelection extends IRange {
@@ -123,11 +85,6 @@ export namespace CodeEditor {
      * The uuid of the text selection owner.
      */
     readonly uuid: string;
-
-    /**
-     * The style of this selection.
-     */
-    readonly style: ISelectionStyle;
   }
 
   /**
@@ -177,16 +134,6 @@ export namespace CodeEditor {
     mimeTypeChanged: ISignal<IModel, IChangedArgs<string>>;
 
     /**
-     * A signal emitted when the shared model was switched.
-     */
-    sharedModelSwitched: ISignal<IModel, boolean>;
-
-    /**
-     * The text stored in the model.
-     */
-    readonly value: IObservableString;
-
-    /**
      * A mime type of the model.
      *
      * #### Notes
@@ -200,24 +147,9 @@ export namespace CodeEditor {
     readonly selections: IObservableMap<ITextSelection[]>;
 
     /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     */
-    readonly modelDB: IModelDB;
-
-    /**
      * The shared model for the cell editor.
      */
-    readonly sharedModel: models.ISharedText;
-
-    /**
-     * When we initialize a cell model, we create a standalone cell model that cannot be shared in a YNotebook.
-     * Call this function to re-initialize the local representation based on a fresh shared model (e.g. models.YFile or models.YCodeCell).
-     */
-    switchSharedModel(
-      sharedModel: models.ISharedText,
-      reinitialize: boolean
-    ): void;
+    readonly sharedModel: ISharedText;
   }
 
   /**
@@ -227,123 +159,17 @@ export namespace CodeEditor {
     /**
      * Construct a new Model.
      */
-    constructor(options?: Model.IOptions) {
-      options = options || {};
-      if (options.modelDB) {
-        this.modelDB = options.modelDB;
-      } else {
-        this.modelDB = new ModelDB();
-      }
-      this.sharedModel = models.createStandaloneCell(
-        this.type,
-        options.id
-      ) as models.ISharedText;
-      this.sharedModel.changed.connect(this._onSharedModelChanged, this);
-
-      const value = this.modelDB.createString('value');
-      value.changed.connect(this._onModelDBValueChanged, this);
-      value.text = value.text || options.value || '';
-
-      const mimeType = this.modelDB.createValue('mimeType');
-      mimeType.changed.connect(this._onModelDBMimeTypeChanged, this);
-      mimeType.set(options.mimeType || 'text/plain');
-
-      this.modelDB.createMap('selections');
-    }
-
-    /**
-     * When we initialize a cell model, we create a standalone model that cannot be shared in a YNotebook.
-     * Call this function to re-initialize the local representation based on a fresh shared model (e.g. models.YFile or models.YCodeCell).
-     *
-     * @param sharedModel
-     * @param reinitialize Whether to reinitialize the shared model.
-     */
-    public switchSharedModel(
-      sharedModel: models.ISharedText,
-      reinitialize?: boolean
-    ): void {
-      if (reinitialize) {
-        // update local modeldb
-        // @todo also change metadata
-        this.value.text = sharedModel.getSource();
-      }
-      this.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
-      // clone model retrieve a shared (not standalone) model
-      this.sharedModel = sharedModel;
-      this.sharedModel.changed.connect(this._onSharedModelChanged, this);
-      this._sharedModelSwitched.emit(true);
-    }
-
-    /**
-     * We update the modeldb store when the shared model changes.
-     * To ensure that we don't run into infinite loops, we wrap this call in a "mutex".
-     * The "mutex" ensures that the wrapped code can only be executed by either the sharedModelChanged handler
-     * or the modelDB change handler.
-     */
-    protected _onSharedModelChanged(
-      sender: models.ISharedBaseCell<any>,
-      change: models.CellChange<nbformat.IBaseCellMetadata>
-    ): void {
-      globalModelDBMutex(() => {
-        if (change.sourceChange) {
-          const value = this.modelDB.get('value') as IObservableString;
-          let currpos = 0;
-          change.sourceChange.forEach(delta => {
-            if (delta.insert != null) {
-              value.insert(currpos, delta.insert);
-              currpos += delta.insert.length;
-            } else if (delta.delete != null) {
-              value.remove(currpos, currpos + delta.delete);
-            } else if (delta.retain != null) {
-              currpos += delta.retain;
-            }
-          });
-        }
-      });
-    }
-
-    /**
-     * Handle a change to the modelDB value.
-     */
-    private _onModelDBValueChanged(
-      value: IObservableString,
-      event: IObservableString.IChangedArgs
-    ): void {
-      globalModelDBMutex(() => {
-        this.sharedModel.transact(() => {
-          switch (event.type) {
-            case 'insert':
-              this.sharedModel.updateSource(
-                event.start,
-                event.start,
-                event.value
-              );
-              break;
-            case 'remove':
-              this.sharedModel.updateSource(event.start, event.end);
-              break;
-            default:
-              this.sharedModel.setSource(value.text);
-              break;
-          }
-        });
-      });
-    }
-
-    get type(): nbformat.CellType {
-      return 'code';
+    constructor(options: Model.IOptions = {}) {
+      // Track if we need to dispose the model or not.
+      this.standaloneModel = typeof options.sharedModel === 'undefined';
+      this.sharedModel = options.sharedModel ?? new YFile();
+      this._mimeType = options.mimeType ?? 'text/plain';
     }
 
     /**
      * The shared model for the cell editor.
      */
-    sharedModel: models.ISharedText;
-
-    /**
-     * The underlying `IModelDB` instance in which model
-     * data is stored.
-     */
-    readonly modelDB: IModelDB;
+    readonly sharedModel: ISharedText;
 
     /**
      * A signal emitted when a mimetype changes.
@@ -353,38 +179,29 @@ export namespace CodeEditor {
     }
 
     /**
-     * A signal emitted when the shared model was switched.
-     */
-    get sharedModelSwitched(): ISignal<this, boolean> {
-      return this._sharedModelSwitched;
-    }
-
-    /**
-     * Get the value of the model.
-     */
-    get value(): IObservableString {
-      return this.modelDB.get('value') as IObservableString;
-    }
-
-    /**
      * Get the selections for the model.
      */
     get selections(): IObservableMap<ITextSelection[]> {
-      return this.modelDB.get('selections') as IObservableMap<ITextSelection[]>;
+      return this._selections;
     }
 
     /**
      * A mime type of the model.
      */
     get mimeType(): string {
-      return this.modelDB.getValue('mimeType') as string;
+      return this._mimeType;
     }
     set mimeType(newValue: string) {
       const oldValue = this.mimeType;
       if (oldValue === newValue) {
         return;
       }
-      this.modelDB.setValue('mimeType', newValue);
+      this._mimeType = newValue;
+      this._mimeTypeChanged.emit({
+        name: 'mimeType',
+        oldValue: oldValue,
+        newValue: newValue
+      });
     }
 
     /**
@@ -402,23 +219,22 @@ export namespace CodeEditor {
         return;
       }
       this._isDisposed = true;
+      this._selections.dispose();
+      if (this.standaloneModel) {
+        this.sharedModel.dispose();
+      }
       Signal.clearData(this);
     }
 
-    private _onModelDBMimeTypeChanged(
-      mimeType: IObservableValue,
-      args: ObservableValue.IChangedArgs
-    ): void {
-      this._mimeTypeChanged.emit({
-        name: 'mimeType',
-        oldValue: args.oldValue as string,
-        newValue: args.newValue as string
-      });
-    }
+    /**
+     * Whether the model should disposed the shared model on disposal or not.
+     */
+    protected standaloneModel = false;
 
     private _isDisposed = false;
+    private _selections = new ObservableMap<ITextSelection[]>();
+    private _mimeType = 'text/plain';
     private _mimeTypeChanged = new Signal<this, IChangedArgs<string>>(this);
-    private _sharedModelSwitched = new Signal<this, boolean>(this);
   }
 
   /**
@@ -497,17 +313,15 @@ export namespace CodeEditor {
 
   /**
    * A widget that provides a code editor.
+   *
+   * As of JupyterLab 4.0.0, it is not possible to provide an editor
+   * that is different of CodeMirror 6.
    */
   export interface IEditor extends ISelectionOwner, IDisposable {
     /**
      * A signal emitted when either the top or bottom edge is requested.
      */
     readonly edgeRequested: ISignal<IEditor, EdgeLocation>;
-
-    /**
-     * The default selection style for the editor.
-     */
-    selectionStyle: CodeEditor.ISelectionStyle;
 
     /**
      * The DOM node that hosts the editor.
@@ -537,17 +351,26 @@ export namespace CodeEditor {
     /**
      * Get a config option for the editor.
      */
-    getOption<K extends keyof IConfig>(option: K): IConfig[K];
+    getOption(option: string): unknown;
 
     /**
      * Set a config option for the editor.
      */
-    setOption<K extends keyof IConfig>(option: K, value: IConfig[K]): void;
+    setOption(option: string, value: unknown): void;
 
     /**
      * Set config options for the editor.
      */
-    setOptions(options: Partial<IConfig>): void;
+    setOptions(options: Record<string, any>): void;
+
+    /**
+     * Inject an extension into the editor
+     *
+     * @alpha
+     * @experimental
+     * @param ext Editor extension
+     */
+    injectExtension(ext: Extension): void;
 
     /**
      * Returns the content for the given line number.
@@ -613,38 +436,6 @@ export namespace CodeEditor {
     blur(): void;
 
     /**
-     * Repaint the editor.
-     *
-     * #### Notes
-     * A repainted editor should fit to its host node.
-     */
-    refresh(): void;
-
-    /**
-     * Resize the editor to fit its host node.
-     */
-    resizeToFit(): void;
-
-    /**
-     * Add a keydown handler to the editor.
-     *
-     * @param handler - A keydown handler.
-     *
-     * @returns A disposable that can be used to remove the handler.
-     */
-    addKeydownHandler(handler: KeydownHandler): IDisposable;
-
-    /**
-     * Set the size of the editor.
-     *
-     * @param size - The desired size.
-     *
-     * #### Notes
-     * Use `null` if the size is unknown.
-     */
-    setSize(size: IDimension | null): void;
-
-    /**
      * Reveals the given position in the editor.
      *
      * @param position - The desired position to reveal.
@@ -654,7 +445,7 @@ export namespace CodeEditor {
     /**
      * Reveals the given selection in the editor.
      *
-     * @param position - The desired selection to reveal.
+     * @param selection - The desired selection to reveal.
      */
     revealSelection(selection: IRange): void;
 
@@ -678,19 +469,24 @@ export namespace CodeEditor {
     getPositionForCoordinate(coordinate: ICoordinate): IPosition | null;
 
     /**
+     * Get a list of tokens for the current editor text content.
+     */
+    getTokens(): CodeEditor.IToken[];
+
+    /**
+     * Get the token at a given editor position.
+     */
+    getTokenAt(offset: number): CodeEditor.IToken;
+
+    /**
+     * Get the token a the cursor position.
+     */
+    getTokenAtCursor(): CodeEditor.IToken;
+
+    /**
      * Inserts a new line at the cursor position and indents it.
      */
     newIndentedLine(): void;
-
-    /**
-     * Gets the token at a given position.
-     */
-    getTokenForPosition(position: IPosition): IToken;
-
-    /**
-     * Gets the list of tokens for the editor model.
-     */
-    getTokens(): IToken[];
 
     /**
      * Replaces selection with the given text.
@@ -702,119 +498,6 @@ export namespace CodeEditor {
    * A factory used to create a code editor.
    */
   export type Factory = (options: IOptions) => CodeEditor.IEditor;
-
-  /**
-   * The configuration options for an editor.
-   */
-  export interface IConfig {
-    /**
-     * Half-period in milliseconds used for cursor blinking.
-     * By setting this to zero, blinking can be disabled.
-     * A negative value hides the cursor entirely.
-     */
-    cursorBlinkRate: number;
-
-    /**
-     * User preferred font family for text editors.
-     */
-    fontFamily: string | null;
-
-    /**
-     * User preferred size in pixel of the font used in text editors.
-     */
-    fontSize: number | null;
-
-    /**
-     * User preferred text line height, as a multiplier of font size.
-     */
-    lineHeight: number | null;
-
-    /**
-     * Whether line numbers should be displayed.
-     */
-    lineNumbers: boolean;
-
-    /**
-     * Control the line wrapping of the editor. Possible values are:
-     * - "off", lines will never wrap.
-     * - "on", lines will wrap at the viewport border.
-     * - "wordWrapColumn", lines will wrap at `wordWrapColumn`.
-     * - "bounded", lines will wrap at minimum between viewport width and wordWrapColumn.
-     */
-    lineWrap: 'off' | 'on' | 'wordWrapColumn' | 'bounded';
-
-    /**
-     * Whether the editor is read-only.
-     */
-    readOnly: boolean;
-
-    /**
-     * The number of spaces a tab is equal to.
-     */
-    tabSize: number;
-
-    /**
-     * Whether to insert spaces when pressing Tab.
-     */
-    insertSpaces: boolean;
-
-    /**
-     * Whether to highlight matching brackets when one of them is selected.
-     */
-    matchBrackets: boolean;
-
-    /**
-     * Whether to automatically close brackets after opening them.
-     */
-    autoClosingBrackets: boolean;
-
-    /**
-     * Whether the editor should handle paste events.
-     */
-    handlePaste?: boolean;
-
-    /**
-     * The column where to break text line.
-     */
-    wordWrapColumn: number;
-
-    /**
-     * Column index at which rulers should be added.
-     */
-    rulers: Array<number>;
-
-    /**
-     * Whether to allow code folding
-     */
-    codeFolding: boolean;
-
-    /**
-     * Whether to highlight trailing whitespace
-     */
-    showTrailingSpace: boolean;
-  }
-
-  /**
-   * The default configuration options for an editor.
-   */
-  export const defaultConfig: IConfig = {
-    autoClosingBrackets: false,
-    codeFolding: false,
-    cursorBlinkRate: 530,
-    fontFamily: null,
-    fontSize: null,
-    handlePaste: true,
-    insertSpaces: true,
-    lineHeight: null,
-    lineNumbers: false,
-    lineWrap: 'on',
-    matchBrackets: true,
-    readOnly: false,
-    tabSize: 4,
-    rulers: [],
-    showTrailingSpace: false,
-    wordWrapColumn: 80
-  };
 
   /**
    * The options used to initialize an editor.
@@ -831,24 +514,29 @@ export namespace CodeEditor {
     model: IModel;
 
     /**
-     * The desired uuid for the editor.
-     */
-    uuid?: string;
-
-    /**
-     * The default selection style for the editor.
-     */
-    selectionStyle?: Partial<CodeEditor.ISelectionStyle>;
-
-    /**
      * The configuration options for the editor.
      */
-    config?: Partial<IConfig>;
+    config?: Record<string, any>;
+
+    /**
+     * List of editor extensions to be added.
+     */
+    extensions?: Extension[];
+
+    /**
+     * Whether the editor will be inline or not.
+     */
+    inline?: boolean;
 
     /**
      * The configuration options for the editor.
      */
     translator?: ITranslator;
+
+    /**
+     * The desired uuid for the editor.
+     */
+    uuid?: string;
   }
 
   export namespace Model {
@@ -859,19 +547,14 @@ export namespace CodeEditor {
       id?: string;
 
       /**
-       * The initial value of the model.
-       */
-      value?: string;
-
-      /**
        * The mimetype of the model.
        */
       mimeType?: string;
 
       /**
-       * An optional modelDB for storing model state.
+       * Shared editor text.
        */
-      modelDB?: IModelDB;
+      sharedModel?: ISharedText;
     }
   }
 }

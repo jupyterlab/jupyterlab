@@ -1,35 +1,26 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { flakyIt as it, JupyterServer } from '@jupyterlab/testutils';
-import { toArray } from '@lumino/algorithm';
+import { JupyterServer } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import { Session, SessionAPI } from '../../src';
-import {
-  createSessionModel,
-  getRequestHandler,
-  init,
-  makeSettings
-} from '../utils';
-
-init();
-
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
+import { createSessionModel, getRequestHandler, makeSettings } from '../utils';
 
 describe('session', () => {
   let session: Session.IModel;
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
 
   beforeAll(async () => {
+    server = new JupyterServer();
+    await server.start();
     const sessions = await SessionAPI.listRunning();
     await Promise.all(sessions.map(s => SessionAPI.shutdownSession(s.id)));
+  }, 30000);
+
+  afterAll(async () => {
+    await server.shutdown();
   });
 
   afterEach(async () => {
@@ -39,13 +30,13 @@ describe('session', () => {
 
   describe('Session.listRunning()', () => {
     it('should yield a list of valid session models', async () => {
-      expect(toArray(await SessionAPI.listRunning()).length).toBe(0);
+      expect(Array.from(await SessionAPI.listRunning()).length).toBe(0);
       const session = await SessionAPI.startSession({
         name: UUID.uuid4(),
         path: UUID.uuid4(),
         type: 'test'
       });
-      expect(toArray(await SessionAPI.listRunning())).toEqual([session]);
+      expect(Array.from(await SessionAPI.listRunning())).toEqual([session]);
     });
 
     it('should throw an error for an invalid model', async () => {

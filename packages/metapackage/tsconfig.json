@@ -31,9 +31,6 @@
       "path": "../cells"
     },
     {
-      "path": "../celltags"
-    },
-    {
       "path": "../celltags-extension"
     },
     {
@@ -77,12 +74,6 @@
     },
     {
       "path": "../docmanager-extension"
-    },
-    {
-      "path": "../docprovider"
-    },
-    {
-      "path": "../docprovider-extension"
     },
     {
       "path": "../docregistry"
@@ -154,6 +145,12 @@
       "path": "../logconsole-extension"
     },
     {
+      "path": "../lsp"
+    },
+    {
+      "path": "../lsp-extension"
+    },
+    {
       "path": "../mainmenu"
     },
     {
@@ -169,10 +166,13 @@
       "path": "../markedparser-extension"
     },
     {
-      "path": "../mathjax2"
+      "path": "../mathjax-extension"
     },
     {
-      "path": "../mathjax2-extension"
+      "path": "../metadataform"
+    },
+    {
+      "path": "../metadataform-extension"
     },
     {
       "path": "../nbformat"
@@ -223,9 +223,6 @@
       "path": "../settingregistry"
     },
     {
-      "path": "../shared-models"
-    },
-    {
       "path": "../shortcuts-extension"
     },
     {
@@ -272,18 +269,6 @@
     },
     {
       "path": "../ui-components-extension"
-    },
-    {
-      "path": "../user"
-    },
-    {
-      "path": "../user-extension"
-    },
-    {
-      "path": "../vdom"
-    },
-    {
-      "path": "../vdom-extension"
     },
     {
       "path": "../vega5-extension"

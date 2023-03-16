@@ -9,13 +9,6 @@ import {
 } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
-import {
-  statusBar as barStyle,
-  item as itemStyle,
-  leftSide as leftSideStyle,
-  rightSide as rightSideStyle,
-  side as sideStyle
-} from './style/statusbar';
 import { IStatusBar } from './tokens';
 
 /**
@@ -24,7 +17,7 @@ import { IStatusBar } from './tokens';
 export class StatusBar extends Widget implements IStatusBar {
   constructor() {
     super();
-    this.addClass(barStyle);
+    this.addClass('jp-StatusBar-Widget');
 
     const rootLayout = (this.layout = new PanelLayout());
 
@@ -32,13 +25,9 @@ export class StatusBar extends Widget implements IStatusBar {
     const middlePanel = (this._middlePanel = new Panel());
     const rightPanel = (this._rightSide = new Panel());
 
-    leftPanel.addClass(sideStyle);
-    leftPanel.addClass(leftSideStyle);
-
-    middlePanel.addClass(sideStyle);
-
-    rightPanel.addClass(sideStyle);
-    rightPanel.addClass(rightSideStyle);
+    leftPanel.addClass('jp-StatusBar-Left');
+    middlePanel.addClass('jp-StatusBar-Middle');
+    rightPanel.addClass('jp-StatusBar-Right');
 
     rootLayout.addWidget(leftPanel);
     rootLayout.addWidget(middlePanel);
@@ -75,7 +64,7 @@ export class StatusBar extends Widget implements IStatusBar {
 
     const rankItem = { id, rank };
 
-    fullStatusItem.item.addClass(itemStyle);
+    fullStatusItem.item.addClass('jp-StatusBar-Item');
     this._statusItems[id] = fullStatusItem;
 
     if (align === 'left') {

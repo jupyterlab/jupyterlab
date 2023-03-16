@@ -6,7 +6,7 @@ import { PlaywrightTestConfig } from '@playwright/test';
 // Default Playwright configuration for JupyterLab
 module.exports = {
   reporter: [
-    [process.env.CI ? 'dot' : 'list'],
+    [process.env.CI ? 'github' : 'list'],
     ['html', { open: process.env.CI ? 'never' : 'on-failure' }]
   ],
   reportSlowTests: null,
@@ -20,6 +20,7 @@ module.exports = {
     viewport: { width: 1024, height: 768 },
 
     // Artifacts
+    // trace: 'on-first-retry',
     video: 'retain-on-failure'
   }
 } as PlaywrightTestConfig;

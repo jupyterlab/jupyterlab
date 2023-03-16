@@ -3,7 +3,13 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import { IFilter, IFilters, ISearchMatch, ISearchProvider } from './tokens';
+import {
+  IFilter,
+  IFilters,
+  IReplaceOptions,
+  ISearchMatch,
+  ISearchProvider
+} from './tokens';
 
 /**
  * Abstract class implementing the search provider interface.
@@ -18,6 +24,7 @@ export abstract class SearchProvider<T extends Widget = Widget>
    */
   constructor(protected widget: T) {
     this._stateChanged = new Signal<this, void>(this);
+    this._filtersChanged = new Signal<this, void>(this);
     this._disposed = false;
   }
 
@@ -26,6 +33,13 @@ export abstract class SearchProvider<T extends Widget = Widget>
    */
   get stateChanged(): ISignal<this, void> {
     return this._stateChanged;
+  }
+
+  /**
+   * Signal indicating that filter definition changed.
+   */
+  get filtersChanged(): ISignal<this, void> {
+    return this._filtersChanged;
   }
 
   /**
@@ -137,7 +151,11 @@ export abstract class SearchProvider<T extends Widget = Widget>
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  abstract replaceCurrentMatch(newText: string): Promise<boolean>;
+  abstract replaceCurrentMatch(
+    newText: string,
+    loop?: boolean,
+    options?: IReplaceOptions
+  ): Promise<boolean>;
 
   /**
    * Replace all matches in the widget with the provided text
@@ -146,9 +164,36 @@ export abstract class SearchProvider<T extends Widget = Widget>
    *
    * @returns A promise that resolves with a boolean indicating whether a replace occurred.
    */
-  abstract replaceAllMatches(newText: string): Promise<boolean>;
+  abstract replaceAllMatches(
+    newText: string,
+    options?: IReplaceOptions
+  ): Promise<boolean>;
+
+  /**
+   * Utility for copying the letter case from old to new text.
+   */
+  static preserveCase(oldText: string, newText: string): string {
+    if (oldText.toUpperCase() === oldText) {
+      return newText.toUpperCase();
+    }
+    if (oldText.toLowerCase() === oldText) {
+      return newText.toLowerCase();
+    }
+    if (toSentenceCase(oldText) === oldText) {
+      return toSentenceCase(newText);
+    }
+    return newText;
+  }
 
   // Needs to be protected so subclass can emit the signal too.
   protected _stateChanged: Signal<this, void>;
+  protected _filtersChanged: Signal<this, void>;
   private _disposed: boolean;
+}
+
+/**
+ * Capitalise first letter of provided word.
+ */
+function toSentenceCase([first = '', ...suffix]: string): string {
+  return first.toUpperCase() + '' + suffix.join('').toLowerCase();
 }

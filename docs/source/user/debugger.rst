@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _debugger:
 
 Debugger
@@ -38,6 +41,7 @@ Usage
 Here is a screencast to enable the debugger and set up breakpoints. The various steps are described more in depth below.
 
 .. image:: ./images/debugger/step.gif
+   :alt: A GIF showing how to enable the debugger within the kernel.
 
 Use a kernel supporting debugger
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

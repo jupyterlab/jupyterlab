@@ -1,3 +1,6 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 [build-system]
 requires = ["jupyter_packaging~=0.10,<2", "jupyterlab~=3.0"]
 build-backend = "jupyter_packaging.build_api"

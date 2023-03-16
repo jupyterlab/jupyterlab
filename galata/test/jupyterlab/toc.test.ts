@@ -9,8 +9,8 @@ const fileName = 'toc_notebook.ipynb';
 test.use({ tmpPath: 'test-toc' });
 
 test.describe('Table of Contents', () => {
-  test.beforeAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
@@ -30,8 +30,8 @@ test.describe('Table of Contents', () => {
     await page.notebook.close(true);
   });
 
-  test.afterAll(async ({ baseURL, tmpPath }) => {
-    const contents = galata.newContentsHelper(baseURL);
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
     await contents.deleteDirectory(tmpPath);
   });
 
@@ -68,18 +68,23 @@ test.describe('Table of Contents', () => {
       await page.sidebar.getTabPosition('table-of-contents')
     );
 
-    await page
-      .locator('.jp-TableOfContents-tree >> text="2. Multiple output types"')
-      .click({
-        button: 'right'
-      });
+    await Promise.all([
+      page.locator(
+        '.jp-TableOfContents-tree >> .jp-tocItem-active >> text="2. Multiple output types"'
+      ),
+      page
+        .locator('.jp-TableOfContents-tree >> text="2. Multiple output types"')
+        .click({
+          button: 'right'
+        })
+    ]);
 
     const menu = await page.menu.getOpenMenu();
 
     await (
       await menu.$('text=Select and Run Cell(s) for this Heading')
     ).click();
-    await page.pause();
+
     await page
       .locator('.jp-TableOfContents-tree >> text="2. HTML title"')
       .waitFor();

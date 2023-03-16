@@ -5,8 +5,9 @@
 
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import { IFormComponentRegistry } from '@jupyterlab/ui-components';
+import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
+import type { Field } from '@rjsf/utils';
 import React, { useEffect, useState } from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
@@ -22,7 +23,7 @@ export interface ISettingsPanelProps {
    * Form component registry that provides renderers
    * for the form editor.
    */
-  editorRegistry: IFormComponentRegistry;
+  editorRegistry: IFormRendererRegistry;
 
   /**
    * Handler for when selection change is triggered by scrolling
@@ -138,18 +139,40 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     };
   }, []);
 
-  const updateDirtyStates = (id: string, dirty: boolean) => {
-    if (editorDirtyStates.current) {
-      editorDirtyStates.current[id] = dirty;
-      for (const editor in editorDirtyStates.current) {
-        if (editorDirtyStates.current[editor]) {
-          updateDirtyState(true);
-          return;
+  const updateDirtyStates = React.useCallback(
+    (id: string, dirty: boolean) => {
+      if (editorDirtyStates.current) {
+        editorDirtyStates.current[id] = dirty;
+        for (const editor in editorDirtyStates.current) {
+          if (editorDirtyStates.current[editor]) {
+            updateDirtyState(true);
+            return;
+          }
         }
       }
-    }
-    updateDirtyState(false);
-  };
+      updateDirtyState(false);
+    },
+    [editorDirtyStates, updateDirtyState]
+  );
+
+  const renderers = React.useMemo(
+    () =>
+      Object.entries(editorRegistry.renderers).reduce<{
+        [plugin: string]: { [property: string]: Field };
+      }>((agg, [id, renderer]) => {
+        const splitPosition = id.lastIndexOf('.');
+        const pluginId = id.substring(0, splitPosition);
+        const propertyName = id.substring(splitPosition + 1);
+        if (!agg[pluginId]) {
+          agg[pluginId] = {};
+        }
+        if (!agg[pluginId][propertyName] && renderer.fieldRenderer) {
+          agg[pluginId][propertyName] = renderer.fieldRenderer;
+        }
+        return agg;
+      }, {}),
+    [editorRegistry]
+  );
 
   return (
     <div className="jp-SettingsPanel" ref={wrapperRef}>
@@ -177,7 +200,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
               }}
               filteredValues={filtered}
               settings={pluginSettings}
-              renderers={editorRegistry.renderers}
+              renderers={renderers}
               hasError={(error: boolean) => {
                 hasError(pluginSettings.id, error);
               }}

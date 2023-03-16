@@ -1,17 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { init } from './utils';
-
-init();
-
 import { KernelSpec, KernelSpecManager, Session } from '@jupyterlab/services';
 
-import {
-  createSession,
-  JupyterServer,
-  signalToPromise
-} from '@jupyterlab/testutils';
+import { createSession } from '@jupyterlab/docregistry/lib/testutils';
+
+import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 
 import { JSONExt, UUID } from '@lumino/coreutils';
 
@@ -41,9 +35,8 @@ class TestKernelSpecManager extends KernelSpecManager {
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -72,7 +65,7 @@ describe('Debugging support', () => {
   describe('#isAvailable', () => {
     it('should return true for kernels that have support for debugging', async () => {
       const enabled = await service.isAvailable({
-        kernel: { name: 'xpython' }
+        kernel: { name: 'python3' }
       } as any);
       expect(enabled).toBe(true);
     });
@@ -80,7 +73,7 @@ describe('Debugging support', () => {
     it.skip('should return false for kernels that do not have support for debugging', async () => {
       // The kernel spec are mocked in KERNELSPECS
       const enabled = await service.isAvailable({
-        kernel: { name: 'python3' }
+        kernel: { name: 'nopydebug' }
       } as any);
       expect(enabled).toBe(false);
     });
@@ -100,9 +93,9 @@ describe('DebuggerService', () => {
       type: 'test',
       path: UUID.uuid4()
     });
-    await connection.changeKernel({ name: 'xpython' });
-    session = new Debugger.Session({ connection });
+    await connection.changeKernel({ name: 'python3' });
     config = new Debugger.Config();
+    session = new Debugger.Session({ connection, config });
     service = new Debugger.Service({ specsManager, config });
   });
 

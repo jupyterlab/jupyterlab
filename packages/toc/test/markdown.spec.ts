@@ -9,7 +9,16 @@ describe('TableOfContentsUtils', () => {
       it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
         [
           '# Title',
-          [{ text: 'Title', level: 1, line: 0, raw: '# Title', prefix: '1. ' }]
+          [
+            {
+              text: 'Title',
+              level: 1,
+              line: 0,
+              raw: '# Title',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
         ],
         [
           '## Title',
@@ -19,7 +28,8 @@ describe('TableOfContentsUtils', () => {
               level: 2,
               line: 0,
               raw: '## Title',
-              prefix: '0.1. '
+              prefix: '0.1. ',
+              skip: false
             }
           ]
         ],
@@ -31,7 +41,8 @@ describe('TableOfContentsUtils', () => {
               level: 3,
               line: 0,
               raw: '### Title',
-              prefix: '0.0.1. '
+              prefix: '0.0.1. ',
+              skip: false
             }
           ]
         ],
@@ -43,7 +54,8 @@ describe('TableOfContentsUtils', () => {
               level: 4,
               line: 0,
               raw: '#### Title',
-              prefix: '0.0.0.1. '
+              prefix: '0.0.0.1. ',
+              skip: false
             }
           ]
         ],
@@ -55,7 +67,8 @@ describe('TableOfContentsUtils', () => {
               level: 5,
               line: 0,
               raw: '##### Title',
-              prefix: '0.0.0.0.1. '
+              prefix: '0.0.0.0.1. ',
+              skip: false
             }
           ]
         ],
@@ -67,7 +80,8 @@ describe('TableOfContentsUtils', () => {
               level: 6,
               line: 0,
               raw: '###### Title',
-              prefix: '0.0.0.0.0.1. '
+              prefix: '0.0.0.0.0.1. ',
+              skip: false
             }
           ]
         ],
@@ -79,7 +93,8 @@ describe('TableOfContentsUtils', () => {
               level: 1,
               line: 0,
               raw: 'Title\n==',
-              prefix: '1. '
+              prefix: '1. ',
+              skip: false
             }
           ]
         ],
@@ -91,7 +106,8 @@ describe('TableOfContentsUtils', () => {
               level: 2,
               line: 0,
               raw: 'Title\n--',
-              prefix: '0.1. '
+              prefix: '0.1. ',
+              skip: false
             }
           ]
         ],
@@ -103,7 +119,8 @@ describe('TableOfContentsUtils', () => {
               level: 1,
               line: 0,
               raw: '<h1>Title</h1>',
-              prefix: '1. '
+              prefix: '1. ',
+              skip: false
             }
           ]
         ],
@@ -115,7 +132,8 @@ describe('TableOfContentsUtils', () => {
               level: 2,
               line: 0,
               raw: '<h2>Title</h2>',
-              prefix: '0.1. '
+              prefix: '0.1. ',
+              skip: false
             }
           ]
         ],
@@ -127,7 +145,8 @@ describe('TableOfContentsUtils', () => {
               level: 3,
               line: 0,
               raw: '<h3>Title</h3>',
-              prefix: '0.0.1. '
+              prefix: '0.0.1. ',
+              skip: false
             }
           ]
         ],
@@ -139,7 +158,8 @@ describe('TableOfContentsUtils', () => {
               level: 4,
               line: 0,
               raw: '<h4>Title</h4>',
-              prefix: '0.0.0.1. '
+              prefix: '0.0.0.1. ',
+              skip: false
             }
           ]
         ],
@@ -151,7 +171,8 @@ describe('TableOfContentsUtils', () => {
               level: 5,
               line: 0,
               raw: '<h5>Title</h5>',
-              prefix: '0.0.0.0.1. '
+              prefix: '0.0.0.0.1. ',
+              skip: false
             }
           ]
         ],
@@ -163,7 +184,8 @@ describe('TableOfContentsUtils', () => {
               level: 6,
               line: 0,
               raw: '<h6>Title</h6>',
-              prefix: '0.0.0.0.0.1. '
+              prefix: '0.0.0.0.0.1. ',
+              skip: false
             }
           ]
         ],
@@ -173,10 +195,13 @@ describe('TableOfContentsUtils', () => {
         ['```\nTitle\n--\n```', []],
         ['```\n<h1>Title</h1>\n```', []]
       ])('should extract headings from %s', (src, headers) => {
-        const headings = TableOfContentsUtils.Markdown.getHeadings(src, {
-          maximalDepth: 6,
-          numberHeaders: true
-        });
+        const headings = TableOfContentsUtils.filterHeadings(
+          TableOfContentsUtils.Markdown.getHeadings(src),
+          {
+            maximalDepth: 6,
+            numberHeaders: true
+          }
+        );
         expect(headings).toHaveLength(headers.length);
 
         for (let i = 0; i < headers.length; i++) {
@@ -196,7 +221,8 @@ describe('TableOfContentsUtils', () => {
       ['<h4 class="jp-toc-ignore b">Title</h4>']
     ])('should skip the heading from %s', src => {
       const headings = TableOfContentsUtils.Markdown.getHeadings(src);
-      expect(headings).toHaveLength(0);
+      expect(headings).toHaveLength(1);
+      expect(headings[0].skip).toEqual(true);
     });
 
     it('should clean the title', () => {
@@ -208,7 +234,7 @@ describe('TableOfContentsUtils', () => {
         text: 'Title with link',
         line: 0,
         raw: src,
-        prefix: ''
+        skip: false
       });
     });
 
@@ -222,9 +248,12 @@ describe('TableOfContentsUtils', () => {
 ##### h5
 ###### h6`;
 
-        const headings = TableOfContentsUtils.Markdown.getHeadings(src, {
-          maximalDepth
-        });
+        const headings = TableOfContentsUtils.filterHeadings(
+          TableOfContentsUtils.Markdown.getHeadings(src),
+          {
+            maximalDepth
+          }
+        );
         expect(headings).toHaveLength(maximalDepth);
         expect(headings[headings.length - 1].level).toEqual(maximalDepth);
       }
@@ -235,9 +264,12 @@ describe('TableOfContentsUtils', () => {
       numberHeaders => {
         const src = '### h3';
 
-        const headings = TableOfContentsUtils.Markdown.getHeadings(src, {
-          numberHeaders
-        });
+        const headings = TableOfContentsUtils.filterHeadings(
+          TableOfContentsUtils.Markdown.getHeadings(src),
+          {
+            numberHeaders
+          }
+        );
         expect(headings).toHaveLength(1);
         expect(headings[0].prefix).toEqual(numberHeaders ? '0.0.1. ' : '');
       }
@@ -248,10 +280,13 @@ describe('TableOfContentsUtils', () => {
       numberingH1 => {
         const src = '# h1';
 
-        const headings = TableOfContentsUtils.Markdown.getHeadings(src, {
-          numberingH1,
-          numberHeaders: true
-        });
+        const headings = TableOfContentsUtils.filterHeadings(
+          TableOfContentsUtils.Markdown.getHeadings(src),
+          {
+            numberingH1,
+            numberHeaders: true
+          }
+        );
         expect(headings).toHaveLength(1);
         expect(headings[0].prefix).toEqual(numberingH1 ? '1. ' : '');
       }
@@ -263,11 +298,14 @@ describe('TableOfContentsUtils', () => {
         const src = `# h1
 ## h2`;
 
-        const headings = TableOfContentsUtils.Markdown.getHeadings(src, {
-          numberingH1,
-          numberHeaders: true,
-          baseNumbering: 3
-        });
+        const headings = TableOfContentsUtils.filterHeadings(
+          TableOfContentsUtils.Markdown.getHeadings(src),
+          {
+            numberingH1,
+            numberHeaders: true,
+            baseNumbering: 3
+          }
+        );
         expect(headings).toHaveLength(2);
         expect(headings[0].prefix).toEqual(numberingH1 ? '3. ' : '');
         expect(headings[1].prefix).toEqual(numberingH1 ? '3.1. ' : '3. ');

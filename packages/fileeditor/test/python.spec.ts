@@ -1,8 +1,13 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import {
   IEditorHeading,
   PythonTableOfContentsModel
 } from '@jupyterlab/fileeditor';
-import { signalToPromise } from '@jupyterlab/testutils';
+import { signalToPromise } from '@jupyterlab/testing';
 
 describe('@jupyterlab/fileeditor', () => {
   describe('PythonTableOfContentsModel', () => {
@@ -120,10 +125,10 @@ describe('@jupyterlab/fileeditor', () => {
           content: {
             model: {
               mimeType: 'text/x-python',
-              value: {
-                text
-              } as any
-            } as any
+              sharedModel: {
+                getSource: () => text
+              }
+            }
           } as any
         } as any);
 

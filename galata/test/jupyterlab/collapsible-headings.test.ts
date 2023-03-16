@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
 
 const fileName = 'notebook.ipynb';
 
@@ -36,7 +41,7 @@ test.describe('Collapsible Headings; showHCB', () => {
 
   test('Collapse Heading; showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
+    await page.click('text=# Heading 1Heading 1¶ >> button');
     expect(
       await (await page.notebook.getNotebookInPanel()).screenshot()
     ).toMatchSnapshot('showHCB_collapse_heading.png');
@@ -44,8 +49,8 @@ test.describe('Collapsible Headings; showHCB', () => {
 
   test('Expand Heading via Collapser Button; showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
-    await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
+    await page.click('text=# Heading 1Heading 1¶ >> button');
+    await page.click('text=# Heading 1Heading 1¶ >> button');
     expect(
       await (await page.notebook.getNotebookInPanel()).screenshot()
     ).toMatchSnapshot('showHCB_expand_heading_via_collapser.png');
@@ -62,7 +67,9 @@ test.describe('Collapsible Headings; no_showHCB', () => {
   // use non-standard showHiddenCellsButton=false
   test.use({
     mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/notebook-extension:tracker': {
+        ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
         showHiddenCellsButton: false
       }
     }
@@ -83,7 +90,7 @@ test.describe('Collapsible Headings; no_showHCB', () => {
 
   test('Collapse Heading; no_showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
+    await page.click('text=# Heading 1Heading 1¶ >> button');
     expect(
       await (await page.notebook.getNotebookInPanel()).screenshot()
     ).toMatchSnapshot('no_showHCB_collapse_heading.png');
@@ -91,8 +98,8 @@ test.describe('Collapsible Headings; no_showHCB', () => {
 
   test('Expand Heading via Collapser Button; no_showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
-    await page.click('text=xxxxxxxxxx # Heading 1Heading 1¶ >> button');
+    await page.click('text=# Heading 1Heading 1¶ >> button');
+    await page.click('text=# Heading 1Heading 1¶ >> button');
     expect(
       await (await page.notebook.getNotebookInPanel()).screenshot()
     ).toMatchSnapshot('no_showHCB_expand_heading_via_collapser.png');

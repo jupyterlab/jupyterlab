@@ -4,9 +4,6 @@
   "references": [
     {
       "path": "."
-    },
-    {
-      "path": "../../testutils"
     }
   ]
 }

@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 const webpack = require('webpack');
 const miniSVGDataURI = require('mini-svg-data-uri');
 
@@ -40,7 +45,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       // Needed for various packages using cwd(), like the path polyfill
-      process: { cwd: () => '/' }
+      process: { cwd: () => '/', env: {} }
     })
   ]
 };

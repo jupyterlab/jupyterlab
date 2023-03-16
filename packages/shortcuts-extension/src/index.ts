@@ -11,7 +11,10 @@ import {
 } from '@jupyterlab/application';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IFormComponentRegistry } from '@jupyterlab/ui-components';
+import {
+  IFormRenderer,
+  IFormRendererRegistry
+} from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
@@ -77,12 +80,12 @@ function getExternalForJupyterLab(
 const shortcuts: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:shortcuts',
   requires: [ISettingRegistry],
-  optional: [ITranslator, IFormComponentRegistry],
+  optional: [ITranslator, IFormRendererRegistry],
   activate: async (
     app: JupyterFrontEnd,
     registry: ISettingRegistry,
     translator: ITranslator | null,
-    editorRegistry: IFormComponentRegistry | null
+    editorRegistry: IFormRendererRegistry | null
   ) => {
     const translator_ = translator ?? nullTranslator;
     const trans = translator_.load('jupyterlab');
@@ -91,12 +94,15 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
     if (editorRegistry) {
-      editorRegistry.addRenderer('shortcuts', (props: any) => {
-        return renderShortCut({
-          external: getExternalForJupyterLab(registry, app, translator_),
-          ...props
-        });
-      });
+      const component: IFormRenderer = {
+        fieldRenderer: (props: any) => {
+          return renderShortCut({
+            external: getExternalForJupyterLab(registry, app, translator_),
+            ...props
+          });
+        }
+      };
+      editorRegistry.addRenderer(`${shortcuts.id}.shortcuts`, component);
     }
 
     /**

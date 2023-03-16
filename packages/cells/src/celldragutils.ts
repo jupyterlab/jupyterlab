@@ -9,7 +9,6 @@
  * Notebook widgets.
  */
 
-import { each, IterableOrArrayLike } from '@lumino/algorithm';
 import { ICodeCellModel } from './model';
 import { Cell } from './widget';
 import { h, VirtualDOM } from '@lumino/virtualdom';
@@ -66,18 +65,19 @@ export namespace CellDragUtils {
    */
   export function findCell(
     node: HTMLElement,
-    cells: IterableOrArrayLike<Cell>,
+    cells: Iterable<Cell>,
     isCellNode: (node: HTMLElement) => boolean
   ): number {
-    let cellIndex: number = -1;
+    let cellIndex = -1;
     while (node && node.parentElement) {
       if (isCellNode(node)) {
-        each(cells, (cell, index) => {
+        let index = -1;
+        for (const cell of cells) {
           if (cell.node === node) {
-            cellIndex = index;
-            return false;
+            cellIndex = ++index;
+            break;
           }
-        });
+        }
         break;
       }
       node = node.parentElement;
@@ -97,9 +97,9 @@ export namespace CellDragUtils {
   ): ICellTargetArea {
     let targetArea: ICellTargetArea;
     if (cell) {
-      if (cell.editorWidget.node.contains(target)) {
+      if (cell.editorWidget?.node.contains(target)) {
         targetArea = 'input';
-      } else if (cell.promptNode.contains(target)) {
+      } else if (cell.promptNode?.contains(target)) {
         targetArea = 'prompt';
       } else {
         targetArea = 'cell';
@@ -153,7 +153,10 @@ export namespace CellDragUtils {
       promptNumber = '';
     }
 
-    const cellContent = activeCell.model.value.text.split('\n')[0].slice(0, 26);
+    const cellContent = activeCell.model.sharedModel
+      .getSource()
+      .split('\n')[0]
+      .slice(0, 26);
     if (count > 1) {
       if (promptNumber !== '') {
         return VirtualDOM.realize(

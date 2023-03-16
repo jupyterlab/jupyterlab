@@ -12,14 +12,17 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
+  Clipboard,
   ICommandPalette,
+  InputDialog,
+  ISessionContextDialogs,
   IThemeManager,
   MainAreaWidget,
-  sessionContextDialogs,
+  SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { CodeCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 import {
@@ -45,7 +48,15 @@ import {
 } from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+
+function notifyCommands(app: JupyterFrontEnd): void {
+  Object.values(Debugger.CommandIDs).forEach(command => {
+    if (app.commands.hasCommand(command)) {
+      app.commands.notifyCommandChanged(command);
+    }
+  });
+}
 
 /**
  * A plugin that provides visual debugging support for consoles.
@@ -73,7 +84,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       const { sessionContext } = widget;
       await sessionContext.ready;
       await handler.updateContext(widget, sessionContext);
-      app.commands.notifyCommandChanged();
+      notifyCommands(app);
     };
 
     if (labShell) {
@@ -136,7 +147,7 @@ const files: JupyterFrontEndPlugin<void> = {
           activeSessions[model.id] = session;
         }
         await handler.update(widget, session);
-        app.commands.notifyCommandChanged();
+        notifyCommands(app);
       } catch {
         return;
       }
@@ -170,17 +181,21 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
   id: '@jupyterlab/debugger-extension:notebooks',
   autoStart: true,
-  requires: [IDebugger, INotebookTracker, ITranslator],
-  optional: [ILabShell, ICommandPalette],
+  requires: [IDebugger, INotebookTracker],
+  optional: [ILabShell, ICommandPalette, ISessionContextDialogs, ITranslator],
   provides: IDebuggerHandler,
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
-    translator: ITranslator,
     labShell: ILabShell | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    sessionDialogs_: ISessionContextDialogs | null,
+    translator_: ITranslator | null
   ): Debugger.Handler => {
+    const translator = translator_ ?? nullTranslator;
+    const sessionDialogs =
+      sessionDialogs_ ?? new SessionContextDialogs({ translator });
     const handler = new Debugger.Handler({
       type: 'notebook',
       shell: app.shell,
@@ -202,14 +217,19 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionContextDialogs.restart(sessionContext);
+        const restarted = await sessionDialogs.restart(sessionContext);
         if (!restarted) {
           return;
         }
 
         await service.restoreDebuggerState(state);
         await handler.updateWidget(widget, sessionContext.session);
-        await NotebookActions.runAll(content, sessionContext);
+        await NotebookActions.runAll(
+          content,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     });
 
@@ -221,7 +241,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         await sessionContext.ready;
         await handler.updateContext(widget, sessionContext);
       }
-      app.commands.notifyCommandChanged();
+      notifyCommands(app);
     };
 
     if (labShell) {
@@ -342,9 +362,11 @@ const variables: JupyterFrontEndPlugin<void> = {
       caption: trans.__('Inspect Variable'),
       isEnabled: args =>
         !!service.session?.isStarted &&
-        (args.variableReference ??
-          service.model.variables.selectedVariable?.variablesReference ??
-          0) > 0,
+        Number(
+          args.variableReference ??
+            service.model.variables.selectedVariable?.variablesReference ??
+            0
+        ) > 0,
       execute: async args => {
         let { variableReference, name } = args as {
           variableReference?: number;
@@ -465,7 +487,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         const refreshWidget = () => {
           // Refresh the widget only if the active element is the same.
           if (handler.activeWidget === activeWidget) {
-            widget.refresh();
+            void widget.refresh();
           }
         };
         widget.disposed.connect(disposeWidget);
@@ -477,6 +499,24 @@ const variables: JupyterFrontEndPlugin<void> = {
           activate: false,
           type: 'Debugger Variables'
         });
+      }
+    });
+
+    commands.addCommand(CommandIDs.copyToClipboard, {
+      label: trans.__('Copy to Clipboard'),
+      caption: trans.__('Copy text representation of the value to clipboard'),
+      isEnabled: () => {
+        return (
+          !!service.session?.isStarted &&
+          !!service.model.variables.selectedVariable?.value
+        );
+      },
+      isVisible: () => handler.activeWidget instanceof NotebookPanel,
+      execute: async () => {
+        const value = service.model.variables.selectedVariable!.value;
+        if (value) {
+          Clipboard.copyToSystem(value);
+        }
       }
     });
   }
@@ -514,7 +554,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
 
     const breakpointsCommands = {
       registry: commands,
-      pause: CommandIDs.pause
+      pauseOnExceptions: CommandIDs.pauseOnExceptions
     };
 
     const sidebar = new Debugger.Sidebar({
@@ -560,7 +600,8 @@ const main: JupyterFrontEndPlugin<void> = {
     IDebuggerSources,
     ILabShell,
     ILayoutRestorer,
-    ILoggerRegistry
+    ILoggerRegistry,
+    ISettingRegistry
   ],
   autoStart: true,
   activate: async (
@@ -573,7 +614,8 @@ const main: JupyterFrontEndPlugin<void> = {
     debuggerSources: IDebugger.ISources | null,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
-    loggerRegistry: ILoggerRegistry | null
+    loggerRegistry: ILoggerRegistry | null,
+    settingRegistry: ISettingRegistry | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
     const { commands, shell, serviceManager } = app;
@@ -608,7 +650,7 @@ const main: JupyterFrontEndPlugin<void> = {
       const info = (await kernel.info).language_info;
       const name = info.name;
       const mimeType =
-        editorServices?.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
+        editorServices.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
       return mimeType;
     };
 
@@ -626,6 +668,10 @@ const main: JupyterFrontEndPlugin<void> = {
           okLabel: trans.__('Evaluate'),
           cancelLabel: trans.__('Cancel'),
           mimeType,
+          contentFactory: new CodeCell.ContentFactory({
+            editorFactory: options =>
+              editorServices.factoryService.newInlineEditor(options)
+          }),
           rendermime
         });
         const code = result.value;
@@ -650,13 +696,29 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.debugContinue, {
-      label: trans.__('Continue'),
-      caption: trans.__('Continue'),
-      icon: Debugger.Icons.continueIcon,
-      isEnabled: () => service.hasStoppedThreads(),
+      label: () => {
+        return service.hasStoppedThreads()
+          ? trans.__('Continue')
+          : trans.__('Pause');
+      },
+      caption: () => {
+        return service.hasStoppedThreads()
+          ? trans.__('Continue')
+          : trans.__('Pause');
+      },
+      icon: () => {
+        return service.hasStoppedThreads()
+          ? Debugger.Icons.continueIcon
+          : Debugger.Icons.pauseIcon;
+      },
+      isEnabled: () => service.session?.isStarted ?? false,
       execute: async () => {
-        await service.continue();
-        commands.notifyCommandChanged();
+        if (service.hasStoppedThreads()) {
+          await service.continue();
+        } else {
+          await service.pause();
+        }
+        commands.notifyCommandChanged(CommandIDs.debugContinue);
       }
     });
 
@@ -667,7 +729,7 @@ const main: JupyterFrontEndPlugin<void> = {
       isEnabled: () => service.hasStoppedThreads(),
       execute: async () => {
         await service.restart();
-        commands.notifyCommandChanged();
+        notifyCommands(app);
       }
     });
 
@@ -701,37 +763,65 @@ const main: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    commands.addCommand(CommandIDs.pause, {
-      label: trans.__('Enable / Disable pausing on exceptions'),
-      caption: () =>
-        service.isStarted
-          ? service.pauseOnExceptionsIsValid()
-            ? service.isPausingOnExceptions
-              ? trans.__('Disable pausing on exceptions')
-              : trans.__('Enable pausing on exceptions')
-            : trans.__('Kernel does not support pausing on exceptions.')
-          : trans.__('Enable / Disable pausing on exceptions'),
-      className: 'jp-PauseOnExceptions',
-      icon: Debugger.Icons.pauseOnExceptionsIcon,
-      isToggled: () => {
-        return service.isPausingOnExceptions;
-      },
+    commands.addCommand(CommandIDs.pauseOnExceptions, {
+      label: args => (args.filter as string) || 'Breakpoints on exception',
+      caption: args => args.description as string,
+      isToggled: args =>
+        service.session?.isPausingOnException(args.filter as string) || false,
       isEnabled: () => service.pauseOnExceptionsIsValid(),
-      execute: async () => {
-        await service.pauseOnExceptions(!service.isPausingOnExceptions);
-        commands.notifyCommandChanged();
+      execute: async args => {
+        if (args?.filter) {
+          let filter = args.filter as string;
+          await service.pauseOnExceptionsFilter(filter as string);
+        } else {
+          let items: string[] = [];
+          service.session?.exceptionBreakpointFilters?.forEach(
+            availableFilter => {
+              items.push(availableFilter.filter);
+            }
+          );
+          const result = await InputDialog.getMultipleItems({
+            title: trans.__('Select a filter for breakpoints on exception'),
+            items: items,
+            defaults: service.session?.currentExceptionFilters || []
+          });
+
+          let filters = result.button.accept ? result.value : null;
+          if (filters !== null) {
+            await service.pauseOnExceptions(filters);
+          }
+        }
       }
     });
 
+    let autoCollapseSidebar = false;
+
+    if (settingRegistry) {
+      const setting = await settingRegistry.load(main.id);
+      const updateSettings = (): void => {
+        autoCollapseSidebar = setting.get('autoCollapseDebuggerSidebar')
+          .composite as boolean;
+      };
+      updateSettings();
+      setting.changed.connect(updateSettings);
+    }
+
     service.eventMessage.connect((_, event): void => {
-      commands.notifyCommandChanged();
+      notifyCommands(app);
       if (labShell && event.event === 'initialized') {
         labShell.activateById(sidebar.id);
+      } else if (
+        labShell &&
+        sidebar.isVisible &&
+        event.event === 'terminated' &&
+        autoCollapseSidebar
+      ) {
+        labShell.collapseRight();
       }
     });
 
     service.sessionChanged.connect(_ => {
-      commands.notifyCommandChanged();
+      notifyCommands(app);
     });
 
     if (restorer) {
@@ -740,6 +830,8 @@ const main: JupyterFrontEndPlugin<void> = {
 
     sidebar.node.setAttribute('role', 'region');
     sidebar.node.setAttribute('aria-label', trans.__('Debugger section'));
+
+    sidebar.title.caption = trans.__('Debugger');
 
     shell.add(sidebar, 'right', { type: 'Debugger' });
 
@@ -759,7 +851,7 @@ const main: JupyterFrontEndPlugin<void> = {
         CommandIDs.stepIn,
         CommandIDs.stepOut,
         CommandIDs.evaluate,
-        CommandIDs.pause
+        CommandIDs.pauseOnExceptions
       ].forEach(command => {
         palette.addItem({ command, category });
       });
@@ -784,7 +876,12 @@ const main: JupyterFrontEndPlugin<void> = {
           })
           .forEach(editor => {
             requestAnimationFrame(() => {
-              Debugger.EditorHandler.showCurrentLine(editor, frame.line);
+              void editor.reveal().then(() => {
+                const edit = editor.get();
+                if (edit) {
+                  Debugger.EditorHandler.showCurrentLine(edit, frame.line);
+                }
+              });
             });
           });
       };
@@ -807,17 +904,12 @@ const main: JupyterFrontEndPlugin<void> = {
         if (results.length > 0) {
           if (breakpoint && typeof breakpoint.line !== 'undefined') {
             results.forEach(editor => {
-              if (editor instanceof CodeMirrorEditor) {
-                (editor as CodeMirrorEditor).scrollIntoViewCentered({
-                  line: (breakpoint.line as number) - 1,
-                  ch: breakpoint.column || 0
-                });
-              } else {
-                editor.revealPosition({
+              void editor.reveal().then(() => {
+                editor.get()?.revealPosition({
                   line: (breakpoint.line as number) - 1,
                   column: breakpoint.column || 0
                 });
-              }
+              });
             });
           }
           return;
@@ -830,8 +922,10 @@ const main: JupyterFrontEndPlugin<void> = {
         const editor = editorWrapper.editor;
         const editorHandler = new Debugger.EditorHandler({
           debuggerService: service,
-          editor,
-          path
+          editorReady: () => Promise.resolve(editor),
+          getEditor: () => editor,
+          path,
+          src: editor.model.sharedModel
         });
         editorWrapper.disposed.connect(() => editorHandler.dispose());
 

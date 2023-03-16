@@ -337,7 +337,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-mirror-editor-number-color: #080;
   --jp-mirror-editor-def-color: #00f;
   --jp-mirror-editor-variable-color: var(--md-grey-900);
-  --jp-mirror-editor-variable-2-color: #05a;
+  --jp-mirror-editor-variable-2-color: rgb(0, 54, 109);
   --jp-mirror-editor-variable-3-color: #085;
   --jp-mirror-editor-punctuation-color: #05a;
   --jp-mirror-editor-property-color: #05a;
@@ -407,4 +407,17 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-reject-color-normal: var(--md-grey-600);
   --jp-reject-color-hover: var(--md-grey-700);
   --jp-reject-color-active: var(--md-grey-800);
+
+  /* File or activity icons and switch semantic variables */
+  --jp-jupyter-icon-color: #f37626;
+  --jp-notebook-icon-color: #f37626;
+  --jp-json-icon-color: var(--md-orange-700);
+  --jp-console-icon-background-color: var(--md-blue-700);
+  --jp-console-icon-color: white;
+  --jp-terminal-icon-background-color: var(--md-grey-800);
+  --jp-terminal-icon-color: var(--md-grey-200);
+  --jp-text-editor-icon-color: var(--md-grey-700);
+  --jp-inspector-icon-color: var(--md-grey-700);
+  --jp-switch-color: var(--md-grey-400);
+  --jp-switch-true-position-color: var(--md-orange-900);
 }

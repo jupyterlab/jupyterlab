@@ -4,7 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": ["src/**/*"],
   "references": [
     {
       "path": "../application"
@@ -17,6 +17,9 @@
     },
     {
       "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
     },
     {
       "path": "../completer"
@@ -46,7 +49,13 @@
       "path": "../logconsole"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../metadataform"
     },
     {
       "path": "../nbformat"

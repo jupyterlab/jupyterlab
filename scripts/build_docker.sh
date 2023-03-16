@@ -1,4 +1,7 @@
 #! /bin/sh
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 # This script build the JupyterLab image
 if [ -d ${PWD}/packages ]; then
     echo Create package.json files archive

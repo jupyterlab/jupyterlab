@@ -1,10 +1,13 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 from os import path
 
 from setuptools import setup
 
 version = "3.0.2"
-name = "test-hyphens"
-module_name = "test-hyphens"
+name = "test_hyphens"
+module_name = "test_hyphens"
 lab_ext_name = "test-hyphens"
 
 HERE = path.abspath(path.dirname(__file__))
@@ -12,7 +15,7 @@ lab_path = path.join(HERE, module_name, "labextension")
 
 data_files_spec = [("share/jupyter/labextensions/" + lab_ext_name, lab_path, "**")]
 
-setup_args = dict(name=name, version=version, packages=[module_name])
+setup_args = {"name": name, "version": version, "packages": [module_name]}
 
 try:
     from jupyter_packaging import get_data_files, npm_builder, wrap_installers
@@ -22,10 +25,10 @@ try:
     cmdclass = wrap_installers(post_develop=post_develop)
 
     setup_args.update(
-        dict(
-            cmdclass=cmdclass,
-            data_files=get_data_files(data_files_spec),
-        )
+        {
+            "cmdclass": cmdclass,
+            "data_files": get_data_files(data_files_spec),
+        }
     )
 except ImportError:
     pass

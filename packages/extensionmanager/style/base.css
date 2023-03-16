@@ -1,28 +1,58 @@
 /*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/*
   Main widget layout and styling
 */
 
-.jp-extensionmanager-view {
-  padding-bottom: 0;
-  color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
+.jp-extensionmanager-view .lm-SplitPanel-child {
+  overflow-y: auto;
+}
+
+.jp-extensionmanager-header {
+  width: 100%;
+}
+
+.jp-extensionmanager-title {
   display: flex;
-  flex-direction: column;
-  font-size: var(--jp-ui-font-size1);
+  margin: 4px 10px 0;
 }
 
-.jp-extensionmanager-content {
-  overflow: auto;
-  overflow-x: hidden;
+.jp-extensionmanager-title svg {
+  width: 14px;
 }
 
-/*
-  Jupyter Org
-*/
+.jp-extensionmanager-title .jp-icon3[fill] {
+  fill: currentcolor;
+}
 
-.jp-extensionmanager-is-jupyter-org {
-  font-size: var(--jp-ui-font-size0);
-  color: var(--jp-ui-font-color2);
+.jp-extensionmanager-path {
+  display: inline flex;
+  padding-left: 4px;
+}
+
+.jp-extensionmanager-header .jp-FilterBox {
+  margin: 4px 10px 0;
+}
+
+.jp-extensionmanager-disclaimer {
+  padding: 0 8px;
+  min-height: 160px;
+}
+
+.jp-extensionmanager-disclaimer a {
+  color: var(--jp-content-link-color);
+}
+
+.jp-extensionmanager-disclaimer a:hover {
+  color: var(--jp-content-link-color);
+  text-decoration: underline;
+}
+
+.jp-extensionmanager-disclaimer .jp-Button {
+  margin: 0 5px;
 }
 
 /*
@@ -32,10 +62,9 @@
 .jp-extensionmanager-listview-wrapper {
   margin: 0;
   padding: 0;
-  padding-bottom: 8px;
   display: flex;
   flex-direction: column;
-  flex: 0 0 auto;
+  height: 100%;
 }
 
 .jp-extensionmanager-listview {
@@ -43,57 +72,16 @@
   margin: 0;
   padding: 0;
   min-height: 0;
+  flex: 1 1 auto;
+  overflow: auto;
 }
 
 /*
   Section headers
 */
 
-.jp-extensionmanager-view .jp-stack-panel-header {
-  display: flex;
-  justify-content: space-between;
-  flex: 0 0 auto;
-  margin: 0;
-  font-weight: 600;
-  text-transform: uppercase;
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
-  letter-spacing: 1px;
-  font-size: var(--jp-ui-font-size0);
-  line-height: 24px;
-  height: 24px;
-  padding: 4px;
-}
-
-.jp-extensionmanager-view .jp-stack-panel-header > .jp-ToolbarButtonComponent {
-  padding: 0 2px;
-  border: 1px solid transparent;
-  background-color: var(--jp-layout-color1);
-  color: var(--jp-ui-font-color1);
-}
-
-.jp-extensionmanager-view
-  .jp-stack-panel-header
-  .jp-extensionmanager-headerText {
-  flex: 1 0 auto;
-  margin: 0 4px;
-}
-
-.jp-extensionmanager-view
-  .jp-stack-panel-header
-  .jp-extensionmanager-headerTextDisabled {
-  flex: 1 0 auto;
-  margin: 0 4px;
-  color: var(--jp-layout-color3);
-}
-
-/*
-  Listing messages
-*/
-
-.jp-extensionmanager-listingmessage {
-  background-color: var(--jp-brand-color1);
-  color: var(--jp-ui-inverse-font-color1);
-  padding: 4px 8px;
+.jp-extensionmanager-view .jp-SidePanel-header .jp-extensionmanager-error {
+  text-transform: none;
   font-size: var(--jp-ui-font-size1);
   font-weight: 400;
 }
@@ -107,40 +95,12 @@
 }
 
 /*
-  Search bar layout and styling
-*/
-
-.jp-extensionmanager-search-bar {
-  padding: 4px;
-}
-
-.jp-extensionmanager-disclaimer {
-  color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-font-size1);
-  font-weight: normal;
-  margin: 8px 8px 8px 32px;
-}
-
-.jp-extensionmanager-search-wrapper input {
-  background: transparent;
-  font-size: var(--jp-ui-font-size1);
-  color: var(--jp-ui-font-color0);
-  line-height: var(--jp-private-commandpalette-search-height);
-  box-sizing: border-box;
-  border-radius: 0;
-}
-
-.jp-extensionmanager-search-wrapper input:focus {
-  box-shadow: inset 0 0 0 1px var(--jp-input-active-box-shadow-color),
-    inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
-}
-
-/*
   List view pagination styling
 */
 
 .jp-extensionmanager-view ul.pagination {
-  display: inline-block;
+  display: flex;
+  justify-content: center;
   padding-left: 0;
   padding-right: 0;
 }
@@ -151,7 +111,6 @@
 
 .jp-extensionmanager-view .pagination li a {
   padding: 0 5px;
-  margin: 0 5px;
 }
 
 .jp-extensionmanager-view .pagination li.active a {
@@ -168,9 +127,9 @@
   cursor: default;
 }
 
-.jp-extensionmanager-pagination {
-  display: flex;
-  justify-content: center;
+.jp-extensionmanager-installedlist,
+.jp-extensionmanager-searchresults {
+  min-height: 100px;
 }
 
 /*
@@ -194,6 +153,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-should-be-uninstalled {
@@ -211,11 +171,6 @@
   border-left: solid 8px var(--jp-error-color2);
   padding-left: 4px;
 }
-
-/* this is not styled */
-
-/* .jp-extensionmanager-entry.jp-extensionmanager-entry-warning {
-} */
 
 .jp-extensionmanager-entry-name {
   font-size: var(--jp-ui-font-size1);
@@ -313,7 +268,7 @@
 */
 
 .jp-extensionmanager-disclaimer-disable {
-  background-color: var(--jp-brand-color1) !important;
+  background-color: var(--jp-reject-color-normal) !important;
   color: white !important;
   border: 0;
   background-image: none !important;

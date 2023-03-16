@@ -1,12 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { hpass, VirtualElement } from '@lumino/virtualdom';
 import { DockPanel, TabBar, TabPanel, Widget } from '@lumino/widgets';
 import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
 import { addIcon, closeIcon } from '../iconimports';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 /**
  * a widget which displays titles as a single row or column of tabs.
@@ -14,16 +14,18 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
  */
 export class TabBarSvg<T> extends TabBar<T> {
   /**
+   * Translator object
+   */
+  static translator: ITranslator | null = null;
+
+  /**
    * Construct a new tab bar. Overrides the default renderer.
    *
    * @param options - The options for initializing the tab bar.
    */
-  constructor(options: TabBarSvg.IOptions<T> = {}) {
-    options.renderer = options.renderer || TabBarSvg.defaultRenderer;
-    super(options);
-    const trans = ((options && options.translator) || nullTranslator).load(
-      'jupyterlab'
-    );
+  constructor(options: TabBar.IOptions<T> = {}) {
+    super({ renderer: TabBarSvg.defaultRenderer, ...options });
+    const trans = (TabBarSvg.translator ?? nullTranslator).load('jupyterlab');
     addIcon.element({
       container: this.addButtonNode,
       title: trans.__('New Launcher')
@@ -62,13 +64,6 @@ export namespace TabBarSvg {
   }
 
   export const defaultRenderer = new Renderer();
-
-  export interface IOptions<T> extends TabBar.IOptions<T> {
-    /**
-     * The application language translator.
-     */
-    translator?: ITranslator;
-  }
 }
 
 /**
@@ -81,9 +76,11 @@ export class DockPanelSvg extends DockPanel {
    *
    * @param options - The options for initializing the panel.
    */
-  constructor(options: DockPanelSvg.IOptions = {}) {
-    options.renderer = options.renderer || DockPanelSvg.defaultRenderer;
-    super(options);
+  constructor(options: DockPanel.IOptions = {}) {
+    super({
+      renderer: DockPanelSvg.defaultRenderer,
+      ...options
+    });
   }
 }
 
@@ -106,13 +103,6 @@ export namespace DockPanelSvg {
   }
 
   export const defaultRenderer = new Renderer();
-
-  export interface IOptions extends DockPanel.IOptions {
-    /**
-     * The application language translator.
-     */
-    translator?: ITranslator;
-  }
 }
 
 /**

@@ -4,7 +4,7 @@
 import * as nbformat from '@jupyterlab/nbformat';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 import { IOutputModel, OutputModel } from '@jupyterlab/rendermime';
-import { each, map, toArray } from '@lumino/algorithm';
+import { map } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -137,11 +137,11 @@ export class OutputAreaModel implements IOutputAreaModel {
       options.contentFactory || OutputAreaModel.defaultContentFactory;
     this.list = new ObservableList<IOutputModel>();
     if (options.values) {
-      each(options.values, value => {
+      for (const value of options.values) {
         const index = this._add(value) - 1;
         const item = this.list.get(index);
         item.changed.connect(this._onGenericChange, this);
-      });
+      }
     }
     this.list.changed.connect(this._onListChanged, this);
   }
@@ -266,9 +266,9 @@ export class OutputAreaModel implements IOutputAreaModel {
       this.clearNext = true;
       return;
     }
-    each(this.list, (item: IOutputModel) => {
+    for (const item of this.list) {
       item.dispose();
-    });
+    }
     this.list.clear();
   }
 
@@ -280,16 +280,18 @@ export class OutputAreaModel implements IOutputAreaModel {
    */
   fromJSON(values: nbformat.IOutput[]): void {
     this.clear();
-    each(values, value => {
+    for (const value of values) {
       this._add(value);
-    });
+    }
   }
 
   /**
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IOutput[] {
-    return toArray(map(this.list, (output: IOutputModel) => output.toJSON()));
+    return Array.from(
+      map(this.list, (output: IOutputModel) => output.toJSON())
+    );
   }
 
   /**

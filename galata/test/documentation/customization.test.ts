@@ -48,7 +48,13 @@ test.describe('Default', () => {
 
     await page.waitForSelector('div[role="main"] >> text=Lorenz.ipynb');
 
-    await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
+    // Wait for kernel to settle on idle
+    await page
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
+    await page
+      .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
+      .waitFor();
 
     expect(
       await page
@@ -196,6 +202,8 @@ test.describe('Customized', () => {
 
     await page.waitForSelector('.jp-Terminal');
 
+    await setSidebarWidth(page, 271, 'right');
+
     expect(await page.screenshot()).toMatchSnapshot(
       'customized-terminal-position-single.png'
     );
@@ -264,7 +272,7 @@ test.describe('Customized', () => {
     await page.click('text=Lorenz.ipynb', { button: 'right' });
 
     await page.hover('ul[role="menu"] >> text=New File');
-    await page.pause();
+
     expect(
       await page.screenshot({ clip: { x: 0, y: 0, width: 500, height: 500 } })
     ).toMatchSnapshot('customized-context-menu.png');

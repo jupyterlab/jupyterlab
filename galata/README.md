@@ -62,17 +62,12 @@ specific options.
 Create `jupyter_server_test_config.py` with the following content.
 
 ```py
-from tempfile import mkdtemp
+from jupyterlab.galata import configure_jupyter_server
 
-c.ServerApp.port = 8888
-c.ServerApp.port_retries = 0
-c.ServerApp.open_browser = False
+configure_jupyter_server(c)
 
-c.ServerApp.root_dir = mkdtemp(prefix='galata-test-')
-c.ServerApp.token = ""
-c.ServerApp.password = ""
-c.ServerApp.disable_check_xsrf = True
-c.LabApp.expose_app_in_browser = True
+# Uncomment to set server log level to debug level
+# c.ServerApp.log_level = "DEBUG"
 ```
 
 Then start the server with:
@@ -80,6 +75,8 @@ Then start the server with:
 ```bash
 jupyter lab --config jupyter_server_test_config.py
 ```
+
+> If you need to customize the set up for galata, you can look at the [`configure_jupyter_server`](https://github.com/jupyterlab/jupyterlab/tree/master/jupyterlab/galata/__init__.py) definition.
 
 ### Run test project
 
@@ -109,7 +106,7 @@ Test assets (including test videos) will be saved in a `test-results` folder and
 report will be created in `playwright-report` folder. That report can be see by running:
 
 ```bash
-http-server ./playwright-report -a localhost -o
+jlpm playwright show-report
 ```
 
 ## User advices
@@ -132,26 +129,175 @@ jupyter lab --config jupyter_server_test_config.py &
 PWDEBUG=1 jlpm playwright test
 ```
 
+### Dealing with login
+
+If you have set up a custom login handler for your Jupyter application and don't want to remove it
+for your integration tests, you can try the following configuration (inspired by the
+[Playwright documentation](https://playwright.dev/docs/test-advanced#global-setup-and-teardown)):
+
+1. Create a file named `global-setup.ts` at the root of the test folder containing the login steps:
+
+```typescript
+// global-setup.ts
+
+import { chromium, FullConfig } from '@playwright/test';
+
+async function globalSetup(config: FullConfig) {
+  const { baseURL, storageState } = config.projects[0].use;
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  // Here follows the step to log in if you setup a known password
+  // See the server documentation https://jupyter-server.readthedocs.io/en/latest/operators/public-server.html?#automatic-password-setup
+  await page.goto(baseURL ?? process.env.TARGET_URL ?? 'http://localhost:8888');
+  await page.locator('input[name="password"]').fill('test');
+  await page.locator('text=Log in').click();
+
+  // Save signed-in state.
+  await page.context().storageState({ path: storageState as string });
+  await browser.close();
+}
+
+export default globalSetup;
+```
+
+2. Modify the Playwright configuration file to use that global setup and the stored state:
+
+```typescript
+var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
+
+module.exports = {
+  ...baseConfig,
+  globalSetup: require.resolve('./global-setup'),
+  use: {
+    ...baseConfig.use,
+    // Tell all tests to load signed-in state from 'storageState.json'.
+    storageState: 'storageState.json'
+  }
+};
+```
+
+When you will start your test, a file named `storageStage.json` will be generated if the log in
+steps were successful. Its content will look like that:
+
+```json
+{
+  "cookies": [
+    {
+      "name": "_xsrf",
+      "value": "...REDACTED...",
+      "domain": "localhost",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "username-localhost-8888",
+      "value": "...REDACTED...",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1664121119.118241,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": []
+}
+```
+
+> This will only work if the authentication is stored in a cookie and you can access the Jupyter
+> app directly when that cookie is set.
+
+## Helpers
+
+### Listen to dialogs
+
+You can add a listener that will be triggered when a JupyterLab dialog is shown:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.on('dialog', (dialog: Dialog<unknown> | null) => {
+    // Use the dialog
+    // You can for instance reject it
+    // dialog.reject()
+  });
+});
+```
+
+The listener will be called when a dialog is started and when it is closed (in that case `dialog == null`).
+
+You can stop listening to the event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.off('dialog', listener);
+});
+```
+
+Or you can listen to a single event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.once('dialog', listener);
+});
+```
+
+### Listen to notification
+
+You can add a listener that will be triggered when a JupyterLab dialog is shown:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.on(
+    'notification',
+    (notification: Notification.INotification) => {
+      // Use the notification
+    }
+  );
+});
+```
+
+The listener will be called when a notification is created or updated.
+
+You can stop listening to the event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.off('notification', listener);
+});
+```
+
+Or you can listen to a single event with:
+
+```typescript
+await page.evaluate(() => {
+  window.galata.once('notification', listener);
+});
+```
+
 ## Fixtures
 
 Here are the new test fixture introduced by Galata on top of [Playwright fixtures](https://playwright.dev/docs/api/class-fixtures).
 
 ### baseURL
 
-- type: < string >
+- type: \< string >
 
 Application base URL without `/lab`. It defaults to environment variable `TARGET_URL` or `http://localhost:8888` if nothing
 is defined.
 
 ### appPath
 
-- type: < string >
+- type: \< string >
 
 Application URL path fragment; default `"/lab"`
 
 ### autoGoto
 
-- type: < boolean >
+- type: \< boolean >
 
 Whether to go to JupyterLab page within the fixture or not; default `true`.
 
@@ -181,7 +327,7 @@ test('Open language menu', async ({ page }) => {
 
 ### serverFiles
 
-- type: <'on' | 'off' | 'only-on-failure'>
+- type: \<'on' | 'off' | 'only-on-failure'>
 
 Galata can keep the uploaded and created files in `tmpPath` on
 the server root for debugging purpose. By default the files are kept
@@ -193,14 +339,14 @@ on failure.
 
 ### mockState
 
-- type: < boolean | Record<string, unknown> >
+- type: \< boolean | Record\<string, unknown> >
 
 Mock JupyterLab state in-memory or not.
 Possible values are:
 
 - true (default): JupyterLab state will be mocked on a per test basis
 - false: JupyterLab state won't be mocked (Be careful it will write state in local files)
-- Record<string, unknown>: Initial JupyterLab data state - Mapping (state key, value).
+- Record\<string, unknown>: Initial JupyterLab data state - Mapping (state key, value).
   By default the state is stored in-memory.
 
 Example:
@@ -254,14 +400,16 @@ test('should return the mocked state', async ({ page }) => {
 
 ### mockSettings
 
-- type: < boolean | Record<string, unknown> >
+- type: \< boolean | Record\<string, unknown> >
 
 Mock JupyterLab settings in-memory or not.
 Possible values are:
 
 - true: JupyterLab settings will be mocked on a per test basis
+
 - false: JupyterLab settings won't be mocked (Be careful it will read & write settings local files)
-- Record<string, unknown>: Mapping {pluginId: settings} that will be default user settings
+
+- Record\<string, unknown>: Mapping {pluginId: settings} that will be default user settings
 
   The default value is `galata.DEFAULT_SETTINGS`
 
@@ -285,15 +433,29 @@ test('should return mocked settings', async ({ page }) => {
 });
 ```
 
+### mockUser
+
+- type: boolean | Partial\<User.IUser>
+
+Mock JupyterLab user in-memory or not.
+
+Possible values are:
+
+- true (default): JupyterLab user will be mocked on a per test basis
+- false: JupyterLab user won't be mocked (It will be a random user so snapshots won't match)
+- Record<string, unknown>: Initial JupyterLab user - Mapping (user attribute, value).
+
+By default the user is stored in-memory.
+
 ### sessions
 
-- type: <Map<string, Session.IModel> | null>
+- type: \<Map\<string, Session.IModel> | null>
 
 Sessions created during the test.
 Possible values are:
 
 - null: The sessions API won't be mocked
-- Map<string, Session.IModel>: The sessions created during a test.
+- Map\<string, Session.IModel>: The sessions created during a test.
   By default the sessions created during a test will be tracked and disposed at the end.
 
 Example:
@@ -317,13 +479,13 @@ test('should return the active sessions', async ({ page, sessions }) => {
 
 ### terminals
 
-- type: < Map<string, TerminalAPI.IModel> | null >
+- type: \< Map\<string, TerminalAPI.IModel> | null >
 
 Terminals created during the test.
 Possible values are:
 
 - null: The Terminals API won't be mocked
-- Map<string, TerminalsAPI.IModel>: The Terminals created during a test.
+- Map\<string, TerminalsAPI.IModel>: The Terminals created during a test.
   By default the Terminals created during a test will be tracked and disposed at the end.
 
 Example:
@@ -354,7 +516,7 @@ test('should return the active terminals', async ({ page, terminals }) => {
 
 ### tmpPath
 
-- type: < string >
+- type: \< string >
 
 Unique test temporary path created on the server.
 
@@ -411,8 +573,8 @@ A special report will be generated in the folder `benchmark-results` that will c
 
 - `lab-benchmark.json`: The execution time of the tests and some metadata.
 - `lab-benchmark.md`: A report in Markdown
-- `lab-benchmark.png`: A comparison of execution time distribution
-- `lab-benchmark.vl.json`: The [_Vega-Lite_](https://vega.github.io/vega-lite) description used to produce the PNG file.
+- `lab-benchmark.svg`: A comparison of execution time distribution
+- `lab-benchmark.vl.json`: The [_Vega-Lite_](https://vega.github.io/vega-lite) description used to produce the figure.
 
 The reference, tagged _expected_, is stored in `lab-benchmark-expected.json`. It can be
 created using the `-u` option of Playwright; i.e. `jlpm run test:benchmark -u`.
@@ -423,7 +585,8 @@ The benchmark can be customized using the following environment variables:
 
 - `BENCHMARK_NUMBER_SAMPLES`: Number of samples to compute the execution time distribution; default 20.
 - `BENCHMARK_OUTPUTFILE`: Benchmark result output file; default `benchmark.json`. It is overridden in the [`playwright-benchmark.config.js`](playwright-benchmark.config.js).
-- `BENCHMARK_REFERENCE`: Reference name of the data; default is `actual` for current data and `expected` for the reference.
+- `BENCHMARK_REFERENCE`: Reference name of the data; default is `actual`.
+- `BENCHMARK_EXPECTED_REFERENCE`: Reference name of the reference data; default is `expected`.
 
 ## Development
 

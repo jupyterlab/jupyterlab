@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 Frequently Asked Questions (FAQ)
 ================================
 
@@ -8,8 +11,7 @@ General
 -------
 
 -  :ref:`What is JupyterLab? <overview>`
--  :ref:`Is JupyterLab ready to use? <releases>`
--  :ref:`What will happen to the classic Jupyter Notebook? <releases>`
+-  :ref:`What will happen to the classic Jupyter Notebook? <classic>`
 -  `Where is the official online documentation for
    JupyterLab? <https://jupyterlab.readthedocs.io>`__
 -  :ref:`How can you report a bug or issue? <issue>`
@@ -39,4 +41,4 @@ Tips and Tricks
 
 - How do I start JupyterLab with a clean workspace every time?
 
-Add ``'c.NotebookApp.default_url = '/lab?reset'`` to your ``jupyter_notebook_config.py``. See `How to create a jupyter_notebook_config.py <https://jupyter-notebook.readthedocs.io/en/stable/config.html>`__ for more information.
+Add ``'c.ServerApp.default_url = '/lab?reset'`` to your ``jupyter_server_config.py``. See `How to create a jupyter_server_config.py <https://jupyter-server.readthedocs.io/en/latest/users/configuration.html>`__ for more information.

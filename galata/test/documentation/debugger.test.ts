@@ -7,7 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { positionMouse, setSidebarWidth } from './utils';
+import { positionMouseOver, setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -21,9 +21,17 @@ test.describe('Debugger', () => {
 
     await createNotebook(page);
 
+    // Wait for kernel to settle on idle
+    await page
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
+    await page
+      .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
+      .waitFor();
+
     expect(
       await page.screenshot({
-        clip: { x: 1050, y: 62, width: 190, height: 28 }
+        clip: { x: 1030, y: 62, width: 210, height: 28 }
       })
     ).toMatchSnapshot('debugger_kernel.png');
   });
@@ -38,7 +46,7 @@ test.describe('Debugger', () => {
     await setSidebarWidth(page, 251, 'right');
 
     expect(
-      await page.screenshot({ clip: { y: 62, x: 800, width: 190, height: 28 } })
+      await page.screenshot({ clip: { y: 62, x: 780, width: 210, height: 28 } })
     ).toMatchSnapshot('debugger_activate.png');
   });
 
@@ -53,6 +61,9 @@ test.describe('Debugger', () => {
 
     await setBreakpoint(page);
 
+    // Wait for breakpoint to finish appearing
+    await page.waitForTimeout(150);
+
     expect(
       await page.screenshot({
         clip: { y: 100, x: 300, width: 300, height: 80 }
@@ -65,16 +76,22 @@ test.describe('Debugger', () => {
 
     await createNotebook(page);
 
+    const runButton = await page.waitForSelector(
+      '.jp-Toolbar-item >> [data-command="runmenu:run"]'
+    );
+
     // Inject mouse pointer
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [positionMouse({ x: 446, y: 80 })]
+      [await positionMouseOver(runButton)]
     );
+    await runButton.focus();
+    await runButton.hover();
 
     expect(
-      await page.screenshot({ clip: { y: 62, x: 400, width: 190, height: 80 } })
+      await page.screenshot({ clip: { y: 62, x: 400, width: 190, height: 60 } })
     ).toMatchSnapshot('debugger_run.png');
   });
 
@@ -90,7 +107,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -104,12 +121,83 @@ test.describe('Debugger', () => {
     await page.click('button[title^=Continue]');
   });
 
+  test('Breakpoints on exception', async ({ page, tmpPath }) => {
+    await page.goto(`tree/${tmpPath}`);
+
+    await createNotebook(page);
+
+    await page.debugger.switchOn();
+    await page.waitForCondition(() => page.debugger.isOpen());
+    await setSidebarWidth(page, 251, 'right');
+
+    await expect(page.locator('button.jp-PauseOnExceptions')).not.toHaveClass(
+      /lm-mod-toggled/
+    );
+    await page.locator('button.jp-PauseOnExceptions').click();
+    const menu = page.locator('.jp-PauseOnExceptions-menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.locator('li.lm-Menu-item')).toHaveCount(3);
+    await expect(menu.locator('li.lm-Menu-item.lm-mod-toggled')).toHaveCount(0);
+
+    await menu
+      .locator('li div.lm-Menu-itemLabel:text("userUnhandled")')
+      .click();
+
+    await expect(page.locator('button.jp-PauseOnExceptions')).toHaveClass(
+      /lm-mod-toggled/
+    );
+
+    await page.notebook.enterCellEditingMode(0);
+    const keyboard = page.keyboard;
+    await keyboard.press('Control+A');
+    await keyboard.type('try:\n1/0\n', { delay: 100 });
+    await keyboard.press('Backspace');
+    await keyboard.type('except:\n2/0\n', { delay: 100 });
+
+    void page.notebook.runCell(0);
+
+    // Wait to be stopped on the breakpoint
+    await page.debugger.waitForCallStack();
+    expect(
+      await page.screenshot({
+        clip: { y: 110, x: 300, width: 300, height: 80 }
+      })
+    ).toMatchSnapshot('debugger_stop_on_unhandled_exception.png');
+
+    await page.click('button[title^=Continue]');
+    await page.notebook.waitForRun(0);
+
+    await page.locator('button.jp-PauseOnExceptions').click();
+
+    await expect(menu.locator('li.lm-Menu-item.lm-mod-toggled')).toHaveCount(1);
+    await expect(
+      menu.locator('li:has(div.lm-Menu-itemLabel:text("userUnhandled"))')
+    ).toHaveClass(/lm-mod-toggled/);
+
+    await menu.locator('li div.lm-Menu-itemLabel:text("raised")').click();
+
+    void page.notebook.runCell(0);
+
+    // Wait to be stopped on the breakpoint
+    await page.debugger.waitForCallStack();
+    expect(
+      await page.screenshot({
+        clip: { y: 110, x: 300, width: 300, height: 80 }
+      })
+    ).toMatchSnapshot('debugger_stop_on_raised_exception.png');
+    await page.click('button[title^=Continue]');
+    await page.click('button[title^=Continue]');
+  });
+
   test('Debugger sidebar', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
 
     await createNotebook(page);
 
-    await page.click('[data-id="jp-debugger-sidebar"]');
+    const sidebar = await page.waitForSelector(
+      '[data-id="jp-debugger-sidebar"]'
+    );
+    await sidebar.click();
     await setSidebarWidth(page, 251, 'right');
 
     // Inject mouse pointer
@@ -117,7 +205,7 @@ test.describe('Debugger', () => {
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [positionMouse({ x: 1240, y: 115 })]
+      [await positionMouseOver(sidebar, { left: 0.25 })]
     );
 
     expect(
@@ -139,10 +227,15 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
+
+    // Wait for the locals variables to be displayed
+    await expect(
+      page.locator('.jp-DebuggerVariables-toolbar select')
+    ).toHaveValue('Locals');
 
     expect(
       await page.screenshot({
@@ -150,6 +243,23 @@ test.describe('Debugger', () => {
       })
     ).toMatchSnapshot('debugger_variables.png');
 
+    // Copy value to clipboard
+    await page
+      .locator('.jp-DebuggerVariables-body :text("b")')
+      .click({ button: 'right' });
+    await page.locator('.lm-Menu-itemLabel:text("Copy to Clipboard")').click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('2');
+
+    // Copy value entry is disabled for variables with empty value
+    await page
+      .locator('.jp-DebuggerVariables-toolbar select')
+      .selectOption('Globals');
+    await page
+      .locator('.jp-DebuggerVariables-body :text("special variables")')
+      .click({ button: 'right' });
+    await expect(
+      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
+    ).toHaveAttribute('aria-disabled', 'true');
     await page.click('button[title^=Continue]');
   });
 
@@ -165,7 +275,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
@@ -196,15 +306,13 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
 
     const breakpointsPanel = await page.debugger.getBreakPointsPanel();
-    expect(await breakpointsPanel.innerText()).toMatch(
-      /ipykernel.*\/2114632017.py/
-    );
+    expect(await breakpointsPanel.innerText()).toMatch(/ipykernel.*\/\d+.py/);
 
     // Don't compare screenshot as the kernel id varies
     // Need to set precisely the path
@@ -228,7 +336,7 @@ test.describe('Debugger', () => {
     await setBreakpoint(page);
 
     // Don't wait as it will be blocked
-    page.notebook.runCell(1);
+    void page.notebook.runCell(1);
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();

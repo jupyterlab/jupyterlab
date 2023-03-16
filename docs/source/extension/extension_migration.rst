@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _extension_migration:
 
 Extension Migration Guide
@@ -26,27 +29,148 @@ bumped their major version (following semver convention). We want to point out p
    As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
 - ``@jupyterlab/apputils`` from 3.x to 4.x
-   Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
+   * Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
+   * ``ISanitizer`` and ``ISanitizer.IOptions`` are deprecated in favor of ``IRenderMime.ISanitizer`` and
+     ``IRenderMime.ISanitizerOptions`` in ``@jupyterlab/rendermime-interfaces``.
+   * Global ``sessionContextDialogs`` is removed; you should request the token ``ISessionContextDialogs`` (from ``@jupyterlab/apputils``).
+- ``@jupyterlab/attachments`` from 3.x to 4.x
+   Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
    * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
      should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
    * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
    * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
 - ``@jupyterlab/cells`` from 3.x to 4.x
-   ``MarkdownCell.toggleCollapsedSignal`` renamed ``MarkdownCell.headingCollapsedChanged``
+   * ``MarkdownCell.toggleCollapsedSignal`` renamed ``MarkdownCell.headingCollapsedChanged``
+     To support notebook windowing, cell widget children (e.g. the editor or the output area) are not instantiated
+     when the cell is attached to the notebook. You can test for ``isPlaceholder()`` to see if the cell has been
+     fully instantiated or wait for the promise ``ready`` to be resolved. Additionally an attribute ``inViewport``
+     and a signal ``inViewportChanged`` are available to test if the cell is attached to the DOM.
+     If you instantiate standalone cells outside of a notebook, you will probably need to set the constructor option
+     ``placeholder`` to ``false`` to ensure direct rendering of the cell.
+   * ``InputArea.defaultContentFactory`` and ``Cell.defaultContentFactory`` have been removed. If you need it, you
+     can request the token ``IEditorServices`` from ``@jupyterlab/codeeditor``. Then you can use
+     ``new Cell.ContentFactory({ editorFactory: token.factoryService.newInlineEditor });``.
+- ``@jupyterlab/celltags`` from 3.x to 4.0
+  The ``@jupyterlab/celltags`` package has been removed and replaced by a widget in ``@jupyterlab/celltags-extension``.
+  This widget is now rendered using ``@jupyterlab/metadataform``.
+- ``@jupyterlab/codeeditor`` from 3.x to 4.0
+   * ``CodeEditor.IEditor`` has changed:
+      - ``resizeToFit()`` is removed
+      - ``addKeydownHandler()`` is removed - you should add a CodeMirror extension ``EditorView.domEventHandlers`` with
+         ``Prec.high`` (to ensure it is not captured by keyboard shortcuts).
+      - ``injectExtension()`` added as experimental to inject a CodeMirror extension - you should prefer registering
+         new extensions with ``IEditorExtensionRegistry``.
+   * ``CodeEditor.IOptions`` has two new optional attributes:
+      - ``extensions?: Extensions[]`` to provide custom extensions at editor instantiation
+      - ``inline?: boolean`` whether the editor is a subpart of a document (like the notebook) or not.
+   * ``CodeEditorWrapper.IOptions`` has changed to ``{ factory, model, editorOptions }``.
+   * ``CodeViewerWidget.IOptions`` has changed to ``{ factory, model, editorOptions }``.
+- ``@jupyterlab/codemirror`` from 3.x to 4.0
+   * Configuration parameters changes:
+      - ``fontFamily``, ``fontSize`` and ``lineHeight``: grouped in a subdictionnary ``customStyles``.
+      - ``insertSpaces``: changed for ``indentUnit`` that can take a value within ['Tab', '1', '2', '4', '8']
+      - ``lineWrap``: changed - it is now a boolean.
+      - ``showTrailingSpace``: renamed ``highlightTrailingWhitespace``
+      - ``coverGutterNextToScrollbar``: removed
+      - ``electricChars``: removed
+      - ``extraKeys``: removed - you should register new keymap using the CodeMirror extension ``keymap.of(KeyBinding[])``
+      - ``handlePaste``: removed
+      - ``keymap``: removed
+      - ``lineSeparator``: removed - Line separator are normalized to ``\n``
+      - ``lineWiseCopyCut``: removed - this is the default behavior
+      - ``scrollbarStyle``: removed
+      - ``styleSelectedText``: removed
+      - ``selectionPointer``: removed
+      - ``wordWrapColumn``: removed
+   * ``Mode`` has been removed. You can instead request the token ``IEditorLanguageHandler``. That provides
+     similar API:
+     - ``Mode.registerModeInfo`` -> ``IEditorLanguageHandler.addLanguage``
+     - ``Mode.ensure()`` -> ``IEditorLanguageHandler.getLanguage()``
+     - ``Mode.modeList`` -> ``IEditorLanguageHandler.getLanguages()``
+     - ``Mode.run()`` -> ``IEditorLanguageHandler.highlight()``
+     - ``Mode.findBest()`` -> ``IEditorLanguageHandler.findBest()``
+     - ``Mode.findByName()`` -> ``IEditorLanguageHandler.findByName()``
+     - ``Mode.findByMIME()`` -> ``IEditorLanguageHandler.findByMIME()``
+     - ``Mode.findByExtension()`` -> ``IEditorLanguageHandler.findByExtension()``
+   * ``EditorSyntaxStatus`` moved to ``@jupyterlab/fileeditor``
+- ``@jupyterlab/codemirror-extension`` from 3.x to 4.0
+   * Moved commands:
+     - ``codemirror:change-theme`` -> ``fileeditor:change-theme`` (moved to ``@juptyerlab/fileeditor-extension``)
+     - ``codemirror:change-mode`` -> ``fileeditor:change-language`` (moved to ``@juptyerlab/fileeditor-extension``)
+     - ``codemirror:find`` -> ``fileeditor:find`` (moved to ``@juptyerlab/fileeditor-extension``)
+     - ``codemirror:go-to-line`` -> ``fileeditor:go-to-line`` (moved to ``@juptyerlab/fileeditor-extension``)
+   * Removed command: ``codemirror:change-keymap``
+   * Moved plugins:
+     - ``@jupyterlab/codemirror-extension:commands`` integrated within ``@jupyterlab/fileeditor-extension:plugin``
+     - ``@jupyterlab/codemirror-extension:editor-syntax-status`` -> ``@jupyterlab/fileeditor-extension:editor-syntax-status``
+     - ``@jupyterlab/codemirror-extension:editor-syntax-status`` -> ``@jupyterlab/fileeditor-extension:editor-syntax-status``
 - ``@jupyterlab/completer`` from 3.x to 4.x
-   Major version bumped following the removal of ``ICompletionManager`` token and the replacement
-   of ``ICompletableAttributes`` interface by ``ICompletionProvider``. To create a completer provider
-   for JupyterLab, users need to implement the interface ``ICompletionProvider`` and then register
-   this provider with ``ICompletionProviderManager`` token.
+   Major version was bumped following major refactor aimed at performance improvements and enabling easier third-party integration.
+
+   * Adding custom completion suggestions (items):
+      - In 3.x and earlier adding custom completion items required re-registering the completer connector for each file/cell
+        using ``register`` method of old manager provided by ``ICompletionManager`` token; in 4.x this token and associated
+        ``ICompletableAttributes`` interface was removed and a proper method of registering a custom source of completions
+        (a provider of completions) was added. To create a completer provider  for JupyterLab, users need to implement the
+        ``ICompletionProvider`` interface and then register this provider with ``ICompletionProviderManager`` token.
+      - In 3.x merging completions from different sources had to be performed by creating a connector internally merging
+        results from other connectors. in 4.x ``IProviderReconciliator`` is used to merge completions from multiple providers,
+        and can be customised in constructor for custom completion handlers (``CompletionHandler``); customizing reconciliator
+        in JupyterLab-managed completers is not yet possible.
+   * Rendering with ``Completer.IRenderer``:
+      - In 3.x it was not possible to easily swap the renderer of JupyterLab-managed completers.
+        In 4.x the renderer from the completion provider with highest rank is now used for all
+        JupyterLab-managed completers. This behaviour is subject to revision in the future (please leave feedback).
+      - Completer box is now using delayed rendering for off-screen content to improve time to first paint
+        for top suggestions. To position the completer without rendering all items we search for the widest
+        item using heuristic which can be adjusted in custom renderers (``itemWidthHeuristic``).
+      - The documentation panel now implements a loading indicator (a progress bar) customizable via
+        optional ``createLoadingDocsIndicator`` renderer method.
+      - ``createItemNode`` was removed in favour of ``createCompletionItemNode`` which is now required.
+      - ``createCompletionItemNode`` is no longer responsible for sanitization of labels which is now a
+        responsibility of the model (see below).
+   * Model:
+      - In 3.x it was not possible to easily swap the model of JupyterLab-managed completers.
+        In 4.x the model factory from the completion provider with highest rank is now used for
+        JupyterLab-managed completers. This behaviour is subject to revision in the future (please leave feedback).
+      - Old methods for updating and accessing the completion items: ``setOptions``, ``options``, and ``items`` were removed
+        in favour of ``completionItems`` and ``setCompletionItems`` which are now required members of ``Completer.IModel``.
+      - New signal ``queryChanged`` was added and has to be emitted by models.
+      - Model is now responsible for sanitization of labels and preserving original label on ``insertText`` attribute
+        (if not already defined); this change was required to properly handle escaping of HTML tags.
+- ``@jupyterlab/codeeditor`` from 3.x to 4.x
+   * Remove ``ISelectionStyle`` (and therefore ``defaultSelectionStyle`` and ``IEditor.selectionStyle``). This was envisaged
+     for real-time collaboration. But this is not used in the final implementation.
 - ``@jupyterlab/console`` from 3.x to 4.x
    The type of ``IConsoleHistory.sessionContext`` has been updated to ``ISessionContext | null`` instead of ``ISessionContext``.
    This might break the compilation of plugins accessing the ``sessionContext`` from a ``ConsoleHistory``,
    in particular those with the strict null checks enabled.
+- ``@jupyterlab/coreutils`` from 3.x to 4.x
+   The ``Time`` namespace does not use the ``moment`` library anymore for managing dates. Instead it switched to using
+   the ``Intl`` API now available in modern web browsers. The ``Time.format`` function is still available but does not accept the
+   ``timeFormat`` argument anymore.
+- ``@jupyterlab/debugger`` from 3.x to 4.x
+   * The command ``debugger:pause`` command ID has been renamed ``debugger:pause-on-exceptions`` to avoid ambiguity with
+     pausing the current running thread.
+- ``@jupyterlab/docmanager`` from 3.x to 4.x
+   * The ``renameDialog`` now receives the ``DocumentRegistry.Context`` instead of a path.
+   * The interface ``DocumentManager.IWidgetOpener`` is now ``IDocumentWidgetOpener`` and is provided
+     by a new plugin ``@jupyterlab/docmanager-extension:opener``.
+     The ``IDocumentWidgetOpener`` interface also now defines an ```opened``` signal that is emitted when a widget is opened.
+   * Removed the property ``docProviderFactory`` from the interface ``DocumentManager.IOptions``.
+- ``@jupyterlab/docregister`` from 3.x to 4.x
+   * ``TextModelFactory.preferredLanguage(path: string)`` will always return ``''``. The editor languages is not available globally to provided it.
+     You can recover the feature if needed, by requesting the token ``IEditorLanguageHandler`` from ``@jupyterlab/codemirror``. Then you can use
+     ``token.findByFileName(widget.context.path)?.name ?? ''``.
 - ``@jupyterlab/docprovider`` from 3.x to 4.x
-   ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
-   ``acquireLock``, ``releaseLock``, ``requestInitialContent`` and ``putInitializedState`` have been removed from ``IDocumentProvider``.
-   ``renameAck`` is not optional anymore in ``IDocumentProvider``.
+   This package is no longer present in JupyterLab. For documentation related to Real-Time Collaboration, please check out
+   `RTC's documentation <https://jupyterlab.readthedocs.io/en/latest/user/rtc.html>`_
+- ``@jupyterlab/docregistry`` from 3.x to 4.x
+   * Removed the property ``docProviderFactory`` from the interface ``Context.IOptions``.
+   * The constructor of the class ``DocumentModel`` receives a parameter ``DocumentModel.IOptions``.
+   * The method ``IModelFactory.createNew`` receives a parameter ``DocumentRegistry.IModelOptions``.
+   * The method ``TextModelFactory.createNew`` receives a parameter ``DocumentModel.IOptions``.
 - ``@jupyterlab/documentsearch`` from 3.x to 4.x
    * ``@jupyterlab/documentsearch:plugin`` has been renamed to ``@jupyterlab/documentsearch-extension:plugin``
    * ``@jupyterlab/documentsearch:labShellWidgetListener`` has been renamed to ``@jupyterlab/documentsearch-extension:labShellWidgetListener``
@@ -55,17 +179,52 @@ bumped their major version (following semver convention). We want to point out p
    The search provider API has been fully reworked. But the logic is similar, for new type of documents
    you will need to register a ``ISearchProviderFactory`` to the ``ISearchProviderRegistry``. The
    factory will build a ``ISearchProvider`` for the document widget.
+- ``@jupyterlab/extensionmanager`` from 3.x to 4.x
+   The frontend API has been drastically reduced to fetch all information from the backend. It is now advised
+   that you implement a custom ``ExtensionManager`` class for your needs rather than overriding the frontend plugins.
+   See ``jupyterlab/extensions/pypi.py`` for an example using PyPI.org and pip. You can then register your manager
+   by defining an entry point in the Python package; see ``pyproject.toml::project.entry-points."jupyterlab.extension_manager_v1"``.
 - ``@jupyterlab/fileeditor`` from 3.x to 4.x
    Remove the class ``FileEditorCodeWrapper``, instead, you can use ``CodeEditorWrapper`` from ``@jupyterlab/codeeditor``.
+- ``@jupyterlab/filebrowser`` from 3.x to 4.x
+   * Remove the property ``defaultBrowser`` from the interface  ``IFileBrowserFactory``. The default browser is now provided by it own
+     plugin by requiring the token ``IDefaultFileBrowser``.
+   * Remove the ``useFuzzyFilter`` setter from the ``FileBrowser`` class.
 - ``@jupyterlab/filebrowser-extension`` from 3.x to 4.x
    Remove command ``filebrowser:create-main-launcher``. You can replace by ``launcher:create`` (same behavior)
    All launcher creation actions are moved to ``@jupyterlab/launcher-extension``.
+- ``@jupyterlab/mainmenu`` from 3.x to 4.x
+   * ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
+     to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
 - ``@jupyterlab/notebook`` from 3.x to 4.x
+   * ``NotebookWidgetFactory.IOptions`` has no ``sessionDialogs`` option any more.
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
    * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
    * Command ``Collapsible_Headings:Collapse_All`` renamed to ``notebook:collapse-all-headings``.
    * Command ``Collapsible_Headings:Expand_All`` renamed to ``notebook:expand-all-headings``.
+   * To support windowing, a new method ``scrollToItem(index, behavior)`` is available to scroll to any
+     cell that may or may not be in the DOM. And new ``cellInViewportChanged`` signal is available to listen
+     for cells entering or leaving the viewport (in windowing mode). And ``scrollToCell(cell)`` is now returning
+     a ``Promise<void>`` calling internally ``scrollToItem``.
+   * ``fullyRendered``, ``placeholderCellRendered`` and ``remainingCellToRenderCount`` have been removed.
+     The defer rendering mode still exists. It will render some cells during spare CPU Idle time.
+   * Settings ``numberCellsToRenderDirectly``, ``remainingTimeBeforeRescheduling``, ``renderCellOnIdle``,
+     ``observedTopMargin`` and ``observedBottomMargin`` have been removed. Instead a ``windowingMode``
+     with value of *defer*, *full* or *none* and ``overscanCount`` have been added to manage the rendering
+     mode.
+   * Added the property ``sharedModel`` to the interface ``NotebookModel.IOptions``.
+   * The method ``NotebookModelFactory.createNew`` receives a parameter ``NotebookModelFactory.IModelOptions``.
+   * The default Notebook toolbar's ``restart-and-run`` button now refers to the command
+     ``notebook:restart-run-all`` instead of ``runmenu:restart-and-run-all``.
+   * ``StaticNotebook.defaultContentFactory`` has been removed. If you need it, you can request the token
+     ``IEditorServices`` from ``@jupyterlab/codeeditor``. You can obtain it by requested
+     ``new NotebookPanel.ContentFactory({ editorFactory: token.factoryService.newInlineEditor });``
+   * ``notebooktools`` module does not provides anymore the ``ActiveCellTool``, the ``NotebookMetadataEditorTool``
+     and the ``CellMetadataEditorTool``. All these widget are replaced by widgets in ``@jupyterlab/notebook-extension``,
+     and are rendered using ``@jupyterlab/metadataform``.
+     The ``KeySelector`` has also been removed as not used anymore, replaced by the use of ``@jupyterlab/metadataform``
+     to provides selection for metadata keys.
 - ``@jupyterlab/rendermime`` from 3.x to 4.x
   The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
   that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
@@ -73,8 +232,12 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/rendermime-interfaces`` from 3.x to 4.x
   Remove ``IRenderMime.IRenderer.translator?`` attribute; the translator object is still passed to
   the constructor if needed by the renderer factory.
+- ``@jupyterlab/services`` from 6.x to 7.x
+   * Remove ``Contents.IDrive.modelDBFactory`` and ``Contents.IManager.getModelDBFactory``.
+   * Added ``Contents.IDrive.sharedModelFactory`` and ``Contents.IManager.getsharedModelFactory``.
 - ``@jupyterlab/shared-models`` from 3.x to 4.x
-   The ``createCellFromType`` function has been renamed to ``createCellModelFromSharedType``
+   This package is no longer present in JupyterLab. For documentation related to the shared models,
+   please check out `@jupyter/ydoc documentation <https://jupyter-ydoc.readthedocs.io/en/latest>`_.
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
   Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
   Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
@@ -82,6 +245,9 @@ bumped their major version (following semver convention). We want to point out p
   Plugin ``@jupyterlab/statusbar-extension:running-sessions-status`` renamed to ``@jupyterlab/apputils-extension:running-sessions-status``
   Plugin ``@jupyterlab/statusbar-extension:line-col-status`` renamed to ``@jupyterlab/codemirror-extension:line-col-status``
   ``HoverBox`` component moved from ``@jupyterlab/apputils`` to ``@jupyterlab/ui-components``.
+- ``@jupyterlab/terminal`` from 3.x to 4.x
+  Xterm.js upgraded from 4.x to 5.x
+  ``IThemeObject.selection`` renamed to ``selectionBackground``
 - ``@jupyterlab/toc`` from 3.x to 4.x
    ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).
@@ -92,15 +258,91 @@ bumped their major version (following semver convention). We want to point out p
    a ``level`` and optionally a ``prefix``, a ``collapsed`` state and a ``dataset`` (data
    DOM attributes dictionary).
 - ``@jupyterlab/ui-components`` from 3.x to 4.x
-   Major version bumped following removal of Blueprint JS dependency. Extensions using proxied
-   components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly
-   from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
-   need to switch to the Blueprint components as the interfaces of those components in JupyterLab
-   do not match those of Blueprint JS.
-- TypeScript 4.6 update
-   As a result of the update to TypeScript 4.5+, a couple of interfaces have had their definitions changed.
+   * Major version bumped following removal of Blueprint JS dependency. Extensions using proxied
+     components like ``Checkbox``, ``Select`` or ``Intent`` will need to import them explicitly
+     from Blueprint JS library. Extensions using ``Button``, ``Collapse`` or ``InputGroup`` may
+     need to switch to the Blueprint components as the interfaces of those components in JupyterLab
+     do not match those of Blueprint JS.
+   * Remove ``Collapse`` React component.
+   * Form component registry changes:
+      - Rename the plugin ``'@jupyterlab/ui-components-extension:form-component-registry'`` to ``'@jupyterlab/ui-components-extension:form-renderer-registry'``
+      - Rename the ``IFormComponentRegistry`` token to ``IFormRendererRegistry``, from ``@jupyterlab/ui-components:ISettingEditorRegistry``
+        to ``@jupyterlab/ui-components:IFormRendererRegistry``.
+      - The ``FormRendererRegistry`` registers ``IFormRenderer`` instead of ``Field`` renderers.
+        A ``IFormRenderer`` defines a ``fieldRenderer`` (this is the renderer to set for backward compatibility)
+        or a ``widgetRenderer``.
+        The renderer id must follow the convention ``<ISettingRegistry.IPlugin.id>.<propertyName>``. This is to
+        ensure a custom renderer is not used for property with the same name but different schema.
+- ``@jupyterlab/translation`` from 3.x to 4.x
+   Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
+- ``@jupyterlab/vdom`` and ``@jupyterlab/vdom-extension`` have been removed.
+   The underlying [vdom](https://github.com/nteract/vdom) Python package is unmaintained.
+   So it was decided to drop it from core packages.
+- ``jupyter.extensions.hub-extension`` from 3.x to 4.x
+   * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
+   * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
+- TypeScript 4.7 update
+   As a result of the update to TypeScript 4.7, a couple of interfaces have had their definitions changed.
    The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
    The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+- React 18.2.0 update
+  The update to React 18.2.0 (from 17.0.1) should be propagated to extensions as well.
+  Here is the documentation about the `migration to react 18 <https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html>`_.
+
+Testing with Jest
+^^^^^^^^^^^^^^^^^
+
+Jest has been updated to 29.2.0 (and *ts-jest* to 29.0.0). And therefore the jest configuration provided by
+``@jupyterlab/testutils`` is compatible for that version. In particular:
+
+- The unmaintained reporter ``jest-summary-reporter`` has been replaced by the new default ``github-actions`` reporter.
+- The helper ``flakyIt`` has been removed. You can use the new `jest.retryTimes <https://jestjs.io/docs/jest-object#jestretrytimesnumretries-options>`_ instead.
+
+With JupyterLab 4, we fixed circular dependencies due to the ``testutils`` package. So it is now only a facade to export
+helpers from various core packages. The exported helpers are the same as before expect for:
+
+- ``NBTestUtils.DEFAULT_CONTENT``: Removed - you could imported from ``@jupyterlab/notebook/lib/testutils`` but we strongly advice not to and to use your own test data.
+- ``NBTestUtils.DEFAULT_CONTENT_45``: Removed
+
+Testing with Galata
+^^^^^^^^^^^^^^^^^^^
+
+The in-page helpers are now in an JupyterLab extension to live in the common Webpack shared scoped. That new extension
+is contained in the JupyterLab python package at ``jupyterlab.galata``. It requires to update your Jupyter server
+configuration by adding the following line:
+
+.. code-block:: python
+
+    import jupyterlab
+    c.LabApp.extra_labextensions_path = str(Path(jupyterlab.__file__).parent / "galata")
+
+.. note::
+
+    To ease configuration, we have introduce a new helper function ``jupyterlab.galata.configure_jupyter_server``. So you can
+    simplify the server configuration to be ``jupyterlab.galata.configure_jupyter_server(c)``.
+
+Here are the changes in the Javascript package ``@jupyterlab/galata`` from 4.x to 5.x:
+   * ``ContentsHelper`` and ``galata.newContentsHelper`` have new constructor arguments to use Playwright API request object:
+     ``new ContentsHelper(baseURL, page?, request?)`` -> ``new ContentsHelper(request?, page?)``
+     ``galata.newContentsHelper(baseURL, page?, request?)`` -> ``galata.newContentsHelper(request?, page?)``
+     you need to provide ``request`` or ``page``; they both are fixtures provided by Playwright.
+   * ``galata.Mock.clearRunners(baseURL, runners, type)`` -> ``galata.Mock.clearRunners(request, runners, type)``
+   * In-pages helpers are now in an extension define in ``jupyterlab/galata/extension`` and
+     store in ``@jupyterlab/galata/lib/extension``. And the global object has been renamed ``window.galata`` instead
+     of ``window.galataip`` (it still exists but it is deprecated).
+
+Deprecated code removed
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The following deprecated API's have been removed:
+
+- ``@jupyterlab/csvviewer``: ``CSVDelimiter.delimiterChanged`` has been removed - dead code. You can directly access the delimiter from the ``CSVViewer`` widget.
+- ``@jupyterlab/mainmenu``: ``IJupyterLabMenu`` and ``JupyterLabMenu`` have been removed. You can use directly ``IRankedMenu`` and ``RankedMenu`` from ``@jupyterlab/ui-components``
+- ``@jupyterlab/notebook``: ``NotebookWidgetFactory`` default toolbar is now empty as the button helpers are deprecated.
+- ``@jupyterlab/rendermime``: ``RenderMimeRegistry.IUrlResolverOptions`` does not accept ``session``; you must set the ``path`` (accessible through ``session.path``).
+- ``@jupyterlab/ui-components``:
+   * ``RankedMenu.menu : Menu`` has been removed as ``RankedMenu`` inherits from ``Menu``.
+   * ``LabIconStyle.IProps`` does not accept ``kind`` nor ``justify``. You should use ``stylesheet`` or ``elementPosition`` respectively.
 
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -112,6 +354,101 @@ Extension Development Changes
 - The ``webpack`` dependency in ``@jupyterlab/builder`` has been updated to ``5.72`` (or newer). Base rules have been updated to use the
   `Asset Modules <https://webpack.js.org/guides/asset-modules>`_ instead of the previous ``file-loader``, ``raw-loader`` and ``url-loader``.
   This might affect third-party extensions if they were relying on specific behaviors from these loaders.
+- In JupyterLab 3.x, the CSS for a _disabled_ prebuilt extensions would still be loaded on the page.
+  This is no longer the case in JupyterLab 4.0.
+- ``window.jupyterlab`` is not exposed anymore when starting JupyterLab with the ``--expose-app-in-browser`` flag.
+  Use ``window.jupyterapp`` instead.
+
+.. _extension_migration_3.5_3.6:
+
+JupyterLab 3.5 to 3.6
+---------------------
+
+AsyncIterable Support
+^^^^^^^^^^^^^^^^^^^^^
+
+For the events service, we are using a JavaScript feature introduced in ES2018. If your code is
+using TypeScript with ES2017 target (as JupyterLab 3.6), you will either need to update your
+target to ES2018 or add ``"ES2018"`` to the `TypeScript lib option <https://www.typescriptlang.org/tsconfig#lib>`_.
+
+.. note::
+
+    JupyterLab 3.6.0 was released with an updated target "ES2018". We strongly advise updating to 3.6.1,
+    which reverts the target back to "ES2017".
+
+
+Jest configuration update
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab 3.6.
+They need to be ignore when transforming the code with Jest. You will need to update the
+``transformIgnorePatterns`` to match:
+
+.. code-block:: javascript
+    :emphasize-lines: 3
+
+    const esModules = [
+      '@jupyterlab/',
+      '@jupyter/ydoc',
+      'lib0',
+      'y\\-protocols',
+      'y\\-websocket',
+      'yjs'
+    ].join('|');
+
+    // ...
+
+    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
+
+For more information, have a look at :ref:`testing_with_jest`.
+
+Real-Time Collaboration
+^^^^^^^^^^^^^^^^^^^^^^^
+In JupyterLab v3.6, it is necessary to install Jupyter Server v2.0 to use real-time collaboration.
+This requirement was introduced to take advantage of the new identity API in Jupyter Server v2.0.
+
+On the other side, we also changed how JupyterLab loads documents (only in collaborative mode).
+Instead of using the content API, now the provider opens a WebSocket connection to the
+`YDocWebSocketHandler`, which is implemented in an external
+`jupyter server extension <https://github.com/jupyter-server/jupyter_server_ydoc>`__.
+
+In addition, the shared models' package was moved to an external package called `@jupyter/ydoc
+<https://github.com/jupyter-server/jupyter_ydoc>`__. All the extensions that depend on
+``@jupyterlab/shared-models`` will need to update to depend in ``@jupyter/ydoc@~0.2.2``; the API should
+be the same.
+
+**API Changes:**
+To be able to fix RTC and make it stable. It was necessary to change the API and make a few breaking changes.
+These changes should not affect the vast majority of extensions. They will only affect a couple
+of extensions focused on RTC.
+
+It was necessary to change the paradigm of how JupyterLab loads documents and replace the locking mechanism
+in the back-end. Instead of identifying the first client to open the document, it now centralizes
+the process by instantiating a YDoc client in the back-end. This client is the only one that loads
+the content of the document into memory and shares it with every other client connected.
+
+The involved packages are:
+
+- ``@jupyterlab/docprovider``:
+   * The interface ``IDocumentProvider``, now extends from ``IDisposable``.
+     Removed: ``acquireLock``, ``releaseLock``, ``setPath``, ``destroy``, ``requestInitialContent`` and ``putInitializedState``.
+     Added: ``ready`` and ``isDisposed``.
+
+   * ``IDocumentProviderFactory.IOptions`` is now templated with ``T extends ISharedDocument = ISharedDocument``.
+     And the ``ymodel`` attribute has been renamed ``model`` typed ``T`` (relaxing typing from ``YDocument`` to ``ISharedDocument``).
+
+   * ``WebSocketProviderWithLocks`` has been renamed to ``WebSocketProvider``.
+     It does not extend ``WebSocketProvider`` from ``y-websocket`` anymore.
+
+   * ``WebSocketProvider.IOptions`` has a new optional attribute, ``user``.
+
+- ``@jupyterlab/services``:
+   * The interface ``IManager`` has a new optional property, ``user`` that implement `User.IManager <../api/interfaces/services.User.IManager.html>`_.
+
+   * The ``ServiceManager`` class implements the optional property ``user`` from the ``IManager``.
+
+
+.. _extension_migration_3.0_3.1:
 
 JupyterLab 3.0 to 3.1
 ---------------------

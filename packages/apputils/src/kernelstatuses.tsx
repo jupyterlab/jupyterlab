@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Session } from '@jupyterlab/services';
-import { interactiveItem, TextItem } from '@jupyterlab/statusbar';
+import { TextItem } from '@jupyterlab/statusbar';
 import {
   ITranslator,
   nullTranslator,
@@ -111,7 +111,7 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
     super(new KernelStatus.Model(translator));
     this.translator = translator || nullTranslator;
     this._handleClick = opts.onClick;
-    this.addClass(interactiveItem);
+    this.addClass('jp-mod-highlighted');
   }
 
   /**
@@ -191,9 +191,17 @@ export namespace KernelStatus {
     }
     set sessionContext(sessionContext: ISessionContext | null) {
       this._sessionContext?.statusChanged.disconnect(
-        this._onKernelStatusChanged
+        this._onKernelStatusChanged,
+        this
       );
-      this._sessionContext?.kernelChanged.disconnect(this._onKernelChanged);
+      this._sessionContext?.connectionStatusChanged.disconnect(
+        this._onKernelStatusChanged,
+        this
+      );
+      this._sessionContext?.kernelChanged.disconnect(
+        this._onKernelChanged,
+        this
+      );
 
       const oldState = this._getAllState();
       this._sessionContext = sessionContext;
@@ -212,25 +220,25 @@ export namespace KernelStatus {
     /**
      * React to changes to the kernel status.
      */
-    private _onKernelStatusChanged = () => {
+    private _onKernelStatusChanged() {
       this._kernelStatus = this._sessionContext?.kernelDisplayStatus;
       this.stateChanged.emit(void 0);
-    };
+    }
 
     /**
      * React to changes in the kernel.
      */
-    private _onKernelChanged = (
+    private _onKernelChanged(
       _sessionContext: ISessionContext,
       change: Session.ISessionConnection.IKernelChangedArgs
-    ) => {
+    ) {
       const oldState = this._getAllState();
 
       // sync setting of status and display name
       this._kernelStatus = this._sessionContext?.kernelDisplayStatus;
       this._kernelName = _sessionContext.kernelDisplayName;
       this._triggerChange(oldState, this._getAllState());
-    };
+    }
 
     private _getAllState(): Private.State {
       return [this._kernelName, this._kernelStatus, this._activityName];

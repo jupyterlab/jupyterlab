@@ -2,11 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig } from '@jupyterlab/coreutils';
-import {
-  flakyIt as it,
-  JupyterServer,
-  testEmission
-} from '@jupyterlab/testutils';
+import { JupyterServer, sleep, testEmission } from '@jupyterlab/testing';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import {
@@ -16,9 +12,7 @@ import {
   Session,
   SessionManager
 } from '../../src';
-import { handleRequest, init, SessionTester } from '../utils';
-
-init();
+import { handleRequest, SessionTester } from '../utils';
 
 let kernelManager: KernelManager;
 let sessionManager: SessionManager;
@@ -35,26 +29,20 @@ async function startNew(): Promise<Session.ISessionConnection> {
   return session;
 }
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-  kernelManager = new KernelManager();
-  sessionManager = new SessionManager({ kernelManager });
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('session', () => {
   let session: Session.ISessionConnection;
   let defaultSession: Session.ISessionConnection;
+  let server: JupyterServer;
+
+  jest.retryTimes(3);
 
   beforeAll(async () => {
-    jest.setTimeout(20000);
+    server = new JupyterServer();
+    await server.start();
+    kernelManager = new KernelManager();
+    sessionManager = new SessionManager({ kernelManager });
     defaultSession = await startNew();
-  });
+  }, 30000);
 
   afterEach(async () => {
     if (session && !session.isDisposed) {
@@ -64,6 +52,7 @@ describe('session', () => {
 
   afterAll(async () => {
     await defaultSession.shutdown();
+    await server.shutdown();
   });
 
   describe('Session.DefaultSession', () => {
@@ -84,7 +73,10 @@ describe('session', () => {
       it('should emit when the kernel changes', async () => {
         let called: Session.ISessionConnection.IKernelChangedArgs | null = null;
         const object = {};
-        await defaultSession.kernel?.requestKernelInfo();
+        while (defaultSession.kernel!.connectionStatus !== 'connected') {
+          await sleep(100);
+        }
+        await defaultSession.kernel!.requestKernelInfo();
         defaultSession.kernelChanged.connect((s, args) => {
           called = args;
           Signal.disconnectReceiver(object);
@@ -110,6 +102,9 @@ describe('session', () => {
             called = true;
           }
         });
+        while (defaultSession.kernel!.connectionStatus !== 'connected') {
+          await sleep(100);
+        }
         await defaultSession.kernel!.requestKernelInfo();
         expect(called).toBe(true);
       });

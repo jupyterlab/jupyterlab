@@ -47,7 +47,7 @@ export interface IPositionModel {
    * associated editor if it can or null otherwise.
    */
   addEditorProvider: (
-    provider: (widget: Widget | null) => CodeEditor.IEditor | null
+    provider: (widget: Widget | null) => Promise<CodeEditor.IEditor | null>
   ) => void;
 
   /**

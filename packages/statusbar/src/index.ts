@@ -9,5 +9,4 @@
 
 export * from './components';
 export * from './statusbar';
-export * from './style/statusbar';
 export * from './tokens';

@@ -15,3 +15,10 @@ pre {
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-code-line-height);
 }
+
+/* fix illegible yellow backround in exception stacktrace */
+:where(.jp-RenderedText[data-mime-type='application/vnd.jupyter.stderr']
+    pre
+    .ansi-yellow-bg) {
+  color: black;
+}

@@ -100,7 +100,7 @@ export namespace Callstack {
     registry: CommandRegistry;
 
     /**
-     * The continue command ID.
+     * The pause/continue command ID.
      */
     continue: string;
 

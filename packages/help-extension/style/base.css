@@ -118,11 +118,13 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color0);
 }
 
 .jp-RenderedHTMLCommon.jp-Licenses-Filters ul,
 .jp-RenderedHTMLCommon.jp-Licenses-Filters li {
   list-style: none;
+  color: var(--jp-ui-font-color0);
 }
 
 .jp-Licenses-Filters input {

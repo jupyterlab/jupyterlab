@@ -7,6 +7,7 @@
   align-items: center;
   display: flex;
   padding: 4px;
+  padding-bottom: 5px;
   margin-right: 1px;
   background-color: var(--jp-layout-color2);
 }

@@ -30,6 +30,10 @@
       {
         "command": "debugger:render-mime-variable",
         "selector": ".jp-DebuggerVariables-body"
+      },
+      {
+        "command": "debugger:copy-to-clipboard",
+        "selector": ".jp-DebuggerVariables-body"
       }
     ]
   },
@@ -106,6 +110,12 @@
       "description": "A regular expression filter to apply by default when showing the kernel sources",
       "type": "string",
       "default": ""
+    },
+    "autoCollapseDebuggerSidebar": {
+      "title": "Auto Collapse Debugger Sidebar",
+      "description": "Collapse the debugger sidebar when disabling the debugger on a document.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

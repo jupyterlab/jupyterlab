@@ -72,11 +72,14 @@ export class MarkdownViewerTableOfContentsModel extends TableOfContentsModel<
    */
   protected getHeadings(): Promise<IMarkdownViewerHeading[] | null> {
     const content = this.widget.context.model.toString();
-    const headings = TableOfContentsUtils.Markdown.getHeadings(content, {
-      ...this.configuration,
-      // Force base number to be equal to 1
-      baseNumbering: 1
-    });
+    const headings = TableOfContentsUtils.filterHeadings(
+      TableOfContentsUtils.Markdown.getHeadings(content),
+      {
+        ...this.configuration,
+        // Force base number to be equal to 1
+        baseNumbering: 1
+      }
+    );
     return Promise.resolve(headings);
   }
 }
@@ -133,11 +136,9 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
 
           if (
             elementBox.top > widgetBox.bottom ||
-            elementBox.bottom < widgetBox.top ||
-            elementBox.left > widgetBox.right ||
-            elementBox.right < widgetBox.left
+            elementBox.bottom < widgetBox.top
           ) {
-            el.scrollIntoView({ inline: 'center' });
+            el.scrollIntoView({ block: 'center' });
           }
         }
       }
@@ -176,7 +177,7 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
       });
     };
 
-    widget.content.ready.then(() => {
+    void widget.content.ready.then(() => {
       onHeadingsChanged();
 
       widget.content.rendered.connect(onHeadingsChanged);

@@ -16,7 +16,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { ElementExt } from '@lumino/domutils';
-import { IDragEvent } from '@lumino/dragdrop';
+import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { FileBrowserModel } from './model';
@@ -98,16 +98,16 @@ export class BreadCrumbs extends Widget {
         this._evtClick(event as MouseEvent);
         break;
       case 'lm-dragenter':
-        this._evtDragEnter(event as IDragEvent);
+        this._evtDragEnter(event as Drag.Event);
         break;
       case 'lm-dragleave':
-        this._evtDragLeave(event as IDragEvent);
+        this._evtDragLeave(event as Drag.Event);
         break;
       case 'lm-dragover':
-        this._evtDragOver(event as IDragEvent);
+        this._evtDragOver(event as Drag.Event);
         break;
       case 'lm-drop':
-        this._evtDrop(event as IDragEvent);
+        this._evtDrop(event as Drag.Event);
         break;
       default:
         return;
@@ -206,7 +206,7 @@ export class BreadCrumbs extends Widget {
   /**
    * Handle the `'lm-dragenter'` event for the widget.
    */
-  private _evtDragEnter(event: IDragEvent): void {
+  private _evtDragEnter(event: Drag.Event): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
       const index = ArrayExt.findFirstIndex(this._crumbs, node =>
         ElementExt.hitTest(node, event.clientX, event.clientY)
@@ -224,7 +224,7 @@ export class BreadCrumbs extends Widget {
   /**
    * Handle the `'lm-dragleave'` event for the widget.
    */
-  private _evtDragLeave(event: IDragEvent): void {
+  private _evtDragLeave(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     const dropTarget = DOMUtils.findElement(this.node, DROP_TARGET_CLASS);
@@ -236,7 +236,7 @@ export class BreadCrumbs extends Widget {
   /**
    * Handle the `'lm-dragover'` event for the widget.
    */
-  private _evtDragOver(event: IDragEvent): void {
+  private _evtDragOver(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     event.dropAction = event.proposedAction;
@@ -255,7 +255,7 @@ export class BreadCrumbs extends Widget {
   /**
    * Handle the `'lm-drop'` event for the widget.
    */
-  private _evtDrop(event: IDragEvent): void {
+  private _evtDrop(event: Drag.Event): void {
     event.preventDefault();
     event.stopPropagation();
     if (event.proposedAction === 'none') {

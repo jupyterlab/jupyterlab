@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfigbase",
   "compilerOptions": {
+    "lib": ["DOM", "ES2018"],
     "outDir": "lib",
     "rootDir": "src",
     "module": "commonjs",
@@ -13,9 +14,6 @@
     },
     {
       "path": "../nbformat"
-    },
-    {
-      "path": "../observables"
     },
     {
       "path": "../settingregistry"

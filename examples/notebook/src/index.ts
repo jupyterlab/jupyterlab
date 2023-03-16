@@ -15,12 +15,8 @@ import '@jupyterlab/notebook/style/index.css';
 import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
-import { CommandRegistry } from '@lumino/commands';
-
-import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
-
 import { ServiceManager } from '@jupyterlab/services';
-import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
 
 import {
   NotebookModelFactory,
@@ -32,11 +28,15 @@ import {
   Completer,
   CompleterModel,
   CompletionHandler,
-  ConnectorProxy,
-  KernelCompleterProvider
+  KernelCompleterProvider,
+  ProviderReconciliator
 } from '@jupyterlab/completer';
 
-import { editorServices } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 
 import { DocumentManager } from '@jupyterlab/docmanager';
 
@@ -46,6 +46,10 @@ import {
   standardRendererFactories as initialFactories,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
+
+import { CommandRegistry } from '@lumino/commands';
+
+import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
 
 import { SetupCommands } from './commands';
 
@@ -72,15 +76,22 @@ function createApp(manager: ServiceManager.IManager): void {
 
   const rendermime = new RenderMimeRegistry({
     initialFactories: initialFactories,
-    latexTypesetter: new MathJaxTypesetter({
-      url: PageConfig.getOption('mathjaxUrl'),
-      config: PageConfig.getOption('mathjaxConfig')
-    })
+    latexTypesetter: new MathJaxTypesetter()
   });
 
   const opener = {
     open: (widget: Widget) => {
       // Do nothing for sibling widgets for now.
+    },
+    get opened() {
+      return {
+        connect: () => {
+          return false;
+        },
+        disconnect: () => {
+          return false;
+        }
+      };
     }
   };
 
@@ -91,7 +102,28 @@ function createApp(manager: ServiceManager.IManager): void {
     opener
   });
   const mFactory = new NotebookModelFactory({});
-  const editorFactory = editorServices.factoryService.newInlineEditor;
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(language =>
+      ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
+    )
+    .forEach(language => {
+      languages.addLanguage(language);
+    });
+  // Language for Markdown cells
+  languages.addLanguage({
+    name: 'ipythongfm',
+    mime: 'text/x-ipythongfm',
+    load: async () => {
+      const m = await import('@codemirror/lang-markdown');
+      return m.markdown({
+        codeLanguages: (info: string) => languages.findBest(info) as any
+      });
+    }
+  });
+  const factoryService = new CodeMirrorEditorFactory({ languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+  const editorFactory = factoryService.newInlineEditor;
   const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
   const wFactory = new NotebookWidgetFactory({
@@ -103,7 +135,7 @@ function createApp(manager: ServiceManager.IManager): void {
     canStartKernel: true,
     rendermime,
     contentFactory,
-    mimeTypeService: editorServices.mimeTypeService
+    mimeTypeService
   });
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
@@ -120,22 +152,22 @@ function createApp(manager: ServiceManager.IManager): void {
   const sessionContext = nbWidget.context.sessionContext;
   const timeout = 1000;
   const provider = new KernelCompleterProvider();
-  const connector = new ConnectorProxy(
-    { widget: nbWidget, editor, session: sessionContext.session },
-    [provider],
-    timeout
-  );
-  const handler = new CompletionHandler({ completer, connector });
+  const reconciliator = new ProviderReconciliator({
+    context: { widget: nbWidget, editor, session: sessionContext.session },
+    providers: [provider],
+    timeout: timeout
+  });
+  const handler = new CompletionHandler({ completer, reconciliator });
 
   void sessionContext.ready.then(() => {
     const provider = new KernelCompleterProvider();
-    const connector = new ConnectorProxy(
-      { widget: nbWidget, editor, session: sessionContext.session },
-      [provider],
-      timeout
-    );
+    const reconciliator = new ProviderReconciliator({
+      context: { widget: nbWidget, editor, session: sessionContext.session },
+      providers: [provider],
+      timeout: timeout
+    });
 
-    handler.connector = connector;
+    handler.reconciliator = reconciliator;
   });
 
   // Set the handler's editor.

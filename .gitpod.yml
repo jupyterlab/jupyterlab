@@ -1,33 +1,59 @@
 github:
   prebuilds:
-    # enable for the master/default branch (defaults to true)
     master: true
-    # enable for all branches in this repo (defaults to false)
     branches: true
-    # enable for pull requests coming from this repo (defaults to true)
     pullRequests: true
-    # enable for pull requests coming from forks (defaults to false)
     pullRequestsFromForks: true
-    # add a check to pull requests (defaults to true)
     addCheck: false
-    # add a "Review in Gitpod" button as a comment to pull requests (defaults to false)
     addComment: false
-    # add a "Review in Gitpod" button to the pull request's description (defaults to false)
     addBadge: false
-    # add a label once the prebuild is ready to pull requests (defaults to false)
     addLabel: false
 tasks:
-  - init: pip3 install -e . && yarn install && yarn run build
-    # for some reason,have to re-install on start, or else it doesn't find the python package
-    # Set no token and allow any origin, so that you can open it in a new tab
-    # Disable iframe security so can load in the editor as well
-    command: >
-      pip3 install -e . &&
-      jupyter lab
-      --dev-mode
-      --watch
-      --LabApp.token=''
-      --LabApp.allow_origin=*
-      --LabApp.tornado_settings='{"headers": {"Content-Security-Policy": "frame-ancestors *"}}'
+  - name: setup
+    init: |
+      pushd /workspace
+      wget -qO- https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+      popd
+      # bootstrap activation commands for other tasks to reuse
+      cat <<EOT > /workspace/bin/activate-env.sh
+      export MAMBA_ROOT_PREFIX=/workspace/.micromamba
+      export MAMBA_EXE=/workspace/bin/micromamba
+      $(/workspace/bin/micromamba shell hook --shell=bash)
+      export JUPYTER_PREFER_ENV_PATH=1
+      micromamba activate
+      EOT
+      source /workspace/bin/activate-env.sh
+      micromamba config append channels conda-forge
+      micromamba install -n base -y python=3.10 nodejs=18 yarn
+      source /workspace/bin/activate-env.sh
+      python -m pip install -e ".[dev,docs,test]" && jlpm install && jlpm run build
+      gp sync-done setup
+    command: |
+      gp sync-done setup
+      source /workspace/bin/activate-env.sh
+      # Set no token and allow any origin, so that you can open it in a new tab
+      # Disable iframe security so can load in the editor as well
+      jupyter lab --dev-mode --watch --extensions-in-dev-mode --ServerApp.IdentityProvider.token='' --ServerApp.allow_origin=* --ServerApp.tornado_settings='{"headers": {"Content-Security-Policy": "frame-ancestors *"}}'
+
+  - name: auto-activate
+    command: |
+      gp sync-await setup
+      echo "source /workspace/bin/activate-env.sh" >> ~/.bashrc
+      source /workspace/bin/activate-env.sh
+
+  - name: documentation
+    command: |
+      gp sync-await setup
+      source /workspace/bin/activate-env.sh
+      cd docs
+      make html
+      cd build/html
+      python -m http.server 8000
+
 ports:
   - port: 8888
+  - port: 8000
+
+vscode:
+  extensions:
+    - esbenp.prettier-vscode

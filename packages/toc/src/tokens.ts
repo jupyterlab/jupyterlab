@@ -166,6 +166,11 @@ export namespace TableOfContents {
      * Whether the heading is collapsed or not
      */
     collapsed?: boolean;
+
+    /**
+     * Whether the heading is marked to skip or not
+     */
+    skip?: boolean;
   }
 
   /**
@@ -272,6 +277,16 @@ export namespace TableOfContents {
      * Table of contents model.
      */
     model?: IModel<IHeading>;
+
+    /**
+     * If no headings are present, a headline to display as a placeholder
+     */
+    placeholderHeadline: string;
+
+    /**
+     * If no headings are present, text to display as a placeholder
+     */
+    placeholderText: string;
   }
 
   /**

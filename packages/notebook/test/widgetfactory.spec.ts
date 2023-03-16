@@ -3,10 +3,13 @@
 
 import { ToolbarButton } from '@jupyterlab/apputils';
 import { Context } from '@jupyterlab/docregistry';
-import { initNotebookContext } from '@jupyterlab/testutils';
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-import { toArray } from '@lumino/algorithm';
-import { INotebookModel, NotebookPanel, NotebookWidgetFactory } from '..';
+import { initNotebookContext } from '@jupyterlab/notebook/lib/testutils';
+import { JupyterServer } from '@jupyterlab/testing';
+import {
+  INotebookModel,
+  NotebookPanel,
+  NotebookWidgetFactory
+} from '@jupyterlab/notebook';
 import * as utils from './utils';
 
 const rendermime = utils.defaultRenderMime();
@@ -14,9 +17,8 @@ const rendermime = utils.defaultRenderMime();
 const server = new JupyterServer();
 
 beforeAll(async () => {
-  jest.setTimeout(20000);
   await server.start();
-});
+}, 30000);
 
 afterAll(async () => {
   await server.shutdown();
@@ -101,9 +103,8 @@ describe('@jupyterlab/notebook', () => {
       it('should populate the default toolbar items', () => {
         const factory = utils.createNotebookWidgetFactory();
         const panel = factory.createNew(context);
-        const items = toArray(panel.toolbar.names());
-        expect(items).toEqual(expect.arrayContaining(['save']));
-        expect(items).toEqual(expect.arrayContaining(['restart']));
+        // It will only contain the popup opener
+        expect(Array.from(panel.toolbar.names())).toHaveLength(1);
       });
 
       it('should populate the customized toolbar items', () => {
@@ -114,18 +115,18 @@ describe('@jupyterlab/notebook', () => {
         const factory = utils.createNotebookWidgetFactory(toolbarFactory);
         const panel = factory.createNew(context);
         const panel2 = factory.createNew(context);
-        expect(toArray(panel.toolbar.names())).toEqual([
+        expect(Array.from(panel.toolbar.names())).toEqual([
           'foo',
           'bar',
           'toolbar-popup-opener'
         ]);
-        expect(toArray(panel2.toolbar.names())).toEqual([
+        expect(Array.from(panel2.toolbar.names())).toEqual([
           'foo',
           'bar',
           'toolbar-popup-opener'
         ]);
-        expect(toArray(panel.toolbar.children()).length).toBe(3);
-        expect(toArray(panel2.toolbar.children()).length).toBe(3);
+        expect(Array.from(panel.toolbar.children()).length).toBe(3);
+        expect(Array.from(panel2.toolbar.children()).length).toBe(3);
       });
 
       it('should clone from the optional source widget', () => {

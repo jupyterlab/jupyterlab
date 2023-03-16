@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 .. _urls:
 
 JupyterLab URLs
@@ -31,6 +34,41 @@ file. This behavior can be changed with the optional ``file-browser-path`` query
 Entering the above URL will show the workspace root directory instead of the ``/path/to/``
 directory in the file browser.
 
+
+Linking Notebook Sections
+-------------------------
+
+To create an URL which will scroll to a specific heading in the notebook append
+a hash (``#``) followed by the heading text with spaces replaced by minus
+characters (``-``), for example:
+
+.. code-block:: none
+
+  /lab/tree/path/to/notebook.ipynb?#my-heading
+
+To get a link for a specific heading, hover over it in a rendered markdown cell
+until you see a pilcrow mark (``¶``) which will contain the desired anchor link:
+
+.. image:: ../images/notebook-heading-anchor-link.png
+   :alt: A markdown cell with pilcrow mark (¶) which serves as an anchor link and is placed after a heading
+   :class: jp-screenshot
+
+
+.. note::
+
+    Currently disambiguation of headings with identical text is not supported.
+
+JupyterLab experimentally supports scrolling to a specified cell by identifier
+using ``#cell-id=<cell-id>`` Fragment Identification Syntax.
+
+.. code-block:: none
+
+  /lab/tree/path/to/notebook.ipynb?#cell-id=my-cell-id
+
+.. note::
+
+    The ``cell-id`` fragment locator is not part of a formal Jupyter standard and subject to change.
+    To leave feedback, please comment in the discussion: `nbformat#317 <https://github.com/jupyter/nbformat/issues/317>`_.
 
 .. _url-workspaces-ui:
 
@@ -212,4 +250,4 @@ It will run the `docmanager:open` with the `{ "path": "package.json", "factory":
       `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
   });
 
-Not that the part of the data key after the first `:`, `package.json:JSON` is dropped and is irrelevant.
+Note the part of the data key after the first `:` (`package.json:JSON`) is dropped and is irrelevant.

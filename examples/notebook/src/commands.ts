@@ -1,7 +1,12 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 /**
  * Set up keyboard shortcuts & commands for notebook
  */
-import { sessionContextDialogs } from '@jupyterlab/apputils';
+import { SessionContextDialogs } from '@jupyterlab/apputils';
 import { CompletionHandler } from '@jupyterlab/completer';
 import {
   SearchDocumentModel,
@@ -106,7 +111,7 @@ export const SetupCommands = (
             nbWidget.activate();
           }
           // find next and previous are now disabled
-          commands.notifyCommandChanged();
+          commands.notifyCommandChanged(cmdIds.startSearch);
         });
 
         /**
@@ -158,6 +163,7 @@ export const SetupCommands = (
     execute: async () =>
       nbWidget.context.sessionContext.session?.kernel?.interrupt()
   });
+  const sessionContextDialogs = new SessionContextDialogs();
   commands.addCommand(cmdIds.restart, {
     label: 'Restart Kernel',
     execute: () =>
@@ -173,7 +179,8 @@ export const SetupCommands = (
     execute: () => {
       return NotebookActions.runAndAdvance(
         nbWidget.content,
-        nbWidget.context.sessionContext
+        nbWidget.context.sessionContext,
+        sessionContextDialogs
       );
     }
   });
@@ -182,7 +189,8 @@ export const SetupCommands = (
     execute: () => {
       return NotebookActions.run(
         nbWidget.content,
-        nbWidget.context.sessionContext
+        nbWidget.context.sessionContext,
+        sessionContextDialogs
       );
     }
   });

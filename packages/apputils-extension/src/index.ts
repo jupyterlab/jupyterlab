@@ -14,7 +14,6 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import {
-  defaultSanitizer,
   Dialog,
   ICommandPalette,
   ISanitizer,
@@ -23,23 +22,27 @@ import {
   IWindowResolver,
   MainAreaWidget,
   Printing,
-  sessionContextDialogs,
+  Sanitizer,
+  SessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
 import { Debouncer, Throttler } from '@lumino/polling';
+import { announcements } from './announcements';
+import { notificationPlugin } from './notificationplugin';
 import { Palette } from './palette';
 import { settingsPlugin } from './settingsplugin';
 import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -309,6 +312,7 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
       label: trans.__('Show Header Above Content'),
       isEnabled: () =>
         app.shell.currentWidget instanceof MainAreaWidget &&
+        !app.shell.currentWidget.contentHeader.isDisposed &&
         app.shell.currentWidget.contentHeader.widgets.length > 0,
       isToggled: () => {
         const widget = app.shell.currentWidget;
@@ -342,7 +346,9 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
     }`;
   } else {
     // File name from current path
-    let currentFile: string = PathExt.basename(current.split(':')[1]);
+    let currentFile: string = PathExt.basename(
+      decodeURIComponent(window.location.href)
+    );
     // Truncate to first 12 characters of current document name + ... if length > 15
     currentFile =
       currentFile.length > 15
@@ -419,13 +425,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         }
 
         const { hash, path, search } = args;
-        const { urls } = paths;
         const query = URLExt.queryStringToObject(search || '');
         const clone =
           typeof query['clone'] === 'string'
             ? query['clone'] === ''
-              ? URLExt.join(urls.base, urls.app)
-              : URLExt.join(urls.base, urls.app, 'workspaces', query['clone'])
+              ? PageConfig.defaultWorkspace
+              : query['clone']
             : null;
         const source = clone || workspace || null;
 
@@ -550,9 +555,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
   id: '@jupyterlab/apputils-extension:sessionDialogs',
   provides: ISessionContextDialogs,
+  optional: [ITranslator],
   autoStart: true,
-  activate: () => {
-    return sessionContextDialogs;
+  activate: async (app: JupyterFrontEnd, translator: ITranslator | null) => {
+    return new SessionContextDialogs({
+      translator: translator ?? nullTranslator
+    });
   }
 };
 
@@ -610,12 +618,45 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
 /**
  * The default HTML sanitizer.
  */
-const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
-  id: '@jupyter/apputils-extension:sanitizer',
+const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
+  id: '@jupyterlab/apputils-extension:sanitizer',
   autoStart: true,
   provides: ISanitizer,
-  activate: () => {
-    return defaultSanitizer;
+  requires: [ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    settings: ISettingRegistry
+  ): IRenderMime.ISanitizer => {
+    const sanitizer = new Sanitizer();
+    const loadSetting = (setting: ISettingRegistry.ISettings): void => {
+      const allowedSchemes = setting.get('allowedSchemes')
+        .composite as Array<string>;
+
+      const autolink = setting.get('autolink').composite as boolean;
+
+      if (allowedSchemes) {
+        sanitizer.setAllowedSchemes(allowedSchemes);
+      }
+
+      sanitizer.setAutolink(autolink);
+    };
+
+    // Wait for the application to be restored and
+    // for the settings for this plugin to be loaded
+    settings
+      .load('@jupyterlab/apputils-extension:sanitizer')
+      .then(setting => {
+        // Read the settings
+        loadSetting(setting);
+
+        // Listen for your plugin setting changes using Signal
+        setting.changed.connect(loadSetting);
+      })
+      .catch(reason => {
+        console.error(`Failed to load sanitizer settings:`, reason);
+      });
+
+    return sanitizer;
   }
 };
 
@@ -623,7 +664,9 @@ const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  announcements,
   kernelStatus,
+  notificationPlugin,
   palette,
   paletteRestorer,
   print,

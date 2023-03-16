@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
-import { framePromise } from '@jupyterlab/testutils';
+import { framePromise } from '@jupyterlab/testing';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
@@ -79,7 +79,7 @@ describe('@jupyterlab/ui-components', () => {
     });
 
     describe('#modelChanged()', () => {
-      it('should fire the stateChanged signal on a change', () => {
+      it('should fire the stateChanged signal on a change', async () => {
         const model = new TestModel();
         const widget = new TestWidget(new TestModel());
         let changed = false;
@@ -95,8 +95,11 @@ describe('@jupyterlab/ui-components', () => {
       it('should render the contents after a model change', async () => {
         const widget = new TestWidget(new TestModel());
         const model = new TestModel();
+        Widget.attach(widget, document.body);
         widget.model = model;
         model.value = 'foo';
+        await framePromise();
+        await widget.renderPromise;
         await framePromise();
         const span = widget.node.firstChild as HTMLElement;
         expect(span.textContent).toBe('foo');
@@ -108,6 +111,7 @@ describe('@jupyterlab/ui-components', () => {
         const widget = new TestWidgetNoModel();
         Widget.attach(widget, document.body);
         await framePromise();
+        await widget.renderPromise;
         const span = widget.node.firstChild as HTMLElement;
         expect(span.textContent).toBe('No model!');
       });

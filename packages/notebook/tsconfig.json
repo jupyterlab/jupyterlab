@@ -4,7 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": ["src/*", "src/default.json"],
   "references": [
     {
       "path": "../apputils"
@@ -28,6 +28,9 @@
       "path": "../documentsearch"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../nbformat"
     },
     {
@@ -41,9 +44,6 @@
     },
     {
       "path": "../settingregistry"
-    },
-    {
-      "path": "../shared-models"
     },
     {
       "path": "../statusbar"

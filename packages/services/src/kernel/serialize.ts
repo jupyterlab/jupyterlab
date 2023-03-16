@@ -75,9 +75,9 @@ namespace Private {
     let buffers = [];
     for (let i = 5; i < offsets.length; i++) {
       if (i == offsets.length - 1) {
-        buffers.push(binMsg.slice(offsets[i]));
+        buffers.push(new DataView(binMsg.slice(offsets[i])));
       } else {
-        buffers.push(binMsg.slice(offsets[i], offsets[i + 1]));
+        buffers.push(new DataView(binMsg.slice(offsets[i], offsets[i + 1])));
       }
     }
     msg = {

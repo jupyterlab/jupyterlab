@@ -21,11 +21,12 @@
 
 .jp-switch-label {
   margin-right: 5px;
+  font-family: var(--jp-ui-font-family);
 }
 
 .jp-switch-track {
   cursor: pointer;
-  background-color: var(--jp-border-color1);
+  background-color: var(--jp-switch-color, var(--jp-border-color1));
   -webkit-transition: 0.4s;
   transition: 0.4s;
   border-radius: 34px;
@@ -48,7 +49,7 @@
 }
 
 .jp-switch[aria-checked='true'] .jp-switch-track {
-  background-color: var(--jp-warn-color0);
+  background-color: var(--jp-switch-true-position-color, var(--jp-warn-color0));
 }
 
 .jp-switch[aria-checked='true'] .jp-switch-track::before {

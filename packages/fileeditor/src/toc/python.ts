@@ -51,9 +51,9 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
     }
 
     // Split the text into lines:
-    const lines = this.widget.content.model.value.text.split(
-      '\n'
-    ) as Array<string>;
+    const lines = this.widget.content.model.sharedModel
+      .getSource()
+      .split('\n') as Array<string>;
 
     // Iterate over the lines to get the heading level and text for each line:
     let headings = new Array<IEditorHeading>();

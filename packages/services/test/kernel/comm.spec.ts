@@ -1,17 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  isFulfilled,
-  flakyIt as it,
-  JupyterServer
-} from '@jupyterlab/testutils';
+import { isFulfilled, JupyterServer } from '@jupyterlab/testing';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Kernel, KernelManager, KernelMessage } from '../../src';
-import { init } from '../utils';
-
-// Initialize fetch override.
-init();
 
 const BLIP = `
 from ipykernel.comm import Comm
@@ -46,25 +38,19 @@ def target_func(comm, msg):
 get_ipython().kernel.comm_manager.register_target("test", target_func)
 `;
 
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  await server.start();
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
-
 describe('jupyter.services - Comm', () => {
+  let server: JupyterServer;
   let kernelManager: KernelManager;
   let kernel: Kernel.IKernelConnection;
 
+  jest.retryTimes(3);
+
   beforeAll(async () => {
-    jest.setTimeout(20000);
+    server = new JupyterServer();
+    await server.start();
     kernelManager = new KernelManager();
     kernel = await kernelManager.startNew({ name: 'ipython' });
-  });
+  }, 30000);
 
   afterEach(() => {
     // A no-op comm target.
@@ -75,6 +61,7 @@ describe('jupyter.services - Comm', () => {
 
   afterAll(async () => {
     await kernel.shutdown();
+    await server.shutdown();
   });
 
   describe('Kernel', () => {

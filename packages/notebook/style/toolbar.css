@@ -19,6 +19,9 @@
 
 .jp-NotebookPanel-toolbar {
   padding: var(--jp-notebook-toolbar-padding);
+
+  /* disable paint containment from lumino 2.0 default strict CSS containment */
+  contain: style size !important;
 }
 
 .jp-Toolbar-item.jp-Notebook-toolbarCellType .jp-select-wrapper.jp-mod-focused {

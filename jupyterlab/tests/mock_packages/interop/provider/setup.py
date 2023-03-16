@@ -1,3 +1,6 @@
+# Copyright (c) Jupyter Development Team.
+# Distributed under the terms of the Modified BSD License.
+
 import json
 import os.path as osp
 from glob import glob
@@ -8,7 +11,7 @@ HERE = osp.abspath(osp.dirname(__file__))
 with open(osp.join(HERE, "package.json")) as fid:
     data = json.load(fid)
 
-from setuptools import setup
+from setuptools import setup  # noqa
 
 js_name = data["name"]
 

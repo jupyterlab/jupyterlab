@@ -1,12 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { jupyterHighlightStyle } from '@jupyterlab/codemirror';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { InputGroup } from '@jupyterlab/ui-components';
+import { Tag, tags } from '@lezer/highlight';
 import { JSONArray, JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import * as React from 'react';
-import Highlight from 'react-highlighter';
+import Highlighter from 'react-highlight-words';
 import { JSONTree } from 'react-json-tree';
+import { StyleModule } from 'style-mod';
 
 /**
  * The properties for the JSON tree component.
@@ -19,6 +22,7 @@ export interface IProps {
    * The application language translator.
    */
   translator?: ITranslator;
+  forwardedRef?: React.Ref<HTMLDivElement>;
 }
 
 /**
@@ -30,12 +34,23 @@ export interface IState {
 }
 
 /**
+ * Get the CodeMirror style for a given tag.
+ */
+function getStyle(tag: Tag): string {
+  return jupyterHighlightStyle.style([tag]) ?? '';
+}
+
+/**
  * A component that renders JSON data as a collapsible tree.
  */
 export class Component extends React.Component<IProps, IState> {
   state = { filter: '', value: '' };
 
   timer: number = 0;
+
+  componentDidMount(): void {
+    StyleModule.mount(document, jupyterHighlightStyle.module as StyleModule);
+  }
 
   handleChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const { value } = event.target;
@@ -50,13 +65,13 @@ export class Component extends React.Component<IProps, IState> {
     const translator = this.props.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
 
-    const { data, metadata } = this.props;
+    const { data, metadata, forwardedRef } = this.props;
     const root = metadata && metadata.root ? (metadata.root as string) : 'root';
     const keyPaths = this.state.filter
       ? filterPaths(data, this.state.filter, [root])
       : [root];
     return (
-      <div className="container">
+      <div className="container" ref={forwardedRef}>
         <InputGroup
           className="filter"
           type="text"
@@ -70,9 +85,9 @@ export class Component extends React.Component<IProps, IState> {
           collectionLimit={100}
           theme={{
             extend: theme,
-            valueLabel: 'cm-variable',
-            valueText: 'cm-string',
-            nestedNodeItemString: 'cm-comment'
+            valueLabel: getStyle(tags.variableName),
+            valueText: getStyle(tags.string),
+            nestedNodeItemString: getStyle(tags.comment)
           }}
           invertTheme={false}
           keyPath={[root]}
@@ -82,7 +97,7 @@ export class Component extends React.Component<IProps, IState> {
               <span>
                 {itemType} {itemString}
               </span>
-            ) : Object.keys(data).length === 0 ? (
+            ) : Object.keys(data as object).length === 0 ? (
               // Only display object type when it's empty i.e. "{}".
               <span>{itemType}</span>
             ) : (
@@ -90,47 +105,35 @@ export class Component extends React.Component<IProps, IState> {
             )
           }
           labelRenderer={([label, type]) => {
-            // let className = 'cm-variable';
-            // if (type === 'root') {
-            //   className = 'cm-variable-2';
-            // }
-            // if (type === 'array') {
-            //   className = 'cm-variable-2';
-            // }
-            // if (type === 'Object') {
-            //   className = 'cm-variable-3';
-            // }
             return (
-              <span className="cm-keyword">
-                <Highlight
-                  search={this.state.filter}
-                  matchStyle={{ backgroundColor: 'yellow' }}
-                >
-                  {`${label}: `}
-                </Highlight>
+              <span className={getStyle(tags.keyword)}>
+                <Highlighter
+                  searchWords={[this.state.filter]}
+                  textToHighlight={`${label}`}
+                  highlightClassName="jp-mod-selected"
+                ></Highlighter>
               </span>
             );
           }}
           valueRenderer={raw => {
-            let className = 'cm-string';
+            let className = getStyle(tags.string);
             if (typeof raw === 'number') {
-              className = 'cm-number';
+              className = getStyle(tags.number);
             }
             if (raw === 'true' || raw === 'false') {
-              className = 'cm-keyword';
+              className = getStyle(tags.keyword);
             }
             return (
               <span className={className}>
-                <Highlight
-                  search={this.state.filter}
-                  matchStyle={{ backgroundColor: 'yellow' }}
-                >
-                  {`${raw}`}
-                </Highlight>
+                <Highlighter
+                  searchWords={[this.state.filter]}
+                  textToHighlight={`${raw}`}
+                  highlightClassName="jp-mod-selected"
+                ></Highlighter>
               </span>
             );
           }}
-          shouldExpandNode={(keyPath, data, level) =>
+          shouldExpandNodeInitially={(keyPath, data, level) =>
             metadata && metadata.expanded
               ? true
               : keyPaths.join(',').includes(keyPath.join(','))

@@ -10,3 +10,11 @@
 .jp-mod-presentationMode .jp-FileEditor {
   --jp-code-font-size: var(--jp-code-presentation-font-size);
 }
+
+.jp-FileEditorCodeWrapper {
+  overflow: auto;
+}
+
+.jp-FileEditorCodeWrapper .cm-editor {
+  height: 100%;
+}

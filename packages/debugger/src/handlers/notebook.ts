@@ -2,22 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Cell, CodeCell, ICellModel } from '@jupyterlab/cells';
-
+import { NotebookPanel } from '@jupyterlab/notebook';
 import {
   IObservableList,
   IObservableMap,
-  IObservableUndoableList,
   ObservableMap
 } from '@jupyterlab/observables';
-
-import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-
 import { IDisposable } from '@lumino/disposable';
-
 import { Signal } from '@lumino/signaling';
-
 import { IDebugger } from '../tokens';
-
 import { EditorHandler } from './editor';
 
 /**
@@ -35,8 +28,7 @@ export class NotebookHandler implements IDisposable {
     this._cellMap = new ObservableMap<EditorHandler>();
 
     const notebook = this._notebookPanel.content;
-    notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
-    notebook.model?.cells.changed.connect(this._onCellsChanged, this);
+    notebook.model!.cells.changed.connect(this._onCellsChanged, this);
 
     this._onCellsChanged();
   }
@@ -57,7 +49,7 @@ export class NotebookHandler implements IDisposable {
     this._cellMap.values().forEach(handler => {
       handler.dispose();
       // Ensure to restore notebook editor settings
-      handler.editor.setOptions({
+      handler.editor?.setOptions({
         ...this._notebookPanel.content.editorConfig.code
       });
     });
@@ -69,7 +61,7 @@ export class NotebookHandler implements IDisposable {
    * Handle a notebook cells changed event.
    */
   private _onCellsChanged(
-    cells?: IObservableUndoableList<ICellModel>,
+    cells?: any,
     changes?: IObservableList.IChangedArgs<ICellModel>
   ): void {
     this._notebookPanel.content.widgets.forEach(cell =>
@@ -96,26 +88,18 @@ export class NotebookHandler implements IDisposable {
     const codeCell = cell as CodeCell;
     const editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,
-      editor: codeCell.editor
+      editorReady: async () => {
+        await codeCell.ready;
+        return codeCell.editor!;
+      },
+      getEditor: () => codeCell.editor,
+      src: cell.model.sharedModel
     });
     codeCell.disposed.connect(() => {
       this._cellMap.delete(modelId);
       editorHandler.dispose();
     });
     this._cellMap.set(cell.model.id, editorHandler);
-  }
-
-  /**
-   * Handle a new active cell.
-   *
-   * @param notebook The notebook for which the active cell has changed.
-   * @param cell The new active cell.
-   */
-  private _onActiveCellChanged(notebook: Notebook, cell: Cell): void {
-    if (this._notebookPanel.content !== notebook) {
-      return;
-    }
-    this._addEditorHandler(cell);
   }
 
   private _debuggerService: IDebugger;

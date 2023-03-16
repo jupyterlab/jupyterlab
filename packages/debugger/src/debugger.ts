@@ -15,7 +15,7 @@ import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
 
 import {
   closeAllIcon as closeAll,
-  pauseOnExceptionsIcon as pauseOnExceptions,
+  pauseIcon as pause,
   stepIntoIcon as stepInto,
   stepOutIcon as stepOut,
   stepOverIcon as stepOver,
@@ -120,7 +120,9 @@ export namespace Debugger {
 
     export const restartDebug = 'debugger:restart-debug';
 
-    export const pause = 'debugger:pause';
+    export const pauseOnExceptions = 'debugger:pause-on-exceptions';
+
+    export const copyToClipboard = 'debugger:copy-to-clipboard';
   }
 
   /**
@@ -130,13 +132,14 @@ export namespace Debugger {
     export const closeAllIcon = closeAll;
     export const evaluateIcon = codeIcon;
     export const continueIcon = runIcon;
+    export const pauseIcon = pause;
     export const stepIntoIcon = stepInto;
     export const stepOutIcon = stepOut;
     export const stepOverIcon = stepOver;
     export const terminateIcon = stopIcon;
     export const variableIcon = variable;
     export const viewBreakpointIcon = viewBreakpoint;
-    export const pauseOnExceptionsIcon = pauseOnExceptions;
+    export const pauseOnExceptionsIcon = pause;
   }
 
   /**

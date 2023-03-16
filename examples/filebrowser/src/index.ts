@@ -13,8 +13,6 @@ import '@jupyterlab/filebrowser/style/index.css';
 import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
-import { each } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
 
 import { DockPanel, Menu, SplitPanel, Widget } from '@lumino/widgets';
@@ -25,7 +23,8 @@ import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import {
   CodeMirrorEditorFactory,
-  CodeMirrorMimeTypeService
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
 } from '@jupyterlab/codemirror';
 
 import { DocumentManager } from '@jupyterlab/docmanager';
@@ -79,6 +78,16 @@ function createApp(
         const index = widgets.indexOf(w);
         widgets.splice(index, 1);
       });
+    },
+    get opened() {
+      return {
+        connect: () => {
+          return false;
+        },
+        disconnect: () => {
+          return false;
+        }
+      };
     }
   };
 
@@ -88,9 +97,30 @@ function createApp(
     manager,
     opener
   });
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(language =>
+      ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
+    )
+    .forEach(language => {
+      languages.addLanguage(language);
+    });
+  // Language for Markdown cells
+  languages.addLanguage({
+    name: 'ipythongfm',
+    mime: 'text/x-ipythongfm',
+    load: async () => {
+      const m = await import('@codemirror/lang-markdown');
+      return m.markdown({
+        codeLanguages: (info: string) => languages.findBest(info) as any
+      });
+    }
+  });
+  const factoryService = new CodeMirrorEditorFactory({ languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
   const editorServices = {
-    factoryService: new CodeMirrorEditorFactory(),
-    mimeTypeService: new CodeMirrorMimeTypeService()
+    factoryService,
+    mimeTypeService
   };
   const wFactory = new FileEditorFactory({
     editorServices,
@@ -153,17 +183,17 @@ function createApp(
   // Add commands.
   commands.addCommand('file-open', {
     label: trans.__('Open'),
-    icon: 'fa fa-folder-open-o',
+    iconClass: 'fa fa-folder-open-o',
     mnemonic: 0,
     execute: () => {
-      each(fbWidget.selectedItems(), item => {
+      for (const item of fbWidget.selectedItems()) {
         docManager.openOrReveal(item.path);
-      });
+      }
     }
   });
   commands.addCommand('file-rename', {
     label: trans.__('Rename'),
-    icon: 'fa fa-edit',
+    iconClass: 'fa fa-edit',
     mnemonic: 0,
     execute: () => {
       return fbWidget.rename();
@@ -177,14 +207,14 @@ function createApp(
   });
   commands.addCommand('file-cut', {
     label: trans.__('Cut'),
-    icon: 'fa fa-cut',
+    iconClass: 'fa fa-cut',
     execute: () => {
       fbWidget.cut();
     }
   });
   commands.addCommand('file-copy', {
     label: trans.__('Copy'),
-    icon: 'fa fa-copy',
+    iconClass: 'fa fa-copy',
     mnemonic: 0,
     execute: () => {
       fbWidget.copy();
@@ -192,7 +222,7 @@ function createApp(
   });
   commands.addCommand('file-delete', {
     label: trans.__('Delete'),
-    icon: 'fa fa-remove',
+    iconClass: 'fa fa-remove',
     mnemonic: 0,
     execute: () => {
       return fbWidget.delete();
@@ -200,7 +230,7 @@ function createApp(
   });
   commands.addCommand('file-duplicate', {
     label: trans.__('Duplicate'),
-    icon: 'fa fa-copy',
+    iconClass: 'fa fa-copy',
     mnemonic: 0,
     execute: () => {
       return fbWidget.duplicate();
@@ -208,7 +238,7 @@ function createApp(
   });
   commands.addCommand('file-paste', {
     label: trans.__('Paste'),
-    icon: 'fa fa-paste',
+    iconClass: 'fa fa-paste',
     mnemonic: 0,
     execute: () => {
       return fbWidget.paste();
@@ -216,14 +246,14 @@ function createApp(
   });
   commands.addCommand('file-download', {
     label: trans.__('Download'),
-    icon: 'fa fa-download',
+    iconClass: 'fa fa-download',
     execute: () => {
       return fbWidget.download();
     }
   });
   commands.addCommand('file-shutdown-kernel', {
     label: trans.__('Shut Down Kernel'),
-    icon: 'fa fa-stop-circle-o',
+    iconClass: 'fa fa-stop-circle-o',
     execute: () => {
       return fbWidget.shutdownKernels();
     }

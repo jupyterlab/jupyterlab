@@ -1,13 +1,13 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ArrayExt, StringExt } from '@lumino/algorithm';
 
 import { ReadonlyJSONArray } from '@lumino/coreutils';
-
-import {
-  ShortcutUIStyle,
-  TopWhitespaceStyle
-} from '../componentStyle/ShortcutUIStyle';
 
 import { ShortcutList } from './ShortcutList';
 
@@ -21,12 +21,6 @@ const enum MatchType {
   Category,
   Split,
   Default
-}
-
-export const enum UISize {
-  Regular,
-  Small,
-  Tiny
 }
 
 /** Props for ShortcutUI component */
@@ -488,8 +482,7 @@ export class ShortcutUI extends React.Component<
       return null;
     }
     return (
-      <div className={ShortcutUIStyle} id="jp-shortcutui">
-        <div className={TopWhitespaceStyle} />
+      <div className="jp-Shortcuts-ShortcutUI" id="jp-shortcutui">
         <TopNav
           updateSearchQuery={this.updateSearchQuery}
           resetShortcuts={this.resetShortcuts}
@@ -510,7 +503,6 @@ export class ShortcutUI extends React.Component<
           sortConflict={this.sortConflict}
           clearConflicts={this.clearConflicts}
           height={this.props.height}
-          errorSize={this.props.width < 775 ? UISize.Small : UISize.Regular}
           contextMenu={this.contextMenu}
           external={this.props.external}
         />

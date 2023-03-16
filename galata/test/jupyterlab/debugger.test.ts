@@ -47,7 +47,7 @@ test.describe('Debugger Tests', () => {
     expect(await callStackPanel.innerText()).toBe('');
 
     // don't add await, run will be blocked by the breakpoint
-    page.notebook.run().then();
+    void page.notebook.run().then();
 
     await page.debugger.waitForCallStack();
     expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
@@ -62,6 +62,58 @@ test.describe('Debugger Tests', () => {
     const sourcesPanel = await page.debugger.getSourcePanel();
     expect(await sourcesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-sources.png'
+    );
+  });
+
+  test('Rich variables inspector', async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, './notebooks/WidgetArch.png'),
+      `${tmpPath}/WidgetArch.png`
+    );
+
+    const notebookName = 'image_notebook.ipynb';
+    const globalVar = 'global_img';
+    const localVar = 'local_img';
+
+    await openNotebook(page, tmpPath, notebookName);
+
+    await page.debugger.switchOn();
+    await page.waitForCondition(() => page.debugger.isOpen());
+
+    await page.notebook.waitForCellGutter(0);
+    await page.notebook.clickCellGutter(0, 8);
+    await page.notebook.clickCellGutter(0, 11);
+
+    // don't add await, run will be blocked by the breakpoint
+    void page.notebook.run().then();
+    await page.debugger.waitForCallStack();
+
+    await page.debugger.waitForVariables();
+    const variablesPanel = await page.debugger.getVariablesPanel();
+    expect(await variablesPanel.screenshot()).toMatchSnapshot(
+      'image-debug-session-global-variables.png'
+    );
+
+    await page.debugger.renderVariable(globalVar);
+    let richVariableTab = await page.activity.getPanel(
+      `${globalVar} - ${notebookName}`
+    );
+    expect(await richVariableTab.screenshot()).toMatchSnapshot(
+      'image-debug-session-global-rich-variable.png'
+    );
+
+    await page.activity.closePanel(`${globalVar} - ${notebookName}`);
+
+    await page.locator('button[title="Continue (F9)"]').click();
+    await expect(variablesPanel).not.toContain('ul');
+    await page.debugger.waitForVariables();
+
+    await page.debugger.renderVariable(localVar);
+    richVariableTab = await page.activity.getPanel(
+      `${localVar} - ${notebookName}`
+    );
+    expect(await richVariableTab.screenshot()).toMatchSnapshot(
+      'image-debug-session-local-rich-variable.png'
     );
   });
 

@@ -43,10 +43,16 @@
       "path": "../launcher"
     },
     {
+      "path": "../lsp"
+    },
+    {
       "path": "../mainmenu"
     },
     {
       "path": "../observables"
+    },
+    {
+      "path": "../rendermime-interfaces"
     },
     {
       "path": "../services"
