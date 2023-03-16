@@ -6,7 +6,7 @@ import {
   Dialog,
   ISessionContext,
   SessionContext,
-  sessionContextDialogs,
+  SessionContextDialogs,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
@@ -46,7 +46,9 @@ export class Context<
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._factory = options.factory;
-    this._dialogs = options.sessionDialogs || sessionContextDialogs;
+    this._dialogs =
+      options.sessionDialogs ??
+      new SessionContextDialogs({ translator: options.translator });
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
@@ -561,7 +563,7 @@ export class Context<
     // any kernel has started.
     void this.sessionContext.initialize().then(shouldSelect => {
       if (shouldSelect) {
-        void this._dialogs.selectKernel(this.sessionContext, this.translator);
+        void this._dialogs.selectKernel(this.sessionContext);
       }
     });
   }

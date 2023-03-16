@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContextDialogs } from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -135,11 +134,6 @@ export namespace NotebookWidgetFactory {
     notebookConfig?: StaticNotebook.INotebookConfig;
 
     /**
-     * The session context dialogs.
-     */
-    sessionDialogs?: ISessionContextDialogs;
-
-    /**
      * The application language translator.
      */
     translator?: ITranslator;
@@ -150,6 +144,11 @@ export namespace NotebookWidgetFactory {
    */
   export interface IFactory
     extends DocumentRegistry.IWidgetFactory<NotebookPanel, INotebookModel> {
+    /**
+     * Whether to automatically start the preferred kernel.
+     */
+    autoStartDefault: boolean;
+
     /**
      * A configuration object for cell editor settings.
      */

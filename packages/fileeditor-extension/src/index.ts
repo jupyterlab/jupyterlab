@@ -18,6 +18,7 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
+  SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
@@ -264,14 +265,16 @@ function activate(
   launcher: ILauncher | null,
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
-  sessionDialogs: ISessionContextDialogs | null,
+  sessionDialogs_: ISessionContextDialogs | null,
   tocRegistry: ITableOfContentsRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null,
-  translator: ITranslator | null,
+  translator_: ITranslator | null,
   formRegistry: IFormRendererRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
-  translator = translator ?? nullTranslator;
+  const translator = translator_ ?? nullTranslator;
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
   let toolbarFactory:
@@ -480,10 +483,8 @@ function activate(
     fileBrowser,
     extensions,
     languages,
-    themes,
     consoleTracker,
-    sessionDialogs,
-    menu
+    sessionDialogs
   );
 
   const codeViewerTracker = new WidgetTracker<MainAreaWidget<CodeViewerWidget>>(
