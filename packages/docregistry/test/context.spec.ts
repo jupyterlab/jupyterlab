@@ -396,11 +396,17 @@ describe('docregistry/context', () => {
         const oldPath = context.path;
         await context.saveAs();
         await promise;
-        expect(context.path).toBe(newPath);
+        // We no longer rename the current document
+        //expect(context.path).toBe(newPath);
         // Make sure the both files are there now.
         const model = await manager.contents.get('', { content: true });
         expect(model.content.find((x: any) => x.name === oldPath)).toBeTruthy();
         expect(model.content.find((x: any) => x.name === newPath)).toBeTruthy();
+
+        // Make sure both files are equal
+        const model1 = await manager.contents.get(oldPath, { content: true });
+        const model2 = await manager.contents.get(newPath, { content: true });
+        expect(model1.content).toEqual(model2.content);
       });
 
       it('should bring up a conflict dialog', async () => {
@@ -421,9 +427,22 @@ describe('docregistry/context', () => {
         });
         await context.initialize(true);
         const promise = func();
+
+        const oldPath = context.path;
         await context.saveAs();
         await promise;
-        expect(context.path).toBe(newPath);
+
+        // We no longer rename the current document
+        //expect(context.path).toBe(newPath);
+        // Make sure the both files are there now.
+        const model = await manager.contents.get('', { content: true });
+        expect(model.content.find((x: any) => x.name === oldPath)).toBeTruthy();
+        expect(model.content.find((x: any) => x.name === newPath)).toBeTruthy();
+
+        // Make sure both files are equal
+        const model1 = await manager.contents.get(oldPath, { content: true });
+        const model2 = await manager.contents.get(newPath, { content: true });
+        expect(model1.content).toEqual(model2.content);
       });
 
       it('should keep the file if overwrite is aborted', async () => {
@@ -456,6 +475,15 @@ describe('docregistry/context', () => {
         await acceptDialog();
         await promise;
         expect(context.path).toBe(path);
+      });
+
+      it('should be rejected if the user cancel the dialog', async () => {
+        await context.initialize(true);
+
+        const promise = context.saveAs();
+        await dismissDialog();
+
+        await expect(promise).rejects.toEqual('Save as cancelled by user.');
       });
     });
 

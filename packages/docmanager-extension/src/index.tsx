@@ -874,7 +874,28 @@ function addCommands(
             buttons: [Dialog.okButton({ label: trans.__('Ok') })]
           });
         }
-        return context.saveAs();
+
+        const onChange = (
+          sender: Contents.IManager,
+          args: Contents.IChangedArgs
+        ) => {
+          if (
+            args.type === 'save' &&
+            args.newValue &&
+            args.newValue.path !== context.path
+          ) {
+            void commands.execute(CommandIDs.open, {
+              path: args.newValue.path
+            });
+          }
+        };
+        docManager.services.contents.fileChanged.connect(onChange);
+        context
+          .saveAs()
+          .then(() => void docManager.closeFile(context.path))
+          .finally(() =>
+            docManager.services.contents.fileChanged.disconnect(onChange)
+          );
       }
     }
   });
