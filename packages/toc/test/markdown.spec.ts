@@ -235,7 +235,7 @@ front: matter
 front: matter
 ---
 # Header
-          
+
 ---
 # Header between horizontal rules
 ---
