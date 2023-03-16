@@ -589,6 +589,14 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       text: input.model.sharedModel.getSource().split('\n')[0]
     });
 
+    input.model.contentChanged.connect((sender, args) => {
+      if (this._inputPlaceholder && this.inputHidden) {
+        this._inputPlaceholder.text = sender.sharedModel
+          .getSource()
+          .split('\n')?.[0];
+      }
+    });
+
     if (this.inputHidden) {
       input.parent = null;
       (inputWrapper.layout as PanelLayout).addWidget(this._inputPlaceholder!);
@@ -1054,6 +1062,12 @@ export class CodeCell extends Cell<ICodeCellModel> {
         this.outputHidden = !this.outputHidden;
       },
       text: this.getOutputPlaceholderText()
+    });
+
+    this.model.outputs.changed.connect((sender, args) => {
+      if (this._outputPlaceholder && this.outputHidden) {
+        this._outputPlaceholder.text = this.getOutputPlaceholderText();
+      }
     });
 
     const layoutWrapper = outputWrapper.layout as PanelLayout;
