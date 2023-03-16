@@ -289,6 +289,7 @@
   display: flex;
   flex-direction: row;
   padding-top: 4px;
+  justify-content: flex-end;
 }
 
 /*
