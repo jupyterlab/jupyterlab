@@ -1076,7 +1076,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   getOutputPlaceholderText(): string {
     const outputData = this.model.outputs.get(0)?.data;
     for (const type of textRendererFactory.mimeTypes) {
-      if (outputData[type] !== undefined) {
+      if (outputData?.[type] !== undefined) {
         return (outputData[type] as string).split('\n')[0] ?? '';
       }
     }
