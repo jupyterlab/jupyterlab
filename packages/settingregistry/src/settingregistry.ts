@@ -375,12 +375,17 @@ export class SettingRegistry implements ISettingRegistry {
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
+      // Force replaying the transform function if expected.
       if (forceTransform) {
+        // Empty the composite and user data before replaying the transforms.
+        plugins[plugin].data = { composite: {}, user: {} };
         await this._load(await this._transform('fetch', plugins[plugin]));
         this._pluginChanged.emit(plugin);
       }
       return new Settings({ plugin: plugins[plugin], registry });
     }
+
+    // If the plugin is not loaded but has already been fetched.
     if (plugin in this._unloadedPlugins && plugin in this._transformers) {
       await this._load(
         await this._transform('fetch', this._unloadedPlugins[plugin])
