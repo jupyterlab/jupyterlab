@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-import { PathExt } from '@jupyterlab/coreutils';
 import {
   LanguageDescription,
   LanguageSupport,
@@ -10,17 +8,14 @@ import {
   StreamLanguage,
   StreamParser
 } from '@codemirror/language';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
+import { PathExt } from '@jupyterlab/coreutils';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { buildParser } from '@lezer/generator';
 import { highlightTree } from '@lezer/highlight';
 
-// This ensures the language spec for python will be loaded when
-// we instantiate a new editor instance, which is required since
-// python is the default language and we don't want to split
-// the editor constructor because of asynchronous loading.
-import { python } from '@codemirror/lang-python';
 import { jupyterHighlightStyle } from './theme';
 import { IEditorLanguage, IEditorLanguageRegistry } from './token';
-import { buildParser } from '@lezer/generator';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 /**
  * CodeMirror language registry
@@ -476,19 +471,21 @@ export namespace EditorLanguageRegistry {
         mime: 'text/x-python',
         extensions: ['BUILD', 'bzl', 'py', 'pyw'],
         filename: /^(BUCK|BUILD)$/,
-        load() {
-          return Promise.resolve(python());
+        async load() {
+          const m = await import('@codemirror/lang-python');
+          return m.python();
         }
       },
       {
         name: 'ipython',
         displayName: trans.__('ipython'),
         mime: 'text/x-ipython',
-        load: () => {
+        async load() {
           // FIXME Restore '?' operator - using the default python LanguageSupport allows
           // to activate feature such as code folding.
           // return Promise.resolve(legacy(mkPython({ singleOperators: /\?/ })));
-          return Promise.resolve(python());
+          const m = await import('@codemirror/lang-python');
+          return m.python();
         }
       },
       {
