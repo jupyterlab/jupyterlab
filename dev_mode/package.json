@@ -17,6 +17,7 @@
     "watch": "webpack --watch"
   },
   "resolutions": {
+    "@codemirror/language": "^6.0.0",
     "@codemirror/state": "^6.2.0",
     "@codemirror/view": "^6.7.0",
     "@jupyter/ydoc": "~0.3.4",
@@ -112,6 +113,8 @@
     "@jupyterlab/ui-components": "~4.0.0-alpha.36",
     "@jupyterlab/ui-components-extension": "~4.0.0-alpha.21",
     "@jupyterlab/vega5-extension": "~4.0.0-alpha.21",
+    "@lezer/common": "^1.0.0",
+    "@lezer/highlight": "^1.0.0",
     "@lumino/algorithm": "^2.0.0-rc.0",
     "@lumino/application": "^2.0.0-rc.0",
     "@lumino/commands": "^2.0.0-rc.0",
@@ -260,6 +263,7 @@
     "buildDir": "./static",
     "outputDir": ".",
     "singletonPackages": [
+      "@codemirror/language",
       "@codemirror/state",
       "@codemirror/view",
       "@jupyter/ydoc",
@@ -298,6 +302,8 @@
       "@jupyterlab/tooltip",
       "@jupyterlab/translation",
       "@jupyterlab/ui-components",
+      "@lezer/common",
+      "@lezer/highlight",
       "@lumino/algorithm",
       "@lumino/application",
       "@lumino/commands",
