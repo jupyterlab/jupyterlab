@@ -76,6 +76,7 @@ export class Placeholder extends Widget {
     this._button = document.createElement('div');
     this._button.classList.add(CONTENT_CLASS);
     this._textContent = document.createElement('span');
+    this._textContent.className = 'jp-PlaceholderText';
     this._textContent.innerText = options.text ?? '';
     node.appendChild(this._textContent);
     node.appendChild(this._button);

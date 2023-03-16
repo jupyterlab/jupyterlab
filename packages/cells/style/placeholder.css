@@ -38,7 +38,7 @@
   background-color: var(--jp-layout-color0);
 }
 
-.jp-RawCell .jp-Placeholder span,
-.jp-CodeCell .jp-Placeholder span {
+.jp-RawCell .jp-Placeholder span.jp-PlaceholderText,
+.jp-CodeCell .jp-Placeholder span.jp-PlaceholderText {
   font-family: var(--jp-code-font-family);
 }
