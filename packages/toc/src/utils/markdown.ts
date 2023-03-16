@@ -82,10 +82,13 @@ export function getHeadings(text: string): IMarkdownHeading[] {
       continue;
     }
 
-    // Don't check for Markdown headings if in a YAML frontmatter block
-    if (line === '---') {
+    // Don't check for Markdown headings if in a YAML frontmatter block.
+    // We can only start a frontmatter block on the first line of the file.
+    // At other positions in a markdown file, '---' represents a horizontal rule.
+    if (line === '---' && (isFrontmatterBlock || lineIdx === 0)) {
       isFrontmatterBlock = !isFrontmatterBlock;
     }
+
     if (isFrontmatterBlock) {
       continue;
     }
