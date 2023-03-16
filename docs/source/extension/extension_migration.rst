@@ -20,6 +20,31 @@ target to ES2018 or add ``"ES2018"`` to the `TypeScript lib option <https://www.
     JupyterLab 3.6.0 was released with an updated target "ES2018". We strongly advise updating to 3.6.1,
     which reverts the target back to "ES2017".
 
+Jest configuration update
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab 3.6.
+They need to be ignore when transforming the code with Jest. You will need to update the
+``transformIgnorePatterns`` to match:
+
+.. code-block:: javascript
+    :emphasize-lines: 3
+
+    const esModules = [
+      '@jupyterlab/',
+      '@jupyter/ydoc',
+      'lib0',
+      'y\\-protocols',
+      'y\\-websocket',
+      'yjs'
+    ].join('|');
+
+    // ...
+
+    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
+
+For more information, have a look at :ref:`testing_with_jest`.
+
 Real-Time Collaboration
 ^^^^^^^^^^^^^^^^^^^^^^^
 In JupyterLab v3.6, it is necessary to install Jupyter Server v2.0 to use real-time collaboration.
