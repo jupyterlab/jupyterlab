@@ -184,7 +184,7 @@ describe('@jupyterlab/apputils', () => {
         const widget = registry.createWidget('factory', documentWidget, item);
 
         expect(widget).toBe(dummyWidget);
-        expect(dummy).toBeCalledWith('factory', documentWidget, item);
+        expect(dummy).toHaveBeenCalledWith('factory', documentWidget, item);
       });
 
       it('should call the registered factory', () => {
@@ -205,8 +205,8 @@ describe('@jupyterlab/apputils', () => {
         const widget = registry.createWidget('factory', documentWidget, item);
 
         expect(widget).toBe(dummyWidget);
-        expect(dummy).toBeCalledWith(documentWidget);
-        expect(defaultFactory).toBeCalledTimes(0);
+        expect(dummy).toHaveBeenCalledWith(documentWidget);
+        expect(defaultFactory).toHaveBeenCalledTimes(0);
       });
     });
 
