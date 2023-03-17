@@ -304,10 +304,7 @@ export class Context<
     const localPath = this._manager.contents.localPath(this.path);
     const newLocalPath = await Private.getSavePath(localPath);
 
-    if (!newLocalPath) {
-      return Promise.reject('Save as cancelled by user.');
-    }
-    if (this.isDisposed) {
+    if (this.isDisposed || !newLocalPath) {
       return;
     }
 
