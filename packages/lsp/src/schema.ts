@@ -155,6 +155,7 @@ export interface ServerSpecProperties {
   troubleshoot?: Troubleshooting;
   urls?: URLs;
   version?: SpecSchemaVersion;
+  workspace_configuration?: WorkspaceConfiguration;
   [k: string]: any;
 }
 /**
@@ -182,6 +183,12 @@ export interface Installation1 {
  */
 export interface URLs {
   [k: string]: string;
+}
+/**
+ * default values to include in the client `workspace/configuration` reply (also known as `serverSettings`). User may override these defaults. The keys should be fully qualified (dotted) names of settings (nested specification is not supported).
+ */
+export interface WorkspaceConfiguration {
+  [k: string]: any;
 }
 /**
  * This interface was referenced by `JupyterLspServerStatusResponse`'s JSON-Schema
