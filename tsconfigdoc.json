@@ -236,6 +236,9 @@
       "path": "./packages/settingregistry"
     },
     {
+      "path": "./packages/shared-models"
+    },
+    {
       "path": "./packages/shortcuts-extension"
     },
     {
