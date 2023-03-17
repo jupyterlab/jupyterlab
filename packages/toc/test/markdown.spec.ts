@@ -242,47 +242,48 @@ front: matter
 ---
 
 # Header after horizontal rules`,
+          [
+            {
+              text: 'Header',
+              level: 1,
+              line: 3,
+              raw: '# Header',
+              prefix: '1. ',
+              skip: false
+            },
+            {
+              text: 'Header between horizontal rules',
+              level: 1,
+              line: 6,
+              raw: '# Header between horizontal rules',
+              prefix: '2. ',
+              skip: false
+            },
+            {
+              text: 'Header after horizontal rules',
+              level: 1,
+              line: 9,
+              raw: '# Header after horizontal rules',
+              prefix: '3. ',
+              skip: false
+            }
+          ]
+        ],
         [
-          {
-            text: 'Header',
-            level: 1,
-            line: 3,
-            raw: '# Header',
-            prefix: '1. ',
-            skip: false
-          },
-          {
-            text: 'Header between horizontal rules',
-            level: 1,
-            line: 6,
-            raw: '# Header between horizontal rules',
-            prefix: '2. ',
-            skip: false
-          },
-          {
-            text: 'Header after horizontal rules',
-            level: 1,
-            line: 9,
-            raw: '# Header after horizontal rules',
-            prefix: '3. ',
-            skip: false
-          }
-        ]
-      ],
-      [
-        `---
+          `---
 # Header`,
-        [
-          {
-            text: 'Header',
-            level: 1,
-            line: 1,
-            raw: '# Header',
-            prefix: '1. ',
-            skip: false
-          }
+          [
+            {
+              text: 'Header',
+              level: 1,
+              line: 1,
+              raw: '# Header',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
         ]
-      ]])('should extract headings from %s', (src, headers) => {
+      ])('should extract headings from %s', (src, headers) => {
         const headings = TableOfContentsUtils.filterHeadings(
           TableOfContentsUtils.Markdown.getHeadings(src),
           {
