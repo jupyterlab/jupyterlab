@@ -230,7 +230,8 @@ front: matter
               skip: false
             }
           ]
-        ][
+        ],
+        [
           `---
 front: matter
 ---
@@ -240,8 +241,7 @@ front: matter
 # Header between horizontal rules
 ---
 
-# Header after horizontal rules`
-        ],
+# Header after horizontal rules`,
         [
           {
             text: 'Header',
@@ -268,7 +268,21 @@ front: matter
             skip: false
           }
         ]
-      ])('should extract headings from %s', (src, headers) => {
+      ],
+      [
+        `---
+# Header`,
+        [
+          {
+            text: 'Header',
+            level: 1,
+            line: 1,
+            raw: '# Header',
+            prefix: '1. ',
+            skip: false
+          }
+        ]
+      ]])('should extract headings from %s', (src, headers) => {
         const headings = TableOfContentsUtils.filterHeadings(
           TableOfContentsUtils.Markdown.getHeadings(src),
           {
