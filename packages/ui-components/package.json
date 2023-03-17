@@ -68,7 +68,7 @@
     "rimraf": "~3.0.0",
     "svgo": "^3.0.1",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.1-rc"
+    "typescript": "~5.0.2"
   },
   "peerDependencies": {
     "react": "^18.2.0"
