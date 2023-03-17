@@ -763,8 +763,8 @@ export interface IServerRequestHandler<
 export type ClientRequests<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
 > = {
-  readonly // has async request(params) returning a promise with result.
-  [key in T]: IClientRequestHandler<key>;
+  // has async request(params) returning a promise with result.
+  readonly [key in T]: IClientRequestHandler<key>;
 };
 
 /**
@@ -774,8 +774,8 @@ export type ClientRequests<
 export type ServerRequests<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > = {
-  readonly // has async request(params) returning a promise with result.
-  [key in T]: IServerRequestHandler<key>;
+  // has async request(params) returning a promise with result.
+  readonly [key in T]: IServerRequestHandler<key>;
 };
 
 /**

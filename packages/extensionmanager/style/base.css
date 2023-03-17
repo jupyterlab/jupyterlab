@@ -237,7 +237,7 @@
 }
 
 @keyframes loading {
-  from {
+  0% {
     left: -200px;
     width: 30%;
   }
@@ -258,7 +258,7 @@
     left: 120%;
   }
 
-  to {
+  100% {
     left: 100%;
   }
 }
