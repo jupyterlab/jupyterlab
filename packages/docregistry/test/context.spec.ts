@@ -470,6 +470,20 @@ describe('docregistry/context', () => {
         const res = await changed;
         expect(res[1].newValue?.path).toEqual(path);
       });
+
+      it('should no trigger save signal if the user cancel the dialog', async () => {
+        let saveEmitted = false;
+        await context.initialize(true);
+        manager.contents.fileChanged.connect((sender, args) => {
+          if (args.type === 'save') {
+            saveEmitted = true;
+          }
+        });
+        const promise = context.saveAs();
+        await dismissDialog();
+        await promise;
+        expect(saveEmitted).toEqual(false);
+      });
     });
 
     describe('#revert()', () => {
