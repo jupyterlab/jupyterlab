@@ -1868,6 +1868,7 @@ export class Notebook extends StaticNotebook {
    */
   protected onActivateRequest(msg: Message): void {
     super.onActivateRequest(msg);
+    console.log('[onActiveRequest] _ensureFocus(force=true)');
     this._ensureFocus(true);
   }
 
@@ -2017,16 +2018,8 @@ export class Notebook extends StaticNotebook {
         }
       }
     }
-    if (force) {
-      const { activeElement } = document;
-      // Reminder - `this.node.contains(this.node)` returns `true`, so we have
-      // to do two checks to determine if a descendant node, and not
-      // `this.node`, has focus:
-      const descendantHasFocus =
-        this.node !== activeElement && this.node.contains(activeElement);
-      if (!descendantHasFocus) {
-        NotebookActions.focusActiveCell(this);
-      }
+    if (force && activeCell && !activeCell.node.contains(document.activeElement)) {
+      NotebookActions.focusActiveCell(this);
     }
   }
 
