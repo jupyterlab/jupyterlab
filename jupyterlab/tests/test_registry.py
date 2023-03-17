@@ -107,5 +107,6 @@ class TestAppHandlerRegistry(AppHandlerTest):
             with open(lock_path) as f:
                 lock = f.read()
 
+            # yarn >=2.x does not record the registry in the lockfile
             self.assertNotIn(commands.YARN_DEFAULT_REGISTRY, lock)
-            self.assertIn(yarn_registry, lock)
+            self.assertNotIn(yarn_registry, lock)

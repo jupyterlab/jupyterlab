@@ -9,13 +9,18 @@ Extension Migration Guide
 JupyterLab 3.x to 4.x
 ---------------------
 
+jlpm
+^^^^
+
+The utility ``jlpm`` is using yarn 3 (it was yarn 1 previously).
+
+API breaking changes
+^^^^^^^^^^^^^^^^^^^^
+
 .. note::
 
    With JupyterLab 4.x, the npm package version policy changed to not bump major version with
    the Python package unless required to ease extension compatibility.
-
-API breaking changes
-^^^^^^^^^^^^^^^^^^^^
 
 Here is a list of JupyterLab npm packages that encountered API changes and therefore have
 bumped their major version (following semver convention). We want to point out particularly

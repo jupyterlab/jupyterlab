@@ -48,7 +48,6 @@
     "mathjax-full": "^3.2.2"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0-alpha.21",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
     "typescript": "~5.0.2"

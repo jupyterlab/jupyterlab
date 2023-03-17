@@ -110,6 +110,12 @@ iframe_figures/
 lerna-debug.log
 yarn-error.log
 
+# yarn >=2.x local files
+.yarn/*
+.pnp.*
+jupyterlab/staging/.yarn/*
+jupyterlab/staging/.pnp.*
+
 # copied changelog file
 docs/source/getting_started/changelog.md
 

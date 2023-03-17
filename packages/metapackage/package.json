@@ -132,6 +132,7 @@
     "@jupyterlab/testing": "^4.0.0-alpha.21",
     "@types/jest": "^29.2.0",
     "fs-extra": "^10.1.0",
+    "jest": "^29.2.0",
     "json-to-html": "~0.1.2",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",

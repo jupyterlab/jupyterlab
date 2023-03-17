@@ -242,11 +242,17 @@ export function prebump(): void {
     encoding: 'utf8'
   });
   if (status.length > 0) {
+    const diff = run('git diff', {
+      stdio: 'pipe',
+      encoding: 'utf8'
+    });
     throw new Error(
       `Must be in a clean git state with no untracked files.
 Run "git status" to see the issues.
 
-${status}`
+${status}
+
+${diff}`
     );
   }
 }
