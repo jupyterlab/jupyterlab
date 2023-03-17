@@ -139,7 +139,12 @@
     {
       "command": "filebrowser:go-up",
       "keys": ["Backspace"],
-      "selector": ".jp-DirListing-content .jp-DirListing-itemText"
+      "selector": ".jp-DirListing:focus"
+    },
+    {
+      "command": "filebrowser:go-up",
+      "keys": ["Backspace"],
+      "selector": ".jp-DirListing-itemText"
     },
     {
       "command": "filebrowser:delete",

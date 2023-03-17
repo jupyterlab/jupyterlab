@@ -991,12 +991,7 @@ function addCommands(
         return;
       }
       const { model } = browserForPath;
-
       await model.restored;
-      if (model.path === model.rootPath) {
-        return;
-      }
-
       void browserForPath.goUp();
     }
   });

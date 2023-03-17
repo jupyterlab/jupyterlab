@@ -1303,15 +1303,6 @@ export class DirListing extends Widget {
         }
         break;
       }
-      case 8:
-        // Backspace
-        if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
-          return;
-        }
-        event.stopPropagation();
-        event.preventDefault();
-        void this.goUp();
-        break;
     }
 
     // Detects printable characters typed by the user.
