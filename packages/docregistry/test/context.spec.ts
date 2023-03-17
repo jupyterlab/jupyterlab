@@ -12,6 +12,7 @@ import { Contents, ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
+  signalToPromise,
   waitForDialog
 } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
@@ -366,18 +367,26 @@ describe('docregistry/context', () => {
           await waitForDialog();
           const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           const input = dialog.getElementsByTagName('input')[0];
-
           input.value = newPath;
           await acceptDialog();
         };
         const promise = func();
         await initialize;
 
+        const changed = signalToPromise(manager.contents.fileChanged);
         const oldPath = context.path;
         await context.saveAs();
         await promise;
+
         // We no longer rename the current document
         //expect(context.path).toBe(newPath);
+
+        // Make sure the signal emitted has a different path
+        const res = await changed;
+        expect(res[1].type).toBe('save');
+        expect(res[1].newValue?.path).toEqual(newPath);
+        expect(res[1].newValue?.path !== oldPath).toBe(true);
+
         // Make sure the both files are there now.
         const model = await manager.contents.get('', { content: true });
         expect(model.content.find((x: any) => x.name === oldPath)).toBeTruthy();
@@ -449,21 +458,31 @@ describe('docregistry/context', () => {
       });
 
       it('should just save if the file name does not change', async () => {
+        const changed = signalToPromise(manager.contents.fileChanged);
+
         const path = context.path;
         await context.initialize(true);
         const promise = context.saveAs();
         await acceptDialog();
         await promise;
         expect(context.path).toBe(path);
+
+        const res = await changed;
+        expect(res[1].newValue?.path).toEqual(path);
       });
 
-      it('should be rejected if the user cancel the dialog', async () => {
+      it('should no trigger save signal if the user cancel the dialog', async () => {
+        let saveEmitted = false;
         await context.initialize(true);
-
+        manager.contents.fileChanged.connect((sender, args) => {
+          if (args.type === 'save') {
+            saveEmitted = true;
+          }
+        });
         const promise = context.saveAs();
         await dismissDialog();
-
-        await expect(promise).rejects.toEqual('Save as cancelled by user.');
+        await promise;
+        expect(saveEmitted).toEqual(false);
       });
     });
 
