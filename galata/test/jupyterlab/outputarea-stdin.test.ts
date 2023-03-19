@@ -50,6 +50,6 @@ test.describe('Stdin for ipdb', () => {
 
     // Check that the input remains focused and cursor is at the end.
     await page.keyboard.insertText('x');
-    await expect(page.locator('body')).toContainText('foofoox');
+    await expect(page.locator('.jp-Stdin-input')).toHaveValue('foofoox');
   });
 });
