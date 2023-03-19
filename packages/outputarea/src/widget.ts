@@ -1098,8 +1098,11 @@ export class Stdin extends Widget implements IStdin {
               this._valueCache = input.value;
             }
 
-            input.value = historyLine;
+            this._setInputValue(historyLine);
             this._historyIndex = searchHistoryIx;
+            // The default action for ArrowUp is moving to first character
+            // but we want to keep the cursor at the end.
+            event.preventDefault();
           }
         }
       } else if (event.key === 'ArrowUp') {
@@ -1110,8 +1113,11 @@ export class Stdin extends Widget implements IStdin {
           if (this._historyIndex === 0) {
             this._valueCache = input.value;
           }
-          input.value = historyLine;
+          this._setInputValue(historyLine);
           --this._historyIndex;
+          // The default action for ArrowUp is moving to first character
+          // but we want to keep the cursor at the end.
+          event.preventDefault();
         }
       } else if (event.key === 'ArrowDown') {
         this.resetSearch();
@@ -1119,12 +1125,12 @@ export class Stdin extends Widget implements IStdin {
         if (this._historyIndex === 0) {
           // do nothing
         } else if (this._historyIndex === -1) {
-          input.value = this._valueCache;
+          this._setInputValue(this._valueCache);
           ++this._historyIndex;
         } else {
           const historyLine = Stdin._historyAt(this._historyIndex + 1);
           if (historyLine) {
-            input.value = historyLine;
+            this._setInputValue(historyLine);
             ++this._historyIndex;
           }
         }
@@ -1149,6 +1155,13 @@ export class Stdin extends Widget implements IStdin {
    */
   protected onBeforeDetach(msg: Message): void {
     this._input.removeEventListener('keydown', this);
+  }
+
+  private _setInputValue(value: string) {
+    this._input.value = value;
+    // Set cursor at the end; this is usyally not necessary when input is
+    // focused but having the explicit placement ensures consistency.
+    this._input.setSelectionRange(value.length, value.length);
   }
 
   private _future: Kernel.IShellFuture;
