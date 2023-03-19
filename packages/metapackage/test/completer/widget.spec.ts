@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 import {
   Completer,
   CompleterModel,
@@ -27,6 +27,11 @@ const ACTIVE_CLASS = 'jp-mod-active';
 function createEditorWidget(): CodeEditorWrapper {
   const model = new CodeEditor.Model({ sharedModel: new YFile() });
   const factory = (options: CodeEditor.IOptions) => {
+    const m = options.model.sharedModel as any;
+    options.extensions = [
+      ...(options.extensions ?? []),
+      ybinding({ ytext: m.ysource })
+    ];
     return new CodeMirrorEditor(options);
   };
   return new CodeEditorWrapper({ factory, model });
@@ -210,7 +215,7 @@ describe('completer/widget', () => {
         options.model!.resolveItem = jest.fn();
         const widget = new Completer(options);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(options.model!.resolveItem).toBeCalledTimes(1);
+        expect(options.model!.resolveItem).toHaveBeenCalledTimes(1);
       });
 
       it('should resolve item from model on switching item.', () => {
@@ -223,7 +228,7 @@ describe('completer/widget', () => {
         const widget = new Completer(options);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         widget['_cycle']('down');
-        expect(options.model!.resolveItem).toBeCalledTimes(2);
+        expect(options.model!.resolveItem).toHaveBeenCalledTimes(2);
       });
     });
 

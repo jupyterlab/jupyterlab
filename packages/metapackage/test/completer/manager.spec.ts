@@ -26,9 +26,7 @@ const SAMPLE_PROVIDER_ID = 'CompletionProvider:sample';
 
 function contextFactory(): Context<INotebookModel> {
   const serviceManager = new ServiceManager({ standby: 'never' });
-  const factory = new NotebookModelFactory({
-    disableDocumentWideUndoRedo: false
-  });
+  const factory = new NotebookModelFactory();
   const context = new Context({
     manager: serviceManager,
     factory,
@@ -188,6 +186,7 @@ describe('completer/manager', () => {
 
         await manager.updateCompleter(completerContext);
         const cell = new Cell({
+          contentFactory: NBTestUtils.createBaseCellFactory(),
           model: new TestCellModel({
             sharedModel: createStandaloneCell({ cell_type: 'code' })
           }),

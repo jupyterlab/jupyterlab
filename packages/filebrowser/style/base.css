@@ -23,6 +23,8 @@
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
+  flex-wrap: wrap;
+  row-gap: 12px;
   border-bottom: none;
   height: auto;
   margin: 8px 12px 0;
@@ -70,6 +72,8 @@
   flex: 0 0 auto;
   padding-left: 0;
   padding-right: 2px;
+  align-items: center;
+  height: unset;
 }
 
 .jp-FileBrowser-toolbar > .jp-Toolbar-item .jp-ToolbarButtonComponent {
@@ -94,12 +98,6 @@
 
 .jp-FileSize-hidden {
   display: none;
-}
-
-.jp-FileBrowser-filterBox {
-  padding: 0;
-  flex: 0 0 auto;
-  margin: 8px 12px 0;
 }
 
 .jp-FileBrowser .lm-AccordionPanel > h3:first-child {

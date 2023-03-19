@@ -15,10 +15,13 @@ export class CodeViewerWidget extends Widget {
 
     const editorWidget = new CodeEditorWrapper({
       factory: options.factory,
-      model: options.model
+      model: this.model,
+      editorOptions: {
+        ...options.editorOptions,
+        config: { ...options.editorOptions?.config, readOnly: true }
+      }
     });
     this.editor = editorWidget.editor;
-    this.editor.setOption('readOnly', true);
 
     const layout = (this.layout = new StackedLayout());
     layout.addWidget(editorWidget);
@@ -27,11 +30,12 @@ export class CodeViewerWidget extends Widget {
   static createCodeViewer(
     options: CodeViewerWidget.INoModelOptions
   ): CodeViewerWidget {
+    const { content, mimeType, ...others } = options;
     const model = new CodeEditor.Model({
-      mimeType: options.mimeType
+      mimeType
     });
-    model.sharedModel.setSource(options.content);
-    const widget = new CodeViewerWidget({ factory: options.factory, model });
+    model.sharedModel.setSource(content);
+    const widget = new CodeViewerWidget({ ...others, model });
     widget.disposed.connect(() => {
       model.dispose();
     });
@@ -62,22 +66,20 @@ export namespace CodeViewerWidget {
      * A code editor factory.
      */
     factory: CodeEditor.Factory;
-
     /**
      * The content model for the viewer.
      */
-    model: CodeEditor.Model;
+    model: CodeEditor.IModel;
+    /**
+     * Code editor options
+     */
+    editorOptions?: Omit<CodeEditor.IOptions, 'host' | 'model'>;
   }
 
   /**
    * The options used to create an code viewer widget without a model.
    */
-  export interface INoModelOptions {
-    /**
-     * A code editor factory.
-     */
-    factory: CodeEditor.Factory;
-
+  export interface INoModelOptions extends Omit<IOptions, 'model'> {
     /**
      * The content to display in the viewer.
      */

@@ -16,7 +16,6 @@ const menuPaths = [
   'Settings',
   'Settings>Theme',
   'Settings>Console Run Keystroke',
-  'Settings>Text Editor Key Map',
   'Settings>Text Editor Theme',
   'Settings>Text Editor Indentation',
   'Settings>Terminal Theme',

@@ -20,30 +20,20 @@ test.describe('Text Editor Tests', () => {
     const imageName = 'text-editor-rulers.png';
     await page.menu.clickMenuItem('File>New>Text File');
 
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.getByRole('main').getByText(DEFAULT_NAME).waitFor();
 
     await page.menu.clickMenuItem('Settings>Settings Editor');
 
-    await page.waitForSelector('text=Text Editor');
-    await page.click('text=Text Editor');
+    await page
+      .getByRole('tab', { name: 'Text Editor' })
+      .getByText('Text Editor')
+      .click();
 
     // Add two rulers
-    await page.click('text="Add"');
-    await page.click(
-      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_0"]'
-    );
-    await page.type(
-      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_0"]',
-      '50'
-    );
-    await page.click('text="Add"');
-    await page.click(
-      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_1"]'
-    );
-    await page.type(
-      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_1"]',
-      '75'
-    );
+    await page.locator('#root').getByRole('button', { name: 'Add' }).click();
+    await page.locator('input[id="root_rulers_0"]').type('50');
+    await page.locator('#root').getByRole('button', { name: 'Add' }).click();
+    await page.locator('input[id="root_rulers_1"]').type('75');
 
     await page.activity.activateTab(DEFAULT_NAME);
 
@@ -70,7 +60,7 @@ ut elit.`
     );
 
     await page.evaluate(async () => {
-      await window.jupyterapp.commands.execute('codemirror:go-to-line', {
+      await window.jupyterapp.commands.execute('fileeditor:go-to-line', {
         line: 2,
         column: 8
       });

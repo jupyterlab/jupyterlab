@@ -15,11 +15,13 @@ import {
   Clipboard,
   ICommandPalette,
   InputDialog,
+  ISessionContextDialogs,
   IThemeManager,
   MainAreaWidget,
-  sessionContextDialogs,
+  SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import { CodeCell } from '@jupyterlab/cells';
 import { IEditorServices } from '@jupyterlab/codeeditor';
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { PageConfig, PathExt } from '@jupyterlab/coreutils';
@@ -46,7 +48,7 @@ import {
 } from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 function notifyCommands(app: JupyterFrontEnd): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -179,17 +181,21 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
   id: '@jupyterlab/debugger-extension:notebooks',
   autoStart: true,
-  requires: [IDebugger, INotebookTracker, ITranslator],
-  optional: [ILabShell, ICommandPalette],
+  requires: [IDebugger, INotebookTracker],
+  optional: [ILabShell, ICommandPalette, ISessionContextDialogs, ITranslator],
   provides: IDebuggerHandler,
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
-    translator: ITranslator,
     labShell: ILabShell | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    sessionDialogs_: ISessionContextDialogs | null,
+    translator_: ITranslator | null
   ): Debugger.Handler => {
+    const translator = translator_ ?? nullTranslator;
+    const sessionDialogs =
+      sessionDialogs_ ?? new SessionContextDialogs({ translator });
     const handler = new Debugger.Handler({
       type: 'notebook',
       shell: app.shell,
@@ -211,14 +217,19 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionContextDialogs.restart(sessionContext);
+        const restarted = await sessionDialogs.restart(sessionContext);
         if (!restarted) {
           return;
         }
 
         await service.restoreDebuggerState(state);
         await handler.updateWidget(widget, sessionContext.session);
-        await NotebookActions.runAll(content, sessionContext);
+        await NotebookActions.runAll(
+          content,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     });
 
@@ -639,7 +650,7 @@ const main: JupyterFrontEndPlugin<void> = {
       const info = (await kernel.info).language_info;
       const name = info.name;
       const mimeType =
-        editorServices?.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
+        editorServices.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
       return mimeType;
     };
 
@@ -657,6 +668,10 @@ const main: JupyterFrontEndPlugin<void> = {
           okLabel: trans.__('Evaluate'),
           cancelLabel: trans.__('Cancel'),
           mimeType,
+          contentFactory: new CodeCell.ContentFactory({
+            editorFactory: options =>
+              editorServices.factoryService.newInlineEditor(options)
+          }),
           rendermime
         });
         const code = result.value;

@@ -36,6 +36,9 @@
       "path": "."
     },
     {
+      "path": "../codemirror"
+    },
+    {
       "path": "../testing"
     }
   ]

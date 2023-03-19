@@ -557,7 +557,7 @@ describe('Kernel.IKernel', () => {
       });
       expect(() => {
         kernel.sendShellMessage(msg, true);
-      }).toThrowError(/Kernel is dead/);
+      }).toThrow(/Kernel is dead/);
     });
 
     it('should handle out of order messages', async () => {
@@ -923,7 +923,7 @@ describe('Kernel.IKernel', () => {
             version: ''
           }
         );
-      }).toThrowError(/Kernel is dead/);
+      }).toThrow(/Kernel is dead/);
       tester.dispose();
     });
   });

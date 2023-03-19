@@ -31,9 +31,6 @@
       "path": "../cells"
     },
     {
-      "path": "../celltags"
-    },
-    {
       "path": "../celltags-extension"
     },
     {
@@ -169,10 +166,7 @@
       "path": "../markedparser-extension"
     },
     {
-      "path": "../mathjax2"
-    },
-    {
-      "path": "../mathjax2-extension"
+      "path": "../mathjax-extension"
     },
     {
       "path": "../metadataform"

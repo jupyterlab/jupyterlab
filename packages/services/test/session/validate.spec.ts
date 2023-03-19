@@ -29,7 +29,7 @@ describe('session/validate', () => {
         path: 'bar',
         name: ''
       };
-      expect(() => validateModel(model)).toThrowError();
+      expect(() => validateModel(model)).toThrow();
     });
   });
 

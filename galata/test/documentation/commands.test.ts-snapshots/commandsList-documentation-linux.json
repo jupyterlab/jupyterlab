@@ -222,36 +222,6 @@
     "shortcuts": []
   },
   {
-    "id": "codemirror:change-keymap",
-    "label": "default",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:change-mode",
-    "label": "Change editor mode to the provided `name`.",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:change-theme",
-    "label": "jupyter",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:find",
-    "label": "Find…",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "codemirror:go-to-line",
-    "label": "Go to Line…",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
     "id": "completer:invoke-console",
     "label": "Display the completion helper.",
     "caption": "",
@@ -891,8 +861,20 @@
     "shortcuts": []
   },
   {
+    "id": "fileeditor:change-language",
+    "label": "Change editor language.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "fileeditor:change-tabs",
     "label": "Indent with Tab",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:change-theme",
+    "label": "jupyter",
     "caption": "",
     "shortcuts": []
   },
@@ -923,6 +905,18 @@
   {
     "id": "fileeditor:cut",
     "label": "Cut",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:find",
+    "label": "Find…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "fileeditor:go-to-line",
+    "label": "Go to Line…",
     "caption": "",
     "shortcuts": []
   },
@@ -989,24 +983,24 @@
   {
     "id": "fileeditor:toggle-current-line-numbers",
     "label": "Show Line Numbers",
-    "caption": "",
+    "caption": "Show the line numbers for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-current-line-wrap",
     "label": "Wrap Words",
-    "caption": "",
+    "caption": "Wrap words for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-current-match-brackets",
     "label": "Match Brackets",
-    "caption": "",
+    "caption": "Change match brackets for the current file.",
     "shortcuts": []
   },
   {
     "id": "fileeditor:toggle-line-numbers",
-    "label": "Line Numbers",
+    "label": "Show Line Numbers",
     "caption": "",
     "shortcuts": []
   },
@@ -1317,6 +1311,18 @@
     "shortcuts": []
   },
   {
+    "id": "mathjax:clipboard",
+    "label": "MathJax Copy Latex",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "mathjax:scale",
+    "label": "Mathjax Scale Reset",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:change-cell-to-code",
     "label": "Change to Code Cell Type",
     "caption": "",
@@ -1422,8 +1428,8 @@
   },
   {
     "id": "notebook:copy-cell",
-    "label": "Copy Cells",
-    "caption": "Copy the selected cells",
+    "label": "Copy Cell",
+    "caption": "Copy this cell",
     "shortcuts": [
       "C"
     ]
@@ -1454,16 +1460,16 @@
   },
   {
     "id": "notebook:cut-cell",
-    "label": "Cut Cells",
-    "caption": "Cut the selected cells",
+    "label": "Cut Cell",
+    "caption": "Cut this cell",
     "shortcuts": [
       "X"
     ]
   },
   {
     "id": "notebook:delete-cell",
-    "label": "Delete Cells",
-    "caption": "",
+    "label": "Delete Cell",
+    "caption": "Delete this cell",
     "shortcuts": [
       "D",
       "D"
@@ -1483,8 +1489,8 @@
   },
   {
     "id": "notebook:duplicate-below",
-    "label": "Duplicate Cells Below",
-    "caption": "Copy the selected cells and paste them below the selection",
+    "label": "Duplicate Cell Below",
+    "caption": "Create a duplicate of this cell below",
     "shortcuts": []
   },
   {
@@ -1588,7 +1594,7 @@
   {
     "id": "notebook:insert-cell-above",
     "label": "Insert Cell Above",
-    "caption": "",
+    "caption": "Insert a cell above",
     "shortcuts": [
       "A"
     ]
@@ -1649,16 +1655,16 @@
   },
   {
     "id": "notebook:move-cell-down",
-    "label": "Move Cells Down",
-    "caption": "",
+    "label": "Move Cell Down",
+    "caption": "Move this cell down",
     "shortcuts": [
       "Ctrl Shift ArrowDown"
     ]
   },
   {
     "id": "notebook:move-cell-up",
-    "label": "Move Cells Up",
-    "caption": "",
+    "label": "Move Cell Up",
+    "caption": "Move this cell up",
     "shortcuts": [
       "Ctrl Shift ArrowUp"
     ]
@@ -1697,20 +1703,20 @@
   },
   {
     "id": "notebook:paste-and-replace-cell",
-    "label": "Paste Cells and Replace",
+    "label": "Paste Cell and Replace",
     "caption": "",
     "shortcuts": []
   },
   {
     "id": "notebook:paste-cell-above",
-    "label": "Paste Cells Above",
-    "caption": "",
+    "label": "Paste Cell Above",
+    "caption": "Paste this cell from the clipboard",
     "shortcuts": []
   },
   {
     "id": "notebook:paste-cell-below",
-    "label": "Paste Cells Below",
-    "caption": "Paste cells from the clipboard",
+    "label": "Paste Cell Below",
+    "caption": "Paste this cell from the clipboard",
     "shortcuts": [
       "V"
     ]
@@ -1791,15 +1797,15 @@
   },
   {
     "id": "notebook:run-cell",
-    "label": "Run Selected Cells and Do not Advance",
-    "caption": "Run the selected cells and do not advance",
+    "label": "Run Selected Cell and Do not Advance",
+    "caption": "",
     "shortcuts": [
       "Ctrl Enter"
     ]
   },
   {
     "id": "notebook:run-cell-and-insert-below",
-    "label": "Run Selected Cells and Insert Below",
+    "label": "Run Selected Cell and Insert Below",
     "caption": "",
     "shortcuts": [
       "Alt Enter"
@@ -1807,8 +1813,8 @@
   },
   {
     "id": "notebook:run-cell-and-select-next",
-    "label": "Run Selected Cells",
-    "caption": "Run the selected cells",
+    "label": "Run Selected Cell",
+    "caption": "Run this cell and advance",
     "shortcuts": [
       "Shift Enter"
     ]

@@ -339,7 +339,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-mirror-editor-number-color: var(--md-green-400);
   --jp-mirror-editor-def-color: var(--md-blue-600);
   --jp-mirror-editor-variable-color: var(--md-grey-300);
-  --jp-mirror-editor-variable-2-color: var(--md-blue-400);
+  --jp-mirror-editor-variable-2-color: var(--md-blue-500);
   --jp-mirror-editor-variable-3-color: var(--md-green-600);
   --jp-mirror-editor-punctuation-color: var(--md-blue-400);
   --jp-mirror-editor-property-color: var(--md-blue-400);

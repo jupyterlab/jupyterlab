@@ -4,7 +4,7 @@
     "outDir": "lib",
     "rootDir": "src"
   },
-  "include": ["src/*"],
+  "include": ["src/**/*"],
   "references": [
     {
       "path": "../codeeditor"
@@ -19,13 +19,7 @@
       "path": "../nbformat"
     },
     {
-      "path": "../statusbar"
-    },
-    {
       "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }

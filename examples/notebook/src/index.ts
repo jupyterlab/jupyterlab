@@ -16,7 +16,7 @@ import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
 import { ServiceManager } from '@jupyterlab/services';
-import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
 
 import {
   NotebookModelFactory,
@@ -32,7 +32,11 @@ import {
   ProviderReconciliator
 } from '@jupyterlab/completer';
 
-import { editorServices } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 
 import { DocumentManager } from '@jupyterlab/docmanager';
 
@@ -72,10 +76,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   const rendermime = new RenderMimeRegistry({
     initialFactories: initialFactories,
-    latexTypesetter: new MathJaxTypesetter({
-      url: PageConfig.getOption('mathjaxUrl'),
-      config: PageConfig.getOption('mathjaxConfig')
-    })
+    latexTypesetter: new MathJaxTypesetter()
   });
 
   const opener = {
@@ -101,7 +102,28 @@ function createApp(manager: ServiceManager.IManager): void {
     opener
   });
   const mFactory = new NotebookModelFactory({});
-  const editorFactory = editorServices.factoryService.newInlineEditor;
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(language =>
+      ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
+    )
+    .forEach(language => {
+      languages.addLanguage(language);
+    });
+  // Language for Markdown cells
+  languages.addLanguage({
+    name: 'ipythongfm',
+    mime: 'text/x-ipythongfm',
+    load: async () => {
+      const m = await import('@codemirror/lang-markdown');
+      return m.markdown({
+        codeLanguages: (info: string) => languages.findBest(info) as any
+      });
+    }
+  });
+  const factoryService = new CodeMirrorEditorFactory({ languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+  const editorFactory = factoryService.newInlineEditor;
   const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
   const wFactory = new NotebookWidgetFactory({
@@ -113,7 +135,7 @@ function createApp(manager: ServiceManager.IManager): void {
     canStartKernel: true,
     rendermime,
     contentFactory,
-    mimeTypeService: editorServices.mimeTypeService
+    mimeTypeService
   });
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);

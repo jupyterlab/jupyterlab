@@ -533,7 +533,9 @@ describe('@jupyter/notebook', () => {
 
       describe('#createCodeCell({})', () => {
         it('should create a `CodeCell`', () => {
-          const contentFactory = new StaticNotebook.ContentFactory();
+          const contentFactory = new StaticNotebook.ContentFactory({
+            editorFactory: utils.editorFactory
+          });
           const model = new CodeCellModel();
           const codeOptions = { model, rendermime, contentFactory };
           const widget = contentFactory.createCodeCell(codeOptions);
@@ -543,7 +545,9 @@ describe('@jupyter/notebook', () => {
 
       describe('#createMarkdownCell({})', () => {
         it('should create a `MarkdownCell`', () => {
-          const contentFactory = new StaticNotebook.ContentFactory();
+          const contentFactory = new StaticNotebook.ContentFactory({
+            editorFactory: utils.editorFactory
+          });
           const model = new MarkdownCellModel();
           const mdOptions = { model, rendermime, contentFactory };
           const widget = contentFactory.createMarkdownCell(mdOptions);
@@ -553,7 +557,9 @@ describe('@jupyter/notebook', () => {
 
       describe('#createRawCell()', () => {
         it('should create a `RawCell`', () => {
-          const contentFactory = new StaticNotebook.ContentFactory();
+          const contentFactory = new StaticNotebook.ContentFactory({
+            editorFactory: utils.editorFactory
+          });
           const model = new RawCellModel();
           const rawOptions = { model, contentFactory };
           const widget = contentFactory.createRawCell(rawOptions);
@@ -1066,7 +1072,7 @@ describe('@jupyter/notebook', () => {
         widget.select(widget.widgets[3]);
         widget.activeCellIndex = 3;
 
-        expect(() => widget.getContiguousSelection()).toThrowError(
+        expect(() => widget.getContiguousSelection()).toThrow(
           /Selection not contiguous/
         );
       });
@@ -1081,13 +1087,13 @@ describe('@jupyter/notebook', () => {
 
         // Check if active cell is outside selection.
         widget.activeCellIndex = 0;
-        expect(() => widget.getContiguousSelection()).toThrowError(
+        expect(() => widget.getContiguousSelection()).toThrow(
           /Active cell not at endpoint of selection/
         );
 
         // Check if active cell is inside selection.
         widget.activeCellIndex = 2;
-        expect(() => widget.getContiguousSelection()).toThrowError(
+        expect(() => widget.getContiguousSelection()).toThrow(
           /Active cell not at endpoint of selection/
         );
       });

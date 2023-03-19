@@ -3,7 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { ISanitizer } from '@jupyterlab/apputils';
 import { URLExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -123,7 +122,7 @@ export namespace renderHTML {
     /**
      * The html sanitizer for untrusted source.
      */
-    sanitizer: ISanitizer;
+    sanitizer: IRenderMime.ISanitizer;
 
     /**
      * An optional url resolver.
@@ -371,7 +370,7 @@ export namespace renderMarkdown {
     /**
      * The html sanitizer for untrusted source.
      */
-    sanitizer: ISanitizer;
+    sanitizer: IRenderMime.ISanitizer;
 
     /**
      * An optional url resolver.
@@ -681,7 +680,10 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
 
   if (preTextContent) {
     // Note: only text nodes and span elements should be present after sanitization in the `<pre>` element.
-    const linkedNodes = autolink(preTextContent);
+    const linkedNodes =
+      sanitizer.getAutolink?.() ?? true
+        ? autolink(preTextContent)
+        : [document.createTextNode(content)];
     let inAnchorElement = false;
 
     const combinedNodes: (HTMLAnchorElement | Text | HTMLSpanElement)[] = [];
@@ -756,7 +758,7 @@ export namespace renderText {
     /**
      * The html sanitizer for untrusted source.
      */
-    sanitizer: ISanitizer;
+    sanitizer: IRenderMime.ISanitizer;
 
     /**
      * The source text to render.

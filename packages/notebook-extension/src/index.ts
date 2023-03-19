@@ -5,6 +5,8 @@
  * @module notebook-extension
  */
 
+import type { FieldProps } from '@rjsf/utils';
+
 import {
   ILabShell,
   ILayoutRestorer,
@@ -24,7 +26,7 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
-  sessionContextDialogs,
+  SessionContextDialogs,
   showDialog,
   Toolbar,
   WidgetTracker
@@ -35,8 +37,13 @@ import {
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
 
+import {
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
+import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
@@ -49,6 +56,7 @@ import {
   ILSPFeatureManager
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
+import { IMetadataFormProvider } from '@jupyterlab/metadataform';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
   CommandEditStatus,
@@ -72,7 +80,11 @@ import {
 } from '@jupyterlab/notebook';
 import { IObservableList } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  IMarkdownParser,
+  IRenderMime,
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -86,18 +98,18 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  IFormRenderer,
+  IFormRendererRegistry,
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
   pasteIcon
 } from '@jupyterlab/ui-components';
-import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
   JSONObject,
-  JSONValue,
   ReadonlyJSONValue,
   ReadonlyPartialJSONObject,
   UUID
@@ -106,6 +118,11 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
+import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
+import {
+  CellMetadataField,
+  NotebookMetadataField
+} from './tool-widgets/metadataEditorFields';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -322,7 +339,7 @@ const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory],
+  requires: [INotebookWidgetFactory, IEditorExtensionRegistry],
   optional: [
     ICommandPalette,
     IDefaultFileBrowser,
@@ -332,7 +349,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     IRouter,
     ISettingRegistry,
     ISessionContextDialogs,
-    ITranslator
+    ITranslator,
+    IFormRendererRegistry
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -360,7 +378,13 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
   provides: INotebookTools,
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
-  requires: [INotebookTracker, IEditorServices, IStateDB, ITranslator],
+  requires: [
+    INotebookTracker,
+    IEditorServices,
+    IEditorLanguageRegistry,
+    IStateDB,
+    ITranslator
+  ],
   optional: [IPropertyInspectorProvider]
 };
 
@@ -581,44 +605,61 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
       )?.submenu;
     }
 
-    void services.nbconvert.getExportFormats().then(response => {
-      if (response) {
-        const formatLabels: any = Private.getFormatLabels(translator);
+    let formatsInitialized = false;
 
-        // Convert export list to palette and menu items.
-        const formatList = Object.keys(response);
-        formatList.forEach(function (key) {
-          const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
-          const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
-          let args = {
-            format: key,
-            label: labelStr,
-            isPalette: false
-          };
-          if (FORMAT_EXCLUDE.indexOf(key) === -1) {
-            if (exportTo) {
-              exportTo.addItem({
-                command: CommandIDs.exportToFormat,
-                args: args
-              });
-            }
-            if (palette) {
-              args = {
-                format: key,
-                label: labelStr,
-                isPalette: true
-              };
-              const category = trans.__('Notebook Operations');
-              palette.addItem({
-                command: CommandIDs.exportToFormat,
-                category,
-                args
-              });
-            }
-          }
-        });
+    /** Request formats only when a notebook might use them. */
+    const maybeInitializeFormats = async () => {
+      if (formatsInitialized) {
+        return;
       }
-    });
+
+      tracker.widgetAdded.disconnect(maybeInitializeFormats);
+
+      formatsInitialized = true;
+
+      const response = await services.nbconvert.getExportFormats(false);
+
+      if (!response) {
+        return;
+      }
+
+      const formatLabels: any = Private.getFormatLabels(translator);
+
+      // Convert export list to palette and menu items.
+      const formatList = Object.keys(response);
+      formatList.forEach(function (key) {
+        const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+        const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
+        let args = {
+          format: key,
+          label: labelStr,
+          isPalette: false
+        };
+        if (FORMAT_EXCLUDE.indexOf(key) === -1) {
+          if (exportTo) {
+            exportTo.addItem({
+              command: CommandIDs.exportToFormat,
+              args: args
+            });
+          }
+          if (palette) {
+            args = {
+              format: key,
+              label: labelStr,
+              isPalette: true
+            };
+            const category = trans.__('Notebook Operations');
+            palette.addItem({
+              command: CommandIDs.exportToFormat,
+              category,
+              args
+            });
+          }
+        }
+      });
+    };
+
+    tracker.widgetAdded.connect(maybeInitializeFormats);
   }
 };
 
@@ -675,11 +716,9 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
       NotebookPanel.IContentFactory,
       IEditorServices,
       IRenderMimeRegistry,
-      ISessionContextDialogs,
-      IToolbarWidgetRegistry,
-      ITranslator
+      IToolbarWidgetRegistry
     ],
-    optional: [ISettingRegistry],
+    optional: [ISettingRegistry, ISessionContextDialogs, ITranslator],
     activate: activateWidgetFactory,
     autoStart: true
   };
@@ -819,7 +858,7 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     tocRegistry: ITableOfContentsRegistry,
-    sanitizer: ISanitizer,
+    sanitizer: IRenderMime.ISanitizer,
     mdParser: IMarkdownParser | null
   ): void => {
     tocRegistry.add(new NotebookToCFactory(tracker, mdParser, sanitizer));
@@ -836,6 +875,156 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   ],
   activate: activateNotebookLanguageServer,
   autoStart: true
+};
+
+const updateRawMimetype: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:update-raw-mimetype',
+  autoStart: true,
+  requires: [INotebookTracker, IMetadataFormProvider, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    metadataForms: IMetadataFormProvider,
+    translator: ITranslator
+  ) => {
+    const trans = translator.load('jupyterlab');
+    let formatsInitialized = false;
+
+    async function maybeInitializeFormats() {
+      if (formatsInitialized) {
+        return;
+      }
+      if (!metadataForms.get('commonToolsSection')) {
+        return;
+      }
+
+      const properties = metadataForms
+        .get('commonToolsSection')!
+        .getProperties('/raw_mimetype');
+
+      if (!properties) {
+        return;
+      }
+
+      tracker.widgetAdded.disconnect(maybeInitializeFormats);
+
+      formatsInitialized = true;
+
+      const services = app.serviceManager;
+      const response = await services.nbconvert.getExportFormats(false);
+      if (!response) {
+        return;
+      }
+
+      // convert exportList to palette and menu items
+      const formatList = Object.keys(response);
+      const formatLabels = Private.getFormatLabels(translator);
+      type enumeration = {
+        const: string;
+        title: string;
+      };
+      formatList.forEach(function (key) {
+        const mimetypeExists =
+          (properties!.oneOf as Array<enumeration>)?.filter(
+            value => value.const === key
+          ).length > 0;
+        if (!mimetypeExists) {
+          const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
+          const option = formatLabels[key] ? formatLabels[key] : altOption;
+          const mimeTypeValue = response[key].output_mimetype;
+
+          (properties!.oneOf as Array<enumeration>)!.push({
+            const: mimeTypeValue,
+            title: option
+          });
+        }
+      });
+
+      metadataForms
+        .get('commonToolsSection')!
+        .setProperties('/raw_mimetype', properties);
+    }
+    tracker.widgetAdded.connect(maybeInitializeFormats);
+  }
+};
+
+/**
+ * Registering metadata editor fields.
+ */
+const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:metadata-editor',
+  autoStart: true,
+  requires: [INotebookTracker, IEditorServices, IFormRendererRegistry],
+  optional: [ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    editorServices: IEditorServices,
+    formRegistry: IFormRendererRegistry,
+    translator?: ITranslator
+  ) => {
+    const editorFactory: CodeEditor.Factory = options =>
+      editorServices.factoryService.newInlineEditor(options);
+    // Register the custom fields.
+    const cellComponent: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return new CellMetadataField({
+          editorFactory,
+          tracker,
+          label: 'Cell metadata',
+          translator: translator
+        }).render(props);
+      }
+    };
+    formRegistry.addRenderer(
+      'notebook-extension:metadata-editor.cell-metadata',
+      cellComponent
+    );
+
+    const notebookComponent: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return new NotebookMetadataField({
+          editorFactory,
+          tracker,
+          label: 'Notebook metadata',
+          translator: translator
+        }).render(props);
+      }
+    };
+    formRegistry.addRenderer(
+      'notebook-extension:metadata-editor.notebook-metadata',
+      notebookComponent
+    );
+  }
+};
+
+/**
+ * Registering active cell field.
+ */
+const activeCellTool: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:active-cell-tool',
+  autoStart: true,
+  requires: [INotebookTracker, IFormRendererRegistry, IEditorLanguageRegistry],
+  activate: (
+    // Register the custom field.
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    formRegistry: IFormRendererRegistry,
+    languages: IEditorLanguageRegistry
+  ) => {
+    const component: IFormRenderer = {
+      fieldRenderer: (props: FieldProps) => {
+        return new ActiveCellTool({
+          tracker,
+          languages
+        }).render(props);
+      }
+    };
+    formRegistry.addRenderer(
+      'notebook-extension:active-cell-tool.renderer',
+      component
+    );
+  }
 };
 
 /**
@@ -859,7 +1048,10 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   completerPlugin,
   searchProvider,
   tocPlugin,
-  languageServerPlugin
+  languageServerPlugin,
+  updateRawMimetype,
+  customMetadataEditorFields,
+  activeCellTool
 ];
 export default plugins;
 
@@ -870,6 +1062,7 @@ function activateNotebookTools(
   app: JupyterFrontEnd,
   tracker: INotebookTracker,
   editorServices: IEditorServices,
+  languages: IEditorLanguageRegistry,
   state: IStateDB,
   translator: ITranslator,
   inspectorProvider: IPropertyInspectorProvider | null
@@ -877,22 +1070,6 @@ function activateNotebookTools(
   const trans = translator.load('jupyterlab');
   const id = 'notebook-tools';
   const notebookTools = new NotebookTools({ tracker, translator });
-  const activeCellTool = new NotebookTools.ActiveCellTool();
-  const editable = NotebookTools.createEditableToggle(translator);
-  const slideShow = NotebookTools.createSlideShowSelector(translator);
-  const tocBaseNumbering = NotebookTools.createToCBaseNumbering(translator);
-  const editorFactory = editorServices.factoryService.newInlineEditor;
-  const cellMetadataEditor = new NotebookTools.CellMetadataEditorTool({
-    editorFactory,
-    collapsed: false,
-    translator
-  });
-  const notebookMetadataEditor = new NotebookTools.NotebookMetadataEditorTool({
-    editorFactory,
-    translator
-  });
-
-  const services = app.serviceManager;
 
   // Create message hook for triggers to save to the database.
   const hook = (sender: any, message: Message): boolean => {
@@ -909,66 +1086,9 @@ function activateNotebookTools(
     }
     return true;
   };
-  const optionsMap: { [key: string]: JSONValue } = {};
-  optionsMap.None = null;
-  void services.nbconvert.getExportFormats().then(response => {
-    if (response) {
-      /**
-       * The excluded Cell Inspector Raw NbConvert Formats
-       * (returned from nbconvert's export list)
-       */
-      const rawFormatExclude = [
-        'pdf',
-        'slides',
-        'script',
-        'notebook',
-        'custom'
-      ];
-      let optionValueArray: any = [
-        [trans.__('PDF'), 'pdf'],
-        [trans.__('Slides'), 'slides'],
-        [trans.__('Script'), 'script'],
-        [trans.__('Notebook'), 'notebook'],
-        [trans.__('Custom'), 'custom']
-      ];
-
-      // convert exportList to palette and menu items
-      const formatList = Object.keys(response);
-      const formatLabels = Private.getFormatLabels(translator);
-      formatList.forEach(function (key) {
-        if (rawFormatExclude.indexOf(key) === -1) {
-          const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
-          const option = formatLabels[key] ? formatLabels[key] : altOption;
-          const mimeTypeValue = response[key].output_mimetype;
-          optionValueArray.push([option, mimeTypeValue]);
-        }
-      });
-      const nbConvert = NotebookTools.createNBConvertSelector(
-        optionValueArray,
-        translator
-      );
-      notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
-    }
-  });
   notebookTools.title.icon = buildIcon;
   notebookTools.title.caption = trans.__('Notebook Tools');
   notebookTools.id = id;
-
-  notebookTools.addItem({ tool: activeCellTool, section: 'common', rank: 1 });
-  notebookTools.addItem({ tool: editable, section: 'common', rank: 2 });
-  notebookTools.addItem({ tool: slideShow, section: 'common', rank: 3 });
-  notebookTools.addItem({ tool: tocBaseNumbering, section: 'common', rank: 4 });
-
-  notebookTools.addItem({
-    tool: cellMetadataEditor,
-    section: 'advanced',
-    rank: 1
-  });
-  notebookTools.addItem({
-    tool: notebookMetadataEditor,
-    section: 'advanced',
-    rank: 2
-  });
 
   MessageLoop.installMessageHook(notebookTools, hook);
 
@@ -990,11 +1110,14 @@ function activateWidgetFactory(
   contentFactory: NotebookPanel.IContentFactory,
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
-  sessionContextDialogs: ISessionContextDialogs,
   toolbarRegistry: IToolbarWidgetRegistry,
-  translator: ITranslator,
-  settingRegistry: ISettingRegistry | null
+  settingRegistry: ISettingRegistry | null,
+  sessionContextDialogs_: ISessionContextDialogs | null,
+  translator_: ITranslator | null
 ): NotebookWidgetFactory.IFactory {
+  const translator = translator_ ?? nullTranslator;
+  const sessionContextDialogs =
+    sessionContextDialogs_ ?? new SessionContextDialogs({ translator });
   const preferKernelOption = PageConfig.getOption('notebookStartsKernel');
 
   // If the option is not set, assume `true`
@@ -1072,11 +1195,11 @@ function activateWidgetFactory(
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
     mimeTypeService: editorServices.mimeTypeService,
-    sessionDialogs: sessionContextDialogs,
     toolbarFactory,
-    translator: translator
+    translator
   });
   app.docRegistry.addWidgetFactory(factory);
+
   return factory;
 }
 
@@ -1405,6 +1528,7 @@ function activateCopyOutput(
 function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
+  extensions: IEditorExtensionRegistry,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
@@ -1412,10 +1536,13 @@ function activateNotebookHandler(
   mainMenu: IMainMenu | null,
   router: IRouter | null,
   settingRegistry: ISettingRegistry | null,
-  sessionDialogs: ISessionContextDialogs | null,
-  translator: ITranslator | null
+  sessionDialogs_: ISessionContextDialogs | null,
+  translator_: ITranslator | null,
+  formRegistry: IFormRendererRegistry | null
 ): INotebookTracker {
-  translator = translator ?? nullTranslator;
+  const translator = translator_ ?? nullTranslator;
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const services = app.serviceManager;
 
@@ -1451,6 +1578,51 @@ function activateNotebookHandler(
       settings.changed.connect(() => {
         updateConfig(settings);
       });
+
+      const updateSessionSettings = (
+        session: ISessionContext,
+        changes: IChangedArgs<ISessionContext.IKernelPreference>
+      ) => {
+        const { newValue, oldValue } = changes;
+        const autoStartDefault = newValue.autoStartDefault;
+
+        if (
+          typeof autoStartDefault === 'boolean' &&
+          autoStartDefault !== oldValue.autoStartDefault
+        ) {
+          // Ensure we break the cycle
+          if (
+            autoStartDefault !==
+            (settings.get('autoStartDefaultKernel').composite as boolean)
+          )
+            // Once the settings is changed `updateConfig` will take care
+            // of the propagation to existing session context.
+            settings
+              .set('autoStartDefaultKernel', autoStartDefault)
+              .catch(reason => {
+                console.error(
+                  `Failed to set ${settings.id}.autoStartDefaultKernel`
+                );
+              });
+        }
+      };
+
+      const sessionContexts = new WeakSet<ISessionContext>();
+      const listenToKernelPreference = (panel: NotebookPanel): void => {
+        const session = panel.context.sessionContext;
+        if (!session.isDisposed && !sessionContexts.has(session)) {
+          sessionContexts.add(session);
+          session.kernelPreferenceChanged.connect(updateSessionSettings);
+          session.disposed.connect(() => {
+            session.kernelPreferenceChanged.disconnect(updateSessionSettings);
+          });
+        }
+      };
+      tracker.forEach(listenToKernelPreference);
+      tracker.widgetAdded.connect((tracker, panel) => {
+        listenToKernelPreference(panel);
+      });
+
       commands.addCommand(CommandIDs.autoClosingBrackets, {
         execute: args => {
           const codeConfig = settings.get('codeCellConfig')
@@ -1478,7 +1650,9 @@ function activateNotebookHandler(
         label: trans.__('Auto Close Brackets for All Notebook Cell Types'),
         isToggled: () =>
           ['codeCellConfig', 'markdownCellConfig', 'rawCellConfig'].some(
-            x => (settings.get(x).composite as JSONObject).autoClosingBrackets
+            x =>
+              ((settings.get(x).composite as JSONObject).autoClosingBrackets ??
+                extensions.baseConfiguration['autoClosingBrackets']) === true
           )
       });
       commands.addCommand(CommandIDs.setSideBySideRatio, {
@@ -1503,9 +1677,30 @@ function activateNotebookHandler(
       updateTracker({
         editorConfig: factory.editorConfig,
         notebookConfig: factory.notebookConfig,
-        kernelShutdown: factory.shutdownOnClose
+        kernelShutdown: factory.shutdownOnClose,
+        autoStartDefault: factory.autoStartDefault
       });
     });
+
+  if (formRegistry) {
+    const CMRenderer = formRegistry.getRenderer(
+      '@jupyterlab/codemirror-extension:plugin.defaultConfig'
+    );
+    if (CMRenderer) {
+      formRegistry.addRenderer(
+        '@jupyterlab/notebook-extension:tracker.codeCellConfig',
+        CMRenderer
+      );
+      formRegistry.addRenderer(
+        '@jupyterlab/notebook-extension:tracker.markdownCellConfig',
+        CMRenderer
+      );
+      formRegistry.addRenderer(
+        '@jupyterlab/notebook-extension:tracker.rawCellConfig',
+        CMRenderer
+      );
+    }
+  }
 
   // Handle state restoration.
   if (restorer) {
@@ -1592,9 +1787,8 @@ function activateNotebookHandler(
       showEditorForReadOnlyMarkdown: settings.get(
         'showEditorForReadOnlyMarkdown'
       ).composite as boolean,
-      disableDocumentWideUndoRedo: settings.get(
-        'experimentalDisableDocumentWideUndoRedo'
-      ).composite as boolean,
+      disableDocumentWideUndoRedo: !settings.get('documentWideUndoRedo')
+        .composite as boolean,
       renderingLayout: settings.get('renderingLayout').composite as
         | 'default'
         | 'side-by-side',
@@ -1623,23 +1817,26 @@ function activateNotebookHandler(
         `<style id="${SIDE_BY_SIDE_STYLE_ID}">${sideBySideMarginStyle}}</style>`
       );
     }
+    factory.autoStartDefault = settings.get('autoStartDefaultKernel')
+      .composite as boolean;
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
 
-    modelFactory.disableDocumentWideUndoRedo = settings.get(
-      'experimentalDisableDocumentWideUndoRedo'
+    modelFactory.disableDocumentWideUndoRedo = !settings.get(
+      'documentWideUndoRedo'
     ).composite as boolean;
 
     updateTracker({
       editorConfig: factory.editorConfig,
       notebookConfig: factory.notebookConfig,
-      kernelShutdown: factory.shutdownOnClose
+      kernelShutdown: factory.shutdownOnClose,
+      autoStartDefault: factory.autoStartDefault
     });
   }
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(mainMenu, tracker, sessionDialogs, isEnabled);
+    populateMenus(mainMenu, isEnabled);
   }
 
   // Utility function to create a new notebook.
@@ -1740,7 +1937,7 @@ function activateNotebookCompleterService(
   notebooks: INotebookTracker,
   manager: ICompletionProviderManager | null,
   translator: ITranslator | null,
-  appSanitizer: ISanitizer | null
+  appSanitizer: IRenderMime.ISanitizer | null
 ): void {
   if (!manager) {
     return;
@@ -1863,13 +2060,11 @@ function addCommands(
   app: JupyterFrontEnd,
   tracker: NotebookTracker,
   translator: ITranslator,
-  sessionDialogs: ISessionContextDialogs | null,
+  sessionDialogs: ISessionContextDialogs,
   isEnabled: () => boolean
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
-
-  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
   const isEnabledAndSingleSelected = (): boolean => {
     return Private.isEnabledAndSingleSelected(shell, tracker);
@@ -1911,43 +2106,105 @@ function addCommands(
     }
   );
 
+  tracker.selectionChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.duplicateBelow);
+    commands.notifyCommandChanged(CommandIDs.deleteCell);
+    commands.notifyCommandChanged(CommandIDs.copy);
+    commands.notifyCommandChanged(CommandIDs.cut);
+    commands.notifyCommandChanged(CommandIDs.pasteBelow);
+    commands.notifyCommandChanged(CommandIDs.pasteAbove);
+    commands.notifyCommandChanged(CommandIDs.pasteAndReplace);
+    commands.notifyCommandChanged(CommandIDs.moveUp);
+    commands.notifyCommandChanged(CommandIDs.moveDown);
+    commands.notifyCommandChanged(CommandIDs.run);
+    commands.notifyCommandChanged(CommandIDs.runAll);
+    commands.notifyCommandChanged(CommandIDs.runAndAdvance);
+    commands.notifyCommandChanged(CommandIDs.runAndInsert);
+  });
+  tracker.activeCellChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.moveUp);
+    commands.notifyCommandChanged(CommandIDs.moveDown);
+  });
+
   commands.addCommand(CommandIDs.runAndAdvance, {
-    label: trans.__('Run Selected Cells'),
-    caption: trans.__('Run the selected cells'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Run Selected Cell',
+        'Run Selected Cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Run this cell and advance',
+        'Run these %1 cells and advance',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndAdvance(content, context.sessionContext);
+        return NotebookActions.runAndAdvance(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
   });
   commands.addCommand(CommandIDs.run, {
-    label: trans.__('Run Selected Cells and Do not Advance'),
-    caption: trans.__('Run the selected cells and do not advance'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Run Selected Cell and Do not Advance',
+        'Run Selected Cells and Do not Advance',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.run(content, context.sessionContext);
+        return NotebookActions.run(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
   });
   commands.addCommand(CommandIDs.runAndInsert, {
-    label: trans.__('Run Selected Cells and Insert Below'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Run Selected Cell and Insert Below',
+        'Run Selected Cells and Insert Below',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndInsert(content, context.sessionContext);
+        return NotebookActions.runAndInsert(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -1961,7 +2218,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAll(content, context.sessionContext);
+        return NotebookActions.runAll(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -1974,7 +2236,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllAbove(content, context.sessionContext);
+        return NotebookActions.runAllAbove(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled: () => {
@@ -1994,7 +2261,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllBelow(content, context.sessionContext);
+        return NotebookActions.runAllBelow(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled: () => {
@@ -2012,11 +2284,8 @@ function addCommands(
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        const { context, content } = current;
-        return NotebookActions.renderAllMarkdown(
-          content,
-          context.sessionContext
-        );
+        const { content } = current;
+        return NotebookActions.renderAllMarkdown(content);
       }
     },
     isEnabled
@@ -2028,7 +2297,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs!.restart(current.sessionContext, translator);
+        return sessionDialogs.restart(current.sessionContext);
       }
     },
     isEnabled
@@ -2205,8 +2474,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.cut, {
-    label: trans.__('Cut Cells'),
-    caption: trans.__('Cut the selected cells'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Cut Cell',
+        'Cut Cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Cut this cell',
+        'Cut these %1 cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2218,8 +2501,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.copy, {
-    label: trans.__('Copy Cells'),
-    caption: trans.__('Copy the selected cells'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Copy Cell',
+        'Copy Cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Copy this cell',
+        'Copy these %1 cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2231,8 +2528,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteBelow, {
-    label: trans.__('Paste Cells Below'),
-    caption: trans.__('Paste cells from the clipboard'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Paste Cell Below',
+        'Paste Cells Below',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Paste this cell from the clipboard',
+        'Paste these %1 cells from the clipboard',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2244,7 +2555,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAbove, {
-    label: trans.__('Paste Cells Above'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Paste Cell Above',
+        'Paste Cells Above',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Paste this cell from the clipboard',
+        'Paste these %1 cells from the clipboard',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2255,10 +2581,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.duplicateBelow, {
-    label: trans.__('Duplicate Cells Below'),
-    caption: trans.__(
-      'Copy the selected cells and paste them below the selection'
-    ),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Duplicate Cell Below',
+        'Duplicate Cells Below',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Create a duplicate of this cell below',
+        'Create duplicates of %1 cells below',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2270,7 +2608,14 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.pasteAndReplace, {
-    label: trans.__('Paste Cells and Replace'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Paste Cell and Replace',
+        'Paste Cells and Replace',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2281,7 +2626,23 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.deleteCell, {
-    label: trans.__('Delete Cells'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Delete Cell',
+        'Delete Cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Delete this cell',
+        'Delete these %1 cells',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2337,6 +2698,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.insertAbove, {
     label: trans.__('Insert Cell Above'),
+    caption: trans.__('Insert a cell above'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2497,7 +2859,22 @@ function addCommands(
     isEnabled
   });
   commands.addCommand(CommandIDs.moveUp, {
-    label: trans.__('Move Cells Up'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Move Cell Up',
+        'Move Cells Up',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Move this cell up',
+        'Move these %1 cells up',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2509,11 +2886,32 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+      return current.content.activeCellIndex >= 1;
+    },
     icon: args => (args.toolbar ? moveUpIcon : undefined)
   });
   commands.addCommand(CommandIDs.moveDown, {
-    label: trans.__('Move Cells Down'),
+    label: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Move Cell Down',
+        'Move Cells Down',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
+    caption: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      return trans._n(
+        'Move this cell down',
+        'Move these %1 cells down',
+        current?.content.selectedCells.length ?? 1
+      );
+    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -2525,7 +2923,15 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current || !current.content.model) {
+        return false;
+      }
+
+      const length = current.content.model.cells.length;
+      return current.content.activeCellIndex < length - 1;
+    },
     icon: args => (args.toolbar ? moveDownIcon : undefined)
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
@@ -2602,7 +3008,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return current.content.activeCell?.editor?.redo();
+        const cell = current.content.activeCell;
+        if (cell) {
+          cell.inputHidden = false;
+          return cell.editor?.redo();
+        }
       }
     }
   });
@@ -2612,7 +3022,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return current.content.activeCell?.editor?.undo();
+        const cell = current.content.activeCell;
+        if (cell) {
+          cell.inputHidden = false;
+          return cell.editor?.undo();
+        }
       }
     }
   });
@@ -2622,10 +3036,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs!.selectKernel(
-          current.context.sessionContext,
-          translator
-        );
+        return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
     isEnabled
@@ -2942,7 +3353,12 @@ function addCommands(
       }
 
       current.content.extendContiguousSelectionTo(lastIndex);
-      void NotebookActions.run(current.content, current.sessionContext);
+      void NotebookActions.run(
+        current.content,
+        current.sessionContext,
+        sessionDialogs,
+        translator
+      );
     }
   });
 }
@@ -3053,14 +3469,7 @@ function populatePalette(
 /**
  * Populates the application menus for the notebook.
  */
-function populateMenus(
-  mainMenu: IMainMenu,
-  tracker: INotebookTracker,
-  sessionDialogs: ISessionContextDialogs | null,
-  isEnabled: () => boolean
-): void {
-  sessionDialogs = sessionDialogs || sessionContextDialogs;
-
+function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   // Add undo/redo hooks to the edit menu.
   mainMenu.editMenu.undoers.redo.add({
     id: CommandIDs.redo,
@@ -3265,7 +3674,7 @@ namespace Private {
   export function raiseSilentNotification(
     message: string,
     notebookNode: HTMLElement
-  ) {
+  ): void {
     const hiddenAlertContainerId = `sr-message-container-${notebookNode.id}`;
 
     const hiddenAlertContainer =

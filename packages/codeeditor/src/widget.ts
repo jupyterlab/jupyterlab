@@ -37,11 +37,11 @@ export class CodeEditorWrapper extends Widget {
    */
   constructor(options: CodeEditorWrapper.IOptions) {
     super();
-    const editor = (this.editor = options.factory({
+    const { factory, model, editorOptions } = options;
+    const editor = (this.editor = factory({
       host: this.node,
-      model: options.model,
-      uuid: options.uuid,
-      config: options.config
+      model,
+      ...editorOptions
     }));
     editor.model.selections.changed.connect(this._onSelectionsChanged, this);
   }
@@ -126,15 +126,6 @@ export class CodeEditorWrapper extends Widget {
     node.removeEventListener('lm-dragleave', this);
     node.removeEventListener('lm-dragover', this);
     node.removeEventListener('lm-drop', this);
-  }
-
-  /**
-   * A message handler invoked on a `'resize'` message.
-   */
-  protected onResize(msg: Widget.ResizeMessage): void {
-    if (this.isVisible) {
-      this.editor.resizeToFit();
-    }
   }
 
   /**
@@ -263,25 +254,20 @@ export namespace CodeEditorWrapper {
      * A code editor factory.
      *
      * #### Notes
-     * The widget needs a factory and a model instead of a `CodeEditor.IEditor`
-     * object because it needs to provide its own node as the host.
+     * The widget needs a factory and a the editor options
+     * because it needs to provide its own node as the host.
      */
     factory: CodeEditor.Factory;
 
     /**
-     * The model used to initialize the code editor.
+     * The content model for the wrapper.
      */
     model: CodeEditor.IModel;
 
     /**
-     * The desired uuid for the editor.
+     * Code editor options
      */
-    uuid?: string;
-
-    /**
-     * The configuration options for the editor.
-     */
-    config?: Partial<CodeEditor.IConfig>;
+    editorOptions?: Omit<CodeEditor.IOptions, 'host' | 'model'>;
   }
 }
 

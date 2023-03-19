@@ -13,12 +13,25 @@ import '@jupyterlab/theme-light-extension/style/theme.css';
 import '@jupyterlab/completer/style/index.css';
 import '../index.css';
 
-import { Toolbar as AppToolbar, SessionContext } from '@jupyterlab/apputils';
-import { Toolbar } from '@jupyterlab/ui-components';
+import {
+  Toolbar as AppToolbar,
+  SessionContext,
+  SessionContextDialogs
+} from '@jupyterlab/apputils';
+import {
+  refreshIcon,
+  stopIcon,
+  Toolbar,
+  ToolbarButton
+} from '@jupyterlab/ui-components';
 
-import { CodeCell, CodeCellModel } from '@jupyterlab/cells';
+import { Cell, CodeCell, CodeCellModel } from '@jupyterlab/cells';
 
-import { CodeMirrorMimeTypeService } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 
 import {
   Completer,
@@ -52,7 +65,16 @@ function main(): void {
     specsManager,
     name: 'Example'
   });
-  const mimeService = new CodeMirrorMimeTypeService();
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(language =>
+      ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
+    )
+    .forEach(language => {
+      languages.addLanguage(language);
+    });
+  const factoryService = new CodeMirrorEditorFactory({ languages });
+  const mimeService = new CodeMirrorMimeTypeService(languages);
 
   // Initialize the command registry with the bindings.
   const commands = new CommandRegistry();
@@ -71,6 +93,9 @@ function main(): void {
   const rendermime = new RenderMimeRegistry({ initialFactories });
 
   const cellWidget = new CodeCell({
+    contentFactory: new Cell.ContentFactory({
+      editorFactory: factoryService.newInlineEditor.bind(factoryService)
+    }),
     rendermime,
     model: new CodeCellModel()
   }).initializeState();
@@ -122,10 +147,29 @@ function main(): void {
   toolbar.addItem('spacer', Toolbar.createSpacerItem());
   toolbar.addItem(
     'interrupt',
-    AppToolbar.createInterruptButton(sessionContext)
+    new ToolbarButton({
+      icon: stopIcon,
+      onClick: () => {
+        void sessionContext.session?.kernel?.interrupt();
+      },
+      tooltip: 'Interrupt the kernel'
+    })
   );
-  toolbar.addItem('restart', AppToolbar.createRestartButton(sessionContext));
-  toolbar.addItem('name', AppToolbar.createKernelNameItem(sessionContext));
+  const dialogs = new SessionContextDialogs();
+  toolbar.addItem(
+    'restart',
+    new ToolbarButton({
+      icon: refreshIcon,
+      onClick: () => {
+        void dialogs.restart(sessionContext);
+      },
+      tooltip: 'Restart the kernel'
+    })
+  );
+  toolbar.addItem(
+    'name',
+    AppToolbar.createKernelNameItem(sessionContext, dialogs)
+  );
   toolbar.addItem('status', AppToolbar.createKernelStatusItem(sessionContext));
 
   // Lay out the widgets.
