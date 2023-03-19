@@ -712,6 +712,11 @@ export namespace Cell {
     maxNumberOutputs?: number;
 
     /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope?: 'global' | 'session';
+
+    /**
      * Whether this cell is a placeholder for future rendering.
      */
     placeholder?: boolean;
@@ -982,7 +987,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       maxNumberOutputs: this.maxNumberOutputs,
       translator: this.translator,
       promptOverlay: true,
-      splitStdinHistoryBySession: this.editorConfig.splitStdinHistoryBySession
+      inputHistoryScope: options.inputHistoryScope
     }));
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {

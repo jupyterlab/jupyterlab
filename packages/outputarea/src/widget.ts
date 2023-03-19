@@ -105,8 +105,7 @@ export class OutputArea extends Widget {
     this.rendermime = options.rendermime;
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
-    this._splitStdinHistoryBySession =
-      options.splitStdinHistoryBySession ?? false;
+    this._inputHistoryScope = options.inputHistoryScope ?? 'global';
 
     const model = (this.model = options.model);
     for (
@@ -442,7 +441,7 @@ export class OutputArea extends Widget {
       password,
       future,
       translator: this._translator,
-      splitHistoryBySession: this._splitStdinHistoryBySession
+      inputHistoryScope: this._inputHistoryScope
     });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
@@ -730,7 +729,7 @@ export class OutputArea extends Widget {
     namespace: UUID.uuid4()
   });
   private _translator: ITranslator;
-  private _splitStdinHistoryBySession: boolean = false;
+  private _inputHistoryScope: 'global' | 'session' = 'global';
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -795,9 +794,9 @@ export namespace OutputArea {
     readonly translator?: ITranslator;
 
     /**
-     * Whether to split stdin history by kernel session
+     * Whether to split stdin line history by kernel session or keep globally accessible.
      */
-    splitStdinHistoryBySession?: boolean;
+    inputHistoryScope?: 'global' | 'session';
   }
 
   /**
@@ -1032,9 +1031,10 @@ export class Stdin extends Widget implements IStdin {
     this.addClass(STDIN_CLASS);
     this._future = options.future;
     this._historyIndex = 0;
-    this._historyKey = options.splitHistoryBySession
-      ? options.parent_header.session
-      : '';
+    this._historyKey =
+      options.inputHistoryScope === 'session'
+        ? options.parent_header.session
+        : '';
     this._historyPat = '';
     this._parentHeader = options.parent_header;
     this._password = options.password;
@@ -1225,9 +1225,9 @@ export namespace Stdin {
     readonly translator?: ITranslator;
 
     /**
-     * Split stdin line history by kernel session
+     * Whether to split stdin line history by kernel session or keep globally accessible.
      */
-    splitHistoryBySession?: boolean;
+    inputHistoryScope?: 'global' | 'session';
   }
 }
 

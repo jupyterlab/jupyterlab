@@ -734,12 +734,6 @@
           "type": "boolean",
           "default": false,
           "title": "Show Trailing Space"
-        },
-        "splitStdinHistoryBySession": {
-          "type": "boolean",
-          "default": false,
-          "title": "Split Stdin History by Kernel",
-          "description": "When enabled, line history for stdin (eg the ipdb prompt) is kept separately for different kernel sessions."
         }
       },
       "additionalProperties": false,
@@ -784,8 +778,7 @@
         "rulers": [],
         "codeFolding": false,
         "lineWiseCopyCut": true,
-        "showTrailingSpace": false,
-        "splitStdinHistoryBySession": false
+        "showTrailingSpace": false
       }
     },
     "defaultCell": {
@@ -794,6 +787,13 @@
       "type": "string",
       "enum": ["code", "markdown", "raw"],
       "default": "code"
+    },
+    "inputHistoryScope": {
+      "type": "string",
+      "default": "global",
+      "enum": ["global", "session"],
+      "title": "Input History Scope",
+      "description": "Whether the line history for standard input (e.g. the ipdb prompt) should kept separately for different kernel sessions (`session`) or combined (`global`)."
     },
     "kernelShutdown": {
       "title": "Shut down kernel",
@@ -821,8 +821,7 @@
         "rulers": [],
         "codeFolding": false,
         "lineWiseCopyCut": true,
-        "showTrailingSpace": false,
-        "splitStdinHistoryBySession": false
+        "showTrailingSpace": false
       }
     },
     "rawCellConfig": {
@@ -845,8 +844,7 @@
         "rulers": [],
         "codeFolding": false,
         "lineWiseCopyCut": true,
-        "showTrailingSpace": false,
-        "splitStdinHistoryBySession": false
+        "showTrailingSpace": false
       }
     },
     "scrollPastEnd": {
