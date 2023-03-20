@@ -37,3 +37,5 @@ rules:
     - ignore: "compounded"
   # matching complex selectors is expensive
   selector-max-class: 4
+  # TODO: decrease max-compound to 3
+  selector-max-compound-selectors: 4
