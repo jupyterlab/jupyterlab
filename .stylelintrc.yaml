@@ -35,3 +35,5 @@ rules:
   selector-max-type:
     - 1
     - ignore: "compounded"
+  # matching complex selectors is expensive
+  selector-max-class: 4
