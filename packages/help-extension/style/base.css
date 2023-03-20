@@ -40,13 +40,6 @@
   line-height: 1.12;
 }
 
-.jp-Dialog
-  .jp-Dialog-content
-  .jp-Dialog-footer
-  .jp-Dialog-button.jp-About-button {
-  margin-right: 0;
-}
-
 .jp-About-version {
   display: block;
   padding-top: 8px;
