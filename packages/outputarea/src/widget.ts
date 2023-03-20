@@ -950,10 +950,14 @@ export interface IStdin extends Widget {
  * The default stdin widget.
  */
 export class Stdin extends Widget implements IStdin {
-  private static _history: { [key: string]: string[] } = {};
+  private static _history: Map<string, string[]> = new Map();
 
   private static _historyIx(key: string, ix: number): number | undefined {
-    const len = Stdin._history[key].length;
+    const history = Stdin._history.get(key);
+    if (!history) {
+      return undefined;
+    }
+    const len = history.length;
     // wrap nonpositive ix to nonnegative ix
     if (ix <= 0) {
       return len + ix;
@@ -961,20 +965,25 @@ export class Stdin extends Widget implements IStdin {
   }
 
   private static _historyAt(key: string, ix: number): string | undefined {
-    const len = Stdin._history[key].length;
+    const history = Stdin._history.get(key);
+    if (!history) {
+      return undefined;
+    }
+    const len = history.length;
     const ixpos = Stdin._historyIx(key, ix);
 
     if (ixpos !== undefined && ixpos < len) {
-      return Stdin._history[key][ixpos];
+      return history[ixpos];
     }
     // return undefined if ix is out of bounds
   }
 
   private static _historyPush(key: string, line: string): void {
-    Stdin._history[key].push(line);
-    if (Stdin._history[key].length > 1000) {
+    const history = Stdin._history.get(key)!;
+    history.push(line);
+    if (history.length > 1000) {
       // truncate line history if it's too long
-      Stdin._history[key].shift();
+      history.shift();
     }
   }
 
@@ -984,7 +993,8 @@ export class Stdin extends Widget implements IStdin {
     ix: number,
     reverse = true
   ): number | undefined {
-    const len = Stdin._history[key].length;
+    const history = Stdin._history.get(key)!;
+    const len = history.length;
     const ixpos = Stdin._historyIx(key, ix);
     const substrFound = (x: string) => x.search(pat) !== -1;
 
@@ -998,9 +1008,9 @@ export class Stdin extends Widget implements IStdin {
         return;
       }
 
-      const ixFound = (
-        Stdin._history[key].slice(0, ixpos) as any
-      ).findLastIndex(substrFound);
+      const ixFound = (history.slice(0, ixpos) as any).findLastIndex(
+        substrFound
+      );
       if (ixFound !== -1) {
         // wrap ix to negative
         return ixFound - len;
@@ -1011,9 +1021,7 @@ export class Stdin extends Widget implements IStdin {
         return;
       }
 
-      const ixFound = Stdin._history[key]
-        .slice(ixpos + 1)
-        .findIndex(substrFound);
+      const ixFound = history.slice(ixpos + 1).findIndex(substrFound);
       if (ixFound !== -1) {
         // wrap ix to negative and adjust for slice
         return ixFound - len + ixpos + 1;
@@ -1048,8 +1056,8 @@ export class Stdin extends Widget implements IStdin {
     );
 
     // initialize line history
-    if (Stdin._history[this._historyKey] === undefined) {
-      Stdin._history[this._historyKey] = [];
+    if (!Stdin._history.has(this._historyKey)) {
+      Stdin._history.set(this._historyKey, []);
     }
   }
 
