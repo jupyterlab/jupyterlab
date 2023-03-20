@@ -258,35 +258,6 @@
 }
 
 /**
- * TODO: come up with non css-hack solution for showing the busy icon on top
- *  of the close icon
- * CSS for complex behavior of close icon of tabs in the sidebar tab manager
- */
-#tab-manager
-  .lm-TabBar-tab.jp-mod-dirty
-  > .lm-TabBar-tabCloseIcon
-  > :not(:hover)
-  > .jp-icon3[fill] {
-  fill: none;
-}
-
-#tab-manager
-  .lm-TabBar-tab.jp-mod-dirty
-  > .lm-TabBar-tabCloseIcon
-  > :not(:hover)
-  > .jp-icon-busy[fill] {
-  fill: var(--jp-inverse-layout-color3);
-}
-
-#tab-manager
-  .lm-TabBar-tab.jp-mod-dirty.jp-mod-active
-  > .lm-TabBar-tabCloseIcon
-  > :not(:hover)
-  > .jp-icon-busy[fill] {
-  fill: #fff;
-}
-
-/**
 * TODO: come up with non css-hack solution for showing the busy icon on top
 *  of the close icon
 * CSS for complex behavior of close icon of tabs in the main area tabbar
