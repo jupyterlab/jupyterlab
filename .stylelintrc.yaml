@@ -39,3 +39,5 @@ rules:
   selector-max-class: 4
   # TODO: decrease max-compound to 3
   selector-max-compound-selectors: 4
+  # TODO: decrease to 0
+  selector-max-universal: 1
