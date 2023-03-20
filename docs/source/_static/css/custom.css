@@ -3,6 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+/* stylelint-disable selector-max-type */
+
 /* Navbar at the top */
 .jupyter-nav-logo {
   padding: 0;

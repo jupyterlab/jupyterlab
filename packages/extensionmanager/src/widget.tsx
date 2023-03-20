@@ -257,7 +257,7 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
             previousLabel={'<'}
             nextLabel={'>'}
             breakLabel="..."
-            breakClassName={'break-me'}
+            breakClassName={'break'}
             initialPage={(props.initialPage ?? 1) - 1}
             pageCount={props.numPages}
             marginPagesDisplayed={2}
@@ -265,7 +265,6 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
             onPageChange={(data: { selected: number }) =>
               props.onPage(data.selected + 1)
             }
-            containerClassName={'pagination'}
             activeClassName={'active'}
           />
         </div>

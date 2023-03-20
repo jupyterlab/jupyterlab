@@ -23,12 +23,12 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-DebuggerCallstack-body ul li {
+.jp-DebuggerCallstack-body li {
   padding: 5px;
   padding-left: 8px;
 }
 
-.jp-DebuggerCallstack-body ul li.selected {
+.jp-DebuggerCallstack-body li.selected {
   color: white;
   background: var(--jp-brand-color1);
 }
