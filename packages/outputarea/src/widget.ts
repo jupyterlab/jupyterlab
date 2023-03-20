@@ -1159,7 +1159,7 @@ export class Stdin extends Widget implements IStdin {
 
   private _setInputValue(value: string) {
     this._input.value = value;
-    // Set cursor at the end; this is usyally not necessary when input is
+    // Set cursor at the end; this is usually not necessary when input is
     // focused but having the explicit placement ensures consistency.
     this._input.setSelectionRange(value.length, value.length);
   }
