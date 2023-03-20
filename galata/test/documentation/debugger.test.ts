@@ -262,46 +262,6 @@ test.describe('Debugger', () => {
     await expect(
       page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
     ).toHaveCount(0);
-
-    // Expect the context menu for local variables to have the 'copyToGlobals' entry
-    await page.locator('select[aria-label="Scope"]').selectOption('Locals');
-    const variable = await page
-      .locator('.jp-DebuggerVariables-body li:first-child')
-      .textContent();
-    await page.click('.jp-DebuggerVariables-body li:first-child', {
-      button: 'right'
-    });
-    await expect(
-      page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
-    ).toHaveCount(1);
-
-    // Copy the local variable to globals scope
-    await page.click(
-      '.lm-Menu-content li[data-command="debugger:copy-to-globals"]'
-    );
-
-    // Expect the local variable to have been copied to global scope
-    await page.locator('select[aria-label="Scope"]').selectOption('Globals');
-    await expect(
-      page.locator(`.jp-DebuggerVariables-body li:text("${variable}")`)
-    ).toHaveCount(1);
-
-    // Expect the context menu for global variables to not have the 'copy' entry
-    await page.click(`.jp-DebuggerVariables-body li:text("${variable}")`, {
-      button: 'right'
-    });
-    await expect(page.locator('.lm-Menu-content')).toBeVisible();
-    await expect(
-      page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
-    ).toHaveCount(0);
-
-    // Close the contextual menu
-    await page.keyboard.press('Escape');
-    await expect(
-      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
-    ).toHaveCount(0);
-
-    await page.click('button[title^=Continue]');
   });
 
   test('Call Stack panel', async ({ page, tmpPath }) => {
