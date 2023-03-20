@@ -257,31 +257,6 @@
   fill: var(--jp-brand-color1);
 }
 
-/* CSS for icons in selected tabs in the sidebar tab manager */
-#tab-manager .lm-TabBar-tab.jp-mod-active .jp-icon-selectable[fill] {
-  fill: #fff;
-}
-
-#tab-manager .lm-TabBar-tab.jp-mod-active .jp-icon-selectable-inverse[fill] {
-  fill: var(--jp-brand-color1);
-}
-
-#tab-manager
-  .lm-TabBar-tab.jp-mod-active
-  .jp-icon-hover
-  :hover
-  .jp-icon-selectable[fill] {
-  fill: var(--jp-brand-color1);
-}
-
-#tab-manager
-  .lm-TabBar-tab.jp-mod-active
-  .jp-icon-hover
-  :hover
-  .jp-icon-selectable-inverse[fill] {
-  fill: #fff;
-}
-
 /**
  * TODO: come up with non css-hack solution for showing the busy icon on top
  *  of the close icon
