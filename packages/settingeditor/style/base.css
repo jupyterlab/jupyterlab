@@ -161,19 +161,6 @@
   align-items: center;
 }
 
-.jp-ToolbarButtonComponent-label
-  .jp-SettingsRawEditor.jp-mod-error
-  .jp-Toolbar-item.jp-BugIcon::after {
-  color: red;
-  content: '\25CF'; /* Unicode circle character (error dot) */
-  font-size: 7px;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 4px;
-  left: 6px;
-}
-
 .jp-SettingsRawEditor .jp-Inspector {
   border-top: 2px solid var(--jp-layout-color2);
   min-height: var(--jp-private-settingeditor-debug-height);
