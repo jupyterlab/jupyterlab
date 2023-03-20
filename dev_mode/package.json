@@ -293,6 +293,7 @@
       "@jupyterlab/services",
       "@jupyterlab/settingeditor",
       "@jupyterlab/settingregistry",
+      "@jupyterlab/shared-models",
       "@jupyterlab/statedb",
       "@jupyterlab/statusbar",
       "@jupyterlab/terminal",

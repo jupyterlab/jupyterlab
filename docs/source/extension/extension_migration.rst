@@ -56,11 +56,12 @@ Instead of using the content API, now the provider opens a WebSocket connection 
 `jupyter server extension <https://github.com/jupyter-server/jupyter_server_ydoc>`__.
 
 In addition, the shared models' package was moved to an external package called `@jupyter/ydoc
-<https://github.com/jupyter-server/jupyter_ydoc>`__. All the extensions that depend on
-``@jupyterlab/shared-models`` will need to update to depend in ``@jupyter/ydoc@~0.2.2``; the API should
-be the same.
+<https://github.com/jupyter-server/jupyter_ydoc>`__. ``@jupyterlab/shared-models`` has been kept
+for backward compatibility (except in 3.6.0 and 3.6.1). It is now a proxy to ``@jupyter/ydoc@~0.2.2``;
+the API is almost the same; see the required modification for the `example <https://github.com/jupyterlab/extension-examples/pull/224>`_.
 
 **API Changes:**
+
 To be able to fix RTC and make it stable. It was necessary to change the API and make a few breaking changes.
 These changes should not affect the vast majority of extensions. They will only affect a couple
 of extensions focused on RTC.
@@ -84,6 +85,9 @@ The involved packages are:
      It does not extend ``WebSocketProvider`` from ``y-websocket`` anymore.
 
    * ``WebSocketProvider.IOptions`` has a new optional attribute, ``user``.
+
+- ``@jupyterlab/shared-models``: It is now a proxy to ``@jupyter/ydoc@~0.2.2``.
+   - A document model extending ``YDocument`` must define a change interface extending ``DocumentChange``.
 
 - ``@jupyterlab/services``:
    * The interface ``IManager`` has a new optional property, ``user`` that implement `User.IManager <../api/interfaces/services.User.IManager.html>`_.
