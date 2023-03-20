@@ -240,28 +240,6 @@ test.describe('Debugger', () => {
         clip: { y: 58, x: 998, width: 280, height: 138 }
       })
     ).toMatchSnapshot('debugger_variables.png');
-
-    // Copy value to clipboard
-    await page
-      .locator('.jp-DebuggerVariables-body :text("b")')
-      .click({ button: 'right' });
-    await page.locator('.lm-Menu-itemLabel:text("Copy to Clipboard")').click();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('2');
-
-    // Copy to clipboard disabled for variables with empty value
-    await page.locator('select[aria-label="Scope"]').selectOption('Globals');
-    await page
-      .locator('.jp-DebuggerVariables-body :text("special variables")')
-      .click({ button: 'right' });
-    await expect(
-      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
-    ).toHaveAttribute('aria-disabled', 'true');
-
-    // Close the contextual menu
-    await page.keyboard.press('Escape');
-    await expect(
-      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
-    ).toHaveCount(0);
   });
 
   test('Call Stack panel', async ({ page, tmpPath }) => {

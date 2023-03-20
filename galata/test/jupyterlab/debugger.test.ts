@@ -172,6 +172,7 @@ test.describe('Debugger Variables', () => {
   test.use({ autoGoto: false });
 
   const copyToGlobalsRequest = new PromiseDelegate<void>();
+
   test.beforeEach(async ({ page, tmpPath }) => {
     // Listener to the websocket, to catch the 'copyToGlobals' request.
     page.on('websocket', ws => {
@@ -196,7 +197,10 @@ test.describe('Debugger Variables', () => {
     await setBreakpoint(page);
   });
 
-  test('Copy to globals should work only local variables', async ({ page }) => {
+  test('Copy to globals should work only for local variables', async ({
+    page
+  }) => {
+    // Kernel supports copyToGlobals.
     await page.evaluate(async () => {
       const debuggerService = await window.galata.getPlugin(
         '@jupyterlab/debugger-extension:service'
@@ -243,6 +247,7 @@ test.describe('Debugger Variables', () => {
   });
 
   test('Copy to globals not available from kernel', async ({ page }) => {
+    // Kernel doesn't support copyToGlobals.
     await page.evaluate(async () => {
       const debuggerService = await window.galata.getPlugin(
         '@jupyterlab/debugger-extension:service'
@@ -265,6 +270,43 @@ test.describe('Debugger Variables', () => {
     await expect(
       page.locator('.lm-Menu-content li div:text("Copy Variable to Globals")')
     ).not.toBeVisible();
+
+    // Close the contextual menu
+    await page.keyboard.press('Escape');
+    await expect(
+      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
+    ).toHaveCount(0);
+  });
+
+  test('Copy to clipboard', async ({ page }) => {
+    // Don't wait as it will be blocked.
+    void page.notebook.runCell(1);
+
+    // Wait to be stopped on the breakpoint and the local variables to be displayed.
+    await page.debugger.waitForCallStack();
+
+    // Copy value to clipboard
+    await page.locator('select[aria-label="Scope"]').selectOption('Locals');
+    await page.click('.jp-DebuggerVariables-body li span:text("local_var")', {
+      button: 'right'
+    });
+    await page.locator('.lm-Menu-itemLabel:text("Copy to Clipboard")').click();
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('3');
+
+    // Copy to clipboard disabled for variables with empty value
+    await page.locator('select[aria-label="Scope"]').selectOption('Globals');
+    await page
+      .locator('.jp-DebuggerVariables-body :text("special variables")')
+      .click({ button: 'right' });
+    await expect(
+      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
+    ).toHaveAttribute('aria-disabled', 'true');
+
+    // Close the contextual menu
+    await page.keyboard.press('Escape');
+    await expect(
+      page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
+    ).toHaveCount(0);
   });
 });
 
