@@ -660,6 +660,14 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     }
   }
 
+  protected onContentChanged() {
+    if (this.inputHidden && this._inputPlaceholder) {
+      this._inputPlaceholder.text = this.model.sharedModel
+        .getSource()
+        .split('\n')?.[0];
+    }
+  }
+
   /**
    * Handle changes in the metadata.
    */
@@ -1064,12 +1072,6 @@ export class CodeCell extends Cell<ICodeCellModel> {
       text: this.getOutputPlaceholderText()
     });
 
-    this.model.outputs.changed.connect((sender, args) => {
-      if (this._outputPlaceholder && this.outputHidden) {
-        this._outputPlaceholder.text = this.getOutputPlaceholderText();
-      }
-    });
-
     const layoutWrapper = outputWrapper.layout as PanelLayout;
     if (this.outputHidden) {
       layoutWrapper.removeWidget(this._output);
@@ -1399,6 +1401,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
    */
   protected onOutputChanged(): void {
     this._headingsCache = null;
+    if (this._outputPlaceholder && this.outputHidden) {
+      this._outputPlaceholder.text = this.getOutputPlaceholderText();
+    }
   }
 
   /**
@@ -2124,6 +2129,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Callback on content changed
    */
   protected onContentChanged(): void {
+    super.onContentChanged();
     this._headingsCache = null;
   }
 
