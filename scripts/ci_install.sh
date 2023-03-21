@@ -31,7 +31,6 @@ pip install -q --upgrade pip --user
 pip --version
 # Show a verbose install if the install fails, for debugging
 pip install -e ".[dev,test]" || pip install -v -e ".[dev,test]"
-yarn --version
 node -p process.versions
 jlpm config
 
