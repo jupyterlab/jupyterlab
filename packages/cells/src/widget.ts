@@ -1098,13 +1098,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
         return outputData['text/html'] as string;
       } else if (outputData['image/svg+xml'] !== undefined) {
         return (outputData['image/svg+xml'] as string[])?.join('');
-      } else if (outputData['text/markdown'] !== undefined) {
-        return (outputData['text/markdown'] as string[])?.[0]
-          ?.split('\n')
-          ?.filter(v => v !== '')?.[0];
       } else if (outputData['application/pdf'] !== undefined) {
         return outputData['application/pdf'] as string;
       }
+    } else if (outputData['text/markdown'] !== undefined) {
+      return (outputData['text/markdown'] as string)
+        ?.split('\n')
+        ?.filter(v => v !== '')?.[0];
     } else if (outputData['text/plain'] !== undefined) {
       return (outputData['text/plain'] as string).split('\n')[0];
     } else if (outputData.output_type === 'stream') {
@@ -1117,6 +1117,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
       }
     } else if (outputData['application/vnd.jupyter.stdout'] !== undefined) {
       return (outputData['application/vnd.jupyter.stdout'] as string)?.split(
+        '\n'
+      )?.[0];
+    } else if (outputData['application/vnd.jupyter.stderr'] !== undefined) {
+      return (outputData['application/vnd.jupyter.stderr'] as string)?.split(
         '\n'
       )?.[0];
     }
