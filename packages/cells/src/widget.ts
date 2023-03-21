@@ -32,8 +32,7 @@ import {
   imageRendererFactory,
   IRenderMime,
   IRenderMimeRegistry,
-  MimeModel,
-  textRendererFactory
+  MimeModel
 } from '@jupyterlab/rendermime';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
@@ -1089,14 +1088,39 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this.node.setAttribute('aria-label', ariaLabel);
   }
 
-  getOutputPlaceholderText(): string {
+  getOutputPlaceholderText(): string | undefined {
     const outputData = this.model.outputs.get(0)?.data;
-    for (const type of textRendererFactory.mimeTypes) {
-      if (outputData?.[type] !== undefined) {
-        return (outputData[type] as string).split('\n')[0] ?? '';
-      }
+    if (!outputData) {
+      return undefined;
     }
-    return '';
+    if (outputData.output_type === 'display_data') {
+      if (outputData['text/html'] !== undefined) {
+        return outputData['text/html'] as string;
+      } else if (outputData['image/svg+xml'] !== undefined) {
+        return (outputData['image/svg+xml'] as string[])?.join('');
+      } else if (outputData['text/markdown'] !== undefined) {
+        return (outputData['text/markdown'] as string[])?.[0]
+          ?.split('\n')
+          ?.filter(v => v !== '')?.[0];
+      } else if (outputData['application/pdf'] !== undefined) {
+        return outputData['application/pdf'] as string;
+      }
+    } else if (outputData['text/plain'] !== undefined) {
+      return (outputData['text/plain'] as string).split('\n')[0];
+    } else if (outputData.output_type === 'stream') {
+      if (outputData.text !== undefined) {
+        return (outputData.text as string[])?.[0];
+      } else if (outputData['application/vnd.jupyter.stderr'] !== undefined) {
+        return (outputData['application/vnd.jupyter.stderr'] as string)?.split(
+          '\n'
+        )?.[0];
+      }
+    } else if (outputData['application/vnd.jupyter.stdout'] !== undefined) {
+      return (outputData['application/vnd.jupyter.stdout'] as string)?.split(
+        '\n'
+      )?.[0];
+    }
+    return undefined;
   }
 
   /**
@@ -1195,7 +1219,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
           this._outputWrapper!.hide();
         }
         if (this._outputPlaceholder) {
-          this._outputPlaceholder.text = this.getOutputPlaceholderText();
+          this._outputPlaceholder.text = this.getOutputPlaceholderText() ?? '';
         }
       } else {
         if (this._outputWrapper!.isHidden) {
@@ -1402,7 +1426,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   protected onOutputChanged(): void {
     this._headingsCache = null;
     if (this._outputPlaceholder && this.outputHidden) {
-      this._outputPlaceholder.text = this.getOutputPlaceholderText();
+      this._outputPlaceholder.text = this.getOutputPlaceholderText() ?? '';
     }
   }
 
