@@ -180,7 +180,6 @@ exclude = [
     "*.js.map",
     "/jupyterlab/staging/build",
     "/jupyterlab/staging/.yarn",
-    "/jupyterlab/tests",
     "node_modules"
 ]
 
