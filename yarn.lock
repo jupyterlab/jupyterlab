@@ -3380,6 +3380,7 @@ __metadata:
     "@jupyterlab/apputils": ^4.0.0-beta.1
     "@jupyterlab/builder": ^4.0.0-beta.1
     "@jupyterlab/cells": ^4.0.0-beta.1
+    "@jupyterlab/debugger": ^4.0.0-beta.1
     "@jupyterlab/docmanager": ^4.0.0-beta.1
     "@jupyterlab/nbformat": ^4.0.0-beta.1
     "@jupyterlab/notebook": ^4.0.0-beta.1
@@ -3399,6 +3400,7 @@ __metadata:
     "@jupyterlab/application": ^4.0.0-beta.1
     "@jupyterlab/apputils": ^4.0.0-beta.1
     "@jupyterlab/coreutils": ^6.0.0-beta.1
+    "@jupyterlab/debugger": ^4.0.0-beta.1
     "@jupyterlab/docmanager": ^4.0.0-beta.1
     "@jupyterlab/nbformat": ^4.0.0-beta.1
     "@jupyterlab/notebook": ^4.0.0-beta.1
