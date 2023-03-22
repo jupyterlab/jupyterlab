@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/help-extension",
-  "version": "4.0.0-alpha.21",
+  "version": "4.0.0-alpha.22",
   "description": "JupyterLab - Help Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,23 +38,23 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.21",
-    "@jupyterlab/apputils": "^4.0.0-alpha.21",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.21",
-    "@jupyterlab/mainmenu": "^4.0.0-alpha.21",
-    "@jupyterlab/services": "^7.0.0-alpha.21",
-    "@jupyterlab/translation": "^4.0.0-alpha.21",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.36",
-    "@lumino/coreutils": "^2.0.0-rc.1",
-    "@lumino/signaling": "^2.0.0-rc.1",
-    "@lumino/virtualdom": "^2.0.0-rc.1",
-    "@lumino/widgets": "^2.0.0-rc.1",
+    "@jupyterlab/application": "^4.0.0-alpha.22",
+    "@jupyterlab/apputils": "^4.0.0-alpha.22",
+    "@jupyterlab/coreutils": "^6.0.0-alpha.22",
+    "@jupyterlab/mainmenu": "^4.0.0-alpha.22",
+    "@jupyterlab/services": "^7.0.0-alpha.22",
+    "@jupyterlab/translation": "^4.0.0-alpha.22",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.37",
+    "@lumino/coreutils": "^2.0.0",
+    "@lumino/signaling": "^2.0.0",
+    "@lumino/virtualdom": "^2.0.0",
+    "@lumino/widgets": "^2.0.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.1-rc"
+    "typescript": "~5.0.2"
   },
   "publishConfig": {
     "access": "public"

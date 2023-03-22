@@ -8,7 +8,6 @@ import {
   ICommandPalette,
   ISessionContextDialogs,
   MainAreaWidget,
-  sessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
@@ -19,8 +18,7 @@ import {
 import {
   CodeMirrorEditor,
   IEditorExtensionRegistry,
-  IEditorLanguageRegistry,
-  IEditorThemeRegistry
+  IEditorLanguageRegistry
 } from '@jupyterlab/codemirror';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
@@ -238,10 +236,8 @@ export namespace Commands {
     defaultBrowser: IDefaultFileBrowser,
     extensions: IEditorExtensionRegistry,
     languages: IEditorLanguageRegistry,
-    themes: IEditorThemeRegistry,
     consoleTracker: IConsoleTracker | null,
-    sessionDialogs: ISessionContextDialogs | null,
-    mainMenu: IMainMenu | null
+    sessionDialogs: ISessionContextDialogs
   ): void {
     /**
      * Add a command to change font size for File Editor
@@ -637,9 +633,7 @@ export namespace Commands {
           widget => widget.sessionContext.session?.path === current.context.path
         );
         if (widget) {
-          return (sessionDialogs || sessionContextDialogs).restart(
-            widget.sessionContext
-          );
+          return sessionDialogs.restart(widget.sessionContext);
         }
       },
       label: trans.__('Restart Kernel'),

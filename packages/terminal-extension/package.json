@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/terminal-extension",
-  "version": "4.0.0-alpha.21",
+  "version": "4.0.0-alpha.22",
   "description": "JupyterLab - Terminal Emulator Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,23 +38,23 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.21",
-    "@jupyterlab/apputils": "^4.0.0-alpha.21",
-    "@jupyterlab/launcher": "^4.0.0-alpha.21",
-    "@jupyterlab/mainmenu": "^4.0.0-alpha.21",
-    "@jupyterlab/running": "^4.0.0-alpha.21",
-    "@jupyterlab/services": "^7.0.0-alpha.21",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.21",
-    "@jupyterlab/terminal": "^4.0.0-alpha.21",
-    "@jupyterlab/translation": "^4.0.0-alpha.21",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.36",
-    "@lumino/widgets": "^2.0.0-rc.1"
+    "@jupyterlab/application": "^4.0.0-alpha.22",
+    "@jupyterlab/apputils": "^4.0.0-alpha.22",
+    "@jupyterlab/launcher": "^4.0.0-alpha.22",
+    "@jupyterlab/mainmenu": "^4.0.0-alpha.22",
+    "@jupyterlab/running": "^4.0.0-alpha.22",
+    "@jupyterlab/services": "^7.0.0-alpha.22",
+    "@jupyterlab/settingregistry": "^4.0.0-alpha.22",
+    "@jupyterlab/terminal": "^4.0.0-alpha.22",
+    "@jupyterlab/translation": "^4.0.0-alpha.22",
+    "@jupyterlab/ui-components": "^4.0.0-alpha.37",
+    "@lumino/widgets": "^2.0.0"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.18.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.1-rc"
+    "typescript": "~5.0.2"
   },
   "publishConfig": {
     "access": "public"

@@ -9,13 +9,18 @@ Extension Migration Guide
 JupyterLab 3.x to 4.x
 ---------------------
 
+jlpm
+^^^^
+
+The utility ``jlpm`` is using yarn 3 (it was yarn 1 previously).
+
+API breaking changes
+^^^^^^^^^^^^^^^^^^^^
+
 .. note::
 
    With JupyterLab 4.x, the npm package version policy changed to not bump major version with
    the Python package unless required to ease extension compatibility.
-
-API breaking changes
-^^^^^^^^^^^^^^^^^^^^
 
 Here is a list of JupyterLab npm packages that encountered API changes and therefore have
 bumped their major version (following semver convention). We want to point out particularly
@@ -32,6 +37,7 @@ bumped their major version (following semver convention). We want to point out p
    * Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
    * ``ISanitizer`` and ``ISanitizer.IOptions`` are deprecated in favor of ``IRenderMime.ISanitizer`` and
      ``IRenderMime.ISanitizerOptions`` in ``@jupyterlab/rendermime-interfaces``.
+   * Global ``sessionContextDialogs`` is removed; you should request the token ``ISessionContextDialogs`` (from ``@jupyterlab/apputils``).
 - ``@jupyterlab/attachments`` from 3.x to 4.x
    Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
@@ -196,6 +202,7 @@ bumped their major version (following semver convention). We want to point out p
    * ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
      to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
 - ``@jupyterlab/notebook`` from 3.x to 4.x
+   * ``NotebookWidgetFactory.IOptions`` has no ``sessionDialogs`` option any more.
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
    * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
@@ -361,6 +368,44 @@ Extension Development Changes
 
 JupyterLab 3.5 to 3.6
 ---------------------
+
+AsyncIterable Support
+^^^^^^^^^^^^^^^^^^^^^
+
+For the events service, we are using a JavaScript feature introduced in ES2018. If your code is
+using TypeScript with ES2017 target (as JupyterLab 3.6), you will either need to update your
+target to ES2018 or add ``"ES2018"`` to the `TypeScript lib option <https://www.typescriptlang.org/tsconfig#lib>`_.
+
+.. note::
+
+    JupyterLab 3.6.0 was released with an updated target "ES2018". We strongly advise updating to 3.6.1,
+    which reverts the target back to "ES2017".
+
+
+Jest configuration update
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab 3.6.
+They need to be ignore when transforming the code with Jest. You will need to update the
+``transformIgnorePatterns`` to match:
+
+.. code-block:: javascript
+    :emphasize-lines: 3
+
+    const esModules = [
+      '@jupyterlab/',
+      '@jupyter/ydoc',
+      'lib0',
+      'y\\-protocols',
+      'y\\-websocket',
+      'yjs'
+    ].join('|');
+
+    // ...
+
+    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
+
+For more information, have a look at :ref:`testing_with_jest`.
 
 Real-Time Collaboration
 ^^^^^^^^^^^^^^^^^^^^^^^

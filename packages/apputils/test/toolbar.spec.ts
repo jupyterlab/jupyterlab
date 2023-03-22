@@ -4,6 +4,7 @@
 import {
   createToolbarFactory,
   SessionContext,
+  SessionContextDialogs,
   Toolbar,
   ToolbarRegistry,
   ToolbarWidgetRegistry
@@ -52,7 +53,10 @@ describe('@jupyterlab/apputils', () => {
 
       describe('.createRestartButton()', () => {
         it("should add an inline svg node with the 'refresh' icon", async () => {
-          const button = Toolbar.createRestartButton(sessionContext);
+          const button = Toolbar.createRestartButton(
+            sessionContext,
+            new SessionContextDialogs()
+          );
           Widget.attach(button, document.body);
           await framePromise();
           expect(
@@ -63,7 +67,10 @@ describe('@jupyterlab/apputils', () => {
 
       describe('.createKernelNameItem()', () => {
         it("should display the `'display_name'` of the kernel", async () => {
-          const item = Toolbar.createKernelNameItem(sessionContext);
+          const item = Toolbar.createKernelNameItem(
+            sessionContext,
+            new SessionContextDialogs()
+          );
           await sessionContext.initialize();
           Widget.attach(item, document.body);
           await framePromise();
@@ -177,7 +184,7 @@ describe('@jupyterlab/apputils', () => {
         const widget = registry.createWidget('factory', documentWidget, item);
 
         expect(widget).toBe(dummyWidget);
-        expect(dummy).toBeCalledWith('factory', documentWidget, item);
+        expect(dummy).toHaveBeenCalledWith('factory', documentWidget, item);
       });
 
       it('should call the registered factory', () => {
@@ -198,8 +205,8 @@ describe('@jupyterlab/apputils', () => {
         const widget = registry.createWidget('factory', documentWidget, item);
 
         expect(widget).toBe(dummyWidget);
-        expect(dummy).toBeCalledWith(documentWidget);
-        expect(defaultFactory).toBeCalledTimes(0);
+        expect(dummy).toHaveBeenCalledWith(documentWidget);
+        expect(defaultFactory).toHaveBeenCalledTimes(0);
       });
     });
 

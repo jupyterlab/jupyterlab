@@ -1,7 +1,12 @@
 {
-  "name": "@jupyterlab/mathjax2",
-  "version": "4.0.0-alpha.21",
-  "description": "A MathJax 2 Typesetting provider for JupyterLab",
+  "name": "@jupyterlab/mathjax-extension",
+  "version": "4.0.0-alpha.22",
+  "description": "A JupyterLab extension providing MathJax Typesetting",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "mathjax"
+  ],
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -11,7 +16,10 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
-  "author": "Project Jupyter",
+  "author": {
+    "name": "Project Jupyter",
+    "email": "jupyter@googlegroups.com"
+  },
   "sideEffects": [
     "style/**/*"
   ],
@@ -24,26 +32,32 @@
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "schema/*.json",
     "style/index.js",
     "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "docs": "typedoc src",
+    "eslint": "eslint . --ext .ts,.tsx --fix",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.21",
-    "@lumino/coreutils": "^2.0.0-rc.1"
+    "@jupyterlab/application": "^4.0.0-alpha.22",
+    "@jupyterlab/rendermime": "^4.0.0-alpha.22",
+    "mathjax-full": "^3.2.2"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.1-rc"
+    "typescript": "~5.0.2"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
 }

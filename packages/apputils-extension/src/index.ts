@@ -23,13 +23,13 @@ import {
   MainAreaWidget,
   Printing,
   Sanitizer,
-  sessionContextDialogs,
+  SessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
@@ -555,9 +555,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
   id: '@jupyterlab/apputils-extension:sessionDialogs',
   provides: ISessionContextDialogs,
+  optional: [ITranslator],
   autoStart: true,
-  activate: () => {
-    return sessionContextDialogs;
+  activate: async (app: JupyterFrontEnd, translator: ITranslator | null) => {
+    return new SessionContextDialogs({
+      translator: translator ?? nullTranslator
+    });
   }
 };
 

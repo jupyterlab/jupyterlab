@@ -20,6 +20,7 @@ import {
   InputDialog,
   ISessionContextDialogs,
   ReactWidget,
+  SessionContextDialogs,
   showDialog,
   showErrorMessage,
   UseSignal
@@ -167,12 +168,15 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   activate: (
     app: JupyterFrontEnd,
     widgetOpener: IDocumentWidgetOpener,
-    translator: ITranslator | null,
+    translator_: ITranslator | null,
     status: ILabStatus | null,
-    sessionDialogs: ISessionContextDialogs | null,
+    sessionDialogs_: ISessionContextDialogs | null,
     info: JupyterLab.IInfo | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
+    const translator = translator_ ?? nullTranslator;
+    const sessionDialogs =
+      sessionDialogs_ ?? new SessionContextDialogs({ translator });
     const when = app.restored.then(() => void 0);
 
     const docManager = new DocumentManager({
@@ -181,7 +185,7 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
       opener: widgetOpener,
       when,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
-      sessionDialogs: sessionDialogs || undefined,
+      sessionDialogs,
       translator: translator ?? nullTranslator,
       isConnectedCallback: () => {
         if (info) {
@@ -955,7 +959,28 @@ function addCommands(
             buttons: [Dialog.okButton()]
           });
         }
-        return context.saveAs();
+
+        const onChange = (
+          sender: Contents.IManager,
+          args: Contents.IChangedArgs
+        ) => {
+          if (
+            args.type === 'save' &&
+            args.newValue &&
+            args.newValue.path !== context.path
+          ) {
+            void docManager.closeFile(context.path);
+            void commands.execute(CommandIDs.open, {
+              path: args.newValue.path
+            });
+          }
+        };
+        docManager.services.contents.fileChanged.connect(onChange);
+        context
+          .saveAs()
+          .finally(() =>
+            docManager.services.contents.fileChanged.disconnect(onChange)
+          );
       }
     }
   });

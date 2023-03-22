@@ -20,7 +20,7 @@ import {
 } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { ISessionContext, sessionContextDialogs } from '../sessioncontext';
+import { ISessionContext, SessionContextDialogs } from '../sessioncontext';
 import { translateKernelStatuses } from '../kernelstatuses';
 /**
  * The class name added to toolbar kernel name text.
@@ -68,14 +68,13 @@ export namespace Toolbar {
     dialogs?: ISessionContext.IDialogs,
     translator?: ITranslator
   ): Widget {
-    translator = translator || nullTranslator;
+    translator = translator ?? nullTranslator;
     const trans = translator.load('jupyterlab');
     return new ToolbarButton({
       icon: refreshIcon,
       onClick: () => {
-        void (dialogs ?? sessionContextDialogs).restart(
-          sessionContext,
-          translator
+        void (dialogs ?? new SessionContextDialogs({ translator })).restart(
+          sessionContext
         );
       },
       tooltip: trans.__('Restart the kernel')
@@ -97,7 +96,7 @@ export namespace Toolbar {
     const el = ReactWidget.create(
       <Private.KernelNameComponent
         sessionContext={sessionContext}
-        dialogs={dialogs ?? sessionContextDialogs}
+        dialogs={dialogs ?? new SessionContextDialogs({ translator })}
         translator={translator}
       />
     );
@@ -155,7 +154,7 @@ namespace Private {
     const translator = props.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     const callback = () => {
-      void props.dialogs.selectKernel(props.sessionContext, translator);
+      void props.dialogs.selectKernel(props.sessionContext);
     };
     return (
       <UseSignal

@@ -131,7 +131,7 @@ describe('@jupyterlab/lsp', () => {
       it('should close all foreign documents', () => {
         document.closeAllForeignDocuments = jest.fn();
         document.dispose();
-        expect(document.closeAllForeignDocuments).toBeCalled();
+        expect(document.closeAllForeignDocuments).toHaveBeenCalled();
       });
       it('should clear all the maps', () => {
         document.dispose();
@@ -259,7 +259,7 @@ describe('@jupyterlab/lsp', () => {
           markdownCellExtractor
         );
         document.closeForeign(md);
-        expect(cb).toBeCalled();
+        expect(cb).toHaveBeenCalled();
       });
       it('should close correctly foreign documents', () => {
         const md: VirtualDocument = document['chooseForeignDocument'](
@@ -268,7 +268,7 @@ describe('@jupyterlab/lsp', () => {
         md.closeAllForeignDocuments = jest.fn();
         document.closeForeign(md);
         expect(document.foreignDocuments.has(md.virtualId)).toEqual(false);
-        expect(md.closeAllForeignDocuments).toBeCalled();
+        expect(md.closeAllForeignDocuments).toHaveBeenCalled();
         expect(md.isDisposed).toEqual(true);
       });
     });

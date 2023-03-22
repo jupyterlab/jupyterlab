@@ -16,7 +16,7 @@ import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
 import { ServiceManager } from '@jupyterlab/services';
-import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
 
 import {
   NotebookModelFactory,
@@ -76,10 +76,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   const rendermime = new RenderMimeRegistry({
     initialFactories: initialFactories,
-    latexTypesetter: new MathJaxTypesetter({
-      url: PageConfig.getOption('mathjaxUrl'),
-      config: PageConfig.getOption('mathjaxConfig')
-    })
+    latexTypesetter: new MathJaxTypesetter()
   });
 
   const opener = {
