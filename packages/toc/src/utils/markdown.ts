@@ -65,7 +65,27 @@ export function getHeadings(text: string): IMarkdownHeading[] {
   // Iterate over the lines to get the header level and text for each line:
   const headings = new Array<IMarkdownHeading>();
   let isCodeBlock;
-  for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+  let lineIdx = 0;
+
+  // Don't check for Markdown headings if in a YAML frontmatter block.
+  // We can only start a frontmatter block on the first line of the file.
+  // At other positions in a markdown file, '---' represents a horizontal rule.
+  if (lines[lineIdx] === '---') {
+    // Search for another '---' and treat that as the end of the frontmatter.
+    // If we don't find one, treat the file as containing no frontmatter.
+    for (
+      let frontmatterEndLineIdx = lineIdx + 1;
+      frontmatterEndLineIdx < lines.length;
+      frontmatterEndLineIdx++
+    ) {
+      if (lines[frontmatterEndLineIdx] === '---') {
+        lineIdx = frontmatterEndLineIdx + 1;
+        break;
+      }
+    }
+  }
+
+  for (; lineIdx < lines.length; lineIdx++) {
     const line = lines[lineIdx];
 
     if (line === '') {
@@ -73,7 +93,7 @@ export function getHeadings(text: string): IMarkdownHeading[] {
       continue;
     }
 
-    // Don't check for Markdown headings if in a code block:
+    // Don't check for Markdown headings if in a code block
     if (line.startsWith('```')) {
       isCodeBlock = !isCodeBlock;
     }
