@@ -263,9 +263,7 @@ These lines:
 - [ ] Update the other repos:
   - [ ] https://github.com/jupyterlab/extension-cookiecutter-js
   - [ ] https://github.com/jupyterlab/extension-cookiecutter-ts
-  - [ ] https://github.com/jupyterlab/mimerender-cookiecutter
   - [ ] https://github.com/jupyterlab/mimerender-cookiecutter-ts
-  - [ ] https://github.com/jupyterlab/theme-cookiecutter
   - [ ] https://github.com/jupyterlab/jupyter-renderers
 - [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
 - [ ] Update the extension examples:
