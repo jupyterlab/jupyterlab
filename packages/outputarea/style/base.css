@@ -74,6 +74,11 @@
 .jp-OutputArea-promptOverlay:hover {
   background: var(--jp-layout-color2);
   box-shadow: inset 0 0 1px var(--jp-inverse-layout-color0);
+  cursor: zoom-out;
+}
+
+.jp-mod-outputsScrolled .jp-OutputArea-promptOverlay:hover {
+  cursor: zoom-in;
 }
 
 /**
