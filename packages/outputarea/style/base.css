@@ -66,7 +66,7 @@
 .jp-OutputArea-promptOverlay {
   position: absolute;
   top: 0;
-  width: var(--jp-cell-prompt-width);
+  width: var(--jp-cell-scroll-button-width);
   height: 100%;
   opacity: 0.5;
 }
