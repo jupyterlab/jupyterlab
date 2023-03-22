@@ -18,10 +18,10 @@ import { IEditorLanguageRegistry } from '@jupyterlab/codemirror';
 import { IMarkdownParser } from '@jupyterlab/rendermime';
 
 import type { marked, Renderer } from 'marked';
-import type mermaid from 'mermaid';
+import type MermaidType from 'mermaid';
 
 const MERMAID_CLASS = 'jp-RenderedMermaid';
-const ERROR_CLASS = 'jp-mod-error';
+const WARNING_CLASS = 'jp-mod-warning';
 
 // values for highlight/diagram cache key and size
 const FENCE = '```~~~';
@@ -61,7 +61,7 @@ export default plugin;
 namespace Private {
   let _initializing: PromiseDelegate<typeof marked> | null = null;
   let _marked: typeof marked | null = null;
-  let _mermaid: typeof mermaid | null = null;
+  let _mermaid: typeof MermaidType | null = null;
   let _themes: IThemeManager | null = null;
   let _languages: IEditorLanguageRegistry | null = null;
   let _markedOptions: marked.MarkedOptions = {};
@@ -204,7 +204,6 @@ namespace Private {
       return;
     }
 
-    let html: string;
     let className = MERMAID_CLASS;
     const id = `jp-mermaid-${_nextMermaidId++}`;
 
@@ -212,31 +211,71 @@ namespace Private {
     const el = document.createElement('div');
     document.body.appendChild(el);
 
+    let result: HTMLElement | null = null;
+
+    // the element that will be dumped as text
+    const output = document.createElement('div');
+    output.className = className;
+
     try {
       const { svg } = await _mermaid.render(id, token.text, el);
-      const attr = getMermaidImgAttributes(svg);
-      html = `<img ${attr}src="data:image/svg+xml,${encodeURIComponent(
-        svg
-      )}" />`;
+      result = makeMermaidImage(svg);
     } catch (err) {
-      className = `${className} ${ERROR_CLASS}`;
-      html = `<code>${err.message}</code>`;
+      output.classList.add(WARNING_CLASS);
+      result = await makeMermaidError(_mermaid, token.text);
     } finally {
       // always remove the element
       el.remove();
     }
 
+    output.appendChild(result);
+
     // update the cache for use when rendering
-    cacheSet(_diagrams, token.text, `<div class="${className}">${html}</div>`);
+    cacheSet(_diagrams, token.text, output.outerHTML);
+  }
+
+  /** Get the parser message from a failed parse
+   *
+   * This doesn't do much of anything if the text is successfully parsed.
+   */
+  async function makeMermaidError(
+    mermaid: typeof MermaidType,
+    text: string
+  ): Promise<HTMLElement> {
+    let errorMessage = '';
+    try {
+      await mermaid.parse(text);
+    } catch (err) {
+      errorMessage = `${err}`;
+    }
+
+    const result = document.createElement('details');
+    const summary = document.createElement('summary');
+    const pre = document.createElement('pre');
+    const code = document.createElement('code');
+    code.innerText = text;
+    pre.appendChild(code);
+    summary.appendChild(pre);
+    result.appendChild(summary);
+
+    const warning = document.createElement('pre');
+    warning.innerText = errorMessage;
+    result.appendChild(warning);
+    return result;
   }
 
   /** Extract extra attributes to add to a generated image.  */
-  function getMermaidImgAttributes(svg: string): string {
+  function makeMermaidImage(svg: string): HTMLImageElement {
+    const img = document.createElement('img');
     const maxWidth = svg.match(/max-width: (\d+)/);
     if (maxWidth && maxWidth[1]) {
-      return `width="${maxWidth[1]}" `;
+      const width = parseInt(maxWidth[1]);
+      if (width && !Number.isNaN(width) && Number.isFinite(width)) {
+        img.width = width;
+      }
     }
-    return '';
+    img.setAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`);
+    return img;
   }
 
   /**

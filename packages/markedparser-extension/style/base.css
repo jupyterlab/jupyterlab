@@ -3,14 +3,25 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-.jp-RenderedMermaid.jp-mod-error {
+.jp-RenderedMarkdown .jp-RenderedMermaid.jp-mod-warning {
   width: auto;
-  background: var(--jp-error-color3);
   padding: 10px;
-  border: var(--jp-border-width) solid var(--jp-error-color1);
+  border: var(--jp-border-width) solid var(--jp-warn-color2);
   border-radius: var(--jp-border-radius);
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   white-space: pre-wrap;
   word-wrap: break-word;
+}
+
+.jp-RenderedMarkdown .jp-RenderedMermaid.jp-mod-warning details > pre {
+  margin-top: 1em;
+}
+
+.jp-RenderedMarkdown .jp-RenderedMermaid.jp-mod-warning summary {
+  color: var(--jp-warn-color2);
+}
+
+.jp-RenderedMarkdown .jp-RenderedMermaid.jp-mod-warning summary > pre {
+  display: inline-block;
 }
