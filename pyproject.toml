@@ -165,6 +165,7 @@ exclude = [
     "/examples",
     "/galata/lib",
     "/jupyterlab/staging/build",
+    "/jupyterlab/staging/.yarn",
     "/packages",
     "/release",
     "/testutils",
@@ -178,6 +179,7 @@ include = [
 exclude = [
     "*.js.map",
     "/jupyterlab/staging/build",
+    "/jupyterlab/staging/.yarn",
     "node_modules"
 ]
 
