@@ -20,6 +20,7 @@
   vertical-align: center;
   color: var(--jp-inverse-layout-color0);
   font-size: var(--jp-ui-font-size0);
+  line-height: 2em;
 }
 
 .jp-ContextualShortcut-TableHeader {
@@ -28,6 +29,7 @@
 
 .jp-ContextualShortcut-TableLastRow {
   height: '2em';
+  padding-bottom: calc(2 * var(--jp-private-shortcuts-row-padding-vertical));
 }
 
 .jp-ContextualShortcut-Key {
