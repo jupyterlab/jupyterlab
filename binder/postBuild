@@ -13,7 +13,7 @@ set -euxo pipefail
 mkdir _reports_
 
 # pre-install nodejs deps and build outside of editable python install
-yarn config set enableScripts false               2>&1 | tee _reports_/00_config.txt
+#yarn config set enableScripts false               2>&1 | tee _reports_/00_config.txt
 (time yarn install)                               2>&1 | tee _reports_/00_yarn.txt
 (time yarn run build:dev:prod:minimize:report)    2>&1 | tee _reports_/01_build.txt
 
