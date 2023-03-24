@@ -60,14 +60,9 @@
   padding-top: 12px;
 }
 
-[data-jp-theme-light='false'] .jp-About-externalLinks > .jp-Button-flat,
-[data-jp-theme-light='false'] .jp-About-externalLinks > .jp-Button-flat:hover {
-  color: var(--jp-warn-color1);
-}
-
 .jp-About-externalLinks > .jp-Button-flat,
 .jp-About-externalLinks > .jp-Button-flat:hover {
-  color: var(--jp-brand-color0);
+  color: var(--jp-content-link-color);
 }
 
 .jp-About-copyright {
