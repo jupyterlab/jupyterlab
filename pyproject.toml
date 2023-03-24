@@ -45,9 +45,9 @@ dependencies = [
     "jupyterlab_server>=2.19.0,<3",
     "notebook_shim>=0.2",
     "packaging",
-    "traitlets",
-    "tornado>=6.2.0",
     "tomli;python_version<\"3.11\"",
+    "tornado>=6.2.0",
+    "traitlets",
 ]
 dynamic = [
     "version",
