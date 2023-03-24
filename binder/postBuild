@@ -28,7 +28,8 @@ mkdir -p ~/.jupyter
 cp binder/jupyter_config.py ~/.jupyter/
 
 # replace the default entry point until jupyter-server is the default on binder
-cp ${NB_PYTHON_PREFIX}/bin/jupyter-lab ${NB_PYTHON_PREFIX}/bin/jupyter-notebook
+#cp ${NB_PYTHON_PREFIX}/bin/jupyter-lab ${NB_PYTHON_PREFIX}/bin/jupyter-notebook
+ls ${NB_PYTHON_PREFIX}/bin/  2>&1 | tee _reports_/00_executables_list.txt
 
 # capture configuration and debug information
 (time pip list)                                        2>&1 | tee _reports_/03_pip_list.txt
