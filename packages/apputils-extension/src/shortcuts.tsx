@@ -9,6 +9,7 @@ import { Selector } from '@lumino/domutils';
 import * as React from 'react';
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { TranslationBundle } from '@jupyterlab/translation';
+
 /**
  * The class name for each row of ContextShortcutTable
  */
@@ -66,6 +67,29 @@ export function displayShortcuts(
       topContainer.push(<span>{container.slice(0, -1)}</span>, <> + </>);
     }
     return <span>{topContainer.slice(0, -1)}</span>;
+  }
+
+  function capitalizeString(str: string) {
+    const capitalizedStr = str.charAt(0).toUpperCase() + str.slice(1);
+    return capitalizedStr;
+  }
+
+  function formatLabel(b: CommandRegistry.IKeyBinding) {
+    const label = commands.label(b.command);
+    const labelLength = label.length;
+    const commandID = b.command.split(':')[1];
+    const automaticLabel = commandID.split('-');
+    let capitalizedLabel = '';
+    for (let i = 0; i < automaticLabel.length; i++) {
+      const str = capitalizeString(automaticLabel[i]);
+      capitalizedLabel = capitalizedLabel + ' ' + str;
+    }
+
+    if (labelLength > 0) {
+      return label;
+    } else {
+      return capitalizedLabel;
+    }
   }
 
   function matchDistance(selector: string, elt: Element | null): number {
@@ -130,8 +154,7 @@ export function displayShortcuts(
       bindingTable.push(
         groupedBindings.get(d)!.map(b => (
           <tr className={SHORTCUT_TABLE_ROW_CLASS} key={b.command}>
-            <td>{commands.label(b.command, b.args)}</td>
-            <td>{b.command.split(':')[0]}</td>
+            <td className={SHORTCUT_TABLE_ITEM_CLASS}>{formatLabel(b)}</td>
             <td className={SHORTCUT_TABLE_ITEM_CLASS}>
               {formatKeys([...b.keys])}
             </td>
@@ -147,7 +170,6 @@ export function displayShortcuts(
       <thead>
         <tr>
           <th className={SHORTCUT_TABLE_HEADER}>Label</th>
-          <th className={SHORTCUT_TABLE_HEADER}>Category</th>
           <th className={SHORTCUT_TABLE_HEADER}>Shortcut</th>
         </tr>
       </thead>
