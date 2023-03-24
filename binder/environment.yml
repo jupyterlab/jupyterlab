@@ -47,7 +47,7 @@ dependencies:
   - python-build
   - ruff
   # demo
-  - jupyter-server-proxy
+  # - jupyter-server-proxy
   - jupyterlab-link-share >=0.2
   - matplotlib-base
   - numpy

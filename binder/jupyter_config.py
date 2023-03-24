@@ -35,13 +35,13 @@ lab_splice_command = " ".join(
 )
 
 
-c.ServerProxy.servers = {
-    "lab-spliced": {
-        "command": ["/bin/bash", "-c", lab_splice_command],
-        "timeout": 300,
-        "absolute_url": True,
-    },
-}
+# c.ServerProxy.servers = {
+#     "lab-spliced": {
+#         "command": ["/bin/bash", "-c", lab_splice_command],
+#         "timeout": 300,
+#         "absolute_url": True,
+#     },
+# }
 
 c.ServerApp.log_level = logging.DEBUG
 
