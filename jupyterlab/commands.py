@@ -208,7 +208,7 @@ def ensure_node_modules(cwd, logger=None):
     """
     logger = _ensure_logger(logger)
     yarn_proc = ProgressProcess(
-        ["node", YARN_PATH, "check", "--verify-tree"], cwd=cwd, logger=logger
+        ["node", YARN_PATH, "install", "--immutable"], cwd=cwd, logger=logger
     )
     ret = yarn_proc.wait()
 
