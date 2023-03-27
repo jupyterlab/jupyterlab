@@ -25,10 +25,6 @@ const SHORTCUT_TABLE_ITEM_CLASS = 'jp-ContextualShortcut-TableItem';
  * The class name for each button-like symbol representing a key used in a shortcut in the ContextShortcutTable
  */
 const SHORTCUT_KEY_CLASS = 'jp-ContextualShortcut-Key';
-/**
- * The class name for each button-like symbol representing a key used in a shortcut in the ContextShortcutTable
- */
-const SHORTCUT_TABLE_HEADER = 'jp-ContextualShortcut-TableHeader';
 
 export interface IOptions {
   commands: CommandRegistry;
@@ -77,7 +73,6 @@ export function displayShortcuts(options: IOptions) {
 
   function formatLabel(b: CommandRegistry.IKeyBinding) {
     const label = commands.label(b.command);
-    const labelLength = label.length;
     const commandID = b.command.split(':')[1];
     const automaticLabel = commandID.split('-');
     let capitalizedLabel = '';
@@ -86,7 +81,7 @@ export function displayShortcuts(options: IOptions) {
       capitalizedLabel = capitalizedLabel + ' ' + str;
     }
 
-    if (labelLength > 0) {
+    if (label.length > 0) {
       return label;
     } else {
       return capitalizedLabel;
@@ -168,12 +163,6 @@ export function displayShortcuts(options: IOptions) {
 
   const body = (
     <table>
-      <thead>
-        <tr>
-          <th className={SHORTCUT_TABLE_HEADER}>Label</th>
-          <th className={SHORTCUT_TABLE_HEADER}>Shortcut</th>
-        </tr>
-      </thead>
       <tbody>{bindingTable}</tbody>
     </table>
   );
