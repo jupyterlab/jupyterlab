@@ -939,19 +939,22 @@ export class Stdin extends Widget implements IStdin {
           if (this._history_ix === 0) {
             this._value_cache = input.value;
           }
-          input.value = historyLine;
+          this._setInputValue(historyLine);
           --this._history_ix;
+          // The default action for ArrowUp is moving to first character
+          // but we want to keep the cursor at the end.
+          event.preventDefault();
         }
       } else if (event.key === 'ArrowDown') {
         if (this._history_ix === 0) {
           // do nothing
         } else if (this._history_ix === -1) {
-          input.value = this._value_cache;
+          this._setInputValue(this._value_cache);
           ++this._history_ix;
         } else {
           const historyLine = Stdin._historyAt(this._history_ix + 1);
           if (historyLine) {
-            input.value = historyLine;
+            this._setInputValue(historyLine);
             ++this._history_ix;
           }
         }
@@ -994,6 +997,13 @@ export class Stdin extends Widget implements IStdin {
    */
   protected onBeforeDetach(msg: Message): void {
     this._input.removeEventListener('keydown', this);
+  }
+
+  private _setInputValue(value: string) {
+    this._input.value = value;
+    // Set cursor at the end; this is usually not necessary when input is
+    // focused but having the explicit placement ensures consistency.
+    this._input.setSelectionRange(value.length, value.length);
   }
 
   private _history_ix: number;
