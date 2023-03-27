@@ -1,4 +1,9 @@
 /*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/*
  * Webkit scrollbar styling.
  * Separate file which is dynamically loaded based on user/theme settings.
  */
