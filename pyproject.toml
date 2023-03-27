@@ -131,6 +131,8 @@ source = "code"
 "jupyterlab/schemas" = "share/jupyter/lab/schemas"
 "jupyterlab/themes" = "share/jupyter/lab/themes"
 "jupyter-config" = "etc/jupyter"
+"jupyterlab.svg" = "share/icons/hicolor/scalable/apps/jupyterlab.svg"
+"jupyterlab.desktop" = "share/applications/jupyterlab.desktop"
 
 [tool.hatch.build]
 ignore-vcs = true
@@ -147,7 +149,9 @@ include = [
     "/galata",
     "/jupyter-config",
     "/jupyterlab",
-    "/package.json"
+    "/package.json",
+    "jupyterlab.svg",
+    "jupyterlab.desktop"
 ]
 exclude = [
     "/.github",
