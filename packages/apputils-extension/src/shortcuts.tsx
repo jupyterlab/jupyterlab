@@ -3,7 +3,6 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
 import { CommandRegistry } from '@lumino/commands';
 import { Selector } from '@lumino/domutils';
 import * as React from 'react';
@@ -31,12 +30,14 @@ const SHORTCUT_KEY_CLASS = 'jp-ContextualShortcut-Key';
  */
 const SHORTCUT_TABLE_HEADER = 'jp-ContextualShortcut-TableHeader';
 
-export function displayShortcuts(
-  app: JupyterFrontEnd,
-  trans: TranslationBundle,
-  activeElement?: Element
-) {
-  const { commands } = app;
+export interface IOptions {
+  commands: CommandRegistry;
+  trans: TranslationBundle;
+  activeElement?: Element;
+}
+
+export function displayShortcuts(options: IOptions) {
+  const { commands, trans, activeElement } = options;
   const elt = activeElement ?? document.activeElement;
 
   /**

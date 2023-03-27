@@ -637,7 +637,8 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
             app.shell.currentWidget?.node;
           currentNode?.focus();
         }
-        displayShortcuts(app, trans);
+        const options = { commands, trans };
+        return displayShortcuts(options);
       }
     });
 
