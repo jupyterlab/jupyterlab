@@ -4442,6 +4442,8 @@ __metadata:
     json5: ^2.2.3
     rimraf: ~3.0.0
     typescript: ~5.0.2
+  peerDependencies:
+    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4607,6 +4609,8 @@ __metadata:
     simulate-event: ~1.4.0
     ts-jest: ^29.0.0
     typescript: ~5.0.2
+  peerDependencies:
+    typescript: ">=4.3"
   languageName: unknown
   linkType: soft
 
