@@ -26,9 +26,21 @@ const SHORTCUT_TABLE_ITEM_CLASS = 'jp-ContextualShortcut-TableItem';
  */
 const SHORTCUT_KEY_CLASS = 'jp-ContextualShortcut-Key';
 
+/**
+ * Display shortcuts options
+ */
 export interface IOptions {
+  /**
+   * Application commands registry
+   */
   commands: CommandRegistry;
+  /**
+   * Translation object
+   */
   trans: TranslationBundle;
+  /**
+   * Element on which to display the keyboard shortcuts help
+   */
   activeElement?: Element;
 }
 
