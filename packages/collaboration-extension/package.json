@@ -44,7 +44,7 @@
     "@jupyterlab/statedb": "^3.6.2",
     "@jupyterlab/translation": "^3.6.2",
     "@jupyterlab/ui-components": "^3.6.2",
-    "@lumino/widgets": "^1.37.1",
+    "@lumino/widgets": "^1.37.2",
     "y-protocols": "^1.0.5",
     "y-websocket": "^1.4.6",
     "yjs": "^13.5.17"
