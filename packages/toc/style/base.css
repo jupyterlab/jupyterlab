@@ -45,12 +45,11 @@
   list-style-type: none;
 }
 
-/* stylelint-disable selector-max-type */
+/* stylelint-disable-next-line selector-max-type */
 .jp-TableOfContents li > ol {
   /* Align left border with triangle icon center */
   padding-left: 11px;
 }
-/* stylelint-enable selector-max-type */
 
 .jp-TableOfContents-content {
   /* left margin for the active heading indicator */

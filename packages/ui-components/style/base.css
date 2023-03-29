@@ -179,13 +179,12 @@ input::placeholder {
 }
 
 /* Use our own theme for hover and option styles */
-/* stylelint-disable selector-max-type */
+/* stylelint-disable-next-line selector-max-type */
 .jp-HTMLSelect.jp-DefaultStyle select:hover,
 .jp-HTMLSelect.jp-DefaultStyle select > option {
   background-color: var(--jp-layout-color2);
   color: var(--jp-ui-font-color0);
 }
-/* stylelint-enable selector-max-type */
 
 select {
   box-sizing: border-box;

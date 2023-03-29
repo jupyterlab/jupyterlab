@@ -69,15 +69,12 @@
   box-shadow: var(--jp-elevation-z6);
 }
 
-/* stylelint-disable selector-max-class */
-
+/* stylelint-disable-next-line selector-max-class */
 .jp-LabShell[data-shell-mode='single-document']
   .lm-MenuBar.lm-mod-active
   .lm-MenuBar-item.lm-mod-active {
   border-top: var(--jp-border-width) solid var(--jp-border-color1);
 }
-
-/* stylelint-enable selector-max-class */
 
 .lm-MenuBar-item.lm-mod-disabled {
   color: var(--jp-ui-font-color3);
