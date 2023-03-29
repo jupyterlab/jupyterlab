@@ -53,6 +53,7 @@
   width: 100%;
   height: auto;
   overflow: auto;
+  padding-left: 1ch;
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;
@@ -66,7 +67,7 @@
 .jp-OutputArea-promptOverlay {
   position: absolute;
   top: 0;
-  width: var(--jp-cell-scroll-button-width);
+  width: var(--jp-cell-prompt-width);
   height: 100%;
   opacity: 0.5;
 }
