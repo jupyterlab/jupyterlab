@@ -3,12 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import React, { useEffect, useState } from 'react';
+
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
 import type { Field } from '@rjsf/utils';
-import React, { useEffect, useState } from 'react';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
 
@@ -82,18 +83,12 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   translator,
   initialFilter
 }: ISettingsPanelProps): JSX.Element => {
-  const [expandedPlugin, setExpandedPlugin] = useState<string | null>(null);
+  const [activePlugin, setActivePlugin] = useState<string | null>('welcome');
+
   const [filterPlugin, setFilter] = useState<
     (plugin: ISettingRegistry.IPlugin) => string[] | null
   >(() => initialFilter);
 
-  // Refs used to keep track of "selected" plugin based on scroll location
-  const editorRefs: {
-    [pluginId: string]: React.RefObject<HTMLDivElement>;
-  } = {};
-  for (const setting of settings) {
-    editorRefs[setting.id] = React.useRef(null);
-  }
   const wrapperRef: React.RefObject<HTMLDivElement> = React.useRef(null);
   const editorDirtyStates: React.RefObject<{
     [id: string]: boolean;
@@ -105,31 +100,14 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
       newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | null
     ) => {
       setFilter(() => newFilter);
-      for (const pluginSettings of settings) {
-        const filtered = newFilter(pluginSettings.plugin);
-        if (filtered === null || filtered.length > 0) {
-          setExpandedPlugin(pluginSettings.id);
-          break;
-        }
-      }
+      setActivePlugin(null);
     };
-
-    // Set first visible plugin as expanded plugin on initial load.
-    for (const pluginSettings of settings) {
-      const filtered = filterPlugin(pluginSettings.plugin);
-      if (filtered === null || filtered.length > 0) {
-        setExpandedPlugin(pluginSettings.id);
-        break;
-      }
-    }
 
     // When filter updates, only show plugins that match search.
     updateFilterSignal.connect(onFilterUpdate);
 
     const onSelectChange = (list: PluginList, pluginId: string) => {
-      setExpandedPlugin(expandedPlugin !== pluginId ? pluginId : null);
-      // Scroll to the plugin when a selection is made in the left panel.
-      editorRefs[pluginId]?.current?.scrollIntoView(true);
+      setActivePlugin(pluginId);
     };
     handleSelectSignal?.connect?.(onSelectChange);
 
@@ -174,29 +152,32 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     [editorRegistry]
   );
 
+  if (activePlugin === 'welcome') {
+    return (
+      <> Select a plugin from the list to view and edit its preferences. </>
+    );
+  }
+
   return (
     <div className="jp-SettingsPanel" ref={wrapperRef}>
       {settings.map(pluginSettings => {
         // Pass filtered results to SettingsFormEditor to only display filtered fields.
         const filtered = filterPlugin(pluginSettings.plugin);
         // If filtered results are an array, only show if the array is non-empty.
-        if (filtered !== null && filtered.length === 0) {
+        if (
+          (activePlugin && activePlugin !== pluginSettings.id) ||
+          (filtered !== null && filtered.length === 0)
+        ) {
           return undefined;
         }
         return (
           <div
-            ref={editorRefs[pluginSettings.id]}
             className="jp-SettingsForm"
             key={`${pluginSettings.id}SettingsEditor`}
           >
             <SettingsFormEditor
-              isCollapsed={pluginSettings.id !== expandedPlugin}
               onCollapseChange={(willCollapse: boolean) => {
-                if (!willCollapse) {
-                  setExpandedPlugin(pluginSettings.id);
-                } else if (pluginSettings.id === expandedPlugin) {
-                  setExpandedPlugin(null);
-                }
+                console.log('boop!');
               }}
               filteredValues={filtered}
               settings={pluginSettings}
