@@ -6,11 +6,7 @@
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
-import {
-  caretDownIcon,
-  caretRightIcon,
-  FormComponent
-} from '@jupyterlab/ui-components';
+import { FormComponent } from '@jupyterlab/ui-components';
 import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
 import { IChangeEvent } from '@rjsf/core';
@@ -42,11 +38,6 @@ export namespace SettingsFormEditor {
      * Dictionary used for custom field renderers in the form.
      */
     renderers: { [id: string]: { [property: string]: Field } };
-
-    /**
-     * Whether the form is collapsed or not.
-     */
-    isCollapsed: boolean;
 
     /**
      * Callback with the collapse state value.
@@ -195,47 +186,31 @@ export class SettingsFormEditor extends React.Component<
 
   render(): JSX.Element {
     const trans = this.props.translator.load('jupyterlab');
-    const icon = this.props.isCollapsed ? caretRightIcon : caretDownIcon;
 
     return (
       <div>
-        <div
-          className="jp-SettingsHeader"
-          onClick={() => {
-            this.props.onCollapseChange(!this.props.isCollapsed);
-            this.props.onSelect(this.props.settings.id);
-          }}
-        >
-          <header className="jp-SettingsTitle">
-            <icon.react
-              tag="span"
-              elementPosition="center"
-              className="jp-SettingsTitle-caret"
-            />
-            <h2 title={this.props.settings.schema.description}>
-              {this.props.settings.schema.title}
-            </h2>
-          </header>
+        <div className="jp-SettingsHeader">
+          <h2 title={this.props.settings.schema.description}>
+            {this.props.settings.schema.title}
+          </h2>
           {this.state.isModified && (
             <button className="jp-RestoreButton" onClick={this.reset}>
               {trans.__('Restore to Defaults')}
             </button>
           )}
         </div>
-        {!this.props.isCollapsed && (
-          <FormComponent
-            validator={validatorAjv8}
-            schema={this.state.filteredSchema as JSONSchema7}
-            formData={this._formData}
-            uiSchema={this.state.uiSchema}
-            fields={this.props.renderers[this.props.settings.id]}
-            formContext={this.state.formContext}
-            liveValidate
-            idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
-            onChange={this._onChange}
-            translator={this.props.translator}
-          />
-        )}
+        <FormComponent
+          validator={validatorAjv8}
+          schema={this.state.filteredSchema as JSONSchema7}
+          formData={this._formData}
+          uiSchema={this.state.uiSchema}
+          fields={this.props.renderers[this.props.settings.id]}
+          formContext={this.state.formContext}
+          liveValidate
+          idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
+          onChange={this._onChange}
+          translator={this.props.translator}
+        />
       </div>
     );
   }
