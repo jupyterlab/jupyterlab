@@ -1783,6 +1783,9 @@ function activateNotebookHandler(
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
       overscanCount: settings.get('overscanCount').composite as number,
+      inputHistoryScope: settings.get('inputHistoryScope').composite as
+        | 'global'
+        | 'session',
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
       showEditorForReadOnlyMarkdown: settings.get(
         'showEditorForReadOnlyMarkdown'
