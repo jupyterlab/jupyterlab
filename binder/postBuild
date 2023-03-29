@@ -13,7 +13,7 @@ set -euxo pipefail
 mkdir _reports_
 
 # pre-install nodejs deps and build outside of editable python install
-(time yarn --ignore-scripts --ignore-optional)         2>&1 | tee _reports_/00_yarn.txt
+(time yarn)                                            2>&1 | tee _reports_/00_yarn.txt
 (time yarn build:dev:prod:minimize:report)             2>&1 | tee _reports_/01_build.txt
 
 # hoist report to where a reviewer might see it
@@ -25,9 +25,6 @@ mv dev_mode/static/webpack-bundle-analyzer.html _reports_/
 # copy configuration to well-known location
 mkdir -p ~/.jupyter
 cp binder/jupyter_config.py ~/.jupyter/
-
-# replace the default entry point until jupyter-server is the default on binder
-cp ${NB_PYTHON_PREFIX}/bin/jupyter-lab ${NB_PYTHON_PREFIX}/bin/jupyter-notebook
 
 # capture configuration and debug information
 (time pip list)                                        2>&1 | tee _reports_/03_pip_list.txt
