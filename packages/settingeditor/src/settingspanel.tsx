@@ -12,6 +12,7 @@ import { ISignal } from '@lumino/signaling';
 import type { Field } from '@rjsf/utils';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
+import { InstructionsPlaceholder } from './InstructionsPlaceholder';
 
 export interface ISettingsPanelProps {
   /**
@@ -153,9 +154,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   );
 
   if (activePlugin === 'welcome') {
-    return (
-      <> Select a plugin from the list to view and edit its preferences. </>
-    );
+    return <InstructionsPlaceholder translator={translator} />;
   }
 
   return (
