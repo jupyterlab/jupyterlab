@@ -200,7 +200,7 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
   };
 
 /**
- * CodeMirror binding provider.
+ * CodeMirror shared model binding provider.
  */
 export const bindingPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:binding',
