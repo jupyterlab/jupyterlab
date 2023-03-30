@@ -14,6 +14,8 @@ import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
 import { InstructionsPlaceholder } from './InstructionsPlaceholder';
 
+const PLACEHOLDER_PLUGIN_NAME = 'InstructionsPlaceholder';
+
 export interface ISettingsPanelProps {
   /**
    * List of Settings objects that provide schema and values
@@ -84,8 +86,9 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   translator,
   initialFilter
 }: ISettingsPanelProps): JSX.Element => {
-  const [activePlugin, setActivePlugin] = useState<string | null>('welcome');
-
+  const [activePluginId, setActivePluginId] = useState<string | null>(
+    PLACEHOLDER_PLUGIN_NAME
+  );
   const [filterPlugin, setFilter] = useState<
     (plugin: ISettingRegistry.IPlugin) => string[] | null
   >(() => initialFilter);
@@ -101,14 +104,14 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
       newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | null
     ) => {
       setFilter(() => newFilter);
-      setActivePlugin(null);
+      setActivePluginId(null);
     };
 
     // When filter updates, only show plugins that match search.
     updateFilterSignal.connect(onFilterUpdate);
 
     const onSelectChange = (list: PluginList, pluginId: string) => {
-      setActivePlugin(pluginId);
+      setActivePluginId(pluginId);
     };
     handleSelectSignal?.connect?.(onSelectChange);
 
@@ -153,7 +156,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     [editorRegistry]
   );
 
-  if (activePlugin === 'welcome') {
+  if (activePluginId === 'InstructionsPlaceholder') {
     return <InstructionsPlaceholder translator={translator} />;
   }
 
@@ -164,7 +167,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
         const filtered = filterPlugin(pluginSettings.plugin);
         // If filtered results are an array, only show if the array is non-empty.
         if (
-          (activePlugin && activePlugin !== pluginSettings.id) ||
+          (activePluginId && activePluginId !== pluginSettings.id) ||
           (filtered !== null && filtered.length === 0)
         ) {
           return undefined;
@@ -175,9 +178,6 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
             key={`${pluginSettings.id}SettingsEditor`}
           >
             <SettingsFormEditor
-              onCollapseChange={(willCollapse: boolean) => {
-                console.log('boop!');
-              }}
               filteredValues={filtered}
               settings={pluginSettings}
               renderers={renderers}

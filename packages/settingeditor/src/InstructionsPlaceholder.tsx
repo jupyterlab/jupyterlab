@@ -5,7 +5,6 @@
 
 import React from 'react';
 
-import { jupyterIcon } from '@jupyterlab/ui-components';
 import { ITranslator } from '@jupyterlab/translation';
 
 type IInstructionPlaceholderProps = {
@@ -17,24 +16,15 @@ export const InstructionsPlaceholder = ({
 }: IInstructionPlaceholderProps) => {
   const trans = translator.load('jupyterlab');
   return (
-    <>
-      <h2>
-        <jupyterIcon.react
-          className="jp-SettingEditorInstructions-icon"
-          tag="span"
-          elementPosition="center"
-          height="auto"
-          width="60px"
-        />
-        <span className="jp-SettingEditorInstructions-title">
-          {trans.__('Settings')}
-        </span>
-      </h2>
-      <span className="jp-SettingEditorInstructions-text">
-        {trans.__(
-          'Select a plugin from the list to view and edit its preferences.'
-        )}
-      </span>
-    </>
+    <div className="jp-TableOfContents-placeholder">
+      <div className="jp-TableOfContents-placeholderContent">
+        <h3>{trans.__('No Plugin Selected')}</h3>
+        <p>
+          {trans.__(
+            'Select a plugin from the list to view and edit its preferences.'
+          )}
+        </p>
+      </div>
+    </div>
   );
 };

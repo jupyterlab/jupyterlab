@@ -41,18 +41,21 @@
   background-color: var(--jp-border-color2);
 }
 
-#json-setting-editor .jp-SettingEditorInstructions {
+.jp-SettingEditorInstructions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
 
-#json-setting-editor .jp-SettingEditorInstructions-icon {
+.jp-SettingEditorInstructions-icon {
   display: inline-block;
   height: 78px;
   margin: 2px 5px 2px 8px;
   width: 60px;
 }
 
-#json-setting-editor .jp-SettingEditorInstructions-title {
+.jp-SettingEditorInstructions-title {
   color: var(--jp-ui-font-color0);
   font-size: 32px;
   font-weight: 200;
@@ -60,7 +63,7 @@
   vertical-align: top;
 }
 
-#json-setting-editor .jp-SettingEditorInstructions-text {
+.jp-SettingEditorInstructions-text {
   color: var(--jp-ui-font-color0);
   font-size: var(--jp-ui-font-size2);
 }
@@ -217,9 +220,9 @@
 }
 
 .jp-SettingsPanel .jp-SettingsHeader h2 {
-  font-size: var(--jp-ui-font-size1);
-  color: var(--jp-ui-font-color1);
-  font-weight: 300;
+  font-size: var(--jp-content-font-size3);
+  color: var(--jp-ui-font-color0);
+  font-weight: var(--jp-content-heading-font-weight);
 }
 
 .jp-SettingsPanel .jp-SettingsTitle {
@@ -323,4 +326,17 @@
 
 .jp-PluginEditor {
   overflow: auto;
+}
+
+.jp-TableOfContents-placeholder {
+  text-align: center;
+}
+
+.jp-TableOfContents-placeholderContent {
+  color: var(--jp-content-font-color2);
+  padding: 8px;
+}
+
+.jp-TableOfContents-placeholderContent > h3 {
+  margin-bottom: var(--jp-content-heading-margin-bottom);
 }

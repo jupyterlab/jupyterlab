@@ -40,11 +40,6 @@ export namespace SettingsFormEditor {
     renderers: { [id: string]: { [property: string]: Field } };
 
     /**
-     * Callback with the collapse state value.
-     */
-    onCollapseChange: (v: boolean) => void;
-
-    /**
      * Translator object
      */
     translator: ITranslator;
