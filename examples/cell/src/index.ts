@@ -54,11 +54,11 @@ import {
   SessionManager
 } from '@jupyterlab/services';
 
+import { IYText } from '@jupyter/ydoc';
+
 import { CommandRegistry } from '@lumino/commands';
 
 import { BoxPanel, Widget } from '@lumino/widgets';
-
-import { IYText } from '@jupyter/ydoc';
 
 function main(): void {
   const kernelManager = new KernelManager();
@@ -69,9 +69,7 @@ function main(): void {
     specsManager,
     name: 'Example'
   });
-  const languages = new EditorLanguageRegistry();
-
-  const extensions = () => {
+  const editorExtensions = () => {
     const registry = new EditorExtensionRegistry();
     for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions({})) {
       registry.addExtension(extensionFactory);
@@ -88,10 +86,9 @@ function main(): void {
         );
       }
     });
-
     return registry;
   }
-
+  const languages = new EditorLanguageRegistry();
   EditorLanguageRegistry.getDefaultLanguages()
     .filter(language =>
       ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
@@ -99,8 +96,9 @@ function main(): void {
     .forEach(language => {
       languages.addLanguage(language);
     });
+
   const factoryService = new CodeMirrorEditorFactory({
-    extensions: extensions(),
+    extensions: editorExtensions(),
     languages
   });
   const mimeService = new CodeMirrorMimeTypeService(languages);

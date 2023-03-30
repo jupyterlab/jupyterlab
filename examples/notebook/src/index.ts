@@ -35,7 +35,9 @@ import {
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
-  EditorLanguageRegistry
+  EditorLanguageRegistry,
+  EditorExtensionRegistry,
+  ybinding
 } from '@jupyterlab/codemirror';
 
 import { DocumentManager } from '@jupyterlab/docmanager';
@@ -46,6 +48,8 @@ import {
   standardRendererFactories as initialFactories,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
+
+import { IYText } from '@jupyter/ydoc';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -102,6 +106,25 @@ function createApp(manager: ServiceManager.IManager): void {
     opener
   });
   const mFactory = new NotebookModelFactory({});
+  const editorExtensions = () => {
+    const registry = new EditorExtensionRegistry();
+    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions({})) {
+      registry.addExtension(extensionFactory);
+    }
+    registry.addExtension({
+      name: 'yjs-binding',
+      factory: options => {
+        const sharedModel = options.model.sharedModel as IYText;
+        return EditorExtensionRegistry.createImmutableExtension(
+          ybinding({
+            ytext: sharedModel.ysource,
+            undoManager: sharedModel.undoManager ?? undefined
+          })
+        );
+      }
+    });
+    return registry;
+  }
   const languages = new EditorLanguageRegistry();
   EditorLanguageRegistry.getDefaultLanguages()
     .filter(language =>
@@ -121,7 +144,10 @@ function createApp(manager: ServiceManager.IManager): void {
       });
     }
   });
-  const factoryService = new CodeMirrorEditorFactory({ languages });
+  const factoryService = new CodeMirrorEditorFactory({
+    extensions: editorExtensions(),
+    languages
+  });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
   const editorFactory = factoryService.newInlineEditor;
   const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
