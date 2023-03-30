@@ -30,8 +30,8 @@ import { Cell, CodeCell, CodeCellModel } from '@jupyterlab/cells';
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
-  EditorLanguageRegistry,
   EditorExtensionRegistry,
+  EditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
 
@@ -71,7 +71,9 @@ function main(): void {
   });
   const editorExtensions = () => {
     const registry = new EditorExtensionRegistry();
-    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions({})) {
+    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions(
+      {}
+    )) {
       registry.addExtension(extensionFactory);
     }
     registry.addExtension({
@@ -87,7 +89,7 @@ function main(): void {
       }
     });
     return registry;
-  }
+  };
   const languages = new EditorLanguageRegistry();
   EditorLanguageRegistry.getDefaultLanguages()
     .filter(language =>

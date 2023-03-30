@@ -21,8 +21,8 @@ import { ServiceManager } from '@jupyterlab/services';
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
-  EditorLanguageRegistry,
   EditorExtensionRegistry,
+  EditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
 
@@ -94,7 +94,9 @@ function startApp(
 
   const editorExtensions = () => {
     const registry = new EditorExtensionRegistry();
-    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions({})) {
+    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions(
+      {}
+    )) {
       registry.addExtension(extensionFactory);
     }
     registry.addExtension({
@@ -110,7 +112,7 @@ function startApp(
       }
     });
     return registry;
-  }
+  };
 
   const languages = new EditorLanguageRegistry();
   EditorLanguageRegistry.getDefaultLanguages()

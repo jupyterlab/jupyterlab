@@ -35,8 +35,8 @@ import {
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
-  EditorLanguageRegistry,
   EditorExtensionRegistry,
+  EditorLanguageRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
 
@@ -108,7 +108,9 @@ function createApp(manager: ServiceManager.IManager): void {
   const mFactory = new NotebookModelFactory({});
   const editorExtensions = () => {
     const registry = new EditorExtensionRegistry();
-    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions({})) {
+    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions(
+      {}
+    )) {
       registry.addExtension(extensionFactory);
     }
     registry.addExtension({
@@ -124,7 +126,7 @@ function createApp(manager: ServiceManager.IManager): void {
       }
     });
     return registry;
-  }
+  };
   const languages = new EditorLanguageRegistry();
   EditorLanguageRegistry.getDefaultLanguages()
     .filter(language =>
