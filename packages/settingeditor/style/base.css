@@ -313,16 +313,19 @@
   height: 100%;
 }
 
+.jp-SettingsForm .jp-Buttonbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin: 8px;
+  gap: 0.5em;
+  max-width: 800px;
+}
+
 .jp-SettingsForm button.jp-RestoreButton {
-  white-space: nowrap;
-  background: none;
-  border: none;
-  outline: none;
-  box-shadow: none;
-  font-size: var(--jp-ui-font-size1);
-  color: var(--jp-brand-color1);
-  cursor: pointer;
-  margin-right: 5px;
+  background-color: var(--jp-accept-color-normal);
+  border: 0;
+  color: var(--jp-ui-inverse-font-color0);
 }
 
 .jp-PluginEditor {
