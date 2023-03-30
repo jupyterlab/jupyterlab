@@ -7,13 +7,13 @@ import React from 'react';
 
 import { ITranslator } from '@jupyterlab/translation';
 
-type IInstructionPlaceholderProps = {
+type ISettingsEditorPlaceholderProps = {
   translator: ITranslator;
 };
 
 export const SettingsEditorPlaceholder = ({
   translator
-}: IInstructionPlaceholderProps) => {
+}: ISettingsEditorPlaceholderProps) => {
   const trans = translator.load('jupyterlab');
   return (
     <div className="jp-SettingsEditor-placeholder">
