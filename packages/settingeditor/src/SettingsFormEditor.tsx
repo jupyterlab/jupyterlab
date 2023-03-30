@@ -3,6 +3,8 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import React from 'react';
+
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
@@ -13,7 +15,7 @@ import { IChangeEvent } from '@rjsf/core';
 import validatorAjv8 from '@rjsf/validator-ajv8';
 import { Field, UiSchema } from '@rjsf/utils';
 import { JSONSchema7 } from 'json-schema';
-import React from 'react';
+import { Button } from '@jupyterlab/ui-components';
 
 /**
  * Indentation to use when saving the settings as JSON document.
@@ -188,12 +190,14 @@ export class SettingsFormEditor extends React.Component<
           <h2 title={this.props.settings.schema.description}>
             {this.props.settings.schema.title}
           </h2>
-          {this.state.isModified && (
-            <button className="jp-RestoreButton" onClick={this.reset}>
-              {trans.__('Restore to Defaults')}
-            </button>
-          )}
         </div>
+        {this.state.isModified && (
+          <div className="jp-Buttonbar">
+            <Button className="jp-RestoreButton" onClick={this.reset}>
+              {trans.__('Restore to Defaults')}
+            </Button>
+          </div>
+        )}
         <FormComponent
           validator={validatorAjv8}
           schema={this.state.filteredSchema as JSONSchema7}
