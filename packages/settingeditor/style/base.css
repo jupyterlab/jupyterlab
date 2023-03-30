@@ -41,33 +41,6 @@
   background-color: var(--jp-border-color2);
 }
 
-.jp-SettingEditorInstructions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.jp-SettingEditorInstructions-icon {
-  display: inline-block;
-  height: 78px;
-  margin: 2px 5px 2px 8px;
-  width: 60px;
-}
-
-.jp-SettingEditorInstructions-title {
-  color: var(--jp-ui-font-color0);
-  font-size: 32px;
-  font-weight: 200;
-  line-height: 78px;
-  vertical-align: top;
-}
-
-.jp-SettingEditorInstructions-text {
-  color: var(--jp-ui-font-color0);
-  font-size: var(--jp-ui-font-size2);
-}
-
 .jp-PluginList {
   min-width: 175px;
   max-width: 275px;
@@ -332,15 +305,15 @@
   overflow: auto;
 }
 
-.jp-TableOfContents-placeholder {
+.jp-SettingsEditor-placeholder {
   text-align: center;
 }
 
-.jp-TableOfContents-placeholderContent {
+.jp-SettingsEditor-placeholderContent {
   color: var(--jp-content-font-color2);
   padding: 8px;
 }
 
-.jp-TableOfContents-placeholderContent > h3 {
+.jp-SettingsEditor-placeholderContent > h3 {
   margin-bottom: var(--jp-content-heading-margin-bottom);
 }

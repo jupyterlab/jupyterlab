@@ -11,13 +11,13 @@ type IInstructionPlaceholderProps = {
   translator: ITranslator;
 };
 
-export const InstructionsPlaceholder = ({
+export const SettingsEditorPlaceholder = ({
   translator
 }: IInstructionPlaceholderProps) => {
   const trans = translator.load('jupyterlab');
   return (
-    <div className="jp-TableOfContents-placeholder">
-      <div className="jp-TableOfContents-placeholderContent">
+    <div className="jp-SettingsEditor-placeholder">
+      <div className="jp-SettingsEditor-placeholderContent">
         <h3>{trans.__('No Plugin Selected')}</h3>
         <p>
           {trans.__(

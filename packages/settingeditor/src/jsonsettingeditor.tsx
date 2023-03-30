@@ -15,7 +15,7 @@ import { Message } from '@lumino/messaging';
 import { ISignal } from '@lumino/signaling';
 import { SplitPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
-import { InstructionsPlaceholder } from './InstructionsPlaceholder';
+import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
 import { PluginEditor } from './plugineditor';
 import { PluginList } from './pluginlist';
 
@@ -52,7 +52,7 @@ export class JsonSettingEditor extends SplitPanel {
     const { commands, editorFactory, rendermime } = options;
     const registry = (this.registry = options.registry);
     const instructions = (this._instructions = ReactWidget.create(
-      <InstructionsPlaceholder translator={this.translator} />
+      <SettingsEditorPlaceholder translator={this.translator} />
     ));
     instructions.addClass('jp-SettingEditorInstructions');
     const editor = (this._editor = new PluginEditor({

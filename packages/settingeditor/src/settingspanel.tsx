@@ -12,7 +12,7 @@ import { ISignal } from '@lumino/signaling';
 import type { Field } from '@rjsf/utils';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
-import { InstructionsPlaceholder } from './InstructionsPlaceholder';
+import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
 
 const PLACEHOLDER_PLUGIN_NAME = 'InstructionsPlaceholder';
 
@@ -157,7 +157,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   );
 
   if (activePluginId === 'InstructionsPlaceholder') {
-    return <InstructionsPlaceholder translator={translator} />;
+    return <SettingsEditorPlaceholder translator={translator} />;
   }
 
   return (
