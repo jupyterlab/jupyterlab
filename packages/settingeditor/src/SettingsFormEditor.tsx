@@ -191,13 +191,13 @@ export class SettingsFormEditor extends React.Component<
             {this.props.settings.schema.title}
           </h2>
         </div>
-        {this.state.isModified && (
-          <div className="jp-Buttonbar">
+        <div className="jp-Buttonbar">
+          {this.state.isModified && (
             <Button className="jp-RestoreButton" onClick={this.reset}>
               {trans.__('Restore to Defaults')}
             </Button>
-          </div>
-        )}
+          )}
+        </div>
         <FormComponent
           validator={validatorAjv8}
           schema={this.state.filteredSchema as JSONSchema7}
