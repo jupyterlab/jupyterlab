@@ -223,6 +223,7 @@
   font-size: var(--jp-content-font-size3);
   color: var(--jp-ui-font-color0);
   font-weight: var(--jp-content-heading-font-weight);
+  padding-inline-start: 0.5em;
 }
 
 .jp-SettingsPanel .jp-SettingsTitle {
