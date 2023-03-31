@@ -68,12 +68,14 @@ export class SettingManager extends DataConnector<
    *
    * @returns A promise that resolves if successful.
    */
-  async list(): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
+  async list(
+    query?: 'ids'
+  ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
     const { serverSettings } = this;
     const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + appUrl;
-    const url = Private.url(base, '');
+    const url = Private.url(base, '', query === 'ids');
     const response = await makeRequest(url, {}, serverSettings);
 
     if (response.status !== 200) {
@@ -81,12 +83,19 @@ export class SettingManager extends DataConnector<
     }
 
     const json = await response.json();
-    const values: ISettingRegistry.IPlugin[] =
-      json?.['settings']?.map((plugin: ISettingRegistry.IPlugin) => {
-        plugin.data = { composite: {}, user: {} };
-        return plugin;
-      }) ?? [];
-    const ids = values.map(plugin => plugin.id);
+    const ids =
+      json?.['settings']?.map(
+        (plugin: ISettingRegistry.IPlugin) => plugin.id
+      ) ?? [];
+
+    let values: ISettingRegistry.IPlugin[] = [];
+    if (!query) {
+      values =
+        json?.['settings']?.map((plugin: ISettingRegistry.IPlugin) => {
+          plugin.data = { composite: {}, user: {} };
+          return plugin;
+        }) ?? [];
+    }
 
     return { ids, values };
   }
@@ -148,7 +157,10 @@ namespace Private {
   /**
    * Get the url for a plugin's settings.
    */
-  export function url(base: string, id: string): string {
-    return URLExt.join(base, SERVICE_SETTINGS_URL, id);
+  export function url(base: string, id: string, idsOnly?: boolean): string {
+    const idsOnlyParam = idsOnly
+      ? URLExt.objectToQueryString({ ids_only: true })
+      : '';
+    return `${URLExt.join(base, SERVICE_SETTINGS_URL, id)}${idsOnlyParam}`;
   }
 }
