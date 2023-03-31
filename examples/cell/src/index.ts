@@ -77,7 +77,7 @@ function main(): void {
       registry.addExtension(extensionFactory);
     }
     registry.addExtension({
-      name: 'yjs-binding',
+      name: 'shared-model-binding',
       factory: options => {
         const sharedModel = options.model.sharedModel as IYText;
         return EditorExtensionRegistry.createImmutableExtension(
