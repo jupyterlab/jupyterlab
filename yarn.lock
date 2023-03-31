@@ -2953,6 +2953,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-console@workspace:examples/console"
   dependencies:
+    "@jupyter/ydoc": ^0.3.4
     "@jupyterlab/application": ^4.0.0-beta.0
     "@jupyterlab/codemirror": ^4.0.0-beta.0
     "@jupyterlab/console": ^4.0.0-beta.0
@@ -3099,6 +3100,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
+    "@jupyter/ydoc": ^0.3.4
     "@jupyterlab/application": ^4.0.0-beta.0
     "@jupyterlab/apputils": ^4.0.0-beta.0
     "@jupyterlab/codemirror": ^4.0.0-beta.0
