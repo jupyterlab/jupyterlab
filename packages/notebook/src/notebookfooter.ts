@@ -18,12 +18,10 @@ export class NotebookFooter extends Widget {
    * Construct a footer widget.
    */
   constructor(protected notebook: Notebook) {
-    super();
+    super({ node: document.createElement('button') });
+    const trans = notebook.translator.load('jupyterlab');
     this.addClass(NOTEBOOK_FOOTER_CLASS);
-    this._createHiddenButton();
-    const text = document.createElement('p');
-    text.innerText = 'Click to add a cell.';
-    this.node.appendChild(text);
+    this.node.innerText = trans.__('Click to add a cell.');
   }
 
   /**
@@ -32,7 +30,7 @@ export class NotebookFooter extends Widget {
   handleEvent(event: Event): void {
     switch (event.type) {
       case 'click':
-        this.onClick(event as MouseEvent);
+        this.onClick();
         break;
       case 'keydown':
         if ((event as KeyboardEvent).key === 'ArrowUp') {
@@ -45,14 +43,18 @@ export class NotebookFooter extends Widget {
   /**
    * On single click (mouse event), insert a cell below (at the end of the notebook as default behavior).
    */
-  onClick(event: any): void {
+  protected onClick(): void {
+    console.log('notebook:', this.notebook);
+    if (this.notebook.widgets.length > 0) {
+      this.notebook.activeCellIndex = this.notebook.widgets.length - 1;
+    }
     NotebookActions.insertBelow(this.notebook);
   }
 
   /**
    * On arrow up key pressed (keydown keyboard event), blur the footer and switch to command mode.
    */
-  onArrowUp(): void {
+  protected onArrowUp(): void {
     this.blur();
     this.notebook.mode = 'command';
   }
@@ -60,16 +62,14 @@ export class NotebookFooter extends Widget {
    * Focus the footer and the hidden button
    */
   focus(): void {
-    this.addClass('focused');
-    this._hiddenButton.focus();
+    this.node.focus();
   }
 
   /**
    * Blur the footer and the hidden button
    */
   blur(): void {
-    this.removeClass('focused');
-    this._hiddenButton.blur();
+    this.node.blur();
   }
 
   /*
@@ -89,13 +89,4 @@ export class NotebookFooter extends Widget {
     this.node.removeEventListener('keydown', this);
     super.onBeforeDetach(msg);
   }
-  /**
-   * Create an hidden button in the notebookfooter widget that enables to add a new cell when it is cliked.
-   */
-  private _createHiddenButton(): void {
-    this._hiddenButton = document.createElement('button');
-    this._hiddenButton.classList.add('hidden');
-    this.node.appendChild(this._hiddenButton);
-  }
-  private _hiddenButton: HTMLButtonElement;
 }

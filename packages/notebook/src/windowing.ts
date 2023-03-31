@@ -131,6 +131,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
   }
 
   protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
     if (this._header && !this._header.isAttached) {
       Widget.attach(
         this._header,

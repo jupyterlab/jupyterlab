@@ -17,7 +17,6 @@ import {
   isRawCellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-/*import { NotebookWindowedLayout } from './windowing';*/
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
