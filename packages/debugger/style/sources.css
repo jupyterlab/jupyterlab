@@ -21,7 +21,7 @@
   height: 100%;
 }
 
-.jp-DebuggerSources-header > div > span {
+.jp-DebuggerSources-header-path {
   overflow: hidden;
   cursor: pointer;
   text-overflow: ellipsis;
