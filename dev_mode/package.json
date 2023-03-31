@@ -182,10 +182,6 @@
     "@jupyterlab/ui-components-extension": "~4.0.0-beta.0",
     "@jupyterlab/vega5-extension": "~4.0.0-beta.0"
   },
-  "peerDependencies": {
-    "@rjsf/utils": "^5.0.0",
-    "react": ">=16"
-  },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-beta.0",
     "@jupyterlab/buildutils": "^4.0.0-beta.0",
@@ -212,6 +208,10 @@
     "whatwg-fetch": "^3.0.0",
     "worker-loader": "^3.0.2",
     "yarn-deduplicate": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@rjsf/utils": "^5.0.0",
+    "react": ">=16"
   },
   "engines": {
     "node": ">=18.0.0"

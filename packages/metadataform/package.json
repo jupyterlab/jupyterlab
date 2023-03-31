@@ -59,10 +59,6 @@
     "json-schema": "^0.4.0",
     "react": "^18.2.0"
   },
-  "peerDependencies": {
-    "@rjsf/utils": "^5.0.0",
-    "react": ">=16"
-  },
   "devDependencies": {
     "@jupyterlab/testing": "^4.0.0-beta.0",
     "@types/jest": "^29.2.0",
@@ -70,7 +66,11 @@
     "jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.28",
-    "typescript": "~5.0.2"
+    "typescript": "~5.0.3"
+  },
+  "peerDependencies": {
+    "@rjsf/utils": "^5.1.0",
+    "react": ">=16"
   },
   "publishConfig": {
     "access": "public"

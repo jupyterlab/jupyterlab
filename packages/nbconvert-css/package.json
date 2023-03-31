@@ -39,9 +39,6 @@
     "@jupyterlab/outputarea": "^4.0.0-beta.0",
     "@jupyterlab/rendermime": "^4.0.0-beta.0"
   },
-  "peerDependencies": {
-    "react": ">=16"
-  },
   "devDependencies": {
     "css-loader": "^6.7.1",
     "mini-css-extract-plugin": "^2.7.0",
@@ -49,6 +46,9 @@
     "rimraf": "~3.0.0",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1"
+  },
+  "peerDependencies": {
+    "react": ">=16"
   },
   "publishConfig": {
     "access": "public"

@@ -138,10 +138,6 @@
     "@jupyterlab/ui-components-extension": "^4.0.0-beta.0",
     "@jupyterlab/vega5-extension": "^4.0.0-beta.0"
   },
-  "peerDependencies": {
-    "@rjsf/utils": "^5.0.0",
-    "react": ">=16"
-  },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-beta.0",
     "copy-webpack-plugin": "^11.0.0",
@@ -157,6 +153,10 @@
     "webpack-cli": "^5.0.1",
     "webpack-merge": "^5.8.0",
     "whatwg-fetch": "^3.0.0"
+  },
+  "peerDependencies": {
+    "@rjsf/utils": "^5.1.0",
+    "react": ">=16"
   },
   "jupyterlab": {
     "buildDir": "./build",
