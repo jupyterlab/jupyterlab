@@ -18,6 +18,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 
+import scrollbarStyleText from '../style/scrollbar.raw.css';
+
 namespace CommandIDs {
   export const changeTheme = 'apputils:change-theme';
 
@@ -28,6 +30,13 @@ namespace CommandIDs {
   export const incrFontSize = 'apputils:incr-font-size';
 
   export const decrFontSize = 'apputils:decr-font-size';
+}
+
+function createStyleSheet(text: string): HTMLStyleElement {
+  const style = document.createElement('style');
+  style.setAttribute('type', 'text/css');
+  style.appendChild(document.createTextNode(text));
+  return style;
 }
 
 /**
@@ -56,6 +65,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
       splash: splash ?? undefined,
       url
     });
+    let scrollbarsStyleElement: HTMLStyleElement | null = null;
 
     // Keep a synchronously set reference to the current theme,
     // since the asynchronous setting of the theme in `changeTheme`
@@ -76,6 +86,20 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
         document.body.dataset.jpThemeScrollbars = String(
           manager.themeScrollbars(currentTheme)
         );
+        if (manager.themeScrollbars(currentTheme)) {
+          if (!scrollbarsStyleElement) {
+            scrollbarsStyleElement = createStyleSheet(scrollbarStyleText);
+          }
+          if (!scrollbarsStyleElement.parentElement) {
+            document.body.appendChild(scrollbarsStyleElement);
+          }
+        } else {
+          if (scrollbarsStyleElement && scrollbarsStyleElement.parentElement) {
+            scrollbarsStyleElement.parentElement.removeChild(
+              scrollbarsStyleElement
+            );
+          }
+        }
       }
 
       commands.notifyCommandChanged(CommandIDs.changeTheme);

@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+/*
+ * Webkit scrollbar styling.
+ * Separate file which is dynamically loaded based on user/theme settings.
+ */
+
+/* use standard opaque scrollbars for most nodes */
+
+::-webkit-scrollbar,
+::-webkit-scrollbar-corner {
+  background: var(--jp-scrollbar-background-color);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--jp-scrollbar-thumb-color));
+  border: var(--jp-scrollbar-thumb-margin) solid transparent;
+  background-clip: content-box;
+  border-radius: var(--jp-scrollbar-thumb-radius);
+}
+
+::-webkit-scrollbar-track:horizontal {
+  border-left: var(--jp-scrollbar-endpad) solid
+    var(--jp-scrollbar-background-color);
+  border-right: var(--jp-scrollbar-endpad) solid
+    var(--jp-scrollbar-background-color);
+}
+
+::-webkit-scrollbar-track:vertical {
+  border-top: var(--jp-scrollbar-endpad) solid
+    var(--jp-scrollbar-background-color);
+  border-bottom: var(--jp-scrollbar-endpad) solid
+    var(--jp-scrollbar-background-color);
+}
+
+/* for code nodes, use a transparent style of scrollbar */
+
+.CodeMirror-hscrollbar::-webkit-scrollbar,
+.CodeMirror-vscrollbar::-webkit-scrollbar,
+.CodeMirror-hscrollbar::-webkit-scrollbar-corner,
+.CodeMirror-vscrollbar::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+.CodeMirror-hscrollbar::-webkit-scrollbar-thumb,
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb {
+  background: rgba(var(--jp-scrollbar-thumb-color), 0.5);
+  border: var(--jp-scrollbar-thumb-margin) solid transparent;
+  background-clip: content-box;
+  border-radius: var(--jp-scrollbar-thumb-radius);
+}
+
+.CodeMirror-hscrollbar::-webkit-scrollbar-track:horizontal {
+  border-left: var(--jp-scrollbar-endpad) solid transparent;
+  border-right: var(--jp-scrollbar-endpad) solid transparent;
+}
+
+.CodeMirror-vscrollbar::-webkit-scrollbar-track:vertical {
+  border-top: var(--jp-scrollbar-endpad) solid transparent;
+  border-bottom: var(--jp-scrollbar-endpad) solid transparent;
+}
