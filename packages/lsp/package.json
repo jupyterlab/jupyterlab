@@ -40,9 +40,6 @@
     "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
-  "resolutions": {
-    "vscode-languageserver-protocol": "^3.17.0"
-  },
   "dependencies": {
     "@jupyterlab/apputils": "^4.0.0-beta.0",
     "@jupyterlab/codeeditor": "^4.0.0-beta.0",
@@ -57,6 +54,9 @@
     "vscode-jsonrpc": "^6.0.0",
     "vscode-languageserver-protocol": "^3.17.0",
     "vscode-ws-jsonrpc": "~1.0.2"
+  },
+  "peerDependencies": {
+    "react": ">=16"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.0.0-beta.0",

@@ -124,6 +124,10 @@
     "stylelint-config-standard": "^31.0.0",
     "stylelint-prettier": "^3.0.0"
   },
+  "peerDependencies": {
+    "react": ">=16",
+    "typescript": "^5.0.2"
+  },
   "devDependencies": {
     "lerna": "^6.6.1",
     "typedoc": "~0.23.28"

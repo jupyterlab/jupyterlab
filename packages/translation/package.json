@@ -46,6 +46,9 @@
     "@jupyterlab/statedb": "^4.0.0-beta.0",
     "@lumino/coreutils": "^2.0.0"
   },
+  "peerDependencies": {
+    "react": ">=16"
+  },
   "devDependencies": {
     "@jupyterlab/testing": "^4.0.0-beta.0",
     "@types/jest": "^29.2.0",

@@ -40,10 +40,13 @@
     "@jupyterlab/rendermime": "^4.0.0-beta.0",
     "marked": "^4.0.17"
   },
+  "peerDependencies": {
+    "react": ">=16"
+  },
   "devDependencies": {
     "@types/marked": "^4.0.3",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
+    "typedoc": "~0.23.28",
     "typescript": "~5.0.2"
   },
   "publishConfig": {

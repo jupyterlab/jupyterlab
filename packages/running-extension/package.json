@@ -51,9 +51,12 @@
     "@lumino/signaling": "^2.0.0",
     "@lumino/widgets": "^2.0.0"
   },
+  "peerDependencies": {
+    "react": ">=16"
+  },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
+    "typedoc": "~0.23.28",
     "typescript": "~5.0.2"
   },
   "publishConfig": {

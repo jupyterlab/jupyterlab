@@ -14,6 +14,9 @@
     "@jupyterlab/theme-light-extension": "^4.0.0-beta.0",
     "@lumino/widgets": "^2.0.0"
   },
+  "peerDependencies": {
+    "react": ">=16"
+  },
   "devDependencies": {
     "css-loader": "^6.7.1",
     "mini-css-extract-plugin": "^2.7.0",
