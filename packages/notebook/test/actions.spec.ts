@@ -1527,6 +1527,7 @@ describe('@jupyterlab/notebook', () => {
           const cell = widget.widgets[i];
           if (cell instanceof CodeCell && cell.model.outputs.length) {
             widget.select(cell);
+            cell.model.outputs.clear();
             index = i;
             break;
           }
