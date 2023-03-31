@@ -117,7 +117,7 @@
     "@lezer/highlight": "^1.0.0",
     "@lumino/algorithm": "^2.0.0",
     "@lumino/application": "^2.0.0",
-    "@lumino/commands": "^2.0.0",
+    "@lumino/commands": "^2.0.1",
     "@lumino/coreutils": "^2.0.0",
     "@lumino/datagrid": "^2.0.0",
     "@lumino/disposable": "^2.0.0",

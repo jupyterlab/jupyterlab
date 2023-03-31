@@ -35,7 +35,7 @@
   "dependencies": {
     "@lumino/algorithm": "^2.0.0",
     "@lumino/application": "^2.0.0",
-    "@lumino/commands": "^2.0.0",
+    "@lumino/commands": "^2.0.1",
     "@lumino/coreutils": "^2.0.0",
     "@lumino/disposable": "^2.0.0",
     "@lumino/domutils": "^2.0.0",

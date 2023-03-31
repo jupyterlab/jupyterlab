@@ -2017,7 +2017,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/widgets": ^2.0.0
@@ -2123,7 +2123,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
     "@lumino/application": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/messaging": ^2.0.0
@@ -2157,7 +2157,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/polling": ^2.0.0
@@ -2186,7 +2186,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/domutils": ^2.0.0
@@ -2228,7 +2228,7 @@ __metadata:
   dependencies:
     "@lumino/algorithm": ^2.0.0
     "@lumino/application": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/domutils": ^2.0.0
@@ -2331,7 +2331,7 @@ __metadata:
     "@jupyterlab/testing": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/disposable": ^2.0.0
     "@lumino/signaling": ^2.0.0
     "@lumino/widgets": ^2.0.0
@@ -2727,7 +2727,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/datagrid": ^2.0.0
     "@lumino/disposable": ^2.0.0
@@ -2761,7 +2761,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/signaling": ^2.0.0
@@ -2935,7 +2935,7 @@ __metadata:
     "@jupyterlab/services": ^7.0.0-beta.0
     "@jupyterlab/theme-light-extension": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/widgets": ^2.0.0
     css-loader: ^6.7.1
     mini-css-extract-plugin: ^2.7.0
@@ -2962,7 +2962,7 @@ __metadata:
     "@jupyterlab/services": ^7.0.0-beta.0
     "@jupyterlab/theme-light-extension": ^4.0.0-beta.0
     "@jupyterlab/translation": ^4.0.0-beta.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/widgets": ^2.0.0
     css-loader: ^6.7.1
     mini-css-extract-plugin: ^2.7.0
@@ -3082,7 +3082,7 @@ __metadata:
     "@jupyterlab/theme-light-extension": ^4.0.0-beta.0
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/widgets": ^2.0.0
     css-loader: ^6.7.1
     mini-css-extract-plugin: ^2.7.0
@@ -3115,7 +3115,7 @@ __metadata:
     "@jupyterlab/services": ^7.0.0-beta.0
     "@jupyterlab/theme-light-extension": ^4.0.0-beta.0
     "@jupyterlab/translation": ^4.0.0-beta.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/widgets": ^2.0.0
     css-loader: ^6.7.1
     mini-css-extract-plugin: ^2.7.0
@@ -3262,7 +3262,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/widgets": ^2.0.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
@@ -3332,7 +3332,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/widgets": ^2.0.0
     rimraf: ~3.0.0
@@ -3357,7 +3357,7 @@ __metadata:
     "@jupyterlab/toc": ^6.0.0-beta.0
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/messaging": ^2.0.0
     "@lumino/widgets": ^2.0.0
@@ -3632,7 +3632,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/properties": ^2.0.0
@@ -3769,7 +3769,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/widgets": ^2.0.0
     "@types/jest": ^29.2.0
@@ -4097,7 +4097,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/messaging": ^2.0.0
@@ -4317,7 +4317,7 @@ __metadata:
     "@jupyterlab/services": ^7.0.0-beta.0
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/polling": ^2.0.0
     "@lumino/signaling": ^2.0.0
     "@lumino/widgets": ^2.0.0
@@ -4407,7 +4407,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/messaging": ^2.0.0
@@ -4433,7 +4433,7 @@ __metadata:
     "@jupyterlab/nbformat": ^4.0.0-beta.0
     "@jupyterlab/statedb": ^4.0.0-beta.0
     "@jupyterlab/testing": ^4.0.0-beta.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/signaling": ^2.0.0
@@ -4459,7 +4459,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@jupyterlab/ui-components": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/domutils": ^2.0.0
@@ -4478,7 +4478,7 @@ __metadata:
   resolution: "@jupyterlab/statedb@workspace:packages/statedb"
   dependencies:
     "@jupyterlab/testing": ^4.0.0-beta.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/properties": ^2.0.0
@@ -4791,7 +4791,7 @@ __metadata:
     "@jupyterlab/testing": ^4.0.0-beta.0
     "@jupyterlab/translation": ^4.0.0-beta.0
     "@lumino/algorithm": ^2.0.0
-    "@lumino/commands": ^2.0.0
+    "@lumino/commands": ^2.0.1
     "@lumino/coreutils": ^2.0.0
     "@lumino/disposable": ^2.0.0
     "@lumino/messaging": ^2.0.0
@@ -5056,6 +5056,21 @@ __metadata:
     "@lumino/signaling": ^2.0.0
     "@lumino/virtualdom": ^2.0.0
   checksum: add40b1460260dc536ec6383514b0328ae091bb77739a4bc0c164e1adf2688b000da93a3947517c4f54bb0f20d596805b526e12d06742efe5f81aa60bad7b762
+  languageName: node
+  linkType: hard
+
+"@lumino/commands@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@lumino/commands@npm:2.0.1"
+  dependencies:
+    "@lumino/algorithm": ^2.0.0
+    "@lumino/coreutils": ^2.0.0
+    "@lumino/disposable": ^2.0.0
+    "@lumino/domutils": ^2.0.0
+    "@lumino/keyboard": ^2.0.0
+    "@lumino/signaling": ^2.0.0
+    "@lumino/virtualdom": ^2.0.0
+  checksum: cefc9bb4b7b61054f199b5bf35501765688eb2922af2610087f43e4bb5f6663ee8579fcf02e12d6083697456423ada67cae5b2d020daa0856c646d050b30d420
   languageName: node
   linkType: hard
 

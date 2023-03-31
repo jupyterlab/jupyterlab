@@ -55,7 +55,7 @@
     "@jupyterlab/translation": "^4.0.0-beta.0",
     "@jupyterlab/ui-components": "^4.0.0-beta.0",
     "@lumino/algorithm": "^2.0.0",
-    "@lumino/commands": "^2.0.0",
+    "@lumino/commands": "^2.0.1",
     "@lumino/coreutils": "^2.0.0",
     "@lumino/disposable": "^2.0.0",
     "@lumino/domutils": "^2.0.0",
