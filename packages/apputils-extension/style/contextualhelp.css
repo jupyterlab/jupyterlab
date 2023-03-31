@@ -6,6 +6,7 @@
 :root {
   --jp-private-shortcuts-key-padding-horizontal: 0.47em;
   --jp-private-shortcuts-key-padding-vertical: 0.28em;
+  --jp-private-shortcuts-label-padding-horizontal: 0.47em;
 }
 
 .jp-ContextualShortcut-TableRow {
@@ -19,6 +20,7 @@
   color: var(--jp-inverse-layout-color0);
   font-size: var(--jp-ui-font-size1);
   line-height: 2em;
+  padding-right: var(--jp-private-shortcuts-label-padding-horizontal);
 }
 
 .jp-ContextualShortcut-TableLastRow {
