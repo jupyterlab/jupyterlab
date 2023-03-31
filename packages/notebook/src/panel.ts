@@ -131,7 +131,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     const kernelPreference = this.context.sessionContext.kernelPreference;
     this.context.sessionContext.kernelPreference = {
       ...kernelPreference,
-      shutdownOnDispose: config.kernelShutdown
+      shutdownOnDispose: config.kernelShutdown,
+      autoStartDefault: config.autoStartDefault
     };
   }
 
@@ -262,6 +263,10 @@ export namespace NotebookPanel {
    */
   export interface IConfig {
     /**
+     * Whether to automatically start the preferred kernel
+     */
+    autoStartDefault: boolean;
+    /**
      * A config object for cell editors
      */
     editorConfig: StaticNotebook.IEditorConfig;
@@ -299,11 +304,6 @@ export namespace NotebookPanel {
       return new Notebook(options);
     }
   }
-
-  /**
-   * Default content factory for the notebook panel.
-   */
-  export const defaultContentFactory: ContentFactory = new ContentFactory();
 
   /**
    * The notebook renderer token.

@@ -312,9 +312,7 @@ test.describe('Debugger', () => {
     await page.debugger.waitForCallStack();
 
     const breakpointsPanel = await page.debugger.getBreakPointsPanel();
-    expect(await breakpointsPanel.innerText()).toMatch(
-      /ipykernel.*\/2114632017.py/
-    );
+    expect(await breakpointsPanel.innerText()).toMatch(/ipykernel.*\/\d+.py/);
 
     // Don't compare screenshot as the kernel id varies
     // Need to set precisely the path

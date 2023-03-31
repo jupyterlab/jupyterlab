@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application-extension",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-beta.0",
   "description": "JupyterLab - Application Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,26 +38,26 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/apputils": "^4.0.0-alpha.19",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/property-inspector": "^4.0.0-alpha.19",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/statedb": "^4.0.0-alpha.19",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
-    "@lumino/algorithm": "^2.0.0-beta.0",
-    "@lumino/commands": "^2.0.0-beta.1",
-    "@lumino/coreutils": "^2.0.0-beta.0",
-    "@lumino/disposable": "^2.0.0-beta.1",
-    "@lumino/widgets": "^2.0.0-beta.1",
+    "@jupyterlab/application": "^4.0.0-beta.0",
+    "@jupyterlab/apputils": "^4.0.0-beta.0",
+    "@jupyterlab/coreutils": "^6.0.0-beta.0",
+    "@jupyterlab/property-inspector": "^4.0.0-beta.0",
+    "@jupyterlab/settingregistry": "^4.0.0-beta.0",
+    "@jupyterlab/statedb": "^4.0.0-beta.0",
+    "@jupyterlab/statusbar": "^4.0.0-beta.0",
+    "@jupyterlab/translation": "^4.0.0-beta.0",
+    "@jupyterlab/ui-components": "^4.0.0-beta.0",
+    "@lumino/algorithm": "^2.0.0",
+    "@lumino/commands": "^2.0.0",
+    "@lumino/coreutils": "^2.0.0",
+    "@lumino/disposable": "^2.0.0",
+    "@lumino/widgets": "^2.0.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.2"
   },
   "publishConfig": {
     "access": "public"

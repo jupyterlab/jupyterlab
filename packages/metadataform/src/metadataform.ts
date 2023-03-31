@@ -416,7 +416,7 @@ export class MetadataFormWidget
       // Navigate to the value.
       for (let nested of nestedKeys) {
         if (nested in workingObject)
-          workingObject = workingObject[nested] as PartialJSONObject;
+          workingObject = workingObject[nested] as JSONObject;
         else {
           hasValue = false;
           break;

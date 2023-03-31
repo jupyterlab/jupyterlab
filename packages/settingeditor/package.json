@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingeditor",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-beta.0",
   "description": "The JupyterLab default setting editor interface",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,23 +37,23 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/apputils": "^4.0.0-alpha.19",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.19",
-    "@jupyterlab/inspector": "^4.0.0-alpha.19",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.19",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/statedb": "^4.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
-    "@lumino/algorithm": "^2.0.0-beta.0",
-    "@lumino/commands": "^2.0.0-beta.1",
-    "@lumino/coreutils": "^2.0.0-beta.0",
-    "@lumino/disposable": "^2.0.0-beta.1",
-    "@lumino/messaging": "^2.0.0-beta.0",
-    "@lumino/polling": "^2.0.0-beta.0",
-    "@lumino/signaling": "^2.0.0-beta.1",
-    "@lumino/widgets": "^2.0.0-beta.1",
+    "@jupyterlab/application": "^4.0.0-beta.0",
+    "@jupyterlab/apputils": "^4.0.0-beta.0",
+    "@jupyterlab/codeeditor": "^4.0.0-beta.0",
+    "@jupyterlab/inspector": "^4.0.0-beta.0",
+    "@jupyterlab/rendermime": "^4.0.0-beta.0",
+    "@jupyterlab/settingregistry": "^4.0.0-beta.0",
+    "@jupyterlab/statedb": "^4.0.0-beta.0",
+    "@jupyterlab/translation": "^4.0.0-beta.0",
+    "@jupyterlab/ui-components": "^4.0.0-beta.0",
+    "@lumino/algorithm": "^2.0.0",
+    "@lumino/commands": "^2.0.0",
+    "@lumino/coreutils": "^2.0.0",
+    "@lumino/disposable": "^2.0.0",
+    "@lumino/messaging": "^2.0.0",
+    "@lumino/polling": "^2.0.0",
+    "@lumino/signaling": "^2.0.0",
+    "@lumino/widgets": "^2.0.0",
     "@rjsf/core": "^5.1.0",
     "@rjsf/utils": "^5.1.0",
     "@rjsf/validator-ajv8": "^5.1.0",
@@ -64,7 +64,7 @@
     "@types/react": "^18.0.26",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.2"
   },
   "publishConfig": {
     "access": "public"

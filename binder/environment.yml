@@ -10,7 +10,7 @@ dependencies:
   - python >=3.11,<3.12
   # package managers
   - pip
-  - yarn <2
+  - yarn >=3,<4
   # build
   - hatch-jupyter-builder >=0.3.2
   - hatchling >=1.5.0
@@ -20,7 +20,7 @@ dependencies:
   - jinja2 >=3.0.3
   - jupyter_core
   - jupyter_server >=2.0.1,<3
-  - jupyter-lsp >=1.5.1
+  - jupyter-lsp >=2.0.0
   - jupyterlab_server >=2.19.0,<3
   - notebook-shim >=0.2
   - packaging
@@ -56,4 +56,4 @@ dependencies:
   # extra conda stuff
   - jsonschema-with-format-nongpl
   - pip:
-    - jupyter-collaboration >=1.0.0a1
+    - jupyter-collaboration >=1.0.0a5

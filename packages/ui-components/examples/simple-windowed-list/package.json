@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-simple-list",
-  "version": "4.0.0-alpha.17",
+  "version": "4.0.0-beta.0",
   "private": true,
   "style": "style/index.css",
   "scripts": {
@@ -9,13 +9,13 @@
     "watch": "webpack --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/observables": "^5.0.0-alpha.19",
-    "@jupyterlab/theme-light-extension": "^4.0.0-alpha.19",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
-    "@lumino/messaging": "^2.0.0-beta.0",
-    "@lumino/widgets": "^2.0.0-beta.1"
+    "@jupyterlab/application": "^4.0.0-beta.0",
+    "@jupyterlab/coreutils": "^6.0.0-beta.0",
+    "@jupyterlab/observables": "^5.0.0-beta.0",
+    "@jupyterlab/theme-light-extension": "^4.0.0-beta.0",
+    "@jupyterlab/ui-components": "^4.0.0-beta.0",
+    "@lumino/messaging": "^2.0.0",
+    "@lumino/widgets": "^2.0.0"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
@@ -23,9 +23,9 @@
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~3.0.0",
     "style-loader": "~3.3.1",
-    "typescript": "~5.0.0-beta",
-    "webpack": "^5.72.0",
-    "webpack-cli": "^5.0.0"
+    "typescript": "~5.0.2",
+    "webpack": "^5.76.1",
+    "webpack-cli": "^5.0.1"
   },
   "styleModule": "style/index.js"
 }

@@ -2,10 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { PromiseDelegate } from '@lumino/coreutils';
+import { JSONObject, ReadonlyJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
-import { ISignal, Signal } from '@lumino/signaling';
+import { IStream, Signal, Stream } from '@lumino/signaling';
 import { ServerConnection } from '../serverconnection';
 
 /**
@@ -26,8 +26,7 @@ export class EventManager implements IDisposable {
 
     // If subscription fails, the poll attempts to reconnect and backs off.
     this._poll = new Poll({ factory: () => this._subscribe() });
-    // TODO: Switch to Lumino 2 `Stream`.
-    this._stream = new Private.Stream(this);
+    this._stream = new Stream(this);
 
     // Subscribe to the events socket.
     void this._poll.start();
@@ -120,7 +119,7 @@ export class EventManager implements IDisposable {
 
   private _poll: Poll;
   private _socket: WebSocket | null = null;
-  private _stream: Private.Stream<this, Event.Emission>;
+  private _stream: Stream<this, Event.Emission>;
 }
 
 /**
@@ -145,8 +144,7 @@ export namespace Event {
   /**
    * The event emission type.
    */
-  export type Emission = {
-    [key: string]: any;
+  export type Emission = ReadonlyJSONObject & {
     schema_id: string;
   };
 
@@ -154,7 +152,7 @@ export namespace Event {
    * The event request type.
    */
   export type Request = {
-    data: { [key: string]: any };
+    data: JSONObject;
     schema_id: string;
     version: string;
   };
@@ -168,62 +166,4 @@ export namespace Event {
    * The interface for the event bus front-end.
    */
   export interface IManager extends EventManager {}
-
-  /**
-   * An object that is both a signal and an async iterable.
-   */
-  export interface IStream<T, U> extends ISignal<T, U>, AsyncIterable<U> {}
-}
-
-/**
- * A namespace for private module data.
- */
-namespace Private {
-  /**
-   * A pending promise in a promise chain underlying a stream.
-   */
-  export type Pending<U> = PromiseDelegate<{ args: U; next: Pending<U> }>;
-
-  /**
-   * A stream with the characteristics of a signal and an async iterable.
-   */
-  export class Stream<T, U> extends Signal<T, U> {
-    /**
-     * Return an async iterator that yields every emission.
-     */
-    async *[Symbol.asyncIterator](): AsyncIterableIterator<U> {
-      let pending = this._pending;
-      while (true) {
-        try {
-          const { args, next } = await pending.promise;
-          pending = next;
-          yield args;
-        } catch (_) {
-          return; // Any promise rejection stops the iterator.
-        }
-      }
-    }
-
-    /**
-     * Emit the signal, invoke the connected slots, and yield the emission.
-     *
-     * @param args - The args to pass to the connected slots.
-     */
-    emit(args: U): void {
-      const pending = this._pending;
-      this._pending = new PromiseDelegate();
-      pending.resolve({ args, next: this._pending });
-      super.emit(args);
-    }
-
-    /**
-     * Stop the stream's async iteration.
-     */
-    stop(): void {
-      this._pending.promise.catch(() => undefined);
-      this._pending.reject('stop');
-    }
-
-    private _pending: Private.Pending<U> = new PromiseDelegate();
-  }
 }

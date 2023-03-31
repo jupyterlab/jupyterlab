@@ -1,11 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DocumentChange, ISharedDocument } from '@jupyter/ydoc';
 import {
   Dialog,
   ISessionContext,
   SessionContext,
-  sessionContextDialogs,
+  SessionContextDialogs,
   showDialog,
   showErrorMessage
 } from '@jupyterlab/apputils';
@@ -17,7 +18,6 @@ import {
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
-import { DocumentChange, ISharedDocument } from '@jupyter/ydoc';
 import {
   ITranslator,
   nullTranslator,
@@ -46,7 +46,9 @@ export class Context<
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._factory = options.factory;
-    this._dialogs = options.sessionDialogs || sessionContextDialogs;
+    this._dialogs =
+      options.sessionDialogs ??
+      new SessionContextDialogs({ translator: options.translator });
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
     this._lastModifiedCheckMargin = options.lastModifiedCheckMargin || 500;
@@ -270,34 +272,36 @@ export class Context<
 
   /**
    * Save the document to a different path chosen by the user.
+   *
+   * It will be rejected if the user abort providing a new path.
    */
-  saveAs(): Promise<void> {
-    return this.ready
-      .then(() => {
-        return Private.getSavePath(this._path);
-      })
-      .then(newPath => {
-        if (this.isDisposed || !newPath) {
-          return;
-        }
-        if (newPath === this._path) {
-          return this.save();
-        }
-        // Make sure the path does not exist.
-        return this._manager.ready
-          .then(() => {
-            return this._manager.contents.get(newPath);
-          })
-          .then(() => {
-            return this._maybeOverWrite(newPath);
-          })
-          .catch(err => {
-            if (!err.response || err.response.status !== 404) {
-              throw err;
-            }
-            return this._finishSaveAs(newPath);
-          });
-      });
+  async saveAs(): Promise<void> {
+    await this.ready;
+    const localPath = this._manager.contents.localPath(this.path);
+    const newLocalPath = await Private.getSavePath(localPath);
+
+    if (this.isDisposed || !newLocalPath) {
+      return;
+    }
+
+    const drive = this._manager.contents.driveName(this.path);
+    const newPath = drive == '' ? newLocalPath : `${drive}:${newLocalPath}`;
+
+    if (newPath === this._path) {
+      return this.save();
+    }
+
+    // Make sure the path does not exist.
+    try {
+      await this._manager.ready;
+      await this._manager.contents.get(newPath);
+      await this._maybeOverWrite(newPath);
+    } catch (err) {
+      if (!err.response || err.response.status !== 404) {
+        throw err;
+      }
+      await this._finishSaveAs(newPath);
+    }
   }
 
   /**
@@ -556,7 +560,7 @@ export class Context<
     // any kernel has started.
     void this.sessionContext.initialize().then(shouldSelect => {
       if (shouldSelect) {
-        void this._dialogs.selectKernel(this.sessionContext, this.translator);
+        void this._dialogs.selectKernel(this.sessionContext);
       }
     });
   }
@@ -592,22 +596,8 @@ export class Context<
    */
   private async _save(): Promise<void> {
     this._saveState.emit('started');
-    const model = this._model;
-    let content: PartialJSONValue = null;
-    if (this._factory.fileFormat === 'json') {
-      content = model.toJSON();
-    } else {
-      content = model.toString();
-      if (this._lineEnding) {
-        content = content.replace(/\n/g, this._lineEnding);
-      }
-    }
+    const options = this._createSaveOptions();
 
-    const options = {
-      type: this._factory.contentType,
-      format: this._factory.fileFormat,
-      content
-    };
     try {
       let value: Contents.IModel;
       await this._manager.ready;
@@ -616,7 +606,7 @@ export class Context<
         return;
       }
 
-      model.dirty = false;
+      this._model.dirty = false;
       this._updateContentsModel(value);
 
       if (!this._isPopulated) {
@@ -876,18 +866,56 @@ or load the version on disk (revert)?`,
    * Finish a saveAs operation given a new path.
    */
   private async _finishSaveAs(newPath: string): Promise<void> {
-    this._path = newPath;
-    await this.sessionContext.session?.setPath(newPath);
-    await this.sessionContext.session?.setName(newPath.split('/').pop()!);
-    // we must rename the document before saving with the new path
-    const localPath = this._manager.contents.localPath(this._path);
-    (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
-    this._model.sharedModel.setState('path', localPath);
-    this._pathChanged.emit(newPath);
+    this._saveState.emit('started');
+    try {
+      await this._manager.ready;
+      const options = this._createSaveOptions();
+      await this._manager.contents.save(newPath, options);
+      await this._maybeCheckpoint(true);
 
-    // save triggers a fileChanged which updates the contents model
-    await this.save();
-    await this._maybeCheckpoint(true);
+      // Emit completion.
+      this._saveState.emit('completed');
+    } catch (err) {
+      // If the save has been canceled by the user,
+      // throw the error so that whoever called save()
+      // can decide what to do.
+      if (
+        err.message === 'Cancel' ||
+        err.message === 'Modal is already displayed'
+      ) {
+        throw err;
+      }
+
+      // Otherwise show an error message and throw the error.
+      const localPath = this._manager.contents.localPath(this._path);
+      const name = PathExt.basename(localPath);
+      void this._handleError(
+        err,
+        this._trans.__('File Save Error for %1', name)
+      );
+
+      // Emit failure.
+      this._saveState.emit('failed');
+      return;
+    }
+  }
+
+  private _createSaveOptions(): Partial<Contents.IModel> {
+    let content: PartialJSONValue = null;
+    if (this._factory.fileFormat === 'json') {
+      content = this._model.toJSON();
+    } else {
+      content = this._model.toString();
+      if (this._lineEnding) {
+        content = content.replace(/\n/g, this._lineEnding);
+      }
+    }
+
+    return {
+      type: this._factory.contentType,
+      format: this._factory.fileFormat,
+      content
+    };
   }
 
   protected translator: ITranslator;

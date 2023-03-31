@@ -71,7 +71,7 @@ describe('@jupyterlab/lsp', () => {
         manager.documentsChanged.connect(cb);
         manager.connectDocumentSignals(document);
         expect(manager.documents.has(document.uri)).toEqual(true);
-        expect(cb).toBeCalled();
+        expect(cb).toHaveBeenCalled();
       });
     });
     describe('#disconnectDocumentSignals', () => {
@@ -90,8 +90,8 @@ describe('@jupyterlab/lsp', () => {
           foreignDocument: document,
           parentHost: document
         });
-        expect(manager.unregisterDocument).toBeCalled();
-        expect(manager.disconnectDocumentSignals).toBeCalled();
+        expect(manager.unregisterDocument).toHaveBeenCalled();
+        expect(manager.disconnectDocumentSignals).toHaveBeenCalled();
       });
     });
   });

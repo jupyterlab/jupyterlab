@@ -18,22 +18,24 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
+  SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
-  CodeEditor,
   CodeViewerWidget,
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
+import {
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry,
+  IEditorThemeRegistry
+} from '@jupyterlab/codemirror';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
-import {
-  IDefaultFileBrowser,
-  IFileBrowserFactory
-} from '@jupyterlab/filebrowser';
+import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import {
   FileEditor,
   FileEditorAdapter,
@@ -53,16 +55,19 @@ import {
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { IFormRendererRegistry, MenuSvg } from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import { JSONObject } from '@lumino/coreutils';
-import { Menu, Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { CommandIDs, Commands, FACTORY, IFileTypeData } from './commands';
+import { editorSyntaxStatus } from './syntaxstatus';
 
 export { Commands } from './commands';
 
@@ -74,10 +79,11 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   id: '@jupyterlab/fileeditor-extension:plugin',
   requires: [
     IEditorServices,
+    IEditorExtensionRegistry,
+    IEditorLanguageRegistry,
+    IEditorThemeRegistry,
     IDefaultFileBrowser,
-    IFileBrowserFactory,
-    ISettingRegistry,
-    ITranslator
+    ISettingRegistry
   ],
   optional: [
     IConsoleTracker,
@@ -87,7 +93,9 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     ILayoutRestorer,
     ISessionContextDialogs,
     ITableOfContentsRegistry,
-    IToolbarWidgetRegistry
+    IToolbarWidgetRegistry,
+    ITranslator,
+    IFormRendererRegistry
   ],
   provides: IEditorTracker,
   autoStart: true
@@ -100,11 +108,17 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
 export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
   autoStart: true,
-  requires: [IEditorTracker, ISettingRegistry, ITranslator],
+  requires: [
+    IEditorTracker,
+    IEditorExtensionRegistry,
+    ISettingRegistry,
+    ITranslator
+  ],
   optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
     editorTracker: IEditorTracker,
+    extensions: IEditorExtensionRegistry,
     settingRegistry: ISettingRegistry,
     translator: ITranslator,
     statusBar: IStatusBar | null
@@ -115,20 +129,18 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
       return;
     }
     // Create a menu for switching tabs vs spaces.
-    const menu = new Menu({ commands: app.commands });
+    const menu = new MenuSvg({ commands: app.commands });
     const command = 'fileeditor:change-tabs';
     const { shell } = app;
     const args: JSONObject = {
-      insertSpaces: false,
-      size: 4,
       name: trans.__('Indent with Tab')
     };
     menu.addItem({ command, args });
-    for (const size of [1, 2, 4, 8]) {
+    for (const size of ['1', '2', '4', '8']) {
       const args: JSONObject = {
-        insertSpaces: true,
         size,
-        name: trans.__('Spaces: %1', size)
+        // Use a context to differentiate with string set as plural in 3.x
+        name: trans._p('v4', 'Spaces: %1', size)
       };
       menu.addItem({ command, args });
     }
@@ -137,18 +149,19 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
     const item = new TabSpaceStatus({ menu, translator });
 
     // Keep a reference to the code editor config from the settings system.
-    const updateSettings = (settings: ISettingRegistry.ISettings): void => {
-      item.model!.config = {
-        ...CodeEditor.defaultConfig,
-        ...(settings.get('editorConfig').composite as JSONObject)
-      };
+    const updateIndentUnit = (settings: ISettingRegistry.ISettings): void => {
+      item.model!.indentUnit =
+        (settings.get('editorConfig').composite as any)?.indentUnit ??
+        extensions.baseConfiguration.indentUnit ??
+        null;
     };
+
     void Promise.all([
       settingRegistry.load('@jupyterlab/fileeditor-extension:plugin'),
       app.restored
     ]).then(([settings]) => {
-      updateSettings(settings);
-      settings.changed.connect(updateSettings);
+      updateIndentUnit(settings);
+      settings.changed.connect(updateIndentUnit);
     });
 
     // Add the status item.
@@ -232,6 +245,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   completerPlugin,
   languageServerPlugin,
   searchProvider,
+  editorSyntaxStatus,
   tabSpaceStatus
 ];
 export default plugins;
@@ -242,20 +256,26 @@ export default plugins;
 function activate(
   app: JupyterFrontEnd,
   editorServices: IEditorServices,
+  extensions: IEditorExtensionRegistry,
+  languages: IEditorLanguageRegistry,
+  themes: IEditorThemeRegistry,
   fileBrowser: IDefaultFileBrowser,
-  browserFactory: IFileBrowserFactory,
   settingRegistry: ISettingRegistry,
-  translator: ITranslator,
   consoleTracker: IConsoleTracker | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
-  sessionDialogs: ISessionContextDialogs | null,
+  sessionDialogs_: ISessionContextDialogs | null,
   tocRegistry: ITableOfContentsRegistry | null,
-  toolbarRegistry: IToolbarWidgetRegistry | null
+  toolbarRegistry: IToolbarWidgetRegistry | null,
+  translator_: ITranslator | null,
+  formRegistry: IFormRendererRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
+  const translator = translator_ ?? nullTranslator;
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
   let toolbarFactory:
@@ -361,6 +381,60 @@ function activate(
   // Fetch the initial state of the settings.
   Promise.all([settingRegistry.load(id), restored])
     .then(([settings]) => {
+      // As the menu are defined in the settings we must ensure they are loaded
+      // before updating dynamically the submenu
+      if (menu) {
+        const languageMenu = menu.viewMenu.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-mainmenu-view-codemirror-language'
+        )?.submenu;
+
+        if (languageMenu) {
+          languages
+            .getLanguages()
+            .sort((a, b) => {
+              const aName = a.name;
+              const bName = b.name;
+              return aName.localeCompare(bName);
+            })
+            .forEach(spec => {
+              // Avoid mode name with a curse word.
+              if (spec.name.indexOf('brainf') === 0) {
+                return;
+              }
+              languageMenu.addItem({
+                command: CommandIDs.changeLanguage,
+                args: { ...spec } as any // TODO: Casting to `any` until lumino typings are fixed
+              });
+            });
+        }
+        const themeMenu = menu.settingsMenu.items.find(
+          item =>
+            item.type === 'submenu' &&
+            item.submenu?.id === 'jp-mainmenu-settings-codemirror-theme'
+        )?.submenu;
+
+        if (themeMenu) {
+          for (const theme of themes.themes) {
+            themeMenu.addItem({
+              command: CommandIDs.changeTheme,
+              args: {
+                theme: theme.name,
+                displayName: theme.displayName ?? theme.name
+              }
+            });
+          }
+        }
+
+        // Add go to line capabilities to the edit menu.
+        menu.editMenu.goToLiners.add({
+          id: CommandIDs.goToLine,
+          isEnabled: (w: Widget) =>
+            tracker.currentWidget !== null && tracker.has(w)
+        });
+      }
+
       Commands.updateSettings(settings, commands);
       Commands.updateTracker(tracker);
       settings.changed.connect(() => {
@@ -372,6 +446,18 @@ function activate(
       console.error(reason.message);
       Commands.updateTracker(tracker);
     });
+
+  if (formRegistry) {
+    const CMRenderer = formRegistry.getRenderer(
+      '@jupyterlab/codemirror-extension:plugin.defaultConfig'
+    );
+    if (CMRenderer) {
+      formRegistry.addRenderer(
+        '@jupyterlab/fileeditor-extension:plugin.editorConfig',
+        CMRenderer
+      );
+    }
+  }
 
   factory.widgetCreated.connect((sender, widget) => {
     // Notify the widget tracker if restore data needs to update.
@@ -389,14 +475,15 @@ function activate(
   });
 
   Commands.addCommands(
-    commands,
+    app.commands,
     settingRegistry,
     trans,
     id,
     isEnabled,
     tracker,
     fileBrowser,
-    browserFactory,
+    extensions,
+    languages,
     consoleTracker,
     sessionDialogs
   );
@@ -484,7 +571,7 @@ function activateFileEditorCompleterService(
   editorTracker: IEditorTracker,
   manager: ICompletionProviderManager | null,
   translator: ITranslator | null,
-  appSanitizer: ISanitizer | null
+  appSanitizer: IRenderMime.ISanitizer | null
 ): void {
   if (!manager) {
     return;

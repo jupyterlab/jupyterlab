@@ -28,7 +28,6 @@ import {
   IRunMenu,
   ITabsMenu,
   IViewMenu,
-  JupyterLabMenu,
   MainMenu
 } from '@jupyterlab/mainmenu';
 import { ServerConnection } from '@jupyterlab/services';
@@ -36,6 +35,7 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
   fastForwardIcon,
+  RankedMenu,
   refreshIcon,
   runIcon,
   stopIcon
@@ -154,12 +154,15 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     if (registry) {
       await Private.loadSettingsMenu(
         registry,
-        (aMenu: JupyterLabMenu) => {
-          menu.addMenu(aMenu, { rank: aMenu.rank });
+        (aMenu: RankedMenu) => {
+          menu.addMenu(aMenu, false, { rank: aMenu.rank });
         },
         options => MainMenu.generateMenu(commands, options, trans),
         translator
       );
+
+      // Trigger single update
+      menu.update();
     }
 
     // Only add quit button if the back-end supports it by checking page config.
@@ -781,7 +784,7 @@ namespace Private {
   export async function loadSettingsMenu(
     registry: ISettingRegistry,
     addMenu: (menu: Menu) => void,
-    menuFactory: (options: IMainMenu.IMenuOptions) => JupyterLabMenu,
+    menuFactory: (options: IMainMenu.IMenuOptions) => RankedMenu,
     translator: ITranslator
   ): Promise<void> {
     const trans = translator.load('jupyterlab');

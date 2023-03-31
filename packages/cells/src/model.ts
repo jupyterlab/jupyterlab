@@ -411,7 +411,7 @@ export abstract class AttachmentsCellModel extends CellModel {
   constructor(options: AttachmentsCellModel.IOptions<ISharedCell>) {
     super(options);
     const factory =
-      options.contentFactory || AttachmentsCellModel.defaultContentFactory;
+      options.contentFactory ?? AttachmentsCellModel.defaultContentFactory;
     const values = (
       this.sharedModel as ISharedAttachmentsCell
     ).getAttachments();

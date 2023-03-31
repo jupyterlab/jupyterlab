@@ -16,7 +16,7 @@ jobs:
 
       - name: Get modified files in the staging directory
         id: modified-files-in-staging
-        uses: tj-actions/changed-files@v35.5.5
+        uses: tj-actions/changed-files@v35.7.0
         with:
           # only checks for modified files in this directory
           files: jupyterlab/staging

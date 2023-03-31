@@ -144,7 +144,11 @@ export class MainMenu extends MenuBar implements IMainMenu {
   /**
    * Add a new menu to the main menu bar.
    */
-  addMenu(menu: Menu, options: IMainMenu.IAddOptions = {}): void {
+  addMenu(
+    menu: Menu,
+    update: boolean = true,
+    options: IMainMenu.IAddOptions = {}
+  ): void {
     if (ArrayExt.firstIndexOf(this.menus, menu) > -1) {
       return;
     }

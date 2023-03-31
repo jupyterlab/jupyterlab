@@ -219,8 +219,7 @@ export class StaticNotebook extends WindowedList {
     this.node.dataset[CODE_RUNNER] = 'true';
     this.rendermime = options.rendermime;
     this.translator = options.translator || nullTranslator;
-    this.contentFactory =
-      options.contentFactory || StaticNotebook.defaultContentFactory;
+    this.contentFactory = options.contentFactory;
     this.editorConfig =
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this.notebookConfig =
@@ -654,6 +653,7 @@ export class StaticNotebook extends WindowedList {
     const options: CodeCell.IOptions = {
       contentFactory,
       editorConfig,
+      inputHistoryScope: this.notebookConfig.inputHistoryScope,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs,
       model,
       placeholder: this._notebookConfig.windowingMode !== 'none',
@@ -833,7 +833,7 @@ export class StaticNotebook extends WindowedList {
   private _updateEditorConfig() {
     for (let i = 0; i < this.widgets.length; i++) {
       const cell = this.widgets[i];
-      let config: Partial<CodeEditor.IConfig> = {};
+      let config: Record<string, any> = {};
       switch (cell.model.type) {
         case 'code':
           config = this._editorConfig.code;
@@ -845,7 +845,7 @@ export class StaticNotebook extends WindowedList {
           config = this._editorConfig.raw;
           break;
       }
-      cell.setEditorConfig({ ...config });
+      cell.updateEditorConfig({ ...config });
     }
   }
 
@@ -944,7 +944,7 @@ export namespace StaticNotebook {
     /**
      * A factory for creating content.
      */
-    contentFactory?: IContentFactory;
+    contentFactory: IContentFactory;
 
     /**
      * A configuration object for the cell editor settings.
@@ -999,15 +999,15 @@ export namespace StaticNotebook {
     /**
      * Config options for code cells.
      */
-    readonly code: Partial<CodeEditor.IConfig>;
+    readonly code: Record<string, any>;
     /**
      * Config options for markdown cells.
      */
-    readonly markdown: Partial<CodeEditor.IConfig>;
+    readonly markdown: Record<string, any>;
     /**
      * Config options for raw cells.
      */
-    readonly raw: Partial<CodeEditor.IConfig>;
+    readonly raw: Record<string, any>;
   }
 
   /**
@@ -1015,22 +1015,19 @@ export namespace StaticNotebook {
    */
   export const defaultEditorConfig: IEditorConfig = {
     code: {
-      ...CodeEditor.defaultConfig,
-      lineWrap: 'off',
-      matchBrackets: true,
-      autoClosingBrackets: false
+      lineNumbers: false,
+      lineWrap: false,
+      matchBrackets: true
     },
     markdown: {
-      ...CodeEditor.defaultConfig,
-      lineWrap: 'on',
-      matchBrackets: false,
-      autoClosingBrackets: false
+      lineNumbers: false,
+      lineWrap: true,
+      matchBrackets: false
     },
     raw: {
-      ...CodeEditor.defaultConfig,
-      lineWrap: 'on',
-      matchBrackets: false,
-      autoClosingBrackets: false
+      lineNumbers: false,
+      lineWrap: true,
+      matchBrackets: false
     }
   };
 
@@ -1052,6 +1049,11 @@ export namespace StaticNotebook {
      * Defines the maximum number of outputs per cell.
      */
     maxNumberOutputs: number;
+
+    /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope: 'global' | 'session';
 
     /**
      * Number of cells to render in addition to those
@@ -1123,9 +1125,10 @@ export namespace StaticNotebook {
     scrollPastEnd: true,
     defaultCell: 'code',
     recordTiming: false,
+    inputHistoryScope: 'global',
     maxNumberOutputs: 50,
     showEditorForReadOnlyMarkdown: true,
-    disableDocumentWideUndoRedo: false,
+    disableDocumentWideUndoRedo: true,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
     sideBySideRightMarginOverride: '10px',
@@ -1149,9 +1152,6 @@ export namespace StaticNotebook {
      * notebook content factory is used.
      */
     createCodeCell(options: CodeCell.IOptions): CodeCell {
-      if (!options.contentFactory) {
-        options.contentFactory = this;
-      }
       return new CodeCell(options).initializeState();
     }
 
@@ -1163,9 +1163,6 @@ export namespace StaticNotebook {
      * notebook content factory is used.
      */
     createMarkdownCell(options: MarkdownCell.IOptions): MarkdownCell {
-      if (!options.contentFactory) {
-        options.contentFactory = this;
-      }
       return new MarkdownCell(options).initializeState();
     }
 
@@ -1177,9 +1174,6 @@ export namespace StaticNotebook {
      * notebook content factory is used.
      */
     createRawCell(options: RawCell.IOptions): RawCell {
-      if (!options.contentFactory) {
-        options.contentFactory = this;
-      }
       return new RawCell(options).initializeState();
     }
   }
@@ -1193,11 +1187,6 @@ export namespace StaticNotebook {
      */
     export interface IOptions extends Cell.ContentFactory.IOptions {}
   }
-
-  /**
-   * Default content factory for the static notebook widget.
-   */
-  export const defaultContentFactory: IContentFactory = new ContentFactory();
 }
 
 /**
@@ -1208,10 +1197,19 @@ export class Notebook extends StaticNotebook {
    * Construct a notebook widget.
    */
   constructor(options: Notebook.IOptions) {
-    super(Private.processNotebookOptions(options));
+    super(options);
     this.node.tabIndex = 0; // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-lm-dragscroll', 'true');
+    this.activeCellChanged.connect(this._updateSelectedCells, this);
+    this.selectionChanged.connect(this._updateSelectedCells, this);
+  }
+
+  /**
+   * List of selected and active cells
+   */
+  get selectedCells(): Cell[] {
+    return this._selectedCells;
   }
 
   /**
@@ -1319,12 +1317,17 @@ export class Notebook extends StaticNotebook {
 
     this._activeCellIndex = newValue;
     const cell = this.widgets[newValue] ?? null;
-    if (cell !== this._activeCell) {
+    const cellChanged = cell !== this._activeCell;
+    if (cellChanged) {
       // Post an update request.
       this.update();
       this._activeCell = cell;
+    }
+
+    if (cellChanged || newValue != oldValue) {
       this._activeCellChanged.emit(cell);
     }
+
     if (this.mode === 'edit' && cell instanceof MarkdownCell) {
       cell.rendered = false;
     }
@@ -2688,6 +2691,12 @@ export class Notebook extends StaticNotebook {
   private _checkCacheOnNextResize = false;
 
   private _lastClipboardInteraction: 'copy' | 'cut' | 'paste' | null = null;
+  private _updateSelectedCells(): void {
+    this._selectedCells = this.widgets.filter(cell =>
+      this.isSelectedOrActive(cell)
+    );
+  }
+  private _selectedCells: Cell[] = [];
 }
 
 /**
@@ -2722,8 +2731,6 @@ export namespace Notebook {
      */
     export interface IOptions extends StaticNotebook.ContentFactory.IOptions {}
   }
-
-  export const defaultContentFactory: IContentFactory = new ContentFactory();
 }
 
 /**
@@ -2814,27 +2821,6 @@ namespace Private {
           )
         );
       }
-    }
-  }
-
-  /**
-   * Process the `IOptions` passed to the notebook widget.
-   *
-   * #### Notes
-   * This defaults the content factory to that in the `Notebook` namespace.
-   */
-  export function processNotebookOptions(
-    options: Notebook.IOptions
-  ): Notebook.IOptions {
-    if (options.contentFactory) {
-      return options;
-    } else {
-      return {
-        rendermime: options.rendermime,
-        languagePreference: options.languagePreference,
-        contentFactory: Notebook.defaultContentFactory,
-        mimeTypeService: options.mimeTypeService
-      };
     }
   }
 

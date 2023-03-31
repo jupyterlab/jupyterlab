@@ -1,55 +1,36 @@
 /* eslint-disable @typescript-eslint/ban-types */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-// / <reference types="codemirror"/>
-// / <reference types="codemirror/searchcursor"/>
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IYText } from '@jupyter/ydoc';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
-import { ArrayExt } from '@lumino/algorithm';
-import { UUID } from '@lumino/coreutils';
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-import { Signal } from '@lumino/signaling';
-
-import {
-  indentMore,
-  insertNewlineAndIndent,
-  insertTab
-} from '@codemirror/commands';
+import { insertNewlineAndIndent } from '@codemirror/commands';
 import { ensureSyntaxTree } from '@codemirror/language';
 import {
+  Compartment,
   EditorSelection,
   EditorState,
   Extension,
   Prec,
   StateCommand,
-  Text,
-  Transaction
+  Text
 } from '@codemirror/state';
 import { Command, EditorView, ViewUpdate } from '@codemirror/view';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import { SyntaxNodeRef } from '@lezer/common';
-import { yCollab } from 'y-codemirror.next';
-import { Awareness } from 'y-protocols/awareness';
-import * as Y from 'yjs';
-import './codemirror-ipython';
+import { UUID } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 import './codemirror-ipythongfm';
-import { Configuration } from './editorconfiguration';
-import { Mode } from './mode';
+import { ExtensionsHandler } from './extension';
+import { EditorLanguageRegistry } from './language';
+import {
+  IEditorExtensionRegistry,
+  IEditorLanguageRegistry,
+  IExtensionsHandler
+} from './token';
 
 /**
  * The class name added to CodeMirrorWidget instances.
  */
 const EDITOR_CLASS = 'jp-CodeMirrorEditor';
-
-/**
- * The class name added to read only cell editor widgets.
- */
-const READ_ONLY_CLASS = 'jp-mod-readOnly';
 
 /**
  * The key code for the up arrow key.
@@ -61,12 +42,6 @@ const UP_ARROW = 38;
  */
 const DOWN_ARROW = 40;
 
-interface IYCodeMirrorBinding {
-  text: Y.Text;
-  awareness: Awareness | null;
-  undoManager: Y.UndoManager | null;
-}
-
 /**
  * CodeMirror editor.
  */
@@ -75,10 +50,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Construct a CodeMirror editor.
    */
   constructor(options: CodeMirrorEditor.IOptions) {
-    this._editorConfig = new Configuration.EditorConfiguration();
+    this._languages = options.languages ?? new EditorLanguageRegistry();
+    this._configurator =
+      options.extensionsRegistry?.createNew({
+        ...options,
+        inline: options.inline ?? false
+      }) ?? new ExtensionsHandler();
     const host = (this.host = options.host);
-    this.translator = options.translator || nullTranslator;
-    this._trans = this.translator.load('jupyterlab');
 
     host.classList.add(EDITOR_CLASS);
     host.classList.add('jp-Editor');
@@ -86,34 +64,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     host.addEventListener('blur', this, true);
     host.addEventListener('scroll', this, true);
 
-    this._uuid = options.uuid || UUID.uuid4();
+    this._uuid = options.uuid ?? UUID.uuid4();
 
     const model = (this._model = options.model);
-    const config = options.config || {};
-    const fullConfig = (this._config = {
-      ...CodeMirrorEditor.defaultConfig,
-      ...config
-    });
 
-    this._initializeEditorBinding();
-
-    // Extension for handling DOM events
-    const domEventHandlers = EditorView.domEventHandlers({
+    // Default keydown handler - it will have low priority
+    const onKeyDown = EditorView.domEventHandlers({
       keydown: (event: KeyboardEvent, view: EditorView) => {
-        const index = ArrayExt.findFirstIndex(
-          this._keydownHandlers,
-          handler => {
-            if (handler(this, event) === true) {
-              event.preventDefault();
-              return true;
-            }
-            return false;
-          }
-        );
-        if (index === -1) {
-          return this.onKeydown(event);
-        }
-        return false;
+        return this.onKeydown(event);
       }
     });
 
@@ -123,70 +81,27 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       }
     );
 
-    // The list of internal strings is available at https://codemirror.net/examples/translate/
-    const translation = EditorState.phrases.of({
-      // @codemirror/view
-      'Control character': this._trans.__('Control character'),
-      // @codemirror/commands
-      'Selection deleted': this._trans.__('Selection deleted'),
-      // @codemirror/language
-      'Folded lines': this._trans.__('Folded lines'),
-      'Unfolded lines': this._trans.__('Unfolded lines'),
-      to: this._trans.__('to'),
-      'folded code': this._trans.__('folded code'),
-      unfold: this._trans.__('unfold'),
-      'Fold line': this._trans.__('Fold line'),
-      'Unfold line': this._trans.__('Unfold line'),
-      // @codemirror/search
-      'Go to line': this._trans.__('Go to line'),
-      go: this._trans.__('go'),
-      Find: this._trans.__('Find'),
-      Replace: this._trans.__('Replace'),
-      next: this._trans.__('next'),
-      previous: this._trans.__('previous'),
-      all: this._trans.__('all'),
-      'match case': this._trans.__('match case'),
-      replace: this._trans.__('replace'),
-      'replace all': this._trans.__('replace all'),
-      close: this._trans.__('close'),
-      'current match': this._trans.__('current match'),
-      'replaced $ matches': this._trans.__('replaced $ matches'),
-      'replaced match on line $': this._trans.__('replaced match on line $'),
-      'on line': this._trans.__('on line'),
-      // @codemirror/autocomplete
-      Completions: this._trans.__('Completions'),
-      // @codemirror/lint
-      Diagnostics: this._trans.__('Diagnostics'),
-      'No diagnostics': this._trans.__('No diagnostics')
-    });
-
     this._editor = Private.createEditor(
       host,
-      fullConfig,
-      this._yeditorBinding,
-      this._editorConfig,
-      [Prec.high(domEventHandlers), updateListener, translation]
+      this._configurator,
+      [
+        // We need to set the order to high, otherwise the keybinding for ArrowUp/ArrowDown
+        // will process the event shunting our edge detection code.
+        Prec.high(onKeyDown),
+        updateListener,
+        // Initialize with empty extension
+        this._language.of([]),
+        ...(options.extensions ?? [])
+      ],
+      model.sharedModel.source
     );
 
     this._onMimeTypeChanged();
     this._onCursorActivity();
 
+    this._configurator.configChanged.connect(this.onConfigChanged, this);
     model.mimeTypeChanged.connect(this._onMimeTypeChanged, this);
   }
-
-  /**
-   * Initialize the editor binding.
-   */
-  private _initializeEditorBinding(): void {
-    const sharedModel = this.model.sharedModel as IYText;
-    this._yeditorBinding = {
-      text: sharedModel.ysource,
-      awareness: sharedModel.awareness,
-      undoManager: sharedModel.undoManager
-    };
-  }
-
-  save: () => void;
 
   /**
    * A signal emitted when either the top or bottom edge is requested.
@@ -268,7 +183,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.removeEventListener('focus', this, true);
     this.host.removeEventListener('blur', this, true);
     this.host.removeEventListener('scroll', this, true);
-    this._keydownHandlers.length = 0;
+    this._configurator.dispose();
     Signal.clearData(this);
     this.editor.destroy();
   }
@@ -276,24 +191,22 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   /**
    * Get a config option for the editor.
    */
-  getOption<K extends keyof CodeMirrorEditor.IConfig>(
-    option: K
-  ): CodeMirrorEditor.IConfig[K] {
-    return this._config[option];
+  getOption(option: string): unknown {
+    return this._configurator.getOption(option);
+  }
+
+  /**
+   * Whether the option exists or not.
+   */
+  hasOption(option: string): boolean {
+    return this._configurator.hasOption(option);
   }
 
   /**
    * Set a config option for the editor.
    */
-  setOption<K extends keyof CodeMirrorEditor.IConfig>(
-    option: K,
-    value: CodeMirrorEditor.IConfig[K]
-  ): void {
-    // Don't bother setting the option if it is already the same.
-    if (this._config[option] !== value) {
-      this._config[option] = value;
-      this._editorConfig.reconfigureExtension(this._editor, option, value);
-    }
+  setOption(option: string, value: unknown): void {
+    this._configurator.setOption(option, value);
   }
 
   /**
@@ -304,13 +217,19 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * the costly update at the end, and not after every option
    * is set.
    */
-  setOptions(options: Partial<CodeMirrorEditor.IConfig>): void {
-    this._config = { ...this._config, ...options };
-    this._editorConfig.reconfigureExtensions(this._editor, options);
+  setOptions(options: Record<string, any>): void {
+    this._configurator.setOptions(options);
   }
 
+  /**
+   * Inject an extension into the editor
+   *
+   * @alpha
+   * @experimental
+   * @param ext CodeMirror 6 extension
+   */
   injectExtension(ext: Extension): void {
-    this._editorConfig.injectExtension(this._editor, ext);
+    this._configurator.injectExtension(this._editor, ext);
   }
 
   /**
@@ -357,7 +276,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Clear the undo history.
    */
   clearHistory(): void {
-    this._yeditorBinding?.undoManager?.clear();
+    this.model.sharedModel.clearUndoHistory();
   }
 
   /**
@@ -379,14 +298,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   blur(): void {
     this._editor.contentDOM.blur();
-  }
-
-  /**
-   * Refresh the editor if it is focused;
-   * otherwise postpone refreshing till focusing.
-   */
-  resizeToFit(): void {
-    this._clearHover();
   }
 
   get state(): EditorState {
@@ -420,20 +331,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const fromOffset = this.getOffsetAt(this._toPosition(from));
     const toOffset = this.getOffsetAt(this._toPosition(to));
     return this.state.sliceDoc(fromOffset, toOffset);
-  }
-
-  /**
-   * Add a keydown handler to the editor.
-   *
-   * @param handler - A keydown handler.
-   *
-   * @returns A disposable that can be used to remove the handler.
-   */
-  addKeydownHandler(handler: CodeEditor.KeydownHandler): IDisposable {
-    this._keydownHandlers.push(handler);
-    return new DisposableDelegate(() => {
-      ArrayExt.removeAllWhere(this._keydownHandlers, val => val === handler);
-    });
   }
 
   /**
@@ -674,6 +571,13 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     command(this.editor);
   }
 
+  protected onConfigChanged(
+    configurator: IExtensionsHandler,
+    changes: Record<string, any>
+  ): void {
+    configurator.reconfigureExtensions(this._editor, changes);
+  }
+
   /**
    * Handle keydown events from the editor.
    */
@@ -710,18 +614,23 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Handles a mime type change.
    */
   private _onMimeTypeChanged(): void {
-    const mime = this._model.mimeType;
-
     // TODO: should we provide a hook for when the mode is done being set?
-    void Mode.ensure(mime).then(spec => {
-      if (spec) {
-        this._editorConfig.reconfigureExtension(
-          this._editor,
-          'language',
-          spec.support!
+    this._languages
+      .getLanguage(this._model.mimeType)
+      .then(language => {
+        this._editor.dispatch({
+          effects: this._language.reconfigure(language?.support ?? [])
+        });
+      })
+      .catch(reason => {
+        console.log(
+          `Failed to load language for '${this._model.mimeType}'.`,
+          reason
         );
-      }
-    });
+        this._editor.dispatch({
+          effects: this._language.reconfigure([])
+        });
+      });
   }
 
   /**
@@ -797,9 +706,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       case 'blur':
         this._evtBlur(event as FocusEvent);
         break;
-      case 'scroll':
-        this._evtScroll();
-        break;
       default:
         break;
     }
@@ -824,109 +730,31 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.host.classList.remove('jp-mod-focused');
   }
 
-  /**
-   * Handle `scroll` events for the editor.
-   */
-  private _evtScroll(): void {
-    // Remove any active hover.
-    this._clearHover();
-  }
-
-  /**
-   * Clear the hover for a caret, due to things like
-   * scrolling, resizing, deactivation, etc, where
-   * the position is no longer valid.
-   */
-  private _clearHover(): void {
-    if (this._caretHover) {
-      window.clearTimeout(this._hoverTimeout);
-      document.body.removeChild(this._caretHover);
-      this._caretHover = null;
-    }
-  }
-
-  protected translator: ITranslator;
-  private _trans: TranslationBundle;
-  private _model: CodeEditor.IModel;
+  private _configurator: IExtensionsHandler;
   private _editor: EditorView;
-  private _caretHover: HTMLElement | null;
-  private _config: CodeMirrorEditor.IConfig;
-  private _hoverTimeout: number;
-  private _keydownHandlers = new Array<CodeEditor.KeydownHandler>();
-  private _uuid = '';
   private _isDisposed = false;
-  private _yeditorBinding: IYCodeMirrorBinding | null;
-  private _editorConfig: Configuration.EditorConfiguration;
+  private _language = new Compartment();
+  private _languages: IEditorLanguageRegistry;
+  private _model: CodeEditor.IModel;
+  private _uuid = '';
 }
 
 /**
  * The namespace for `CodeMirrorEditor` statics.
  */
 export namespace CodeMirrorEditor {
-  export interface IConfig extends Configuration.IConfig {}
   /**
    * The options used to initialize a code mirror editor.
    */
   export interface IOptions extends CodeEditor.IOptions {
     /**
-     * The configuration options for the editor.
+     * CodeMirror extensions registry
      */
-    config?: Partial<IConfig>;
-  }
-
-  /**
-   * The options used to set several options at once with reconfigure.
-   */
-  export interface IConfigOptions<K extends keyof IConfig> {
-    K: IConfig[K];
-  }
-
-  /**
-   * The default configuration options for an editor.
-   */
-  export const defaultConfig: Required<IConfig> = {
-    ...CodeEditor.defaultConfig,
-    mode: 'null',
-    theme: 'jupyter',
-    smartIndent: true,
-    electricChars: true,
-    keyMap: 'default',
-    extraKeys: null,
-    gutters: [],
-    fixedGutter: true,
-    showCursorWhenSelecting: false,
-    coverGutterNextToScrollbar: false,
-    dragDrop: true,
-    lineSeparator: null,
-    scrollbarStyle: 'native',
-    lineWiseCopyCut: true,
-    scrollPastEnd: false,
-    styleActiveLine: false,
-    styleSelectedText: true,
-    selectionPointer: false,
-    handlePaste: true
-  };
-
-  /**
-   * Indent or insert a tab as appropriate.
-   */
-  export function indentMoreOrInsertTab(target: {
-    state: EditorState;
-    dispatch: (transaction: Transaction) => void;
-  }): boolean {
-    const arg = { state: target.state, dispatch: target.dispatch };
-    const from = target.state.selection.main.from;
-    const to = target.state.selection.main.to;
-    if (from != to) {
-      return indentMore(arg);
-    }
-    const line = target.state.doc.lineAt(from);
-    const before = target.state.doc.slice(line.from, from).toString();
-    if (/^\s*$/.test(before)) {
-      return indentMore(arg);
-    } else {
-      return insertTab(arg);
-    }
+    extensionsRegistry?: IEditorExtensionRegistry;
+    /**
+     * CodeMirror languages registry
+     */
+    languages?: IEditorLanguageRegistry;
   }
 }
 
@@ -936,21 +764,12 @@ export namespace CodeMirrorEditor {
 namespace Private {
   export function createEditor(
     host: HTMLElement,
-    config: CodeMirrorEditor.IConfig,
-    ybinding: IYCodeMirrorBinding | null,
-    editorConfig: Configuration.EditorConfiguration,
-    additionalExtensions: Extension[]
+    editorConfig: IExtensionsHandler,
+    additionalExtensions: Extension[],
+    doc?: string
   ): EditorView {
-    const extensions = editorConfig.getInitialExtensions(config);
-    if (ybinding) {
-      extensions.push(
-        yCollab(ybinding.text, ybinding.awareness, {
-          undoManager: ybinding.undoManager ?? false
-        })
-      );
-    }
+    const extensions = editorConfig.getInitialExtensions();
     extensions.push(...additionalExtensions);
-    const doc = ybinding?.text.toString();
     const view = new EditorView({
       state: EditorState.create({
         doc,
@@ -958,10 +777,6 @@ namespace Private {
       }),
       parent: host
     });
-
-    if (config.readOnly) {
-      view.dom.classList.add(READ_ONLY_CLASS);
-    }
 
     return view;
   }

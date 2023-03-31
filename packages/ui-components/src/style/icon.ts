@@ -139,16 +139,6 @@ export namespace LabIconStyle {
      * the array, giving precedence to the rightmost values.
      */
     stylesheet?: ISheetResolvable | ISheetResolvable[];
-
-    /**
-     * @deprecated use stylesheet instead
-     */
-    kind?: IBuiltin;
-
-    /**
-     * @deprecated use elementPosition instead
-     */
-    justify?: 'center' | 'right' | 'left';
   }
 
   /**
@@ -274,10 +264,6 @@ export namespace LabIconStyle {
         $nest: {
           '.lm-DockPanel-tabBar &': {
             marginRight: '4px'
-          },
-          '#tab-manager &': {
-            marginRight: '2px',
-            position: 'relative'
           }
         }
       },
@@ -286,10 +272,6 @@ export namespace LabIconStyle {
           '.lm-DockPanel-tabBar &': {
             height: '14px',
             width: '14px'
-          },
-          '#tab-manager &': {
-            height: '16px',
-            width: '16px'
           }
         }
       },
@@ -529,24 +511,7 @@ export namespace LabIconStyle {
       return '';
     }
 
-    let {
-      elementPosition,
-      elementSize,
-      stylesheet,
-      kind,
-      justify,
-      ...elementCSS
-    } = props;
-
-    // DEPRECATED: alias kind => stylesheet
-    if (!stylesheet) {
-      stylesheet = kind;
-    }
-
-    // DEPRECATED: alias justify => elementPosition
-    if (!elementPosition) {
-      elementPosition = justify;
-    }
+    let { elementPosition, elementSize, stylesheet, ...elementCSS } = props;
 
     // add option args with defined values to overrides
     const options = {

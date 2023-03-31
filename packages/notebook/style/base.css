@@ -28,6 +28,8 @@
 | Notebook
 |----------------------------------------------------------------------------*/
 
+/* stylelint-disable selector-max-class */
+
 .jp-NotebookPanel {
   display: block;
   height: 100%;
@@ -227,20 +229,16 @@
   overflow: auto;
 }
 
-.jp-NotebookTools-tool {
-  padding: 0 12px;
-}
-
 .jp-ActiveCellTool {
-  padding: 12px;
+  padding: 12px 0;
   display: flex;
 }
 
-.jp-ActiveCell-Content {
+.jp-ActiveCellTool-Content {
   flex: 1 1 auto;
 }
 
-.jp-ActiveCellTool .jp-Cell-Content {
+.jp-ActiveCellTool .jp-ActiveCellTool-CellContent {
   background: var(--jp-cell-editor-background);
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   border-radius: 0;
@@ -251,7 +249,7 @@
   min-width: calc(var(--jp-cell-prompt-width) * 0.75);
 }
 
-.jp-Cell-Content > pre {
+.jp-ActiveCellTool-CellContent > pre {
   padding: 5px 4px;
   margin: 0;
   white-space: normal;

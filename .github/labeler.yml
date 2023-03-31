@@ -57,8 +57,6 @@ pkg:cells:
   - packages/cells/*
 
 pkg:celltags:
-  - packages/celltags/**/*
-  - packages/celltags/*
   - packages/celltags-extension/**/*
   - packages/celltags-extension/*
 
@@ -198,11 +196,9 @@ pkg:markdownviewer:
   - packages/markdownviewer-extension/**/*
   - packages/markdownviewer-extension/*
 
-pkg:mathjax2:
-  - packages/mathjax2/**/*
-  - packages/mathjax2/*
-  - packages/mathjax2-extension/**/*
-  - packages/mathjax2-extension/*
+pkg:mathjax:
+  - packages/mathjax-extension/**/*
+  - packages/mathjax-extension/*
 
 pkg:notebook:
   - packages/notebook/**/*

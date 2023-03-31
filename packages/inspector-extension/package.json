@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/inspector-extension",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-beta.0",
   "description": "JupyterLab - Code Inspector Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,19 +38,19 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/apputils": "^4.0.0-alpha.19",
-    "@jupyterlab/console": "^4.0.0-alpha.19",
-    "@jupyterlab/inspector": "^4.0.0-alpha.19",
-    "@jupyterlab/launcher": "^4.0.0-alpha.19",
-    "@jupyterlab/notebook": "^4.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.34"
+    "@jupyterlab/application": "^4.0.0-beta.0",
+    "@jupyterlab/apputils": "^4.0.0-beta.0",
+    "@jupyterlab/console": "^4.0.0-beta.0",
+    "@jupyterlab/inspector": "^4.0.0-beta.0",
+    "@jupyterlab/launcher": "^4.0.0-beta.0",
+    "@jupyterlab/notebook": "^4.0.0-beta.0",
+    "@jupyterlab/translation": "^4.0.0-beta.0",
+    "@jupyterlab/ui-components": "^4.0.0-beta.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.2"
   },
   "publishConfig": {
     "access": "public"

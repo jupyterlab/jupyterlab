@@ -1,8 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { editorServices } from '@jupyterlab/codemirror';
+import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 import { CodeCellModel } from './model';
 import { Cell } from './widget';
 
@@ -11,6 +15,16 @@ import { Cell } from './widget';
  */
 
 export namespace NBTestUtils {
+  const editorServices: IEditorServices = (function () {
+    const languages = new EditorLanguageRegistry();
+    const factoryService = new CodeMirrorEditorFactory({ languages });
+    const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+    return {
+      factoryService,
+      mimeTypeService
+    };
+  })();
+
   export const editorFactory =
     editorServices.factoryService.newInlineEditor.bind(
       editorServices.factoryService
@@ -36,7 +50,7 @@ export namespace NBTestUtils {
    */
   export function createCellEditor(model?: CodeCellModel): CodeEditorWrapper {
     return new CodeEditorWrapper({
-      model: model || new CodeCellModel({}),
+      model: model ?? new CodeCellModel(),
       factory: editorFactory
     });
   }

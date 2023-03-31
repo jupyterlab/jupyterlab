@@ -86,6 +86,11 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               <div>{entry.name}</div>
             )}
           </div>
+          <div className="jp-extensionmanager-entry-version">
+            <div title={trans.__('Version: %1', entry.installed_version)}>
+              {entry.installed_version}
+            </div>
+          </div>
           {entry.installed && !entry.allowed && (
             <ToolbarButtonComponent
               icon={infoIcon}
@@ -125,11 +130,15 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       {ListModel.entryHasUpdate(entry) && (
                         <Button
                           onClick={() => props.performAction!('install', entry)}
-                          title={trans.__('Update "%1"', entry.name)}
+                          title={trans.__(
+                            'Update "%1" to "%2"',
+                            entry.name,
+                            entry.latest_version
+                          )}
                           minimal
                           small
                         >
-                          {trans.__('Update')}
+                          {trans.__('Update to %1', entry.latest_version)}
                         </Button>
                       )}
                       <Button
@@ -248,7 +257,7 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
             previousLabel={'<'}
             nextLabel={'>'}
             breakLabel="..."
-            breakClassName={'break-me'}
+            breakClassName={'break'}
             initialPage={(props.initialPage ?? 1) - 1}
             pageCount={props.numPages}
             marginPagesDisplayed={2}
@@ -256,7 +265,6 @@ function ListView(props: ListView.IProperties): React.ReactElement<any> {
             onPageChange={(data: { selected: number }) =>
               props.onPage(data.selected + 1)
             }
-            containerClassName={'pagination'}
             activeClassName={'active'}
           />
         </div>
@@ -650,7 +658,7 @@ export class ExtensionsPanel extends SidePanel {
       (this.content as AccordionPanel).collapse(2);
     }
 
-    this.model.stateChanged.connect(this._onDisclaimedChanged, this);
+    this.model.stateChanged.connect(this._onStateChanged, this);
   }
 
   /**
@@ -660,7 +668,7 @@ export class ExtensionsPanel extends SidePanel {
     if (this.isDisposed) {
       return;
     }
-    this.model.stateChanged.disconnect(this._onDisclaimedChanged, this);
+    this.model.stateChanged.disconnect(this._onStateChanged, this);
     super.dispose();
   }
 
@@ -726,13 +734,13 @@ export class ExtensionsPanel extends SidePanel {
     super.onActivateRequest(msg);
   }
 
-  private _onDisclaimedChanged(): void {
+  private _onStateChanged(): void {
     if (!this._wasDisclaimed && this.model.isDisclaimed) {
       (this.content as AccordionPanel).collapse(0);
       (this.content as AccordionPanel).expand(1);
       (this.content as AccordionPanel).expand(2);
-      (this.content.layout as AccordionLayout).setRelativeSizes([0, 1, 1]);
     }
+    this._wasDisclaimed = this.model.isDisclaimed;
   }
 
   /**

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "7.0.0-alpha.19",
+  "version": "7.0.0-beta.0",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -46,27 +46,28 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter/ydoc": "^0.3.1",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.19",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/statedb": "^4.0.0-alpha.19",
-    "@lumino/coreutils": "^2.0.0-beta.0",
-    "@lumino/disposable": "^2.0.0-beta.1",
-    "@lumino/polling": "^2.0.0-beta.0",
-    "@lumino/properties": "^2.0.0-beta.0",
-    "@lumino/signaling": "^2.0.0-beta.1",
+    "@jupyter/ydoc": "^0.3.4",
+    "@jupyterlab/coreutils": "^6.0.0-beta.0",
+    "@jupyterlab/nbformat": "^4.0.0-beta.0",
+    "@jupyterlab/settingregistry": "^4.0.0-beta.0",
+    "@jupyterlab/statedb": "^4.0.0-beta.0",
+    "@lumino/coreutils": "^2.0.0",
+    "@lumino/disposable": "^2.0.0",
+    "@lumino/polling": "^2.0.0",
+    "@lumino/properties": "^2.0.0",
+    "@lumino/signaling": "^2.0.0",
     "ws": "^8.11.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.19",
+    "@jupyterlab/testing": "^4.0.0-beta.0",
     "@types/jest": "^29.2.0",
     "@types/ws": "^8.5.3",
+    "jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.0-beta",
-    "webpack": "^5.72.0",
-    "webpack-cli": "^5.0.0"
+    "typescript": "~5.0.2",
+    "webpack": "^5.76.1",
+    "webpack-cli": "^5.0.1"
   },
   "publishConfig": {
     "access": "public"

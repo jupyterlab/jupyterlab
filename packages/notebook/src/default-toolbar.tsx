@@ -6,7 +6,7 @@ import {
   Dialog,
   ISessionContext,
   ISessionContextDialogs,
-  sessionContextDialogs,
+  SessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -190,13 +190,19 @@ export namespace ToolbarItems {
    */
   export function createRunButton(
     panel: NotebookPanel,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): ReactWidget {
-    const trans = (translator || nullTranslator).load('jupyterlab');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: runIcon,
       onClick: () => {
-        void NotebookActions.runAndAdvance(panel.content, panel.sessionContext);
+        void NotebookActions.runAndAdvance(
+          panel.content,
+          panel.sessionContext,
+          sessionDialogs,
+          translator
+        );
       },
       tooltip: trans.__('Run the selected cells and advance')
     });
@@ -212,18 +218,22 @@ export namespace ToolbarItems {
     dialogs?: ISessionContext.IDialogs,
     translator?: ITranslator
   ): ReactWidget {
-    const trans = (translator || nullTranslator).load('jupyterlab');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: fastForwardIcon,
       onClick: () => {
-        void (dialogs ?? sessionContextDialogs)
-          .restart(panel.sessionContext, translator)
-          .then(restarted => {
-            if (restarted) {
-              void NotebookActions.runAll(panel.content, panel.sessionContext);
-            }
-            return restarted;
-          });
+        const dialogs_ = dialogs ?? new SessionContextDialogs({ translator });
+        void dialogs_.restart(panel.sessionContext).then(restarted => {
+          if (restarted) {
+            void NotebookActions.runAll(
+              panel.content,
+              panel.sessionContext,
+              dialogs_,
+              translator
+            );
+          }
+          return restarted;
+        });
       },
       tooltip: trans.__('Restart the kernel, then re-run the whole notebook')
     });
@@ -249,6 +259,8 @@ export namespace ToolbarItems {
 
   /**
    * Get the default toolbar items for panel
+   *
+   * @deprecated since v4
    */
   export function getDefaultItems(
     panel: NotebookPanel,
@@ -261,7 +273,10 @@ export namespace ToolbarItems {
       { name: 'cut', widget: createCutButton(panel, translator) },
       { name: 'copy', widget: createCopyButton(panel, translator) },
       { name: 'paste', widget: createPasteButton(panel, translator) },
-      { name: 'run', widget: createRunButton(panel, translator) },
+      {
+        name: 'run',
+        widget: createRunButton(panel, sessionDialogs, translator)
+      },
       {
         name: 'interrupt',
         widget: AppToolbar.createInterruptButton(

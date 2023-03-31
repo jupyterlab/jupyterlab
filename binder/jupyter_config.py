@@ -47,5 +47,6 @@ c.ServerApp.log_level = logging.DEBUG
 
 c.LabApp.dev_mode = True
 c.LabApp.extensions_in_dev_mode = True
+c.LabApp.skip_dev_build = True
 
 c.ContentsManager.allow_hidden = True

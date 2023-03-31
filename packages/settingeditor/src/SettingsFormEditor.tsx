@@ -156,7 +156,6 @@ export class SettingsFormEditor extends React.Component<
 
   /**
    * Handler for edits made in the form editor.
-   * @param data - Form data sent from the form editor
    */
   handleChange(): void {
     // Prevent unnecessary save when opening settings that haven't been modified.

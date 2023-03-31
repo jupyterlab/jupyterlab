@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/running-extension",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-beta.0",
   "description": "JupyterLab - Running Sessions Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,23 +38,23 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.19",
-    "@jupyterlab/running": "^4.0.0-alpha.19",
-    "@jupyterlab/services": "^7.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
-    "@lumino/commands": "^2.0.0-beta.1",
-    "@lumino/polling": "^2.0.0-beta.0",
-    "@lumino/signaling": "^2.0.0-beta.1",
-    "@lumino/widgets": "^2.0.0-beta.1"
+    "@jupyterlab/application": "^4.0.0-beta.0",
+    "@jupyterlab/coreutils": "^6.0.0-beta.0",
+    "@jupyterlab/docregistry": "^4.0.0-beta.0",
+    "@jupyterlab/rendermime-interfaces": "^3.8.0-beta.0",
+    "@jupyterlab/running": "^4.0.0-beta.0",
+    "@jupyterlab/services": "^7.0.0-beta.0",
+    "@jupyterlab/translation": "^4.0.0-beta.0",
+    "@jupyterlab/ui-components": "^4.0.0-beta.0",
+    "@lumino/commands": "^2.0.0",
+    "@lumino/polling": "^2.0.0",
+    "@lumino/signaling": "^2.0.0",
+    "@lumino/widgets": "^2.0.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.2"
   },
   "publishConfig": {
     "access": "public"

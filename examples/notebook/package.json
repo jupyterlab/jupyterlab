@@ -1,28 +1,29 @@
 {
   "name": "@jupyterlab/example-notebook",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-beta.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/apputils": "^4.0.0-alpha.19",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.19",
-    "@jupyterlab/completer": "^4.0.0-alpha.19",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/docmanager": "^4.0.0-alpha.19",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/documentsearch": "^4.0.0-alpha.19",
-    "@jupyterlab/mathjax2": "^4.0.0-alpha.19",
-    "@jupyterlab/notebook": "^4.0.0-alpha.19",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.19",
-    "@jupyterlab/services": "^7.0.0-alpha.19",
-    "@jupyterlab/theme-light-extension": "^4.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19",
-    "@lumino/commands": "^2.0.0-beta.1",
-    "@lumino/widgets": "^2.0.0-beta.1"
+    "@jupyter/ydoc": "^0.3.4",
+    "@jupyterlab/application": "^4.0.0-beta.0",
+    "@jupyterlab/apputils": "^4.0.0-beta.0",
+    "@jupyterlab/codemirror": "^4.0.0-beta.0",
+    "@jupyterlab/completer": "^4.0.0-beta.0",
+    "@jupyterlab/coreutils": "^6.0.0-beta.0",
+    "@jupyterlab/docmanager": "^4.0.0-beta.0",
+    "@jupyterlab/docregistry": "^4.0.0-beta.0",
+    "@jupyterlab/documentsearch": "^4.0.0-beta.0",
+    "@jupyterlab/mathjax-extension": "^4.0.0-beta.0",
+    "@jupyterlab/notebook": "^4.0.0-beta.0",
+    "@jupyterlab/rendermime": "^4.0.0-beta.0",
+    "@jupyterlab/services": "^7.0.0-beta.0",
+    "@jupyterlab/theme-light-extension": "^4.0.0-beta.0",
+    "@jupyterlab/translation": "^4.0.0-beta.0",
+    "@lumino/commands": "^2.0.0",
+    "@lumino/widgets": "^2.0.0"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
@@ -30,9 +31,9 @@
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~3.0.0",
     "style-loader": "~3.3.1",
-    "typescript": "~5.0.0-beta",
-    "webpack": "^5.72.0",
-    "webpack-cli": "^5.0.0",
+    "typescript": "~5.0.2",
+    "webpack": "^5.76.1",
+    "webpack-cli": "^5.0.1",
     "whatwg-fetch": "^3.0.0"
   }
 }

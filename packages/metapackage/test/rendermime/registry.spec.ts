@@ -1,9 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { SessionContext } from '@jupyterlab/apputils';
-import { PageConfig } from '@jupyterlab/coreutils';
-import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
 import {
   IRenderMime,
   MimeModel,
@@ -101,14 +99,10 @@ describe('rendermime/registry', () => {
       });
 
       it('should be clonable', () => {
-        const args = {
-          url: PageConfig.getOption('mathjaxUrl'),
-          config: PageConfig.getOption('mathjaxConfig')
-        };
-        const typesetter1 = new MathJaxTypesetter(args);
+        const typesetter1 = new MathJaxTypesetter();
         const clone1 = r.clone({ latexTypesetter: typesetter1 });
         expect(clone1.latexTypesetter).toBe(typesetter1);
-        const typesetter2 = new MathJaxTypesetter(args);
+        const typesetter2 = new MathJaxTypesetter();
         const clone2 = r.clone({ latexTypesetter: typesetter2 });
         expect(clone2.latexTypesetter).toBe(typesetter2);
       });
@@ -123,7 +117,7 @@ describe('rendermime/registry', () => {
       it('should raise an error for an unregistered mime type', () => {
         expect(() => {
           r.createRenderer('text/fizz');
-        }).toThrowError();
+        }).toThrow();
       });
 
       it('should render json data', async () => {
@@ -319,7 +313,6 @@ describe('rendermime/registry', () => {
 
     describe('.UrlResolver', () => {
       let manager: ServiceManager.IManager;
-      let resolverSession: RenderMimeRegistry.UrlResolver;
       let resolverPath: RenderMimeRegistry.UrlResolver;
       let contents: Contents.IManager;
       let session: Session.ISessionConnection;
@@ -338,10 +331,6 @@ describe('rendermime/registry', () => {
           path: path,
           type: 'test'
         });
-        resolverSession = new RenderMimeRegistry.UrlResolver({
-          session,
-          contents: manager.contents
-        });
         resolverPath = new RenderMimeRegistry.UrlResolver({
           path: path,
           contents: manager.contents
@@ -354,40 +343,14 @@ describe('rendermime/registry', () => {
 
       describe('#constructor', () => {
         it('should create a UrlResolver instance', () => {
-          expect(resolverSession).toBeInstanceOf(
-            RenderMimeRegistry.UrlResolver
-          );
           expect(resolverPath).toBeInstanceOf(RenderMimeRegistry.UrlResolver);
         });
       });
 
       describe('.path', () => {
-        it('should give precedence to the explicit path over the session', async () => {
-          const resolver = new RenderMimeRegistry.UrlResolver({
-            session: new SessionContext({
-              sessionManager: manager.sessions,
-              specsManager: manager.kernelspecs,
-              path: pathParent + '/pr%25 ' + UUID.uuid4(),
-              kernelPreference: { canStart: false, shouldStart: false }
-            }),
-            contents: manager.contents,
-            path: '/some/path/file.txt'
-          });
-          expect(await resolver.resolveUrl('./foo')).toContain('some/path/foo');
-        });
-
-        it('should fall back to the session path if only the session is given', () => {
-          expect(resolverSession.path).toBe(path);
-        });
-
         it('should allow the path to be changed', async () => {
           const resolver = new RenderMimeRegistry.UrlResolver({
-            session: new SessionContext({
-              sessionManager: manager.sessions,
-              specsManager: manager.kernelspecs,
-              path: pathParent + '/pr%25 ' + UUID.uuid4(),
-              kernelPreference: { canStart: false, shouldStart: false }
-            }),
+            path: pathParent + '/pr%25 ' + UUID.uuid4(),
             contents: manager.contents
           });
           resolver.path = '/some/path/file.txt';
@@ -405,9 +368,6 @@ describe('rendermime/registry', () => {
 
       describe('#resolveUrl()', () => {
         it('should resolve a relative url', async () => {
-          expect(await resolverSession.resolveUrl('./foo')).toContain(
-            urlParent + '/foo'
-          );
           expect(await resolverPath.resolveUrl('./foo')).toContain(
             urlParent + '/foo'
           );
@@ -415,12 +375,7 @@ describe('rendermime/registry', () => {
 
         it('should resolve a relative url with no active session', async () => {
           const resolver = new RenderMimeRegistry.UrlResolver({
-            session: new SessionContext({
-              sessionManager: manager.sessions,
-              specsManager: manager.kernelspecs,
-              path: pathParent + '/pr%25 ' + UUID.uuid4(),
-              kernelPreference: { canStart: false, shouldStart: false }
-            }),
+            path: pathParent + '/pr%25 ' + UUID.uuid4(),
             contents: manager.contents
           });
           const path = await resolver.resolveUrl('./foo');
@@ -428,18 +383,12 @@ describe('rendermime/registry', () => {
         });
 
         it('should ignore urls that have a protocol', async () => {
-          expect(await resolverSession.resolveUrl('http://foo')).toContain(
-            'http://foo'
-          );
           expect(await resolverPath.resolveUrl('http://foo')).toContain(
             'http://foo'
           );
         });
 
         it('should resolve URLs with escapes', async () => {
-          expect(
-            await resolverSession.resolveUrl('has%20space%23hash')
-          ).toContain(urlParent + '/has%20space%23hash');
           expect(await resolverPath.resolveUrl('has%20space%23hash')).toContain(
             urlParent + '/has%20space%23hash'
           );

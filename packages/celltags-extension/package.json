@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/celltags-extension",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-beta.0",
   "description": "An extension for manipulating tags in cell metadata",
   "keywords": [
     "jupyter",
@@ -31,7 +31,8 @@
     "lib/*.{d.ts,js,js.map}",
     "style/*.css",
     "style/index.js",
-    "src/**/*.{ts,tsx}"
+    "src/**/*.{ts,tsx}",
+    "schema/*.json"
   ],
   "scripts": {
     "build": "tsc",
@@ -39,20 +40,24 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/celltags": "^4.0.0-alpha.19",
-    "@jupyterlab/notebook": "^4.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19"
+    "@jupyterlab/application": "^4.0.0-beta.0",
+    "@jupyterlab/notebook": "^4.0.0-beta.0",
+    "@jupyterlab/translation": "^4.0.0-beta.0",
+    "@jupyterlab/ui-components": "^4.0.0-beta.0",
+    "@lumino/algorithm": "^2.0.0",
+    "@rjsf/utils": "^5.1.0",
+    "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.2"
   },
   "publishConfig": {
     "access": "public"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "schemaDir": "schema"
   },
   "styleModule": "style/index.js"
 }

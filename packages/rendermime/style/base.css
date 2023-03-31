@@ -329,6 +329,8 @@
 
 /* Lists */
 
+/* stylelint-disable selector-max-type, selector-max-compound-selectors */
+
 .jp-RenderedHTMLCommon ul:not(.list-inline),
 .jp-RenderedHTMLCommon ol:not(.list-inline) {
   padding-left: 2em;
@@ -377,6 +379,8 @@
 .jp-RenderedHTMLCommon ol ol {
   margin-bottom: 0;
 }
+
+/* stylelint-enable selector-max-type, selector-max-compound-selectors */
 
 .jp-RenderedHTMLCommon hr {
   color: var(--jp-border-color2);

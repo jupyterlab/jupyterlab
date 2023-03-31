@@ -18,13 +18,13 @@ describe('validate', () => {
     it('should fail on missing data', () => {
       const model = JSON.parse(JSON.stringify(DEFAULT_FILE));
       delete model['path'];
-      expect(() => validateContentsModel(model)).toThrowError();
+      expect(() => validateContentsModel(model)).toThrow();
     });
 
     it('should fail on incorrect data', () => {
       const model = JSON.parse(JSON.stringify(DEFAULT_FILE));
       model.type = 1;
-      expect(() => validateContentsModel(model)).toThrowError();
+      expect(() => validateContentsModel(model)).toThrow();
     });
   });
 
@@ -37,12 +37,12 @@ describe('validate', () => {
 
     it('should fail on missing data', () => {
       const model = { id: 'foo' };
-      expect(() => validateCheckpointModel(model as any)).toThrowError();
+      expect(() => validateCheckpointModel(model as any)).toThrow();
     });
 
     it('should fail on incorrect data', () => {
       const model = { id: 1, last_modified: '1' };
-      expect(() => validateCheckpointModel(model as any)).toThrowError();
+      expect(() => validateCheckpointModel(model as any)).toThrow();
     });
   });
 });

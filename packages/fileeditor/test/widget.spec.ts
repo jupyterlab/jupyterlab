@@ -3,7 +3,8 @@
 
 import {
   CodeMirrorEditorFactory,
-  CodeMirrorMimeTypeService
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
 } from '@jupyterlab/codemirror';
 import {
   Context,
@@ -49,7 +50,16 @@ class LogFileEditor extends FileEditor {
 describe('fileeditorcodewrapper', () => {
   const factoryService = new CodeMirrorEditorFactory();
   const modelFactory = new TextModelFactory();
-  const mimeTypeService = new CodeMirrorMimeTypeService();
+  const languages = (() => {
+    const registry = new EditorLanguageRegistry();
+    EditorLanguageRegistry.getDefaultLanguages()
+      .filter(language => ['Julia', 'Python'].includes(language.name))
+      .forEach(language => {
+        registry.addLanguage(language);
+      });
+    return registry;
+  })();
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
   let context: Context<DocumentRegistry.ICodeModel>;
   let manager: ServiceManager.IManager;
 

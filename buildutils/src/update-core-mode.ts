@@ -22,7 +22,7 @@ data['jupyterlab']['linkedPackages'] = {};
 const staging = './jupyterlab/staging';
 
 // Ensure a clean staging directory.
-const keep = ['yarn.js', '.yarnrc'];
+const keep = ['yarn.js', '.yarnrc.yml'];
 fs.readdirSync(staging).forEach(name => {
   if (keep.indexOf(name) === -1) {
     fs.removeSync(path.join(staging, name));
@@ -62,13 +62,9 @@ fs.copySync(
   path.join('.', 'yarn.lock'),
   path.join('.', 'jupyterlab', 'staging', 'yarn.lock')
 );
+process.env.YARN_UNSAFE_HTTP_WHITELIST = '0.0.0.0';
 utils.run('jlpm', { cwd: staging });
-try {
-  utils.run('jlpm yarn-deduplicate -s fewer --fail', { cwd: staging });
-} catch {
-  // re-run install if we deduped packages!
-  utils.run('jlpm', { cwd: staging });
-}
+utils.run('jlpm dedupe', { cwd: staging });
 
 // Build the core assets.
 utils.run('jlpm run build:prod:release', { cwd: staging });

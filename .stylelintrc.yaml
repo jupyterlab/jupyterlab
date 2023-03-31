@@ -30,3 +30,14 @@ rules:
   selector-pseudo-class-no-unknown: null
   selector-pseudo-element-no-unknown: null
   selector-not-notation: null
+  # disallow use of more than one bare HTML tag like `div span` to avoid performance regression,
+  # while allowing compounded HTML tags like `button.jp-Button`
+  selector-max-type:
+    - 1
+    - ignore: "compounded"
+  # matching complex selectors is expensive
+  selector-max-class: 4
+  # TODO: decrease max-compound to 3
+  selector-max-compound-selectors: 4
+  # TODO: decrease to 0
+  selector-max-universal: 1

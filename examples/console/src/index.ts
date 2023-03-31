@@ -18,7 +18,13 @@ import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { editorServices } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
 
 import { ConsolePanel } from '@jupyterlab/console';
 
@@ -32,6 +38,8 @@ import {
   nullTranslator,
   TranslationManager
 } from '@jupyterlab/translation';
+
+import { IYText } from '@jupyter/ydoc';
 
 async function main(): Promise<any> {
   const translator = new TranslationManager();
@@ -84,14 +92,50 @@ function startApp(
 
   const rendermime = new RenderMimeRegistry({ initialFactories });
 
-  const editorFactory = editorServices.factoryService.newInlineEditor;
+  const editorExtensions = () => {
+    const registry = new EditorExtensionRegistry();
+    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions(
+      {}
+    )) {
+      registry.addExtension(extensionFactory);
+    }
+    registry.addExtension({
+      name: 'shared-model-binding',
+      factory: options => {
+        const sharedModel = options.model.sharedModel as IYText;
+        return EditorExtensionRegistry.createImmutableExtension(
+          ybinding({
+            ytext: sharedModel.ysource,
+            undoManager: sharedModel.undoManager ?? undefined
+          })
+        );
+      }
+    });
+    return registry;
+  };
+
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(language =>
+      ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
+    )
+    .forEach(language => {
+      languages.addLanguage(language);
+    });
+  const factoryService = new CodeMirrorEditorFactory({
+    extensions: editorExtensions(),
+    languages
+  });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+  const editorFactory = factoryService.newInlineEditor;
   const contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
+
   const consolePanel = new ConsolePanel({
     rendermime,
     manager,
     path,
     contentFactory,
-    mimeTypeService: editorServices.mimeTypeService
+    mimeTypeService
   });
   consolePanel.title.label = trans.__('Console');
 

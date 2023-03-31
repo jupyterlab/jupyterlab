@@ -54,11 +54,11 @@ The recommended time period for the Release Candidate phase is a minimum of 1 we
 
 ## Automated Releases with the Jupyter Releaser
 
-The recommended way to make a release is to use [`jupyter_releaser`](https://github.com/jupyter-server/jupyter_releaser#checklist-for-adoption).
+The recommended way to make a release is to use [`jupyter_releaser`](https://jupyter-releaser.readthedocs.io/en/latest/how_to_guides/convert_repo_from_repo.html).
 
 ### Workflow
 
-The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_releaser.html#making-your-first-release-from-jupyter-releaser. There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
+The full process is documented in https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_repo.html. There is a recording of the full workflow on [YouTube](https://youtu.be/cdRvvyZvYKM).
 
 Here is a quick summary of the different steps.
 
@@ -69,11 +69,13 @@ It is good practice to let other maintainers and users know when starting a new 
 For this we usually leave a small message in the `jupyterlab` room on Gitter: https://gitter.im/jupyterlab/jupyterlab.
 Once the release is done, we also post a message with a link to the release notes, which include the changelog.
 
-#### Prep Release
+#### 1. Prep Release
 
 The first step is to generate a new changelog entry for the upcoming release.
 
-We use the "Prep Release" workflow as documented here: https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_releaser.html#prep-release
+We use the "Prep Release" workflow as documented here: https://jupyter-releaser.readthedocs.io/en/latest/get_started/making_release_from_repo.html#prep-release
+
+Go the Actions tab of the JupyterLab Repo and click on the `1. Prep Release` workflow: https://github.com/jupyterlab/jupyterlab/actions
 
 The workflow takes a couple of input parameters. Here is an overview with example values:
 
@@ -88,17 +90,17 @@ The version spec follows the specification documented below in the [Bump Version
 
 We can use `next` when making a `patch` release or a `build` pre-release.
 
-Click on "Run workflow", then wait for:
+Click on "Run workflow", then once completed:
 
-1. the PR to be created on the repo. Example: https://github.com/jupyterlab/jupyterlab/pull/11422
-1. Tests to pass
-1. Merge the changelog PR
+1. Go to the Releases: https://github.com/jupyterlab/jupyterlab/releases
+1. Check the draft GitHub Release has been created
+1. Make edits to the changelog if needed. ⚠️ If you make edits to the content of the GitHub Release, then don't forget to click on "Save Draft" and not "Publish Release".
 
-### Full Release
+### 2. Publish Release
 
 #### PyPI and npm tokens
 
-Before running the "Full Release" workflow, make sure you have been added to:
+Before running the "Publish Release" workflow, make sure you have been added to:
 
 - the `jupyterlab` project on PyPI: https://pypi.org/project/jupyterlab/
 - the `@jupyterlab` organization on npm: https://www.npmjs.com/settings/jupyterlab/packages
@@ -107,18 +109,17 @@ Then create the PyPI and npm tokens. Check out the links in the [Jupyter Release
 
 #### Running the workflow
 
-On the `jupyter_releaser` fork, select the "Full Release" workflow.
+On the [Actions](https://github.com/jupyterlab/jupyterlab/actions) page, select the "2. Publish Release" workflow.
 
 Fill in the information as mentioned in the body of the changelog PR, for example:
 
-| Input        | Value                 |
-| ------------ | --------------------- |
-| Target       | jupyterlab/jupyterlab |
-| Branch       | master                |
-| Version Spec | next                  |
-| Since        | v4.0.0a15             |
+| Input                                 | Value      |
+| ------------------------------------- | ---------- |
+| The target branch                     | master     |
+| The URL of the draft GitHub release   |            |
+| Comma separated list of steps to skip | ensure-sha |
 
-The "Full Release" workflow:
+The "Publish Release" workflow:
 
 - builds and uploads the `jupyterlab` Python package to PyPI
 - builds the `@jupyterlab/*` packages and uploads them to `npm`
@@ -262,9 +263,7 @@ These lines:
 - [ ] Update the other repos:
   - [ ] https://github.com/jupyterlab/extension-cookiecutter-js
   - [ ] https://github.com/jupyterlab/extension-cookiecutter-ts
-  - [ ] https://github.com/jupyterlab/mimerender-cookiecutter
   - [ ] https://github.com/jupyterlab/mimerender-cookiecutter-ts
-  - [ ] https://github.com/jupyterlab/theme-cookiecutter
   - [ ] https://github.com/jupyterlab/jupyter-renderers
 - [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
 - [ ] Update the extension examples:

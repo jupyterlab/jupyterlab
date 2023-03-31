@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/property-inspector",
-  "version": "4.0.0-alpha.19",
+  "version": "4.0.0-beta.0",
   "description": "A property inspector display for widgets",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,18 +34,19 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19",
-    "@jupyterlab/ui-components": "^4.0.0-alpha.34",
-    "@lumino/coreutils": "^2.0.0-beta.0",
-    "@lumino/disposable": "^2.0.0-beta.1",
-    "@lumino/signaling": "^2.0.0-beta.1",
-    "@lumino/widgets": "^2.0.0-beta.1",
+    "@jupyterlab/application": "^4.0.0-beta.0",
+    "@jupyterlab/translation": "^4.0.0-beta.0",
+    "@jupyterlab/ui-components": "^4.0.0-beta.0",
+    "@lumino/coreutils": "^2.0.0",
+    "@lumino/disposable": "^2.0.0",
+    "@lumino/signaling": "^2.0.0",
+    "@lumino/widgets": "^2.0.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
+    "jest": "^29.2.0",
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta"
+    "typescript": "~5.0.2"
   },
   "publishConfig": {
     "access": "public"

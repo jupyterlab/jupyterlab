@@ -55,7 +55,13 @@ export interface IReplaceOptions {
   /**
    * Should the letter case be preserved?
    */
-  preserveCase: boolean;
+  preserveCase?: boolean;
+  /**
+   * Did user request regular expressions?
+   *
+   * This has impact on how `$` is interpreted in replacement text.
+   */
+  regularExpression?: boolean;
 }
 
 /**
@@ -360,4 +366,9 @@ export interface ISearchProvider extends IBaseSearchProvider {
    * @returns The valid filter value
    */
   validateFilter?(name: string, value: boolean): Promise<boolean>;
+
+  /**
+   * Signal emitted when filter definition changed.
+   */
+  filtersChanged?: ISignal<ISearchProvider, void>;
 }

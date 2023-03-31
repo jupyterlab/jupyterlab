@@ -6,3 +6,12 @@
 #filebrowser.jp-mod-restoring .jp-DirListing-content {
   display: none;
 }
+
+.jp-FileBrowser-filterBox {
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.jp-FileBrowser-filterBox input {
+  line-height: 24px;
+}
