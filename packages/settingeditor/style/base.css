@@ -199,15 +199,6 @@
   padding-inline-start: 0.5em;
 }
 
-.jp-SettingsPanel .jp-SettingsTitle {
-  display: flex;
-  align-items: center;
-}
-
-.jp-SettingsPanel .jp-SettingsTitle-caret {
-  flex-shrink: 0;
-}
-
 .jp-SettingsForm {
   position: relative;
 }
