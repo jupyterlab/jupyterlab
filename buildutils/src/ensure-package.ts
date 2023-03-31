@@ -188,12 +188,12 @@ export async function ensurePackage(
       // Template the CSS index file.
       const cssIndexContents = [
         utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
-        ...cssImports.map(x => `@import url('~${x}');`),
-        ''
+        ...cssImports.map(x => `@import url('~${x}');`)
       ];
       if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
-        cssIndexContents.push("@import url('./base.css');\n");
+        cssIndexContents.push("@import url('./base.css');");
       }
+      cssIndexContents.push('');
 
       // write out cssIndexContents, if needed
       const cssIndexPath = path.join(pkgPath, 'style/index.css');
@@ -207,12 +207,12 @@ export async function ensurePackage(
       // Template the style module index file.
       const jsIndexContents = [
         utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
-        ...cssModuleImports.map(x => `import '${x}';`),
-        ''
+        ...cssModuleImports.map(x => `import '${x}';`)
       ];
       if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
-        jsIndexContents.push("import './base.css';\n");
+        jsIndexContents.push("import './base.css';");
       }
+      jsIndexContents.push('');
 
       // write out jsIndexContents, if needed
       const jsIndexPath = path.join(pkgPath, 'style/index.js');
