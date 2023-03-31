@@ -248,7 +248,6 @@ def update_extension(  # noqa
                     override_pyproject = True
             else:
                 warnings.append(f"skipped _temp_extension/{relpath!s}")
-    print(override_pyproject, (target / "setup.cfg").exists())
     if override_pyproject and (target / "setup.cfg").exists():
         config = configparser.ConfigParser()
         with (target / "setup.cfg").open() as setup_cfg_file:
