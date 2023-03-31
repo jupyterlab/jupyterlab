@@ -457,7 +457,7 @@ test.describe('General', () => {
 
     // Relax threshold as displayed map may change a bit (in particular text positioning)
     expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {
-      threshold: 0.3
+      maxDiffPixelRatio: 0.02
     });
   });
 
