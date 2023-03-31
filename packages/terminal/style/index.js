@@ -7,5 +7,4 @@
 import '@lumino/widgets/style/index.js';
 import '@jupyterlab/apputils/style/index.js';
 import 'xterm/css/xterm.css';
-
 import './base.css';

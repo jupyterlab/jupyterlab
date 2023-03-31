@@ -10,5 +10,4 @@ import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/docregistry/style/index.js';
 import '@jupyterlab/cells/style/index.js';
 import '@jupyterlab/notebook/style/index.js';
-
 import './base.css';
