@@ -1089,40 +1089,32 @@ export class CodeCell extends Cell<ICodeCellModel> {
   }
 
   protected getOutputPlaceholderText(): string | undefined {
-    const outputData = this.model.outputs.get(0)?.data;
+    const firstOutput = this.model.outputs.get(0);
+    const outputData = firstOutput?.data;
     if (!outputData) {
       return undefined;
     }
-    if (outputData.output_type === 'display_data') {
-      if (outputData['text/html'] !== undefined) {
-        return outputData['text/html'] as string;
-      } else if (outputData['image/svg+xml'] !== undefined) {
-        return (outputData['image/svg+xml'] as string[])?.join('');
-      } else if (outputData['application/pdf'] !== undefined) {
-        return outputData['application/pdf'] as string;
-      }
-    } else if (outputData['text/markdown'] !== undefined) {
-      return (outputData['text/markdown'] as string)
-        ?.split('\n')
-        ?.filter(v => v !== '')?.[0];
-    } else if (outputData['text/plain'] !== undefined) {
-      return (outputData['text/plain'] as string).split('\n')[0];
-    } else if (outputData.output_type === 'stream') {
-      if (outputData.text !== undefined) {
-        return (outputData.text as string[])?.[0];
-      } else if (outputData['application/vnd.jupyter.stderr'] !== undefined) {
-        return (outputData['application/vnd.jupyter.stderr'] as string)?.split(
-          '\n'
-        )?.[0];
-      }
-    } else if (outputData['application/vnd.jupyter.stdout'] !== undefined) {
-      return (outputData['application/vnd.jupyter.stdout'] as string)?.split(
-        '\n'
-      )?.[0];
-    } else if (outputData['application/vnd.jupyter.stderr'] !== undefined) {
-      return (outputData['application/vnd.jupyter.stderr'] as string)?.split(
-        '\n'
-      )?.[0];
+    const supportedOutputTypes = [
+      'text/html',
+      'image/svg+xml',
+      'application/pdf',
+      'text/markdown',
+      'text/plain',
+      'application/vnd.jupyter.stderr',
+      'application/vnd.jupyter.stdout',
+      'text'
+    ];
+    const preferredOutput = supportedOutputTypes.find(mt => {
+      const data = firstOutput.data[mt];
+      return (Array.isArray(data) ? typeof data[0] : typeof data) === 'string';
+    });
+    const dataToDisplay = firstOutput.data[preferredOutput ?? ''];
+    if (dataToDisplay !== undefined) {
+      return (
+        Array.isArray(dataToDisplay)
+          ? dataToDisplay
+          : (dataToDisplay as string)?.split('\n')
+      )?.find(part => part !== '');
     }
     return undefined;
   }
