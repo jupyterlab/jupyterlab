@@ -177,6 +177,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
                 title={cat + ' icon'}
               />
               <h2 className="jp-Launcher-sectionTitle" title={cat + ' title'}>
+                {' '}
                 {cat}
               </h2>
             </div>
