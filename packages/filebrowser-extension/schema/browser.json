@@ -63,7 +63,7 @@
       },
       {
         "command": "filebrowser:copy",
-        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 8
       },
       {

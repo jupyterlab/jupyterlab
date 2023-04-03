@@ -112,6 +112,7 @@ module.exports = {
           'file_extension',
           'help_links',
           'hist_access_type',
+          'ids_only',
           'implementation_version',
           'installed_version',
           'is_allowed',

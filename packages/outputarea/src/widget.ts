@@ -105,6 +105,7 @@ export class OutputArea extends Widget {
     this.rendermime = options.rendermime;
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
+    this._inputHistoryScope = options.inputHistoryScope ?? 'global';
 
     const model = (this.model = options.model);
     for (
@@ -439,7 +440,8 @@ export class OutputArea extends Widget {
       prompt: stdinPrompt,
       password,
       future,
-      translator: this._translator
+      translator: this._translator,
+      inputHistoryScope: this._inputHistoryScope
     });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
@@ -727,6 +729,7 @@ export class OutputArea extends Widget {
     namespace: UUID.uuid4()
   });
   private _translator: ITranslator;
+  private _inputHistoryScope: 'global' | 'session' = 'global';
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -789,6 +792,11 @@ export namespace OutputArea {
      * Translator
      */
     readonly translator?: ITranslator;
+
+    /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope?: 'global' | 'session';
   }
 
   /**
@@ -942,41 +950,52 @@ export interface IStdin extends Widget {
  * The default stdin widget.
  */
 export class Stdin extends Widget implements IStdin {
-  private static _history: string[] = [];
+  private static _history: Map<string, string[]> = new Map();
 
-  private static _historyIx(ix: number): number | undefined {
-    const len = Stdin._history.length;
+  private static _historyIx(key: string, ix: number): number | undefined {
+    const history = Stdin._history.get(key);
+    if (!history) {
+      return undefined;
+    }
+    const len = history.length;
     // wrap nonpositive ix to nonnegative ix
     if (ix <= 0) {
       return len + ix;
     }
   }
 
-  private static _historyAt(ix: number): string | undefined {
-    const len = Stdin._history.length;
-    const ixpos = Stdin._historyIx(ix);
+  private static _historyAt(key: string, ix: number): string | undefined {
+    const history = Stdin._history.get(key);
+    if (!history) {
+      return undefined;
+    }
+    const len = history.length;
+    const ixpos = Stdin._historyIx(key, ix);
 
     if (ixpos !== undefined && ixpos < len) {
-      return Stdin._history[ixpos];
+      return history[ixpos];
     }
     // return undefined if ix is out of bounds
   }
 
-  private static _historyPush(line: string): void {
-    Stdin._history.push(line);
-    if (Stdin._history.length > 1000) {
+  private static _historyPush(key: string, line: string): void {
+    const history = Stdin._history.get(key)!;
+    history.push(line);
+    if (history.length > 1000) {
       // truncate line history if it's too long
-      Stdin._history.shift();
+      history.shift();
     }
   }
 
   private static _historySearch(
+    key: string,
     pat: string,
     ix: number,
     reverse = true
   ): number | undefined {
-    const len = Stdin._history.length;
-    const ixpos = Stdin._historyIx(ix);
+    const history = Stdin._history.get(key)!;
+    const len = history.length;
+    const ixpos = Stdin._historyIx(key, ix);
     const substrFound = (x: string) => x.search(pat) !== -1;
 
     if (ixpos === undefined) {
@@ -989,7 +1008,7 @@ export class Stdin extends Widget implements IStdin {
         return;
       }
 
-      const ixFound = (Stdin._history.slice(0, ixpos) as any).findLastIndex(
+      const ixFound = (history.slice(0, ixpos) as any).findLastIndex(
         substrFound
       );
       if (ixFound !== -1) {
@@ -1002,7 +1021,7 @@ export class Stdin extends Widget implements IStdin {
         return;
       }
 
-      const ixFound = Stdin._history.slice(ixpos + 1).findIndex(substrFound);
+      const ixFound = history.slice(ixpos + 1).findIndex(substrFound);
       if (ixFound !== -1) {
         // wrap ix to negative and adjust for slice
         return ixFound - len + ixpos + 1;
@@ -1020,6 +1039,10 @@ export class Stdin extends Widget implements IStdin {
     this.addClass(STDIN_CLASS);
     this._future = options.future;
     this._historyIndex = 0;
+    this._historyKey =
+      options.inputHistoryScope === 'session'
+        ? options.parent_header.session
+        : '';
     this._historyPat = '';
     this._parentHeader = options.parent_header;
     this._password = options.password;
@@ -1031,6 +1054,11 @@ export class Stdin extends Widget implements IStdin {
     this._input.placeholder = this._trans.__(
       '↑↓ for history. Search history with c-↑/c-↓'
     );
+
+    // initialize line history
+    if (!Stdin._history.has(this._historyKey)) {
+      Stdin._history.set(this._historyKey, []);
+    }
   }
 
   /**
@@ -1068,7 +1096,7 @@ export class Stdin extends Widget implements IStdin {
           this._value += '········';
         } else {
           this._value += input.value;
-          Stdin._historyPush(input.value);
+          Stdin._historyPush(this._historyKey, input.value);
         }
         this._promise.resolve(void 0);
       } else if (event.key === 'Escape') {
@@ -1086,32 +1114,45 @@ export class Stdin extends Widget implements IStdin {
 
         const reverse = event.key === 'ArrowUp';
         const searchHistoryIx = Stdin._historySearch(
+          this._historyKey,
           this._historyPat,
           this._historyIndex,
           reverse
         );
 
         if (searchHistoryIx !== undefined) {
-          const historyLine = Stdin._historyAt(searchHistoryIx);
+          const historyLine = Stdin._historyAt(
+            this._historyKey,
+            searchHistoryIx
+          );
           if (historyLine !== undefined) {
             if (this._historyIndex === 0) {
               this._valueCache = input.value;
             }
 
-            input.value = historyLine;
+            this._setInputValue(historyLine);
             this._historyIndex = searchHistoryIx;
+            // The default action for ArrowUp is moving to first character
+            // but we want to keep the cursor at the end.
+            event.preventDefault();
           }
         }
       } else if (event.key === 'ArrowUp') {
         this.resetSearch();
 
-        const historyLine = Stdin._historyAt(this._historyIndex - 1);
+        const historyLine = Stdin._historyAt(
+          this._historyKey,
+          this._historyIndex - 1
+        );
         if (historyLine) {
           if (this._historyIndex === 0) {
             this._valueCache = input.value;
           }
-          input.value = historyLine;
+          this._setInputValue(historyLine);
           --this._historyIndex;
+          // The default action for ArrowUp is moving to first character
+          // but we want to keep the cursor at the end.
+          event.preventDefault();
         }
       } else if (event.key === 'ArrowDown') {
         this.resetSearch();
@@ -1119,12 +1160,15 @@ export class Stdin extends Widget implements IStdin {
         if (this._historyIndex === 0) {
           // do nothing
         } else if (this._historyIndex === -1) {
-          input.value = this._valueCache;
+          this._setInputValue(this._valueCache);
           ++this._historyIndex;
         } else {
-          const historyLine = Stdin._historyAt(this._historyIndex + 1);
+          const historyLine = Stdin._historyAt(
+            this._historyKey,
+            this._historyIndex + 1
+          );
           if (historyLine) {
-            input.value = historyLine;
+            this._setInputValue(historyLine);
             ++this._historyIndex;
           }
         }
@@ -1151,13 +1195,21 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
+  private _setInputValue(value: string) {
+    this._input.value = value;
+    // Set cursor at the end; this is usually not necessary when input is
+    // focused but having the explicit placement ensures consistency.
+    this._input.setSelectionRange(value.length, value.length);
+  }
+
   private _future: Kernel.IShellFuture;
   private _historyIndex: number;
+  private _historyKey: string;
+  private _historyPat: string;
   private _input: HTMLInputElement;
   private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
   private _password: boolean;
   private _promise = new PromiseDelegate<void>();
-  private _historyPat: string;
   private _trans: TranslationBundle;
   private _value: string;
   private _valueCache: string;
@@ -1192,6 +1244,11 @@ export namespace Stdin {
      * Translator
      */
     readonly translator?: ITranslator;
+
+    /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope?: 'global' | 'session';
   }
 }
 

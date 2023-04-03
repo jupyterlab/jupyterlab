@@ -62,7 +62,6 @@ export namespace galata {
   export type DefaultSidebarTabId =
     | 'filebrowser'
     | 'jp-running-sessions'
-    | 'tab-manager'
     | 'jp-property-inspector'
     | 'table-of-contents'
     | 'extensionmanager.main-view'

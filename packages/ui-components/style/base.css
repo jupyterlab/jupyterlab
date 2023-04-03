@@ -40,12 +40,11 @@ a:hover {
 /* Accessibility for links inside dialog box text */
 .jp-Dialog-content a {
   text-decoration: revert;
-  color: revert;
+  color: var(--jp-content-link-color);
 }
 
 .jp-Dialog-content a:hover {
   text-decoration: revert;
-  color: revert;
 }
 
 /* Styles for ui-components */
@@ -180,6 +179,7 @@ input::placeholder {
 }
 
 /* Use our own theme for hover and option styles */
+/* stylelint-disable-next-line selector-max-type */
 .jp-HTMLSelect.jp-DefaultStyle select:hover,
 .jp-HTMLSelect.jp-DefaultStyle select > option {
   background-color: var(--jp-layout-color2);

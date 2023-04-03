@@ -139,7 +139,8 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
     for (const size of ['1', '2', '4', '8']) {
       const args: JSONObject = {
         size,
-        name: trans.__('Spaces: %1', size)
+        // Use a context to differentiate with string set as plural in 3.x
+        name: trans._p('v4', 'Spaces: %1', size)
       };
       menu.addItem({ command, args });
     }

@@ -83,7 +83,6 @@ button.jp-mod-styled.jp-mod-warn:focus-visible {
 .jp-Button-flat {
   text-decoration: none;
   padding: var(--jp-flat-button-padding);
-  color: var(--jp-warn-color-normal, var(--jp-warn-color1));
   font-weight: 500;
   background-color: transparent;
   height: var(--jp-private-running-shutdown-button-height);
@@ -92,12 +91,7 @@ button.jp-mod-styled.jp-mod-warn:focus-visible {
   border-radius: 2px;
 }
 
-.jp-Button-flat:hover {
-  background-color: var(--jp-warn-color-hover, rgba(153, 153, 153, 0.1));
-}
-
 .jp-Button-flat:focus {
   border: none;
   box-shadow: none;
-  background-color: var(--jp-warn-color-active, rgba(153, 153, 153, 0.2));
 }

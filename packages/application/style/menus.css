@@ -69,6 +69,7 @@
   box-shadow: var(--jp-elevation-z6);
 }
 
+/* stylelint-disable-next-line selector-max-class */
 .jp-LabShell[data-shell-mode='single-document']
   .lm-MenuBar.lm-mod-active
   .lm-MenuBar-item.lm-mod-active {

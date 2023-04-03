@@ -688,6 +688,13 @@
       "type": "boolean",
       "default": false
     },
+    "inputHistoryScope": {
+      "type": "string",
+      "default": "global",
+      "enum": ["global", "session"],
+      "title": "Input History Scope",
+      "description": "Whether the line history for standard input (e.g. the ipdb prompt) should kept separately for different kernel sessions (`session`) or combined (`global`)."
+    },
     "kernelShutdown": {
       "title": "Shut down kernel",
       "description": "Whether to shut down or not the kernel when closing a notebook.",
