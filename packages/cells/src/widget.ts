@@ -1088,7 +1088,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this.node.setAttribute('aria-label', ariaLabel);
   }
 
-  getOutputPlaceholderText(): string | undefined {
+  protected getOutputPlaceholderText(): string | undefined {
     const outputData = this.model.outputs.get(0)?.data;
     if (!outputData) {
       return undefined;
