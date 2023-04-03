@@ -19,10 +19,10 @@
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   color: var(--jp-layout-color3);
   margin-top: 6px;
+  background-color: transparent;
+  cursor: pointer;
 }
 
 .jp-Notebook-footer:focus {
   border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
-  box-shadow: var(--jp-input-box-shadow);
-  background-color: var(--jp-cell-editor-active-background);
 }

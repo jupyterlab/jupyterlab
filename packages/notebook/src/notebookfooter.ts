@@ -44,7 +44,6 @@ export class NotebookFooter extends Widget {
    * On single click (mouse event), insert a cell below (at the end of the notebook as default behavior).
    */
   protected onClick(): void {
-    console.log('notebook:', this.notebook);
     if (this.notebook.widgets.length > 0) {
       this.notebook.activeCellIndex = this.notebook.widgets.length - 1;
     }
