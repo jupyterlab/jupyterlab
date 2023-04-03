@@ -2445,7 +2445,7 @@ def _fetch_package_metadata(registry, name, logger):
     except AttributeError:
         logger.debug("Fetching URL: %s" % (req.get_full_url()))
     try:
-        with contextlib.closing(urlopen(req)) as response:
+        with contextlib.closing(urlopen(req)) as response:  # noqa S310
             return json.loads(response.read().decode("utf-8"))
     except URLError as exc:
         logger.warning("Failed to fetch package metadata for %r: %r", name, exc)

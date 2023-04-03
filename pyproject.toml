@@ -115,7 +115,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.255",
+    "ruff==0.0.260",
     "black[jupyter]==23.3.0"
 ]
 
@@ -281,6 +281,8 @@ ignore = [
 "jupyterlab/browser_check.py" = ["T201"]
 # C901 method is too complex
 "jupyterlab/commands.py" = ["C901"]
+# B028 No explicit `stacklevel` keyword argument found
+"jupyterlab/debuglog.py" = ["B028"]
 "jupyterlab/extensions/manager.py" = ["C901"]
 # T201 `print` found
 "jupyterlab/labapp.py" = ["T201"]

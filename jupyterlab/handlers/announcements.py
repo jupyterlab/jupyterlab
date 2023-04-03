@@ -223,7 +223,7 @@ class NewsHandler(APIHandler):
                     self.news_url,
                     headers={"Content-Type": "application/atom+xml"},
                 )
-                tree = ET.fromstring(response.body)
+                tree = ET.fromstring(response.body)  # noqa S314
 
                 def build_entry(node):
                     return Notification(
