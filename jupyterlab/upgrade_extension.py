@@ -12,7 +12,6 @@ try:
     import tomllib
 except ImportError:
     import tomli as tomllib
-import tomli_w
 
 try:
     from importlib.resources import files
@@ -114,8 +113,11 @@ def update_extension(  # noqa
     author = data.get("author", "<author_name>")
     author_email = "<author_email>"
     if isinstance(author, dict):
-        author = author.get("name", "<author_name>")
+        author_name = author.get("name", "<author_name>")
         author_email = author.get("email", author_email)
+    else:
+        author_name = author
+
     kind = "frontend"
     if (target / "jupyter-config").exists():
         kind = "server"
@@ -130,7 +132,7 @@ def update_extension(  # noqa
 
     extra_context = {
         "kind": kind,
-        "author_name": author,
+        "author_name": author_name,
         "author_email": author_email,
         "labextension_name": data["name"],
         "python_name": python_name,
@@ -248,41 +250,54 @@ def update_extension(  # noqa
                     override_pyproject = True
             else:
                 warnings.append(f"skipped _temp_extension/{relpath!s}")
-    if override_pyproject and (target / "setup.cfg").exists():
-        config = configparser.ConfigParser()
-        with (target / "setup.cfg").open() as setup_cfg_file:
-            config.read_file(setup_cfg_file)
 
-        pyproject_file = target / "pyproject.toml"
-        pyproject = tomllib.loads(pyproject_file.read_text())
+    if override_pyproject:
+        if (target / "setup.cfg").exists():
+            try:
+                import tomli_w
+            except ImportError:
+                msg = "To update pyproject.toml, you need to install tomli_w"
+                print(msg)
+            else:
+                config = configparser.ConfigParser()
+                with (target / "setup.cfg").open() as setup_cfg_file:
+                    config.read_file(setup_cfg_file)
 
-        # Backport requirements
-        requirements_raw = config.get('options', 'install_requires', fallback=None)
-        if requirements_raw is not None:
-            requirements = list(
-                filter(
-                    lambda r: r and JUPYTER_SERVER_REQUIREMENT.match(r) is None,
-                    requirements_raw.splitlines(),
+                pyproject_file = target / "pyproject.toml"
+                pyproject = tomllib.loads(pyproject_file.read_text())
+
+                # Backport requirements
+                requirements_raw = config.get('options', 'install_requires', fallback=None)
+                if requirements_raw is not None:
+                    requirements = list(
+                        filter(
+                            lambda r: r and JUPYTER_SERVER_REQUIREMENT.match(r) is None,
+                            requirements_raw.splitlines(),
+                        )
+                    )
+
+                pyproject["project"]["dependencies"] = (
+                    pyproject["project"].get("dependencies", []) + requirements
                 )
-            )
 
-        pyproject["project"]["dependencies"] = (
-            pyproject["project"].get("dependencies", []) + requirements
-        )
+                # Backport extras
+                if config.has_section('options.extras_require'):
+                    for extra, deps_raw in config.items('options.extras_require'):
+                        deps = list(filter(lambda r: r, deps_raw.splitlines()))
+                        if extra in pyproject["project"].get("optional-dependencies", {}):
+                            if pyproject["project"].get("optional-dependencies") is None:
+                                pyproject["project"]["optional-dependencies"] = {}
+                            deps = pyproject["project"]["optional-dependencies"][extra] + deps
+                        pyproject["project"]["optional-dependencies"][extra] = deps
 
-        # Backport extras
-        if config.has_section('options.extras_require'):
-            for extra, deps_raw in config.items('options.extras_require'):
-                deps = list(filter(lambda r: r, deps_raw.splitlines()))
-                if extra in pyproject["project"].get("optional-dependencies", {}):
-                    if pyproject["project"].get("optional-dependencies") is None:
-                        pyproject["project"]["optional-dependencies"] = {}
-                    deps = pyproject["project"]["optional-dependencies"][extra] + deps
-                pyproject["project"]["optional-dependencies"][extra] = deps
+                pyproject_file.write_text(tomli_w.dumps(pyproject))
+                (target / "setup.cfg").unlink()
+                warnings.append("DELETED setup.cfg")
 
-        pyproject_file.write_text(tomli_w.dumps(pyproject))
-        (target / "setup.cfg").unlink()
-        warnings.append("DELETED setup.cfg")
+        manifest_in = target / "MANIFEST.in"
+        if manifest_in.exists():
+            manifest_in.unlink()
+            warnings.append("DELETED MANIFEST.in")
 
     # Print out all warnings
     for warning in warnings:
