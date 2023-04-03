@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@lumino/coreutils": "^2.0.0",
-    "@lumino/widgets": "^2.0.0"
+    "@lumino/widgets": "^2.0.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
