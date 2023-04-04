@@ -85,10 +85,10 @@ docs = [
 ]
 docs-screenshots = [
     "altair==4.2.2",
-    "ipython==8.11.0",
-    "ipywidgets==8.0.4",
+    "ipython==8.12.0",
+    "ipywidgets==8.0.6",
     "jupyterlab-geojson==3.3.1",
-    "jupyterlab-language-pack-zh-CN==3.6.post0",
+    "jupyterlab-language-pack-zh-CN==3.6.post1",
     "matplotlib==3.7.1",
     "nbconvert>=7.0.0",
     "pandas==1.5.3",
@@ -115,8 +115,8 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.255",
-    "black[jupyter]==23.1.0"
+    "ruff==0.0.260",
+    "black[jupyter]==23.3.0"
 ]
 
 [tool.check-wheel-contents]
@@ -281,6 +281,8 @@ ignore = [
 "jupyterlab/browser_check.py" = ["T201"]
 # C901 method is too complex
 "jupyterlab/commands.py" = ["C901"]
+# B028 No explicit `stacklevel` keyword argument found
+"jupyterlab/debuglog.py" = ["B028"]
 "jupyterlab/extensions/manager.py" = ["C901"]
 # T201 `print` found
 "jupyterlab/labapp.py" = ["T201"]

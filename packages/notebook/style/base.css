@@ -28,6 +28,8 @@
 | Notebook
 |----------------------------------------------------------------------------*/
 
+/* stylelint-disable selector-max-class */
+
 .jp-NotebookPanel {
   display: block;
   height: 100%;
