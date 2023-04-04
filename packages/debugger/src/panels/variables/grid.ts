@@ -7,8 +7,6 @@ import { ITranslator } from '@jupyterlab/translation';
 
 import { CommandRegistry } from '@lumino/commands';
 
-import { PromiseDelegate } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
 
 import { Panel } from '@lumino/widgets';
@@ -48,7 +46,7 @@ export class VariablesBodyGrid extends Panel {
   }
 
   /**
-   * The current scope of the variables
+   * The current scope of the variables.
    */
   get scope(): string {
     return this._scope;
@@ -64,15 +62,15 @@ export class VariablesBodyGrid extends Panel {
   protected translator: ITranslator | undefined;
 
   /**
-   * Load the grid panel implementation.
+   * Load the grid panel implementation and instantiate a grid.
    */
   protected async initialize(): Promise<unknown> {
     if (this._grid || this._pending) {
       return;
     }
 
-    const pending = (this._pending = Private.ensureGridPanel());
-    const { Grid } = await pending;
+    // Lazily load the datagrid module when the first grid is requested.
+    const { Grid } = await (this._pending = import('./gridpanel'));
     const { commands, model, themeManager, translator } = this;
 
     this._grid = new Grid({ commands, model, themeManager, translator });
@@ -143,23 +141,5 @@ export namespace VariablesBodyGrid {
      * The application language translator.
      */
     translator?: ITranslator;
-  }
-}
-
-/**
- * A private namespace for managing lazy loading of the underlying grid panel.
- */
-namespace Private {
-  let gridPanelLoaded: PromiseDelegate<typeof GridPanelModule> | null = null;
-
-  /**
-   * Lazily load the datagrid module when the first grid is requested.
-   */
-  export async function ensureGridPanel(): Promise<typeof GridPanelModule> {
-    if (gridPanelLoaded == null) {
-      gridPanelLoaded = new PromiseDelegate();
-      gridPanelLoaded.resolve(await import('./gridpanel'));
-    }
-    return gridPanelLoaded.promise;
   }
 }
