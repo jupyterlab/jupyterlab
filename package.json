@@ -349,5 +349,10 @@
         "version": "detect"
       }
     }
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "none",
+    "arrowParens": "avoid"
   }
 }
