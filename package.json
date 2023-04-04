@@ -354,5 +354,46 @@
     "singleQuote": true,
     "trailingComma": "none",
     "arrowParens": "avoid"
+  },
+  "stylelint": {
+    "extends": [
+      "stylelint-config-standard",
+      "stylelint-config-recommended",
+      "stylelint-prettier/recommended"
+    ],
+    "rules": {
+      "import-notation": null,
+      "no-descending-specificity": null,
+      "comment-whitespace-inside": null,
+      "property-no-vendor-prefix": null,
+      "selector-no-vendor-prefix": null,
+      "value-no-vendor-prefix": null,
+      "alpha-value-notation": null,
+      "color-function-notation": null,
+      "custom-property-pattern": null,
+      "declaration-block-no-redundant-longhand-properties": null,
+      "function-linear-gradient-no-nonstandard-direction": null,
+      "function-url-quotes": null,
+      "keyframes-name-pattern": null,
+      "number-max-precision": null,
+      "selector-class-pattern": null,
+      "selector-id-pattern": null,
+      "selector-pseudo-class-no-unknown": null,
+      "selector-pseudo-element-no-unknown": null,
+      "selector-not-notation": null,
+      "selector-max-type": {
+        "limit": 2,
+        "ignore": "compounded"
+      },
+      "selector-max-class": 4,
+      "selector-max-compound-selectors": 4,
+      "selector-max-universal": 1
+    },
+    "ignoreFiles": [
+      "packages/nbconvert-css/style/index.css",
+      "docs/_build",
+      "docs/build",
+      "docs/api"
+    ]
   }
 }
