@@ -282,12 +282,15 @@ export class SettingRegistry implements ISettingRegistry {
     this.validator = options.validator || new DefaultSchemaValidator();
     this._timeout = options.timeout || DEFAULT_TRANSFORM_TIMEOUT;
 
-    // Preload with any available data at instantiation-time.
+    // Plugins with transformation may not be loaded if the transformation function is
+    // not yet available. To avoid fetching again the associated data when the transformation
+    // function is available, the plugin data is kept in cache.
     if (options.plugins) {
       options.plugins
         .filter(plugin => plugin.schema['jupyter.lab.transform'])
-        .forEach(plugin => (this._unloadedPlugins[plugin.id] = plugin));
+        .forEach(plugin => this._unloadedPlugins.set(plugin.id, plugin));
 
+      // Preload with any available data at instantiation-time.
       this._ready = this._preload(options.plugins);
     }
   }
@@ -360,6 +363,8 @@ export class SettingRegistry implements ISettingRegistry {
    *
    * @param plugin - The name of the plugin whose settings are being loaded.
    *
+   * @param forceTransform - An optional parameter to force replay the transforms methods.
+   *
    * @returns A promise that resolves with a plugin settings object or rejects
    * if the plugin is not found.
    */
@@ -386,13 +391,13 @@ export class SettingRegistry implements ISettingRegistry {
     }
 
     // If the plugin is not loaded but has already been fetched.
-    if (plugin in this._unloadedPlugins && plugin in this._transformers) {
+    if (this._unloadedPlugins.has(plugin) && plugin in this._transformers) {
       await this._load(
-        await this._transform('fetch', this._unloadedPlugins[plugin])
+        await this._transform('fetch', this._unloadedPlugins.get(plugin)!)
       );
       if (plugin in plugins) {
         this._pluginChanged.emit(plugin);
-        delete this._unloadedPlugins[plugin];
+        this._unloadedPlugins.delete(plugin);
         return new Settings({ plugin: plugins[plugin], registry });
       }
     }
@@ -720,8 +725,7 @@ export class SettingRegistry implements ISettingRegistry {
       [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform;
     };
   } = Object.create(null);
-  private _unloadedPlugins: { [name: string]: ISettingRegistry.IPlugin } =
-    Object.create(null);
+  private _unloadedPlugins = new Map<string, ISettingRegistry.IPlugin>();
 }
 
 /**

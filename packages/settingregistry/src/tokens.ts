@@ -76,6 +76,7 @@ export interface ISettingRegistry {
    * Load a plugin's settings into the setting registry.
    *
    * @param plugin - The name of the plugin whose settings are being loaded.
+   *
    * @param forceTransform - An optional parameter to force replay the transforms methods.
    *
    * @returns A promise that resolves with a plugin settings object or rejects
