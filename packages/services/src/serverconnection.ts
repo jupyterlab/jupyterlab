@@ -146,10 +146,11 @@ export namespace ServerConnection {
         if (data['traceback']) {
           console.error(data['traceback']);
         }
-        if (data['message']) {
-          return new ResponseError(response, data['message']);
-        }
-        return new ResponseError(response);
+        return new ResponseError(
+          response,
+          data['message'] ? data['message'] : undefined,
+          data['traceback'] ? data['traceback'] : undefined
+        );
       } catch (e) {
         console.debug(e);
         return new ResponseError(response);
