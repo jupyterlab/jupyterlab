@@ -364,7 +364,9 @@ Available file types:
 
     // If the document registry gains or loses a factory or file type,
     // regenerate the settings description with the available options.
-    registry.changed.connect(() => settingRegistry.reload(docManagerPluginId));
+    registry.changed.connect(() =>
+      settingRegistry.load(docManagerPluginId, true)
+    );
   }
 };
 

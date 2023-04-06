@@ -158,7 +158,7 @@ function activate(
     }
   });
   languageServerManager.sessionsChanged.connect(async () => {
-    await settingRegistry.reload(plugin.id);
+    await settingRegistry.load(plugin.id, true);
   });
 
   settingRegistry
