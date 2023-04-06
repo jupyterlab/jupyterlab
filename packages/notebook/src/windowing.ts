@@ -12,7 +12,6 @@ import {
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
-import { NotebookFooter } from './notebookfooter';
 
 /**
  * Notebook view model for the windowed list.
@@ -73,22 +72,14 @@ export class NotebookViewModel extends WindowedListModel {
  */
 export class NotebookWindowedLayout extends WindowedLayout {
   private _header: Widget | null = null;
-  private _footer: NotebookFooter | null = null;
+  private _footer: Widget | null = null;
 
   /**
    * Notebook's header
-   *
-   * @return Widget | null
    */
   get header(): Widget | null {
     return this._header;
   }
-
-  /**
-   * Set Notebook's header
-   *
-   * @param header: Widget | null
-   */
   set header(header: Widget | null) {
     if (this._header && this._header.isAttached) {
       Widget.detach(this._header);
@@ -100,21 +91,18 @@ export class NotebookWindowedLayout extends WindowedLayout {
   }
 
   /**
-   ** Notebook widget's footer
-   *
-   **/
-
-  get footer(): NotebookFooter | null {
+   * Notebook widget's footer
+   */
+  get footer(): Widget | null {
     return this._footer;
   }
-
-  set footer(footer: NotebookFooter | null) {
+  set footer(footer: Widget | null) {
     if (this._footer && this._footer.isAttached) {
-      NotebookFooter.detach(this._footer);
+      Widget.detach(this._footer);
     }
     this._footer = footer;
     if (this._footer && this.parent?.isAttached) {
-      NotebookFooter.attach(this._footer, this.parent!.node);
+      Widget.attach(this._footer, this.parent!.node);
     }
   }
 
@@ -128,20 +116,6 @@ export class NotebookWindowedLayout extends WindowedLayout {
     this._header?.dispose();
     this._footer?.dispose();
     super.dispose();
-  }
-
-  protected onAfterAttach(msg: Message): void {
-    super.onAfterAttach(msg);
-    if (this._header && !this._header.isAttached) {
-      Widget.attach(
-        this._header,
-        this.parent!.node,
-        this.parent!.node.firstElementChild as HTMLElement | null
-      );
-    }
-    if (this._footer && !this._footer.isAttached) {
-      Widget.attach(this._footer, this.parent!.node);
-    }
   }
 
   /**
@@ -336,6 +310,30 @@ export class NotebookWindowedLayout extends WindowedLayout {
     } else {
       ref.insertAdjacentElement('beforebegin', widget.node);
     }
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    if (this._header && !this._header.isAttached) {
+      Widget.attach(
+        this._header,
+        this.parent!.node,
+        this.parent!.node.firstElementChild as HTMLElement | null
+      );
+    }
+    if (this._footer && !this._footer.isAttached) {
+      Widget.attach(this._footer, this.parent!.node);
+    }
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    if (this._header?.isAttached) {
+      Widget.detach(this._header);
+    }
+    if (this._footer?.isAttached) {
+      Widget.detach(this._footer);
+    }
+    this.onBeforeDetach(msg);
   }
 
   /**

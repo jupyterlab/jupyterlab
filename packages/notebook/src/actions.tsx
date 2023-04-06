@@ -850,7 +850,7 @@ export namespace NotebookActions {
 
     if (notebook.activeCellIndex === maxCellIndex) {
       const footer = (notebook.layout as NotebookWindowedLayout).footer;
-      footer?.focus();
+      footer?.node.focus();
     }
 
     // Find last non-hidden cell
