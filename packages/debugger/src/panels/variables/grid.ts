@@ -64,7 +64,7 @@ export class VariablesBodyGrid extends Panel {
   /**
    * Load the grid panel implementation and instantiate a grid.
    */
-  protected async initialize(): Promise<unknown> {
+  protected async initialize(): Promise<void> {
     if (this._grid || this._pending) {
       return;
     }
