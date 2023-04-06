@@ -6,6 +6,7 @@
 import { ellipsesIcon } from '@jupyterlab/ui-components';
 import { Widget } from '@lumino/widgets';
 import { Message } from '@lumino/messaging';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 /**
  * The CSS class added to placeholders.
@@ -53,6 +54,11 @@ export interface IPlaceholderOptions {
    * Text to include with the placeholder
    */
   text?: string;
+
+  /**
+   * Translator object
+   */
+  translator?: ITranslator;
 }
 
 /**
@@ -70,18 +76,21 @@ export class Placeholder extends Widget {
     const node = document.createElement('div');
 
     super({ node });
+    const trans = (options.translator ?? nullTranslator).load('jupyterlab');
     const innerNode = document.createElement('div');
     innerNode.className = options.promptClass ?? '';
     node.insertAdjacentHTML('afterbegin', innerNode.outerHTML);
-    this._button = document.createElement('div');
-    this._button.classList.add(CONTENT_CLASS);
-    this._textContent = document.createElement('span');
+    this._cell = document.createElement('div');
+    this._cell.classList.add(CONTENT_CLASS);
+    this._cell.title = trans.__('Click to expand');
+    const container = this._cell.appendChild(document.createElement('div'));
+    container.classList.add('jp-Placeholder-contentContainer');
+    this._textContent = container.appendChild(document.createElement('span'));
     this._textContent.className = 'jp-PlaceholderText';
     this._textContent.innerText = options.text ?? '';
-    node.appendChild(this._textContent);
-    node.appendChild(this._button);
+    node.appendChild(this._cell);
     ellipsesIcon.element({
-      container: this._button.appendChild(document.createElement('div')),
+      container: container.appendChild(document.createElement('span')),
       className: 'jp-MoreHorizIcon',
       elementPosition: 'center',
       height: 'auto',
@@ -104,16 +113,16 @@ export class Placeholder extends Widget {
 
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    this._button.addEventListener('click', this._callback);
+    this.node.addEventListener('click', this._callback);
   }
 
   protected onBeforeDetach(msg: Message): void {
-    this._button.removeEventListener('click', this._callback);
+    this.node.removeEventListener('click', this._callback);
     super.onBeforeDetach(msg);
   }
 
   private _callback: (e: MouseEvent) => void;
-  private _button: HTMLElement;
+  private _cell: HTMLElement;
   private _textContent: HTMLSpanElement;
 }
 
