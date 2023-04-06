@@ -2164,8 +2164,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -2249,8 +2247,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -2532,8 +2528,6 @@ __metadata:
     typedoc: ~0.23.28
     typescript: ~5.0.3
     yjs: ^13.5.40
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -2579,8 +2573,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -2608,8 +2600,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -2643,8 +2633,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -2691,8 +2679,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -2718,8 +2704,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -2748,8 +2732,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -2878,8 +2860,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3288,8 +3268,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3340,8 +3318,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3413,8 +3389,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3465,8 +3439,6 @@ __metadata:
     "@lumino/signaling": ^2.0.0
     rimraf: ~3.0.0
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3494,8 +3466,6 @@ __metadata:
     vega: ^5.20.0
     vega-lite: ^5.6.1
     vega-statistics: ^1.7.9
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3586,8 +3556,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3607,8 +3575,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3627,8 +3593,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3654,8 +3618,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3668,8 +3630,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3716,8 +3676,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3858,8 +3816,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3880,8 +3836,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3900,8 +3854,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3922,8 +3874,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3939,8 +3889,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -3954,8 +3902,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4002,9 +3948,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    "@rjsf/utils": ^5.1.0
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4110,9 +4053,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    "@rjsf/utils": ^5.1.0
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4318,8 +4258,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4367,8 +4305,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4408,8 +4344,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4455,8 +4389,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4525,8 +4457,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4642,8 +4572,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4697,8 +4625,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4725,8 +4651,6 @@ __metadata:
     xterm-addon-fit: ~0.7.0
     xterm-addon-web-links: ~0.8.0
     xterm-addon-webgl: ~0.14.0
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4785,8 +4709,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4800,8 +4722,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4817,8 +4737,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4869,8 +4787,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4888,8 +4804,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4937,8 +4851,6 @@ __metadata:
     rimraf: ~3.0.0
     typedoc: ~0.23.28
     typescript: ~5.0.3
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 
@@ -4995,8 +4907,6 @@ __metadata:
     vega: ^5.20.0
     vega-embed: ^6.2.1
     vega-lite: ^5.6.1-next.1
-  peerDependencies:
-    react: ">=16"
   languageName: unknown
   linkType: soft
 

@@ -48,9 +48,6 @@
     "rimraf": "~3.0.0",
     "typescript": "~5.0.3"
   },
-  "peerDependencies": {
-    "react": ">=16"
-  },
   "jupyterlab": {
     "extension": true,
     "outputDir": "../../jupyterlab/galata/@jupyterlab/galata-extension"

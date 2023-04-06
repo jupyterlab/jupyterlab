@@ -68,10 +68,6 @@
     "typedoc": "~0.23.28",
     "typescript": "~5.0.3"
   },
-  "peerDependencies": {
-    "@rjsf/utils": "^5.1.0",
-    "react": ">=16"
-  },
   "publishConfig": {
     "access": "public"
   },

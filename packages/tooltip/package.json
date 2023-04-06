@@ -50,9 +50,6 @@
     "typedoc": "~0.23.28",
     "typescript": "~5.0.3"
   },
-  "peerDependencies": {
-    "react": ">=16"
-  },
   "publishConfig": {
     "access": "public"
   },
