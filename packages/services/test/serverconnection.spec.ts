@@ -78,4 +78,44 @@ describe('ServerConnection', () => {
       expect(err.message).toBe('Invalid response: 200 OK');
     });
   });
+
+  describe('ResponseError', () => {
+    describe('#create', () => {
+      it.each([
+        {
+          status: 456,
+          statusText: 'Dummy error'
+        },
+        {
+          status: 456,
+          statusText: 'Dummy error',
+          message: 'Nice error message'
+        },
+        {
+          status: 456,
+          statusText: 'Dummy error',
+          traceback: 'Nice traceback'
+        },
+        {
+          status: 456,
+          statusText: 'Dummy error',
+          message: 'Nice error message',
+          traceback: 'Nice traceback'
+        },
+      ])('should create a error response from %j', async (data) => {
+        const error = await ResponseError.create(
+          {
+            json: jest.fn().mockImplementation(
+              async () => {
+                Promise.resolve(data)
+              }
+            )
+          } as any
+        );
+
+        expect(error.message).toEqual(data.message ?? 'Invalid response: 456 Dummy error')
+        expect(error.traceback).toEqual(data.traceback ?? '')
+      });
+    });
+  });
 });
