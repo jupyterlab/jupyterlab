@@ -53,11 +53,14 @@
   width: 100%;
   height: auto;
   overflow: auto;
-  padding-left: 1ch;
   user-select: text;
   -moz-user-select: text;
   -webkit-user-select: text;
   -ms-user-select: text;
+}
+
+.jp-RenderedText {
+  padding-left: 1ch;
 }
 
 /**
