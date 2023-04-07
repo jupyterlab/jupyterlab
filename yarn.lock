@@ -3405,7 +3405,7 @@ __metadata:
     "@jupyterlab/services": ^7.0.0-beta.0
     "@jupyterlab/settingregistry": ^4.0.0-beta.0
     "@lumino/coreutils": ^2.0.0
-    "@playwright/test": ^1.31.0
+    "@playwright/test": ^1.32.2
     "@stdlib/stats": ~0.0.13
     fs-extra: ^10.1.0
     json5: ^2.2.3
@@ -5695,19 +5695,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:^1.31.0":
-  version: 1.31.2
-  resolution: "@playwright/test@npm:1.31.2"
+"@playwright/test@npm:^1.32.2":
+  version: 1.32.2
+  resolution: "@playwright/test@npm:1.32.2"
   dependencies:
     "@types/node": "*"
     fsevents: 2.3.2
-    playwright-core: 1.31.2
+    playwright-core: 1.32.2
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     playwright: cli.js
-  checksum: 5459ee0ce15b9a54337f4c26e2ee2d29c11e67e6207c167158eb180a4bea6659c988a2897f51dbebf591fc879f0d81f417e70936b9d8a001448c957939882588
+  checksum: 3e4a9286c2a63c12b55368c3b94e8817fee15146e09e5be549be21d6938b6bcd26a32b0dc295100a3b24f1f0839fdb65be680e7a11a39014f485f36551c6844a
   languageName: node
   linkType: hard
 
@@ -15855,12 +15855,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.31.2":
-  version: 1.31.2
-  resolution: "playwright-core@npm:1.31.2"
+"playwright-core@npm:1.32.2":
+  version: 1.32.2
+  resolution: "playwright-core@npm:1.32.2"
   bin:
     playwright: cli.js
-  checksum: bf1257b7d80b9d027c99cbfa7ab9d47a2110ec804422b3e3d623bbb3c43e06df7bec4764ca1d852a6d62c76e35c8776efb19941f42ce738db9bc92e7f1b6281c
+  checksum: ff000cbf280e5d558fe70fd3edf14910a2e86ec68b04e28327176268345be7b3f88a5d22d78e8dae677dd633dce6cd493237df199773b55312f2ae1ab85d711f
   languageName: node
   linkType: hard
 
