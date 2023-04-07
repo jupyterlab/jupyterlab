@@ -89,32 +89,31 @@ describe('ServerConnection', () => {
         {
           status: 456,
           statusText: 'Dummy error',
-          message: 'Nice error message'
+          body: { message: 'Nice error message' }
         },
         {
           status: 456,
           statusText: 'Dummy error',
-          traceback: 'Nice traceback'
+          body: { traceback: 'Nice traceback' }
         },
         {
           status: 456,
           statusText: 'Dummy error',
-          message: 'Nice error message',
-          traceback: 'Nice traceback'
-        },
-      ])('should create a error response from %j', async (data) => {
-        const error = await ResponseError.create(
-          {
-            json: jest.fn().mockImplementation(
-              async () => {
-                Promise.resolve(data)
-              }
-            )
-          } as any
-        );
+          body: {
+            message: 'Nice error message',
+            traceback: 'Nice traceback'
+          }
+        }
+      ])('should create a error response from %j', async response => {
+        const error = await ServerConnection.ResponseError.create({
+          ...response,
+          json: () => Promise.resolve(response.body ?? {})
+        } as any);
 
-        expect(error.message).toEqual(data.message ?? 'Invalid response: 456 Dummy error')
-        expect(error.traceback).toEqual(data.traceback ?? '')
+        expect(error.message).toEqual(
+          response.body?.message ?? 'Invalid response: 456 Dummy error'
+        );
+        expect(error.traceback).toEqual(response.body?.traceback ?? '');
       });
     });
   });
