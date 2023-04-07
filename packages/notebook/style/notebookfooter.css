@@ -19,10 +19,22 @@
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
   color: var(--jp-layout-color3);
   margin-top: 6px;
-  background-color: transparent;
+  background: none;
   cursor: pointer;
 }
 
 .jp-Notebook-footer:focus {
-  border: var(--jp-border-width) solid var(--jp-cell-editor-active-border-color);
+  border-color: var(--jp-cell-editor-active-border-color);
+}
+
+/* For devices that support hovering, footer until hover */
+@media (hover: hover) {
+  .jp-Notebook-footer {
+    opacity: 0;
+  }
+
+  .jp-Notebook-footer:focus,
+  .jp-Notebook-footer:hover {
+    opacity: 1;
+  }
 }
