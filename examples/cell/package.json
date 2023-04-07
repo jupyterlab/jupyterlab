@@ -7,7 +7,7 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyter/ydoc": "^0.3.4",
+    "@jupyter/ydoc": "^1.0.0",
     "@jupyterlab/application": "^4.0.0-beta.0",
     "@jupyterlab/apputils": "^4.0.0-beta.0",
     "@jupyterlab/cells": "^4.0.0-beta.0",
