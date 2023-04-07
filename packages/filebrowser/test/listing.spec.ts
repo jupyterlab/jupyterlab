@@ -62,17 +62,17 @@ describe('filebrowser/listing', () => {
       await signalToPromise(dirListing.updated);
     });
 
+    afterEach(() => {
+      // Dispose will detach the widget
+      dirListing.dispose();
+    });
+
     it('should reflect initial conditions', () => {
       // Check initial conditions
       const selectedItems = [...dirListing.selectedItems()];
       const sortedItems = [...dirListing.sortedItems()];
       expect(selectedItems).toHaveLength(0);
       expect(sortedItems).toHaveLength(4);
-    });
-
-    afterEach(() => {
-      Widget.detach(dirListing);
-      jest.restoreAllMocks();
     });
 
     describe('#constructor', () => {
@@ -683,6 +683,7 @@ describe('filebrowser/listing', () => {
             dirListing.selectNext();
             await signalToPromise(dirListing.updated);
           });
+
           const expectInitialConditions = () => {
             const headerCheckbox = dirListing.renderer.getCheckboxNode!(
               dirListing.headerNode
