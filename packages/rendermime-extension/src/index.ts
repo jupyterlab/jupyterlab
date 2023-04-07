@@ -16,6 +16,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import {
   ILatexTypesetter,
   IMarkdownParser,
+  IRenderMime,
   IRenderMimeRegistry,
   RenderMimeRegistry,
   standardRendererFactories
@@ -55,7 +56,7 @@ function activate(
   app: JupyterFrontEnd,
   docManager: IDocumentManager | null,
   latexTypesetter: ILatexTypesetter | null,
-  sanitizer: ISanitizer | null,
+  sanitizer: IRenderMime.ISanitizer | null,
   markdownParser: IMarkdownParser | null,
   translator: ITranslator | null
 ): RenderMimeRegistry {

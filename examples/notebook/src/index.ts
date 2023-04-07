@@ -16,7 +16,7 @@ import '@jupyterlab/theme-light-extension/style/theme.css';
 import '../index.css';
 
 import { ServiceManager } from '@jupyterlab/services';
-import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
 
 import {
   NotebookModelFactory,
@@ -35,7 +35,9 @@ import {
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService,
-  EditorLanguageRegistry
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  ybinding
 } from '@jupyterlab/codemirror';
 
 import { DocumentManager } from '@jupyterlab/docmanager';
@@ -46,6 +48,8 @@ import {
   standardRendererFactories as initialFactories,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
+
+import { IYText } from '@jupyter/ydoc';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -76,10 +80,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   const rendermime = new RenderMimeRegistry({
     initialFactories: initialFactories,
-    latexTypesetter: new MathJaxTypesetter({
-      url: PageConfig.getOption('mathjaxUrl'),
-      config: PageConfig.getOption('mathjaxConfig')
-    })
+    latexTypesetter: new MathJaxTypesetter()
   });
 
   const opener = {
@@ -105,6 +106,27 @@ function createApp(manager: ServiceManager.IManager): void {
     opener
   });
   const mFactory = new NotebookModelFactory({});
+  const editorExtensions = () => {
+    const registry = new EditorExtensionRegistry();
+    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions(
+      {}
+    )) {
+      registry.addExtension(extensionFactory);
+    }
+    registry.addExtension({
+      name: 'shared-model-binding',
+      factory: options => {
+        const sharedModel = options.model.sharedModel as IYText;
+        return EditorExtensionRegistry.createImmutableExtension(
+          ybinding({
+            ytext: sharedModel.ysource,
+            undoManager: sharedModel.undoManager ?? undefined
+          })
+        );
+      }
+    });
+    return registry;
+  };
   const languages = new EditorLanguageRegistry();
   EditorLanguageRegistry.getDefaultLanguages()
     .filter(language =>
@@ -124,7 +146,10 @@ function createApp(manager: ServiceManager.IManager): void {
       });
     }
   });
-  const factoryService = new CodeMirrorEditorFactory({ languages });
+  const factoryService = new CodeMirrorEditorFactory({
+    extensions: editorExtensions(),
+    languages
+  });
   const mimeTypeService = new CodeMirrorMimeTypeService(languages);
   const editorFactory = factoryService.newInlineEditor;
   const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });

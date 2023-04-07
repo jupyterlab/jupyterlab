@@ -5,7 +5,7 @@ import {
   ISessionContext,
   MainAreaWidget,
   SessionContext,
-  sessionContextDialogs
+  SessionContextDialogs
 } from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { PathExt, Time, URLExt } from '@jupyterlab/coreutils';
@@ -48,7 +48,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       sessionContext,
       translator
     } = options;
-    this.translator = translator || nullTranslator;
+    this.translator = translator ?? nullTranslator;
     const trans = this.translator.load('jupyterlab');
 
     const contentFactory = (this.contentFactory = options.contentFactory);
@@ -58,7 +58,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     }
 
     sessionContext = this._sessionContext =
-      sessionContext ||
+      sessionContext ??
       new SessionContext({
         sessionManager: manager.sessions,
         specsManager: manager.kernelspecs,
@@ -70,7 +70,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       });
 
     const resolver = new RenderMimeRegistry.UrlResolver({
-      session: sessionContext,
+      path,
       contents: manager.contents
     });
     rendermime = rendermime.clone({ resolver });
@@ -87,7 +87,9 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     void sessionContext.initialize().then(async value => {
       if (value) {
-        await sessionContextDialogs.selectKernel(sessionContext!);
+        await (
+          options.sessionDialogs ?? new SessionContextDialogs({ translator })
+        ).selectKernel(sessionContext!);
       }
       this._connected = new Date();
       this._updateTitlePanel();
@@ -215,6 +217,11 @@ export namespace ConsolePanel {
      * An existing session context to use.
      */
     sessionContext?: ISessionContext;
+
+    /**
+     * Session dialogs to use.
+     */
+    sessionDialogs?: ISessionContext.IDialogs;
 
     /**
      * The model factory for the console widget.

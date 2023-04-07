@@ -502,7 +502,7 @@ describe('LabShell', () => {
     });
 
     it('should throw an error when an unrecognized area is given', () => {
-      expect(() => shell.widgets('foo' as any)).toThrowError(/Invalid area/);
+      expect(() => shell.widgets('foo' as any)).toThrow(/Invalid area/);
     });
   });
 

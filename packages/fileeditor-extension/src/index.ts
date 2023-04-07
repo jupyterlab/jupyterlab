@@ -18,6 +18,7 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
+  SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
@@ -54,6 +55,7 @@ import {
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -137,7 +139,8 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
     for (const size of ['1', '2', '4', '8']) {
       const args: JSONObject = {
         size,
-        name: trans.__('Spaces: %1', size)
+        // Use a context to differentiate with string set as plural in 3.x
+        name: trans._p('v4', 'Spaces: %1', size)
       };
       menu.addItem({ command, args });
     }
@@ -263,14 +266,16 @@ function activate(
   launcher: ILauncher | null,
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
-  sessionDialogs: ISessionContextDialogs | null,
+  sessionDialogs_: ISessionContextDialogs | null,
   tocRegistry: ITableOfContentsRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null,
-  translator: ITranslator | null,
+  translator_: ITranslator | null,
   formRegistry: IFormRendererRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
-  translator = translator ?? nullTranslator;
+  const translator = translator_ ?? nullTranslator;
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
   let toolbarFactory:
@@ -479,10 +484,8 @@ function activate(
     fileBrowser,
     extensions,
     languages,
-    themes,
     consoleTracker,
-    sessionDialogs,
-    menu
+    sessionDialogs
   );
 
   const codeViewerTracker = new WidgetTracker<MainAreaWidget<CodeViewerWidget>>(
@@ -568,7 +571,7 @@ function activateFileEditorCompleterService(
   editorTracker: IEditorTracker,
   manager: ICompletionProviderManager | null,
   translator: ITranslator | null,
-  appSanitizer: ISanitizer | null
+  appSanitizer: IRenderMime.ISanitizer | null
 ): void {
   if (!manager) {
     return;

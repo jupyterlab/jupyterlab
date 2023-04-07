@@ -653,6 +653,7 @@ export class StaticNotebook extends WindowedList {
     const options: CodeCell.IOptions = {
       contentFactory,
       editorConfig,
+      inputHistoryScope: this.notebookConfig.inputHistoryScope,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs,
       model,
       placeholder: this._notebookConfig.windowingMode !== 'none',
@@ -1050,6 +1051,11 @@ export namespace StaticNotebook {
     maxNumberOutputs: number;
 
     /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope: 'global' | 'session';
+
+    /**
      * Number of cells to render in addition to those
      * visible in the viewport.
      *
@@ -1119,9 +1125,10 @@ export namespace StaticNotebook {
     scrollPastEnd: true,
     defaultCell: 'code',
     recordTiming: false,
+    inputHistoryScope: 'global',
     maxNumberOutputs: 50,
     showEditorForReadOnlyMarkdown: true,
-    disableDocumentWideUndoRedo: false,
+    disableDocumentWideUndoRedo: true,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
     sideBySideRightMarginOverride: '10px',
@@ -1310,12 +1317,17 @@ export class Notebook extends StaticNotebook {
 
     this._activeCellIndex = newValue;
     const cell = this.widgets[newValue] ?? null;
-    if (cell !== this._activeCell) {
+    const cellChanged = cell !== this._activeCell;
+    if (cellChanged) {
       // Post an update request.
       this.update();
       this._activeCell = cell;
+    }
+
+    if (cellChanged || newValue != oldValue) {
       this._activeCellChanged.emit(cell);
     }
+
     if (this.mode === 'edit' && cell instanceof MarkdownCell) {
       cell.rendered = false;
     }

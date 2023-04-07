@@ -457,7 +457,7 @@ test.describe('General', () => {
 
     // Relax threshold as displayed map may change a bit (in particular text positioning)
     expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {
-      threshold: 0.3
+      maxDiffPixelRatio: 0.02
     });
   });
 
@@ -577,6 +577,18 @@ test.describe('General', () => {
     expect(
       await (await page.$('#modal-command-palette')).screenshot()
     ).toMatchSnapshot('command_palette.png');
+  });
+
+  test('Keyboard Shortcuts Help', async ({ page, tmpPath }) => {
+    await page.goto(`tree/${tmpPath}`);
+
+    await page.notebook.createNew();
+
+    await page.keyboard.press('Control+Shift+H');
+
+    expect(await page.locator('.jp-Notebook').screenshot()).toMatchSnapshot(
+      'shortcuts_help.png'
+    );
   });
 
   test('Open With', async ({ page }) => {

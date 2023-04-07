@@ -9,13 +9,62 @@ Extension Migration Guide
 JupyterLab 3.x to 4.x
 ---------------------
 
+Upgrading extension using the upgrade script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab 4.x provides a script to upgrade an existing extension to use the new extension system and packaging.
+
+.. note::
+
+    Back up your extension - the best if you use a version control like git, is to work on a new branch.
+
+First, make sure to update to JupyterLab 4 and install ``cookiecutter``. With ``pip``:
+
+.. code:: bash
+
+   pip install -U jupyterlab
+   pip install cookiecutter
+
+
+Or with ``conda``:
+
+.. code:: bash
+
+   conda install -c conda-forge jupyterlab=4 cookiecutter
+
+
+Then at the root folder of the extension, run:
+
+.. code:: bash
+
+   python -m jupyterlab.upgrade_extension .
+
+The upgrade script creates the necessary files for packaging the JupyterLab extension as a Python package.
+The script will ask you for all files if you want to override them or not. By default the configuration files
+will be overridden for the newer version. In particular, if you were using Python setuptools (aka ``setup.py``
+and/or ``setup.cfg``), you will like need to update the ``pyproject.toml`` file (see
+`PEP example <https://peps.python.org/pep-0621/#example>`_).
+
+The upgrade script also updates the dependencies in ``package.json`` to the ``^4.0.0`` packages.
+
+For more details about the new file structure and packaging of the extension, check out the extension tutorial: :ref:`extension_tutorial`
+
+.. note::
+
+    You will need to modify the code of your extension if it is impacted by the API changes mentioned below.
+
+jlpm
+^^^^
+
+The utility ``jlpm`` is using yarn 3 (it was yarn 1 previously).
+
+API breaking changes
+^^^^^^^^^^^^^^^^^^^^
+
 .. note::
 
    With JupyterLab 4.x, the npm package version policy changed to not bump major version with
    the Python package unless required to ease extension compatibility.
-
-API breaking changes
-^^^^^^^^^^^^^^^^^^^^
 
 Here is a list of JupyterLab npm packages that encountered API changes and therefore have
 bumped their major version (following semver convention). We want to point out particularly
@@ -29,7 +78,10 @@ bumped their major version (following semver convention). We want to point out p
    As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
    See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
 - ``@jupyterlab/apputils`` from 3.x to 4.x
-   Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
+   * Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
+   * ``ISanitizer`` and ``ISanitizer.IOptions`` are deprecated in favor of ``IRenderMime.ISanitizer`` and
+     ``IRenderMime.ISanitizerOptions`` in ``@jupyterlab/rendermime-interfaces``.
+   * Global ``sessionContextDialogs`` is removed; you should request the token ``ISessionContextDialogs`` (from ``@jupyterlab/apputils``).
 - ``@jupyterlab/attachments`` from 3.x to 4.x
    Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
@@ -194,6 +246,7 @@ bumped their major version (following semver convention). We want to point out p
    * ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
      to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
 - ``@jupyterlab/notebook`` from 3.x to 4.x
+   * ``NotebookWidgetFactory.IOptions`` has no ``sessionDialogs`` option any more.
    * The ``NotebookPanel._onSave`` method is now ``private``.
    * ``NotebookActions.collapseAll`` method renamed to ``NotebookActions.collapseAllHeadings``.
    * Command ``Collapsible_Headings:Toggle_Collapse`` renamed to ``notebook:toggle-heading-collapse``.
@@ -327,6 +380,19 @@ Here are the changes in the Javascript package ``@jupyterlab/galata`` from 4.x t
      store in ``@jupyterlab/galata/lib/extension``. And the global object has been renamed ``window.galata`` instead
      of ``window.galataip`` (it still exists but it is deprecated).
 
+Deprecated code removed
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The following deprecated API's have been removed:
+
+- ``@jupyterlab/csvviewer``: ``CSVDelimiter.delimiterChanged`` has been removed - dead code. You can directly access the delimiter from the ``CSVViewer`` widget.
+- ``@jupyterlab/mainmenu``: ``IJupyterLabMenu`` and ``JupyterLabMenu`` have been removed. You can use directly ``IRankedMenu`` and ``RankedMenu`` from ``@jupyterlab/ui-components``
+- ``@jupyterlab/notebook``: ``NotebookWidgetFactory`` default toolbar is now empty as the button helpers are deprecated.
+- ``@jupyterlab/rendermime``: ``RenderMimeRegistry.IUrlResolverOptions`` does not accept ``session``; you must set the ``path`` (accessible through ``session.path``).
+- ``@jupyterlab/ui-components``:
+   * ``RankedMenu.menu : Menu`` has been removed as ``RankedMenu`` inherits from ``Menu``.
+   * ``LabIconStyle.IProps`` does not accept ``kind`` nor ``justify``. You should use ``stylesheet`` or ``elementPosition`` respectively.
+
 Extension Development Changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -346,6 +412,44 @@ Extension Development Changes
 
 JupyterLab 3.5 to 3.6
 ---------------------
+
+AsyncIterable Support
+^^^^^^^^^^^^^^^^^^^^^
+
+For the events service, we are using a JavaScript feature introduced in ES2018. If your code is
+using TypeScript with ES2017 target (as JupyterLab 3.6), you will either need to update your
+target to ES2018 or add ``"ES2018"`` to the `TypeScript lib option <https://www.typescriptlang.org/tsconfig#lib>`_.
+
+.. note::
+
+    JupyterLab 3.6.0 was released with an updated target "ES2018". We strongly advise updating to 3.6.1,
+    which reverts the target back to "ES2017".
+
+
+Jest configuration update
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab 3.6.
+They need to be ignore when transforming the code with Jest. You will need to update the
+``transformIgnorePatterns`` to match:
+
+.. code-block:: javascript
+    :emphasize-lines: 3
+
+    const esModules = [
+      '@jupyterlab/',
+      '@jupyter/ydoc',
+      'lib0',
+      'y\\-protocols',
+      'y\\-websocket',
+      'yjs'
+    ].join('|');
+
+    // ...
+
+    transformIgnorePatterns: [`/node_modules/(?!${esModules}).+`]
+
+For more information, have a look at :ref:`testing_with_jest`.
 
 Real-Time Collaboration
 ^^^^^^^^^^^^^^^^^^^^^^^

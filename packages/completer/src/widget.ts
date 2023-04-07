@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISanitizer, Sanitizer } from '@jupyterlab/apputils';
+import { Sanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { renderText } from '@jupyterlab/rendermime';
+import { IRenderMime, renderText } from '@jupyterlab/rendermime';
 import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -94,7 +94,7 @@ export class Completer extends Widget {
   /**
    * The sanitizer used to sanitize untrusted HTML inputs.
    */
-  readonly sanitizer: ISanitizer;
+  readonly sanitizer: IRenderMime.ISanitizer;
 
   /**
    * The active index.
@@ -933,7 +933,7 @@ export namespace Completer {
     /**
      * Sanitizer used to sanitize html strings
      */
-    sanitizer?: ISanitizer;
+    sanitizer?: IRenderMime.ISanitizer;
   }
 
   /**
@@ -1153,7 +1153,7 @@ export namespace Completer {
       /**
        * The sanitizer used to sanitize untrusted HTML inputs.
        */
-      sanitizer?: ISanitizer;
+      sanitizer?: IRenderMime.ISanitizer;
     }
   }
 
@@ -1168,7 +1168,7 @@ export namespace Completer {
     /**
      * The sanitizer used to sanitize untrusted HTML inputs.
      */
-    readonly sanitizer: ISanitizer;
+    readonly sanitizer: IRenderMime.ISanitizer;
 
     /**
      * Create an item node from an ICompletionItem for a text completer menu.
@@ -1199,7 +1199,7 @@ export namespace Completer {
     ): HTMLElement {
       const host = document.createElement('div');
       host.classList.add('jp-RenderedText');
-      const sanitizer = { sanitize: this.sanitizer.sanitize };
+      const sanitizer = this.sanitizer;
       const source = activeItem.documentation || '';
 
       renderText({ host, sanitizer, source }).catch(console.error);
@@ -1312,7 +1312,9 @@ export namespace Completer {
   /**
    * The default `IRenderer` instance.
    */
-  export function getDefaultRenderer(sanitizer?: ISanitizer): Renderer {
+  export function getDefaultRenderer(
+    sanitizer?: IRenderMime.ISanitizer
+  ): Renderer {
     if (
       !_defaultRenderer ||
       (sanitizer && _defaultRenderer.sanitizer !== sanitizer)

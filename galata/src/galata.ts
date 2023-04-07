@@ -35,7 +35,12 @@ export namespace galata {
       fetchNews: 'false'
     },
     '@jupyterlab/fileeditor-extension:plugin': {},
-    '@jupyterlab/notebook-extension:tracker': {}
+    '@jupyterlab/notebook-extension:tracker': {},
+    '@jupyterlab/codemirror-extension:plugin': {
+      defaultConfig: {
+        cursorBlinkRate: 0
+      }
+    }
   };
 
   export const DEFAULT_DOCUMENTATION_STATE: Record<string, any> = {
@@ -57,7 +62,6 @@ export namespace galata {
   export type DefaultSidebarTabId =
     | 'filebrowser'
     | 'jp-running-sessions'
-    | 'tab-manager'
     | 'jp-property-inspector'
     | 'table-of-contents'
     | 'extensionmanager.main-view'

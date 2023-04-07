@@ -200,7 +200,7 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
   };
 
 /**
- * CodeMirror real-time collaboration binding provider.
+ * CodeMirror shared model binding provider.
  */
 export const bindingPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:binding',
@@ -208,11 +208,14 @@ export const bindingPlugin: JupyterFrontEndPlugin<void> = {
   requires: [IEditorExtensionRegistry],
   activate: (app: JupyterFrontEnd, extensions: IEditorExtensionRegistry) => {
     extensions.addExtension({
-      name: 'yjs-binding',
+      name: 'shared-model-binding',
       factory: options => {
         const sharedModel = options.model.sharedModel as IYText;
         return EditorExtensionRegistry.createImmutableExtension(
-          ybinding(sharedModel.ysource)
+          ybinding({
+            ytext: sharedModel.ysource,
+            undoManager: sharedModel.undoManager ?? undefined
+          })
         );
       }
     });

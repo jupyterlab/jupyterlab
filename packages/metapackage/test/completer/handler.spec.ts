@@ -17,7 +17,10 @@ function createEditorWidget(): CodeEditorWrapper {
   const model = new CodeEditor.Model({ sharedModel: new YFile() });
   const factory = (options: CodeEditor.IOptions) => {
     const m = options.model.sharedModel as any;
-    options.extensions = [...(options.extensions ?? []), ybinding(m.ysource)];
+    options.extensions = [
+      ...(options.extensions ?? []),
+      ybinding({ ytext: m.ysource })
+    ];
     return new CodeMirrorEditor(options);
   };
   return new CodeEditorWrapper({ factory, model });

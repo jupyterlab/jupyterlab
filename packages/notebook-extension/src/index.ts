@@ -26,7 +26,7 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
-  sessionContextDialogs,
+  SessionContextDialogs,
   showDialog,
   Toolbar,
   WidgetTracker
@@ -37,7 +37,7 @@ import {
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
 
 import {
   IEditorExtensionRegistry,
@@ -80,7 +80,11 @@ import {
 } from '@jupyterlab/notebook';
 import { IObservableList } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  IMarkdownParser,
+  IRenderMime,
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -712,11 +716,9 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
       NotebookPanel.IContentFactory,
       IEditorServices,
       IRenderMimeRegistry,
-      ISessionContextDialogs,
-      IToolbarWidgetRegistry,
-      ITranslator
+      IToolbarWidgetRegistry
     ],
-    optional: [ISettingRegistry],
+    optional: [ISettingRegistry, ISessionContextDialogs, ITranslator],
     activate: activateWidgetFactory,
     autoStart: true
   };
@@ -856,7 +858,7 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     tocRegistry: ITableOfContentsRegistry,
-    sanitizer: ISanitizer,
+    sanitizer: IRenderMime.ISanitizer,
     mdParser: IMarkdownParser | null
   ): void => {
     tocRegistry.add(new NotebookToCFactory(tracker, mdParser, sanitizer));
@@ -1108,11 +1110,14 @@ function activateWidgetFactory(
   contentFactory: NotebookPanel.IContentFactory,
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
-  sessionContextDialogs: ISessionContextDialogs,
   toolbarRegistry: IToolbarWidgetRegistry,
-  translator: ITranslator,
-  settingRegistry: ISettingRegistry | null
+  settingRegistry: ISettingRegistry | null,
+  sessionContextDialogs_: ISessionContextDialogs | null,
+  translator_: ITranslator | null
 ): NotebookWidgetFactory.IFactory {
+  const translator = translator_ ?? nullTranslator;
+  const sessionContextDialogs =
+    sessionContextDialogs_ ?? new SessionContextDialogs({ translator });
   const preferKernelOption = PageConfig.getOption('notebookStartsKernel');
 
   // If the option is not set, assume `true`
@@ -1190,11 +1195,11 @@ function activateWidgetFactory(
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
     mimeTypeService: editorServices.mimeTypeService,
-    sessionDialogs: sessionContextDialogs,
     toolbarFactory,
-    translator: translator
+    translator
   });
   app.docRegistry.addWidgetFactory(factory);
+
   return factory;
 }
 
@@ -1531,11 +1536,13 @@ function activateNotebookHandler(
   mainMenu: IMainMenu | null,
   router: IRouter | null,
   settingRegistry: ISettingRegistry | null,
-  sessionDialogs: ISessionContextDialogs | null,
-  translator: ITranslator | null,
+  sessionDialogs_: ISessionContextDialogs | null,
+  translator_: ITranslator | null,
   formRegistry: IFormRendererRegistry | null
 ): INotebookTracker {
-  translator = translator ?? nullTranslator;
+  const translator = translator_ ?? nullTranslator;
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const services = app.serviceManager;
 
@@ -1571,6 +1578,51 @@ function activateNotebookHandler(
       settings.changed.connect(() => {
         updateConfig(settings);
       });
+
+      const updateSessionSettings = (
+        session: ISessionContext,
+        changes: IChangedArgs<ISessionContext.IKernelPreference>
+      ) => {
+        const { newValue, oldValue } = changes;
+        const autoStartDefault = newValue.autoStartDefault;
+
+        if (
+          typeof autoStartDefault === 'boolean' &&
+          autoStartDefault !== oldValue.autoStartDefault
+        ) {
+          // Ensure we break the cycle
+          if (
+            autoStartDefault !==
+            (settings.get('autoStartDefaultKernel').composite as boolean)
+          )
+            // Once the settings is changed `updateConfig` will take care
+            // of the propagation to existing session context.
+            settings
+              .set('autoStartDefaultKernel', autoStartDefault)
+              .catch(reason => {
+                console.error(
+                  `Failed to set ${settings.id}.autoStartDefaultKernel`
+                );
+              });
+        }
+      };
+
+      const sessionContexts = new WeakSet<ISessionContext>();
+      const listenToKernelPreference = (panel: NotebookPanel): void => {
+        const session = panel.context.sessionContext;
+        if (!session.isDisposed && !sessionContexts.has(session)) {
+          sessionContexts.add(session);
+          session.kernelPreferenceChanged.connect(updateSessionSettings);
+          session.disposed.connect(() => {
+            session.kernelPreferenceChanged.disconnect(updateSessionSettings);
+          });
+        }
+      };
+      tracker.forEach(listenToKernelPreference);
+      tracker.widgetAdded.connect((tracker, panel) => {
+        listenToKernelPreference(panel);
+      });
+
       commands.addCommand(CommandIDs.autoClosingBrackets, {
         execute: args => {
           const codeConfig = settings.get('codeCellConfig')
@@ -1625,7 +1677,8 @@ function activateNotebookHandler(
       updateTracker({
         editorConfig: factory.editorConfig,
         notebookConfig: factory.notebookConfig,
-        kernelShutdown: factory.shutdownOnClose
+        kernelShutdown: factory.shutdownOnClose,
+        autoStartDefault: factory.autoStartDefault
       });
     });
 
@@ -1730,13 +1783,15 @@ function activateNotebookHandler(
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
       overscanCount: settings.get('overscanCount').composite as number,
+      inputHistoryScope: settings.get('inputHistoryScope').composite as
+        | 'global'
+        | 'session',
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
       showEditorForReadOnlyMarkdown: settings.get(
         'showEditorForReadOnlyMarkdown'
       ).composite as boolean,
-      disableDocumentWideUndoRedo: settings.get(
-        'experimentalDisableDocumentWideUndoRedo'
-      ).composite as boolean,
+      disableDocumentWideUndoRedo: !settings.get('documentWideUndoRedo')
+        .composite as boolean,
       renderingLayout: settings.get('renderingLayout').composite as
         | 'default'
         | 'side-by-side',
@@ -1765,23 +1820,26 @@ function activateNotebookHandler(
         `<style id="${SIDE_BY_SIDE_STYLE_ID}">${sideBySideMarginStyle}}</style>`
       );
     }
+    factory.autoStartDefault = settings.get('autoStartDefaultKernel')
+      .composite as boolean;
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
 
-    modelFactory.disableDocumentWideUndoRedo = settings.get(
-      'experimentalDisableDocumentWideUndoRedo'
+    modelFactory.disableDocumentWideUndoRedo = !settings.get(
+      'documentWideUndoRedo'
     ).composite as boolean;
 
     updateTracker({
       editorConfig: factory.editorConfig,
       notebookConfig: factory.notebookConfig,
-      kernelShutdown: factory.shutdownOnClose
+      kernelShutdown: factory.shutdownOnClose,
+      autoStartDefault: factory.autoStartDefault
     });
   }
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(mainMenu, tracker, sessionDialogs, isEnabled);
+    populateMenus(mainMenu, isEnabled);
   }
 
   // Utility function to create a new notebook.
@@ -1882,7 +1940,7 @@ function activateNotebookCompleterService(
   notebooks: INotebookTracker,
   manager: ICompletionProviderManager | null,
   translator: ITranslator | null,
-  appSanitizer: ISanitizer | null
+  appSanitizer: IRenderMime.ISanitizer | null
 ): void {
   if (!manager) {
     return;
@@ -2005,13 +2063,11 @@ function addCommands(
   app: JupyterFrontEnd,
   tracker: NotebookTracker,
   translator: ITranslator,
-  sessionDialogs: ISessionContextDialogs | null,
+  sessionDialogs: ISessionContextDialogs,
   isEnabled: () => boolean
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
-
-  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
   const isEnabledAndSingleSelected = (): boolean => {
     return Private.isEnabledAndSingleSelected(shell, tracker);
@@ -2068,10 +2124,14 @@ function addCommands(
     commands.notifyCommandChanged(CommandIDs.runAndAdvance);
     commands.notifyCommandChanged(CommandIDs.runAndInsert);
   });
+  tracker.activeCellChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.moveUp);
+    commands.notifyCommandChanged(CommandIDs.moveDown);
+  });
 
   commands.addCommand(CommandIDs.runAndAdvance, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Run Selected Cell',
         'Run Selected Cells',
@@ -2079,7 +2139,7 @@ function addCommands(
       );
     },
     caption: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Run this cell and advance',
         'Run these %1 cells and advance',
@@ -2092,14 +2152,19 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndAdvance(content, context.sessionContext);
+        return NotebookActions.runAndAdvance(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
   });
   commands.addCommand(CommandIDs.run, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Run Selected Cell and Do not Advance',
         'Run Selected Cells and Do not Advance',
@@ -2112,14 +2177,19 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.run(content, context.sessionContext);
+        return NotebookActions.run(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
   });
   commands.addCommand(CommandIDs.runAndInsert, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Run Selected Cell and Insert Below',
         'Run Selected Cells and Insert Below',
@@ -2132,7 +2202,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndInsert(content, context.sessionContext);
+        return NotebookActions.runAndInsert(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -2146,7 +2221,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAll(content, context.sessionContext);
+        return NotebookActions.runAll(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -2159,7 +2239,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllAbove(content, context.sessionContext);
+        return NotebookActions.runAllAbove(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled: () => {
@@ -2179,7 +2264,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllBelow(content, context.sessionContext);
+        return NotebookActions.runAllBelow(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled: () => {
@@ -2197,11 +2287,8 @@ function addCommands(
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        const { context, content } = current;
-        return NotebookActions.renderAllMarkdown(
-          content,
-          context.sessionContext
-        );
+        const { content } = current;
+        return NotebookActions.renderAllMarkdown(content);
       }
     },
     isEnabled
@@ -2213,7 +2300,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs!.restart(current.sessionContext, translator);
+        return sessionDialogs.restart(current.sessionContext);
       }
     },
     isEnabled
@@ -2391,7 +2478,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.cut, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Cut Cell',
         'Cut Cells',
@@ -2399,7 +2486,7 @@ function addCommands(
       );
     },
     caption: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Cut this cell',
         'Cut these %1 cells',
@@ -2418,7 +2505,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.copy, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Copy Cell',
         'Copy Cells',
@@ -2426,7 +2513,7 @@ function addCommands(
       );
     },
     caption: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Copy this cell',
         'Copy these %1 cells',
@@ -2445,7 +2532,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.pasteBelow, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Paste Cell Below',
         'Paste Cells Below',
@@ -2453,7 +2540,7 @@ function addCommands(
       );
     },
     caption: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Paste this cell from the clipboard',
         'Paste these %1 cells from the clipboard',
@@ -2472,7 +2559,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.pasteAbove, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Paste Cell Above',
         'Paste Cells Above',
@@ -2480,7 +2567,7 @@ function addCommands(
       );
     },
     caption: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Paste this cell from the clipboard',
         'Paste these %1 cells from the clipboard',
@@ -2498,7 +2585,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.duplicateBelow, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Duplicate Cell Below',
         'Duplicate Cells Below',
@@ -2506,7 +2593,7 @@ function addCommands(
       );
     },
     caption: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Create a duplicate of this cell below',
         'Create duplicates of %1 cells below',
@@ -2525,7 +2612,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.pasteAndReplace, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Paste Cell and Replace',
         'Paste Cells and Replace',
@@ -2543,7 +2630,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.deleteCell, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Delete Cell',
         'Delete Cells',
@@ -2551,7 +2638,7 @@ function addCommands(
       );
     },
     caption: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Delete this cell',
         'Delete these %1 cells',
@@ -2776,7 +2863,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.moveUp, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Move Cell Up',
         'Move Cells Up',
@@ -2784,7 +2871,7 @@ function addCommands(
       );
     },
     caption: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Move this cell up',
         'Move these %1 cells up',
@@ -2802,12 +2889,18 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current) {
+        return false;
+      }
+      return current.content.activeCellIndex >= 1;
+    },
     icon: args => (args.toolbar ? moveUpIcon : undefined)
   });
   commands.addCommand(CommandIDs.moveDown, {
     label: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Move Cell Down',
         'Move Cells Down',
@@ -2815,7 +2908,7 @@ function addCommands(
       );
     },
     caption: args => {
-      const current = getCurrent(tracker, shell, args);
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
       return trans._n(
         'Move this cell down',
         'Move these %1 cells down',
@@ -2833,7 +2926,15 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: args => {
+      const current = getCurrent(tracker, shell, { ...args, activate: false });
+      if (!current || !current.content.model) {
+        return false;
+      }
+
+      const length = current.content.model.cells.length;
+      return current.content.activeCellIndex < length - 1;
+    },
     icon: args => (args.toolbar ? moveDownIcon : undefined)
   });
   commands.addCommand(CommandIDs.toggleAllLines, {
@@ -2910,7 +3011,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return current.content.activeCell?.editor?.redo();
+        const cell = current.content.activeCell;
+        if (cell) {
+          cell.inputHidden = false;
+          return cell.editor?.redo();
+        }
       }
     }
   });
@@ -2920,7 +3025,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return current.content.activeCell?.editor?.undo();
+        const cell = current.content.activeCell;
+        if (cell) {
+          cell.inputHidden = false;
+          return cell.editor?.undo();
+        }
       }
     }
   });
@@ -2930,10 +3039,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs!.selectKernel(
-          current.context.sessionContext,
-          translator
-        );
+        return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
     isEnabled
@@ -3250,7 +3356,12 @@ function addCommands(
       }
 
       current.content.extendContiguousSelectionTo(lastIndex);
-      void NotebookActions.run(current.content, current.sessionContext);
+      void NotebookActions.run(
+        current.content,
+        current.sessionContext,
+        sessionDialogs,
+        translator
+      );
     }
   });
 }
@@ -3361,14 +3472,7 @@ function populatePalette(
 /**
  * Populates the application menus for the notebook.
  */
-function populateMenus(
-  mainMenu: IMainMenu,
-  tracker: INotebookTracker,
-  sessionDialogs: ISessionContextDialogs | null,
-  isEnabled: () => boolean
-): void {
-  sessionDialogs = sessionDialogs || sessionContextDialogs;
-
+function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   // Add undo/redo hooks to the edit menu.
   mainMenu.editMenu.undoers.redo.add({
     id: CommandIDs.redo,
@@ -3573,7 +3677,7 @@ namespace Private {
   export function raiseSilentNotification(
     message: string,
     notebookNode: HTMLElement
-  ) {
+  ): void {
     const hiddenAlertContainerId = `sr-message-container-${notebookNode.id}`;
 
     const hiddenAlertContainer =

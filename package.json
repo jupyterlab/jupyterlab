@@ -37,7 +37,7 @@
     "build:all": "lerna run build:all",
     "postbuild:all": "npm run build:testutils && npm run build:galata",
     "build:builder": "cd builder && npm run build",
-    "build:core": "cd jupyterlab/staging && jlpm && (jlpm deduplicate || jlpm) && npm run build",
+    "build:core": "cd jupyterlab/staging && jlpm && (jlpm dedupe || jlpm) && npm run build",
     "build:dev": "npm run integrity && npm run build:all && cd dev_mode && npm run build",
     "build:dev:prod": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod",
     "build:dev:prod:minimize": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod:minimize",
@@ -68,7 +68,6 @@
     "coverage": "lerna run coverage --scope \"@jupyterlab/test-*\" --stream --concurrency 1",
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",
-    "deduplicate": "jlpm yarn-deduplicate -s fewer --fail",
     "docs": "typedoc --options typedoc.js",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --cache --fix .",
@@ -106,21 +105,19 @@
     "watch:packages": "python scripts/watch_packages.py"
   },
   "resolutions": {
-    "@lumino/coreutils": "^2.0.0-rc.0",
-    "@lumino/disposable": "^2.0.0-rc.0",
-    "@lumino/signaling": "^2.0.0-rc.0",
+    "@jupyterlab/services/ws": "8.12.0",
     "@types/react": "^18.0.26",
     "react": "^18.2.0",
     "yjs": "^13.5.40"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "~5.28.0",
-    "@typescript-eslint/parser": "~5.28.0",
-    "eslint": "~8.17.0",
-    "eslint-config-prettier": "~8.5.0",
-    "eslint-plugin-jest": "~26.5.3",
-    "eslint-plugin-prettier": "~4.0.0",
-    "eslint-plugin-react": "~7.29.4",
+    "@typescript-eslint/eslint-plugin": "~5.55.0",
+    "@typescript-eslint/parser": "~5.55.0",
+    "eslint": "~8.36.0",
+    "eslint-config-prettier": "~8.7.0",
+    "eslint-plugin-jest": "~27.2.1",
+    "eslint-plugin-prettier": "~4.2.1",
+    "eslint-plugin-react": "~7.32.2",
     "prettier": "~2.6.0",
     "stylelint": "^14.9.1",
     "stylelint-config-prettier": "^9.0.3",
@@ -130,7 +127,6 @@
   },
   "devDependencies": {
     "lerna": "^6.4.1",
-    "typedoc": "~0.23.25",
-    "yarn": "1.22.19"
+    "typedoc": "~0.23.25"
   }
 }

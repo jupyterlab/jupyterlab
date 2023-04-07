@@ -55,9 +55,9 @@ test.describe('Notebook Edit', () => {
 
     let imageName = 'copy-paste-cell.png';
     await page.notebook.selectCells(1);
-    await page.menu.clickMenuItem('Edit>Copy Cells');
+    await page.menu.clickMenuItem('Edit>Copy Cell');
     await page.notebook.selectCells(0);
-    await page.menu.clickMenuItem('Edit>Paste Cells Above');
+    await page.menu.clickMenuItem('Edit>Paste Cell Above');
     let nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
@@ -68,9 +68,9 @@ test.describe('Notebook Edit', () => {
 
     const imageName = 'cut-paste-cell.png';
     await page.notebook.selectCells(0);
-    await page.menu.clickMenuItem('Edit>Cut Cells');
+    await page.menu.clickMenuItem('Edit>Cut Cell');
     await page.notebook.selectCells(0);
-    await page.menu.clickMenuItem('Edit>Paste Cells Below');
+    await page.menu.clickMenuItem('Edit>Paste Cell Below');
     const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
@@ -81,9 +81,9 @@ test.describe('Notebook Edit', () => {
 
     const imageName = 'paste-replace-cell.png';
     await page.notebook.selectCells(0);
-    await page.menu.clickMenuItem('Edit>Copy Cells');
+    await page.menu.clickMenuItem('Edit>Copy Cell');
     await page.notebook.selectCells(2);
-    await page.menu.clickMenuItem('Edit>Paste Cells and Replace');
+    await page.menu.clickMenuItem('Edit>Paste Cell and Replace');
     const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
@@ -94,7 +94,7 @@ test.describe('Notebook Edit', () => {
 
     const imageName = 'delete-cell.png';
     await page.notebook.selectCells(2);
-    await page.menu.clickMenuItem('Edit>Delete Cells');
+    await page.menu.clickMenuItem('Edit>Delete Cell');
     const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
@@ -124,7 +124,7 @@ test.describe('Notebook Edit', () => {
     await populateNotebook(page);
     const imageName = 'move-cell-up.png';
     await page.notebook.selectCells(1);
-    await page.menu.clickMenuItem('Edit>Move Cells Up');
+    await page.menu.clickMenuItem('Edit>Move Cell Up');
     const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
@@ -134,7 +134,7 @@ test.describe('Notebook Edit', () => {
     await populateNotebook(page);
     const imageName = 'move-cell-down.png';
     await page.notebook.selectCells(0);
-    await page.menu.clickMenuItem('Edit>Move Cells Down');
+    await page.menu.clickMenuItem('Edit>Move Cell Down');
     const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);

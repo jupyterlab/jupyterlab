@@ -141,7 +141,7 @@ describe('docregistry/registry', () => {
               defaultFor: []
             })
           );
-        }).toThrowError(/Invalid/);
+        }).toThrow(/Invalid/);
         expect(() => {
           registry.addWidgetFactory(
             new WidgetFactory({
@@ -150,7 +150,7 @@ describe('docregistry/registry', () => {
               defaultFor: []
             })
           );
-        }).toThrowError(/Invalid/);
+        }).toThrow(/Invalid/);
       });
     });
 
@@ -521,10 +521,10 @@ describe('docregistry/registry', () => {
         registry.addWidgetFactory(factory);
         expect(() => {
           registry.setDefaultWidgetFactory('foobar', 'fake');
-        }).toThrowError(/Cannot find/);
+        }).toThrow(/Cannot find/);
         expect(() => {
           registry.setDefaultWidgetFactory('fake', undefined);
-        }).toThrowError(/Cannot find/);
+        }).toThrow(/Cannot find/);
       });
 
       it('should throw if the factory cannot render a file type', () => {
@@ -536,7 +536,7 @@ describe('docregistry/registry', () => {
         registry.addWidgetFactory(mdFactory);
         expect(() => {
           registry.setDefaultWidgetFactory('foobar', 'markdown');
-        }).toThrowError(/cannot view/);
+        }).toThrow(/cannot view/);
       });
 
       it('should revert to the default widget factory if the override is removed', () => {

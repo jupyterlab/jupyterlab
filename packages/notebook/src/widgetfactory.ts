@@ -1,15 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ISessionContextDialogs,
-  sessionContextDialogs
-} from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ITranslator } from '@jupyterlab/translation';
-import { ToolbarItems } from './default-toolbar';
 import { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { StaticNotebook } from './widget';
@@ -35,7 +30,6 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this._notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
-    this._sessionDialogs = options.sessionDialogs || sessionContextDialogs;
   }
 
   /*
@@ -101,22 +95,8 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     return new NotebookPanel({ context, content });
   }
 
-  /**
-   * Default factory for toolbar items to be added after the widget is created.
-   */
-  protected defaultToolbarFactory(
-    widget: NotebookPanel
-  ): DocumentRegistry.IToolbarItem[] {
-    return ToolbarItems.getDefaultItems(
-      widget,
-      this._sessionDialogs,
-      this.translator
-    );
-  }
-
   private _editorConfig: StaticNotebook.IEditorConfig;
   private _notebookConfig: StaticNotebook.INotebookConfig;
-  private _sessionDialogs: ISessionContextDialogs;
 }
 
 /**
@@ -154,11 +134,6 @@ export namespace NotebookWidgetFactory {
     notebookConfig?: StaticNotebook.INotebookConfig;
 
     /**
-     * The session context dialogs.
-     */
-    sessionDialogs?: ISessionContextDialogs;
-
-    /**
      * The application language translator.
      */
     translator?: ITranslator;
@@ -169,6 +144,11 @@ export namespace NotebookWidgetFactory {
    */
   export interface IFactory
     extends DocumentRegistry.IWidgetFactory<NotebookPanel, INotebookModel> {
+    /**
+     * Whether to automatically start the preferred kernel.
+     */
+    autoStartDefault: boolean;
+
     /**
      * A configuration object for cell editor settings.
      */

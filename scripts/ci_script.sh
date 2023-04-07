@@ -6,13 +6,25 @@
 set -ex
 set -o pipefail
 
+# use a single global cache dir
+export YARN_ENABLE_GLOBAL_CACHE=1
+
+# display verbose output for pkg builds run during `jlpm install`
+export YARN_ENABLE_INLINE_BUILDS=1
+
+
 if [[ $GROUP != nonode ]]; then
     python -c "from jupyterlab.commands import build_check; build_check()"
 fi
 
 
 if [[ $GROUP == python ]]; then
-    jupyter lab build --debug
+    export JUPYTERLAB_DIR="${HOME}/share/jupyter/lab/"
+    mkdir -p $JUPYTERLAB_DIR
+
+    # the env var ensures that `yarn.lock` in app dir does not change on a simple `jupyter lab build` call
+    YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
+
     # Run the python tests
     python -m pytest
 fi
@@ -46,9 +58,6 @@ if [[ $GROUP == integrity ]]; then
     # Run the integrity script first
     jlpm run integrity --force
 
-    # Check yarn.lock file
-    jlpm check --integrity
-
     # Run a browser check in dev mode
     jlpm run build
     python -m jupyterlab.browser_check --dev-mode
@@ -79,12 +88,8 @@ if [[ $GROUP == integrity2 ]]; then
     # Make sure we can build for release
     jlpm run build:dev:prod:release
 
-    jlpm config set prefix ~/.yarn
-
     # Make sure we have CSS that can be converted with postcss
-    jlpm global add postcss postcss-cli
-
-    ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
+    jlpm dlx -p postcss -p postcss-cli postcss packages/**/style/*.css --dir /tmp --config scripts/postcss.config.js
 
     # run twine check on the python build assets.
     # this must be done before altering any versions below.
@@ -144,6 +149,7 @@ if [[ $GROUP == release_test ]]; then
     ./scripts/release_test.sh
     node buildutils/lib/local-repository.js stop
 fi
+
 
 if [[ $GROUP == examples ]]; then
     # Run the integrity script to link binary files
@@ -278,20 +284,21 @@ if [[ $GROUP == usage2 ]]; then
     python -m jupyterlab.browser_check --watch
 
     # Make sure we can non-dev install.
-    virtualenv -p $(which python3) test_install
-    ./test_install/bin/pip install -q ".[dev,test]"  # this populates <sys_prefix>/share/jupyter/lab
+    TEST_INSTALL_PATH="${HOME}/test_install"
+    virtualenv -p $(which python3) $TEST_INSTALL_PATH
+    $TEST_INSTALL_PATH/bin/pip install -q ".[dev,test]"  # this populates <sys_prefix>/share/jupyter/lab
 
-    ./test_install/bin/jupyter server extension list 1>serverextensions 2>&1
+    $TEST_INSTALL_PATH/bin/jupyter server extension list 1>serverextensions 2>&1
     cat serverextensions
     cat serverextensions | grep -i "jupyterlab.*enabled"
     cat serverextensions | grep -i "jupyterlab.*OK"
 
-    ./test_install/bin/python -m jupyterlab.browser_check
+    $TEST_INSTALL_PATH/bin/python -m jupyterlab.browser_check
     # Make sure we can run the build
-    ./test_install/bin/jupyter lab build
+    $TEST_INSTALL_PATH/bin/jupyter lab build
 
     # Make sure we can start and kill the lab server
-    ./test_install/bin/jupyter lab --no-browser &
+    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser &
     TASK_PID=$!
     # Make sure the task is running
     ps -p $TASK_PID || exit 1
@@ -300,9 +307,9 @@ if [[ $GROUP == usage2 ]]; then
     wait $TASK_PID
 
     # Check the labhubapp
-    ./test_install/bin/pip install jupyterhub
+    $TEST_INSTALL_PATH/bin/pip install jupyterhub
     export JUPYTERHUB_API_TOKEN="mock_token"
-    ./test_install/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
+    $TEST_INSTALL_PATH/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
     TASK_PID=$!
     unset JUPYTERHUB_API_TOKEN
     # Make sure the task is running

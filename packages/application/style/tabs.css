@@ -129,6 +129,8 @@
   margin-top: 0;
 }
 
+/* stylelint-disable selector-max-class */
+
 .lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab.lm-mod-current,
 .lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab.lm-mod-current {
   min-width: 80px;
@@ -148,6 +150,8 @@
   background-size: 14px;
   margin-right: 4px;
 }
+
+/* stylelint-enable selector-max-class */
 
 .lm-TabBar-tab.lm-mod-drag-image {
   background: var(--jp-layout-color1);

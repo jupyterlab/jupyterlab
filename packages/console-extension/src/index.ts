@@ -19,7 +19,7 @@ import {
   ISessionContext,
   ISessionContextDialogs,
   Sanitizer,
-  sessionContextDialogs,
+  SessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -33,7 +33,7 @@ import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { consoleIcon, IFormRendererRegistry } from '@jupyterlab/ui-components';
@@ -104,8 +104,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ConsolePanel.IContentFactory,
     IEditorServices,
     IRenderMimeRegistry,
-    ISettingRegistry,
-    ITranslator
+    ISettingRegistry
   ],
   optional: [
     ILayoutRestorer,
@@ -115,7 +114,8 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     ILauncher,
     ILabStatus,
     ISessionContextDialogs,
-    IFormRendererRegistry
+    IFormRendererRegistry,
+    ITranslator
   ],
   activate: activateConsole,
   autoStart: true
@@ -240,21 +240,23 @@ async function activateConsole(
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
-  translator: ITranslator,
   restorer: ILayoutRestorer | null,
   filebrowser: IDefaultFileBrowser | null,
   mainMenu: IMainMenu | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   status: ILabStatus | null,
-  sessionDialogs: ISessionContextDialogs | null,
-  formRegistry: IFormRendererRegistry | null
+  sessionDialogs_: ISessionContextDialogs | null,
+  formRegistry: IFormRendererRegistry | null,
+  translator_: ITranslator | null
 ): Promise<IConsoleTracker> {
+  const translator = translator_ ?? nullTranslator;
   const trans = translator.load('jupyterlab');
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = trans.__('Console');
-  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
 
   // Create a widget tracker for all console panels.
   const tracker = new WidgetTracker<ConsolePanel>({
@@ -363,6 +365,7 @@ async function activateConsole(
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
+      sessionDialogs,
       translator,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
@@ -625,10 +628,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return sessionDialogs!.restart(
-        current.console.sessionContext,
-        translator
-      );
+      return sessionDialogs.restart(current.console.sessionContext);
     },
     isEnabled
   });
@@ -703,10 +703,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return sessionDialogs!.selectKernel(
-        current.console.sessionContext,
-        translator
-      );
+      return sessionDialogs.selectKernel(current.console.sessionContext);
     },
     isEnabled
   });
@@ -829,7 +826,7 @@ function activateConsoleCompleterService(
   consoles: IConsoleTracker,
   manager: ICompletionProviderManager | null,
   translator: ITranslator | null,
-  appSanitizer: ISanitizer | null
+  appSanitizer: IRenderMime.ISanitizer | null
 ): void {
   if (!manager) {
     return;

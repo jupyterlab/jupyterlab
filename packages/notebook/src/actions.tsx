@@ -5,7 +5,7 @@ import {
   Clipboard,
   Dialog,
   ISessionContext,
-  sessionContextDialogs,
+  ISessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
 import {
@@ -489,8 +489,9 @@ export namespace NotebookActions {
    * Run the selected cell(s).
    *
    * @param notebook - The target notebook widget.
-   *
-   * @param sessionContext - The optional client session object.
+   * @param sessionContext - The client session object.
+   * @param sessionDialogs - The session dialogs.
+   * @param translator - The application translator.
    *
    * #### Notes
    * The last selected cell will be activated, but not scrolled into view.
@@ -500,14 +501,21 @@ export namespace NotebookActions {
    */
   export function run(
     notebook: Notebook,
-    sessionContext?: ISessionContext
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
     }
 
     const state = Private.getState(notebook);
-    const promise = Private.runSelected(notebook, sessionContext);
+    const promise = Private.runSelected(
+      notebook,
+      sessionContext,
+      sessionDialogs,
+      translator
+    );
 
     Private.handleRunState(notebook, state, false);
     return promise;
@@ -517,8 +525,9 @@ export namespace NotebookActions {
    * Run the selected cell(s) and advance to the next cell.
    *
    * @param notebook - The target notebook widget.
-   *
-   * @param sessionContext - The optional client session object.
+   * @param sessionContext - The client session object.
+   * @param sessionDialogs - The session dialogs.
+   * @param translator - The application translator.
    *
    * #### Notes
    * The existing selection will be cleared.
@@ -530,14 +539,21 @@ export namespace NotebookActions {
    */
   export async function runAndAdvance(
     notebook: Notebook,
-    sessionContext?: ISessionContext
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
     }
 
     const state = Private.getState(notebook);
-    const promise = Private.runSelected(notebook, sessionContext);
+    const promise = Private.runSelected(
+      notebook,
+      sessionContext,
+      sessionDialogs,
+      translator
+    );
     const model = notebook.model;
 
     if (notebook.activeCellIndex === notebook.widgets.length - 1) {
@@ -566,8 +582,9 @@ export namespace NotebookActions {
    * Run the selected cell(s) and insert a new code cell.
    *
    * @param notebook - The target notebook widget.
-   *
-   * @param sessionContext - The optional client session object.
+   * @param sessionContext - The client session object.
+   * @param sessionDialogs - The session dialogs.
+   * @param translator - The application translator.
    *
    * #### Notes
    * An execution error will prevent the remaining code cells from executing.
@@ -579,14 +596,21 @@ export namespace NotebookActions {
    */
   export async function runAndInsert(
     notebook: Notebook,
-    sessionContext?: ISessionContext
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
     }
 
     const state = Private.getState(notebook);
-    const promise = Private.runSelected(notebook, sessionContext);
+    const promise = Private.runSelected(
+      notebook,
+      sessionContext,
+      sessionDialogs,
+      translator
+    );
     const model = notebook.model;
     model.sharedModel.insertCell(notebook.activeCellIndex + 1, {
       cell_type: notebook.notebookConfig.defaultCell
@@ -608,8 +632,9 @@ export namespace NotebookActions {
    * Run all of the cells in the notebook.
    *
    * @param notebook - The target notebook widget.
-   *
-   * @param sessionContext - The optional client session object.
+   * @param sessionContext - The client session object.
+   * @param sessionDialogs - The session dialogs.
+   * @param translator - The application translator.
    *
    * #### Notes
    * The existing selection will be cleared.
@@ -619,7 +644,9 @@ export namespace NotebookActions {
    */
   export function runAll(
     notebook: Notebook,
-    sessionContext?: ISessionContext
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -631,16 +658,18 @@ export namespace NotebookActions {
       notebook.select(child);
     });
 
-    const promise = Private.runSelected(notebook, sessionContext);
+    const promise = Private.runSelected(
+      notebook,
+      sessionContext,
+      sessionDialogs,
+      translator
+    );
 
     Private.handleRunState(notebook, state, true);
     return promise;
   }
 
-  export function renderAllMarkdown(
-    notebook: Notebook,
-    sessionContext?: ISessionContext
-  ): Promise<boolean> {
+  export function renderAllMarkdown(notebook: Notebook): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
     }
@@ -657,7 +686,7 @@ export namespace NotebookActions {
     if (notebook.activeCell.model.type !== 'markdown') {
       return Promise.resolve(true);
     }
-    const promise = Private.runSelected(notebook, sessionContext);
+    const promise = Private.runSelected(notebook);
     notebook.activeCellIndex = previousIndex;
     Private.handleRunState(notebook, state, true);
     return promise;
@@ -667,8 +696,9 @@ export namespace NotebookActions {
    * Run all of the cells before the currently active cell (exclusive).
    *
    * @param notebook - The target notebook widget.
-   *
-   * @param sessionContext - The optional client session object.
+   * @param sessionContext - The client session object.
+   * @param sessionDialogs - The session dialogs.
+   * @param translator - The application translator.
    *
    * #### Notes
    * The existing selection will be cleared.
@@ -678,7 +708,9 @@ export namespace NotebookActions {
    */
   export function runAllAbove(
     notebook: Notebook,
-    sessionContext?: ISessionContext
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
   ): Promise<boolean> {
     const { activeCell, activeCellIndex, model } = notebook;
 
@@ -694,7 +726,12 @@ export namespace NotebookActions {
       notebook.select(notebook.widgets[i]);
     }
 
-    const promise = Private.runSelected(notebook, sessionContext);
+    const promise = Private.runSelected(
+      notebook,
+      sessionContext,
+      sessionDialogs,
+      translator
+    );
 
     notebook.activeCellIndex++;
     Private.handleRunState(notebook, state, true);
@@ -705,8 +742,9 @@ export namespace NotebookActions {
    * Run all of the cells after the currently active cell (inclusive).
    *
    * @param notebook - The target notebook widget.
-   *
-   * @param sessionContext - The optional client session object.
+   * @param sessionContext - The client session object.
+   * @param sessionDialogs - The session dialogs.
+   * @param translator - The application translator.
    *
    * #### Notes
    * The existing selection will be cleared.
@@ -716,7 +754,9 @@ export namespace NotebookActions {
    */
   export function runAllBelow(
     notebook: Notebook,
-    sessionContext?: ISessionContext
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
   ): Promise<boolean> {
     if (!notebook.model || !notebook.activeCell) {
       return Promise.resolve(false);
@@ -729,7 +769,12 @@ export namespace NotebookActions {
       notebook.select(notebook.widgets[i]);
     }
 
-    const promise = Private.runSelected(notebook, sessionContext);
+    const promise = Private.runSelected(
+      notebook,
+      sessionContext,
+      sessionDialogs,
+      translator
+    );
 
     Private.handleRunState(notebook, state, true);
     return promise;
@@ -1243,7 +1288,7 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    *
    * #### Notes
-   * This is a no-op if if there are no cell actions to undo.
+   * This is a no-op if there are no cell actions to undo.
    */
   export function undo(notebook: Notebook): void {
     if (!notebook.model) {
@@ -1332,7 +1377,7 @@ export namespace NotebookActions {
         cell.sharedModel.transact(() => {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
-        });
+        }, false);
       }
     }
     Private.handleState(notebook, state, true);
@@ -1360,7 +1405,7 @@ export namespace NotebookActions {
         cell.sharedModel.transact(() => {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
-        });
+        }, false);
       }
     }
     Private.handleState(notebook, state, true);
@@ -2095,10 +2140,17 @@ namespace Private {
 
   /**
    * Run the selected cells.
+   *
+   * @param notebook Notebook
+   * @param sessionContext Notebook session context
+   * @param sessionDialogs Session dialogs
+   * @param translator Application translator
    */
   export function runSelected(
     notebook: Notebook,
-    sessionContext?: ISessionContext
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
   ): Promise<boolean> {
     notebook.mode = 'command';
 
@@ -2117,7 +2169,9 @@ namespace Private {
     notebook.deselectAll();
 
     return Promise.all(
-      selected.map(child => runCell(notebook, child, sessionContext))
+      selected.map(child =>
+        runCell(notebook, child, sessionContext, sessionDialogs, translator)
+      )
     )
       .then(results => {
         if (notebook.isDisposed) {
@@ -2161,10 +2215,11 @@ namespace Private {
   /**
    * Run a cell.
    */
-  function runCell(
+  async function runCell(
     notebook: Notebook,
     cell: Cell,
     sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
     translator = translator || nullTranslator;
@@ -2178,7 +2233,7 @@ namespace Private {
       case 'code':
         if (sessionContext) {
           if (sessionContext.isTerminating) {
-            void showDialog({
+            await showDialog({
               title: trans.__('Kernel Terminating'),
               body: trans.__(
                 'The kernel for %1 appears to be terminating. You can not run any cell for now.',
@@ -2189,27 +2244,45 @@ namespace Private {
             break;
           }
           if (sessionContext.pendingInput) {
-            void showDialog({
+            await showDialog({
               title: trans.__('Cell not executed due to pending input'),
               body: trans.__(
                 'The cell has not been executed to avoid kernel deadlock as there is another pending input! Submit your pending input and try again.'
               ),
               buttons: [Dialog.okButton()]
             });
-            return Promise.resolve(false);
+            return false;
           }
           if (sessionContext.hasNoKernel) {
-            void sessionContextDialogs.selectKernel(sessionContext);
-            return Promise.resolve(false);
+            const shouldSelect = await sessionContext.startKernel();
+            if (shouldSelect && sessionDialogs) {
+              await sessionDialogs.selectKernel(sessionContext);
+            }
           }
+
+          if (sessionContext.hasNoKernel) {
+            cell.model.sharedModel.transact(() => {
+              (cell.model as ICodeCellModel).clearExecution();
+            });
+            return true;
+          }
+
           const deletedCells = notebook.model?.deletedCells ?? [];
           executionScheduled.emit({ notebook, cell });
-          return CodeCell.execute(cell as CodeCell, sessionContext, {
-            deletedCells,
-            recordTiming: notebook.notebookConfig.recordTiming
-          })
-            .then(reply => {
-              deletedCells.splice(0, deletedCells.length);
+
+          let ran = false;
+          try {
+            const reply = await CodeCell.execute(
+              cell as CodeCell,
+              sessionContext,
+              {
+                deletedCells,
+                recordTiming: notebook.notebookConfig.recordTiming
+              }
+            );
+            deletedCells.splice(0, deletedCells.length);
+
+            ran = (() => {
               if (cell.isDisposed) {
                 return false;
               }
@@ -2228,25 +2301,30 @@ namespace Private {
               } else {
                 throw new KernelError(reply.content);
               }
-            })
-            .catch(reason => {
-              if (cell.isDisposed || reason.message.startsWith('Canceled')) {
-                return false;
-              }
-              executed.emit({ notebook, cell, success: false, error: reason });
+            })();
+          } catch (reason) {
+            if (cell.isDisposed || reason.message.startsWith('Canceled')) {
+              ran = false;
+            } else {
+              executed.emit({
+                notebook,
+                cell,
+                success: false,
+                error: reason
+              });
               throw reason;
-            })
-            .then(ran => {
-              if (ran) {
-                executed.emit({ notebook, cell, success: true });
-              }
+            }
+          }
 
-              return ran;
-            });
+          if (ran) {
+            executed.emit({ notebook, cell, success: true });
+          }
+
+          return ran;
         }
         cell.model.sharedModel.transact(() => {
           (cell.model as ICodeCellModel).clearExecution();
-        });
+        }, false);
         break;
       default:
         break;

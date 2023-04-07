@@ -88,7 +88,7 @@ button.jp-ToolbarButtonComponent:disabled {
   opacity: 0.4;
 }
 
-button.jp-ToolbarButtonComponent span {
+button.jp-ToolbarButtonComponent > span {
   padding: 0;
   flex: 0 0 auto;
 }

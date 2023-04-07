@@ -14,12 +14,14 @@ import {
   caseSensitiveIcon,
   classes,
   closeIcon,
-  ellipsesIcon,
+  filterDotIcon,
+  filterIcon,
   regexIcon,
   VDomRenderer,
   wordIcon
 } from '@jupyterlab/ui-components';
 import { ISignal, Signal } from '@lumino/signaling';
+import { UseSignal } from '@jupyterlab/apputils';
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
 import { useState } from 'react';
@@ -35,13 +37,12 @@ const INPUT_BUTTON_CLASS_ON = 'jp-DocumentSearch-input-button-on';
 const INDEX_COUNTER_CLASS = 'jp-DocumentSearch-index-counter';
 const UP_DOWN_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-up-down-wrapper';
 const UP_DOWN_BUTTON_CLASS = 'jp-DocumentSearch-up-down-button';
-const ELLIPSES_BUTTON_CLASS = 'jp-DocumentSearch-ellipses-button';
-const ELLIPSES_BUTTON_ENABLED_CLASS =
-  'jp-DocumentSearch-ellipses-button-enabled';
+const FILTER_BUTTON_CLASS = 'jp-DocumentSearch-filter-button';
+const FILTER_BUTTON_ENABLED_CLASS = 'jp-DocumentSearch-filter-button-enabled';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
-const SEARCH_OPTIONS_DISABLED_CLASS =
-  'jp-DocumentSearch-search-options-disabled';
+const SEARCH_FILTER_DISABLED_CLASS = 'jp-DocumentSearch-search-filter-disabled';
+const SEARCH_FILTER_CLASS = 'jp-DocumentSearch-search-filter';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
 const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
@@ -59,6 +60,7 @@ interface ISearchInputProps {
   inputRef?: React.RefObject<HTMLTextAreaElement>;
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  autoFocus: boolean;
 }
 
 function SearchInput(props: ISearchInputProps): JSX.Element {
@@ -81,6 +83,7 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
       ref={props.inputRef}
       title={props.title}
       defaultValue={props.value}
+      autoFocus={props.autoFocus}
     ></textarea>
   );
 }
@@ -126,6 +129,7 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
         onKeyDown={e => props.onKeydown(e)}
         inputRef={props.inputRef}
         title={trans.__('Find')}
+        autoFocus={true}
       />
       <button
         className={BUTTON_WRAPPER_CLASS}
@@ -186,6 +190,7 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
           onKeyDown={e => props.onReplaceKeydown(e)}
           onChange={e => props.onChange(e)}
           title={trans.__('Replace')}
+          autoFocus={false}
         />
         {props.replaceOptionsSupport?.preserveCase ? (
           <button
@@ -282,34 +287,32 @@ function SearchIndices(props: ISearchIndexProps) {
 }
 
 interface IFilterToggleProps {
-  enabled: boolean;
-  toggleEnabled: () => void;
+  visible: boolean;
+  toggleVisible: () => void;
+  anyEnabled: boolean;
   trans: TranslationBundle;
 }
 
 function FilterToggle(props: IFilterToggleProps): JSX.Element {
-  let className = `${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`;
-  if (props.enabled) {
-    className = `${className} ${ELLIPSES_BUTTON_ENABLED_CLASS}`;
+  let className = `${FILTER_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`;
+  if (props.visible) {
+    className = `${className} ${FILTER_BUTTON_ENABLED_CLASS}`;
   }
+
+  const icon = props.anyEnabled ? filterDotIcon : filterIcon;
 
   return (
     <button
       className={BUTTON_WRAPPER_CLASS}
-      onClick={() => props.toggleEnabled()}
+      onClick={() => props.toggleVisible()}
       tabIndex={0}
       title={
-        props.enabled
+        props.visible
           ? props.trans.__('Hide Search Filters')
           : props.trans.__('Show Search Filters')
       }
     >
-      <ellipsesIcon.react
-        className={className}
-        tag="span"
-        height="20px"
-        width="20px"
-      />
+      <icon.react className={className} tag="span" height="20px" width="20px" />
     </button>
   );
 }
@@ -325,28 +328,23 @@ interface IFilterSelectionProps {
 function FilterSelection(props: IFilterSelectionProps): JSX.Element {
   return (
     <label
-      className={props.isEnabled ? '' : SEARCH_OPTIONS_DISABLED_CLASS}
+      className={
+        props.isEnabled
+          ? SEARCH_FILTER_CLASS
+          : `${SEARCH_FILTER_CLASS} ${SEARCH_FILTER_DISABLED_CLASS}`
+      }
       title={props.description}
     >
-      {props.title}
       <input
         type="checkbox"
+        className="jp-mod-styled"
         disabled={!props.isEnabled}
         checked={props.value}
         onChange={props.onToggle}
       />
+      {props.title}
     </label>
   );
-}
-
-/**
- * React search component state
- */
-interface ISearchOverlayState {
-  /**
-   * Is the filters view open?
-   */
-  filtersOpen: boolean;
 }
 
 interface ISearchOverlayProps {
@@ -379,9 +377,13 @@ interface ISearchOverlayProps {
    */
   preserveCase: boolean;
   /**
-   * Whether or not the replace entry row is visible
+   * Whether the replace entry row is visible.
    */
   replaceEntryVisible: boolean;
+  /**
+   * Whther the filters grid is visible.
+   */
+  filtersVisible: boolean;
   /**
    * Support for replace options
    */
@@ -433,6 +435,10 @@ interface ISearchOverlayProps {
    */
   onFilterChanged: (name: string, value: boolean) => Promise<void>;
   /**
+   * Callback on filters grid visibility change.
+   */
+  onFiltersVisibilityChanged: (v: boolean) => void;
+  /**
    * Callback on close button click.
    */
   onClose: () => void;
@@ -470,16 +476,10 @@ interface ISearchOverlayProps {
   onSearchChanged: (q: string) => void;
 }
 
-class SearchOverlay extends React.Component<
-  ISearchOverlayProps,
-  ISearchOverlayState
-> {
+class SearchOverlay extends React.Component<ISearchOverlayProps> {
   constructor(props: ISearchOverlayProps) {
     super(props);
     this.translator = props.translator || nullTranslator;
-    this.state = {
-      filtersOpen: false
-    };
   }
 
   private _onSearchChange(event: React.ChangeEvent) {
@@ -545,10 +545,8 @@ class SearchOverlay extends React.Component<
     this.props.onReplaceEntryShown(!this.props.replaceEntryVisible);
   }
 
-  private _toggleFiltersOpen() {
-    this.setState(prevState => ({
-      filtersOpen: !prevState.filtersOpen
-    }));
+  private _toggleFiltersVisibility() {
+    this.props.onFiltersVisibilityChanged(!this.props.filtersVisible);
   }
 
   render() {
@@ -560,8 +558,12 @@ class SearchOverlay extends React.Component<
     const hasFilters = Object.keys(filters).length > 0;
     const filterToggle = hasFilters ? (
       <FilterToggle
-        enabled={this.state.filtersOpen}
-        toggleEnabled={() => this._toggleFiltersOpen()}
+        visible={this.props.filtersVisible}
+        anyEnabled={Object.keys(filters).some(name => {
+          const filter = filters[name];
+          return this.props.filters[name] ?? filter.default;
+        })}
+        toggleVisible={() => this._toggleFiltersVisibility()}
         trans={trans}
       />
     ) : null;
@@ -630,6 +632,7 @@ class SearchOverlay extends React.Component<
             searchText={this.props.searchText}
             translator={this.translator}
           />
+          {filterToggle}
           <SearchIndices
             currentIndex={this.props.currentIndex}
             totalMatches={this.props.totalMatches ?? 0}
@@ -643,7 +646,6 @@ class SearchOverlay extends React.Component<
             }}
             trans={trans}
           />
-          {showReplace ? null : filterToggle}
           <button
             className={BUTTON_WRAPPER_CLASS}
             onClick={() => this._onClose()}
@@ -678,11 +680,10 @@ class SearchOverlay extends React.Component<
                 translator={this.translator}
               />
               <div className={SPACER_CLASS}></div>
-              {filterToggle}
             </>
           ) : null}
         </div>
-        {this.state.filtersOpen ? filter : null}
+        {this.props.filtersVisible ? filter : null}
         {!!this.props.errorMessage && (
           <div className={REGEX_ERROR_CLASS}>{this.props.errorMessage}</div>
         )}
@@ -769,7 +770,24 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
     }
   }
 
+  protected setFiltersVisibility(v: boolean): void {
+    if (this._showFilters !== v) {
+      this._showFilters = v;
+      this.update();
+    }
+  }
+
   render(): JSX.Element {
+    return this.model.filtersDefinitionChanged ? (
+      <UseSignal signal={this.model.filtersDefinitionChanged}>
+        {() => this._renderOverlay()}
+      </UseSignal>
+    ) : (
+      this._renderOverlay()
+    );
+  }
+
+  private _renderOverlay() {
     return (
       <SearchOverlay
         caseSensitive={this.model.caseSensitive}
@@ -780,6 +798,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         filtersDefinition={this.model.filtersDefinition}
         preserveCase={this.model.preserveCase}
         replaceEntryVisible={this._showReplace}
+        filtersVisible={this._showFilters}
         replaceOptionsSupport={this.model.replaceOptionsSupport}
         replaceText={this.model.replaceText}
         searchText={this.model.searchExpression}
@@ -801,6 +820,9 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         }}
         onFilterChanged={async (name: string, value: boolean) => {
           await this.model.setFilter(name, value);
+        }}
+        onFiltersVisibilityChanged={(v: boolean) => {
+          this.setFiltersVisibility(v);
         }}
         onHighlightNext={() => {
           void this.model.highlightNext();
@@ -835,5 +857,6 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
 
   private _searchInput: React.RefObject<HTMLTextAreaElement>;
   private _showReplace = false;
+  private _showFilters = false;
   private _closed = new Signal<this, void>(this);
 }

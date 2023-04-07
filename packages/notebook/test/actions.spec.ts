@@ -71,9 +71,7 @@ describe('@jupyterlab/notebook', () => {
           windowingMode: 'none'
         }
       });
-      const model = new NotebookModel({
-        disableDocumentWideUndoRedo: true
-      });
+      const model = new NotebookModel();
       model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
       model.sharedModel.clearUndoHistory();
@@ -691,7 +689,17 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
-        const result = await NotebookActions.run(widget, undefined);
+        const result = await NotebookActions.run(
+          widget,
+          {
+            isTerminating: false,
+            pendingInput: false,
+            hasNoKernel: true,
+            kernelPreference: { autoStartDefault: false },
+            startKernel: () => Promise.resolve(true)
+          } as ISessionContext,
+          { selectKernel: () => Promise.resolve() } as any
+        );
         expect(result).toBe(true);
         const cell = widget.activeCell as CodeCell;
         expect(cell.model.executionCount).toBe(null);

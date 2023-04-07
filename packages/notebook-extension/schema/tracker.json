@@ -682,6 +682,19 @@
       "enum": ["code", "markdown", "raw"],
       "default": "code"
     },
+    "autoStartDefaultKernel": {
+      "title": "Automatically Start Preferred Kernel",
+      "description": "Whether to automatically start the preferred kernel.",
+      "type": "boolean",
+      "default": false
+    },
+    "inputHistoryScope": {
+      "type": "string",
+      "default": "global",
+      "enum": ["global", "session"],
+      "title": "Input History Scope",
+      "description": "Whether the line history for standard input (e.g. the ipdb prompt) should kept separately for different kernel sessions (`session`) or combined (`global`)."
+    },
     "kernelShutdown": {
       "title": "Shut down kernel",
       "description": "Whether to shut down or not the kernel when closing a notebook.",
@@ -746,9 +759,9 @@
         "showProgress": true
       }
     },
-    "experimentalDisableDocumentWideUndoRedo": {
-      "title": "Experimental settings to enable the undo/redo on the notebook document level.",
-      "description": "Disable the undo/redo on the notebook document level, so actions independent cells can have their own history. The undo/redo never applies on the outputs, in other words, outputs don't have history. A moved cell completely looses history capability for now.",
+    "documentWideUndoRedo": {
+      "title": "Enable undo/redo actions at the notebook document level.",
+      "description": "Enables the undo/redo actions at the notebook document level; aka undoing within a cell may undo the latest notebook change that happen in another cell. This is deprecated and will be removed in 5.0.0.",
       "type": "boolean",
       "default": false
     },

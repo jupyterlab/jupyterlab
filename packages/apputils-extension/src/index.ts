@@ -23,13 +23,13 @@ import {
   MainAreaWidget,
   Printing,
   Sanitizer,
-  sessionContextDialogs,
+  SessionContextDialogs,
   WindowResolver
 } from '@jupyterlab/apputils';
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate } from '@lumino/disposable';
@@ -42,6 +42,8 @@ import { kernelStatus, runningSessionsStatus } from './statusbarplugin';
 import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { displayShortcuts } from './shortcuts';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -65,6 +67,8 @@ namespace CommandIDs {
   export const runAllEnabled = 'apputils:run-all-enabled';
 
   export const toggleHeader = 'apputils:toggle-header';
+
+  export const displayShortcuts = 'apputils:display-shortcuts';
 }
 
 /**
@@ -345,7 +349,9 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
     }`;
   } else {
     // File name from current path
-    let currentFile: string = PathExt.basename(window.location.href);
+    let currentFile: string = PathExt.basename(
+      decodeURIComponent(window.location.href)
+    );
     // Truncate to first 12 characters of current document name + ... if length > 15
     currentFile =
       currentFile.length > 15
@@ -552,9 +558,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
   id: '@jupyterlab/apputils-extension:sessionDialogs',
   provides: ISessionContextDialogs,
+  optional: [ITranslator],
   autoStart: true,
-  activate: () => {
-    return sessionContextDialogs;
+  activate: async (app: JupyterFrontEnd, translator: ITranslator | null) => {
+    return new SessionContextDialogs({
+      translator: translator ?? nullTranslator
+    });
   }
 };
 
@@ -564,8 +573,13 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
 const utilityCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:utilityCommands',
   requires: [ITranslator],
+  optional: [ICommandPalette],
   autoStart: true,
-  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ) => {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
     commands.addCommand(CommandIDs.runFirstEnabled, {
@@ -606,26 +620,59 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    commands.addCommand(CommandIDs.displayShortcuts, {
+      label: trans.__('Show Keyboard Shortcuts'),
+      caption: trans.__(
+        'Show relevant keyboard shortcuts for the current active widget'
+      ),
+      execute: args => {
+        const included = app.shell.currentWidget?.node.contains(
+          document.activeElement
+        );
+
+        if (!included) {
+          const currentNode =
+            (app.shell.currentWidget as MainAreaWidget)?.content.node ??
+            app.shell.currentWidget?.node;
+          currentNode?.focus();
+        }
+        const options = { commands, trans };
+        return displayShortcuts(options);
+      }
+    });
+
+    if (palette) {
+      const category: string = trans.__('Help');
+      palette.addItem({ command: CommandIDs.displayShortcuts, category });
+    }
   }
 };
 
 /**
  * The default HTML sanitizer.
  */
-const sanitizer: JupyterFrontEndPlugin<ISanitizer> = {
+const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
   id: '@jupyterlab/apputils-extension:sanitizer',
   autoStart: true,
   provides: ISanitizer,
   requires: [ISettingRegistry],
-  activate: (app: JupyterFrontEnd, settings: ISettingRegistry): ISanitizer => {
+  activate: (
+    app: JupyterFrontEnd,
+    settings: ISettingRegistry
+  ): IRenderMime.ISanitizer => {
     const sanitizer = new Sanitizer();
     const loadSetting = (setting: ISettingRegistry.ISettings): void => {
       const allowedSchemes = setting.get('allowedSchemes')
         .composite as Array<string>;
 
+      const autolink = setting.get('autolink').composite as boolean;
+
       if (allowedSchemes) {
         sanitizer.setAllowedSchemes(allowedSchemes);
       }
+
+      sanitizer.setAutolink(autolink);
     };
 
     // Wait for the application to be restored and
