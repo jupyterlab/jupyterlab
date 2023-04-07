@@ -104,88 +104,31 @@
     "watch:main": "npm run watch",
     "watch:packages": "python scripts/watch_packages.py"
   },
-  "resolutions": {
-    "@jupyterlab/services/ws": "8.12.0",
-    "@types/react": "^18.0.26",
-    "react": "^18.2.0",
-    "yjs": "^13.5.40"
+  "prettier": {
+    "arrowParens": "avoid",
+    "singleQuote": true,
+    "trailingComma": "none"
   },
-  "dependencies": {
-    "@typescript-eslint/eslint-plugin": "~5.55.0",
-    "@typescript-eslint/parser": "~5.55.0",
-    "eslint": "~8.36.0",
-    "eslint-config-prettier": "~8.7.0",
-    "eslint-plugin-jest": "~27.2.1",
-    "eslint-plugin-prettier": "~4.2.1",
-    "eslint-plugin-react": "~7.32.2",
-    "prettier": "~2.6.0",
-    "stylelint": "^14.9.1",
-    "stylelint-config-prettier": "^9.0.3",
-    "stylelint-config-recommended": "^8.0.0",
-    "stylelint-config-standard": "^26.0.0",
-    "stylelint-prettier": "^2.0.0"
-  },
-  "devDependencies": {
-    "lerna": "^6.4.1",
-    "typedoc": "~0.23.25"
-  },
-  "eslintIgnore": [
-    "**/node_modules",
-    "**/build",
-    "**/lib",
-    "**/mock_packages",
-    "**/static",
-    "**/typings",
-    "**/schemas",
-    "**/themes",
-    "coverage",
-    "*.map.js",
-    "*.bundle.js",
-    "dev_mode/index.js",
-    "!dev_mode/static/index.out.js",
-    "dev_mode/workspaces",
-    "docs/_build",
-    "docs/api",
-    "docs/build",
-    "examples/example.spec.ts",
-    "examples/federated/core_package/index.template.js",
-    "examples/federated/core_package/index.js",
-    "examples/federated/labextensions",
-    "galata/playwright-report",
-    "jupyterlab/chrome-test.js",
-    "jupyterlab/geckodriver",
-    "jupyterlab/staging/yarn.js",
-    "jupyterlab/staging/index.js",
-    "jupyterlab/staging/webpack.config.js",
-    "packages/extensionmanager-extension/examples/listings",
-    "packages/nbconvert-css/raw.js",
-    "packages/services/dist",
-    "packages/ui-components/src/icon/iconimports.ts",
-    "tsconfigdoc.json",
-    "typedoc-theme/",
-    ".idea/",
-    ".history/",
-    ".vscode/",
-    "packages/lsp/src/_*",
-    "packages/lsp/schema.js"
-  ],
   "eslintConfig": {
     "env": {
       "browser": true,
       "es2021": true,
-      "node": true,
-      "jest/globals": true
+      "jest/globals": true,
+      "node": true
     },
-    "globals": {
-      "BigInt": "readonly",
-      "HTMLCollectionOf": "readonly",
-      "JSX": "readonly",
-      "NodeJS": "readonly",
-      "RequestInit": "readonly",
-      "RequestInfo": "readonly",
-      "ScrollLogicalPosition": "readonly"
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "project:": "./tsconfig.eslint.json"
     },
-    "root": true,
+    "settings": {
+      "react": {
+        "version": "detect"
+      }
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ],
     "extends": [
       "eslint:recommended",
       "plugin:@typescript-eslint/eslint-recommended",
@@ -193,55 +136,7 @@
       "prettier",
       "plugin:react/recommended"
     ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": 2018,
-      "project:": "./tsconfig.eslint.json"
-    },
-    "plugins": ["@typescript-eslint"],
-    "overrides": [
-      {
-        "files": ["packages/**/*.spec.ts", "testutils/**/*.spec.ts"],
-        "plugins": ["jest"],
-        "extends": ["plugin:jest/recommended"],
-        "rules": {
-          "jest/no-conditional-expect": "warn",
-          "jest/valid-title": "warn",
-          "jest/no-standalone-expect": [
-            "error",
-            {
-              "additionalTestBlockFunctions": ["it"]
-            }
-          ]
-        }
-      }
-    ],
     "rules": {
-      "@typescript-eslint/naming-convention": [
-        "error",
-        {
-          "selector": "interface",
-          "format": ["PascalCase"],
-          "custom": {
-            "regex": "^I[A-Z]",
-            "match": true
-          }
-        }
-      ],
-      "@typescript-eslint/no-unused-vars": ["warn", { "args": "none" }],
-      "@typescript-eslint/no-use-before-define": "off",
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-non-null-assertion": "off",
-      "@typescript-eslint/no-namespace": "off",
-      "@typescript-eslint/interface-name-prefix": "off",
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/ban-ts-comment": ["warn", { "ts-ignore": true }],
-      "@typescript-eslint/ban-types": "warn",
-      "@typescript-eslint/no-non-null-asserted-optional-chain": "warn",
-      "@typescript-eslint/no-var-requires": "off",
-      "@typescript-eslint/no-empty-interface": "off",
-      "@typescript-eslint/triple-slash-reference": "warn",
-      "@typescript-eslint/no-inferrable-types": "off",
       "camelcase": [
         "error",
         {
@@ -324,37 +219,148 @@
           ]
         }
       ],
-      "id-match": ["error", "^[a-zA-Z_]+[a-zA-Z0-9_]*$"],
+      "id-match": [
+        "error",
+        "^[a-zA-Z_]+[a-zA-Z0-9_]*$"
+      ],
+      "no-case-declarations": "warn",
+      "no-control-regex": "warn",
       "no-inner-declarations": "off",
       "no-prototype-builtins": "off",
-      "no-control-regex": "warn",
       "no-undef": "warn",
-      "no-case-declarations": "warn",
       "no-useless-escape": "off",
       "prefer-const": "off",
-      "react/prop-types": "warn",
       "sort-imports": [
         "error",
         {
           "ignoreCase": true,
           "ignoreDeclarationSort": true,
           "ignoreMemberSort": false,
-          "memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
+          "memberSyntaxSortOrder": [
+            "none",
+            "all",
+            "multiple",
+            "single"
+          ],
           "allowSeparatedGroups": false
         }
-      ]
+      ],
+      "@typescript-eslint/ban-ts-comment": [
+        "warn",
+        {
+          "ts-ignore": true
+        }
+      ],
+      "@typescript-eslint/ban-types": "warn",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/interface-name-prefix": "off",
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          "selector": "interface",
+          "format": [
+            "PascalCase"
+          ],
+          "custom": {
+            "regex": "^I[A-Z]",
+            "match": true
+          }
+        }
+      ],
+      "@typescript-eslint/no-empty-interface": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-inferrable-types": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-non-null-asserted-optional-chain": "warn",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          "args": "none"
+        }
+      ],
+      "@typescript-eslint/no-use-before-define": "off",
+      "@typescript-eslint/no-var-requires": "off",
+      "@typescript-eslint/triple-slash-reference": "warn",
+      "react/prop-types": "warn"
     },
-    "settings": {
-      "react": {
-        "version": "detect"
+    "overrides": [
+      {
+        "files": [
+          "packages/**/*.spec.ts",
+          "testutils/**/*.spec.ts"
+        ],
+        "plugins": [
+          "jest"
+        ],
+        "extends": [
+          "plugin:jest/recommended"
+        ],
+        "rules": {
+          "jest/no-conditional-expect": "warn",
+          "jest/no-standalone-expect": [
+            "error",
+            {
+              "additionalTestBlockFunctions": [
+                "it"
+              ]
+            }
+          ],
+          "jest/valid-title": "warn"
+        }
       }
-    }
+    ],
+    "globals": {
+      "BigInt": "readonly",
+      "HTMLCollectionOf": "readonly",
+      "JSX": "readonly",
+      "NodeJS": "readonly",
+      "RequestInfo": "readonly",
+      "RequestInit": "readonly",
+      "ScrollLogicalPosition": "readonly"
+    },
+    "root": true
   },
-  "prettier": {
-    "singleQuote": true,
-    "trailingComma": "none",
-    "arrowParens": "avoid"
-  },
+  "eslintIgnore": [
+    "**/node_modules",
+    "**/build",
+    "**/lib",
+    "**/mock_packages",
+    "**/static",
+    "**/typings",
+    "**/schemas",
+    "**/themes",
+    "coverage",
+    "*.map.js",
+    "*.bundle.js",
+    "dev_mode/index.js",
+    "!dev_mode/static/index.out.js",
+    "dev_mode/workspaces",
+    "docs/_build",
+    "docs/api",
+    "docs/build",
+    "examples/example.spec.ts",
+    "examples/federated/core_package/index.template.js",
+    "examples/federated/core_package/index.js",
+    "examples/federated/labextensions",
+    "galata/playwright-report",
+    "jupyterlab/chrome-test.js",
+    "jupyterlab/geckodriver",
+    "jupyterlab/staging/yarn.js",
+    "jupyterlab/staging/index.js",
+    "jupyterlab/staging/webpack.config.js",
+    "packages/extensionmanager-extension/examples/listings",
+    "packages/nbconvert-css/raw.js",
+    "packages/services/dist",
+    "packages/ui-components/src/icon/iconimports.ts",
+    "tsconfigdoc.json",
+    "typedoc-theme/",
+    ".idea/",
+    ".history/",
+    ".vscode/",
+    "packages/lsp/src/_*",
+    "packages/lsp/schema.js"
+  ],
   "stylelint": {
     "extends": [
       "stylelint-config-standard",
@@ -395,5 +401,30 @@
       "docs/build",
       "docs/api"
     ]
+  },
+  "resolutions": {
+    "@jupyterlab/services/ws": "8.12.0",
+    "@types/react": "^18.0.26",
+    "react": "^18.2.0",
+    "yjs": "^13.5.40"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "~5.55.0",
+    "@typescript-eslint/parser": "~5.55.0",
+    "eslint": "~8.36.0",
+    "eslint-config-prettier": "~8.7.0",
+    "eslint-plugin-jest": "~27.2.1",
+    "eslint-plugin-prettier": "~4.2.1",
+    "eslint-plugin-react": "~7.32.2",
+    "prettier": "~2.6.0",
+    "stylelint": "^14.9.1",
+    "stylelint-config-prettier": "^9.0.3",
+    "stylelint-config-recommended": "^8.0.0",
+    "stylelint-config-standard": "^26.0.0",
+    "stylelint-prettier": "^2.0.0"
+  },
+  "devDependencies": {
+    "lerna": "^6.4.1",
+    "typedoc": "~0.23.25"
   }
 }
