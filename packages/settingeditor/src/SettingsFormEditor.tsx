@@ -201,7 +201,7 @@ export class SettingsFormEditor extends React.Component<
         <FormComponent
           validator={validatorAjv8}
           schema={this.state.filteredSchema as JSONSchema7}
-          formData={this._formData}
+          formData={this._getFilteredFormData(this.state.filteredSchema)}
           uiSchema={this.state.uiSchema}
           fields={this.props.renderers[this.props.settings.id]}
           formContext={this.state.formContext}
@@ -272,6 +272,19 @@ export class SettingsFormEditor extends React.Component<
 
       this.setState({ filteredSchema });
     }
+  }
+
+  private _getFilteredFormData(filteredSchema?: ISettingRegistry.ISchema): any {
+    if (!filteredSchema?.properties) {
+      return this._formData;
+    }
+    const filteredFormData = JSONExt.deepCopy(this._formData);
+    for (const field in filteredFormData) {
+      if (!filteredSchema.properties[field]) {
+        delete filteredFormData[field];
+      }
+    }
+    return filteredFormData;
   }
 
   private _debouncer: Debouncer<void, any>;
