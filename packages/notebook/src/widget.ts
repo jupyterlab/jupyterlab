@@ -547,7 +547,14 @@ export class StaticNotebook extends WindowedList {
     const collab = newValue.collaborative ?? false;
     if (!collab && !cells.length) {
       newValue.sharedModel.insertCell(0, {
-        cell_type: this.notebookConfig.defaultCell
+        cell_type: this.notebookConfig.defaultCell,
+        metadata:
+          this.notebookConfig.defaultCell === 'code'
+            ? {
+                // This is an empty cell created in empty notebook, thus is trusted
+                trusted: true
+              }
+            : {}
       });
     }
     let index = -1;
@@ -598,7 +605,14 @@ export class StaticNotebook extends WindowedList {
           requestAnimationFrame(() => {
             if (model && !model.isDisposed && !model.sharedModel.cells.length) {
               model.sharedModel.insertCell(0, {
-                cell_type: this.notebookConfig.defaultCell
+                cell_type: this.notebookConfig.defaultCell,
+                metadata:
+                  this.notebookConfig.defaultCell === 'code'
+                    ? {
+                        // This is an empty cell created in empty notebook, thus is trusted
+                        trusted: true
+                      }
+                    : {}
               });
             }
           });
@@ -2488,6 +2502,7 @@ export class Notebook extends StaticNotebook {
       const start = index;
       const values = event.mimeData.getData(JUPYTER_CELL_MIME);
       // Insert the copies of the original cells.
+      // We preserve trust status of pasted cells by not modifying metadata.
       model.sharedModel.insertCells(index, values);
       // Select the inserted cells.
       this.deselectAll();
