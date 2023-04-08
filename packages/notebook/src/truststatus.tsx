@@ -27,7 +27,7 @@ function cellTrust(
   if (props.trustedCells === props.totalCells) {
     return [
       trans.__(
-        'Notebook trusted: %1 of %2 cells trusted.',
+        'Notebook trusted: %1 of %2 code cells trusted.',
         props.trustedCells,
         props.totalCells
       ),
@@ -36,7 +36,7 @@ function cellTrust(
   } else if (props.activeCellTrusted) {
     return [
       trans.__(
-        'Active cell trusted: %1 of %2 cells trusted.',
+        'Active cell trusted: %1 of %2 code cells trusted.',
         props.trustedCells,
         props.totalCells
       ),
@@ -45,7 +45,7 @@ function cellTrust(
   } else {
     return [
       trans.__(
-        'Notebook not trusted: %1 of %2 cells trusted.',
+        'Notebook not trusted: %1 of %2 code cells trusted.',
         props.trustedCells,
         props.totalCells
       ),
@@ -90,12 +90,12 @@ namespace NotebookTrustComponent {
     activeCellTrusted: boolean;
 
     /**
-     * The total number of cells for the current notebook.
+     * The total number of code cells for the current notebook.
      */
     totalCells: number;
 
     /**
-     * The number of trusted cells for the current notebook.
+     * The number of trusted code cells for the current notebook.
      */
     trustedCells: number;
   }
@@ -145,14 +145,14 @@ export namespace NotebookTrustStatus {
    */
   export class Model extends VDomModel {
     /**
-     * The number of trusted cells in the current notebook.
+     * The number of trusted code cells in the current notebook.
      */
     get trustedCells(): number {
       return this._trustedCells;
     }
 
     /**
-     * The total number of cells in the current notebook.
+     * The total number of code cells in the current notebook.
      */
     get totalCells(): number {
       return this._totalCells;
@@ -240,7 +240,7 @@ export namespace NotebookTrustStatus {
     }
 
     /**
-     * Given a notebook model, figure out how many of the cells are trusted.
+     * Given a notebook model, figure out how many of the code cells are trusted.
      */
     private _deriveCellTrustState(model: INotebookModel | null): {
       total: number;
@@ -249,13 +249,18 @@ export namespace NotebookTrustStatus {
       if (model === null) {
         return { total: 0, trusted: 0 };
       }
+      let total = 0;
       let trusted = 0;
       for (const cell of model.cells) {
+        if (cell.type !== 'code') {
+          continue;
+        }
+        total++;
         if (cell.trusted) {
           trusted++;
         }
       }
-      return { total: model.cells.length, trusted };
+      return { total, trusted };
     }
 
     /**
