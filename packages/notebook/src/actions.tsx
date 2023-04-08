@@ -2504,6 +2504,10 @@ namespace Private {
           if (value === 'code') {
             // After change of type outputs are deleted so cell can be trusted.
             raw.metadata.trusted = true;
+          } else {
+            // Otherwsie clear the metadata as trusted is only "valid" on code
+            // cells (since other cell types cannot have outputs).
+            raw.metadata.trusted = undefined;
           }
           const newCell = notebookSharedModel.insertCell(index, {
             cell_type: value,
