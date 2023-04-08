@@ -664,7 +664,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     this._setDirty(false);
     this.sharedModel.deleteMetadata('execution');
     // We trust this cell as it no longer has any outputs.
-    this.sharedModel.setMetadata('trusted', true);
+    this.trusted = true;
   }
 
   /**
