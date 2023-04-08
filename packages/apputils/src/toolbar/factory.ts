@@ -220,9 +220,13 @@ async function setToolbarItems(
         await displayInformation(trans);
       } else {
         if (newItems.length > 0) {
+          // Empty the default values to avoid toolbar settings collisions.
           canonical = null;
-          // This will trigger a settings.changed signal that will update the items
-          await registry.reload(pluginId);
+          const schema = registry.plugins[pluginId]!.schema;
+          schema.properties!.toolbar.default = [];
+
+          // Run again the transformations.
+          await registry.load(pluginId, true);
         }
       }
     }

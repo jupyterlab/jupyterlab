@@ -9,6 +9,50 @@ Extension Migration Guide
 JupyterLab 3.x to 4.x
 ---------------------
 
+Upgrading extension using the upgrade script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab 4.x provides a script to upgrade an existing extension to use the new extension system and packaging.
+
+.. note::
+
+    Back up your extension - the best if you use a version control like git, is to work on a new branch.
+
+First, make sure to update to JupyterLab 4 and install ``cookiecutter``. With ``pip``:
+
+.. code:: bash
+
+   pip install -U jupyterlab
+   pip install cookiecutter
+
+
+Or with ``conda``:
+
+.. code:: bash
+
+   conda install -c conda-forge jupyterlab=4 cookiecutter
+
+
+Then at the root folder of the extension, run:
+
+.. code:: bash
+
+   python -m jupyterlab.upgrade_extension .
+
+The upgrade script creates the necessary files for packaging the JupyterLab extension as a Python package.
+The script will ask you for all files if you want to override them or not. By default the configuration files
+will be overridden for the newer version. In particular, if you were using Python setuptools (aka ``setup.py``
+and/or ``setup.cfg``), you will like need to update the ``pyproject.toml`` file (see
+`PEP example <https://peps.python.org/pep-0621/#example>`_).
+
+The upgrade script also updates the dependencies in ``package.json`` to the ``^4.0.0`` packages.
+
+For more details about the new file structure and packaging of the extension, check out the extension tutorial: :ref:`extension_tutorial`
+
+.. note::
+
+    You will need to modify the code of your extension if it is impacted by the API changes mentioned below.
+
 jlpm
 ^^^^
 

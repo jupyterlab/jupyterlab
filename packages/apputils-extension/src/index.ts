@@ -43,6 +43,7 @@ import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { displayShortcuts } from './shortcuts';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -66,6 +67,8 @@ namespace CommandIDs {
   export const runAllEnabled = 'apputils:run-all-enabled';
 
   export const toggleHeader = 'apputils:toggle-header';
+
+  export const displayShortcuts = 'apputils:display-shortcuts';
 }
 
 /**
@@ -570,8 +573,13 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
 const utilityCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:utilityCommands',
   requires: [ITranslator],
+  optional: [ICommandPalette],
   autoStart: true,
-  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ) => {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
     commands.addCommand(CommandIDs.runFirstEnabled, {
@@ -612,6 +620,32 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    commands.addCommand(CommandIDs.displayShortcuts, {
+      label: trans.__('Show Keyboard Shortcuts'),
+      caption: trans.__(
+        'Show relevant keyboard shortcuts for the current active widget'
+      ),
+      execute: args => {
+        const included = app.shell.currentWidget?.node.contains(
+          document.activeElement
+        );
+
+        if (!included) {
+          const currentNode =
+            (app.shell.currentWidget as MainAreaWidget)?.content.node ??
+            app.shell.currentWidget?.node;
+          currentNode?.focus();
+        }
+        const options = { commands, trans };
+        return displayShortcuts(options);
+      }
+    });
+
+    if (palette) {
+      const category: string = trans.__('Help');
+      palette.addItem({ command: CommandIDs.displayShortcuts, category });
+    }
   }
 };
 

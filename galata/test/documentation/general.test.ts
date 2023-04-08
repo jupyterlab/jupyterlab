@@ -579,6 +579,18 @@ test.describe('General', () => {
     ).toMatchSnapshot('command_palette.png');
   });
 
+  test('Keyboard Shortcuts Help', async ({ page, tmpPath }) => {
+    await page.goto(`tree/${tmpPath}`);
+
+    await page.notebook.createNew();
+
+    await page.keyboard.press('Control+Shift+H');
+
+    expect(await page.locator('.jp-Notebook').screenshot()).toMatchSnapshot(
+      'shortcuts_help.png'
+    );
+  });
+
   test('Open With', async ({ page }) => {
     await page.goto();
     await page.addStyleTag({

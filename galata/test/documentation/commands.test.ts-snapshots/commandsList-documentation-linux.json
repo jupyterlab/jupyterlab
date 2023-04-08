@@ -148,6 +148,14 @@
     "shortcuts": []
   },
   {
+    "id": "apputils:display-shortcuts",
+    "label": "Show Keyboard Shortcuts",
+    "caption": "Show relevant keyboard shortcuts for the current active widget",
+    "shortcuts": [
+      "Ctrl Shift H"
+    ]
+  },
+  {
     "id": "apputils:incr-font-size",
     "label": "Increase Font Size",
     "caption": "",
