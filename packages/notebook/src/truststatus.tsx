@@ -14,6 +14,8 @@ import {
 import React from 'react';
 import { INotebookModel, Notebook } from '.';
 
+const TRUST_CLASS = 'jp-StatusItem-trust';
+
 /**
  * Determine the notebook trust status message.
  */
@@ -102,6 +104,7 @@ export class NotebookTrustStatus extends VDomRenderer<NotebookTrustStatus.Model>
   constructor(translator?: ITranslator) {
     super(new NotebookTrustStatus.Model());
     this.translator = translator || nullTranslator;
+    this.node.classList.add(TRUST_CLASS);
   }
 
   /**
