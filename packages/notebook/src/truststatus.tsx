@@ -20,37 +20,28 @@ import { INotebookModel, Notebook } from '.';
 function cellTrust(
   props: NotebookTrustComponent.IProps | NotebookTrustStatus.Model,
   translator?: ITranslator
-): string[] {
+): string {
   translator = translator || nullTranslator;
   const trans = translator.load('jupyterlab');
 
   if (props.trustedCells === props.totalCells) {
-    return [
-      trans.__(
-        'Notebook trusted: %1 of %2 code cells trusted.',
-        props.trustedCells,
-        props.totalCells
-      ),
-      'jp-StatusItem-trusted'
-    ];
+    return trans.__(
+      'Notebook trusted: %1 of %2 code cells trusted.',
+      props.trustedCells,
+      props.totalCells
+    );
   } else if (props.activeCellTrusted) {
-    return [
-      trans.__(
-        'Active cell trusted: %1 of %2 code cells trusted.',
-        props.trustedCells,
-        props.totalCells
-      ),
-      'jp-StatusItem-trusted'
-    ];
+    return trans.__(
+      'Active cell trusted: %1 of %2 code cells trusted.',
+      props.trustedCells,
+      props.totalCells
+    );
   } else {
-    return [
-      trans.__(
-        'Notebook not trusted: %1 of %2 code cells trusted.',
-        props.trustedCells,
-        props.totalCells
-      ),
-      'jp-StatusItem-untrusted'
-    ];
+    return trans.__(
+      'Notebook not trusted: %1 of %2 code cells trusted.',
+      props.trustedCells,
+      props.totalCells
+    );
   }
 }
 
@@ -120,16 +111,17 @@ export class NotebookTrustStatus extends VDomRenderer<NotebookTrustStatus.Model>
     if (!this.model) {
       return null;
     }
-    this.node.title = cellTrust(this.model, this.translator)[0];
+    const newTitle = cellTrust(this.model, this.translator);
+    if (newTitle !== this.node.title) {
+      this.node.title = newTitle;
+    }
     return (
-      <div>
-        <NotebookTrustComponent
-          allCellsTrusted={this.model.trustedCells === this.model.totalCells}
-          activeCellTrusted={this.model.activeCellTrusted}
-          totalCells={this.model.totalCells}
-          trustedCells={this.model.trustedCells}
-        />
-      </div>
+      <NotebookTrustComponent
+        allCellsTrusted={this.model.trustedCells === this.model.totalCells}
+        activeCellTrusted={this.model.activeCellTrusted}
+        totalCells={this.model.totalCells}
+        trustedCells={this.model.trustedCells}
+      />
     );
   }
 
