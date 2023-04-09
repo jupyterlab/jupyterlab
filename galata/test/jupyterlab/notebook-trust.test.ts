@@ -21,7 +21,7 @@ test.describe('Notebook Trust', () => {
     await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(1);
     await page.notebook.save();
     // Reload page
-    await page.goto();
+    await page.reload({ waitForIsReady: false });
     // Should still be trusted
     await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(1);
   });
@@ -67,7 +67,7 @@ test.describe('Notebook Trust', () => {
     );
 
     // Reload page
-    await page.goto();
+    await page.reload({ waitForIsReady: false });
 
     // It should no longer be trusted
     await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(0);
