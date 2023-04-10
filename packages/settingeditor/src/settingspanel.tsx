@@ -152,7 +152,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     [editorRegistry]
   );
 
-  if (!activePluginId && !activePluginId) {
+  if (!activePluginId) {
     return <SettingsEditorPlaceholder translator={translator} />;
   }
 
