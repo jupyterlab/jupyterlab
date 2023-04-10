@@ -7,6 +7,13 @@ import * as path from 'path';
 
 const fileName = 'search.ipynb';
 
+function getSelectionRange(textarea: HTMLTextAreaElement) {
+  return {
+    start: textarea.selectionStart,
+    end: textarea.selectionEnd
+  };
+}
+
 test.describe('Notebook Search', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
@@ -87,20 +94,46 @@ test.describe('Notebook Search', () => {
 
     // Go to first line
     await page.keyboard.press('PageUp');
-
     // Select first line
     await page.keyboard.press('Shift+End');
-
     // Open search box
     await page.keyboard.press('Control+f');
 
-    // Expect it to be populated with first line
-    await page.waitForSelector(
+    // Expect it to be populated with the first line
+    const inputWithFirstLine = page.locator(
       '[placeholder="Find"] >> text="Test with one notebook withr"'
     );
+    expect(inputWithFirstLine).toBeVisible();
+    expect(inputWithFirstLine).toBeFocused();
+    // Expect the newly set text to be selected
+    expect(await inputWithFirstLine.evaluate(getSelectionRange)).toStrictEqual({
+      start: 0,
+      end: 28
+    });
 
     // Expect both matches to be found (xfail)
     // await page.waitForSelector('text=1/2');
+
+    // Enter first cell again
+    await page.notebook.enterCellEditingMode(0);
+    // Go to last line
+    await page.keyboard.press('PageDown');
+    // Select last line
+    await page.keyboard.press('Shift+Home');
+    // Update search box
+    await page.keyboard.press('Control+f');
+
+    // Expect it to be populated with the last line
+    const inputWithLastLine = page.locator(
+      '[placeholder="Find"] >> text="This is a multi line with hits with"'
+    );
+    expect(inputWithLastLine).toBeVisible();
+    expect(inputWithLastLine).toBeFocused();
+    // Expect the newly set text to be selected
+    expect(await inputWithLastLine.evaluate(getSelectionRange)).toStrictEqual({
+      start: 0,
+      end: 35
+    });
 
     await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
   });
@@ -181,7 +214,7 @@ test.describe('Notebook Search', () => {
     await page.fill('[placeholder="Find"]', 'text/');
     await page.waitForSelector('text=1/3');
 
-    // Activete third cell
+    // Activate third cell
     const cell = await page.notebook.getCell(2);
     const editor = await cell.$('.jp-Editor');
     await editor.click();
