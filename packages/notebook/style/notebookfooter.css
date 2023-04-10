@@ -17,7 +17,7 @@
       )
   );
   border: var(--jp-border-width) solid var(--jp-cell-editor-border-color);
-  color: var(--jp-layout-color3);
+  color: var(--jp-ui-font-color3);
   margin-top: 6px;
   background: none;
   cursor: pointer;
@@ -27,7 +27,7 @@
   border-color: var(--jp-cell-editor-active-border-color);
 }
 
-/* For devices that support hovering, footer until hover */
+/* For devices that support hovering, hide footer until hover */
 @media (hover: hover) {
   .jp-Notebook-footer {
     opacity: 0;
