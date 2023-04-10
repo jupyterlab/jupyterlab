@@ -55,13 +55,13 @@ const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
 interface ISearchInputProps {
   placeholder: string;
-  value: string;
   title: string;
-  initialValue?: string;
+  initialValue: string;
   inputRef?: React.RefObject<HTMLTextAreaElement>;
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   autoFocus: boolean;
+  autoUpdate: boolean;
 }
 
 function SearchInput(props: ISearchInputProps): JSX.Element {
@@ -106,7 +106,7 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
       }}
       // Setting a key ensures that `defaultValue` will become updated
       // when the initial value changes.
-      key={props.initialValue}
+      key={props.autoUpdate ? props.initialValue : null}
       tabIndex={0}
       ref={props.inputRef}
       title={props.title}
@@ -152,13 +152,13 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
     <div className={wrapperClass}>
       <SearchInput
         placeholder={trans.__('Find')}
-        value={props.initialSearchText}
         onChange={e => props.onChange(e)}
         onKeyDown={e => props.onKeydown(e)}
         inputRef={props.inputRef}
         initialValue={props.initialSearchText}
         title={trans.__('Find')}
         autoFocus={true}
+        autoUpdate={true}
       />
       <button
         className={BUTTON_WRAPPER_CLASS}
@@ -215,11 +215,12 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <div className={INPUT_WRAPPER_CLASS}>
         <SearchInput
           placeholder={trans.__('Replace')}
-          value={props.replaceText ?? ''}
+          initialValue={props.replaceText ?? ''}
           onKeyDown={e => props.onReplaceKeydown(e)}
           onChange={e => props.onChange(e)}
           title={trans.__('Replace')}
           autoFocus={false}
+          autoUpdate={false}
         />
         {props.replaceOptionsSupport?.preserveCase ? (
           <button
