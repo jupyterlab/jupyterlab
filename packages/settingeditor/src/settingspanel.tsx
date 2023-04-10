@@ -12,9 +12,6 @@ import { ISignal } from '@lumino/signaling';
 import type { Field } from '@rjsf/utils';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
-import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
-
-const PLACEHOLDER_PLUGIN_NAME = 'InstructionsPlaceholder';
 
 export interface ISettingsPanelProps {
   /**
@@ -86,9 +83,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   translator,
   initialFilter
 }: ISettingsPanelProps): JSX.Element => {
-  const [activePluginId, setActivePluginId] = useState<string | null>(
-    PLACEHOLDER_PLUGIN_NAME
-  );
+  const [activePluginId, setActivePluginId] = useState<string | null>(null);
   const [filterPlugin, setFilter] = useState<
     (plugin: ISettingRegistry.IPlugin) => string[] | null
   >(() => initialFilter);
@@ -155,10 +150,6 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
       }, {}),
     [editorRegistry]
   );
-
-  if (activePluginId === 'InstructionsPlaceholder') {
-    return <SettingsEditorPlaceholder translator={translator} />;
-  }
 
   return (
     <div className="jp-SettingsPanel" ref={wrapperRef}>
