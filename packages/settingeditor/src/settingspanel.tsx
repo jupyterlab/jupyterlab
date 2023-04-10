@@ -12,6 +12,7 @@ import { ISignal } from '@lumino/signaling';
 import type { Field } from '@rjsf/utils';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
+import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
 
 export interface ISettingsPanelProps {
   /**
@@ -85,8 +86,8 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
 }: ISettingsPanelProps): JSX.Element => {
   const [activePluginId, setActivePluginId] = useState<string | null>(null);
   const [filterPlugin, setFilter] = useState<
-    (plugin: ISettingRegistry.IPlugin) => string[] | null
-  >(() => initialFilter);
+    ((plugin: ISettingRegistry.IPlugin) => string[] | null) | null
+  >(initialFilter ? () => initialFilter : null);
 
   const wrapperRef: React.RefObject<HTMLDivElement> = React.useRef(null);
   const editorDirtyStates: React.RefObject<{
@@ -151,11 +152,17 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     [editorRegistry]
   );
 
+  if (!activePluginId && !activePluginId) {
+    return <SettingsEditorPlaceholder translator={translator} />;
+  }
+
   return (
     <div className="jp-SettingsPanel" ref={wrapperRef}>
       {settings.map(pluginSettings => {
         // Pass filtered results to SettingsFormEditor to only display filtered fields.
-        const filtered = filterPlugin(pluginSettings.plugin);
+        const filtered = filterPlugin
+          ? filterPlugin(pluginSettings.plugin)
+          : null;
         // If filtered results are an array, only show if the array is non-empty.
         if (
           (activePluginId && activePluginId !== pluginSettings.id) ||

@@ -91,7 +91,6 @@ export class PluginList extends ReactWidget {
     void loadSettings();
 
     this._errors = {};
-    this.selection = this._allPlugins[0].id;
   }
 
   /**
