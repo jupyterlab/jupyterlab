@@ -14,6 +14,8 @@ import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
 import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
 
+const PLACEHOLDER_PLUGIN_NAME = 'SettingsEditorPlaceholder';
+
 export interface ISettingsPanelProps {
   /**
    * List of Settings objects that provide schema and values
@@ -84,7 +86,9 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   translator,
   initialFilter
 }: ISettingsPanelProps): JSX.Element => {
-  const [activePluginId, setActivePluginId] = useState<string | null>(null);
+  const [activePluginId, setActivePluginId] = useState<string | null>(
+    PLACEHOLDER_PLUGIN_NAME
+  );
   const [filterPlugin, setFilter] = useState<
     ((plugin: ISettingRegistry.IPlugin) => string[] | null) | null
   >(initialFilter ? () => initialFilter : null);
@@ -152,7 +156,10 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     [editorRegistry]
   );
 
-  if (!activePluginId) {
+  if (
+    activePluginId === PLACEHOLDER_PLUGIN_NAME ||
+    (!activePluginId && !filterPlugin)
+  ) {
     return <SettingsEditorPlaceholder translator={translator} />;
   }
 
