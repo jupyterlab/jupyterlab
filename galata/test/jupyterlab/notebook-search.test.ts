@@ -103,8 +103,8 @@ test.describe('Notebook Search', () => {
     const inputWithFirstLine = page.locator(
       '[placeholder="Find"] >> text="Test with one notebook withr"'
     );
-    expect(inputWithFirstLine).toBeVisible();
-    expect(inputWithFirstLine).toBeFocused();
+    await expect(inputWithFirstLine).toBeVisible();
+    await expect(inputWithFirstLine).toBeFocused();
     // Expect the newly set text to be selected
     expect(await inputWithFirstLine.evaluate(getSelectionRange)).toStrictEqual({
       start: 0,
@@ -127,8 +127,8 @@ test.describe('Notebook Search', () => {
     const inputWithLastLine = page.locator(
       '[placeholder="Find"] >> text="This is a multi line with hits with"'
     );
-    expect(inputWithLastLine).toBeVisible();
-    expect(inputWithLastLine).toBeFocused();
+    await expect(inputWithLastLine).toBeVisible();
+    await expect(inputWithLastLine).toBeFocused();
     // Expect the newly set text to be selected
     expect(await inputWithLastLine.evaluate(getSelectionRange)).toStrictEqual({
       start: 0,
@@ -136,6 +136,32 @@ test.describe('Notebook Search', () => {
     });
 
     await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
+  });
+
+  test('Restore previous search query if there is no selection', async ({
+    page
+  }) => {
+    const inputWithTestLocator = page.locator(
+      '[placeholder="Find"] >> text="test"'
+    );
+    const overlayLocator = page.locator('.jp-DocumentSearch-overlay');
+
+    // Search for "test"
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'test');
+    await page.waitForSelector('text=1/2');
+
+    // Close search box
+    await page.keyboard.press('Escape');
+    await expect(overlayLocator).toBeHidden();
+
+    // Open search box again
+    await page.keyboard.press('Control+f');
+    await expect(overlayLocator).toBeVisible();
+    // Expect the text to be set in the input field
+    await expect(inputWithTestLocator).toBeVisible();
+    // Expect the search to be active again
+    await page.waitForSelector('text=1/2');
   });
 
   test('Close with Escape', async ({ page }) => {

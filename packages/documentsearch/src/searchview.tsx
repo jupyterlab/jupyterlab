@@ -754,7 +754,11 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
    */
   setSearchText(search: string): void {
     this.model.initialQuery = search;
-    this.model.searchExpression = search;
+    // Only set the new search text to search expression if there is any
+    // to avoid nullifying the one that was remembered from last time.
+    if (search) {
+      this.model.searchExpression = search;
+    }
   }
 
   /**
