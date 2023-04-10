@@ -72,8 +72,9 @@ means that, for a JupyterLab version X.Y.Z:
 - Patch version (Z) number changes indicate backwards compatible bug fixes
 
 Contributions to JupyterLab extensions and other customizations should plan for possible
-breaking changes. You may wish to consider pinning the major version of JupyterLab when
-developing extensions (in your package metadata).
+breaking changes. Consider documenting your maintenance plans to users in these projects.
+You may also wish to consider pinning the major version of JupyterLab when developing
+extensions (in your package metadata).
 
 We maintain the **two most recently released major versions of JupyterLab**,
 JupyterLab v2 and JupyterLab v3. After JupyterLab v4 is released, we will no
