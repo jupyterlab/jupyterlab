@@ -24,7 +24,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { UseSignal } from '@jupyterlab/apputils';
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { SearchDocumentModel } from './searchmodel';
 import { IFilter, IFilters, IReplaceOptionsSupport } from './tokens';
 
@@ -67,6 +67,12 @@ interface ISearchInputProps {
 function SearchInput(props: ISearchInputProps): JSX.Element {
   const [rows, setRows] = useState<number>(1);
 
+  const updateRows = useCallback(() => {
+    if (props.inputRef?.current) {
+      setRows(props.inputRef.current.value.split(/\n/).length);
+    }
+  }, []);
+
   useEffect(() => {
     // For large part, `focusSearchInput()` is responsible for focusing and
     // selecting the search input, however when `initialValue` changes, this
@@ -74,6 +80,9 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
     // which means that `focusSearchInput` is no longer effective as it has
     // already fired before the re-render, hence we use this conditional effect.
     props.inputRef?.current?.select();
+    // After any change to initial value we also want to update rows in case if
+    // multi-line text was selected.
+    updateRows();
   }, [props.initialValue]);
 
   return (
@@ -83,11 +92,11 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
       rows={rows}
       onChange={e => {
         props.onChange(e);
-        setRows((e.target as HTMLTextAreaElement).value.split(/\n/).length);
+        updateRows();
       }}
       onKeyDown={e => {
         props.onKeyDown(e);
-        setRows((e.target as HTMLTextAreaElement).value.split(/\n/).length);
+        updateRows();
       }}
       // Setting a key ensures that `defaultValue` will become updated
       // when the initial value changes.
