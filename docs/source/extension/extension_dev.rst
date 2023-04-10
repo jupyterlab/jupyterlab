@@ -12,6 +12,14 @@ A JupyterLab extension is a package that contains a number of JupyterLab plugins
 
 See the sections below for more detailed information, or browse the rest of this page for an overview.
 
+.. warning::
+    Your extensions may break with new releases of JupyterLab. As noted in :ref:`versioning_notes`,
+    JupyterLab development and release cycles follow semantic versioning, so we recommend planning
+    your development process to account for possible future breaking changes that may disrupt users
+    of your extensions. Consider documenting your maintenance plans to users in your project, or
+    setting an upper bound on the version of JupyterLab your extension is compatible with in your
+    project's package metadata.
+
 .. toctree::
    :maxdepth: 1
 
