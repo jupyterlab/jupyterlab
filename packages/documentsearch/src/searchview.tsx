@@ -67,11 +67,17 @@ interface ISearchInputProps {
 function SearchInput(props: ISearchInputProps): JSX.Element {
   const [rows, setRows] = useState<number>(1);
 
-  const updateRows = useCallback(() => {
-    if (props.inputRef?.current) {
-      setRows(props.inputRef.current.value.split(/\n/).length);
-    }
-  }, []);
+  const updateRows = useCallback(
+    (event?: React.SyntheticEvent<HTMLTextAreaElement>) => {
+      const element = event
+        ? (event.target as HTMLTextAreaElement)
+        : props.inputRef?.current;
+      if (element) {
+        setRows(element.value.split(/\n/).length);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     // For large part, `focusSearchInput()` is responsible for focusing and
@@ -92,11 +98,11 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
       rows={rows}
       onChange={e => {
         props.onChange(e);
-        updateRows();
+        updateRows(e);
       }}
       onKeyDown={e => {
         props.onKeyDown(e);
-        updateRows();
+        updateRows(e);
       }}
       // Setting a key ensures that `defaultValue` will become updated
       // when the initial value changes.
