@@ -187,9 +187,9 @@ def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
 COMMANDS_LIST_PATH = "commands.test.ts-snapshots/commandsList-documentation-linux.json"
 COMMANDS_LIST_DOC = "user/commands_list.md"
 PLUGINS_LIST_PATH = "plugins.test.ts-snapshots/plugins-documentation-linux.json"
-PLUGINS_LIST_DOC = "extensions/plugins_list.rst"
+PLUGINS_LIST_DOC = "extension/plugins_list.rst"
 TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
-TOKENS_LIST_DOC = "extensions/tokens_list.rst"
+TOKENS_LIST_DOC = "extension/tokens_list.rst"
 
 
 def document_commands_list(temp_folder: Path) -> None:
@@ -220,14 +220,12 @@ def document_commands_list(temp_folder: Path) -> None:
 
 def document_plugins_tokens_list(list_path: Path, output_path: Path) -> None:
     """Generate the plugins list documentation page from application extraction."""
-    list_path = HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / PLUGINS_LIST_PATH
-
     items = json.loads(list_path.read_text())
 
     template = ""
 
     for _name, _description in items.items():
-        template += "- ``{plugin}``: {description}\n"
+        template += f"- ``{_name}``: {_description}\n"
 
     output_path.write_text(template)
 
@@ -389,9 +387,9 @@ def setup(app):
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
     # Skip we are dealing with internationalization
-    outdir = Path(app.outdir)
-    if outdir.name != "gettext":
-        build_api_docs(outdir)
+    Path(app.outdir)
+    # if outdir.name != "gettext":
+    #    build_api_docs(outdir)
 
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)
     tmp_files = copy_automated_screenshots(Path(app.srcdir) / IMAGES_FOLDER)

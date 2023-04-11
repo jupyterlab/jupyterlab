@@ -10,8 +10,8 @@ import { IDataConnector } from './interfaces';
 export const IStateDB = new Token<IStateDB>(
   '@jupyterlab/coreutils:IStateDB',
   `A service for the JupyterLab state database.
-Use this if you want to store data that will persist across page loads.
-See "state database" for more information.`
+  Use this if you want to store data that will persist across page loads.
+  See "state database" for more information.`
 );
 
 /**
