@@ -36,9 +36,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@lumino/commands": "^2.0.1",
-    "@lumino/coreutils": "^2.0.0",
-    "@lumino/disposable": "^2.0.0",
+    "@lumino/commands": "^2.1.0",
+    "@lumino/coreutils": "^2.1.0",
+    "@lumino/disposable": "^2.1.0",
     "@lumino/properties": "^2.0.0",
     "@lumino/signaling": "^2.1.0"
   },

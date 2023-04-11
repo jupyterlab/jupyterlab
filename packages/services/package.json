@@ -51,9 +51,9 @@
     "@jupyterlab/nbformat": "^4.0.0-beta.1",
     "@jupyterlab/settingregistry": "^4.0.0-beta.1",
     "@jupyterlab/statedb": "^4.0.0-beta.1",
-    "@lumino/coreutils": "^2.0.0",
-    "@lumino/disposable": "^2.0.0",
-    "@lumino/polling": "^2.0.0",
+    "@lumino/coreutils": "^2.1.0",
+    "@lumino/disposable": "^2.1.0",
+    "@lumino/polling": "^2.1.0",
     "@lumino/properties": "^2.0.0",
     "@lumino/signaling": "^2.1.0",
     "ws": "^8.11.0"
