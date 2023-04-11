@@ -44,8 +44,8 @@
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "test": "jest -i",
     "test:cov": "jest -i --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
