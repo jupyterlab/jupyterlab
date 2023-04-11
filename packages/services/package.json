@@ -55,7 +55,7 @@
     "@lumino/disposable": "^2.0.0",
     "@lumino/polling": "^2.0.0",
     "@lumino/properties": "^2.0.0",
-    "@lumino/signaling": "^2.0.0",
+    "@lumino/signaling": "^2.1.0",
     "ws": "^8.11.0"
   },
   "devDependencies": {

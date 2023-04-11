@@ -41,6 +41,7 @@ import type { FieldProps } from '@rjsf/utils';
 const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
   activate,
   id: '@jupyterlab/lsp-extension:plugin',
+  description: 'Provides the language server connection manager.',
   requires: [ISettingRegistry, ITranslator],
   optional: [IRunningSessionManagers, IFormRendererRegistry],
   provides: ILSPDocumentConnectionManager,
@@ -49,6 +50,7 @@ const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
 
 const featurePlugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
   id: '@jupyterlab/lsp-extension:feature',
+  description: 'Provides the language server feature manager.',
   activate: () => new FeatureManager(),
   provides: ILSPFeatureManager,
   autoStart: true
@@ -57,6 +59,7 @@ const featurePlugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
 const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManager> =
   {
     id: ILSPCodeExtractorsManager.name,
+    description: 'Provides the code extractor manager.',
     activate: app => {
       const extractorManager = new CodeExtractorsManager();
 

@@ -46,6 +46,7 @@ const FACTORY = 'Markdown Preview';
 const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
   activate,
   id: '@jupyterlab/markdownviewer-extension:plugin',
+  description: 'Adds markdown file viewer and provides its tracker.',
   provides: IMarkdownViewerTracker,
   requires: [IRenderMimeRegistry, ITranslator],
   optional: [ILayoutRestorer, ISettingRegistry, ITableOfContentsRegistry],

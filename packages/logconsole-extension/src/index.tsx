@@ -63,6 +63,7 @@ namespace CommandIDs {
 const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   activate: activateLogConsole,
   id: LOG_CONSOLE_PLUGIN_ID,
+  description: 'Provides the logger registry.',
   provides: ILoggerRegistry,
   requires: [ILabShell, IRenderMimeRegistry, INotebookTracker, ITranslator],
   optional: [ICommandPalette, ILayoutRestorer, ISettingRegistry, IStatusBar],

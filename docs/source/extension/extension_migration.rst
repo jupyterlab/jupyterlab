@@ -101,12 +101,13 @@ bumped their major version (following semver convention). We want to point out p
 ``@jupyterlab/documentsearch`` and ``@jupyterlab/toc`` API that have been fully reworked.
 
 - ``@jupyterlab/application`` from 3.x to 4.x
-   Major version bump to allow alternate ``ServiceManager`` implementations in ``JupyterFrontEnd``.
-   Specifically this allows the use of a mock manager.
-   This also makes the ``JupyterLab.IOptions`` more permissive to not require a shell when options are
-   given and allow a shell that meets the ``ILabShell`` interface.
-   As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
-   See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
+   * Major version bump to allow alternate ``ServiceManager`` implementations in ``JupyterFrontEnd``.
+     Specifically this allows the use of a mock manager.
+     This also makes the ``JupyterLab.IOptions`` more permissive to not require a shell when options are
+     given and allow a shell that meets the ``ILabShell`` interface.
+     As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
+     See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
+   * Rename token ``@jupyterlab/apputils:IConnectionLost`` to ``@jupyterlab/application:IConnectionLost``.
 - ``@jupyterlab/apputils`` from 3.x to 4.x
    * Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
    * ``ISanitizer`` and ``ISanitizer.IOptions`` are deprecated in favor of ``IRenderMime.ISanitizer`` and
@@ -305,9 +306,10 @@ bumped their major version (following semver convention). We want to point out p
      The ``KeySelector`` has also been removed as not used anymore, replaced by the use of ``@jupyterlab/metadataform``
      to provides selection for metadata keys.
 - ``@jupyterlab/rendermime`` from 3.x to 4.x
-  The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
-  that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
-  Consequently the ``IRendererFactory.createRenderer`` has a new option ``markdownParser``.
+   * The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
+     that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
+     Consequently the ``IRendererFactory.createRenderer`` has a new option ``markdownParser``.
+   * [Not breaking] ``IRenderMime.IExtension`` has a new optional ``description: string`` attribute for documentation.
 - ``@jupyterlab/rendermime-interfaces`` from 3.x to 4.x
   Remove ``IRenderMime.IRenderer.translator?`` attribute; the translator object is still passed to
   the constructor if needed by the renderer factory.

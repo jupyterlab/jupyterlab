@@ -48,6 +48,7 @@ namespace CommandIDs {
 
 const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/documentsearch-extension:labShellWidgetListener',
+  description: 'Active search on valid document',
   requires: [ILabShell, ISearchProviderRegistry],
   autoStart: true,
   activate: (
@@ -93,6 +94,7 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
  */
 const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   id: '@jupyterlab/documentsearch-extension:plugin',
+  description: 'Provides the document search registry.',
   provides: ISearchProviderRegistry,
   requires: [ITranslator],
   optional: [ICommandPalette, ISettingRegistry],

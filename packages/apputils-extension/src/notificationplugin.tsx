@@ -366,6 +366,7 @@ function NotificationStatus(props: INotificationStatusProps): JSX.Element {
  */
 export const notificationPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:notification',
+  description: 'Add the notification center and its status indicator.',
   autoStart: true,
   requires: [IStatusBar],
   optional: [ISettingRegistry, ITranslator],

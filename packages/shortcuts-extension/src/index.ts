@@ -79,6 +79,7 @@ function getExternalForJupyterLab(
  */
 const shortcuts: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/shortcuts-extension:shortcuts',
+  description: 'Adds the keyboard shortcuts editor.',
   requires: [ISettingRegistry],
   optional: [ITranslator, IFormRendererRegistry],
   activate: async (

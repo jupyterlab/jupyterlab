@@ -76,6 +76,7 @@ const HELP_CLASS = 'jp-Help';
  */
 const about: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:about',
+  description: 'Adds a "About" dialog feature.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ICommandPalette],
@@ -168,6 +169,7 @@ const about: JupyterFrontEndPlugin<void> = {
  */
 const jupyterForum: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:jupyter-forum',
+  description: 'Adds command to open the Jupyter Forum website.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ICommandPalette],
@@ -198,6 +200,7 @@ const jupyterForum: JupyterFrontEndPlugin<void> = {
  */
 const resources: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:resources',
+  description: 'Adds commands to Jupyter reference documentation websites.',
   autoStart: true,
   requires: [IMainMenu, ITranslator],
   optional: [ILabShell, ICommandPalette, ILayoutRestorer],
@@ -453,6 +456,7 @@ const resources: JupyterFrontEndPlugin<void> = {
  */
 const licenses: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:licenses',
+  description: 'Adds licenses used report tools.',
   autoStart: true,
   requires: [ITranslator],
   optional: [IMainMenu, ICommandPalette, ILayoutRestorer],

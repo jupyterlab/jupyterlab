@@ -99,6 +99,7 @@ namespace CommandIDs {
  */
 const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   id: '@jupyterlab/console-extension:tracker',
+  description: 'Provides the console widget tracker.',
   provides: IConsoleTracker,
   requires: [
     ConsolePanel.IContentFactory,
@@ -126,6 +127,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
  */
 const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
   id: '@jupyterlab/console-extension:factory',
+  description: 'Provides the console widget content factory.',
   provides: ConsolePanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
@@ -140,6 +142,7 @@ const factory: JupyterFrontEndPlugin<ConsolePanel.IContentFactory> = {
  */
 const kernelStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:kernel-status',
+  description: 'Adds the console to the kernel status indicator model.',
   autoStart: true,
   requires: [IConsoleTracker, IKernelStatusModel],
   activate: (
@@ -166,6 +169,7 @@ const kernelStatus: JupyterFrontEndPlugin<void> = {
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:cursor-position',
+  description: 'Adds the console to the code editor cursor position model.',
   autoStart: true,
   requires: [IConsoleTracker, IPositionModel],
   activate: (
@@ -212,6 +216,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:completer',
+  description: 'Adds completion to the console.',
   autoStart: true,
   requires: [IConsoleTracker],
   optional: [ICompletionProviderManager, ITranslator, ISanitizer],

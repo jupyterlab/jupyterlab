@@ -36,6 +36,7 @@ namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
+  description: 'Provides the launcher tab service.',
   requires: [ITranslator],
   optional: [
     ILabShell,

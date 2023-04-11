@@ -238,6 +238,15 @@ export namespace IRenderMime {
     readonly id: string;
 
     /**
+     * Extension description.
+     *
+     * #### Notes
+     * This can be used to provide user documentation on the feature
+     * brought by the extension.
+     */
+    readonly description?: string;
+
+    /**
      * A renderer factory to be registered to render the MIME type.
      */
     readonly rendererFactory: IRendererFactory;
