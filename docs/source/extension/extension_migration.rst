@@ -81,7 +81,7 @@ package configuration.
    [Yarn documentation](https://yarnpkg.com/getting-started/migration).
 
 If you are hit by multiple versions of the same packages (like ``@lumino/widgets``),
-TypeScript may complain that the types are not matching. One of the possible solution
+TypeScript may complain that the types are not matching. One possible solution
 is to force packages deduplication using:
 
 .. code-block:: sh
