@@ -156,7 +156,7 @@ test.describe('Notebook Search', () => {
     );
   });
 
-  test('Search in selected cells', async ({ page }) => {
+  test('Search in a single selected cell', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
 
@@ -169,9 +169,48 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/4');
 
     const nbPanel = await page.notebook.getNotebookInPanel();
-
     expect(await nbPanel.screenshot()).toMatchSnapshot(
       'search-in-selected-cells.png'
+    );
+  });
+
+  test('Search in multiple selected cells', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+
+    await page.fill('[placeholder="Find"]', 'with');
+
+    await page.click('button[title="Show Search Filters"]');
+
+    await page.click('text=Search in 1 Selected Cell');
+
+    // Bring focus to first cell without switching away from command mode
+    let cell = await page.notebook.getCell(0);
+    await (await cell.$('.jp-InputPrompt')).click();
+
+    // Select two cells below
+    await page.keyboard.press('Shift+ArrowDown');
+    await page.keyboard.press('Shift+ArrowDown');
+
+    // Expect the filter text to be updated
+    await page.waitForSelector('text=Search in 3 Selected Cells');
+
+    // Reset selection, switch to third cell, preserving command mode
+    cell = await page.notebook.getCell(2);
+    await (await cell.$('.jp-InputPrompt')).click();
+
+    await page.waitForSelector('text=Search in 1 Selected Cell');
+
+    // Select cell above
+    await page.keyboard.press('Shift+ArrowUp');
+
+    // Expect updated text
+    await page.waitForSelector('text=Search in 2 Selected Cells');
+    // Expect 15 matches
+    await page.waitForSelector('text=1/15');
+
+    const nbPanel = await page.notebook.getNotebookInPanel();
+    expect(await nbPanel.screenshot()).toMatchSnapshot(
+      'search-in-two-selected-cells.png'
     );
   });
 
