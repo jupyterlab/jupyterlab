@@ -77,7 +77,7 @@ package configuration.
 
 .. note::
 
-   You can find more information on upgrading yarn from version 1 to version 3 in
+   You can find more information on upgrading Yarn from version 1 to version 3 in
    [Yarn documentation](https://yarnpkg.com/getting-started/migration).
 
 If you are hit by multiple versions of the same packages (like ``@lumino/widgets``),
