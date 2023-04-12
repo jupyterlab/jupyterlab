@@ -333,7 +333,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
     if (this._footer?.isAttached) {
       Widget.detach(this._footer);
     }
-    this.onBeforeDetach(msg);
+    super.onBeforeDetach(msg);
   }
 
   /**

@@ -848,17 +848,17 @@ export namespace NotebookActions {
     }
     let maxCellIndex = notebook.widgets.length - 1;
 
-    if (notebook.activeCellIndex === maxCellIndex) {
-      const footer = (notebook.layout as NotebookWindowedLayout).footer;
-      footer?.node.focus();
-    }
-
     // Find last non-hidden cell
     while (
       notebook.widgets[maxCellIndex].isHidden ||
       notebook.widgets[maxCellIndex].inputHidden
     ) {
       maxCellIndex -= 1;
+    }
+    if (notebook.activeCellIndex === maxCellIndex) {
+      const footer = (notebook.layout as NotebookWindowedLayout).footer;
+      footer?.node.focus();
+      return;
     }
 
     let possibleNextCellIndex = notebook.activeCellIndex + 1;
@@ -873,6 +873,7 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+
     notebook.activeCellIndex = possibleNextCellIndex;
     notebook.deselectAll();
     Private.handleState(notebook, state, true);
