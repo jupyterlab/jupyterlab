@@ -330,8 +330,8 @@ bumped their major version (following semver convention). We want to point out p
    * ``HoverBox`` component moved from ``@jupyterlab/apputils`` to ``@jupyterlab/ui-components``.
    * Remove ``STATUSBAR_PLUGIN_ID`` from public API.
 - ``@jupyterlab/terminal`` from 3.x to 4.x
-   Xterm.js upgraded from 4.x to 5.x
-  ``IThemeObject.selection`` renamed to ``selectionBackground``
+   * Xterm.js upgraded from 4.x to 5.x
+   * ``IThemeObject.selection`` renamed to ``selectionBackground``
 - ``@jupyterlab/terminal-extension`` from 3.x to 4.x
    Remove ``addCommands`` from public API
 - ``@jupyterlab/toc`` from 3.x to 4.x
@@ -360,17 +360,17 @@ bumped their major version (following semver convention). We want to point out p
         The renderer id must follow the convention ``<ISettingRegistry.IPlugin.id>.<propertyName>``. This is to
         ensure a custom renderer is not used for property with the same name but different schema.
 - ``@jupyterlab/translation`` from 3.x to 4.x
-   Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
+  Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
 - ``@jupyterlab/vdom`` and ``@jupyterlab/vdom-extension`` have been removed.
-   The underlying [vdom](https://github.com/nteract/vdom) Python package is unmaintained.
-   So it was decided to drop it from core packages.
+  The underlying [vdom](https://github.com/nteract/vdom) Python package is unmaintained.
+  So it was decided to drop it from core packages.
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
    * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
-- TypeScript 4.7 update
-   As a result of the update to TypeScript 4.7, a couple of interfaces have had their definitions changed.
-   The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
-   The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+- TypeScript 5.0 update
+  As a result of the update to TypeScript 5.0, a couple of interfaces have had their definitions changed.
+  The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
+  The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 - React 18.2.0 update
   The update to React 18.2.0 (from 17.0.1) should be propagated to extensions as well.
   Here is the documentation about the `migration to react 18 <https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html>`_.
