@@ -264,8 +264,9 @@ test.describe('Notebook Search', () => {
 
     // Expect updated text
     await page.waitForSelector('text=Search in 2 Selected Cells');
-    // Expect 15 matches (note: should be 1/15, but this is xfail for now)
-    await page.waitForSelector('text=-/15');
+
+    // Expect 15 matches
+    await page.waitForSelector('text=1/15');
 
     const nbPanel = await page.notebook.getNotebookInPanel();
     expect(await nbPanel.screenshot()).toMatchSnapshot(
