@@ -37,7 +37,7 @@ function getExternalForJupyterLab(
   return {
     translator,
     getAllShortCutSettings: () =>
-      settingRegistry.reload(shortcutPluginLocation),
+      settingRegistry.load(shortcutPluginLocation, true),
     removeShortCut: (key: string) =>
       settingRegistry.remove(shortcutPluginLocation, key),
     createMenu: () => new Menu({ commands }),
@@ -170,8 +170,13 @@ List of keyboard shortcuts:`,
           oldShortcuts === undefined ||
           !JSONExt.deepEqual(oldShortcuts, newShortcuts)
         ) {
+          // Empty the default values to avoid shortcut collisions.
           canonical = null;
-          await registry.reload(shortcuts.id);
+          const schema = registry.plugins[shortcuts.id]!.schema;
+          schema.properties!.shortcuts.default = [];
+
+          // Reload the settings.
+          await registry.load(shortcuts.id, true);
         }
       }
     });

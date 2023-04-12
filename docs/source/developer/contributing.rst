@@ -56,10 +56,33 @@ Documentation <https://jupyter.readthedocs.io/en/latest/contributing/content-con
 and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
+.. _versioning_notes:
+
+Backwards Compatibility, Versions and Breaking Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+New versions of JupyterLab may break backwards compatibility with extensions and other Jupyter
+customizations. Breaking changes are kept to a minimum where possible. JupyterLab development
+and release cycles follow `semantic versioning <https://semver.org/>`__, so when breaking
+changes are necessary, they are communicated via the version numbering scheme. In short, this
+means that, for a JupyterLab version X.Y.Z:
+
+- Major version (X) number changes indicate breaking changes (NOT backwards compatible)
+- Minor Version (Y) number changes indicate a backwards compatible addition of new features
+- Patch version (Z) number changes indicate backwards compatible bug fixes
+
+Contributions to JupyterLab extensions and other customizations should plan for possible
+breaking changes. Consider documenting your maintenance plans to users in these projects.
+You may also wish to consider pinning the major version of JupyterLab when developing
+extensions (in your package metadata).
+
 We maintain the **two most recently released major versions of JupyterLab**,
 JupyterLab v2 and JupyterLab v3. After JupyterLab v4 is released, we will no
-longer maintain v2.
-All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+longer maintain v2. All JupyterLab v2 users are strongly advised to upgrade
+as soon as possible.
+
+Languages, Tools and Processes
+------------------------------
 
 All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style

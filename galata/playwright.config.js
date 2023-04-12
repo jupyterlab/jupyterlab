@@ -10,7 +10,7 @@ module.exports = {
       name: 'documentation',
       // Try one retry as some tests are flaky
       retries: process.env.CI ? 2 : 0,
-      testMatch: 'test/documentation/**',
+      testMatch: 'test/documentation/**/*.test.ts',
       testIgnore: '**/.ipynb_checkpoints/**',
       timeout: 90000,
       use: {

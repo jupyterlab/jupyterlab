@@ -9,10 +9,84 @@ Extension Migration Guide
 JupyterLab 3.x to 4.x
 ---------------------
 
+Upgrading extension using the upgrade script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab 4.x provides a script to upgrade an existing extension to use the new extension system and packaging.
+
+.. note::
+
+    Back up your extension - the best if you use a version control like git, is to work on a new branch.
+
+First, make sure to update to JupyterLab 4 and install ``cookiecutter``. With ``pip``:
+
+.. code:: bash
+
+   pip install -U jupyterlab
+   pip install cookiecutter
+
+
+Or with ``conda``:
+
+.. code:: bash
+
+   conda install -c conda-forge jupyterlab=4 cookiecutter
+
+
+Then at the root folder of the extension, run:
+
+.. code:: bash
+
+   python -m jupyterlab.upgrade_extension .
+
+The upgrade script creates the necessary files for packaging the JupyterLab extension as a Python package.
+The script will ask you for all files if you want to override them or not. By default the configuration files
+will be overridden for the newer version. In particular, if you were using Python setuptools (aka ``setup.py``
+and/or ``setup.cfg``), you will like need to update the ``pyproject.toml`` file (see
+`PEP example <https://peps.python.org/pep-0621/#example>`_).
+
+The upgrade script also updates the dependencies in ``package.json`` to the ``^4.0.0`` packages.
+
+For more details about the new file structure and packaging of the extension, check out the extension tutorial: :ref:`extension_tutorial`
+
+.. note::
+
+    You will need to modify the code of your extension if it is impacted by the API changes mentioned below.
+
 jlpm
 ^^^^
 
-The utility ``jlpm`` is using yarn 3 (it was yarn 1 previously).
+The utility ``jlpm`` uses Yarn 3 (previously Yarn 1). This will require updating your
+package configuration.
+
+- Create a file ``.yarnrc.yml`` containing:
+
+.. code-block:: yaml
+
+   enableImmutableInstalls: false
+   nodeLinker: node-modules
+
+- Add to ``.gitignore``
+
+.. code-block::
+
+   .yarn/
+
+- Run ``jlpm install``
+  This will reset your ``yarn.lock`` content as its format has changed.
+
+.. note::
+
+   You can find more information on upgrading Yarn from version 1 to version 3 in
+   [Yarn documentation](https://yarnpkg.com/getting-started/migration).
+
+If you are hit by multiple versions of the same packages (like ``@lumino/widgets``),
+TypeScript may complain that the types are not matching. One possible solution
+is to force packages deduplication using:
+
+.. code-block:: sh
+
+   jlpm dedupe --strategy highest
 
 API breaking changes
 ^^^^^^^^^^^^^^^^^^^^
