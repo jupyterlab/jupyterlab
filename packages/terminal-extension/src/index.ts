@@ -329,7 +329,7 @@ function addRunningSessionManager(
 /**
  * Add the commands for the terminal.
  */
-export function addCommands(
+function addCommands(
   app: JupyterFrontEnd,
   tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
   settingRegistry: ISettingRegistry,

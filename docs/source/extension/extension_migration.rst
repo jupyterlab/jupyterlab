@@ -272,9 +272,13 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/filebrowser-extension`` from 3.x to 4.x
    Remove command ``filebrowser:create-main-launcher``. You can replace by ``launcher:create`` (same behavior)
    All launcher creation actions are moved to ``@jupyterlab/launcher-extension``.
+- ``@jupyterlab/imageviewer-extension`` from 3.x to 4.x
+   Remove ``addCommands`` from public API
 - ``@jupyterlab/mainmenu`` from 3.x to 4.x
    * ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
      to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
+   * Remove ``createEditMenu``, ``createFileMenu``, ``createKernelMenu``, ``createViewMenu``, ``createRunMenu``,
+     ``createTabsMenu``, ``createHelpMenu`` from public API.
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * ``NotebookWidgetFactory.IOptions`` has no ``sessionDialogs`` option any more.
    * The ``NotebookPanel._onSave`` method is now ``private``.
@@ -318,15 +322,18 @@ bumped their major version (following semver convention). We want to point out p
    This package is no longer present in JupyterLab. For documentation related to the shared models,
    please check out `@jupyter/ydoc documentation <https://jupyter-ydoc.readthedocs.io/en/latest>`_.
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
-  Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
-  Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
-  Plugin ``@jupyterlab/statusbar-extension:kernel-status`` renamed to ``@jupyterlab/apputils-extension:kernel-status``
-  Plugin ``@jupyterlab/statusbar-extension:running-sessions-status`` renamed to ``@jupyterlab/apputils-extension:running-sessions-status``
-  Plugin ``@jupyterlab/statusbar-extension:line-col-status`` renamed to ``@jupyterlab/codemirror-extension:line-col-status``
-  ``HoverBox`` component moved from ``@jupyterlab/apputils`` to ``@jupyterlab/ui-components``.
+   * Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
+   * Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
+   * Plugin ``@jupyterlab/statusbar-extension:kernel-status`` renamed to ``@jupyterlab/apputils-extension:kernel-status``
+   * Plugin ``@jupyterlab/statusbar-extension:running-sessions-status`` renamed to ``@jupyterlab/apputils-extension:running-sessions-status``
+   * Plugin ``@jupyterlab/statusbar-extension:line-col-status`` renamed to ``@jupyterlab/codemirror-extension:line-col-status``
+   * ``HoverBox`` component moved from ``@jupyterlab/apputils`` to ``@jupyterlab/ui-components``.
+   * Remove ``STATUSBAR_PLUGIN_ID`` from public API.
 - ``@jupyterlab/terminal`` from 3.x to 4.x
-  Xterm.js upgraded from 4.x to 5.x
+   Xterm.js upgraded from 4.x to 5.x
   ``IThemeObject.selection`` renamed to ``selectionBackground``
+- ``@jupyterlab/terminal-extension`` from 3.x to 4.x
+   Remove ``addCommands`` from public API
 - ``@jupyterlab/toc`` from 3.x to 4.x
    ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).

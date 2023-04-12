@@ -259,7 +259,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 /**
  * Create the basic `Edit` menu.
  */
-export function createEditMenu(
+function createEditMenu(
   app: JupyterFrontEnd,
   menu: IEditMenu,
   trans: TranslationBundle
@@ -330,7 +330,7 @@ export function createEditMenu(
 /**
  * Create the basic `File` menu.
  */
-export function createFileMenu(
+function createFileMenu(
   app: JupyterFrontEnd,
   menu: IFileMenu,
   router: IRouter,
@@ -452,7 +452,7 @@ export function createFileMenu(
 /**
  * Create the basic `Kernel` menu.
  */
-export function createKernelMenu(
+function createKernelMenu(
   app: JupyterFrontEnd,
   menu: IKernelMenu,
   trans: TranslationBundle
@@ -559,7 +559,7 @@ export function createKernelMenu(
 /**
  * Create the basic `View` menu.
  */
-export function createViewMenu(
+function createViewMenu(
   app: JupyterFrontEnd,
   menu: IViewMenu,
   trans: TranslationBundle
@@ -606,7 +606,7 @@ export function createViewMenu(
 /**
  * Create the basic `Run` menu.
  */
-export function createRunMenu(
+function createRunMenu(
   app: JupyterFrontEnd,
   menu: IRunMenu,
   trans: TranslationBundle
@@ -656,7 +656,7 @@ export function createRunMenu(
 /**
  * Create the basic `Tabs` menu.
  */
-export function createTabsMenu(
+function createTabsMenu(
   app: JupyterFrontEnd,
   menu: ITabsMenu,
   labShell: ILabShell | null,
@@ -739,7 +739,7 @@ export function createTabsMenu(
 /**
  * Create the basic `Help` menu.
  */
-export function createHelpMenu(
+function createHelpMenu(
   app: JupyterFrontEnd,
   menu: IHelpMenu,
   trans: TranslationBundle

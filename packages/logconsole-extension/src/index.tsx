@@ -312,7 +312,7 @@ function activateLogConsole(
  */
 export class LogLevelSwitcher extends ReactWidget {
   /**
-   * Construct a new cell type switcher.
+   * Construct a new log level switcher.
    */
   constructor(widget: LogConsolePanel, translator?: ITranslator) {
     super();
