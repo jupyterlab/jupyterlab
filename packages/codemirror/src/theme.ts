@@ -54,6 +54,10 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor: 'var(--jp-layout-color2)'
   },
 
+  '.cm-lineNumbers': {
+    color: 'var(--jp-ui-font-color2)'
+  },
+
   '.cm-searchMatch': {
     backgroundColor: 'var(--jp-search-unselected-match-background-color)',
     color: 'var(--jp-search-unselected-match-color)'
