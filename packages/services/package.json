@@ -65,7 +65,7 @@
     "jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.2",
+    "typescript": "~5.0.4",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1"
   },

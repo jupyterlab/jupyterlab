@@ -54,7 +54,7 @@
     "@types/webpack-env": "^1.18.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.2"
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"
