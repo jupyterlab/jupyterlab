@@ -56,7 +56,7 @@ For more details about the new file structure and packaging of the extension, ch
 jlpm
 ^^^^
 
-The utility ``jlpm`` is using yarn 3 (it was yarn 1 previously). This will require to update your
+The utility ``jlpm`` uses Yarn 3 (previously Yarn 1). This will require updating your
 package configuration.
 
 - Create a file ``.yarnrc.yml`` containing:
