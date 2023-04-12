@@ -73,7 +73,7 @@ package configuration.
    .yarn/
 
 - Run ``jlpm install``
-  This will reset your ``yarn.lock`` content as its format changed.
+  This will reset your ``yarn.lock`` content as its format has changed.
 
 .. note::
 
