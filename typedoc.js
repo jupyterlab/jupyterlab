@@ -77,9 +77,6 @@ const exclude =
   packages.flatMap(p => [`packages/${p}/test`]) +
   ['packages/application-extension'];
 
-console.log(entryPoints);
-console.log(exclude);
-
 module.exports = {
   entryPoints,
   exclude,
@@ -191,6 +188,10 @@ module.exports = {
         'https://lumino.readthedocs.io/en/stable/api/classes/widgets.PanelLayout.html',
       SplitPanel:
         'https://lumino.readthedocs.io/en/latest/api/classes/widgets.SplitPanel-1.html',
+      TabBar:
+        'https://lumino.readthedocs.io/en/stable/api/classes/widgets.TabBar-1.html',
+      'TabBar.IOptions':
+        'https://lumino.readthedocs.io/en/stable/api/interfaces/widgets.TabBar.IOptions.html',
       TabPanel:
         'https://lumino.readthedocs.io/en/stable/api/classes/widgets.TabPanel-1.html',
       'TabPanel.IOptions':
