@@ -203,13 +203,6 @@ module.exports = {
       FieldProps:
         'https://rjsf-team.github.io/react-jsonschema-form/docs/advanced-customization/custom-widgets-fields/#field-props'
     },
-    typescript: {
-      Omit: 'https://www.typescriptlang.org/docs/handbook/utility-types.html#omittype-keys',
-      Partial:
-        'https://www.typescriptlang.org/docs/handbook/utility-types.html#partialtype',
-      Record:
-        'https://www.typescriptlang.org/docs/handbook/utility-types.html#recordkeys-type'
-    },
     yjs: {
       RelativePosition: 'https://docs.yjs.dev/api/relative-positions',
       UndoManager: 'https://docs.yjs.dev/api/undo-manager',
@@ -223,6 +216,7 @@ module.exports = {
     Jupyter: 'https://jupyter.org'
   },
   name: '@jupyterlab',
+  plugin: ['typedoc-plugin-mdn-links'],
   out: 'docs/api',
   readme: 'README.md',
   theme: 'default',
