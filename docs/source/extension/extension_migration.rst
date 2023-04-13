@@ -116,7 +116,8 @@ bumped their major version (following semver convention). We want to point out p
    Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
    * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
-     should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
+     should use the `TypeScript extension Cookiecutter <https://github.com/jupyterlab/extension-cookiecutter-ts>`_
+     (choosing ``theme`` as ``kind`` ) instead.
    * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
    * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
 - ``@jupyterlab/cells`` from 3.x to 4.x
@@ -273,11 +274,11 @@ bumped their major version (following semver convention). We want to point out p
    Remove command ``filebrowser:create-main-launcher``. You can replace by ``launcher:create`` (same behavior)
    All launcher creation actions are moved to ``@jupyterlab/launcher-extension``.
 - ``@jupyterlab/imageviewer-extension`` from 3.x to 4.x
-   Remove ``addCommands`` from public API
+   Removed ``addCommands`` from public API
 - ``@jupyterlab/mainmenu`` from 3.x to 4.x
    * ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
      to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
-   * Remove ``createEditMenu``, ``createFileMenu``, ``createKernelMenu``, ``createViewMenu``, ``createRunMenu``,
+   * Removed ``createEditMenu``, ``createFileMenu``, ``createKernelMenu``, ``createViewMenu``, ``createRunMenu``,
      ``createTabsMenu``, ``createHelpMenu`` from public API.
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * ``NotebookWidgetFactory.IOptions`` has no ``sessionDialogs`` option any more.
@@ -328,12 +329,12 @@ bumped their major version (following semver convention). We want to point out p
    * Plugin ``@jupyterlab/statusbar-extension:running-sessions-status`` renamed to ``@jupyterlab/apputils-extension:running-sessions-status``
    * Plugin ``@jupyterlab/statusbar-extension:line-col-status`` renamed to ``@jupyterlab/codemirror-extension:line-col-status``
    * ``HoverBox`` component moved from ``@jupyterlab/apputils`` to ``@jupyterlab/ui-components``.
-   * Remove ``STATUSBAR_PLUGIN_ID`` from public API.
+   * Removed ``STATUSBAR_PLUGIN_ID`` from public API.
 - ``@jupyterlab/terminal`` from 3.x to 4.x
    * Xterm.js upgraded from 4.x to 5.x
    * ``IThemeObject.selection`` renamed to ``selectionBackground``
 - ``@jupyterlab/terminal-extension`` from 3.x to 4.x
-   Remove ``addCommands`` from public API
+   Removed ``addCommands`` from public API
 - ``@jupyterlab/toc`` from 3.x to 4.x
    ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).
@@ -362,7 +363,7 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/translation`` from 3.x to 4.x
   Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
 - ``@jupyterlab/vdom`` and ``@jupyterlab/vdom-extension`` have been removed.
-  The underlying [vdom](https://github.com/nteract/vdom) Python package is unmaintained.
+  The underlying `vdom https://github.com/nteract/vdom`_ Python package is unmaintained.
   So it was decided to drop it from core packages.
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
