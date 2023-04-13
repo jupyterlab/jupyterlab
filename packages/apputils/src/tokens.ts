@@ -341,6 +341,11 @@ export interface IToolbarWidgetRegistry {
     toolbarItemName: string,
     factory: (main: T) => Widget
   ): ((main: T) => Widget) | undefined;
+
+  /**
+   * A signal emitted when a factory widget has been added.
+   */
+  readonly factoryAdded: ISignal<this, string>;
 }
 
 /**

@@ -312,6 +312,22 @@ export function createToolbarFactory(
       })
     });
 
+    // Re-render the widget if a new factory has been added.
+    toolbarRegistry.factoryAdded.connect((_, itemName) => {
+      for (let i = 0; i < items.length; i++) {
+        if (items.get(i).name === itemName) {
+          toolbar.set(i, {
+            name: itemName,
+            widget: toolbarRegistry.createWidget(
+              factoryName,
+              widget,
+              items.get(i)
+            )
+          });
+        }
+      }
+    });
+
     items.changed.connect(updateToolbar);
     widget.disposed.connect(() => {
       items.changed.disconnect(updateToolbar);
