@@ -170,12 +170,14 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              <LabIcon.resolveReact
-                icon={icon}
-                iconClass={classes(iconClass, 'jp-Icon-cover')}
-                stylesheet="launcherSection"
-                title={cat + ' icon'}
-              />{' '}
+              <div className="jp-Labicon-section" aria-hidden={true}>
+                <LabIcon.resolveReact
+                  icon={icon}
+                  iconClass={classes(iconClass, 'jp-Icon-cover')}
+                  stylesheet="launcherSection"
+                  title={cat + ' icon'}
+                />{' '}
+              </div>
               <h2 className="jp-Launcher-sectionTitle" title={cat + ' title'}>
                 {cat}
               </h2>
@@ -307,11 +309,13 @@ function Card(
               alt={trans.__('Kernel icon')}
             />
           ) : (
+            //maybe change here
             <div className="jp-LauncherCard-noKernelIcon">
               {label[0].toUpperCase()}
             </div>
           )
         ) : (
+          //maybe change here
           <LabIcon.resolveReact
             icon={icon}
             iconClass={classes(iconClass, 'jp-Icon-cover')}
