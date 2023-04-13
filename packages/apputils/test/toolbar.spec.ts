@@ -534,5 +534,99 @@ describe('@jupyterlab/apputils', () => {
       expect(factory(new Widget())).toHaveLength(3);
       expect(factory2(new Widget())).toHaveLength(3);
     });
+
+    it('should update the toolbar items with late item factory', async () => {
+      const factoryName = 'dummyFactory';
+      const pluginId = 'test-plugin:settings';
+
+      const dummyWidget = new Widget();
+      const defaultFactory = jest.fn().mockReturnValue(dummyWidget);
+
+      const textContent = 'This is a test widget';
+      const node = document.createElement('div');
+      node.textContent = textContent;
+      const testWidget = new Widget({ node });
+      const itemFactory = jest.fn().mockReturnValue(testWidget);
+
+      const toolbarRegistry = new ToolbarWidgetRegistry({
+        defaultFactory: defaultFactory
+      });
+
+      const bar: ISettingRegistry.IPlugin = {
+        data: {
+          composite: {},
+          user: {}
+        },
+        id: pluginId,
+        raw: '{}',
+        schema: {
+          'jupyter.lab.toolbars': {
+            dummyFactory: [
+              {
+                name: 'test',
+                rank: 20
+              }
+            ]
+          },
+          'jupyter.lab.transform': true,
+          properties: {
+            toolbar: {
+              type: 'array'
+            }
+          },
+          type: 'object'
+        },
+        version: 'test'
+      };
+
+      const connector: IDataConnector<
+        ISettingRegistry.IPlugin,
+        string,
+        string,
+        string
+      > = {
+        fetch: jest.fn().mockImplementation((id: string) => {
+          switch (id) {
+            case bar.id:
+              return bar;
+            default:
+              return {};
+          }
+        }),
+        list: jest.fn(),
+        save: jest.fn(),
+        remove: jest.fn()
+      };
+
+      const settingRegistry = new SettingRegistry({
+        connector
+      });
+
+      const translator: ITranslator = {
+        languageCode: 'en',
+        load: jest.fn()
+      };
+
+      const factory = createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        factoryName,
+        pluginId,
+        translator
+      );
+
+      await settingRegistry.load(bar.id);
+
+      const toolbar = factory(new Widget());
+
+      // Should contain the defaultFactory widget
+      expect(toolbar).toHaveLength(1);
+      expect(toolbar.get(0).widget.node.textContent).not.toContain(textContent);
+
+      // Add a factory item to the toolbar should re-render the widget.
+      toolbarRegistry.addFactory(factoryName, 'test', itemFactory);
+      expect(toolbar).toHaveLength(1);
+      expect(toolbar.get(0).widget.node.textContent).toContain(textContent);
+    });
   });
 });
