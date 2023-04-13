@@ -147,6 +147,8 @@ module.exports = {
         'https://lumino.readthedocs.io/en/latest/api/types/coreutils.PartialJSONValue.html',
       ReadonlyJSONObject:
         'https://lumino.readthedocs.io/en/latest/api/interfaces/coreutils.ReadonlyJSONObject.html',
+      ReadonlyPartialJSONObject:
+        'https://lumino.readthedocs.io/en/latest/api/interfaces/coreutils.ReadonlyPartialJSONObject.html',
       Token:
         'https://lumino.readthedocs.io/en/latest/api/classes/coreutils.Token.html'
     },
@@ -173,6 +175,10 @@ module.exports = {
         'https://lumino.readthedocs.io/en/stable/api/classes/widgets.ContextMenu-1.html',
       'ContextMenu.IOptions':
         'https://lumino.readthedocs.io/en/stable/api/interfaces/widgets.ContextMenu.IOptions.html',
+      DockPanel:
+        'https://lumino.readthedocs.io/en/stable/api/classes/widgets.DockPanel-1.html',
+      'DockPanel.IOptions':
+        'https://lumino.readthedocs.io/en/stable/api/interfaces/widgets.DockPanel.IOptions.html',
       Menu: 'https://lumino.readthedocs.io/en/stable/api/classes/widgets.Menu-1.html',
       'Menu.IItem':
         'https://lumino.readthedocs.io/en/stable/api/interfaces/widgets.Menu.IItem.html',
