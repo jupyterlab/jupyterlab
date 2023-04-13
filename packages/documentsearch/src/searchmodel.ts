@@ -100,7 +100,25 @@ export class SearchDocumentModel
    * The initial query string.
    */
   get initialQuery(): string {
-    return this._searchExpression || this.searchProvider.getInitialQuery();
+    return this._initialQuery;
+  }
+  set initialQuery(v: string) {
+    if (v) {
+      // Usually the value comes from user selection (set by search provider).
+      this._initialQuery = v;
+    } else {
+      // If user selection is empty, we fall back to most recent value (if any).
+      this._initialQuery = this._searchExpression;
+    }
+  }
+
+  /**
+   * Initial query as suggested by provider.
+   *
+   * A common choice is the text currently selected by the user.
+   */
+  get suggestedInitialQuery(): string {
+    return this.searchProvider.getInitialQuery();
   }
 
   /**
@@ -338,6 +356,7 @@ export class SearchDocumentModel
   private _disposed = new Signal<this, void>(this);
   private _parsingError = '';
   private _preserveCase = false;
+  private _initialQuery = '';
   private _filters: IFilters = {};
   private _replaceText: string;
   private _searchDebouncer: Debouncer;

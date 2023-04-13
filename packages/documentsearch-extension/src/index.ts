@@ -233,7 +233,9 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           if (searchText) {
             searchWidget.setSearchText(searchText);
           } else {
-            searchWidget.setSearchText(searchWidget.model.initialQuery);
+            searchWidget.setSearchText(
+              searchWidget.model.suggestedInitialQuery
+            );
           }
           searchWidget.focusSearchInput();
         }
@@ -250,7 +252,9 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           if (searchText) {
             searchWidget.setSearchText(searchText);
           } else {
-            searchWidget.setSearchText(searchWidget.model.initialQuery);
+            searchWidget.setSearchText(
+              searchWidget.model.suggestedInitialQuery
+            );
           }
           const replaceText = args['replaceText'] as string;
           if (replaceText) {
