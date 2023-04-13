@@ -310,7 +310,7 @@ export function createToolbarFactory(
       const itemIndex = Array.from(items).findIndex(
         item => item.name === itemName
       );
-      if (itemIndex >= -1) {
+      if (itemIndex >= 0) {
         toolbar.set(itemIndex, {
           name: itemName,
           widget: toolbarRegistry.createWidget(
