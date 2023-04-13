@@ -27,6 +27,7 @@ import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
 import { Notebook, StaticNotebook } from './widget';
+import { NotebookWindowedLayout } from './windowing';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -846,6 +847,7 @@ export namespace NotebookActions {
       return;
     }
     let maxCellIndex = notebook.widgets.length - 1;
+
     // Find last non-hidden cell
     while (
       notebook.widgets[maxCellIndex].isHidden ||
@@ -854,6 +856,8 @@ export namespace NotebookActions {
       maxCellIndex -= 1;
     }
     if (notebook.activeCellIndex === maxCellIndex) {
+      const footer = (notebook.layout as NotebookWindowedLayout).footer;
+      footer?.node.focus();
       return;
     }
 

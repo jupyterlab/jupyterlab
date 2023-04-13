@@ -36,8 +36,8 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "resolutions": {
@@ -65,7 +65,7 @@
     "jest": "^29.2.0",
     "json-schema-to-typescript": "^8.0.0",
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.2"
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

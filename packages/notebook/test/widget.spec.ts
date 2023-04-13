@@ -1414,18 +1414,14 @@ describe('@jupyter/notebook', () => {
         const child = widget.widgets[0];
         await framePromise();
         Widget.detach(widget);
-        expect(widget.methods).toEqual(
-          expect.arrayContaining(['onBeforeDetach'])
-        );
+        expect(widget.methods).toContain('onBeforeDetach');
         widget.events = [];
         simulate(widget.node, 'mousedown');
-        expect(widget.events).toEqual(
-          expect.not.arrayContaining(['mousedown'])
-        );
+        expect(widget.events).not.toContain('mousedown');
         simulate(widget.node, 'dblclick');
-        expect(widget.events).toEqual(expect.not.arrayContaining(['dblclick']));
+        expect(widget.events).not.toContain('dblclick');
         simulate(child.node, 'focusin');
-        expect(widget.events).toEqual(expect.not.arrayContaining(['focusin']));
+        expect(widget.events).not.toContain('focusin');
         widget.dispose();
       });
     });

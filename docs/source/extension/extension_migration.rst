@@ -56,7 +56,37 @@ For more details about the new file structure and packaging of the extension, ch
 jlpm
 ^^^^
 
-The utility ``jlpm`` is using yarn 3 (it was yarn 1 previously).
+The utility ``jlpm`` uses Yarn 3 (previously Yarn 1). This will require updating your
+package configuration.
+
+- Create a file ``.yarnrc.yml`` containing:
+
+.. code-block:: yaml
+
+   enableImmutableInstalls: false
+   nodeLinker: node-modules
+
+- Add to ``.gitignore``
+
+.. code-block::
+
+   .yarn/
+
+- Run ``jlpm install``
+  This will reset your ``yarn.lock`` content as its format has changed.
+
+.. note::
+
+   You can find more information on upgrading Yarn from version 1 to version 3 in
+   [Yarn documentation](https://yarnpkg.com/getting-started/migration).
+
+If you are hit by multiple versions of the same packages (like ``@lumino/widgets``),
+TypeScript may complain that the types are not matching. One possible solution
+is to force packages deduplication using:
+
+.. code-block:: sh
+
+   jlpm dedupe --strategy highest
 
 API breaking changes
 ^^^^^^^^^^^^^^^^^^^^

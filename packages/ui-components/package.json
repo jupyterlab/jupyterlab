@@ -36,8 +36,8 @@
     "docs:init": "bash docs/build.sh",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -69,7 +69,7 @@
     "rimraf": "~3.0.0",
     "svgo": "^3.0.1",
     "typedoc": "~0.23.25",
-    "typescript": "~5.0.2"
+    "typescript": "~5.0.4"
   },
   "peerDependencies": {
     "react": "^18.2.0"

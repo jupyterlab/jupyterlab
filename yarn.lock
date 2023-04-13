@@ -2024,7 +2024,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2135,7 +2135,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2168,7 +2168,7 @@ __metadata:
     react-toastify: ^9.0.8
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2203,7 +2203,7 @@ __metadata:
     rimraf: ~3.0.0
     sanitize-html: ~2.7.3
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2219,7 +2219,7 @@ __metadata:
     "@lumino/signaling": ^2.0.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2259,7 +2259,7 @@ __metadata:
     style-loader: ~3.3.1
     supports-color: ^7.2.0
     terser-webpack-plugin: ^5.3.7
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
     webpack-merge: ^5.8.0
@@ -2294,7 +2294,7 @@ __metadata:
     rimraf: ~3.0.0
     semver: ^7.3.2
     sort-package-json: ~1.53.1
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     verdaccio: ^5.20.1
   bin:
     get-dependency: ./lib/get-dependency.js
@@ -2315,7 +2315,7 @@ __metadata:
     "@jupyterlab/settingregistry": ^4.0.0-beta.1
     "@jupyterlab/translation": ^4.0.0-beta.1
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2339,7 +2339,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2381,7 +2381,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2397,7 +2397,7 @@ __metadata:
     "@rjsf/utils": ^5.1.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2425,7 +2425,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2449,7 +2449,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2495,7 +2495,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     yjs: ^13.5.40
   languageName: unknown
   linkType: soft
@@ -2513,7 +2513,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2541,7 +2541,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2568,7 +2568,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2601,7 +2601,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2623,9 +2623,9 @@ __metadata:
     minimist: ~1.2.0
     path-browserify: ^1.0.0
     rimraf: ~3.0.0
-    ts-jest: ^29.0.0
+    ts-jest: ^29.1.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     url-parse: ~1.5.4
   languageName: unknown
   linkType: soft
@@ -2647,7 +2647,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2672,7 +2672,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2700,7 +2700,7 @@ __metadata:
     "@types/react-dom": ^18.0.9
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2743,7 +2743,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2770,7 +2770,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2798,7 +2798,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2828,7 +2828,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2843,7 +2843,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.1
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2865,7 +2865,7 @@ __metadata:
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -2943,7 +2943,7 @@ __metadata:
     mini-svg-data-uri: ^1.4.4
     rimraf: ~3.0.0
     style-loader: ~3.3.1
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
     whatwg-fetch: ^3.0.0
@@ -2969,7 +2969,7 @@ __metadata:
     mini-css-extract-plugin: ^2.7.0
     rimraf: ~3.0.0
     style-loader: ~3.3.1
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
     whatwg-fetch: ^3.0.0
@@ -3090,7 +3090,7 @@ __metadata:
     mini-svg-data-uri: ^1.4.4
     rimraf: ~3.0.0
     style-loader: ~3.3.1
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
     whatwg-fetch: ^3.0.0
@@ -3123,7 +3123,7 @@ __metadata:
     mini-svg-data-uri: ^1.4.4
     rimraf: ~3.0.0
     style-loader: ~3.3.1
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
     whatwg-fetch: ^3.0.0
@@ -3138,7 +3138,7 @@ __metadata:
     "@jupyterlab/services": ^7.0.0-beta.1
     "@lumino/coreutils": ^2.0.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
   languageName: unknown
@@ -3155,7 +3155,7 @@ __metadata:
     css-loader: ^6.7.1
     rimraf: ~3.0.0
     style-loader: ~3.3.1
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
   languageName: unknown
@@ -3177,7 +3177,7 @@ __metadata:
     mini-svg-data-uri: ^1.4.4
     rimraf: ~3.0.0
     style-loader: ~3.3.1
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
   languageName: unknown
@@ -3198,7 +3198,7 @@ __metadata:
     mini-svg-data-uri: ^1.4.4
     rimraf: ~3.0.0
     style-loader: ~3.3.1
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
     whatwg-fetch: ^3.0.0
@@ -3217,7 +3217,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.0.0-beta.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3242,7 +3242,7 @@ __metadata:
     rimraf: ~3.0.0
     semver: ^7.3.2
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3267,7 +3267,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3300,7 +3300,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3338,7 +3338,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3368,7 +3368,7 @@ __metadata:
     regexp-match-indices: ^1.0.2
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3388,7 +3388,7 @@ __metadata:
     "@lumino/coreutils": ^2.0.0
     "@lumino/signaling": ^2.0.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3412,7 +3412,7 @@ __metadata:
     path: ~0.12.7
     rimraf: ~3.0.0
     systeminformation: ^5.8.6
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     vega: ^5.20.0
     vega-lite: ^5.6.1
     vega-statistics: ^1.7.9
@@ -3437,7 +3437,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3454,7 +3454,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.1
     "@jupyterlab/ui-components": ^4.0.0-beta.1
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3472,7 +3472,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     react: ^18.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3486,7 +3486,7 @@ __metadata:
     "@jupyterlab/services": ^7.0.0-beta.1
     "@jupyterlab/translation": ^4.0.0-beta.1
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3501,7 +3501,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3520,7 +3520,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3538,7 +3538,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.0.0-beta.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3563,7 +3563,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3575,7 +3575,7 @@ __metadata:
     "@jupyterlab/rendermime-interfaces": ^3.8.0-beta.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3602,7 +3602,7 @@ __metadata:
     rimraf: ~3.0.0
     style-mod: ^4.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3621,7 +3621,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3642,7 +3642,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3665,7 +3665,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     react: ^18.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3688,7 +3688,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3708,7 +3708,7 @@ __metadata:
     "@rjsf/utils": ^5.1.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3732,7 +3732,7 @@ __metadata:
     json-schema-to-typescript: ^8.0.0
     lodash.mergewith: ^4.6.1
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     vscode-jsonrpc: ^6.0.0
     vscode-languageserver-protocol: ^3.17.0
     vscode-ws-jsonrpc: ~1.0.2
@@ -3757,7 +3757,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3777,7 +3777,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3795,7 +3795,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3815,7 +3815,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3830,7 +3830,7 @@ __metadata:
     marked: ^4.0.17
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3843,7 +3843,7 @@ __metadata:
     mathjax-full: ^3.2.2
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3859,7 +3859,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.0.0-beta.1
     "@lumino/coreutils": ^2.0.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3886,7 +3886,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -3991,7 +3991,7 @@ __metadata:
     json-to-html: ~0.1.2
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4059,7 +4059,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4108,7 +4108,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4149,7 +4149,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4167,7 +4167,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4194,7 +4194,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4208,7 +4208,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4226,7 +4226,7 @@ __metadata:
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4241,7 +4241,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4253,7 +4253,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4280,7 +4280,7 @@ __metadata:
     lodash.escape: ^4.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4324,7 +4324,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4343,7 +4343,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4367,7 +4367,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
     ws: ^8.11.0
@@ -4390,7 +4390,7 @@ __metadata:
     "@lumino/disposable": ^2.0.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4423,7 +4423,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4444,7 +4444,7 @@ __metadata:
     jest: ^29.2.0
     json5: ^2.2.3
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   peerDependencies:
     react: ">=16"
   languageName: unknown
@@ -4470,7 +4470,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4488,7 +4488,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4505,7 +4505,7 @@ __metadata:
     "@types/react-dom": ^18.0.9
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4525,7 +4525,7 @@ __metadata:
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4536,7 +4536,7 @@ __metadata:
     "@jupyterlab/testing": ^4.0.0-beta.1
     "@types/jest": ^29.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4558,7 +4558,7 @@ __metadata:
     "@types/webpack-env": ^1.18.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4579,7 +4579,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     xterm: ~5.1.0
     xterm-addon-canvas: ~0.3.0
     xterm-addon-fit: ~0.7.0
@@ -4610,8 +4610,8 @@ __metadata:
     node-fetch: ^2.6.0
     rimraf: ~3.0.0
     simulate-event: ~1.4.0
-    ts-jest: ^29.0.0
-    typescript: ~5.0.2
+    ts-jest: ^29.1.0
+    typescript: ~5.0.4
   peerDependencies:
     typescript: ">=4.3"
   languageName: unknown
@@ -4627,7 +4627,7 @@ __metadata:
     "@jupyterlab/rendermime": ^4.0.0-beta.1
     "@jupyterlab/testing": ^4.0.0-beta.1
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4640,7 +4640,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4653,7 +4653,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-beta.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4668,7 +4668,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.0.0-beta.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4695,7 +4695,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4718,7 +4718,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4735,7 +4735,7 @@ __metadata:
     "@lumino/widgets": ^2.0.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4749,7 +4749,7 @@ __metadata:
     "@jupyterlab/settingregistry": ^4.0.0-beta.1
     "@jupyterlab/translation": ^4.0.0-beta.1
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4766,7 +4766,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4778,7 +4778,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.0.0-beta.1
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
   languageName: unknown
   linkType: soft
 
@@ -4811,7 +4811,7 @@ __metadata:
     rimraf: ~3.0.0
     svgo: ^3.0.1
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     typestyle: ^2.0.4
   peerDependencies:
     react: ^18.2.0
@@ -4831,7 +4831,7 @@ __metadata:
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.23.25
-    typescript: ~5.0.2
+    typescript: ~5.0.4
     vega: ^5.20.0
     vega-embed: ^6.2.1
     vega-lite: ^5.6.1-next.1
@@ -18270,9 +18270,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-jest@npm:^29.0.0":
-  version: 29.0.5
-  resolution: "ts-jest@npm:29.0.5"
+"ts-jest@npm:^29.1.0":
+  version: 29.1.0
+  resolution: "ts-jest@npm:29.1.0"
   dependencies:
     bs-logger: 0.x
     fast-json-stable-stringify: 2.x
@@ -18287,7 +18287,7 @@ __metadata:
     "@jest/types": ^29.0.0
     babel-jest: ^29.0.0
     jest: ^29.0.0
-    typescript: ">=4.3"
+    typescript: ">=4.3 <6"
   peerDependenciesMeta:
     "@babel/core":
       optional: true
@@ -18299,7 +18299,7 @@ __metadata:
       optional: true
   bin:
     ts-jest: cli.js
-  checksum: f60f129c2287f4c963d9ee2677132496c5c5a5d39c27ad234199a1140c26318a7d5bda34890ab0e30636ec42a8de28f84487c09e9dcec639c9c67812b3a38373
+  checksum: 535dc42ad523cbe1e387701fb2e448518419b515c082f09b25411f0b3dd0b854cf3e8141c316d6f4b99883aeb4a4f94159cbb1edfb06d7f77ea6229fadb2e1bf
   languageName: node
   linkType: hard
 
@@ -18511,13 +18511,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:~5.0.2":
-  version: 5.0.2
-  resolution: "typescript@npm:5.0.2"
+"typescript@npm:~5.0.4":
+  version: 5.0.4
+  resolution: "typescript@npm:5.0.4"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: bef1dcd166acfc6934b2ec4d72f93edb8961a5fab36b8dd2aaf6f4f4cd5c0210f2e0850aef4724f3b4913d5aef203a94a28ded731b370880c8bcff7e4ff91fc1
+  checksum: 82b94da3f4604a8946da585f7d6c3025fff8410779e5bde2855ab130d05e4fd08938b9e593b6ebed165bda6ad9292b230984f10952cf82f0a0ca07bbeaa08172
   languageName: node
   linkType: hard
 
@@ -18531,13 +18531,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@~5.0.2#~builtin<compat/typescript>":
-  version: 5.0.2
-  resolution: "typescript@patch:typescript@npm%3A5.0.2#~builtin<compat/typescript>::version=5.0.2&hash=1f5320"
+"typescript@patch:typescript@~5.0.4#~builtin<compat/typescript>":
+  version: 5.0.4
+  resolution: "typescript@patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=85af82"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: bdbf3d0aac0d6cf010fbe0536753dc19f278eb4aba88140dcd25487dfe1c56ca8b33abc0dcd42078790a939b08ebc4046f3e9bb961d77d3d2c3cfa9829da4d53
+  checksum: bb309d320c59a26565fb3793dba550576ab861018ff3fd1b7fccabbe46ae4a35546bc45f342c0a0b6f265c801ccdf64ffd68f548f117ceb7f0eac4b805cd52a9
   languageName: node
   linkType: hard
 

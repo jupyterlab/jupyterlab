@@ -34,6 +34,7 @@ import { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
+import { NotebookFooter } from './notebookfooter';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -1203,6 +1204,7 @@ export class Notebook extends StaticNotebook {
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.selectionChanged.connect(this._updateSelectedCells, this);
+    this.addFooter();
   }
 
   /**
@@ -1210,6 +1212,14 @@ export class Notebook extends StaticNotebook {
    */
   get selectedCells(): Cell[] {
     return this._selectedCells;
+  }
+
+  /**
+   * Adds a footer to the notebook.
+   */
+  protected addFooter(): void {
+    const info = new NotebookFooter(this);
+    (this.layout as NotebookWindowedLayout).footer = info;
   }
 
   /**
