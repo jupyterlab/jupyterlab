@@ -303,6 +303,25 @@ export function createToolbarFactory(
       }
     };
 
+    const updateWidget = (
+      registry: IToolbarWidgetRegistry,
+      itemName: string
+    ) => {
+      const itemIndex = Array.from(items).findIndex(
+        item => item.name === itemName
+      );
+      if (itemIndex >= -1) {
+        toolbar.set(itemIndex, {
+          name: itemName,
+          widget: toolbarRegistry.createWidget(
+            factoryName,
+            widget,
+            items.get(itemIndex)
+          )
+        });
+      }
+    };
+
     const toolbar = new ObservableList<ToolbarRegistry.IToolbarItem>({
       values: Array.from(items).map(item => {
         return {
@@ -313,24 +332,13 @@ export function createToolbarFactory(
     });
 
     // Re-render the widget if a new factory has been added.
-    toolbarRegistry.factoryAdded.connect((_, itemName) => {
-      for (let i = 0; i < items.length; i++) {
-        if (items.get(i).name === itemName) {
-          toolbar.set(i, {
-            name: itemName,
-            widget: toolbarRegistry.createWidget(
-              factoryName,
-              widget,
-              items.get(i)
-            )
-          });
-        }
-      }
-    });
+    toolbarRegistry.factoryAdded.connect(updateWidget);
 
     items.changed.connect(updateToolbar);
+
     widget.disposed.connect(() => {
       items.changed.disconnect(updateToolbar);
+      toolbarRegistry.factoryAdded.disconnect(updateWidget);
     });
 
     return toolbar;
