@@ -174,7 +174,7 @@ on the command line. You can enable it again by running:
 Trust
 ^^^^^
 
-JavaScript and HTML in notebooks created on other machines is not trusted,
+JavaScript and HTML in notebooks created on other machines are not trusted,
 which results in sanitization of HTML and interactive outputs not being
 displayed until the notebook is explicitly trusted.
 

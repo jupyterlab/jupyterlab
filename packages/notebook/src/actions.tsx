@@ -2505,7 +2505,7 @@ namespace Private {
             // After change of type outputs are deleted so cell can be trusted.
             raw.metadata.trusted = true;
           } else {
-            // Otherwsie clear the metadata as trusted is only "valid" on code
+            // Otherwise clear the metadata as trusted is only "valid" on code
             // cells (since other cell types cannot have outputs).
             raw.metadata.trusted = undefined;
           }
