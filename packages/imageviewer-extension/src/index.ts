@@ -179,7 +179,7 @@ function activate(
 /**
  * Add the commands for the image widget.
  */
-export function addCommands(
+function addCommands(
   app: JupyterFrontEnd,
   tracker: IImageTracker,
   translator: ITranslator

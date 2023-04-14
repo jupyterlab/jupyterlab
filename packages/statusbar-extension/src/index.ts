@@ -15,7 +15,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, StatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
 
-export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
+const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 
 /**
  * Initialization data for the statusbar extension.
