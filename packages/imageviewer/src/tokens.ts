@@ -19,5 +19,8 @@ export interface IImageTracker
  * The image tracker token.
  */
 export const IImageTracker = new Token<IImageTracker>(
-  '@jupyterlab/imageviewer:IImageTracker'
+  '@jupyterlab/imageviewer:IImageTracker',
+  `A widget tracker for images.
+  Use this if you want to be able to iterate over and interact with images
+  viewed by the application.`
 );

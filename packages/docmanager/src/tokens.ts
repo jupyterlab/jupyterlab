@@ -13,14 +13,18 @@ import { Widget } from '@lumino/widgets';
  * The document registry token.
  */
 export const IDocumentManager = new Token<IDocumentManager>(
-  '@jupyterlab/docmanager:IDocumentManager'
+  '@jupyterlab/docmanager:IDocumentManager',
+  `A service for the manager for all
+  documents used by the application. Use this if you want to open and close documents,
+  create and delete files, and otherwise interact with the file system.`
 );
 
 /**
  * The document widget opener token.
  */
 export const IDocumentWidgetOpener = new Token<IDocumentWidgetOpener>(
-  '@jupyterlab/docmanager:IDocumentWidgetOpener'
+  '@jupyterlab/docmanager:IDocumentWidgetOpener',
+  `A service to open a widget.`
 );
 
 /**

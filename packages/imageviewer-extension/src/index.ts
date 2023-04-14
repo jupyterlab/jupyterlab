@@ -70,6 +70,7 @@ const TEXT_FILE_REGEX = new RegExp(`[.](${TEXT_FILE_TYPES.join('|')})$`);
  */
 const plugin: JupyterFrontEndPlugin<IImageTracker> = {
   activate,
+  description: 'Adds image viewer and provide its tracker.',
   id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,
   requires: [ITranslator],

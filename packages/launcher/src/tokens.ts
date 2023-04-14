@@ -13,7 +13,11 @@ import { Widget } from '@lumino/widgets';
 /**
  * The launcher token.
  */
-export const ILauncher = new Token<ILauncher>('@jupyterlab/launcher:ILauncher');
+export const ILauncher = new Token<ILauncher>(
+  '@jupyterlab/launcher:ILauncher',
+  `A service for the application activity launcher.
+  Use this to add your extension activities to the launcher panel.`
+);
 
 /**
  * The launcher interface.

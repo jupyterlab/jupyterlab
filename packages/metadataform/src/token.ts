@@ -213,8 +213,9 @@ export interface IMetadataFormProvider {
 }
 
 /**
- * The property inspector provider token.
+ * The metadata form provider token.
  */
 export const IMetadataFormProvider = new Token<IMetadataFormProvider>(
-  '@jupyterlab/metadataform:IMetadataFormProvider'
+  '@jupyterlab/metadataform:IMetadataFormProvider',
+  `A service to register new metadata editor widgets.`
 );

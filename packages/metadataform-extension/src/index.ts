@@ -270,6 +270,7 @@ namespace Private {
  */
 const metadataForm: JupyterFrontEndPlugin<IMetadataFormProvider> = {
   id: PLUGIN_ID,
+  description: 'Provides the metadata form registry.',
   autoStart: true,
   requires: [
     INotebookTools,

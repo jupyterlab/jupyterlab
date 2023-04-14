@@ -314,6 +314,7 @@ async function activateTOC(
  */
 const registry: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
   id: '@jupyterlab/toc-extension:registry',
+  description: 'Provides the table of contents registry.',
   autoStart: true,
   provides: ITableOfContentsRegistry,
   activate: (): ITableOfContentsRegistry => {
@@ -327,6 +328,7 @@ const registry: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
  */
 const tracker: JupyterFrontEndPlugin<ITableOfContentsTracker> = {
   id: '@jupyterlab/toc-extension:tracker',
+  description: 'Adds the table of content widget and provides its tracker.',
   autoStart: true,
   provides: ITableOfContentsTracker,
   requires: [ITableOfContentsRegistry],

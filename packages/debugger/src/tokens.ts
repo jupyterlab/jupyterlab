@@ -1040,32 +1040,39 @@ export namespace IDebugger {
 /**
  * The visual debugger token.
  */
-export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger:IDebugger');
+export const IDebugger = new Token<IDebugger>(
+  '@jupyterlab/debugger:IDebugger',
+  'A debugger user interface.'
+);
 
 /**
  * The debugger configuration token.
  */
 export const IDebuggerConfig = new Token<IDebugger.IConfig>(
-  '@jupyterlab/debugger:IDebuggerConfig'
+  '@jupyterlab/debugger:IDebuggerConfig',
+  'A service to handle the debugger configuration.'
 );
 
 /**
  * The debugger sources utility token.
  */
 export const IDebuggerSources = new Token<IDebugger.ISources>(
-  '@jupyterlab/debugger:IDebuggerSources'
+  '@jupyterlab/debugger:IDebuggerSources',
+  'A service to display sources in debug mode.'
 );
 
 /**
- * The debugger configuration token.
+ * The debugger sidebar token.
  */
 export const IDebuggerSidebar = new Token<IDebugger.ISidebar>(
-  '@jupyterlab/debugger:IDebuggerSidebar'
+  '@jupyterlab/debugger:IDebuggerSidebar',
+  'A service for the debugger sidebar.'
 );
 
 /**
  * The debugger handler token.
  */
 export const IDebuggerHandler = new Token<IDebugger.IHandler>(
-  '@jupyterlab/debugger:IDebuggerHandler'
+  '@jupyterlab/debugger:IDebuggerHandler',
+  'A service for handling notebook debugger.'
 );

@@ -17,6 +17,7 @@ import { ITranslator } from '@jupyterlab/translation';
  */
 const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/theme-dark-extension:plugin',
+  description: 'Adds a dark theme.',
   requires: [IThemeManager, ITranslator],
   activate: (
     app: JupyterFrontEnd,

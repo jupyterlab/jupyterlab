@@ -36,6 +36,7 @@ const ICON_NAME = 'jp-JupyterIcon';
  */
 export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:workspaces',
+  description: 'Add workspace file type and commands.',
   autoStart: true,
   requires: [
     IDefaultFileBrowser,

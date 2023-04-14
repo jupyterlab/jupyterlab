@@ -132,6 +132,7 @@ export namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   id: PLUGIN_ID,
+  description: 'Adds and provides the application main menu.',
   requires: [IRouter, ITranslator],
   optional: [ICommandPalette, ILabShell, ISettingRegistry],
   provides: IMainMenu,

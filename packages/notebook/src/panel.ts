@@ -309,6 +309,8 @@ export namespace NotebookPanel {
    * The notebook renderer token.
    */
   export const IContentFactory = new Token<IContentFactory>(
-    '@jupyterlab/notebook:IContentFactory'
+    '@jupyterlab/notebook:IContentFactory',
+    `A factory object that creates new notebooks.
+    Use this if you want to create and host notebooks in your own UI elements.`
   );
 }
