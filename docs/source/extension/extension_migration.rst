@@ -363,7 +363,7 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/translation`` from 3.x to 4.x
   Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
 - ``@jupyterlab/vdom`` and ``@jupyterlab/vdom-extension`` have been removed.
-  The underlying `vdom https://github.com/nteract/vdom`_ Python package is unmaintained.
+  The underlying `vdom <https://github.com/nteract/vdom>`_ Python package is unmaintained.
   So it was decided to drop it from core packages.
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
