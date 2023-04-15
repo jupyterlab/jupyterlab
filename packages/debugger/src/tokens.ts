@@ -119,6 +119,14 @@ export interface IDebugger {
   ): Promise<DebugProtocol.Variable[]>;
 
   /**
+   * Request to set a variable in the global scope.
+   *
+   * @param name The name of the variable.
+   * @param value The value of the variable.
+   */
+  copyToGlobals(name: string): Promise<void>;
+
+  /**
    * Request rich representation of a variable.
    *
    * @param variableName The variable name to request
@@ -521,6 +529,7 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsArguments;
       configurationDone: DebugProtocol.ConfigurationDoneArguments;
       continue: DebugProtocol.ContinueArguments;
+      copyToGlobals: ICopyToGlobalsArguments;
       debugInfo: Record<string, never>;
       disconnect: DebugProtocol.DisconnectArguments;
       dumpCell: IDumpCellArguments;
@@ -565,6 +574,7 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsResponse;
       configurationDone: DebugProtocol.ConfigurationDoneResponse;
       continue: DebugProtocol.ContinueResponse;
+      copyToGlobals: DebugProtocol.SetExpressionResponse;
       debugInfo: IDebugInfoResponse;
       disconnect: DebugProtocol.DisconnectResponse;
       dumpCell: IDumpCellResponse;
@@ -602,6 +612,17 @@ export namespace IDebugger {
     };
 
     /**
+     * Arguments for CopyToGlobals request.
+     * This is an addition to the Debug Adaptor protocol to support
+     * copying variable from Locals() to Globals() during breakpoint.
+     */
+    export interface ICopyToGlobalsArguments {
+      srcVariableName: string;
+      dstVariableName: string;
+      srcFrameId: number;
+    }
+
+    /**
      * List of breakpoints in a source file.
      */
     export interface IDebugInfoBreakpoints {
@@ -617,6 +638,10 @@ export namespace IDebugger {
     export interface IDebugInfoResponse extends DebugProtocol.Response {
       body: {
         breakpoints: IDebugInfoBreakpoints[];
+        /**
+         * Whether the kernel supports the 'copyToGlobals' request.
+         */
+        copyToGlobals?: boolean;
         hashMethod: string;
         hashSeed: number;
         isStarted: boolean;
@@ -886,6 +911,11 @@ export namespace IDebugger {
        * Whether the kernel support rich variable rendering based on mime type.
        */
       hasRichVariableRendering: boolean;
+
+      /**
+       * Whether the kernel supports the copyToGlobals request.
+       */
+      supportCopyToGlobals: boolean;
 
       /**
        * The variables UI model.

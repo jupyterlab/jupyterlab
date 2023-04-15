@@ -75,6 +75,16 @@ export class DebuggerModel implements IDebugger.Model.IService {
   }
 
   /**
+   * Whether the kernel supports the copyToGlobals request.
+   */
+  get supportCopyToGlobals(): boolean {
+    return this._supportCopyToGlobals;
+  }
+  set supportCopyToGlobals(v: boolean) {
+    this._supportCopyToGlobals = v;
+  }
+
+  /**
    * Whether the model is disposed.
    */
   get isDisposed(): boolean {
@@ -149,6 +159,7 @@ export class DebuggerModel implements IDebugger.Model.IService {
   private _disposed = new Signal<this, void>(this);
   private _isDisposed = false;
   private _hasRichVariableRendering = false;
+  private _supportCopyToGlobals = false;
   private _stoppedThreads = new Set<number>();
   private _title = '-';
   private _titleChanged = new Signal<this, string>(this);

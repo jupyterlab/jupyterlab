@@ -123,6 +123,8 @@ export namespace Debugger {
     export const pauseOnExceptions = 'debugger:pause-on-exceptions';
 
     export const copyToClipboard = 'debugger:copy-to-clipboard';
+
+    export const copyToGlobals = 'debugger:copy-to-globals';
   }
 
   /**
