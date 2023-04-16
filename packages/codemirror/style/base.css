@@ -63,20 +63,19 @@
   color: var(--jp-search-unselected-match-color);
 }
 
-.cm-content .cm-searching::selection,
-.cm-content .cm-searching span::selection {
+.cm-searching::selection {
   background-color: var(--jp-search-unselected-match-background-color);
   color: var(--jp-search-unselected-match-color);
 }
 
-.jp-current-match .cm-searching,
-.jp-current-match .cm-searching span {
+.jp-current-match > .cm-searching,
+.cm-searching > .jp-current-match {
   background-color: var(--jp-search-selected-match-background-color);
   color: var(--jp-search-selected-match-color);
 }
 
-.cm-content .jp-current-match .cm-searching::selection,
-.cm-content .jp-current-match .cm-searching span::selection {
+.jp-current-match > .cm-searching::selection,
+.cm-searching > .jp-current-match::selection {
   background-color: var(--jp-search-selected-match-background-color);
   color: var(--jp-search-selected-match-color);
 }

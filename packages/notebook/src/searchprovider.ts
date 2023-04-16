@@ -698,7 +698,23 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         // Clear highlight from previous provider
         await this.clearHighlight();
       }
-      this._currentProviderIndex = this.widget.content.activeCellIndex;
+      if (this._onSelection && !previousProviderInCurrentSelection) {
+        // If we are searching in all cells, we should not change the active
+        // provider when switching active cell to preserve current match;
+        // if we are searching within selected cells we should update
+        this._currentProviderIndex = this.widget.content.activeCellIndex;
+      }
+      /// If there is no current match, but there are results,
+      //  select a match as current
+      if (this._currentProviderIndex === null) {
+        this._currentProviderIndex = this.widget.content.activeCellIndex;
+        const searchEngine = this._searchProviders[this._currentProviderIndex];
+        const currentMatch = searchEngine.getCurrentMatch();
+        if (!currentMatch && this.matchesCount) {
+          // Select a match as current by highlighting next with looping
+          await this.highlightNext(true);
+        }
+      }
     }
     this._observeActiveCell();
     this._activeCellChangedFinished.resolve();

@@ -32,7 +32,12 @@
 
 import { ISearchMatch } from '@jupyterlab/documentsearch';
 import { CodeMirrorEditor } from './editor';
-import { StateEffect, StateEffectType, StateField } from '@codemirror/state';
+import {
+  Extension,
+  StateEffect,
+  StateEffectType,
+  StateField
+} from '@codemirror/state';
 import { Decoration, DecorationSet, EditorView } from '@codemirror/view';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
@@ -495,6 +500,8 @@ export class CodeMirrorSearchHighlighter {
           if (ef.is(this._highlightEffect)) {
             const e = ef as StateEffect<IEffectValue>;
             if (e.value.matches.length) {
+              // Note: nesting will vary; sometimes `.cm-searching` will be
+              // inside `.jp-current-match`, sometime the other way round.
               highlights = highlights.update({
                 add: e.value.matches.map(m =>
                   this._highlightMark.range(
@@ -524,6 +531,13 @@ export class CodeMirrorSearchHighlighter {
         return highlights;
       },
       provide: f => EditorView.decorations.from(f)
+    });
+
+    this._domEventHandlers = EditorView.domEventHandlers({
+      focus: () => {
+        // Set cursor on active match when editor gets focused.
+        this._selectCurrentMatch();
+      }
     });
   }
 
@@ -623,6 +637,9 @@ export class CodeMirrorSearchHighlighter {
       if (this._currentIndex !== null) {
         this._highlightCurrentMatch();
       }
+      this._cm.editor.dispatch({
+        effects: StateEffect.appendConfig.of(this._domEventHandlers)
+      });
       this._refresh();
     }
   }
@@ -640,6 +657,10 @@ export class CodeMirrorSearchHighlighter {
       selection.from === match.position &&
       selection.to === match.position + match.text.length
     ) {
+      // selection is already set - onyl scroll
+      this._cm.editor.dispatch({
+        scrollIntoView: true
+      });
       return;
     }
     const cursor = {
@@ -657,7 +678,6 @@ export class CodeMirrorSearchHighlighter {
       // no-op
       return;
     }
-
     // Highlight the current index
     if (this._currentIndex !== null) {
       const match = this.matches[this._currentIndex];
@@ -694,14 +714,8 @@ export class CodeMirrorSearchHighlighter {
 
     if (!this._cm!.state.field(this._highlightField, false)) {
       effects.push(StateEffect.appendConfig.of([this._highlightField]));
-      // set cursor on active match when editor gets focused
-      const focusExtension = EditorView.domEventHandlers({
-        focus: () => {
-          this._selectCurrentMatch();
-        }
-      });
-      effects.push(StateEffect.appendConfig.of([focusExtension]));
     }
+    // TODO: CM6 issue makes this focus editor
     this._cm!.editor.dispatch({ effects });
   }
 
@@ -757,6 +771,7 @@ export class CodeMirrorSearchHighlighter {
   private _highlightMark: Decoration;
   private _currentMark: Decoration;
   private _highlightField: StateField<DecorationSet>;
+  private _domEventHandlers: Extension;
 }
 
 /**
