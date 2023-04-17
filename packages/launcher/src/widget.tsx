@@ -170,17 +170,13 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              <div className="jp-Labicon-section" aria-hidden={true}>
-                <LabIcon.resolveReact
-                  icon={icon}
-                  iconClass={classes(iconClass, 'jp-Icon-cover')}
-                  stylesheet="launcherSection"
-                  title={cat + ' icon'}
-                />{' '}
-              </div>
-              <h2 className="jp-Launcher-sectionTitle" title={cat + ' title'}>
-                {cat}
-              </h2>
+              <LabIcon.resolveReact
+                icon={icon}
+                iconClass={classes(iconClass, 'jp-Icon-cover')}
+                stylesheet="launcherSection"
+                title={this._trans.__('%s icon', cat)}
+              />{' '}
+              <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
             <div className="jp-Launcher-cardContainer">
               {Array.from(
