@@ -261,13 +261,12 @@ These lines:
     of a package (it will fail on the `jupyter lab build` command because
     webpack cannot find the referenced styles to import.
 - [ ] Update the other repos:
-  - [ ] https://github.com/jupyterlab/extension-cookiecutter-js
-  - [ ] https://github.com/jupyterlab/extension-cookiecutter-ts
-  - [ ] https://github.com/jupyterlab/mimerender-cookiecutter-ts
+  - [ ] https://github.com/jupyterlab/extension-template
   - [ ] https://github.com/jupyterlab/jupyter-renderers
-- [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
+- [ ] Publish a release (with a **updated tag**) to the [extension template](https://github.com/jupyterlab/extension-template/releases) with the new JupyterLab version
 - [ ] Update the extension examples:
   - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
+  - [ ] [Notebook widget](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/extension/notebook.rst#adding-a-widget-to-the-notebook-header)
 - [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 
@@ -311,6 +310,15 @@ git checkout -b BRANCH # whatever the new version is, e.g., 1.0
 git rebase -i --root
 ```
 
+To seed the latest version of the extension template (first commit), you
+can execute (assuming you are editing the first commit):
+
+```sh
+copier copy https://github.com/jupyterlab/extension-template .
+# Fix any conflicts
+git commit --amend '-S'
+```
+
 "Edit" the commits that involve installing packages, so you can update the
 `package.json`. Amend the last commit to bump the version number in package.json
 in preparation for publishing to npm. Then skip down to the step below about
@@ -325,10 +333,7 @@ updating package versions, then do the next steps instead.
 git checkout --orphan name-of-branch
 git rm -rf .
 git clean -dfx
-cookiecutter -o initial path-to-local-extension-cookiecutter-ts
-# Fill in the values from the previous branch package.json initial commit
-cp -r initial/jupyterlab_apod .
-rm -rf initial
+copier https://github.com/jupyterlab/extension-template .
 ```
 
 - Create a new PR in JupyterLab.

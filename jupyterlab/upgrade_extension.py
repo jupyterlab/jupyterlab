@@ -20,13 +20,13 @@ except ImportError:
 from pathlib import Path
 
 try:
-    from cookiecutter.main import cookiecutter
+    import copier
 except ImportError:
-    msg = "Please install cookiecutter"
+    msg = "Please install copier and jinja2-time"
     raise RuntimeError(msg) from None
 
 
-DEFAULT_COOKIECUTTER_BRANCH = "4.0"
+DEFAULT_COPIER_TAG = "v4.0.0"
 
 # List of files recommended to be overridden
 RECOMMENDED_TO_OVERRIDE = [
@@ -59,14 +59,14 @@ JUPYTER_SERVER_REQUIREMENT = re.compile("^jupyter_server([^\\w]|$)")
 
 
 def update_extension(  # noqa
-    target: str, branch: str = DEFAULT_COOKIECUTTER_BRANCH, interactive: bool = True
+    target: str, vcs_ref: str = DEFAULT_COPIER_TAG, interactive: bool = True
 ) -> None:
     """Update an extension to the current JupyterLab
 
     target: str
         Path to the extension directory containing the extension
-    branch: str [default: DEFAULT_COOKIECUTTER_BRANCH]
-        Template branch to checkout
+    vcs_ref: str [default: DEFAULT_COPIER_TAG]
+        Template vcs_ref to checkout
     interactive: bool [default: true]
         Whether to ask before overwriting content
 
@@ -146,7 +146,7 @@ def update_extension(  # noqa
     template = "https://github.com/jupyterlab/extension-cookiecutter-ts"
     cookiecutter(
         template=template,
-        checkout=branch,
+        checkout=vcs_ref,
         output_dir=output_dir,
         extra_context=extra_context,
         no_input=not interactive,
@@ -256,7 +256,7 @@ def update_extension(  # noqa
             try:
                 import tomli_w
             except ImportError:
-                msg = "To update pyproject.toml, you need to install tomli_w"
+                msg = "To update pyproject.toml, you need to install tomli-w"
                 print(msg)
             else:
                 config = configparser.ConfigParser()
@@ -316,9 +316,9 @@ if __name__ == "__main__":
     parser.add_argument("path", action="store", type=str, help="the target path")
 
     parser.add_argument(
-        "--branch", help="the template branch to checkout", default=DEFAULT_COOKIECUTTER_BRANCH
+        "--vcs-ref", help="the template hash to checkout", default=DEFAULT_COPIER_TAG
     )
 
     args = parser.parse_args()
 
-    update_extension(args.path, args.branch, args.no_input is False)
+    update_extension(args.path, args.vcs_ref, args.no_input is False)
