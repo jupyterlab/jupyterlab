@@ -110,6 +110,10 @@ namespace Private {
    * Start the storage event handler.
    */
   function initialize(): void {
+    // This call will fail in non-browser and SSR environments as window is undefined
+    // Adding a guard and early return, impact of early return it that event handlers
+    // are not set but this would not be possible in a non browser environment
+    if (typeof window === 'undefined') return;
     // Listen to all storage events for beacons and window names.
     window.addEventListener('storage', (event: StorageEvent) => {
       const { key, newValue } = event;
