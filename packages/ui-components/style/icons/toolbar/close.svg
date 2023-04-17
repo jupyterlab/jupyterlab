@@ -1,6 +1,6 @@
-<svg aria-labelledby="alt" viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg" >
-<alt id="close icon" lang="en">Close icon</alt>
-<desc id="close icon"> Black x, used to close down tabs </desc>
+<svg viewBox="0 0 24 24" width="16" xmlns="http://www.w3.org/2000/svg" >
+<!-- <alt id="close icon" lang="en">Close icon</alt>
+<desc id="close icon"> Black x, used to close down tabs </desc> -->
   <g class="jp-icon-none jp-icon-selectable-inverse jp-icon3-hover" fill="none">
     <circle cx="12" cy="12" r="11"/>
   </g>
