@@ -154,6 +154,8 @@ const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
+// Use of window at file scope makes it impossible to import this code in a non-browser or SSR environment
+// Adding a guard to skip callback registration in those environments
 if (
   typeof window !== 'undefined' &&
   (window as any).requestIdleCallback === undefined

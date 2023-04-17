@@ -423,8 +423,10 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     this._svgInnerHTML = undefined;
     this._svgReactAttrs = undefined;
 
-    // update icon elements created using .element method
+    // document object is not available in non-browser or SSR environments
+    // adding a guard to skip the reference when in such an environment
     if (typeof document === 'undefined') return;
+    // update icon elements created using .element method
     document
       .querySelectorAll(`[data-icon-id="${uuidOld}"]`)
       .forEach(oldSvgElement => {
