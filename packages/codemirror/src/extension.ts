@@ -16,6 +16,7 @@ import {
   StateEffect
 } from '@codemirror/state';
 import {
+  crosshairCursor,
   drawSelection,
   EditorView,
   highlightActiveLine,
@@ -24,6 +25,7 @@ import {
   KeyBinding,
   keymap,
   lineNumbers,
+  rectangularSelection,
   scrollPastEnd
 } from '@codemirror/view';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -716,6 +718,22 @@ export namespace EditorExtensionRegistry {
         schema: {
           type: 'boolean',
           title: trans.__('Match Brackets')
+        }
+      }),
+      Object.freeze({
+        name: 'rectangularSelection',
+        default: true,
+        factory: () =>
+          createConditionalExtension([
+            rectangularSelection(),
+            crosshairCursor()
+          ]),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Rectangular selection'),
+          description: trans.__(
+            'Rectangular (block) selection can be created by dragging the mouse pointer while holding the left mouse button and the Alt key. When the Alt key is pressed, a crosshair cursor will appear, indicating that the rectangular selection mode is active.'
+          )
         }
       }),
       Object.freeze({
