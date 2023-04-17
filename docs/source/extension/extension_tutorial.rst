@@ -132,7 +132,7 @@ are using to fetch pictures).
      https://github.com/github_username/jupyterlab_apod
 
 .. note::
-  
+
   - If you are not using a repository, leave the repository field blank. You can come back and edit the repository field in the ``package.json`` file later.
   - If you are using the latest version of the template, you will notice that tests are included in the template. If you don't want to include them just answer ``n`` to the test prompt.
 
@@ -141,16 +141,17 @@ List the files.
 
 .. code-block:: shell
 
-    ls
+    ls -a
 
 You should see a list like the following.
 
 .. code-block::
 
-    babel.config.js  jest.config.js   pyproject.toml  src                 ui-tests
-    binder           jupyterlab_apod  README.md       style               yarn.lock
-    CHANGELOG.md     LICENSE          RELEASE.md      tsconfig.json
-    install.json     package.json     setup.py        tsconfig.test.json
+    .copier-answers.yml  .github          .gitignore      .prettierignore     .yarnrc.yml
+    babel.config.js      jest.config.js   pyproject.toml  src                 ui-tests
+    binder               jupyterlab_apod  README.md       style               yarn.lock
+    CHANGELOG.md         LICENSE          RELEASE.md      tsconfig.json
+    install.json         package.json     setup.py        tsconfig.test.json
 
 Commit what you have to git
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -229,7 +230,7 @@ If not, go back make sure you didn't miss a step, and `reach
 out <https://github.com/jupyterlab/jupyterlab/blob/master/README.md#getting-help>`__ if you're stuck.
 
 .. note::
-  
+
    Leave the terminal running the ``jupyter lab`` command open and running
    JupyterLab to see the effects of changes below.
 

@@ -72,7 +72,7 @@ def update_extension(  # noqa
 
     """
     # Input is a directory with a package.json or the current directory
-    # Use the cookiecutter as the source
+    # Use the extension template as the source
     # Pull in the relevant config
     # Pull in the Python parts if possible
     # Pull in the scripts if possible
@@ -109,7 +109,7 @@ def update_extension(  # noqa
     if output_dir.exists():
         shutil.rmtree(output_dir)
 
-    # Build up the cookiecutter args and run the cookiecutter
+    # Build up the template answers and run the template engine
     author = data.get("author", "<author_name>")
     author_email = "<author_email>"
     if isinstance(author, dict):
@@ -137,30 +137,14 @@ def update_extension(  # noqa
         "labextension_name": data["name"],
         "python_name": python_name,
         "project_short_description": data.get("description", "<description>"),
-        "has_settings": "y" if data.get("jupyterlab", {}).get("schemaDir", "") else "n",
-        "has_binder": "y" if (target / "binder").exists() else "n",
-        "test": "y" if has_test else "n",
+        "has_settings": bool(data.get("jupyterlab", {}).get("schemaDir", "")),
+        "has_binder": bool((target / "binder").exists()),
+        "test": bool(has_test),
         "repository": data.get("repository", {}).get("url", "<repository"),
     }
 
-    template = "https://github.com/jupyterlab/extension-cookiecutter-ts"
-    cookiecutter(
-        template=template,
-        checkout=vcs_ref,
-        output_dir=output_dir,
-        extra_context=extra_context,
-        no_input=not interactive,
-    )
-
-    for element in output_dir.glob("*"):
-        python_name = element.name
-        break
-
-    # hoist the output up one level
-    shutil.move(output_dir / python_name, output_dir / "_temp")
-    for filename in (output_dir / "_temp").glob("*"):
-        shutil.move(filename, output_dir / filename.name)
-    shutil.rmtree(output_dir / "_temp")
+    template = "https://github.com/jupyterlab/extension-template"
+    copier.run_auto(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True)
 
     # From the created package.json grab the devDependencies
     with (output_dir / "package.json").open() as fid:
@@ -321,4 +305,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    update_extension(args.path, args.vcs_ref, args.no_input is False)
+    answer_file = Path(args.path) / ".copier-answers.yml"
+
+    if answer_file.exists():
+        print(
+            "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
+        )
+    else:
+        update_extension(args.path, args.vcs_ref, args.no_input is False)
