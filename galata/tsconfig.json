@@ -20,6 +20,9 @@
       "path": "../packages/coreutils"
     },
     {
+      "path": "../packages/debugger"
+    },
+    {
       "path": "../packages/docmanager"
     },
     {

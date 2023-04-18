@@ -65,6 +65,7 @@ namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
   activate,
   id: '@jupyterlab/terminal-extension:plugin',
+  description: 'Adds terminal and provides its tracker.',
   provides: ITerminalTracker,
   requires: [ISettingRegistry, ITranslator],
   optional: [
@@ -329,7 +330,7 @@ function addRunningSessionManager(
 /**
  * Add the commands for the terminal.
  */
-export function addCommands(
+function addCommands(
   app: JupyterFrontEnd,
   tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
   settingRegistry: ISettingRegistry,

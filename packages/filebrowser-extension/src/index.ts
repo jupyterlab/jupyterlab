@@ -154,6 +154,7 @@ const namespace = 'filebrowser';
  */
 const browser: JupyterFrontEndPlugin<void> = {
   id: FILE_BROWSER_PLUGIN_ID,
+  description: 'Set up the default file browser (commands, settings,...).',
   requires: [IDefaultFileBrowser, IFileBrowserFactory, ITranslator],
   optional: [
     ILayoutRestorer,
@@ -251,6 +252,7 @@ const browser: JupyterFrontEndPlugin<void> = {
  */
 const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   id: '@jupyterlab/filebrowser-extension:factory',
+  description: 'Provides the file browser factory.',
   provides: IFileBrowserFactory,
   requires: [IDocumentManager, ITranslator],
   optional: [IStateDB, JupyterLab.IInfo],
@@ -301,6 +303,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
  */
 const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   id: '@jupyterlab/filebrowser-extension:default-file-browser',
+  description: 'Provides the default file browser',
   provides: IDefaultFileBrowser,
   requires: [IFileBrowserFactory],
   optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
@@ -339,6 +342,8 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
  */
 const downloadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:download',
+  description:
+    'Adds the download file commands. Disabling this plugin will NOT disable downloading files from the server, if the user enters the appropriate download URLs.',
   requires: [IFileBrowserFactory, ITranslator],
   autoStart: true,
   activate: (
@@ -392,6 +397,7 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
  */
 const browserWidget: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:widget',
+  description: 'Adds the file browser to the application shell.',
   requires: [
     IDocumentManager,
     IDefaultFileBrowser,
@@ -605,6 +611,8 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
  */
 const shareFile: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:share-file',
+  description:
+    'Adds the "Copy Shareable Link" command; useful for JupyterHub deployment for example.',
   requires: [IFileBrowserFactory, ITranslator],
   autoStart: true,
   activate: (
@@ -649,6 +657,8 @@ const shareFile: JupyterFrontEndPlugin<void> = {
  */
 const openWithPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:open-with',
+  description:
+    'Adds the open-with feature allowing an user to pick the non-preferred document viewer.',
   requires: [IFileBrowserFactory],
   autoStart: true,
   activate: (app: JupyterFrontEnd, factory: IFileBrowserFactory): void => {
@@ -709,6 +719,7 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
  */
 const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:open-browser-tab',
+  description: 'Adds the open-in-new-browser-tab features.',
   requires: [IFileBrowserFactory, ITranslator],
   autoStart: true,
   activate: (
@@ -769,6 +780,7 @@ const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
  */
 export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:file-upload-status',
+  description: 'Adds a file upload status widget.',
   autoStart: true,
   requires: [IFileBrowserFactory, ITranslator],
   optional: [IStatusBar],
@@ -806,6 +818,7 @@ export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
  */
 const openUrlPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:open-url',
+  description: 'Adds the feature "Open files from remote URLs".',
   autoStart: true,
   requires: [IDefaultFileBrowser, ITranslator],
   optional: [ICommandPalette],

@@ -47,13 +47,13 @@
     "@jupyterlab/translation": "^4.0.0-beta.1",
     "@jupyterlab/ui-components": "^4.0.0-beta.1",
     "@lumino/algorithm": "^2.0.0",
-    "@lumino/commands": "^2.0.1",
-    "@lumino/coreutils": "^2.0.0",
-    "@lumino/disposable": "^2.0.0",
+    "@lumino/commands": "^2.1.0",
+    "@lumino/coreutils": "^2.1.0",
+    "@lumino/disposable": "^2.1.0",
     "@lumino/messaging": "^2.0.0",
-    "@lumino/polling": "^2.0.0",
-    "@lumino/signaling": "^2.0.0",
-    "@lumino/widgets": "^2.0.1",
+    "@lumino/polling": "^2.1.0",
+    "@lumino/signaling": "^2.1.0",
+    "@lumino/widgets": "^2.1.0",
     "@rjsf/core": "^5.1.0",
     "@rjsf/utils": "^5.1.0",
     "@rjsf/validator-ajv8": "^5.1.0",
@@ -63,8 +63,8 @@
   "devDependencies": {
     "@types/react": "^18.0.26",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
-    "typescript": "~5.0.2"
+    "typedoc": "~0.24.1",
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

@@ -12,13 +12,20 @@ import { requestTranslationsAPI } from './server';
 /*
  * Translation
  */
-type Language = { [key: string]: string };
+export type Language = { [key: string]: string };
 
+/**
+ * Translation connection interface.
+ */
 export interface ITranslatorConnector
   extends IDataConnector<Language, Language, { language: string }> {}
 
+/**
+ * A service to connect to the server translation endpoint
+ */
 export const ITranslatorConnector = new Token<ITranslatorConnector>(
-  '@jupyterlab/translation:ITranslatorConnector'
+  '@jupyterlab/translation:ITranslatorConnector',
+  'A service to connect to the server translation endpoint.'
 );
 
 export class TranslatorConnector
@@ -57,6 +64,10 @@ export type TranslationBundle = IRenderMime.TranslationBundle;
  */
 export interface ITranslator extends IRenderMime.ITranslator {}
 
+/**
+ * Translation provider token
+ */
 export const ITranslator = new Token<ITranslator>(
-  '@jupyterlab/translation:ITranslator'
+  '@jupyterlab/translation:ITranslator',
+  'A service to translate strings.'
 );

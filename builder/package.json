@@ -34,17 +34,17 @@
   },
   "dependencies": {
     "@lumino/algorithm": "^2.0.0",
-    "@lumino/application": "^2.0.1",
-    "@lumino/commands": "^2.0.1",
-    "@lumino/coreutils": "^2.0.0",
-    "@lumino/disposable": "^2.0.0",
+    "@lumino/application": "^2.1.0",
+    "@lumino/commands": "^2.1.0",
+    "@lumino/coreutils": "^2.1.0",
+    "@lumino/disposable": "^2.1.0",
     "@lumino/domutils": "^2.0.0",
-    "@lumino/dragdrop": "^2.0.0",
+    "@lumino/dragdrop": "^2.1.0",
     "@lumino/messaging": "^2.0.0",
     "@lumino/properties": "^2.0.0",
-    "@lumino/signaling": "^2.0.0",
+    "@lumino/signaling": "^2.1.0",
     "@lumino/virtualdom": "^2.0.0",
-    "@lumino/widgets": "^2.0.1",
+    "@lumino/widgets": "^2.1.0",
     "ajv": "^8.12.0",
     "commander": "^9.4.1",
     "css-loader": "^6.7.1",
@@ -71,7 +71,7 @@
     "@types/node": "^18.11.18",
     "@types/supports-color": "^5.3.0",
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.2"
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

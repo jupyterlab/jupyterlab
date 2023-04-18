@@ -65,8 +65,8 @@
     "@types/jest": "^29.2.0",
     "@types/react-dom": "^18.0.9",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
-    "typescript": "~5.0.2"
+    "typedoc": "~0.24.1",
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

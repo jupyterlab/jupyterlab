@@ -38,6 +38,7 @@ export namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<IRunningSessionManagers> = {
   activate,
   id: '@jupyterlab/running-extension:plugin',
+  description: 'Provides the running session managers.',
   provides: IRunningSessionManagers,
   requires: [ITranslator],
   optional: [ILayoutRestorer, ILabShell],

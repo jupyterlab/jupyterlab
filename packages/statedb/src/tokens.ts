@@ -7,7 +7,12 @@ import { IDataConnector } from './interfaces';
 /**
  * The default state database token.
  */
-export const IStateDB = new Token<IStateDB>('@jupyterlab/coreutils:IStateDB');
+export const IStateDB = new Token<IStateDB>(
+  '@jupyterlab/coreutils:IStateDB',
+  `A service for the JupyterLab state database.
+  Use this if you want to store data that will persist across page loads.
+  See "state database" for more information.`
+);
 
 /**
  * The description of a state database.

@@ -461,6 +461,37 @@ test.describe('General', () => {
     });
   });
 
+  test('Trust indicator', async ({ page }) => {
+    await page.goto();
+    // Open Data.ipynb which is not trusted by default
+    await page.dblclick(
+      '[aria-label="File Browser Section"] >> text=notebooks'
+    );
+    await page.dblclick('text=Data.ipynb');
+
+    const trustIndictor = page.locator('.jp-StatusItem-trust');
+
+    expect(await trustIndictor.screenshot()).toMatchSnapshot(
+      'notebook_not_trusted.png'
+    );
+
+    // Open trust dialog
+    // Note: we do not `await` here as it only resolves once dialog is closed
+    const trustPromise = page.evaluate(() => {
+      return window.jupyterapp.commands.execute('notebook:trust');
+    });
+    const dialogSelector = '.jp-Dialog-content';
+    await page.waitForSelector(dialogSelector);
+    // Accept option to trust the notebook
+    await page.click('.jp-Dialog-button.jp-mod-accept');
+    // Wait until dialog is gone
+    await trustPromise;
+
+    expect(await trustIndictor.screenshot()).toMatchSnapshot(
+      'notebook_trusted.png'
+    );
+  });
+
   test('Heading anchor', async ({ page }, testInfo) => {
     await page.goto();
     await setSidebarWidth(page);

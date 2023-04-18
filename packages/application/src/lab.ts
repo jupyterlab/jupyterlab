@@ -188,7 +188,10 @@ export namespace JupyterLab {
   /**
    * The layout restorer token.
    */
-  export const IInfo = new Token<IInfo>('@jupyterlab/application:IInfo');
+  export const IInfo = new Token<IInfo>(
+    '@jupyterlab/application:IInfo',
+    'A service providing metadata about the current application, including disabled extensions and whether dev mode is enabled.'
+  );
 
   /**
    * The information about a JupyterLab application.

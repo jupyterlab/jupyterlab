@@ -41,13 +41,13 @@
     "@jupyterlab/observables": "^5.0.0-beta.1",
     "@jupyterlab/rendermime": "^4.0.0-beta.1",
     "@jupyterlab/rendermime-interfaces": "^3.8.0-beta.1",
-    "@lumino/disposable": "^2.0.0",
-    "@lumino/signaling": "^2.0.0"
+    "@lumino/disposable": "^2.1.0",
+    "@lumino/signaling": "^2.1.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
-    "typescript": "~5.0.2"
+    "typedoc": "~0.24.1",
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

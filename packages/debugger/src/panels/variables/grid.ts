@@ -53,6 +53,11 @@ export class VariablesBodyGrid extends Panel {
   }
   set scope(scope: string) {
     this._scope = scope;
+    if (scope !== 'Globals') {
+      this.addClass('jp-debuggerVariables-local');
+    } else {
+      this.removeClass('jp-debuggerVariables-local');
+    }
     this.update();
   }
 

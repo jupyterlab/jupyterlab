@@ -53,6 +53,7 @@ namespace CommandIDs {
 const csv: JupyterFrontEndPlugin<void> = {
   activate: activateCsv,
   id: '@jupyterlab/csvviewer-extension:csv',
+  description: 'Adds viewer for CSV file types',
   requires: [ITranslator],
   optional: [
     ILayoutRestorer,
@@ -71,6 +72,7 @@ const csv: JupyterFrontEndPlugin<void> = {
 const tsv: JupyterFrontEndPlugin<void> = {
   activate: activateTsv,
   id: '@jupyterlab/csvviewer-extension:tsv',
+  description: 'Adds viewer for TSV file types.',
   requires: [ITranslator],
   optional: [
     ILayoutRestorer,

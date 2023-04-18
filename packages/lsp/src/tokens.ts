@@ -544,7 +544,8 @@ export interface ILSPCodeExtractorsManager {
  */
 export const ILSPDocumentConnectionManager =
   new Token<ILSPDocumentConnectionManager>(
-    '@jupyterlab/lsp:ILSPDocumentConnectionManager'
+    '@jupyterlab/lsp:ILSPDocumentConnectionManager',
+    'Provides the virtual documents and language server connections service.'
   );
 
 /**
@@ -555,7 +556,8 @@ export const ILSPDocumentConnectionManager =
  *
  */
 export const ILSPFeatureManager = new Token<ILSPFeatureManager>(
-  '@jupyterlab/lsp:ILSPFeatureManager'
+  '@jupyterlab/lsp:ILSPFeatureManager',
+  'Provides the language server feature manager. This token is required to register new client capabilities.'
 );
 
 /**
@@ -567,7 +569,8 @@ export const ILSPFeatureManager = new Token<ILSPFeatureManager>(
  *
  */
 export const ILSPCodeExtractorsManager = new Token<ILSPCodeExtractorsManager>(
-  '@jupyterlab/lsp:ILSPCodeExtractorsManager'
+  '@jupyterlab/lsp:ILSPCodeExtractorsManager',
+  'Provides the code extractor manager. This token is required in your extension to register code extractor allowing the creation of multiple virtual document from an opened document.'
 );
 
 /**
