@@ -16,5 +16,8 @@ export interface IEditorTracker
  * The editor tracker token.
  */
 export const IEditorTracker = new Token<IEditorTracker>(
-  '@jupyterlab/fileeditor:IEditorTracker'
+  '@jupyterlab/fileeditor:IEditorTracker',
+  `A widget tracker for file editors.
+  Use this if you want to be able to iterate over and interact with file editors
+  created by the application.`
 );

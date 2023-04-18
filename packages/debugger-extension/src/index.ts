@@ -15,9 +15,10 @@ import {
   Clipboard,
   ICommandPalette,
   InputDialog,
+  ISessionContextDialogs,
   IThemeManager,
   MainAreaWidget,
-  sessionContextDialogs,
+  SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import { CodeCell } from '@jupyterlab/cells';
@@ -47,7 +48,7 @@ import {
 } from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 function notifyCommands(app: JupyterFrontEnd): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -61,7 +62,9 @@ function notifyCommands(app: JupyterFrontEnd): void {
  * A plugin that provides visual debugging support for consoles.
  */
 const consoles: JupyterFrontEndPlugin<void> = {
+  // FIXME This should be in @jupyterlab/console-extension
   id: '@jupyterlab/debugger-extension:consoles',
+  description: 'Add debugger capability to the consoles.',
   autoStart: true,
   requires: [IDebugger, IConsoleTracker],
   optional: [ILabShell],
@@ -107,7 +110,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
  * A plugin that provides visual debugging support for file editors.
  */
 const files: JupyterFrontEndPlugin<void> = {
+  // FIXME This should be in @jupyterlab/fileeditor-extension
   id: '@jupyterlab/debugger-extension:files',
+  description: 'Adds debugger capabilities to files.',
   autoStart: true,
   requires: [IDebugger, IEditorTracker],
   optional: [ILabShell],
@@ -178,19 +183,26 @@ const files: JupyterFrontEndPlugin<void> = {
  * A plugin that provides visual debugging support for notebooks.
  */
 const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
+  // FIXME This should be in @jupyterlab/notebook-extension
   id: '@jupyterlab/debugger-extension:notebooks',
+  description:
+    'Adds debugger capability to notebooks and provides the debugger notebook handler.',
   autoStart: true,
-  requires: [IDebugger, INotebookTracker, ITranslator],
-  optional: [ILabShell, ICommandPalette],
+  requires: [IDebugger, INotebookTracker],
+  optional: [ILabShell, ICommandPalette, ISessionContextDialogs, ITranslator],
   provides: IDebuggerHandler,
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
-    translator: ITranslator,
     labShell: ILabShell | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    sessionDialogs_: ISessionContextDialogs | null,
+    translator_: ITranslator | null
   ): Debugger.Handler => {
+    const translator = translator_ ?? nullTranslator;
+    const sessionDialogs =
+      sessionDialogs_ ?? new SessionContextDialogs({ translator });
     const handler = new Debugger.Handler({
       type: 'notebook',
       shell: app.shell,
@@ -212,14 +224,19 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionContextDialogs.restart(sessionContext);
+        const restarted = await sessionDialogs.restart(sessionContext);
         if (!restarted) {
           return;
         }
 
         await service.restoreDebuggerState(state);
         await handler.updateWidget(widget, sessionContext.session);
-        await NotebookActions.runAll(content, sessionContext);
+        await NotebookActions.runAll(
+          content,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     });
 
@@ -265,6 +282,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
  */
 const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger-extension:service',
+  description: 'Provides the debugger service.',
   autoStart: true,
   provides: IDebugger,
   requires: [IDebuggerConfig],
@@ -288,6 +306,7 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
  */
 const configuration: JupyterFrontEndPlugin<IDebugger.IConfig> = {
   id: '@jupyterlab/debugger-extension:config',
+  description: 'Provides the debugger configuration',
   provides: IDebuggerConfig,
   autoStart: true,
   activate: () => new Debugger.Config()
@@ -298,6 +317,7 @@ const configuration: JupyterFrontEndPlugin<IDebugger.IConfig> = {
  */
 const sources: JupyterFrontEndPlugin<IDebugger.ISources> = {
   id: '@jupyterlab/debugger-extension:sources',
+  description: 'Provides the source feature for debugging',
   autoStart: true,
   provides: IDebuggerSources,
   requires: [IDebuggerConfig, IEditorServices],
@@ -325,6 +345,8 @@ const sources: JupyterFrontEndPlugin<IDebugger.ISources> = {
  */
 const variables: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:variables',
+  description:
+    'Adds variables renderer and inspection in the debugger variable panel.',
   autoStart: true,
   requires: [IDebugger, IDebuggerHandler, ITranslator],
   optional: [IThemeManager, IRenderMimeRegistry],
@@ -509,6 +531,19 @@ const variables: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    commands.addCommand(CommandIDs.copyToGlobals, {
+      label: trans.__('Copy Variable to Globals'),
+      caption: trans.__('Copy variable to globals scope'),
+      isEnabled: () => !!service.session?.isStarted,
+      isVisible: () =>
+        handler.activeWidget instanceof NotebookPanel &&
+        service.model.supportCopyToGlobals,
+      execute: async args => {
+        const name = service.model.variables.selectedVariable!.name;
+        await service.copyToGlobals(name);
+      }
+    });
   }
 };
 
@@ -517,6 +552,7 @@ const variables: JupyterFrontEndPlugin<void> = {
  */
 const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
   id: '@jupyterlab/debugger-extension:sidebar',
+  description: 'Provides the debugger sidebar.',
   provides: IDebuggerSidebar,
   requires: [IDebugger, IEditorServices, ITranslator],
   optional: [IThemeManager, ISettingRegistry],
@@ -584,6 +620,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:main',
+  description: 'Initialize the debugger user interface.',
   requires: [IDebugger, IDebuggerSidebar, IEditorServices, ITranslator],
   optional: [
     ICommandPalette,

@@ -80,7 +80,7 @@ const UNUSED: Dict<string[]> = {
     'worker-loader',
     'source-map-loader'
   ],
-  '@jupyterlab/buildutils': ['verdaccio'],
+  '@jupyterlab/buildutils': ['inquirer', 'verdaccio'],
   '@jupyterlab/codemirror': [
     '@codemirror/lang-cpp',
     '@codemirror/lang-css',
@@ -100,7 +100,6 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/services': ['ws'],
-  '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testing': [
     '@babel/core',
     '@babel/preset-env',
@@ -159,6 +158,7 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/galata': [
     '@jupyterlab/application',
     '@jupyterlab/apputils',
+    '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
     '@jupyterlab/notebook'
   ],
@@ -166,6 +166,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/application',
     '@jupyterlab/apputils',
     '@jupyterlab/cells',
+    '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
     '@jupyterlab/notebook'
   ],
@@ -193,7 +194,6 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/notebook',
     '@jupyterlab/cell-toolbar',
     '@jupyterlab/cell-toolbar-extension',
-    '@jupyterlab/celltags',
     '@jupyterlab/celltags-extension',
     '@jupyterlab/fileeditor',
     '@jupyterlab/codemirror-extension',
@@ -232,8 +232,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/markdownviewer',
     '@jupyterlab/markdownviewer-extension',
     '@jupyterlab/markedparser-extension',
-    '@jupyterlab/mathjax2',
-    '@jupyterlab/mathjax2-extension',
+    '@jupyterlab/mathjax-extension',
     '@jupyterlab/metadataform',
     '@jupyterlab/metadataform-extension',
     '@jupyterlab/nbconvert-css',

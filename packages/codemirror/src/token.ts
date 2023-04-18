@@ -40,7 +40,8 @@ export interface IConfigurableExtension<T> {
  * Editor language token.
  */
 export const IEditorExtensionRegistry = new Token<IEditorExtensionRegistry>(
-  '@jupyterlab/codemirror:IEditorExtensionRegistry'
+  '@jupyterlab/codemirror:IEditorExtensionRegistry',
+  `A registry for CodeMirror extension factories.`
 );
 
 /**
@@ -243,7 +244,8 @@ export interface IEditorFactoryOptions {
  * Editor language token.
  */
 export const IEditorLanguageRegistry = new Token<IEditorLanguageRegistry>(
-  '@jupyterlab/codemirror:IEditorLanguageRegistry'
+  '@jupyterlab/codemirror:IEditorLanguageRegistry',
+  'A registry for CodeMirror languages.'
 );
 
 /**
@@ -379,7 +381,8 @@ export interface IEditorLanguageRegistry {
  * Editor theme token.
  */
 export const IEditorThemeRegistry = new Token<IEditorThemeRegistry>(
-  '@jupyterlab/codemirror:IEditorThemeRegistry'
+  '@jupyterlab/codemirror:IEditorThemeRegistry',
+  'A registry for CodeMirror theme.'
 );
 
 /**

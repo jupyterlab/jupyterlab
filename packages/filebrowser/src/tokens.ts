@@ -10,14 +10,18 @@ import type { FileBrowser } from './browser';
  * The file browser factory token.
  */
 export const IFileBrowserFactory = new Token<IFileBrowserFactory>(
-  '@jupyterlab/filebrowser:IFileBrowserFactory'
+  '@jupyterlab/filebrowser:IFileBrowserFactory',
+  `A factory object that creates file browsers.
+  Use this if you want to create your own file browser (e.g., for a custom storage backend),
+  or to interact with other file browsers that have been created by extensions.`
 );
 
 /**
  * The default file browser token.
  */
 export const IDefaultFileBrowser = new Token<IDefaultFileBrowser>(
-  '@jupyterlab/filebrowser:IDefaultFileBrowser'
+  '@jupyterlab/filebrowser:IDefaultFileBrowser',
+  'A service for the default file browser.'
 );
 
 /**
@@ -118,5 +122,6 @@ export namespace IFileBrowserFactory {
  * The token that indicates the default file browser commands are loaded.
  */
 export const IFileBrowserCommands = new Token<void>(
-  '@jupyterlab/filebrowser:IFileBrowserCommands'
+  '@jupyterlab/filebrowser:IFileBrowserCommands',
+  'A token to ensure file browser commands are loaded.'
 );

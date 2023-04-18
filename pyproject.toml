@@ -40,8 +40,8 @@ dependencies = [
     "ipykernel",
     "jinja2>=3.0.3",
     "jupyter_core",
-    "jupyter-lsp>=1.5.1",
-    "jupyter_server>=2.0.1,<3",
+    "jupyter-lsp>=2.0.0",
+    "jupyter_server>=2.4.0,<3",
     "jupyterlab_server>=2.19.0,<3",
     "notebook_shim>=0.2",
     "packaging",
@@ -85,11 +85,11 @@ docs = [
 ]
 docs-screenshots = [
     "altair==4.2.2",
-    "ipython==8.10.0",
-    "ipywidgets==8.0.4",
+    "ipython==8.12.0",
+    "ipywidgets==8.0.6",
     "jupyterlab-geojson==3.3.1",
-    "jupyterlab-language-pack-zh-CN==3.6.post0",
-    "matplotlib==3.7.0",
+    "jupyterlab-language-pack-zh-CN==3.6.post1",
+    "matplotlib==3.7.1",
     "nbconvert>=7.0.0",
     "pandas==1.5.3",
     "scipy==1.10.1",
@@ -115,8 +115,8 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.252",
-    "black[jupyter]==23.1.0"
+    "ruff==0.0.260",
+    "black[jupyter]==23.3.0"
 ]
 
 [tool.check-wheel-contents]
@@ -131,6 +131,8 @@ source = "code"
 "jupyterlab/schemas" = "share/jupyter/lab/schemas"
 "jupyterlab/themes" = "share/jupyter/lab/themes"
 "jupyter-config" = "etc/jupyter"
+"jupyterlab.svg" = "share/icons/hicolor/scalable/apps/jupyterlab.svg"
+"jupyterlab.desktop" = "share/applications/jupyterlab.desktop"
 
 [tool.hatch.build]
 ignore-vcs = true
@@ -147,7 +149,9 @@ include = [
     "/galata",
     "/jupyter-config",
     "/jupyterlab",
-    "/package.json"
+    "/package.json",
+    "jupyterlab.svg",
+    "jupyterlab.desktop"
 ]
 exclude = [
     "/.github",
@@ -165,6 +169,7 @@ exclude = [
     "/examples",
     "/galata/lib",
     "/jupyterlab/staging/build",
+    "/jupyterlab/staging/.yarn",
     "/packages",
     "/release",
     "/testutils",
@@ -178,6 +183,7 @@ include = [
 exclude = [
     "*.js.map",
     "/jupyterlab/staging/build",
+    "/jupyterlab/staging/.yarn",
     "node_modules"
 ]
 
@@ -263,17 +269,36 @@ ignore = [
 [tool.ruff.per-file-ignores]
 # F821 Undefined name `c`
 "binder/jupyter_config.py" = ["F821"]
+# T201 `print` found
+"examples/test_examples.py" = ["T201"]
+# T201 `print` found
+"galata/*" = ["T201"]
 # F821 Undefined name `c`
 # S104 Possible binding to all interfaces
 # S105 Possible hardcoded password: `""`
 "galata/jupyter_server_test_config.py" = ["F821", "S104", "S105"]
+# T201 `print` found
+"jupyterlab/browser_check.py" = ["T201"]
+# C901 method is too complex
+"jupyterlab/commands.py" = ["C901"]
+# B028 No explicit `stacklevel` keyword argument found
+"jupyterlab/debuglog.py" = ["B028"]
+"jupyterlab/extensions/manager.py" = ["C901"]
+# T201 `print` found
+"jupyterlab/labapp.py" = ["T201"]
+# C901 method is too complex
 # S101 Use of `assert` detected
 # N802 Function name `foo` should be lowercase
 # EM101 Exception must not use a string literal
 # PLR2004 Magic value used in comparison
-"jupyterlab/tests/*" = ["S101", "N802", "E501", "EM101", "EM102", "EM103", "PLR2004"]
+"jupyterlab/tests/*" = ["C901", "S101", "N802", "E501", "EM101", "EM102", "EM103", "PLR2004"]
 # T201 `print` found
 "scripts/milestone_check.py" = ["T201"]
 # N806 Variable `tM` in function should be lowercase
 # N816 Variable `comparatorTrimReplace` in global scope should not be mixedCase
-"jupyterlab/semver.py" = ["N806", "N816", "EM101", "EM102", "C901"]
+# PLC1901 test can be simplified as an empty string is falsey
+"jupyterlab/semver.py" = ["C901", "EM101", "EM102", "N806", "N816", "PLC1901"]
+# T201 `print` found
+"jupyterlab/upgrade_extension.py" = ["T201"]
+# T201 `print` found
+"scripts/i18n_check.py" = ["T201"]

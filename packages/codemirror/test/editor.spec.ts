@@ -63,7 +63,7 @@ describe('CodeMirrorEditor', () => {
       model,
       languages,
       // Binding between the editor and the Yjs model
-      extensions: [ybinding(sharedModel.ysource)]
+      extensions: [ybinding({ ytext: sharedModel.ysource })]
     });
   });
 

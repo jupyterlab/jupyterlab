@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Clipboard } from '@jupyterlab/apputils';
+import { Clipboard, SessionContextDialogs } from '@jupyterlab/apputils';
 import { Cell, CodeCellModel } from '@jupyterlab/cells';
 import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
 import {
@@ -55,6 +55,7 @@ export async function initNotebookContext(
   await manager.ready;
 
   const context = new Context({
+    sessionDialogs: new SessionContextDialogs(),
     manager,
     factory,
     path,
@@ -101,7 +102,7 @@ export namespace NBTestUtils {
       name: 'binding',
       factory: ({ model }) =>
         EditorExtensionRegistry.createImmutableExtension(
-          ybinding((model.sharedModel as any).ysource)
+          ybinding({ ytext: (model.sharedModel as any).ysource })
         )
     });
     const factoryService = new CodeMirrorEditorFactory({
@@ -230,6 +231,7 @@ export namespace NBTestUtils {
     const factory = new NotebookModelFactory({});
 
     const context = new Context({
+      sessionDialogs: new SessionContextDialogs(),
       manager,
       factory,
       path,
@@ -251,9 +253,7 @@ export namespace NBTestUtils {
 namespace Private {
   let manager: ServiceManager;
 
-  export const notebookFactory = new NotebookModelFactory({
-    disableDocumentWideUndoRedo: false
-  });
+  export const notebookFactory = new NotebookModelFactory();
 
   /**
    * Get or create the service manager singleton.

@@ -23,7 +23,8 @@ import { ILabShell } from './shell';
  * The layout restorer token.
  */
 export const ILayoutRestorer = new Token<ILayoutRestorer>(
-  '@jupyterlab/application:ILayoutRestorer'
+  '@jupyterlab/application:ILayoutRestorer',
+  'A service providing application layout restoration functionality. Use this to have your activities restored across page loads.'
 );
 
 /**

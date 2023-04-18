@@ -100,6 +100,8 @@
 
 /* Borders */
 
+/* stylelint-disable selector-max-class */
+
 .jp-SideBar.lm-TabBar .lm-TabBar-tab + .lm-TabBar-tab {
   border-top: var(--jp-border-width) solid var(--jp-layout-color2);
 }
@@ -188,6 +190,8 @@
   border: none;
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
 }
+
+/* stylelint-enable selector-max-class */
 
 /* Stack panels */
 

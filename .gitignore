@@ -12,6 +12,8 @@ dev_mode/stats.json
 
 docs/_build
 docs/source/user/commands_list.md
+docs/source/extension/plugins_list.rst
+docs/source/extension/tokens_list.rst
 docs/api
 **/docs/source/_build
 
@@ -109,6 +111,12 @@ iframe_figures/
 
 lerna-debug.log
 yarn-error.log
+
+# yarn >=2.x local files
+.yarn/*
+.pnp.*
+jupyterlab/staging/.yarn/*
+jupyterlab/staging/.pnp.*
 
 # copied changelog file
 docs/source/getting_started/changelog.md

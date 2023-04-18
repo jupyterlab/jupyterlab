@@ -414,6 +414,11 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       const layout = this._inputWrapper!.layout as PanelLayout;
       if (value) {
         this._input!.parent = null;
+        if (this._inputPlaceholder) {
+          this._inputPlaceholder.text = this.model.sharedModel
+            .getSource()
+            .split('\n')?.[0];
+        }
         layout.addWidget(this._inputPlaceholder!);
       } else {
         this._inputPlaceholder!.parent = null;
@@ -576,8 +581,20 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
-    this._inputPlaceholder = new InputPlaceholder(() => {
-      this.inputHidden = !this.inputHidden;
+    this._inputPlaceholder = new InputPlaceholder({
+      callback: () => {
+        this.inputHidden = !this.inputHidden;
+      },
+      text: input.model.sharedModel.getSource().split('\n')[0],
+      translator: this.translator
+    });
+
+    input.model.contentChanged.connect((sender, args) => {
+      if (this._inputPlaceholder && this.inputHidden) {
+        this._inputPlaceholder.text = sender.sharedModel
+          .getSource()
+          .split('\n')?.[0];
+      }
     });
 
     if (this.inputHidden) {
@@ -640,6 +657,14 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     // Handle read only state.
     if (this.editor?.getOption('readOnly') !== this._readOnly) {
       this.editor?.setOption('readOnly', this._readOnly);
+    }
+  }
+
+  protected onContentChanged() {
+    if (this.inputHidden && this._inputPlaceholder) {
+      this._inputPlaceholder.text = this.model.sharedModel
+        .getSource()
+        .split('\n')?.[0];
     }
   }
 
@@ -724,6 +749,11 @@ export namespace Cell {
      * The maximum number of output items to display in cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope?: 'global' | 'session';
 
     /**
      * Whether this cell is a placeholder for future rendering.
@@ -986,7 +1016,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       contentFactory: contentFactory,
       maxNumberOutputs: this.maxNumberOutputs,
       translator: this.translator,
-      promptOverlay: true
+      promptOverlay: true,
+      inputHistoryScope: options.inputHistoryScope
     }));
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
@@ -1040,8 +1071,12 @@ export class CodeCell extends Cell<ICodeCellModel> {
       this.addClass(DIRTY_CLASS);
     }
 
-    this._outputPlaceholder = new OutputPlaceholder(() => {
-      this.outputHidden = !this.outputHidden;
+    this._outputPlaceholder = new OutputPlaceholder({
+      callback: () => {
+        this.outputHidden = !this.outputHidden;
+      },
+      text: this.getOutputPlaceholderText(),
+      translator: this.translator
     });
 
     const layoutWrapper = outputWrapper.layout as PanelLayout;
@@ -1059,6 +1094,37 @@ export class CodeCell extends Cell<ICodeCellModel> {
         ? trans.__('Code Cell Content')
         : trans.__('Code Cell Content with Output');
     this.node.setAttribute('aria-label', ariaLabel);
+  }
+
+  protected getOutputPlaceholderText(): string | undefined {
+    const firstOutput = this.model.outputs.get(0);
+    const outputData = firstOutput?.data;
+    if (!outputData) {
+      return undefined;
+    }
+    const supportedOutputTypes = [
+      'text/html',
+      'image/svg+xml',
+      'application/pdf',
+      'text/markdown',
+      'text/plain',
+      'application/vnd.jupyter.stderr',
+      'application/vnd.jupyter.stdout',
+      'text'
+    ];
+    const preferredOutput = supportedOutputTypes.find(mt => {
+      const data = firstOutput.data[mt];
+      return (Array.isArray(data) ? typeof data[0] : typeof data) === 'string';
+    });
+    const dataToDisplay = firstOutput.data[preferredOutput ?? ''];
+    if (dataToDisplay !== undefined) {
+      return (
+        Array.isArray(dataToDisplay)
+          ? dataToDisplay
+          : (dataToDisplay as string)?.split('\n')
+      )?.find(part => part !== '');
+    }
+    return undefined;
   }
 
   /**
@@ -1156,6 +1222,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
         if (this.inputHidden && !this._outputWrapper!.isHidden) {
           this._outputWrapper!.hide();
         }
+        if (this._outputPlaceholder) {
+          this._outputPlaceholder.text = this.getOutputPlaceholderText() ?? '';
+        }
       } else {
         if (this._outputWrapper!.isHidden) {
           this._outputWrapper!.show();
@@ -1198,7 +1267,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       } else {
         this.model.deleteMetadata('collapsed');
       }
-    });
+    }, false);
   }
 
   /**
@@ -1360,6 +1429,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
    */
   protected onOutputChanged(): void {
     this._headingsCache = null;
+    if (this._outputPlaceholder && this.outputHidden) {
+      this._outputPlaceholder.text = this.getOutputPlaceholderText() ?? '';
+    }
   }
 
   /**
@@ -1437,7 +1509,7 @@ export namespace CodeCell {
     if (!code.trim() || !sessionContext.session?.kernel) {
       model.sharedModel.transact(() => {
         model.clearExecution();
-      });
+      }, false);
       return;
     }
     const cellId = { cellId: model.sharedModel.getId() };
@@ -1450,7 +1522,7 @@ export namespace CodeCell {
     model.sharedModel.transact(() => {
       model.clearExecution();
       cell.outputHidden = false;
-    });
+    }, false);
     cell.setPrompt('*');
     model.trusted = true;
     let future:
@@ -2085,6 +2157,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Callback on content changed
    */
   protected onContentChanged(): void {
+    super.onContentChanged();
     this._headingsCache = null;
   }
 

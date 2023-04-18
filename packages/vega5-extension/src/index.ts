@@ -144,7 +144,11 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     // Add png representation of vega chart to output
     const imageURL = await this._result.view.toImageURL(
       'png',
-      embedOptions.scaleFactor
+      typeof embedOptions.scaleFactor === 'number'
+        ? embedOptions.scaleFactor
+        : embedOptions.scaleFactor
+        ? (embedOptions.scaleFactor as any).png
+        : embedOptions.scaleFactor
     );
     model.setData({
       data: { ...model.data, 'image/png': imageURL.split(',')[1] }
@@ -178,6 +182,7 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
 
 const extension: IRenderMime.IExtension = {
   id: '@jupyterlab/vega5-extension:factory',
+  description: 'Provides a renderer for Vega 5 and Vega-Lite 3 to 5 content.',
   rendererFactory,
   rank: 57,
   dataType: 'json',

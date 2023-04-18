@@ -16,6 +16,7 @@ import {
   StateEffect
 } from '@codemirror/state';
 import {
+  crosshairCursor,
   drawSelection,
   EditorView,
   highlightActiveLine,
@@ -24,6 +25,7 @@ import {
   KeyBinding,
   keymap,
   lineNumbers,
+  rectangularSelection,
   scrollPastEnd
 } from '@codemirror/view';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -620,13 +622,13 @@ export namespace EditorExtensionRegistry {
         default: 1200,
         factory: () =>
           createConfigurableExtension((value: number) =>
-            value !== 1200 ? drawSelection({ cursorBlinkRate: value }) : []
+            drawSelection({ cursorBlinkRate: value })
           ),
         schema: {
           type: 'number',
           title: trans.__('Cursor blinking rate'),
           description: trans.__(
-            'Half-period in milliseconds used for cursor blinking. The default blink rate is 1200ms. By setting this to zero, blinking can be disabled. Using a non-default value has a performance cost.'
+            'Half-period in milliseconds used for cursor blinking. The default blink rate is 1200ms. By setting this to zero, blinking can be disabled.'
           )
         }
       }),
@@ -716,6 +718,22 @@ export namespace EditorExtensionRegistry {
         schema: {
           type: 'boolean',
           title: trans.__('Match Brackets')
+        }
+      }),
+      Object.freeze({
+        name: 'rectangularSelection',
+        default: true,
+        factory: () =>
+          createConditionalExtension([
+            rectangularSelection(),
+            crosshairCursor()
+          ]),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Rectangular selection'),
+          description: trans.__(
+            'Rectangular (block) selection can be created by dragging the mouse pointer while holding the left mouse button and the Alt key. When the Alt key is pressed, a crosshair cursor will appear, indicating that the rectangular selection mode is active.'
+          )
         }
       }),
       Object.freeze({
@@ -810,6 +828,18 @@ export namespace EditorExtensionRegistry {
         schema: {
           type: 'number',
           title: trans.__('Tab size')
+        }
+      }),
+      Object.freeze({
+        name: 'allowMultipleSelections',
+        default: true,
+        factory: () =>
+          createConfigurableExtension((value: boolean) =>
+            EditorState.allowMultipleSelections.of(value)
+          ),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Multiple selections')
         }
       }),
       Object.freeze({

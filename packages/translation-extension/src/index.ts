@@ -28,6 +28,7 @@ const PLUGIN_ID = '@jupyterlab/translation-extension:plugin';
 
 const translator: JupyterFrontEndPlugin<ITranslator> = {
   id: '@jupyterlab/translation:translator',
+  description: 'Provides the application translation object.',
   autoStart: true,
   requires: [JupyterFrontEnd.IPaths, ISettingRegistry],
   optional: [ILabShell],
@@ -69,6 +70,7 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
  */
 const langMenu: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
+  description: 'Adds translation commands and settings.',
   requires: [ISettingRegistry, ITranslator],
   optional: [IMainMenu, ICommandPalette],
   autoStart: true,

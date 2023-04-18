@@ -16,6 +16,7 @@ import { SettingConnector } from './settingconnector';
  */
 export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
+  description: 'Provides the setting registry.',
   activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
     const { isDisabled } = PageConfig.Extension;
     const connector = new SettingConnector(app.serviceManager.settings);
@@ -38,8 +39,8 @@ export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
     // because otherwise, its settings will never become available in the
     // setting registry.
     void app.restored.then(async () => {
-      const plugins = await connector.list('all');
-      plugins.ids.forEach(async (id, index) => {
+      const plugins = await connector.list('ids');
+      plugins.ids.forEach(async id => {
         if (!app.hasPlugin(id) || isDisabled(id) || id in registry.plugins) {
           return;
         }
@@ -48,10 +49,11 @@ export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
           await registry.load(id);
         } catch (error) {
           console.warn(`Settings failed to load for (${id})`, error);
-          if (plugins.values[index].schema['jupyter.lab.transform']) {
+          if (!app.isPluginActivated(id)) {
             console.warn(
-              `This may happen if {autoStart: false} in (${id}) ` +
-                `or if it is one of the deferredExtensions in page config.`
+              `If 'jupyter.lab.transform=true' in the plugin schema, this ` +
+                `may happen if {autoStart: false} in (${id}) or if it is ` +
+                `one of the deferredExtensions in page config.`
             );
           }
         }

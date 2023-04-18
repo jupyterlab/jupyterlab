@@ -25,4 +25,5 @@
 @import url('~@jupyterlab/lsp/style/index.css');
 @import url('~@jupyterlab/mainmenu/style/index.css');
 @import url('~@jupyterlab/notebook/style/index.css');
+@import url('~@jupyterlab/metadataform/style/index.css');
 @import url('~@jupyterlab/property-inspector/style/index.css');

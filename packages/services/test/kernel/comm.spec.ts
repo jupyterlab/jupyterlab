@@ -79,7 +79,7 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should throw an error if there is an existing comm', () => {
-        expect(() => kernel.createComm('test', '1234')).toThrowError();
+        expect(() => kernel.createComm('test', '1234')).toThrow();
       });
 
       it('should throw an error when the kernel does not handle comms', async () => {
@@ -88,7 +88,7 @@ describe('jupyter.services - Comm', () => {
           { handleComms: false }
         );
         expect(kernel2.handleComms).toBe(false);
-        expect(() => kernel2.createComm('test', '1234')).toThrowError();
+        expect(() => kernel2.createComm('test', '1234')).toThrow();
       });
     });
 
@@ -357,7 +357,7 @@ describe('jupyter.services - Comm', () => {
         await comm.close({ foo: 'bar' }).done;
         expect(() => {
           comm.send('test');
-        }).toThrowError();
+        }).toThrow();
       });
     });
   });

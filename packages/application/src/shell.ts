@@ -64,7 +64,8 @@ const ACTIVITY_CLASS = 'jp-Activity';
  * The JupyterLab application shell token.
  */
 export const ILabShell = new Token<ILabShell>(
-  '@jupyterlab/application:ILabShell'
+  '@jupyterlab/application:ILabShell',
+  'A service for interacting with the JupyterLab shell. The top-level ``application`` object also has a reference to the shell, but it has a restricted interface in order to be agnostic to different shell implementations on the application. Use this to get more detailed information about currently active widgets and layout state.'
 );
 
 /**

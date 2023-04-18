@@ -16,9 +16,7 @@ import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 
 function contextFactory(): Context<INotebookModel> {
   const serviceManager = new ServiceManager({ standby: 'never' });
-  const factory = new NotebookModelFactory({
-    disableDocumentWideUndoRedo: false
-  });
+  const factory = new NotebookModelFactory();
   const context = new Context({
     manager: serviceManager,
     factory,
@@ -106,8 +104,8 @@ describe('completer/reconciliator', () => {
           providers: [fooProvider1, fooProvider2]
         });
         void reconciliator.fetch({ offset: 0, text: '' });
-        expect(fooProvider1.fetch).toBeCalled();
-        expect(fooProvider2.fetch).toBeCalled();
+        expect(fooProvider1.fetch).toHaveBeenCalled();
+        expect(fooProvider2.fetch).toHaveBeenCalled();
       });
       it('should de-duplicate completions from multiple providers', async () => {
         const provider1 = new FooCompletionProvider();
@@ -218,8 +216,8 @@ describe('completer/reconciliator', () => {
           providers: [fooProvider1, fooProvider1]
         });
         reconciliator.shouldShowContinuousHint(true, null as any);
-        expect(fooProvider1.shouldShowContinuousHint).toBeCalledTimes(1);
-        expect(fooProvider2.shouldShowContinuousHint).toBeCalledTimes(0);
+        expect(fooProvider1.shouldShowContinuousHint).toHaveBeenCalledTimes(1);
+        expect(fooProvider2.shouldShowContinuousHint).toHaveBeenCalledTimes(0);
       });
     });
   });

@@ -75,9 +75,9 @@ async function openForm(
 ) {
   await activatePropertyInspector(page);
 
-  const form = page.locator(
-    `.jp-NotebookTools .jp-Collapse:has(>.jp-Collapse-header:text('${label}'))`
-  );
+  const form = page.locator('.jp-NotebookTools .jp-Collapse', {
+    hasText: label
+  });
   if (form.locator('.jp-Collapse-contents.lm-mod-hidden')) {
     await form.click();
     await expect(
@@ -159,9 +159,9 @@ test.describe('Required metadata', () => {
     await activatePropertyInspector(page);
 
     // Retrieves the form from its header's text, it should be collapsed.
-    const form = page.locator(
-      '.jp-NotebookTools .jp-Collapse:has(>.jp-Collapse-header:text("Extension metadata"))'
-    );
+    const form = page.locator('.jp-NotebookTools .jp-Collapse', {
+      hasText: 'Extension metadata'
+    });
     expect(await form.screenshot()).toMatchSnapshot(
       'metadata-collapsed-form.png'
     );

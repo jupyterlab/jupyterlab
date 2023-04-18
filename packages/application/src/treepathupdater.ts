@@ -9,7 +9,8 @@ import { Token } from '@lumino/coreutils';
  * The tree path updater token.
  */
 export const ITreePathUpdater = new Token<ITreePathUpdater>(
-  '@jupyterlab/application:ITreePathUpdater'
+  '@jupyterlab/application:ITreePathUpdater',
+  'A service to update the tree path.'
 );
 
 /**

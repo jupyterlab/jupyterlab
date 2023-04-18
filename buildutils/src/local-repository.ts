@@ -35,7 +35,11 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
   let prev_npm = utils.run('npm config get registry', { stdio: 'pipe' }, true);
   let prev_yarn = '';
   try {
-    prev_yarn = utils.run('yarn config get registry', { stdio: 'pipe' }, true);
+    prev_yarn = utils.run(
+      'yarn config get npmRegistryServer',
+      { stdio: 'pipe' },
+      true
+    );
   } catch (e) {
     // Do nothing
   }
@@ -140,8 +144,15 @@ packages:
     child_process.execFileSync('yarn', [
       'config',
       'set',
-      'registry',
+      'npmRegistryServer',
       local_registry
+    ]);
+    child_process.execFileSync('yarn', [
+      'config',
+      'set',
+      'unsafeHttpWhitelist',
+      '--json',
+      '["0.0.0.0"]'
     ]);
   } catch (e) {
     // yarn not available
@@ -229,10 +240,14 @@ async function stopLocalRegistry(out_dir: string) {
     child_process.execSync(`npm config rm registry`);
   }
   if (data.prev_yarn) {
-    child_process.execSync(`yarn config set registry ${data.prev_yarn}`);
+    child_process.execSync(
+      `yarn config set npmRegistryServer ${data.prev_yarn}`
+    );
+    child_process.execSync(`yarn config unset unsafeHttpWhitelist`);
   } else {
     try {
-      child_process.execSync(`yarn config delete registry`);
+      child_process.execSync(`yarn config unset npmRegistryServer`);
+      child_process.execSync(`yarn config unset unsafeHttpWhitelist`);
     } catch (e) {
       // yarn not available
     }
@@ -245,7 +260,11 @@ async function stopLocalRegistry(out_dir: string) {
 function fixLinks(package_dir: string) {
   let yarn_reg = '';
   try {
-    yarn_reg = utils.run('yarn config get registry', { stdio: 'pipe' }, true);
+    yarn_reg = utils.run(
+      'yarn config get npmRegistryServer',
+      { stdio: 'pipe' },
+      true
+    );
   } catch (e) {
     // Do nothing
   }

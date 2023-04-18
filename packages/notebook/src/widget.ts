@@ -34,6 +34,7 @@ import { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
+import { NotebookFooter } from './notebookfooter';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -547,7 +548,14 @@ export class StaticNotebook extends WindowedList {
     const collab = newValue.collaborative ?? false;
     if (!collab && !cells.length) {
       newValue.sharedModel.insertCell(0, {
-        cell_type: this.notebookConfig.defaultCell
+        cell_type: this.notebookConfig.defaultCell,
+        metadata:
+          this.notebookConfig.defaultCell === 'code'
+            ? {
+                // This is an empty cell created in empty notebook, thus is trusted
+                trusted: true
+              }
+            : {}
       });
     }
     let index = -1;
@@ -598,7 +606,14 @@ export class StaticNotebook extends WindowedList {
           requestAnimationFrame(() => {
             if (model && !model.isDisposed && !model.sharedModel.cells.length) {
               model.sharedModel.insertCell(0, {
-                cell_type: this.notebookConfig.defaultCell
+                cell_type: this.notebookConfig.defaultCell,
+                metadata:
+                  this.notebookConfig.defaultCell === 'code'
+                    ? {
+                        // This is an empty cell created in empty notebook, thus is trusted
+                        trusted: true
+                      }
+                    : {}
               });
             }
           });
@@ -653,6 +668,7 @@ export class StaticNotebook extends WindowedList {
     const options: CodeCell.IOptions = {
       contentFactory,
       editorConfig,
+      inputHistoryScope: this.notebookConfig.inputHistoryScope,
       maxNumberOutputs: this.notebookConfig.maxNumberOutputs,
       model,
       placeholder: this._notebookConfig.windowingMode !== 'none',
@@ -1053,6 +1069,11 @@ export namespace StaticNotebook {
     maxNumberOutputs: number;
 
     /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope: 'global' | 'session';
+
+    /**
      * Number of cells to render in addition to those
      * visible in the viewport.
      *
@@ -1122,9 +1143,10 @@ export namespace StaticNotebook {
     scrollPastEnd: true,
     defaultCell: 'code',
     recordTiming: false,
+    inputHistoryScope: 'global',
     maxNumberOutputs: 50,
     showEditorForReadOnlyMarkdown: true,
-    disableDocumentWideUndoRedo: false,
+    disableDocumentWideUndoRedo: true,
     renderingLayout: 'default',
     sideBySideLeftMarginOverride: '10px',
     sideBySideRightMarginOverride: '10px',
@@ -1196,6 +1218,24 @@ export class Notebook extends StaticNotebook {
     super(options);
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-lm-dragscroll', 'true');
+    this.activeCellChanged.connect(this._updateSelectedCells, this);
+    this.selectionChanged.connect(this._updateSelectedCells, this);
+    this.addFooter();
+  }
+
+  /**
+   * List of selected and active cells
+   */
+  get selectedCells(): Cell[] {
+    return this._selectedCells;
+  }
+
+  /**
+   * Adds a footer to the notebook.
+   */
+  protected addFooter(): void {
+    const info = new NotebookFooter(this);
+    (this.layout as NotebookWindowedLayout).footer = info;
   }
 
   /**
@@ -1303,12 +1343,17 @@ export class Notebook extends StaticNotebook {
 
     this._activeCellIndex = newValue;
     const cell = this.widgets[newValue] ?? null;
-    if (cell !== this._activeCell) {
+    const cellChanged = cell !== this._activeCell;
+    if (cellChanged) {
       // Post an update request.
       this.update();
       this._activeCell = cell;
+    }
+
+    if (cellChanged || newValue != oldValue) {
       this._activeCellChanged.emit(cell);
     }
+
     if (this.mode === 'edit' && cell instanceof MarkdownCell) {
       cell.rendered = false;
     }
@@ -2480,6 +2525,7 @@ export class Notebook extends StaticNotebook {
       const start = index;
       const values = event.mimeData.getData(JUPYTER_CELL_MIME);
       // Insert the copies of the original cells.
+      // We preserve trust status of pasted cells by not modifying metadata.
       model.sharedModel.insertCells(index, values);
       // Select the inserted cells.
       this.deselectAll();
@@ -2685,6 +2731,12 @@ export class Notebook extends StaticNotebook {
   private _checkCacheOnNextResize = false;
 
   private _lastClipboardInteraction: 'copy' | 'cut' | 'paste' | null = null;
+  private _updateSelectedCells(): void {
+    this._selectedCells = this.widgets.filter(cell =>
+      this.isSelectedOrActive(cell)
+    );
+  }
+  private _selectedCells: Cell[] = [];
 }
 
 /**

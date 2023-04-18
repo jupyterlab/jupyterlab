@@ -1,0 +1,55 @@
+name: "Step 2: Publish Release"
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "The target branch"
+        required: false
+      release_url:
+        description: "The URL of the draft GitHub release"
+        required: false
+      steps_to_skip:
+        description: "Comma separated list of steps to skip"
+        required: false
+        default: "ensure-sha"
+
+jobs:
+  publish_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Populate Release
+        id: populate-release
+        uses: jupyter-server/jupyter_releaser/.github/actions/populate-release@v2
+        with:
+          token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          target: ${{ github.event.inputs.target }}
+          branch: ${{ github.event.inputs.branch }}
+          release_url: ${{ github.event.inputs.release_url }}
+          steps_to_skip: ${{ github.event.inputs.steps_to_skip }}
+
+      - name: Finalize Release
+        id: finalize-release
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          PYPI_TOKEN_MAP: ${{ secrets.PYPI_TOKEN_MAP }}
+          TWINE_USERNAME: __token__
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        uses: jupyter-server/jupyter-releaser/.github/actions/finalize-release@v2
+        with:
+          token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          target: ${{ github.event.inputs.target }}
+          release_url: ${{ steps.populate-release.outputs.release_url }}
+
+      - name: "** Next Step **"
+        if: ${{ success() }}
+        run: |
+          echo "Verify the final release"
+          echo ${{ steps.finalize-release.outputs.release_url }}
+
+      - name: "** Failure Message **"
+        if: ${{ failure() }}
+        run: |
+          echo "Failed to Publish the Draft Release Url:"
+          echo ${{ steps.populate-release.outputs.release_url }}

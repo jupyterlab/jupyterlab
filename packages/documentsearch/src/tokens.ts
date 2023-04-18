@@ -11,7 +11,10 @@ import { Widget } from '@lumino/widgets';
  * The search provider registry token.
  */
 export const ISearchProviderRegistry = new Token<ISearchProviderRegistry>(
-  '@jupyterlab/documentsearch:ISearchProviderRegistry'
+  '@jupyterlab/documentsearch:ISearchProviderRegistry',
+  `A service for a registry of search
+  providers for the application. Plugins can register their UI elements with this registry
+  to provide find/replace support.`
 );
 
 /**
@@ -366,4 +369,9 @@ export interface ISearchProvider extends IBaseSearchProvider {
    * @returns The valid filter value
    */
   validateFilter?(name: string, value: boolean): Promise<boolean>;
+
+  /**
+   * Signal emitted when filter definition changed.
+   */
+  filtersChanged?: ISignal<ISearchProvider, void>;
 }

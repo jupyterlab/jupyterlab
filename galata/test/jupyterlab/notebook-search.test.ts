@@ -7,6 +7,13 @@ import * as path from 'path';
 
 const fileName = 'search.ipynb';
 
+function getSelectionRange(textarea: HTMLTextAreaElement) {
+  return {
+    start: textarea.selectionStart,
+    end: textarea.selectionEnd
+  };
+}
+
 test.describe('Notebook Search', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
@@ -81,28 +88,80 @@ test.describe('Notebook Search', () => {
     expect(await overlay.screenshot()).toMatchSnapshot('multi-line-search.png');
   });
 
-  test('Search selected', async ({ page }) => {
+  test('Populate search box with selected text', async ({ page }) => {
     // Enter first cell
     await page.notebook.enterCellEditingMode(0);
 
     // Go to first line
     await page.keyboard.press('PageUp');
-
     // Select first line
     await page.keyboard.press('Shift+End');
-
     // Open search box
     await page.keyboard.press('Control+f');
 
-    // Expect it to be populated with first line
-    await page.waitForSelector(
+    // Expect it to be populated with the first line
+    const inputWithFirstLine = page.locator(
       '[placeholder="Find"] >> text="Test with one notebook withr"'
     );
+    await expect(inputWithFirstLine).toBeVisible();
+    await expect(inputWithFirstLine).toBeFocused();
+    // Expect the newly set text to be selected
+    expect(await inputWithFirstLine.evaluate(getSelectionRange)).toStrictEqual({
+      start: 0,
+      end: 28
+    });
 
     // Expect both matches to be found (xfail)
     // await page.waitForSelector('text=1/2');
 
+    // Enter first cell again
+    await page.notebook.enterCellEditingMode(0);
+    // Go to last line
+    await page.keyboard.press('PageDown');
+    // Select last line
+    await page.keyboard.press('Shift+Home');
+    // Update search box
+    await page.keyboard.press('Control+f');
+
+    // Expect it to be populated with the last line
+    const inputWithLastLine = page.locator(
+      '[placeholder="Find"] >> text="This is a multi line with hits with"'
+    );
+    await expect(inputWithLastLine).toBeVisible();
+    await expect(inputWithLastLine).toBeFocused();
+    // Expect the newly set text to be selected
+    expect(await inputWithLastLine.evaluate(getSelectionRange)).toStrictEqual({
+      start: 0,
+      end: 35
+    });
+
     await expect(page.locator('.jp-DocumentSearch-overlay')).toBeVisible();
+  });
+
+  test('Restore previous search query if there is no selection', async ({
+    page
+  }) => {
+    const inputWithTestLocator = page.locator(
+      '[placeholder="Find"] >> text="test"'
+    );
+    const overlayLocator = page.locator('.jp-DocumentSearch-overlay');
+
+    // Search for "test"
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'test');
+    await page.waitForSelector('text=1/2');
+
+    // Close search box
+    await page.keyboard.press('Escape');
+    await expect(overlayLocator).toBeHidden();
+
+    // Open search box again
+    await page.keyboard.press('Control+f');
+    await expect(overlayLocator).toBeVisible();
+    // Expect the text to be set in the input field
+    await expect(inputWithTestLocator).toBeVisible();
+    // Expect the search to be active again
+    await page.waitForSelector('text=1/2');
   });
 
   test('Close with Escape', async ({ page }) => {
@@ -164,7 +223,7 @@ test.describe('Notebook Search', () => {
 
     await page.click('button[title="Show Search Filters"]');
 
-    await page.click('text=Search Selected Cell(s)');
+    await page.click('text=Search in 1 Selected Cell');
 
     await page.waitForSelector('text=1/4');
 
@@ -172,6 +231,53 @@ test.describe('Notebook Search', () => {
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(
       'search-in-selected-cells.png'
+    );
+  });
+
+  test('Search in selected text', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+
+    await page.fill('[placeholder="Find"]', 'text/');
+    await page.waitForSelector('text=1/3');
+
+    // Activate third cell
+    const cell = await page.notebook.getCell(2);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Select 7 lines
+    await page.keyboard.press('Control+Home');
+    for (let i = 0; i < 6; i++) {
+      await page.keyboard.press('Shift+ArrowDown');
+    }
+
+    // Switch to selection search mode
+    await page.click('button[title="Show Search Filters"]');
+    await page.click('text=Search in 7 Selected Lines');
+
+    await page.waitForSelector('text=1/2');
+
+    const nbPanel = await page.notebook.getNotebookInPanel();
+
+    expect(await nbPanel.screenshot()).toMatchSnapshot(
+      'search-in-selected-text.png'
+    );
+  });
+
+  test('Highlights are visible when text is selected', async ({ page }) => {
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'with');
+    await page.waitForSelector('text=1/21');
+
+    const cell = await page.notebook.getCell(0);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Select text (to see if the highlights will still be visible)
+    await page.keyboard.press('Control+A');
+
+    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
+      'highlight-visible-under-selection.png'
     );
   });
 

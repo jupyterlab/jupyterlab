@@ -68,7 +68,7 @@ describe('Debugger', () => {
     factory: ({ model }) => {
       const m = model.sharedModel as IYText;
       return EditorExtensionRegistry.createImmutableExtension(
-        ybinding(m.ysource)
+        ybinding({ ytext: m.ysource })
       );
     }
   });

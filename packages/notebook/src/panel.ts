@@ -131,7 +131,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     const kernelPreference = this.context.sessionContext.kernelPreference;
     this.context.sessionContext.kernelPreference = {
       ...kernelPreference,
-      shutdownOnDispose: config.kernelShutdown
+      shutdownOnDispose: config.kernelShutdown,
+      autoStartDefault: config.autoStartDefault
     };
   }
 
@@ -262,6 +263,10 @@ export namespace NotebookPanel {
    */
   export interface IConfig {
     /**
+     * Whether to automatically start the preferred kernel
+     */
+    autoStartDefault: boolean;
+    /**
      * A config object for cell editors
      */
     editorConfig: StaticNotebook.IEditorConfig;
@@ -304,6 +309,8 @@ export namespace NotebookPanel {
    * The notebook renderer token.
    */
   export const IContentFactory = new Token<IContentFactory>(
-    '@jupyterlab/notebook:IContentFactory'
+    '@jupyterlab/notebook:IContentFactory',
+    `A factory object that creates new notebooks.
+    Use this if you want to create and host notebooks in your own UI elements.`
   );
 }

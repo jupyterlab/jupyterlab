@@ -699,7 +699,7 @@ class _AppHandler:
         staging = pjoin(app_dir, "staging")
 
         # Make sure packages are installed.
-        ret = self._run(["node", YARN_PATH, "install", "--non-interactive"], cwd=staging)
+        ret = self._run(["node", YARN_PATH, "install"], cwd=staging)
         if ret != 0:
             msg = "npm dependencies failed to install"
             self.logger.debug(msg)
@@ -1246,7 +1246,7 @@ class _AppHandler:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(source_dir, fname), target)
 
-        for fname in [".yarnrc", "yarn.js"]:
+        for fname in [".yarnrc.yml", "yarn.js"]:
             target = pjoin(staging, fname)
             shutil.copy(pjoin(HERE, "staging", fname), target)
 
@@ -1995,7 +1995,7 @@ def _yarn_config(logger):
 
     try:
         output_binary = subprocess.check_output(
-            [node, YARN_PATH, "config", "list", "--json"], stderr=subprocess.PIPE, cwd=HERE
+            [node, YARN_PATH, "config", "--json"], stderr=subprocess.PIPE, cwd=HERE
         )
         output = output_binary.decode("utf-8")
         lines = iter(output.splitlines())
@@ -2326,7 +2326,7 @@ def _log_multiple_compat_errors(logger, errors_map):
     if outdated:
         logger.warning(
             "\n        ".join(
-                ["\n   The following extension are outdated:", *outdated]
+                ["\n   The following extensions are outdated:", *outdated]
                 + [
                     '\n   Consider running "jupyter labextension update --all" '
                     "to check for updates.\n"
@@ -2445,7 +2445,7 @@ def _fetch_package_metadata(registry, name, logger):
     except AttributeError:
         logger.debug("Fetching URL: %s" % (req.get_full_url()))
     try:
-        with contextlib.closing(urlopen(req)) as response:
+        with contextlib.closing(urlopen(req)) as response:  # noqa S310
             return json.loads(response.read().decode("utf-8"))
     except URLError as exc:
         logger.warning("Failed to fetch package metadata for %r: %r", name, exc)

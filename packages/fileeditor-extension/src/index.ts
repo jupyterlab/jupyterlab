@@ -18,6 +18,7 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
+  SessionContextDialogs,
   WidgetTracker
 } from '@jupyterlab/apputils';
 import {
@@ -54,6 +55,7 @@ import {
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -75,6 +77,7 @@ export { Commands } from './commands';
 const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
+  description: 'Provides the file editor widget tracker.',
   requires: [
     IEditorServices,
     IEditorExtensionRegistry,
@@ -105,6 +108,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
  */
 export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
+  description: 'Adds a file editor indentation status widget.',
   autoStart: true,
   requires: [
     IEditorTracker,
@@ -137,7 +141,8 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
     for (const size of ['1', '2', '4', '8']) {
       const args: JSONObject = {
         size,
-        name: trans.__('Spaces: %1', size)
+        // Use a context to differentiate with string set as plural in 3.x
+        name: trans._p('v4', 'Spaces: %1', size)
       };
       menu.addItem({ command, args });
     }
@@ -183,6 +188,7 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:cursor-position',
+  description: 'Adds a file editor cursor position status widget.',
   activate: (
     app: JupyterFrontEnd,
     tracker: IEditorTracker,
@@ -202,6 +208,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:completer',
+  description: 'Adds the completer capability to the file editor.',
   requires: [IEditorTracker],
   optional: [ICompletionProviderManager, ITranslator, ISanitizer],
   activate: activateFileEditorCompleterService,
@@ -213,6 +220,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
  */
 const searchProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:search',
+  description: 'Adds search capability to the file editor.',
   requires: [ISearchProviderRegistry],
   autoStart: true,
   activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
@@ -222,6 +230,7 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 
 const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:language-server',
+  description: 'Adds Language Server capability to the file editor.',
   requires: [
     IEditorTracker,
     ILSPDocumentConnectionManager,
@@ -263,14 +272,16 @@ function activate(
   launcher: ILauncher | null,
   menu: IMainMenu | null,
   restorer: ILayoutRestorer | null,
-  sessionDialogs: ISessionContextDialogs | null,
+  sessionDialogs_: ISessionContextDialogs | null,
   tocRegistry: ITableOfContentsRegistry | null,
   toolbarRegistry: IToolbarWidgetRegistry | null,
-  translator: ITranslator | null,
+  translator_: ITranslator | null,
   formRegistry: IFormRendererRegistry | null
 ): IEditorTracker {
   const id = plugin.id;
-  translator = translator ?? nullTranslator;
+  const translator = translator_ ?? nullTranslator;
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const namespace = 'editor';
   let toolbarFactory:
@@ -479,10 +490,8 @@ function activate(
     fileBrowser,
     extensions,
     languages,
-    themes,
     consoleTracker,
-    sessionDialogs,
-    menu
+    sessionDialogs
   );
 
   const codeViewerTracker = new WidgetTracker<MainAreaWidget<CodeViewerWidget>>(
@@ -568,7 +577,7 @@ function activateFileEditorCompleterService(
   editorTracker: IEditorTracker,
   manager: ICompletionProviderManager | null,
   translator: ITranslator | null,
-  appSanitizer: ISanitizer | null
+  appSanitizer: IRenderMime.ISanitizer | null
 ): void {
   if (!manager) {
     return;

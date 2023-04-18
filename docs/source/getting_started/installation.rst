@@ -8,6 +8,13 @@ Installation
 
 JupyterLab can be installed using ``conda``, ``mamba``, ``pip``, ``pipenv`` or ``docker``.
 
+.. warning::
+    New versions of JupyterLab may break backwards compatibility with extensions and other
+    Jupyter customizations. As noted in :ref:`versioning_notes`, JupyterLab development and
+    release cycles follow semantic versioning, so we recommend planning your installation and
+    upgrade procedures to account for possible breaking changes that may disrupt your usage
+    of JupyterLab and any related tools that are critical to your workflows.
+
 conda
 -----
 

@@ -125,19 +125,6 @@
   background-color: var(--jp-error-color0);
 }
 
-.jp-PluginList button.jp-mod-selected.jp-ErrorPlugin span {
-  color: var(--jp-error-color0);
-}
-
-.jp-PluginList button.jp-mod-selected span {
-  font-weight: var(--jp-content-heading-font-weight);
-  color: var(--jp-brand-color1);
-}
-
-.jp-FormComponent li span {
-  overflow: hidden;
-}
-
 .jp-SettingEditor-header {
   font-size: var(--jp-content-font-size4);
   font-weight: var(--jp-content-heading-font-weight);
@@ -148,10 +135,6 @@
   top: 0;
   z-index: 999;
   background-color: var(--jp-layout-color0);
-}
-
-ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
-  background-image: var(--jp-icon-file-selected);
 }
 
 .jp-PluginList-icon {
@@ -176,19 +159,6 @@ ul.jp-PluginList li.jp-mod-selected span.jp-PluginList-icon.jp-FileIcon {
 .jp-SettingsRawEditor .jp-Toolbar-item {
   margin-top: 1px;
   align-items: center;
-}
-
-.jp-ToolbarButtonComponent-label
-  .jp-SettingsRawEditor.jp-mod-error
-  .jp-Toolbar-item.jp-BugIcon::after {
-  color: red;
-  content: '\25CF'; /* Unicode circle character (error dot) */
-  font-size: 7px;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 4px;
-  left: 6px;
 }
 
 .jp-SettingsRawEditor .jp-Inspector {

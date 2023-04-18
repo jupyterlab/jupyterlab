@@ -51,11 +51,11 @@ class DebugLogFileMixin(Configurable):
             for line in msg:
                 self.log.debug(line)
             if isinstance(ex, SystemExit):
-                warnings.warn("An error occurred. See the log file for details: ", log_path)
+                warnings.warn(f"An error occurred. See the log file for details: {log_path!s}")
                 raise
             warnings.warn("An error occurred.")
             warnings.warn(msg[-1].strip())
-            warnings.warn("See the log file for details: ", log_path)
+            warnings.warn(f"See the log file for details: {log_path!s}")
             self.exit(1)
         else:
             log.removeHandler(_debug_handler)

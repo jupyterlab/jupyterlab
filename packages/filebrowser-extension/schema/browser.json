@@ -63,7 +63,7 @@
       },
       {
         "command": "filebrowser:copy",
-        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 8
       },
       {
@@ -136,6 +136,11 @@
   "title": "File Browser",
   "description": "File Browser settings.",
   "jupyter.lab.shortcuts": [
+    {
+      "command": "filebrowser:go-up",
+      "keys": ["Backspace"],
+      "selector": ".jp-DirListing:focus"
+    },
     {
       "command": "filebrowser:go-up",
       "keys": ["Backspace"],

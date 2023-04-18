@@ -1072,7 +1072,7 @@ describe('@jupyter/notebook', () => {
         widget.select(widget.widgets[3]);
         widget.activeCellIndex = 3;
 
-        expect(() => widget.getContiguousSelection()).toThrowError(
+        expect(() => widget.getContiguousSelection()).toThrow(
           /Selection not contiguous/
         );
       });
@@ -1087,13 +1087,13 @@ describe('@jupyter/notebook', () => {
 
         // Check if active cell is outside selection.
         widget.activeCellIndex = 0;
-        expect(() => widget.getContiguousSelection()).toThrowError(
+        expect(() => widget.getContiguousSelection()).toThrow(
           /Active cell not at endpoint of selection/
         );
 
         // Check if active cell is inside selection.
         widget.activeCellIndex = 2;
-        expect(() => widget.getContiguousSelection()).toThrowError(
+        expect(() => widget.getContiguousSelection()).toThrow(
           /Active cell not at endpoint of selection/
         );
       });
@@ -1414,18 +1414,14 @@ describe('@jupyter/notebook', () => {
         const child = widget.widgets[0];
         await framePromise();
         Widget.detach(widget);
-        expect(widget.methods).toEqual(
-          expect.arrayContaining(['onBeforeDetach'])
-        );
+        expect(widget.methods).toContain('onBeforeDetach');
         widget.events = [];
         simulate(widget.node, 'mousedown');
-        expect(widget.events).toEqual(
-          expect.not.arrayContaining(['mousedown'])
-        );
+        expect(widget.events).not.toContain('mousedown');
         simulate(widget.node, 'dblclick');
-        expect(widget.events).toEqual(expect.not.arrayContaining(['dblclick']));
+        expect(widget.events).not.toContain('dblclick');
         simulate(child.node, 'focusin');
-        expect(widget.events).toEqual(expect.not.arrayContaining(['focusin']));
+        expect(widget.events).not.toContain('focusin');
         widget.dispose();
       });
     });

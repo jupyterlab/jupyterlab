@@ -52,6 +52,8 @@ async function requestAPI<T>(
 
 export const announcements: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:announcements',
+  description:
+    'Add the announcement feature. It will fetch news on the internet and check for application updates.',
   autoStart: true,
   optional: [ISettingRegistry, ITranslator],
   activate: (

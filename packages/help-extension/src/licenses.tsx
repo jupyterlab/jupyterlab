@@ -17,6 +17,8 @@ import { h, VirtualElement } from '@lumino/virtualdom';
 import { Panel, SplitPanel, TabBar, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
+const FILTER_SECTION_TITLE_CLASS = 'jp-Licenses-Filters-title';
+
 /**
  * A license viewer
  */
@@ -511,7 +513,9 @@ export namespace Licenses {
       return (
         <div>
           <label>
-            <strong>{trans.__('Filter Licenses By')}</strong>
+            <strong className={FILTER_SECTION_TITLE_CLASS}>
+              {trans.__('Filter Licenses By')}
+            </strong>
           </label>
           <ul>
             <li>
@@ -528,7 +532,9 @@ export namespace Licenses {
             </li>
           </ul>
           <label>
-            <strong>{trans.__('Distributions')}</strong>
+            <strong className={FILTER_SECTION_TITLE_CLASS}>
+              {trans.__('Distributions')}
+            </strong>
           </label>
         </div>
       );
