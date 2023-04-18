@@ -5,17 +5,16 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
+import { Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { IFormRendererRegistry } from '@jupyterlab/ui-components';
 import { ISignal } from '@lumino/signaling';
-import type { Field } from '@rjsf/utils';
 import { PluginList } from './pluginlist';
 import { SettingsFormEditor } from './SettingsFormEditor';
 import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
 
-const PLACEHOLDER_PLUGIN_NAME = 'SettingsEditorPlaceholder';
-
+import type { Field } from '@rjsf/utils';
+import type { SettingsEditor } from './settingseditor';
 export interface ISettingsPanelProps {
   /**
    * List of Settings objects that provide schema and values
@@ -59,16 +58,13 @@ export interface ISettingsPanelProps {
   /**
    * Signal that sends updated filter when search value changes.
    */
-  updateFilterSignal: ISignal<
-    PluginList,
-    (plugin: ISettingRegistry.IPlugin) => string[] | null
-  >;
+  updateFilterSignal: ISignal<PluginList, SettingsEditor.PluginSearchFilter>;
 
   /**
    * If the settings editor is created with an initial search query, an initial
    * filter function is passed to the settings panel.
    */
-  initialFilter: (item: ISettingRegistry.IPlugin) => string[] | null;
+  initialFilter: SettingsEditor.PluginSearchFilter;
 }
 
 /**
@@ -86,13 +82,10 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   translator,
   initialFilter
 }: ISettingsPanelProps): JSX.Element => {
-  const [activePluginId, setActivePluginId] = useState<string | null>(
-    PLACEHOLDER_PLUGIN_NAME
+  const [activePluginId, setActivePluginId] = useState<string | null>(null);
+  const [filterPlugin, setFilter] = useState<SettingsEditor.PluginSearchFilter>(
+    initialFilter ? () => initialFilter : null
   );
-  const [filterPlugin, setFilter] = useState<
-    ((plugin: ISettingRegistry.IPlugin) => string[] | null) | null
-  >(initialFilter ? () => initialFilter : null);
-
   const wrapperRef: React.RefObject<HTMLDivElement> = React.useRef(null);
   const editorDirtyStates: React.RefObject<{
     [id: string]: boolean;
@@ -101,9 +94,9 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
   useEffect(() => {
     const onFilterUpdate = (
       list: PluginList,
-      newFilter: (plugin: ISettingRegistry.IPlugin) => string[] | null
+      newFilter: SettingsEditor.PluginSearchFilter
     ) => {
-      setFilter(() => newFilter);
+      newFilter ? setFilter(() => newFilter) : setFilter(null);
       setActivePluginId(null);
     };
 
@@ -156,10 +149,7 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
     [editorRegistry]
   );
 
-  if (
-    activePluginId === PLACEHOLDER_PLUGIN_NAME ||
-    (!activePluginId && !filterPlugin)
-  ) {
+  if (!activePluginId && !filterPlugin) {
     return <SettingsEditorPlaceholder translator={translator} />;
   }
 
