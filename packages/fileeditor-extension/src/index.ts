@@ -77,6 +77,7 @@ export { Commands } from './commands';
 const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
+  description: 'Provides the file editor widget tracker.',
   requires: [
     IEditorServices,
     IEditorExtensionRegistry,
@@ -107,6 +108,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
  */
 export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
+  description: 'Adds a file editor indentation status widget.',
   autoStart: true,
   requires: [
     IEditorTracker,
@@ -186,6 +188,7 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:cursor-position',
+  description: 'Adds a file editor cursor position status widget.',
   activate: (
     app: JupyterFrontEnd,
     tracker: IEditorTracker,
@@ -205,6 +208,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:completer',
+  description: 'Adds the completer capability to the file editor.',
   requires: [IEditorTracker],
   optional: [ICompletionProviderManager, ITranslator, ISanitizer],
   activate: activateFileEditorCompleterService,
@@ -216,6 +220,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
  */
 const searchProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:search',
+  description: 'Adds search capability to the file editor.',
   requires: [ISearchProviderRegistry],
   autoStart: true,
   activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
@@ -225,6 +230,7 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 
 const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:language-server',
+  description: 'Adds Language Server capability to the file editor.',
   requires: [
     IEditorTracker,
     ILSPDocumentConnectionManager,

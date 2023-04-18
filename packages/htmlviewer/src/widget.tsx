@@ -2,12 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/**
- * @packageDocumentation
- * @module htmlviewer
- */
 
-import { IWidgetTracker } from '@jupyterlab/apputils';
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 import {
   ABCWidgetFactory,
@@ -24,22 +19,10 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/ui-components';
-import { Token } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
-/**
- * A class that tracks HTML viewer widgets.
- */
-export interface IHTMLViewerTracker extends IWidgetTracker<HTMLViewer> {}
-
-/**
- * The HTML viewer tracker token.
- */
-export const IHTMLViewerTracker = new Token<IHTMLViewerTracker>(
-  '@jupyterlab/htmlviewer:IHTMLViewerTracker'
-);
 /**
  * The timeout to wait for change activity to have ceased before rendering.
  */

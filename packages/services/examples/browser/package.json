@@ -12,11 +12,11 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^6.0.0-beta.1",
     "@jupyterlab/services": "^7.0.0-beta.1",
-    "@lumino/coreutils": "^2.0.0"
+    "@lumino/coreutils": "^2.1.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.2",
+    "typescript": "~5.0.4",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1"
   }

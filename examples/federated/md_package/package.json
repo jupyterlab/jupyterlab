@@ -11,7 +11,7 @@
     "@jupyterlab/application": "^4.0.0-beta.1",
     "@jupyterlab/example-federated-middle": "^3.0.0-beta.1",
     "@jupyterlab/markdownviewer-extension": "^4.0.0-beta.1",
-    "@lumino/widgets": "^2.0.1"
+    "@lumino/widgets": "^2.1.0"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.0-beta.1",

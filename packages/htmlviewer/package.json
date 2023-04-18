@@ -38,14 +38,14 @@
     "@jupyterlab/docregistry": "^4.0.0-beta.1",
     "@jupyterlab/translation": "^4.0.0-beta.1",
     "@jupyterlab/ui-components": "^4.0.0-beta.1",
-    "@lumino/coreutils": "^2.0.0",
-    "@lumino/signaling": "^2.0.0",
-    "@lumino/widgets": "^2.0.1",
+    "@lumino/coreutils": "^2.1.0",
+    "@lumino/signaling": "^2.1.0",
+    "@lumino/widgets": "^2.1.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.2"
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

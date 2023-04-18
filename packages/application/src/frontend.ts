@@ -303,7 +303,12 @@ export namespace JupyterFrontEnd {
   /**
    * The application paths dictionary token.
    */
-  export const IPaths = new Token<IPaths>('@jupyterlab/application:IPaths');
+  export const IPaths = new Token<IPaths>(
+    '@jupyterlab/application:IPaths',
+    `A service providing information about various
+  URLs and server paths for the current application. Use this service if you want to
+  assemble URLs to use the JupyterLab REST API.`
+  );
 
   /**
    * An interface for URL and directory paths used by a Jupyter front-end.
@@ -364,7 +369,8 @@ export namespace JupyterFrontEnd {
    * dependency if it is possible to make it an optional dependency.
    */
   export const ITreeResolver = new Token<ITreeResolver>(
-    '@jupyterlab/application:ITreeResolver'
+    '@jupyterlab/application:ITreeResolver',
+    'A service to resolve the tree path.'
   );
 
   /**

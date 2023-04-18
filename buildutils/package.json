@@ -55,7 +55,7 @@
     "process": "^0.11.10",
     "semver": "^7.3.2",
     "sort-package-json": "~1.53.1",
-    "typescript": "~5.0.2",
+    "typescript": "~5.0.4",
     "verdaccio": "^5.20.1"
   },
   "devDependencies": {

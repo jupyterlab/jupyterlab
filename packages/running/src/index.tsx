@@ -76,7 +76,8 @@ const SHUTDOWN_ALL_BUTTON_CLASS = 'jp-RunningSessions-shutdownAll';
  * The running sessions token.
  */
 export const IRunningSessionManagers = new Token<IRunningSessionManagers>(
-  '@jupyterlab/running:IRunningSessionManagers'
+  '@jupyterlab/running:IRunningSessionManagers',
+  'A service to add running session managers.'
 );
 
 /**

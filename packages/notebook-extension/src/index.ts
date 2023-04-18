@@ -338,6 +338,7 @@ const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
  */
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
+  description: 'Provides the notebook widget tracker.',
   provides: INotebookTracker,
   requires: [INotebookWidgetFactory, IEditorExtensionRegistry],
   optional: [
@@ -361,6 +362,7 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
  */
 const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   id: '@jupyterlab/notebook-extension:factory',
+  description: 'Provides the notebook cell factory.',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
@@ -377,6 +379,7 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
   activate: activateNotebookTools,
   provides: INotebookTools,
   id: '@jupyterlab/notebook-extension:tools',
+  description: 'Provides the notebook tools.',
   autoStart: true,
   requires: [
     INotebookTracker,
@@ -393,6 +396,7 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
  */
 export const commandEditItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
+  description: 'Adds a notebook mode status widget.',
   autoStart: true,
   requires: [INotebookTracker, ITranslator],
   optional: [IStatusBar],
@@ -432,6 +436,7 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
  */
 export const executionIndicator: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:execution-indicator',
+  description: 'Adds a notebook execution status widget.',
   autoStart: true,
   requires: [INotebookTracker, ILabShell, ITranslator],
   optional: [IStatusBar, ISettingRegistry],
@@ -539,6 +544,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
  */
 export const exportPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:export',
+  description: 'Adds the export notebook commands.',
   autoStart: true,
   requires: [ITranslator, INotebookTracker],
   optional: [IMainMenu, ICommandPalette],
@@ -668,6 +674,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
  */
 export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:trust-status',
+  description: 'Adds the notebook trusted status widget.',
   autoStart: true,
   requires: [INotebookTracker, ITranslator],
   optional: [IStatusBar],
@@ -711,6 +718,7 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
 const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> =
   {
     id: '@jupyterlab/notebook-extension:widget-factory',
+    description: 'Provides the notebook widget factory.',
     provides: INotebookWidgetFactory,
     requires: [
       NotebookPanel.IContentFactory,
@@ -728,6 +736,7 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
  */
 const clonedOutputsPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:cloned-outputs',
+  description: 'Adds the clone output feature.',
   requires: [IDocumentManager, INotebookTracker, ITranslator],
   optional: [ILayoutRestorer],
   activate: activateClonedOutputs,
@@ -739,6 +748,7 @@ const clonedOutputsPlugin: JupyterFrontEndPlugin<void> = {
  */
 const codeConsolePlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:code-console',
+  description: 'Adds the notebook code consoles features.',
   requires: [INotebookTracker, ITranslator],
   activate: activateCodeConsole,
   autoStart: true
@@ -749,6 +759,7 @@ const codeConsolePlugin: JupyterFrontEndPlugin<void> = {
  */
 const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:copy-output',
+  description: 'Adds the copy cell outputs feature.',
   activate: activateCopyOutput,
   requires: [ITranslator, INotebookTracker],
   autoStart: true
@@ -759,6 +770,7 @@ const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
  */
 const kernelStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:kernel-status',
+  description: 'Adds the notebook kernel status.',
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
@@ -785,6 +797,7 @@ const kernelStatus: JupyterFrontEndPlugin<void> = {
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:cursor-position',
+  description: 'Adds the notebook cursor position status.',
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
@@ -831,6 +844,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:completer',
+  description: 'Adds the code completion capability to notebooks.',
   requires: [INotebookTracker],
   optional: [ICompletionProviderManager, ITranslator, ISanitizer],
   activate: activateNotebookCompleterService,
@@ -842,6 +856,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
  */
 const searchProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:search',
+  description: 'Adds search capability to notebooks.',
   requires: [ISearchProviderRegistry],
   autoStart: true,
   activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
@@ -851,6 +866,7 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 
 const tocPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:toc',
+  description: 'Adds table of content capability to the notebooks',
   requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
   optional: [IMarkdownParser],
   autoStart: true,
@@ -867,6 +883,7 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
 
 const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:language-server',
+  description: 'Adds language server capability to the notebooks.',
   requires: [
     INotebookTracker,
     ILSPDocumentConnectionManager,
@@ -877,8 +894,12 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
+/**
+ * Metadata editor for the raw cell mimetype.
+ */
 const updateRawMimetype: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:update-raw-mimetype',
+  description: 'Adds metadata form editor for raw cell mimetype.',
   autoStart: true,
   requires: [INotebookTracker, IMetadataFormProvider, ITranslator],
   activate: (
@@ -953,6 +974,7 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
  */
 const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:metadata-editor',
+  description: 'Adds metadata form for full metadata editor.',
   autoStart: true,
   requires: [INotebookTracker, IEditorServices, IFormRendererRegistry],
   optional: [ITranslator],
@@ -1003,6 +1025,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
  */
 const activeCellTool: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:active-cell-tool',
+  description: 'Adds active cell field in the metadata editor tab.',
   autoStart: true,
   requires: [INotebookTracker, IFormRendererRegistry, IEditorLanguageRegistry],
   activate: (
@@ -2740,7 +2763,6 @@ function addCommands(
     label: trans.__('Select Cell Below'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
-
       if (current) {
         return NotebookActions.selectBelow(current.content);
       }

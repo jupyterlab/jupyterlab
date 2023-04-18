@@ -12,6 +12,8 @@ dev_mode/stats.json
 
 docs/_build
 docs/source/user/commands_list.md
+docs/source/extension/plugins_list.rst
+docs/source/extension/tokens_list.rst
 docs/api
 **/docs/source/_build
 

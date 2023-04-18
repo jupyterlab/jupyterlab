@@ -74,18 +74,26 @@ describe('documentsearch/searchmodel', () => {
       });
     });
 
-    describe('#initialQuery', () => {
-      it('should get query from search expression or provider', () => {
+    describe('#suggestedInitialQuery', () => {
+      it('should return inital query from provider', () => {
+        expect(model.suggestedInitialQuery).toEqual('unset');
         provider.initialQuery = 'provider-set-query';
-        expect(model.initialQuery).toEqual('provider-set-query');
-        model.searchExpression = 'query';
-        expect(model.initialQuery).toEqual('query');
-        model.searchExpression = '';
-        expect(model.initialQuery).toEqual('provider-set-query');
+        expect(model.suggestedInitialQuery).toEqual('provider-set-query');
+      });
+    });
+
+    describe('#initialQuery', () => {
+      it('should set/get inital non-empty query', () => {
+        model.initialQuery = 'externally-set-query';
+        expect(model.initialQuery).toEqual('externally-set-query');
+      });
+      it('should fallback to previous search expression on empty value in setter', () => {
+        model.searchExpression = 'search-expression';
+        model.initialQuery = '';
+        expect(model.initialQuery).toEqual('search-expression');
       });
       it('should remember last query', async () => {
-        provider.initialQuery = 'provider-set-query';
-        model.searchExpression = 'query';
+        model.initialQuery = 'query';
         expect(model.initialQuery).toEqual('query');
         await model.endQuery();
         expect(model.initialQuery).toEqual('query');

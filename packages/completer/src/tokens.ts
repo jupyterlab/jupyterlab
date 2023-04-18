@@ -115,7 +115,8 @@ export interface ICompletionProvider<
  * The exported token used to register new provider.
  */
 export const ICompletionProviderManager = new Token<ICompletionProviderManager>(
-  '@jupyterlab/completer:ICompletionProviderManager'
+  '@jupyterlab/completer:ICompletionProviderManager',
+  'A service for the completion providers management.'
 );
 
 export interface ICompletionProviderManager {

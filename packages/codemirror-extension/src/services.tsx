@@ -41,6 +41,7 @@ const SETTINGS_ID = '@jupyterlab/codemirror-extension:plugin';
  */
 export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
   id: '@jupyterlab/codemirror-extension:languages',
+  description: 'Provides the CodeMirror languages registry.',
   provides: IEditorLanguageRegistry,
   optional: [ITranslator],
   activate: (app: JupyterFrontEnd, translator: ITranslator | null) => {
@@ -75,6 +76,7 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
  */
 export const themePlugin: JupyterFrontEndPlugin<IEditorThemeRegistry> = {
   id: '@jupyterlab/codemirror-extension:themes',
+  description: 'Provides the CodeMirror theme registry',
   provides: IEditorThemeRegistry,
   optional: [ITranslator],
   activate: (app: JupyterFrontEnd, translator: ITranslator | null) => {
@@ -93,6 +95,7 @@ export const themePlugin: JupyterFrontEndPlugin<IEditorThemeRegistry> = {
 export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
   {
     id: '@jupyterlab/codemirror-extension:extensions',
+    description: 'Provides the CodeMirror extension factory registry.',
     provides: IEditorExtensionRegistry,
     requires: [IEditorThemeRegistry],
     optional: [ITranslator, ISettingRegistry, IFormRendererRegistry],
@@ -204,6 +207,8 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
  */
 export const bindingPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:binding',
+  description:
+    'Register the CodeMirror extension factory binding the editor and the shared model.',
   autoStart: true,
   requires: [IEditorExtensionRegistry],
   activate: (app: JupyterFrontEnd, extensions: IEditorExtensionRegistry) => {
@@ -227,6 +232,7 @@ export const bindingPlugin: JupyterFrontEndPlugin<void> = {
  */
 export const servicesPlugin: JupyterFrontEndPlugin<IEditorServices> = {
   id: '@jupyterlab/codemirror-extension:services',
+  description: 'Provides the service to instantiate CodeMirror editors.',
   provides: IEditorServices,
   requires: [
     IEditorLanguageRegistry,
