@@ -21,6 +21,7 @@ import {
  */
 const labiconManager: JupyterFrontEndPlugin<ILabIconManager> = {
   id: '@jupyterlab/ui-components-extension:labicon-manager',
+  description: 'Provides the icon manager.',
   provides: ILabIconManager,
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
@@ -33,6 +34,7 @@ const labiconManager: JupyterFrontEndPlugin<ILabIconManager> = {
  */
 const rendererRegistryPlugin: JupyterFrontEndPlugin<IFormRendererRegistry> = {
   id: '@jupyterlab/ui-components-extension:form-renderer-registry',
+  description: 'Provides the settings form renderer registry.',
   provides: IFormRendererRegistry,
   autoStart: true,
   activate: (app: JupyterFrontEnd): IFormRendererRegistry => {

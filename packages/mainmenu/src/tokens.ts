@@ -16,7 +16,11 @@ import { IViewMenu } from './view';
 /**
  * The main menu token.
  */
-export const IMainMenu = new Token<IMainMenu>('@jupyterlab/mainmenu:IMainMenu');
+export const IMainMenu = new Token<IMainMenu>(
+  '@jupyterlab/mainmenu:IMainMenu',
+  `A service for the main menu bar for the application.
+  Use this if you want to add your own menu items or provide implementations for standardized menu items for specific activities.`
+);
 
 /**
  * The main menu interface.

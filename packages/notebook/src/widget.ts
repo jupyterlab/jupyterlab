@@ -34,6 +34,7 @@ import { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
+import { NotebookFooter } from './notebookfooter';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -547,7 +548,14 @@ export class StaticNotebook extends WindowedList {
     const collab = newValue.collaborative ?? false;
     if (!collab && !cells.length) {
       newValue.sharedModel.insertCell(0, {
-        cell_type: this.notebookConfig.defaultCell
+        cell_type: this.notebookConfig.defaultCell,
+        metadata:
+          this.notebookConfig.defaultCell === 'code'
+            ? {
+                // This is an empty cell created in empty notebook, thus is trusted
+                trusted: true
+              }
+            : {}
       });
     }
     let index = -1;
@@ -598,7 +606,14 @@ export class StaticNotebook extends WindowedList {
           requestAnimationFrame(() => {
             if (model && !model.isDisposed && !model.sharedModel.cells.length) {
               model.sharedModel.insertCell(0, {
-                cell_type: this.notebookConfig.defaultCell
+                cell_type: this.notebookConfig.defaultCell,
+                metadata:
+                  this.notebookConfig.defaultCell === 'code'
+                    ? {
+                        // This is an empty cell created in empty notebook, thus is trusted
+                        trusted: true
+                      }
+                    : {}
               });
             }
           });
@@ -1203,6 +1218,7 @@ export class Notebook extends StaticNotebook {
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.selectionChanged.connect(this._updateSelectedCells, this);
+    this.addFooter();
   }
 
   /**
@@ -1210,6 +1226,14 @@ export class Notebook extends StaticNotebook {
    */
   get selectedCells(): Cell[] {
     return this._selectedCells;
+  }
+
+  /**
+   * Adds a footer to the notebook.
+   */
+  protected addFooter(): void {
+    const info = new NotebookFooter(this);
+    (this.layout as NotebookWindowedLayout).footer = info;
   }
 
   /**
@@ -2488,6 +2512,7 @@ export class Notebook extends StaticNotebook {
       const start = index;
       const values = event.mimeData.getData(JUPYTER_CELL_MIME);
       // Insert the copies of the original cells.
+      // We preserve trust status of pasted cells by not modifying metadata.
       model.sharedModel.insertCells(index, values);
       // Select the inserted cells.
       this.deselectAll();

@@ -39,11 +39,11 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   }
 
   /**
-   * Resolve an icon name or a {name, svgstr} pair into an
+   * Resolve an icon name or a \{name, svgstr\} pair into an
    * actual LabIcon.
    *
    * @param icon - either a string with the name of an existing icon
-   * or an object with {name: string, svgstr: string} fields.
+   * or an object with \{name: string, svgstr: string\} fields.
    *
    * @returns a LabIcon instance
    */
@@ -73,20 +73,20 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       return new LabIcon({ name: icon, svgstr: refreshSvgstr, _loading: true });
     }
 
-    // icon was provided as a non-LabIcon {name, svgstr} pair, communicating
+    // icon was provided as a non-LabIcon \{name, svgstr\} pair, communicating
     // an intention to create a new icon
     return new LabIcon(icon);
   }
 
   /**
-   * Resolve an icon name or a {name, svgstr} pair into a DOM element.
+   * Resolve an icon name or a \{name, svgstr\} pair into a DOM element.
    * If icon arg is undefined, the function will fall back to trying to render
    * the icon as a CSS background image, via the iconClass arg.
    * If both icon and iconClass are undefined, this function will return
    * an empty div.
    *
    * @param icon - optional, either a string with the name of an existing icon
-   * or an object with {name: string, svgstr: string} fields
+   * or an object with \{name: string, svgstr: string\} fields
    *
    * @param iconClass - optional, if the icon arg is not set, the iconClass arg
    * should be a CSS class associated with an existing CSS background-image
@@ -121,14 +121,14 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   }
 
   /**
-   * Resolve an icon name or a {name, svgstr} pair into a React component.
+   * Resolve an icon name or a \{name, svgstr\} pair into a React component.
    * If icon arg is undefined, the function will fall back to trying to render
    * the icon as a CSS background image, via the iconClass arg.
    * If both icon and iconClass are undefined, the returned component
    * will simply render an empty div.
    *
    * @param icon - optional, either a string with the name of an existing icon
-   * or an object with {name: string, svgstr: string} fields
+   * or an object with \{name: string, svgstr: string\} fields
    *
    * @param iconClass - optional, if the icon arg is not set, the iconClass arg
    * should be a CSS class associated with an existing CSS background-image
@@ -164,7 +164,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   }
 
   /**
-   * Resolve a {name, svgstr} pair into an actual svg node.
+   * Resolve a \{name, svgstr\} pair into an actual svg node.
    */
   static resolveSvg({ name, svgstr }: LabIcon.IIcon): HTMLElement | null {
     const svgDoc = new DOMParser().parseFromString(

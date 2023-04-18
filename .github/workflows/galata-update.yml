@@ -43,6 +43,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: http-get://localhost:8888/lab
           test_folder: galata
+          artifact_name: updated-galata-snapshots
+          report_name: update-galata-report
 
       - name: Comment back on the PR
         run: |
@@ -119,6 +121,8 @@ jobs:
           test_folder: core/galata
           start_server_script: start:doc
           update_script: test:doc:update
+          artifact_name: updated-documentation-snapshots
+          report_name: update-documentation-report
 
       - name: Comment back on the PR
         run: |

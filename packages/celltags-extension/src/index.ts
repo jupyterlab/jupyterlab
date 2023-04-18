@@ -24,6 +24,7 @@ import {
  */
 const customCellTag: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/celltags-extension:plugin',
+  description: 'Adds the cell tags editor.',
   autoStart: true,
   requires: [INotebookTracker],
   optional: [IFormRendererRegistry],

@@ -42,7 +42,8 @@ export interface ITableOfContentsRegistry {
  * Table of contents registry token.
  */
 export const ITableOfContentsRegistry = new Token<ITableOfContentsRegistry>(
-  '@jupyterlab/toc:ITableOfContentsRegistry'
+  '@jupyterlab/toc:ITableOfContentsRegistry',
+  'A service to register table of content factory.'
 );
 
 /**
@@ -61,7 +62,8 @@ export interface ITableOfContentsTracker {
  * Table of contents tracker token.
  */
 export const ITableOfContentsTracker = new Token<ITableOfContentsTracker>(
-  '@jupyterlab/toc:ITableOfContentsTracker'
+  '@jupyterlab/toc:ITableOfContentsTracker',
+  'A widget tracker for table of contents.'
 );
 
 /**

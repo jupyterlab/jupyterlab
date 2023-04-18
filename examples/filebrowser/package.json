@@ -19,8 +19,8 @@
     "@jupyterlab/theme-light-extension": "^4.0.0-beta.1",
     "@jupyterlab/translation": "^4.0.0-beta.1",
     "@jupyterlab/ui-components": "^4.0.0-beta.1",
-    "@lumino/commands": "^2.0.1",
-    "@lumino/widgets": "^2.0.1"
+    "@lumino/commands": "^2.1.0",
+    "@lumino/widgets": "^2.1.0"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
@@ -28,7 +28,7 @@
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~3.0.0",
     "style-loader": "~3.3.1",
-    "typescript": "~5.0.2",
+    "typescript": "~5.0.4",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1",
     "whatwg-fetch": "^3.0.0"

@@ -56,7 +56,37 @@ For more details about the new file structure and packaging of the extension, ch
 jlpm
 ^^^^
 
-The utility ``jlpm`` is using yarn 3 (it was yarn 1 previously).
+The utility ``jlpm`` uses Yarn 3 (previously Yarn 1). This will require updating your
+package configuration.
+
+- Create a file ``.yarnrc.yml`` containing:
+
+.. code-block:: yaml
+
+   enableImmutableInstalls: false
+   nodeLinker: node-modules
+
+- Add to ``.gitignore``
+
+.. code-block::
+
+   .yarn/
+
+- Run ``jlpm install``
+  This will reset your ``yarn.lock`` content as its format has changed.
+
+.. note::
+
+   You can find more information on upgrading Yarn from version 1 to version 3 in
+   [Yarn documentation](https://yarnpkg.com/getting-started/migration).
+
+If you are hit by multiple versions of the same packages (like ``@lumino/widgets``),
+TypeScript may complain that the types are not matching. One possible solution
+is to force packages deduplication using:
+
+.. code-block:: sh
+
+   jlpm dedupe --strategy highest
 
 API breaking changes
 ^^^^^^^^^^^^^^^^^^^^
@@ -71,12 +101,13 @@ bumped their major version (following semver convention). We want to point out p
 ``@jupyterlab/documentsearch`` and ``@jupyterlab/toc`` API that have been fully reworked.
 
 - ``@jupyterlab/application`` from 3.x to 4.x
-   Major version bump to allow alternate ``ServiceManager`` implementations in ``JupyterFrontEnd``.
-   Specifically this allows the use of a mock manager.
-   This also makes the ``JupyterLab.IOptions`` more permissive to not require a shell when options are
-   given and allow a shell that meets the ``ILabShell`` interface.
-   As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
-   See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
+   * Major version bump to allow alternate ``ServiceManager`` implementations in ``JupyterFrontEnd``.
+     Specifically this allows the use of a mock manager.
+     This also makes the ``JupyterLab.IOptions`` more permissive to not require a shell when options are
+     given and allow a shell that meets the ``ILabShell`` interface.
+     As a consequence, all other ``@jupyterlab/`` packages have their major version bumped too.
+     See https://github.com/jupyterlab/jupyterlab/pull/11537 for more details.
+   * Rename token ``@jupyterlab/apputils:IConnectionLost`` to ``@jupyterlab/application:IConnectionLost``.
 - ``@jupyterlab/apputils`` from 3.x to 4.x
    * Rename ``IToolbarWidgetRegistry.registerFactory`` to ``IToolbarWidgetRegistry.addFactory``
    * ``ISanitizer`` and ``ISanitizer.IOptions`` are deprecated in favor of ``IRenderMime.ISanitizer`` and
@@ -86,7 +117,8 @@ bumped their major version (following semver convention). We want to point out p
    Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
    * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
-     should use the `Theme Cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_ instead.
+     should use the `TypeScript extension Cookiecutter <https://github.com/jupyterlab/extension-cookiecutter-ts>`_
+     (choosing ``theme`` as ``kind`` ) instead.
    * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
    * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
 - ``@jupyterlab/cells`` from 3.x to 4.x
@@ -242,9 +274,13 @@ bumped their major version (following semver convention). We want to point out p
 - ``@jupyterlab/filebrowser-extension`` from 3.x to 4.x
    Remove command ``filebrowser:create-main-launcher``. You can replace by ``launcher:create`` (same behavior)
    All launcher creation actions are moved to ``@jupyterlab/launcher-extension``.
+- ``@jupyterlab/imageviewer-extension`` from 3.x to 4.x
+   Removed ``addCommands`` from public API
 - ``@jupyterlab/mainmenu`` from 3.x to 4.x
    * ``IMainMenu.addMenu`` signature changed from ``addMenu(menu: Menu, options?: IMainMenu.IAddOptions): void``
      to ``addMenu(menu: Menu, update?: boolean, options?: IMainMenu.IAddOptions): void``
+   * Removed ``createEditMenu``, ``createFileMenu``, ``createKernelMenu``, ``createViewMenu``, ``createRunMenu``,
+     ``createTabsMenu``, ``createHelpMenu`` from public API.
 - ``@jupyterlab/notebook`` from 3.x to 4.x
    * ``NotebookWidgetFactory.IOptions`` has no ``sessionDialogs`` option any more.
    * The ``NotebookPanel._onSave`` method is now ``private``.
@@ -275,9 +311,10 @@ bumped their major version (following semver convention). We want to point out p
      The ``KeySelector`` has also been removed as not used anymore, replaced by the use of ``@jupyterlab/metadataform``
      to provides selection for metadata keys.
 - ``@jupyterlab/rendermime`` from 3.x to 4.x
-  The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
-  that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
-  Consequently the ``IRendererFactory.createRenderer`` has a new option ``markdownParser``.
+   * The markdown parser has been extracted to its own plugin ``@jupyterlab/markedparser-extension:plugin``
+     that provides a new token ``IMarkdownParser`` (defined in ``@jupyterlab/rendermime``).
+     Consequently the ``IRendererFactory.createRenderer`` has a new option ``markdownParser``.
+   * [Not breaking] ``IRenderMime.IExtension`` has a new optional ``description: string`` attribute for documentation.
 - ``@jupyterlab/rendermime-interfaces`` from 3.x to 4.x
   Remove ``IRenderMime.IRenderer.translator?`` attribute; the translator object is still passed to
   the constructor if needed by the renderer factory.
@@ -288,15 +325,18 @@ bumped their major version (following semver convention). We want to point out p
    This package is no longer present in JupyterLab. For documentation related to the shared models,
    please check out `@jupyter/ydoc documentation <https://jupyter-ydoc.readthedocs.io/en/latest>`_.
 - ``@jupyterlab/statusbar`` from 3.x to 4.x
-  Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
-  Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
-  Plugin ``@jupyterlab/statusbar-extension:kernel-status`` renamed to ``@jupyterlab/apputils-extension:kernel-status``
-  Plugin ``@jupyterlab/statusbar-extension:running-sessions-status`` renamed to ``@jupyterlab/apputils-extension:running-sessions-status``
-  Plugin ``@jupyterlab/statusbar-extension:line-col-status`` renamed to ``@jupyterlab/codemirror-extension:line-col-status``
-  ``HoverBox`` component moved from ``@jupyterlab/apputils`` to ``@jupyterlab/ui-components``.
+   * Setting ``@jupyterlab/statusbar-extension:plugin . startMode`` moved to ``@jupyterlab/application-extension:shell . startMode``
+   * Plugin ``@jupyterlab/statusbar-extension:mode-switch`` renamed to ``@jupyterlab/application-extension:mode-switch``
+   * Plugin ``@jupyterlab/statusbar-extension:kernel-status`` renamed to ``@jupyterlab/apputils-extension:kernel-status``
+   * Plugin ``@jupyterlab/statusbar-extension:running-sessions-status`` renamed to ``@jupyterlab/apputils-extension:running-sessions-status``
+   * Plugin ``@jupyterlab/statusbar-extension:line-col-status`` renamed to ``@jupyterlab/codemirror-extension:line-col-status``
+   * ``HoverBox`` component moved from ``@jupyterlab/apputils`` to ``@jupyterlab/ui-components``.
+   * Removed ``STATUSBAR_PLUGIN_ID`` from public API.
 - ``@jupyterlab/terminal`` from 3.x to 4.x
-  Xterm.js upgraded from 4.x to 5.x
-  ``IThemeObject.selection`` renamed to ``selectionBackground``
+   * Xterm.js upgraded from 4.x to 5.x
+   * ``IThemeObject.selection`` renamed to ``selectionBackground``
+- ``@jupyterlab/terminal-extension`` from 3.x to 4.x
+   Removed ``addCommands`` from public API
 - ``@jupyterlab/toc`` from 3.x to 4.x
    ``@jupyterlab/toc:plugin`` renamed ``@jupyterlab/toc-extension:registry``
    This may impact application configuration (for instance if the plugin was disabled).
@@ -323,17 +363,17 @@ bumped their major version (following semver convention). We want to point out p
         The renderer id must follow the convention ``<ISettingRegistry.IPlugin.id>.<propertyName>``. This is to
         ensure a custom renderer is not used for property with the same name but different schema.
 - ``@jupyterlab/translation`` from 3.x to 4.x
-   Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
+  Renamed the method ``locale`` into the property ``languageCode`` in the ``NullTranslator``
 - ``@jupyterlab/vdom`` and ``@jupyterlab/vdom-extension`` have been removed.
-   The underlying [vdom](https://github.com/nteract/vdom) Python package is unmaintained.
-   So it was decided to drop it from core packages.
+  The underlying `vdom <https://github.com/nteract/vdom>`_ Python package is unmaintained.
+  So it was decided to drop it from core packages.
 - ``jupyter.extensions.hub-extension`` from 3.x to 4.x
    * Renamed ``jupyter.extensions.hub-extension`` to ``@jupyterlab/hub-extension:plugin``.
    * Renamed ``jupyter.extensions.hub-extension:plugin`` to ``@jupyterlab/hub-extension:menu``.
-- TypeScript 4.7 update
-   As a result of the update to TypeScript 4.7, a couple of interfaces have had their definitions changed.
-   The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
-   The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
+- TypeScript 5.0 update
+  As a result of the update to TypeScript 5.0, a couple of interfaces have had their definitions changed.
+  The ``anchor`` parameter of ``HoverBox.IOptions`` is now a ``DOMRect`` instead of ``ClientRect``.
+  The ``CodeEditor.ICoordinate`` interface now extends ``DOMRectReadOnly`` instead of ``JSONObject, ClientRect``.
 - React 18.2.0 update
   The update to React 18.2.0 (from 17.0.1) should be propagated to extensions as well.
   Here is the documentation about the `migration to react 18 <https://reactjs.org/blog/2022/03/08/react-18-upgrade-guide.html>`_.

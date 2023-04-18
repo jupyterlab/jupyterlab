@@ -47,12 +47,13 @@
     "@jupyterlab/application": "^4.0.0-beta.1",
     "@jupyterlab/apputils": "^4.0.0-beta.1",
     "@jupyterlab/coreutils": "^6.0.0-beta.1",
+    "@jupyterlab/debugger": "^4.0.0-beta.1",
     "@jupyterlab/docmanager": "^4.0.0-beta.1",
     "@jupyterlab/nbformat": "^4.0.0-beta.1",
     "@jupyterlab/notebook": "^4.0.0-beta.1",
     "@jupyterlab/services": "^7.0.0-beta.1",
     "@jupyterlab/settingregistry": "^4.0.0-beta.1",
-    "@lumino/coreutils": "^2.0.0",
+    "@lumino/coreutils": "^2.1.0",
     "@playwright/test": "^1.32.2",
     "@stdlib/stats": "~0.0.13",
     "fs-extra": "^10.1.0",
@@ -65,7 +66,7 @@
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.2"
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

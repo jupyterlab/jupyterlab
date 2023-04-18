@@ -75,7 +75,7 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
 /**
- * The overlay tha can be clicked to switch between output scrolling modes.
+ * The overlay that can be clicked to switch between output scrolling modes.
  */
 const OUTPUT_PROMPT_OVERLAY = 'jp-OutputArea-promptOverlay';
 

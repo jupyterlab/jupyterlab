@@ -63,6 +63,7 @@ namespace CommandIDs {
 const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   activate: activateLogConsole,
   id: LOG_CONSOLE_PLUGIN_ID,
+  description: 'Provides the logger registry.',
   provides: ILoggerRegistry,
   requires: [ILabShell, IRenderMimeRegistry, INotebookTracker, ITranslator],
   optional: [ICommandPalette, ILayoutRestorer, ISettingRegistry, IStatusBar],
@@ -312,7 +313,7 @@ function activateLogConsole(
  */
 export class LogLevelSwitcher extends ReactWidget {
   /**
-   * Construct a new cell type switcher.
+   * Construct a new log level switcher.
    */
   constructor(widget: LogConsolePanel, translator?: ITranslator) {
     super();

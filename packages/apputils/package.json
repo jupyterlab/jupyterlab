@@ -40,8 +40,8 @@
     "docs": "typedoc src",
     "test": "jest -i",
     "test:cov": "jest -i --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -55,14 +55,14 @@
     "@jupyterlab/translation": "^4.0.0-beta.1",
     "@jupyterlab/ui-components": "^4.0.0-beta.1",
     "@lumino/algorithm": "^2.0.0",
-    "@lumino/commands": "^2.0.1",
-    "@lumino/coreutils": "^2.0.0",
-    "@lumino/disposable": "^2.0.0",
+    "@lumino/commands": "^2.1.0",
+    "@lumino/coreutils": "^2.1.0",
+    "@lumino/disposable": "^2.1.0",
     "@lumino/domutils": "^2.0.0",
     "@lumino/messaging": "^2.0.0",
-    "@lumino/signaling": "^2.0.0",
+    "@lumino/signaling": "^2.1.0",
     "@lumino/virtualdom": "^2.0.0",
-    "@lumino/widgets": "^2.0.1",
+    "@lumino/widgets": "^2.1.0",
     "@types/react": "^18.0.26",
     "react": "^18.2.0",
     "sanitize-html": "~2.7.3"
@@ -73,8 +73,8 @@
     "@types/sanitize-html": "^2.3.1",
     "jest": "^29.2.0",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
-    "typescript": "~5.0.2"
+    "typedoc": "~0.24.1",
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

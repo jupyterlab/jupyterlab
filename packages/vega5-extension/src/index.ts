@@ -182,6 +182,7 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
 
 const extension: IRenderMime.IExtension = {
   id: '@jupyterlab/vega5-extension:factory',
+  description: 'Provides a renderer for Vega 5 and Vega-Lite 3 to 5 content.',
   rendererFactory,
   rank: 57,
   dataType: 'json',

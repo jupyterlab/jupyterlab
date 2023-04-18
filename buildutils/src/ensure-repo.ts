@@ -158,6 +158,7 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/galata': [
     '@jupyterlab/application',
     '@jupyterlab/apputils',
+    '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
     '@jupyterlab/notebook'
   ],
@@ -165,6 +166,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/application',
     '@jupyterlab/apputils',
     '@jupyterlab/cells',
+    '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
     '@jupyterlab/notebook'
   ],

@@ -9,7 +9,10 @@ import { ConsolePanel } from './panel';
  * The console tracker token.
  */
 export const IConsoleTracker = new Token<IConsoleTracker>(
-  '@jupyterlab/console:IConsoleTracker'
+  '@jupyterlab/console:IConsoleTracker',
+  `A widget tracker for code consoles.
+  Use this if you want to be able to iterate over and interact with code consoles
+  created by the application.`
 );
 
 /**

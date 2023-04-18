@@ -32,8 +32,8 @@
     "docs": "node build-doc-index.js",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -135,8 +135,8 @@
     "jest": "^29.2.0",
     "json-to-html": "~0.1.2",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
-    "typescript": "~5.0.2"
+    "typedoc": "~0.24.1",
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

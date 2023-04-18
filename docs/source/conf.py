@@ -186,10 +186,14 @@ def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
 
 COMMANDS_LIST_PATH = "commands.test.ts-snapshots/commandsList-documentation-linux.json"
 COMMANDS_LIST_DOC = "user/commands_list.md"
+PLUGINS_LIST_PATH = "plugins.test.ts-snapshots/plugins-documentation-linux.json"
+PLUGINS_LIST_DOC = "extension/plugins_list.rst"
+TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
+TOKENS_LIST_DOC = "extension/tokens_list.rst"
 
 
 def document_commands_list(temp_folder: Path) -> None:
-    """Generate the command list documentation page for application extraction."""
+    """Generate the command list documentation page from application extraction."""
     list_path = HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / COMMANDS_LIST_PATH
 
     commands_list = json.loads(list_path.read_text())
@@ -212,6 +216,18 @@ def document_commands_list(temp_folder: Path) -> None:
         template += "| `{id}` | {label} | {shortcuts} |\n".format(**command)
 
     (temp_folder / COMMANDS_LIST_DOC).write_text(template)
+
+
+def document_plugins_tokens_list(list_path: Path, output_path: Path) -> None:
+    """Generate the plugins list documentation page from application extraction."""
+    items = json.loads(list_path.read_text())
+
+    template = ""
+
+    for _name, _description in items.items():
+        template += f"- ``{_name}``: {_description}\n"
+
+    output_path.write_text(template)
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -388,6 +404,15 @@ def setup(app):
         for f in tmp_files:
             f.unlink()
 
-    document_commands_list(Path(app.srcdir))
+    src_dir = Path(app.srcdir)
+    document_commands_list(src_dir)
+    document_plugins_tokens_list(
+        HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / PLUGINS_LIST_PATH,
+        src_dir / PLUGINS_LIST_DOC,
+    )
+    document_plugins_tokens_list(
+        HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / TOKENS_LIST_PATH,
+        src_dir / TOKENS_LIST_DOC,
+    )
 
     app.connect("build-finished", partial(clean_code_files, tmp_files))

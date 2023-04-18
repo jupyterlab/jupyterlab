@@ -27,6 +27,7 @@ import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
 import { Notebook, StaticNotebook } from './widget';
+import { NotebookWindowedLayout } from './windowing';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -300,6 +301,10 @@ export namespace NotebookActions {
 
     const primaryModel = primary.model.sharedModel;
     const { cell_type, metadata } = primaryModel.toJSON();
+    if (primaryModel.cell_type === 'code') {
+      // We can trust this cell because the outputs will be removed.
+      metadata.trusted = true;
+    }
     const newModel = {
       cell_type,
       metadata,
@@ -372,7 +377,14 @@ export namespace NotebookActions {
 
     const newIndex = notebook.activeCell ? notebook.activeCellIndex : 0;
     model.sharedModel.insertCell(newIndex, {
-      cell_type: notebook.notebookConfig.defaultCell
+      cell_type: notebook.notebookConfig.defaultCell,
+      metadata:
+        notebook.notebookConfig.defaultCell === 'code'
+          ? {
+              // This is an empty cell created by user, thus is trusted
+              trusted: true
+            }
+          : {}
     });
     // Make the newly inserted cell active.
     notebook.activeCellIndex = newIndex;
@@ -402,7 +414,14 @@ export namespace NotebookActions {
 
     const newIndex = notebook.activeCell ? notebook.activeCellIndex + 1 : 0;
     model.sharedModel.insertCell(newIndex, {
-      cell_type: notebook.notebookConfig.defaultCell
+      cell_type: notebook.notebookConfig.defaultCell,
+      metadata:
+        notebook.notebookConfig.defaultCell === 'code'
+          ? {
+              // This is an empty cell created by user, thus is trusted
+              trusted: true
+            }
+          : {}
     });
     // Make the newly inserted cell active.
     notebook.activeCellIndex = newIndex;
@@ -560,7 +579,14 @@ export namespace NotebookActions {
       // Do not use push here, as we want an widget insertion
       // to make sure no placeholder widget is rendered.
       model.sharedModel.insertCell(notebook.widgets.length, {
-        cell_type: notebook.notebookConfig.defaultCell
+        cell_type: notebook.notebookConfig.defaultCell,
+        metadata:
+          notebook.notebookConfig.defaultCell === 'code'
+            ? {
+                // This is an empty cell created by user, thus is trusted
+                trusted: true
+              }
+            : {}
       });
       notebook.activeCellIndex++;
       if (notebook.activeCell?.inViewport === false) {
@@ -613,7 +639,14 @@ export namespace NotebookActions {
     );
     const model = notebook.model;
     model.sharedModel.insertCell(notebook.activeCellIndex + 1, {
-      cell_type: notebook.notebookConfig.defaultCell
+      cell_type: notebook.notebookConfig.defaultCell,
+      metadata:
+        notebook.notebookConfig.defaultCell === 'code'
+          ? {
+              // This is an empty cell created by user, thus is trusted
+              trusted: true
+            }
+          : {}
     });
     notebook.activeCellIndex++;
     if (notebook.activeCell?.inViewport === false) {
@@ -846,6 +879,7 @@ export namespace NotebookActions {
       return;
     }
     let maxCellIndex = notebook.widgets.length - 1;
+
     // Find last non-hidden cell
     while (
       notebook.widgets[maxCellIndex].isHidden ||
@@ -854,6 +888,8 @@ export namespace NotebookActions {
       maxCellIndex -= 1;
     }
     if (notebook.activeCellIndex === maxCellIndex) {
+      const footer = (notebook.layout as NotebookWindowedLayout).footer;
+      footer?.node.focus();
       return;
     }
 
@@ -2367,13 +2403,26 @@ namespace Private {
     const cells = notebook.model!.cells;
     const index = findIndex(cells, model => model === cell.model);
 
+    // While this cell has no outputs and could be trusted following the letter
+    // of Jupyter trust model, its content comes from kernel and hence is not
+    // necessarily controlled by the user; if we set it as trusted, a user
+    // executing cells in succession could end up with unwanted trusted output.
     if (index === -1) {
       notebookModel.insertCell(notebookModel.cells.length, {
         cell_type: 'code',
-        source: text
+        source: text,
+        metadata: {
+          trusted: false
+        }
       });
     } else {
-      notebookModel.insertCell(index + 1, { cell_type: 'code', source: text });
+      notebookModel.insertCell(index + 1, {
+        cell_type: 'code',
+        source: text,
+        metadata: {
+          trusted: false
+        }
+      });
     }
   }
 
@@ -2456,6 +2505,14 @@ namespace Private {
         const raw = child.model.toJSON();
         notebookSharedModel.transact(() => {
           notebookSharedModel.deleteCell(index);
+          if (value === 'code') {
+            // After change of type outputs are deleted so cell can be trusted.
+            raw.metadata.trusted = true;
+          } else {
+            // Otherwise clear the metadata as trusted is only "valid" on code
+            // cells (since other cell types cannot have outputs).
+            raw.metadata.trusted = undefined;
+          }
           const newCell = notebookSharedModel.insertCell(index, {
             cell_type: value,
             source: raw.source,
@@ -2518,7 +2575,14 @@ namespace Private {
         // a notebook's last cell undoable.
         if (sharedModel.cells.length == toDelete.length) {
           sharedModel.insertCell(0, {
-            cell_type: notebook.notebookConfig.defaultCell
+            cell_type: notebook.notebookConfig.defaultCell,
+            metadata:
+              notebook.notebookConfig.defaultCell === 'code'
+                ? {
+                    // This is an empty cell created in empty notebook, thus is trusted
+                    trusted: true
+                  }
+                : {}
           });
         }
       });

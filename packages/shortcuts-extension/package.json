@@ -36,8 +36,8 @@
     "docs": "typedoc src",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -46,20 +46,20 @@
     "@jupyterlab/translation": "^4.0.0-beta.1",
     "@jupyterlab/ui-components": "^4.0.0-beta.1",
     "@lumino/algorithm": "^2.0.0",
-    "@lumino/commands": "^2.0.1",
-    "@lumino/coreutils": "^2.0.0",
-    "@lumino/disposable": "^2.0.0",
+    "@lumino/commands": "^2.1.0",
+    "@lumino/coreutils": "^2.1.0",
+    "@lumino/disposable": "^2.1.0",
     "@lumino/domutils": "^2.0.0",
     "@lumino/keyboard": "^2.0.0",
-    "@lumino/widgets": "^2.0.1",
+    "@lumino/widgets": "^2.1.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.0.0-beta.1",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
-    "typescript": "~5.0.2"
+    "typedoc": "~0.24.1",
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

@@ -28,16 +28,16 @@
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "test": "jest -i",
     "test:cov": "jest -i --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
     "@jupyterlab/coreutils": "^6.0.0-beta.1",
-    "@lumino/coreutils": "^2.0.0",
-    "@lumino/signaling": "^2.0.0",
+    "@lumino/coreutils": "^2.1.0",
+    "@lumino/signaling": "^2.1.0",
     "child_process": "~1.0.2",
     "deepmerge": "^4.2.2",
     "fs-extra": "^10.1.0",
@@ -47,14 +47,14 @@
     "jest-junit": "^15.0.0",
     "node-fetch": "^2.6.0",
     "simulate-event": "~1.4.0",
-    "ts-jest": "^29.0.0"
+    "ts-jest": "^29.1.0"
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",
     "@types/node": "^18.11.18",
     "@types/node-fetch": "^2.6.2",
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.2"
+    "typescript": "~5.0.4"
   },
   "peerDependencies": {
     "typescript": ">=4.3"
