@@ -97,7 +97,6 @@ export const SettingsPanel: React.FC<ISettingsPanelProps> = ({
       newFilter: SettingsEditor.PluginSearchFilter
     ) => {
       newFilter ? setFilter(() => newFilter) : setFilter(null);
-      setActivePluginId(null);
     };
 
     // When filter updates, only show plugins that match search.
