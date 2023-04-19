@@ -8,13 +8,14 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { jupyterIcon, ReactWidget } from '@jupyterlab/ui-components';
+import { ReactWidget } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 import { Message } from '@lumino/messaging';
 import { ISignal } from '@lumino/signaling';
 import { SplitPanel, Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { SettingsEditorPlaceholder } from './InstructionsPlaceholder';
 import { PluginEditor } from './plugineditor';
 import { PluginList } from './pluginlist';
 
@@ -44,7 +45,6 @@ export class JsonSettingEditor extends SplitPanel {
       spacing: 1
     });
     this.translator = options.translator || nullTranslator;
-    const trans = this.translator.load('jupyterlab');
     this.addClass('jp-SettingEditor');
     this.key = options.key;
     this.state = options.state;
@@ -52,25 +52,7 @@ export class JsonSettingEditor extends SplitPanel {
     const { commands, editorFactory, rendermime } = options;
     const registry = (this.registry = options.registry);
     const instructions = (this._instructions = ReactWidget.create(
-      <React.Fragment>
-        <h2>
-          <jupyterIcon.react
-            className="jp-SettingEditorInstructions-icon"
-            tag="span"
-            elementPosition="center"
-            height="auto"
-            width="60px"
-          />
-          <span className="jp-SettingEditorInstructions-title">
-            {trans.__('Settings')}
-          </span>
-        </h2>
-        <span className="jp-SettingEditorInstructions-text">
-          {trans.__(
-            'Select a plugin from the list to view and edit its preferences.'
-          )}
-        </span>
-      </React.Fragment>
+      <SettingsEditorPlaceholder translator={this.translator} />
     ));
     instructions.addClass('jp-SettingEditorInstructions');
     const editor = (this._editor = new PluginEditor({
