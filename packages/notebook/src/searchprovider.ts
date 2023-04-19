@@ -24,6 +24,7 @@ import {
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ArrayExt } from '@lumino/algorithm';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { CellList } from './celllist';
 import { NotebookPanel } from './panel';
@@ -679,13 +680,28 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   private async _onActiveCellChanged() {
-    await this._onCellSelectionChanged();
+    this._activeCellChangedFinished = new PromiseDelegate();
 
     if (this.widget.content.activeCellIndex !== this._currentProviderIndex) {
-      await this.clearHighlight();
+      const previouslyProviderCell =
+        this._currentProviderIndex !== null &&
+        this._currentProviderIndex < this.widget.content.widgets.length
+          ? this.widget.content.widgets[this._currentProviderIndex]
+          : null;
+
+      const previousProviderInCurrentSelection =
+        previouslyProviderCell &&
+        this.widget.content.isSelectedOrActive(previouslyProviderCell);
+
+      if (!previousProviderInCurrentSelection) {
+        await this._updateCellSelection();
+        // Clear highlight from previous provider
+        await this.clearHighlight();
+      }
       this._currentProviderIndex = this.widget.content.activeCellIndex;
     }
     this._observeActiveCell();
+    this._activeCellChangedFinished.resolve();
   }
 
   private _observeActiveCell() {
@@ -765,6 +781,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   private async _onCellSelectionChanged() {
+    if (this._activeCellChangedFinished) {
+      // Avoid race condition due to `activeCellChanged` and `selectionChanged`
+      // signals firing in short sequence, with handling of the former having
+      // potential to undo selection set by the latter.
+      await this._activeCellChangedFinished.promise;
+    }
+    await this._updateCellSelection();
+  }
+
+  private async _updateCellSelection() {
     const cells = this.widget.content.widgets;
     let selectedCells = 0;
     await Promise.all(
@@ -788,6 +814,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._filtersChanged.emit();
   }
 
+  private _activeCellChangedFinished: PromiseDelegate<void> | undefined;
   private _currentProviderIndex: number | null = null;
   private _filters: IFilters | undefined;
   private _onSelection = false;
