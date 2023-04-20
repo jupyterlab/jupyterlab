@@ -267,12 +267,16 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    *
    * @param index Item index
    * @param align Where to align the item in the viewport
+   * @param margin In 'smart' mode the viewport proportion to add
    * @returns The needed scroll offset
    */
   getOffsetForIndexAndAlignment(
     index: number,
-    align: WindowedList.ScrollToAlign = 'auto'
+    align: WindowedList.ScrollToAlign = 'auto',
+    margin: number = 0.25
   ): number {
+    const margin_ =
+      align === 'smart' ? Math.min(Math.max(0.0, margin), 1.0) : 0.0;
     const size = this._height;
     const itemMetadata = this._getItemMetadata(index);
 
@@ -280,19 +284,19 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     // To ensure it reflects actual measurements instead of just estimates.
     const estimatedTotalSize = this.getEstimatedTotalSize();
 
-    const maxOffset = Math.max(
+    const topOffset = Math.max(
       0,
       Math.min(estimatedTotalSize - size, itemMetadata.offset)
     );
-    const minOffset = Math.max(
+    const bottomOffset = Math.max(
       0,
       itemMetadata.offset - size + itemMetadata.size
     );
 
     if (align === 'smart') {
       if (
-        this._scrollOffset >= minOffset - size &&
-        this._scrollOffset <= maxOffset + size
+        this._scrollOffset >= bottomOffset - size &&
+        this._scrollOffset <= topOffset + size
       ) {
         align = 'auto';
       } else {
@@ -302,22 +306,22 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
     switch (align) {
       case 'start':
-        return maxOffset;
+        return topOffset;
       case 'end':
-        return minOffset;
+        return bottomOffset;
       case 'center':
-        return Math.round(minOffset + (maxOffset - minOffset) / 2);
+        return Math.round(bottomOffset + (topOffset - bottomOffset) / 2);
       case 'auto':
       default:
         if (
-          this._scrollOffset >= minOffset &&
-          this._scrollOffset <= maxOffset
+          this._scrollOffset >= bottomOffset &&
+          this._scrollOffset <= itemMetadata.offset
         ) {
           return this._scrollOffset;
-        } else if (this._scrollOffset < minOffset) {
-          return minOffset;
+        } else if (this._scrollOffset < bottomOffset) {
+          return bottomOffset + margin_ * size;
         } else {
-          return maxOffset;
+          return Math.max(0, topOffset - margin_ * size);
         }
     }
   }
@@ -723,6 +727,7 @@ export class WindowedList<
    * @deprecated since v4 This is an internal helper. Prefer calling `scrollToItem`.
    */
   scrollTo(scrollOffset: number): void {
+    console.log(`scrollTo ${scrollOffset}`);
     if (!this.viewModel.windowingActive) {
       this.node.scrollTo({ top: scrollOffset });
       return;
@@ -751,10 +756,12 @@ export class WindowedList<
    *
    * @param index Item index to scroll to
    * @param align Type of alignment
+   * @param margin In 'smart' mode the viewport proportion to add
    */
   scrollToItem(
     index: number,
-    align: WindowedList.ScrollToAlign = 'auto'
+    align: WindowedList.ScrollToAlign = 'auto',
+    margin: number = 0.25
   ): Promise<void> {
     if (!this.viewModel.windowingActive) {
       const widget = this.layout.widgets[index];
@@ -786,7 +793,8 @@ export class WindowedList<
     this.scrollTo(
       this.viewModel.getOffsetForIndexAndAlignment(
         Math.max(0, Math.min(index, this._viewModel.widgetCount - 1)),
-        align
+        align,
+        margin
       )
     );
 
@@ -1245,9 +1253,14 @@ export namespace WindowedList {
      *
      * @param index Item index
      * @param align Where to align the item in the viewport
+     * @param margin In 'smart' mode the viewport proportion to add
      * @returns The needed scroll offset
      */
-    getOffsetForIndexAndAlignment(index: number, align: ScrollToAlign): number;
+    getOffsetForIndexAndAlignment(
+      index: number,
+      align?: ScrollToAlign,
+      margin?: number
+    ): number;
     /**
      * Compute the items range to display.
      *
