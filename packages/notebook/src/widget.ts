@@ -1307,14 +1307,13 @@ export class Notebook extends StaticNotebook {
       for (const widget of this.widgets) {
         this.deselect(widget);
       }
-      //  Edit mode unrenders an active markdown widget.
+      // Edit mode unrenders an active markdown widget.
       if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
       }
       activeCell!.inputHidden = false;
     } else {
-      // Focus on the active cell node, which blurs the editor node.
-      NotebookActions.focusActiveCell(this);
+      activeCell?.node.focus();
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
     this._ensureFocus();
@@ -1913,7 +1912,6 @@ export class Notebook extends StaticNotebook {
    */
   protected onActivateRequest(msg: Message): void {
     super.onActivateRequest(msg);
-    console.log('[onActiveRequest] _ensureFocus(force=true)');
     this._ensureFocus(true);
   }
 
@@ -2063,7 +2061,11 @@ export class Notebook extends StaticNotebook {
         }
       }
     }
-    if (force && activeCell && !activeCell.node.contains(document.activeElement)) {
+    if (
+      force &&
+      activeCell &&
+      !activeCell.node.contains(document.activeElement)
+    ) {
       NotebookActions.focusActiveCell(this);
     }
   }
@@ -2532,7 +2534,6 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex = start;
       this.extendContiguousSelectionTo(index - 1);
     }
-
     NotebookActions.focusActiveCell(this);
   }
 

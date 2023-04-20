@@ -2192,7 +2192,6 @@ namespace Private {
         });
       }
     }
-
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
