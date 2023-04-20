@@ -2661,7 +2661,7 @@ export class Notebook extends StaticNotebook {
     if (this.mode !== 'command') {
       this.mode = 'command';
 
-      // Switching to command mode currently focuses the notebook element, so
+      // Switching to command mode currently focuses the active cell, so
       // refocus the relatedTarget so the focus actually switches as intended.
       if (relatedTarget) {
         relatedTarget.focus();
