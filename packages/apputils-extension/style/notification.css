@@ -84,6 +84,7 @@
 .Toastify__toast {
   position: relative;
   min-height: unset;
+  padding: 4px;
   font-size: var(--jp-ui-font-size1);
   border-width: var(--jp-border-width);
   border-radius: var(--jp-border-radius);
@@ -98,6 +99,7 @@
 }
 
 .jp-Notification-Toast-Close {
+  padding: 0;
   position: absolute;
   right: 0.1px;
   cursor: pointer;
@@ -173,6 +175,7 @@
   flex-direction: row;
   flex-wrap: nowrap;
   flex: 0 0 auto;
+  padding-block-start: 8px;
 }
 
 .jp-toast-spacer {
