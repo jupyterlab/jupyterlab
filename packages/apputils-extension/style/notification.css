@@ -82,6 +82,7 @@
 }
 
 .Toastify__toast {
+  position: relative;
   min-height: unset;
   font-size: var(--jp-ui-font-size1);
   border-width: var(--jp-border-width);
@@ -91,9 +92,14 @@
   cursor: default;
 }
 
+.Toastify__toast-body {
+  display: flex;
+  flex-grow: 1;
+}
+
 .jp-Notification-Toast-Close {
-  align-self: start;
-  padding: 0;
+  position: absolute;
+  right: 0.1px;
   cursor: pointer;
 }
 
@@ -129,6 +135,10 @@
 .Toastify__toast-body a:hover {
   color: var(--jp-content-link-color);
   text-decoration: underline;
+}
+
+.jp-toast-message {
+  padding-inline-end: 16px;
 }
 
 /* p elements are added by the markdown rendering.

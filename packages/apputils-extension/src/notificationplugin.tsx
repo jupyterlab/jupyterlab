@@ -203,30 +203,32 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                   <div
                     className={`Toastify__toast Toastify__toast-theme--light Toastify__toast--${toastType} jp-Notification-Toast-${toastType}`}
                   >
-                    <div className="Toastify__toast-body">
-                      {icon && (
-                        <div className="Toastify__toast-icon">
-                          {icon({ theme: 'light', type: toastType })}
-                        </div>
-                      )}
-                      <div>
-                        {Private.createContent(
-                          message,
-                          closeNotification,
-                          options.actions
+                    <div className="jp-Notification-Toast-Wrapper">
+                      <div className="Toastify__toast-body">
+                        {icon && (
+                          <div className="Toastify__toast-icon">
+                            {icon({ theme: 'light', type: toastType })}
+                          </div>
                         )}
+                        <div>
+                          {Private.createContent(
+                            message,
+                            closeNotification,
+                            options.actions
+                          )}
+                        </div>
                       </div>
+                      <button
+                        className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
+                        title={trans.__('Dismiss notification')}
+                        onClick={closeNotification}
+                      >
+                        <deleteIcon.react
+                          className="jp-icon-hover"
+                          tag="span"
+                        ></deleteIcon.react>
+                      </button>
                     </div>
-                    <button
-                      className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
-                      title={trans.__('Dismiss notification')}
-                      onClick={closeNotification}
-                    >
-                      <deleteIcon.react
-                        className="jp-icon-hover"
-                        tag="span"
-                      ></deleteIcon.react>
-                    </button>
                   </div>
                 </li>
               );
@@ -834,7 +836,7 @@ namespace Private {
         : message;
     return (
       <>
-        <div>
+        <div className="jp-toast-message">
           {shortenMessage.split('\n').map((part, index) => (
             <React.Fragment key={`part-${index}`}>
               {index > 0 ? <br /> : null}
