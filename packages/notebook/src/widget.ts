@@ -1313,7 +1313,15 @@ export class Notebook extends StaticNotebook {
       }
       activeCell!.inputHidden = false;
     } else {
-      activeCell?.node.focus();
+      NotebookActions.focusActiveCell(this, {
+        // Do not await the active cell because that creates a bug. If the user
+        // is editing a code cell and presses Accel Shift C to open the command
+        // palette, then the command palette opens before
+        // activeCell.node.focus() is called, which closes the command palette.
+        // To the end user, it looks as if all the keyboard shortcut did was
+        // focus the active cell.
+        shouldWait: false
+      });
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
     this._ensureFocus();
