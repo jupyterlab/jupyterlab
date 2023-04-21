@@ -24,7 +24,7 @@
       },
       "metadataOptions": {
         "/tags": {
-          "customRenderer": "celltags-extension:plugin.renderer"
+          "customRenderer": "@jupyterlab/celltags-extension:plugin.renderer"
         }
       }
     }

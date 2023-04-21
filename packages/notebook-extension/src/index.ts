@@ -999,7 +999,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       }
     };
     formRegistry.addRenderer(
-      'notebook-extension:metadata-editor.cell-metadata',
+      '@jupyterlab/notebook-extension:metadata-editor.cell-metadata',
       cellComponent
     );
 
@@ -1014,7 +1014,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       }
     };
     formRegistry.addRenderer(
-      'notebook-extension:metadata-editor.notebook-metadata',
+      '@jupyterlab/notebook-extension:metadata-editor.notebook-metadata',
       notebookComponent
     );
   }
@@ -1044,7 +1044,7 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
       }
     };
     formRegistry.addRenderer(
-      'notebook-extension:active-cell-tool.renderer',
+      '@jupyterlab/notebook-extension:active-cell-tool.renderer',
       component
     );
   }
