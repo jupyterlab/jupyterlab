@@ -657,7 +657,7 @@ export class CodeMirrorSearchHighlighter {
       selection.from === match.position &&
       selection.to === match.position + match.text.length
     ) {
-      // selection is already set - onyl scroll
+      // Selection is already set - only scroll.
       this._cm.editor.dispatch({
         scrollIntoView: true
       });
@@ -678,6 +678,7 @@ export class CodeMirrorSearchHighlighter {
       // no-op
       return;
     }
+
     // Highlight the current index
     if (this._currentIndex !== null) {
       const match = this.matches[this._currentIndex];
@@ -715,7 +716,6 @@ export class CodeMirrorSearchHighlighter {
     if (!this._cm!.state.field(this._highlightField, false)) {
       effects.push(StateEffect.appendConfig.of([this._highlightField]));
     }
-    // TODO: CM6 issue makes this focus editor
     this._cm!.editor.dispatch({ effects });
   }
 
