@@ -1554,14 +1554,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.2.2, @codemirror/view@npm:^6.6.0, @codemirror/view@npm:^6.9.5":
-  version: 6.9.5
-  resolution: "@codemirror/view@npm:6.9.5"
+"@codemirror/view@npm:^6.0.0, @codemirror/view@npm:^6.2.2, @codemirror/view@npm:^6.6.0, @codemirror/view@npm:^6.9.6":
+  version: 6.9.6
+  resolution: "@codemirror/view@npm:6.9.6"
   dependencies:
     "@codemirror/state": ^6.1.4
     style-mod: ^4.0.0
     w3c-keyname: ^2.2.4
-  checksum: 38039ae5d1cf4ec54c5d0252790a942b5788b9e8670dcf58e63c1f2befe11e852581c88f4e044ca664a7b11c634b1c152099da1a4ac9f454939b20d7c649b808
+  checksum: af6f3f66b26234e35a7036562d9f43f309b75b048e68b6300b0ccc6f7a13ac2a1aa4e16f84ebd05a8ded039549efc19cf495fea66593726f6ffebe45c0117418
   languageName: node
   linkType: hard
 
@@ -2348,7 +2348,7 @@ __metadata:
   resolution: "@jupyterlab/cells@workspace:packages/cells"
   dependencies:
     "@codemirror/state": ^6.2.0
-    "@codemirror/view": ^6.9.5
+    "@codemirror/view": ^6.9.6
     "@jupyter/ydoc": ^1.0.2
     "@jupyterlab/apputils": ^4.0.0-beta.1
     "@jupyterlab/attachments": ^4.0.0-beta.1
@@ -2476,7 +2476,7 @@ __metadata:
     "@codemirror/legacy-modes": ^6.3.2
     "@codemirror/search": ^6.3.0
     "@codemirror/state": ^6.2.0
-    "@codemirror/view": ^6.9.5
+    "@codemirror/view": ^6.9.6
     "@jupyter/ydoc": ^1.0.2
     "@jupyterlab/codeeditor": ^4.0.0-beta.1
     "@jupyterlab/coreutils": ^6.0.0-beta.1
@@ -2577,7 +2577,7 @@ __metadata:
   resolution: "@jupyterlab/console@workspace:packages/console"
   dependencies:
     "@codemirror/state": ^6.2.0
-    "@codemirror/view": ^6.9.5
+    "@codemirror/view": ^6.9.6
     "@jupyter/ydoc": ^1.0.2
     "@jupyterlab/apputils": ^4.0.0-beta.1
     "@jupyterlab/cells": ^4.0.0-beta.1
@@ -2709,7 +2709,7 @@ __metadata:
   resolution: "@jupyterlab/debugger@workspace:packages/debugger"
   dependencies:
     "@codemirror/state": ^6.2.0
-    "@codemirror/view": ^6.9.5
+    "@codemirror/view": ^6.9.6
     "@jupyter/ydoc": ^1.0.2
     "@jupyterlab/application": ^4.0.0-beta.1
     "@jupyterlab/apputils": ^4.0.0-beta.1
