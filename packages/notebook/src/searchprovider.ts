@@ -693,10 +693,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // change, and if selection is getting extended, we do not want to clear
       // highlights just to re-apply them shortly after, which has side effects
       // impacting the functionality and performance.
-      this._delayedActiveCellChangeHandler = setTimeout(
-        this._handleHighlightsAfterActiveCellChange,
-        0
-      );
+      this._delayedActiveCellChangeHandler = setTimeout(() => {
+        this.delayedActiveCellChangeHandlerReady =
+          this._handleHighlightsAfterActiveCellChange();
+      }, 0);
     }
     this._observeActiveCell();
   }
@@ -867,6 +867,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._filtersChanged.emit();
   }
 
+  // used for testing only
+  protected delayedActiveCellChangeHandlerReady: Promise<void>;
   private _currentProviderIndex: number | null = null;
   private _delayedActiveCellChangeHandler: number | null = null;
   private _filters: IFilters | undefined;
