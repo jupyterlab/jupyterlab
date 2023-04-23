@@ -495,7 +495,7 @@ test.describe('Notebook Search', () => {
     await page.keyboard.press('d');
     await page.keyboard.press('d');
 
-    await page.waitForSelector('text=-/19');
+    await page.waitForSelector('text=1/19');
 
     const nbPanel = await page.notebook.getNotebookInPanel();
 
