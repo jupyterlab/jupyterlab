@@ -65,7 +65,7 @@ export class FileEditorSearchProvider
     filters: IFilters | undefined
   ): Promise<void> {
     await super.startQuery(query, filters);
-    await this.highlightNext(false, true);
+    await this.highlightNext(true, 'selection-start');
   }
 
   /**

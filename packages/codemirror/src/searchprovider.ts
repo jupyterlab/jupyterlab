@@ -46,6 +46,7 @@ import {
   IBaseSearchProvider,
   IFilters,
   IReplaceOptions,
+  SearchStartAnchor,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -231,13 +232,12 @@ export abstract class EditorSearchProvider<
    */
   async highlightNext(
     loop = true,
-    fromCursor = false
+    from: SearchStartAnchor = 'auto'
   ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
-      // This starts from the cursor position if `fromCursor` is true
-      let match = await this.cmHandler.highlightNext(fromCursor);
+      let match = await this.cmHandler.highlightNext(from);
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
@@ -259,13 +259,12 @@ export abstract class EditorSearchProvider<
    */
   async highlightPrevious(
     loop = true,
-    fromCursor = false
+    from: SearchStartAnchor = 'auto'
   ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
-      // This starts from the cursor position if `fromCursor` is true
-      let match = await this.cmHandler.highlightPrevious(fromCursor);
+      let match = await this.cmHandler.highlightPrevious(from);
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
@@ -425,7 +424,7 @@ export abstract class EditorSearchProvider<
           this.cmHandler.currentIndex === null &&
           this.cmHandler.matches.length > 0
         ) {
-          await this.cmHandler.highlightNext(true, false);
+          await this.cmHandler.highlightNext('selection', false);
         }
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
@@ -472,9 +471,9 @@ interface IEffectValue {
  *
  * **NOTES:**
  * - to retain the selection visibility `drawSelection` extension is needed.
- * - highlighting starts from the cursor (if editor is focused, cursor moved,
- *   or `fromCursor` argument is set to `true`), or from last "current" match
- *   otherwise.
+ * - highlighting starts from the cursor (if editor is focused and `from` is set
+ *   to `'auto'`, cursor moved, or `from` argument is set to `'selection'` or
+ *   `'selection-start'`), or from last "current" match otherwise.
  * - `currentIndex` is the (readonly) source of truth for the current match.
  */
 export class CodeMirrorSearchHighlighter {
@@ -623,10 +622,10 @@ export class CodeMirrorSearchHighlighter {
    * @returns The next match if available
    */
   highlightNext(
-    fromCursor = false,
+    from: SearchStartAnchor = 'auto',
     doNotModifySelection = false
   ): Promise<ISearchMatch | undefined> {
-    this._currentIndex = this._findNext(false, fromCursor);
+    this._currentIndex = this._findNext(false, from);
     this._highlightCurrentMatch(doNotModifySelection);
     return Promise.resolve(
       this._currentIndex !== null
@@ -640,8 +639,10 @@ export class CodeMirrorSearchHighlighter {
    *
    * @returns The previous match if available
    */
-  highlightPrevious(fromCursor = false): Promise<ISearchMatch | undefined> {
-    this._currentIndex = this._findNext(true, fromCursor);
+  highlightPrevious(
+    from: SearchStartAnchor = 'auto'
+  ): Promise<ISearchMatch | undefined> {
+    this._currentIndex = this._findNext(true, from);
     this._highlightCurrentMatch();
     return Promise.resolve(
       this._currentIndex !== null
@@ -759,16 +760,24 @@ export class CodeMirrorSearchHighlighter {
     this._cm!.editor.dispatch({ effects });
   }
 
-  private _findNext(reverse: boolean, fromCursor = false): number | null {
+  private _findNext(
+    reverse: boolean,
+    from: SearchStartAnchor = 'auto'
+  ): number | null {
     if (this._matches.length === 0) {
       // No-op
       return null;
     }
 
     let lastPosition = 0;
-    if (this._cm!.hasFocus() || fromCursor) {
+    if ((from === 'auto' && this._cm!.hasFocus()) || from === 'selection') {
       const cursor = this._cm!.state.selection.main;
       lastPosition = reverse ? cursor.anchor : cursor.head;
+    } else if (from === 'selection-start') {
+      const cursor = this._cm!.state.selection.main;
+      lastPosition = Math.min(cursor.anchor, cursor.head);
+    } else if (from === 'start') {
+      lastPosition = 0;
     } else if (this._current) {
       lastPosition = reverse
         ? this._current.position

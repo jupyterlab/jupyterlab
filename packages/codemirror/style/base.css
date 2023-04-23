@@ -59,6 +59,7 @@
 
 .cm-searching,
 .cm-searching span {
+  /* `.cm-searching span`: we need to override syntax highlighting */
   background-color: var(--jp-search-unselected-match-background-color);
   color: var(--jp-search-unselected-match-color);
 }
@@ -69,13 +70,16 @@
 }
 
 .jp-current-match > .cm-searching,
-.cm-searching > .jp-current-match {
+.jp-current-match > .cm-searching span,
+.cm-searching > .jp-current-match,
+.cm-searching > .jp-current-match span {
   background-color: var(--jp-search-selected-match-background-color);
   color: var(--jp-search-selected-match-color);
 }
 
 .jp-current-match > .cm-searching::selection,
-.cm-searching > .jp-current-match::selection {
+.cm-searching > .jp-current-match::selection,
+.jp-current-match > .cm-searching span::selection {
   background-color: var(--jp-search-selected-match-background-color);
   color: var(--jp-search-selected-match-color);
 }

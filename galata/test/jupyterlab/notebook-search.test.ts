@@ -111,8 +111,8 @@ test.describe('Notebook Search', () => {
       end: 28
     });
 
-    // Expect both matches to be found (xfail)
-    // await page.waitForSelector('text=1/2');
+    // Expect the first match to be highlighted
+    await page.waitForSelector('text=1/2');
 
     // Enter first cell again
     await page.notebook.enterCellEditingMode(0);
@@ -235,11 +235,8 @@ test.describe('Notebook Search', () => {
 
   test('Search in multiple selected cells', async ({ page }) => {
     await page.keyboard.press('Control+f');
-
     await page.fill('[placeholder="Find"]', 'with');
-
     await page.click('button[title="Show Search Filters"]');
-
     await page.click('text=Search in 1 Selected Cell');
 
     // Bring focus to first cell without switching away from command mode
@@ -272,6 +269,34 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot(
       'search-in-two-selected-cells.png'
     );
+  });
+
+  test('Search in multiple selected cells from edit mode', async ({ page }) => {
+    // This is testing focus handling when extending the selection after
+    // switching focus away from cell editor, which needs to protect against
+    // race conditions and CodeMirror6 focus issues when highlights get added.
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'with');
+    await page.click('button[title="Show Search Filters"]');
+    await page.click('text=Search in 1 Selected Cell');
+    await page.waitForSelector('text=1/4');
+
+    // Bring focus to first cell without switching to edit mode
+    let cell = await page.notebook.getCell(0);
+    await (await cell.$('.jp-Editor')).click();
+
+    // Switch back to command mode
+    await page.keyboard.press('Escape');
+
+    // Select two cells below
+    await page.keyboard.press('Shift+ArrowDown');
+    await page.keyboard.press('Shift+ArrowDown');
+
+    // Expect the filter text to be updated
+    await page.waitForSelector('text=Search in 3 Selected Cells');
+
+    // Expect 19 matches
+    await page.waitForSelector('text=1/19');
   });
 
   test('Search in selected text', async ({ page }) => {

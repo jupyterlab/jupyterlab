@@ -241,6 +241,21 @@ export interface ISearchProviderRegistry {
 }
 
 /**
+ * Defines from which position the search should be executed.
+ * - `'selection'` - search from selection head/anchor (depending on search direction)
+ * - `'previous-match'` - search from previous match
+ * - `'auto'` - search from selection if editor is focused or previous match otherwise
+ * - `'selection-start'` - search from selection head/anchor whichever is smaller
+ * - `'start'` - from start of the editor
+ */
+export type SearchStartAnchor =
+  | 'auto'
+  | 'selection'
+  | 'selection-start'
+  | 'previous-match'
+  | 'start';
+
+/**
  * Base search provider interface
  *
  * #### Notes

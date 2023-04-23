@@ -19,7 +19,8 @@ import {
   IReplaceOptionsSupport,
   ISearchMatch,
   ISearchProvider,
-  SearchProvider
+  SearchProvider,
+  SearchStartAnchor
 } from '@jupyterlab/documentsearch';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -308,9 +309,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    */
   async highlightNext(
     loop: boolean = true,
-    fromCursor = false
+    from: SearchStartAnchor = 'auto'
   ): Promise<ISearchMatch | undefined> {
-    const match = await this._stepNext(false, loop, fromCursor);
+    const match = await this._stepNext(false, loop, from);
     return match ?? undefined;
   }
 
@@ -383,13 +384,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     );
     this._currentProviderIndex = currentProviderIndex;
 
-    // If we are searching in selection we do not want to show the first
-    // "current" closest to cursor as depending on which way the user
-    // dragged the selection it would be the first or last match.
-    const firstMatchAfterCursor = !(
-      this._onSelection && this._selectionSearchMode === 'text'
-    );
-    await this.highlightNext(false, firstMatchAfterCursor);
+    // We do not want to show the first "current" closest to cursor as depending
+    // on which way the user dragged the selection it would be:
+    // - the first or last match when searching in selection
+    // - the next match when starting search using ctrl + f
+    await this.highlightNext(true, 'selection-start');
 
     return Promise.resolve();
   }
@@ -576,7 +575,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private async _stepNext(
     reverse = false,
     loop = false,
-    fromCursor = false
+    from: SearchStartAnchor = 'auto'
   ): Promise<ISearchMatch | null> {
     const activateNewMatch = async (match: ISearchMatch) => {
       this._selectionLock = true;
@@ -640,8 +639,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
       const match = reverse
-        ? await searchEngine.highlightPrevious(false, fromCursor)
-        : await searchEngine.highlightNext(false, fromCursor);
+        ? await searchEngine.highlightPrevious(false, from)
+        : await searchEngine.highlightNext(false, from);
 
       if (match) {
         await activateNewMatch(match);
@@ -668,8 +667,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // try the first provider again
       const searchEngine = this._searchProviders[startIndex];
       const match = reverse
-        ? await searchEngine.highlightPrevious(false, fromCursor)
-        : await searchEngine.highlightNext(false, fromCursor);
+        ? await searchEngine.highlightPrevious(false, from)
+        : await searchEngine.highlightNext(false, from);
       if (match) {
         await activateNewMatch(match);
         return match;
@@ -703,26 +702,26 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   private async _handleHighlightsAfterActiveCellChange() {
-    const previousProviderCell =
-      this._currentProviderIndex !== null &&
-      this._currentProviderIndex < this.widget.content.widgets.length
-        ? this.widget.content.widgets[this._currentProviderIndex]
-        : null;
+    if (this._onSelection) {
+      const previousProviderCell =
+        this._currentProviderIndex !== null &&
+        this._currentProviderIndex < this.widget.content.widgets.length
+          ? this.widget.content.widgets[this._currentProviderIndex]
+          : null;
 
-    const previousProviderInCurrentSelection =
-      previousProviderCell &&
-      this.widget.content.isSelectedOrActive(previousProviderCell);
+      const previousProviderInCurrentSelection =
+        previousProviderCell &&
+        this.widget.content.isSelectedOrActive(previousProviderCell);
 
-    if (!previousProviderInCurrentSelection) {
-      await this._updateCellSelection();
-      // Clear highlight from previous provider
-      await this.clearHighlight();
-    }
-    if (this._onSelection && !previousProviderInCurrentSelection) {
-      // If we are searching in all cells, we should not change the active
-      // provider when switching active cell to preserve current match;
-      // if we are searching within selected cells we should update
-      this._currentProviderIndex = this.widget.content.activeCellIndex;
+      if (!previousProviderInCurrentSelection) {
+        await this._updateCellSelection();
+        // Clear highlight from previous provider
+        await this.clearHighlight();
+        // If we are searching in all cells, we should not change the active
+        // provider when switching active cell to preserve current match;
+        // if we are searching within selected cells we should update
+        this._currentProviderIndex = this.widget.content.activeCellIndex;
+      }
     }
 
     await this._ensureCurrentMatch();
@@ -735,10 +734,15 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   private async _ensureCurrentMatch() {
     if (this._currentProviderIndex !== null) {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
+      if (!searchEngine) {
+        // This can happen when `startQuery()` has not finished yet.
+        return;
+      }
       const currentMatch = searchEngine.getCurrentMatch();
       if (!currentMatch && this.matchesCount) {
-        // Select a match as current by highlighting next (with looping).
-        await this.highlightNext(true);
+        // Select a match as current by highlighting next (with looping) from
+        // the selection start, to prevent "current" match from jumping around.
+        await this.highlightNext(true, 'start');
       }
     }
   }

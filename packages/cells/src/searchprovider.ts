@@ -8,7 +8,8 @@ import {
   GenericSearchProvider,
   IBaseSearchProvider,
   IFilters,
-  ISearchMatch
+  ISearchMatch,
+  SearchStartAnchor
 } from '@jupyterlab/documentsearch';
 import { OutputArea } from '@jupyterlab/outputarea';
 import { ICellModel } from './model';
@@ -125,13 +126,13 @@ class CodeCellSearchProvider extends CellSearchProvider {
    */
   async highlightNext(
     loop?: boolean,
-    fromCursor = false
+    from: SearchStartAnchor = 'auto'
   ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       if (this.currentProviderIndex === -1) {
-        const match = await super.highlightNext(true, fromCursor);
+        const match = await super.highlightNext(true, from);
         if (match) {
           this.currentIndex = this.cmHandler.currentIndex;
           return match;
