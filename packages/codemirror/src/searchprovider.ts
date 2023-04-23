@@ -33,6 +33,7 @@
 import { ISearchMatch } from '@jupyterlab/documentsearch';
 import { CodeMirrorEditor } from './editor';
 import {
+  EditorSelection,
   Extension,
   StateEffect,
   StateEffectType,
@@ -172,7 +173,7 @@ export abstract class EditorSearchProvider<
   }
 
   /**
-   * Set whether search should be limitted to specified selection.
+   * Set whether search should be limitted to specified text selection.
    */
   async setSearchSelection(selection: CodeEditor.IRange | null): Promise<void> {
     if (this._inSelection === selection) {
@@ -181,6 +182,20 @@ export abstract class EditorSearchProvider<
     this._inSelection = selection;
     await this.updateCodeMirror(this.model.sharedModel.getSource());
     this._stateChanged.emit();
+  }
+
+  /**
+   * Set whether user selection should be protected from modifications.
+   *
+   * If disabled, the selection will be updated on search and on editor focus
+   * to cover the current match. We need to protect selection from modifications
+   * for both: search in text and search in cells; since `setSearchSelection`
+   * is only telling us about search in text, we need to have an additional
+   * way to signal that either search in text or in cells is active, or for
+   * any other reason selection range should be protected.
+   */
+  setProtectSelection(v: boolean) {
+    this.cmHandler.protectSelection = v;
   }
 
   /**
@@ -568,6 +583,17 @@ export class CodeMirrorSearchHighlighter {
   private _current: ISearchMatch | null = null;
 
   /**
+   * Whether the cursor/selection should not be modified.
+   */
+  get protectSelection(): boolean {
+    return this._protectSelection;
+  }
+  set protectSelection(v: boolean) {
+    this._protectSelection = v;
+  }
+  private _protectSelection: boolean;
+
+  /**
    * Clear all highlighted matches
    */
   clearHighlight(): void {
@@ -645,6 +671,16 @@ export class CodeMirrorSearchHighlighter {
   }
 
   private _selectCurrentMatch(): void {
+    // This method has two responsibilities:
+    // 1) Scroll the current match into the view - useful for long lines,
+    //    and file editors with more lines that fit on the screen
+    // 2) When user has focus on the editor (not search box) and presses
+    //    ctrl + g/ctrl + shift + g to jump to next match they want their
+    //    cursor to jump too.
+    // We execute (1) and (2) together as CodeMirror has a special code path
+    // to handle both in a single dispatch.
+    // The (2) case is inapplicable to search in selection mode, as it would
+    // invalidate the query selection, so in that case we only execute (1).
     const match = this._current;
     if (!match) {
       return;
@@ -652,21 +688,25 @@ export class CodeMirrorSearchHighlighter {
     if (!this._cm) {
       return;
     }
-    const selection = this._cm.editor.state.selection.main;
-    if (
-      selection.from === match.position &&
-      selection.to === match.position + match.text.length
-    ) {
-      // Selection is already set - only scroll.
-      this._cm.editor.dispatch({
-        scrollIntoView: true
-      });
-      return;
-    }
     const cursor = {
       anchor: match.position,
       head: match.position + match.text.length
     };
+    const selection = this._cm.editor.state.selection.main;
+    if (
+      (selection.from === match.position &&
+        selection.to === match.position + match.text.length) ||
+      this._protectSelection
+    ) {
+      // Correct selection is already set or search is restricted to selection:
+      // scroll without changing the selection.
+      this._cm.editor.dispatch({
+        effects: EditorView.scrollIntoView(
+          EditorSelection.range(cursor.anchor, cursor.head)
+        )
+      });
+      return;
+    }
     this._cm.editor.dispatch({
       selection: cursor,
       scrollIntoView: true
