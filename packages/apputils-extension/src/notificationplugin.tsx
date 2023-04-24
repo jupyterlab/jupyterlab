@@ -30,6 +30,7 @@ import {
   Button,
   closeIcon,
   deleteIcon,
+  LabIcon,
   ToolbarButtonComponent,
   UseSignal,
   VDomModel
@@ -203,32 +204,24 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                   <div
                     className={`Toastify__toast Toastify__toast-theme--light Toastify__toast--${toastType} jp-Notification-Toast-${toastType}`}
                   >
-                    <div className="jp-Notification-Toast-Wrapper">
-                      <div className="Toastify__toast-body">
-                        {icon && (
-                          <div className="Toastify__toast-icon">
-                            {icon({ theme: 'light', type: toastType })}
-                          </div>
-                        )}
-                        <div>
-                          {Private.createContent(
-                            message,
-                            closeNotification,
-                            options.actions
-                          )}
+                    <div className="Toastify__toast-body">
+                      {icon && (
+                        <div className="Toastify__toast-icon">
+                          {icon({ theme: 'light', type: toastType })}
                         </div>
+                      )}
+                      <div>
+                        {Private.createContent(
+                          message,
+                          closeNotification,
+                          options.actions
+                        )}
                       </div>
-                      <button
-                        className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
-                        title={trans.__('Dismiss notification')}
-                        onClick={closeNotification}
-                      >
-                        <deleteIcon.react
-                          className="jp-icon-hover"
-                          tag="span"
-                        ></deleteIcon.react>
-                      </button>
                     </div>
+                    <Private.CloseButton
+                      close={closeNotification}
+                      closeIcon={deleteIcon.react}
+                    />
                   </div>
                 </li>
               );
@@ -643,17 +636,27 @@ namespace Private {
    */
   let toastify: typeof ReactToastify | null = null;
 
-  function CloseButton(props: CloseButtonProps): JSX.Element {
+  export interface IToastCloseButtonProps {
+    close: (e?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+    closeIcon: LabIcon.IReact;
+  }
+
+  export function CloseButton(props: IToastCloseButtonProps) {
     const trans = translator.load('jupyterlab');
     return (
       <button
         className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
         title={trans.__('Hide notification')}
-        onClick={props.closeToast}
+        onClick={props.close}
       >
-        <closeIcon.react className="jp-icon-hover" tag="span"></closeIcon.react>
+        <props.closeIcon className="jp-icon-hover" tag="span" />
       </button>
     );
+  }
+
+  export function CloseToastButton(props: CloseButtonProps): JSX.Element {
+    const closeToastIcon = closeIcon.react;
+    return <CloseButton close={props.closeToast} closeIcon={closeToastIcon} />;
   }
 
   /**
@@ -752,7 +755,7 @@ namespace Private {
           position="bottom-right"
           className="jp-toastContainer"
           transition={toastify.Slide}
-          closeButton={CloseButton}
+          closeButton={CloseToastButton}
         ></toastify.ToastContainer>
       );
 
