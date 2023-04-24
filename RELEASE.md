@@ -260,10 +260,6 @@ shasum -a 256 dist/*.tar.gz
 - Create a PR with the version bump
 - Update `recipe/meta.yaml` with the new version and md5 and reset the build number to 0.
 
-## Updating API Docs
-
-Run `source scripts/docs_push.sh` to update the `gh-pages` branch that backs http://jupyterlab.github.io/jupyterlab/.
-
 ## Making a patch release
 
 - Backport the change to the previous release branch
