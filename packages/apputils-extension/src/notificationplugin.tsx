@@ -170,13 +170,13 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
               icon={deleteIcon}
               tooltip={trans.__('Dismiss all notifications')}
               enabled={manager.count > 0}
-            ></ToolbarButtonComponent>
+            />
             <ToolbarButtonComponent
               actualOnClick={true}
               onClick={onClose}
               icon={closeIcon}
               tooltip={trans.__('Hide notifications')}
-            ></ToolbarButtonComponent>
+            />
           </h2>
           <ol className="jp-Notification-List">
             {notifications.map(notification => {
@@ -282,7 +282,7 @@ class NotificationStatusModel extends VDomModel {
   }
 
   protected onNotificationChanged(
-    manager: NotificationManager,
+    _: NotificationManager,
     change: Notification.IChange
   ): void {
     // Set private attribute to trigger only once the signal emission
@@ -350,8 +350,8 @@ function NotificationStatus(props: INotificationStatusProps): JSX.Element {
       <TextItem
         className="jp-Notification-Status-Text"
         source={`${props.count}`}
-      ></TextItem>
-      <bellIcon.react top={'2px'} stylesheet={'statusBar'}></bellIcon.react>
+      />
+      <bellIcon.react top={'2px'} stylesheet={'statusBar'} />
     </GroupItem>
   );
 }
@@ -488,7 +488,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
           popup?.dispose();
         }}
         trans={trans}
-      ></NotificationCenter>
+      />
     );
     notificationList.addClass('jp-Notification-Center');
 
@@ -609,7 +609,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
               highlight={model.highlight}
               trans={trans}
               onClick={displayNotifications}
-            ></NotificationStatus>
+            />
           );
         }}
       </UseSignal>
@@ -636,12 +636,14 @@ namespace Private {
    */
   let toastify: typeof ReactToastify | null = null;
 
-  export interface IToastCloseButtonProps {
+  export interface ICloseButtonProps {
     close: (e?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
     closeIcon: LabIcon.IReact;
   }
 
-  export function CloseButton(props: IToastCloseButtonProps) {
+  type IToastifyCloseButtonProps = CloseButtonProps;
+
+  export function CloseButton(props: ICloseButtonProps) {
     const trans = translator.load('jupyterlab');
     return (
       <button
@@ -654,9 +656,10 @@ namespace Private {
     );
   }
 
-  export function CloseToastButton(props: CloseButtonProps): JSX.Element {
-    const closeToastIcon = closeIcon.react;
-    return <CloseButton close={props.closeToast} closeIcon={closeToastIcon} />;
+  export function ToastifyCloseButton(
+    props: IToastifyCloseButtonProps
+  ): JSX.Element {
+    return <CloseButton close={props.closeToast} closeIcon={closeIcon.react} />;
   }
 
   /**
@@ -755,8 +758,8 @@ namespace Private {
           position="bottom-right"
           className="jp-toastContainer"
           transition={toastify.Slide}
-          closeButton={CloseToastButton}
-        ></toastify.ToastContainer>
+          closeButton={ToastifyCloseButton}
+        />
       );
 
       waitForToastify.resolve();
