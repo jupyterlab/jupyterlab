@@ -148,6 +148,9 @@ input::placeholder {
   top: 0;
   right: 0;
   padding: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .jp-HTMLSelect.jp-DefaultStyle select {
