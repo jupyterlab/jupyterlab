@@ -9,7 +9,10 @@ import {
   ICellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditor,
+  IHighlightAdjacentMatchOptions
+} from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import {
@@ -19,8 +22,7 @@ import {
   IReplaceOptionsSupport,
   ISearchMatch,
   ISearchProvider,
-  SearchProvider,
-  SearchStartAnchor
+  SearchProvider
 } from '@jupyterlab/documentsearch';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -309,9 +311,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    */
   async highlightNext(
     loop: boolean = true,
-    from: SearchStartAnchor = 'auto'
+    options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
-    const match = await this._stepNext(false, loop, from);
+    const match = await this._stepNext(false, loop, options);
     return match ?? undefined;
   }
 
@@ -323,9 +325,10 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * @returns The previous match if available.
    */
   async highlightPrevious(
-    loop: boolean = true
+    loop: boolean = true,
+    options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
-    const match = await this._stepNext(true, loop);
+    const match = await this._stepNext(true, loop, options);
     return match ?? undefined;
   }
 
@@ -388,7 +391,14 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     // on which way the user dragged the selection it would be:
     // - the first or last match when searching in selection
     // - the next match when starting search using ctrl + f
-    await this.highlightNext(true, 'selection-start');
+    // `scroll` and `select` are disabled because `startQuery` is also used as
+    // "restartQuery" after each text change and if those were enabled, we would
+    // steal the cursor.
+    await this.highlightNext(true, {
+      from: 'selection-start',
+      scroll: false,
+      select: false
+    });
 
     return Promise.resolve();
   }
@@ -570,14 +580,21 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
 
         break;
     }
+    this._stateChanged.emit();
   }
 
   private async _stepNext(
     reverse = false,
     loop = false,
-    from: SearchStartAnchor = 'auto'
+    options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | null> {
     const activateNewMatch = async (match: ISearchMatch) => {
+      const shouldScroll = options?.scroll ?? true;
+      if (!shouldScroll) {
+        // do not activate the match if scrolling was disabled
+        return;
+      }
+
       this._selectionLock = true;
       if (this.widget.content.activeCellIndex !== this._currentProviderIndex!) {
         this.widget.content.activeCellIndex = this._currentProviderIndex!;
@@ -639,8 +656,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const searchEngine = this._searchProviders[this._currentProviderIndex];
 
       const match = reverse
-        ? await searchEngine.highlightPrevious(false, from)
-        : await searchEngine.highlightNext(false, from);
+        ? await searchEngine.highlightPrevious(false, options)
+        : await searchEngine.highlightNext(false, options);
 
       if (match) {
         await activateNewMatch(match);
@@ -667,8 +684,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // try the first provider again
       const searchEngine = this._searchProviders[startIndex];
       const match = reverse
-        ? await searchEngine.highlightPrevious(false, from)
-        : await searchEngine.highlightNext(false, from);
+        ? await searchEngine.highlightPrevious(false, options)
+        : await searchEngine.highlightNext(false, options);
       if (match) {
         await activateNewMatch(match);
         return match;
@@ -742,7 +759,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       if (!currentMatch && this.matchesCount) {
         // Select a match as current by highlighting next (with looping) from
         // the selection start, to prevent "current" match from jumping around.
-        await this.highlightNext(true, 'start');
+        await this.highlightNext(true, {
+          from: 'start',
+          scroll: false,
+          select: false
+        });
       }
     }
   }

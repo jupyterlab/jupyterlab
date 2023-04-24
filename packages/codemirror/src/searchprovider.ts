@@ -46,11 +46,47 @@ import {
   IBaseSearchProvider,
   IFilters,
   IReplaceOptions,
-  SearchStartAnchor,
   TextSearchEngine
 } from '@jupyterlab/documentsearch';
 import { ISignal, Signal } from '@lumino/signaling';
 import { ISharedText, SourceChange } from '@jupyter/ydoc';
+
+/**
+ * Defines from which position the search should be executed.
+ * - `'selection'` - search from selection head/anchor (depending on search direction)
+ * - `'previous-match'` - search from previous match
+ * - `'auto'` - search from selection if editor is focused or previous match otherwise
+ * - `'selection-start'` - search from selection head/anchor whichever is smaller
+ * - `'start'` - from start of the editor
+ */
+type SearchStartAnchor =
+  | 'auto'
+  | 'selection'
+  | 'selection-start'
+  | 'previous-match'
+  | 'start';
+
+interface IHighlightMatchOptions {
+  /**
+   * Whether the highlighted match should be scrolled into view.
+   * Defaults to `true`.
+   */
+  scroll?: boolean;
+  /**
+   * Whether the user cursor should be moved to select the match.
+   * `protectSelection` flag takes precedence over this option.
+   * Defaults to `true`.
+   */
+  select?: boolean;
+}
+
+export interface IHighlightAdjacentMatchOptions extends IHighlightMatchOptions {
+  /**
+   * What should be used as an anchor when searching for adjecent match.
+   * Defaults to `'auto'`.
+   */
+  from?: SearchStartAnchor;
+}
 
 /**
  * Search provider for editors.
@@ -232,12 +268,12 @@ export abstract class EditorSearchProvider<
    */
   async highlightNext(
     loop = true,
-    from: SearchStartAnchor = 'auto'
+    options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
-      let match = await this.cmHandler.highlightNext(from);
+      let match = await this.cmHandler.highlightNext(options);
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
@@ -259,12 +295,12 @@ export abstract class EditorSearchProvider<
    */
   async highlightPrevious(
     loop = true,
-    from: SearchStartAnchor = 'auto'
+    options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
-      let match = await this.cmHandler.highlightPrevious(from);
+      let match = await this.cmHandler.highlightPrevious(options);
       if (match) {
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
@@ -424,7 +460,11 @@ export abstract class EditorSearchProvider<
           this.cmHandler.currentIndex === null &&
           this.cmHandler.matches.length > 0
         ) {
-          await this.cmHandler.highlightNext('selection', false);
+          await this.cmHandler.highlightNext({
+            from: 'selection',
+            select: false,
+            scroll: false
+          });
         }
         this.currentIndex = this.cmHandler.currentIndex;
       } else {
@@ -576,7 +616,7 @@ export class CodeMirrorSearchHighlighter {
     ) {
       this._currentIndex = this._matches.length > 0 ? 0 : null;
     }
-    this._highlightCurrentMatch(true);
+    this._highlightCurrentMatch({ select: false });
   }
 
   private _current: ISearchMatch | null = null;
@@ -622,11 +662,10 @@ export class CodeMirrorSearchHighlighter {
    * @returns The next match if available
    */
   highlightNext(
-    from: SearchStartAnchor = 'auto',
-    doNotModifySelection = false
+    options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
-    this._currentIndex = this._findNext(false, from);
-    this._highlightCurrentMatch(doNotModifySelection);
+    this._currentIndex = this._findNext(false, options?.from ?? 'auto');
+    this._highlightCurrentMatch(options);
     return Promise.resolve(
       this._currentIndex !== null
         ? this._matches[this._currentIndex]
@@ -640,10 +679,10 @@ export class CodeMirrorSearchHighlighter {
    * @returns The previous match if available
    */
   highlightPrevious(
-    from: SearchStartAnchor = 'auto'
+    options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
-    this._currentIndex = this._findNext(true, from);
-    this._highlightCurrentMatch();
+    this._currentIndex = this._findNext(true, options?.from ?? 'auto');
+    this._highlightCurrentMatch(options);
     return Promise.resolve(
       this._currentIndex !== null
         ? this._matches[this._currentIndex]
@@ -671,7 +710,7 @@ export class CodeMirrorSearchHighlighter {
     }
   }
 
-  private _selectCurrentMatch(): void {
+  private _selectCurrentMatch(scroll = true): void {
     // This method has two responsibilities:
     // 1) Scroll the current match into the view - useful for long lines,
     //    and file editors with more lines that fit on the screen
@@ -701,20 +740,23 @@ export class CodeMirrorSearchHighlighter {
     ) {
       // Correct selection is already set or search is restricted to selection:
       // scroll without changing the selection.
+      if (scroll) {
+        this._cm.editor.dispatch({
+          effects: EditorView.scrollIntoView(
+            EditorSelection.range(cursor.anchor, cursor.head)
+          )
+        });
+        return;
+      }
+    } else {
       this._cm.editor.dispatch({
-        effects: EditorView.scrollIntoView(
-          EditorSelection.range(cursor.anchor, cursor.head)
-        )
+        selection: cursor,
+        scrollIntoView: scroll
       });
-      return;
     }
-    this._cm.editor.dispatch({
-      selection: cursor,
-      scrollIntoView: true
-    });
   }
 
-  private _highlightCurrentMatch(doNotModifySelection = false): void {
+  private _highlightCurrentMatch(options?: IHighlightMatchOptions): void {
     if (!this._cm) {
       // no-op
       return;
@@ -724,12 +766,14 @@ export class CodeMirrorSearchHighlighter {
     if (this._currentIndex !== null) {
       const match = this.matches[this._currentIndex];
       this._current = match;
-      // Do not change selection/scroll if user is selecting
-      if (!doNotModifySelection) {
+      // We do not change selection nor scroll if:
+      // - user is selecting text,
+      // - document was modified
+      if (options?.select ?? true) {
         if (this._cm.hasFocus()) {
           // If editor is focused we actually set the cursor on the match.
-          this._selectCurrentMatch();
-        } else {
+          this._selectCurrentMatch(options?.scroll ?? true);
+        } else if (options?.scroll ?? true) {
           // otherwise we just scroll to preserve the selection.
           this._cm.editor.dispatch({
             effects: EditorView.scrollIntoView(match.position)
