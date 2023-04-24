@@ -40,7 +40,10 @@ const customCellTag: JupyterFrontEndPlugin<void> = {
           return new CellTagField(tracker).render(props);
         }
       };
-      formRegistry.addRenderer('celltags-extension:plugin.renderer', component);
+      formRegistry.addRenderer(
+        '@jupyterlab/celltags-extension:plugin.renderer',
+        component
+      );
     }
   }
 };
