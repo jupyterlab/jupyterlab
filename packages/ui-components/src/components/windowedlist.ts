@@ -265,6 +265,14 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   /**
    * Get the scroll offset to display an item in the viewport.
    *
+   * By default, the list will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
+   *
+   *   auto (default) - Scroll as little as possible to ensure the item is visible. (If the item is already visible, it won't scroll at all.)
+   *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away, scroll so that it becomes visible (including the margin). If it is more than one viewport away, scroll so that it is centered within the list.
+   *   center - Center align the item within the list.
+   *   end - Align the item to the end of the list
+   *   start - Align the item to the beginning of the list
+   *
    * @param index Item index
    * @param align Where to align the item in the viewport
    * @param margin In 'smart' mode the viewport proportion to add
@@ -275,7 +283,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     align: WindowedList.ScrollToAlign = 'auto',
     margin: number = 0.25
   ): number {
-    const margin_ =
+    const boundedMargin =
       align === 'smart' ? Math.min(Math.max(0.0, margin), 1.0) : 0.0;
     const size = this._height;
     const itemMetadata = this._getItemMetadata(index);
@@ -319,9 +327,9 @@ export abstract class WindowedListModel implements WindowedList.IModel {
         ) {
           return this._scrollOffset;
         } else if (this._scrollOffset < bottomOffset) {
-          return bottomOffset + margin_ * size;
+          return bottomOffset + boundedMargin * size;
         } else {
-          return Math.max(0, topOffset - margin_ * size);
+          return Math.max(0, topOffset - boundedMargin * size);
         }
     }
   }
@@ -727,7 +735,6 @@ export class WindowedList<
    * @deprecated since v4 This is an internal helper. Prefer calling `scrollToItem`.
    */
   scrollTo(scrollOffset: number): void {
-    console.log(`scrollTo ${scrollOffset}`);
     if (!this.viewModel.windowingActive) {
       this.node.scrollTo({ top: scrollOffset });
       return;
