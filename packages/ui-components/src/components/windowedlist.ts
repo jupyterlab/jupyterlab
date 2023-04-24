@@ -753,10 +753,10 @@ export class WindowedList<
   /**
    * Scroll to the specified item.
    *
-   * By default, the List will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
+   * By default, the list will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
    *
    *   auto (default) - Scroll as little as possible to ensure the item is visible. (If the item is already visible, it won't scroll at all.)
-   *   smart - If the item is already visible, don't scroll at all. If it is less than one viewport away, scroll as little as possible so that it becomes visible. If it is more than one viewport away, scroll so that it is centered within the list.
+   *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away, scroll so that it becomes visible (including the margin). If it is more than one viewport away, scroll so that it is centered within the list.
    *   center - Center align the item within the list.
    *   end - Align the item to the end of the list
    *   start - Align the item to the beginning of the list
@@ -1257,6 +1257,14 @@ export namespace WindowedList {
 
     /**
      * Get the scroll offset to display an item in the viewport.
+     *
+     * By default, the list will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
+     *
+     *   auto (default) - Scroll as little as possible to ensure the item is visible. (If the item is already visible, it won't scroll at all.)
+     *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away, scroll so that it becomes visible (including the margin). If it is more than one viewport away, scroll so that it is centered within the list.
+     *   center - Center align the item within the list.
+     *   end - Align the item to the end of the list
+     *   start - Align the item to the beginning of the list
      *
      * @param index Item index
      * @param align Where to align the item in the viewport

@@ -1316,7 +1316,7 @@ export namespace NotebookActions {
     if (cellsFromClipboard) {
       notebook.lastClipboardInteraction = 'paste';
     }
-    Private.handleState(notebook, state);
+    Private.handleState(notebook, state, true);
   }
 
   /**
@@ -2146,7 +2146,7 @@ namespace Private {
     }
 
     if (scrollIfNeeded && activeCell) {
-      notebook.scrollToItem(activeCellIndex, 'smart').catch(reason => {
+      notebook.scrollToItem(activeCellIndex, 'smart', 0.05).catch(reason => {
         // no-op
       });
     }
