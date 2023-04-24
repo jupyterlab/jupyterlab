@@ -2034,7 +2034,8 @@ export class Notebook extends StaticNotebook {
   private _ensureFocus(force = false): void {
     const activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
-      if (activeCell.editor?.hasFocus() === false) {
+      // Test for !== true to cover hasFocus is false and editor is not yet rendered.
+      if (activeCell.editor?.hasFocus() !== true) {
         if (activeCell.inViewport) {
           activeCell.editor?.focus();
         } else {
