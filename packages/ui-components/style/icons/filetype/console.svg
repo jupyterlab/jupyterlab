@@ -1,6 +1,4 @@
-<svg aria-labelledby="alt" xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 200 200">
-<alt id="console icon" lang="en">Console icon </alt>
-<desc id="console icon">Blue square background with white greater than sign and a underscore</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 200 200">
   <g class="jp-console-icon-background-color jp-icon-selectable" fill="#0288D1">
     <path d="M20 19.8h160v159.9H20z"/>
   </g>

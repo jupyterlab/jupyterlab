@@ -306,7 +306,6 @@ function Card(
               alt={trans.__('Kernel icon')}
             />
           ) : (
-            //maybe change here
             <div className="jp-LauncherCard-noKernelIcon">
               {label[0].toUpperCase()}
             </div>
