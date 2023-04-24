@@ -82,7 +82,6 @@
 }
 
 .Toastify__toast {
-  position: relative;
   min-height: unset;
   padding: 4px;
   font-size: var(--jp-ui-font-size1);
