@@ -19,7 +19,8 @@ import {
   IReplaceOptionsSupport,
   ISearchMatch,
   ISearchProvider,
-  SearchProvider
+  SearchProvider,
+  SelectionState
 } from '@jupyterlab/documentsearch';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -160,6 +161,19 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     return {
       preserveCase: true
     };
+  }
+
+  getSelectionState(): SelectionState {
+    // TODO needs a test to verify that `_selectedCells` and `_selectedLines` are already set
+    const selectedCount =
+      this._selectionSearchMode === 'cells'
+        ? this._selectedCells
+        : this._selectedLines;
+    return selectedCount > 1
+      ? 'multiple'
+      : selectedCount === 1
+      ? 'single'
+      : 'none';
   }
 
   /**
