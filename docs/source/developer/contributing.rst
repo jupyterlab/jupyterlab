@@ -47,6 +47,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    repo
    components
    patterns
+   accessibility
    internationalization
    css
    performance
