@@ -1313,7 +1313,7 @@ export class Notebook extends StaticNotebook {
       }
       activeCell!.inputHidden = false;
     } else {
-      NotebookActions.focusActiveCell(this, {
+      void NotebookActions.focusActiveCell(this, {
         // Do not await the active cell because that creates a bug. If the user
         // is editing a code cell and presses Accel Shift C to open the command
         // palette, then the command palette opens before
@@ -2074,7 +2074,7 @@ export class Notebook extends StaticNotebook {
       activeCell &&
       !activeCell.node.contains(document.activeElement)
     ) {
-      NotebookActions.focusActiveCell(this);
+      void NotebookActions.focusActiveCell(this);
     }
   }
 
@@ -2361,7 +2361,7 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex = index;
       // Focus notebook if active cell changes but does not have focus.
       if (!this.activeCell!.node.contains(document.activeElement)) {
-        NotebookActions.focusActiveCell(this);
+        void NotebookActions.focusActiveCell(this);
       }
     }
 
@@ -2542,7 +2542,7 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex = start;
       this.extendContiguousSelectionTo(index - 1);
     }
-    NotebookActions.focusActiveCell(this);
+    void NotebookActions.focusActiveCell(this);
   }
 
   /**

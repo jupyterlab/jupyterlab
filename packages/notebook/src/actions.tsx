@@ -216,7 +216,7 @@ export namespace NotebookActions {
       .catch(reason => {
         // no-op
       });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -330,7 +330,7 @@ export namespace NotebookActions {
     if (primary instanceof MarkdownCell) {
       (notebook.activeCell as MarkdownCell).rendered = false;
     }
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -351,7 +351,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     Private.deleteCells(notebook);
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -388,7 +388,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = newIndex;
 
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -425,7 +425,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = newIndex;
 
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   function move(notebook: Notebook, shift: number): void {
@@ -454,7 +454,7 @@ export namespace NotebookActions {
       notebook.moveCell(firstIndex, firstIndex + shift, lastIndex - firstIndex);
     }
 
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -499,7 +499,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     Private.changeCellType(notebook, value);
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -534,7 +534,7 @@ export namespace NotebookActions {
       translator
     );
 
-    Private.handleRunState(notebook, state, false);
+    void Private.handleRunState(notebook, state, false);
     return promise;
   }
 
@@ -598,7 +598,7 @@ export namespace NotebookActions {
     } else {
       notebook.activeCellIndex++;
     }
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -655,7 +655,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -696,7 +696,7 @@ export namespace NotebookActions {
       translator
     );
 
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -719,7 +719,7 @@ export namespace NotebookActions {
     }
     const promise = Private.runSelected(notebook);
     notebook.activeCellIndex = previousIndex;
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -765,7 +765,7 @@ export namespace NotebookActions {
     );
 
     notebook.activeCellIndex++;
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -807,7 +807,7 @@ export namespace NotebookActions {
       translator
     );
 
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -858,7 +858,7 @@ export namespace NotebookActions {
 
     notebook.activeCellIndex = possibleNextCellIndex;
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -906,7 +906,7 @@ export namespace NotebookActions {
 
     notebook.activeCellIndex = possibleNextCellIndex;
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /** Insert new heading of same level above active cell.
@@ -998,7 +998,7 @@ export namespace NotebookActions {
     }
     // clear selection and handle state
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1030,7 +1030,7 @@ export namespace NotebookActions {
       }
     }
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1064,7 +1064,7 @@ export namespace NotebookActions {
     } else {
       notebook.extendContiguousSelectionTo(notebook.activeCellIndex - 1);
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1098,7 +1098,7 @@ export namespace NotebookActions {
     } else {
       notebook.extendContiguousSelectionTo(notebook.activeCellIndex + 1);
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1314,7 +1314,7 @@ export namespace NotebookActions {
     if (cellsFromClipboard) {
       notebook.lastClipboardInteraction = 'paste';
     }
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1335,7 +1335,7 @@ export namespace NotebookActions {
     notebook.mode = 'command';
     notebook.model.sharedModel.undo();
     notebook.deselectAll();
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1356,7 +1356,7 @@ export namespace NotebookActions {
     notebook.mode = 'command';
     notebook.model.sharedModel.redo();
     notebook.deselectAll();
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1387,7 +1387,7 @@ export namespace NotebookActions {
     };
 
     notebook.editorConfig = newConfig;
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1415,7 +1415,7 @@ export namespace NotebookActions {
         }, false);
       }
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1443,7 +1443,7 @@ export namespace NotebookActions {
         }, false);
       }
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1463,7 +1463,7 @@ export namespace NotebookActions {
         cell.inputHidden = true;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1483,7 +1483,7 @@ export namespace NotebookActions {
         cell.inputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1503,7 +1503,7 @@ export namespace NotebookActions {
         cell.inputHidden = true;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1523,7 +1523,7 @@ export namespace NotebookActions {
         cell.inputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1543,7 +1543,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = true;
       }
     });
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1563,7 +1563,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1583,7 +1583,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = true;
       }
     });
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1621,7 +1621,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1641,7 +1641,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputsScrolled = true;
       }
     });
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1661,7 +1661,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputsScrolled = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1730,7 +1730,7 @@ export namespace NotebookActions {
       }
     });
     Private.changeCellType(notebook, 'markdown');
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1747,7 +1747,7 @@ export namespace NotebookActions {
       }
     }
     notebook.activeCellIndex = 0;
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -2842,7 +2842,7 @@ namespace Private {
       }
       notebook.deselectAll();
 
-      Private.handleState(notebook, state, true);
+      void Private.handleState(notebook, state, true);
       notebook.mode = 'edit';
       notebook.widgets[cellIndex].setHidden(false);
     }
