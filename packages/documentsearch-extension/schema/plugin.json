@@ -51,12 +51,12 @@
     {
       "command": "documentsearch:toggleSearchInSelection",
       "keys": ["Alt L"],
-      "selector": ".jp-mod-searchable[data-jp-search-active]"
+      "selector": ".jp-mod-search-active"
     },
     {
       "command": "documentsearch:end",
       "keys": ["Escape"],
-      "selector": ".jp-mod-searchable[data-jp-search-active]"
+      "selector": ".jp-mod-search-active"
     }
   ],
   "properties": {

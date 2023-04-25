@@ -21,7 +21,14 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
+/**
+ * Class added to widgets that can be searched (have a search provider).
+ */
 const SEARCHABLE_CLASS = 'jp-mod-searchable';
+/**
+ * Class added to widgets for with open search view (not necessarily focused).
+ */
+const SEARCH_ACTIVE_CLASS = 'jp-mod-search-active';
 
 namespace CommandIDs {
   /**
@@ -193,6 +200,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         newView.closed.connect(() => {
           if (!widget.isDisposed) {
             widget.activate();
+            widget.removeClass(SEARCH_ACTIVE_CLASS);
           }
         });
 
@@ -202,6 +210,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         newView.disposed.connect(() => {
           if (!widget.isDisposed) {
             widget.activate();
+            widget.removeClass(SEARCH_ACTIVE_CLASS);
           }
           searchViews.delete(widgetId);
           // find next, previous and end are now disabled
@@ -229,6 +238,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
 
       if (!searchView.isAttached) {
         Widget.attach(searchView, widget.node);
+        widget.addClass(SEARCH_ACTIVE_CLASS);
         if (widget instanceof MainAreaWidget) {
           // Offset the position of the search widget to not cover the toolbar nor the content header.
           // TODO this does not update once the search widget is displayed.
@@ -247,7 +257,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     app.commands.addCommand(CommandIDs.search, {
       label: trans.__('Find…'),
       isEnabled: isEnabled,
-      execute: args => {
+      execute: async args => {
         const searchWidget = getSearchWidget(app.shell.currentWidget);
         if (searchWidget) {
           const searchText = args['searchText'] as string;
@@ -274,8 +284,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
               break;
           }
           if (enableSelectionMode) {
-            searchWidget.model.setFilter('selection', true);
-            // TODO: toggle filter list?
+            await searchWidget.model.setFilter('selection', true);
           }
           searchWidget.focusSearchInput();
         }
@@ -369,8 +378,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         }
 
         const currentValue = model.filters['selection'];
-        model.setFilter('selection', !currentValue);
-        // TODO expand/the filters section?
+        return model.setFilter('selection', !currentValue);
       }
     });
 
