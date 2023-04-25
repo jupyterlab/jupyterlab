@@ -144,13 +144,17 @@ test('should scroll past end when running and inserting a cell at the viewport b
 
   await mdCell.click();
 
-  await expect(
-    page.getByRole('main').locator('.jp-CodeCell[data-windowed-list-index="5"]')
-  ).not.toBeInViewport();
+  await expect
+    .soft(
+      page
+        .getByRole('main')
+        .locator('.jp-RawCell[data-windowed-list-index="4"]')
+    )
+    .not.toBeInViewport();
 
   await page.keyboard.press('Shift+Enter');
 
   await expect(
-    page.getByRole('main').locator('.jp-CodeCell[data-windowed-list-index="5"]')
+    page.getByRole('main').locator('.jp-RawCell[data-windowed-list-index="4"]')
   ).toBeInViewport();
 });
