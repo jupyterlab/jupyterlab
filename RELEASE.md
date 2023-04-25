@@ -389,10 +389,6 @@ shasum -a 256 dist/*.tar.gz
 - Create a PR with the version bump
 - Update `recipe/meta.yaml` with the new version and sha256 and reset the build number to 0.
 
-## Updating API Docs
-
-Run `source scripts/docs_push.sh` to update the `gh-pages` branch that backs http://jupyterlab.github.io/jupyterlab/.
-
 ## Making a manual patch release
 
 - Backport the change to the previous release branch
@@ -478,3 +474,4 @@ Here is a list of previous issues that happened while releasing JupyterLab, that
 new issues show up in the future:
 
 - HTTP Error 502: Bad Gateway (JupyterLab `4.0.0a23`): https://github.com/jupyterlab/jupyterlab/issues/12324
+- Degraded performance of npm publish (JupyterLab `4.0.0b2`): https://github.com/jupyterlab/jupyterlab/issues/14431

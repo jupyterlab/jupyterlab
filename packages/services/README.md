@@ -2,7 +2,7 @@
 
 Javascript client for the Jupyter services REST APIs
 
-[API Docs](http://jupyterlab.github.io/jupyterlab/)
+[API Docs](https://jupyterlab.readthedocs.io/en/latest/api/)
 
 [REST API Docs](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml)
 
