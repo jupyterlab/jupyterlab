@@ -216,6 +216,7 @@ export namespace NotebookActions {
       .catch(reason => {
         // no-op
       });
+
     void Private.handleState(notebook, state);
   }
 
@@ -330,6 +331,7 @@ export namespace NotebookActions {
     if (primary instanceof MarkdownCell) {
       (notebook.activeCell as MarkdownCell).rendered = false;
     }
+
     void Private.handleState(notebook, state);
   }
 
@@ -1178,7 +1180,7 @@ export namespace NotebookActions {
     const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
 
     addCells(notebook, mode, values, true);
-    focusActiveCell(notebook);
+    void focusActiveCell(notebook);
   }
 
   /**
