@@ -97,6 +97,13 @@ The extension status is determined in the following ways:
 - Green 'OK': the extension is installed.
 - Green 'ENABLED': the extension is installed and enabled.
 
+When upgrading extensions manually you may encounter the red 'X' status that indicates compatibility errors
+in the dependencies of your extension. It is likely that there are dependencies, in addition those which
+are JupyterLab packages, that are being compared to the dependencies of core JupyterLab and whose versions
+are not coinciding. Some of those dependencies may include the following: yjs, react, react-dom, typescript,
+and more. Once those versions declared for your extension match those that are declared in JupyterLab, the
+extension status can be observed as `OK`.
+
 API breaking changes
 ^^^^^^^^^^^^^^^^^^^^
 
