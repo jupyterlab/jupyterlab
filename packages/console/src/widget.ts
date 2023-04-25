@@ -242,7 +242,7 @@ export class CodeConsole extends Widget {
         highlightActiveLine: false,
         highlightTrailingWhitespace: false,
         highlightWhitespace: false,
-        indentUnit: '2',
+        indentUnit: '4',
         lineNumbers: false,
         lineWrap: true,
         matchBrackets: false,

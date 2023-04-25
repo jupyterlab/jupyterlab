@@ -1,11 +1,11 @@
 **[Installation](#installation)** |
-**[Documentation](http://jupyterlab.readthedocs.io)** |
+**[Documentation](https://jupyterlab.readthedocs.io)** |
 **[Contributing](#contributing)** |
 **[License](#license)** |
 **[Team](#team)** |
 **[Getting help](#getting-help)** |
 
-# [JupyterLab](http://jupyterlab.github.io/jupyterlab/)
+# [JupyterLab](https://jupyterlab.readthedocs.io)
 
 [![PyPI version](https://badge.fury.io/py/jupyterlab.svg)](https://badge.fury.io/py/jupyterlab)
 [![Downloads](https://pepy.tech/badge/jupyterlab/month)](https://pepy.tech/project/jupyterlab/month)

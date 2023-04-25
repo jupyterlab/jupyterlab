@@ -41,30 +41,6 @@
   background-color: var(--jp-border-color2);
 }
 
-#json-setting-editor .jp-SettingEditorInstructions {
-  text-align: center;
-}
-
-#json-setting-editor .jp-SettingEditorInstructions-icon {
-  display: inline-block;
-  height: 78px;
-  margin: 2px 5px 2px 8px;
-  width: 60px;
-}
-
-#json-setting-editor .jp-SettingEditorInstructions-title {
-  color: var(--jp-ui-font-color0);
-  font-size: 32px;
-  font-weight: 200;
-  line-height: 78px;
-  vertical-align: top;
-}
-
-#json-setting-editor .jp-SettingEditorInstructions-text {
-  color: var(--jp-ui-font-color0);
-  font-size: var(--jp-ui-font-size2);
-}
-
 .jp-PluginList {
   min-width: 175px;
   max-width: 275px;
@@ -219,27 +195,8 @@
 .jp-SettingsPanel .jp-SettingsHeader h2 {
   font-size: var(--jp-content-font-size3);
   color: var(--jp-ui-font-color0);
-  font-weight: 300;
-  margin: 1em;
-}
-
-.jp-SettingsPanel .jp-SettingsHeader-description {
-  font-size: var(--jp-content-font-size2);
-  color: var(--jp-ui-font-color1);
-  font-weight: 200;
-  margin: 1em;
-  line-height: var(--jp-content-font-size3);
-}
-
-.jp-SettingsPanel .jp-SettingsTitle {
-  display: flex;
-  align-items: center;
-  padding-left: 1em;
-}
-
-.jp-SettingsPanel .jp-SettingsTitle-caret {
-  width: 2em;
-  flex-shrink: 0;
+  font-weight: var(--jp-content-heading-font-weight);
+  padding-inline-start: 0.5em;
 }
 
 .jp-SettingsForm {
@@ -300,7 +257,7 @@
 
 .jp-SettingsPanel .jp-SettingsHeader-Name {
   text-transform: inherit;
-  font-size: var(--jp-content-font-size3);
+  font-size: var(--jp-ui-font-size1);
 }
 
 .jp-SettingsPanel .jp-SettingsEditor {
@@ -320,18 +277,34 @@
   height: 100%;
 }
 
+.jp-SettingsForm .jp-Buttonbar {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  margin: 8px;
+  gap: 0.5em;
+  max-width: 800px;
+}
+
 .jp-SettingsForm button.jp-RestoreButton {
-  white-space: nowrap;
-  background: none;
-  border: none;
-  outline: none;
-  box-shadow: none;
-  font-size: var(--jp-content-font-size2);
-  color: var(--jp-brand-color1);
-  cursor: pointer;
-  margin-right: 5px;
+  background-color: var(--jp-warn-color-normal);
+  border: 0;
+  color: var(--jp-ui-inverse-font-color0);
 }
 
 .jp-PluginEditor {
   overflow: auto;
+}
+
+.jp-SettingsEditor-placeholder {
+  text-align: center;
+}
+
+.jp-SettingsEditor-placeholderContent {
+  color: var(--jp-content-font-color2);
+  padding: 8px;
+}
+
+.jp-SettingsEditor-placeholderContent > h3 {
+  margin-bottom: var(--jp-content-heading-margin-bottom);
 }
