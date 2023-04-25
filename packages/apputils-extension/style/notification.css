@@ -104,6 +104,10 @@
   cursor: pointer;
 }
 
+.jp-Notification-Toast-Close-Margin {
+  margin-right: 4px;
+}
+
 .jp-toastContainer .jp-Notification-Toast-Close:hover {
   /* The close button has its own hover style */
   background: none;

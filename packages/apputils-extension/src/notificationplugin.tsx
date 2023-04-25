@@ -60,6 +60,11 @@ import type {
 const TOAST_CLOSE_BUTTON_CLASS = 'jp-Notification-Toast-Close';
 
 /**
+ * Toast close button class right margin requiered due to custom hover effect
+ */
+const TOAST_CLOSE_BUTTON_MARGIN_CLASS = 'jp-Notification-Toast-Close-Margin';
+
+/**
  * Maximal number of characters displayed in a notification.
  */
 const MAX_MESSAGE_LENGTH = 140;
@@ -221,6 +226,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                     <Private.CloseButton
                       close={closeNotification}
                       closeIcon={deleteIcon.react}
+                      closeIconMargin
                     />
                   </div>
                 </li>
@@ -639,6 +645,7 @@ namespace Private {
   export interface ICloseButtonProps {
     close: (e?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
     closeIcon: LabIcon.IReact;
+    closeIconMargin?: boolean;
   }
 
   type IToastifyCloseButtonProps = CloseButtonProps;
@@ -647,7 +654,9 @@ namespace Private {
     const trans = translator.load('jupyterlab');
     return (
       <button
-        className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
+        className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}${
+          props.closeIconMargin ? ` ${TOAST_CLOSE_BUTTON_MARGIN_CLASS}` : ''
+        }`}
         title={trans.__('Hide notification')}
         onClick={props.close}
       >
