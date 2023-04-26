@@ -90,7 +90,7 @@ is to force packages deduplication using:
 
 Extension Status
 ^^^^^^^^^^^^^^^^
-The extension has four possible status reportings: red 'X', red 'DSIABLED', green 'OK', and green 'ENABLED'.
+The extension has four possible status reportings: red 'X', red 'DISABLED', green 'OK', and green 'ENABLED'.
 The extension status is determined in the following ways:
 - Red 'X': the extension is reporting compatibility errors
 - Red 'DISABLED': the extension is disabled.
