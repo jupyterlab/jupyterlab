@@ -6,6 +6,93 @@
 
 ## 4.0
 
+Below are the major highlights in JupyterLab 4.
+
+### New text editor
+
+CodeMirror, the text editor used for cells and file editors, has been updated to [CodeMirror 6](https://codemirror.net/). This brings important
+performance improvements as well as better customization capabilities.
+The editor settings have also been improved. Previously settings had to be individually set for each type of cell, the file editor, and the console editor. Now they are all set in one place, and you can choose to use the default settings for all editors and change some settings for specific cases. For example, it is possible to hide the line numbers for markdown cells.
+
+Developers can now provide editor extensions, like themes and programming language parsers, through new application registries.
+
+### New extension manager
+
+Starting with JupyterLab 3, extensions can be installed via Python packages.
+
+In JupyterLab 4, building on this feature, the Extension Manager can now list and install extensions from [pypi.org](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab).
+
+Developers can provide an alternative package repository to display your own set of extensions.
+
+### Improved document search
+
+The Search and Replace functionality has been improved with new features when searching in a notebook:
+
+- Highlight matches in rendered markdown cells
+- Search in selection
+- Multi-line search
+- Replace using regex capture-group references
+- Replace while preserving case
+
+### UI improvements
+
+Some new elements have been added or changed in the UI:
+
+- Rework the running kernels section
+- "Add cell" button at the notebook bottom
+- Dialog to display keyboard shortcuts as in the Classic Notebook (use <kbd>CTRL+SHIFT+H</kbd>)
+- Display first line of cell input and outputs when they are collapsed
+
+### Accessibility improvements
+
+JupyterLab is not yet fully accessible. Currently the focus is on making Notebook 7 accessible.
+A big part of the code is shared, though, and the following accessibility improvements are in JupyterLab 4:
+
+- Improved focus and keyboard navigation in the file browser
+- Add more roles and labels to UI elements
+- Main menu collapses to a hamburger menu if the web page is not wide enough to display all items.
+
+### Performance enhancements
+
+JupyterLab is now faster, thanks to the following improvements:
+
+- CSS rules optimization: CSS selectors have been optimized to improve web browser performance when many elements are present on a page.
+- Upgrade to CodeMirror 6: Especially for notebooks with many cells, the new CodeMirror version is far more efficient than the previous version. Large notebook should now load faster.
+- Notebook windowing: By rendering only the parts of a notebook that fit in the web browser viewport, JupyterLab is much more efficient. See an important note below.
+
+_Notebook windowing_ might add side effects with notebooks containing cells injecting new CSS styles or JavaScript. It may also be less convenient if some cell outputs are displaying [iframes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe). If you have issues with notebook rendering, try changing the user setting _Notebook_ > _Windowing mode_ to `defer` or `none`. (`none` should be used as a last resort, because it disables all optimizations.)
+
+### Real Time Collaboration
+
+In JupyterLab 3.6, we made a huge step forward for real time collaboration (RTC).
+We decided to extract the feature to an external extension: [jupyter_collaboration](https://github.com/jupyterlab/jupyter_collaboration).
+The rationale is to limit the dependencies for users who don't need RTC. We also separated RTC to benefit organizations that do not meet the specific requirements regarding file content management.
+
+If you want to try RTC, you can install it:
+
+- with pip: `pip install "jupyter-collaboration>=1.0.0a0"`
+- with conda: _not yet available_
+
+Some highlights:
+
+- Support displaying multiple cursors and selections
+- Support registration of new shared model types
+
+###️ For developers
+
+For contributors and extension authors, here are the main tools that you need to upgrade to work with JupyterLab 4:
+
+- TypeScript v5
+- Yarn v3
+- React v18
+- Lumino v2
+
+We also recommend NodeJS v18, the only version to remain supported in 2024 (see [Node release schedule](https://github.com/nodejs/release#release-schedule)).
+
+To ease your code migration to JupyterLab 4, have a look at the [migration guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html). You can also look at the following PRs that migrated some extensions:
+- the [extensions examples](https://github.com/jupyterlab/extension-examples/pull/225)
+- the [Jupyter MIME type renderers](https://github.com/jupyterlab/jupyter-renderers/pull/296)
+
 <!-- <START NEW CHANGELOG ENTRY> -->
 
 ## 4.0.0b2
