@@ -12,19 +12,19 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "main": "lib/custom-component.js",
+  "main": "lib/jupyter-component.js",
   "directories": {
     "lib": "lib/"
   },
   "files": [
-    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "src/**/*.{js}",
-    "src/**/*.{ts,tsx}"
+    "lib/**/*.{js,js.map}",
+    "src/**/*.{js,ts,tsx}"
   ],
   "scripts": {
     "build": "webpack --mode production",
     "build:all": "npm run build",
-    "clean": "rimraf lib"
+    "clean": "rimraf lib",
+    "watch": "webpack --watch"
   },
   "devDependencies": {
     "mathjax-full": "^3.2.2",

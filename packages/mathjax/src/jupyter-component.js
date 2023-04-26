@@ -2,9 +2,12 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-/**
- * @packageDocumentation
- * @module mathjax
+/*
+  This creates a custom MathJax component for Jupyter as suggested in
+  https://github.com/mathjax/MathJax/issues/3021#issuecomment-1470941932
+
+  It is based on https://github.com/mathjax/MathJax-src/tree/master/components/src/tex-chtml-full
+  from which ui/safe has been added and ui/menu has been removed.
  */
 
 //
@@ -37,11 +40,6 @@ import { insert } from 'mathjax-full/js/util/Options.js';
 insert(
   MathJax.config,
   {
-    // loader: {
-    //   paths: {
-    //     mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5'
-    //   }
-    // },
     tex: {
       inlineMath: [
         ['$', '$'],

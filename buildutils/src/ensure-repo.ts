@@ -232,6 +232,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/markdownviewer',
     '@jupyterlab/markdownviewer-extension',
     '@jupyterlab/markedparser-extension',
+    '@jupyterlab/mathjax',
     '@jupyterlab/mathjax-extension',
     '@jupyterlab/metadataform',
     '@jupyterlab/metadataform-extension',
@@ -859,6 +860,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   // Handle the refs in the top level tsconfigdoc.json
   const tsConfigDocExclude = [
     'application-extension',
+    'mathjax',
     'metapackage',
     'nbconvert-css',
     'testing'
@@ -867,7 +869,12 @@ export async function ensureIntegrity(): Promise<boolean> {
   const tsConfigdocData = utils.readJSONFile(tsConfigdocPath);
   tsConfigdocData.references = utils
     .getCorePaths()
-    .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
+    .filter(
+      pth =>
+        !tsConfigDocExclude.some(
+          pkg => pth.match(new RegExp(`${pkg}$`)) !== null
+        )
+    )
     .map(pth => {
       return { path: './' + path.relative('.', pth).replace(/\\/g, '/') };
     });
