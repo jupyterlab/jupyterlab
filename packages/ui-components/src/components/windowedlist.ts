@@ -265,14 +265,26 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   /**
    * Get the scroll offset to display an item in the viewport.
    *
+   * By default, the list will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
+   *
+   *   auto (default) - Scroll as little as possible to ensure the item is visible. (If the item is already visible, it won't scroll at all.)
+   *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away, scroll so that it becomes visible (including the margin). If it is more than one viewport away, scroll so that it is centered within the list.
+   *   center - Center align the item within the list.
+   *   end - Align the item to the end of the list
+   *   start - Align the item to the beginning of the list
+   *
    * @param index Item index
    * @param align Where to align the item in the viewport
+   * @param margin In 'smart' mode the viewport proportion to add
    * @returns The needed scroll offset
    */
   getOffsetForIndexAndAlignment(
     index: number,
-    align: WindowedList.ScrollToAlign = 'auto'
+    align: WindowedList.ScrollToAlign = 'auto',
+    margin: number = 0.25
   ): number {
+    const boundedMargin =
+      align === 'smart' ? Math.min(Math.max(0.0, margin), 1.0) : 0.0;
     const size = this._height;
     const itemMetadata = this._getItemMetadata(index);
 
@@ -280,19 +292,19 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     // To ensure it reflects actual measurements instead of just estimates.
     const estimatedTotalSize = this.getEstimatedTotalSize();
 
-    const maxOffset = Math.max(
+    const topOffset = Math.max(
       0,
       Math.min(estimatedTotalSize - size, itemMetadata.offset)
     );
-    const minOffset = Math.max(
+    const bottomOffset = Math.max(
       0,
       itemMetadata.offset - size + itemMetadata.size
     );
 
     if (align === 'smart') {
       if (
-        this._scrollOffset >= minOffset - size &&
-        this._scrollOffset <= maxOffset + size
+        this._scrollOffset >= bottomOffset - size &&
+        this._scrollOffset <= topOffset + size
       ) {
         align = 'auto';
       } else {
@@ -302,22 +314,22 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
     switch (align) {
       case 'start':
-        return maxOffset;
+        return topOffset;
       case 'end':
-        return minOffset;
+        return bottomOffset;
       case 'center':
-        return Math.round(minOffset + (maxOffset - minOffset) / 2);
+        return Math.round(bottomOffset + (topOffset - bottomOffset) / 2);
       case 'auto':
       default:
         if (
-          this._scrollOffset >= minOffset &&
-          this._scrollOffset <= maxOffset
+          this._scrollOffset >= bottomOffset &&
+          this._scrollOffset <= itemMetadata.offset
         ) {
           return this._scrollOffset;
-        } else if (this._scrollOffset < minOffset) {
-          return minOffset;
+        } else if (this._scrollOffset < bottomOffset) {
+          return bottomOffset + boundedMargin * size;
         } else {
-          return maxOffset;
+          return Math.max(0, topOffset - boundedMargin * size);
         }
     }
   }
@@ -741,20 +753,22 @@ export class WindowedList<
   /**
    * Scroll to the specified item.
    *
-   * By default, the List will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
+   * By default, the list will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
    *
    *   auto (default) - Scroll as little as possible to ensure the item is visible. (If the item is already visible, it won't scroll at all.)
-   *   smart - If the item is already visible, don't scroll at all. If it is less than one viewport away, scroll as little as possible so that it becomes visible. If it is more than one viewport away, scroll so that it is centered within the list.
+   *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away, scroll so that it becomes visible (including the margin). If it is more than one viewport away, scroll so that it is centered within the list.
    *   center - Center align the item within the list.
    *   end - Align the item to the end of the list
    *   start - Align the item to the beginning of the list
    *
    * @param index Item index to scroll to
    * @param align Type of alignment
+   * @param margin In 'smart' mode the viewport proportion to add
    */
   scrollToItem(
     index: number,
-    align: WindowedList.ScrollToAlign = 'auto'
+    align: WindowedList.ScrollToAlign = 'auto',
+    margin: number = 0.25
   ): Promise<void> {
     if (!this.viewModel.windowingActive) {
       const widget = this.layout.widgets[index];
@@ -786,7 +800,8 @@ export class WindowedList<
     this.scrollTo(
       this.viewModel.getOffsetForIndexAndAlignment(
         Math.max(0, Math.min(index, this._viewModel.widgetCount - 1)),
-        align
+        align,
+        margin
       )
     );
 
@@ -1243,11 +1258,24 @@ export namespace WindowedList {
     /**
      * Get the scroll offset to display an item in the viewport.
      *
+     * By default, the list will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
+     *
+     *   auto (default) - Scroll as little as possible to ensure the item is visible. (If the item is already visible, it won't scroll at all.)
+     *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away, scroll so that it becomes visible (including the margin). If it is more than one viewport away, scroll so that it is centered within the list.
+     *   center - Center align the item within the list.
+     *   end - Align the item to the end of the list
+     *   start - Align the item to the beginning of the list
+     *
      * @param index Item index
      * @param align Where to align the item in the viewport
+     * @param margin In 'smart' mode the viewport proportion to add
      * @returns The needed scroll offset
      */
-    getOffsetForIndexAndAlignment(index: number, align: ScrollToAlign): number;
+    getOffsetForIndexAndAlignment(
+      index: number,
+      align?: ScrollToAlign,
+      margin?: number
+    ): number;
     /**
      * Compute the items range to display.
      *
