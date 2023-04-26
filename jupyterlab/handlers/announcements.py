@@ -23,6 +23,10 @@ JUPYTERLAB_LAST_RELEASE_URL = "https://pypi.org/pypi/jupyterlab/json"
 JUPYTERLAB_RELEASE_URL = "https://github.com/jupyterlab/jupyterlab/releases/tag/v"
 
 
+def format_datetime(dt_str: str):
+    return datetime.fromisoformat(dt_str).timestamp() * 1000
+
+
 @dataclass(frozen=True)
 class Notification:
     """Notification
@@ -226,32 +230,54 @@ class NewsHandler(APIHandler):
                 tree = ET.fromstring(response.body)  # noqa S314
 
                 def build_entry(node):
-                    return Notification(
-                        message=node.find("atom:title", xml_namespaces).text
-                        + "\n"
-                        + node.find("atom:summary", xml_namespaces).text,
-                        createdAt=datetime.fromisoformat(
-                            node.find("atom:published", xml_namespaces).text
-                        ).timestamp()
-                        * 1000,
-                        modifiedAt=datetime.fromisoformat(
-                            node.find("atom:updated", xml_namespaces).text
-                        ).timestamp()
-                        * 1000,
+                    def get_xml_text(attr: str, required: bool = False) -> str:
+                        node_item = node.find(f"atom:{attr}", xml_namespaces)
+                        if node_item is not None:
+                            return node_item.text
+                        elif required:
+                            error_m = (
+                                f'atom feed entry does not contain a required attribute: {attr}'
+                            )
+                            raise KeyError(error_m)
+                        else:
+                            return ''
+
+                    entry_title = get_xml_text("title", required=True)
+                    entry_id = get_xml_text("id", required=True)
+                    entry_updated = get_xml_text("updated", required=True)
+                    entry_published = get_xml_text("published")
+                    entry_summary = get_xml_text("summary")
+                    entry_link = node.find("atom:link[@rel='alternate']", xml_namespaces).get(
+                        "href"
+                    )
+
+                    message = (
+                        "\n".join([entry_title, entry_summary]) if entry_summary else entry_title
+                    )
+                    modified_at = format_datetime(entry_updated)
+                    created_at = (
+                        modified_at if not entry_published else format_datetime(entry_published)
+                    )
+                    notification = Notification(
+                        message=message,
+                        createdAt=created_at,
+                        modifiedAt=modified_at,
                         type="info",
                         link=(
                             trans.__("Open full post"),
-                            node.find("atom:link", xml_namespaces).get("href"),
+                            entry_link,
                         ),
                         options={
                             "data": {
-                                "id": node.find("atom:id", xml_namespaces).text,
+                                "id": entry_id,
                                 "tags": ["news"],
                             }
                         },
                     )
+                    return notification
 
-                news.extend(map(build_entry, tree.findall("atom:entry", xml_namespaces)))
+                entries = map(build_entry, tree.findall("atom:entry", xml_namespaces))
+                news.extend(entries)
             except Exception as e:
                 self.log.debug(
                     f"Failed to get announcements from Atom feed: {self.news_url}",
