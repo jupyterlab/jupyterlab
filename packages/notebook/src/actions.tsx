@@ -2511,7 +2511,7 @@ namespace Private {
     } else {
       notebook.lastClipboardInteraction = 'copy';
     }
-    handleState(notebook, state);
+    void handleState(notebook, state);
   }
 
   /**
