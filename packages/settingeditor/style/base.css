@@ -11,6 +11,7 @@
   --jp-private-settingeditor-toolbar-height: 28px;
   --jp-private-settingeditor-type-width: 75px;
   --jp-private-settingeditor-modifier-indent: 5px;
+  --jp-private-settingeditor-header-spacing: 8px;
 }
 
 .jp-SettingsPanel,
@@ -40,6 +41,8 @@
 #json-setting-editor .lm-SplitPanel-handle {
   background-color: var(--jp-border-color2);
 }
+
+/** Plugin list **/
 
 .jp-PluginList {
   min-width: 175px;
@@ -101,18 +104,6 @@
   background-color: var(--jp-error-color0);
 }
 
-.jp-SettingEditor-header {
-  font-size: var(--jp-content-font-size4);
-  font-weight: var(--jp-content-heading-font-weight);
-  color: var(--jp-ui-font-color0);
-  padding: 20px 0 10px 20px;
-  border-bottom: 1px solid var(--jp-border-color2);
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  background-color: var(--jp-layout-color0);
-}
-
 .jp-PluginList-icon {
   display: flex;
   height: 20px;
@@ -121,97 +112,7 @@
   position: relative;
 }
 
-.jp-SettingsRawEditor .jp-Toolbar {
-  color: var(--jp-ui-font-color0);
-  font-size: var(--jp-ui-font-size1);
-  height: var(--jp-private-settingeditor-toolbar-height);
-  max-height: var(--jp-private-settingeditor-toolbar-height);
-}
-
-.jp-SettingsRawEditor .jp-Toolbar .jp-ToolbarButtonComponent-label {
-  display: none;
-}
-
-.jp-SettingsRawEditor .jp-Toolbar-item {
-  margin-top: 1px;
-  align-items: center;
-}
-
-.jp-SettingsRawEditor .jp-Inspector {
-  border-top: 2px solid var(--jp-layout-color2);
-  min-height: var(--jp-private-settingeditor-debug-height);
-  max-height: var(--jp-private-settingeditor-debug-height);
-}
-
-.jp-SettingsRawEditor .jp-Inspector.jp-SettingsDebug .jp-RenderedHTMLCommon {
-  padding: 2px 5px 2px 0;
-  width: 100%;
-}
-
-.jp-SettingsRawEditor .jp-Inspector.jp-SettingsDebug .jp-RenderedHTMLCommon p {
-  text-align: right;
-}
-
-.jp-SettingsRawEditor .cm-editor {
-  height: 100%;
-}
-
-.jp-SettingsPanel .checkbox p {
-  font-size: var(--jp-content-font-size1);
-}
-
-.jp-SettingsPanel .checkbox {
-  display: flex;
-  flex-direction: column-reverse;
-}
-
-.jp-SettingsPanel .form-group {
-  display: flex;
-  padding: 4px 8px 4px var(--jp-private-settingeditor-modifier-indent);
-  margin-top: 5px;
-}
-
-.jp-SettingsPanel .jp-SaveSettingsBanner {
-  position: absolute;
-  bottom: 0;
-  padding: 20px;
-  width: 100%;
-  background: var(--jp-border-color3);
-}
-
-.jp-SettingsPanel .jp-SaveSettingsBanner button {
-  box-shadow: none;
-  outline: none;
-  border: none;
-  color: var(--jp-brand-color1);
-  font-size: var(--jp-ui-font-size1);
-  cursor: pointer;
-}
-
-.jp-SettingsPanel .jp-SaveSettingsBanner button:hover {
-  color: var(--jp-brand-color0);
-}
-
-.jp-SettingsPanel .jp-SettingsHeader h2 {
-  font-size: var(--jp-content-font-size3);
-  color: var(--jp-ui-font-color0);
-  font-weight: var(--jp-content-heading-font-weight);
-  padding-inline-start: 0.5em;
-}
-
-.jp-SettingsForm {
-  position: relative;
-}
-
-.jp-SettingsPanel .jp-SettingsHeader {
-  display: flex;
-  flex: auto;
-  justify-content: space-between;
-  cursor: pointer;
-  border: 1px solid var(--jp-border-color2);
-}
-
-.jp-PluginList .jp-FilterBox {
+.jp-PluginList-wrapper > .jp-FilterBox {
   margin: 8px 12px 0;
 }
 
@@ -255,21 +156,62 @@
   line-height: var(--jp-cell-collapser-min-height);
 }
 
-.jp-SettingsPanel .jp-SettingsHeader-Name {
-  text-transform: inherit;
+/** Raw editor **/
+
+.jp-SettingsRawEditor .jp-Toolbar {
+  color: var(--jp-ui-font-color0);
   font-size: var(--jp-ui-font-size1);
+  height: var(--jp-private-settingeditor-toolbar-height);
+  max-height: var(--jp-private-settingeditor-toolbar-height);
+}
+
+.jp-SettingsRawEditor .jp-Toolbar .jp-ToolbarButtonComponent-label {
+  display: none;
+}
+
+.jp-SettingsRawEditor .jp-Toolbar-item {
+  margin-top: 1px;
+  align-items: center;
+}
+
+.jp-SettingsRawEditor .jp-Inspector {
+  border-top: 2px solid var(--jp-layout-color2);
+  min-height: var(--jp-private-settingeditor-debug-height);
+  max-height: var(--jp-private-settingeditor-debug-height);
+}
+
+.jp-SettingsRawEditor .jp-Inspector.jp-SettingsDebug .jp-RenderedHTMLCommon {
+  padding: 2px 5px 2px 0;
+  width: 100%;
+}
+
+.jp-SettingsRawEditor .jp-Inspector.jp-SettingsDebug .jp-RenderedHTMLCommon p {
+  text-align: right;
+}
+
+.jp-SettingsRawEditor .cm-editor {
+  height: 100%;
+}
+
+/** Panel **/
+
+.jp-SettingsPanel .checkbox p {
+  font-size: var(--jp-content-font-size1);
+}
+
+.jp-SettingsPanel .checkbox {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.jp-SettingsPanel .form-group {
+  display: flex;
+  padding: 4px 8px 4px var(--jp-private-settingeditor-modifier-indent);
+  margin-top: 5px;
 }
 
 .jp-SettingsPanel .jp-SettingsEditor {
   padding: 20px;
-}
-
-.jp-SettingsPanel .jp-SettingEditor-Switch .jp-switch {
-  position: absolute;
-  bottom: 0;
-  z-index: 999;
-  background-color: var(--jp-border-color3);
-  border: 1px solid var(--jp-border-color1);
 }
 
 .jp-SettingsPanel {
@@ -277,16 +219,49 @@
   height: 100%;
 }
 
-.jp-SettingsForm .jp-Buttonbar {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  margin: 8px;
-  gap: 0.5em;
-  max-width: 800px;
+.jp-SettingsForm {
+  position: relative;
 }
 
-.jp-SettingsForm button.jp-RestoreButton {
+.jp-SettingsForm > .rjsf > .form-group {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+/** Settings header **/
+
+.jp-SettingsHeader {
+  display: grid;
+  grid-template:
+    'title buttonbar'
+    'description buttonbar';
+  grid-template-columns: 1fr max-content;
+  padding: 0 var(--jp-private-settingeditor-header-spacing);
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-SettingsHeader-title {
+  font-size: var(--jp-content-font-size3);
+  color: var(--jp-ui-font-color0);
+  font-weight: 400;
+  grid-area: title;
+  padding: 0;
+  margin-top: calc(var(--jp-private-settingeditor-header-spacing) * 2);
+  margin-bottom: calc(var(--jp-private-settingeditor-header-spacing) / 2);
+}
+
+.jp-SettingsHeader-description {
+  grid-area: description;
+  padding-bottom: var(--jp-private-settingeditor-header-spacing);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-SettingsHeader-buttonbar {
+  margin: auto var(--jp-private-settingeditor-header-spacing);
+  grid-row: span 2;
+}
+
+.jp-SettingsHeader-buttonbar > .jp-RestoreButton {
   background-color: var(--jp-warn-color-normal);
   border: 0;
   color: var(--jp-ui-inverse-font-color0);
@@ -295,6 +270,8 @@
 .jp-PluginEditor {
   overflow: auto;
 }
+
+/** Placeholder **/
 
 .jp-SettingsEditor-placeholder {
   text-align: center;
