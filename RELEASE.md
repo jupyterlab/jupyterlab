@@ -474,3 +474,4 @@ Here is a list of previous issues that happened while releasing JupyterLab, that
 new issues show up in the future:
 
 - HTTP Error 502: Bad Gateway (JupyterLab `4.0.0a23`): https://github.com/jupyterlab/jupyterlab/issues/12324
+- Degraded performance of npm publish (JupyterLab `4.0.0b2`): https://github.com/jupyterlab/jupyterlab/issues/14431

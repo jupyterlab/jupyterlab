@@ -141,5 +141,35 @@ describe('documentsearch/searchmodel', () => {
         query.lastIndex = 0;
       });
     });
+
+    describe('#replaceText', () => {
+      it('defaults to empty string', () => {
+        expect(model.replaceText).toEqual('');
+      });
+
+      it('changes after assignment with setter', () => {
+        model.replaceText = 'test';
+        expect(model.replaceText).toEqual('test');
+      });
+
+      it('emits `stateChanged` signal on assignment', () => {
+        let emitted = false;
+        model.stateChanged.connect(() => {
+          emitted = true;
+        });
+        model.replaceText = 'test';
+        expect(emitted).toEqual(true);
+      });
+
+      it('does not emit `stateChanged` signal if value has not changed', () => {
+        let emitted = 0;
+        model.stateChanged.connect(() => {
+          emitted += 1;
+        });
+        model.replaceText = '1';
+        model.replaceText = '1';
+        expect(emitted).toEqual(1);
+      });
+    });
   });
 });
