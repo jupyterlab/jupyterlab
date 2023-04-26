@@ -64,11 +64,11 @@ _Notebook windowing_ might add side effects with notebooks containing cells inje
 
 ### Real Time Collaboration
 
-In JupyterLab 3.6, we made a huge step forward for real time collaboration (RTC).
-We decided to extract the feature to an external extension: [jupyter_collaboration](https://github.com/jupyterlab/jupyter_collaboration).
-The rationale is to limit the dependencies for users who don't need RTC. We also separated RTC to benefit organizations that do not meet the specific requirements regarding file content management.
+JupyterLab 3.6 already made significant improvements to the Real Time Collaboration (RTC) feature.
+The feature has now been to a separate repository: [jupyter_collaboration](https://github.com/jupyterlab/jupyter_collaboration).
+The rationale is to limit the dependencies for users who don't need RTC. Separating RTC also helps organizations using JupyterLab that do not meet the specific requirements regarding file content management.
 
-If you want to try RTC, you can install it:
+To enable RTC, install the `jupyter-collaboration` package with:
 
 - with pip: `pip install "jupyter-collaboration>=1.0.0a0"`
 - with conda: _not yet available_
@@ -80,7 +80,7 @@ Some highlights:
 
 ###️ For developers
 
-For contributors and extension authors, here are the main tools that you need to upgrade to work with JupyterLab 4:
+Here are the main tool updates that may affect extension authors and developers:
 
 - TypeScript v5
 - Yarn v3
@@ -89,7 +89,7 @@ For contributors and extension authors, here are the main tools that you need to
 
 We also recommend NodeJS v18, the only version to remain supported in 2024 (see [Node release schedule](https://github.com/nodejs/release#release-schedule)).
 
-To ease your code migration to JupyterLab 4, have a look at the [migration guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html). You can also look at the following PRs that migrated some extensions:
+To ease code migration to JupyterLab 4, have a look at the [migration guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
 - the [extensions examples](https://github.com/jupyterlab/extension-examples/pull/225)
 - the [Jupyter MIME type renderers](https://github.com/jupyterlab/jupyter-renderers/pull/296)
 
