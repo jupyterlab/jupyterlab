@@ -78,7 +78,7 @@ Some highlights:
 - Support displaying multiple cursors and selections
 - Support registration of new shared model types
 
-###️ For developers
+### For developers
 
 Here are the main tool updates that may affect extension authors and developers:
 
