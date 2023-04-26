@@ -12,7 +12,7 @@ Below are the major highlights in JupyterLab 4.
 
 CodeMirror, the text editor used for cells and file editors, has been updated to [CodeMirror 6](https://codemirror.net/). This brings important
 performance improvements as well as better customization capabilities.
-The editor settings have also been improved. Previously settings had to be individually set for each type of cell, the file editor, and the console editor. Now they are all set in one place, and you can choose to use the default settings for all editors and change some settings for specific cases. For example, it is possible to hide the line numbers for markdown cells.
+The editor settings have also been improved. Previously settings had to be individually set for each type of cell, the file editor, and the console editor. Now they are all set in one place, which makes it easier to use the default settings for all editors or change some settings for specific cases. For example, it is possible to hide the line numbers for markdown cells.
 
 Developers can now provide editor extensions, like themes and programming language parsers, through new application registries.
 
@@ -22,7 +22,7 @@ Starting with JupyterLab 3, extensions can be installed via Python packages.
 
 In JupyterLab 4, building on this feature, the Extension Manager can now list and install extensions from [pypi.org](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab).
 
-Developers can provide an alternative package repository to display your own set of extensions.
+Developers can provide an alternative package repository to display their own set of extensions.
 
 ### Improved document search
 
@@ -89,8 +89,8 @@ Here are the main tool updates that may affect extension authors and developers:
 
 We also recommend NodeJS v18, the only version to remain supported in 2024 (see [Node release schedule](https://github.com/nodejs/release#release-schedule)).
 
-To ease code migration to JupyterLab 4, have a look at the [migration guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
-- the [extensions examples](https://github.com/jupyterlab/extension-examples/pull/225)
+To ease code migration to JupyterLab 4, developers can have a look at the [migration guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
+- the [Extensions Examples](https://github.com/jupyterlab/extension-examples/pull/225)
 - the [Jupyter MIME type renderers](https://github.com/jupyterlab/jupyter-renderers/pull/296)
 
 <!-- <START NEW CHANGELOG ENTRY> -->
