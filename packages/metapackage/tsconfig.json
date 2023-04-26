@@ -166,6 +166,9 @@
       "path": "../markedparser-extension"
     },
     {
+      "path": "../mathjax"
+    },
+    {
       "path": "../mathjax-extension"
     },
     {

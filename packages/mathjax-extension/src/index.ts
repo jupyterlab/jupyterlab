@@ -5,6 +5,8 @@
  * @module mathjax-extension
  */
 
+/* global MathJax */
+
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -13,6 +15,13 @@ import {
 import { ILatexTypesetter } from '@jupyterlab/rendermime';
 
 import type { MathDocument } from 'mathjax-full/js/core/MathDocument';
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  interface Window {
+    MathJax: Record<string, any>;
+  }
+}
 
 namespace CommandIDs {
   /**
@@ -40,56 +49,11 @@ export class MathJaxTypesetter implements ILatexTypesetter {
       return;
     }
 
-    await import('mathjax-full/js/input/tex/require/RequireConfiguration');
-    const { mathjax } = await import('mathjax-full/js/mathjax');
-    const { CHTML } = await import('mathjax-full/js/output/chtml');
-    const { TeX } = await import('mathjax-full/js/input/tex');
-    const { TeXFont } = await import('mathjax-full/js/output/chtml/fonts/tex');
-    const { AllPackages } = await import(
-      'mathjax-full/js/input/tex/AllPackages'
-    );
-    const { SafeHandler } = await import('mathjax-full/js/ui/safe/SafeHandler');
-    const { HTMLHandler } = await import(
-      'mathjax-full/js/handlers/html/HTMLHandler'
-    );
-    const { browserAdaptor } = await import(
-      'mathjax-full/js/adaptors/browserAdaptor'
-    );
-    const { AssistiveMmlHandler } = await import(
-      'mathjax-full/js/a11y/assistive-mml'
-    );
+    // @ts-expect-error Expected no type
+    await import('@jupyterlab/mathjax/lib/custom-component.js');
 
-    mathjax.handlers.register(
-      AssistiveMmlHandler(SafeHandler(new HTMLHandler(browserAdaptor())))
-    );
-
-    class EmptyFont extends TeXFont {
-      defaultFonts = {};
-    }
-
-    const chtml = new CHTML({
-      // Override dynamically generated fonts in favor of our font css
-      font: new EmptyFont()
-    });
-
-    const tex = new TeX({
-      packages: AllPackages.concat('require'),
-      inlineMath: [
-        ['$', '$'],
-        ['\\(', '\\)']
-      ],
-      displayMath: [
-        ['$$', '$$'],
-        ['\\[', '\\]']
-      ],
-      processEscapes: true,
-      processEnvironments: true
-    });
-
-    this._mathDocument = mathjax.document(window.document, {
-      InputJax: tex,
-      OutputJax: chtml
-    });
+    // @ts-expect-error Unknown MathJax
+    this._mathDocument = MathJax.startup.document;
     this._initialized = true;
   }
 
