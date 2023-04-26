@@ -358,7 +358,7 @@ export class SearchDocumentModel
   private _preserveCase = false;
   private _initialQuery = '';
   private _filters: IFilters = {};
-  private _replaceText: string;
+  private _replaceText: string = '';
   private _searchDebouncer: Debouncer;
   private _searchExpression = '';
   private _useRegex = false;
