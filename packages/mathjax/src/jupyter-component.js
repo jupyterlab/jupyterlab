@@ -37,9 +37,15 @@ Loader.preLoad(
 //  to the location from which this file is loaded)
 //
 import { insert } from 'mathjax-full/js/util/Options.js';
+
 insert(
   MathJax.config,
   {
+    chtml: {
+      // FIXME don't load fonts from CDN
+      fontURL:
+        'https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2'
+    },
     tex: {
       inlineMath: [
         ['$', '$'],
@@ -77,3 +83,6 @@ import 'mathjax-full/components/src/a11y/assistive-mml/assistive-mml.js';
 //
 import 'mathjax-full/components/src/startup/startup.js';
 import { MathJax } from 'mathjax-full/js/components/global';
+
+// FIXME
+MathJax.config.chtml.font.options.fontURL = MathJax.config.chtml.fontURL;
