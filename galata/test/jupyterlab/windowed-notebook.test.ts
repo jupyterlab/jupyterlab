@@ -130,3 +130,31 @@ test('should remove all cells including hidden outputs artifacts', async ({
   }
   expect(found).toEqual(false);
 });
+
+test('should scroll past end when running and inserting a cell at the viewport bottom', async ({
+  page
+}) => {
+  const h = await page.notebook.getNotebookInPanel();
+  const mdCellSelector = '.jp-MarkdownCell[data-windowed-list-index="2"]';
+  const mdCell = await h!.waitForSelector(mdCellSelector);
+
+  await page
+    .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
+    .waitFor();
+
+  await mdCell.click();
+
+  await expect
+    .soft(
+      page
+        .getByRole('main')
+        .locator('.jp-RawCell[data-windowed-list-index="4"]')
+    )
+    .not.toBeInViewport();
+
+  await page.keyboard.press('Shift+Enter');
+
+  await expect(
+    page.getByRole('main').locator('.jp-RawCell[data-windowed-list-index="4"]')
+  ).toBeInViewport();
+});

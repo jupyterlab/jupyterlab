@@ -600,7 +600,8 @@ export namespace NotebookActions {
     } else {
       notebook.activeCellIndex++;
     }
-    Private.handleRunState(notebook, state, true);
+
+    Private.handleState(notebook, state, true);
     return promise;
   }
 
@@ -657,7 +658,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    Private.handleRunState(notebook, state, true);
+    Private.handleState(notebook, state, true);
     return promise;
   }
 
@@ -1315,7 +1316,7 @@ export namespace NotebookActions {
     if (cellsFromClipboard) {
       notebook.lastClipboardInteraction = 'paste';
     }
-    Private.handleState(notebook, state);
+    Private.handleState(notebook, state, true);
   }
 
   /**
@@ -2145,7 +2146,7 @@ namespace Private {
     }
 
     if (scrollIfNeeded && activeCell) {
-      notebook.scrollToItem(activeCellIndex).catch(reason => {
+      notebook.scrollToItem(activeCellIndex, 'smart', 0.05).catch(reason => {
         // no-op
       });
     }
