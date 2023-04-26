@@ -60,7 +60,7 @@ import type {
 const TOAST_CLOSE_BUTTON_CLASS = 'jp-Notification-Toast-Close';
 
 /**
- * Toast close button class right margin requiered due to custom hover effect
+ * Toast close button class right margin required due to custom hover effect
  */
 const TOAST_CLOSE_BUTTON_MARGIN_CLASS = 'jp-Notification-Toast-Close-Margin';
 
