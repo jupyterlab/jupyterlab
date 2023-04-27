@@ -100,6 +100,7 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
+  '@jupyterlab/mathjax-extension': ['@jupyterlab/mathjax'],
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testing': [
     '@babel/core',
@@ -116,7 +117,6 @@ const UNUSED: Dict<string[]> = {
     '@jupyterlab/notebook',
     '@jupyterlab/rendermime'
   ],
-  '@jupyterlab/test-csvviewer': ['csv-spectrum'],
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite']
 };
 

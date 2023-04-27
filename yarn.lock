@@ -3841,6 +3841,7 @@ __metadata:
   resolution: "@jupyterlab/mathjax-extension@workspace:packages/mathjax-extension"
   dependencies:
     "@jupyterlab/application": ^4.0.0-beta.2
+    "@jupyterlab/mathjax": ^4.0.0-beta.2
     "@jupyterlab/rendermime": ^4.0.0-beta.2
     mathjax-full: ^3.2.2
     rimraf: ~3.0.0
@@ -3855,7 +3856,6 @@ __metadata:
   dependencies:
     mathjax-full: ^3.2.2
     rimraf: ~3.0.0
-    typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
   languageName: unknown

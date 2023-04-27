@@ -50,7 +50,7 @@ export class MathJaxTypesetter implements ILatexTypesetter {
     }
 
     // @ts-expect-error Expected no type
-    await import('@jupyterlab/mathjax/lib/jupyter-component.js');
+    await import('@jupyterlab/mathjax');
 
     // @ts-expect-error Unknown MathJax
     this._mathDocument = MathJax.startup.document;

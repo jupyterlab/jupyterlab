@@ -11,7 +11,10 @@
     "url": "https://github.com/jupyterlab/jupyterlab.git"
   },
   "license": "BSD-3-Clause",
-  "author": "Project Jupyter",
+  "author": {
+    "name": "Project Jupyter",
+    "email": "jupyter@googlegroups.com"
+  },
   "main": "lib/jupyter-component.js",
   "directories": {
     "lib": "lib/"
@@ -29,7 +32,6 @@
   "devDependencies": {
     "mathjax-full": "^3.2.2",
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.4",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1"
   },
