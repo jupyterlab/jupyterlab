@@ -191,18 +191,24 @@ export class SettingsFormEditor extends React.Component<
     const trans = this.props.translator.load('jupyterlab');
 
     return (
-      <div>
+      <>
         <div className="jp-SettingsHeader">
-          <h2 title={this.props.settings.schema.description}>
+          <h2
+            className="jp-SettingsHeader-title"
+            title={this.props.settings.schema.description}
+          >
             {this.props.settings.schema.title}
           </h2>
-        </div>
-        <div className="jp-Buttonbar">
-          {this.state.isModified && (
-            <Button className="jp-RestoreButton" onClick={this.reset}>
-              {trans.__('Restore to Defaults')}
-            </Button>
-          )}
+          <div className="jp-SettingsHeader-buttonbar">
+            {this.state.isModified && (
+              <Button className="jp-RestoreButton" onClick={this.reset}>
+                {trans.__('Restore to Defaults')}
+              </Button>
+            )}
+          </div>
+          <div className="jp-SettingsHeader-description">
+            {this.props.settings.schema.description}
+          </div>
         </div>
         <FormComponent
           validator={validatorAjv8}
@@ -216,7 +222,7 @@ export class SettingsFormEditor extends React.Component<
           onChange={this._onChange}
           translator={this.props.translator}
         />
-      </div>
+      </>
     );
   }
 
