@@ -145,12 +145,9 @@ input::placeholder {
 
 .jp-InputGroupAction {
   position: absolute;
-  top: 0;
+  bottom:1px;
   right: 0;
   padding: 6px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .jp-HTMLSelect.jp-DefaultStyle select {
