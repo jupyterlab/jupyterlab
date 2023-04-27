@@ -51,11 +51,11 @@
     "@jupyterlab/nbformat": "^4.0.0-beta.2",
     "@jupyterlab/settingregistry": "^4.0.0-beta.2",
     "@jupyterlab/statedb": "^4.0.0-beta.2",
-    "@lumino/coreutils": "^2.1.0",
-    "@lumino/disposable": "^2.1.0",
-    "@lumino/polling": "^2.1.0",
+    "@lumino/coreutils": "^2.1.1",
+    "@lumino/disposable": "^2.1.1",
+    "@lumino/polling": "^2.1.1",
     "@lumino/properties": "^2.0.0",
-    "@lumino/signaling": "^2.1.0",
+    "@lumino/signaling": "^2.1.1",
     "ws": "^8.11.0"
   },
   "devDependencies": {

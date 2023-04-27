@@ -38,10 +38,10 @@
   },
   "dependencies": {
     "@lumino/algorithm": "^2.0.0",
-    "@lumino/coreutils": "^2.1.0",
-    "@lumino/disposable": "^2.1.0",
+    "@lumino/coreutils": "^2.1.1",
+    "@lumino/disposable": "^2.1.1",
     "@lumino/messaging": "^2.0.0",
-    "@lumino/signaling": "^2.1.0"
+    "@lumino/signaling": "^2.1.1"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.0.0-beta.2",

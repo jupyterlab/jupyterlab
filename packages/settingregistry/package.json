@@ -39,10 +39,10 @@
   "dependencies": {
     "@jupyterlab/nbformat": "^4.0.0-beta.2",
     "@jupyterlab/statedb": "^4.0.0-beta.2",
-    "@lumino/commands": "^2.1.0",
-    "@lumino/coreutils": "^2.1.0",
-    "@lumino/disposable": "^2.1.0",
-    "@lumino/signaling": "^2.1.0",
+    "@lumino/commands": "^2.1.1",
+    "@lumino/coreutils": "^2.1.1",
+    "@lumino/disposable": "^2.1.1",
+    "@lumino/signaling": "^2.1.1",
     "@rjsf/utils": "^5.1.0",
     "ajv": "^8.12.0",
     "json5": "^2.2.3"
