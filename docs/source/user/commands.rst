@@ -14,6 +14,17 @@ also require input arguments. Those arguments are maybe different in the command
 and the keyboard shortcuts for example. That can explain varying behavior depending on the
 source of a command trigger.
 
+Commands in Markdown Files
+==========================
+
+JupyterLab supports using commands in Markdown files with the following syntax:
+
+.. code-block:: markdown
+
+   `<button data-commandLinker-command="help:about" href="#">TEST</button>`
+
+This allows you to embed buttons or other elements with custom commands in your Markdown documents. 
+
 Command Palette
 ^^^^^^^^^^^^^^^
 
