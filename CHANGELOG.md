@@ -11,7 +11,7 @@ Below are the major highlights in JupyterLab 4.
 ### New text editor
 
 CodeMirror, the text editor used for cells and file editors, has been updated to [CodeMirror 6](https://codemirror.net/). This brings important
-performance improvements as well as better customization capabilities.
+accessibility and performance improvements as well as better customization capabilities.
 The editor settings have also been improved. Previously settings had to be individually set for each type of cell, the file editor, and the console editor. Now they are all set in one place, which makes it easier to use the default settings for all editors or change some settings for specific cases. For example, it is possible to hide the line numbers for markdown cells.
 
 Developers can now provide editor extensions, like themes and programming language parsers, through new application registries.
