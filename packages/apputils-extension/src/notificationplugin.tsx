@@ -665,7 +665,7 @@ namespace Private {
     );
   }
 
-  export function ToastifyCloseButton(
+  function ToastifyCloseButton(
     props: IToastifyCloseButtonProps
   ): JSX.Element {
     return <CloseButton close={props.closeToast} closeIcon={closeIcon.react} />;
