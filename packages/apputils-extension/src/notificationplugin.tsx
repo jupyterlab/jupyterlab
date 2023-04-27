@@ -653,8 +653,6 @@ namespace Private {
     closeIconMargin?: boolean;
   }
 
-  type IToastifyCloseButtonProps = CloseButtonProps;
-
   export function CloseButton(props: ICloseButtonProps) {
     return (
       <button
@@ -669,7 +667,7 @@ namespace Private {
     );
   }
 
-  function ToastifyCloseButton(props: IToastifyCloseButtonProps): JSX.Element {
+  function ToastifyCloseButton(props: CloseButtonProps): JSX.Element {
     const trans = translator.load('jupyterlab');
     return (
       <CloseButton
