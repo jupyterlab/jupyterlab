@@ -600,7 +600,8 @@ export namespace NotebookActions {
     } else {
       notebook.activeCellIndex++;
     }
-    void Private.handleRunState(notebook, state, true);
+
+    void Private.handleState(notebook, state, true);
     return promise;
   }
 
@@ -657,7 +658,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
     return promise;
   }
 
@@ -1316,7 +1317,7 @@ export namespace NotebookActions {
     if (cellsFromClipboard) {
       notebook.lastClipboardInteraction = 'paste';
     }
-    void Private.handleState(notebook, state);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -2177,9 +2178,11 @@ namespace Private {
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
     if (scrollIfNeeded && activeCell) {
-      await notebook.scrollToItem(activeCellIndex).catch(reason => {
-        // no-op
-      });
+      await notebook
+        .scrollToItem(activeCellIndex, 'smart', 0.05)
+        .catch(reason => {
+          // no-op
+        });
     }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();

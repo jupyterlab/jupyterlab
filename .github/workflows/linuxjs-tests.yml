@@ -48,6 +48,7 @@ jobs:
             js-outputarea,
             js-rendermime,
             js-services,
+            js-settingeditor,
             js-settingregistry,
             js-statedb,
             js-statusbar,
