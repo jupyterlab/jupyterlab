@@ -60,6 +60,7 @@ JupyterLab is now faster, thanks to the following improvements:
 
 - CSS rules optimization: CSS selectors have been optimized to improve web browser performance when many elements are present on a page.
 - Upgrade to CodeMirror 6: Especially for notebooks with many cells, the new CodeMirror version is far more efficient than the previous version. Large notebooks should load more quickly.
+- Upgrade to MathJax 3: The mathematical equations renderer library has been been upgrade from v2 to v3 allowing faster rendering.
 - Notebook windowing: By rendering only the parts of a notebook that fit in the web browser viewport, JupyterLab is much more efficient. See an important note below.
 
 Notebook windowing _might_ add side effects with notebooks containing cells injecting new CSS styles or JavaScript. It may also be less convenient if some cell outputs are displaying [iframes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe). If you have issues with notebook rendering, try changing the user setting _Notebook_ > _Windowing mode_ to `defer` or `none`. (`none` should be used as a last resort, because it disables all optimizations.)
