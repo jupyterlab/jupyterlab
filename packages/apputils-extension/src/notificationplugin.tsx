@@ -226,6 +226,7 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                     <Private.CloseButton
                       close={closeNotification}
                       closeIcon={deleteIcon.react}
+                      title={trans.__('Dismiss notification')}
                       closeIconMargin
                     />
                   </div>
@@ -642,7 +643,11 @@ namespace Private {
    */
   let toastify: typeof ReactToastify | null = null;
 
-  export interface ICloseButtonProps {
+  export interface ICloseButtonProps
+    extends React.DetailedHTMLProps<
+      React.ButtonHTMLAttributes<HTMLButtonElement>,
+      HTMLButtonElement
+    > {
     close: (e?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
     closeIcon: LabIcon.IReact;
     closeIconMargin?: boolean;
@@ -651,13 +656,12 @@ namespace Private {
   type IToastifyCloseButtonProps = CloseButtonProps;
 
   export function CloseButton(props: ICloseButtonProps) {
-    const trans = translator.load('jupyterlab');
     return (
       <button
         className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}${
           props.closeIconMargin ? ` ${TOAST_CLOSE_BUTTON_MARGIN_CLASS}` : ''
         }`}
-        title={trans.__('Hide notification')}
+        title={props.title ?? ''}
         onClick={props.close}
       >
         <props.closeIcon className="jp-icon-hover" tag="span" />
@@ -665,10 +669,15 @@ namespace Private {
     );
   }
 
-  function ToastifyCloseButton(
-    props: IToastifyCloseButtonProps
-  ): JSX.Element {
-    return <CloseButton close={props.closeToast} closeIcon={closeIcon.react} />;
+  function ToastifyCloseButton(props: IToastifyCloseButtonProps): JSX.Element {
+    const trans = translator.load('jupyterlab');
+    return (
+      <CloseButton
+        close={props.closeToast}
+        closeIcon={closeIcon.react}
+        title={trans.__('Hide notification')}
+      />
+    );
   }
 
   /**
