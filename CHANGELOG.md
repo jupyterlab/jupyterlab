@@ -21,7 +21,7 @@ Developers can now provide editor extensions, like themes and programming langua
 Starting with JupyterLab 3, extensions can be installed via Python packages
 (or other providers of [prebuilt extensions](https://jupyterlab.readthedocs.io/en/latest/extension/extension_dev.html#prebuilt-extensions)).
 
-In JupyterLab 4, building on this feature, the Extension Manager can now list and install extensions from [pypi.org](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab).
+In JupyterLab 4, building on this feature, the Extension Manager now includes extensions from [pypi.org](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab).
 This removes the build step from installation of extension when using Extension Manager.
 
 Developers can provide an alternative package repository to display their own set of extensions.
