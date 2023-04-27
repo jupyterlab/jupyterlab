@@ -23,7 +23,7 @@ JupyterLab supports using commands in Markdown files with the following syntax:
 
    `<button data-commandLinker-command="help:about" href="#">TEST</button>`
 
-This allows you to embed buttons or other elements with custom commands in your Markdown documents. 
+This allows you to embed buttons or other elements with custom commands in your Markdown documents.
 
 Command Palette
 ^^^^^^^^^^^^^^^
