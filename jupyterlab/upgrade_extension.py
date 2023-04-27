@@ -20,13 +20,13 @@ except ImportError:
 from pathlib import Path
 
 try:
-    from cookiecutter.main import cookiecutter
+    import copier
 except ImportError:
-    msg = "Please install cookiecutter"
+    msg = "Please install copier and jinja2-time"
     raise RuntimeError(msg) from None
 
 
-DEFAULT_COOKIECUTTER_BRANCH = "4.0"
+DEFAULT_COPIER_TAG = "v4.0.0"
 
 # List of files recommended to be overridden
 RECOMMENDED_TO_OVERRIDE = [
@@ -59,20 +59,20 @@ JUPYTER_SERVER_REQUIREMENT = re.compile("^jupyter_server([^\\w]|$)")
 
 
 def update_extension(  # noqa
-    target: str, branch: str = DEFAULT_COOKIECUTTER_BRANCH, interactive: bool = True
+    target: str, vcs_ref: str = DEFAULT_COPIER_TAG, interactive: bool = True
 ) -> None:
     """Update an extension to the current JupyterLab
 
     target: str
         Path to the extension directory containing the extension
-    branch: str [default: DEFAULT_COOKIECUTTER_BRANCH]
-        Template branch to checkout
+    vcs_ref: str [default: DEFAULT_COPIER_TAG]
+        Template vcs_ref to checkout
     interactive: bool [default: true]
         Whether to ask before overwriting content
 
     """
     # Input is a directory with a package.json or the current directory
-    # Use the cookiecutter as the source
+    # Use the extension template as the source
     # Pull in the relevant config
     # Pull in the Python parts if possible
     # Pull in the scripts if possible
@@ -109,7 +109,7 @@ def update_extension(  # noqa
     if output_dir.exists():
         shutil.rmtree(output_dir)
 
-    # Build up the cookiecutter args and run the cookiecutter
+    # Build up the template answers and run the template engine
     author = data.get("author", "<author_name>")
     author_email = "<author_email>"
     if isinstance(author, dict):
@@ -137,30 +137,14 @@ def update_extension(  # noqa
         "labextension_name": data["name"],
         "python_name": python_name,
         "project_short_description": data.get("description", "<description>"),
-        "has_settings": "y" if data.get("jupyterlab", {}).get("schemaDir", "") else "n",
-        "has_binder": "y" if (target / "binder").exists() else "n",
-        "test": "y" if has_test else "n",
+        "has_settings": bool(data.get("jupyterlab", {}).get("schemaDir", "")),
+        "has_binder": bool((target / "binder").exists()),
+        "test": bool(has_test),
         "repository": data.get("repository", {}).get("url", "<repository"),
     }
 
-    template = "https://github.com/jupyterlab/extension-cookiecutter-ts"
-    cookiecutter(
-        template=template,
-        checkout=branch,
-        output_dir=output_dir,
-        extra_context=extra_context,
-        no_input=not interactive,
-    )
-
-    for element in output_dir.glob("*"):
-        python_name = element.name
-        break
-
-    # hoist the output up one level
-    shutil.move(output_dir / python_name, output_dir / "_temp")
-    for filename in (output_dir / "_temp").glob("*"):
-        shutil.move(filename, output_dir / filename.name)
-    shutil.rmtree(output_dir / "_temp")
+    template = "https://github.com/jupyterlab/extension-template"
+    copier.run_auto(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True)
 
     # From the created package.json grab the devDependencies
     with (output_dir / "package.json").open() as fid:
@@ -256,7 +240,7 @@ def update_extension(  # noqa
             try:
                 import tomli_w
             except ImportError:
-                msg = "To update pyproject.toml, you need to install tomli_w"
+                msg = "To update pyproject.toml, you need to install tomli-w"
                 print(msg)
             else:
                 config = configparser.ConfigParser()
@@ -316,9 +300,16 @@ if __name__ == "__main__":
     parser.add_argument("path", action="store", type=str, help="the target path")
 
     parser.add_argument(
-        "--branch", help="the template branch to checkout", default=DEFAULT_COOKIECUTTER_BRANCH
+        "--vcs-ref", help="the template hash to checkout", default=DEFAULT_COPIER_TAG
     )
 
     args = parser.parse_args()
 
-    update_extension(args.path, args.branch, args.no_input is False)
+    answer_file = Path(args.path) / ".copier-answers.yml"
+
+    if answer_file.exists():
+        print(
+            "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
+        )
+    else:
+        update_extension(args.path, args.vcs_ref, args.no_input is False)

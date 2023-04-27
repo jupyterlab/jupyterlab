@@ -406,7 +406,7 @@ function activate(
             })
             .forEach(spec => {
               // Avoid mode name with a curse word.
-              if (spec.name.indexOf('brainf') === 0) {
+              if (spec.name.toLowerCase().indexOf('brainf') === 0) {
                 return;
               }
               languageMenu.addItem({

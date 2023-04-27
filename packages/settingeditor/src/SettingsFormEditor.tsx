@@ -9,7 +9,12 @@ import { showErrorMessage } from '@jupyterlab/apputils';
 import { ISettingRegistry, Settings } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { FormComponent } from '@jupyterlab/ui-components';
-import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import {
+  JSONExt,
+  PartialJSONObject,
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
 import { IChangeEvent } from '@rjsf/core';
 import validatorAjv8 from '@rjsf/validator-ajv8';
@@ -105,7 +110,7 @@ export class SettingsFormEditor extends React.Component<
   constructor(props: SettingsFormEditor.IProps) {
     super(props);
     const { settings } = props;
-    this._formData = settings.composite;
+    this._formData = settings.composite as ReadonlyJSONObject;
     this.state = {
       isModified: settings.isModified,
       uiSchema: {},
@@ -149,6 +154,7 @@ export class SettingsFormEditor extends React.Component<
     // Prevent unnecessary save when opening settings that haven't been modified.
     if (
       !this.props.settings.isModified &&
+      this._formData &&
       this.props.settings.isDefault(this._formData)
     ) {
       this.props.updateDirtyState(false);
@@ -177,7 +183,7 @@ export class SettingsFormEditor extends React.Component<
     for (const field in this.props.settings.user) {
       await this.props.settings.remove(field);
     }
-    this._formData = this.props.settings.composite;
+    this._formData = this.props.settings.composite as ReadonlyJSONObject;
     this.setState({ isModified: false });
   };
 
@@ -185,23 +191,29 @@ export class SettingsFormEditor extends React.Component<
     const trans = this.props.translator.load('jupyterlab');
 
     return (
-      <div>
+      <>
         <div className="jp-SettingsHeader">
-          <h2 title={this.props.settings.schema.description}>
+          <h2
+            className="jp-SettingsHeader-title"
+            title={this.props.settings.schema.description}
+          >
             {this.props.settings.schema.title}
           </h2>
-        </div>
-        <div className="jp-Buttonbar">
-          {this.state.isModified && (
-            <Button className="jp-RestoreButton" onClick={this.reset}>
-              {trans.__('Restore to Defaults')}
-            </Button>
-          )}
+          <div className="jp-SettingsHeader-buttonbar">
+            {this.state.isModified && (
+              <Button className="jp-RestoreButton" onClick={this.reset}>
+                {trans.__('Restore to Defaults')}
+              </Button>
+            )}
+          </div>
+          <div className="jp-SettingsHeader-description">
+            {this.props.settings.schema.description}
+          </div>
         </div>
         <FormComponent
           validator={validatorAjv8}
           schema={this.state.filteredSchema as JSONSchema7}
-          formData={this._formData}
+          formData={this._getFilteredFormData(this.state.filteredSchema)}
           uiSchema={this.state.uiSchema}
           fields={this.props.renderers[this.props.settings.id]}
           formContext={this.state.formContext}
@@ -210,13 +222,13 @@ export class SettingsFormEditor extends React.Component<
           onChange={this._onChange}
           translator={this.props.translator}
         />
-      </div>
+      </>
     );
   }
 
   private _onChange = (e: IChangeEvent<ReadonlyPartialJSONObject>): void => {
     this.props.hasError(e.errors.length !== 0);
-    this._formData = e.formData;
+    this._formData = e.formData as ReadonlyJSONObject;
     if (e.errors.length === 0) {
       this.props.updateDirtyState(true);
       void this._debouncer.invoke();
@@ -274,6 +286,23 @@ export class SettingsFormEditor extends React.Component<
     }
   }
 
+  private _getFilteredFormData(
+    filteredSchema?: ISettingRegistry.ISchema
+  ): ReadonlyJSONObject {
+    if (!filteredSchema?.properties) {
+      return this._formData;
+    }
+    const filteredFormData = JSONExt.deepCopy(
+      this._formData as PartialJSONObject
+    );
+    for (const field in filteredFormData) {
+      if (!filteredSchema.properties[field]) {
+        delete filteredFormData[field];
+      }
+    }
+    return filteredFormData as ReadonlyJSONObject;
+  }
+
   private _debouncer: Debouncer<void, any>;
-  private _formData: any;
+  private _formData: ReadonlyJSONObject;
 }

@@ -205,20 +205,21 @@ You may add a ``rank`` attribute to modify the item position (the default value 
 Adding a widget to the notebook header
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Start from the cookie cutter extension template.
+Start from the extension template.
 
-::
+.. code-block:: shell
 
-    pip install cookiecutter
-    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
-    cd my_cookie_cutter_name
+    pip install copier jinja2-time
+    mkdir myextension
+    cd myextension
+    copier https://github.com/jupyterlab/extension-template .
 
 Install the dependencies. Note that extensions are built against the
 released npm packages, not the development versions.
 
-::
+.. code-block:: shell
 
-    jlpm add -D @jupyterlab/notebook @jupyterlab/application @jupyterlab/ui-components @jupyterlab/docregistry @lumino/disposable @lumino/widgets --legacy-peer-deps
+    jlpm add -D @jupyterlab/notebook @jupyterlab/application @jupyterlab/ui-components @jupyterlab/docregistry @lumino/disposable @lumino/widgets
 
 Copy the following to ``src/index.ts``:
 
@@ -243,6 +244,7 @@ Copy the following to ``src/index.ts``:
     const plugin: JupyterFrontEndPlugin<void> = {
       activate,
       id: 'my-extension-name:widgetPlugin',
+      description: 'Add a widget to the notebook header.',
       autoStart: true
     };
 
@@ -298,7 +300,7 @@ Copy the following to ``src/index.ts``:
 
 And the following to ``style/base.css``:
 
-.. code:: css
+.. code-block:: css
 
     .jp-myextension-myheader {
         min-height: 20px;
@@ -308,10 +310,9 @@ And the following to ``style/base.css``:
 
 Run the following commands:
 
-::
+.. code-block:: shell
 
     pip install -e .
-    pip install jupyter-packaging
     jupyter labextension develop . --overwrite
     jupyter lab
 

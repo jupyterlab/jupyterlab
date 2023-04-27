@@ -18,19 +18,19 @@ JupyterLab 4.x provides a script to upgrade an existing extension to use the new
 
     Back up your extension - the best if you use a version control like git, is to work on a new branch.
 
-First, make sure to update to JupyterLab 4 and install ``cookiecutter``. With ``pip``:
+First, make sure to update to JupyterLab 4 and install ``copier`` and some dependencies. With ``pip``:
 
 .. code:: bash
 
    pip install -U jupyterlab
-   pip install cookiecutter
+   pip install copier jinja2-time tomli-w
 
 
 Or with ``conda``:
 
 .. code:: bash
 
-   conda install -c conda-forge jupyterlab=4 cookiecutter
+   conda install -c conda-forge jupyterlab=4 copier jinja2-time tomli-w
 
 
 Then at the root folder of the extension, run:
@@ -117,7 +117,7 @@ bumped their major version (following semver convention). We want to point out p
    Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
    * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
-     should use the `TypeScript extension Cookiecutter <https://github.com/jupyterlab/extension-cookiecutter-ts>`_
+     should use the `TypeScript extension template <https://github.com/jupyterlab/extension-template>`_
      (choosing ``theme`` as ``kind`` ) instead.
    * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
    * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
