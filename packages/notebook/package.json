@@ -60,14 +60,14 @@
     "@jupyterlab/translation": "^4.0.0-beta.2",
     "@jupyterlab/ui-components": "^4.0.0-beta.2",
     "@lumino/algorithm": "^2.0.0",
-    "@lumino/coreutils": "^2.1.0",
+    "@lumino/coreutils": "^2.1.1",
     "@lumino/domutils": "^2.0.0",
-    "@lumino/dragdrop": "^2.1.0",
+    "@lumino/dragdrop": "^2.1.1",
     "@lumino/messaging": "^2.0.0",
     "@lumino/properties": "^2.0.0",
-    "@lumino/signaling": "^2.1.0",
+    "@lumino/signaling": "^2.1.1",
     "@lumino/virtualdom": "^2.0.0",
-    "@lumino/widgets": "^2.1.0",
+    "@lumino/widgets": "^2.1.1",
     "react": "^18.2.0"
   },
   "devDependencies": {
