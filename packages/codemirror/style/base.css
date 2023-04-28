@@ -64,7 +64,8 @@
   color: var(--jp-search-unselected-match-color);
 }
 
-.cm-searching::selection {
+.cm-searching::selection,
+.cm-searching span::selection {
   background-color: var(--jp-search-unselected-match-background-color);
   color: var(--jp-search-unselected-match-color);
 }
