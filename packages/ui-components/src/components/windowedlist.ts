@@ -905,10 +905,17 @@ export class WindowedList<
     if (this.viewModel.windowingActive) {
       // Throttle update request
       if (this._scrollRepaint === null) {
+        this._needsUpdate = false;
         this._scrollRepaint = window.requestAnimationFrame(() => {
           this._scrollRepaint = null;
           this._update();
+          if (this._needsUpdate) {
+            this.update();
+          }
         });
+      } else {
+        // Force re rendering if some changes happen during rendering.
+        this._needsUpdate = true;
       }
     } else {
       this._update();
@@ -1077,6 +1084,7 @@ export class WindowedList<
   protected _viewModel: T;
   private _innerElement: HTMLDivElement;
   private _isScrolling: PromiseDelegate<void> | null;
+  private _needsUpdate = false;
   private _windowElement: HTMLDivElement;
   private _resetScrollToItemTimeout: number | null;
   private _resizeObserver: ResizeObserver | null;
