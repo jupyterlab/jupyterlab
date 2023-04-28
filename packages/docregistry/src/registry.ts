@@ -1409,6 +1409,17 @@ export namespace DocumentRegistry {
         icon: jsonIcon
       },
       {
+        name: 'jsonl',
+        displayName: trans.__('JSONLines File'),
+        extensions: ['.jsonl', '.ndjson'],
+        mimeTypes: [
+          'text/jsonl',
+          'application/jsonl',
+          'application/json-lines'
+        ],
+        icon: jsonIcon
+      },
+      {
         name: 'julia',
         displayName: trans.__('Julia File'),
         extensions: ['.jl'],
