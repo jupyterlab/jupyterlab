@@ -145,7 +145,7 @@ input::placeholder {
 
 .jp-InputGroupAction {
   position: absolute;
-  bottom:1px;
+  top: 0;
   right: 0;
   padding: 6px;
 }
