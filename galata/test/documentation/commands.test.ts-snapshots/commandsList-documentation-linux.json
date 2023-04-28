@@ -406,6 +406,12 @@
     "shortcuts": []
   },
   {
+    "id": "debugger:copy-to-globals",
+    "label": "Copy Variable to Globals",
+    "caption": "Copy variable to globals scope",
+    "shortcuts": []
+  },
+  {
     "id": "debugger:evaluate",
     "label": "Evaluate Code",
     "caption": "Evaluate Code",
