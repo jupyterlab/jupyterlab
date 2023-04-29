@@ -164,14 +164,11 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   }
 
   getSelectionState(): SelectionState {
-    // TODO needs a test to verify that `_selectedCells` and `_selectedLines` are already set
-    const selectedCount =
-      this._selectionSearchMode === 'cells'
-        ? this._selectedCells
-        : this._selectedLines;
+    const cellMode = this._selectionSearchMode === 'cells';
+    const selectedCount = cellMode ? this._selectedCells : this._selectedLines;
     return selectedCount > 1
       ? 'multiple'
-      : selectedCount === 1
+      : selectedCount === 1 && !cellMode
       ? 'single'
       : 'none';
   }

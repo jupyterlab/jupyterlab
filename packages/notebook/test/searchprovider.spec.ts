@@ -329,7 +329,10 @@ describe('@jupyterlab/notebook', () => {
         panel.content.activeCellIndex = 0;
         await signalToPromise(provider.filtersChanged);
         let state = provider.getSelectionState();
-        expect(state).toBe('single');
+        // Currently it is impossible to select a single cell (a cell is always
+        // active; while this can be seen as always having a selected cell, this
+        // is not deemed useful for this feature).
+        expect(state).toBe('none');
         panel.content.select(panel.content.widgets[0]);
         await signalToPromise(provider.filtersChanged);
         panel.content.select(panel.content.widgets[1]);
