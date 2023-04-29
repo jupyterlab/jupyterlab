@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { signalToPromise } from '@jupyterlab/coreutils';
 import {
   INotebookModel,
   NotebookPanel,
@@ -10,6 +9,7 @@ import {
 import { Context } from '@jupyterlab/docregistry';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { signalToPromise } from '@jupyterlab/testing';
 import * as utils from './utils';
 
 /**
@@ -320,6 +320,56 @@ describe('@jupyterlab/notebook', () => {
         let source = panel.model!.cells.get(0).sharedModel.getSource();
         expect(source).toBe('test1\nbar2\nbar3\nbar4\ntest5');
         await provider.endQuery();
+      });
+    });
+
+    describe('#getSelectionState()', () => {
+      it('should reflect cell selection state in command mode', async () => {
+        panel.content.mode = 'command';
+        panel.content.activeCellIndex = 0;
+        await signalToPromise(provider.filtersChanged);
+        let state = provider.getSelectionState();
+        expect(state).toBe('single');
+        panel.content.select(panel.content.widgets[0]);
+        await signalToPromise(provider.filtersChanged);
+        panel.content.select(panel.content.widgets[1]);
+        await signalToPromise(provider.filtersChanged);
+        state = provider.getSelectionState();
+        expect(state).toBe('multiple');
+      });
+
+      it('should reflect line selection state in edit mode', async () => {
+        panel.model!.sharedModel.deleteCellRange(0, 2);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1\ntest2\ntest3\ntest4\ntest5' }
+        ]);
+        panel.content.activeCellIndex = 0;
+        panel.content.mode = 'edit';
+        // TODO: revisit (remove filtersChanged?) once
+        // https://github.com/jupyterlab/jupyterlab/pull/14387 is in
+        await signalToPromise(provider.filtersChanged);
+
+        await setSelections(panel.content.activeCell!.editor!, [
+          {
+            uuid: 'main-selection',
+            start: { line: 1, column: 0 },
+            end: { line: 2, column: 6 }
+          }
+        ]);
+        await signalToPromise(provider.filtersChanged);
+        let state = provider.getSelectionState();
+        expect(state).toBe('multiple');
+
+        await setSelections(panel.content.activeCell!.editor!, [
+          {
+            uuid: 'main-selection',
+            start: { line: 1, column: 0 },
+            end: { line: 1, column: 6 }
+          }
+        ]);
+        await signalToPromise(provider.filtersChanged);
+        state = provider.getSelectionState();
+        expect(state).toBe('single');
       });
     });
   });
