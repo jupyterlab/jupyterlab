@@ -136,7 +136,7 @@ PWDEBUG=1 jlpm playwright test
 
 If you have set up a custom login handler for your Jupyter application and don't want to remove it
 for your integration tests, you can try the following configuration (inspired by the
-[Playwright documentation](https://playwright.dev/docs/test-advanced#global-setup-and-teardown)):
+[Playwright documentation](https://playwright.dev/docs/test-global-setup-teardown)):
 
 1. Create a file named `global-setup.ts` at the root of the test folder containing the login steps:
 
@@ -537,7 +537,7 @@ By default, both projects will be executed when running `jlpm run test`. But you
 
 ## Configuration
 
-Galata can be configured by using [command line arguments](https://playwright.dev/docs/cli) or using [`playwright.config.js` file](https://playwright.dev/docs/test-configuration). Full list of config options can be accessed using `jlpm playwright test --help`.
+Galata can be configured by using [command line arguments](https://playwright.dev/docs/test-cli#reference) or using [`playwright.config.js` file](https://playwright.dev/docs/test-configuration). Full list of config options can be accessed using `jlpm playwright test --help`.
 
 ### Custom benchmark report
 
