@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
+import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import * as path from 'path';
 
@@ -14,21 +14,21 @@ function getSelectionRange(textarea: HTMLTextAreaElement) {
   };
 }
 
+test.beforeEach(async ({ page, tmpPath }) => {
+  await page.contents.uploadFile(
+    path.resolve(__dirname, `./notebooks/${fileName}`),
+    `${tmpPath}/${fileName}`
+  );
+
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  await page.notebook.activate(fileName);
+});
+
+test.afterEach(async ({ page, tmpPath }) => {
+  await page.contents.deleteDirectory(tmpPath);
+});
+
 test.describe('Notebook Search', () => {
-  test.beforeEach(async ({ page, tmpPath }) => {
-    await page.contents.uploadFile(
-      path.resolve(__dirname, `./notebooks/${fileName}`),
-      `${tmpPath}/${fileName}`
-    );
-
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-  });
-
-  test.afterEach(async ({ page, tmpPath }) => {
-    await page.contents.deleteDirectory(tmpPath);
-  });
-
   test('Search', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
@@ -476,5 +476,133 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot(
       'search-on-deleted-cell.png'
     );
+  });
+
+  test('Toggle search in selection with shortcut', async ({ page }) => {
+    const filterCheckbox = page.getByLabel('Search in 1 Selected Cell');
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    await expect(filterCheckbox).not.toBeChecked();
+    // Toggle search in selection on
+    await page.keyboard.press('Alt+l');
+    await expect(filterCheckbox).toBeChecked();
+    // Toggle search in selection off
+    await page.keyboard.press('Alt+l');
+    await expect(filterCheckbox).not.toBeChecked();
+  });
+});
+
+test.describe('Auto search in multiple selection', async () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/documentsearch-extension:plugin': {
+        autoSearchInSelection: 'multiple-selected'
+      }
+    }
+  });
+
+  test('Toggles search in cell selection', async ({ page }) => {
+    // Bring focus to first cell without switching away from command mode
+    let cell = await page.notebook.getCell(0);
+    await (await cell.$('.jp-InputPrompt')).click();
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled when only 1 cell is selected
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+    // Close search box
+    await page.keyboard.press('Escape');
+
+    // Select a cell below
+    await page.keyboard.press('Shift+ArrowDown');
+    // Open search box (filters should already be shown)
+    await page.keyboard.press('Control+f');
+    // Expect search in selection to be enabled since 2 cells are selected
+    await expect(page.getByLabel('Search in 2 Selected Cells')).toBeChecked();
+  });
+
+  test('Toggles search in line selection', async ({ page }) => {
+    // Activate third cell
+    const cell = await page.notebook.getCell(2);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Select 1st line
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.press('Shift+End');
+
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled when only 1 cell is selected
+    // As only one line is selected, the filter proposes to search in the cell.
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+
+    // Select 1st and 2nd line
+    await editor.click();
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.press('Shift+End');
+    await page.keyboard.press('Shift+ArrowDown');
+    // Open search box (filters should already be shown)
+    await page.keyboard.press('Control+f');
+    // Expect search in selection to be enabled since 2 lines are selected
+    await expect(page.getByLabel('Search in 2 Selected Lines')).toBeChecked();
+  });
+});
+
+test.describe('Auto search in any selection', async () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/documentsearch-extension:plugin': {
+        autoSearchInSelection: 'any-selected'
+      }
+    }
+  });
+
+  test('Toggles search in cell selection', async ({ page }) => {
+    // Bring focus to first cell without switching away from command mode
+    let cell = await page.notebook.getCell(0);
+    await (await cell.$('.jp-InputPrompt')).click();
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled as while there is an >active<
+    // cell, no cells are >selected<; the label is not ideal but it may be
+    // preferred as-is for consistency.
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+  });
+
+  test('Toggles search in line selection', async ({ page }) => {
+    // Activate third cell
+    const cell = await page.notebook.getCell(2);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled as no character is selected.
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+
+    // Select 1st line
+    await editor.click();
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.press('Shift+End');
+
+    // Open search box (filters should already be shown)
+    await page.keyboard.press('Control+f');
+    // Expect search in selection to be enabled as 1 line is selected.
+    await expect(page.getByLabel('Search in 1 Selected Line')).toBeChecked();
   });
 });
