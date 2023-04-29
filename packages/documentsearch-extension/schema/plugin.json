@@ -71,7 +71,7 @@
       "title": "Search in selection automatically",
       "description": "When starting search, the 'search in selection' mode will be enabled if `any` text/cell is selected, or when `multiple` lines or cells are selected, or `never`.",
       "type": "string",
-      "enum": ["never", "multiple-selected", "any-selection"],
+      "enum": ["never", "multiple-selected", "any-selected"],
       "default": "never"
     }
   },

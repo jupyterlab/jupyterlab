@@ -63,7 +63,7 @@ namespace CommandIDs {
  *
  * - `multiline`: when multiple lines are selected
  */
-type AutoSearchInSelection = 'never' | 'multiple-selected' | 'any-selection';
+type AutoSearchInSelection = 'never' | 'multiple-selected' | 'any-selected';
 
 const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/documentsearch-extension:labShellWidgetListener',
@@ -275,7 +275,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
             case 'multiple-selected':
               enableSelectionMode = selectionState === 'multiple';
               break;
-            case 'any-selection':
+            case 'any-selected':
               enableSelectionMode =
                 selectionState === 'multiple' || selectionState === 'single';
               break;
