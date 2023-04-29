@@ -386,7 +386,7 @@ export interface ISearchProvider extends IBaseSearchProvider {
    * The selection can be made of one or more lines, notebook cells, or other
    * objects (e.g. spreadsheet cells). The provider can decide whether it counts
    * multiple characters (as opposed to lines) as multiple selection or not,
-   * which will inluence the heuristic auto-enabling "search in selection" mode.
+   * which will influence the heuristic auto-enabling "search in selection" mode.
    */
   getSelectionState?(): SelectionState;
 }

@@ -26,7 +26,7 @@ import { Widget } from '@lumino/widgets';
  */
 const SEARCHABLE_CLASS = 'jp-mod-searchable';
 /**
- * Class added to widgets for with open search view (not necessarily focused).
+ * Class added to widgets with open search view (not necessarily focused).
  */
 const SEARCH_ACTIVE_CLASS = 'jp-mod-search-active';
 
@@ -61,7 +61,9 @@ namespace CommandIDs {
 /**
  * When automatic selection search filter logic should be active.
  *
- * - `multiline`: when multiple lines are selected
+ * - `multiple-selected`: when multiple lines/cells are selected
+ * - `any-selected`: when any number of characters/cells are selected
+ * - `never`: never
  */
 type AutoSearchInSelection = 'never' | 'multiple-selected' | 'any-selected';
 
