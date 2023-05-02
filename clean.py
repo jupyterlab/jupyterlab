@@ -11,7 +11,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 if os.name == "nt":
     for root, dnames, _ in os.walk(here):
         if "node_modules" in dnames:
-            subprocess.check_call(  # noqa S602 S607
+            subprocess.check_call(  # S602 S607
                 ["rmdir", "/s", "/q", "node_modules"], cwd=root, shell=True
             )
             dnames.remove("node_modules")
