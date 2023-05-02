@@ -1059,9 +1059,9 @@ export class WindowedList<
         this.scrollToItem(...this._scrollToItem).catch(reason => {
           console.log(reason);
         });
-      } else {
-        this.update();
       }
+
+      this.update();
     }
   }
 
