@@ -97,8 +97,8 @@ def update_extension(  # noqa
         if setup_file.exists():
             python_name = (
                 subprocess.check_output(
-                    [sys.executable, "setup.py", "--name"], cwd=target
-                )  # S603
+                    [sys.executable, "setup.py", "--name"], cwd=target  # noqa S603
+                )
                 .decode("utf8")
                 .strip()
             )

@@ -1966,7 +1966,7 @@ def _node_check(logger):
     """Check for the existence of nodejs with the correct version."""
     node = which("node")
     try:
-        output = subprocess.check_output([node, "node-version-check.js"], cwd=HERE)
+        output = subprocess.check_output([node, "node-version-check.js"], cwd=HERE)  # noqa S603
         logger.debug(output.decode("utf-8"))
     except Exception:
         data = CoreConfig()._data
@@ -1994,7 +1994,7 @@ def _yarn_config(logger):
 
     try:
         output_binary = subprocess.check_output(
-            [node, YARN_PATH, "config", "--json"], stderr=subprocess.PIPE, cwd=HERE
+            [node, YARN_PATH, "config", "--json"], stderr=subprocess.PIPE, cwd=HERE  # noqa S603
         )
         output = output_binary.decode("utf-8")
         lines = iter(output.splitlines())
