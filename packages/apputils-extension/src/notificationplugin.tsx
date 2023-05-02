@@ -643,13 +643,25 @@ namespace Private {
    */
   let toastify: typeof ReactToastify | null = null;
 
+  /**
+   * Interface for CloseButton component
+   */
   export interface ICloseButtonProps
     extends React.DetailedHTMLProps<
       React.ButtonHTMLAttributes<HTMLButtonElement>,
       HTMLButtonElement
     > {
+    /**
+     * A function to handle a close event when the CloseButton is clicked
+     */
     close: (e?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+    /**
+     * The LabIcon component to be used as the close icon
+     */
     closeIcon: LabIcon.IReact;
+    /**
+     * Optional boolean to apply margin to the close icon. Default is false.
+     */
     closeIconMargin?: boolean;
   }
 
