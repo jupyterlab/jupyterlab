@@ -23,7 +23,8 @@ export interface IEditorHeading extends TableOfContents.IHeading {
  * Base table of contents model factory for file editor
  */
 export abstract class EditorTableOfContentsFactory extends TableOfContentsFactory<
-  IDocumentWidget<FileEditor>
+  IDocumentWidget<FileEditor>,
+  IEditorHeading
 > {
   /**
    * Create a new table of contents model for the widget
@@ -39,13 +40,7 @@ export abstract class EditorTableOfContentsFactory extends TableOfContentsFactor
     IEditorHeading,
     IDocumentWidget<FileEditor, DocumentRegistry.IModel>
   > {
-    const model = super.createNew(
-      widget,
-      configuration
-    ) as TableOfContentsModel<
-      IEditorHeading,
-      IDocumentWidget<FileEditor, DocumentRegistry.IModel>
-    >;
+    const model = super.createNew(widget, configuration);
 
     const onActiveHeadingChanged = (
       model: TableOfContentsModel<
