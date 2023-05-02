@@ -82,7 +82,7 @@ interface IHighlightMatchOptions {
 
 export interface IHighlightAdjacentMatchOptions extends IHighlightMatchOptions {
   /**
-   * What should be used as an anchor when searching for adjecent match.
+   * What should be used as an anchor when searching for adjacent match.
    * Defaults to `'auto'`.
    */
   from?: SearchStartAnchor;

@@ -264,7 +264,7 @@ test.describe('Notebook Search', () => {
 
     // Expect 15 matches; this is 6/15, not 1/15 because current match is set
     // in second cell and when selection is extended, it does not move; keeping
-    // the current match whhn extending the selection is desired as user may use
+    // the current match when extending the selection is desired as user may use
     // it as a reference, especially when it was set as closest to the cursor.
     await page.waitForSelector('text=6/15');
 
