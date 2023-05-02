@@ -208,17 +208,17 @@ class InstallLabExtensionApp(BaseExtensionApp):
         self.extra_args = self.extra_args or [os.getcwd()]
         return any(
             install_extension(
-                    arg,
-                    # Pass in pinned alias if we have it
-                    pin=pinned_versions[i] if i < len(pinned_versions) else None,
-                    app_options=AppOptions(
-                        app_dir=self.app_dir,
-                        logger=self.log,
-                        core_config=self.core_config,
-                        labextensions_path=self.labextensions_path,
-                    ),
-                )
-                for i, arg in enumerate(self.extra_args)
+                arg,
+                # Pass in pinned alias if we have it
+                pin=pinned_versions[i] if i < len(pinned_versions) else None,
+                app_options=AppOptions(
+                    app_dir=self.app_dir,
+                    logger=self.log,
+                    core_config=self.core_config,
+                    labextensions_path=self.labextensions_path,
+                ),
+            )
+            for i, arg in enumerate(self.extra_args)
         )
 
 
@@ -398,8 +398,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
             core_config=self.core_config,
         )
         return any(
-            uninstall_extension(arg, all_=self.all, app_options=options)
-                for arg in self.extra_args
+            uninstall_extension(arg, all_=self.all, app_options=options) for arg in self.extra_args
         )
 
 
