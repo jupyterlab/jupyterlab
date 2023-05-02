@@ -119,9 +119,9 @@ def build_api_docs(out_dir: Path):
         # `make clean` to force a rebuild
         pass
     else:
-        check_call(jlpm, cwd=str(root))
-        check_call([*jlpm, "build:packages"], cwd=str(root))
-        check_call([*jlpm, "docs"], cwd=str(root))
+        check_call(jlpm, cwd=str(root))  # noqa S603
+        check_call([*jlpm, "build:packages"], cwd=str(root))  # noqa S603
+        check_call([*jlpm, "docs"], cwd=str(root))  # noqa S603
 
     dest_dir = out_dir / "api"
     if dest_dir.exists():
