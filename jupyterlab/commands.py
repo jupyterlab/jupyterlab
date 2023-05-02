@@ -1828,8 +1828,7 @@ class _AppHandler:
                 # skip deprecated versions
                 if "deprecated" in data:
                     self.logger.debug(
-                        "Disregarding compatible version of package as it is deprecated: %s@%s"
-                        % (name, version)
+                        f"Disregarding compatible version of package as it is deprecated: {name}@{version}"
                     )
                     continue
                 # Verify that the version is a valid extension.

@@ -45,8 +45,7 @@ MILESTONE = sys.argv[1]
 
 if MILESTONE not in ranges:
     print(
-        "Error: I do not know about milestone %r. Possible milestones are %r"
-        % (MILESTONE, list(ranges.keys()))
+        f"Error: I do not know about milestone {MILESTONE!r}. Possible milestones are {list(ranges.keys())!r}"
     )
     sys.exit(1)
 

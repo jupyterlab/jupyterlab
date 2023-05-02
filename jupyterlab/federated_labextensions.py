@@ -304,8 +304,7 @@ def _ensure_builder(ext_path, core_path):
 
     if not overlap:
         raise ValueError(
-            "Extensions require a devDependency on @jupyterlab/builder@%s, you have a dependency on %s"
-            % (dep_version1, dep_version2)
+            f"Extensions require a devDependency on @jupyterlab/builder@{dep_version1}, you have a dependency on {dep_version2}"
         )
 
     return osp.join(
