@@ -230,34 +230,36 @@ class NewsHandler(APIHandler):
                 tree = ET.fromstring(response.body)  # noqa S314
 
                 def build_entry(node):
-                    def get_xml_text(attr: str, required: bool = False) -> str:
+                    def get_xml_text(attr: str, default: Optional[str] = None) -> str:
                         node_item = node.find(f"atom:{attr}", xml_namespaces)
                         if node_item is not None:
                             return node_item.text
-                        elif required:
+                        elif default is not None:
+                            return default
+                        else:
                             error_m = (
                                 f'atom feed entry does not contain a required attribute: {attr}'
                             )
                             raise KeyError(error_m)
-                        else:
-                            return ''
 
-                    entry_title = get_xml_text("title", required=True)
-                    entry_id = get_xml_text("id", required=True)
-                    entry_updated = get_xml_text("updated", required=True)
-                    entry_published = get_xml_text("published")
-                    entry_summary = get_xml_text("summary")
-                    entry_link = node.find("atom:link[@rel='alternate']", xml_namespaces).get(
-                        "href"
-                    )
+                    entry_title = get_xml_text("title")
+                    entry_id = get_xml_text("id")
+                    entry_updated = get_xml_text("updated")
+                    entry_published = get_xml_text("published", entry_updated)
+                    entry_summary = get_xml_text("summary", default='')
+                    links = node.findall("atom:link", xml_namespaces)
+                    if len(links) > 1:
+                        alternate = list(filter(lambda elem: elem.get('rel') == 'alternate', links))
+                        link_node = alternate[0] if alternate else links[0]
+                    else:
+                        link_node = links[0]
+                    entry_link = link_node.get("href") if link_node is not None else None
 
                     message = (
                         "\n".join([entry_title, entry_summary]) if entry_summary else entry_title
                     )
                     modified_at = format_datetime(entry_updated)
-                    created_at = (
-                        modified_at if not entry_published else format_datetime(entry_published)
-                    )
+                    created_at = format_datetime(entry_published)
                     notification = Notification(
                         message=message,
                         createdAt=created_at,
