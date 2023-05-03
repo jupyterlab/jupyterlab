@@ -3,8 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Widget } from '@lumino/widgets';
 import { Message } from '@lumino/messaging';
+import { Throttler } from '@lumino/polling';
+import { Widget } from '@lumino/widgets';
 
 const RESIZE_HANDLE_CLASS = 'jp-CellResizeHandle';
 
@@ -14,25 +15,18 @@ const CELL_RESIZED_CLASS = 'jp-mod-resizedCell';
  * A handle that allows to change input/output proportions in side-by-side mode.
  */
 export class ResizeHandle extends Widget {
-  private _isActive: boolean = false;
-  private _isDragging: boolean = false;
-  private _protectedWidth = 10;
-
   constructor(protected targetNode: HTMLElement) {
     super();
     this.addClass(RESIZE_HANDLE_CLASS);
+    this._resizer = new Throttler(event => this._resize(event), 50);
   }
 
-  protected onAfterAttach(msg: Message) {
-    super.onAfterAttach(msg);
-    this.node.addEventListener('dblclick', this);
-    this.node.addEventListener('mousedown', this);
-  }
-
-  protected onAfterDetach(msg: Message) {
-    super.onAfterAttach(msg);
-    this.node.removeEventListener('dblclick', this);
-    this.node.removeEventListener('mousedown', this);
+  /**
+   * Dispose the resizer handle.
+   */
+  dispose(): void {
+    this._resizer.dispose();
+    super.dispose();
   }
 
   /**
@@ -66,22 +60,9 @@ export class ResizeHandle extends Widget {
         window.addEventListener('mouseup', this);
         break;
       case 'mousemove': {
-        if (!this._isActive || !this._isDragging) {
-          return;
+        if (this._isActive && this._isDragging) {
+          void this._resizer.invoke(event as MouseEvent);
         }
-        const targetRect = this.targetNode.getBoundingClientRect();
-
-        const width = targetRect.width - this._protectedWidth * 2;
-        const position =
-          (event as MouseEvent).clientX - targetRect.x - this._protectedWidth;
-
-        const outputRatio = width / position - 1;
-
-        document.documentElement.style.setProperty(
-          '--jp-side-by-side-output-size',
-          `${outputRatio}fr`
-        );
-
         break;
       }
       case 'mouseup':
@@ -93,4 +74,40 @@ export class ResizeHandle extends Widget {
         break;
     }
   }
+
+  /**
+   * Handle `after-attach` messages.
+   */
+  protected onAfterAttach(msg: Message) {
+    this.node.addEventListener('dblclick', this);
+    this.node.addEventListener('mousedown', this);
+    super.onAfterAttach(msg);
+  }
+
+  /**
+   * Handle `before-detach` messages.
+   */
+  protected onBeforeDetach(msg: Message) {
+    this.node.removeEventListener('dblclick', this);
+    this.node.removeEventListener('mousedown', this);
+    super.onBeforeDetach(msg);
+  }
+
+  private _resize(event: MouseEvent): void {
+    // Gate the output size ratio between {0.05, 50} as sensible defaults.
+    const { width, x } = this.targetNode.getBoundingClientRect();
+    const position = event.clientX - x;
+    const ratio = width / position - 1;
+    if (0 < ratio) {
+      const normalized = Math.max(Math.min(Math.abs(ratio), 50), 0.05);
+      document.documentElement.style.setProperty(
+        '--jp-side-by-side-output-size',
+        `${normalized}fr`
+      );
+    }
+  }
+
+  private _isActive = false;
+  private _isDragging = false;
+  private _resizer: Throttler<void, void, [MouseEvent]>;
 }
