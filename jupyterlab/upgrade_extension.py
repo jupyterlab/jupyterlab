@@ -261,6 +261,8 @@ def update_extension(  # noqa
                             requirements_raw.splitlines(),
                         )
                     )
+                else:
+                    requirements = []
 
                 pyproject["project"]["dependencies"] = (
                     pyproject["project"].get("dependencies", []) + requirements
