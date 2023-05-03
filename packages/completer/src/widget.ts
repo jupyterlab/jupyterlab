@@ -327,7 +327,7 @@ export class Completer extends Widget {
     const node = this._createCompleterNode(model, items);
 
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
-    active.classList.add(ACTIVE_CLASS);
+    active?.classList.add(ACTIVE_CLASS);
 
     // Add the documentation panel
     if (this._showDoc) {
@@ -534,7 +534,7 @@ export class Completer extends Widget {
         this._activeIndex = index < last ? index + 1 : 0;
         break;
       case 'pageUp':
-      case 'pageDown':
+      case 'pageDown': {
         // Measure the number of items on a page and clamp to the list length.
         const container = this.node.getBoundingClientRect();
         const current = active.getBoundingClientRect();
@@ -542,10 +542,11 @@ export class Completer extends Widget {
         const sign = direction === 'pageUp' ? -1 : 1;
         this._activeIndex = Math.min(Math.max(0, index + sign * page), last);
         break;
+      }
     }
 
     active = items[this._activeIndex] as HTMLElement;
-    active.classList.add(ACTIVE_CLASS);
+    active?.classList.add(ACTIVE_CLASS);
     let completionList = this.node.querySelector(`.${LIST_CLASS}`) as Element;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
     this._indexChanged.emit(this._activeIndex);

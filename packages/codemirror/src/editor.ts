@@ -522,7 +522,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
           if (node.node.firstChild !== null) {
             return true;
           }
-          if (offset >= node.from && offset <= node.to) {
+          if (!token && offset >= node.from && offset <= node.to) {
             token = {
               value: this.state.sliceDoc(node.from, node.to),
               offset: node.from,
