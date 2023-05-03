@@ -55,6 +55,11 @@ import type {
 const TOAST_CLOSE_BUTTON_CLASS = 'jp-Notification-Toast-Close';
 
 /**
+ * Toast close button class right margin required due to custom hover effect
+ */
+const TOAST_CLOSE_BUTTON_MARGIN_CLASS = 'jp-Notification-Toast-Close-Margin';
+
+/**
  * Maximal number of characters displayed in a notification.
  */
 const MAX_MESSAGE_LENGTH = 140;
@@ -165,13 +170,13 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
               icon={deleteIcon}
               tooltip={trans.__('Dismiss all notifications')}
               enabled={manager.count > 0}
-            ></ToolbarButtonComponent>
+            />
             <ToolbarButtonComponent
               actualOnClick={true}
               onClick={onClose}
               icon={closeIcon}
               tooltip={trans.__('Hide notifications')}
-            ></ToolbarButtonComponent>
+            />
           </h2>
           <ol className="jp-Notification-List">
             {notifications.map(notification => {
@@ -213,16 +218,12 @@ function NotificationCenter(props: INotificationCenterProps): JSX.Element {
                         )}
                       </div>
                     </div>
-                    <button
-                      className={`bp3-button bp3-minimal jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
+                    <Private.CloseButton
+                      close={closeNotification}
+                      closeIcon={deleteIcon.react}
                       title={trans.__('Dismiss notification')}
-                      onClick={closeNotification}
-                    >
-                      <deleteIcon.react
-                        className="jp-icon-hover"
-                        tag="span"
-                      ></deleteIcon.react>
-                    </button>
+                      closeIconMargin
+                    />
                   </div>
                 </li>
               );
@@ -283,7 +284,7 @@ class NotificationStatusModel extends VDomModel {
   }
 
   protected onNotificationChanged(
-    manager: NotificationManager,
+    _: NotificationManager,
     change: Notification.IChange
   ): void {
     // Set private attribute to trigger only once the signal emission
@@ -351,8 +352,8 @@ function NotificationStatus(props: INotificationStatusProps): JSX.Element {
       <TextItem
         className="jp-Notification-Status-Text"
         source={`${props.count}`}
-      ></TextItem>
-      <bellIcon.react top={'2px'} stylesheet={'statusBar'}></bellIcon.react>
+      />
+      <bellIcon.react top={'2px'} stylesheet={'statusBar'} />
     </GroupItem>
   );
 }
@@ -488,7 +489,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
           popup?.dispose();
         }}
         trans={trans}
-      ></NotificationCenter>
+      />
     );
     notificationList.addClass('jp-Notification-Center');
 
@@ -612,7 +613,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
               highlight={model.highlight}
               trans={trans}
               onClick={displayNotifications}
-            ></NotificationStatus>
+            />
           );
         }}
       </UseSignal>
@@ -639,16 +640,50 @@ namespace Private {
    */
   let toastify: typeof ReactToastify | null = null;
 
-  function CloseButton(props: CloseButtonProps): JSX.Element {
-    const trans = translator.load('jupyterlab');
+  /**
+   * Interface for CloseButton component
+   */
+  export interface ICloseButtonProps
+    extends React.DetailedHTMLProps<
+      React.ButtonHTMLAttributes<HTMLButtonElement>,
+      HTMLButtonElement
+    > {
+    /**
+     * A function to handle a close event when the CloseButton is clicked
+     */
+    close: (e?: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+    /**
+     * The LabIcon component to be used as the close icon
+     */
+    closeIcon: LabIcon.IReact;
+    /**
+     * Optional boolean to apply margin to the close icon. Default is false.
+     */
+    closeIconMargin?: boolean;
+  }
+
+  export function CloseButton(props: ICloseButtonProps) {
     return (
       <button
-        className={`bp3-button bp3-minimal jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}`}
-        title={trans.__('Hide notification')}
-        onClick={props.closeToast}
+        className={`bp3-button bp3-minimal jp-Button jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}${
+          props.closeIconMargin ? ` ${TOAST_CLOSE_BUTTON_MARGIN_CLASS}` : ''
+        }`}
+        title={props.title ?? ''}
+        onClick={props.close}
       >
-        <closeIcon.react className="jp-icon-hover" tag="span"></closeIcon.react>
+        <props.closeIcon className="jp-icon-hover" tag="span" />
       </button>
+    );
+  }
+
+  function ToastifyCloseButton(props: CloseButtonProps): JSX.Element {
+    const trans = translator.load('jupyterlab');
+    return (
+      <CloseButton
+        close={props.closeToast}
+        closeIcon={closeIcon.react}
+        title={trans.__('Hide notification')}
+      />
     );
   }
 
@@ -739,7 +774,7 @@ namespace Private {
           position="bottom-right"
           className="jp-toastContainer"
           transition={toastify.Slide}
-          closeButton={CloseButton}
+          closeButton={ToastifyCloseButton}
         ></toastify.ToastContainer>,
         container
       );
@@ -822,7 +857,7 @@ namespace Private {
         : message;
     return (
       <>
-        <div>
+        <div className="jp-toast-message">
           {shortenMessage.split('\n').map((part, index) => (
             <React.Fragment key={`part-${index}`}>
               {index > 0 ? <br /> : null}
