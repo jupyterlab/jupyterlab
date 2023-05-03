@@ -336,7 +336,6 @@ export class CompleterModel implements Completer.IModel {
     }
 
     let { start, end } = cursor;
-    console.log('start', start, 'end', end);
     // Also include any filtering/additional-typing that has occurred
     // since the completion request in the patched length.
     end = end + (current.text.length - original.text.length);
