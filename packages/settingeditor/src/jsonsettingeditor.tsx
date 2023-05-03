@@ -66,7 +66,8 @@ export class JsonSettingEditor extends SplitPanel {
     const list = (this._list = new PluginList({
       confirm,
       registry,
-      translator: this.translator
+      translator: this.translator,
+      query: ''
     }));
     const when = options.when;
 
