@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import sys
+from typing import Optional
 
 try:
     import tomllib
@@ -24,9 +25,6 @@ try:
 except ImportError:
     msg = "Please install copier and jinja2-time"
     raise RuntimeError(msg) from None
-
-
-DEFAULT_COPIER_TAG = "v4.0.0"
 
 # List of files recommended to be overridden
 RECOMMENDED_TO_OVERRIDE = [
@@ -59,13 +57,13 @@ JUPYTER_SERVER_REQUIREMENT = re.compile("^jupyter_server([^\\w]|$)")
 
 
 def update_extension(  # noqa
-    target: str, vcs_ref: str = DEFAULT_COPIER_TAG, interactive: bool = True
+    target: str, vcs_ref: Optional[str] = None, interactive: bool = True
 ) -> None:
     """Update an extension to the current JupyterLab
 
     target: str
         Path to the extension directory containing the extension
-    vcs_ref: str [default: DEFAULT_COPIER_TAG]
+    vcs_ref: str [default: None]
         Template vcs_ref to checkout
     interactive: bool [default: true]
         Whether to ask before overwriting content
@@ -261,6 +259,8 @@ def update_extension(  # noqa
                             requirements_raw.splitlines(),
                         )
                     )
+                else:
+                    requirements = []
 
                 pyproject["project"]["dependencies"] = (
                     pyproject["project"].get("dependencies", []) + requirements
@@ -301,9 +301,7 @@ if __name__ == "__main__":
 
     parser.add_argument("path", action="store", type=str, help="the target path")
 
-    parser.add_argument(
-        "--vcs-ref", help="the template hash to checkout", default=DEFAULT_COPIER_TAG
-    )
+    parser.add_argument("--vcs-ref", help="the template hash to checkout", default=None)
 
     args = parser.parse_args()
 
