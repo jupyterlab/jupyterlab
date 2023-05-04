@@ -278,8 +278,8 @@ describe('completer/model', () => {
       it('should order list based on score', () => {
         const model = new CompleterModel();
         const want: CompletionHandler.ICompletionItems = [
-          { insertText: 'qux', label: '<mark>qux</mark>' },
-          { insertText: 'quux', label: '<mark>qu</mark>u<mark>x</mark>' }
+          { insertText: 'bar', label: '<mark>ba</mark>r' },
+          { insertText: 'baz', label: '<mark>ba</mark>z' }
         ];
         model.setCompletionItems([
           { label: 'foo' },
@@ -288,7 +288,7 @@ describe('completer/model', () => {
           { label: 'quux' },
           { label: 'qux' }
         ]);
-        model.query = 'qux';
+        model.query = 'ba';
         expect(model.completionItems()).toEqual(want);
       });
 

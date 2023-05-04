@@ -801,14 +801,13 @@ describe('completer/widget', () => {
           await framePromise();
           let marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
           expect(value).toHaveLength(0);
-          expect(marked).toHaveLength(4);
+          expect(marked).toHaveLength(3);
           expect(marked[0].textContent).toBe('fo');
           expect(marked[1].textContent).toBe('fo');
           expect(marked[2].textContent).toBe('fo');
-          expect(marked[3].textContent).toBe('fo');
           simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-          expect(value).toBe('fo');
+          expect(value).toBe('foo');
           widget.dispose();
           anchor.dispose();
         });
