@@ -82,7 +82,7 @@ The workflow takes a couple of input parameters. Here is an overview with exampl
 | Input        | Description                                             | Example Value           |
 | ------------ | ------------------------------------------------------- | ----------------------- |
 | Target       | The owner/repo GitHub target                            | `jupyterlab/jupyterlab` |
-| Branch       | The branch to target                                    | `master`                |
+| Branch       | The branch to target                                    | `main`                  |
 | Version Spec | New Version Spec                                        | `next`                  |
 | Since        | Use PRs since activity since this date or git reference | `v4.0.0a15`             |
 
@@ -115,7 +115,7 @@ Fill in the information as mentioned in the body of the changelog PR, for exampl
 
 | Input                                 | Value      |
 | ------------------------------------- | ---------- |
-| The target branch                     | master     |
+| The target branch                     | main     |
 | The URL of the draft GitHub release   |            |
 | Comma separated list of steps to skip | ensure-sha |
 
@@ -262,30 +262,30 @@ These lines:
   - [ ] https://github.com/jupyterlab/jupyter-renderers
 - [ ] Publish a release (with a **updated tag**) to the [extension template](https://github.com/jupyterlab/extension-template/releases) with the new JupyterLab version
 - [ ] Update the extension examples:
-  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
-  - [ ] [Notebook widget](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/extension/notebook.rst#adding-a-widget-to-the-notebook-header)
-- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-extension-tutorial)
+  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/main/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
+  - [ ] [Notebook widget](https://github.com/jupyterlab/jupyterlab/blob/main/docs/source/extension/notebook.rst#adding-a-widget-to-the-notebook-header)
+- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 
 Now do the actual final release:
 
 - [ ] Run `jlpm run bumpversion release` to switch to final release
-- [ ] Push the commit and tags to master
+- [ ] Push the commit and tags to main
 - [ ] Run `npm run publish:all` to publish the packages
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Update the API [docs](#updating-api-docs)
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
-- [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#publishing-to-conda-forge).
+- [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#publishing-to-conda-forge).
 
 After a few days (to allow for possible patch releases), set up development for
 the next release:
 
 - [ ] Run `jlpm run bumpversion minor` to bump to alpha for the next alpha release
-- [ ] Put the commit and tags to master
+- [ ] Put the commit and tags to main
 - [ ] Run `npm run publish:all` to publish the packages
 - [ ] Release the other repos as appropriate
-- [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
+- [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#update-version-for-binder)
 
 ### Updating the extension tutorial
 
