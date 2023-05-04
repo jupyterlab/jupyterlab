@@ -64,7 +64,7 @@ export class PluginList extends ReactWidget {
     );
     this.setError = this.setError.bind(this);
     this._evtMousedown = this._evtMousedown.bind(this);
-    this._query = options.query;
+    this._query = options.query ?? '';
 
     this._allPlugins = PluginList.sortPlugins(this.registry).filter(plugin => {
       const { schema } = plugin;
