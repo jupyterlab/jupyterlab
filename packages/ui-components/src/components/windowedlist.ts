@@ -259,8 +259,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     const totalSizeOfUnmeasuredItems =
       numUnmeasuredItems * this._estimatedWidgetSize;
 
-    const h = totalSizeOfMeasuredItems + totalSizeOfUnmeasuredItems;
-    return h;
+    return totalSizeOfMeasuredItems + totalSizeOfUnmeasuredItems;
   }
 
   /**
