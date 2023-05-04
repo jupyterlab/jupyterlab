@@ -252,7 +252,7 @@ class NewsHandler(APIHandler):
                         alternate = list(filter(lambda elem: elem.get('rel') == 'alternate', links))
                         link_node = alternate[0] if alternate else links[0]
                     else:
-                        link_node = links[0]
+                        link_node = links[0] if len(links) == 1 else None
                     entry_link = link_node.get("href") if link_node is not None else None
 
                     message = (
@@ -265,7 +265,9 @@ class NewsHandler(APIHandler):
                         createdAt=created_at,
                         modifiedAt=modified_at,
                         type="info",
-                        link=(
+                        link=None
+                        if entry_link is None
+                        else (
                             trans.__("Open full post"),
                             entry_link,
                         ),

@@ -37,7 +37,8 @@ using the command line option ``--LabApp.news_url="<URL_TO_FEED_XML_FILE>"``.
 
 .. note::
 
-    An entry in a custom feed is required to have the following tags: ``title``, ``id``, and ``updated``. The following tags are also used but not required: ``published``, ``summary``, and at least one ``link`` with attribute ``rel="alternate"``.
+    An entry in a custom feed is required to have the following tags: ``title``, ``id``, and ``updated``.
+    The following tags are also used but not required: ``published``, ``summary``, and at least one ``link``.
 
 Binder
 ------
