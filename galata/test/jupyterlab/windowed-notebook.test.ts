@@ -13,6 +13,32 @@ test.beforeEach(async ({ page, tmpPath }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 });
 
+test('should not update height when hiding', async ({ page }) => {
+  // Wait to ensure the rendering logic is stable.
+  await page.waitForTimeout(200);
+
+  const h = await page.notebook.getNotebookInPanel();
+  const initialHeight = parseInt(
+    (await h?.$$eval(
+      '.jp-WindowedPanel-inner',
+      nodes => nodes[0].style.height
+    )) ?? '0',
+    10
+  );
+
+  expect(initialHeight).toBeGreaterThan(0);
+
+  await page.menu.clickMenuItem('File>New Launcher');
+
+  const innerHeight =
+    (await h?.$$eval(
+      '.jp-WindowedPanel-inner',
+      nodes => nodes[0].style.height
+    )) ?? '-1';
+
+  expect(parseInt(innerHeight, 10)).toEqual(initialHeight);
+});
+
 test('should hide first code cell when scrolling down', async ({ page }) => {
   const h = await page.notebook.getNotebookInPanel();
   const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';

@@ -694,6 +694,19 @@ export class WindowedList<
   }
 
   /**
+   * Whether the parent is hidden or not.
+   *
+   * This should be set externally if a container is hidden to
+   * stop updating the widget size when hidden.
+   */
+  get isParentHidden(): boolean {
+    return this._isParentHidden;
+  }
+  set isParentHidden(v: boolean) {
+    this._isParentHidden = v;
+  }
+
+  /**
    * Widget layout
    */
   get layout(): WindowedLayout {
@@ -1036,6 +1049,10 @@ export class WindowedList<
   private _onWidgetResize(entries: ResizeObserverEntry[]): void {
     this._resetScrollToItem();
 
+    if (this.isHidden || this.isParentHidden) {
+      return;
+    }
+
     const newSizes: { index: number; size: number }[] = [];
     for (let entry of entries) {
       // Update size only if item is attached to the DOM
@@ -1083,6 +1100,7 @@ export class WindowedList<
 
   protected _viewModel: T;
   private _innerElement: HTMLDivElement;
+  private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
   private _needsUpdate = false;
   private _windowElement: HTMLDivElement;
