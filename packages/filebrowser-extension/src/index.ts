@@ -1253,7 +1253,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.toggleSortNotebooksFirst, {
-    label: trans.__('Sort Notebooks First'),
+    label: trans.__('Sort Notebooks Above Files'),
     isToggled: () => browser.sortNotebooksFirst,
     execute: () => {
       const value = !browser.sortNotebooksFirst;

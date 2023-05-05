@@ -171,7 +171,7 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
-   * Whether to show checkboxes next to files and folders
+   * Whether to sort notebooks above other files
    */
   get sortNotebooksFirst(): boolean {
     return this._sortNotebooksFirst;
