@@ -374,8 +374,7 @@ export class CompleterModel implements Completer.IModel {
       // don't count parameters, `b`, `a`, and `r` as matches.
       const index = item.label.indexOf('(');
       const text = index > -1 ? item.label.substring(0, index) : item.label;
-      const match =
-        text !== query && StringExt.matchSumOfSquares(escapeHTML(text), query);
+      const match = StringExt.matchSumOfSquares(escapeHTML(text), query);
       // Filter non-matching items.
       if (match) {
         // Highlight label text if there's a match
