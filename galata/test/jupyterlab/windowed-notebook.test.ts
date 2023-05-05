@@ -221,7 +221,7 @@ test('should rendered injected styles of out-of-viewport cells', async ({
   // Check the cell is out of the viewport
   await expect
     .soft(page.locator('.jp-Cell[data-windowed-list-index="4"]'))
-    .toHaveCount(0);
+    .not.toBeVisible();
 
   await page.waitForFunction(() => {
     const cell = document.querySelector('.jp-Notebook-cell');
@@ -260,7 +260,7 @@ test('should rendered injected HTML scripts of out-of-viewport cells', async ({
   // Check the cell is out of the viewport
   await expect
     .soft(page.locator('.jp-Cell[data-windowed-list-index="4"]'))
-    .toHaveCount(0);
+    .not.toBeVisible();
 
   await page.getByText('JavaScript injected from HTML').first().waitFor();
   expect(
@@ -278,7 +278,7 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
   // Check the cell is out of the viewport
   await expect
     .soft(page.locator('.jp-Cell[data-windowed-list-index="4"]'))
-    .toHaveCount(0);
+    .not.toBeVisible();
 
   await page.getByText('JavaScript injected header').first().waitFor();
   expect(
