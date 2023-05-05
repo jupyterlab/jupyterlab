@@ -335,6 +335,8 @@
   min-width: 120px;
   min-height: 120px;
   outline: none;
+}
+
 .jp-DirListing-deadSpace {
   flex: 1 1 auto;
   margin: 0;

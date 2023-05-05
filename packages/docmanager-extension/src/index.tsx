@@ -570,30 +570,28 @@ export namespace ToolbarItems {
    * create readonly label toolbar item
    */
   export function createReadonlyLabel(
-    panel: DocumentWidget,
+    panel: IDocumentWidget,
     translator?: ITranslator
   ): Widget {
     const trans = (translator || nullTranslator).load('jupyterlab');
-    return addCommandToolbarButtonClass(
-      ReactWidget.create(
-        <UseSignal signal={panel.context.fileChanged}>
-          {() =>
-            !panel.context.contentsModel?.writable ? (
-              <readonlyIcon.react
-                className="jp-ToolbarLabelComponent-icon"
-                label="readonly document"
-                stylesheet="toolbarButton"
-                tag="span"
-                title={trans.__(
-                  `document is permissioned readonly; "save" is disabled, use "save as..." instead`
-                )}
-              />
-            ) : (
-              <></>
-            )
-          }
-        </UseSignal>
-      )
+    return ReactWidget.create(
+      <UseSignal signal={panel.context.fileChanged}>
+        {() =>
+          !panel.context.contentsModel?.writable ? (
+            <readonlyIcon.react
+              className="jp-ToolbarLabelComponent-icon"
+              label="readonly document"
+              stylesheet="toolbarButton"
+              tag="span"
+              title={trans.__(
+                `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+              )}
+            />
+          ) : (
+            <></>
+          )
+        }
+      </UseSignal>
     );
   }
 
