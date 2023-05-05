@@ -2102,7 +2102,6 @@ __metadata:
     webpack-merge: ^5.8.0
     whatwg-fetch: ^3.0.0
     worker-loader: ^3.0.2
-    yarn-berry-deduplicate: ^2.0.0
   languageName: unknown
   linkType: soft
 
@@ -5070,7 +5069,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lumino/coreutils@npm:^1.11.0 || ^2.0.0, @lumino/coreutils@npm:^2.1.0, @lumino/coreutils@npm:^2.1.1":
+"@lumino/coreutils@npm:^1.11.0 || ^2.0.0, @lumino/coreutils@npm:^2.1.1":
   version: 2.1.1
   resolution: "@lumino/coreutils@npm:2.1.1"
   checksum: dfdeb2b0282caae17b6c3edfebadf4ce7c75fc879fa60cacfef9b154412f4b35e4ffd95b1833b99d8dacb99aaaa04513570129ae2024c3f33e2677a01f0576ce
@@ -5155,7 +5154,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lumino/signaling@npm:^1.10.0 || ^2.0.0, @lumino/signaling@npm:^2.1.0, @lumino/signaling@npm:^2.1.1":
+"@lumino/signaling@npm:^1.10.0 || ^2.0.0, @lumino/signaling@npm:^2.1.1":
   version: 2.1.1
   resolution: "@lumino/signaling@npm:2.1.1"
   dependencies:
@@ -7230,16 +7229,6 @@ __metadata:
   version: 1.1.0
   resolution: "@yarnpkg/lockfile@npm:1.1.0"
   checksum: 05b881b4866a3546861fee756e6d3812776ea47fa6eb7098f983d6d0eefa02e12b66c3fff931574120f196286a7ad4879ce02743c8bb2be36c6a576c7852083a
-  languageName: node
-  linkType: hard
-
-"@yarnpkg/parsers@npm:^2.0.0-rc.10":
-  version: 2.5.1
-  resolution: "@yarnpkg/parsers@npm:2.5.1"
-  dependencies:
-    js-yaml: ^3.10.0
-    tslib: ^1.13.0
-  checksum: 42f98b8bd635add304ce392c6f600b46e40c2c4429d7b6c38b70f50b5fd6a854dd2369e0987b70546a3c8f690d280f040a885b35acfde891f5e173fc3f974277
   languageName: node
   linkType: hard
 
@@ -13942,13 +13931,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mdn-data@npm:2.0.30":
-  version: 2.0.30
-  resolution: "mdn-data@npm:2.0.30"
-  checksum: d6ac5ac7439a1607df44b22738ecf83f48e66a0874e4482d6424a61c52da5cde5750f1d1229b6f5fa1b80a492be89465390da685b11f97d62b8adcc6e88189aa
-  languageName: node
-  linkType: hard
-
 "media-typer@npm:0.3.0":
   version: 0.3.0
   resolution: "media-typer@npm:0.3.0"
@@ -14161,7 +14143,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:2 || 3, minimatch@npm:3.1.2, minimatch@npm:^3.0.4, minimatch@npm:^3.0.5, minimatch@npm:^3.1.1, minimatch@npm:^3.1.2":
+"minimatch@npm:2 || 3, minimatch@npm:3.1.2, minimatch@npm:^3.0.4, minimatch@npm:^3.0.5, minimatch@npm:^3.1.2":
   version: 3.1.2
   resolution: "minimatch@npm:3.1.2"
   dependencies:
@@ -14282,13 +14264,6 @@ __metadata:
   dependencies:
     yallist: ^4.0.0
   checksum: a30d083c8054cee83cdcdc97f97e4641a3f58ae743970457b1489ce38ee1167b3aaf7d815cd39ec7a99b9c40397fd4f686e83750e73e652b21cb516f6d845e48
-  languageName: node
-  linkType: hard
-
-"minipass@npm:^4.0.0":
-  version: 4.2.4
-  resolution: "minipass@npm:4.2.4"
-  checksum: c664f2ae4401408d1e7a6e4f50aca45f87b1b0634bc9261136df5c378e313e77355765f73f59c4a5abcadcdf43d83fcd3eb14e4a7cdcce8e36508e2290345753
   languageName: node
   linkType: hard
 
@@ -14515,7 +14490,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"node-fetch@npm:2.6.7, node-fetch@npm:cjs, node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.7":
+"node-fetch@npm:2.6.7, node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.7, node-fetch@npm:cjs":
   version: 2.6.7
   resolution: "node-fetch@npm:2.6.7"
   dependencies:
@@ -14652,15 +14627,6 @@ __metadata:
   dependencies:
     npm-normalize-package-bin: ^1.0.1
   checksum: 6e599155ef28d0b498622f47f1ba189dfbae05095a1ed17cb3a5babf961e965dd5eab621f0ec6f0a98de774e5836b8f5a5ee639010d64f42850a74acec3d4d09
-  languageName: node
-  linkType: hard
-
-"npm-bundled@npm:^2.0.0":
-  version: 2.0.1
-  resolution: "npm-bundled@npm:2.0.1"
-  dependencies:
-    npm-normalize-package-bin: ^2.0.0
-  checksum: 7747293985c48c5268871efe691545b03731cb80029692000cbdb0b3344b9617be5187aa36281cabbe6b938e3651b4e87236d1c31f9e645eef391a1a779413e6
   languageName: node
   linkType: hard
 
@@ -16704,7 +16670,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"safe-buffer@npm:5.2.1, safe-buffer@npm:^5.0.1, safe-buffer@npm:^5.1.0, safe-buffer@npm:^5.1.2, safe-buffer@npm:~5.2.0":
+"safe-buffer@npm:5.2.1, safe-buffer@npm:^5.0.1, safe-buffer@npm:^5.1.0, safe-buffer@npm:^5.1.2":
   version: 5.2.1
   resolution: "safe-buffer@npm:5.2.1"
   checksum: b99c4b41fdd67a6aaf280fcd05e9ffb0813654894223afb78a31f14a19ad220bba8aba1cb14eddce1fcfb037155fe6de4e861784eb434f7d11ed58d1e70dd491
@@ -16808,15 +16774,6 @@ __metadata:
   bin:
     semver: ./bin/semver
   checksum: 57fd0acfd0bac382ee87cd52cd0aaa5af086a7dc8d60379dfe65fea491fb2489b6016400813930ecd61fd0952dae75c115287a1b16c234b1550887117744dfaf
-  languageName: node
-  linkType: hard
-
-"semver@npm:7.1.3":
-  version: 7.1.3
-  resolution: "semver@npm:7.1.3"
-  bin:
-    semver: bin/semver.js
-  checksum: a7700fd0399ca5a199a8ad08c10f5ef0a270ec0a9096bc5951c50e4f7ae08d090552c47435dc9360a90167af01ffe7f7b5a54a5430fe90c842328bcb7cdc0a41
   languageName: node
   linkType: hard
 
@@ -18054,7 +18011,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tslib@npm:^1.13.0, tslib@npm:^1.8.1":
+"tslib@npm:^1.8.1":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
   checksum: dbe628ef87f66691d5d2959b3e41b9ca0045c3ee3c7c7b906cc1e328b39f199bb1ad9e671c39025bd56122ac57dfbf7385a94843b1cc07c60a4db74795829acd
@@ -19808,19 +19765,6 @@ __metadata:
     y18n: ^5.0.5
     yargs-parser: ^21.1.1
   checksum: 47da1b0d854fa16d45a3ded57b716b013b2179022352a5f7467409da5a04a1eef5b3b3d97a2dfc13e8bbe5f2ffc0afe3bc6a4a72f8254e60f5a4bd7947138643
-  languageName: node
-  linkType: hard
-
-"yarn-berry-deduplicate@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "yarn-berry-deduplicate@npm:2.0.0"
-  dependencies:
-    "@yarnpkg/parsers": ^2.0.0-rc.10
-    commander: ^4.1.1
-    semver: 7.1.3
-  bin:
-    yarn-berry-deduplicate: cli.js
-  checksum: 579f65b0c27964ed41710ca99385ccd21d9124f308342a48b745f4344eba4a1866d4e7267711e81feac61696cdf58f7d4f09aacbbf383f1a5220a920d19844db
   languageName: node
   linkType: hard
 
