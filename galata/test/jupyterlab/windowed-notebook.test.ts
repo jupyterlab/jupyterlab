@@ -17,9 +17,7 @@ test.beforeEach(async ({ page, tmpPath }) => {
   );
 });
 
-test('should not update height when hiding', async ({ page,
-  tmpPath
-}) => {
+test('should not update height when hiding', async ({ page, tmpPath }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
   // Wait to ensure the rendering logic is stable.
@@ -222,7 +220,7 @@ test('should rendered injected styles of out-of-viewport cells', async ({
 
   // Check the cell is out of the viewport
   await expect
-    .soft(page.locator('.jp-Cell[data-windowed-list-index="3"]'))
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="4"]'))
     .toHaveCount(0);
 
   await page.waitForFunction(() => {
@@ -261,7 +259,7 @@ test('should rendered injected HTML scripts of out-of-viewport cells', async ({
 
   // Check the cell is out of the viewport
   await expect
-    .soft(page.locator('.jp-Cell[data-windowed-list-index="3"]'))
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="4"]'))
     .toHaveCount(0);
 
   await page.getByText('JavaScript injected from HTML').first().waitFor();
@@ -279,7 +277,7 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
 
   // Check the cell is out of the viewport
   await expect
-    .soft(page.locator('.jp-Cell[data-windowed-list-index="3"]'))
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="4"]'))
     .toHaveCount(0);
 
   await page.getByText('JavaScript injected header').first().waitFor();

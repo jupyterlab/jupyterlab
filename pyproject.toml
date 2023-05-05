@@ -244,6 +244,11 @@ after-publish-assets = "npm run after:publish:assets"
 line-length = 100
 target-version = ["py37"]
 skip-string-normalization = true
+extend-exclude = '''
+(
+  .*\/css_js_injection.ipynb  # Exclude integration test notebook
+)
+'''
 
 [tool.ruff]
 target-version = "py37"
