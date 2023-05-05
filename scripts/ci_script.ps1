@@ -24,6 +24,11 @@ if ($Env:GROUP -eq "python") {
 if ($Env:GROUP -eq "integrity") {
     # Run the integrity script first
     jlpm run integrity --force
+    jlpm dlx yarn-berry-deduplicate --strategy fewerHighest --fail --print
+    if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
+
+    # Validate the project
+    jlpm install --immutable --immutable-cache
     if ($LASTEXITCODE -ne 0) { throw "Command failed. See above errors for details" }
 
     # Run a browser check in dev mode

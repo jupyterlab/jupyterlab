@@ -179,9 +179,6 @@ We are essentially sub-dividing semver to allow us to bump minor versions
 of the JS packages as many times as we need to for minor releases of the
 top level JupyterLab application.
 
-Other note: It's ok if `yarn-deduplicate` exits with a non zero code. This is
-expected!
-
 #### JS major release(s)
 
 In a major Python release, we can have one or more JavaScript packages also have

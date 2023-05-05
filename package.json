@@ -37,7 +37,7 @@
     "build:all": "lerna run build:all",
     "postbuild:all": "npm run build:testutils && npm run build:galata",
     "build:builder": "cd builder && npm run build",
-    "build:core": "cd jupyterlab/staging && jlpm && (jlpm dedupe || jlpm) && npm run build",
+    "build:core": "cd jupyterlab/staging && jlpm && (jlpm dlx yarn-berry-deduplicate --strategy fewerHighest || jlpm) && npm run build",
     "build:dev": "npm run integrity && npm run build:all && cd dev_mode && npm run build",
     "build:dev:prod": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod",
     "build:dev:prod:minimize": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod:minimize",

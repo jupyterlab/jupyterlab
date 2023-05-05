@@ -207,7 +207,7 @@
     "webpack-merge": "^5.8.0",
     "whatwg-fetch": "^3.0.0",
     "worker-loader": "^3.0.2",
-    "yarn-deduplicate": "^5.0.0"
+    "yarn-berry-deduplicate": "^2.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
