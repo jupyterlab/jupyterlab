@@ -742,7 +742,7 @@ describe('filebrowser/listing', () => {
 
       beforeEach(async () => {
         const options = createOptionsForConstructor();
-  
+
         // Create files that can be sorted alphabetically
         let file;
         file = await options.model.manager.newUntitled({ type: 'file' });
@@ -757,11 +757,11 @@ describe('filebrowser/listing', () => {
         await options.model.manager.rename(file.path, '5');
         file = await options.model.manager.newUntitled({ type: 'notebook' });
         await options.model.manager.rename(file.path, '6.ipynb');
-  
+
         // Create the widget and mount it to the DOM.
         dirListing = new TestDirListing(options);
         Widget.attach(dirListing, document.body);
-  
+
         // Wait for the widget to update its internal DOM state before running
         // tests.
         await signalToPromise(dirListing.updated);
@@ -778,7 +778,7 @@ describe('filebrowser/listing', () => {
           const itemNodes = Array.from(
             dirListing.contentNode.children
           ) as HTMLElement[];
-         
+
           expect(itemNodes.map(node => node.querySelector('.jp-DirListing-itemText span')?.textContent)).toEqual([ "2", "5", "1.txt", "3.ipynb", "4.txt", "6.ipynb" ])
         });
         it('should sort alphabetically descending correctly', async () => {
@@ -791,7 +791,7 @@ describe('filebrowser/listing', () => {
           const itemNodes = Array.from(
             dirListing.contentNode.children
           ) as HTMLElement[];
-          
+
           expect(itemNodes.map(node => node.querySelector('.jp-DirListing-itemText span')?.textContent)).toEqual([ "5", "2", "6.ipynb", "4.txt", "3.ipynb", "1.txt" ])
         });
       });
@@ -809,7 +809,7 @@ describe('filebrowser/listing', () => {
           const itemNodes = Array.from(
             dirListing.contentNode.children
           ) as HTMLElement[];
-         
+
           expect(itemNodes.map(node => node.querySelector('.jp-DirListing-itemText span')?.textContent)).toEqual([ "2", "5", "3.ipynb", "6.ipynb",  "1.txt", "4.txt" ])
         });
         it('should sort alphabetically descending correctly', async () => {
@@ -824,11 +824,11 @@ describe('filebrowser/listing', () => {
           const itemNodes = Array.from(
             dirListing.contentNode.children
           ) as HTMLElement[];
-          
+
           expect(itemNodes.map(node => node.querySelector('.jp-DirListing-itemText span')?.textContent)).toEqual([ "5", "2", "6.ipynb", "3.ipynb", "4.txt", "1.txt" ])
         });
       });
     });
   });
-  
+
 });
