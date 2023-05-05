@@ -171,6 +171,22 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to show checkboxes next to files and folders
+   */
+  get sortNotebooksFirst(): boolean {
+    return this._sortNotebooksFirst;
+  }
+
+  set sortNotebooksFirst(value: boolean) {
+    if (this.listing.setNotebooksFirstSorting) {
+      this.listing.setNotebooksFirstSorting(value);
+      this._sortNotebooksFirst = value;
+    } else {
+      console.warn('Listing does not support toggling column visibility');
+    }
+  }
+
+  /**
    * Create an iterator over the listing's selected items.
    *
    * @returns A new iterator over the listing's selected items.
@@ -390,6 +406,7 @@ export class FileBrowser extends SidePanel {
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
   private _showFileCheckboxes: boolean = false;
+  private _sortNotebooksFirst: boolean = false;
 }
 
 /**
