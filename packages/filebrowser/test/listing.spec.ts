@@ -856,39 +856,39 @@ describe('filebrowser/listing', () => {
       describe('with sortNotebooksFirst toggled on/off', () => {
         it('should sort correctly when switching between options', async () => {
           dirListing.sort({
-            direction: 'ascending',
+            direction: 'descending',
             key: 'last_modified'
           });
           await signalToPromise(dirListing.updated);
           expect(getItemTitles(dirListing)).toEqual([
-            '5',
             '2',
-            '6.ipynb',
-            '4.txt',
+            '5',
+            '1.txt',
             '3.ipynb',
-            '1.txt'
+            '4.txt',
+            '6.ipynb'
           ]);
 
           dirListing.setNotebooksFirstSorting(true);
           await signalToPromise(dirListing.updated);
           expect(getItemTitles(dirListing)).toEqual([
-            '5',
             '2',
-            '6.ipynb',
+            '5',
             '3.ipynb',
-            '4.txt',
-            '1.txt'
+            '6.ipynb',
+            '1.txt',
+            '4.txt'
           ]);
 
           dirListing.setNotebooksFirstSorting(false);
           await signalToPromise(dirListing.updated);
           expect(getItemTitles(dirListing)).toEqual([
-            '5',
             '2',
-            '6.ipynb',
-            '4.txt',
+            '5',
+            '1.txt',
             '3.ipynb',
-            '1.txt'
+            '4.txt',
+            '6.ipynb'
           ]);
         });
       });
