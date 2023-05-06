@@ -10,7 +10,6 @@
     "tests/**/*",
     "dev_mode/*",
     "docs/**/*",
-    ".eslintrc.js",
     ".eslintrc.typecheck.js",
     "examples/**/*",
     "galata/.eslintrc.js",

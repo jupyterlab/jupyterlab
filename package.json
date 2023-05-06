@@ -105,6 +105,304 @@
     "watch:main": "npm run watch",
     "watch:packages": "python scripts/watch_packages.py"
   },
+  "prettier": {
+    "arrowParens": "avoid",
+    "singleQuote": true,
+    "trailingComma": "none"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es2021": true,
+      "jest/globals": true,
+      "node": true
+    },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "project:": "./tsconfig.eslint.json"
+    },
+    "settings": {
+      "react": {
+        "version": "detect"
+      }
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier",
+      "plugin:react/recommended"
+    ],
+    "rules": {
+      "camelcase": [
+        "error",
+        {
+          "allow": [
+            "__webpack_public_path__",
+            "__webpack_share_scopes__",
+            "__webpack_init_sharing__",
+            "allow_stdin",
+            "allowed_extensions",
+            "allowed_extensions_uris",
+            "blocked_extensions",
+            "blocked_extensions_uris",
+            "bundles_extension",
+            "cell_type",
+            "check_update",
+            "clear_output",
+            "codemirror_mode",
+            "comm_close",
+            "comm_id",
+            "comm_msg",
+            "comm_open",
+            "copy_from",
+            "creation_date",
+            "cursor_end",
+            "cursor_pos",
+            "cursor_start",
+            "detail_level",
+            "display_data",
+            "display_id",
+            "display_name",
+            "embed_options",
+            "execute_input",
+            "execute_result",
+            "execution_count",
+            "execution_state",
+            "extension_data",
+            "extension_name",
+            "file_extension",
+            "help_links",
+            "hist_access_type",
+            "ids_only",
+            "implementation_version",
+            "installed_version",
+            "is_allowed",
+            "jlab_core",
+            "jupyterlab_extensions",
+            "jupyterlab_mime_extensions",
+            "kernel_spec",
+            "language_info",
+            "last_modified",
+            "last_update_date",
+            "latest_version",
+            "lineWrap_type",
+            "msg_type",
+            "msg_id",
+            "msgid_plural",
+            "nbconverter_exporter",
+            "nbformat_minor",
+            "orig_nbformat",
+            "output_mimetype",
+            "output_type",
+            "outputs_hidden",
+            "parent_header",
+            "per_page",
+            "pf_re",
+            "pkg_type",
+            "protocol_version",
+            "pygments_lexer",
+            "request_seq",
+            "slide_type",
+            "source_hidden",
+            "shutdown_reply",
+            "stop_on_error",
+            "store_history",
+            "target_name",
+            "target_module",
+            "UNSAFE_componentWillUpdate",
+            "UNSAFE_componentWillReceiveProps",
+            "user_expressions"
+          ]
+        }
+      ],
+      "id-match": [
+        "error",
+        "^[a-zA-Z_]+[a-zA-Z0-9_]*$"
+      ],
+      "no-case-declarations": "warn",
+      "no-control-regex": "warn",
+      "no-inner-declarations": "off",
+      "no-prototype-builtins": "off",
+      "no-undef": "warn",
+      "no-useless-escape": "off",
+      "prefer-const": "off",
+      "sort-imports": [
+        "error",
+        {
+          "ignoreCase": true,
+          "ignoreDeclarationSort": true,
+          "ignoreMemberSort": false,
+          "memberSyntaxSortOrder": [
+            "none",
+            "all",
+            "multiple",
+            "single"
+          ],
+          "allowSeparatedGroups": false
+        }
+      ],
+      "@typescript-eslint/ban-ts-comment": [
+        "warn",
+        {
+          "ts-ignore": true
+        }
+      ],
+      "@typescript-eslint/ban-types": "warn",
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/interface-name-prefix": "off",
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          "selector": "interface",
+          "format": [
+            "PascalCase"
+          ],
+          "custom": {
+            "regex": "^I[A-Z]",
+            "match": true
+          }
+        }
+      ],
+      "@typescript-eslint/no-empty-interface": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-inferrable-types": "off",
+      "@typescript-eslint/no-namespace": "off",
+      "@typescript-eslint/no-non-null-asserted-optional-chain": "warn",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          "args": "none"
+        }
+      ],
+      "@typescript-eslint/no-use-before-define": "off",
+      "@typescript-eslint/no-var-requires": "off",
+      "@typescript-eslint/triple-slash-reference": "warn",
+      "react/prop-types": "warn"
+    },
+    "overrides": [
+      {
+        "files": [
+          "packages/**/*.spec.ts",
+          "testutils/**/*.spec.ts"
+        ],
+        "plugins": [
+          "jest"
+        ],
+        "extends": [
+          "plugin:jest/recommended"
+        ],
+        "rules": {
+          "jest/no-conditional-expect": "warn",
+          "jest/no-standalone-expect": [
+            "error",
+            {
+              "additionalTestBlockFunctions": [
+                "it"
+              ]
+            }
+          ],
+          "jest/valid-title": "warn"
+        }
+      }
+    ],
+    "globals": {
+      "BigInt": "readonly",
+      "HTMLCollectionOf": "readonly",
+      "JSX": "readonly",
+      "NodeJS": "readonly",
+      "RequestInfo": "readonly",
+      "RequestInit": "readonly",
+      "ScrollLogicalPosition": "readonly"
+    },
+    "root": true
+  },
+  "eslintIgnore": [
+    "**/node_modules",
+    "**/build",
+    "**/lib",
+    "**/mock_packages",
+    "**/static",
+    "**/typings",
+    "**/schemas",
+    "**/themes",
+    "coverage",
+    "*.map.js",
+    "*.bundle.js",
+    "dev_mode/index.js",
+    "!dev_mode/static/index.out.js",
+    "dev_mode/workspaces",
+    "docs/_build",
+    "docs/api",
+    "docs/build",
+    "examples/example.spec.ts",
+    "examples/federated/core_package/index.template.js",
+    "examples/federated/core_package/index.js",
+    "examples/federated/labextensions",
+    "galata/playwright-report",
+    "jupyterlab/chrome-test.js",
+    "jupyterlab/geckodriver",
+    "jupyterlab/staging/yarn.js",
+    "jupyterlab/staging/index.js",
+    "jupyterlab/staging/webpack.config.js",
+    "packages/extensionmanager-extension/examples/listings",
+    "packages/nbconvert-css/raw.js",
+    "packages/services/dist",
+    "packages/ui-components/src/icon/iconimports.ts",
+    "tsconfigdoc.json",
+    "typedoc-theme/",
+    ".idea/",
+    ".history/",
+    ".vscode/",
+    "packages/lsp/src/_*",
+    "packages/lsp/schema.js"
+  ],
+  "stylelint": {
+    "extends": [
+      "stylelint-config-standard",
+      "stylelint-config-recommended",
+      "stylelint-prettier/recommended"
+    ],
+    "rules": {
+      "import-notation": null,
+      "no-descending-specificity": null,
+      "comment-whitespace-inside": null,
+      "property-no-vendor-prefix": null,
+      "selector-no-vendor-prefix": null,
+      "value-no-vendor-prefix": null,
+      "alpha-value-notation": null,
+      "color-function-notation": null,
+      "custom-property-pattern": null,
+      "declaration-block-no-redundant-longhand-properties": null,
+      "function-linear-gradient-no-nonstandard-direction": null,
+      "function-url-quotes": null,
+      "keyframes-name-pattern": null,
+      "number-max-precision": null,
+      "selector-class-pattern": null,
+      "selector-id-pattern": null,
+      "selector-pseudo-class-no-unknown": null,
+      "selector-pseudo-element-no-unknown": null,
+      "selector-not-notation": null,
+      "selector-max-type": {
+        "limit": 2,
+        "ignore": "compounded"
+      },
+      "selector-max-class": 4,
+      "selector-max-compound-selectors": 4,
+      "selector-max-universal": 1
+    },
+    "ignoreFiles": [
+      "packages/nbconvert-css/style/index.css",
+      "docs/_build",
+      "docs/build",
+      "docs/api"
+    ]
+  },
   "resolutions": {
     "@jupyterlab/services/ws": "8.12.0",
     "@types/react": "^18.0.26",
