@@ -24,6 +24,7 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import json
+import os
 import shutil
 import time
 from collections import ChainMap
@@ -266,10 +267,18 @@ html_theme_options = {
             "icon": "fab fa-gitter",
         },
     ],
+    "logo": {
+        "alt_text": "Lumino",
+    },
     "use_edit_page_button": True,
     "navbar_align": "left",
     "navbar_end": ["navbar-icon-links.html", "search-field.html"],
+    "navbar_start": ["navbar-logo", "version-switcher"],
     "footer_start": ["copyright.html"],
+    "switcher": {
+        "json_url": "https://jupyterlab.readthedocs.io/en/latest/_static/switcher.json",
+        "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
+    },
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -292,7 +301,7 @@ html_context = {
     "github_user": "jupyterlab",  # Username
     "github_repo": "jupyterlab",  # Repo name
     "github_version": "master",  # Version
-    "conf_py_path": "/docs/source/",  # Path in the checkout to the docs root
+    "doc_path": "docs/source/",  # Path in the checkout to the docs root
 }
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -389,7 +398,8 @@ def setup(app):
     # Skip we are dealing with internationalization
     outdir = Path(app.outdir)
     if outdir.name != "gettext":
-        build_api_docs(outdir)
+        # build_api_docs(outdir)
+        ...
 
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)
     tmp_files = copy_automated_screenshots(Path(app.srcdir) / IMAGES_FOLDER)
