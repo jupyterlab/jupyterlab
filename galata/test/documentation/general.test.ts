@@ -440,7 +440,7 @@ test.describe('General', () => {
       '[aria-label="File Browser Section"] >> text=notebooks'
     );
     await page.dblclick('text=Data.ipynb');
-
+    await page.menu.clickMenuItem('Edit>Clear Outputs of All Cells');
     await page.notebook.setCell(
       1,
       'code',

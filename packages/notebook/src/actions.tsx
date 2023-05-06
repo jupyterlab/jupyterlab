@@ -151,6 +151,11 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    // We force the notebook back in edit mode as splitting a cell
+    // requires using the cursor position within a cell (aka it was recently in edit mode)
+    // However the focus may be stolen if the action is triggered
+    // from the menu entry; switching the notebook in command mode.
+    notebook.mode = 'edit';
 
     notebook.deselectAll();
 

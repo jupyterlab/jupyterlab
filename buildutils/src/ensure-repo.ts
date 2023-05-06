@@ -314,7 +314,10 @@ function ensureBranch(): string[] {
     .trim()
     .split(/\r?\n/);
   files = files.filter(filePath => {
-    return fileTypes.indexOf(path.extname(filePath)) !== -1;
+    return (
+      fileTypes.indexOf(path.extname(filePath)) !== -1 &&
+      !filePath.endsWith('_static/switcher.json')
+    );
   });
 
   // Set up string replacements
