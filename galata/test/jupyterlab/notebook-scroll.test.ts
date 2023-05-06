@@ -1,11 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
-import { expect } from '@playwright/test';
+import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
 const fileName = 'scroll.ipynb';
+
+test.use({
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/notebook-extension:tracker': {
+      ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+      windowingMode: 'full'
+    }
+  }
+});
 
 test.describe('Notebook Scroll', () => {
   test.beforeEach(async ({ page, tmpPath }) => {

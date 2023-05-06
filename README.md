@@ -136,7 +136,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Eric Charles, Datalayer, (general development, extensions).
 - Frédéric Collonval, QuantStack (general development, extensions).
 - Martha Cryan, IBM (general development, extensions).
-- Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
+- Afshin Darian, QuantStack (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 - Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,

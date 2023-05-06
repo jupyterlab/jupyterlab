@@ -86,7 +86,7 @@ is to force packages deduplication using:
 
 .. code-block:: sh
 
-   jlpm dedupe --strategy highest
+   jlpm dlx yarn-berry-deduplicate
 
 API breaking changes
 ^^^^^^^^^^^^^^^^^^^^

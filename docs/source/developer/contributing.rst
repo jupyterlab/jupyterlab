@@ -10,9 +10,17 @@ contributing!
 
 Please take a look at the Contributor documentation, familiarize
 yourself with using JupyterLab, and introduce yourself to the community
-(on the mailing list or discourse) and share what area of the project
-you are interested in working on. Please also see the Jupyter `Community
+(on the `chat <https://gitter.im/jupyterlab/jupyterlab>`__ and/or the `forum <https://discourse.jupyter.org/c/jupyterlab/17>`__)
+and share what area of the project you are interested in working on. Please also see the Jupyter `Community
 Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
+
+You can help make it better by:
+- `submitting bug reports <https://github.com/jupyterlab/jupyterlab/issues/new/choose>`__,
+- `proposing new features <https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md>`__,
+- `translating the application <https://crowdin.com/project/jupyterlab>`__,
+- `improving the documentation <https://jupyterlab.readthedocs.io/en/latest>`__,
+- improving the code base and fixing bug (see below)
+
 
 We have labeled some issues as `good first
 issue <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22>`__
@@ -810,7 +818,7 @@ need to install the documentation dependencies with ``pip``:
 
 .. code:: bash
 
-   pip install -e .[docs]
+   pip install -e ".[docs]"
 
 
 To test the docs run:
