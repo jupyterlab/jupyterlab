@@ -828,6 +828,8 @@ export class WindowedList<
     super.onAfterAttach(msg);
     if (this._viewModel.windowingActive) {
       this._addListeners();
+    } else {
+      this._applyNoWindowingStyles();
     }
     this.viewModel.height = this.node.getBoundingClientRect().height;
   }
@@ -951,13 +953,16 @@ export class WindowedList<
     this._windowElement.style.position = 'absolute';
   }
 
+  private _applyNoWindowingStyles() {
+    this._windowElement.style.position = 'relative';
+    this._windowElement.style.top = '0px';
+  }
+
   private _removeListeners() {
     this.node.removeEventListener('scroll', this);
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
-    this._innerElement.style.height = '100%';
-    this._windowElement.style.position = 'relative';
-    this._windowElement.style.top = '0px';
+    this._applyNoWindowingStyles();
   }
 
   private _update(): void {
