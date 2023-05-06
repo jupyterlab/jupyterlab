@@ -149,9 +149,13 @@ test.describe('Notebook Edit', () => {
     await page.keyboard.insertText('3 ** 2');
     await page.keyboard.press('Home');
     await page.menu.clickMenuItem('Edit>Split Cell');
+
+    // Wait for the focus to settle down into the new cell
+    await page.waitForTimeout(200);
+
     const nbPanel = await page.notebook.getNotebookInPanel();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Merge split cells', async ({ page }) => {
