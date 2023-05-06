@@ -150,9 +150,6 @@ test.describe('Notebook Edit', () => {
     await page.keyboard.press('Home');
     await page.menu.clickMenuItem('Edit>Split Cell');
 
-    // Wait for the focus to settle down into the new cell
-    await page.waitForTimeout(200);
-
     const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
