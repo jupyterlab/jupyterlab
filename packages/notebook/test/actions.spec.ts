@@ -230,9 +230,9 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).toBeNull();
       });
 
-      it('should preserve the widget mode', () => {
+      it('should switch the widget mode to edit', () => {
         NotebookActions.splitCell(widget);
-        expect(widget.mode).toBe('command');
+        expect(widget.mode).toBe('edit');
         widget.mode = 'edit';
         NotebookActions.splitCell(widget);
         expect(widget.mode).toBe('edit');
