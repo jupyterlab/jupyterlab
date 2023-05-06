@@ -398,8 +398,7 @@ def setup(app):
     # Skip we are dealing with internationalization
     outdir = Path(app.outdir)
     if outdir.name != "gettext":
-        # build_api_docs(outdir)
-        ...
+        build_api_docs(outdir)
 
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)
     tmp_files = copy_automated_screenshots(Path(app.srcdir) / IMAGES_FOLDER)
