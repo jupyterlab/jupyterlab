@@ -5,11 +5,12 @@
 
 import json
 import re
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field, fields, replace
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Union
 
 import tornado
+from jupyterlab_server.translation_utils import translator
 from traitlets.config import Configurable, LoggingConfigurable
 
 from jupyterlab.commands import (
@@ -117,7 +118,22 @@ class ActionResult:
 
 
 @dataclass
-class ExtensionManagerOptions:
+class PluginManagerOptions:
+    """Plugin manager options.
+
+    Attributes:
+        lock_all: Whether to lock (prevent enabling/disabling) all plugins.
+        lock_rules: A list of plugins or extensions that cannot be toggled.
+            If extension name is provided, all its plugins will be disabled.
+            The plugin names need to follow colon-separated format of `extension:plugin`.
+    """
+
+    lock_rules: Set[str] = field(default_factory=set)
+    lock_all: bool = False
+
+
+@dataclass
+class ExtensionManagerOptions(PluginManagerOptions):
     """Extension manager options.
 
     Attributes:
@@ -161,7 +177,117 @@ class ExtensionsCache:
     last_page: int = 1
 
 
-class ExtensionManager(LoggingConfigurable):
+class PluginManager(LoggingConfigurable):
+    """Plugin manager enables or disables plugins unless locked.
+
+    It can also disable/enable all plugins in an extension.
+
+    Args:
+        app_options: Application options
+        ext_options: Plugin manager (subset of extension manager) options
+        parent: Configurable parent
+
+    Attributes:
+        app_options: Application options
+        options: Plugin manager options
+    """
+
+    def __init__(
+        self,
+        app_options: Optional[dict] = None,
+        ext_options: Optional[dict] = None,
+        parent: Optional[Configurable] = None,
+    ) -> None:
+        super().__init__(parent=parent)
+        self.app_options = _ensure_options(app_options)
+        plugin_options_field = {f.name for f in fields(PluginManagerOptions)}
+        plugin_options = {
+            option: value
+            for option, value in (ext_options or {}).items()
+            if option in plugin_options_field
+        }
+        self.options = PluginManagerOptions(**plugin_options)
+
+    async def plugin_locks(self) -> dict:
+        """Get information about locks on plugin enabling/disabling"""
+        return {
+            "lockRules": list(self.options.lock_rules),
+            "allLocked": self.options.lock_all,
+        }
+
+    def _find_locked(self, plugins_or_extensions: List[str]) -> Set[str]:
+        """Find a subset of plugins (or extensions) which are locked"""
+        if self.options.lock_all:
+            return set(plugins_or_extensions)
+        locked_subset = set()
+        extensions_with_locked_plugins = {
+            plugin.split(':')[0] for plugin in self.options.lock_rules
+        }
+        for plugin in plugins_or_extensions:
+            if ':' in plugin:
+                # check directly if this is a plugin identifier (has colon)
+                if plugin in self.options.lock_rules:
+                    locked_subset.add(plugin)
+            elif plugin in extensions_with_locked_plugins:
+                # this is an extension - we need to check for >any< plugin
+                # belonging to said extension
+                locked_subset.add(plugin)
+        return locked_subset
+
+    async def disable(self, plugins: Union[str, List[str]]) -> ActionResult:
+        """Disable a set of plugins (or an extension).
+
+        Args:
+            plugins: The list of plugins to disable
+        Returns:
+            The action result
+        """
+        plugins = plugins if isinstance(plugins, list) else [plugins]
+        locked = self._find_locked(plugins)
+        trans = translator.load("jupyterlab")
+        if locked:
+            return ActionResult(
+                status="error",
+                message=trans.gettext(
+                    "The following plugins cannot be disabled as they are locked: "
+                )
+                + ", ".join(locked),
+            )
+        try:
+            for plugin in plugins:
+                disable_extension(plugin, app_options=self.app_options)
+            return ActionResult(status="ok", needs_restart=["frontend"])
+        except Exception as err:
+            return ActionResult(status="error", message=repr(err))
+
+    async def enable(self, plugins: Union[str, List[str]]) -> ActionResult:
+        """Enable a set of plugins (or an extension).
+
+        Args:
+            plugins: The list of plugins to enable
+        Returns:
+            The action result
+        """
+        plugins = plugins if isinstance(plugins, list) else [plugins]
+        locked = self._find_locked(plugins)
+        trans = translator.load("jupyterlab")
+        if locked:
+            return ActionResult(
+                status="error",
+                message=trans.gettext(
+                    "The following plugins cannot be enabled as they are locked: "
+                )
+                + ", ".join(locked),
+            )
+        try:
+            for plugin in plugins:
+                enable_extension(plugin, app_options=self.app_options)
+            return ActionResult(status="ok", needs_restart=["frontend"])
+        except Exception as err:
+            return ActionResult(status="error", message=repr(err))
+
+
+class ExtensionManager(PluginManager):
     """Base abstract extension manager.
 
     Note:
@@ -195,12 +321,10 @@ class ExtensionManager(LoggingConfigurable):
         ext_options: Optional[dict] = None,
         parent: Optional[Configurable] = None,
     ) -> None:
-        super().__init__(parent=parent)
-        app_options = _ensure_options(app_options)
-        self.log = app_options.logger
-        self.app_dir = Path(app_options.app_dir)
-        self.core_config = app_options.core_config
-        self.app_options = app_options
+        super().__init__(app_options=app_options, ext_options=ext_options, parent=parent)
+        self.log = self.app_options.logger
+        self.app_dir = Path(self.app_options.app_dir)
+        self.core_config = self.app_options.core_config
         self.options = ExtensionManagerOptions(**(ext_options or {}))
         self._extensions_cache: Dict[Optional[str], ExtensionsCache] = {}
         self._listings_cache: Optional[dict] = None
@@ -285,34 +409,6 @@ class ExtensionManager(LoggingConfigurable):
             The action result
         """
         raise NotImplementedError()
-
-    async def disable(self, extension: str) -> ActionResult:
-        """Disable an extension.
-
-        Args:
-            extension: The extension name
-        Returns:
-            The action result
-        """
-        try:
-            disable_extension(extension, app_options=self.app_options)
-            return ActionResult(status="ok", needs_restart=["frontend"])
-        except Exception as err:
-            return ActionResult(status="error", message=repr(err))
-
-    async def enable(self, extension: str) -> ActionResult:
-        """Enable an extension.
-
-        Args:
-            extension: The extension name
-        Returns:
-            The action result
-        """
-        try:
-            enable_extension(extension, app_options=self.app_options)
-            return ActionResult(status="ok", needs_restart=["frontend"])
-        except Exception as err:
-            return ActionResult(status="error", message=repr(err))
 
     @staticmethod
     def get_semver_version(version: str) -> str:

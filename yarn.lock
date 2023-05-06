@@ -2067,6 +2067,7 @@ __metadata:
     "@jupyterlab/metadataform-extension": ~4.0.0
     "@jupyterlab/notebook-extension": ~4.0.0
     "@jupyterlab/pdf-extension": ~4.0.0
+    "@jupyterlab/pluginmanager-extension": ~4.0.0
     "@jupyterlab/rendermime-extension": ~4.0.0
     "@jupyterlab/running-extension": ~4.0.0
     "@jupyterlab/settingeditor-extension": ~4.0.0
@@ -3962,6 +3963,8 @@ __metadata:
     "@jupyterlab/observables": ^5.0.0
     "@jupyterlab/outputarea": ^4.0.0
     "@jupyterlab/pdf-extension": ^4.0.0
+    "@jupyterlab/pluginmanager": ^4.0.0
+    "@jupyterlab/pluginmanager-extension": ^4.0.0
     "@jupyterlab/property-inspector": ^4.0.0
     "@jupyterlab/rendermime": ^4.0.0
     "@jupyterlab/rendermime-extension": ^4.0.0
@@ -4213,6 +4216,45 @@ __metadata:
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
     typedoc: ~0.24.7
+    typescript: ~5.0.4
+  languageName: unknown
+  linkType: soft
+
+"@jupyterlab/pluginmanager-extension@^4.0.0, @jupyterlab/pluginmanager-extension@workspace:packages/pluginmanager-extension, @jupyterlab/pluginmanager-extension@~4.0.0":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/pluginmanager-extension@workspace:packages/pluginmanager-extension"
+  dependencies:
+    "@jupyterlab/application": ^4.0.0
+    "@jupyterlab/apputils": ^4.0.0
+    "@jupyterlab/mainmenu": ^4.0.0
+    "@jupyterlab/pluginmanager": ^4.0.0
+    "@jupyterlab/testing": ^4.0.0
+    "@jupyterlab/translation": ^4.0.0
+    "@jupyterlab/ui-components": ^4.0.0
+    "@lumino/coreutils": ^2.1.1
+    "@types/jest": ^29.2.0
+    rimraf: ~3.0.0
+    typescript: ~5.0.4
+  languageName: unknown
+  linkType: soft
+
+"@jupyterlab/pluginmanager@^4.0.0, @jupyterlab/pluginmanager@workspace:packages/pluginmanager":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/pluginmanager@workspace:packages/pluginmanager"
+  dependencies:
+    "@jupyterlab/application": ^4.0.0
+    "@jupyterlab/apputils": ^4.0.0
+    "@jupyterlab/coreutils": ^6.0.0
+    "@jupyterlab/services": ^7.0.0
+    "@jupyterlab/testing": ^4.0.0
+    "@jupyterlab/translation": ^4.0.0
+    "@jupyterlab/ui-components": ^4.0.0
+    "@lumino/coreutils": ^2.1.1
+    "@lumino/signaling": ^2.1.1
+    "@lumino/widgets": ^2.1.1
+    "@types/jest": ^29.2.0
+    react: ^18.2.0
+    rimraf: ~3.0.0
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft

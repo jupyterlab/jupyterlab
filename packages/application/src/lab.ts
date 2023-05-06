@@ -218,6 +218,11 @@ export namespace JupyterLab {
     readonly mimeExtensions: IRenderMime.IExtensionModule[];
 
     /**
+     * The information about available plugins.
+     */
+    readonly availablePlugins: IPluginInfo[];
+
+    /**
      * Whether files are cached on the server.
      */
     readonly filesCached: boolean;
@@ -236,6 +241,56 @@ export namespace JupyterLab {
   }
 
   /**
+   * A readonly subset of lumino plugin bundle (excluding activation function,
+   * service, and state information).
+   */
+  interface ILuminoPluginData {
+    /**
+     * The human readable ID of the plugin.
+     */
+    readonly id: string;
+
+    /**
+     * The description of the plugin.
+     */
+    readonly description: string;
+
+    /**
+     * Whether the plugin should be activated on application start.
+     */
+    readonly autoStart: boolean;
+
+    /**
+     * The types of required services for the plugin, or `[]`.
+     */
+    readonly requires: Token<any>[];
+
+    /**
+     * The types of optional services for the the plugin, or `[]`.
+     */
+    readonly optional: Token<any>[];
+
+    /**
+     * The type of service provided by the plugin, or `null`.
+     */
+    readonly provides: Token<any> | null;
+  }
+
+  /**
+   * A subset of plugin bundle enriched with JupyterLab extension metadata.
+   */
+  export interface IPluginInfo extends ILuminoPluginData {
+    /**
+     * The name of the extension which provides the plugin.
+     */
+    extension: string;
+    /**
+     * Whether the plugin is enabled.
+     */
+    enabled: boolean;
+  }
+
+  /**
    * The default JupyterLab application info.
    */
   export const defaultInfo: IInfo = {
@@ -243,6 +298,7 @@ export namespace JupyterLab {
     deferred: { patterns: [], matches: [] },
     disabled: { patterns: [], matches: [] },
     mimeExtensions: [],
+    availablePlugins: [],
     filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
     isConnected: true
   };

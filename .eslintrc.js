@@ -137,6 +137,7 @@ module.exports = {
           'outputs_hidden',
           'parent_header',
           'per_page',
+          'plugin_name',
           'pf_re',
           'pkg_type',
           'protocol_version',

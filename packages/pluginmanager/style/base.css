@@ -1,0 +1,127 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
+.jp-pluginmanager {
+  display: grid;
+  grid-template-rows: min-content min-content 1fr;
+}
+
+.jp-pluginmanager-Header,
+.jp-pluginmanager-Disclaimer {
+  padding: 8px;
+}
+
+.jp-pluginmanager-Disclaimer-checkbox {
+  position: relative;
+  top: 2px;
+}
+
+.jp-pluginmanager-AvailableList {
+  overflow: auto;
+}
+
+.jp-pluginmanager-AvailableList > .jp-sortable-table > thead {
+  position: sticky;
+}
+
+.jp-pluginmanager-PluginInUseMessage {
+  text-wrap: balance;
+  max-width: 550px;
+}
+
+/**
+ * Table - move to ui-components if agreed.
+ */
+
+.jp-sortable-table {
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+  border-spacing: 0;
+
+  /* required to preserve borders of `<th>` when using position:sticky */
+  border-collapse: separate;
+  width: 100%;
+  overflow-wrap: break-word;
+}
+
+.jp-sortable-table > thead {
+  box-shadow: var(--jp-toolbar-box-shadow);
+}
+
+.jp-sortable-table > tbody {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.jp-sortable-table th,
+.jp-sortable-table td {
+  padding: 4px 12px 2px;
+  height: 18px;
+}
+
+.jp-sortable-table-tr > td {
+  border-left: var(--jp-border-width) solid var(--jp-border-color3);
+}
+
+.jp-sortable-table-tr:hover > td {
+  border-color: var(--jp-border-color2);
+}
+
+.jp-sortable-table th {
+  font-weight: 500;
+  text-align: left;
+  border-width: var(--jp-border-width) 0;
+  margin-top: calc(var(--jp-border-width) * -1);
+  border-style: solid;
+  border-color: var(--jp-border-color1);
+  background: var(--jp-layout-color1);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.jp-sortable-table th:not(:first-child) {
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+}
+
+.jp-sortable-table th:hover {
+  background: var(--jp-layout-color2);
+}
+
+.jp-sortable-table > tbody > tr:hover {
+  background: var(--jp-layout-color2);
+}
+
+.jp-sortable-table-th-wrapper {
+  flex-direction: row;
+  display: flex;
+}
+
+.jp-sortable-table-th-wrapper > label {
+  flex: 1;
+  text-overflow: ellipsis;
+}
+
+.jp-sort-icon {
+  flex: 0;
+  height: var(--jp-ui-font-size1);
+  width: var(--jp-ui-font-size1);
+}
+
+.jp-sort-icon > svg {
+  display: inline;
+  height: auto;
+}
+
+.jp-sortable-table > thead th:not(.jp-sorted-header) .jp-sort-icon {
+  opacity: 0;
+}
+
+.jp-sortable-table > thead th:not(.jp-sorted-header):hover .jp-sort-icon {
+  opacity: 0.5;
+}

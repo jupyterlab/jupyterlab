@@ -242,6 +242,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/nbconvert-css',
     '@jupyterlab/notebook-extension',
     '@jupyterlab/pdf-extension',
+    '@jupyterlab/pluginmanager',
+    '@jupyterlab/pluginmanager-extension',
     '@jupyterlab/rendermime-extension',
     '@jupyterlab/running',
     '@jupyterlab/running-extension',

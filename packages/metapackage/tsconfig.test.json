@@ -189,6 +189,12 @@
       "path": "../pdf-extension"
     },
     {
+      "path": "../pluginmanager"
+    },
+    {
+      "path": "../pluginmanager-extension"
+    },
+    {
       "path": "../property-inspector"
     },
     {

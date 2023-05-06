@@ -43,6 +43,7 @@ from .commands import (
 from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
 from .extensions import MANAGERS as EXT_MANAGERS
+from .extensions.manager import PluginManager
 from .extensions.readonly import ReadOnlyExtensionManager
 from .handlers.announcements import (
     CheckForUpdate,
@@ -55,6 +56,7 @@ from .handlers.announcements import (
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
+from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -582,6 +584,12 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         config=True,
     )
 
+    lock_all_plugins = Bool(
+        False,
+        config=True,
+        help="Whether all plugins are locked (cannot be enabled/disabled from the UI)",
+    )
+
     check_for_updates_class = Type(
         default_value=CheckForUpdate,
         klass=CheckForUpdateABC,
@@ -707,13 +715,13 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         self.log.info("JupyterLab extension loaded from %s" % HERE)
         self.log.info("JupyterLab application directory is %s" % self.app_dir)
 
-        build_handler_options = AppOptions(
+        app_options = AppOptions(
             logger=self.log,
             app_dir=self.app_dir,
             labextensions_path=self.extra_labextensions_path + self.labextensions_path,
             splice_source=self.splice_source,
         )
-        builder = Builder(self.core_mode, app_options=build_handler_options)
+        builder = Builder(self.core_mode, app_options=app_options)
         build_handler = (build_path, BuildHandler, {"builder": builder})
         handlers.append(build_handler)
 
@@ -741,7 +749,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             if self.dev_mode:
                 watch_dev(self.log)
             else:
-                watch(app_options=build_handler_options)
+                watch(app_options=app_options)
                 page_config["buildAvailable"] = False
             self.cache_files = False
 
@@ -784,14 +792,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 self.log.debug(f"Extension manager will be constrained by {listings_config}")
 
             try:
-                ext_manager = manager_factory(build_handler_options, listings_config, self)
+                ext_manager = manager_factory(app_options, listings_config, self)
                 metadata = dataclasses.asdict(ext_manager.metadata)
             except Exception as err:
                 self.log.warning(
                     f"Failed to instantiate the extension manager {provider}. Falling back to read-only manager.",
                     exc_info=err,
                 )
-                ext_manager = ReadOnlyExtensionManager(build_handler_options, listings_config, self)
+                ext_manager = ReadOnlyExtensionManager(app_options, listings_config, self)
                 metadata = dataclasses.asdict(ext_manager.metadata)
 
             page_config["extensionManager"] = metadata
@@ -801,6 +809,26 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 {"manager": ext_manager},
             )
             handlers.append(ext_handler)
+
+            # Add plugin manager handlers
+            lock_rules = {
+                rule for rule, value in page_config.get("lockedExtensions", {}).items() if value
+            }
+            handlers.append(
+                (
+                    plugins_handler_path,
+                    PluginHandler,
+                    {
+                        "manager": PluginManager(
+                            app_options=app_options,
+                            ext_options={
+                                "lock_rules": lock_rules,
+                                "all_locked": self.lock_all_plugins,
+                            },
+                        )
+                    },
+                )
+            )
 
             # Add announcement handlers
             page_config["news"] = {"disabled": self.news_url is None}
