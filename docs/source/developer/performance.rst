@@ -34,6 +34,13 @@ However code cell outputs bring a huge constraint that their internal state is w
 DOM node (e.g. the zoom level on a map view). So the outputs cannot be detached once displayed
 With those considerations in mind, here is the algorithm coded for the notebook windowing.
 
+.. note::
+
+    When initializing the view, the code cell outputs are scanned to detect if they contain
+    ``text/html`` output defining ``style`` and/or ``scripts`` elements. If they do, those
+    cells are rendered to ensure styles and JavaScript are applied as they may leak outside
+    their definition cell (e.g. injection of custom styles).
+
 When cell widgets are instantiated, their children are not created (i.e. the editor, the
 outputs,…) and they are not attached to the DOM. The view is updated on scroll events following:
 
@@ -70,6 +77,10 @@ Side effect of the implementation
   the UI may freeze as all outputs never rendered will need to be rendered.
 - The cell editor is available only for cell that have been at least once in the viewport.
   The editor is not destroyed when the cells are out of the viewport. So its state can be modified.
+- HTML element measurements cannot capture margins. Therefore the cell containers should not use it.
+  Padding is the solution as measurements is limited to border sizing. This is because top and bottom
+  margins between adjacent elements `can be collapsed <https://developer.mozilla.org/en-US/docs/Web/CSS/margin#margin_collapsing>`__
+  by the web browsers.
 
 Viewport state
 ^^^^^^^^^^^^^^
