@@ -79,6 +79,7 @@ module.exports = {
           '__webpack_public_path__',
           '__webpack_share_scopes__',
           '__webpack_init_sharing__',
+          '_jupyter_types_experimental',
           'allow_stdin',
           'allowed_extensions',
           'allowed_extensions_uris',
