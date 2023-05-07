@@ -327,7 +327,7 @@ export class Completer extends Widget {
     const node = this._createCompleterNode(model, items);
 
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
-    active?.classList.add(ACTIVE_CLASS);
+    active.classList.add(ACTIVE_CLASS);
 
     // Add the documentation panel
     if (this._showDoc) {
@@ -546,7 +546,7 @@ export class Completer extends Widget {
     }
 
     active = items[this._activeIndex] as HTMLElement;
-    active?.classList.add(ACTIVE_CLASS);
+    active.classList.add(ACTIVE_CLASS);
     let completionList = this.node.querySelector(`.${LIST_CLASS}`) as Element;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
     this._indexChanged.emit(this._activeIndex);
