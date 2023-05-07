@@ -203,6 +203,11 @@ test.describe('Notebook Search', () => {
 
     await page.click('text=Search Cell Outputs');
 
+    // If the notebook is not fully loaded yet a confirmation dialog will show up
+    if (await page.locator('.jp-Dialog').isVisible()) {
+      await page.click('.jp-Dialog .jp-mod-accept');
+    }
+
     await page.waitForSelector('text=1/29');
 
     const cell = await page.notebook.getCell(5);
