@@ -97,6 +97,7 @@ const UNUSED: Dict<string[]> = {
     '@codemirror/lang-xml',
     '@codemirror/legacy-modes'
   ],
+  '@jupyterlab/codemirror-extension': ['@codemirror/lang-markdown'],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/services': ['ws'],

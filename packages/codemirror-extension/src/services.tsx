@@ -18,6 +18,7 @@ import {
   IEditorExtensionRegistry,
   IEditorLanguageRegistry,
   IEditorThemeRegistry,
+  MathIPython,
   ybinding
 } from '@jupyterlab/codemirror';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -63,7 +64,9 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
         // TODO: add support for LaTeX
         const m = await import('@codemirror/lang-markdown');
         return m.markdown({
-          codeLanguages: (info: string) => languages.findBest(info) as any
+          base: m.markdownLanguage,
+          codeLanguages: (info: string) => languages.findBest(info) as any,
+          extensions: [MathIPython]
         });
       }
     });
