@@ -335,7 +335,6 @@ describe('@jupyterlab/notebook', () => {
       it('should reflect cell selection state in command mode', async () => {
         panel.content.mode = 'command';
         panel.content.activeCellIndex = 0;
-        await signalToPromise(provider.filtersChanged);
         let state = provider.getSelectionState();
         // Currently it is impossible to select a single cell (a cell is always
         // active; while this can be seen as always having a selected cell, this
@@ -356,9 +355,8 @@ describe('@jupyterlab/notebook', () => {
         ]);
         panel.content.activeCellIndex = 0;
         panel.content.mode = 'edit';
-        // TODO: revisit (remove filtersChanged?) once
-        // https://github.com/jupyterlab/jupyterlab/pull/14387 is in
-        await signalToPromise(provider.filtersChanged);
+        let state = provider.getSelectionState();
+        expect(state).toBe('none');
 
         await setSelections(panel.content.activeCell!.editor!, [
           {
@@ -367,18 +365,16 @@ describe('@jupyterlab/notebook', () => {
             end: { line: 2, column: 6 }
           }
         ]);
-        await signalToPromise(provider.filtersChanged);
-        let state = provider.getSelectionState();
+        state = provider.getSelectionState();
         expect(state).toBe('multiple');
 
         await setSelections(panel.content.activeCell!.editor!, [
           {
             uuid: 'main-selection',
             start: { line: 1, column: 0 },
-            end: { line: 1, column: 6 }
+            end: { line: 1, column: 5 }
           }
         ]);
-        await signalToPromise(provider.filtersChanged);
         state = provider.getSelectionState();
         expect(state).toBe('single');
       });
