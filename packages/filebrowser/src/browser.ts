@@ -182,7 +182,7 @@ export class FileBrowser extends SidePanel {
       this.listing.setNotebooksFirstSorting(value);
       this._sortNotebooksFirst = value;
     } else {
-      console.warn('Listing does not support toggling column visibility');
+      console.warn('Listing does not support sorting notebooks first');
     }
   }
 
