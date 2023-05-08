@@ -3,76 +3,133 @@
 
 import { parseMixed, Parser } from '@lezer/common';
 import { tags } from '@lezer/highlight';
-import { DelimiterType, InlineContext, MarkdownConfig } from '@lezer/markdown';
+import {
+  DelimiterType,
+  InlineContext,
+  MarkdownConfig,
+  NodeSpec
+} from '@lezer/markdown';
 
+// Mathematical expression delimiters
+const INLINE_MATH_DOLLAR = 'InlineMathDollar';
+const INLINE_MATH_BRACKET = 'InlineMathBracket';
+const BLOCK_MATH_DOLLAR = 'BlockMathDollar';
+const BLOCK_MATH_BRACKET = 'BlockMathBracket';
+
+/**
+ * Lengh of the delimiter for a math expression
+ */
 const DELIMITER_LENGTH: Record<string, number> = {
-  InlineMath: 1,
-  InlineMathBracket: 3,
-  InlineMath2: 2,
-  BlockMathBracket: 3
-};
-
-const INLINE_MATH_NODE = 'InlineMath';
-
-const INLINE_MATH_DELIMITER: DelimiterType = {
-  resolve: INLINE_MATH_NODE,
-  mark: `${INLINE_MATH_NODE}Mark`
-};
-
-const INLINE_MATH2_NODE = 'InlineMath2';
-
-const INLINE_MATH2_DELIMITER: DelimiterType = {
-  resolve: INLINE_MATH2_NODE,
-  mark: `${INLINE_MATH2_NODE}Mark`
+  [INLINE_MATH_DOLLAR]: 1,
+  [INLINE_MATH_BRACKET]: 3,
+  [BLOCK_MATH_DOLLAR]: 2,
+  [BLOCK_MATH_BRACKET]: 3
 };
 
 /**
+ * Delimiters for math expressions
+ */
+// Delimiters must be defined as constant because they are used in object match tests
+const DELIMITERS = Object.keys(DELIMITER_LENGTH).reduce<
+  Record<string, DelimiterType>
+>((agg, name) => {
+  agg[name] = { mark: `${name}Mark`, resolve: name };
+  return agg;
+}, {});
+
+/**
  * Define an IPython mathematical expression parser for Markdown.
+ *
+ * @param latexParser CodeMirror {@link Parser} for LaTeX mathematical expression
+ * @returns Markdown extension
  */
 export function parseMathIPython(latexParser: Parser): MarkdownConfig {
+  const defineNodes = new Array<NodeSpec>();
+  Object.keys(DELIMITER_LENGTH).forEach(name => {
+    defineNodes.push(
+      {
+        name,
+        style: tags.emphasis
+      },
+      { name: `${name}Mark`, style: tags.processingInstruction }
+    );
+  });
   return {
-    defineNodes: [
-      {
-        name: INLINE_MATH_NODE,
-        style: tags.quote
-      },
-      { name: `${INLINE_MATH_NODE}Mark`, style: tags.processingInstruction },
-      {
-        name: INLINE_MATH2_NODE,
-        style: tags.quote
-      },
-      { name: `${INLINE_MATH2_NODE}Mark`, style: tags.processingInstruction }
-    ],
+    defineNodes,
     parseInline: [
       {
-        name: INLINE_MATH2_NODE,
+        name: BLOCK_MATH_DOLLAR,
         parse(cx: InlineContext, next: number, pos: number): number {
           if (next != 36 /* '$' */ || cx.char(pos + 1) != 36) {
             return -1;
           }
 
           return cx.addDelimiter(
-            INLINE_MATH2_DELIMITER,
+            DELIMITERS[BLOCK_MATH_DOLLAR],
             pos,
-            pos + 2,
+            pos + DELIMITER_LENGTH[BLOCK_MATH_DOLLAR],
             true,
             true
           );
         }
       },
       {
-        name: INLINE_MATH_NODE,
+        name: INLINE_MATH_DOLLAR,
         parse(cx: InlineContext, next: number, pos: number): number {
           if (next != 36 /* '$' */ || cx.char(pos + 1) == 36) {
             return -1;
           }
 
           return cx.addDelimiter(
-            INLINE_MATH_DELIMITER,
+            DELIMITERS[INLINE_MATH_DOLLAR],
             pos,
-            pos + 1,
+            pos + DELIMITER_LENGTH[INLINE_MATH_DOLLAR],
             true,
             true
+          );
+        }
+      },
+      // Inline expression wrapped in \\( ... \\)
+      {
+        name: INLINE_MATH_BRACKET,
+        before: 'Escape', // Search for this delimiter before the escape character
+        parse(cx: InlineContext, next: number, pos: number): number {
+          if (
+            next != 92 /* '\' */ ||
+            cx.char(pos + 1) != 92 ||
+            ![40 /* '(' */, 41 /* ')' */].includes(cx.char(pos + 2))
+          ) {
+            return -1;
+          }
+
+          return cx.addDelimiter(
+            DELIMITERS[INLINE_MATH_BRACKET],
+            pos,
+            pos + DELIMITER_LENGTH[INLINE_MATH_BRACKET],
+            cx.char(pos + 2) == 40,
+            cx.char(pos + 2) == 41
+          );
+        }
+      },
+      // Block expression wrapped in \\[ ... \\]
+      {
+        name: BLOCK_MATH_BRACKET,
+        before: 'Escape', // Search for this delimiter before the escape character
+        parse(cx: InlineContext, next: number, pos: number): number {
+          if (
+            next != 92 /* '\' */ ||
+            cx.char(pos + 1) != 92 ||
+            ![91 /* '[' */, 93 /* ']' */].includes(cx.char(pos + 2))
+          ) {
+            return -1;
+          }
+
+          return cx.addDelimiter(
+            DELIMITERS[BLOCK_MATH_BRACKET],
+            pos,
+            pos + DELIMITER_LENGTH[BLOCK_MATH_BRACKET],
+            cx.char(pos + 2) == 91,
+            cx.char(pos + 2) == 93
           );
         }
       }
