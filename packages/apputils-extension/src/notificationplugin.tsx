@@ -672,7 +672,7 @@ namespace Private {
         title={props.title ?? ''}
         onClick={props.close}
       >
-        <props.closeIcon className="jp-icon-hover" tag="span" />
+        <props.closeIcon tag="span" />
       </button>
     );
   }
@@ -684,6 +684,7 @@ namespace Private {
         close={props.closeToast}
         closeIcon={closeIcon.react}
         title={trans.__('Hide notification')}
+        closeIconMargin
       />
     );
   }
