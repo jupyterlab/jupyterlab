@@ -597,7 +597,7 @@ export namespace EditorExtensionRegistry {
     } = {}
   ): ReadonlyArray<Readonly<IEditorExtensionFactory<any>>> {
     const { themes, translator } = options;
-    const trans = (translator ?? nullTranslator).load('jupyter');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const extensions: IEditorExtensionFactory<any>[] = [
       Object.freeze({
         name: 'autoClosingBrackets',
