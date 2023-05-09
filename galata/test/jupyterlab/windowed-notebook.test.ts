@@ -1,10 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
 const fileName = 'windowed_notebook.ipynb';
 const injectionFile = 'css_js_injection.ipynb';
+
+test.use({
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/notebook-extension:tracker': {
+      ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+      windowingMode: 'full'
+    }
+  }
+});
 
 test.beforeEach(async ({ page, tmpPath }) => {
   await page.contents.uploadFile(

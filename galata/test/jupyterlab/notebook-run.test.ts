@@ -59,7 +59,7 @@ test.describe.serial('Notebook Run', () => {
     numNBImages++;
 
     for (let c = 0; c < numNBImages; ++c) {
-      expect(captures[c]).toMatchSnapshot(getCaptureImageName(c));
+      expect.soft(captures[c]).toMatchSnapshot(getCaptureImageName(c));
     }
   });
 
