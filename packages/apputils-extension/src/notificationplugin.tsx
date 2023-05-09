@@ -666,7 +666,7 @@ namespace Private {
   export function CloseButton(props: ICloseButtonProps): JSX.Element {
     return (
       <button
-        className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}${
+        className={`bp3-button bp3-minimal jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}${
           props.closeIconMargin ? ` ${TOAST_CLOSE_BUTTON_MARGIN_CLASS}` : ''
         }`}
         title={props.title ?? ''}
