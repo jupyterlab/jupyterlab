@@ -43,7 +43,7 @@ const DELIMITERS = Object.keys(DELIMITER_LENGTH).reduce<
  * @param latexParser CodeMirror {@link Parser} for LaTeX mathematical expression
  * @returns Markdown extension
  */
-export function parseMathIPython(latexParser: Parser): MarkdownConfig {
+export function parseMathIPython(latexParser?: Parser): MarkdownConfig {
   const defineNodes = new Array<NodeSpec>();
   Object.keys(DELIMITER_LENGTH).forEach(name => {
     defineNodes.push(
@@ -136,6 +136,7 @@ export function parseMathIPython(latexParser: Parser): MarkdownConfig {
     ],
     wrap: latexParser
       ? parseMixed((node, input) => {
+          // Test if the node type is one of the math expression
           const delimiterLength = DELIMITER_LENGTH[node.type.name];
           if (delimiterLength) {
             return {
