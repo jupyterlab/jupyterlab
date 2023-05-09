@@ -216,7 +216,7 @@ def ensure_node_modules(cwd, logger=None):
     """
     logger = _ensure_logger(logger)
     yarn_proc = ProgressProcess(
-        ["node", YARN_PATH, " --immutable", "--immutable-cache"], cwd=cwd, logger=logger
+        ["node", YARN_PATH, "--immutable", "--immutable-cache"], cwd=cwd, logger=logger
     )
     ret = yarn_proc.wait()
 
