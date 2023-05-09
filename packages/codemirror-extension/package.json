@@ -40,6 +40,7 @@
   "dependencies": {
     "@codemirror/lang-markdown": "^6.1.1",
     "@codemirror/language": "^6.6.0",
+    "@codemirror/legacy-modes": "^6.3.2",
     "@jupyter/ydoc": "^1.0.2",
     "@jupyterlab/application": "^4.0.0-rc.0",
     "@jupyterlab/codeeditor": "^4.0.0-rc.0",
