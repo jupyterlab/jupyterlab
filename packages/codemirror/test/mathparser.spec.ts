@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 // This test utils are modified from the ones in @lezer/markdown licensed under MIT License
 // Copyright (C) 2020 by Marijn Haverbeke <marijnh@gmail.com> and others
 
