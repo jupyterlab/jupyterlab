@@ -663,7 +663,7 @@ namespace Private {
     closeIconMargin?: boolean;
   }
 
-  export function CloseButton(props: ICloseButtonProps) {
+  export function CloseButton(props: ICloseButtonProps): JSX.Element {
     return (
       <button
         className={`jp-Button jp-mod-minimal ${TOAST_CLOSE_BUTTON_CLASS}${
