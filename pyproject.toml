@@ -236,7 +236,6 @@ before-build-python = [
     "node buildutils/lib/local-repository start",
     "jlpm run before:build:python",
     "node buildutils/lib/local-repository stop",
-    "node buildutils/lib/local-repository fix-links --path jupyterlab/staging",
 ]
 after-publish-assets = "npm run after:publish:assets"
 
