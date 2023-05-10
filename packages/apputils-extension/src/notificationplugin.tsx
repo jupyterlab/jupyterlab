@@ -684,7 +684,6 @@ namespace Private {
         close={props.closeToast}
         closeIcon={closeIcon.react}
         title={trans.__('Hide notification')}
-        closeIconMargin
       />
     );
   }
