@@ -944,11 +944,8 @@ export class DirListing extends Widget {
    * Update the setting to sort notebooks above files.
    * This sorts the items again if the internal value is modified.
    */
-  get notebooksFirstSorting(): boolean {
-    return this._sortNotebooksFirst;
-  }
-  set notebooksFirstSorting(isEnabled: boolean) {
-    const previousValue = this._sortNotebooksFirst;
+  setNotebooksFirstSorting(isEnabled: boolean) {
+    let previousValue = this._sortNotebooksFirst;
     this._sortNotebooksFirst = isEnabled;
     if (this._sortNotebooksFirst !== previousValue) {
       this.sort(this._sortState);
