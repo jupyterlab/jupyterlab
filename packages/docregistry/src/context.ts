@@ -79,7 +79,7 @@ export class Context<
     this.sessionContext = new SessionContext({
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
-      path: this._path,
+      path: localPath,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
       kernelPreference: options.kernelPreference || { shouldStart: false },
@@ -417,23 +417,7 @@ export class Context<
             newPath = `${driveName}:${change.newValue}`;
           }
 
-          if (this._path !== newPath) {
-            this._path = newPath;
-            const localPath = this._manager.contents.localPath(newPath);
-            const name = PathExt.basename(localPath);
-            this.sessionContext.session?.setPath(newPath) as any;
-            void this.sessionContext.session?.setName(name);
-            (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
-            if (this._contentsModel) {
-              const contentsModel = {
-                ...this._contentsModel,
-                name: name,
-                path: newPath
-              };
-              this._updateContentsModel(contentsModel);
-            }
-            this._pathChanged.emit(newPath);
-          }
+          this._updatePath(newPath);
         }
       });
     }
@@ -467,19 +451,11 @@ export class Context<
           path: newPath
         };
       }
-      this._path = newPath;
-      const updateModel = {
+      this._updateContentsModel({
         ...this._contentsModel,
         ...changeModel
-      };
-
-      const localPath = this._manager.contents.localPath(newPath);
-      void this.sessionContext.session?.setPath(newPath);
-      void this.sessionContext.session?.setName(PathExt.basename(localPath));
-      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
-      this._updateContentsModel(updateModel as Contents.IModel);
-      this._model.sharedModel.setState('path', localPath);
-      this._pathChanged.emit(newPath);
+      } as Contents.IModel);
+      this._updatePath(newPath);
     }
   }
 
@@ -490,23 +466,8 @@ export class Context<
     if (type !== 'path') {
       return;
     }
-    const path = this.sessionContext.session!.path;
-    if (path !== this._path) {
-      this._path = path;
-      const localPath = this._manager.contents.localPath(path);
-      const name = PathExt.basename(localPath);
-      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = path;
-      if (this._contentsModel) {
-        const contentsModel = {
-          ...this._contentsModel,
-          name: name,
-          path: path
-        };
-        this._updateContentsModel(contentsModel);
-      }
-      this._model.sharedModel.setState('path', localPath);
-      this._pathChanged.emit(path);
-    }
+
+    this._updatePath(this.sessionContext.session!.path);
   }
 
   /**
@@ -531,6 +492,41 @@ export class Context<
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
+  }
+
+  private _updatePath(newPath: string): void {
+    if (this._path === newPath) {
+      return;
+    }
+
+    this._path = newPath;
+    const localPath = this._manager.contents.localPath(newPath);
+    const name = PathExt.basename(localPath);
+    if (this.sessionContext.session?.path !== localPath) {
+      void this.sessionContext.session?.setPath(localPath);
+    }
+    if (this.sessionContext.session?.name !== name) {
+      void this.sessionContext.session?.setName(name);
+    }
+    if ((this.urlResolver as RenderMimeRegistry.UrlResolver).path !== newPath) {
+      (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
+    }
+    if (
+      this._contentsModel &&
+      (this._contentsModel.path !== newPath ||
+        this._contentsModel.name !== name)
+    ) {
+      const contentsModel = {
+        ...this._contentsModel,
+        name: name,
+        path: newPath
+      };
+      this._updateContentsModel(contentsModel);
+    }
+    if (this._model.sharedModel.getState('path') !== localPath) {
+      this._model.sharedModel.setState('path', localPath);
+    }
+    this._pathChanged.emit(newPath);
   }
 
   /**
