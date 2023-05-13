@@ -70,6 +70,7 @@ export class BreadCrumbs extends Widget {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._model = options.model;
+    this._fullPath = true; // options.fullPath
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
@@ -152,7 +153,8 @@ export class BreadCrumbs extends Widget {
       this._crumbs,
       this._crumbSeps,
       localPath,
-      this._hasPreferred
+      this._hasPreferred,
+      this._fullPath
     );
   }
 
@@ -309,6 +311,7 @@ export class BreadCrumbs extends Widget {
   private _hasPreferred: boolean;
   private _crumbs: ReadonlyArray<HTMLElement>;
   private _crumbSeps: ReadonlyArray<HTMLElement>;
+  private _fullPath: boolean;
 }
 
 /**
@@ -328,6 +331,11 @@ export namespace BreadCrumbs {
      * The application language translator.
      */
     translator?: ITranslator;
+  
+    /**
+     * Show the full fill path
+     */
+    fullPath?: boolean;
   }
 }
 
@@ -353,7 +361,8 @@ namespace Private {
     breadcrumbs: ReadonlyArray<HTMLElement>,
     separators: ReadonlyArray<HTMLElement>,
     path: string,
-    hasPreferred: boolean
+    hasPreferred: boolean,
+    fullPath: boolean,
   ): void {
     const node = breadcrumbs[0].parentNode as HTMLElement;
 
@@ -371,7 +380,8 @@ namespace Private {
     }
 
     const parts = path.split('/');
-    if (parts.length > 2) {
+    console.error("STATTEL PARTS=", parts);
+    if (!fullPath && parts.length > 2) {
       node.appendChild(breadcrumbs[Crumb.Ellipsis]);
       const grandParent = parts.slice(0, parts.length - 2).join('/');
       breadcrumbs[Crumb.Ellipsis].title = grandParent;
@@ -379,17 +389,28 @@ namespace Private {
     }
 
     if (path) {
-      if (parts.length >= 2) {
-        breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
-        node.appendChild(breadcrumbs[Crumb.Parent]);
-        const parent = parts.slice(0, parts.length - 1).join('/');
-        breadcrumbs[Crumb.Parent].title = parent;
-        node.appendChild(separators[2]);
+      if (!fullPath) {
+        if (parts.length >= 2) {
+          breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
+          node.appendChild(breadcrumbs[Crumb.Parent]);
+          const parent = parts.slice(0, parts.length - 1).join('/');
+          breadcrumbs[Crumb.Parent].title = parent;
+          node.appendChild(separators[2]);
+        }
+        breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
+        node.appendChild(breadcrumbs[Crumb.Current]);
+        breadcrumbs[Crumb.Current].title = path;
+        node.appendChild(separators[3]);
       }
-      breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
-      node.appendChild(breadcrumbs[Crumb.Current]);
-      breadcrumbs[Crumb.Current].title = path;
-      node.appendChild(separators[3]);
+      else {
+        for (let i=0; i<parts.length; i++) {
+          breadcrumbs[i].textContent = parts[i];
+          node.appendChild(breadcrumbs[Crumb.Parent]);
+          const parent = `${parts[i]}/`;
+          breadcrumbs[Crumb.Current].title = parent;
+          node.appendChild(separators[1+i]);
+        }
+      }
     }
   }
 
@@ -427,7 +448,11 @@ namespace Private {
   export function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
     const items: HTMLElement[] = [];
     // The maximum number of directories that will be shown in the crumbs
-    const MAX_DIRECTORIES = 2;
+    const contents = this._model.manager.services.contents;
+    const localPath = contents.localPath(this._model.path);
+    const parts = localPath.split('/');
+    const pathSize = parts.length;
+    const MAX_DIRECTORIES = this._fullPath ? pathSize : 2;
 
     // Make separators for after each directory, one at the beginning, and one
     // after a possible ellipsis.
