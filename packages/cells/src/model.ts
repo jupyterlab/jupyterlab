@@ -15,7 +15,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import * as nbformat from '@jupyterlab/nbformat';
 
-import * as models from '@jupyter/ydoc';
+import * as models from '@jupyterlab/shared-models';
 
 import { UUID } from '@lumino/coreutils';
 

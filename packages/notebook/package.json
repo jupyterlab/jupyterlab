@@ -52,6 +52,7 @@
     "@jupyterlab/rendermime": "^3.6.3",
     "@jupyterlab/services": "^6.6.3",
     "@jupyterlab/settingregistry": "^3.6.3",
+    "@jupyterlab/shared-models": "^3.6.3",
     "@jupyterlab/statusbar": "^3.6.3",
     "@jupyterlab/translation": "^3.6.3",
     "@jupyterlab/ui-components": "^3.6.3",
