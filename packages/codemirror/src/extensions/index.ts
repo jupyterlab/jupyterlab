@@ -4,5 +4,6 @@
  */
 
 export * from './customStyle';
+export * from './ipython-md';
 export * from './rulers';
 export * from './ybinding';
