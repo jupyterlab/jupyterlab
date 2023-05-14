@@ -2023,7 +2023,7 @@ __metadata:
     "@lumino/widgets": ^2.1.1
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2133,7 +2133,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2166,7 +2166,7 @@ __metadata:
     react-dom: ^18.2.0
     react-toastify: ^9.0.8
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2201,7 +2201,7 @@ __metadata:
     react: ^18.2.0
     rimraf: ~3.0.0
     sanitize-html: ~2.7.3
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2217,7 +2217,7 @@ __metadata:
     "@lumino/disposable": ^2.1.1
     "@lumino/signaling": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2379,7 +2379,7 @@ __metadata:
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2423,7 +2423,7 @@ __metadata:
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2447,7 +2447,7 @@ __metadata:
     "@types/react": ^18.0.26
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2493,7 +2493,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
     yjs: ^13.5.40
   languageName: unknown
@@ -2511,7 +2511,7 @@ __metadata:
     "@rjsf/utils": ^5.1.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2539,7 +2539,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2566,7 +2566,7 @@ __metadata:
     "@lumino/properties": ^2.0.0
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2599,7 +2599,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2623,7 +2623,7 @@ __metadata:
     path-browserify: ^1.0.0
     rimraf: ~3.0.0
     ts-jest: ^29.1.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
     url-parse: ~1.5.4
   languageName: unknown
@@ -2645,7 +2645,7 @@ __metadata:
     "@lumino/datagrid": ^2.1.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2670,7 +2670,7 @@ __metadata:
     csv-spectrum: ^1.0.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2698,7 +2698,7 @@ __metadata:
     "@types/jest": ^29.2.0
     "@types/react-dom": ^18.0.9
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2741,7 +2741,7 @@ __metadata:
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2768,7 +2768,7 @@ __metadata:
     "@lumino/widgets": ^2.1.1
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2796,7 +2796,7 @@ __metadata:
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -2826,7 +2826,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3215,7 +3215,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-rc.1
     "@jupyterlab/ui-components": ^4.0.0-rc.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3240,7 +3240,7 @@ __metadata:
     react-paginate: ^6.3.2
     rimraf: ~3.0.0
     semver: ^7.3.2
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3265,7 +3265,7 @@ __metadata:
     "@lumino/commands": ^2.1.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3298,7 +3298,7 @@ __metadata:
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3336,7 +3336,7 @@ __metadata:
     "@lumino/coreutils": ^2.1.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3366,7 +3366,7 @@ __metadata:
     react: ^18.2.0
     regexp-match-indices: ^1.0.2
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3437,7 +3437,7 @@ __metadata:
     "@lumino/widgets": ^2.1.1
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3501,7 +3501,7 @@ __metadata:
     "@jupyterlab/imageviewer": ^4.0.0-rc.1
     "@jupyterlab/translation": ^4.0.0-rc.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3520,7 +3520,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3539,7 +3539,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.0.0-rc.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3564,7 +3564,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3576,7 +3576,7 @@ __metadata:
     "@jupyterlab/rendermime": ^4.0.0-rc.1
     "@jupyterlab/rendermime-interfaces": ^3.8.0-rc.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3603,7 +3603,7 @@ __metadata:
     react-json-tree: ^0.18.0
     rimraf: ~3.0.0
     style-mod: ^4.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3622,7 +3622,7 @@ __metadata:
     "@lumino/coreutils": ^2.1.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3643,7 +3643,7 @@ __metadata:
     "@types/react": ^18.0.26
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3758,7 +3758,7 @@ __metadata:
     "@lumino/disposable": ^2.1.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3778,7 +3778,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3796,7 +3796,7 @@ __metadata:
     "@jupyterlab/toc": ^6.0.0-rc.1
     "@jupyterlab/translation": ^4.0.0-rc.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3816,7 +3816,7 @@ __metadata:
     "@lumino/signaling": ^2.1.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3831,7 +3831,7 @@ __metadata:
     "@types/marked": ^4.0.3
     marked: ^4.0.17
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3844,7 +3844,7 @@ __metadata:
     "@jupyterlab/rendermime": ^4.0.0-rc.1
     mathjax-full: ^3.2.2
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3887,7 +3887,7 @@ __metadata:
     json-schema: ^0.4.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -3992,7 +3992,7 @@ __metadata:
     jest: ^29.2.0
     json-to-html: ~0.1.2
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4109,7 +4109,7 @@ __metadata:
     "@rjsf/utils": ^5.1.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4150,7 +4150,7 @@ __metadata:
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4168,7 +4168,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4195,7 +4195,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4209,7 +4209,7 @@ __metadata:
     "@lumino/disposable": ^2.1.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4242,7 +4242,7 @@ __metadata:
     "@jupyterlab/rendermime": ^4.0.0-rc.1
     "@jupyterlab/translation": ^4.0.0-rc.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4254,7 +4254,7 @@ __metadata:
     "@lumino/coreutils": ^2.1.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4281,7 +4281,7 @@ __metadata:
     jest: ^29.2.0
     lodash.escape: ^4.0.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4304,7 +4304,7 @@ __metadata:
     stylelint-config-recommended: ^8.0.0
     stylelint-config-standard: ^26.0.0
     stylelint-prettier: ^2.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typedoc-plugin-mdn-links: ^3.0.3
   languageName: unknown
   linkType: soft
@@ -4326,7 +4326,7 @@ __metadata:
     "@lumino/signaling": ^2.1.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4345,7 +4345,7 @@ __metadata:
     "@lumino/widgets": ^2.1.1
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4369,7 +4369,7 @@ __metadata:
     "@types/ws": ^8.5.3
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
     webpack: ^5.76.1
     webpack-cli: ^5.0.1
@@ -4392,7 +4392,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.0.0-rc.1
     "@lumino/disposable": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4431,7 +4431,7 @@ __metadata:
     react-test-renderer: ^18.2.0
     rimraf: ~3.0.0
     ts-jest: ^29.1.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4478,7 +4478,7 @@ __metadata:
     "@types/jest": ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4496,7 +4496,7 @@ __metadata:
     "@types/jest": ^29.2.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4513,7 +4513,7 @@ __metadata:
     "@types/react": ^18.0.26
     "@types/react-dom": ^18.0.9
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4566,7 +4566,7 @@ __metadata:
     "@lumino/widgets": ^2.1.1
     "@types/webpack-env": ^1.18.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4587,7 +4587,7 @@ __metadata:
     canvas: ^2.9.1
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
     xterm: ~5.1.0
     xterm-addon-canvas: ~0.3.0
@@ -4648,7 +4648,7 @@ __metadata:
     "@jupyterlab/apputils": ^4.0.0-rc.1
     "@jupyterlab/translation": ^4.0.0-rc.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4661,7 +4661,7 @@ __metadata:
     "@jupyterlab/apputils": ^4.0.0-rc.1
     "@jupyterlab/translation": ^4.0.0-rc.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4676,7 +4676,7 @@ __metadata:
     "@jupyterlab/translation": ^4.0.0-rc.1
     "@jupyterlab/ui-components": ^4.0.0-rc.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4703,7 +4703,7 @@ __metadata:
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4726,7 +4726,7 @@ __metadata:
     "@lumino/coreutils": ^2.1.1
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4743,7 +4743,7 @@ __metadata:
     "@lumino/messaging": ^2.0.0
     "@lumino/widgets": ^2.1.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4786,7 +4786,7 @@ __metadata:
     "@jupyterlab/application": ^4.0.0-rc.1
     "@jupyterlab/ui-components": ^4.0.0-rc.1
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
   languageName: unknown
   linkType: soft
@@ -4819,7 +4819,7 @@ __metadata:
     react-dom: ^18.2.0
     rimraf: ~3.0.0
     svgo: ^3.0.1
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
     typestyle: ^2.0.4
   peerDependencies:
@@ -4839,7 +4839,7 @@ __metadata:
     "@types/webpack-env": ^1.18.0
     jest: ^29.2.0
     rimraf: ~3.0.0
-    typedoc: ~0.24.1
+    typedoc: ~0.24.7
     typescript: ~5.0.4
     vega: ^5.20.0
     vega-embed: ^6.2.1
@@ -13896,12 +13896,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^4.0.17, marked@npm:^4.2.12":
+"marked@npm:^4.0.17":
   version: 4.2.12
   resolution: "marked@npm:4.2.12"
   bin:
     marked: bin/marked.js
   checksum: bd551cd61028ee639d4ca2ccdfcc5a6ba4227c1b143c4538f3cde27f569dcb57df8e6313560394645b418b84a7336c07ab1e438b89b6324c29d7d8cdd3102d63
+  languageName: node
+  linkType: hard
+
+"marked@npm:^4.3.0":
+  version: 4.3.0
+  resolution: "marked@npm:4.3.0"
+  bin:
+    marked: bin/marked.js
+  checksum: 0db6817893952c3ec710eb9ceafb8468bf5ae38cb0f92b7b083baa13d70b19774674be04db5b817681fa7c5c6a088f61300815e4dd75a59696f4716ad69f6260
   languageName: node
   linkType: hard
 
@@ -14170,12 +14179,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^7.1.3":
-  version: 7.4.2
-  resolution: "minimatch@npm:7.4.2"
+"minimatch@npm:^9.0.0":
+  version: 9.0.0
+  resolution: "minimatch@npm:9.0.0"
   dependencies:
     brace-expansion: ^2.0.1
-  checksum: 9e341b04e69d5ab03e4206dcb61c8a158e3b8709628bf5e1a4eaa9f3b72c0ba925e24ad959b1f6ce6835caa5a927131d5087fae6836b69e7d99d7d5e63ef0bd8
+  checksum: 7bd57899edd1d1b0560f50b5b2d1ea4ad2a366c5a2c8e0a943372cf2f200b64c256bae45a87a80915adbce27fa36526264296ace0da57b600481fe5ea3e372e5
   languageName: node
   linkType: hard
 
@@ -18191,19 +18200,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedoc@npm:~0.24.1":
-  version: 0.24.1
-  resolution: "typedoc@npm:0.24.1"
+"typedoc@npm:~0.24.7":
+  version: 0.24.7
+  resolution: "typedoc@npm:0.24.7"
   dependencies:
     lunr: ^2.3.9
-    marked: ^4.2.12
-    minimatch: ^7.1.3
+    marked: ^4.3.0
+    minimatch: ^9.0.0
     shiki: ^0.14.1
   peerDependencies:
     typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x
   bin:
     typedoc: bin/typedoc
-  checksum: 49ecc56060a9d37fd3da4fb57f0a848bf618f3b97542ef503dad67e805a611359ad2453a625da0e2dd7a2d9eb7992bcefded58115b5cb3ddc98780b548e6dfd5
+  checksum: 9ae433566cb02b96deb9eb2a9f5b23d1b199f5aeb61ca8c7e2653ff5d339fbfb4d526e024febab4f3278332978814aaa0885f1d5925ba21a441d93a611510ac3
   languageName: node
   linkType: hard
 
