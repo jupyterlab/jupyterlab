@@ -244,11 +244,6 @@ export class Completer extends Widget {
     document.addEventListener('scroll', this, USE_CAPTURE);
   }
 
-  protected onBeforeShow(msg: Message): void {
-    super.onBeforeShow(msg);
-    console.log('Triggered..');
-  }
-
   /**
    * Handle `before-detach` messages for the widget.
    */
