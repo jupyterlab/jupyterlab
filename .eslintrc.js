@@ -131,6 +131,7 @@ module.exports = {
           'msgid_plural',
           'nbconverter_exporter',
           'nbformat_minor',
+          'needs_restart',
           'orig_nbformat',
           'output_mimetype',
           'output_type',

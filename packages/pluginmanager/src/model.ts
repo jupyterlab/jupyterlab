@@ -10,7 +10,11 @@ import { ServerConnection } from '@jupyterlab/services';
 import { VDomModel } from '@jupyterlab/ui-components';
 import { ISignal, Signal } from '@lumino/signaling';
 import { PromiseDelegate } from '@lumino/coreutils';
-import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 import { PluginInUseMessage, PluginRequiredMessage } from './dialogs';
 
@@ -94,7 +98,7 @@ export namespace PluginListModel {
     /**
      * Translator.
      */
-    translator: ITranslator;
+    translator?: ITranslator;
     /**
      * Server connection settings.
      */
@@ -124,7 +128,7 @@ export class PluginListModel extends VDomModel {
     this.refresh()
       .then(() => this._ready.resolve())
       .catch(e => this._ready.reject(e));
-    this._trans = options.translator.load('jupyterlab');
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
   }
 
   get available(): ReadonlyArray<IEntry> {

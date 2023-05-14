@@ -174,9 +174,9 @@ class AvailableList extends ReactWidget {
                           return;
                         }
                         if (event.target.checked) {
-                          this.onAction('enable', row);
+                          void this.onAction('enable', row);
                         } else {
-                          this.onAction('disable', row);
+                          void this.onAction('disable', row);
                         }
                       }}
                     />

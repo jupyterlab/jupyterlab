@@ -46,6 +46,7 @@ jobs:
             js-notebook,
             js-observables,
             js-outputarea,
+            js-pluginmanager,
             js-rendermime,
             js-services,
             js-settingeditor,
