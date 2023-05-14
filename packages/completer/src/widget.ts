@@ -197,8 +197,8 @@ export class Completer extends Widget {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
         break;
-      case 'mousedown':
-        this._evtMousedown(event as MouseEvent);
+      case 'pointerdown':
+        this._evtPointerdown(event as PointerEvent);
         break;
       case 'scroll':
         this._evtScroll(event as MouseEvent);
@@ -240,8 +240,13 @@ export class Completer extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     document.addEventListener('keydown', this, USE_CAPTURE);
-    document.addEventListener('mousedown', this, USE_CAPTURE);
+    document.addEventListener('pointerdown', this, USE_CAPTURE);
     document.addEventListener('scroll', this, USE_CAPTURE);
+  }
+
+  protected onBeforeShow(msg: Message): void {
+    super.onBeforeShow(msg);
+    console.log('Triggered..');
   }
 
   /**
@@ -249,7 +254,7 @@ export class Completer extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     document.removeEventListener('keydown', this, USE_CAPTURE);
-    document.removeEventListener('mousedown', this, USE_CAPTURE);
+    document.removeEventListener('pointerdown', this, USE_CAPTURE);
     document.removeEventListener('scroll', this, USE_CAPTURE);
   }
 
@@ -631,7 +636,7 @@ export class Completer extends Widget {
   /**
    * Handle mousedown events for the widget.
    */
-  private _evtMousedown(event: MouseEvent) {
+  private _evtPointerdown(event: PointerEvent) {
     if (this.isHidden || !this._editor) {
       return;
     }
