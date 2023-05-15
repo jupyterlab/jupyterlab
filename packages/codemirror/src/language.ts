@@ -679,7 +679,7 @@ export namespace EditorLanguageRegistry {
       },
       {
         name: 'CoffeeScript',
-        displayName: trans.__('CoffeScript'),
+        displayName: trans.__('CoffeeScript'),
         alias: ['coffee', 'coffee-script'],
         mime: [
           'application/vnd.coffeescript',

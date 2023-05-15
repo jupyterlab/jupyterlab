@@ -20,6 +20,7 @@ import { marked } from 'marked';
  */
 const plugin: JupyterFrontEndPlugin<IMarkdownParser> = {
   id: '@jupyterlab/markedparser-extension:plugin',
+  description: 'Provides the Markdown parser.',
   autoStart: true,
   provides: IMarkdownParser,
   requires: [IEditorLanguageRegistry],

@@ -13,6 +13,7 @@ import type {
   NotificationManager,
   WidgetTracker
 } from '@jupyterlab/apputils';
+import type { IDebugger } from '@jupyterlab/debugger';
 import type { IDocumentManager } from '@jupyterlab/docmanager';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 
@@ -86,6 +87,7 @@ export interface IPluginNameToInterfaceMap {
   '@jupyterlab/application-extension:router': IRouter;
   '@jupyterlab/docmanager-extension:manager': IDocumentManager;
   '@jupyterlab/apputils-extension:settings': ISettingRegistry;
+  '@jupyterlab/debugger-extension:service': IDebugger;
 }
 
 /**

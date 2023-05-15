@@ -641,16 +641,13 @@ export class GalataInpage implements IGalataInpage {
         await callback.onAfterCellRun(i);
       }
 
-      await notebook
-        .scrollToItem(
-          i,
-          ((cell.model as CodeCellModel).outputs?.length ?? 0) > 0
-            ? 'end'
-            : 'start'
-        )
-        .catch(reason => {
-          // no-op
-        });
+      if (callback?.onBeforeScroll) {
+        await callback.onBeforeScroll();
+      }
+
+      await notebook.scrollToItem(i).catch(reason => {
+        // no-op
+      });
 
       if (callback?.onAfterScroll) {
         await callback.onAfterScroll();

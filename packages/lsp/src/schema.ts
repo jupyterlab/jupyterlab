@@ -149,6 +149,10 @@ export interface ServerSpecProperties {
   display_name?: DisplayName;
   env?: EnvironmentVariables;
   extend?: Extensions;
+  /**
+   * Whether to write un-saved documents to disk in a transient `.virtual_documents` directory. Well-behaved language servers that work against in-memory files should set this to `false`, which will become the default in the future.
+   */
+  requires_documents_on_disk?: boolean;
   install?: Installation1;
   languages?: LanguageList;
   mime_types?: MIMETypes;

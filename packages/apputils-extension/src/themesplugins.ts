@@ -18,6 +18,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 
+import scrollbarStyleText from '../style/scrollbar.raw.css';
+
 namespace CommandIDs {
   export const changeTheme = 'apputils:change-theme';
 
@@ -30,11 +32,19 @@ namespace CommandIDs {
   export const decrFontSize = 'apputils:decr-font-size';
 }
 
+function createStyleSheet(text: string): HTMLStyleElement {
+  const style = document.createElement('style');
+  style.setAttribute('type', 'text/css');
+  style.appendChild(document.createTextNode(text));
+  return style;
+}
+
 /**
  * The default theme manager provider.
  */
 export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
+  description: 'Provides the theme manager.',
   requires: [ISettingRegistry, JupyterFrontEnd.IPaths, ITranslator],
   optional: [ISplashScreen],
   activate: (
@@ -56,6 +66,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
       splash: splash ?? undefined,
       url
     });
+    let scrollbarsStyleElement: HTMLStyleElement | null = null;
 
     // Keep a synchronously set reference to the current theme,
     // since the asynchronous setting of the theme in `changeTheme`
@@ -76,6 +87,20 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
         document.body.dataset.jpThemeScrollbars = String(
           manager.themeScrollbars(currentTheme)
         );
+        if (manager.themeScrollbars(currentTheme)) {
+          if (!scrollbarsStyleElement) {
+            scrollbarsStyleElement = createStyleSheet(scrollbarStyleText);
+          }
+          if (!scrollbarsStyleElement.parentElement) {
+            document.body.appendChild(scrollbarsStyleElement);
+          }
+        } else {
+          if (scrollbarsStyleElement && scrollbarsStyleElement.parentElement) {
+            scrollbarsStyleElement.parentElement.removeChild(
+              scrollbarsStyleElement
+            );
+          }
+        }
       }
 
       commands.notifyCommandChanged(CommandIDs.changeTheme);
@@ -165,6 +190,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
  */
 export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:themes-palette-menu',
+  description: 'Adds theme commands to the menu and the command palette.',
   requires: [IThemeManager, ITranslator],
   optional: [ICommandPalette, IMainMenu],
   activate: (

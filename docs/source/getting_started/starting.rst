@@ -14,7 +14,7 @@ Start JupyterLab using:
 
 JupyterLab will open automatically in your browser.
 
-If your notebook files are not in the current directory, you can pass your working directory path as argument when starting JupyterLab. Avoid running it from your root volume (e.g. `C:\` on Windows or `/` on Linux) to limit the risk of modifying system files.
+If your notebook files are not in the current directory, you can pass your working directory path as argument when starting JupyterLab. Avoid running it from your root volume (e.g. ``C:\`` on Windows or ``/`` on Linux) to limit the risk of modifying system files.
 
 Example:
 

@@ -19,6 +19,7 @@ import {
 import { Token } from '@lumino/coreutils';
 import { INotebookModel } from './model';
 import { Notebook, StaticNotebook } from './widget';
+import { Message } from '@lumino/messaging';
 
 /**
  * The class name added to notebook panels.
@@ -174,6 +175,26 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
+   * A message handler invoked on a 'before-hide' message.
+   */
+  protected onBeforeHide(msg: Message): void {
+    super.onBeforeHide(msg);
+    // Inform the windowed list that the notebook is gonna be hidden
+    this.content.isParentHidden = true;
+  }
+
+  /**
+   * A message handler invoked on a 'before-show' message.
+   */
+  protected onBeforeShow(msg: Message): void {
+    // Inform the windowed list that the notebook is gonna be shown
+    // Use onBeforeShow instead of onAfterShow to take into account
+    // resizing (like sidebars got expanded before switching to the notebook tab)
+    this.content.isParentHidden = false;
+    super.onBeforeShow(msg);
+  }
+
+  /**
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(
@@ -309,6 +330,8 @@ export namespace NotebookPanel {
    * The notebook renderer token.
    */
   export const IContentFactory = new Token<IContentFactory>(
-    '@jupyterlab/notebook:IContentFactory'
+    '@jupyterlab/notebook:IContentFactory',
+    `A factory object that creates new notebooks.
+    Use this if you want to create and host notebooks in your own UI elements.`
   );
 }

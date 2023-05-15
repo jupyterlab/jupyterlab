@@ -282,8 +282,15 @@ export class SettingRegistry implements ISettingRegistry {
     this.validator = options.validator || new DefaultSchemaValidator();
     this._timeout = options.timeout || DEFAULT_TRANSFORM_TIMEOUT;
 
-    // Preload with any available data at instantiation-time.
+    // Plugins with transformation may not be loaded if the transformation function is
+    // not yet available. To avoid fetching again the associated data when the transformation
+    // function is available, the plugin data is kept in cache.
     if (options.plugins) {
+      options.plugins
+        .filter(plugin => plugin.schema['jupyter.lab.transform'])
+        .forEach(plugin => this._unloadedPlugins.set(plugin.id, plugin));
+
+      // Preload with any available data at instantiation-time.
       this._ready = this._preload(options.plugins);
     }
   }
@@ -356,10 +363,15 @@ export class SettingRegistry implements ISettingRegistry {
    *
    * @param plugin - The name of the plugin whose settings are being loaded.
    *
+   * @param forceTransform - An optional parameter to force replay the transforms methods.
+   *
    * @returns A promise that resolves with a plugin settings object or rejects
    * if the plugin is not found.
    */
-  async load(plugin: string): Promise<ISettingRegistry.ISettings> {
+  async load(
+    plugin: string,
+    forceTransform: boolean = false
+  ): Promise<ISettingRegistry.ISettings> {
     // Wait for data preload before allowing normal operation.
     await this._ready;
 
@@ -368,7 +380,26 @@ export class SettingRegistry implements ISettingRegistry {
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
+      // Force replaying the transform function if expected.
+      if (forceTransform) {
+        // Empty the composite and user data before replaying the transforms.
+        plugins[plugin].data = { composite: {}, user: {} };
+        await this._load(await this._transform('fetch', plugins[plugin]));
+        this._pluginChanged.emit(plugin);
+      }
       return new Settings({ plugin: plugins[plugin], registry });
+    }
+
+    // If the plugin is not loaded but has already been fetched.
+    if (this._unloadedPlugins.has(plugin) && plugin in this._transformers) {
+      await this._load(
+        await this._transform('fetch', this._unloadedPlugins.get(plugin)!)
+      );
+      if (plugin in plugins) {
+        this._pluginChanged.emit(plugin);
+        this._unloadedPlugins.delete(plugin);
+        return new Settings({ plugin: plugins[plugin], registry });
+      }
     }
 
     // If the plugin needs to be loaded from the data connector, fetch.
@@ -694,6 +725,7 @@ export class SettingRegistry implements ISettingRegistry {
       [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform;
     };
   } = Object.create(null);
+  private _unloadedPlugins = new Map<string, ISettingRegistry.IPlugin>();
 }
 
 /**

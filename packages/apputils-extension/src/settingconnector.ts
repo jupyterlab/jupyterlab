@@ -38,14 +38,24 @@ export class SettingConnector extends DataConnector<
     return throttlers[id].invoke();
   }
 
+  async list(query: 'ids'): Promise<{ ids: string[] }>;
   async list(
-    query: 'active' | 'all' = 'all'
-  ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }> {
+    query: 'active' | 'all'
+  ): Promise<{ ids: string[]; values: ISettingRegistry.IPlugin[] }>;
+  async list(
+    query: 'active' | 'all' | 'ids' = 'all'
+  ): Promise<{ ids: string[]; values?: ISettingRegistry.IPlugin[] }> {
     const { isDeferred, isDisabled } = PageConfig.Extension;
-    const { ids, values } = await this._connector.list();
+    const { ids, values } = await this._connector.list(
+      query === 'ids' ? 'ids' : undefined
+    );
 
     if (query === 'all') {
       return { ids, values };
+    }
+
+    if (query === 'ids') {
+      return { ids };
     }
 
     return {

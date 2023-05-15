@@ -48,6 +48,7 @@ namespace CommandIDs {
 
 const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/documentsearch-extension:labShellWidgetListener',
+  description: 'Active search on valid document',
   requires: [ILabShell, ISearchProviderRegistry],
   autoStart: true,
   activate: (
@@ -93,6 +94,7 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
  */
 const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
   id: '@jupyterlab/documentsearch-extension:plugin',
+  description: 'Provides the document search registry.',
   provides: ISearchProviderRegistry,
   requires: [ITranslator],
   optional: [ICommandPalette, ISettingRegistry],
@@ -233,7 +235,9 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           if (searchText) {
             searchWidget.setSearchText(searchText);
           } else {
-            searchWidget.setSearchText(searchWidget.model.initialQuery);
+            searchWidget.setSearchText(
+              searchWidget.model.suggestedInitialQuery
+            );
           }
           searchWidget.focusSearchInput();
         }
@@ -250,7 +254,9 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           if (searchText) {
             searchWidget.setSearchText(searchText);
           } else {
-            searchWidget.setSearchText(searchWidget.model.initialQuery);
+            searchWidget.setSearchText(
+              searchWidget.model.suggestedInitialQuery
+            );
           }
           const replaceText = args['replaceText'] as string;
           if (replaceText) {

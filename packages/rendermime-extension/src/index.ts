@@ -32,6 +32,7 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
   id: '@jupyterlab/rendermime-extension:plugin',
+  description: 'Provides the render mime registry.',
   optional: [
     IDocumentManager,
     ILatexTypesetter,

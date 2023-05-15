@@ -16,7 +16,10 @@ export interface ITerminalTracker
  * The editor tracker token.
  */
 export const ITerminalTracker = new Token<ITerminalTracker>(
-  '@jupyterlab/terminal:ITerminalTracker'
+  '@jupyterlab/terminal:ITerminalTracker',
+  `A widget tracker for terminals.
+  Use this if you want to be able to iterate over and interact with terminals
+  created by the application.`
 );
 
 /**

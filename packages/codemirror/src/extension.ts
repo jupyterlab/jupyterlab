@@ -16,6 +16,7 @@ import {
   StateEffect
 } from '@codemirror/state';
 import {
+  crosshairCursor,
   drawSelection,
   EditorView,
   highlightActiveLine,
@@ -24,6 +25,7 @@ import {
   KeyBinding,
   keymap,
   lineNumbers,
+  rectangularSelection,
   scrollPastEnd
 } from '@codemirror/view';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -595,7 +597,7 @@ export namespace EditorExtensionRegistry {
     } = {}
   ): ReadonlyArray<Readonly<IEditorExtensionFactory<any>>> {
     const { themes, translator } = options;
-    const trans = (translator ?? nullTranslator).load('jupyter');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const extensions: IEditorExtensionFactory<any>[] = [
       Object.freeze({
         name: 'autoClosingBrackets',
@@ -660,7 +662,7 @@ export namespace EditorExtensionRegistry {
       }),
       Object.freeze({
         name: 'indentUnit',
-        default: '2',
+        default: '4',
         factory: () =>
           createConfigurableExtension<string>((value: string) =>
             value == 'Tab'
@@ -671,7 +673,7 @@ export namespace EditorExtensionRegistry {
           type: 'string',
           title: trans.__('Indentation unit'),
           description: trans.__(
-            'The indentation is a `Tab` or the number of spaces. This defaults to 2 spaces.'
+            'The indentation is a `Tab` or the number of spaces. This defaults to 4 spaces.'
           ),
           enum: ['Tab', '1', '2', '4', '8']
         }
@@ -716,6 +718,22 @@ export namespace EditorExtensionRegistry {
         schema: {
           type: 'boolean',
           title: trans.__('Match Brackets')
+        }
+      }),
+      Object.freeze({
+        name: 'rectangularSelection',
+        default: true,
+        factory: () =>
+          createConditionalExtension([
+            rectangularSelection(),
+            crosshairCursor()
+          ]),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Rectangular selection'),
+          description: trans.__(
+            'Rectangular (block) selection can be created by dragging the mouse pointer while holding the left mouse button and the Alt key. When the Alt key is pressed, a crosshair cursor will appear, indicating that the rectangular selection mode is active.'
+          )
         }
       }),
       Object.freeze({

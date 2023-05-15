@@ -12,7 +12,8 @@ import { MimeModel } from './mimemodel';
  * The rendermime token.
  */
 export const IRenderMimeRegistry = new Token<IRenderMimeRegistry>(
-  '@jupyterlab/rendermime:IRenderMimeRegistry'
+  '@jupyterlab/rendermime:IRenderMimeRegistry',
+  'A service for the rendermime registry for the application. Use this to create renderers for various mime-types in your extension. Many times it will be easier to create a "mime renderer extension" rather than using this service directly.'
 );
 
 export interface IRenderMimeRegistry {
@@ -188,7 +189,8 @@ export namespace IRenderMimeRegistry {
  * The latex typesetter token.
  */
 export const ILatexTypesetter = new Token<IRenderMime.ILatexTypesetter>(
-  '@jupyterlab/rendermime:ILatexTypesetter'
+  '@jupyterlab/rendermime:ILatexTypesetter',
+  'A service for the LaTeX typesetter for the application. Use this if you want to typeset math in your extension.'
 );
 
 export interface ILatexTypesetter extends IRenderMime.ILatexTypesetter {}
@@ -197,7 +199,8 @@ export interface ILatexTypesetter extends IRenderMime.ILatexTypesetter {}
  * The markdown parser token.
  */
 export const IMarkdownParser = new Token<IRenderMime.IMarkdownParser>(
-  '@jupyterlab/rendermime:IMarkdownParser'
+  '@jupyterlab/rendermime:IMarkdownParser',
+  'A service for rendering markdown syntax as HTML content.'
 );
 
 export interface IMarkdownParser extends IRenderMime.IMarkdownParser {}

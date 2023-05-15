@@ -10,6 +10,8 @@
   width: 100%;
 }
 
+/* stylelint-disable selector-max-type */
+
 .jp-FormGroup-content fieldset .jp-inputFieldWrapper input,
 .jp-FormGroup-content fieldset .jp-inputFieldWrapper select,
 .jp-FormGroup-content fieldset .jp-inputFieldWrapper textarea {
@@ -60,6 +62,8 @@
 .jp-FormGroup-content fieldset select:hover:not(:focus) {
   background-color: var(--jp-border-color2);
 }
+
+/* stylelint-enable selector-max-type */
 
 .jp-FormGroup-content .checkbox .field-description {
   /* Disable default description field for checkbox:

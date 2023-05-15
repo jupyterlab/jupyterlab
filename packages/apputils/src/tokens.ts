@@ -14,7 +14,9 @@ import { ISessionContext } from './sessioncontext';
  * The command palette token.
  */
 export const ICommandPalette = new Token<ICommandPalette>(
-  '@jupyterlab/apputils:ICommandPalette'
+  '@jupyterlab/apputils:ICommandPalette',
+  `A service for the application command palette
+  in the left panel. Use this to add commands to the palette.`
 );
 
 /**
@@ -46,8 +48,12 @@ export interface ICommandPalette {
   addItem(options: IPaletteItem): IDisposable;
 }
 
+/**
+ * The kernel status indicator model.
+ */
 export const IKernelStatusModel = new Token<IKernelStatusModel>(
-  '@jupyterlab/apputils:IKernelStatusModel'
+  '@jupyterlab/apputils:IKernelStatusModel',
+  'A service to register kernel session provider to the kernel status indicator.'
 );
 
 /**
@@ -74,14 +80,16 @@ export interface ISessionContextDialogs extends ISessionContext.IDialogs {}
  * The session context dialogs token.
  */
 export const ISessionContextDialogs = new Token<ISessionContext.IDialogs>(
-  '@jupyterlab/apputils:ISessionContextDialogs'
+  '@jupyterlab/apputils:ISessionContextDialogs',
+  'A service for handling the session dialogs.'
 );
 
 /**
  * The theme manager token.
  */
 export const IThemeManager = new Token<IThemeManager>(
-  '@jupyterlab/apputils:IThemeManager'
+  '@jupyterlab/apputils:IThemeManager',
+  'A service for the theme manager for the application. This is used primarily in theme extensions to register new themes.'
 );
 
 /**
@@ -192,7 +200,8 @@ export namespace IThemeManager {
  * The sanitizer token.
  */
 export const ISanitizer = new Token<IRenderMime.ISanitizer>(
-  '@jupyterlab/apputils:ISanitizer'
+  '@jupyterlab/apputils:ISanitizer',
+  'A service for sanitizing HTML strings.'
 );
 
 /**
@@ -216,7 +225,9 @@ export namespace ISanitizer {
  * The main menu token.
  */
 export const ISplashScreen = new Token<ISplashScreen>(
-  '@jupyterlab/apputils:ISplashScreen'
+  '@jupyterlab/apputils:ISplashScreen',
+  `A service for the splash screen for the application.
+  Use this if you want to show the splash screen for your own purposes.`
 );
 
 /**
@@ -237,7 +248,10 @@ export interface ISplashScreen {
  * The default window resolver token.
  */
 export const IWindowResolver = new Token<IWindowResolver>(
-  '@jupyterlab/apputils:IWindowResolver'
+  '@jupyterlab/apputils:IWindowResolver',
+  `A service for a window resolver for the
+  application. JupyterLab workspaces are given a name, which are determined using
+  the window resolver. Require this if you want to use the name of the current workspace.`
 );
 
 /**
@@ -341,11 +355,18 @@ export interface IToolbarWidgetRegistry {
     toolbarItemName: string,
     factory: (main: T) => Widget
   ): ((main: T) => Widget) | undefined;
+
+  /**
+   * A signal emitted when a factory widget has been added.
+   */
+  readonly factoryAdded: ISignal<this, string>;
 }
 
 /**
  * The toolbar registry token.
  */
 export const IToolbarWidgetRegistry = new Token<IToolbarWidgetRegistry>(
-  '@jupyterlab/apputils:IToolbarWidgetRegistry'
+  '@jupyterlab/apputils:IToolbarWidgetRegistry',
+  `A registry for toolbar widgets. Require this
+  if you want to build the toolbar dynamically from a data definition (stored in settings for example).`
 );

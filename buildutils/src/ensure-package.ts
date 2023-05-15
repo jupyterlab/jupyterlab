@@ -140,8 +140,13 @@ export async function ensurePackage(
     data.name !== '@jupyterlab/codemirror'
   ) {
     imports.forEach(importStr => {
-      if (importStr.indexOf('.css') !== -1) {
-        messages.push('CSS imports are not allowed source files');
+      if (
+        importStr.indexOf('.css') !== -1 &&
+        importStr.indexOf('.raw.css') === -1
+      ) {
+        messages.push(
+          'CSS imports are not allowed source files unless using `.raw.css` extension'
+        );
       }
     });
   }

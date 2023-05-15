@@ -242,7 +242,7 @@ export class CodeConsole extends Widget {
         highlightActiveLine: false,
         highlightTrailingWhitespace: false,
         highlightWhitespace: false,
-        indentUnit: '2',
+        indentUnit: '4',
         lineNumbers: false,
         lineWrap: true,
         matchBrackets: false,
@@ -605,6 +605,8 @@ export class CodeConsole extends Widget {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
       Signal.clearData(promptCell.editor);
+      // Ensure to clear the cursor
+      promptCell.editor?.blur();
       const child = input.widgets[0];
       child.parent = null;
       this.addCell(promptCell);
