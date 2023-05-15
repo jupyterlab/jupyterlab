@@ -29,14 +29,14 @@ type CoreData = Map<string, any>;
 // URL config for this branch
 // Source and target branches
 // Target RTD version name
-// For master these will be the same, for other branches the source
+// For main these will be the same, for other branches the source
 // branch is whichever branch it was created from
 // The current release branch should target RTD stable
-// Master should target latest
+// Main should target latest
 // All other release branches should target a specific named version
 const URL_CONFIG = {
-  source: 'master',
-  target: 'master',
+  source: 'main',
+  target: 'main',
   rtdVersion: 'latest'
 };
 

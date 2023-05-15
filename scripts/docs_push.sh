@@ -11,4 +11,4 @@ git init
 touch .nojekyll  # disable jekyll
 git add .
 git commit -m "Deploy to GitHub Pages"
-git push --force "https://github.com/jupyterlab/jupyterlab" master:gh-pages
+git push --force "https://github.com/jupyterlab/jupyterlab" main:gh-pages

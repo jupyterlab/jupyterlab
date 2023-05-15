@@ -166,7 +166,7 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
     extension2 = ExtensionPackage(
         name="jupyterlab-github",
         description="JupyterLab viewer for GitHub repositories",
-        homepage_url="https://github.com/jupyterlab/jupyterlab-github/blob/master/README.md",
+        homepage_url="https://github.com/jupyterlab/jupyterlab-github/blob/main/README.md",
         pkg_type="prebuilt",
         latest_version="3.0.1",
         author="Ian Rose",
@@ -285,7 +285,7 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
                 "download_url": "",
                 "project_url": "",
                 "project_urls": {
-                    "Homepage": "https://github.com/jupyterlab/jupyterlab-github/blob/master/README.md",
+                    "Homepage": "https://github.com/jupyterlab/jupyterlab-github/blob/main/README.md",
                     "Bug Tracker": "https://github.com/jupyterlab/jupyterlab-github/issues",
                     "Source Code": "https://github.com/jupyterlab/jupyterlab-github",
                 },
