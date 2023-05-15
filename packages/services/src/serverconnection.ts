@@ -66,6 +66,11 @@ export namespace ServerConnection {
     readonly appendToken: boolean;
 
     /**
+     * The root folder of the server.
+     */
+    readonly serverRoot: string;
+
+    /**
      * The `fetch` method to use.
      */
     readonly fetch: (
@@ -239,6 +244,7 @@ namespace Private {
           process?.env?.JEST_WORKER_ID !== undefined) ||
         URLExt.getHostName(pageBaseUrl) !== URLExt.getHostName(wsUrl),
       ...options,
+      serverRoot: PageConfig.getServerRoot(),
       baseUrl,
       wsUrl
     };

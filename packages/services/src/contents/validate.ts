@@ -12,6 +12,7 @@ export function validateContentsModel(
 ): asserts model is Contents.IModel {
   validateProperty(model, 'name', 'string');
   validateProperty(model, 'path', 'string');
+  validateProperty(model, 'osPath', 'string');
   validateProperty(model, 'type', 'string');
   validateProperty(model, 'created', 'string');
   validateProperty(model, 'last_modified', 'string');

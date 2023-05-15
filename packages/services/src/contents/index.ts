@@ -50,6 +50,11 @@ export namespace Contents {
     readonly path: string;
 
     /**
+     * The full absolute file path.
+     */
+    osPath: string;
+
+    /**
      * The path as returned by the server contents API.
      *
      * #### Notes
@@ -1133,6 +1138,8 @@ export class Drive implements Contents.IDrive {
       throw err;
     }
     const data = await response.json();
+    // convert to absolute path
+    data.osPath = PathExt.join(settings.serverRoot, data.path);
     validate.validateContentsModel(data);
     return data;
   }

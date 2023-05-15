@@ -1209,7 +1209,7 @@ function addCommands(
         return;
       }
 
-      Clipboard.copyToSystem(item.value.path);
+      Clipboard.copyToSystem(item.value.osPath);
     },
     isVisible: () =>
       // So long as this command only handles one file at time, don't show it

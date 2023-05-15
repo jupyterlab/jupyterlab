@@ -247,6 +247,13 @@ export namespace PageConfig {
   }
 
   /**
+   * Getter for JupyterLab server root folder
+   */
+  export function getServerRoot(): string {
+    return getOption('serverRoot') || '';
+  }
+
+  /**
    * Private page config data for the Jupyter application.
    */
   let configData: { [key: string]: string } | null = null;
