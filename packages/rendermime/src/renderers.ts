@@ -919,11 +919,32 @@ export function renderError(
   return Promise.resolve(undefined);
 }
 
+/**
+ * The namespace for the `renderError` function statics.
+ */
 export namespace renderError {
+  /**
+   * The options for the `renderError` function.
+   */
   export interface IRenderOptions {
+    /**
+     * The host node for the error content.
+     */
     host: HTMLElement;
+
+    /**
+     * The html sanitizer for untrusted source.
+     */
     sanitizer: IRenderMime.ISanitizer;
+
+    /**
+     * The source error to render.
+     */
     source: string;
+
+    /**
+     * The application language translator.
+     */
     translator?: ITranslator;
   }
 }

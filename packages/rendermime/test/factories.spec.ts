@@ -3,6 +3,7 @@
 
 import { Sanitizer } from '@jupyterlab/apputils';
 import {
+  errorRendererFactory,
   htmlRendererFactory,
   imageRendererFactory,
   IMarkdownParser,
@@ -493,6 +494,92 @@ describe('rendermime/factories', () => {
         expect(el.src).toBe('data:image/gif;base64,' + source);
         expect(el.localName).toBe('img');
         expect(el.innerHTML).toBe('');
+      });
+    });
+  });
+
+  describe('errorRendererFactory', () => {
+    describe('#mimeTypes', () => {
+      it('should support application/vnd.jupyter.stderr mime types', () => {
+        expect(errorRendererFactory.mimeTypes).toEqual([
+          'application/vnd.jupyter.stderr'
+        ]);
+      });
+    });
+
+    describe('#createRenderer()', () => {
+      it('should output the correct HTML', async () => {
+        const f = errorRendererFactory;
+        const mimeType = 'application/vnd.jupyter.stderr';
+        const model = createModel(mimeType, 'x = 2 ** a');
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
+      });
+
+      it('should be re-renderable', async () => {
+        const f = errorRendererFactory;
+        const mimeType = 'application/vnd.jupyter.stderr';
+        const model = createModel(mimeType, 'x = 2 ** a');
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
+      });
+
+      it('should escape inline html', async () => {
+        const f = errorRendererFactory;
+        const source =
+          'There is no text <script>window.x=1</script> but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
+        const mimeType = 'application/vnd.jupyter.stderr';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
+        );
+      });
+
+      it('should autolink single file path', async () => {
+        const f = errorRendererFactory;
+        const urls = [
+          ['/usr/local/lib/message.py', '', ''],
+          ['/usr/local/lib/message.py', '"', '"'],
+          ['/tmp/ipykernel_361344/2220647380.py', '', '']
+        ];
+        await Promise.all(
+          urls.map(async u => {
+            const [url, before, after] = u;
+            const source = `Text with the URL ${before}${url}${after} inside.`;
+            const mimeType = 'application/vnd.jupyter.stderr';
+            const model = createModel(mimeType, source);
+            const w = f.createRenderer({ mimeType, ...defaultOptions });
+            const [urlEncoded, beforeEncoded, afterEncoded] = [
+              url,
+              before,
+              after
+            ].map(encodeChars);
+            // TODO should this be data-commandlinker-command="some:command" data-commandlinker-args="{some:arg}"?
+            const prefixedUrl = urlEncoded.startsWith('www.')
+              ? 'https://' + urlEncoded
+              : urlEncoded;
+            await w.renderModel(model);
+            expect(w.node.innerHTML).toBe(
+              `<pre>Text with the URL ${beforeEncoded}<a href="${prefixedUrl}" rel="noopener" target="_blank">${urlEncoded}</a>${afterEncoded} inside.</pre>`
+            );
+          })
+        );
+      });
+
+      it('should autolink URLs', async () => {
+        const source = 'www.example.com';
+        const expected = '<pre>www.example.com</pre>';
+        const f = textRendererFactory;
+        const mimeType = 'application/vnd.jupyter.stderr';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(expected);
       });
     });
   });
