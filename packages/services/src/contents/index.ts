@@ -52,7 +52,7 @@ export namespace Contents {
     /**
      * The full absolute file path.
      */
-    osPath: string;
+    osPath: string | null;
 
     /**
      * The path as returned by the server contents API.
