@@ -6,7 +6,7 @@
 
 ## v4.0
 
-### 4.0.0 - Higlights
+### 4.0.0 - Highlights
 
 Below are the major highlights in JupyterLab 4.0.0.
 
