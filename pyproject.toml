@@ -219,7 +219,7 @@ ignore = "tests examples"
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
-npm-cmd = "npm publish --tag next"
+npm-cmd = "npm publish --tag latest"
 release-message = "[ci skip] Publish {version}"
 tag-message = "[ci skip] Release {tag_name}"
 
@@ -236,7 +236,6 @@ before-build-python = [
     "node buildutils/lib/local-repository start",
     "jlpm run before:build:python",
     "node buildutils/lib/local-repository stop",
-    "node buildutils/lib/local-repository fix-links --path jupyterlab/staging",
 ]
 after-publish-assets = "npm run after:publish:assets"
 
@@ -244,6 +243,11 @@ after-publish-assets = "npm run after:publish:assets"
 line-length = 100
 target-version = ["py37"]
 skip-string-normalization = true
+extend-exclude = '''
+(
+  .*\/css_js_injection.ipynb  # Exclude integration test notebook
+)
+'''
 
 [tool.ruff]
 target-version = "py37"

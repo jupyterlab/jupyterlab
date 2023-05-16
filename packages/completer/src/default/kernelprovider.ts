@@ -52,10 +52,11 @@ export class KernelCompleterProvider implements ICompletionProvider {
     }
 
     const items = new Array<CompletionHandler.ICompletionItem>();
-    const metadata = response.metadata
-      ._jupyter_types_experimental as Array<JSONObject>;
+    const metadata = response.metadata._jupyter_types_experimental as
+      | Array<JSONObject>
+      | undefined;
     response.matches.forEach((label, index) => {
-      if (metadata[index]) {
+      if (metadata && metadata[index]) {
         items.push({
           label,
           type: metadata[index].type as string,

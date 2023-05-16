@@ -10,9 +10,17 @@ contributing!
 
 Please take a look at the Contributor documentation, familiarize
 yourself with using JupyterLab, and introduce yourself to the community
-(on the mailing list or discourse) and share what area of the project
-you are interested in working on. Please also see the Jupyter `Community
+(on the `chat <https://gitter.im/jupyterlab/jupyterlab>`__ and/or the `forum <https://discourse.jupyter.org/c/jupyterlab/17>`__)
+and share what area of the project you are interested in working on. Please also see the Jupyter `Community
 Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
+
+You can help make it better by:
+- `submitting bug reports <https://github.com/jupyterlab/jupyterlab/issues/new/choose>`__,
+- `proposing new features <https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md>`__,
+- `translating the application <https://crowdin.com/project/jupyterlab>`__,
+- `improving the documentation <https://jupyterlab.readthedocs.io/en/latest>`__,
+- improving the code base and fixing bug (see below)
+
 
 We have labeled some issues as `good first
 issue <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22>`__
@@ -289,7 +297,7 @@ Installing Node.js and jlpm
 Building JupyterLab from its GitHub source code requires Node.js. The
 development version requires Node.js version 18+, as defined in the
 ``engines`` specification in
-`dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/master/dev_mode/package.json>`__.
+`dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/main/dev_mode/package.json>`__.
 
 If you use `conda <https://conda.io>`__, you can get it with:
 
@@ -586,7 +594,7 @@ Visual Regression and UI Tests
 ------------------------------
 
 As part of JupyterLab CI workflows, UI tests are run with visual regression checks.
-`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__ is used for UI
+`Galata <https://github.com/jupyterlab/jupyterlab/tree/main/galata>`__ is used for UI
 testing. Galata provides `Playwright <https://playwright.dev>`__ helpers to control and
 inspect JupyterLab UI programmatically.
 
@@ -625,7 +633,7 @@ Main reasons for UI test failures are:
      documentation test snapshots.
    - ``please update snapshots``: Combine the two previous comments effects.
 
-For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/master/galata/README.md>`__
+For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.
 
 Good Practices for Integration tests

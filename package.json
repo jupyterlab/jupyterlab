@@ -37,7 +37,7 @@
     "build:all": "lerna run build:all",
     "postbuild:all": "npm run build:testutils && npm run build:galata",
     "build:builder": "cd builder && npm run build",
-    "build:core": "cd jupyterlab/staging && jlpm && (jlpm dedupe || jlpm) && npm run build",
+    "build:core": "cd jupyterlab/staging && jlpm && (jlpm dlx yarn-berry-deduplicate -s fewerHighest || jlpm) && npm run build",
     "build:dev": "npm run integrity && npm run build:all && cd dev_mode && npm run build",
     "build:dev:prod": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod",
     "build:dev:prod:minimize": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod:minimize",
@@ -68,6 +68,7 @@
     "coverage": "lerna run coverage --scope \"@jupyterlab/test-*\" --stream --concurrency 1",
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",
+    "deduplicate": "jlpm dlx yarn-berry-deduplicate -s fewerHighest",
     "docs": "typedoc --options typedoc.js",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --cache --fix .",
@@ -127,7 +128,7 @@
   },
   "devDependencies": {
     "lerna": "^6.4.1",
-    "typedoc": "~0.24.1",
+    "typedoc": "~0.24.7",
     "typedoc-plugin-mdn-links": "^3.0.3"
   }
 }

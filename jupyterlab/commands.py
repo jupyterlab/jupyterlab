@@ -189,7 +189,15 @@ def dedupe_yarn(path, logger=None):
     """
     had_dupes = (
         ProgressProcess(
-            ["node", YARN_PATH, "yarn-deduplicate", "-s", "fewer", "--fail"],
+            [
+                "node",
+                YARN_PATH,
+                "dlx",
+                "yarn-berry-deduplicate",
+                "-s",
+                "fewerHighest",
+                "--fail",
+            ],
             cwd=path,
             logger=logger,
         ).wait()
@@ -208,7 +216,7 @@ def ensure_node_modules(cwd, logger=None):
     """
     logger = _ensure_logger(logger)
     yarn_proc = ProgressProcess(
-        ["node", YARN_PATH, "check", "--verify-tree"], cwd=cwd, logger=logger
+        ["node", YARN_PATH, "--immutable", "--immutable-cache"], cwd=cwd, logger=logger
     )
     ret = yarn_proc.wait()
 
@@ -1342,15 +1350,7 @@ class _AppHandler:
         # copy known-good yarn.lock if missing
         lock_path = pjoin(staging, "yarn.lock")
         lock_template = pjoin(HERE, "staging", "yarn.lock")
-        if (
-            self.registry != YARN_DEFAULT_REGISTRY
-        ):  # Replace on the fly the yarn repository see #3658
-            with open(lock_template, encoding="utf-8") as f:
-                template = f.read()
-            template = template.replace(YARN_DEFAULT_REGISTRY, self.registry.strip("/"))
-            with open(lock_path, "w", encoding="utf-8") as f:
-                f.write(template)
-        elif not osp.exists(lock_path):
+        if not osp.exists(lock_path):
             shutil.copy(lock_template, lock_path)
             os.chmod(lock_path, stat.S_IWRITE | stat.S_IREAD)
 
