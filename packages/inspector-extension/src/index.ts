@@ -27,6 +27,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { inspectorIcon } from '@jupyterlab/ui-components';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the inspector plugin.
@@ -228,16 +229,13 @@ const consoles: JupyterFrontEndPlugin<void> = {
     });
 
     // Keep track of console instances and set inspector source.
-    labShell.currentChanged.connect((_, args) => {
-      const widget = args.newValue;
-      if (!widget || !consoles.has(widget)) {
-        return;
+    const setSource = (widget: Widget | null): void => {
+      if (widget && consoles.has(widget) && handlers[widget.id]) {
+        manager.source = handlers[widget.id];
       }
-      const source = handlers[widget.id];
-      if (source) {
-        manager.source = source;
-      }
-    });
+    };
+    labShell.currentChanged.connect((_, args) => setSource(args.newValue));
+    void app.restored.then(() => setSource(labShell.currentWidget));
   }
 };
 
@@ -290,16 +288,13 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     });
 
     // Keep track of notebook instances and set inspector source.
-    labShell.currentChanged.connect((sender, args) => {
-      const widget = args.newValue;
-      if (!widget || !notebooks.has(widget)) {
-        return;
+    const setSource = (widget: Widget | null): void => {
+      if (widget && notebooks.has(widget) && handlers[widget.id]) {
+        manager.source = handlers[widget.id];
       }
-      const source = handlers[widget.id];
-      if (source) {
-        manager.source = source;
-      }
-    });
+    };
+    labShell.currentChanged.connect((_, args) => setSource(args.newValue));
+    void app.restored.then(() => setSource(labShell.currentWidget));
   }
 };
 

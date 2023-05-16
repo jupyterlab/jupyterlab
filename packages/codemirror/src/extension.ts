@@ -597,7 +597,7 @@ export namespace EditorExtensionRegistry {
     } = {}
   ): ReadonlyArray<Readonly<IEditorExtensionFactory<any>>> {
     const { themes, translator } = options;
-    const trans = (translator ?? nullTranslator).load('jupyter');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     const extensions: IEditorExtensionFactory<any>[] = [
       Object.freeze({
         name: 'autoClosingBrackets',
@@ -662,7 +662,7 @@ export namespace EditorExtensionRegistry {
       }),
       Object.freeze({
         name: 'indentUnit',
-        default: '2',
+        default: '4',
         factory: () =>
           createConfigurableExtension<string>((value: string) =>
             value == 'Tab'
@@ -673,7 +673,7 @@ export namespace EditorExtensionRegistry {
           type: 'string',
           title: trans.__('Indentation unit'),
           description: trans.__(
-            'The indentation is a `Tab` or the number of spaces. This defaults to 2 spaces.'
+            'The indentation is a `Tab` or the number of spaces. This defaults to 4 spaces.'
           ),
           enum: ['Tab', '1', '2', '4', '8']
         }

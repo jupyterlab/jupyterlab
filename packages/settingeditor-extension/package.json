@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingeditor-extension",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0",
   "description": "JupyterLab - Setting Editor Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,20 +38,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-beta.1",
-    "@jupyterlab/apputils": "^4.0.0-beta.1",
-    "@jupyterlab/codeeditor": "^4.0.0-beta.1",
-    "@jupyterlab/rendermime": "^4.0.0-beta.1",
-    "@jupyterlab/settingeditor": "^4.0.0-beta.1",
-    "@jupyterlab/settingregistry": "^4.0.0-beta.1",
-    "@jupyterlab/statedb": "^4.0.0-beta.1",
-    "@jupyterlab/translation": "^4.0.0-beta.1",
-    "@jupyterlab/ui-components": "^4.0.0-beta.1",
-    "@lumino/disposable": "^2.1.0"
+    "@jupyterlab/application": "^4.0.0",
+    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/codeeditor": "^4.0.0",
+    "@jupyterlab/rendermime": "^4.0.0",
+    "@jupyterlab/settingeditor": "^4.0.0",
+    "@jupyterlab/settingregistry": "^4.0.0",
+    "@jupyterlab/statedb": "^4.0.0",
+    "@jupyterlab/translation": "^4.0.0",
+    "@jupyterlab/ui-components": "^4.0.0",
+    "@lumino/disposable": "^2.1.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "~0.24.1",
+    "typedoc": "~0.24.7",
     "typescript": "~5.0.4"
   },
   "publishConfig": {

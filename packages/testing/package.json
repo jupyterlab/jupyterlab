@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/testing",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0",
   "description": "JupyterLab basic testing utilities.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,9 +35,9 @@
   "dependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/coreutils": "^6.0.0-beta.1",
-    "@lumino/coreutils": "^2.1.0",
-    "@lumino/signaling": "^2.1.0",
+    "@jupyterlab/coreutils": "^6.0.0",
+    "@lumino/coreutils": "^2.1.1",
+    "@lumino/signaling": "^2.1.1",
     "child_process": "~1.0.2",
     "deepmerge": "^4.2.2",
     "fs-extra": "^10.1.0",

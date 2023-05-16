@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/tooltip-extension",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0",
   "description": "JupyterLab - Tooltip Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,23 +38,23 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-beta.1",
-    "@jupyterlab/codeeditor": "^4.0.0-beta.1",
-    "@jupyterlab/console": "^4.0.0-beta.1",
-    "@jupyterlab/coreutils": "^6.0.0-beta.1",
-    "@jupyterlab/fileeditor": "^4.0.0-beta.1",
-    "@jupyterlab/notebook": "^4.0.0-beta.1",
-    "@jupyterlab/rendermime": "^4.0.0-beta.1",
-    "@jupyterlab/services": "^7.0.0-beta.1",
-    "@jupyterlab/tooltip": "^4.0.0-beta.1",
-    "@jupyterlab/translation": "^4.0.0-beta.1",
+    "@jupyterlab/application": "^4.0.0",
+    "@jupyterlab/codeeditor": "^4.0.0",
+    "@jupyterlab/console": "^4.0.0",
+    "@jupyterlab/coreutils": "^6.0.0",
+    "@jupyterlab/fileeditor": "^4.0.0",
+    "@jupyterlab/notebook": "^4.0.0",
+    "@jupyterlab/rendermime": "^4.0.0",
+    "@jupyterlab/services": "^7.0.0",
+    "@jupyterlab/tooltip": "^4.0.0",
+    "@jupyterlab/translation": "^4.0.0",
     "@lumino/algorithm": "^2.0.0",
-    "@lumino/coreutils": "^2.1.0",
-    "@lumino/widgets": "^2.1.0"
+    "@lumino/coreutils": "^2.1.1",
+    "@lumino/widgets": "^2.1.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "~0.24.1",
+    "typedoc": "~0.24.7",
     "typescript": "~5.0.4"
   },
   "publishConfig": {

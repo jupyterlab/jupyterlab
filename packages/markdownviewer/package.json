@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/markdownviewer",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0",
   "description": "JupyterLab - Markdown viewer Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,20 +37,20 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-beta.1",
-    "@jupyterlab/coreutils": "^6.0.0-beta.1",
-    "@jupyterlab/docregistry": "^4.0.0-beta.1",
-    "@jupyterlab/rendermime": "^4.0.0-beta.1",
-    "@jupyterlab/toc": "^6.0.0-beta.1",
-    "@jupyterlab/translation": "^4.0.0-beta.1",
-    "@lumino/coreutils": "^2.1.0",
+    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/coreutils": "^6.0.0",
+    "@jupyterlab/docregistry": "^4.0.0",
+    "@jupyterlab/rendermime": "^4.0.0",
+    "@jupyterlab/toc": "^6.0.0",
+    "@jupyterlab/translation": "^4.0.0",
+    "@lumino/coreutils": "^2.1.1",
     "@lumino/messaging": "^2.0.0",
-    "@lumino/signaling": "^2.1.0",
-    "@lumino/widgets": "^2.1.0"
+    "@lumino/signaling": "^2.1.1",
+    "@lumino/widgets": "^2.1.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "~0.24.1",
+    "typedoc": "~0.24.7",
     "typescript": "~5.0.4"
   },
   "publishConfig": {

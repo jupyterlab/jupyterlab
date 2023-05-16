@@ -85,13 +85,13 @@ docs = [
 ]
 docs-screenshots = [
     "altair==4.2.2",
-    "ipython==8.12.0",
+    "ipython==8.13.1",
     "ipywidgets==8.0.6",
     "jupyterlab-geojson==3.3.1",
     "jupyterlab-language-pack-zh-CN==3.6.post1",
     "matplotlib==3.7.1",
     "nbconvert>=7.0.0",
-    "pandas==1.5.3",
+    "pandas==2.0.1",
     "scipy==1.10.1",
     "vega_datasets==0.9.0",
 ]
@@ -115,7 +115,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.260",
+    "ruff==0.0.263",
     "black[jupyter]==23.3.0"
 ]
 
@@ -219,7 +219,7 @@ ignore = "tests examples"
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
-npm-cmd = "npm publish --tag next"
+npm-cmd = "npm publish --tag latest"
 release-message = "[ci skip] Publish {version}"
 tag-message = "[ci skip] Release {tag_name}"
 
@@ -236,7 +236,6 @@ before-build-python = [
     "node buildutils/lib/local-repository start",
     "jlpm run before:build:python",
     "node buildutils/lib/local-repository stop",
-    "node buildutils/lib/local-repository fix-links --path jupyterlab/staging",
 ]
 after-publish-assets = "npm run after:publish:assets"
 
@@ -244,6 +243,11 @@ after-publish-assets = "npm run after:publish:assets"
 line-length = 100
 target-version = ["py37"]
 skip-string-normalization = true
+extend-exclude = '''
+(
+  .*\/css_js_injection.ipynb  # Exclude integration test notebook
+)
+'''
 
 [tool.ruff]
 target-version = "py37"

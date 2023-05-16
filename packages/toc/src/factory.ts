@@ -18,8 +18,10 @@ const RENDER_TIMEOUT = 1000;
 /**
  * Abstract table of contents model factory for IDocumentWidget.
  */
-export abstract class TableOfContentsFactory<W extends IDocumentWidget>
-  implements TableOfContents.IFactory<W>
+export abstract class TableOfContentsFactory<
+  W extends IDocumentWidget,
+  H extends TableOfContents.IHeading = TableOfContents.IHeading
+> implements TableOfContents.IFactory<W, H>
 {
   /**
    * Constructor
@@ -52,7 +54,7 @@ export abstract class TableOfContentsFactory<W extends IDocumentWidget>
   createNew(
     widget: W,
     configuration?: TableOfContents.IConfig
-  ): TableOfContentsModel<TableOfContents.IHeading, W> {
+  ): TableOfContentsModel<H, W> {
     const model = this._createNew(widget, configuration);
 
     const context = widget.context;
@@ -102,5 +104,5 @@ export abstract class TableOfContentsFactory<W extends IDocumentWidget>
   protected abstract _createNew(
     widget: W,
     configuration?: TableOfContents.IConfig
-  ): TableOfContentsModel<TableOfContents.IHeading, W>;
+  ): TableOfContentsModel<H, W>;
 }

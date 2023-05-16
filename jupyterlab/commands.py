@@ -189,7 +189,15 @@ def dedupe_yarn(path, logger=None):
     """
     had_dupes = (
         ProgressProcess(
-            ["node", YARN_PATH, "yarn-deduplicate", "-s", "fewer", "--fail"],
+            [
+                "node",
+                YARN_PATH,
+                "dlx",
+                "yarn-berry-deduplicate",
+                "-s",
+                "fewerHighest",
+                "--fail",
+            ],
             cwd=path,
             logger=logger,
         ).wait()
@@ -208,7 +216,7 @@ def ensure_node_modules(cwd, logger=None):
     """
     logger = _ensure_logger(logger)
     yarn_proc = ProgressProcess(
-        ["node", YARN_PATH, "check", "--verify-tree"], cwd=cwd, logger=logger
+        ["node", YARN_PATH, "--immutable", "--immutable-cache"], cwd=cwd, logger=logger
     )
     ret = yarn_proc.wait()
 
@@ -1342,15 +1350,7 @@ class _AppHandler:
         # copy known-good yarn.lock if missing
         lock_path = pjoin(staging, "yarn.lock")
         lock_template = pjoin(HERE, "staging", "yarn.lock")
-        if (
-            self.registry != YARN_DEFAULT_REGISTRY
-        ):  # Replace on the fly the yarn repository see #3658
-            with open(lock_template, encoding="utf-8") as f:
-                template = f.read()
-            template = template.replace(YARN_DEFAULT_REGISTRY, self.registry.strip("/"))
-            with open(lock_path, "w", encoding="utf-8") as f:
-                f.write(template)
-        elif not osp.exists(lock_path):
+        if not osp.exists(lock_path):
             shutil.copy(lock_template, lock_path)
             os.chmod(lock_path, stat.S_IWRITE | stat.S_IREAD)
 
@@ -1828,8 +1828,7 @@ class _AppHandler:
                 # skip deprecated versions
                 if "deprecated" in data:
                     self.logger.debug(
-                        "Disregarding compatible version of package as it is deprecated: %s@%s"
-                        % (name, version)
+                        f"Disregarding compatible version of package as it is deprecated: {name}@{version}"
                     )
                     continue
                 # Verify that the version is a valid extension.
@@ -1967,7 +1966,7 @@ def _node_check(logger):
     """Check for the existence of nodejs with the correct version."""
     node = which("node")
     try:
-        output = subprocess.check_output([node, "node-version-check.js"], cwd=HERE)
+        output = subprocess.check_output([node, "node-version-check.js"], cwd=HERE)  # noqa S603
         logger.debug(output.decode("utf-8"))
     except Exception:
         data = CoreConfig()._data
@@ -1995,7 +1994,7 @@ def _yarn_config(logger):
 
     try:
         output_binary = subprocess.check_output(
-            [node, YARN_PATH, "config", "--json"], stderr=subprocess.PIPE, cwd=HERE
+            [node, YARN_PATH, "config", "--json"], stderr=subprocess.PIPE, cwd=HERE  # noqa S603
         )
         output = output_binary.decode("utf-8")
         lines = iter(output.splitlines())

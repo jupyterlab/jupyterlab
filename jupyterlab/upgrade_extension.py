@@ -7,6 +7,7 @@ import re
 import shutil
 import subprocess
 import sys
+from typing import Optional
 
 try:
     import tomllib
@@ -20,13 +21,10 @@ except ImportError:
 from pathlib import Path
 
 try:
-    from cookiecutter.main import cookiecutter
+    import copier
 except ImportError:
-    msg = "Please install cookiecutter"
+    msg = "Please install copier and jinja2-time"
     raise RuntimeError(msg) from None
-
-
-DEFAULT_COOKIECUTTER_BRANCH = "4.0"
 
 # List of files recommended to be overridden
 RECOMMENDED_TO_OVERRIDE = [
@@ -59,20 +57,20 @@ JUPYTER_SERVER_REQUIREMENT = re.compile("^jupyter_server([^\\w]|$)")
 
 
 def update_extension(  # noqa
-    target: str, branch: str = DEFAULT_COOKIECUTTER_BRANCH, interactive: bool = True
+    target: str, vcs_ref: Optional[str] = None, interactive: bool = True
 ) -> None:
     """Update an extension to the current JupyterLab
 
     target: str
         Path to the extension directory containing the extension
-    branch: str [default: DEFAULT_COOKIECUTTER_BRANCH]
-        Template branch to checkout
+    vcs_ref: str [default: None]
+        Template vcs_ref to checkout
     interactive: bool [default: true]
         Whether to ask before overwriting content
 
     """
     # Input is a directory with a package.json or the current directory
-    # Use the cookiecutter as the source
+    # Use the extension template as the source
     # Pull in the relevant config
     # Pull in the Python parts if possible
     # Pull in the scripts if possible
@@ -96,7 +94,9 @@ def update_extension(  # noqa
     if python_name is None:
         if setup_file.exists():
             python_name = (
-                subprocess.check_output([sys.executable, "setup.py", "--name"], cwd=target)
+                subprocess.check_output(
+                    [sys.executable, "setup.py", "--name"], cwd=target  # noqa S603
+                )
                 .decode("utf8")
                 .strip()
             )
@@ -109,7 +109,7 @@ def update_extension(  # noqa
     if output_dir.exists():
         shutil.rmtree(output_dir)
 
-    # Build up the cookiecutter args and run the cookiecutter
+    # Build up the template answers and run the template engine
     author = data.get("author", "<author_name>")
     author_email = "<author_email>"
     if isinstance(author, dict):
@@ -137,30 +137,14 @@ def update_extension(  # noqa
         "labextension_name": data["name"],
         "python_name": python_name,
         "project_short_description": data.get("description", "<description>"),
-        "has_settings": "y" if data.get("jupyterlab", {}).get("schemaDir", "") else "n",
-        "has_binder": "y" if (target / "binder").exists() else "n",
-        "test": "y" if has_test else "n",
+        "has_settings": bool(data.get("jupyterlab", {}).get("schemaDir", "")),
+        "has_binder": bool((target / "binder").exists()),
+        "test": bool(has_test),
         "repository": data.get("repository", {}).get("url", "<repository"),
     }
 
-    template = "https://github.com/jupyterlab/extension-cookiecutter-ts"
-    cookiecutter(
-        template=template,
-        checkout=branch,
-        output_dir=output_dir,
-        extra_context=extra_context,
-        no_input=not interactive,
-    )
-
-    for element in output_dir.glob("*"):
-        python_name = element.name
-        break
-
-    # hoist the output up one level
-    shutil.move(output_dir / python_name, output_dir / "_temp")
-    for filename in (output_dir / "_temp").glob("*"):
-        shutil.move(filename, output_dir / filename.name)
-    shutil.rmtree(output_dir / "_temp")
+    template = "https://github.com/jupyterlab/extension-template"
+    copier.run_auto(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True)
 
     # From the created package.json grab the devDependencies
     with (output_dir / "package.json").open() as fid:
@@ -256,7 +240,7 @@ def update_extension(  # noqa
             try:
                 import tomli_w
             except ImportError:
-                msg = "To update pyproject.toml, you need to install tomli_w"
+                msg = "To update pyproject.toml, you need to install tomli-w"
                 print(msg)
             else:
                 config = configparser.ConfigParser()
@@ -275,6 +259,8 @@ def update_extension(  # noqa
                             requirements_raw.splitlines(),
                         )
                     )
+                else:
+                    requirements = []
 
                 pyproject["project"]["dependencies"] = (
                     pyproject["project"].get("dependencies", []) + requirements
@@ -315,10 +301,15 @@ if __name__ == "__main__":
 
     parser.add_argument("path", action="store", type=str, help="the target path")
 
-    parser.add_argument(
-        "--branch", help="the template branch to checkout", default=DEFAULT_COOKIECUTTER_BRANCH
-    )
+    parser.add_argument("--vcs-ref", help="the template hash to checkout", default=None)
 
     args = parser.parse_args()
 
-    update_extension(args.path, args.branch, args.no_input is False)
+    answer_file = Path(args.path) / ".copier-answers.yml"
+
+    if answer_file.exists():
+        print(
+            "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
+        )
+    else:
+        update_extension(args.path, args.vcs_ref, args.no_input is False)

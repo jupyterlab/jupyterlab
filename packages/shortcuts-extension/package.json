@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/shortcuts-extension",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0",
   "description": "JupyterLab - Shortcuts Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,24 +41,24 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-beta.1",
-    "@jupyterlab/settingregistry": "^4.0.0-beta.1",
-    "@jupyterlab/translation": "^4.0.0-beta.1",
-    "@jupyterlab/ui-components": "^4.0.0-beta.1",
+    "@jupyterlab/application": "^4.0.0",
+    "@jupyterlab/settingregistry": "^4.0.0",
+    "@jupyterlab/translation": "^4.0.0",
+    "@jupyterlab/ui-components": "^4.0.0",
     "@lumino/algorithm": "^2.0.0",
-    "@lumino/commands": "^2.1.0",
-    "@lumino/coreutils": "^2.1.0",
-    "@lumino/disposable": "^2.1.0",
+    "@lumino/commands": "^2.1.1",
+    "@lumino/coreutils": "^2.1.1",
+    "@lumino/disposable": "^2.1.1",
     "@lumino/domutils": "^2.0.0",
     "@lumino/keyboard": "^2.0.0",
-    "@lumino/widgets": "^2.1.0",
+    "@lumino/widgets": "^2.1.1",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-beta.1",
+    "@jupyterlab/testing": "^4.0.0",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.24.1",
+    "typedoc": "~0.24.7",
     "typescript": "~5.0.4"
   },
   "publishConfig": {

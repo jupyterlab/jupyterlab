@@ -20,7 +20,7 @@ By working through this tutorial, you'll learn:
 -  How to set up an extension development environment from scratch on a
    Linux or OSX machine. (You'll need to modify the commands slightly if you are on Windows.)
 -  How to start an extension project from
-   `jupyterlab/extension-cookiecutter-ts <https://github.com/jupyterlab/extension-cookiecutter-ts>`__
+   `jupyterlab/extension-template <https://github.com/jupyterlab/extension-template>`__
 -  How to iteratively code, build, and load your extension in JupyterLab
 -  How to version control your work with git
 -  How to release your extension for others to enjoy
@@ -50,8 +50,8 @@ Install NodeJS, JupyterLab, etc. in a conda environment
 
 Next create a conda environment that includes:
 
-1. the latest release of JupyterLab
-2. `cookiecutter <https://github.com/audreyr/cookiecutter>`__, the tool
+1. The latest release of JupyterLab
+2. `copier <https://copier.readthedocs.io>`__ and some dependencies, the tool
    you'll use to bootstrap your extension project structure (this is a Python tool
    which we'll install using conda below).
 3. `NodeJS <https://nodejs.org>`__, the JavaScript runtime you'll use to
@@ -66,7 +66,7 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=3 cookiecutter nodejs jupyter-packaging git
+    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=18 git copier jinja2-time
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
@@ -84,64 +84,74 @@ Create a repository
 -------------------
 
 Create a new repository for your extension (see, for example, the
-`GitHub instructions <https://docs.github.com/en/get-started/quickstart/create-a-repo>`__. This is an
+`GitHub instructions <https://docs.github.com/en/get-started/quickstart/create-a-repo>`__). This is an
 optional step, but highly recommended if you want to share your
 extension.
 
 Create an extension project
 ---------------------------
 
-Initialize the project from a cookiecutter
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Initialize the project from the template
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Next use cookiecutter to create a new project for your extension.
+Next use copier to create a new project for your extension.
 This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
-    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
+    mkdir my_first_extension
+    cd my_first_extension
+    copier https://github.com/jupyterlab/extension-template .
 
-When prompted, enter values like the following for all of the cookiecutter
+When prompted, enter values like the following for all of the template
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
 are using to fetch pictures).
 
 .. code:: bash
 
-    Select kind:
-    1 - frontend
-    2 - server
-    3 - theme
-    Choose from 1, 2, 3 [1]: 1
-    author_name [My Name]: Your Name
-    author_email [me@test.com]: your@name.org
-    labextension_name [myextension]: jupyterlab_apod
-    python_name [jupyterlab_apod]: jupyterlab_apod
-    project_short_description [A JupyterLab extension.]: Show a random NASA Astronomy Picture of the Day in a JupyterLab panel
-    has_settings [n]: n
-    has_binder [n]: y
-    test [y]: y
-    repository [https://github.com/github_username/jupyterlab_apod]: https://github.com/github_username/jupyterlab_apod
+    What is your extension kind?
+    (Use arrow keys)
+     frontend
+    Extension author name
+     Your Name
+    Extension author email
+     your@name.org
+    JavaScript package name
+     jupyterlab_apod
+    Python package name
+     jupyterlab_apod
+    Extension short description
+     Show a random NASA Astronomy Picture of the Day in a JupyterLab panel
+    Does the extension have user settings?
+     N
+    Do you want to set up Binder example?
+     Y
+    Do you want to set up test for the extension?
+     Y
+    Git remote repository URL
+     https://github.com/github_username/jupyterlab_apod
 
-Notes:
+.. note::
 
-- If you are not using a repository, leave the repository field blank. You can come back and edit the repository field in the ``package.json`` file later.
+  - If you are not using a repository, leave the repository field blank. You can come back and edit the repository field in the ``package.json`` file later.
+  - If you are using the latest version of the template, you will notice that tests are included in the template. If you don't want to include them just answer ``n`` to the test prompt.
 
-- If you are using the latest version of ``cookiecutter`` you will notice that tests are included in the template. If you don't want to include them just insert ``n`` .
 
+List the files.
 
-Change to the directory the cookiecutter created and list the files.
+.. code-block:: shell
 
-.. code:: bash
-
-    cd jupyterlab_apod
-    ls
+    ls -a
 
 You should see a list like the following.
 
-::
+.. code-block::
 
-    CHANGELOG.md    README.md       babel.config.js install.json    jupyterlab_apod pyproject.toml  src       tsconfig.json
-    LICENSE         RELEASE.md      binder          jest.config.js  package.json    setup.py        style     ui-tests
+    .copier-answers.yml  .github          .gitignore      .prettierignore     .yarnrc.yml
+    babel.config.js      jest.config.js   pyproject.toml  src                 ui-tests
+    binder               jupyterlab_apod  README.md       style               yarn.lock
+    CHANGELOG.md         LICENSE          RELEASE.md      tsconfig.json
+    install.json         package.json     setup.py        tsconfig.test.json
 
 Commit what you have to git
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -153,14 +163,15 @@ initialize it as a git repository and commit the current code.
 
     git init
     git add .
-    git commit -m 'Seed apod project from cookiecutter'
+    git commit -m 'Seed apod project from extension template'
 
-Note: This step is not technically necessary, but it is good practice to
-track changes in version control system in case you need to rollback to
-an earlier version or want to collaborate with others. You
-can compare your work throughout this tutorial with the commits in a
-reference version of ``jupyterlab_apod`` on GitHub at
-https://github.com/jupyterlab/jupyterlab_apod.
+.. note::
+   This step is not technically necessary, but it is good practice to
+   track changes in version control system in case you need to rollback to
+   an earlier version or want to collaborate with others. You
+   can compare your work throughout this tutorial with the commits in a
+   reference version of ``jupyterlab_apod`` on GitHub at
+   https://github.com/jupyterlab/jupyterlab_apod.
 
 
 Build and install the extension for development
@@ -187,7 +198,7 @@ JupyterLab:
 
 .. note::
 
-   On Windows, symbolic links can be activated on Windows 10 for Python version 3.8 or higher
+   On Windows, symbolic links can be activated on Windows 10 or above for Python version 3.8 or higher
    by activating the 'Developer Mode'. That may not be allowed by your administrators.
    See `Activate Developer Mode on Windows <https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development>`__
    for instructions.
@@ -216,10 +227,12 @@ After you reload the page with the console open, you should see a message that s
 ``JupyterLab extension jupyterlab_apod is activated!`` in the console.
 If you do, congratulations, you're ready to start modifying the extension!
 If not, go back make sure you didn't miss a step, and `reach
-out <https://github.com/jupyterlab/jupyterlab/blob/master/README.md#getting-help>`__ if you're stuck.
+out <https://github.com/jupyterlab/jupyterlab/blob/main/README.md#getting-help>`__ if you're stuck.
 
-Note: Leave the terminal running the ``jupyter lab`` command open and running
-JupyterLab to see the effects of changes below.
+.. note::
+
+   Leave the terminal running the ``jupyter lab`` command open and running
+   JupyterLab to see the effects of changes below.
 
 
 Add an Astronomy Picture of the Day widget
@@ -251,13 +264,14 @@ Locate the ``plugin`` object of type ``JupyterFrontEndPlugin``. Change the
 definition so that it reads like so:
 
 .. code-block:: typescript
-    :emphasize-lines: 5,7-8,10
+    :emphasize-lines: 5,8-9,11
 
     /**
      * Initialization data for the jupyterlab_apod extension.
      */
     const plugin: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab-apod',
+      description: 'Show a random NASA Astronomy Picture of the Day in a JupyterLab panel.',
       autoStart: true,
       requires: [ICommandPalette],
       activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
@@ -280,8 +294,7 @@ repository root folder to install the dependencies and save them to your
 
 .. code:: bash
 
-    jlpm add @jupyterlab/apputils
-    jlpm add @jupyterlab/application
+    jlpm add @jupyterlab/apputils @jupyterlab/application
 
 Finally, run the following to rebuild your extension.
 
@@ -309,7 +322,7 @@ build command for errors and correct your code.
     ICommandPalette: Palette {_palette: CommandPalette}
 
 Note that we had to run ``jlpm run build`` in order for the bundle to
-update. This command does two things: compiles the TypeScript files in `src/`
+update. This command does two things: compiles the TypeScript files in ``src/```
 into JavaScript files in ``lib/`` (``jlpm run build``), then bundles the
 JavaScript files in ``lib/`` into a JupyterLab extension in
 ``jupyterlab_apod/static`` (``jlpm run build:extension``). If you wish to avoid
@@ -342,10 +355,11 @@ only modifying the contents of that function, so make sure your braces match,
 and leave the* ``export default plugin`` *part lower down intact)*:
 
 .. code-block:: typescript
-    :emphasize-lines: 5-41
+    :emphasize-lines: 6-42
 
     const plugin: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab-apod',
+      description: 'Show a random NASA Astronomy Picture of the Day in a JupyterLab panel.',
       autoStart: true,
       requires: [ICommandPalette],
       activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
@@ -421,7 +435,7 @@ The single *Astronomy Picture* tab should come to the foreground.
 
 If your widget is not behaving, compare your code with the reference
 project state at the `01-show-a-panel
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/3.5-01-show-a-panel>`__.
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-01-show-a-panel>`__.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
@@ -551,7 +565,7 @@ of these problems in the upcoming sections.
 
 If you don't see a image at all, compare your code with the
 `02-show-an-image
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/3.5-02-show-an-image>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-02-show-an-image>`__
 in the reference project. When it's working, make another git commit.
 
 .. code:: bash
@@ -665,7 +679,7 @@ of the image.
 
 If anything is not working correctly, compare your code with the reference project
 `03-style-and-attribute
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/3.5-03-style-and-attribute>`__.
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-03-style-and-attribute>`__.
 When everything is working as expected, make another commit.
 
 .. code:: bash
@@ -841,7 +855,7 @@ image.
 
 If anything is not working correctly, compare your code with the
 `04-refactor-and-refresh
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/3.5-04-refactor-and-refresh>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-04-refactor-and-refresh>`__
 to debug. Once it is working properly, commit it.
 
 .. code:: bash
@@ -884,10 +898,11 @@ definition as ``optional``. This addition passes the global ``LayoutRestorer`` a
 third parameter of the ``activate`` function.
 
 .. code-block:: typescript
-    :emphasize-lines: 5
+    :emphasize-lines: 6
 
     const plugin: JupyterFrontEndPlugin<void> = {
       id: 'jupyterlab-apod',
+      description: 'Show a random NASA Astronomy Picture of the Day in a JupyterLab panel.',
       autoStart: true,
       requires: [ICommandPalette],
       optional: [ILayoutRestorer],
@@ -979,7 +994,7 @@ after the refresh.
    The completed extension, showing the `Astronomy Picture of the Day for 24 Jul 2015 <https://apod.nasa.gov/apod/ap150724.html>`__.
 
 Refer to the `05-restore-panel-state
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/3.5-05-restore-panel-state>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/4.0-05-restore-panel-state>`__
 if your extension is not working correctly. Make a commit when the state of your
 extension persists properly.
 
@@ -996,8 +1011,8 @@ of this tutorial.
 Packaging your extension
 ------------------------
 
-JupyterLab extensions for JupyterLab 3.0 can be distributed as Python
-packages. The cookiecutter template we used contains all of the Python
+JupyterLab extensions for JupyterLab 3.0 and above can be distributed as Python
+packages. The extension template we used contains all of the Python
 packaging instructions in the ``pyproject.toml`` file to wrap your extension in a
 Python package. Before generating a package, we first need to install ``build``.
 
@@ -1071,7 +1086,7 @@ You may want to also publish your extension as a JavaScript package to the
 Automated Releases
 ^^^^^^^^^^^^^^^^^^
 
-If you used the cookiecutter to bootstrap your extension, the repository should already
+If you used the template to bootstrap your extension, the repository should already
 be compatible with the `Jupyter Releaser <https://github.com/jupyter-server/jupyter_releaser>`_.
 
 The Jupyter Releaser provides a set of GitHub Actions Workflows to:

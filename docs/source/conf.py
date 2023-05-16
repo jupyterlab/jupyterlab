@@ -24,6 +24,7 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import json
+import os
 import shutil
 import time
 from collections import ChainMap
@@ -119,9 +120,9 @@ def build_api_docs(out_dir: Path):
         # `make clean` to force a rebuild
         pass
     else:
-        check_call(jlpm, cwd=str(root))
-        check_call([*jlpm, "build:packages"], cwd=str(root))
-        check_call([*jlpm, "docs"], cwd=str(root))
+        check_call(jlpm, cwd=str(root))  # noqa S603
+        check_call([*jlpm, "build:packages"], cwd=str(root))  # noqa S603
+        check_call([*jlpm, "docs"], cwd=str(root))  # noqa S603
 
     dest_dir = out_dir / "api"
     if dest_dir.exists():
@@ -266,10 +267,18 @@ html_theme_options = {
             "icon": "fab fa-gitter",
         },
     ],
+    "logo": {
+        "alt_text": "Lumino",
+    },
     "use_edit_page_button": True,
     "navbar_align": "left",
     "navbar_end": ["navbar-icon-links.html", "search-field.html"],
+    "navbar_start": ["navbar-logo", "version-switcher"],
     "footer_start": ["copyright.html"],
+    "switcher": {
+        "json_url": "https://jupyterlab.readthedocs.io/en/latest/_static/switcher.json",
+        "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
+    },
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -291,8 +300,8 @@ html_sidebars = {
 html_context = {
     "github_user": "jupyterlab",  # Username
     "github_repo": "jupyterlab",  # Repo name
-    "github_version": "master",  # Version
-    "conf_py_path": "/docs/source/",  # Path in the checkout to the docs root
+    "github_version": "main",  # Version
+    "doc_path": "docs/source/",  # Path in the checkout to the docs root
 }
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -379,7 +388,7 @@ epub_exclude_files = ["search.html"]
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"https://docs.python.org/": None}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
 
 
 def setup(app):

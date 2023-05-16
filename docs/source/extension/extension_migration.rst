@@ -18,19 +18,19 @@ JupyterLab 4.x provides a script to upgrade an existing extension to use the new
 
     Back up your extension - the best if you use a version control like git, is to work on a new branch.
 
-First, make sure to update to JupyterLab 4 and install ``cookiecutter``. With ``pip``:
+First, make sure to update to JupyterLab 4 and install ``copier`` and some dependencies. With ``pip``:
 
 .. code:: bash
 
    pip install -U jupyterlab
-   pip install cookiecutter
+   pip install copier jinja2-time tomli-w
 
 
 Or with ``conda``:
 
 .. code:: bash
 
-   conda install -c conda-forge jupyterlab=4 cookiecutter
+   conda install -c conda-forge jupyterlab=4 copier jinja2-time tomli-w
 
 
 Then at the root folder of the extension, run:
@@ -86,7 +86,7 @@ is to force packages deduplication using:
 
 .. code-block:: sh
 
-   jlpm dedupe --strategy highest
+   jlpm dlx yarn-berry-deduplicate
 
 API breaking changes
 ^^^^^^^^^^^^^^^^^^^^
@@ -117,7 +117,7 @@ bumped their major version (following semver convention). We want to point out p
    Removed ``modelDB`` from ``IAttachmentsModel.IOptions``.
 - ``@jupyterlab/buildutils`` from 3.x to 4.x
    * The ``create-theme`` script has been removed. If you want to create a new theme extension, you
-     should use the `TypeScript extension Cookiecutter <https://github.com/jupyterlab/extension-cookiecutter-ts>`_
+     should use the `TypeScript extension template <https://github.com/jupyterlab/extension-template>`_
      (choosing ``theme`` as ``kind`` ) instead.
    * The ``add-sibling`` script has been removed. Check out :ref:`source_dev_workflow` instead.
    * The ``exitOnUuncaughtException`` util function has been renamed to ``exitOnUncaughtException`` (typo fix).
@@ -727,7 +727,7 @@ Upgrading library versions
 The ``@phosphor/*`` libraries that JupyterLab 1.x uses have been renamed to
 ``@lumino/*``. Updating your ``package.json`` is straightforward. The easiest
 way to do this is to look in the
-`JupyterLab core packages code base <https://github.com/jupyterlab/jupyterlab/tree/master/packages>`__
+`JupyterLab core packages code base <https://github.com/jupyterlab/jupyterlab/tree/main/packages>`__
 and to simply adopt the versions of the relevant libraries that are used
 there.
 
@@ -848,7 +848,7 @@ Using ``Session`` and ``SessionContext`` to manage kernel sessions
 
   For full API documentation and examples of how to use
   ``@jupyterlab/services``,
-  `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/master/packages/services#readme>`__.
+  `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/main/packages/services#readme>`__.
 
 ``ConsolePanel`` and ``NotebookPanel`` now expose a
 ``sessionContext: ISessionContext`` attribute that allows for a uniform way to
@@ -883,4 +883,4 @@ Using the new icon system and ``LabIcon``
 
   For full API documentation and examples of how to use
   the new icon support based on ``LabIcon`` from ``@jupyterlab/ui-components``,
-  `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/master/packages/ui-components#readme>`__.
+  `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/main/packages/ui-components#readme>`__.

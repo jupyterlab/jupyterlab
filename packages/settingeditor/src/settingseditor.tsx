@@ -162,6 +162,13 @@ export namespace SettingsEditor {
   export type SaveState = 'started' | 'failed' | 'completed';
 
   /**
+   *
+   */
+  export type PluginSearchFilter =
+    | ((plugin: ISettingRegistry.IPlugin) => string[] | null)
+    | null;
+
+  /**
    * Settings editor options
    */
   export interface IOptions {

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/statusbar-extension",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0",
   "description": "JupyterLab - Statusbar Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,17 +37,17 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-beta.1",
-    "@jupyterlab/apputils": "^4.0.0-beta.1",
-    "@jupyterlab/settingregistry": "^4.0.0-beta.1",
-    "@jupyterlab/statusbar": "^4.0.0-beta.1",
-    "@jupyterlab/translation": "^4.0.0-beta.1"
+    "@jupyterlab/application": "^4.0.0",
+    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/settingregistry": "^4.0.0",
+    "@jupyterlab/statusbar": "^4.0.0",
+    "@jupyterlab/translation": "^4.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.9",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.24.1",
+    "typedoc": "~0.24.7",
     "typescript": "~5.0.4"
   },
   "publishConfig": {

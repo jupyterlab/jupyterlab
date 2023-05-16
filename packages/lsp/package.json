@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/lsp",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0",
   "description": "",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -44,22 +44,22 @@
     "vscode-languageserver-protocol": "^3.17.0"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0-beta.1",
-    "@jupyterlab/codeeditor": "^4.0.0-beta.1",
-    "@jupyterlab/coreutils": "^6.0.0-beta.1",
-    "@jupyterlab/docregistry": "^4.0.0-beta.1",
-    "@jupyterlab/services": "^7.0.0-beta.1",
-    "@jupyterlab/translation": "^4.0.0-beta.1",
-    "@lumino/coreutils": "^2.1.0",
-    "@lumino/disposable": "^2.1.0",
-    "@lumino/signaling": "^2.1.0",
+    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/codeeditor": "^4.0.0",
+    "@jupyterlab/coreutils": "^6.0.0",
+    "@jupyterlab/docregistry": "^4.0.0",
+    "@jupyterlab/services": "^7.0.0",
+    "@jupyterlab/translation": "^4.0.0",
+    "@lumino/coreutils": "^2.1.1",
+    "@lumino/disposable": "^2.1.1",
+    "@lumino/signaling": "^2.1.1",
     "lodash.mergewith": "^4.6.1",
     "vscode-jsonrpc": "^6.0.0",
     "vscode-languageserver-protocol": "^3.17.0",
     "vscode-ws-jsonrpc": "~1.0.2"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-beta.1",
+    "@jupyterlab/testing": "^4.0.0",
     "@types/jest": "^29.2.0",
     "@types/lodash.mergewith": "^4.6.1",
     "jest": "^29.2.0",

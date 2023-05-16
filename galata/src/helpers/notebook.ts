@@ -349,6 +349,33 @@ export class NotebookHelper {
   }
 
   /**
+   * Trust the active notebook
+   *
+   * @returns Whether the action succeeded or not.
+   */
+  async trust(): Promise<boolean> {
+    if (
+      (await this.isAnyActive()) &&
+      (await this.page
+        .locator('[data-icon="ui-components:not-trusted"]')
+        .count()) === 1
+    ) {
+      await this.page.keyboard.press('Control+Shift+C');
+      await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
+      await this.page.getByText('Trust Notebook').click();
+      await this.page.getByRole('button', { name: 'Trust' }).click();
+
+      return (
+        (await this.page
+          .locator('[data-icon="ui-components:trusted"]')
+          .count()) === 1
+      );
+    }
+
+    return true;
+  }
+
+  /**
    * Wait for notebook cells execution to finish
    *
    * @param cellIndex Cell index

@@ -73,7 +73,10 @@ export namespace TableOfContents {
   /**
    * Table of content model factory interface
    */
-  export interface IFactory<W extends Widget = Widget> {
+  export interface IFactory<
+    W extends Widget = Widget,
+    H extends IHeading = IHeading
+  > {
     /**
      * Whether the factory can handle the widget or not.
      *
@@ -92,7 +95,7 @@ export namespace TableOfContents {
     createNew: (
       widget: W,
       configuration?: TableOfContents.IConfig
-    ) => IModel<IHeading>;
+    ) => IModel<H>;
   }
 
   /**

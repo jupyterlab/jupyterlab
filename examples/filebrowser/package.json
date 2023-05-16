@@ -1,26 +1,26 @@
 {
   "name": "@jupyterlab/example-filebrowser",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-beta.1",
-    "@jupyterlab/apputils": "^4.0.0-beta.1",
-    "@jupyterlab/codemirror": "^4.0.0-beta.1",
-    "@jupyterlab/coreutils": "^6.0.0-beta.1",
-    "@jupyterlab/docmanager": "^4.0.0-beta.1",
-    "@jupyterlab/docregistry": "^4.0.0-beta.1",
-    "@jupyterlab/filebrowser": "^4.0.0-beta.1",
-    "@jupyterlab/fileeditor": "^4.0.0-beta.1",
-    "@jupyterlab/services": "^7.0.0-beta.1",
-    "@jupyterlab/theme-light-extension": "^4.0.0-beta.1",
-    "@jupyterlab/translation": "^4.0.0-beta.1",
-    "@jupyterlab/ui-components": "^4.0.0-beta.1",
-    "@lumino/commands": "^2.1.0",
-    "@lumino/widgets": "^2.1.0"
+    "@jupyterlab/application": "^4.0.0",
+    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/codemirror": "^4.0.0",
+    "@jupyterlab/coreutils": "^6.0.0",
+    "@jupyterlab/docmanager": "^4.0.0",
+    "@jupyterlab/docregistry": "^4.0.0",
+    "@jupyterlab/filebrowser": "^4.0.0",
+    "@jupyterlab/fileeditor": "^4.0.0",
+    "@jupyterlab/services": "^7.0.0",
+    "@jupyterlab/theme-light-extension": "^4.0.0",
+    "@jupyterlab/translation": "^4.0.0",
+    "@jupyterlab/ui-components": "^4.0.0",
+    "@lumino/commands": "^2.1.1",
+    "@lumino/widgets": "^2.1.1"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",

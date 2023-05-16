@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-services-browser",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0",
   "private": true,
   "files": [
     "lib/*.{d.ts,js,js.map}"
@@ -10,9 +10,9 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-beta.1",
-    "@jupyterlab/services": "^7.0.0-beta.1",
-    "@lumino/coreutils": "^2.1.0"
+    "@jupyterlab/coreutils": "^6.0.0",
+    "@jupyterlab/services": "^7.0.0",
+    "@lumino/coreutils": "^2.1.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

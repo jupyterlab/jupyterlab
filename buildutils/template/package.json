@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/template",
-  "version": "4.0.0-beta.1",
+  "version": "4.0.0",
   "description": "JupyterLab - Package Template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,7 +37,7 @@
     "watch": "tsc -b --watch"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-beta.1",
+    "@jupyterlab/testing": "^4.0.0",
     "@types/jest": "^29.2.0",
     "rimraf": "~3.0.0",
     "typescript": "~5.0.4"

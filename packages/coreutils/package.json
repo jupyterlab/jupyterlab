@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/coreutils",
-  "version": "6.0.0-beta.1",
+  "version": "6.0.0",
   "description": "JupyterLab - Core Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,9 +40,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@lumino/coreutils": "^2.1.0",
-    "@lumino/disposable": "^2.1.0",
-    "@lumino/signaling": "^2.1.0",
+    "@lumino/coreutils": "^2.1.1",
+    "@lumino/disposable": "^2.1.1",
+    "@lumino/signaling": "^2.1.1",
     "minimist": "~1.2.0",
     "path-browserify": "^1.0.0",
     "url-parse": "~1.5.4"
@@ -58,7 +58,7 @@
     "jest-junit": "^15.0.0",
     "rimraf": "~3.0.0",
     "ts-jest": "^29.1.0",
-    "typedoc": "~0.24.1",
+    "typedoc": "~0.24.7",
     "typescript": "~5.0.4"
   },
   "publishConfig": {

@@ -6,7 +6,6 @@
 /* eslint-disable camelcase */
 import * as fs from 'fs-extra';
 import * as child_process from 'child_process';
-import * as crypto from 'crypto';
 import * as path from 'path';
 import * as os from 'os';
 import * as ps from 'process';
@@ -255,39 +254,6 @@ async function stopLocalRegistry(out_dir: string) {
 }
 
 /**
- * Fix the yarn lock links in the given directory.
- */
-function fixLinks(package_dir: string) {
-  let yarn_reg = '';
-  try {
-    yarn_reg = utils.run(
-      'yarn config get npmRegistryServer',
-      { stdio: 'pipe' },
-      true
-    );
-  } catch (e) {
-    // Do nothing
-  }
-  yarn_reg = yarn_reg || 'https://registry.yarnpkg.com';
-  const lock_file = path.join(package_dir, 'yarn.lock');
-  console.log(`Fixing links in ${lock_file}`);
-  const content = fs.readFileSync(lock_file, { encoding: 'utf-8' });
-
-  let shasum = crypto.createHash('sha256');
-  let hash = shasum.update(content);
-  console.log('Prior hash', hash.digest('hex'));
-
-  const regex = /http\:\/\/0\.0\.0\.0\:\d+/g;
-  const new_content = content.replace(regex, yarn_reg);
-
-  shasum = crypto.createHash('sha256');
-  hash = shasum.update(new_content);
-  console.log('After hash', hash.digest('hex'));
-
-  fs.writeFileSync(lock_file, new_content, 'utf8');
-}
-
-/**
  * Publish the npm tar files in a given directory
  */
 function publishPackages(dist_dir: string) {
@@ -325,14 +291,6 @@ program
     utils.exitOnUncaughtException();
     const out_dir = options.path || DEFAULT_OUT_DIR;
     await stopLocalRegistry(out_dir);
-  });
-
-program
-  .command('fix-links')
-  .option('--path <path>', 'Path to the directory with a yarn lock')
-  .action((options: any) => {
-    utils.exitOnUncaughtException();
-    fixLinks(options.path || process.cwd());
   });
 
 program
