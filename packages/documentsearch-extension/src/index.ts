@@ -159,7 +159,12 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           searchDebounceTime
         );
 
-        const newView = new SearchDocumentView(searchModel, translator);
+        const newView = new SearchDocumentView(
+          searchModel,
+          app.commands,
+          translator
+        );
+
 
         searchViews.set(widgetId, newView);
         // find next, previous and end are now enabled

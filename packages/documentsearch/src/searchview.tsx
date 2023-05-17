@@ -21,6 +21,7 @@ import {
   wordIcon
 } from '@jupyterlab/ui-components';
 import { ISignal, Signal } from '@lumino/signaling';
+import { CommandRegistry } from '@lumino/commands';
 import { UseSignal } from '@jupyterlab/apputils';
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
@@ -265,19 +266,48 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
 }
 
 interface IUpDownProps {
+  commands: CommandRegistry;
   onHighlightPrevious: () => void;
   onHighlightNext: () => void;
   trans: TranslationBundle;
 }
 
 function UpDownButtons(props: IUpDownProps) {
+  // Getting the key bindings for the next and previous commands
+  const nextBinding = props.commands.keyBindings.find(
+    (binding: { command: string }) =>
+      binding.command === 'documentsearch:highlightNext'
+  );
+
+  console.log('nextBinding:', nextBinding);
+
+
+  console.log(nextBinding);
+  const prevBinding = props.commands.keyBindings.find(
+    (binding: { command: string }) =>
+      binding.command === 'documentsearch:highlightPrevious'
+  );
+
+  console.log('prevBinding:', prevBinding);
+
+
+  const nextKeys = nextBinding
+    ? CommandRegistry.formatKeystroke(nextBinding.keys)
+    : '';
+  const prevKeys = prevBinding
+    ? CommandRegistry.formatKeystroke(prevBinding.keys)
+    : '';
+
+  const prevShortcut = prevKeys ? `(${prevKeys})` : '';
+  const nextShortcut = nextKeys ? `(${nextKeys})` : '';
+
   return (
     <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightPrevious()}
         tabIndex={0}
-        title={props.trans.__('Previous Match')}
+        title={`${props.trans.__('Previous Match')} ${prevShortcut}`}
       >
         <caretUpEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -288,7 +318,7 @@ function UpDownButtons(props: IUpDownProps) {
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightNext()}
         tabIndex={0}
-        title={props.trans.__('Next Match')}
+        title={`${props.trans.__('Next Match')} ${nextShortcut}`}
       >
         <caretDownEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -675,6 +705,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
               this.props.onHighlightNext();
             }}
             trans={trans}
+            commands={new CommandRegistry()}
           />
           <button
             className={BUTTON_WRAPPER_CLASS}
@@ -732,12 +763,19 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
    * Search document widget constructor.
    *
    * @param model Search document model
+   * @param commands
    * @param translator Application translator object
+   *
    */
-  constructor(model: SearchDocumentModel, protected translator?: ITranslator) {
+  constructor(
+    model: SearchDocumentModel,
+    commands: CommandRegistry,
+    protected translator?: ITranslator
+  ) {
     super(model);
     this.addClass(OVERLAY_CLASS);
     this._searchInput = React.createRef<HTMLTextAreaElement>();
+    this._commands = commands;
   }
 
   /**
@@ -892,4 +930,5 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
   private _showReplace = false;
   private _showFilters = false;
   private _closed = new Signal<this, void>(this);
+  protected _commands: CommandRegistry;
 }

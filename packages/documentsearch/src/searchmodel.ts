@@ -11,6 +11,7 @@ import {
   IReplaceOptionsSupport,
   ISearchProvider
 } from './tokens';
+import { CommandRegistry } from '@lumino/commands';
 
 /**
  * Search in a document model.
@@ -351,6 +352,21 @@ export class SearchDocumentModel
       );
     }
   }
+
+  /**
+   * Set the command registry object.
+   *
+   * @param commands Command registry object
+   */
+  setCommands(commands: CommandRegistry) {
+    this._commands = commands;
+    console.log('commands:', commands);
+  }
+
+  /**
+   * Command registry object.
+   */
+  protected _commands: CommandRegistry;
 
   private _caseSensitive = false;
   private _disposed = new Signal<this, void>(this);
