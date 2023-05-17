@@ -279,17 +279,10 @@ function UpDownButtons(props: IUpDownProps) {
       binding.command === 'documentsearch:highlightNext'
   );
 
-  console.log('nextBinding:', nextBinding);
-
-
-  console.log(nextBinding);
   const prevBinding = props.commands.keyBindings.find(
     (binding: { command: string }) =>
       binding.command === 'documentsearch:highlightPrevious'
   );
-
-  console.log('prevBinding:', prevBinding);
-
 
   const nextKeys = nextBinding
     ? CommandRegistry.formatKeystroke(nextBinding.keys)

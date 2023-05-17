@@ -360,7 +360,6 @@ export class SearchDocumentModel
    */
   setCommands(commands: CommandRegistry) {
     this._commands = commands;
-    console.log('commands:', commands);
   }
 
   /**
