@@ -84,7 +84,9 @@ export class Dialog<T> extends Widget {
    * @param options - The dialog setup options.
    */
   constructor(options: Partial<Dialog.IOptions<T>> = {}) {
-    super();
+    const dialogNode = document.createElement('dialog');
+    dialogNode.ariaModal = 'true';
+    super({ node: dialogNode });
     this.addClass('jp-Dialog');
     const normalized = Private.handleOptions(options);
     const renderer = normalized.renderer;
@@ -117,6 +119,7 @@ export class Dialog<T> extends Widget {
     content.addClass('jp-Dialog-content');
     if (typeof options.body === 'string') {
       content.addClass('jp-Dialog-content-small');
+      dialogNode.ariaLabel = [normalized.title, options.body].join(' ');
     }
     layout.addWidget(content);
 
