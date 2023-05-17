@@ -1337,8 +1337,14 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       label = sessionContext.kernelDisplayName;
     }
     const buttons = [
-      Dialog.cancelButton({ label }),
-      Dialog.okButton({ label: trans.__('Select') })
+      Dialog.cancelButton({
+        label,
+        ariaLabel: trans.__('Cancel Kernel Select')
+      }),
+      Dialog.okButton({
+        label: trans.__('Select'),
+        ariaLabel: trans.__('Select Kernel')
+      })
     ];
 
     const autoStartDefault = sessionContext.kernelPreference.autoStartDefault;
@@ -1410,14 +1416,20 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       throw new Error('No kernel to restart');
     }
 
-    const restartBtn = Dialog.warnButton({ label: 'Restart' });
+    const restartBtn = Dialog.warnButton({
+      label: 'Restart',
+      ariaLabel: trans.__('Confirm Kernel Restart')
+    });
     const result = await showDialog({
       title: trans.__('Restart Kernel?'),
       body: trans.__(
         'Do you want to restart the kernel of %1? All variables will be lost.',
         sessionContext.name
       ),
-      buttons: [Dialog.cancelButton(), restartBtn]
+      buttons: [
+        Dialog.cancelButton({ ariaLabel: trans.__('Cancel Kernel Restart') }),
+        restartBtn
+      ]
     });
 
     if (kernel.isDisposed) {

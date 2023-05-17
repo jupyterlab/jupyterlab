@@ -535,6 +535,10 @@ export namespace Dialog {
    */
   export interface IButton {
     /**
+     * The aria label for the button.
+     */
+    ariaLabel: string;
+    /**
      * The label for the button.
      */
     label: string;
@@ -762,6 +766,7 @@ export namespace Dialog {
     const trans = translator.load('jupyterlab');
     const defaultLabel = value.accept ? trans.__('Ok') : trans.__('Cancel');
     return {
+      ariaLabel: value.ariaLabel || value.label || defaultLabel,
       label: value.label || defaultLabel,
       iconClass: value.iconClass || '',
       iconLabel: value.iconLabel || '',
@@ -1060,6 +1065,7 @@ export namespace Dialog {
       const e = document.createElement('div');
       e.className = 'jp-Dialog-buttonLabel';
       e.title = data.caption;
+      e.ariaLabel = data.ariaLabel;
       e.appendChild(document.createTextNode(data.label));
       return e;
     }

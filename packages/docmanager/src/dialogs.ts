@@ -54,7 +54,10 @@ export function renameDialog(
     focusNodeSelector: 'input',
     buttons: [
       Dialog.cancelButton(),
-      Dialog.okButton({ label: trans.__('Rename') })
+      Dialog.okButton({
+        label: trans.__('Rename'),
+        ariaLabel: trans.__('Rename File')
+      })
     ]
   }).then(result => {
     if (!result.value) {
@@ -115,7 +118,10 @@ export function shouldOverwrite(
     body: trans.__('"%1" already exists, overwrite?', path),
     buttons: [
       Dialog.cancelButton(),
-      Dialog.warnButton({ label: trans.__('Overwrite') })
+      Dialog.warnButton({
+        label: trans.__('Overwrite'),
+        ariaLabel: trans.__('Overwrite Existing File')
+      })
     ]
   };
   return showDialog(options).then(result => {
