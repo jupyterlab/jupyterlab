@@ -100,7 +100,7 @@
   flex-direction: column;
   cursor: pointer;
   width: var(--jp-private-launcher-card-size);
-  height: var(--jp-private-launcher-card-size);
+  min-height: var(--jp-private-launcher-card-size);
   margin: 8px;
   padding: 0;
   border: 1px solid var(--jp-border-color2);
@@ -154,14 +154,14 @@
 
 .jp-LauncherCard-label {
   width: 100%;
-  height: var(--jp-private-launcher-card-label-height);
+  min-height: var(--jp-private-launcher-card-label-height);
   padding: 0 4px 4px;
   box-sizing: border-box;
   overflow: hidden;
 }
 
 .jp-LauncherCard-label p {
-  height: 2.154em;
+  min-height: 2.154em;
   word-break: break-word;
   text-align: center;
   color: var(--jp-ui-font-color1);
