@@ -1,6 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
+// import { MainAreaWidget, setToolbar, Notification } from '@jupyterlab/apputils';
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
@@ -607,6 +607,12 @@ export class DocumentWidget<
     this.node.dataset.readonly = this.context.contentsModel?.writable
       ? 'false'
       : 'true';
+    // console.log(this.title.label)
+    // console.log(this.node.dataset.readonly)
+    // console.log(this.context.contentsModel)
+    // if (this.node.dataset.readonly) {
+    //   Notification.warning(`${this.title.label} is read-only`);
+    // }
   }
 
   /**
@@ -616,9 +622,12 @@ export class DocumentWidget<
     sender: DocumentRegistry.IModel,
     args: IChangedArgs<any>
   ): void {
+    console.log(args);
     if (args.name === 'dirty') {
       this._handleDirtyState();
     }
+    console.log('label: ', this.title.label);
+    console.log('_onModelStateChanged: ', this.context.contentsModel?.writable);
   }
 
   /**

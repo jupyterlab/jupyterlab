@@ -574,6 +574,11 @@ export namespace ToolbarItems {
     translator?: ITranslator
   ): Widget {
     const trans = (translator || nullTranslator).load('jupyterlab');
+    console.log('createReadonlyLabel');
+    console.log('name: ', panel.context.contentsModel?.name);
+    console.log('writable: ', panel.context.contentsModel?.writable);
+    console.log('not writable: ', !panel.context.contentsModel?.writable);
+
     return ReactWidget.create(
       <UseSignal signal={panel.context.fileChanged}>
         {() =>
