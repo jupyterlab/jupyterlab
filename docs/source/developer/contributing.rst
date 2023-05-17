@@ -85,9 +85,8 @@ You may also wish to consider pinning the major version of JupyterLab when devel
 extensions (in your package metadata).
 
 We maintain the **two most recently released major versions of JupyterLab**,
-JupyterLab v2 and JupyterLab v3. After JupyterLab v4 is released, we will no
-longer maintain v2. All JupyterLab v2 users are strongly advised to upgrade
-as soon as possible.
+JupyterLab v3 and JupyterLab v4. JupyterLab v1 and v2 are no longer maintained.
+All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
 
 Languages, Tools and Processes
 ------------------------------
