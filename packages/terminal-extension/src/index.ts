@@ -353,7 +353,9 @@ function addCommands(
     execute: async args => {
       const name = args['name'] as string;
       const cwd = args['cwd'] as string;
-      const localPath = serviceManager.contents.localPath(cwd);
+      const localPath = cwd
+        ? serviceManager.contents.localPath(cwd)
+        : undefined;
 
       let session;
       if (name) {

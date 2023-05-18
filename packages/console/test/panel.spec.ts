@@ -33,29 +33,28 @@ class TestPanel extends ConsolePanel {
 const contentFactory = createConsolePanelFactory();
 
 describe('console/panel', () => {
-  let panel: TestPanel;
-  const manager = new ServiceManagerMock();
-
-  beforeAll(async () => {
-    manager.contents.addDrive(new Drive({ name: 'TestDrive' }));
-    return await manager.ready;
-  });
-
-  beforeEach(() => {
-    panel = new TestPanel({
-      manager,
-      contentFactory,
-      rendermime,
-      mimeTypeService,
-      sessionContext: createSimpleSessionContext()
-    });
-  });
-
-  afterEach(() => {
-    panel.dispose();
-  });
-
   describe('ConsolePanel', () => {
+    let panel: TestPanel;
+    const manager = new ServiceManagerMock();
+
+    beforeAll(async () => {
+      return await manager.ready;
+    });
+
+    beforeEach(() => {
+      panel = new TestPanel({
+        manager,
+        contentFactory,
+        rendermime,
+        mimeTypeService,
+        sessionContext: createSimpleSessionContext()
+      });
+    });
+
+    afterEach(() => {
+      panel.dispose();
+    });
+
     describe('#constructor()', () => {
       it('should create a new console panel', () => {
         expect(panel).toBeInstanceOf(ConsolePanel);
@@ -65,6 +64,7 @@ describe('console/panel', () => {
       });
 
       it('should set the session context path to local path', () => {
+        manager.contents.addDrive(new Drive({ name: 'TestDrive' }));
         const localPath = `${UUID.uuid4()}.txt`;
         const panel = new TestPanel({
           manager,
@@ -75,6 +75,7 @@ describe('console/panel', () => {
         });
 
         expect(panel.sessionContext.path).toEqual(localPath);
+        panel.dispose();
       });
     });
 
