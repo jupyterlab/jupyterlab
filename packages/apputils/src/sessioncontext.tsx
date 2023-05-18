@@ -1338,8 +1338,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     }
     const buttons = [
       Dialog.cancelButton({
-        label,
-        ariaLabel: trans.__('Cancel Kernel Select')
+        label
       }),
       Dialog.okButton({
         label: trans.__('Select'),
