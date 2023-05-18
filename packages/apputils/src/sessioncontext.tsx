@@ -1417,7 +1417,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
     }
 
     const restartBtn = Dialog.warnButton({
-      label: 'Restart',
+      label: trans.__('Restart'),
       ariaLabel: trans.__('Confirm Kernel Restart')
     });
     const result = await showDialog({
