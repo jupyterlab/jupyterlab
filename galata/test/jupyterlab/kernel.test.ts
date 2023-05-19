@@ -95,7 +95,7 @@ test.describe('Kernel', () => {
 
       await page
         .locator('.jp-Dialog')
-        .getByRole('button', { name: 'Select', exact: true })
+        .getByRole('button', { name: 'Select Kernel', exact: true })
         .click();
 
       await expect(page.getByTitle('Switch kernel')).toHaveText(
