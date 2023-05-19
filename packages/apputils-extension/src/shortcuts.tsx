@@ -62,19 +62,22 @@ export function displayShortcuts(options: IOptions) {
 
   function formatKeys(keys: string[]): JSX.Element {
     const topContainer: JSX.Element[] = [];
-    for (const key of keys) {
+    keys.forEach((key, index) => {
       const container: JSX.Element[] = [];
       for (const ch of key.split(' ')) {
         container.push(
-          <span className={SHORTCUT_KEY_CLASS}>
+          <span className={SHORTCUT_KEY_CLASS} key={ch}>
             <kbd>{ch}</kbd>
           </span>,
-          <> + </>
+          <React.Fragment key={`${ch}-fragment`}> + </React.Fragment>
         );
       }
       /*topContainer.push(<span>{container.slice(0, -1)}</span>, <>,</>);*/
-      topContainer.push(<span>{container.slice(0, -1)}</span>, <> + </>);
-    }
+      topContainer.push(
+        <span key={index}>{container.slice(0, -1)}</span>,
+        <> + </>
+      );
+    });
     return <span>{topContainer.slice(0, -1)}</span>;
   }
 
@@ -161,7 +164,10 @@ export function displayShortcuts(options: IOptions) {
     if (groupedBindings.has(d)) {
       bindingTable.push(
         groupedBindings.get(d)!.map(b => (
-          <tr className={SHORTCUT_TABLE_ROW_CLASS} key={b.command}>
+          <tr
+            className={SHORTCUT_TABLE_ROW_CLASS}
+            key={`${b.command}-${b.keys.join('-')}`}
+          >
             <td className={SHORTCUT_TABLE_ITEM_CLASS}>{formatLabel(b)}</td>
             <td className={SHORTCUT_TABLE_ITEM_CLASS}>
               {formatKeys([...b.keys])}
@@ -169,7 +175,12 @@ export function displayShortcuts(options: IOptions) {
           </tr>
         ))
       );
-      bindingTable.push(<tr className={SHORTCUT_TABLE_LAST_ROW_CLASS}></tr>);
+      bindingTable.push(
+        <tr
+          className={SHORTCUT_TABLE_LAST_ROW_CLASS}
+          key={`group-${d}-last`}
+        ></tr>
+      );
     }
   }
 
