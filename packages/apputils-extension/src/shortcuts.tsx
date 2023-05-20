@@ -64,17 +64,19 @@ export function displayShortcuts(options: IOptions) {
     const topContainer: JSX.Element[] = [];
     keys.forEach((key, index) => {
       const container: JSX.Element[] = [];
-      for (const ch of key.split(' ')) {
+      key.split(' ').forEach((ch, chIndex) => {
         container.push(
-          <span className={SHORTCUT_KEY_CLASS} key={ch}>
+          <span className={SHORTCUT_KEY_CLASS} key={`ch-${chIndex}`}>
             <kbd>{ch}</kbd>
           </span>,
-          <React.Fragment key={`${ch}-fragment`}> + </React.Fragment>
+          <React.Fragment key={`fragment-${chIndex}`}> + </React.Fragment>
         );
-      }
+      });
       topContainer.push(
-        <span key={index}>{container.slice(0, -1)}</span>,
-        <> + </>
+        <span key={index} className={`key-${index}`}>
+          {container.slice(0, -1)}
+        </span>,
+        <React.Fragment key={`fragment-${index}`}> + </React.Fragment>
       );
     });
     return <span>{topContainer.slice(0, -1)}</span>;
