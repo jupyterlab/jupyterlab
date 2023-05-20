@@ -72,7 +72,6 @@ export function displayShortcuts(options: IOptions) {
           <React.Fragment key={`${ch}-fragment`}> + </React.Fragment>
         );
       }
-      /*topContainer.push(<span>{container.slice(0, -1)}</span>, <>,</>);*/
       topContainer.push(
         <span key={index}>{container.slice(0, -1)}</span>,
         <> + </>
