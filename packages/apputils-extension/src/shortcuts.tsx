@@ -73,9 +73,7 @@ export function displayShortcuts(options: IOptions) {
         );
       });
       topContainer.push(
-        <span key={index} className={`key-${index}`}>
-          {container.slice(0, -1)}
-        </span>,
+        <span key={`key-${index}`}>{container.slice(0, -1)}</span>,
         <React.Fragment key={`fragment-${index}`}> + </React.Fragment>
       );
     });
