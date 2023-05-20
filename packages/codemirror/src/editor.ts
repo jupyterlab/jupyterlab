@@ -18,7 +18,6 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { SyntaxNodeRef } from '@lezer/common';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-import './codemirror-ipythongfm';
 import { ExtensionsHandler } from './extension';
 import { EditorLanguageRegistry } from './language';
 import {

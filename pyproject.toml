@@ -115,7 +115,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.263",
+    "ruff==0.0.267",
     "black[jupyter]==23.3.0"
 ]
 
@@ -219,7 +219,7 @@ ignore = "tests examples"
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
-npm-cmd = "npm publish --tag next"
+npm-cmd = "npm publish --tag latest"
 release-message = "[ci skip] Publish {version}"
 tag-message = "[ci skip] Release {tag_name}"
 
