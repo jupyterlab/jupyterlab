@@ -31,17 +31,17 @@
   padding: 0;
 }
 
-.jp-RenderedText pre a:link {
+.jp-RenderedText pre a[href]:link {
   text-decoration: none;
   color: var(--jp-content-link-color);
 }
 
-.jp-RenderedText pre a:hover {
+.jp-RenderedText pre a[href]:hover {
   text-decoration: underline;
   color: var(--jp-content-link-color);
 }
 
-.jp-RenderedText pre a:visited {
+.jp-RenderedText pre a[href]:visited {
   text-decoration: none;
   color: var(--jp-content-link-color);
 }

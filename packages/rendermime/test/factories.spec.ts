@@ -42,11 +42,7 @@ describe('rendermime/factories', () => {
   describe('textRendererFactory', () => {
     describe('#mimeTypes', () => {
       it('should have text related mimeTypes', () => {
-        const mimeTypes = [
-          'text/plain',
-          'application/vnd.jupyter.stdout',
-          'application/vnd.jupyter.stderr'
-        ];
+        const mimeTypes = ['text/plain', 'application/vnd.jupyter.stdout'];
         expect(textRendererFactory.mimeTypes).toEqual(mimeTypes);
       });
     });
@@ -507,12 +503,46 @@ describe('rendermime/factories', () => {
       });
     });
 
+    const knownPaths = [
+      '/usr/local/lib/message.py',
+      '/tmp/ipykernel_361344/2220647380.py',
+      '~/jupyterlab/a_file.py',
+      '~/jupyterlab/b_file.py',
+      '/home/user/jupyterlab/a_file.py'
+    ];
+    const options = {
+      ...defaultOptions,
+      resolver: {
+        resolvePath: (url: string) => {
+          if (knownPaths.includes(url)) {
+            return Promise.resolve({
+              path: url,
+              scope: 'server'
+            });
+          }
+          return Promise.resolve(null);
+        },
+        isLocal: (url: string) => {
+          return knownPaths.includes(url);
+        },
+        exists: () => {
+          return false;
+        }
+      },
+      linkHandler: {
+        handlePath: (...args: any[]) => {
+          // no-op
+          return null;
+        }
+      }
+    };
+
     describe('#createRenderer()', () => {
       it('should output the correct HTML', async () => {
         const f = errorRendererFactory;
         const mimeType = 'application/vnd.jupyter.stderr';
         const model = createModel(mimeType, 'x = 2 ** a');
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
       });
@@ -521,7 +551,7 @@ describe('rendermime/factories', () => {
         const f = errorRendererFactory;
         const mimeType = 'application/vnd.jupyter.stderr';
         const model = createModel(mimeType, 'x = 2 ** a');
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
@@ -533,14 +563,14 @@ describe('rendermime/factories', () => {
           'There is no text <script>window.x=1</script> but \x1b[01;41;32mtext\x1b[00m.\nWoo.';
         const mimeType = 'application/vnd.jupyter.stderr';
         const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(
           '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
         );
       });
 
-      it('should autolink single file path', async () => {
+      it('should autolink a single known file path', async () => {
         const f = errorRendererFactory;
         const urls = [
           ['/usr/local/lib/message.py', '', ''],
@@ -553,31 +583,69 @@ describe('rendermime/factories', () => {
             const source = `Text with the URL ${before}${url}${after} inside.`;
             const mimeType = 'application/vnd.jupyter.stderr';
             const model = createModel(mimeType, source);
-            const w = f.createRenderer({ mimeType, ...defaultOptions });
+            const w = f.createRenderer({ mimeType, ...options });
             const [urlEncoded, beforeEncoded, afterEncoded] = [
               url,
               before,
               after
             ].map(encodeChars);
-            // TODO should this be data-commandlinker-command="some:command" data-commandlinker-args="{some:arg}"?
             const prefixedUrl = urlEncoded.startsWith('www.')
               ? 'https://' + urlEncoded
               : urlEncoded;
             await w.renderModel(model);
             expect(w.node.innerHTML).toBe(
-              `<pre>Text with the URL ${beforeEncoded}<a href="${prefixedUrl}" rel="noopener" target="_blank">${urlEncoded}</a>${afterEncoded} inside.</pre>`
+              `<pre>Text with the URL ${beforeEncoded}<a href="${prefixedUrl}">${urlEncoded}</a>${afterEncoded} inside.</pre>`
             );
           })
         );
       });
 
+      it('should autolink multiple links', async () => {
+        const f = errorRendererFactory;
+        const source =
+          'prefix ~/jupyterlab/a_file.py:1 suffix\nprefix ~/jupyterlab/b_file.py:1 suffix';
+        const mimeType = 'application/vnd.jupyter.stderr';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...options });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<pre>prefix <a href="~/jupyterlab/a_file.py#line=1">~/jupyterlab/a_file.py:1</a> suffix\nprefix <a href="~/jupyterlab/b_file.py#line=1">~/jupyterlab/b_file.py:1</a> suffix</pre>'
+        );
+      });
+
+      it('should autolink to a specific line (Python style)', async () => {
+        const f = errorRendererFactory;
+        const source =
+          'File "/home/user/jupyterlab/a_file.py", line 1, in <module>';
+        const mimeType = 'application/vnd.jupyter.stderr';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...options });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<pre>File "<a href="/home/user/jupyterlab/a_file.py#line=1">/home/user/jupyterlab/a_file.py", line 1</a>, in &lt;module&gt;</pre>'
+        );
+      });
+
+      it('should autolink to a specific line (IPython style)', async () => {
+        const f = errorRendererFactory;
+        const source = 'File ~/jupyterlab/a_file.py:1';
+        const mimeType = 'application/vnd.jupyter.stderr';
+        const model = createModel(mimeType, source);
+        const w = f.createRenderer({ mimeType, ...options });
+        await w.renderModel(model);
+        expect(w.node.innerHTML).toBe(
+          '<pre>File <a href="~/jupyterlab/a_file.py#line=1">~/jupyterlab/a_file.py:1</a></pre>'
+        );
+      });
+
       it('should autolink URLs', async () => {
         const source = 'www.example.com';
-        const expected = '<pre>www.example.com</pre>';
+        const expected =
+          '<pre><a href="https://www.example.com" rel="noopener" target="_blank">www.example.com</a></pre>';
         const f = textRendererFactory;
         const mimeType = 'application/vnd.jupyter.stderr';
         const model = createModel(mimeType, source);
-        const w = f.createRenderer({ mimeType, ...defaultOptions });
+        const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(expected);
       });

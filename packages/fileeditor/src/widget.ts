@@ -205,6 +205,37 @@ export namespace FileEditor {
 }
 
 /**
+ * A document widget for file editor widgets.
+ */
+export class FileEditorWidget extends DocumentWidget<FileEditor> {
+  /**
+   * Set URI fragment identifier for text files
+   */
+  setFragment(fragment: string): void {
+    const parseFragments = fragment.split('=');
+
+    // TODO: expand to allow more schemes of Fragment Identification Syntax
+    // reference: https://datatracker.ietf.org/doc/html/rfc5147#section-3
+    if (parseFragments[0] !== '#line') {
+      return;
+    }
+
+    // A range of lines can be provided, only respect first for now.
+    let firstLine = parseFragments[1].split(',')[0];
+
+    // Reveal the line
+    void this.context.ready.then(() => {
+      const position = {
+        line: parseInt(firstLine, 10) - 1,
+        column: 0
+      };
+      this.content.editor.setCursorPosition(position);
+      this.content.editor.revealPosition(position);
+    });
+  }
+}
+
+/**
  * A widget factory for editors.
  */
 export class FileEditorFactory extends ABCWidgetFactory<
@@ -237,7 +268,7 @@ export class FileEditorFactory extends ABCWidgetFactory<
     });
 
     content.title.icon = textEditorIcon;
-    const widget = new DocumentWidget({ content, context });
+    const widget = new FileEditorWidget({ content, context });
     return widget;
   }
 
