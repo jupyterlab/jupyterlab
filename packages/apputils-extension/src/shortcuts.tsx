@@ -165,7 +165,7 @@ export function displayShortcuts(options: IOptions) {
         groupedBindings.get(d)!.map(b => (
           <tr
             className={SHORTCUT_TABLE_ROW_CLASS}
-            key={`${b.command}-${b.keys.join('-')}`}
+            key={`${b.command}-${b.keys.join('-').replace(' ', '_')}`}
           >
             <td className={SHORTCUT_TABLE_ITEM_CLASS}>{formatLabel(b)}</td>
             <td className={SHORTCUT_TABLE_ITEM_CLASS}>
