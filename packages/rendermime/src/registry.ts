@@ -423,7 +423,8 @@ export namespace RenderMimeRegistry {
         }
       }
       // The file is not accessible from jupyter-server but maybe it is
-      // available from DAP `source`; as we have no way of checking this
+      // available from DAP `source`; we assume the path is available
+      // from kernel because currently we have no way of checking this
       // without introducing a cycle (unless we were to set the debugger
       // service instance on the resolver later).
       return {
