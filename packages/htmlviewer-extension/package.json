@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0",
-    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/apputils": "^4.1.0",
     "@jupyterlab/docregistry": "^4.0.0",
     "@jupyterlab/htmlviewer": "^4.0.0",
     "@jupyterlab/observables": "^5.0.0",
