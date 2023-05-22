@@ -169,15 +169,15 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
       if (cat in categories) {
         section = (
           <div className="jp-Launcher-section" key={cat}>
-            <div className="jp-Launcher-sectionHeader">
+            <div className="jp-Launcher-sectionHeader" aria-describedby="title">
               <LabIcon.resolveReact
                 icon={icon}
                 iconClass={classes(iconClass, 'jp-Icon-cover')}
                 stylesheet="launcherSection"
-                title={this._trans.__('%s icon', cat)}
                 aria-hidden="true"
-              />{' '}
-              <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
+                title={this._trans.__(cat)}
+              />
+              <a className="jp-Launcher-sectionTitle">{cat}</a>
             </div>
             <div className="jp-Launcher-cardContainer">
               {Array.from(

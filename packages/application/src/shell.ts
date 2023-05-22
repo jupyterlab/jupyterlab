@@ -308,6 +308,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
       this
     ));
+    this.add(skipLinkWidget, 'top', { rank: 0 });
     this._skipLinkWidget.show();
     //  Wrap the skip widget to customize its position and size
     const skipLinkWrapper = new Panel();
@@ -710,7 +711,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       TabBarSvg.translator = value;
 
       const trans = value.load('jupyterlab');
-      this._menuHandler.panel.node.setAttribute('aria-label', trans.__('main'));
+      this._menuHandler.panel.node.setAttribute(
+        'aria-label',
+        trans.__('main menu')
+      );
       this._leftHandler.sideBar.node.setAttribute(
         'aria-label',
         trans.__('main sidebar')
@@ -2136,6 +2140,9 @@ namespace Private {
       this.id = 'jp-skiplink';
       this._shell = shell;
       this._createSkipLink('Skip to left side bar');
+      this._createSkipLink('Skip to launcher content area');
+      this._createSkipLink('Skip to right side bar');
+      this._createSkipLink('Skip to footer');
     }
 
     handleEvent(event: Event): void {

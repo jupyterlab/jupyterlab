@@ -44,10 +44,10 @@ export class MainAreaWidget<T extends Widget = Widget>
     const trans = (options.translator || nullTranslator).load('jupyterlab');
     const content = (this._content = options.content);
     content.node.setAttribute('role', 'region');
-    content.node.setAttribute('aria-label', trans.__('notebook content'));
+    content.node.setAttribute('aria-label', trans.__('launcher content'));
     const toolbar = (this._toolbar = options.toolbar || new ReactiveToolbar());
     toolbar.node.setAttribute('role', 'navigation');
-    toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
+    toolbar.node.setAttribute('aria-label', trans.__('launcher actions'));
     const contentHeader = (this._contentHeader =
       options.contentHeader ||
       new BoxPanel({
