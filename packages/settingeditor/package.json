@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0",
-    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/apputils": "^4.1.0",
     "@jupyterlab/codeeditor": "^4.0.0",
     "@jupyterlab/inspector": "^4.0.0",
     "@jupyterlab/rendermime": "^4.0.0",
