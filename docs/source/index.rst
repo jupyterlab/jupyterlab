@@ -25,7 +25,7 @@ ideas with others.
 
 **JupyterLab** is a sibling to other notebook authoring applications under
 the `Project Jupyter <https://docs.jupyter.org/en/latest/>`_ umbrella, like
-`Juyter Notebook <https://jupyterlab.readthedocs.io/en/latest/>`_. JupyterLab
+`Jupyter Notebook <https://jupyterlab.readthedocs.io/en/latest/>`_. JupyterLab
 offers a more advanced, feature rich, customizable experience compared to
 Jupyter Notebook.
 
