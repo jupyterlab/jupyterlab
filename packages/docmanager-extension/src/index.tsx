@@ -598,6 +598,7 @@ export namespace ToolbarItems {
 
   /**
    * Create save button toolbar item.
+   *
    */
   export function createSaveButton(
     commands: CommandRegistry,

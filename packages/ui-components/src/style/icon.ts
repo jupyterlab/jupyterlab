@@ -394,7 +394,7 @@ export namespace LabIconStyle {
         display: 'flex'
       },
       element: {
-        display: 'inline-block',
+        display: 'block',
         ...extra
       }
     };

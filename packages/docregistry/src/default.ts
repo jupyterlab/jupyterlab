@@ -603,9 +603,6 @@ export class DocumentWidget<
     this.title.label = PathExt.basename(sender.localPath);
     // The document is not untitled any more.
     this.isUntitled = false;
-    this.node.dataset.readonly = this.context.contentsModel?.writable
-      ? 'false'
-      : 'true';
   }
 
   /**
