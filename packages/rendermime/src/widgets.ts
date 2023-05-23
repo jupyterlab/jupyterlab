@@ -313,6 +313,20 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
     });
   }
 
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    // Toggle the trusted class on the widget.
+    this.toggleClass('jp-mod-trusted', model.trusted);
+
+    // Render the actual content.
+    await this.render(model);
+
+    // Handle the fragment identifier if given.
+    const { fragment } = model.metadata;
+    if (fragment) {
+      this.setFragment(fragment as string);
+    }
+  }
+
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
