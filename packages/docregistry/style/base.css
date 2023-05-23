@@ -7,13 +7,20 @@
   outline: none;
 }
 
-.jp-Document {
-  min-width: 120px;
-  min-height: 120px;
-  outline: none;
-}
+/* .jp-Document { */
 
-.jp-MainAreaWidget.jp-Document {
-  display: flex;
-  flex-direction: column;
-}
+/*   min-width: 120px; */
+
+/*   min-height: 120px; */
+
+/*   outline: none; */
+
+/* } */
+
+/* .jp-MainAreaWidget.jp-Document { */
+
+/*   display: flex; */
+
+/*   flex-direction: column; */
+
+/* } */

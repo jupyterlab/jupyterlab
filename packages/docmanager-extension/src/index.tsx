@@ -45,7 +45,7 @@ import { some } from '@lumino/algorithm';
 import {
   addCommandToolbarButtonClass,
   CommandToolbarButtonComponent,
-  readonlyIcon,
+  // readonlyIcon,
   saveIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
@@ -579,16 +579,29 @@ export namespace ToolbarItems {
       <UseSignal signal={panel.context.fileChanged}>
         {() =>
           !panel.context.contentsModel?.writable ? (
-            <readonlyIcon.react
-              className="jp-ToolbarLabelComponent-icon"
-              label="readonly document"
-              stylesheet="toolbarButton"
-              tag="span"
-              title={trans.__(
-                `document is permissioned readonly; "save" is disabled, use "save as..." instead`
-              )}
-            />
+            <div>
+              <span
+                className="jp-ToolbarLabelComponent-label"
+                // label="Document is read-only"
+                // stylesheet="toolbarButton"
+                // tag="span"
+                title={trans.__(
+                  `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+                )}
+              >
+                Document is read-only
+              </span>
+            </div>
           ) : (
+            // <readonlyIcon.react
+            //   className="jp-ToolbarLabelComponent-icon"
+            //   label="Document is read-only"
+            //   stylesheet="toolbarButton"
+            //   tag="span"
+            //   title={trans.__(
+            //     `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+            //   )}
+            // />
             <></>
           )
         }
