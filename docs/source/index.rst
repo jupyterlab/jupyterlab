@@ -13,7 +13,7 @@ JupyterLab Documentation
 Welcome to the **JupyterLab** documentation site. JupyterLab is a highly
 extensible, feature-rich notebook authoring application and editing environment,
 and is a part of `Project Jupyter <https://docs.jupyter.org/en/latest/>`_, a
-large umbrella project centered around the goal of providing tools (and `standards <https://jupyter-client.readthedocs.io/en/stable/messaging.html>`_) for interactive
+large umbrella project centered around the goal of providing tools (and `standards <https://docs.jupyter.org/en/stable/#sub-project-documentation`_) for interactive
 computing with `computational notebooks <https://docs.jupyter.org/en/latest/#what-is-a-notebook>`_.
 
 A `computational notebook <https://docs.jupyter.org/en/latest/#what-is-a-notebook>`_
