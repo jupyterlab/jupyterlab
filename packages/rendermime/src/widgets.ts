@@ -76,20 +76,21 @@ export abstract class RenderedCommon
    *
    * @param model - The mime model to render.
    *
-   * @returns A promise which resolves when rendering is complete.
+   * @param clearExisting - whether to clear existing nodes before render
    *
-   * #### Notes
-   * If the DOM node for this widget already has content, it is emptied
-   * before rendering. Subclasses that do not want this behavior
-   * (if, for instance, they are using DOM diffing), should override
-   * this method and not call `super.renderModel()`.
+   * @returns A promise which resolves when rendering is complete.
    */
-  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+  async renderCommonModel(
+    model: IRenderMime.IMimeModel,
+    clearExisting = true
+  ): Promise<void> {
     // TODO compare model against old model for early bail?
 
     // Empty any existing content in the node from previous renders
-    while (this.node.firstChild) {
-      this.node.removeChild(this.node.firstChild);
+    if (clearExisting) {
+      while (this.node.firstChild) {
+        this.node.removeChild(this.node.firstChild);
+      }
     }
 
     // Toggle the trusted class on the widget.
@@ -103,6 +104,23 @@ export abstract class RenderedCommon
     if (fragment) {
       this.setFragment(fragment as string);
     }
+  }
+
+  /**
+   * Render a mime model.
+   *
+   * @param model - The mime model to render.
+   *
+   * @returns A promise which resolves when rendering is complete.
+   *
+   * #### Notes
+   * If the DOM node for this widget already has content, it is emptied
+   * before rendering. Subclasses that do not want this behavior
+   * (if, for instance, they are using DOM diffing), should override
+   * this method and not call `super.renderModel()`.
+   */
+  async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    await this.renderCommonModel(model);
   }
 
   /**
@@ -313,18 +331,15 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
     });
   }
 
+  /**
+   * Render a mime model.
+   *
+   * @param model - The mime model to render.
+   *
+   * @returns A promise which resolves when rendering is complete.
+   */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    // Toggle the trusted class on the widget.
-    this.toggleClass('jp-mod-trusted', model.trusted);
-
-    // Render the actual content.
-    await this.render(model);
-
-    // Handle the fragment identifier if given.
-    const { fragment } = model.metadata;
-    if (fragment) {
-      this.setFragment(fragment as string);
-    }
+    await this.renderCommonModel(model, false);
   }
 
   /**
