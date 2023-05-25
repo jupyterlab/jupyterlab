@@ -81,10 +81,10 @@ export abstract class RenderedCommon
    * @returns A promise which resolves when rendering is complete.
    *
    * #### Notes
-   * By default, if the DOM node for this widget already has content, it is emptied
-   * before rendering. Subclasses that do not want this behavior
-   * (if, for instance, they are using DOM diffing), should override
-   * this method and not call `super.renderModel()`.
+   * By default, if the DOM node for this widget already has content, it
+   * is emptied before rendering. Subclasses that do not want this behavior
+   * (if, for instance, they are using DOM diffing), should override this
+   * method or call `super.renderModel(model, false)`.
    */
   async renderModel(
     model: IRenderMime.IMimeModel,
