@@ -1,6 +1,6 @@
 # User Guide
 
-Use this page to navigate to in-depth guides, tutorials, and how-tos for using :ref:`JupyterLab <homepage_bookmark>`.
+Use this page to navigate to in-depth guides, tutorials, and how-tos for using :ref:`JupyterLab <HomepageBookmark>`.
 
 ```{toctree}
 :maxdepth: 2
