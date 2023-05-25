@@ -76,12 +76,12 @@ export abstract class RenderedCommon
    *
    * @param model - The mime model to render.
    *
-   * @param clearExisting - whether to clear existing nodes before render
+   * @param clearExisting - Whether to clear existing nodes before render.
    *
    * @returns A promise which resolves when rendering is complete.
    *
    * #### Notes
-   * If the DOM node for this widget already has content, it is emptied
+   * By default, if the DOM node for this widget already has content, it is emptied
    * before rendering. Subclasses that do not want this behavior
    * (if, for instance, they are using DOM diffing), should override
    * this method and not call `super.renderModel()`.
