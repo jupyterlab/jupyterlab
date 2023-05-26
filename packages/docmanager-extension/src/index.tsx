@@ -45,7 +45,6 @@ import { some } from '@lumino/algorithm';
 import {
   addCommandToolbarButtonClass,
   CommandToolbarButtonComponent,
-  // readonlyIcon,
   saveIcon
 } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
