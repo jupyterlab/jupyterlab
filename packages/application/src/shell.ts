@@ -778,7 +778,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Activate Specified Area Widget.
    */
   activateWidget(area?: ILabShell.Area): void {
-    console.log(area);
     switch (area ?? 'main') {
       case 'main':
         const current = this._currentTabBar();
