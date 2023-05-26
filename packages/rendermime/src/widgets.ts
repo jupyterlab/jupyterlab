@@ -76,7 +76,7 @@ export abstract class RenderedCommon
    *
    * @param model - The mime model to render.
    *
-   * @param clearExisting - Whether to clear existing nodes before render.
+   * @param keepExisting - Whether to keep the existing rendering.
    *
    * @returns A promise which resolves when rendering is complete.
    *
@@ -84,16 +84,16 @@ export abstract class RenderedCommon
    * By default, if the DOM node for this widget already has content, it
    * is emptied before rendering. Subclasses that do not want this behavior
    * (if, for instance, they are using DOM diffing), should override this
-   * method or call `super.renderModel(model, false)`.
+   * method or call `super.renderModel(model, true)`.
    */
   async renderModel(
     model: IRenderMime.IMimeModel,
-    clearExisting?: boolean
+    keepExisting?: boolean
   ): Promise<void> {
     // TODO compare model against old model for early bail?
 
     // Empty any existing content in the node from previous renders
-    if (clearExisting !== false) {
+    if (!keepExisting) {
       while (this.node.firstChild) {
         this.node.removeChild(this.node.firstChild);
       }
@@ -328,7 +328,7 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    await super.renderModel(model, false);
+    await super.renderModel(model, true);
   }
 
   /**
