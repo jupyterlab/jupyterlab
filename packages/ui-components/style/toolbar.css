@@ -107,18 +107,6 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   color: white;
 }
 
-/* .jp-ToolbarLabelComponent-icon .jp-icon3[fill] { */
-
-/*   fill: white; */
-
-/* } */
-
-/* .jp-ToolbarLabelComponent-icon .jp-icon3[stroke] { */
-
-/*   stroke: white; */
-
-/* } */
-
 span.jp-ToolbarLabelComponent-icon {
   font-size: var(--jp-ui-font-size1);
   line-height: 100%;
