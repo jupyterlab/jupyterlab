@@ -107,13 +107,6 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   color: white;
 }
 
-span.jp-ToolbarLabelComponent-icon {
-  font-size: var(--jp-ui-font-size1);
-  line-height: 100%;
-  padding: 0 0 0 2px;
-  flex: 0 0 auto;
-}
-
 #jp-main-dock-panel[data-mode='single-document']
   .jp-MainAreaWidget
   > .jp-Toolbar.jp-Toolbar-micro {
