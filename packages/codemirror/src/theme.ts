@@ -129,7 +129,12 @@ export const jupyterHighlightStyle = HighlightStyle.define([
   { tag: [t.separator, t.derefOperator, t.paren], color: '' },
   { tag: t.strong, fontWeight: 'bold' },
   { tag: t.emphasis, fontStyle: 'italic' },
-  { tag: t.strikethrough, textDecoration: 'line-through' }
+  { tag: t.strikethrough, textDecoration: 'line-through' },
+  {
+    tag: t.bool,
+    color: 'var(--jp-mirror-editor-keyword-color)',
+    fontWeight: 'bold'
+  }
 ]);
 
 /**
