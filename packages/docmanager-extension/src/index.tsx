@@ -574,34 +574,21 @@ export namespace ToolbarItems {
     translator?: ITranslator
   ): Widget {
     const trans = (translator || nullTranslator).load('jupyterlab');
-
     return ReactWidget.create(
       <UseSignal signal={panel.context.fileChanged}>
         {() =>
           !panel.context.contentsModel?.writable ? (
             <div>
               <span
-                className="jp-ToolbarLabelComponent-label"
-                // label="Document is read-only"
-                // stylesheet="toolbarButton"
-                // tag="span"
+                className="jp-ToolbarLabelComponent"
                 title={trans.__(
                   `document is permissioned readonly; "save" is disabled, use "save as..." instead`
                 )}
               >
-                Document is read-only
+                Notebook is read-only
               </span>
             </div>
           ) : (
-            // <readonlyIcon.react
-            //   className="jp-ToolbarLabelComponent-icon"
-            //   label="Document is read-only"
-            //   stylesheet="toolbarButton"
-            //   tag="span"
-            //   title={trans.__(
-            //     `document is permissioned readonly; "save" is disabled, use "save as..." instead`
-            //   )}
-            // />
             <></>
           )
         }

@@ -64,7 +64,8 @@ div.jp-ToolbarButton {
   margin: 0;
 }
 
-button.jp-ToolbarButtonComponent {
+button.jp-ToolbarButtonComponent,
+.jp-ToolbarLabelComponent {
   background: var(--jp-layout-color1);
   border: none;
   box-sizing: border-box;
@@ -101,27 +102,9 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   font-family: var(--jp-ui-font-family);
 }
 
-.jp-ToolbarLabelComponent-label {
+.jp-ToolbarLabelComponent {
   background-color: var(--jp-brand-color1);
   color: white;
-  font-family: var(--jp-ui-font-family);
-  min-height: unset;
-  font-size: var(--jp-ui-font-size1);
-  line-height: 100%;
-  padding: 0 6px;
-  display: flex;
-  flex: 0 0 auto;
-  border: none;
-  margin: 0;
-  height: 24px;
-  border-radius: var(--jp-border-radius);
-  align-items: center;
-  text-align: center;
-  min-width: unset;
-  max-width: unset;
-  flex-direction: row;
-  justify-content: center;
-  vertical-align: middle;
 }
 
 /* .jp-ToolbarLabelComponent-icon .jp-icon3[fill] { */
