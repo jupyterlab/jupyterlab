@@ -22,15 +22,6 @@
   overflow-y: auto;
 }
 
-.jp-DebuggerKernelSources-header > div > span {
-  overflow: hidden;
-  cursor: pointer;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--jp-ui-font-size0);
-  color: var(--jp-ui-font-color1);
-}
-
 .jp-DebuggerKernelSource-filterBox {
   padding: 0;
   flex: 0 0 auto;

@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISanitizer, Sanitizer } from '@jupyterlab/apputils';
+import { Sanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { renderText } from '@jupyterlab/rendermime';
+import { IRenderMime, renderText } from '@jupyterlab/rendermime';
 import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -94,7 +94,7 @@ export class Completer extends Widget {
   /**
    * The sanitizer used to sanitize untrusted HTML inputs.
    */
-  readonly sanitizer: ISanitizer;
+  readonly sanitizer: IRenderMime.ISanitizer;
 
   /**
    * The active index.
@@ -522,30 +522,27 @@ export class Completer extends Widget {
   private _cycle(direction: Private.scrollType): void {
     const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
     const index = this._activeIndex;
+    const last = items.length - 1;
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     active.classList.remove(ACTIVE_CLASS);
 
-    if (direction === 'up') {
-      this._activeIndex = index === 0 ? items.length - 1 : index - 1;
-    } else if (direction === 'down') {
-      this._activeIndex = index < items.length - 1 ? index + 1 : 0;
-    } else {
-      // Measure the number of items on a page.
-      const boxHeight = this.node.getBoundingClientRect().height;
-      const itemHeight = active.getBoundingClientRect().height;
-      const pageLength = Math.floor(boxHeight / itemHeight);
-
-      // Update the index
-      if (direction === 'pageUp') {
-        this._activeIndex = index - pageLength;
-      } else {
-        this._activeIndex = index + pageLength;
+    switch (direction) {
+      case 'up':
+        this._activeIndex = index === 0 ? last : index - 1;
+        break;
+      case 'down':
+        this._activeIndex = index < last ? index + 1 : 0;
+        break;
+      case 'pageUp':
+      case 'pageDown': {
+        // Measure the number of items on a page and clamp to the list length.
+        const container = this.node.getBoundingClientRect();
+        const current = active.getBoundingClientRect();
+        const page = Math.floor(container.height / current.height);
+        const sign = direction === 'pageUp' ? -1 : 1;
+        this._activeIndex = Math.min(Math.max(0, index + sign * page), last);
+        break;
       }
-      // Clamp to the length of the list.
-      this._activeIndex = Math.min(
-        Math.max(0, this._activeIndex),
-        items.length - 1
-      );
     }
 
     active = items[this._activeIndex] as HTMLElement;
@@ -593,12 +590,13 @@ export class Completer extends Widget {
         // then emit a completion signal with that `query` (=subset match),
         // but only if the query has actually changed.
         // See: https://github.com/jupyterlab/jupyterlab/issues/10439#issuecomment-875189540
-        if (model.query && model.query != this._lastSubsetMatch) {
+        if (model.query && model.query !== this._lastSubsetMatch) {
           model.subsetMatch = true;
           this._selected.emit(model.query);
           model.subsetMatch = false;
           this._lastSubsetMatch = model.query;
         }
+
         // If the query changed, update rendering of the options.
         if (populated) {
           this.update();
@@ -933,7 +931,7 @@ export namespace Completer {
     /**
      * Sanitizer used to sanitize html strings
      */
-    sanitizer?: ISanitizer;
+    sanitizer?: IRenderMime.ISanitizer;
   }
 
   /**
@@ -1153,7 +1151,7 @@ export namespace Completer {
       /**
        * The sanitizer used to sanitize untrusted HTML inputs.
        */
-      sanitizer?: ISanitizer;
+      sanitizer?: IRenderMime.ISanitizer;
     }
   }
 
@@ -1168,7 +1166,7 @@ export namespace Completer {
     /**
      * The sanitizer used to sanitize untrusted HTML inputs.
      */
-    readonly sanitizer: ISanitizer;
+    readonly sanitizer: IRenderMime.ISanitizer;
 
     /**
      * Create an item node from an ICompletionItem for a text completer menu.
@@ -1199,7 +1197,7 @@ export namespace Completer {
     ): HTMLElement {
       const host = document.createElement('div');
       host.classList.add('jp-RenderedText');
-      const sanitizer = { sanitize: this.sanitizer.sanitize };
+      const sanitizer = this.sanitizer;
       const source = activeItem.documentation || '';
 
       renderText({ host, sanitizer, source }).catch(console.error);
@@ -1312,7 +1310,9 @@ export namespace Completer {
   /**
    * The default `IRenderer` instance.
    */
-  export function getDefaultRenderer(sanitizer?: ISanitizer): Renderer {
+  export function getDefaultRenderer(
+    sanitizer?: IRenderMime.ISanitizer
+  ): Renderer {
     if (
       !_defaultRenderer ||
       (sanitizer && _defaultRenderer.sanitizer !== sanitizer)

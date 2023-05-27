@@ -54,6 +54,10 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor: 'var(--jp-layout-color2)'
   },
 
+  '.cm-lineNumbers': {
+    color: 'var(--jp-ui-font-color2)'
+  },
+
   '.cm-searchMatch': {
     backgroundColor: 'var(--jp-search-unselected-match-background-color)',
     color: 'var(--jp-search-unselected-match-color)'
@@ -125,7 +129,12 @@ export const jupyterHighlightStyle = HighlightStyle.define([
   { tag: [t.separator, t.derefOperator, t.paren], color: '' },
   { tag: t.strong, fontWeight: 'bold' },
   { tag: t.emphasis, fontStyle: 'italic' },
-  { tag: t.strikethrough, textDecoration: 'line-through' }
+  { tag: t.strikethrough, textDecoration: 'line-through' },
+  {
+    tag: t.bool,
+    color: 'var(--jp-mirror-editor-keyword-color)',
+    fontWeight: 'bold'
+  }
 ]);
 
 /**

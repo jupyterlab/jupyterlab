@@ -8,10 +8,11 @@ import {
   TextModelFactory
 } from '@jupyterlab/docregistry';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Contents, ServiceManager } from '@jupyterlab/services';
+import { Contents, Drive, ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
+  signalToPromise,
   waitForDialog
 } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
@@ -24,6 +25,7 @@ describe('docregistry/context', () => {
 
   beforeAll(() => {
     manager = new ServiceManagerMock();
+    manager.contents.addDrive(new Drive({ name: 'TestDrive' }));
     return manager.ready;
   });
 
@@ -51,6 +53,17 @@ describe('docregistry/context', () => {
           path: UUID.uuid4() + '.txt'
         });
         expect(context).toBeInstanceOf(Context);
+      });
+
+      it('should set the session path with local path', () => {
+        const localPath = `${UUID.uuid4()}.txt`;
+        context = new Context({
+          manager,
+          factory,
+          path: `TestDrive:${localPath}`
+        });
+
+        expect(context.sessionContext.path).toEqual(localPath);
       });
     });
 
@@ -144,7 +157,7 @@ describe('docregistry/context', () => {
           called += 1;
         });
 
-        await expect(context.initialize(true)).rejects.toThrowError(
+        await expect(context.initialize(true)).rejects.toThrow(
           'Invalid response: 403 Forbidden'
         );
         expect(called).toBe(2);
@@ -366,21 +379,35 @@ describe('docregistry/context', () => {
           await waitForDialog();
           const dialog = document.body.getElementsByClassName('jp-Dialog')[0];
           const input = dialog.getElementsByTagName('input')[0];
-
           input.value = newPath;
           await acceptDialog();
         };
         const promise = func();
         await initialize;
 
+        const changed = signalToPromise(manager.contents.fileChanged);
         const oldPath = context.path;
         await context.saveAs();
         await promise;
-        expect(context.path).toBe(newPath);
+
+        // We no longer rename the current document
+        //expect(context.path).toBe(newPath);
+
+        // Make sure the signal emitted has a different path
+        const res = await changed;
+        expect(res[1].type).toBe('save');
+        expect(res[1].newValue?.path).toEqual(newPath);
+        expect(res[1].newValue?.path !== oldPath).toBe(true);
+
         // Make sure the both files are there now.
         const model = await manager.contents.get('', { content: true });
         expect(model.content.find((x: any) => x.name === oldPath)).toBeTruthy();
         expect(model.content.find((x: any) => x.name === newPath)).toBeTruthy();
+
+        // Make sure both files are equal
+        const model1 = await manager.contents.get(oldPath, { content: true });
+        const model2 = await manager.contents.get(newPath, { content: true });
+        expect(model1.content).toEqual(model2.content);
       });
 
       it('should bring up a conflict dialog', async () => {
@@ -401,9 +428,22 @@ describe('docregistry/context', () => {
         });
         await context.initialize(true);
         const promise = func();
+
+        const oldPath = context.path;
         await context.saveAs();
         await promise;
-        expect(context.path).toBe(newPath);
+
+        // We no longer rename the current document
+        //expect(context.path).toBe(newPath);
+        // Make sure the both files are there now.
+        const model = await manager.contents.get('', { content: true });
+        expect(model.content.find((x: any) => x.name === oldPath)).toBeTruthy();
+        expect(model.content.find((x: any) => x.name === newPath)).toBeTruthy();
+
+        // Make sure both files are equal
+        const model1 = await manager.contents.get(oldPath, { content: true });
+        const model2 = await manager.contents.get(newPath, { content: true });
+        expect(model1.content).toEqual(model2.content);
       });
 
       it('should keep the file if overwrite is aborted', async () => {
@@ -430,12 +470,31 @@ describe('docregistry/context', () => {
       });
 
       it('should just save if the file name does not change', async () => {
+        const changed = signalToPromise(manager.contents.fileChanged);
+
         const path = context.path;
         await context.initialize(true);
         const promise = context.saveAs();
         await acceptDialog();
         await promise;
         expect(context.path).toBe(path);
+
+        const res = await changed;
+        expect(res[1].newValue?.path).toEqual(path);
+      });
+
+      it('should no trigger save signal if the user cancel the dialog', async () => {
+        let saveEmitted = false;
+        await context.initialize(true);
+        manager.contents.fileChanged.connect((sender, args) => {
+          if (args.type === 'save') {
+            saveEmitted = true;
+          }
+        });
+        const promise = context.saveAs();
+        await dismissDialog();
+        await promise;
+        expect(saveEmitted).toEqual(false);
       });
     });
 

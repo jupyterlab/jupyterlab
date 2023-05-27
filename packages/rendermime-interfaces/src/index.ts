@@ -202,7 +202,7 @@ export namespace IRenderMime {
 
     /**
      * The icon for the file type. Can either be a string containing the name
-     * of an existing icon, or an object with {name, svgstr} fields, where
+     * of an existing icon, or an object with \{name, svgstr\} fields, where
      * svgstr is a string containing the raw contents of an svg file.
      */
     readonly icon?: LabIcon.IResolvable;
@@ -236,6 +236,15 @@ export namespace IRenderMime {
      * `'@jupyterlab/apputils-extension:settings'` or `'foo-extension:bar'`.
      */
     readonly id: string;
+
+    /**
+     * Extension description.
+     *
+     * #### Notes
+     * This can be used to provide user documentation on the feature
+     * brought by the extension.
+     */
+    readonly description?: string;
 
     /**
      * A renderer factory to be registered to render the MIME type.
@@ -375,13 +384,43 @@ export namespace IRenderMime {
   }
 
   /**
+   * The options used to sanitize.
+   */
+  export interface ISanitizerOptions {
+    /**
+     * The allowed tags.
+     */
+    allowedTags?: string[];
+
+    /**
+     * The allowed attributes for a given tag.
+     */
+    allowedAttributes?: { [key: string]: string[] };
+
+    /**
+     * The allowed style values for a given tag.
+     */
+    allowedStyles?: { [key: string]: { [key: string]: RegExp[] } };
+  }
+
+  /**
    * An object that handles html sanitization.
    */
   export interface ISanitizer {
     /**
-     * Sanitize an HTML string.
+     * @returns Whether to replace URLs by HTML anchors.
      */
-    sanitize(dirty: string): string;
+    getAutolink?(): boolean;
+
+    /**
+     * Sanitize an HTML string.
+     *
+     * @param dirty - The dirty text.
+     * @param options - The optional sanitization options.
+     *
+     * @returns The sanitized string.
+     */
+    sanitize(dirty: string, options?: ISanitizerOptions): string;
   }
 
   /**

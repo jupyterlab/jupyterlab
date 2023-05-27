@@ -215,7 +215,7 @@ describe('completer/widget', () => {
         options.model!.resolveItem = jest.fn();
         const widget = new Completer(options);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(options.model!.resolveItem).toBeCalledTimes(1);
+        expect(options.model!.resolveItem).toHaveBeenCalledTimes(1);
       });
 
       it('should resolve item from model on switching item.', () => {
@@ -228,7 +228,7 @@ describe('completer/widget', () => {
         const widget = new Completer(options);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         widget['_cycle']('down');
-        expect(options.model!.resolveItem).toBeCalledTimes(2);
+        expect(options.model!.resolveItem).toHaveBeenCalledTimes(2);
       });
     });
 

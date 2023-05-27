@@ -24,7 +24,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { UseSignal } from '@jupyterlab/apputils';
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { SearchDocumentModel } from './searchmodel';
 import { IFilter, IFilters, IReplaceOptionsSupport } from './tokens';
 
@@ -55,16 +55,41 @@ const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
 interface ISearchInputProps {
   placeholder: string;
-  value: string;
   title: string;
+  initialValue: string;
   inputRef?: React.RefObject<HTMLTextAreaElement>;
   onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   autoFocus: boolean;
+  autoUpdate: boolean;
 }
 
 function SearchInput(props: ISearchInputProps): JSX.Element {
   const [rows, setRows] = useState<number>(1);
+
+  const updateRows = useCallback(
+    (event?: React.SyntheticEvent<HTMLTextAreaElement>) => {
+      const element = event
+        ? (event.target as HTMLTextAreaElement)
+        : props.inputRef?.current;
+      if (element) {
+        setRows(element.value.split(/\n/).length);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    // For large part, `focusSearchInput()` is responsible for focusing and
+    // selecting the search input, however when `initialValue` changes, this
+    // triggers React re-render to update `defaultValue` (implemented via `key`)
+    // which means that `focusSearchInput` is no longer effective as it has
+    // already fired before the re-render, hence we use this conditional effect.
+    props.inputRef?.current?.select();
+    // After any change to initial value we also want to update rows in case if
+    // multi-line text was selected.
+    updateRows();
+  }, [props.initialValue]);
 
   return (
     <textarea
@@ -73,16 +98,19 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
       rows={rows}
       onChange={e => {
         props.onChange(e);
-        setRows((e.target as HTMLTextAreaElement).value.split(/\n/).length);
+        updateRows(e);
       }}
       onKeyDown={e => {
         props.onKeyDown(e);
-        setRows((e.target as HTMLTextAreaElement).value.split(/\n/).length);
+        updateRows(e);
       }}
+      // Setting a key ensures that `defaultValue` will become updated
+      // when the initial value changes.
+      key={props.autoUpdate ? props.initialValue : null}
       tabIndex={0}
       ref={props.inputRef}
       title={props.title}
-      defaultValue={props.value}
+      defaultValue={props.initialValue}
       autoFocus={props.autoFocus}
     ></textarea>
   );
@@ -98,7 +126,7 @@ interface ISearchEntryProps {
   caseSensitive: boolean;
   useRegex: boolean;
   wholeWords: boolean;
-  searchText: string;
+  initialSearchText: string;
   translator?: ITranslator;
 }
 
@@ -124,12 +152,13 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
     <div className={wrapperClass}>
       <SearchInput
         placeholder={trans.__('Find')}
-        value={props.searchText}
         onChange={e => props.onChange(e)}
         onKeyDown={e => props.onKeydown(e)}
         inputRef={props.inputRef}
+        initialValue={props.initialSearchText}
         title={trans.__('Find')}
         autoFocus={true}
+        autoUpdate={true}
       />
       <button
         className={BUTTON_WRAPPER_CLASS}
@@ -186,11 +215,12 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <div className={INPUT_WRAPPER_CLASS}>
         <SearchInput
           placeholder={trans.__('Replace')}
-          value={props.replaceText ?? ''}
+          initialValue={props.replaceText ?? ''}
           onKeyDown={e => props.onReplaceKeydown(e)}
           onChange={e => props.onChange(e)}
           title={trans.__('Replace')}
           autoFocus={false}
+          autoUpdate={false}
         />
         {props.replaceOptionsSupport?.preserveCase ? (
           <button
@@ -395,7 +425,7 @@ interface ISearchOverlayProps {
   /**
    * The text in the search entry
    */
-  searchText: string;
+  initialSearchText: string;
   /**
    * Search input reference.
    */
@@ -629,7 +659,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               this._onSearchChange(e)
             }
-            searchText={this.props.searchText}
+            initialSearchText={this.props.initialSearchText}
             translator={this.translator}
           />
           {filterToggle}
@@ -727,12 +757,15 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
   }
 
   /**
-   * Set the search text
-   *
-   * It does not trigger a view update.
+   * Set the initial search text.
    */
   setSearchText(search: string): void {
-    this.model.searchExpression = search;
+    this.model.initialQuery = search;
+    // Only set the new search text to search expression if there is any
+    // to avoid nullifying the one that was remembered from last time.
+    if (search) {
+      this.model.searchExpression = search;
+    }
   }
 
   /**
@@ -801,7 +834,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         filtersVisible={this._showFilters}
         replaceOptionsSupport={this.model.replaceOptionsSupport}
         replaceText={this.model.replaceText}
-        searchText={this.model.searchExpression}
+        initialSearchText={this.model.initialQuery}
         searchInputRef={
           this._searchInput as React.RefObject<HTMLTextAreaElement>
         }

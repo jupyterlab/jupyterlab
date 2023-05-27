@@ -1,4 +1,6 @@
 ci:
+  # Same schedule interval as dependabot see .github/dependabot.yml
+  autoupdate_schedule: monthly
   # skip any check that needs internet access
   skip: [prettier, eslint, stylelint]
 
@@ -22,20 +24,20 @@ repos:
       - id: debug-statements
       - id: check-builtin-literals
       - id: trailing-whitespace
-        exclude: .bumpversion.cfg
+        exclude: (.bumpversion.cfg|yarn.js)
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.21.0
+    rev: 0.22.0
     hooks:
       - id: check-github-workflows
 
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.3.0
     hooks:
       - id: black
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.254
+    rev: v0.0.267
     hooks:
       - id: ruff
         args: ["--fix"]

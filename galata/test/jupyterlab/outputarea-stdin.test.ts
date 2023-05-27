@@ -12,7 +12,7 @@ test.describe('Stdin for ipdb', () => {
     await page.notebook.setCell(0, 'code', 'raise');
     await page.notebook.addCell('code', '%debug');
 
-    // Run first cell on proceed to the second one.
+    // Run first cell and proceed to the second one.
     await page.notebook.runCell(0);
 
     // Run the selected (second) cell without proceeding and without waiting
@@ -47,5 +47,9 @@ test.describe('Stdin for ipdb', () => {
     const imageName = 'stdin-history-search.png';
     const cell = await page.notebook.getCell(1);
     expect(await cell.screenshot()).toMatchSnapshot(imageName);
+
+    // Check that the input remains focused and cursor is at the end.
+    await page.keyboard.insertText('x');
+    await expect(page.locator('.jp-Stdin-input')).toHaveValue('foofoox');
   });
 });

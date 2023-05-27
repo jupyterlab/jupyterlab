@@ -26,7 +26,7 @@
   right: 8px;
 
   /* Override .jp-Toolbar */
-  background-color: inherit;
+  background-color: transparent;
   border-bottom: inherit;
   box-shadow: inherit;
 }

@@ -4,8 +4,9 @@
 import {
   Dialog,
   ISessionContext,
+  ISessionContextDialogs,
   SessionContext,
-  sessionContextDialogs
+  SessionContextDialogs
 } from '@jupyterlab/apputils';
 import {
   KernelManager,
@@ -13,6 +14,7 @@ import {
   SessionAPI,
   SessionManager
 } from '@jupyterlab/services';
+import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 import {
   acceptDialog,
   dismissDialog,
@@ -337,15 +339,6 @@ describe('@jupyterlab/apputils', () => {
         };
         expect(sessionContext.kernelDisplayName).toBe('No Kernel');
       });
-
-      it('should display the pending kernel name when it looks like we are starting a kernel', async () => {
-        sessionContext.kernelPreference = {
-          autoStartDefault: true,
-          canStart: true,
-          shouldStart: true
-        };
-        expect(sessionContext.kernelDisplayName).toBe('Echo Kernel');
-      });
     });
 
     describe('#kernelDisplayStatus', () => {
@@ -440,7 +433,7 @@ describe('@jupyterlab/apputils', () => {
         const name = 'echo';
         const kernelPromise = sessionContext.changeKernel({ name });
 
-        let lastKernel = null;
+        let lastKernel: IKernelConnection | null | undefined = null;
         sessionContext.kernelChanged.connect(() => {
           lastKernel = sessionContext.session?.kernel;
         });
@@ -458,7 +451,7 @@ describe('@jupyterlab/apputils', () => {
         // The last launched kernel should win.
         const kernelPromise1 = sessionContext.changeKernel({ name });
 
-        let lastKernel = null;
+        let lastKernel: IKernelConnection | null | undefined = null;
         sessionContext.kernelChanged.connect(() => {
           lastKernel = sessionContext.session?.kernel;
         });
@@ -552,74 +545,116 @@ describe('@jupyterlab/apputils', () => {
         ).toBeNull();
       });
     });
+  });
+  describe('SessionContextDialogs', () => {
+    let sessionContextDialogs: ISessionContextDialogs;
+    let kernelManager: KernelManager;
+    let sessionManager: SessionManager;
+    let specsManager: KernelSpecManager;
+    let path = '';
+    let sessionContext: SessionContext;
 
-    describe('.sessionContextDialogs', () => {
-      describe('#selectKernel()', () => {
-        it('should select a kernel for the session', async () => {
-          await sessionContext.initialize();
+    beforeAll(async () => {
+      kernelManager = new KernelManager();
+      sessionManager = new SessionManager({ kernelManager });
+      specsManager = new KernelSpecManager();
+      await Promise.all([
+        sessionManager.ready,
+        kernelManager.ready,
+        specsManager.ready
+      ]);
+    }, 30000);
 
-          const { id, name } = sessionContext!.session!.kernel!;
-          const accept = acceptDialog();
-
-          await sessionContextDialogs.selectKernel(sessionContext);
-          await accept;
-
-          const session = sessionContext?.session;
-          expect(session!.kernel!.id).not.toBe(id);
-          expect(session!.kernel!.name).toBe(name);
-        });
-
-        it('should keep the existing kernel if dismissed', async () => {
-          await sessionContext.initialize();
-
-          const { id, name } = sessionContext!.session!.kernel!;
-          const dismiss = dismissDialog();
-
-          await sessionContextDialogs.selectKernel(sessionContext);
-          await dismiss;
-
-          const session = sessionContext.session;
-          expect(session!.kernel!.id).toBe(id);
-          expect(session!.kernel!.name).toBe(name);
-        });
+    beforeEach(async () => {
+      Dialog.flush();
+      path = UUID.uuid4();
+      sessionContext = new SessionContext({
+        path,
+        sessionManager,
+        specsManager,
+        kernelPreference: { name: specsManager.specs?.default }
       });
 
-      describe('#restart()', () => {
-        it('should restart if the user accepts the dialog', async () => {
-          const emission = testEmission(sessionContext.statusChanged, {
-            find: (_, args) => args === 'restarting'
-          });
-          await sessionContext.initialize();
-          await sessionContext!.session?.kernel?.info;
-          const restart = sessionContextDialogs.restart(sessionContext);
+      sessionContextDialogs = new SessionContextDialogs();
+    });
 
-          await acceptDialog();
-          expect(await restart).toBe(true);
-          await emission;
-        });
-
-        it('should not restart if the user rejects the dialog', async () => {
-          let called = false;
-
-          await sessionContext.initialize();
-          sessionContext.statusChanged.connect((sender, args) => {
-            if (args === 'restarting') {
-              called = true;
-            }
-          });
-
-          const restart = sessionContextDialogs.restart(sessionContext);
-          await dismissDialog();
-          expect(await restart).toBe(false);
-          expect(called).toBe(false);
-        });
-
-        it('should start the same kernel as the previously started kernel', async () => {
-          await sessionContext.initialize();
+    afterEach(async () => {
+      Dialog.flush();
+      try {
+        if (sessionContext.session) {
           await sessionContext.shutdown();
-          await sessionContextDialogs.restart(sessionContext);
-          expect(sessionContext?.session?.kernel).toBeTruthy();
+        }
+      } catch (error) {
+        console.warn('Session shutdown failed.', error);
+      }
+      sessionContext.dispose();
+    });
+
+    describe('#selectKernel()', () => {
+      it('should select a kernel for the session', async () => {
+        await sessionContext.initialize();
+
+        const { id, name } = sessionContext!.session!.kernel!;
+        const accept = acceptDialog();
+
+        await sessionContextDialogs.selectKernel(sessionContext);
+        await accept;
+
+        const session = sessionContext?.session;
+        expect(session!.kernel!.id).not.toBe(id);
+        expect(session!.kernel!.name).toBe(name);
+      });
+
+      it('should keep the existing kernel if dismissed', async () => {
+        await sessionContext.initialize();
+
+        const { id, name } = sessionContext!.session!.kernel!;
+        const dismiss = dismissDialog();
+
+        await sessionContextDialogs.selectKernel(sessionContext);
+        await dismiss;
+
+        const session = sessionContext.session;
+        expect(session!.kernel!.id).toBe(id);
+        expect(session!.kernel!.name).toBe(name);
+      });
+    });
+
+    describe('#restart()', () => {
+      it('should restart if the user accepts the dialog', async () => {
+        const emission = testEmission(sessionContext.statusChanged, {
+          find: (_, args) => args === 'restarting'
         });
+        await sessionContext.initialize();
+        await sessionContext!.session?.kernel?.info;
+        const restart = sessionContextDialogs.restart(sessionContext);
+
+        await acceptDialog();
+        expect(await restart).toBe(true);
+        await emission;
+      });
+
+      it('should not restart if the user rejects the dialog', async () => {
+        let called = false;
+
+        await sessionContext.initialize();
+        sessionContext.statusChanged.connect((sender, args) => {
+          if (args === 'restarting') {
+            called = true;
+          }
+        });
+
+        const restart = sessionContextDialogs.restart(sessionContext);
+        await dismissDialog();
+        expect(await restart).toBe(false);
+        expect(called).toBe(false);
+      });
+
+      it('should start the same kernel as the previously started kernel', async () => {
+        await sessionContext.initialize();
+        await sessionContext.shutdown();
+        await sessionContextDialogs.restart(sessionContext);
+        expect(sessionContext?.session?.kernel).toBeTruthy();
       });
     });
   });

@@ -28,7 +28,7 @@ import '@jupyterlab/lsp-extension/style/index.js';
 import '@jupyterlab/mainmenu-extension/style/index.js';
 import '@jupyterlab/markdownviewer-extension/style/index.js';
 import '@jupyterlab/markedparser-extension/style/index.js';
-import '@jupyterlab/mathjax2-extension/style/index.js';
+import '@jupyterlab/mathjax-extension/style/index.js';
 import '@jupyterlab/metadataform-extension/style/index.js';
 import '@jupyterlab/notebook-extension/style/index.js';
 import '@jupyterlab/pdf-extension/style/index.js';

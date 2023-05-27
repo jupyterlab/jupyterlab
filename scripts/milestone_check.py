@@ -26,7 +26,7 @@ ranges = {
     "2.1": "origin/2.1.x --not origin/2.0.x",
     "2.2": "origin/2.2.x --not origin/2.1.x",
     # 6507205805 is a commit in the debugger ancestor tree before merging
-    "3.0": "origin/master ^origin/2.2.x ^6507205805",
+    "3.0": "origin/main ^origin/2.2.x ^6507205805",
 }
 
 try:
@@ -45,15 +45,14 @@ MILESTONE = sys.argv[1]
 
 if MILESTONE not in ranges:
     print(
-        "Error: I do not know about milestone %r. Possible milestones are %r"
-        % (MILESTONE, list(ranges.keys()))
+        f"Error: I do not know about milestone {MILESTONE!r}. Possible milestones are {list(ranges.keys())!r}"
     )
     sys.exit(1)
 
 
 out = subprocess.run(
     f"git log {ranges[MILESTONE]} --format='%H,%cE,%s'",
-    shell=True,
+    shell=True,  # noqa S602
     encoding="utf8",
     stdout=subprocess.PIPE,
 )
@@ -228,7 +227,7 @@ if len(notfound):
     print(
         """The following commits are not included in any PR on this milestone.
 This probably means the commit's PR needs to be assigned to this milestone,
-or the commit was pushed to master directly.
+or the commit was pushed to main directly.
 """
     )
     print("\n".join(f"{c} {commits[c][0]} {commits[c][1]}" for c in notfound))

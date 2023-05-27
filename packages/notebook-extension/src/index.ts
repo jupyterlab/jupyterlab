@@ -26,7 +26,7 @@ import {
   IToolbarWidgetRegistry,
   MainAreaWidget,
   Sanitizer,
-  sessionContextDialogs,
+  SessionContextDialogs,
   showDialog,
   Toolbar,
   WidgetTracker
@@ -37,7 +37,7 @@ import {
   IEditorServices,
   IPositionModel
 } from '@jupyterlab/codeeditor';
-import { PageConfig } from '@jupyterlab/coreutils';
+import { IChangedArgs, PageConfig } from '@jupyterlab/coreutils';
 
 import {
   IEditorExtensionRegistry,
@@ -80,7 +80,11 @@ import {
 } from '@jupyterlab/notebook';
 import { IObservableList } from '@jupyterlab/observables';
 import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
-import { IMarkdownParser, IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  IMarkdownParser,
+  IRenderMime,
+  IRenderMimeRegistry
+} from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -334,6 +338,7 @@ const SIDE_BY_SIDE_STYLE_ID = 'jp-NotebookExtension-sideBySideMargins';
  */
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
+  description: 'Provides the notebook widget tracker.',
   provides: INotebookTracker,
   requires: [INotebookWidgetFactory, IEditorExtensionRegistry],
   optional: [
@@ -357,6 +362,7 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
  */
 const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   id: '@jupyterlab/notebook-extension:factory',
+  description: 'Provides the notebook cell factory.',
   provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
   autoStart: true,
@@ -373,6 +379,7 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
   activate: activateNotebookTools,
   provides: INotebookTools,
   id: '@jupyterlab/notebook-extension:tools',
+  description: 'Provides the notebook tools.',
   autoStart: true,
   requires: [
     INotebookTracker,
@@ -389,6 +396,7 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
  */
 export const commandEditItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:mode-status',
+  description: 'Adds a notebook mode status widget.',
   autoStart: true,
   requires: [INotebookTracker, ITranslator],
   optional: [IStatusBar],
@@ -428,6 +436,7 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
  */
 export const executionIndicator: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:execution-indicator',
+  description: 'Adds a notebook execution status widget.',
   autoStart: true,
   requires: [INotebookTracker, ILabShell, ITranslator],
   optional: [IStatusBar, ISettingRegistry],
@@ -535,6 +544,7 @@ export const executionIndicator: JupyterFrontEndPlugin<void> = {
  */
 export const exportPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:export',
+  description: 'Adds the export notebook commands.',
   autoStart: true,
   requires: [ITranslator, INotebookTracker],
   optional: [IMainMenu, ICommandPalette],
@@ -664,6 +674,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
  */
 export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:trust-status',
+  description: 'Adds the notebook trusted status widget.',
   autoStart: true,
   requires: [INotebookTracker, ITranslator],
   optional: [IStatusBar],
@@ -707,16 +718,15 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
 const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> =
   {
     id: '@jupyterlab/notebook-extension:widget-factory',
+    description: 'Provides the notebook widget factory.',
     provides: INotebookWidgetFactory,
     requires: [
       NotebookPanel.IContentFactory,
       IEditorServices,
       IRenderMimeRegistry,
-      ISessionContextDialogs,
-      IToolbarWidgetRegistry,
-      ITranslator
+      IToolbarWidgetRegistry
     ],
-    optional: [ISettingRegistry],
+    optional: [ISettingRegistry, ISessionContextDialogs, ITranslator],
     activate: activateWidgetFactory,
     autoStart: true
   };
@@ -726,6 +736,7 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
  */
 const clonedOutputsPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:cloned-outputs',
+  description: 'Adds the clone output feature.',
   requires: [IDocumentManager, INotebookTracker, ITranslator],
   optional: [ILayoutRestorer],
   activate: activateClonedOutputs,
@@ -737,6 +748,7 @@ const clonedOutputsPlugin: JupyterFrontEndPlugin<void> = {
  */
 const codeConsolePlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:code-console',
+  description: 'Adds the notebook code consoles features.',
   requires: [INotebookTracker, ITranslator],
   activate: activateCodeConsole,
   autoStart: true
@@ -747,6 +759,7 @@ const codeConsolePlugin: JupyterFrontEndPlugin<void> = {
  */
 const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:copy-output',
+  description: 'Adds the copy cell outputs feature.',
   activate: activateCopyOutput,
   requires: [ITranslator, INotebookTracker],
   autoStart: true
@@ -757,6 +770,7 @@ const copyOutputPlugin: JupyterFrontEndPlugin<void> = {
  */
 const kernelStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:kernel-status',
+  description: 'Adds the notebook kernel status.',
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
@@ -783,6 +797,7 @@ const kernelStatus: JupyterFrontEndPlugin<void> = {
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:cursor-position',
+  description: 'Adds the notebook cursor position status.',
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
@@ -829,6 +844,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:completer',
+  description: 'Adds the code completion capability to notebooks.',
   requires: [INotebookTracker],
   optional: [ICompletionProviderManager, ITranslator, ISanitizer],
   activate: activateNotebookCompleterService,
@@ -840,6 +856,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
  */
 const searchProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:search',
+  description: 'Adds search capability to notebooks.',
   requires: [ISearchProviderRegistry],
   autoStart: true,
   activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
@@ -849,6 +866,7 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 
 const tocPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:toc',
+  description: 'Adds table of content capability to the notebooks',
   requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
   optional: [IMarkdownParser],
   autoStart: true,
@@ -856,7 +874,7 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     tocRegistry: ITableOfContentsRegistry,
-    sanitizer: ISanitizer,
+    sanitizer: IRenderMime.ISanitizer,
     mdParser: IMarkdownParser | null
   ): void => {
     tocRegistry.add(new NotebookToCFactory(tracker, mdParser, sanitizer));
@@ -865,6 +883,7 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
 
 const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:language-server',
+  description: 'Adds language server capability to the notebooks.',
   requires: [
     INotebookTracker,
     ILSPDocumentConnectionManager,
@@ -875,8 +894,12 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   autoStart: true
 };
 
+/**
+ * Metadata editor for the raw cell mimetype.
+ */
 const updateRawMimetype: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:update-raw-mimetype',
+  description: 'Adds metadata form editor for raw cell mimetype.',
   autoStart: true,
   requires: [INotebookTracker, IMetadataFormProvider, ITranslator],
   activate: (
@@ -951,6 +974,7 @@ const updateRawMimetype: JupyterFrontEndPlugin<void> = {
  */
 const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:metadata-editor',
+  description: 'Adds metadata form for full metadata editor.',
   autoStart: true,
   requires: [INotebookTracker, IEditorServices, IFormRendererRegistry],
   optional: [ITranslator],
@@ -975,7 +999,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       }
     };
     formRegistry.addRenderer(
-      'notebook-extension:metadata-editor.cell-metadata',
+      '@jupyterlab/notebook-extension:metadata-editor.cell-metadata',
       cellComponent
     );
 
@@ -990,7 +1014,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
       }
     };
     formRegistry.addRenderer(
-      'notebook-extension:metadata-editor.notebook-metadata',
+      '@jupyterlab/notebook-extension:metadata-editor.notebook-metadata',
       notebookComponent
     );
   }
@@ -1001,6 +1025,7 @@ const customMetadataEditorFields: JupyterFrontEndPlugin<void> = {
  */
 const activeCellTool: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:active-cell-tool',
+  description: 'Adds active cell field in the metadata editor tab.',
   autoStart: true,
   requires: [INotebookTracker, IFormRendererRegistry, IEditorLanguageRegistry],
   activate: (
@@ -1019,7 +1044,7 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
       }
     };
     formRegistry.addRenderer(
-      'notebook-extension:active-cell-tool.renderer',
+      '@jupyterlab/notebook-extension:active-cell-tool.renderer',
       component
     );
   }
@@ -1108,11 +1133,14 @@ function activateWidgetFactory(
   contentFactory: NotebookPanel.IContentFactory,
   editorServices: IEditorServices,
   rendermime: IRenderMimeRegistry,
-  sessionContextDialogs: ISessionContextDialogs,
   toolbarRegistry: IToolbarWidgetRegistry,
-  translator: ITranslator,
-  settingRegistry: ISettingRegistry | null
+  settingRegistry: ISettingRegistry | null,
+  sessionContextDialogs_: ISessionContextDialogs | null,
+  translator_: ITranslator | null
 ): NotebookWidgetFactory.IFactory {
+  const translator = translator_ ?? nullTranslator;
+  const sessionContextDialogs =
+    sessionContextDialogs_ ?? new SessionContextDialogs({ translator });
   const preferKernelOption = PageConfig.getOption('notebookStartsKernel');
 
   // If the option is not set, assume `true`
@@ -1190,11 +1218,11 @@ function activateWidgetFactory(
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
     mimeTypeService: editorServices.mimeTypeService,
-    sessionDialogs: sessionContextDialogs,
     toolbarFactory,
-    translator: translator
+    translator
   });
   app.docRegistry.addWidgetFactory(factory);
+
   return factory;
 }
 
@@ -1531,11 +1559,13 @@ function activateNotebookHandler(
   mainMenu: IMainMenu | null,
   router: IRouter | null,
   settingRegistry: ISettingRegistry | null,
-  sessionDialogs: ISessionContextDialogs | null,
-  translator: ITranslator | null,
+  sessionDialogs_: ISessionContextDialogs | null,
+  translator_: ITranslator | null,
   formRegistry: IFormRendererRegistry | null
 ): INotebookTracker {
-  translator = translator ?? nullTranslator;
+  const translator = translator_ ?? nullTranslator;
+  const sessionDialogs =
+    sessionDialogs_ ?? new SessionContextDialogs({ translator });
   const trans = translator.load('jupyterlab');
   const services = app.serviceManager;
 
@@ -1571,6 +1601,51 @@ function activateNotebookHandler(
       settings.changed.connect(() => {
         updateConfig(settings);
       });
+
+      const updateSessionSettings = (
+        session: ISessionContext,
+        changes: IChangedArgs<ISessionContext.IKernelPreference>
+      ) => {
+        const { newValue, oldValue } = changes;
+        const autoStartDefault = newValue.autoStartDefault;
+
+        if (
+          typeof autoStartDefault === 'boolean' &&
+          autoStartDefault !== oldValue.autoStartDefault
+        ) {
+          // Ensure we break the cycle
+          if (
+            autoStartDefault !==
+            (settings.get('autoStartDefaultKernel').composite as boolean)
+          )
+            // Once the settings is changed `updateConfig` will take care
+            // of the propagation to existing session context.
+            settings
+              .set('autoStartDefaultKernel', autoStartDefault)
+              .catch(reason => {
+                console.error(
+                  `Failed to set ${settings.id}.autoStartDefaultKernel`
+                );
+              });
+        }
+      };
+
+      const sessionContexts = new WeakSet<ISessionContext>();
+      const listenToKernelPreference = (panel: NotebookPanel): void => {
+        const session = panel.context.sessionContext;
+        if (!session.isDisposed && !sessionContexts.has(session)) {
+          sessionContexts.add(session);
+          session.kernelPreferenceChanged.connect(updateSessionSettings);
+          session.disposed.connect(() => {
+            session.kernelPreferenceChanged.disconnect(updateSessionSettings);
+          });
+        }
+      };
+      tracker.forEach(listenToKernelPreference);
+      tracker.widgetAdded.connect((tracker, panel) => {
+        listenToKernelPreference(panel);
+      });
+
       commands.addCommand(CommandIDs.autoClosingBrackets, {
         execute: args => {
           const codeConfig = settings.get('codeCellConfig')
@@ -1625,7 +1700,8 @@ function activateNotebookHandler(
       updateTracker({
         editorConfig: factory.editorConfig,
         notebookConfig: factory.notebookConfig,
-        kernelShutdown: factory.shutdownOnClose
+        kernelShutdown: factory.shutdownOnClose,
+        autoStartDefault: factory.autoStartDefault
       });
     });
 
@@ -1730,6 +1806,9 @@ function activateNotebookHandler(
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
       overscanCount: settings.get('overscanCount').composite as number,
+      inputHistoryScope: settings.get('inputHistoryScope').composite as
+        | 'global'
+        | 'session',
       maxNumberOutputs: settings.get('maxNumberOutputs').composite as number,
       showEditorForReadOnlyMarkdown: settings.get(
         'showEditorForReadOnlyMarkdown'
@@ -1764,6 +1843,8 @@ function activateNotebookHandler(
         `<style id="${SIDE_BY_SIDE_STYLE_ID}">${sideBySideMarginStyle}}</style>`
       );
     }
+    factory.autoStartDefault = settings.get('autoStartDefaultKernel')
+      .composite as boolean;
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
 
@@ -1774,13 +1855,14 @@ function activateNotebookHandler(
     updateTracker({
       editorConfig: factory.editorConfig,
       notebookConfig: factory.notebookConfig,
-      kernelShutdown: factory.shutdownOnClose
+      kernelShutdown: factory.shutdownOnClose,
+      autoStartDefault: factory.autoStartDefault
     });
   }
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(mainMenu, tracker, sessionDialogs, isEnabled);
+    populateMenus(mainMenu, isEnabled);
   }
 
   // Utility function to create a new notebook.
@@ -1881,7 +1963,7 @@ function activateNotebookCompleterService(
   notebooks: INotebookTracker,
   manager: ICompletionProviderManager | null,
   translator: ITranslator | null,
-  appSanitizer: ISanitizer | null
+  appSanitizer: IRenderMime.ISanitizer | null
 ): void {
   if (!manager) {
     return;
@@ -2004,13 +2086,11 @@ function addCommands(
   app: JupyterFrontEnd,
   tracker: NotebookTracker,
   translator: ITranslator,
-  sessionDialogs: ISessionContextDialogs | null,
+  sessionDialogs: ISessionContextDialogs,
   isEnabled: () => boolean
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
-
-  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
   const isEnabledAndSingleSelected = (): boolean => {
     return Private.isEnabledAndSingleSelected(shell, tracker);
@@ -2095,7 +2175,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndAdvance(content, context.sessionContext);
+        return NotebookActions.runAndAdvance(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -2115,7 +2200,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.run(content, context.sessionContext);
+        return NotebookActions.run(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -2135,7 +2225,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndInsert(content, context.sessionContext);
+        return NotebookActions.runAndInsert(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -2149,7 +2244,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAll(content, context.sessionContext);
+        return NotebookActions.runAll(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled
@@ -2162,7 +2262,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllAbove(content, context.sessionContext);
+        return NotebookActions.runAllAbove(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled: () => {
@@ -2182,7 +2287,12 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllBelow(content, context.sessionContext);
+        return NotebookActions.runAllBelow(
+          content,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled: () => {
@@ -2200,11 +2310,8 @@ function addCommands(
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        const { context, content } = current;
-        return NotebookActions.renderAllMarkdown(
-          content,
-          context.sessionContext
-        );
+        const { content } = current;
+        return NotebookActions.renderAllMarkdown(content);
       }
     },
     isEnabled
@@ -2216,7 +2323,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs!.restart(current.sessionContext, translator);
+        return sessionDialogs.restart(current.sessionContext);
       }
     },
     isEnabled
@@ -2656,7 +2763,6 @@ function addCommands(
     label: trans.__('Select Cell Below'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
-
       if (current) {
         return NotebookActions.selectBelow(current.content);
       }
@@ -2955,10 +3061,7 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs!.selectKernel(
-          current.context.sessionContext,
-          translator
-        );
+        return sessionDialogs.selectKernel(current.context.sessionContext);
       }
     },
     isEnabled
@@ -3275,7 +3378,12 @@ function addCommands(
       }
 
       current.content.extendContiguousSelectionTo(lastIndex);
-      void NotebookActions.run(current.content, current.sessionContext);
+      void NotebookActions.run(
+        current.content,
+        current.sessionContext,
+        sessionDialogs,
+        translator
+      );
     }
   });
 }
@@ -3386,14 +3494,7 @@ function populatePalette(
 /**
  * Populates the application menus for the notebook.
  */
-function populateMenus(
-  mainMenu: IMainMenu,
-  tracker: INotebookTracker,
-  sessionDialogs: ISessionContextDialogs | null,
-  isEnabled: () => boolean
-): void {
-  sessionDialogs = sessionDialogs || sessionContextDialogs;
-
+function populateMenus(mainMenu: IMainMenu, isEnabled: () => boolean): void {
   // Add undo/redo hooks to the edit menu.
   mainMenu.editMenu.undoers.redo.add({
     id: CommandIDs.redo,
@@ -3598,7 +3699,7 @@ namespace Private {
   export function raiseSilentNotification(
     message: string,
     notebookNode: HTMLElement
-  ) {
+  ): void {
     const hiddenAlertContainerId = `sr-message-container-${notebookNode.id}`;
 
     const hiddenAlertContainer =

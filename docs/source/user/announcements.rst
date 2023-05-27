@@ -35,6 +35,11 @@ Jupyter news
 The news are fetched from a news feed. The URL can be customized to point to any `Atom feed <https://www.rfc-editor.org/rfc/rfc5023>`_
 using the command line option ``--LabApp.news_url="<URL_TO_FEED_XML_FILE>"``.
 
+.. note::
+
+    An entry in a custom feed is required to have the following tags: ``title``, ``id``, and ``updated``.
+    The following tags are also used but not required: ``published``, ``summary``, and at least one ``link``.
+
 Binder
 ------
 

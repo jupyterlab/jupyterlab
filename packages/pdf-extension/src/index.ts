@@ -134,6 +134,7 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
 const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   {
     id: '@jupyterlab/pdf-extension:factory',
+    description: 'Adds renderer for PDF content.',
     rendererFactory,
     dataType: 'string',
     documentWidgetFactoryOptions: {

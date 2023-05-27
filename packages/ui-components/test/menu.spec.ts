@@ -101,7 +101,7 @@ describe('@jupyterlab/ui-components', () => {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           menu.rank = 42;
-        }).toThrowError();
+        }).toThrow();
       });
     });
 

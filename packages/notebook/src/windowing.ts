@@ -9,7 +9,7 @@ import {
   WindowedList,
   WindowedListModel
 } from '@jupyterlab/ui-components';
-import { MessageLoop } from '@lumino/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 
@@ -72,34 +72,55 @@ export class NotebookViewModel extends WindowedListModel {
  */
 export class NotebookWindowedLayout extends WindowedLayout {
   private _header: Widget | null = null;
+  private _footer: Widget | null = null;
 
   /**
-   * Returns Notebook's header
-   *
-   * @return Widget | null
+   * Notebook's header
    */
   get header(): Widget | null {
     return this._header;
   }
-
-  /**
-   * Set Notebook's header
-   *
-   * @param v: Widget | null
-   */
-  set header(v: Widget | null) {
+  set header(header: Widget | null) {
     if (this._header && this._header.isAttached) {
       Widget.detach(this._header);
     }
-    this._header = v;
+    this._header = header;
     if (this._header && this.parent?.isAttached) {
       Widget.attach(this._header, this.parent!.node);
     }
   }
 
   /**
-   * Remove a widget from the layout.
-   *
+   * Notebook widget's footer
+   */
+  get footer(): Widget | null {
+    return this._footer;
+  }
+  set footer(footer: Widget | null) {
+    if (this._footer && this._footer.isAttached) {
+      Widget.detach(this._footer);
+    }
+    this._footer = footer;
+    if (this._footer && this.parent?.isAttached) {
+      Widget.attach(this._footer, this.parent!.node);
+    }
+  }
+
+  /**
+   * Dispose the layout
+   * */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this._header?.dispose();
+    this._footer?.dispose();
+    super.dispose();
+  }
+
+  /**
+   * * A message handler invoked on a `'child-removed'` message.
+   * *
    * @param widget - The widget to remove from the layout.
    *
    * #### Notes
@@ -289,6 +310,30 @@ export class NotebookWindowedLayout extends WindowedLayout {
     } else {
       ref.insertAdjacentElement('beforebegin', widget.node);
     }
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    super.onAfterAttach(msg);
+    if (this._header && !this._header.isAttached) {
+      Widget.attach(
+        this._header,
+        this.parent!.node,
+        this.parent!.node.firstElementChild as HTMLElement | null
+      );
+    }
+    if (this._footer && !this._footer.isAttached) {
+      Widget.attach(this._footer, this.parent!.node);
+    }
+  }
+
+  protected onBeforeDetach(msg: Message): void {
+    if (this._header?.isAttached) {
+      Widget.detach(this._header);
+    }
+    if (this._footer?.isAttached) {
+      Widget.detach(this._footer);
+    }
+    super.onBeforeDetach(msg);
   }
 
   /**

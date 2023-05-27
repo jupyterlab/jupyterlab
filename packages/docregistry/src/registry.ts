@@ -649,7 +649,8 @@ export class DocumentRegistry implements IDisposable {
       language,
       shouldStart: widgetFactory.preferKernel,
       canStart: widgetFactory.canStartKernel,
-      shutdownOnDispose: widgetFactory.shutdownOnClose
+      shutdownOnDispose: widgetFactory.shutdownOnClose,
+      autoStartDefault: widgetFactory.autoStartDefault
     };
   }
 
@@ -1037,6 +1038,11 @@ export namespace DocumentRegistry {
       IRenderMime.IDocumentWidgetFactoryOptions,
       'primaryFileType' | 'toolbarFactory'
     > {
+    /**
+     * Whether to automatically start the preferred kernel
+     */
+    readonly autoStartDefault?: boolean;
+
     /**
      * Whether the widget factory is read only.
      */
