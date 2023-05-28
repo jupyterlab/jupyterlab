@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.0",
-    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/apputils": "^4.1.0",
     "@jupyterlab/cells": "^4.0.0",
     "@jupyterlab/codemirror": "^4.0.0",
     "@jupyterlab/notebook": "^4.0.0",

@@ -23,7 +23,7 @@
     "@jupyter/ydoc": "~1.0.2",
     "@jupyterlab/application": "~4.0.0",
     "@jupyterlab/application-extension": "~4.0.0",
-    "@jupyterlab/apputils": "~4.0.0",
+    "@jupyterlab/apputils": "~4.1.0",
     "@jupyterlab/apputils-extension": "~4.0.0",
     "@jupyterlab/attachments": "~4.0.0",
     "@jupyterlab/cell-toolbar": "~4.0.0",
