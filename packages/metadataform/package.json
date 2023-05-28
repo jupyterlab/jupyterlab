@@ -45,7 +45,7 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.0.0",
+    "@jupyterlab/apputils": "^4.1.0",
     "@jupyterlab/nbformat": "^4.0.0",
     "@jupyterlab/notebook": "^4.0.0",
     "@jupyterlab/settingregistry": "^4.0.0",
