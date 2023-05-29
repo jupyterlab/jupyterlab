@@ -30,9 +30,6 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
           }
         })
     });
-    this.restored = this.shell.restored
-      .then(() => undefined)
-      .catch(() => undefined);
 
     // Create an IInfo dictionary from the options to override the defaults.
     const info = Object.keys(JupyterLab.defaultInfo).reduce((acc, val) => {
@@ -44,6 +41,24 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
 
     // Populate application info.
     this._info = { ...JupyterLab.defaultInfo, ...info };
+
+    this.restored = this.shell.restored
+      .then(() => {
+        // Backward compatibility
+        try {
+          // @ts-ignore
+          this.activateDeferredPlugins();
+        } catch (error) {
+          // no-op
+        }
+
+        if (this._info.deferred) {
+          this._info.deferred.matches.forEach(pluginID =>
+            this.activatePlugin(pluginID)
+          );
+        }
+      })
+      .catch(() => undefined);
 
     // Populate application paths override the defaults if necessary.
     const defaultURLs = JupyterLab.defaultPaths.urls;
