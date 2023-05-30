@@ -59,6 +59,12 @@
       "title": "Synchronize collapse state",
       "description": "If set to true, when a heading is collapsed in the table of contents the corresponding section in the document is collapsed as well and vice versa. This inhibits the cell output headings.",
       "default": false
+    },
+    "baseNumbering": {
+      "title": "Base level for the highest headings",
+      "type": "integer",
+      "description": "The number headings start at.",
+      "default": 1
     }
   },
   "additionalProperties": false,

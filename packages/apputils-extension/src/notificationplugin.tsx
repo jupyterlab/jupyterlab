@@ -370,11 +370,10 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:notification',
   description: 'Add the notification center and its status indicator.',
   autoStart: true,
-  requires: [IStatusBar],
-  optional: [ISettingRegistry, ITranslator],
+  optional: [IStatusBar, ISettingRegistry, ITranslator],
   activate: (
     app: JupyterFrontEnd,
-    statusBar: IStatusBar,
+    statusBar: IStatusBar | null,
     settingRegistry: ISettingRegistry | null,
     translator: ITranslator | null
   ): void => {
@@ -624,11 +623,13 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
 
     notificationStatus.addClass('jp-Notification-Status');
 
-    statusBar.registerStatusItem(notificationPlugin.id, {
-      item: notificationStatus,
-      align: 'right',
-      rank: -1
-    });
+    if (statusBar) {
+      statusBar.registerStatusItem(notificationPlugin.id, {
+        item: notificationStatus,
+        align: 'right',
+        rank: -1
+      });
+    }
   }
 };
 

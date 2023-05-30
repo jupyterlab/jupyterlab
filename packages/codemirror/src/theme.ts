@@ -32,6 +32,11 @@ export const jupyterEditorTheme = EditorView.theme({
     caretColor: 'var(--jp-editor-cursor-color)'
   },
 
+  /* Inherit font family from .cm-editor */
+  '.cm-scroller': {
+    fontFamily: 'inherit'
+  },
+
   '.cm-cursor, .cm-dropCursor': {
     borderLeft:
       'var(--jp-code-cursor-width0) solid var(--jp-editor-cursor-color)'
