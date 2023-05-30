@@ -9,7 +9,7 @@ import {
   IObservableUndoableList,
   ObservableMap
 } from '@jupyterlab/observables';
-import * as models from '@jupyter/ydoc';
+import * as models from '@jupyterlab/shared-models';
 import {
   ArrayExt,
   ArrayIterator,

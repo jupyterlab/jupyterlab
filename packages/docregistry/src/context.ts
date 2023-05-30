@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentChange, ISharedDocument } from '@jupyter/ydoc';
+import { DocumentChange, ISharedDocument } from '@jupyterlab/shared-models';
 import {
   Dialog,
   ISessionContext,

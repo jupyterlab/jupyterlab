@@ -11,7 +11,7 @@ import {
   ModelDB,
   ObservableValue
 } from '@jupyterlab/observables';
-import * as models from '@jupyter/ydoc';
+import * as models from '@jupyterlab/shared-models';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';

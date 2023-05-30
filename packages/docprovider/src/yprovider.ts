@@ -8,7 +8,7 @@ import { Dialog, showErrorMessage } from '@jupyterlab/apputils';
 import { ServerConnection, User } from '@jupyterlab/services';
 import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 
-import { DocumentChange, YDocument } from '@jupyter/ydoc';
+import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';

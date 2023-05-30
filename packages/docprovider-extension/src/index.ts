@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/docprovider';
 import { ServerConnection } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { DocumentChange, YDocument } from '@jupyter/ydoc';
+import { DocumentChange, YDocument } from '@jupyterlab/shared-models';
 
 /**
  * The default document provider plugin

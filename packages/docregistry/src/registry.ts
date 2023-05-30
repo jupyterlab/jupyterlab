@@ -14,7 +14,7 @@ import {
 import { IModelDB, IObservableList } from '@jupyterlab/observables';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents, Kernel } from '@jupyterlab/services';
-import { ISharedDocument, ISharedFile } from '@jupyter/ydoc';
+import { ISharedDocument, ISharedFile } from '@jupyterlab/shared-models';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   fileIcon,
