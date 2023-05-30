@@ -2173,7 +2173,7 @@ namespace Private {
       switch (event.type) {
         case 'click':
           if (event.target instanceof HTMLElement) {
-            this._shell.activateWidget(
+            this._shell.activateArea(
               event.target?.dataset?.targetarea as ILabShell.Area
             );
           }
