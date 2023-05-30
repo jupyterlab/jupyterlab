@@ -775,17 +775,19 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * Activate Specified Area Widget.
+   * Activate specified Area widget.
    */
-  activateWidget(area?: ILabShell.Area): void {
+  activateArea(area?: ILabShell.Area): void {
     switch (area ?? 'main') {
       case 'main':
-        const current = this._currentTabBar();
-        if (!current) {
-          return;
-        }
-        if (current.currentTitle) {
-          current.currentTitle.owner.activate();
+        {
+          const current = this._currentTabBar();
+          if (!current) {
+            return;
+          }
+          if (current.currentTitle) {
+            current.currentTitle.owner.activate();
+          }
         }
         return;
       case 'left':
@@ -794,7 +796,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       case 'top':
       case 'menu':
       case 'bottom':
-        return;
+        throw new Error(`Area: ${area} activation not yet implemented`);
       default:
         throw new Error(`Invalid area: ${area}`);
     }
@@ -2201,7 +2203,6 @@ namespace Private {
       const skipLink = document.createElement('a');
       skipLink.href = '#';
       skipLink.tabIndex = 1;
-      skipLink.addEventListener;
       skipLink.text = skipLinkText;
       skipLink.className = 'skip-link';
       skipLink.dataset['targetarea'] = area;
