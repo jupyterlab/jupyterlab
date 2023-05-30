@@ -27,6 +27,7 @@ export namespace galata {
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
     '@jupyterlab/apputils-extension:notification': {
+      checkForUpdates: false,
       fetchNews: 'false'
     },
     '@jupyterlab/fileeditor-extension:plugin': {
