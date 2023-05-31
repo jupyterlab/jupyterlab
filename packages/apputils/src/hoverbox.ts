@@ -165,7 +165,7 @@ export namespace HoverBox {
 
     // Make sure the box ought to be visible.
     const withinBounds =
-      maxHeight > minHeight &&
+      maxHeight >= minHeight &&
       (spaceBelow >= minHeight || spaceAbove >= minHeight);
 
     if (!withinBounds) {
