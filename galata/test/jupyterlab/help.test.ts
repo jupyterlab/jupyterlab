@@ -20,7 +20,7 @@ test('Switch back and forth to reference page', async ({ page }) => {
       .frameLocator('iframe[src="https://jupyter.org/documentation"]')
       .locator('h1')
       .first()
-  ).toHaveText('Jupyter Project Documentation#');
+  ).toHaveText('Project Jupyter Documentation#');
 
   await page.activity.activateTab(notebookFilename);
 
