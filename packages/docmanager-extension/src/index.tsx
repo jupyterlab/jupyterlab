@@ -584,7 +584,7 @@ export namespace ToolbarItems {
                   `document is permissioned readonly; "save" is disabled, use "save as..." instead`
                 )}
               >
-                Notebook is read-only
+                {trans.__(`Document is read-only`)}
               </span>
             </div>
           ) : (

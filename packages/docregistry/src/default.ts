@@ -544,7 +544,7 @@ export class DocumentWidget<
     // Include the context ready promise in the widget reveal promise
     options.reveal = Promise.all([options.reveal, options.context.ready]);
     super(options);
-
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.context = options.context;
 
     // Handle context path changes
@@ -616,7 +616,9 @@ export class DocumentWidget<
       this._handleDirtyState();
     }
     if (!this.context.contentsModel?.writable && !this.context.model.dirty) {
-      Notification.warning(`${this.title.label} is a read-only document.`);
+      Notification.warning(
+        this._trans.__(`%1 is a read-only document.`, this.title.label)
+      );
     }
   }
 
@@ -635,7 +637,7 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
-
+  private _trans;
   /**
    * Whether the document has an auto-generated name or not.
    *
