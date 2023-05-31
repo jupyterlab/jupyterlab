@@ -80,9 +80,19 @@ export async function ensurePackage(
       seenDeps[name] = await getDependency(name);
     }
     if (deps[name] !== seenDeps[name]) {
-      messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
+      const inRange =
+        deps[name].includes('||') &&
+        deps[name]
+          .split(/\|\|/)
+          .map(v => v.trim())
+          .includes(seenDeps[name]);
+
+      if (!inRange) {
+        messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
+
+        deps[name] = seenDeps[name];
+      }
     }
-    deps[name] = seenDeps[name];
   });
 
   await Promise.all(promises);
