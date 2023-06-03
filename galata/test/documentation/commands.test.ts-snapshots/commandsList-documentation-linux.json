@@ -869,6 +869,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-sort-notebooks-first",
+    "label": "Sort Notebooks Above Files",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "fileeditor:change-font-size",
     "label": "Decrease Font Size",
     "caption": "",
