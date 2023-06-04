@@ -30,7 +30,7 @@ lab_splice_command = " ".join(
         "lab",
         "--ServerApp.base_url={base_url}lab-spliced",
         *common,
-        ">jupyterlab-spliced.log 2>&1"
+        ">jupyterlab-spliced.log 2>&1",
     ]
 )
 
