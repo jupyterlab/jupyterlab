@@ -85,7 +85,7 @@ docs = [
 ]
 docs-screenshots = [
     "altair==4.2.2",
-    "ipython==8.13.2",
+    "ipython==8.14.0",
     "ipywidgets==8.0.6",
     "jupyterlab-geojson==3.4.0",
     "jupyterlab-language-pack-zh-CN==4.0.post0",
