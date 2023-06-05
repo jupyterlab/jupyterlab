@@ -80,14 +80,14 @@ export async function ensurePackage(
       seenDeps[name] = await getDependency(name);
     }
     if (deps[name] !== seenDeps[name]) {
-      const inRange =
+      const oneOf =
         deps[name].includes('||') &&
         deps[name]
           .split(/\|\|/)
           .map(v => v.trim())
           .includes(seenDeps[name]);
 
-      if (!inRange) {
+      if (!oneOf) {
         messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
 
         deps[name] = seenDeps[name];
