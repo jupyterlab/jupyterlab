@@ -147,7 +147,9 @@ def update_extension(  # noqa
     if tuple(copier.__version__.split('.')) < ('8', '0', '0'):
         copier.run_auto(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True)
     else:
-        copier.run_copy(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True, unsafe=True)
+        copier.run_copy(
+            template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True, unsafe=True
+        )
 
     # From the created package.json grab the devDependencies
     with (output_dir / "package.json").open() as fid:
