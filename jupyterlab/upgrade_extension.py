@@ -144,7 +144,10 @@ def update_extension(  # noqa
     }
 
     template = "https://github.com/jupyterlab/extension-template"
-    copier.run_auto(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True)
+    if tuple(copier.__version__.split('.')) < ('8', '0', '0'):
+        copier.run_auto(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True)
+    else:
+        copier.run_copy(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True, unsafe=True)
 
     # From the created package.json grab the devDependencies
     with (output_dir / "package.json").open() as fid:
@@ -308,8 +311,9 @@ if __name__ == "__main__":
     answer_file = Path(args.path) / ".copier-answers.yml"
 
     if answer_file.exists():
-        print(
-            "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
-        )
+        msg = "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
+        if tuple(copier.__version__.split('.')) >= ('8', '0', '0'):
+            msg += " --UNSAFE"
+        print(msg)
     else:
         update_extension(args.path, args.vcs_ref, args.no_input is False)
