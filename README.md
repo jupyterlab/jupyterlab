@@ -58,7 +58,7 @@ If you use [conda](https://docs.conda.io/en/latest/), [mamba](https://mamba.read
   ```shell
   pip install jupyterlab
   ```
-  
+
   #### Pathing
 
 If the user is new to working with software that requires working with pathing, this installation process may seem daunting. PATH, according to wikipedia, is "an environment variable on Unix-like operating systems, DOS, OS/2, and Microsoft Windows, specifying a set of directories where executable programs are located. In general, each executing process or user session has its own PATH setting." To execute either a file you create, or download as in our situation, you must have a path to that file. Just as you would double click a shortcut on a GUI, or as you would execute a file from a folder in a CLI, you must designate what you will be running and its location. What this means for the user is that the operating system requires instructions for how to use the commands it receives, and these methods differ depending on what operating system is running.
