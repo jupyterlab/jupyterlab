@@ -281,7 +281,7 @@ about 7 minutes again.
 Setting up a local development environment
 ------------------------------------------
 This section explains how to set up a local development environment. We assume you use GNU/Linux,
-macOS, or Windows Subsystem for Linux.
+macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing Anaconda for windows and then using the Anaconda command prompt for all installation steps.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
