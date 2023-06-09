@@ -21,7 +21,10 @@ import type { RJSFSchema, UiSchema } from '@rjsf/utils';
  * The setting registry token.
  */
 export const ISettingRegistry = new Token<ISettingRegistry>(
-  '@jupyterlab/coreutils:ISettingRegistry'
+  '@jupyterlab/coreutils:ISettingRegistry',
+  `A service for the JupyterLab settings system.
+  Use this if you want to store settings for your application.
+  See "schemaDir" for more information.`
 );
 
 /**

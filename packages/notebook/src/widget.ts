@@ -34,6 +34,7 @@ import { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
+import { NotebookFooter } from './notebookfooter';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -517,7 +518,7 @@ export class StaticNotebook extends WindowedList {
    */
   protected onUpdateRequest(msg: Message): void {
     if (this.notebookConfig.windowingMode === 'defer') {
-      void this._updateForDeferMode();
+      void this._runOnIdleTime();
     } else {
       super.onUpdateRequest(msg);
     }
@@ -547,7 +548,14 @@ export class StaticNotebook extends WindowedList {
     const collab = newValue.collaborative ?? false;
     if (!collab && !cells.length) {
       newValue.sharedModel.insertCell(0, {
-        cell_type: this.notebookConfig.defaultCell
+        cell_type: this.notebookConfig.defaultCell,
+        metadata:
+          this.notebookConfig.defaultCell === 'code'
+            ? {
+                // This is an empty cell created in empty notebook, thus is trusted
+                trusted: true
+              }
+            : {}
       });
     }
     let index = -1;
@@ -598,7 +606,14 @@ export class StaticNotebook extends WindowedList {
           requestAnimationFrame(() => {
             if (model && !model.isDisposed && !model.sharedModel.cells.length) {
               model.sharedModel.insertCell(0, {
-                cell_type: this.notebookConfig.defaultCell
+                cell_type: this.notebookConfig.defaultCell,
+                metadata:
+                  this.notebookConfig.defaultCell === 'code'
+                    ? {
+                        // This is an empty cell created in empty notebook, thus is trusted
+                        trusted: true
+                      }
+                    : {}
               });
             }
           });
@@ -782,7 +797,7 @@ export class StaticNotebook extends WindowedList {
   }
 
   private _scheduleCellRenderOnIdle() {
-    if (this.notebookConfig.windowingMode === 'defer' && !this.isDisposed) {
+    if (this.notebookConfig.windowingMode !== 'none' && !this.isDisposed) {
       if (!this._idleCallBack) {
         this._idleCallBack = requestIdleCallback(
           (deadline: IdleDeadline) => {
@@ -790,7 +805,7 @@ export class StaticNotebook extends WindowedList {
 
             // In case of timeout, render for some time even if it means freezing the UI
             // This avoids the cells to never be loaded.
-            void this._updateForDeferMode(
+            void this._runOnIdleTime(
               deadline.didTimeout
                 ? MAXIMUM_TIME_REMAINING
                 : deadline.timeRemaining()
@@ -849,7 +864,7 @@ export class StaticNotebook extends WindowedList {
     }
   }
 
-  private async _updateForDeferMode(
+  private async _runOnIdleTime(
     remainingTime: number = MAXIMUM_TIME_REMAINING
   ): Promise<void> {
     const startTime = Date.now();
@@ -860,9 +875,14 @@ export class StaticNotebook extends WindowedList {
     ) {
       const cell = this.cellsArray[cellIdx];
       if (cell.isPlaceholder()) {
-        cell.dataset.windowedListIndex = `${cellIdx}`;
-        this.layout.insertWidget(cellIdx, cell);
-        await cell.ready;
+        switch (this.notebookConfig.windowingMode) {
+          case 'defer':
+            await this._updateForDeferMode(cell, cellIdx);
+            break;
+          case 'full':
+            this._renderCSSAndJSOutputs(cell, cellIdx);
+            break;
+        }
       }
       cellIdx++;
     }
@@ -873,6 +893,43 @@ export class StaticNotebook extends WindowedList {
       if (this._idleCallBack) {
         window.cancelIdleCallback(this._idleCallBack);
         this._idleCallBack = null;
+      }
+    }
+  }
+
+  private async _updateForDeferMode(
+    cell: Cell<ICellModel>,
+    cellIdx: number
+  ): Promise<void> {
+    cell.dataset.windowedListIndex = `${cellIdx}`;
+    this.layout.insertWidget(cellIdx, cell);
+    await cell.ready;
+  }
+
+  private _renderCSSAndJSOutputs(
+    cell: Cell<ICellModel>,
+    cellIdx: number
+  ): void {
+    // Only render cell with text/html outputs containing scripts or/and styles
+    // Note:
+    //   We don't need to render JavaScript mimetype outputs because they get
+    //   directly evaluate without adding DOM elements (see @jupyterlab/javascript-extension)
+    if (cell instanceof CodeCell) {
+      for (
+        let outputIdx = 0;
+        outputIdx < (cell.model.outputs?.length ?? 0);
+        outputIdx++
+      ) {
+        const output = cell.model.outputs.get(outputIdx);
+        const html = (output.data['text/html'] as string) ?? '';
+        if (
+          html.match(
+            /(<style[^>]*>[^<]*<\/style[^>]*>|<script[^>]*>.*?<\/script[^>]*>)/gims
+          )
+        ) {
+          this.renderCellOutputs(cellIdx);
+          break;
+        }
       }
     }
   }
@@ -1203,6 +1260,7 @@ export class Notebook extends StaticNotebook {
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.selectionChanged.connect(this._updateSelectedCells, this);
+    this.addFooter();
   }
 
   /**
@@ -1210,6 +1268,14 @@ export class Notebook extends StaticNotebook {
    */
   get selectedCells(): Cell[] {
     return this._selectedCells;
+  }
+
+  /**
+   * Adds a footer to the notebook.
+   */
+  protected addFooter(): void {
+    const info = new NotebookFooter(this);
+    (this.layout as NotebookWindowedLayout).footer = info;
   }
 
   /**
@@ -2010,7 +2076,8 @@ export class Notebook extends StaticNotebook {
   private _ensureFocus(force = false): void {
     const activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
-      if (activeCell.editor?.hasFocus() === false) {
+      // Test for !== true to cover hasFocus is false and editor is not yet rendered.
+      if (activeCell.editor?.hasFocus() !== true) {
         if (activeCell.inViewport) {
           activeCell.editor?.focus();
         } else {
@@ -2488,6 +2555,7 @@ export class Notebook extends StaticNotebook {
       const start = index;
       const values = event.mimeData.getData(JUPYTER_CELL_MIME);
       // Insert the copies of the original cells.
+      // We preserve trust status of pasted cells by not modifying metadata.
       model.sharedModel.insertCells(index, values);
       // Select the inserted cells.
       this.deselectAll();

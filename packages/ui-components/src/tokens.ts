@@ -51,7 +51,8 @@ export interface IFormRendererRegistry {
  * The token for the form component registry.
  */
 export const IFormRendererRegistry = new Token<IFormRendererRegistry>(
-  '@jupyterlab/ui-components:IFormRendererRegistry'
+  '@jupyterlab/ui-components:IFormRendererRegistry',
+  'A service for settings form renderer registration.'
 );
 
 /**
@@ -64,5 +65,6 @@ export interface ILabIconManager {}
  * The ILabIconManager token.
  */
 export const ILabIconManager = new Token<ILabIconManager>(
-  '@jupyterlab/ui-components:ILabIconManager'
+  '@jupyterlab/ui-components:ILabIconManager',
+  'A service to register and request icons.'
 );

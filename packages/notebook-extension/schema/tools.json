@@ -103,7 +103,7 @@
       },
       "metadataOptions": {
         "_CELL-TOOL": {
-          "customRenderer": "notebook-extension:active-cell-tool.renderer"
+          "customRenderer": "@jupyterlab/notebook-extension:active-cell-tool.renderer"
         },
         "/raw_mimetype": {
           "cellTypes": ["raw"]
@@ -131,10 +131,10 @@
       },
       "metadataOptions": {
         "_CELL-METADATA": {
-          "customRenderer": "notebook-extension:metadata-editor.cell-metadata"
+          "customRenderer": "@jupyterlab/notebook-extension:metadata-editor.cell-metadata"
         },
         "_NOTEBOOK-METADATA": {
-          "customRenderer": "notebook-extension:metadata-editor.notebook-metadata"
+          "customRenderer": "@jupyterlab/notebook-extension:metadata-editor.notebook-metadata"
         }
       }
     }

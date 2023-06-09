@@ -44,6 +44,7 @@ function createStyleSheet(text: string): HTMLStyleElement {
  */
 export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
+  description: 'Provides the theme manager.',
   requires: [ISettingRegistry, JupyterFrontEnd.IPaths, ITranslator],
   optional: [ISplashScreen],
   activate: (
@@ -189,6 +190,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
  */
 export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:themes-palette-menu',
+  description: 'Adds theme commands to the menu and the command palette.',
   requires: [IThemeManager, ITranslator],
   optional: [ICommandPalette, IMainMenu],
   activate: (

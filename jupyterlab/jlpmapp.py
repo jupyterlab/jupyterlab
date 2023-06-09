@@ -33,7 +33,7 @@ def execvp(cmd, argv):
         p.wait()
         sys.exit(p.returncode)
     else:
-        os.execvp(cmd, argv)
+        os.execvp(cmd, argv)  # noqa S606
 
 
 def main(argv=None):

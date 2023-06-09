@@ -35,6 +35,7 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
+  description: 'Adds the extension manager plugin.',
   autoStart: true,
   requires: [ISettingRegistry],
   optional: [ITranslator, ILayoutRestorer, ICommandPalette],

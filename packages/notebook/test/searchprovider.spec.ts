@@ -27,16 +27,27 @@ async function setSelections(
   await promise;
 }
 
+class TestProvider extends NotebookSearchProvider {
+  get cellChangeHandled(): Promise<void> {
+    // ensure `_delayedActiveCellChangeHandler` fired
+    jest.advanceTimersByTime(0);
+    // ensure `_delayedActiveCellChangeHandler` has completed
+    return this.delayedActiveCellChangeHandlerReady;
+  }
+}
+
+jest.useFakeTimers();
+
 describe('@jupyterlab/notebook', () => {
   describe('NotebookSearchProvider', () => {
     let context: Context<INotebookModel>;
     let panel: NotebookPanel;
-    let provider: NotebookSearchProvider;
+    let provider: TestProvider;
 
     beforeEach(async () => {
       context = await NBTestUtils.createMockContext(false);
       panel = utils.createNotebookPanel(context);
-      provider = new NotebookSearchProvider(panel);
+      provider = new TestProvider(panel);
       panel.model!.sharedModel.insertCells(0, [
         { cell_type: 'markdown', source: 'test1 test2' },
         { cell_type: 'code', source: 'test3' }
@@ -86,7 +97,6 @@ describe('@jupyterlab/notebook', () => {
     describe('#highlightNext()', () => {
       it('should highlight next match', async () => {
         await provider.startQuery(/test/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(1);
@@ -175,7 +185,6 @@ describe('@jupyterlab/notebook', () => {
 
       it('should loop back to last match', async () => {
         await provider.startQuery(/test/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
         await provider.highlightPrevious();
         expect(provider.currentMatchIndex).toBe(2);
@@ -184,7 +193,9 @@ describe('@jupyterlab/notebook', () => {
 
       it('should go to previous cell if there is no current match in active cell', async () => {
         await provider.startQuery(/test/, undefined);
-        panel.content.activeCellIndex = 1;
+        await provider.highlightNext();
+        await provider.highlightNext();
+        expect(provider.currentMatchIndex).toBe(2);
         expect(panel.content.activeCellIndex).toBe(1);
         await provider.highlightPrevious();
         expect(panel.content.activeCellIndex).toBe(0);
@@ -195,7 +206,6 @@ describe('@jupyterlab/notebook', () => {
     describe('#replaceCurrentMatch()', () => {
       it('should replace with a shorter text and highlight next', async () => {
         await provider.startQuery(/test\d/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
         let replaced = await provider.replaceCurrentMatch('bar');
         expect(replaced).toBe(true);
@@ -206,7 +216,6 @@ describe('@jupyterlab/notebook', () => {
 
       it('should substitute groups in regular expressions', async () => {
         await provider.startQuery(/test(\d)/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
         await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(1);
@@ -222,7 +231,6 @@ describe('@jupyterlab/notebook', () => {
 
       it('should not substitute if regular expression toggle is off', async () => {
         await provider.startQuery(/test(\d)/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
         let replaced = await provider.replaceCurrentMatch(
           '$1st_bar (was $&)',
@@ -236,7 +244,6 @@ describe('@jupyterlab/notebook', () => {
 
       it('should replace with a longer text and highlight next', async () => {
         await provider.startQuery(/test\d/, undefined);
-        await provider.highlightNext();
         expect(provider.currentMatchIndex).toBe(0);
         let replaced = await provider.replaceCurrentMatch('rabarbar');
         expect(replaced).toBe(true);
@@ -275,7 +282,8 @@ describe('@jupyterlab/notebook', () => {
         await provider.startQuery(/test/, { selection: true });
         panel.content.mode = 'command';
         panel.content.activeCellIndex = 0;
-        await provider.highlightNext();
+        await provider.cellChangeHandled;
+        expect(provider.currentMatchIndex).toBe(0);
         const replaced = await provider.replaceAllMatches('bar');
         expect(replaced).toBe(true);
         let source = panel.model!.cells.get(0).sharedModel.getSource();
@@ -289,7 +297,7 @@ describe('@jupyterlab/notebook', () => {
         await provider.startQuery(/test/, { selection: true });
         panel.content.mode = 'command';
         panel.content.activeCellIndex = 1;
-        await provider.highlightNext();
+        await provider.cellChangeHandled;
         const replaced = await provider.replaceAllMatches('bar');
         expect(replaced).toBe(true);
         let source = panel.model!.cells.get(0).sharedModel.getSource();

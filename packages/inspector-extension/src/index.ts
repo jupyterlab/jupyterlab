@@ -27,6 +27,7 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { inspectorIcon } from '@jupyterlab/ui-components';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the inspector plugin.
@@ -42,6 +43,7 @@ namespace CommandIDs {
  */
 const inspector: JupyterFrontEndPlugin<IInspector> = {
   id: '@jupyterlab/inspector-extension:inspector',
+  description: 'Provides the code introspection widget.',
   requires: [ITranslator],
   optional: [ICommandPalette, ILauncher, ILayoutRestorer],
   provides: IInspector,
@@ -185,7 +187,9 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
  * An extension that registers consoles for inspection.
  */
 const consoles: JupyterFrontEndPlugin<void> = {
+  // FIXME This should be in @jupyterlab/console-extension
   id: '@jupyterlab/inspector-extension:consoles',
+  description: 'Adds code introspection support to consoles.',
   requires: [IInspector, IConsoleTracker, ILabShell],
   autoStart: true,
   activate: (
@@ -225,16 +229,13 @@ const consoles: JupyterFrontEndPlugin<void> = {
     });
 
     // Keep track of console instances and set inspector source.
-    labShell.currentChanged.connect((_, args) => {
-      const widget = args.newValue;
-      if (!widget || !consoles.has(widget)) {
-        return;
+    const setSource = (widget: Widget | null): void => {
+      if (widget && consoles.has(widget) && handlers[widget.id]) {
+        manager.source = handlers[widget.id];
       }
-      const source = handlers[widget.id];
-      if (source) {
-        manager.source = source;
-      }
-    });
+    };
+    labShell.currentChanged.connect((_, args) => setSource(args.newValue));
+    void app.restored.then(() => setSource(labShell.currentWidget));
   }
 };
 
@@ -242,7 +243,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
  * An extension that registers notebooks for inspection.
  */
 const notebooks: JupyterFrontEndPlugin<void> = {
+  // FIXME This should be in @jupyterlab/notebook-extension
   id: '@jupyterlab/inspector-extension:notebooks',
+  description: 'Adds code introspection to notebooks.',
   requires: [IInspector, INotebookTracker, ILabShell],
   autoStart: true,
   activate: (
@@ -285,16 +288,13 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     });
 
     // Keep track of notebook instances and set inspector source.
-    labShell.currentChanged.connect((sender, args) => {
-      const widget = args.newValue;
-      if (!widget || !notebooks.has(widget)) {
-        return;
+    const setSource = (widget: Widget | null): void => {
+      if (widget && notebooks.has(widget) && handlers[widget.id]) {
+        manager.source = handlers[widget.id];
       }
-      const source = handlers[widget.id];
-      if (source) {
-        manager.source = source;
-      }
-    });
+    };
+    labShell.currentChanged.connect((_, args) => setSource(args.newValue));
+    void app.restored.then(() => setSource(labShell.currentWidget));
   }
 };
 

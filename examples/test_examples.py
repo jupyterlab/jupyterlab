@@ -46,13 +46,13 @@ def main():
             with tempfile.TemporaryDirectory() as cwd:
                 header(path)
                 runner = osp.join(path, "main.py")
-                subprocess.check_call([sys.executable, runner], cwd=cwd)
+                subprocess.check_call([sys.executable, runner], cwd=cwd)  # noqa S603
                 count += 1
         elif osp.exists(osp.join(path, "main.py")):
             with tempfile.TemporaryDirectory() as cwd:
                 header(path)
                 runner = osp.join(here, "example_check.py")
-                subprocess.check_call([sys.executable, runner, path], cwd=cwd)
+                subprocess.check_call([sys.executable, runner, path], cwd=cwd)  # noqa S603
                 count += 1
 
     print("\n\n%s tests complete!" % count)

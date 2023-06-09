@@ -64,7 +64,9 @@ fs.copySync(
 );
 process.env.YARN_UNSAFE_HTTP_WHITELIST = '0.0.0.0';
 utils.run('jlpm', { cwd: staging });
-utils.run('jlpm dedupe', { cwd: staging });
+utils.run('jlpm dlx yarn-berry-deduplicate --strategy fewerHighest', {
+  cwd: staging
+});
 
 // Build the core assets.
 utils.run('jlpm run build:prod:release', { cwd: staging });
