@@ -103,7 +103,10 @@ import {
   moveDownIcon,
   moveUpIcon,
   notebookIcon,
-  pasteIcon
+  pasteIcon,
+  refreshIcon,
+  runIcon,
+  stopIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -2183,7 +2186,8 @@ function addCommands(
         );
       }
     },
-    isEnabled
+    isEnabled,
+    icon: args => (args.toolbar ? runIcon : undefined)
   });
   commands.addCommand(CommandIDs.run, {
     label: args => {
@@ -2326,7 +2330,8 @@ function addCommands(
         return sessionDialogs.restart(current.sessionContext);
       }
     },
-    isEnabled
+    isEnabled,
+    icon: args => (args.toolbar ? refreshIcon : undefined)
   });
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shut Down Kernel'),
@@ -2464,7 +2469,8 @@ function addCommands(
         return kernel.interrupt();
       }
     },
-    isEnabled
+    isEnabled,
+    icon: args => (args.toolbar ? stopIcon : undefined)
   });
   commands.addCommand(CommandIDs.toCode, {
     label: trans.__('Change to Code Cell Type'),

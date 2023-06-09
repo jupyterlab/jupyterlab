@@ -30,7 +30,8 @@
         "args": {
           "commands": ["notebook:restart-kernel", "notebook:run-all-cells"]
         },
-        "label": "Restart Kernel and Run All",
+        "caption": "Restart Kernel and Run All",
+        "icon": "ui-components:fast-forward",
         "rank": 33
       },
       { "name": "cellType", "rank": 40 },
@@ -82,6 +83,11 @@
         "label": {
           "title": "Item label",
           "description": "If defined, it will override the command label",
+          "type": "string"
+        },
+        "caption": {
+          "title": "Item caption",
+          "description": "If defined, it will override the command caption",
           "type": "string"
         },
         "type": {
