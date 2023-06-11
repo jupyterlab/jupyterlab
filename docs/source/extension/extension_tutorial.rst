@@ -43,6 +43,8 @@ Install conda using miniconda
 Start by installing miniconda, following
 `Conda's installation documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`__.
 
+Building an extension in JupyterLab involves a number of moving parts: node, yarn, tsc, pip, hatch, and a large number of JupyterLab and utility modules. Each of these are under active development, and incompatibilities occur when versions are mismatched. The conda jupyter environment ensures a curated environment with tested versions. We strongly recommend that you use this environment in building your extension.
+
 .. _install-nodejs-jupyterlab-etc-in-a-conda-environment:
 
 Install NodeJS, JupyterLab, etc. in a conda environment
