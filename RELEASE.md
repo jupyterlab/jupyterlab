@@ -311,7 +311,7 @@ To seed the latest version of the extension template (first commit), you
 can execute (assuming you are editing the first commit):
 
 ```sh
-copier copy https://github.com/jupyterlab/extension-template .
+copier copy --UNSAFE https://github.com/jupyterlab/extension-template .
 # Fix any conflicts
 git commit --amend '-S'
 ```
@@ -330,7 +330,7 @@ updating package versions, then do the next steps instead.
 git checkout --orphan name-of-branch
 git rm -rf .
 git clean -dfx
-copier https://github.com/jupyterlab/extension-template .
+copier copy --UNSAFE https://github.com/jupyterlab/extension-template .
 ```
 
 - Create a new PR in JupyterLab.
