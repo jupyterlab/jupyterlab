@@ -164,7 +164,7 @@ area is restored.
 Searching
 ---------
 
-JupyterLab has a special built-in search plugin for finding text within a
+JupyterLab has an advanced built-in search plugin for finding text within a
 notebook or other document, which uses the `Ctrl-F` shortcut by default.
 
 Your browser's `find` function will give unexpected results because it doesn't have
