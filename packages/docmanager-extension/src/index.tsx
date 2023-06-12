@@ -561,6 +561,85 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
 ];
 export default plugins;
 
+// function get_info(panel: IDocumentWidget): string|null {
+//   var s: string = ''
+//   if (!!panel.context.contentsModel) {
+//     var content_type = panel.context.contentsModel.type
+//     s = content_type || '';
+//   } else {
+//     s = ''
+//   }
+//   return s
+// }
+
+/**
+ * Namespace for ToolbarButtonComponent.
+ */
+export namespace ReadOnlyLabelComponent {
+  /**
+   * Interface for ToolbarButtonComponent props.
+   */
+  export interface IProps {
+    panel: IDocumentWidget;
+    writable?: boolean;
+    type?: string;
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+  }
+}
+
+export function ReadOnlyLabelComponent(
+  props: ReadOnlyLabelComponent.IProps
+): JSX.Element {
+  const trans = (props.translator || nullTranslator).load('jupyterlab');
+  const readOnly = !props.writable;
+  if (readOnly) {
+    // if (props.type === "file") {
+    //   props.panel.toolbar.createSpacerItem()
+    // }
+    return (
+      // <div className="lm-Widget jp-Toolbar-spacer jp-Toolbar-item"></div>
+      <div>
+        <span
+          className="jp-ToolbarLabelComponent"
+          title={trans.__(
+            `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+          )}
+        >
+          {trans.__(`%1 is read-only`, props.type)}
+        </span>
+      </div>
+    );
+  } else {
+    if (props.type === 'file') {
+      // props.panel.toolbar.children
+      props.panel.toolbar.addClass('jp-Toolbar-micro');
+      // props.panel.addClass('lm-mod-hidden')
+    }
+    return <></>;
+  }
+}
+
+// export function createReadonlyLabel(
+//     panel: IDocumentWidget,
+//     translator?: ITranslator
+//   ): Widget {
+//     return ReactWidget.create(
+//       <UseSignal signal={panel.context.fileChanged}>
+//         {() =>
+//           <ReadOnlyLabelComponent
+//          panel={panel}
+//          writable={panel.context.contentsModel?.writable}
+//          type={panel.context.contentsModel?.type}
+//          translator={translator}
+//           />
+//         }
+//       </UseSignal>
+//     );
+//   }
+
 /**
  * Toolbar item factory
  */
@@ -572,25 +651,16 @@ export namespace ToolbarItems {
     panel: IDocumentWidget,
     translator?: ITranslator
   ): Widget {
-    const trans = (translator || nullTranslator).load('jupyterlab');
     return ReactWidget.create(
       <UseSignal signal={panel.context.fileChanged}>
-        {() =>
-          !panel.context.contentsModel?.writable ? (
-            <div>
-              <span
-                className="jp-ToolbarLabelComponent"
-                title={trans.__(
-                  `document is permissioned readonly; "save" is disabled, use "save as..." instead`
-                )}
-              >
-                {trans.__(`Document is read-only`)}
-              </span>
-            </div>
-          ) : (
-            <></>
-          )
-        }
+        {() => (
+          <ReadOnlyLabelComponent
+            panel={panel}
+            writable={panel.context.contentsModel?.writable}
+            type={panel.context.contentsModel?.type}
+            translator={translator}
+          />
+        )}
       </UseSignal>
     );
   }
@@ -1195,6 +1265,7 @@ function addLabCommands(
 function handleContext(
   status: ILabStatus,
   context: DocumentRegistry.Context
+  // widget: IDocumentWidget
 ): void {
   let disposable: IDisposable | null = null;
   const onStateChanged = (sender: any, args: IChangedArgs<any>) => {
@@ -1213,6 +1284,12 @@ function handleContext(
     context.model.stateChanged.connect(onStateChanged);
     if (context.model.dirty) {
       disposable = status.setDirty();
+    } else {
+      console.log('state changed not dirty');
+      console.log(this.context.contentsModel?.type);
+      // if (!widget.toolbar.insertBefore('kernelName', 'read-only label', createReadonlyLabel(widget))) {
+      //   widget.toolbar.addItem('read-only label', createReadonlyLabel(widget));
+      // }
     }
   });
   context.disposed.connect(() => {

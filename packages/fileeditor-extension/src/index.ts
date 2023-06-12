@@ -34,6 +34,7 @@ import {
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
+import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import {
@@ -291,6 +292,12 @@ function activate(
     | undefined;
 
   if (toolbarRegistry) {
+    toolbarRegistry.addFactory<IDocumentWidget>(
+      FACTORY,
+      'readonlyLabel',
+      panel => DocToolbarItems.createReadonlyLabel(panel, translator)
+    );
+    console.log('toolbarRegistry: ', toolbarRegistry);
     toolbarFactory = createToolbarFactory(
       toolbarRegistry,
       settingRegistry,

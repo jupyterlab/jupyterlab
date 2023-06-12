@@ -13,8 +13,8 @@ import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 import {
   ITranslator,
-  nullTranslator,
-  TranslationBundle
+  nullTranslator
+  // TranslationBundle
 } from '@jupyterlab/translation';
 import { Token } from '@lumino/coreutils';
 import { INotebookModel } from './model';
@@ -44,7 +44,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   constructor(options: DocumentWidget.IOptions<Notebook, INotebookModel>) {
     super(options);
     this.translator = options.translator || nullTranslator;
-    this._trans = this.translator.load('jupyterlab');
+    // this._trans = this.translator.load('jupyterlab');
 
     // Set up CSS classes
     this.addClass(NOTEBOOK_PANEL_CLASS);
@@ -267,7 +267,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   translator: ITranslator;
-  private _trans: TranslationBundle;
+  // private _trans: TranslationBundle;
   /**
    * Whether we are currently in a series of autorestarts we have already
    * notified the user about.

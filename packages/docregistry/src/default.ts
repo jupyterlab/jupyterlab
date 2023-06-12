@@ -616,6 +616,10 @@ export class DocumentWidget<
       this._handleDirtyState();
     }
     if (!this.context.contentsModel?.writable && !this.context.model.dirty) {
+      console.log(this.context.contentsModel?.type);
+      // if (!this.toolbar.insertBefore('kernelName', 'read-only label', createReadonlyLabel)) {
+      //   this.toolbar.addItem('read-only label', createReadonlyLabel);
+      // }
       Notification.warning(
         this._trans.__(`%1 is a read-only document.`, this.title.label)
       );
@@ -637,7 +641,7 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
-  private _trans;
+  readonly _trans;
   /**
    * Whether the document has an auto-generated name or not.
    *
