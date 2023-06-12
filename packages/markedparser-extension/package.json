@@ -37,10 +37,10 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.2",
-    "@jupyterlab/apputils": "^4.0.2",
+    "@jupyterlab/apputils": "^4.1.2",
     "@jupyterlab/codemirror": "^4.0.2",
     "@jupyterlab/rendermime": "^4.0.2",
-    "@lumino/coreutils": "^2.0.0",
+    "@lumino/coreutils": "^2.1.1",
     "marked": "^5.1.0",
     "mermaid": "^10.2.3"
   },
