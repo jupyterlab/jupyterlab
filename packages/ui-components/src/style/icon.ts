@@ -264,10 +264,6 @@ export namespace LabIconStyle {
         $nest: {
           '.lm-DockPanel-tabBar &': {
             marginRight: '4px'
-          },
-          '#tab-manager &': {
-            marginRight: '2px',
-            position: 'relative'
           }
         }
       },
@@ -276,10 +272,6 @@ export namespace LabIconStyle {
           '.lm-DockPanel-tabBar &': {
             height: '14px',
             width: '14px'
-          },
-          '#tab-manager &': {
-            height: '16px',
-            width: '16px'
           }
         }
       },

@@ -2,7 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor, EditorSearchProvider } from '@jupyterlab/codemirror';
+import {
+  CodeMirrorEditor,
+  EditorSearchProvider,
+  IHighlightAdjacentMatchOptions
+} from '@jupyterlab/codemirror';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import {
   GenericSearchProvider,
@@ -125,13 +129,13 @@ class CodeCellSearchProvider extends CellSearchProvider {
    */
   async highlightNext(
     loop?: boolean,
-    fromCursor = false
+    options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
     if (this.matchesCount === 0 || !this.isActive) {
       this.currentIndex = null;
     } else {
       if (this.currentProviderIndex === -1) {
-        const match = await super.highlightNext(true, fromCursor);
+        const match = await super.highlightNext(true, options);
         if (match) {
           this.currentIndex = this.cmHandler.currentIndex;
           return match;

@@ -293,7 +293,7 @@ class TestExtension(AppHandlerTest):
         # The archive file names are printed to stdout when run `npm pack`
         packages = [
             subprocess.run(
-                ["npm", "pack", name],
+                ["npm", "pack", name],  # noqa S603 S607
                 stdout=subprocess.PIPE,
                 text=True,
                 check=True,

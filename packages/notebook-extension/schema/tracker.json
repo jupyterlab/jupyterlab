@@ -688,6 +688,13 @@
       "type": "boolean",
       "default": false
     },
+    "inputHistoryScope": {
+      "type": "string",
+      "default": "global",
+      "enum": ["global", "session"],
+      "title": "Input History Scope",
+      "description": "Whether the line history for standard input (e.g. the ipdb prompt) should kept separately for different kernel sessions (`session`) or combined (`global`)."
+    },
     "kernelShutdown": {
       "title": "Shut down kernel",
       "description": "Whether to shut down or not the kernel when closing a notebook.",
@@ -791,9 +798,9 @@
     },
     "windowingMode": {
       "title": "Windowing mode",
-      "description": "'defer': Wait for idle CPU cycles to attach out of viewport cells - 'full': Attach to the DOM only cells in viewport - 'none': Attach all cells to the viewport",
+      "description": "'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells - 'full': Best performance with side effects - Attach to the DOM only cells in viewport - 'none': Worst performance without side effects - Attach all cells to the viewport",
       "enum": ["defer", "full", "none"],
-      "default": "full"
+      "default": "defer"
     }
   },
   "additionalProperties": false,

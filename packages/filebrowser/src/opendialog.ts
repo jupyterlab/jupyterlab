@@ -148,7 +148,7 @@ class OpenDialog
         widget: new ToolbarButton({
           icon: newFolderIcon,
           onClick: () => {
-            browser.createNewDirectory();
+            void browser.createNewDirectory();
           },
           tooltip: trans.__('New Folder')
         })

@@ -8,7 +8,8 @@ import { Widget } from '@lumino/widgets';
 
 // tslint:disable-next-line:variable-name
 export const IStatusBar = new Token<IStatusBar>(
-  '@jupyterlab/statusbar:IStatusBar'
+  '@jupyterlab/statusbar:IStatusBar',
+  'A service for the status bar on the application. Use this if you want to add new status bar items.'
 );
 
 /**

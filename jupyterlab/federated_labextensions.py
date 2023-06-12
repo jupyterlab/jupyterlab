@@ -215,7 +215,7 @@ def build_labextension(
     if source_map:
         arguments.append("--source-map")
 
-    subprocess.check_call(arguments, cwd=ext_path)
+    subprocess.check_call(arguments, cwd=ext_path)  # noqa S603
 
 
 def watch_labextension(
@@ -250,7 +250,7 @@ def watch_labextension(
     if source_map:
         arguments.append("--source-map")
 
-    subprocess.check_call(arguments, cwd=ext_path)
+    subprocess.check_call(arguments, cwd=ext_path)  # noqa S603
 
 
 # ------------------------------------------------------------------------------
@@ -279,7 +279,7 @@ def _ensure_builder(ext_path, core_path):
         with open(osp.join(ext_path, dep_version2, "package.json")) as fid:
             dep_version2 = json.load(fid).get("version")
     if not osp.exists(osp.join(ext_path, "node_modules")):
-        subprocess.check_call(["jlpm"], cwd=ext_path)
+        subprocess.check_call(["jlpm"], cwd=ext_path)  # noqa S603 S607
 
     # Find @jupyterlab/builder using node module resolution
     # We cannot use a script because the script path is a shell script on Windows
@@ -303,10 +303,8 @@ def _ensure_builder(ext_path, core_path):
         )
 
     if not overlap:
-        raise ValueError(
-            "Extensions require a devDependency on @jupyterlab/builder@%s, you have a dependency on %s"
-            % (dep_version1, dep_version2)
-        )
+        msg = f"Extensions require a devDependency on @jupyterlab/builder@{dep_version1}, you have a dependency on {dep_version2}"
+        raise ValueError(msg)
 
     return osp.join(
         target, "node_modules", "@jupyterlab", "builder", "lib", "build-labextension.js"
@@ -443,7 +441,9 @@ def _get_labextension_metadata(module):  # noqa
     if not package:
         try:
             package = (
-                subprocess.check_output([sys.executable, "setup.py", "--name"], cwd=mod_path)
+                subprocess.check_output(
+                    [sys.executable, "setup.py", "--name"], cwd=mod_path  # noqa S603
+                )
                 .decode("utf8")
                 .strip()
             )
@@ -458,7 +458,7 @@ def _get_labextension_metadata(module):  # noqa
     try:
         version(package)
     except PackageNotFoundError:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "-e", mod_path])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-e", mod_path])  # noqa S603
         sys.path.insert(0, mod_path)
 
     from setuptools import find_namespace_packages, find_packages

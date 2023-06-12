@@ -82,7 +82,7 @@ The workflow takes a couple of input parameters. Here is an overview with exampl
 | Input        | Description                                             | Example Value           |
 | ------------ | ------------------------------------------------------- | ----------------------- |
 | Target       | The owner/repo GitHub target                            | `jupyterlab/jupyterlab` |
-| Branch       | The branch to target                                    | `master`                |
+| Branch       | The branch to target                                    | `main`                  |
 | Version Spec | New Version Spec                                        | `next`                  |
 | Since        | Use PRs since activity since this date or git reference | `v4.0.0a15`             |
 
@@ -115,7 +115,7 @@ Fill in the information as mentioned in the body of the changelog PR, for exampl
 
 | Input                                 | Value      |
 | ------------------------------------- | ---------- |
-| The target branch                     | master     |
+| The target branch                     | main       |
 | The URL of the draft GitHub release   |            |
 | Comma separated list of steps to skip | ensure-sha |
 
@@ -178,9 +178,6 @@ we are not competing amongst the minor releases for version numbers.
 We are essentially sub-dividing semver to allow us to bump minor versions
 of the JS packages as many times as we need to for minor releases of the
 top level JupyterLab application.
-
-Other note: It's ok if `yarn-deduplicate` exits with a non zero code. This is
-expected!
 
 #### JS major release(s)
 
@@ -261,35 +258,34 @@ These lines:
     of a package (it will fail on the `jupyter lab build` command because
     webpack cannot find the referenced styles to import.
 - [ ] Update the other repos:
-  - [ ] https://github.com/jupyterlab/extension-cookiecutter-js
-  - [ ] https://github.com/jupyterlab/extension-cookiecutter-ts
-  - [ ] https://github.com/jupyterlab/mimerender-cookiecutter-ts
+  - [ ] https://github.com/jupyterlab/extension-template
   - [ ] https://github.com/jupyterlab/jupyter-renderers
-- [ ] Add a tag to [ts cookiecutter](https://github.com/jupyterlab/extension-cookiecutter-ts) with the new JupyterLab version
+- [ ] Publish a release (with a **updated tag**) to the [extension template](https://github.com/jupyterlab/extension-template/releases) with the new JupyterLab version
 - [ ] Update the extension examples:
-  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/master/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
-- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#updating-the-extension-tutorial)
+  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/main/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
+  - [ ] [Notebook widget](https://github.com/jupyterlab/jupyterlab/blob/main/docs/source/extension/notebook.rst#adding-a-widget-to-the-notebook-header)
+- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 
 Now do the actual final release:
 
 - [ ] Run `jlpm run bumpversion release` to switch to final release
-- [ ] Push the commit and tags to master
+- [ ] Push the commit and tags to main
 - [ ] Run `npm run publish:all` to publish the packages
 - [ ] Create a branch for the release and push to GitHub
 - [ ] Update the API [docs](#updating-api-docs)
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
-- [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#publishing-to-conda-forge).
+- [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#publishing-to-conda-forge).
 
 After a few days (to allow for possible patch releases), set up development for
 the next release:
 
 - [ ] Run `jlpm run bumpversion minor` to bump to alpha for the next alpha release
-- [ ] Put the commit and tags to master
+- [ ] Put the commit and tags to main
 - [ ] Run `npm run publish:all` to publish the packages
 - [ ] Release the other repos as appropriate
-- [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#update-version-for-binder)
+- [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#update-version-for-binder)
 
 ### Updating the extension tutorial
 
@@ -311,6 +307,15 @@ git checkout -b BRANCH # whatever the new version is, e.g., 1.0
 git rebase -i --root
 ```
 
+To seed the latest version of the extension template (first commit), you
+can execute (assuming you are editing the first commit):
+
+```sh
+copier copy https://github.com/jupyterlab/extension-template .
+# Fix any conflicts
+git commit --amend '-S'
+```
+
 "Edit" the commits that involve installing packages, so you can update the
 `package.json`. Amend the last commit to bump the version number in package.json
 in preparation for publishing to npm. Then skip down to the step below about
@@ -325,10 +330,7 @@ updating package versions, then do the next steps instead.
 git checkout --orphan name-of-branch
 git rm -rf .
 git clean -dfx
-cookiecutter -o initial path-to-local-extension-cookiecutter-ts
-# Fill in the values from the previous branch package.json initial commit
-cp -r initial/jupyterlab_apod .
-rm -rf initial
+copier https://github.com/jupyterlab/extension-template .
 ```
 
 - Create a new PR in JupyterLab.
@@ -388,10 +390,6 @@ shasum -a 256 dist/*.tar.gz
 - Fork https://github.com/conda-forge/jupyterlab-feedstock
 - Create a PR with the version bump
 - Update `recipe/meta.yaml` with the new version and sha256 and reset the build number to 0.
-
-## Updating API Docs
-
-Run `source scripts/docs_push.sh` to update the `gh-pages` branch that backs http://jupyterlab.github.io/jupyterlab/.
 
 ## Making a manual patch release
 
@@ -478,3 +476,4 @@ Here is a list of previous issues that happened while releasing JupyterLab, that
 new issues show up in the future:
 
 - HTTP Error 502: Bad Gateway (JupyterLab `4.0.0a23`): https://github.com/jupyterlab/jupyterlab/issues/12324
+- Degraded performance of npm publish (JupyterLab `4.0.0b2`): https://github.com/jupyterlab/jupyterlab/issues/14431

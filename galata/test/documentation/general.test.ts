@@ -132,6 +132,9 @@ test.describe('General', () => {
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toBeEmpty();
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
+    ).not.toHaveClass(/lm-mod-hidden/);
 
     expect(
       await page.screenshot({
@@ -437,7 +440,7 @@ test.describe('General', () => {
       '[aria-label="File Browser Section"] >> text=notebooks'
     );
     await page.dblclick('text=Data.ipynb');
-
+    await page.menu.clickMenuItem('Edit>Clear Outputs of All Cells');
     await page.notebook.setCell(
       1,
       'code',
@@ -457,8 +460,39 @@ test.describe('General', () => {
 
     // Relax threshold as displayed map may change a bit (in particular text positioning)
     expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {
-      threshold: 0.3
+      maxDiffPixelRatio: 0.02
     });
+  });
+
+  test('Trust indicator', async ({ page }) => {
+    await page.goto();
+    // Open Data.ipynb which is not trusted by default
+    await page.dblclick(
+      '[aria-label="File Browser Section"] >> text=notebooks'
+    );
+    await page.dblclick('text=Data.ipynb');
+
+    const trustIndictor = page.locator('.jp-StatusItem-trust');
+
+    expect(await trustIndictor.screenshot()).toMatchSnapshot(
+      'notebook_not_trusted.png'
+    );
+
+    // Open trust dialog
+    // Note: we do not `await` here as it only resolves once dialog is closed
+    const trustPromise = page.evaluate(() => {
+      return window.jupyterapp.commands.execute('notebook:trust');
+    });
+    const dialogSelector = '.jp-Dialog-content';
+    await page.waitForSelector(dialogSelector);
+    // Accept option to trust the notebook
+    await page.click('.jp-Dialog-button.jp-mod-accept');
+    // Wait until dialog is gone
+    await trustPromise;
+
+    expect(await trustIndictor.screenshot()).toMatchSnapshot(
+      'notebook_trusted.png'
+    );
   });
 
   test('Heading anchor', async ({ page }, testInfo) => {
@@ -577,6 +611,18 @@ test.describe('General', () => {
     expect(
       await (await page.$('#modal-command-palette')).screenshot()
     ).toMatchSnapshot('command_palette.png');
+  });
+
+  test('Keyboard Shortcuts Help', async ({ page, tmpPath }) => {
+    await page.goto(`tree/${tmpPath}`);
+
+    await page.notebook.createNew();
+
+    await page.keyboard.press('Control+Shift+H');
+
+    expect(await page.locator('.jp-Notebook').screenshot()).toMatchSnapshot(
+      'shortcuts_help.png'
+    );
   });
 
   test('Open With', async ({ page }) => {

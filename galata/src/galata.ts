@@ -32,6 +32,7 @@ export namespace galata {
    */
   export const DEFAULT_SETTINGS: Record<string, any> = {
     '@jupyterlab/apputils-extension:notification': {
+      checkForUpdates: false,
       fetchNews: 'false'
     },
     '@jupyterlab/fileeditor-extension:plugin': {},
@@ -62,7 +63,6 @@ export namespace galata {
   export type DefaultSidebarTabId =
     | 'filebrowser'
     | 'jp-running-sessions'
-    | 'tab-manager'
     | 'jp-property-inspector'
     | 'table-of-contents'
     | 'extensionmanager.main-view'

@@ -328,6 +328,41 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Request to set a variable in the global scope.
+   *
+   * @param name The name of the variable.
+   */
+  async copyToGlobals(name: string): Promise<void> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
+    if (!this.model.supportCopyToGlobals) {
+      throw new Error(
+        'The "copyToGlobals" request is not supported by the kernel'
+      );
+    }
+
+    const frames = this.model.callstack.frames;
+    this.session
+      .sendRequest('copyToGlobals', {
+        srcVariableName: name,
+        dstVariableName: name,
+        srcFrameId: frames[0].id
+      })
+      .then(async () => {
+        const scopes = await this._getScopes(frames[0]);
+        const variables = await Promise.all(
+          scopes.map(scope => this._getVariables(scope))
+        );
+        const variableScopes = this._convertScopes(scopes, variables);
+        this._model.variables.scopes = variableScopes;
+      })
+      .catch(reason => {
+        console.error(reason);
+      });
+  }
+
+  /**
    * Requests all the defined variables and display them in the
    * table view.
    */
@@ -389,6 +424,8 @@ export class DebuggerService implements IDebugger, IDisposable {
     const stoppedThreads = new Set(body.stoppedThreads);
 
     this._model.hasRichVariableRendering = body.richRendering === true;
+    this._model.supportCopyToGlobals = body.copyToGlobals === true;
+
     this._config.setHashParams({
       kernel: this.session?.connection?.kernel?.name ?? '',
       method: body.hashMethod,

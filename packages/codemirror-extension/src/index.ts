@@ -27,6 +27,7 @@ import {
  */
 export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
   id: '@jupyterlab/codemirror-extension:line-col-status',
+  description: 'Provides the code editor cursor position model.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ILabShell, IStatusBar],

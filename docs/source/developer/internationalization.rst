@@ -23,7 +23,7 @@ Four elements are used to handle the internationalization of JupyterLab:
 The *language-packs* repository is the main entry point. It interacts with Crowdin to publish
 newer source strings and get the latest translation. It also creates and updates the language packs.
 And finally it publishes them. All those actions are carried out using helpers defined in
-``jupyterlab-translate`` and the cookiecutter template.
+``jupyterlab-translate`` and the package template.
 
 Workflows
 ---------

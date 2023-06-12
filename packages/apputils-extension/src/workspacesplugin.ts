@@ -36,6 +36,7 @@ const ICON_NAME = 'jp-JupyterIcon';
  */
 export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:workspaces',
+  description: 'Add workspace file type and commands.',
   autoStart: true,
   requires: [
     IDefaultFileBrowser,
@@ -262,7 +263,10 @@ namespace Private {
   ): Promise<string | null> {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
-    const saveBtn = Dialog.okButton({ label: trans.__('Save') });
+    const saveBtn = Dialog.okButton({
+      label: trans.__('Save'),
+      ariaLabel: trans.__('Save Current Workspace')
+    });
     const result = await showDialog({
       title: trans.__('Save Current Workspace As…'),
       body: new SaveWidget(defaultPath),

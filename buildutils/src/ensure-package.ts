@@ -80,9 +80,19 @@ export async function ensurePackage(
       seenDeps[name] = await getDependency(name);
     }
     if (deps[name] !== seenDeps[name]) {
-      messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
+      const oneOf =
+        deps[name].includes('||') &&
+        deps[name]
+          .split(/\|\|/)
+          .map(v => v.trim())
+          .includes(seenDeps[name]);
+
+      if (!oneOf) {
+        messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
+
+        deps[name] = seenDeps[name];
+      }
     }
-    deps[name] = seenDeps[name];
   });
 
   await Promise.all(promises);
@@ -140,8 +150,13 @@ export async function ensurePackage(
     data.name !== '@jupyterlab/codemirror'
   ) {
     imports.forEach(importStr => {
-      if (importStr.indexOf('.css') !== -1) {
-        messages.push('CSS imports are not allowed source files');
+      if (
+        importStr.indexOf('.css') !== -1 &&
+        importStr.indexOf('.raw.css') === -1
+      ) {
+        messages.push(
+          'CSS imports are not allowed source files unless using `.raw.css` extension'
+        );
       }
     });
   }

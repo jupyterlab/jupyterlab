@@ -161,27 +161,25 @@ export class GridModel extends DataModel {
    */
   constructor(translator?: ITranslator) {
     super();
-    translator = translator || nullTranslator;
-    this._trans = translator.load('jupyterlab');
+    this._trans = (translator || nullTranslator).load('jupyterlab');
   }
 
   /**
-   * Set the variable filter list.
+   * The variable filter list.
    */
+  get filter(): Set<string> {
+    return this._filter;
+  }
   set filter(filter: Set<string>) {
     this._filter = filter;
   }
 
   /**
-   * Get the current scope for the variables.
+   * The current scope for the variables.
    */
   get scope(): string {
     return this._scope;
   }
-
-  /**
-   * Set the variable scope
-   */
   set scope(scope: string) {
     this._scope = scope;
   }

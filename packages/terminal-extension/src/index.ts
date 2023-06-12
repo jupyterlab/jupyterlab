@@ -65,6 +65,7 @@ namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
   activate,
   id: '@jupyterlab/terminal-extension:plugin',
+  description: 'Adds terminal and provides its tracker.',
   provides: ITerminalTracker,
   requires: [ISettingRegistry, ITranslator],
   optional: [
@@ -329,7 +330,7 @@ function addRunningSessionManager(
 /**
  * Add the commands for the terminal.
  */
-export function addCommands(
+function addCommands(
   app: JupyterFrontEnd,
   tracker: WidgetTracker<MainAreaWidget<ITerminal.ITerminal>>,
   settingRegistry: ISettingRegistry,
@@ -352,6 +353,9 @@ export function addCommands(
     execute: async args => {
       const name = args['name'] as string;
       const cwd = args['cwd'] as string;
+      const localPath = cwd
+        ? serviceManager.contents.localPath(cwd)
+        : undefined;
 
       let session;
       if (name) {
@@ -363,12 +367,15 @@ export function addCommands(
         } else {
           // we are restoring a terminal widget but the corresponding terminal was closed
           // let's start a new terminal with the original name
-          session = await serviceManager.terminals.startNew({ name, cwd });
+          session = await serviceManager.terminals.startNew({
+            name,
+            cwd: localPath
+          });
         }
       } else {
         // we are creating a new terminal widget with a new terminal
         // let the server choose the terminal name
-        session = await serviceManager.terminals.startNew({ cwd });
+        session = await serviceManager.terminals.startNew({ cwd: localPath });
       }
 
       const term = new XTerm(session, options, translator);

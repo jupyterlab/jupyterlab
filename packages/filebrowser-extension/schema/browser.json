@@ -63,7 +63,7 @@
       },
       {
         "command": "filebrowser:copy",
-        "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
+        "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 8
       },
       {
@@ -112,6 +112,11 @@
         "rank": 16
       },
       {
+        "command": "filebrowser:toggle-sort-notebooks-first",
+        "selector": ".jp-DirListing-header",
+        "rank": 17
+      },
+      {
         "command": "filebrowser:share-main",
         "selector": ".jp-DirListing-item[data-isdir]",
         "rank": 17
@@ -136,6 +141,11 @@
   "title": "File Browser",
   "description": "File Browser settings.",
   "jupyter.lab.shortcuts": [
+    {
+      "command": "filebrowser:go-up",
+      "keys": ["Backspace"],
+      "selector": ".jp-DirListing:focus"
+    },
     {
       "command": "filebrowser:go-up",
       "keys": ["Backspace"],
@@ -213,6 +223,12 @@
       "type": "boolean",
       "title": "Use checkboxes to select items",
       "description": "Whether to show checkboxes next to files and folders",
+      "default": false
+    },
+    "sortNotebooksFirst": {
+      "type": "boolean",
+      "title": "When sorting by name, group notebooks before other files",
+      "description": "Whether to group the notebooks away from files",
       "default": false
     }
   },
