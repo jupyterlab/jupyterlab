@@ -796,7 +796,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       case 'top':
       case 'menu':
       case 'bottom':
-        throw new Error(`Area: ${area} activation not yet implemented`);
+        console.debug(`Area: ${area} activation not yet implemented`);
       default:
         throw new Error(`Invalid area: ${area}`);
     }
