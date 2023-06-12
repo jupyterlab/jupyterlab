@@ -170,7 +170,7 @@ notebook or other document, which uses the `Ctrl-F` shortcut by default.
 Your browser's `find` function will give unexpected results because it doesn't have
 access to the full content of a document (by default), but you can still use your browser find
 function from the browser menu if you want, or you can disable the built-in search
-shortcut using the Advanced Settings editor.
+shortcut using the Advanced Settings Editor.
 
 Alternatively, you can disable windowed notebook rendering to expose the full
 document content to the browser at the expense of performance.
