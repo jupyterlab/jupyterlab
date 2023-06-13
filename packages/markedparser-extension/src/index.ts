@@ -22,6 +22,8 @@ import type MermaidType from 'mermaid';
 
 const MERMAID_CLASS = 'jp-RenderedMermaid';
 const WARNING_CLASS = 'jp-mod-warning';
+const DETAILS_CLASS = 'jp-RenderedMermaid-Details';
+const SUMMARY_CLASS = 'jp-RenderedMermaid-Summary';
 
 // values for highlight/diagram cache key and size
 const FENCE = '```~~~';
@@ -251,7 +253,9 @@ namespace Private {
     }
 
     const result = document.createElement('details');
+    result.className = DETAILS_CLASS;
     const summary = document.createElement('summary');
+    summary.className = SUMMARY_CLASS;
     const pre = document.createElement('pre');
     const code = document.createElement('code');
     code.innerText = text;

@@ -5,7 +5,8 @@
 
 .jp-RenderedMarkdown .jp-RenderedMermaid.jp-mod-warning {
   width: auto;
-  padding: 10px;
+  padding: 0.5em;
+  margin-top: 0.5em;
   border: var(--jp-border-width) solid var(--jp-warn-color2);
   border-radius: var(--jp-border-radius);
   color: var(--jp-ui-font-color1);
@@ -14,14 +15,14 @@
   word-wrap: break-word;
 }
 
-.jp-RenderedMarkdown .jp-RenderedMermaid.jp-mod-warning details > pre {
+.jp-RenderedMermaid-Details > pre {
   margin-top: 1em;
 }
 
-.jp-RenderedMarkdown .jp-RenderedMermaid.jp-mod-warning summary {
+.jp-RenderedMermaid-Summary {
   color: var(--jp-warn-color2);
 }
 
-.jp-RenderedMarkdown .jp-RenderedMermaid.jp-mod-warning summary > pre {
+.jp-RenderedMermaid-Summary > pre {
   display: inline-block;
 }
