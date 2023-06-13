@@ -9,3 +9,4 @@ export * from './context';
 export * from './default';
 export * from './mimedocument';
 export * from './registry';
+export * from './components';

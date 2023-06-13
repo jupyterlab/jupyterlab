@@ -10,7 +10,11 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Title, Widget } from '@lumino/widgets';
-import { DocumentRegistry, IDocumentWidget } from './index';
+import {
+  createReadonlyLabel,
+  DocumentRegistry,
+  IDocumentWidget
+} from './index';
 // import {createReadonlyLabel} from './components'
 
 /**
