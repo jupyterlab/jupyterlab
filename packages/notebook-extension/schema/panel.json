@@ -31,7 +31,6 @@
       },
       { "name": "cellType", "rank": 40 },
       { "name": "spacer", "type": "spacer", "rank": 100 },
-      { "name": "readonlyLabel", "rank": 1000 },
       { "name": "kernelName", "rank": 1001 },
       { "name": "executionProgress", "rank": 1002 }
     ]

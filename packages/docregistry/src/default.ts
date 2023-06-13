@@ -11,6 +11,7 @@ import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Title, Widget } from '@lumino/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
+// import {createReadonlyLabel} from './components'
 
 /**
  * The default implementation of a document model.
@@ -617,25 +618,13 @@ export class DocumentWidget<
     }
     if (!this.context.model.dirty) {
       if (!this.context.contentsModel?.writable) {
+        // const readOnlyIndicator = createReadonlyLabel(this, this._trans)
+        // if (!this.toolbar.insertBefore('kernelName', 'read-only-indicator', readOnlyIndicator)) {
+        //     this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+        //   }
         Notification.warning(
           this._trans.__(`%1 is a read-only document.`, this.title.label)
         );
-      } else {
-        if (this.context.contentsModel?.type === 'file') {
-          let children = this.toolbar.children();
-          // find the read-only indicator to hide if file writable
-          let child = children.next();
-          while (!child.done) {
-            // hide the indicator widget if the file is writeable
-            if (child.value.node.classList.contains('readOnlyIndicator')) {
-              child.value.hide();
-              // update toolbar height
-              this.toolbar.parent!.node.style.minHeight = '';
-              break;
-            }
-            child = children.next();
-          }
-        }
       }
     }
   }

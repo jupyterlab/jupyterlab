@@ -1166,9 +1166,6 @@ function activateWidgetFactory(
   toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'cellType', panel =>
     ToolbarItems.createCellTypeItem(panel, translator)
   );
-  toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'readonlyLabel', panel =>
-    DocToolbarItems.createReadonlyLabel(panel, translator)
-  );
   toolbarRegistry.addFactory<NotebookPanel>(FACTORY, 'kernelName', panel =>
     Toolbar.createKernelNameItem(
       panel.sessionContext,

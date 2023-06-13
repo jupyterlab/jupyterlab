@@ -292,11 +292,6 @@ function activate(
     | undefined;
 
   if (toolbarRegistry) {
-    toolbarRegistry.addFactory<IDocumentWidget>(
-      FACTORY,
-      'readonlyLabel',
-      panel => DocToolbarItems.createReadonlyLabel(panel, translator)
-    );
     toolbarFactory = createToolbarFactory(
       toolbarRegistry,
       settingRegistry,
