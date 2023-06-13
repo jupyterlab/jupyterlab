@@ -43,23 +43,4 @@ using the command line option ``--LabApp.news_url="<URL_TO_FEED_XML_FILE>"``.
 Binder
 ------
 
-To deactivate the announcements on Binder, you can change the default settings.
-To do that, you will need to add those two files in your Binder configuration:
-
-.. code-block:: json
-    :caption: overrides.json
-
-    {
-      "@jupyterlab/apputils-extension:notification": {
-        "fetchNews": "false"
-      }
-    }
-
-.. code-block:: sh
-    :caption: postBuild
-
-    #!/usr/bin/env bash
-    set -eux
-
-    mkdir -p ${NB_PYTHON_PREFIX}/share/jupyter/lab/settings
-    cp overrides.json ${NB_PYTHON_PREFIX}/share/jupyter/lab/settings
+You will find how to deactivate those features on Binder at :ref:`binder`.
