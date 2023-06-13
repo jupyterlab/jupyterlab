@@ -237,6 +237,10 @@ function activateCsv(
       isEnabled
     });
   }
+
+  tracker.currentChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.CSVGoToLine);
+  });
 }
 
 /**
@@ -391,6 +395,10 @@ function activateTsv(
       isEnabled
     });
   }
+
+  tracker.currentChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.TSVGoToLine);
+  });
 }
 
 /**

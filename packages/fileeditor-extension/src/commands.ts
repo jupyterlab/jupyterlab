@@ -998,6 +998,34 @@ export namespace Commands {
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       label: trans.__('Select All')
     });
+
+    // All commands with isEnabled defined directly or in a semantic commands
+    const commandIds = [
+      CommandIDs.lineNumbers,
+      CommandIDs.currentLineNumbers,
+      CommandIDs.lineWrap,
+      CommandIDs.currentLineWrap,
+      CommandIDs.matchBrackets,
+      CommandIDs.currentMatchBrackets,
+      CommandIDs.find,
+      CommandIDs.goToLine,
+      CommandIDs.changeLanguage,
+      CommandIDs.replaceSelection,
+      CommandIDs.createConsole,
+      CommandIDs.restartConsole,
+      CommandIDs.runCode,
+      CommandIDs.runAllCode,
+      CommandIDs.undo,
+      CommandIDs.redo,
+      CommandIDs.cut,
+      CommandIDs.copy,
+      CommandIDs.paste,
+      CommandIDs.selectAll,
+      CommandIDs.createConsole
+    ];
+    tracker.currentChanged.connect(() => {
+      commandIds.forEach(id => commands.notifyCommandChanged(id));
+    });
   }
 
   export function addCompleterCommands(

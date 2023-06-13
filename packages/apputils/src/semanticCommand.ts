@@ -38,6 +38,13 @@ export class SemanticCommand {
   static readonly DEFAULT_RANK = 500;
 
   /**
+   * The command IDs used by this semantic command.
+   */
+  get ids(): string[] {
+    return this._commands.map(c => c.id);
+  }
+
+  /**
    * Add a command to the semantic group
    *
    * @param command Command to add
@@ -71,6 +78,18 @@ export class SemanticCommand {
 
     const command = commands[0] ?? { id: null };
     return command.id;
+  }
+
+  /**
+   * Remove a command ID.
+   *
+   * @param id Command ID to remove
+   */
+  remove(id: string): void {
+    const index = this._commands.findIndex(c => c.id === id);
+    if (index >= 0) {
+      this._commands.splice(index, 1);
+    }
   }
 
   protected _commands = new Array<Required<ISemanticCommand>>();

@@ -572,6 +572,17 @@ function addCommands(
       }
     }
   });
+
+  // All commands with isEnabled defined directly or in a semantic commands
+  const commandIds = [
+    CommandIDs.refresh,
+    CommandIDs.copy,
+    CommandIDs.paste,
+    CommandIDs.shutdown
+  ];
+  tracker.currentChanged.connect(() => {
+    commandIds.forEach(id => commands.notifyCommandChanged(id));
+  });
 }
 
 /**
