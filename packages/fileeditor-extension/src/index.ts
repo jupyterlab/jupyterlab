@@ -297,7 +297,6 @@ function activate(
       'readonlyLabel',
       panel => DocToolbarItems.createReadonlyLabel(panel, translator)
     );
-    console.log('toolbarRegistry: ', toolbarRegistry);
     toolbarFactory = createToolbarFactory(
       toolbarRegistry,
       settingRegistry,

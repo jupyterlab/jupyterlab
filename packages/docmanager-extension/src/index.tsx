@@ -622,24 +622,6 @@ export function ReadOnlyLabelComponent(
   }
 }
 
-// export function createReadonlyLabel(
-//     panel: IDocumentWidget,
-//     translator?: ITranslator
-//   ): Widget {
-//     return ReactWidget.create(
-//       <UseSignal signal={panel.context.fileChanged}>
-//         {() =>
-//           <ReadOnlyLabelComponent
-//          panel={panel}
-//          writable={panel.context.contentsModel?.writable}
-//          type={panel.context.contentsModel?.type}
-//          translator={translator}
-//           />
-//         }
-//       </UseSignal>
-//     );
-//   }
-
 /**
  * Toolbar item factory
  */
@@ -651,7 +633,7 @@ export namespace ToolbarItems {
     panel: IDocumentWidget,
     translator?: ITranslator
   ): Widget {
-    return ReactWidget.create(
+    let widget = ReactWidget.create(
       <UseSignal signal={panel.context.fileChanged}>
         {() => (
           <ReadOnlyLabelComponent
@@ -663,6 +645,13 @@ export namespace ToolbarItems {
         )}
       </UseSignal>
     );
+    widget.addClass('readOnlyIndicator');
+    console.log(widget);
+    if (panel.context.contentsModel?.writable) {
+      console.log('hiding: ', panel.context.contentsModel?.writable);
+      widget.hide();
+    }
+    return widget;
   }
 
   /**
@@ -1284,12 +1273,6 @@ function handleContext(
     context.model.stateChanged.connect(onStateChanged);
     if (context.model.dirty) {
       disposable = status.setDirty();
-    } else {
-      console.log('state changed not dirty');
-      console.log(this.context.contentsModel?.type);
-      // if (!widget.toolbar.insertBefore('kernelName', 'read-only label', createReadonlyLabel(widget))) {
-      //   widget.toolbar.addItem('read-only label', createReadonlyLabel(widget));
-      // }
     }
   });
   context.disposed.connect(() => {

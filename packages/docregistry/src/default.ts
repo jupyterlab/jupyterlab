@@ -615,14 +615,28 @@ export class DocumentWidget<
     if (args.name === 'dirty') {
       this._handleDirtyState();
     }
-    if (!this.context.contentsModel?.writable && !this.context.model.dirty) {
-      console.log(this.context.contentsModel?.type);
-      // if (!this.toolbar.insertBefore('kernelName', 'read-only label', createReadonlyLabel)) {
-      //   this.toolbar.addItem('read-only label', createReadonlyLabel);
-      // }
-      Notification.warning(
-        this._trans.__(`%1 is a read-only document.`, this.title.label)
-      );
+    if (!this.context.model.dirty) {
+      if (!this.context.contentsModel?.writable) {
+        Notification.warning(
+          this._trans.__(`%1 is a read-only document.`, this.title.label)
+        );
+      } else {
+        if (this.context.contentsModel?.type === 'file') {
+          let children = this.toolbar.children();
+          // find the read-only indicator to hide if file writable
+          let child = children.next();
+          while (!child.done) {
+            // hide the indicator widget if the file is writeable
+            if (child.value.node.classList.contains('readOnlyIndicator')) {
+              child.value.hide();
+              // update toolbar height
+              this.toolbar.parent!.node.style.minHeight = '';
+              break;
+            }
+            child = children.next();
+          }
+        }
+      }
     }
   }
 

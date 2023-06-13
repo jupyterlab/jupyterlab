@@ -171,10 +171,7 @@
     ]
   },
   "jupyter.lab.toolbars": {
-    "Editor": [
-      { "name": "spacer", "type": "spacer", "rank": 100 },
-      { "name": "readonlyLabel", "rank": 1000 }
-    ]
+    "Editor": [{ "name": "readonlyLabel", "rank": 1000 }]
   },
   "jupyter.lab.transform": true,
   "properties": {
