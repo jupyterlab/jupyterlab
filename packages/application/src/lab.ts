@@ -47,15 +47,24 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
         // Backward compatibility
         try {
           // @ts-ignore
-          this.activateDeferredPlugins().catch(error => { console.error('Error when activating deferred plugins\n:', error); };
+          this.activateDeferredPlugins().catch(error => {
+            console.error('Error when activating deferred plugins\n:', error);
+          });
         } catch (error) {
           // no-op
         }
 
         if (this._info.deferred) {
-          Promise.all(this._info.deferred.matches.map(pluginID =>
-            this.activatePlugin(pluginID)
-          )).catch(error => { console.error('Error when activating customize list of deferred plugins:\n', error); });
+          Promise.all(
+            this._info.deferred.matches.map(pluginID =>
+              this.activatePlugin(pluginID)
+            )
+          ).catch(error => {
+            console.error(
+              'Error when activating customize list of deferred plugins:\n',
+              error
+            );
+          });
         }
       })
       .catch(() => undefined);
