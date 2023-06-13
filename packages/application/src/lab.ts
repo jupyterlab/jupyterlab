@@ -47,7 +47,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
         // Backward compatibility
         try {
           // @ts-ignore
-          this.activateDeferredPlugins();
+          this.activateDeferredPlugins().catch(error => { console.error('Error when activating deferred plugins\n:', error); };
         } catch (error) {
           // no-op
         }
