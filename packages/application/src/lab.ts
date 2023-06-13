@@ -53,9 +53,9 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
         }
 
         if (this._info.deferred) {
-          this._info.deferred.matches.forEach(pluginID =>
+          Promise.all(this._info.deferred.matches.map(pluginID =>
             this.activatePlugin(pluginID)
-          );
+          )).catch(error => { console.error('Error when activating customize list of deferred plugins:\n', error); });
         }
       })
       .catch(() => undefined);
