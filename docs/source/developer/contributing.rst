@@ -15,11 +15,12 @@ and share what area of the project you are interested in working on. Please also
 Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
 
 You can help make it better by:
-- `submitting bug reports <https://github.com/jupyterlab/jupyterlab/issues/new/choose>`__,
-- `proposing new features <https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md>`__,
-- `translating the application <https://crowdin.com/project/jupyterlab>`__,
-- `improving the documentation <https://jupyterlab.readthedocs.io/en/latest>`__,
-- improving the code base and fixing bug (see below)
+
+* `submitting bug reports <https://github.com/jupyterlab/jupyterlab/issues/new/choose>`__,
+* `proposing new features <https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md>`__,
+* `translating the application <https://crowdin.com/project/jupyterlab>`__,
+* `improving the documentation <https://jupyterlab.readthedocs.io/en/latest>`__,
+* improving the code base and fixing bug (see below)
 
 
 We have labeled some issues as `good first
