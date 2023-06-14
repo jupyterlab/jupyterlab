@@ -251,6 +251,11 @@ pass without a reply that unblocks it.
 Our expectation is that every new issue should be examined within a week of
 its creation.
 
+Triagers are encouraged to label easier issues as ``good first issue`` to
+facilitate beginner contributions; the triage team should ensure that
+sufficient context and links to relevant parts of the codebase are included
+before applying this label.
+
 Tagging Issues with Labels
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
