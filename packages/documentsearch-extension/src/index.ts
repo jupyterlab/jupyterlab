@@ -449,6 +449,12 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       }
     });
 
+    app.shell.currentChanged?.connect(() => {
+      Object.keys(CommandIDs).forEach(cmd => {
+        app.commands.notifyCommandChanged(cmd);
+      });
+    });
+
     // Add the command to the palette.
     if (palette) {
       [
