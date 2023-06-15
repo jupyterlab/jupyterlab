@@ -1565,7 +1565,6 @@ namespace Private {
     translator?: ITranslator,
     currentKernelDisplayName: string | null = null
   ): void {
-
     while (node.firstChild) {
       node.removeChild(node.firstChild);
     }
