@@ -8,7 +8,7 @@ import { ContextMenuSvg } from '@jupyterlab/ui-components';
 import { Application, IPlugin } from '@lumino/application';
 import { Token } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
+import { FocusTracker, Widget } from '@lumino/widgets';
 
 /**
  * The type for all JupyterFrontEnd application plugins.
@@ -275,6 +275,14 @@ export namespace JupyterFrontEnd {
      * or "focused" mean, depending on their user interface characteristics.
      */
     readonly currentWidget: Widget | null;
+
+    /**
+     * A signal emitted when the focused widget in the application shell changes.
+     */
+    readonly currentChanged?: ISignal<
+      IShell,
+      FocusTracker.IChangedArgs<Widget>
+    >;
 
     /**
      * Returns an iterator for the widgets inside the application shell.

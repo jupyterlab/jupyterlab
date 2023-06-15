@@ -249,6 +249,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    shell.currentChanged?.connect(() => {
+      [
+        CommandIDs.close,
+        CommandIDs.closeOtherTabs,
+        CommandIDs.closeRightTabs
+      ].forEach(cmd => commands.notifyCommandChanged(cmd));
+    });
+
     if (labShell) {
       commands.addCommand(CommandIDs.activateNextTab, {
         label: trans.__('Activate Next Tab'),
