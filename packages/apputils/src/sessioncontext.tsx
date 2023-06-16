@@ -1599,8 +1599,8 @@ namespace Private {
       names.push(name);
     }
 
-    // Then look by language.
-    if (language) {
+    // Then look by language if we have a selected and existing kernel.
+    if (name && names.length > 0 && language) {
       for (const specName in specs.kernelspecs) {
         if (name !== specName && languages[specName] === language) {
           names.push(specName);
