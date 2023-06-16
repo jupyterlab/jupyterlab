@@ -1,5 +1,5 @@
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
-import { TranslationBundle } from '@jupyterlab/translation';
+import { ReactWidget } from '@jupyterlab/apputils';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
@@ -19,21 +19,18 @@ export namespace ReadOnlyLabelComponent {
     /**
      * The application language translator.
      */
-    trans?: TranslationBundle;
+    trans?: ITranslator | null;
   }
 }
 
 export function ReadOnlyLabelComponent(
-  props: ReadOnlyLabelComponent.IProps,
-  trans: TranslationBundle
+  props: ReadOnlyLabelComponent.IProps
 ): JSX.Element {
+  let trans = (props.trans ?? nullTranslator).load('jupyterlab');
   const readOnly = !props.writable;
   if (readOnly) {
-    // if (props.type === "file") {
-    //   props.panel.toolbar.createSpacerItem()
-    // }
+    console.log(trans);
     return (
-      // <div className="lm-Widget jp-Toolbar-spacer jp-Toolbar-item"></div>
       <div>
         <span
           className="jp-ToolbarLabelComponent"
@@ -60,19 +57,21 @@ export function ReadOnlyLabelComponent(
  */
 export function createReadonlyLabel(
   panel: IDocumentWidget,
-  trans: TranslationBundle
+  translator?: ITranslator
 ): Widget {
+  // let trans = (translator ?? nullTranslator).load('jupyterlab');
+  // console.log(trans)
   let widget = ReactWidget.create(
-    <UseSignal signal={panel.context.fileChanged}>
-      {() => (
-        <ReadOnlyLabelComponent
-          panel={panel}
-          writable={panel.context.contentsModel?.writable}
-          type={panel.context.contentsModel?.type}
-          trans={trans}
-        />
-      )}
-    </UseSignal>
+    // <UseSignal signal={panel.context.fileChanged}>
+    //   {() => (
+    <ReadOnlyLabelComponent
+      panel={panel}
+      writable={panel.context.contentsModel?.writable}
+      type={panel.context.contentsModel?.type}
+      trans={translator}
+    />
+    //   )}
+    // </UseSignal>
   );
   widget.addClass('readOnlyIndicator');
   console.log(widget);

@@ -34,7 +34,6 @@ import {
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import { IConsoleTracker } from '@jupyterlab/console';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import {

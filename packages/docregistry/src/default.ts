@@ -10,12 +10,8 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Title, Widget } from '@lumino/widgets';
-import {
-  createReadonlyLabel,
-  DocumentRegistry,
-  IDocumentWidget
-} from './index';
-// import {createReadonlyLabel} from './components'
+import { DocumentRegistry, IDocumentWidget } from './index';
+import { createReadonlyLabel } from './components';
 
 /**
  * The default implementation of a document model.
@@ -622,10 +618,16 @@ export class DocumentWidget<
     }
     if (!this.context.model.dirty) {
       if (!this.context.contentsModel?.writable) {
-        // const readOnlyIndicator = createReadonlyLabel(this, this._trans)
-        // if (!this.toolbar.insertBefore('kernelName', 'read-only-indicator', readOnlyIndicator)) {
-        //     this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
-        //   }
+        const readOnlyIndicator = createReadonlyLabel(this);
+        let roi = this.toolbar.insertAfter(
+          'spacer',
+          'read-only-indicator',
+          readOnlyIndicator
+        );
+        console.log(roi);
+        if (!roi) {
+          this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+        }
         Notification.warning(
           this._trans.__(`%1 is a read-only document.`, this.title.label)
         );
