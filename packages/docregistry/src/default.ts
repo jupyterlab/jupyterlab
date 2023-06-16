@@ -619,12 +619,11 @@ export class DocumentWidget<
     if (!this.context.model.dirty) {
       if (!this.context.contentsModel?.writable) {
         const readOnlyIndicator = createReadonlyLabel(this);
-        let roi = this.toolbar.insertAfter(
-          'spacer',
+        let roi = this.toolbar.insertBefore(
+          'kernelName',
           'read-only-indicator',
           readOnlyIndicator
         );
-        console.log(roi);
         if (!roi) {
           this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
         }
