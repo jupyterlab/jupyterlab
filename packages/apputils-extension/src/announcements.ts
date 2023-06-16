@@ -17,7 +17,7 @@ const COMMAND_HELP_OPEN = 'help:open';
 const NEWS_API_URL = '/lab/api/news';
 const UPDATE_API_URL = '/lab/api/update';
 const PRIVACY_URL =
-  'https://jupyterlab.readthedocs.io/en/latest/privacy_policies.html';
+  'https://jupyterlab.readthedocs.io/en/stable/privacy_policies.html';
 
 /**
  * Call the announcement API

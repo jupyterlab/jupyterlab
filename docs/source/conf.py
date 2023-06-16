@@ -276,7 +276,7 @@ html_theme_options = {
     "navbar_start": ["navbar-logo", "version-switcher"],
     "footer_start": ["copyright.html"],
     "switcher": {
-        "json_url": "https://jupyterlab.readthedocs.io/en/latest/_static/switcher.json",
+        "json_url": "https://jupyterlab.readthedocs.io/en/stable/_static/switcher.json",
         "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
     },
 }
@@ -300,7 +300,7 @@ html_sidebars = {
 html_context = {
     "github_user": "jupyterlab",  # Username
     "github_repo": "jupyterlab",  # Repo name
-    "github_version": "main",  # Version
+    "github_version": "4.0.x",  # Version
     "doc_path": "docs/source/",  # Path in the checkout to the docs root
 }
 
