@@ -26,4 +26,5 @@ rtc
 lsp
 interface_customization
 directories
+binder
 ```
