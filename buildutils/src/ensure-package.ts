@@ -68,6 +68,7 @@ export async function ensurePackage(
   const cssImports = options.cssImports || [];
   const cssModuleImports = options.cssModuleImports || [];
   const differentVersions = options.differentVersions || [];
+  const backwardVersions = options.backwardVersions ?? {};
   const isPrivate = data.private == true;
 
   // Verify dependencies are consistent.
@@ -88,9 +89,22 @@ export async function ensurePackage(
           .includes(seenDeps[name]);
 
       if (!oneOf) {
-        messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
-
-        deps[name] = seenDeps[name];
+        if (
+          Object.keys(backwardVersions).includes(data.name) &&
+          Object.keys(backwardVersions[data.name]).includes(name)
+        ) {
+          messages.push(
+            `Updated dependency: ${name}@${
+              backwardVersions[data.name][name]
+            } || ${seenDeps[name]}`
+          );
+          deps[name] = `${backwardVersions[data.name][name]} || ${
+            seenDeps[name]
+          }`;
+        } else {
+          messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
+          deps[name] = seenDeps[name];
+        }
       }
     }
   });
@@ -813,6 +827,11 @@ export interface IEnsurePackageOptions {
    * Packages which are allowed to have multiple versions pulled in
    */
   differentVersions?: string[];
+
+  /**
+   * Older versions supported by core packages in addition to the latest.
+   */
+  backwardVersions?: Record<string, Record<string, string>>;
 }
 
 /**
