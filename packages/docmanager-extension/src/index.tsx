@@ -794,7 +794,10 @@ function addCommands(
           body: new RevertConfirmWidget(targetCheckpoint, trans, type),
           buttons: [
             Dialog.cancelButton(),
-            Dialog.warnButton({ label: trans.__('Revert') })
+            Dialog.warnButton({
+              label: trans.__('Revert'),
+              ariaLabel: trans.__('Revert to Checkpoint')
+            })
           ]
         }).then(result => {
           if (context.isDisposed) {

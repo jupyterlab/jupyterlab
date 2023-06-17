@@ -22,7 +22,7 @@ const path = require('path');
 const url = require('url');
 
 const basePath = path.resolve('..');
-const baseUrl = 'https://github.com/jupyterlab/jupyterlab/tree/master/packages';
+const baseUrl = 'https://github.com/jupyterlab/jupyterlab/tree/main/packages';
 const packages = glob.sync(path.join(basePath, 'packages/*'));
 
 // Begin the graph specification

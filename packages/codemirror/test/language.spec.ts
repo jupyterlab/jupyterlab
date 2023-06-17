@@ -60,7 +60,7 @@ describe('@jupyterlab/codemirror', () => {
           `<span class="ͼ19">(</span>defun check-login <span class="ͼ19">(</span>name password<span class="ͼ19">)</span> <span class="ͼ11">; absolutely secure</span>
       <span class="ͼ19">(</span>if <span class="ͼ19">(</span>equal name <span class="ͼ12">"admin"</span><span class="ͼ19">)</span>
         <span class="ͼ19">(</span>equal password <span class="ͼ12">"12345"</span><span class="ͼ19">)</span>
-        #t<span class="ͼ19">)</span><span class="ͼ19">)</span>`
+        <span class="ͼ1d">#t</span><span class="ͼ19">)</span><span class="ͼ19">)</span>`
         );
       });
     });

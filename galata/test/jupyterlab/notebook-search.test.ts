@@ -459,6 +459,11 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
+    // Wait until search has settled before entering a cell for edition
+    // as this can lead to selection of active result near that cell
+    // (rather than at the beginning of the notebook)
+    await page.waitForSelector('text=1/21');
+
     await page.notebook.setCell(5, 'code', 'with');
 
     const cell = await page.notebook.getCell(5);
