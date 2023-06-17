@@ -260,7 +260,7 @@ facilitate beginner contributions. A good first issue should have:
 
 Unless an issue is time-sensitive, such as if it is a release blocker
 for an imminent release, experienced Jupyter developers should avoid
-picking up issues with the ``good first issue`` label.
+picking up recent issues with the ``good first issue`` label.
 
 Tagging Issues with Labels
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
