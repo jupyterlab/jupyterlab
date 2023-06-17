@@ -251,15 +251,15 @@ pass without a reply that unblocks it.
 Our expectation is that every new issue should be examined within a week of
 its creation.
 
-Triagers should label easier issues as ``good first issue`` to
+Triagers should label easier/lower complexity issues as ``good first issue`` to
 facilitate beginner contributions. A good first issue should have:
 
 * A clear, easily understood description, with screen shots and expectations that do not require much familiarity with the product
 * Links, either in the description or in comments, to documentation and source code files that are relevant to the issue
-* Recommended points of contact, either by GitHub username or on other forums (Discourse, etc) where a developer can get help
+* Recommended points of contact, either by GitHub username or on other forums (Discourse, etc) where a contributor can get help
 
 Unless an issue is time-sensitive, such as if it is a release blocker
-for an imminent release, experienced Jupyter developers should avoid
+for an imminent release, experienced Jupyter contributors should avoid
 picking up recent issues with the ``good first issue`` label.
 
 Tagging Issues with Labels
