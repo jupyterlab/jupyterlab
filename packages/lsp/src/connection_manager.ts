@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { ServerConnection } from '@jupyterlab/services';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -547,7 +548,8 @@ export namespace DocumentConnectionManager {
     virtualDocument: VirtualDocument,
     language: string
   ): IURIs | undefined {
-    const wsBase = PageConfig.getBaseUrl().replace(/^http/, 'ws');
+    const settings = ServerConnection.makeSettings();
+    const wsBase = settings.wsUrl;
     const rootUri = PageConfig.getOption('rootUri');
     const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
 
