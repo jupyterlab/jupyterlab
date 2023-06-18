@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { ServerConnection } from '@jupyterlab/services';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -548,7 +547,7 @@ export namespace DocumentConnectionManager {
     virtualDocument: VirtualDocument,
     language: string
   ): IURIs | undefined {
-    const settings = ServerConnection.makeSettings();
+    const { settings } = Private.getLanguageServerManager();
     const wsBase = settings.wsUrl;
     const rootUri = PageConfig.getOption('rootUri');
     const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
@@ -655,7 +654,8 @@ namespace Private {
   ): Promise<LSPConnection> {
     let connection = _connections.get(languageServerId);
     if (!connection) {
-      const socket = new WebSocket(uris.socket);
+      const { settings } = Private.getLanguageServerManager();
+      const socket = new settings.WebSocket(uris.socket);
       const connection = new LSPConnection({
         languageId: language,
         serverUri: uris.server,
