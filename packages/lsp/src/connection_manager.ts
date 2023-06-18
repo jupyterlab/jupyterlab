@@ -404,7 +404,7 @@ export class DocumentConnectionManager
   }
 
   /**
-   * Disconnect the signals of requested virtual document uri.
+   * Disconnect the signals of requested virtual document URI.
    */
   unregisterDocument(uri: string, emit: boolean = true): void {
     const connection = this.connections.get(uri);
@@ -423,7 +423,7 @@ export class DocumentConnectionManager
   }
 
   /**
-   * Enable or disable the logging feature of the language servers
+   * Enable or disable the logging of language server communication.
    */
   updateLogging(
     logAllCommunication: boolean,
