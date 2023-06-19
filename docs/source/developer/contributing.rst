@@ -254,7 +254,7 @@ its creation.
 Triagers should label easier/lower complexity issues as ``good first issue`` to
 facilitate beginner contributions. A good first issue should have:
 
-* A clear, easily understood description, with screen shots and expectations that do not require much familiarity with the product
+* A clear, easily understood description with screen shots and expectations that do not require much familiarity with the project
 * Links, either in the description or in comments, to documentation and source code files that are relevant to the issue
 * Recommended points of contact, either by GitHub username or on other forums (Discourse, etc) where a contributor can get help
 
