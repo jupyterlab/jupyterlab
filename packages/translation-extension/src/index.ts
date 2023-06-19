@@ -107,6 +107,9 @@ const langMenu: JupyterFrontEndPlugin<void> = {
             '-'
           );
         }
+        else {
+          document.documentElement.lang = 'en-US';
+        }
 
         // Listen for your plugin setting changes using Signal
         setting.changed.connect(loadSetting);
