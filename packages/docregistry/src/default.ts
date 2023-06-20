@@ -617,19 +617,22 @@ export class DocumentWidget<
       this._handleDirtyState();
     }
     if (!this.context.model.dirty) {
-      if (!this.context.contentsModel?.writable) {
-        const readOnlyIndicator = createReadonlyLabel(this);
-        let roi = this.toolbar.insertBefore(
-          'kernelName',
-          'read-only-indicator',
-          readOnlyIndicator
-        );
-        if (!roi) {
-          this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+      const path = this.context.contentsModel?.path;
+      if (path && !path.startsWith('RTC:')) {
+        if (!this.context.contentsModel?.writable) {
+          const readOnlyIndicator = createReadonlyLabel(this);
+          let roi = this.toolbar.insertBefore(
+            'kernelName',
+            'read-only-indicator',
+            readOnlyIndicator
+          );
+          if (!roi) {
+            this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+          }
+          Notification.warning(
+            this._trans.__(`%1 is a read-only document.`, this.title.label)
+          );
         }
-        Notification.warning(
-          this._trans.__(`%1 is a read-only document.`, this.title.label)
-        );
       }
     }
   }
