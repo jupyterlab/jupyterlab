@@ -106,8 +106,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
             '_',
             '-'
           );
-        }
-        else {
+        } else {
           document.documentElement.lang = 'en-US';
         }
 
