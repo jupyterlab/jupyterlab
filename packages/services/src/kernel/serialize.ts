@@ -74,10 +74,14 @@ namespace Private {
     );
     let buffers = [];
     for (let i = 5; i < offsets.length; i++) {
+      let buffer: DataView;
       if (i == offsets.length - 1) {
-        buffers.push(new DataView(binMsg.slice(offsets[i])));
+        buffer = new DataView(binMsg.slice(offsets[i]));
       } else {
-        buffers.push(new DataView(binMsg.slice(offsets[i], offsets[i + 1])));
+        buffer = new DataView(binMsg.slice(offsets[i], offsets[i + 1]));
+      }
+      if (buffer.byteLength > 0) {
+        buffers.push(buffer);
       }
     }
     msg = {
