@@ -625,7 +625,7 @@ Here is an example of using the ``closeAndCleaners`` semantic menu item:
       isEnabled: (w: Widget) => tracker.currentWidget !== null && tracker.has(w)
     });
 
-In this example, ``tracker`` is a :ref:`notebook-tracker`, which allows the menu
+In this example, ``tracker`` is a :ref:`widget-tracker`, which allows the menu
 item to determine whether to delegate the menu command to your activity, and ``id`` is a the command identifier.
 
 More examples for how to register semantic menu items are found throughout the JupyterLab code base.
