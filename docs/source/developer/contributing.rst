@@ -15,11 +15,12 @@ and share what area of the project you are interested in working on. Please also
 Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
 
 You can help make it better by:
-- `submitting bug reports <https://github.com/jupyterlab/jupyterlab/issues/new/choose>`__,
-- `proposing new features <https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md>`__,
-- `translating the application <https://crowdin.com/project/jupyterlab>`__,
-- `improving the documentation <https://jupyterlab.readthedocs.io/en/latest>`__,
-- improving the code base and fixing bug (see below)
+
+* `submitting bug reports <https://github.com/jupyterlab/jupyterlab/issues/new/choose>`__,
+* `proposing new features <https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md>`__,
+* `translating the application <https://crowdin.com/project/jupyterlab>`__,
+* `improving the documentation <https://jupyterlab.readthedocs.io/en/latest>`__,
+* improving the code base and fixing bug (see below)
 
 
 We have labeled some issues as `good first
@@ -250,6 +251,17 @@ pass without a reply that unblocks it.
 Our expectation is that every new issue should be examined within a week of
 its creation.
 
+Triagers should label easier/lower complexity issues as ``good first issue`` to
+facilitate beginner contributions. A good first issue should have:
+
+* A clear, easily understood description with screen shots and expectations that do not require much familiarity with the project
+* Links, either in the description or in comments, to documentation and source code files that are relevant to the issue
+* Recommended points of contact, either by GitHub username or on other forums (Discourse, etc) where a contributor can get help
+
+Unless an issue is time-sensitive, such as if it is a release blocker
+for an imminent release, experienced Jupyter contributors should avoid
+picking up recent issues with the ``good first issue`` label.
+
 Tagging Issues with Labels
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -288,7 +300,7 @@ about 7 minutes again.
 Setting up a local development environment
 ------------------------------------------
 This section explains how to set up a local development environment. We assume you use GNU/Linux,
-macOS, or Windows Subsystem for Linux.
+macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__ and then using the Anaconda command prompt for all installation steps.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
