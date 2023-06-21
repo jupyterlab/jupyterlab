@@ -75,7 +75,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
-          path: ./build/${{ matrix.group }}_output
+          path: |
+            ./build/${{ matrix.group }}_output
+            ./examples/*/test-results
 
   test_minimum_versions:
     name: Test Minimum Versions
