@@ -356,7 +356,7 @@ This requires you to define a keyboard shortcut for ``apputils:run-all-enabled``
 
 In this example ``my-command-1`` and ``my-command-2`` are passed in ``args``
 of ``apputils:run-all-enabled`` command as ``commands`` list.
-You can optionally pass the command arguemnts of ``my-command-1`` and ``my-command-2`` in ``args``
+You can optionally pass the command arguments of ``my-command-1`` and ``my-command-2`` in ``args``
 of ``apputils:run-all-enabled`` command as ``args`` list.
 
 Launcher
