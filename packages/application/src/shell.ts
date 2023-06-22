@@ -308,7 +308,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const skipLinkWidget = (this._skipLinkWidget = new Private.SkipLinkWidget(
       this
     ));
-    this.add(skipLinkWidget, 'top', { rank: 0 });
     this._skipLinkWidget.show();
     //  Wrap the skip widget to customize its position and size
     const skipLinkWrapper = new Panel();
@@ -797,6 +796,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       case 'menu':
       case 'bottom':
         console.debug(`Area: ${area} activation not yet implemented`);
+        break;
       default:
         throw new Error(`Invalid area: ${area}`);
     }
