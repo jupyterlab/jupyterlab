@@ -547,25 +547,37 @@ export namespace DocumentConnectionManager {
     virtualDocument: VirtualDocument,
     language: string
   ): IURIs | undefined {
-    const wsBase = PageConfig.getBaseUrl().replace(/^http/, 'ws');
+    const serverManager = Private.getLanguageServerManager();
+    const wsBase = serverManager.settings.wsUrl;
     const rootUri = PageConfig.getOption('rootUri');
     const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
 
-    const baseUri = virtualDocument.hasLspSupportedFile
-      ? rootUri
-      : virtualDocumentsUri;
-
     // for now take the best match only
-    const matchingServers =
-      Private.getLanguageServerManager().getMatchingServers({
-        language
-      });
+    const serverOptions: ILanguageServerManager.IGetServerIdOptions = {
+      language
+    };
+    const matchingServers = serverManager.getMatchingServers(serverOptions);
     const languageServerId =
       matchingServers.length === 0 ? null : matchingServers[0];
 
     if (languageServerId === null) {
       return;
     }
+
+    const specs = serverManager.getMatchingSpecs(serverOptions);
+    const spec = specs.get(languageServerId);
+    if (!spec) {
+      console.warn(
+        `Specification not available for server ${languageServerId}`
+      );
+    }
+    const requiresOnDiskFiles = spec?.requires_documents_on_disk ?? true;
+    const supportsInMemoryFiles = !requiresOnDiskFiles;
+
+    const baseUri =
+      virtualDocument.hasLspSupportedFile || supportsInMemoryFiles
+        ? rootUri
+        : virtualDocumentsUri;
 
     // workaround url-parse bug(s) (see https://github.com/jupyter-lsp/jupyterlab-lsp/issues/595)
     let documentUri = URLExt.join(baseUri, virtualDocument.uri);
@@ -653,7 +665,8 @@ namespace Private {
   ): Promise<LSPConnection> {
     let connection = _connections.get(languageServerId);
     if (!connection) {
-      const socket = new WebSocket(uris.socket);
+      const { settings } = Private.getLanguageServerManager();
+      const socket = new settings.WebSocket(uris.socket);
       const connection = new LSPConnection({
         languageId: language,
         serverUri: uris.server,

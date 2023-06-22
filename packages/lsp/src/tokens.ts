@@ -94,6 +94,13 @@ export interface ILanguageServerManager extends IDisposable {
   /**
    * @alpha
    *
+   * Get server connection settings.
+   */
+  readonly settings: ServerConnection.ISettings;
+
+  /**
+   * @alpha
+   *
    * A promise that is fulfilled when the connection manager is ready.
    */
   readonly ready: Promise<void>;
