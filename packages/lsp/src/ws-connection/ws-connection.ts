@@ -261,9 +261,9 @@ export class LspWsConnection implements ILspConnection {
   protected openedUris = new Map<string, boolean>();
 
   /**
-   * Server capabilities provider.
+   * Lists server capabilities.
    */
-  protected serverCapabilities: protocol.ServerCapabilities;
+  serverCapabilities: protocol.ServerCapabilities;
 
   /**
    * The connection is connected?
