@@ -3443,11 +3443,13 @@ function addCommands(
   // All commands with isEnabled defined directly or in a semantic commands
   // To simplify here we added all commands as most of them have isEnabled
   const skip = [CommandIDs.createNew];
-  tracker.currentChanged.connect(() => {
+  const notify = () => {
     Object.values(CommandIDs)
       .filter(id => !skip.includes(id))
       .forEach(id => app.commands.notifyCommandChanged(id));
-  });
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 }
 
 /**

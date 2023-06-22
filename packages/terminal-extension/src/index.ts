@@ -580,9 +580,11 @@ function addCommands(
     CommandIDs.paste,
     CommandIDs.shutdown
   ];
-  tracker.currentChanged.connect(() => {
+  const notify = () => {
     commandIds.forEach(id => commands.notifyCommandChanged(id));
-  });
+  };
+  tracker.currentChanged.connect(notify);
+  app.shell.currentChanged?.connect(notify);
 }
 
 /**

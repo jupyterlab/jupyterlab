@@ -727,12 +727,15 @@ async function activateConsole(
   });
 
   // All commands with isEnabled defined directly or in a semantic commands
+
   const skip = [CommandIDs.create];
-  tracker.currentChanged.connect(() => {
+  const notify = () => {
     Object.values(CommandIDs)
       .filter(id => !skip.includes(id))
       .forEach(id => app.commands.notifyCommandChanged(id));
-  });
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 
   if (palette) {
     // Add command palette items

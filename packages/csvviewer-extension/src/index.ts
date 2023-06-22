@@ -238,9 +238,11 @@ function activateCsv(
     });
   }
 
-  tracker.currentChanged.connect(() => {
+  const notify = () => {
     commands.notifyCommandChanged(CommandIDs.CSVGoToLine);
-  });
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 }
 
 /**

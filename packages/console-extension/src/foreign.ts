@@ -97,9 +97,11 @@ function activateForeign(
       tracker.currentWidget === shell.currentWidget
   });
 
-  tracker.currentChanged.connect(() => {
+  const notify = () => {
     commands.notifyCommandChanged(toggleShowAllActivity);
-  });
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 
   if (palette) {
     palette.addItem({

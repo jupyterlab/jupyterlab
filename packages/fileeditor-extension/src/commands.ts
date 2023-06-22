@@ -238,7 +238,8 @@ export namespace Commands {
     extensions: IEditorExtensionRegistry,
     languages: IEditorLanguageRegistry,
     consoleTracker: IConsoleTracker | null,
-    sessionDialogs: ISessionContextDialogs
+    sessionDialogs: ISessionContextDialogs,
+    shell: JupyterFrontEnd.IShell
   ): void {
     /**
      * Add a command to change font size for File Editor
@@ -1023,9 +1024,11 @@ export namespace Commands {
       CommandIDs.selectAll,
       CommandIDs.createConsole
     ];
-    tracker.currentChanged.connect(() => {
+    const notify = () => {
       commandIds.forEach(id => commands.notifyCommandChanged(id));
-    });
+    };
+    tracker.currentChanged.connect(notify);
+    shell.currentChanged?.connect(notify);
   }
 
   export function addCompleterCommands(

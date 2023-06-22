@@ -493,7 +493,8 @@ function activate(
     extensions,
     languages,
     consoleTracker,
-    sessionDialogs
+    sessionDialogs,
+    app.shell
   );
 
   const codeViewerTracker = new WidgetTracker<MainAreaWidget<CodeViewerWidget>>(

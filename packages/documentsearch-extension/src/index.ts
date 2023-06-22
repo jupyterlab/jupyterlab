@@ -451,7 +451,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     });
 
     app.shell.currentChanged?.connect(() => {
-      Object.keys(CommandIDs).forEach(cmd => {
+      Object.values(CommandIDs).forEach(cmd => {
         app.commands.notifyCommandChanged(cmd);
       });
     });

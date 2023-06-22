@@ -245,10 +245,12 @@ function addCommands(
     isEnabled
   });
 
-  // All commands with isEnabled defined directly or in a semantic commands
-  tracker.currentChanged.connect(() => {
+  const notify = () => {
     Object.values(CommandIDs).forEach(id => commands.notifyCommandChanged(id));
-  });
+  };
+  // All commands with isEnabled defined directly or in a semantic commands
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 
   function zoomIn(): void {
     const widget = tracker.currentWidget?.content;
