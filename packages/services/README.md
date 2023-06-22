@@ -17,11 +17,12 @@ can be used to polyfill browsers that do not support the `fetch` API.
 **Prerequisites**
 
 - [node](http://nodejs.org/)
-- [python](https://www.anaconda.com/distribution/)
+- Python, e.g. via [conda](https://www.anaconda.com/download)
 
 ```bash
 npm install --save @jupyterlab/services
-conda install notebook  # notebook 4.3+ required
+conda install jupyter-server # jupyter-server 2.0+ is recommended
+# or `pip install jupyter-server`
 ```
 
 ## Source Build
@@ -71,14 +72,14 @@ This can be as a `<script>` tag in the browser or by using the `requirejs`
 package in node (`npm install requirejs` and setting
 `global.requirejs = require('requirejs');`).
 
-## Starting the Notebook Server
+## Starting the Jupyter Server
 
 Follow the package install instructions first.
 
-The library requires a running Jupyter Notebook server, launched as:
+The library requires a running Jupyter Server, launched as:
 
 ```bash
-jupyter notebook
+jupyter server
 ```
 
 or
