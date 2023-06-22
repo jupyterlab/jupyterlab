@@ -33,11 +33,19 @@ export class LanguageServerManager implements ILanguageServerManager {
   get isEnabled(): boolean {
     return this._enabled;
   }
+
   /**
    * Check if the manager is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
+  }
+
+  /**
+   * Get server connection settings.
+   */
+  get settings() {
+    return this._settings;
   }
 
   /**
@@ -204,7 +212,7 @@ export class LanguageServerManager implements ILanguageServerManager {
     for (let key of Object.keys(sessions)) {
       let id: TLanguageServerId = key as TLanguageServerId;
       if (this._sessions.has(id)) {
-        Object.assign(this._sessions.get(id)!, sessions[key]);
+        Object.assign(this._sessions.get(id) || {}, sessions[key]);
       } else {
         this._sessions.set(id, sessions[key]);
       }
