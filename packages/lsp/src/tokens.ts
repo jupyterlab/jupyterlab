@@ -412,6 +412,11 @@ export interface ILSPDocumentConnectionManager {
   updateConfiguration(allServerSettings: TLanguageServerConfigurations): void;
 
   /**
+   * Enable or disable the logging of language server communication.
+   */
+  updateLogging(logAllCommunication: boolean, setTrace: lsp.TraceValues): void;
+
+  /**
    * Handles the settings that the language servers accept using
    * `onDidChangeConfiguration` messages, which should be passed under
    * the "serverSettings" keyword in the setting registry.
@@ -850,6 +855,20 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    * message..
    */
   errorSignal: ISignal<ILSPConnection, any>;
+
+  /**
+   * @alpha
+   *
+   * Check if a capability is available in the server capabilities.
+   */
+  provides(capability: keyof lsp.ServerCapabilities): boolean;
+
+  /**
+   * @alpha
+   *
+   * Lists server capabilities.
+   */
+  serverCapabilities: lsp.ServerCapabilities;
 
   /**
    * @alpha
