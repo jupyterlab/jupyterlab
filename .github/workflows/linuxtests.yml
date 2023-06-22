@@ -17,6 +17,8 @@ jobs:
         # This will be used by the base setup action
         python-version: ["3.8", "3.11"]
         include:
+          - group: examples
+            upload-output: true
           - group: release_test
             upload-output: true
         exclude:
