@@ -53,6 +53,7 @@ from .handlers.announcements import (
     news_handler_path,
 )
 from .handlers.build_handler import Builder, BuildHandler, build_path
+from .handlers.custom_css_handler import CustomCssHandler
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
 
@@ -488,6 +489,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         {"LabApp": {"collaborative": True}},
         "Whether to enable collaborative mode.",
     )
+    flags["custom-css"] = (
+        {"JupyterNotebookApp": {"custom_css": True}},
+        "Load custom CSS in template html files. Default is True",
+    )
 
     subcommands = {
         "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -571,6 +576,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         False,
         config=True,
         help="Whether to expose the global app instance to browser via window.jupyterapp",
+    )
+
+    custom_css = Bool(
+        True,
+        config=True,
+        help="""Whether custom CSS is loaded on the page.
+    Defaults to True and custom CSS is loaded.
+    """,
     )
 
     collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
@@ -688,6 +701,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
+    def _prepare_templates(self):
+        super(LabServerApp, self)._prepare_templates()
+        self.jinja2_env.globals.update(custom_css=self.custom_css)
+
     def initialize_handlers(self):  # noqa
         handlers = []
 
@@ -706,6 +723,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         self.log.info("JupyterLab extension loaded from %s" % HERE)
         self.log.info("JupyterLab application directory is %s" % self.app_dir)
+
+        handlers.append(("/custom/custom.css", CustomCssHandler))
 
         build_handler_options = AppOptions(
             logger=self.log,
