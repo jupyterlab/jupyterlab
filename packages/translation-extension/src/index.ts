@@ -99,7 +99,16 @@ const langMenu: JupyterFrontEndPlugin<void> = {
       .then(setting => {
         // Read the settings
         loadSetting(setting);
-        document.documentElement.lang = (currentLocale ?? '').replace('_', '-');
+
+        // Ensure currentLocale is not 'default' which is not a valid language code
+        if (currentLocale !== 'default') {
+          document.documentElement.lang = (currentLocale ?? '').replace(
+            '_',
+            '-'
+          );
+        } else {
+          document.documentElement.lang = 'en-US';
+        }
 
         // Listen for your plugin setting changes using Signal
         setting.changed.connect(loadSetting);
