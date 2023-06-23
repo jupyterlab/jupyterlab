@@ -31,7 +31,7 @@
       },
       { "name": "cellType", "rank": 40 },
       { "name": "spacer", "type": "spacer", "rank": 100 },
-      { "name": "kernelName", "rank": 1001 },
+      { "name": "kernelName", "rank": 1000 },
       { "name": "executionProgress", "rank": 1002 }
     ]
   },

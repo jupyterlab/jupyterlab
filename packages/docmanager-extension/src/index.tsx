@@ -13,6 +13,8 @@ import {
   JupyterLab
 } from '@jupyterlab/application';
 import {
+  addCommandToolbarButtonClass,
+  CommandToolbarButtonComponent,
   Dialog,
   ICommandPalette,
   InputDialog,
@@ -41,12 +43,8 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { saveIcon } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
-import {
-  addCommandToolbarButtonClass,
-  CommandToolbarButtonComponent,
-  saveIcon
-} from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -1165,7 +1163,6 @@ function addLabCommands(
 function handleContext(
   status: ILabStatus,
   context: DocumentRegistry.Context
-  // widget: IDocumentWidget
 ): void {
   let disposable: IDisposable | null = null;
   const onStateChanged = (sender: any, args: IChangedArgs<any>) => {
