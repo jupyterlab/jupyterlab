@@ -317,6 +317,6 @@ Users can add a "Open in Simple Mode" context menu option by adding the followin
 .. _custom-css:
 
 Custom CSS
-----------
+==========
 
 .. include:: custom_css.rst

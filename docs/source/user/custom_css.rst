@@ -2,7 +2,7 @@
 .. Distributed under the terms of the Modified BSD License.
 
 Applying Custom CSS
-===================
+-------------------
 
 To apply custom CSS, you can add a ``/custom/custom.css`` file in the
 jupyter ``config`` directory. You can find the path, ``~/.jupyter``, to
