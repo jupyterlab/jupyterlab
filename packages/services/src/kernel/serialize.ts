@@ -73,12 +73,8 @@ namespace Private {
       decoder.decode(binMsg.slice(offsets[4], offsets[5]))
     );
     let buffers = [];
-    for (let i = 5; i < offsets.length; i++) {
-      if (i == offsets.length - 1) {
-        buffers.push(new DataView(binMsg.slice(offsets[i])));
-      } else {
-        buffers.push(new DataView(binMsg.slice(offsets[i], offsets[i + 1])));
-      }
+    for (let i = 5; i < offsets.length - 1; i++) {
+      buffers.push(new DataView(binMsg.slice(offsets[i], offsets[i + 1])));
     }
     msg = {
       channel,

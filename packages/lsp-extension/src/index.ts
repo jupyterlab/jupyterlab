@@ -94,7 +94,9 @@ function activate(
   settingRendererRegistry: IFormRendererRegistry | null
 ): ILSPDocumentConnectionManager {
   const LANGUAGE_SERVERS = 'languageServers';
-  const languageServerManager = new LanguageServerManager({});
+  const languageServerManager = new LanguageServerManager({
+    settings: app.serviceManager.serverSettings
+  });
   const connectionManager = new DocumentConnectionManager({
     languageServerManager
   });
