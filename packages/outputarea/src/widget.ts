@@ -310,18 +310,23 @@ export class OutputArea extends Widget {
     return this._toggleScrolling;
   }
 
+  get initialize(): ISignal<OutputArea, void> {
+    return this._initialize;
+  }
+
   /**
    * Add overlay allowing to toggle scrolling.
    */
   private _addPromptOverlay() {
     const overlay = document.createElement('div');
     overlay.className = OUTPUT_PROMPT_OVERLAY;
-    const trans = this._translator.load('jupyterlab');
-    overlay.title = trans.__('Toggle output scrolling');
     overlay.addEventListener('click', () => {
       this._toggleScrolling.emit();
     });
     this.node.appendChild(overlay);
+    requestAnimationFrame(() => {
+      this._initialize.emit();
+    });
   }
 
   /**
@@ -725,6 +730,7 @@ export class OutputArea extends Widget {
   private _minHeightTimeout: number | null = null;
   private _inputRequested = new Signal<OutputArea, void>(this);
   private _toggleScrolling = new Signal<OutputArea, void>(this);
+  private _initialize = new Signal<OutputArea, void>(this);
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
