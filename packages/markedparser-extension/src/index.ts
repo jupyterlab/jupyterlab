@@ -269,8 +269,8 @@ namespace Private {
     return result;
   }
 
-  /** Extract extra attributes to add to a generated image.  */
-  function makeMermaidImage(svg: string): HTMLImageElement {
+  /** Extract extra attributes to add to a generated figure.  */
+  function makeMermaidImage(svg: string): HTMLElement {
     const img = document.createElement('img');
     const maxWidth = svg.match(/max-width: (\d+)/);
     if (maxWidth && maxWidth[1]) {
@@ -280,7 +280,21 @@ namespace Private {
       }
     }
     img.setAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`);
-    return img;
+    const title = svg.match(/<title .*?>(.*?)<\/title>/);
+    const desc = svg.match(/<desc .*?>(.*?)<\/desc>/s);
+    if (title && title[1]) {
+      img.setAttribute('alt', title[1]);
+    }
+    if (!desc || !desc[1]) {
+      return img;
+    }
+    const figure = document.createElement('figure');
+    figure.appendChild(img);
+    const caption = document.createElement('figcaption');
+    caption.className = 'sr-only';
+    caption.textContent = desc[1];
+    figure.appendChild(caption);
+    return figure;
   }
 
   /**
@@ -292,9 +306,11 @@ namespace Private {
     if (_themes && _themes.theme) {
       theme = _themes.isLight(_themes.theme) ? DEFAULT_THEME : DARK_THEME;
     }
+    console.warn('mermaid theme', theme);
 
     if (_mermaid) {
       _diagrams.clear();
+      _mermaid.mermaidAPI.globalReset();
       _mermaid.mermaidAPI.initialize({
         theme,
         maxTextSize: 100000,
