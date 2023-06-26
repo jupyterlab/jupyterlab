@@ -33,7 +33,7 @@ describe('plugins', () => {
       registry: new CommandRegistry()
     });
     const mode: DockPanel.Mode = 'multiple-document';
-    lab.shell.restoreLayout(mode, restorer);
+    void lab.shell.restoreLayout(mode, restorer);
     await lab.restored;
     expect(
       lab.isPluginActivated('@jupyterlab/test-extension:plugin')
@@ -50,7 +50,7 @@ describe('plugins', () => {
       registry: new CommandRegistry()
     });
     const mode: DockPanel.Mode = 'multiple-document';
-    lab.shell.restoreLayout(mode, restorer);
+    void lab.shell.restoreLayout(mode, restorer);
     await lab.restored;
     expect(
       lab.isPluginActivated('@jupyterlab/test-extension:plugin')
@@ -71,7 +71,7 @@ describe('plugins', () => {
       registry: new CommandRegistry()
     });
     const mode: DockPanel.Mode = 'multiple-document';
-    lab.shell.restoreLayout(mode, restorer);
+    void lab.shell.restoreLayout(mode, restorer);
     await lab.restored;
     expect(
       lab.isPluginActivated('@jupyterlab/test-extension:plugin')
