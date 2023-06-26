@@ -95,7 +95,7 @@ export interface IObservableList<T> extends IDisposable, Iterable<T> {
   /**
    * Move a value from one index to another.
    *
-   * @parm fromIndex - The index of the element to move.
+   * @param fromIndex - The index of the element to move.
    *
    * @param toIndex - The index to move the element to.
    *
@@ -549,7 +549,7 @@ export class ObservableList<T> implements IObservableList<T> {
   /**
    * Move a value from one index to another.
    *
-   * @parm fromIndex - The index of the element to move.
+   * @param fromIndex - The index of the element to move.
    *
    * @param toIndex - The index to move the element to.
    *

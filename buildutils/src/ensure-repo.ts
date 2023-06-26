@@ -126,6 +126,14 @@ const UNUSED: Dict<string[]> = {
 // Packages that are allowed to have differing versions
 const DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
 
+// Packages that have backward versions support
+const BACKWARD_VERSIONS: Record<string, Record<string, string>> = {
+  '@jupyterlab/rendermime-interfaces': {
+    '@lumino/coreutils': '^1.11.0',
+    '@lumino/widgets': '^1.37.2'
+  }
+};
+
 const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
   '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
@@ -796,7 +804,8 @@ export async function ensureIntegrity(): Promise<boolean> {
       locals,
       cssImports: cssImports[name],
       cssModuleImports: cssModuleImports[name],
-      differentVersions: DIFFERENT_VERSIONS
+      differentVersions: DIFFERENT_VERSIONS,
+      backwardVersions: BACKWARD_VERSIONS
     };
 
     if (name === '@jupyterlab/metapackage') {

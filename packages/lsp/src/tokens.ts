@@ -94,6 +94,13 @@ export interface ILanguageServerManager extends IDisposable {
   /**
    * @alpha
    *
+   * Get server connection settings.
+   */
+  readonly settings: ServerConnection.ISettings;
+
+  /**
+   * @alpha
+   *
    * A promise that is fulfilled when the connection manager is ready.
    */
   readonly ready: Promise<void>;
@@ -410,6 +417,11 @@ export interface ILSPDocumentConnectionManager {
    * This function should be called **before** initialization of servers.
    */
   updateConfiguration(allServerSettings: TLanguageServerConfigurations): void;
+
+  /**
+   * Enable or disable the logging of language server communication.
+   */
+  updateLogging(logAllCommunication: boolean, setTrace: lsp.TraceValues): void;
 
   /**
    * Handles the settings that the language servers accept using
@@ -850,6 +862,20 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    * message..
    */
   errorSignal: ISignal<ILSPConnection, any>;
+
+  /**
+   * @alpha
+   *
+   * Check if a capability is available in the server capabilities.
+   */
+  provides(capability: keyof lsp.ServerCapabilities): boolean;
+
+  /**
+   * @alpha
+   *
+   * Lists server capabilities.
+   */
+  serverCapabilities: lsp.ServerCapabilities;
 
   /**
    * @alpha
