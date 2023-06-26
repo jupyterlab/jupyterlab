@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/statusbar-extension",
-  "version": "3.6.4",
+  "version": "3.6.5",
   "description": "JupyterLab - Statusbar Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,17 +36,17 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.6.4",
-    "@jupyterlab/apputils": "^3.6.4",
-    "@jupyterlab/cells": "^3.6.4",
-    "@jupyterlab/console": "^3.6.4",
-    "@jupyterlab/docregistry": "^3.6.4",
-    "@jupyterlab/fileeditor": "^3.6.4",
-    "@jupyterlab/notebook": "^3.6.4",
-    "@jupyterlab/settingregistry": "^3.6.4",
-    "@jupyterlab/statusbar": "^3.6.4",
-    "@jupyterlab/translation": "^3.6.4",
-    "@jupyterlab/ui-components": "^3.6.4",
+    "@jupyterlab/application": "^3.6.5",
+    "@jupyterlab/apputils": "^3.6.5",
+    "@jupyterlab/cells": "^3.6.5",
+    "@jupyterlab/console": "^3.6.5",
+    "@jupyterlab/docregistry": "^3.6.5",
+    "@jupyterlab/fileeditor": "^3.6.5",
+    "@jupyterlab/notebook": "^3.6.5",
+    "@jupyterlab/settingregistry": "^3.6.5",
+    "@jupyterlab/statusbar": "^3.6.5",
+    "@jupyterlab/translation": "^3.6.5",
+    "@jupyterlab/ui-components": "^3.6.5",
     "@lumino/commands": "^1.19.0",
     "@lumino/widgets": "^1.37.2"
   },

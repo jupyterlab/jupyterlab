@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docmanager",
-  "version": "3.6.4",
+  "version": "3.6.5",
   "description": "JupyterLab - Document Manager",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,13 +41,13 @@
     "watch": "npm run test -- --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.6.4",
-    "@jupyterlab/coreutils": "^5.6.4",
-    "@jupyterlab/docprovider": "^3.6.4",
-    "@jupyterlab/docregistry": "^3.6.4",
-    "@jupyterlab/services": "^6.6.4",
-    "@jupyterlab/statusbar": "^3.6.4",
-    "@jupyterlab/translation": "^3.6.4",
+    "@jupyterlab/apputils": "^3.6.5",
+    "@jupyterlab/coreutils": "^5.6.5",
+    "@jupyterlab/docprovider": "^3.6.5",
+    "@jupyterlab/docregistry": "^3.6.5",
+    "@jupyterlab/services": "^6.6.5",
+    "@jupyterlab/statusbar": "^3.6.5",
+    "@jupyterlab/translation": "^3.6.5",
     "@lumino/algorithm": "^1.9.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/disposable": "^1.10.0",
@@ -58,7 +58,7 @@
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.6.4",
+    "@jupyterlab/testutils": "^3.6.5",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

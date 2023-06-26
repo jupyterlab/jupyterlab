@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/json-extension",
-  "version": "3.6.4",
+  "version": "3.6.5",
   "description": "JupyterLab - JSON Renderer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,10 +32,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.6.4",
-    "@jupyterlab/rendermime-interfaces": "^3.6.4",
-    "@jupyterlab/translation": "^3.6.4",
-    "@jupyterlab/ui-components": "^3.6.4",
+    "@jupyterlab/apputils": "^3.6.5",
+    "@jupyterlab/rendermime-interfaces": "^3.6.5",
+    "@jupyterlab/translation": "^3.6.5",
+    "@jupyterlab/ui-components": "^3.6.5",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/messaging": "^1.10.0",
     "@lumino/widgets": "^1.37.2",

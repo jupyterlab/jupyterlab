@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/vdom-extension",
-  "version": "3.6.4",
+  "version": "3.6.5",
   "description": "JupyterLab - VDOM Renderer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,13 +32,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.6.4",
-    "@jupyterlab/apputils": "^3.6.4",
-    "@jupyterlab/docregistry": "^3.6.4",
-    "@jupyterlab/notebook": "^3.6.4",
-    "@jupyterlab/rendermime": "^3.6.4",
-    "@jupyterlab/ui-components": "^3.6.4",
-    "@jupyterlab/vdom": "^3.6.4"
+    "@jupyterlab/application": "^3.6.5",
+    "@jupyterlab/apputils": "^3.6.5",
+    "@jupyterlab/docregistry": "^3.6.5",
+    "@jupyterlab/notebook": "^3.6.5",
+    "@jupyterlab/rendermime": "^3.6.5",
+    "@jupyterlab/ui-components": "^3.6.5",
+    "@jupyterlab/vdom": "^3.6.5"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

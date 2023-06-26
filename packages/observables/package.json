@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/observables",
-  "version": "4.6.4",
+  "version": "4.6.5",
   "description": "Data structures which may be observed for changes.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -43,7 +43,7 @@
     "@lumino/signaling": "^1.10.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.6.4",
+    "@jupyterlab/testutils": "^3.6.5",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

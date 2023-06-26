@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime-interfaces",
-  "version": "3.6.4",
+  "version": "3.6.5",
   "description": "JupyterLab - Interfaces for Mime Renderers",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -30,7 +30,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/translation": "^3.6.4",
+    "@jupyterlab/translation": "^3.6.5",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/widgets": "^1.37.2"
   },

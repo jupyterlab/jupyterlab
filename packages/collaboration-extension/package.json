@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/collaboration-extension",
-  "version": "3.6.4",
+  "version": "3.6.5",
   "description": "JupyterLab - Collaboration Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,14 +36,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.6.4",
-    "@jupyterlab/apputils": "^3.6.4",
-    "@jupyterlab/collaboration": "^3.6.4",
-    "@jupyterlab/coreutils": "^5.6.4",
-    "@jupyterlab/services": "^6.6.4",
-    "@jupyterlab/statedb": "^3.6.4",
-    "@jupyterlab/translation": "^3.6.4",
-    "@jupyterlab/ui-components": "^3.6.4",
+    "@jupyterlab/application": "^3.6.5",
+    "@jupyterlab/apputils": "^3.6.5",
+    "@jupyterlab/collaboration": "^3.6.5",
+    "@jupyterlab/coreutils": "^5.6.5",
+    "@jupyterlab/services": "^6.6.5",
+    "@jupyterlab/statedb": "^3.6.5",
+    "@jupyterlab/translation": "^3.6.5",
+    "@jupyterlab/ui-components": "^3.6.5",
     "@lumino/widgets": "^1.37.2",
     "y-protocols": "^1.0.5",
     "y-websocket": "^1.4.6",

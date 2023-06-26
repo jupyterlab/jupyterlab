@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingregistry",
-  "version": "3.6.4",
+  "version": "3.6.5",
   "description": "Settings registry for Jupyterlab",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,7 +35,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/statedb": "^3.6.4",
+    "@jupyterlab/statedb": "^3.6.5",
     "@lumino/commands": "^1.19.0",
     "@lumino/coreutils": "^1.11.0",
     "@lumino/disposable": "^1.10.0",
@@ -44,7 +44,7 @@
     "json5": "^2.1.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.6.4",
+    "@jupyterlab/testutils": "^3.6.5",
     "@types/jest": "^26.0.10",
     "@types/json5": "^0.0.30",
     "jest": "^26.4.2",
