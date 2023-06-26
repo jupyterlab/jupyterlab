@@ -5,7 +5,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { Base64ModelFactory } from '@jupyterlab/docregistry';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { ServiceManager } from '@jupyterlab/services';
-import { Token } from '@lumino/coreutils';
+import { PromiseDelegate, Token } from '@lumino/coreutils';
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
 import { createRendermimePlugins } from './mimerenderers';
 import { ILabShell, LabShell } from './shell';
@@ -43,23 +43,30 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     this._info = { ...JupyterLab.defaultInfo, ...info };
 
     this.restored = this.shell.restored
-      .then(() => {
-        this.activateDeferredPlugins().catch(error => {
+      .then(async () => {
+        const activated: Promise<void | void[]>[] = [];
+        const deferred = this.activateDeferredPlugins().catch(error => {
           console.error('Error when activating deferred plugins\n:', error);
         });
-
+        activated.push(deferred);
         if (this._info.deferred) {
-          Promise.all(
+          const customizedDeferred = Promise.all(
             this._info.deferred.matches.map(pluginID =>
               this.activatePlugin(pluginID)
             )
           ).catch(error => {
             console.error(
-              'Error when activating customize list of deferred plugins:\n',
+              'Error when activating customized list of deferred plugins:\n',
               error
             );
           });
+          activated.push(customizedDeferred);
         }
+        Promise.all(activated)
+          .then(() => {
+            this._allPluginsActivated.resolve();
+          })
+          .catch(() => undefined);
       })
       .catch(() => undefined);
 
@@ -153,6 +160,12 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
   }
 
   /**
+   * Promise that resolves when all the plugins are activated, including the deferred.
+   */
+  get allPluginsActivated(): Promise<void> {
+    return this._allPluginsActivated.promise;
+  }
+  /**
    * Register plugins from a plugin module.
    *
    * @param mod - The plugin module to register.
@@ -188,6 +201,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
 
   private _info: JupyterLab.IInfo = JupyterLab.defaultInfo;
   private _paths: JupyterFrontEnd.IPaths;
+  private _allPluginsActivated = new PromiseDelegate<void>();
 }
 
 /**
