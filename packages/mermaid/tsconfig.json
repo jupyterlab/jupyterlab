@@ -7,22 +7,10 @@
   "include": ["src/*"],
   "references": [
     {
-      "path": "../application"
-    },
-    {
       "path": "../apputils"
     },
     {
-      "path": "../codemirror"
-    },
-    {
       "path": "../coreutils"
-    },
-    {
-      "path": "../mermaid"
-    },
-    {
-      "path": "../rendermime"
     }
   ]
 }

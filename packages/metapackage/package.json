@@ -15,6 +15,7 @@
   "sideEffects": false,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
@@ -22,7 +23,9 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "src/**/*.{ts,tsx}"
+    "src/**/*.{ts,tsx}",
+    "style/index.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -91,6 +94,8 @@
     "@jupyterlab/markdownviewer-extension": "^4.0.2",
     "@jupyterlab/markedparser-extension": "^4.0.2",
     "@jupyterlab/mathjax-extension": "^4.0.2",
+    "@jupyterlab/mermaid": "^4.0.2",
+    "@jupyterlab/mermaid-extension": "^4.0.2",
     "@jupyterlab/metadataform": "^4.0.2",
     "@jupyterlab/metadataform-extension": "^4.0.2",
     "@jupyterlab/nbconvert-css": "^4.0.2",
@@ -140,5 +145,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "styleModule": "style/index.js"
 }

@@ -2071,6 +2071,7 @@ __metadata:
     "@jupyterlab/markdownviewer-extension": ~4.0.2
     "@jupyterlab/markedparser-extension": ~4.0.2
     "@jupyterlab/mathjax-extension": ~4.0.2
+    "@jupyterlab/mermaid-extension": ~4.0.2
     "@jupyterlab/metadataform-extension": ~4.0.2
     "@jupyterlab/notebook-extension": ~4.0.2
     "@jupyterlab/pdf-extension": ~4.0.2
@@ -3838,6 +3839,8 @@ __metadata:
     "@jupyterlab/application": ^4.0.2
     "@jupyterlab/apputils": ^4.1.2
     "@jupyterlab/codemirror": ^4.0.2
+    "@jupyterlab/coreutils": ^6.0.2
+    "@jupyterlab/mermaid": ^4.0.2
     "@jupyterlab/rendermime": ^4.0.2
     "@lumino/coreutils": ^2.1.1
     "@types/d3": ^7.4.0
@@ -3858,6 +3861,34 @@ __metadata:
     "@jupyterlab/application": ^4.0.2
     "@jupyterlab/rendermime": ^4.0.2
     mathjax-full: ^3.2.2
+    rimraf: ~3.0.0
+    typedoc: ~0.24.7
+    typescript: ~5.0.4
+  languageName: unknown
+  linkType: soft
+
+"@jupyterlab/mermaid-extension@^4.0.2, @jupyterlab/mermaid-extension@workspace:packages/mermaid-extension, @jupyterlab/mermaid-extension@~4.0.2":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/mermaid-extension@workspace:packages/mermaid-extension"
+  dependencies:
+    "@jupyterlab/application": ^4.0.2
+    "@jupyterlab/apputils": ^4.1.2
+    "@jupyterlab/mermaid": ^4.0.2
+    "@lumino/coreutils": ^2.1.1
+    rimraf: ~3.0.0
+    typedoc: ~0.24.7
+    typescript: ~5.0.4
+  languageName: unknown
+  linkType: soft
+
+"@jupyterlab/mermaid@^4.0.2, @jupyterlab/mermaid@workspace:packages/mermaid":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/mermaid@workspace:packages/mermaid"
+  dependencies:
+    "@jupyterlab/apputils": ^4.1.2
+    "@jupyterlab/coreutils": ^6.0.2
+    "@lumino/coreutils": ^2.1.1
+    mermaid: ^10.2.3
     rimraf: ~3.0.0
     typedoc: ~0.24.7
     typescript: ~5.0.4
@@ -3965,6 +3996,8 @@ __metadata:
     "@jupyterlab/markdownviewer-extension": ^4.0.2
     "@jupyterlab/markedparser-extension": ^4.0.2
     "@jupyterlab/mathjax-extension": ^4.0.2
+    "@jupyterlab/mermaid": ^4.0.2
+    "@jupyterlab/mermaid-extension": ^4.0.2
     "@jupyterlab/metadataform": ^4.0.2
     "@jupyterlab/metadataform-extension": ^4.0.2
     "@jupyterlab/nbconvert-css": ^4.0.2
