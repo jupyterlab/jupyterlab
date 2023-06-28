@@ -168,13 +168,13 @@ export class MermaidManager implements IMermaidManager {
     }
 
     // add accessible alt title
-    const title = svg.match(/<title .*?>(.*?)<\/title>/);
+    const title = svg.match(/<title[^>]*>([^<]+)<\/title>/);
     if (title && title[1]) {
       img.setAttribute('alt', title[1]);
     }
 
     // add accessible caption
-    const desc = svg.match(/<desc .*?>(.*?)<\/desc>/s);
+    const desc = svg.match(/<desc[^>]*>([^<]+)<\/desc>/s);
     if (desc && desc[1]) {
       const caption = document.createElement('figcaption');
       caption.className = 'sr-only';
