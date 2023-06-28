@@ -24,10 +24,10 @@
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
   flex-wrap: wrap;
-  row-gap: 12px;
+  row-gap: min(1.5vh, 12px);
   border-bottom: none;
   height: auto;
-  margin: 8px 12px 0;
+  margin: min(1vh, 8px) min(1.5vh, 12px) 0;
   box-shadow: none;
   padding: 0;
   justify-content: flex-start;
@@ -41,7 +41,7 @@
 
 .jp-BreadCrumbs {
   flex: 0 0 auto;
-  margin: 8px 12px;
+  margin: min(1vw, 8px) min(1vw, 12px);
 }
 
 .jp-BreadCrumbs-item {
@@ -128,7 +128,7 @@
 }
 
 .jp-DirListing-headerItem {
-  padding: 4px 12px 2px;
+  padding: min(1vh, 4px) min(1vw, 12px) min(1vw, 2px);
   font-weight: 500;
 }
 
@@ -205,7 +205,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 4px 12px;
+  padding: min(1vh, 4px) min(1vw, 12px);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
