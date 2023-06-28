@@ -201,7 +201,12 @@ export class StaticNotebook extends WindowedList {
           (options.notebookConfig?.windowingMode ??
             StaticNotebook.defaultNotebookConfig.windowingMode) === 'full'
       }),
-      layout: new NotebookWindowedLayout()
+      layout: new NotebookWindowedLayout(),
+      windowContainerCallback: (windowContainer: Element) => {
+        windowContainer.setAttribute('role', 'feed');
+        // TODO translation
+        windowContainer.setAttribute('aria-label', 'Cells');
+      }
     });
     this.addClass(NB_CLASS);
     this.cellsArray = cells;
