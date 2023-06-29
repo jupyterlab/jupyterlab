@@ -84,7 +84,7 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
-    "altair==4.2.2",
+    "altair==5.0.1",
     "ipython==8.14.0",
     "ipywidgets==8.0.6",
     "jupyterlab-geojson==3.4.0",
@@ -115,7 +115,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.270",
+    "ruff==0.0.271",
     "black[jupyter]==23.3.0"
 ]
 
