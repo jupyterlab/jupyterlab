@@ -509,7 +509,7 @@ export abstract class ABCWidgetFactory<
         | IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
   private _isDisposed = false;
-  private _translator: ITranslator;
+  _translator: ITranslator;
   private _name: string;
   private _label: string;
   private _autoStartDefault: boolean;
@@ -617,8 +617,7 @@ export class DocumentWidget<
       this._handleDirtyState();
     }
     if (!this.context.model.dirty) {
-      const path = this.context.contentsModel?.path;
-      if (path && !path.startsWith('RTC:')) {
+      if (!this.context.model.collaborative) {
         if (!this.context.contentsModel?.writable) {
           const readOnlyIndicator = createReadonlyLabel(this);
           let roi = this.toolbar.insertBefore(

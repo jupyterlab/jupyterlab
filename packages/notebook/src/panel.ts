@@ -11,6 +11,7 @@ import { isMarkdownCellModel } from '@jupyterlab/cells';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import { ITranslator } from '@jupyterlab/translation';
 import { Token } from '@lumino/coreutils';
 import { INotebookModel } from './model';
 import { Notebook, StaticNotebook } from './widget';
@@ -264,6 +265,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * notified the user about.
    */
   private _autorestarting = false;
+  translator: ITranslator;
 }
 
 /**

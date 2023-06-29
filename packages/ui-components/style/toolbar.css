@@ -104,7 +104,7 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
 
 .jp-ToolbarLabelComponent {
   background-color: var(--jp-brand-color1);
-  color: white;
+  color: var(--jp-ui-inverse-font-color1);
 }
 
 #jp-main-dock-panel[data-mode='single-document']
