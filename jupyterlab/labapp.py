@@ -53,7 +53,6 @@ from .handlers.announcements import (
     news_handler_path,
 )
 from .handlers.build_handler import Builder, BuildHandler, build_path
-from .handlers.custom_css_handler import CustomCssHandler
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
 
@@ -724,7 +723,16 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         self.log.info("JupyterLab extension loaded from %s" % HERE)
         self.log.info("JupyterLab application directory is %s" % self.app_dir)
 
-        handlers.append(("/custom/custom.css", CustomCssHandler))
+        handlers.append(
+            (
+                r"/custom/(.*)(?<!\.js)$",
+                self.serverapp.web_app.settings["static_handler_class"],
+                {
+                    'path': self.serverapp.web_app.settings['static_custom_path'],
+                    'no_cache_paths': ['/'],  # don't cache anything in custom
+                },
+            )
+        )
 
         build_handler_options = AppOptions(
             logger=self.log,
