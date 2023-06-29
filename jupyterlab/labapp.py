@@ -702,7 +702,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.template_paths = [self.templates_dir]
 
     def _prepare_templates(self):
-        super(LabApp, self)._prepare_templates()
+        super()._prepare_templates()
         self.jinja2_env.globals.update(custom_css=self.custom_css)
 
     def initialize_handlers(self):  # noqa
