@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DocumentChange, ISharedDocument } from '@jupyter/ydoc';
 import {
   Dialog,
   ISessionContext,
@@ -23,10 +22,12 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+
 import { PartialJSONValue, PromiseDelegate } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+
 import { DocumentRegistry } from './registry';
 
 /**
@@ -92,7 +93,6 @@ export class Context<
       path: this._path,
       contents: manager.contents
     });
-    this.model.sharedModel.changed.connect(this.onStateChanged, this);
   }
 
   /**
@@ -407,22 +407,6 @@ export class Context<
     });
   }
 
-  protected onStateChanged(sender: ISharedDocument, changes: DocumentChange) {
-    if (changes.stateChange) {
-      changes.stateChange.forEach(change => {
-        if (change.name === 'path') {
-          const driveName = this._manager.contents.driveName(this._path);
-          let newPath = change.newValue;
-          if (driveName) {
-            newPath = `${driveName}:${change.newValue}`;
-          }
-
-          this._updatePath(newPath);
-        }
-      });
-    }
-  }
-
   /**
    * Handle a change on the contents manager.
    */
@@ -467,7 +451,14 @@ export class Context<
       return;
     }
 
-    this._updatePath(this.sessionContext.session!.path);
+    // The session uses local paths.
+    // We need to convert it to a global path.
+    const driveName = this._manager.contents.driveName(this.path);
+    let newPath = this.sessionContext.session!.path;
+    if (driveName) {
+      newPath = `${driveName}:${newPath}`;
+    }
+    this._updatePath(newPath);
   }
 
   /**
@@ -488,7 +479,6 @@ export class Context<
     };
     const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
-    this._model.sharedModel.setState('last_modified', newModel.last_modified);
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
     }
@@ -522,9 +512,6 @@ export class Context<
         path: newPath
       };
       this._updateContentsModel(contentsModel);
-    }
-    if (this._model.sharedModel.getState('path') !== localPath) {
-      this._model.sharedModel.setState('path', localPath);
     }
     this._pathChanged.emit(newPath);
   }
@@ -577,14 +564,6 @@ export class Context<
 
     // rename triggers a fileChanged which updates the contents model
     await this._manager.contents.rename(this.path, newPath);
-    await this.sessionContext.session?.setPath(newPath);
-    await this.sessionContext.session?.setName(newName);
-
-    this._path = newPath;
-    const localPath = this._manager.contents.localPath(this._path);
-    (this.urlResolver as RenderMimeRegistry.UrlResolver).path = newPath;
-    this._model.sharedModel.setState('path', localPath);
-    this._pathChanged.emit(newPath);
   }
 
   /**
@@ -712,11 +691,7 @@ export class Context<
         // (our last save)
         // In some cases the filesystem reports an inconsistent time, so we allow buffer when comparing.
         const lastModifiedCheckMargin = this._lastModifiedCheckMargin;
-        const ycontextModified = this._model.sharedModel.getState(
-          'last_modified'
-        ) as string;
-        // prefer using the timestamp from the state because it is more up to date
-        const modified = ycontextModified || this.contentsModel?.last_modified;
+        const modified = this.contentsModel?.last_modified;
         const tClient = modified ? new Date(modified) : new Date();
         const tDisk = new Date(model.last_modified);
         if (
