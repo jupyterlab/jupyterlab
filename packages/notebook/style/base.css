@@ -138,7 +138,11 @@
 }
 
 .jp-Notebook.jp-mod-commandMode .jp-Cell:focus {
-  outline: solid var(--jp-inverse-layout-color0) 1px;
+  outline: none;
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--jp-inverse-layout-color2);
+  transition: 0.1s;
 }
 
 /* Edit mode */
