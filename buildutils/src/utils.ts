@@ -85,7 +85,7 @@ export function getCorePaths(): string[] {
  *
  * @param data - The package data.
  *
- * @oaram pkgJsonPath - The path to the package.json file.
+ * @param pkgJsonPath - The path to the package.json file.
  *
  * @returns Whether the file has changed.
  */
