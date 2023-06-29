@@ -490,7 +490,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         "Whether to enable collaborative mode.",
     )
     flags["custom-css"] = (
-        {"JupyterNotebookApp": {"custom_css": True}},
+        {"LabApp": {"custom_css": True}},
         "Load custom CSS in template html files. Default is True",
     )
 
