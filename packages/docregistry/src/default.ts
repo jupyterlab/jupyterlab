@@ -652,7 +652,7 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
-  readonly _trans;
+  protected readonly _trans;
 
   /**
    * Whether the document has an auto-generated name or not.
