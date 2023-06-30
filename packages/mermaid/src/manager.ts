@@ -10,16 +10,14 @@ import { LruCache } from '@jupyterlab/coreutils';
 import { IThemeManager } from '@jupyterlab/apputils';
 
 import {
-  DARK_THEME,
-  DEFAULT_THEME,
   DETAILS_CLASS,
   IMermaidManager,
   MERMAID_CLASS,
+  MERMAID_DARK_THEME,
+  MERMAID_DEFAULT_THEME,
   SUMMARY_CLASS,
   WARNING_CLASS
 } from './tokens';
-
-import '../style/base.css';
 
 /**
  * A mermaid diagram manager with cache.
@@ -47,6 +45,20 @@ export class MermaidManager implements IMermaidManager {
   }
 
   /**
+   * Get the underlying, potentially un-initialized mermaid module.
+   */
+  async getMermaid(): Promise<typeof MermaidType> {
+    return await Private.ensureMermaid();
+  }
+
+  /**
+   * Get the version of the currently-loaded mermaid module
+   */
+  getMermaidVersion(): string | null {
+    return Private.version();
+  }
+
+  /**
    * Get a pre-cached mermaid figure.
    *
    * This primarily exists for the needs of `marked`, which supports async node
@@ -59,11 +71,8 @@ export class MermaidManager implements IMermaidManager {
   /**
    * Attempt a raw rendering of mermaid to an SVG string.
    */
-  async renderSvg(
-    text: string,
-    options: IMermaidManager.IRenderOptions
-  ): Promise<string> {
-    const _mermaid = await Private.ensureMermaid();
+  async renderSvg(text: string): Promise<string> {
+    const _mermaid = await this.getMermaid();
 
     const id = `jp-mermaid-${Private.nextMermaidId()}`;
 
@@ -82,10 +91,7 @@ export class MermaidManager implements IMermaidManager {
   /**
    * Provide and cache a fully-rendered element, checking the cache first.
    */
-  async renderFigure(
-    text: string,
-    options: IMermaidManager.IRenderOptions
-  ): Promise<HTMLElement> {
+  async renderFigure(text: string): Promise<HTMLElement> {
     // bail if already cached
     let output: HTMLElement | null = this._diagrams.get(text);
 
@@ -102,11 +108,17 @@ export class MermaidManager implements IMermaidManager {
     output.className = className;
 
     try {
-      const svg = await this.renderSvg(text, options);
+      const svg = await this.renderSvg(text);
       result = this.makeMermaidFigure(svg);
     } catch (err) {
       output.classList.add(WARNING_CLASS);
       result = await this.makeMermaidError(text);
+    }
+
+    let version = this.getMermaidVersion();
+
+    if (version) {
+      result.dataset.jpMermaidVersion = version;
     }
 
     output.appendChild(result);
@@ -123,10 +135,10 @@ export class MermaidManager implements IMermaidManager {
    * This doesn't do much of anything if the text is successfully parsed.
    */
   async makeMermaidError(text: string): Promise<HTMLElement> {
-    const mermaid = await Private.ensureMermaid();
+    const _mermaid = await this.getMermaid();
     let errorMessage = '';
     try {
-      await mermaid.parse(text);
+      await _mermaid.parse(text);
     } catch (err) {
       errorMessage = `${err}`;
     }
@@ -207,6 +219,7 @@ namespace Private {
   let _mermaid: typeof MermaidType | null = null;
   let _loading: PromiseDelegate<typeof MermaidType> | null = null;
   let _nextMermaidId = 0;
+  let _version: string | null = null;
 
   /**
    * Cache a reference to the theme manager.
@@ -215,16 +228,29 @@ namespace Private {
     _themes = themes;
   }
 
+  /**
+   * Get the version of mermaid used for rendering.
+   */
+  export function version(): string | null {
+    return _version;
+  }
+
+  /**
+   * (Re-)initialize mermaid with lab-specific theme information
+   */
   export function initMermaid(): boolean {
     if (!_mermaid) {
       return false;
     }
 
-    let theme = DEFAULT_THEME;
+    let theme = MERMAID_DEFAULT_THEME;
 
     if (_themes) {
       const jpTheme = _themes.theme;
-      theme = jpTheme && _themes.isLight(jpTheme) ? DEFAULT_THEME : DARK_THEME;
+      theme =
+        jpTheme && _themes.isLight(jpTheme)
+          ? MERMAID_DEFAULT_THEME
+          : MERMAID_DARK_THEME;
     }
 
     const fontFamily = window
@@ -266,6 +292,7 @@ namespace Private {
       return _loading.promise;
     }
     _loading = new PromiseDelegate();
+    _version = (await import('mermaid/package.json')).version;
     _mermaid = (await import('mermaid')).default;
     initMermaid();
     _loading.resolve(_mermaid);

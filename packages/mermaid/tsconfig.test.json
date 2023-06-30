@@ -1,10 +1,6 @@
 {
-  "extends": "../../tsconfigbase",
-  "compilerOptions": {
-    "outDir": "lib",
-    "rootDir": "src"
-  },
-  "include": ["src/*"],
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
   "references": [
     {
       "path": "../apputils"
@@ -14,6 +10,9 @@
     },
     {
       "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "."
     }
   ]
 }

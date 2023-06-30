@@ -2,6 +2,10 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+.jp-RenderedMermaid {
+  overflow: auto;
+  display: flex;
+}
 
 .jp-RenderedMermaid.jp-mod-warning {
   width: auto;
@@ -17,6 +21,12 @@
 
 .jp-RenderedMermaid figure {
   margin: 0;
+  overflow: auto;
+  max-width: 100%;
+}
+
+.jp-RenderedMermaid img {
+  max-width: 100%;
 }
 
 .jp-RenderedMermaid-Details > pre {
@@ -29,4 +39,5 @@
 
 .jp-RenderedMermaid-Summary > pre {
   display: inline-block;
+  white-space: normal;
 }

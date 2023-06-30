@@ -15,7 +15,8 @@ import {
   IMermaidManager,
   IMermaidMarkdown,
   MermaidManager,
-  MermaidMarkdown
+  MermaidMarkdown,
+  RenderedMermaid
 } from '@jupyterlab/mermaid';
 
 /**
@@ -28,7 +29,9 @@ const core: JupyterFrontEndPlugin<IMermaidManager> = {
   optional: [IThemeManager],
   provides: IMermaidManager,
   activate: (app: JupyterFrontEnd, themes: IThemeManager) => {
-    return new MermaidManager({ themes });
+    const manager = new MermaidManager({ themes });
+    RenderedMermaid.manager = manager;
+    return manager;
   }
 };
 

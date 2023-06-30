@@ -262,6 +262,7 @@
     "mimeExtensions": {
       "@jupyterlab/javascript-extension": "",
       "@jupyterlab/json-extension": "",
+      "@jupyterlab/mermaid-extension": "lib/mime.js",
       "@jupyterlab/pdf-extension": "",
       "@jupyterlab/vega5-extension": ""
     },

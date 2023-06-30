@@ -2,14 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Token } from '@lumino/coreutils';
+import type MermaidType from 'mermaid';
 
 // documented upstream constants
-export const MIME_TYPE = 'text/vnd.mermaid';
-export const EXTENSIONS = ['.mmd', '.mermaid'];
+export const MERMAID_MIME_TYPE = 'text/vnd.mermaid';
+export const MERMAID_FILE_EXTENSIONS = ['.mmd', '.mermaid'];
 
 // mermaid themes
-export const DEFAULT_THEME = 'default';
-export const DARK_THEME = 'dark';
+export const MERMAID_DEFAULT_THEME = 'default';
+export const MERMAID_DARK_THEME = 'dark';
 
 // DOM
 export const MERMAID_CLASS = 'jp-RenderedMermaid';
@@ -30,34 +31,29 @@ export const IMermaidManager = new Token<IMermaidManager>(
  */
 export interface IMermaidManager {
   /**
+   * Get the (potentially uninitialized) mermaid module.
+   */
+  getMermaid(): Promise<typeof MermaidType>;
+
+  /**
+   * Get the version of the currently-loaded mermaid module
+   */
+  getMermaidVersion(): string | null;
+
+  /**
    * Render mermaid source to an SVG string.
    */
-  renderSvg(
-    text: string,
-    options?: IMermaidManager.IRenderOptions
-  ): Promise<string>;
+  renderSvg(text: string): Promise<string>;
 
   /**
    * Render and cache mermaid source as a figure of an image, or a unsuccessful parser message.
    */
-  renderFigure(
-    text: string,
-    options?: IMermaidManager.IRenderOptions
-  ): Promise<HTMLElement>;
+  renderFigure(text: string): Promise<HTMLElement>;
 
   /**
    * Get the pre-cached element for a mermaid string, if available.
    */
   getCachedFigure(text: string): HTMLElement | null;
-}
-
-/**
- * A namespace for mermaid interfaces
- */
-export namespace IMermaidManager {
-  export interface IRenderOptions {
-    theme?: string;
-  }
 }
 
 /**

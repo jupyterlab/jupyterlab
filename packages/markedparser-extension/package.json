@@ -37,14 +37,12 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.0.2",
-    "@jupyterlab/apputils": "^4.1.2",
     "@jupyterlab/codemirror": "^4.0.2",
     "@jupyterlab/coreutils": "^6.0.2",
     "@jupyterlab/mermaid": "^4.0.2",
     "@jupyterlab/rendermime": "^4.0.2",
     "@lumino/coreutils": "^2.1.1",
-    "marked": "^5.1.0",
-    "mermaid": "^10.2.3"
+    "marked": "^5.1.0"
   },
   "devDependencies": {
     "@types/d3": "^7.4.0",
