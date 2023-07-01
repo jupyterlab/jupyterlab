@@ -41,9 +41,9 @@ export interface IMermaidManager {
   getMermaidVersion(): string | null;
 
   /**
-   * Render mermaid source to an SVG string.
+   * Render mermaid source to an SVG string with extraced metadata.
    */
-  renderSvg(text: string): Promise<string>;
+  renderSvg(text: string): Promise<IMermaidManager.IRenderInfo>;
 
   /**
    * Render and cache mermaid source as a figure of an image, or a unsuccessful parser message.
@@ -54,6 +54,25 @@ export interface IMermaidManager {
    * Get the pre-cached element for a mermaid string, if available.
    */
   getCachedFigure(text: string): HTMLElement | null;
+}
+
+/**
+ * A namespace for the mermaid manager.
+ */
+export namespace IMermaidManager {
+  /**
+   * The results of a successful rendering of a mermaid text-based diagram.
+   */
+  export interface IRenderInfo {
+    /** The raw rendered SVG. */
+    svg: string;
+    /** The extracted accessible description, if found. */
+    accessibleDescription?: string | null;
+    /** The extracted accessible title, if found. */
+    accessibleTitle?: string | null;
+    /** The extracted width of the digaram, if found. */
+    width?: number | null;
+  }
 }
 
 /**

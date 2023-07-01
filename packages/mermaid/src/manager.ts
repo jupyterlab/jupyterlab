@@ -69,9 +69,9 @@ export class MermaidManager implements IMermaidManager {
   }
 
   /**
-   * Attempt a raw rendering of mermaid to an SVG string.
+   * Attempt a raw rendering of mermaid to an SVG string, extracting some metadata.
    */
-  async renderSvg(text: string): Promise<string> {
+  async renderSvg(text: string): Promise<IMermaidManager.IRenderInfo> {
     const _mermaid = await this.getMermaid();
 
     const id = `jp-mermaid-${Private.nextMermaidId()}`;
@@ -79,10 +79,24 @@ export class MermaidManager implements IMermaidManager {
     // create temporary element into which to render
     const el = document.createElement('div');
     document.body.appendChild(el);
-
     try {
-      const { svg } = await _mermaid.render(id, text, el);
-      return svg;
+      const result = await _mermaid.render(id, text, el);
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(result.svg, 'image/svg+xml');
+
+      const info: IMermaidManager.IRenderInfo = { svg: result.svg };
+      const svg = doc.querySelector('svg');
+      const { maxWidth } = svg?.style || {};
+      info.width = maxWidth ? parseFloat(maxWidth) : null;
+      const firstTitle = doc.querySelector('title');
+      const firstDesc = doc.querySelector('desc');
+      if (firstTitle) {
+        info.accessibleTitle = firstTitle.textContent;
+      }
+      if (firstDesc) {
+        info.accessibleDescription = firstDesc.textContent;
+      }
+      return info;
     } finally {
       el.remove();
     }
@@ -108,8 +122,8 @@ export class MermaidManager implements IMermaidManager {
     output.className = className;
 
     try {
-      const svg = await this.renderSvg(text);
-      result = this.makeMermaidFigure(svg);
+      const response = await this.renderSvg(text);
+      result = this.makeMermaidFigure(response);
     } catch (err) {
       output.classList.add(WARNING_CLASS);
       result = await this.makeMermaidError(text);
@@ -163,34 +177,31 @@ export class MermaidManager implements IMermaidManager {
   /**
    * Extract extra attributes to add to a generated figure.
    */
-  makeMermaidFigure(svg: string): HTMLElement {
+  makeMermaidFigure(info: IMermaidManager.IRenderInfo): HTMLElement {
     const figure = document.createElement('figure');
     const img = document.createElement('img');
 
     figure.appendChild(img);
-    img.setAttribute('src', `data:image/svg+xml,${encodeURIComponent(svg)}`);
+    img.setAttribute(
+      'src',
+      `data:image/svg+xml,${encodeURIComponent(info.svg)}`
+    );
 
     // add dimension information
-    const maxWidth = svg.match(/max-width: (\d+)/);
-    if (maxWidth && maxWidth[1]) {
-      const width = parseInt(maxWidth[1]);
-      if (width && !Number.isNaN(width) && Number.isFinite(width)) {
-        img.width = width;
-      }
+    if (info.width) {
+      img.width = info.width;
     }
 
     // add accessible alt title
-    const title = svg.match(/<title[^>]*>([^<]+)<\/title>/);
-    if (title && title[1]) {
-      img.setAttribute('alt', title[1]);
+    if (info.accessibleTitle) {
+      img.setAttribute('alt', info.accessibleTitle);
     }
 
     // add accessible caption
-    const desc = svg.match(/<desc[^>]*>([^<]+)<\/desc>/s);
-    if (desc && desc[1]) {
+    if (info.accessibleDescription) {
       const caption = document.createElement('figcaption');
       caption.className = 'sr-only';
-      caption.textContent = desc[1];
+      caption.textContent = info.accessibleDescription;
       figure.appendChild(caption);
     }
 
