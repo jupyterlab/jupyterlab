@@ -165,12 +165,6 @@
       "path": "../mathjax-extension"
     },
     {
-      "path": "../mermaid"
-    },
-    {
-      "path": "../mermaid-extension"
-    },
-    {
       "path": "../metadataform"
     },
     {
@@ -274,6 +268,12 @@
     },
     {
       "path": "../vega5-extension"
+    },
+    {
+      "path": "../mermaid"
+    },
+    {
+      "path": "../mermaid-extension"
     },
     {
       "path": "."
