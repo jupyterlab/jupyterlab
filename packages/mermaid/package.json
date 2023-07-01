@@ -46,7 +46,7 @@
     "@jupyterlab/rendermime-interfaces": "^3.8.2",
     "@lumino/coreutils": "^2.1.1",
     "@lumino/widgets": "^2.1.1",
-    "mermaid": "^10.2.3"
+    "mermaid": "^10.2.4"
   },
   "devDependencies": {
     "@types/jest": "^29.2.0",
