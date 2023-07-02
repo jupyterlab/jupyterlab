@@ -30,7 +30,14 @@
   background-color: var(--jp-inverse-layout-color3);
 }
 
+.jp-tocItem-content[data-running='-1']::after {
+  border-radius: 50%;
+  border: var(--jp-border-width) solid var(--jp-error-color2);
+  background-color: var(--jp-error-color2);
+}
+
 .jp-tocItem-content[data-running='0'],
-.jp-tocItem-content[data-running='1'] {
+.jp-tocItem-content[data-running='1'],
+.jp-tocItem-content[data-running='-1'] {
   margin-right: 12px;
 }
