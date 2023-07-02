@@ -14,6 +14,8 @@ test.describe('ToC Running indicator', () => {
     await page.notebook.addCell('code', 'sleep(2)');
     await page.notebook.addCell('markdown', '## Title 1.2');
     await page.notebook.addCell('code', 'sleep(1)');
+    await page.notebook.addCell('markdown', '## Title 1.3');
+    await page.notebook.addCell('code', 'raise ValueError("Test error")');
 
     await page.sidebar.openTab('table-of-contents');
     await page.waitForSelector(
@@ -29,6 +31,19 @@ test.describe('ToC Running indicator', () => {
     await tocPanel.waitForSelector('[data-running="1"]');
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicators.png'
+    );
+
+    await executed;
+  });
+
+  test('should display error indicators', async ({ page }) => {
+    const tocPanel = await page.sidebar.getContentPanel(
+      await page.sidebar.getTabPosition('table-of-contents')
+    );
+    const executed = page.notebook.run();
+    await tocPanel.waitForSelector('[data-running="-1"]');
+    expect(await tocPanel.screenshot()).toMatchSnapshot(
+      'toc-running-indicator-error.png'
     );
 
     await executed;
