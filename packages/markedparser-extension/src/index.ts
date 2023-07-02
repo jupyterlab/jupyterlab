@@ -122,6 +122,8 @@ namespace Private {
     // load marked lazily, and exactly once
     const { marked, Renderer } = await import('marked');
 
+    await initializeMarkedPlugins(marked);
+
     // finish marked configuration
     _markedOptions = {
       // use the explicit async paradigm for `walkTokens`
@@ -140,6 +142,26 @@ namespace Private {
     _marked = marked;
     _initializing.resolve(_marked);
     return _marked;
+  }
+
+  /**
+   * Load and use marked plugins.
+   *
+   * As of writing, both of these features would work without plugins, but emit
+   * deprecation warnings.
+   */
+  async function initializeMarkedPlugins(
+    _marked: typeof marked
+  ): Promise<void> {
+    // load marked plugins
+    const plugins: marked.MarkedExtension[] = await Promise.all([
+      (async () => (await import('marked-gfm-heading-id')).gfmHeadingId())(),
+      (async () => (await import('marked-mangle')).mangle())()
+    ]);
+
+    for (const plugin of plugins) {
+      _marked.use(plugin);
+    }
   }
 
   /**

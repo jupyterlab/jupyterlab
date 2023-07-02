@@ -3846,6 +3846,8 @@ __metadata:
     "@types/dompurify": ^2.4.0
     "@types/marked": ^5.0.0
     marked: ^5.1.0
+    marked-gfm-heading-id: ^3.0.4
+    marked-mangle: ^1.1.0
     rimraf: ~3.0.0
     typedoc: ~0.24.7
     typescript: ~5.0.4
@@ -11817,6 +11819,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"github-slugger@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "github-slugger@npm:2.0.0"
+  checksum: 250375cde2058f21454872c2c79f72c4637340c30c51ff158ca4ec71cbc478f33d54477d787a662f9207aeb095a2060f155bc01f15329ba8a5fb6698e0fc81f8
+  languageName: node
+  linkType: hard
+
 "glob-parent@npm:5.1.2, glob-parent@npm:^5.1.2, glob-parent@npm:~5.1.2":
   version: 5.1.2
   resolution: "glob-parent@npm:5.1.2"
@@ -14556,6 +14565,26 @@ __metadata:
   peerDependencies:
     react: ">= 0.14.0"
   checksum: 81ab9bd0ad93d4e90c39a67a4df2cc2d3b24579f8f018852f05abce442b246cee9cd705ea9d01304144729a48c972b8b535d40a33e04a0a05d5073958e96ae76
+  languageName: node
+  linkType: hard
+
+"marked-gfm-heading-id@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "marked-gfm-heading-id@npm:3.0.4"
+  dependencies:
+    github-slugger: ^2.0.0
+  peerDependencies:
+    marked: ^4 || ^5
+  checksum: 8c65d0fe0f59291d6f4529f49a4af00cad5787a72a59b9397f82d6ab58b1affbf53678f7efdca77fa75c32e80bbdab1c53c2aa5d7ece3e821d2fe35a76fb4930
+  languageName: node
+  linkType: hard
+
+"marked-mangle@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "marked-mangle@npm:1.1.0"
+  peerDependencies:
+    marked: ^4 || ^5
+  checksum: 3897cb6b0ed580e9be029bf78f8b3b22534ca3e0c061fd9e45d0f256263c01f9667122d68235c767583c7109347bd1cc823dca5f428b95460123ba4b212cdb11
   languageName: node
   linkType: hard
 
