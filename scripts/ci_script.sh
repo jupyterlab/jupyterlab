@@ -253,7 +253,7 @@ if [[ $GROUP == usage ]]; then
     jlpm run get:dependency react-native
 
     # Use the extension upgrade script
-    python -m pip install copier jinja2-time
+    python -m pip install copier jinja2-time "pydantic<2"
     python -m jupyterlab.upgrade_extension --no-input jupyterlab/tests/mock_packages/extension
 fi
 
