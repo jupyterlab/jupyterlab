@@ -103,6 +103,11 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
+  '@jupyterlab/markedparser-extension': [
+    // only (but always) imported asynchronously
+    'marked-gfm-heading-id',
+    'marked-mangle'
+  ],
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testing': [
     '@babel/core',
