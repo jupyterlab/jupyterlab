@@ -27,7 +27,7 @@
   "properties": {
     "checkForUpdates": {
       "title": "Check for JupyterLab updates",
-      "description": "Whether to check for newer version of JupyterLab or not. It requires `fechNews` to be `true` to be active. If `true`, it will make a request to a website.",
+      "description": "Whether to check for newer version of JupyterLab or not. It requires `fetchNews` to be `true` to be active. If `true`, it will make a request to a website.",
       "type": "boolean",
       "default": true
     },
