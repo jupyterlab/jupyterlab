@@ -33,7 +33,7 @@
 .jp-Shortcuts-Input {
   animation-duration: 0.5s;
   animation-timing-function: ease-out;
-  animation-name: 'slide-animation';
+  animation-name: slide-animation;
   border-width: var(--jp-border-width);
   border-color: var(--jp-border-color3);
   border-style: solid;
