@@ -4306,6 +4306,7 @@ __metadata:
     stylelint-config-prettier: ^9.0.3
     stylelint-config-recommended: ^8.0.0
     stylelint-config-standard: ^26.0.0
+    stylelint-csstree-validator: ^3.0.0
     stylelint-prettier: ^2.0.0
     typedoc: ~0.24.7
     typedoc-plugin-mdn-links: ^3.0.3
@@ -9139,6 +9140,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"css-tree@npm:^2.3.1":
+  version: 2.3.1
+  resolution: "css-tree@npm:2.3.1"
+  dependencies:
+    mdn-data: 2.0.30
+    source-map-js: ^1.0.1
+  checksum: 493cc24b5c22b05ee5314b8a0d72d8a5869491c1458017ae5ed75aeb6c3596637dbe1b11dac2548974624adec9f7a1f3a6cf40593dc1f9185eb0e8279543fbc0
+  languageName: node
+  linkType: hard
+
 "css-what@npm:^6.0.1, css-what@npm:^6.1.0":
   version: 6.1.0
   resolution: "css-what@npm:6.1.0"
@@ -13934,6 +13945,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mdn-data@npm:2.0.30":
+  version: 2.0.30
+  resolution: "mdn-data@npm:2.0.30"
+  checksum: d6ac5ac7439a1607df44b22738ecf83f48e66a0874e4482d6424a61c52da5cde5750f1d1229b6f5fa1b80a492be89465390da685b11f97d62b8adcc6e88189aa
+  languageName: node
+  linkType: hard
+
 "media-typer@npm:0.3.0":
   version: 0.3.0
   resolution: "media-typer@npm:0.3.0"
@@ -17496,6 +17514,17 @@ __metadata:
   peerDependencies:
     stylelint: ^14.9.0
   checksum: c1fe44df1755bcccc740b385a24acffa922d331d9f9ba39dafad81cc9643e6c1f870abd1ee73b2737d6903e06efb83b2a1ee26d786faef0123fc22e1f09c13fe
+  languageName: node
+  linkType: hard
+
+"stylelint-csstree-validator@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "stylelint-csstree-validator@npm:3.0.0"
+  dependencies:
+    css-tree: ^2.3.1
+  peerDependencies:
+    stylelint: ">=7.0.0 <16.0.0"
+  checksum: e518c8c17714022946b7637c23a6816fd2ccdd6052a19c5a138b3f7ce9b913ead9c612ac4401e102f14800a19967dbfd4b588b44cbf3f3c6a5984bef7bda4017
   languageName: node
   linkType: hard
 
