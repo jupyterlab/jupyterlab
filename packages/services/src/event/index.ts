@@ -173,7 +173,7 @@ export namespace Event {
     /**
      * An event stream that emits and yields each new event.
      */
-    stream: Event.Stream;
+    readonly stream: Event.Stream;
     /**
      * Post an event request to be emitted by the event bus.
      */
