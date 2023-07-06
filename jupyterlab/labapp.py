@@ -487,10 +487,11 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     flags["collaborative"] = (
         {"LabApp": {"collaborative": True}},
         """To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
-        This flag is now deprecated and will be removed in JupyterLab v5.
         You can install it using pip for example:
 
-            python -m pip install jupyter_collaboration""",
+            python -m pip install jupyter_collaboration
+
+        This flag is now deprecated and will be removed in JupyterLab v5.""",
     )
 
     subcommands = {
@@ -581,10 +582,11 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         False,
         config=True,
         help="""To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
-        This flag is now deprecated and will be removed in JupyterLab v5.
         You can install it using pip for example:
 
-            python -m pip install jupyter_collaboration""",
+            python -m pip install jupyter_collaboration
+
+        This flag is now deprecated and will be removed in JupyterLab v5.""",
     )
 
     news_url = Unicode(
@@ -870,9 +872,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                     """
 To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
 You can install it using pip for example:
-This flag is now deprecated and will be removed in JupyterLab v5.
 
   python -m pip install jupyter_collaboration
+
+This flag is now deprecated and will be removed in JupyterLab v5.
 """
                 )
                 sys.exit(1)
