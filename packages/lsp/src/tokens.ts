@@ -131,7 +131,7 @@ export interface ILanguageServerManager extends IDisposable {
    *
    * Enable the language server services
    */
-  enable(): void;
+  enable(): Promise<void>;
 
   /**
    * @alpha
@@ -408,6 +408,11 @@ export interface ILSPDocumentConnectionManager {
    * A promise that is fulfilled when the connection manager is ready.
    */
   readonly ready: Promise<void>;
+
+  /**
+   * Initial configuration for the language servers.
+   */
+  initialConfigurations: TLanguageServerConfigurations;
 
   /**
    * Handles the settings that do not require an existing connection
