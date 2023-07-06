@@ -66,7 +66,7 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=18 git copier jinja2-time
+    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=18 git copier=8 jinja2-time
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
@@ -101,7 +101,7 @@ This will create a new folder for your extension in your current directory.
 
     mkdir my_first_extension
     cd my_first_extension
-    copier https://github.com/jupyterlab/extension-template .
+    copier copy --UNSAFE https://github.com/jupyterlab/extension-template .
 
 When prompted, enter values like the following for all of the template
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
@@ -227,7 +227,7 @@ After you reload the page with the console open, you should see a message that s
 ``JupyterLab extension jupyterlab_apod is activated!`` in the console.
 If you do, congratulations, you're ready to start modifying the extension!
 If not, go back make sure you didn't miss a step, and `reach
-out <https://github.com/jupyterlab/jupyterlab/blob/master/README.md#getting-help>`__ if you're stuck.
+out <https://github.com/jupyterlab/jupyterlab/blob/main/README.md#getting-help>`__ if you're stuck.
 
 .. note::
 

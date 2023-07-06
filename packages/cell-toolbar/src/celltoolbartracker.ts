@@ -243,15 +243,19 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _updateCellForToolbarOverlap(activeCell: Cell<ICellModel>) {
-    // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
-    const activeCellElement = activeCell.node;
-    activeCellElement.classList.remove(TOOLBAR_OVERLAP_CLASS);
-
-    if (this._cellToolbarOverlapsContents(activeCell)) {
-      // Add the "toolbar overlap" class to the cell, completely concealing the toolbar,
-      // if the first line of the content overlaps with it at all
-      activeCellElement.classList.add(TOOLBAR_OVERLAP_CLASS);
-    }
+    // When we do change in cell, If we don't wait the browser might not have
+    // completed the layout update, resulting in the previous width being returned
+    // using `getBoundingClientRect().width` in later functions.
+    requestAnimationFrame(() => {
+      // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
+      const activeCellElement = activeCell.node;
+      activeCellElement.classList.remove(TOOLBAR_OVERLAP_CLASS);
+      if (this._cellToolbarOverlapsContents(activeCell)) {
+        // Add the "toolbar overlap" class to the cell, completely concealing the toolbar,
+        // if the first line of the content overlaps with it at all
+        activeCellElement.classList.add(TOOLBAR_OVERLAP_CLASS);
+      }
+    });
   }
 
   private _cellToolbarOverlapsContents(activeCell: Cell<ICellModel>): boolean {

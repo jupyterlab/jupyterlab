@@ -245,7 +245,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
 
   /**
    * Signal emitted when the connection receives an error
-   * message..
+   * message.
    */
   get errorSignal(): ISignal<ILSPConnection, any> {
     return this._errorSignal;
@@ -315,10 +315,10 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   }
 
   /**
-   * Check if a provider is available in the registered capabilities.
+   * Check if a capability is available in the server capabilities.
    */
-  provides(provider: keyof lsp.ServerCapabilities): boolean {
-    return !!(this.serverCapabilities && this.serverCapabilities[provider]);
+  provides(capability: keyof lsp.ServerCapabilities): boolean {
+    return !!(this.serverCapabilities && this.serverCapabilities[capability]);
   }
 
   /**
@@ -334,7 +334,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   }
 
   /**
-   * initialize a connection over a web socket that speaks the LSP
+   * Initialize a connection over a web socket that speaks the LSP.
    */
   connect(socket: WebSocket): void {
     super.connect(socket);

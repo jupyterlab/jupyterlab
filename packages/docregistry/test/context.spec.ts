@@ -8,7 +8,7 @@ import {
   TextModelFactory
 } from '@jupyterlab/docregistry';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Contents, ServiceManager } from '@jupyterlab/services';
+import { Contents, Drive, ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
@@ -25,6 +25,7 @@ describe('docregistry/context', () => {
 
   beforeAll(() => {
     manager = new ServiceManagerMock();
+    manager.contents.addDrive(new Drive({ name: 'TestDrive' }));
     return manager.ready;
   });
 
@@ -52,6 +53,17 @@ describe('docregistry/context', () => {
           path: UUID.uuid4() + '.txt'
         });
         expect(context).toBeInstanceOf(Context);
+      });
+
+      it('should set the session path with local path', () => {
+        const localPath = `${UUID.uuid4()}.txt`;
+        context = new Context({
+          manager,
+          factory,
+          path: `TestDrive:${localPath}`
+        });
+
+        expect(context.sessionContext.path).toEqual(localPath);
       });
     });
 

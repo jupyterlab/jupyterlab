@@ -29,14 +29,14 @@ type CoreData = Map<string, any>;
 // URL config for this branch
 // Source and target branches
 // Target RTD version name
-// For master these will be the same, for other branches the source
+// For main these will be the same, for other branches the source
 // branch is whichever branch it was created from
 // The current release branch should target RTD stable
-// Master should target latest
+// Main should target latest
 // All other release branches should target a specific named version
 const URL_CONFIG = {
-  source: 'master',
-  target: 'master',
+  source: 'main',
+  target: 'main',
   rtdVersion: 'latest'
 };
 
@@ -97,6 +97,10 @@ const UNUSED: Dict<string[]> = {
     '@codemirror/lang-xml',
     '@codemirror/legacy-modes'
   ],
+  '@jupyterlab/codemirror-extension': [
+    '@codemirror/lang-markdown',
+    '@codemirror/legacy-modes'
+  ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/services': ['ws'],
@@ -121,6 +125,14 @@ const UNUSED: Dict<string[]> = {
 
 // Packages that are allowed to have differing versions
 const DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
+
+// Packages that have backward versions support
+const BACKWARD_VERSIONS: Record<string, Record<string, string>> = {
+  '@jupyterlab/rendermime-interfaces': {
+    '@lumino/coreutils': '^1.11.0',
+    '@lumino/widgets': '^1.37.2'
+  }
+};
 
 const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
@@ -792,7 +804,8 @@ export async function ensureIntegrity(): Promise<boolean> {
       locals,
       cssImports: cssImports[name],
       cssModuleImports: cssModuleImports[name],
-      differentVersions: DIFFERENT_VERSIONS
+      differentVersions: DIFFERENT_VERSIONS,
+      backwardVersions: BACKWARD_VERSIONS
     };
 
     if (name === '@jupyterlab/metapackage') {
