@@ -25,21 +25,18 @@ async function nbDiskContent(
 }
 
 test.describe.serial('Notebook Run Vega', () => {
-  test.beforeAll(async ({ request, tmpPath }) => {
+  test.beforeEach(async ({ page, request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
     );
-  });
-
-  test.beforeEach(async ({ page, tmpPath }) => {
     await page.filebrowser.openDirectory(tmpPath);
   });
 
-  test.afterAll(async ({ request, tmpPath }) => {
+  test.afterEach(async ({ request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
+    await contents.deleteFile(tmpPath);
   });
 
   test('Run notebook with Vega cell in default theme', async ({
