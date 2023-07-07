@@ -53,9 +53,10 @@ export class NotebookFooter extends Widget {
   }
 
   /**
-   * On arrow up key pressed (keydown keyboard event), blur the footer and switch to command mode.
+   * When an event (such as a keydown keyboard event) occurs that triggers selection of the widget above the footer,
+   * blur the footer and switch to command mode.
    */
-  protected onArrowUp(): void {
+  public onSelectAbove(): void {
     this.node.blur();
     this.notebook.mode = 'command';
   }

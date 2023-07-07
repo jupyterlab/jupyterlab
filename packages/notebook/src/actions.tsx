@@ -847,6 +847,7 @@ export namespace NotebookActions {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
+    notebook.footer?.onSelectAbove();
     if (notebook.activeCellIndex === 0) {
       return;
     }
