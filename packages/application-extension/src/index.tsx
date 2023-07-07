@@ -104,6 +104,9 @@ namespace CommandIDs {
 
   export const toggleSideTabBar: string = 'application:toggle-side-tabbar';
 
+  export const focusFirstElementInRightSidebar: string =
+    'application:focusFirstElementInRightSidebar';
+
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
 
@@ -327,6 +330,16 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isToggled: () => !labShell.rightCollapsed,
         isEnabled: () => !labShell.isEmpty('right')
       });
+      //WIP
+      commands.addCommand(CommandIDs.focusFirstElementInRightSidebar, {
+        label: trans.__('Focus Right Sidebar First Element'),
+        execute: () => {
+          let rightSidBarFirstElement = document.getElementById('tab-key-1-1');
+          if (rightSidBarFirstElement) {
+            rightSidBarFirstElement.focus();
+          }
+        }
+      });
 
       commands.addCommand(CommandIDs.toggleSideTabBar, {
         label: args =>
@@ -443,6 +456,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.closeAll,
         CommandIDs.closeOtherTabs,
         CommandIDs.closeRightTabs,
+        CommandIDs.focusFirstElementInRightSidebar,
         CommandIDs.toggleHeader,
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,

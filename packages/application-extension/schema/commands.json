@@ -46,6 +46,11 @@
       "command": "application:toggle-presentation-mode",
       "keys": [""],
       "selector": "body"
+    },
+    {
+      "command": "application:focusFirstElementInRightSidebar",
+      "keys": ["Alt Shift Z"],
+      "selector": "body"
     }
   ],
   "jupyter.lab.menus": {
