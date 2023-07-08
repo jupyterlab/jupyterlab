@@ -50,6 +50,10 @@ export class NotebookFooter extends Widget {
    * blur the footer and switch to command mode.
    */
   public onSelectAbove(): void {
+    if (document.activeElement !== this.node) {
+      // short-circuit if the footer is not currently focused
+      return;
+    }
     this.node.blur();
     this.notebook.mode = 'command';
   }

@@ -1262,7 +1262,7 @@ export namespace StaticNotebook {
  */
 export class Notebook extends StaticNotebook {
 
-  footer: NotebookFooter;
+  protected footer: NotebookFooter;
 
   /**
    * Construct a notebook widget.
