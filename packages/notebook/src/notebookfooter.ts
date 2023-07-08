@@ -32,13 +32,6 @@ export class NotebookFooter extends Widget {
       case 'click':
         this.onClick();
         break;
-      case 'keydown': {
-        const key = (event as KeyboardEvent).key;
-        if (key === 'ArrowUp' || key === 'k') {
-          this.onArrowUp();
-          break;
-        }
-      }
     }
   }
 
