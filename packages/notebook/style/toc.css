@@ -31,9 +31,8 @@
 }
 
 .jp-tocItem-content[data-running='-1']::after {
-  border-radius: 50%;
-  border: var(--jp-border-width) solid var(--jp-error-color2);
-  background-color: var(--jp-error-color2);
+  content: '⚠';
+  color: var(--jp-error-color1);
 }
 
 .jp-tocItem-content[data-running='0'],
