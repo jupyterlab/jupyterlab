@@ -102,9 +102,34 @@ export interface IThemeManager {
   readonly theme: string | null;
 
   /**
+   * Get the name of the preferred light theme.
+   */
+  readonly preferredLightTheme: string | null;
+
+  /**
+   * Get the name of the preferred dark theme.
+   */
+  readonly preferredDarkTheme: string | null;
+
+  /**
+   * Get the name of the preferred theme.
+   */
+  readonly preferredTheme: string | null;
+
+  /**
    * The names of the registered themes.
    */
   readonly themes: ReadonlyArray<string>;
+
+  /**
+   * Get the names of the registered light themes.
+   */
+  readonly lightThemes: ReadonlyArray<string>;
+
+  /**
+   * Get the names of the registered light themes.
+   */
+  readonly darkThemes: ReadonlyArray<string>;
 
   /**
    * A signal fired when the application theme changes.
