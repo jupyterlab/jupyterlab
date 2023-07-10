@@ -111,6 +111,7 @@
   "@jupyterlab/logconsole-extension:plugin": "Provides the logger registry.",
   "@jupyterlab/lsp-extension:plugin": "Provides the language server connection manager.",
   "@jupyterlab/lsp-extension:feature": "Provides the language server feature manager.",
+  "@jupyterlab/lsp-extension:settings": "Provides the language server settings.",
   "@jupyterlab/lsp:ILSPCodeExtractorsManager": "Provides the code extractor manager.",
   "@jupyterlab/mainmenu-extension:plugin": "Adds and provides the application main menu.",
   "@jupyterlab/markdownviewer-extension:plugin": "Adds markdown file viewer and provides its tracker.",

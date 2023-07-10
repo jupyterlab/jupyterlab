@@ -58,6 +58,14 @@
     "shortcuts": []
   },
   {
+    "id": "application:focusFirstElementInRightSidebar",
+    "label": "Focus Right Sidebar First Element",
+    "caption": "",
+    "shortcuts": [
+      "Alt Shift Z"
+    ]
+  },
+  {
     "id": "application:reset-layout",
     "label": "Reset Default Layout",
     "caption": "",
