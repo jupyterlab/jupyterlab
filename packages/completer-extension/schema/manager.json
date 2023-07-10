@@ -15,7 +15,7 @@
       },
       "additionalProperties": false,
       "default": {
-        "CompletionProvider:context": 501,
+        "CompletionProvider:context": 550,
         "CompletionProvider:kernel": 500
       }
     },

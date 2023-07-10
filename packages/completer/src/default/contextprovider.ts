@@ -13,7 +13,7 @@ export const CONTEXT_PROVIDER_ID = 'CompletionProvider:context';
 export class ContextCompleterProvider implements ICompletionProvider {
   readonly identifier = CONTEXT_PROVIDER_ID;
 
-  readonly rank: number = 501;
+  readonly rank: number = 550;
 
   readonly renderer = null;
 
