@@ -50,7 +50,7 @@ export interface ICompletionProvider<
   readonly identifier: string;
 
   /**
-   * Rank use to order completion results from different completion providers.
+   * Rank used to order completion results from different completion providers.
    *
    * #### Note: The default providers (CompletionProvider:context and
    * CompletionProvider:kernel) use a rank of ≈500. If you want to give
