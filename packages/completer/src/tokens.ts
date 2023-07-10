@@ -66,10 +66,12 @@ export interface ICompletionProvider<
    *
    * @param request - the completion request text and details
    * @param context - additional information about context of completion request
+   * @param shouldShowContinuousHint - Who triggered the request (optional).
    */
   fetch(
     request: CompletionHandler.IRequest,
-    context: ICompletionContext
+    context: ICompletionContext,
+    shouldShowContinuousHint?: boolean
   ): Promise<CompletionHandler.ICompletionItemsReply<T>>;
 
   /**
@@ -104,10 +106,12 @@ export interface ICompletionProvider<
    * @param  completerIsVisible - Current visibility status of the
    *  completer widget0
    * @param  changed - changed text.
+   * @param  context - The context of the completer (optional).
    */
   shouldShowContinuousHint?(
     completerIsVisible: boolean,
-    changed: SourceChange
+    changed: SourceChange,
+    context?: ICompletionContext
   ): boolean;
 }
 
