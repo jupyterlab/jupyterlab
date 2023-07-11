@@ -36,6 +36,7 @@ repos:
     hooks:
       - id: black
 
+  # Check ruff version is aligned with the one in pyproject.toml
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.0.276
     hooks:
