@@ -1451,14 +1451,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/lang-python@npm:^6.1.2":
-  version: 6.1.2
-  resolution: "@codemirror/lang-python@npm:6.1.2"
+"@codemirror/lang-python@npm:^6.1.3":
+  version: 6.1.3
+  resolution: "@codemirror/lang-python@npm:6.1.3"
   dependencies:
     "@codemirror/autocomplete": ^6.3.2
-    "@codemirror/language": ^6.0.0
-    "@lezer/python": ^1.0.0
-  checksum: e822a1236fb3c2773e1889d4a24f8f2f7fb45ab8cf6e0521d311508a3eda19c4dcf4e2f943766b93545e673f3f0336725418e0bb48b3d9fb6a942339d164cfa5
+    "@codemirror/language": ^6.8.0
+    "@lezer/python": ^1.1.4
+  checksum: 65a0276a4503e4e3b70dd28d1c93ef472632b6d2c4bf3ae92d305d14ee8cf60b0bbbf62d5ceb51294de9598d9e2d42eafcde26f317ee7b90d0a11dfa863c1d1a
   languageName: node
   linkType: hard
 
@@ -1509,9 +1509,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@codemirror/language@npm:^6.0.0, @codemirror/language@npm:^6.3.0, @codemirror/language@npm:^6.4.0, @codemirror/language@npm:^6.6.0":
-  version: 6.6.0
-  resolution: "@codemirror/language@npm:6.6.0"
+"@codemirror/language@npm:^6.0.0, @codemirror/language@npm:^6.3.0, @codemirror/language@npm:^6.4.0, @codemirror/language@npm:^6.6.0, @codemirror/language@npm:^6.8.0":
+  version: 6.8.0
+  resolution: "@codemirror/language@npm:6.8.0"
   dependencies:
     "@codemirror/state": ^6.0.0
     "@codemirror/view": ^6.0.0
@@ -1519,7 +1519,7 @@ __metadata:
     "@lezer/highlight": ^1.0.0
     "@lezer/lr": ^1.0.0
     style-mod: ^4.0.0
-  checksum: bb9411620e2f231653a3f0c4429e0d19a3843bff5dbc117df4649d7bf783ec4ad809c0add8bc0887a4ec3f48b4f8f941621168e47d76101d5383f0d670af1722
+  checksum: 64408d996641931fa4c6b892e17ee1fdaee0f63d3d84c019a6ea7b1e6d1c774f92357b95c2ebaed60545062b795b72d0a058c03578b2bf4023c87726e97b5d2f
   languageName: node
   linkType: hard
 
@@ -2477,7 +2477,7 @@ __metadata:
     "@codemirror/lang-json": ^6.0.1
     "@codemirror/lang-markdown": ^6.1.1
     "@codemirror/lang-php": ^6.0.1
-    "@codemirror/lang-python": ^6.1.2
+    "@codemirror/lang-python": ^6.1.3
     "@codemirror/lang-rust": ^6.0.1
     "@codemirror/lang-sql": ^6.4.1
     "@codemirror/lang-wast": ^6.0.1
@@ -5049,13 +5049,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lezer/python@npm:^1.0.0":
-  version: 1.1.2
-  resolution: "@lezer/python@npm:1.1.2"
+"@lezer/python@npm:^1.1.4":
+  version: 1.1.7
+  resolution: "@lezer/python@npm:1.1.7"
   dependencies:
     "@lezer/highlight": ^1.0.0
     "@lezer/lr": ^1.0.0
-  checksum: e4f49beeba4c1afb24546448a93b2b2814e88cc0e9c216e9cfd47945743c28859899c38c1b78dbca3e2c12a15fc689e32bd1045d0be1a3f8ecc6ec1b0993d891
+  checksum: 7ae6b4ae770b3cd849eee3d8fb1d904745aee202a76e7db0a079725a97571c4778fa5bd74878206e44aa3349044bf056008e19e7a90650fad93d51890f685077
   languageName: node
   linkType: hard
 
