@@ -32,7 +32,9 @@
     rgba(255, 255, 255, 0) 42%
   );
   position: relative;
-  animation: load3 1s infinite linear, fadeIn 1s;
+  animation:
+    load3 1s infinite linear,
+    fadeIn 1s;
 }
 
 .jp-SpinnerContent::before {
