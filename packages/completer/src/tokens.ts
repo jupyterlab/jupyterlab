@@ -12,6 +12,15 @@ import { CompletionHandler } from './handler';
 import { Completer } from './widget';
 
 /**
+ * The type of completion request.
+ */
+export enum CompletionTriggerKind {
+  Invoked = 1,
+  TriggerCharacter = 2,
+  TriggerForIncompleteCompletions = 3
+}
+
+/**
  * The context which will be passed to the `fetch` function
  * of a provider.
  */
@@ -66,12 +75,12 @@ export interface ICompletionProvider<
    *
    * @param request - the completion request text and details
    * @param context - additional information about context of completion request
-   * @param shouldShowContinuousHint - Who triggered the request (optional).
+   * @param trigger - Who triggered the request (optional).
    */
   fetch(
     request: CompletionHandler.IRequest,
     context: ICompletionContext,
-    shouldShowContinuousHint?: boolean
+    trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply<T>>;
 
   /**
@@ -165,9 +174,11 @@ export interface IProviderReconciliator {
    * the result of this provider will be ignore.
    *
    * @param {CompletionHandler.IRequest} request - The completion request.
+   * @param trigger - Who triggered the request (optional).
    */
   fetch(
-    request: CompletionHandler.IRequest
+    request: CompletionHandler.IRequest,
+    trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply | null>;
 
   /**
