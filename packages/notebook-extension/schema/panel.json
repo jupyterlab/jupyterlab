@@ -26,12 +26,7 @@
       { "name": "restart", "command": "notebook:restart-kernel", "rank": 32 },
       {
         "name": "restart-and-run",
-        "command": "apputils:run-all-enabled",
-        "args": {
-          "commands": ["notebook:restart-kernel", "notebook:run-all-cells"]
-        },
-        "caption": "Restart Kernel and Run All",
-        "icon": "ui-components:fast-forward",
+        "command": "notebook:restart-run-all",
         "rank": 33
       },
       { "name": "cellType", "rank": 40 },

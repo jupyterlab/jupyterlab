@@ -2186,7 +2186,7 @@ function addCommands(
         );
       }
     },
-    isEnabled,
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
     icon: args => (args.toolbar ? runIcon : undefined)
   });
   commands.addCommand(CommandIDs.run, {
@@ -2330,7 +2330,7 @@ function addCommands(
         return sessionDialogs.restart(current.sessionContext);
       }
     },
-    isEnabled,
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
     icon: args => (args.toolbar ? refreshIcon : undefined)
   });
   commands.addCommand(CommandIDs.shutdown, {
@@ -2426,8 +2426,8 @@ function addCommands(
         await commands.execute(CommandIDs.runAll);
       }
     },
-    isEnabled,
-    icon: fastForwardIcon
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    icon: args => (args.toolbar ? fastForwardIcon : undefined)
   });
   commands.addCommand(CommandIDs.clearAllOutputs, {
     label: trans.__('Clear Outputs of All Cells'),
@@ -2469,7 +2469,7 @@ function addCommands(
         return kernel.interrupt();
       }
     },
-    isEnabled,
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
     icon: args => (args.toolbar ? stopIcon : undefined)
   });
   commands.addCommand(CommandIDs.toCode, {
@@ -2530,7 +2530,7 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? cutIcon : undefined),
-    isEnabled
+    isEnabled: args => (args.toolbar ? true : isEnabled())
   });
   commands.addCommand(CommandIDs.copy, {
     label: args => {
@@ -2557,7 +2557,7 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? copyIcon : undefined),
-    isEnabled
+    isEnabled: args => (args.toolbar ? true : isEnabled())
   });
   commands.addCommand(CommandIDs.pasteBelow, {
     label: args => {
@@ -2584,7 +2584,7 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? pasteIcon : undefined),
-    isEnabled
+    isEnabled: args => (args.toolbar ? true : isEnabled())
   });
   commands.addCommand(CommandIDs.pasteAbove, {
     label: args => {
@@ -2637,7 +2637,7 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? duplicateIcon : undefined),
-    isEnabled
+    isEnabled: args => (args.toolbar ? true : isEnabled())
   });
   commands.addCommand(CommandIDs.pasteAndReplace, {
     label: args => {
@@ -2682,7 +2682,7 @@ function addCommands(
         return NotebookActions.deleteCells(current.content);
       }
     },
-    isEnabled
+    isEnabled: args => (args.toolbar ? true : isEnabled())
   });
   commands.addCommand(CommandIDs.split, {
     label: trans.__('Split Cell'),
@@ -2739,7 +2739,7 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? addAboveIcon : undefined),
-    isEnabled
+    isEnabled: args => (args.toolbar ? true : isEnabled())
   });
   commands.addCommand(CommandIDs.insertBelow, {
     label: trans.__('Insert Cell Below'),
@@ -2752,7 +2752,7 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? addBelowIcon : undefined),
-    isEnabled
+    isEnabled: args => (args.toolbar ? true : isEnabled())
   });
   commands.addCommand(CommandIDs.selectAbove, {
     label: trans.__('Select Cell Above'),
