@@ -569,7 +569,7 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(
     commands: CommandRegistry,
-    fileChanged: ISignal<any, Contents.IModel>
+    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>
   ): Widget {
     return addCommandToolbarButtonClass(
       ReactWidget.create(
