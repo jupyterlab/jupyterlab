@@ -41,7 +41,7 @@
 
 .jp-BreadCrumbs {
   flex: 0 0 auto;
-  margin: min(1vw, 8px) min(1vw, 12px);
+  margin: min(1vh, 8px) min(1vw, 12px);
 }
 
 .jp-BreadCrumbs-item {
