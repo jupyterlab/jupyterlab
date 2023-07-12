@@ -32,6 +32,7 @@ import {
   CodeMirrorMimeTypeService,
   EditorExtensionRegistry,
   EditorLanguageRegistry,
+  EditorThemeRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
 
@@ -70,12 +71,17 @@ function main(): void {
     name: 'Example'
   });
   const editorExtensions = () => {
+    const themes = new EditorThemeRegistry();
+    EditorThemeRegistry.getDefaultThemes().forEach(theme => {
+      themes.addTheme(theme);
+    });
     const registry = new EditorExtensionRegistry();
-    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions(
-      {}
-    )) {
-      registry.addExtension(extensionFactory);
-    }
+
+    EditorExtensionRegistry.getDefaultExtensions({ themes }).forEach(
+      extensionFactory => {
+        registry.addExtension(extensionFactory);
+      }
+    );
     registry.addExtension({
       name: 'shared-model-binding',
       factory: options => {
