@@ -63,7 +63,7 @@ if [[ $GROUP == integrity ]]; then
     # Here we should not be stringent as yarn may clean
     # output of `yarn-berry-deduplicate`
     jlpm install
-    if [[ $(git status --porcelain | wc -l) != '0' ]]; then
+    if [[ "$(git status --porcelain | wc -l | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")" != "0" ]]; then
         git diff
         exit 1
     fi
