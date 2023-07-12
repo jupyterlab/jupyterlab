@@ -1,4 +1,4 @@
-cellapplication remix example
+# Code cell example
 
 This example demonstrates how to create an application allowing the user
 to interact with a single code cell.
