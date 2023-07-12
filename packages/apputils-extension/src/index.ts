@@ -43,6 +43,7 @@ import { themesPaletteMenuPlugin, themesPlugin } from './themesplugins';
 import { toolbarRegistry } from './toolbarregistryplugin';
 import { workspacesPlugin } from './workspacesplugin';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { displayShortcuts } from './shortcuts';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -66,6 +67,8 @@ namespace CommandIDs {
   export const runAllEnabled = 'apputils:run-all-enabled';
 
   export const toggleHeader = 'apputils:toggle-header';
+
+  export const displayShortcuts = 'apputils:display-shortcuts';
 }
 
 /**
@@ -73,6 +76,7 @@ namespace CommandIDs {
  */
 const palette: JupyterFrontEndPlugin<ICommandPalette> = {
   id: '@jupyterlab/apputils-extension:palette',
+  description: 'Provides the command palette.',
   autoStart: true,
   requires: [ITranslator],
   provides: ICommandPalette,
@@ -97,6 +101,7 @@ const palette: JupyterFrontEndPlugin<ICommandPalette> = {
  */
 const paletteRestorer: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:palette-restorer',
+  description: 'Restores the command palette.',
   autoStart: true,
   requires: [ILayoutRestorer, ITranslator],
   activate: (
@@ -113,6 +118,7 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
  */
 const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
   id: '@jupyterlab/apputils-extension:resolver',
+  description: 'Provides the window name resolver.',
   autoStart: true,
   provides: IWindowResolver,
   requires: [JupyterFrontEnd.IPaths, IRouter],
@@ -162,6 +168,7 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
  */
 const splash: JupyterFrontEndPlugin<ISplashScreen> = {
   id: '@jupyterlab/apputils-extension:splash',
+  description: 'Provides the splash screen.',
   autoStart: true,
   requires: [ITranslator],
   provides: ISplashScreen,
@@ -274,6 +281,7 @@ Would you like to clear the workspace or keep waiting?`),
 
 const print: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:print',
+  description: 'Add the print capability',
   autoStart: true,
   requires: [ITranslator],
   activate: (app: JupyterFrontEnd, translator: ITranslator) => {
@@ -297,6 +305,7 @@ const print: JupyterFrontEndPlugin<void> = {
 
 export const toggleHeader: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:toggle-header',
+  description: 'Adds a command to display the main area widget content header.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ICommandPalette],
@@ -381,6 +390,7 @@ async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
  */
 const state: JupyterFrontEndPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
+  description: 'Provides the application state. It is stored per workspaces.',
   autoStart: true,
   provides: IStateDB,
   requires: [JupyterFrontEnd.IPaths, IRouter, ITranslator],
@@ -554,6 +564,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
  */
 const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
   id: '@jupyterlab/apputils-extension:sessionDialogs',
+  description: 'Provides the session context dialogs.',
   provides: ISessionContextDialogs,
   optional: [ITranslator],
   autoStart: true,
@@ -569,9 +580,15 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
  */
 const utilityCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:utilityCommands',
+  description: 'Adds meta commands to run set of other commands.',
   requires: [ITranslator],
+  optional: [ICommandPalette],
   autoStart: true,
-  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    palette: ICommandPalette | null
+  ) => {
     const trans = translator.load('jupyterlab');
     const { commands } = app;
     commands.addCommand(CommandIDs.runFirstEnabled, {
@@ -612,6 +629,32 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    commands.addCommand(CommandIDs.displayShortcuts, {
+      label: trans.__('Show Keyboard Shortcuts'),
+      caption: trans.__(
+        'Show relevant keyboard shortcuts for the current active widget'
+      ),
+      execute: args => {
+        const included = app.shell.currentWidget?.node.contains(
+          document.activeElement
+        );
+
+        if (!included) {
+          const currentNode =
+            (app.shell.currentWidget as MainAreaWidget)?.content.node ??
+            app.shell.currentWidget?.node;
+          currentNode?.focus();
+        }
+        const options = { commands, trans };
+        return displayShortcuts(options);
+      }
+    });
+
+    if (palette) {
+      const category: string = trans.__('Help');
+      palette.addItem({ command: CommandIDs.displayShortcuts, category });
+    }
   }
 };
 
@@ -620,6 +663,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
  */
 const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
   id: '@jupyterlab/apputils-extension:sanitizer',
+  description: 'Provides the HTML sanitizer.',
   autoStart: true,
   provides: ISanitizer,
   requires: [ISettingRegistry],

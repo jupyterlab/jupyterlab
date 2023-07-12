@@ -23,6 +23,7 @@ import { ITranslator } from '@jupyterlab/translation';
  */
 export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:editor-syntax-status',
+  description: 'Adds a file editor syntax status widget.',
   autoStart: true,
   requires: [IEditorTracker, IEditorLanguageRegistry, ILabShell, ITranslator],
   optional: [IStatusBar],

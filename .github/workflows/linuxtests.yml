@@ -2,9 +2,9 @@ name: Linux Tests
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
   release:
     types: [published]
 
@@ -148,4 +148,4 @@ jobs:
       - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
         with:
           ignore_glob: "packages/ui-components/docs/source/ui_components.rst images"
-          ignore_links: "../api/*.* .*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io"
+          ignore_links: "../api/*.* .*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.*"

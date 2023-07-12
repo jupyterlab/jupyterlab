@@ -10,9 +10,18 @@ contributing!
 
 Please take a look at the Contributor documentation, familiarize
 yourself with using JupyterLab, and introduce yourself to the community
-(on the mailing list or discourse) and share what area of the project
-you are interested in working on. Please also see the Jupyter `Community
+(on the `chat <https://gitter.im/jupyterlab/jupyterlab>`__ and/or the `forum <https://discourse.jupyter.org/c/jupyterlab/17>`__)
+and share what area of the project you are interested in working on. Please also see the Jupyter `Community
 Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
+
+You can help make it better by:
+
+* `submitting bug reports <https://github.com/jupyterlab/jupyterlab/issues/new/choose>`__,
+* `proposing new features <https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md>`__,
+* `translating the application <https://crowdin.com/project/jupyterlab>`__,
+* `improving the documentation <https://jupyterlab.readthedocs.io/en/latest>`__,
+* improving the code base and fixing bug (see below)
+
 
 We have labeled some issues as `good first
 issue <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22>`__
@@ -56,10 +65,32 @@ Documentation <https://jupyter.readthedocs.io/en/latest/contributing/content-con
 and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
+.. _versioning_notes:
+
+Backwards Compatibility, Versions and Breaking Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+New versions of JupyterLab may break backwards compatibility with extensions and other Jupyter
+customizations. Breaking changes are kept to a minimum where possible. JupyterLab development
+and release cycles follow `semantic versioning <https://semver.org/>`__, so when breaking
+changes are necessary, they are communicated via the version numbering scheme. In short, this
+means that, for a JupyterLab version X.Y.Z:
+
+- Major version (X) number changes indicate breaking changes (NOT backwards compatible)
+- Minor Version (Y) number changes indicate a backwards compatible addition of new features
+- Patch version (Z) number changes indicate backwards compatible bug fixes
+
+Contributions to JupyterLab extensions and other customizations should plan for possible
+breaking changes. Consider documenting your maintenance plans to users in these projects.
+You may also wish to consider pinning the major version of JupyterLab when developing
+extensions (in your package metadata).
+
 We maintain the **two most recently released major versions of JupyterLab**,
-JupyterLab v2 and JupyterLab v3. After JupyterLab v4 is released, we will no
-longer maintain v2.
+JupyterLab v3 and JupyterLab v4. JupyterLab v1 and v2 are no longer maintained.
 All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+
+Languages, Tools and Processes
+------------------------------
 
 All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
@@ -220,6 +251,17 @@ pass without a reply that unblocks it.
 Our expectation is that every new issue should be examined within a week of
 its creation.
 
+Triagers should label easier/lower complexity issues as ``good first issue`` to
+facilitate beginner contributions. A good first issue should have:
+
+* A clear, easily understood description with screen shots and expectations that do not require much familiarity with the project
+* Links, either in the description or in comments, to documentation and source code files that are relevant to the issue
+* Recommended points of contact, either by GitHub username or on other forums (Discourse, etc) where a contributor can get help
+
+Unless an issue is time-sensitive, such as if it is a release blocker
+for an imminent release, experienced Jupyter contributors should avoid
+picking up recent issues with the ``good first issue`` label.
+
 Tagging Issues with Labels
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -258,7 +300,7 @@ about 7 minutes again.
 Setting up a local development environment
 ------------------------------------------
 This section explains how to set up a local development environment. We assume you use GNU/Linux,
-macOS, or Windows Subsystem for Linux.
+macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__ and then using the Anaconda command prompt for all installation steps.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -266,7 +308,7 @@ Installing Node.js and jlpm
 Building JupyterLab from its GitHub source code requires Node.js. The
 development version requires Node.js version 18+, as defined in the
 ``engines`` specification in
-`dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/master/dev_mode/package.json>`__.
+`dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/main/dev_mode/package.json>`__.
 
 If you use `conda <https://conda.io>`__, you can get it with:
 
@@ -563,7 +605,7 @@ Visual Regression and UI Tests
 ------------------------------
 
 As part of JupyterLab CI workflows, UI tests are run with visual regression checks.
-`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__ is used for UI
+`Galata <https://github.com/jupyterlab/jupyterlab/tree/main/galata>`__ is used for UI
 testing. Galata provides `Playwright <https://playwright.dev>`__ helpers to control and
 inspect JupyterLab UI programmatically.
 
@@ -602,7 +644,7 @@ Main reasons for UI test failures are:
      documentation test snapshots.
    - ``please update snapshots``: Combine the two previous comments effects.
 
-For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/master/galata/README.md>`__
+For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.
 
 Good Practices for Integration tests
@@ -787,7 +829,7 @@ need to install the documentation dependencies with ``pip``:
 
 .. code:: bash
 
-   pip install -e .[docs]
+   pip install -e ".[docs]"
 
 
 To test the docs run:

@@ -220,9 +220,13 @@ async function setToolbarItems(
         await displayInformation(trans);
       } else {
         if (newItems.length > 0) {
+          // Empty the default values to avoid toolbar settings collisions.
           canonical = null;
-          // This will trigger a settings.changed signal that will update the items
-          await registry.reload(pluginId);
+          const schema = registry.plugins[pluginId]!.schema;
+          schema.properties!.toolbar.default = [];
+
+          // Run again the transformations.
+          await registry.load(pluginId, true);
         }
       }
     }
@@ -299,6 +303,25 @@ export function createToolbarFactory(
       }
     };
 
+    const updateWidget = (
+      registry: IToolbarWidgetRegistry,
+      itemName: string
+    ) => {
+      const itemIndex = Array.from(items).findIndex(
+        item => item.name === itemName
+      );
+      if (itemIndex >= 0) {
+        toolbar.set(itemIndex, {
+          name: itemName,
+          widget: toolbarRegistry.createWidget(
+            factoryName,
+            widget,
+            items.get(itemIndex)
+          )
+        });
+      }
+    };
+
     const toolbar = new ObservableList<ToolbarRegistry.IToolbarItem>({
       values: Array.from(items).map(item => {
         return {
@@ -308,9 +331,14 @@ export function createToolbarFactory(
       })
     });
 
+    // Re-render the widget if a new factory has been added.
+    toolbarRegistry.factoryAdded.connect(updateWidget);
+
     items.changed.connect(updateToolbar);
+
     widget.disposed.connect(() => {
       items.changed.disconnect(updateToolbar);
+      toolbarRegistry.factoryAdded.disconnect(updateWidget);
     });
 
     return toolbar;

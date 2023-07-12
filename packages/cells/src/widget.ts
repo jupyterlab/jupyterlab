@@ -9,7 +9,7 @@ import { EditorView } from '@codemirror/view';
 
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import { DOMUtils, ISessionContext } from '@jupyterlab/apputils';
 
 import { ActivityMonitor, IChangedArgs, URLExt } from '@jupyterlab/coreutils';
 
@@ -43,7 +43,7 @@ import { TableOfContentsUtils } from '@jupyterlab/toc';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { addIcon } from '@jupyterlab/ui-components';
+import { addIcon, collapseIcon, expandIcon } from '@jupyterlab/ui-components';
 
 import { JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 
@@ -414,6 +414,11 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       const layout = this._inputWrapper!.layout as PanelLayout;
       if (value) {
         this._input!.parent = null;
+        if (this._inputPlaceholder) {
+          this._inputPlaceholder.text = this.model.sharedModel
+            .getSource()
+            .split('\n')?.[0];
+        }
         layout.addWidget(this._inputPlaceholder!);
       } else {
         this._inputPlaceholder!.parent = null;
@@ -576,8 +581,20 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     inputWrapper.addWidget(input);
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
-    this._inputPlaceholder = new InputPlaceholder(() => {
-      this.inputHidden = !this.inputHidden;
+    this._inputPlaceholder = new InputPlaceholder({
+      callback: () => {
+        this.inputHidden = !this.inputHidden;
+      },
+      text: input.model.sharedModel.getSource().split('\n')[0],
+      translator: this.translator
+    });
+
+    input.model.contentChanged.connect((sender, args) => {
+      if (this._inputPlaceholder && this.inputHidden) {
+        this._inputPlaceholder.text = sender.sharedModel
+          .getSource()
+          .split('\n')?.[0];
+      }
     });
 
     if (this.inputHidden) {
@@ -640,6 +657,14 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     // Handle read only state.
     if (this.editor?.getOption('readOnly') !== this._readOnly) {
       this.editor?.setOption('readOnly', this._readOnly);
+    }
+  }
+
+  protected onContentChanged() {
+    if (this.inputHidden && this._inputPlaceholder) {
+      this._inputPlaceholder.text = this.model.sharedModel
+        .getSource()
+        .split('\n')?.[0];
     }
   }
 
@@ -724,6 +749,11 @@ export namespace Cell {
      * The maximum number of output items to display in cell output.
      */
     maxNumberOutputs?: number;
+
+    /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope?: 'global' | 'session';
 
     /**
      * Whether this cell is a placeholder for future rendering.
@@ -986,13 +1016,16 @@ export class CodeCell extends Cell<ICodeCellModel> {
       contentFactory: contentFactory,
       maxNumberOutputs: this.maxNumberOutputs,
       translator: this.translator,
-      promptOverlay: true
+      promptOverlay: true,
+      inputHistoryScope: options.inputHistoryScope
     }));
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
       this.outputsScrolled = !this.outputsScrolled;
     });
-
+    output.initialize.connect(() => {
+      this.updatePromptOverlayIcon();
+    });
     // Defer setting placeholder as OutputArea must be instantiated before initializing the DOM
     this.placeholder = options.placeholder ?? true;
 
@@ -1040,8 +1073,12 @@ export class CodeCell extends Cell<ICodeCellModel> {
       this.addClass(DIRTY_CLASS);
     }
 
-    this._outputPlaceholder = new OutputPlaceholder(() => {
-      this.outputHidden = !this.outputHidden;
+    this._outputPlaceholder = new OutputPlaceholder({
+      callback: () => {
+        this.outputHidden = !this.outputHidden;
+      },
+      text: this.getOutputPlaceholderText(),
+      translator: this.translator
     });
 
     const layoutWrapper = outputWrapper.layout as PanelLayout;
@@ -1059,6 +1096,37 @@ export class CodeCell extends Cell<ICodeCellModel> {
         ? trans.__('Code Cell Content')
         : trans.__('Code Cell Content with Output');
     this.node.setAttribute('aria-label', ariaLabel);
+  }
+
+  protected getOutputPlaceholderText(): string | undefined {
+    const firstOutput = this.model.outputs.get(0);
+    const outputData = firstOutput?.data;
+    if (!outputData) {
+      return undefined;
+    }
+    const supportedOutputTypes = [
+      'text/html',
+      'image/svg+xml',
+      'application/pdf',
+      'text/markdown',
+      'text/plain',
+      'application/vnd.jupyter.stderr',
+      'application/vnd.jupyter.stdout',
+      'text'
+    ];
+    const preferredOutput = supportedOutputTypes.find(mt => {
+      const data = firstOutput.data[mt];
+      return (Array.isArray(data) ? typeof data[0] : typeof data) === 'string';
+    });
+    const dataToDisplay = firstOutput.data[preferredOutput ?? ''];
+    if (dataToDisplay !== undefined) {
+      return (
+        Array.isArray(dataToDisplay)
+          ? dataToDisplay
+          : (dataToDisplay as string)?.split('\n')
+      )?.find(part => part !== '');
+    }
+    return undefined;
   }
 
   /**
@@ -1156,6 +1224,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
         if (this.inputHidden && !this._outputWrapper!.isHidden) {
           this._outputWrapper!.hide();
         }
+        if (this._outputPlaceholder) {
+          this._outputPlaceholder.text = this.getOutputPlaceholderText() ?? '';
+        }
       } else {
         if (this._outputWrapper!.isHidden) {
           this._outputWrapper!.show();
@@ -1224,8 +1295,41 @@ export class CodeCell extends Cell<ICodeCellModel> {
     if (this.syncScrolled) {
       this.saveScrolledState();
     }
+    this.updatePromptOverlayIcon();
   }
 
+  /**
+   * Update the Prompt Overlay Icon
+   */
+  updatePromptOverlayIcon(): void {
+    const overlay = DOMUtils.findElement(
+      this.node,
+      'jp-OutputArea-promptOverlay'
+    );
+    if (!overlay) {
+      return;
+    }
+    // If you are changing this, don't forget about svg.
+    const ICON_HEIGHT = 16 + 4 + 4; // 4px for padding
+    if (overlay.clientHeight <= ICON_HEIGHT) {
+      overlay.firstChild?.remove();
+      return;
+    }
+    let overlayTitle: string;
+    if (this._outputsScrolled) {
+      expandIcon.element({
+        container: overlay
+      });
+      overlayTitle = 'Expand Output';
+    } else {
+      collapseIcon.element({
+        container: overlay
+      });
+      overlayTitle = 'Collapse Output';
+    }
+    const trans = this.translator.load('jupyterlab');
+    overlay.title = trans.__(overlayTitle);
+  }
   /**
    * Save view collapse state to model
    */
@@ -1360,6 +1464,11 @@ export class CodeCell extends Cell<ICodeCellModel> {
    */
   protected onOutputChanged(): void {
     this._headingsCache = null;
+    if (this._outputPlaceholder && this.outputHidden) {
+      this._outputPlaceholder.text = this.getOutputPlaceholderText() ?? '';
+    }
+    // This is to hide/show icon on single line output.
+    this.updatePromptOverlayIcon();
   }
 
   /**
@@ -2085,6 +2194,7 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
    * Callback on content changed
    */
   protected onContentChanged(): void {
+    super.onContentChanged();
     this._headingsCache = null;
   }
 

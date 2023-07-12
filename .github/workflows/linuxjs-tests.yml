@@ -2,9 +2,9 @@ name: Linux JS Tests
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
-    branches: [master]
+    branches: [main]
   release:
     types: [published]
 
@@ -48,6 +48,7 @@ jobs:
             js-outputarea,
             js-rendermime,
             js-services,
+            js-settingeditor,
             js-settingregistry,
             js-statedb,
             js-statusbar,

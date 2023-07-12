@@ -47,7 +47,7 @@ fi
 
 if [[ $GROUP == docs ]]; then
     # Build the docs (includes API docs)
-    pip install .[docs]
+    python -m pip install .[docs]
     pushd docs
     make html
     popd
@@ -57,7 +57,10 @@ fi
 if [[ $GROUP == integrity ]]; then
     # Run the integrity script first
     jlpm run integrity --force
-
+    # Validate the project
+    jlpm install --immutable  --immutable-cache
+    # Use print to not update the yarn.lock only fail
+    jlpm dlx yarn-berry-deduplicate --strategy fewerHighest --fail --print
     # Run a browser check in dev mode
     jlpm run build
     python -m jupyterlab.browser_check --dev-mode
@@ -201,11 +204,11 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension build extension
 
     # Test develop script with hyphens and underscores in the module name
-    pip install -e test-hyphens
+    python -m pip install -e test-hyphens
     jupyter labextension develop test-hyphens --overwrite --debug
-    pip install -e test_no_hyphens
+    python -m pip install -e test_no_hyphens
     jupyter labextension develop test_no_hyphens --overwrite --debug
-    pip install -e test-hyphens-underscore
+    python -m pip install -e test-hyphens-underscore
     jupyter labextension develop test-hyphens-underscore --overwrite --debug
 
     python -m jupyterlab.browser_check
@@ -250,7 +253,7 @@ if [[ $GROUP == usage ]]; then
     jlpm run get:dependency react-native
 
     # Use the extension upgrade script
-    pip install cookiecutter
+    python -m pip install copier jinja2-time "pydantic<2"
     python -m jupyterlab.upgrade_extension --no-input jupyterlab/tests/mock_packages/extension
 fi
 
@@ -365,7 +368,7 @@ if [[ $GROUP == interop ]]; then
     popd
     pushd provider
     jupyter labextension build .
-    pip install .
+    python -m pip install .
     popd
     pushd consumer
     jupyter labextension install .
@@ -389,7 +392,7 @@ if [[ $GROUP == interop ]]; then
     popd
     pushd consumer
     jupyter labextension build .
-    pip install .
+    python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
@@ -413,7 +416,7 @@ if [[ $GROUP == interop ]]; then
     # if installed after
     jupyter labextension install .
     jupyter labextension build .
-    pip install .
+    python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"

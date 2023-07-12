@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/markedparser-extension",
-  "version": "4.0.0-alpha.22",
+  "version": "4.0.2",
   "description": "JupyterLab - Markdown parser provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,16 +35,16 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.22",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.22",
-    "@jupyterlab/rendermime": "^4.0.0-alpha.22",
+    "@jupyterlab/application": "^4.0.2",
+    "@jupyterlab/codemirror": "^4.0.2",
+    "@jupyterlab/rendermime": "^4.0.2",
     "marked": "^4.0.17"
   },
   "devDependencies": {
     "@types/marked": "^4.0.3",
     "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
-    "typescript": "~5.0.2"
+    "typedoc": "~0.24.7",
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

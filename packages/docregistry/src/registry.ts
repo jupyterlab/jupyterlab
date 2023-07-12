@@ -876,7 +876,7 @@ export namespace DocumentRegistry {
     /**
      * A signal emitted when the contentsModel changes.
      */
-    fileChanged: ISignal<this, Contents.IModel>;
+    fileChanged: ISignal<this, Omit<Contents.IModel, 'content'>>;
 
     /**
      * A signal emitted on the start and end of a saving operation.
@@ -920,9 +920,9 @@ export namespace DocumentRegistry {
      *
      * #### Notes
      * This will be null until the context is 'ready'. Since we only store
-     * metadata here, the `.contents` attribute will always be empty.
+     * metadata here, the `content` attribute is removed.
      */
-    readonly contentsModel: Contents.IModel | null;
+    readonly contentsModel: Omit<Contents.IModel, 'content'> | null;
 
     /**
      * The url resolver for the context.

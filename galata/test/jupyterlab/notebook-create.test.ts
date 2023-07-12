@@ -4,6 +4,7 @@
 import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 
 const fileName = 'notebook.ipynb';
+const TRUSTED_SELECTOR = 'svg[data-icon="ui-components:trusted"]';
 
 const menuPaths = ['File', 'Edit', 'View', 'Run', 'Kernel', 'Help'];
 
@@ -25,6 +26,7 @@ test.describe('Notebook Create', () => {
     await page.notebook.setCell(0, 'raw', 'Just a raw cell');
     expect(await page.notebook.getCellCount()).toBe(1);
     expect(await page.notebook.getCellType(0)).toBe('raw');
+    await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(1);
   });
 
   test('Create a Markdown cell', async ({ page }) => {
@@ -35,12 +37,14 @@ test.describe('Notebook Create', () => {
     await page.notebook.runCell(1, true);
     expect(await page.notebook.getCellCount()).toBe(2);
     expect(await page.notebook.getCellType(1)).toBe('markdown');
+    await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(1);
   });
 
   test('Create a Code cell', async ({ page }) => {
     await page.notebook.addCell('code', '2 ** 3');
     expect(await page.notebook.getCellCount()).toBe(2);
     expect(await page.notebook.getCellType(1)).toBe('code');
+    await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(1);
   });
 
   test('Save Notebook', async ({ page }) => {
@@ -72,6 +76,7 @@ test.describe('Notebook Create', () => {
     const imageName = 'run-cells.png';
 
     expect((await page.notebook.getCellTextOutput(2))[0]).toBe('8');
+    await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(1);
 
     const nbPanel = await page.notebook.getNotebookInPanel();
 

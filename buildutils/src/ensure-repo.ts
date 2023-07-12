@@ -29,14 +29,14 @@ type CoreData = Map<string, any>;
 // URL config for this branch
 // Source and target branches
 // Target RTD version name
-// For master these will be the same, for other branches the source
+// For main these will be the same, for other branches the source
 // branch is whichever branch it was created from
 // The current release branch should target RTD stable
-// Master should target latest
+// Main should target latest
 // All other release branches should target a specific named version
 const URL_CONFIG = {
-  source: 'master',
-  target: 'master',
+  source: 'main',
+  target: 'main',
   rtdVersion: 'latest'
 };
 
@@ -97,6 +97,10 @@ const UNUSED: Dict<string[]> = {
     '@codemirror/lang-xml',
     '@codemirror/legacy-modes'
   ],
+  '@jupyterlab/codemirror-extension': [
+    '@codemirror/lang-markdown',
+    '@codemirror/legacy-modes'
+  ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
   '@jupyterlab/services': ['ws'],
@@ -121,6 +125,14 @@ const UNUSED: Dict<string[]> = {
 
 // Packages that are allowed to have differing versions
 const DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
+
+// Packages that have backward versions support
+const BACKWARD_VERSIONS: Record<string, Record<string, string>> = {
+  '@jupyterlab/rendermime-interfaces': {
+    '@lumino/coreutils': '^1.11.0',
+    '@lumino/widgets': '^1.37.2'
+  }
+};
 
 const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
@@ -158,6 +170,7 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/galata': [
     '@jupyterlab/application',
     '@jupyterlab/apputils',
+    '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
     '@jupyterlab/notebook'
   ],
@@ -165,6 +178,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/application',
     '@jupyterlab/apputils',
     '@jupyterlab/cells',
+    '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
     '@jupyterlab/notebook'
   ],
@@ -312,7 +326,10 @@ function ensureBranch(): string[] {
     .trim()
     .split(/\r?\n/);
   files = files.filter(filePath => {
-    return fileTypes.indexOf(path.extname(filePath)) !== -1;
+    return (
+      fileTypes.indexOf(path.extname(filePath)) !== -1 &&
+      !filePath.endsWith('_static/switcher.json')
+    );
   });
 
   // Set up string replacements
@@ -662,37 +679,6 @@ function ensureBuildUtils() {
 }
 
 /**
- * Ensure lockfile structure
- */
-function ensureLockfile(): string[] {
-  const staging = './jupyterlab/staging';
-  const lockFile = path.join(staging, 'yarn.lock');
-  const content = fs.readFileSync(lockFile, { encoding: 'utf-8' });
-  let newContent = content;
-  const messages = [];
-
-  // Verify that all packages have resolved to the correct (default) registry
-  const resolvedPattern =
-    /^\s*resolved "((?!https:\/\/registry\.yarnpkg\.com\/).*)"\s*$/gm;
-  let badRegistry;
-  while ((badRegistry = resolvedPattern.exec(content)) !== null) {
-    messages.push(`Fixing bad npm/yarn registry: ${badRegistry[1]}`);
-    const parsed = new URL(badRegistry[1]);
-    const newUrl = badRegistry[1].replace(
-      parsed.origin,
-      'https://registry.yarnpkg.com'
-    );
-    newContent = newContent.replace(badRegistry[1], newUrl);
-  }
-
-  if (content !== newContent) {
-    // Write the updated lockfile data back
-    fs.writeFileSync(lockFile, newContent, 'utf-8');
-  }
-  return messages;
-}
-
-/**
  * Ensure the repo integrity.
  */
 export async function ensureIntegrity(): Promise<boolean> {
@@ -818,7 +804,8 @@ export async function ensureIntegrity(): Promise<boolean> {
       locals,
       cssImports: cssImports[name],
       cssModuleImports: cssModuleImports[name],
-      differentVersions: DIFFERENT_VERSIONS
+      differentVersions: DIFFERENT_VERSIONS,
+      backwardVersions: BACKWARD_VERSIONS
     };
 
     if (name === '@jupyterlab/metapackage') {
@@ -839,12 +826,6 @@ export async function ensureIntegrity(): Promise<boolean> {
       messages[pkgName] = [];
     }
     messages[pkgName] = messages[pkgName].concat(pkgMessages);
-  }
-
-  // Ensure the staging area lockfile
-  const lockFileMessages = ensureLockfile();
-  if (lockFileMessages.length > 0) {
-    messages['lockfile'] = lockFileMessages;
   }
 
   // Handle the top level package.

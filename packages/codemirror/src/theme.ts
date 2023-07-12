@@ -32,6 +32,11 @@ export const jupyterEditorTheme = EditorView.theme({
     caretColor: 'var(--jp-editor-cursor-color)'
   },
 
+  /* Inherit font family from .cm-editor */
+  '.cm-scroller': {
+    fontFamily: 'inherit'
+  },
+
   '.cm-cursor, .cm-dropCursor': {
     borderLeft:
       'var(--jp-code-cursor-width0) solid var(--jp-editor-cursor-color)'
@@ -52,6 +57,10 @@ export const jupyterEditorTheme = EditorView.theme({
 
   '.cm-gutter, .cm-activeLine': {
     backgroundColor: 'var(--jp-layout-color2)'
+  },
+
+  '.cm-lineNumbers': {
+    color: 'var(--jp-ui-font-color2)'
   },
 
   '.cm-searchMatch': {
@@ -125,7 +134,12 @@ export const jupyterHighlightStyle = HighlightStyle.define([
   { tag: [t.separator, t.derefOperator, t.paren], color: '' },
   { tag: t.strong, fontWeight: 'bold' },
   { tag: t.emphasis, fontStyle: 'italic' },
-  { tag: t.strikethrough, textDecoration: 'line-through' }
+  { tag: t.strikethrough, textDecoration: 'line-through' },
+  {
+    tag: t.bool,
+    color: 'var(--jp-mirror-editor-keyword-color)',
+    fontWeight: 'bold'
+  }
 ]);
 
 /**

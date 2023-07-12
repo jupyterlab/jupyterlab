@@ -155,10 +155,10 @@ def run_browser_sync(url):
     target = osp.join(get_app_dir(), "browser_test")
     if not osp.exists(osp.join(target, "node_modules")):
         os.makedirs(target)
-        subprocess.call(["npm", "init", "-y"], cwd=target)
-        subprocess.call(["npm", "install", "playwright@^1.9.2"], cwd=target)
+        subprocess.call(["npm", "init", "-y"], cwd=target)  # noqa S603 S607
+        subprocess.call(["npm", "install", "playwright@^1.9.2"], cwd=target)  # noqa S603 S607
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
-    return subprocess.check_call(["node", "browser-test.js", url], cwd=target)
+    return subprocess.check_call(["node", "browser-test.js", url], cwd=target)  # noqa S603 S607
 
 
 class BrowserApp(LabApp):

@@ -61,10 +61,15 @@
 
 .jp-RunningSessions-item:hover {
   background-color: var(--jp-layout-color2);
+  cursor: pointer;
 }
 
 .jp-RunningSessions-item.jp-mod-running-child {
   padding-left: 40px;
+}
+
+.jp-RunningSessions-item.jp-mod-kernel:not(.jp-mod-running-child) {
+  user-select: none;
 }
 
 .jp-RunningSessions-item img {

@@ -21,6 +21,7 @@ import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 const cellToolbar: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/cell-toolbar-extension:plugin',
+  description: 'Add the cells toolbar.',
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,

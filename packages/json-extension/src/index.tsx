@@ -96,6 +96,7 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
 const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
   {
     id: '@jupyterlab/json-extension:factory',
+    description: 'Adds renderer for JSON content.',
     rendererFactory,
     rank: 0,
     dataType: 'json',

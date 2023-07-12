@@ -378,7 +378,8 @@ export namespace Commands {
     commands.addCommand(CommandIDs.changeTabs, {
       label: args => {
         if (args.size) {
-          return trans.__('Spaces: %1', args.size ?? '');
+          // Use a context to differentiate with string set as plural in 3.x
+          return trans._p('v4', 'Spaces: %1', args.size ?? '');
         } else {
           return trans.__('Indent with Tab');
         }

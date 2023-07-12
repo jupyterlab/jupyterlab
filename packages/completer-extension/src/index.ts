@@ -28,6 +28,7 @@ const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:manager';
 
 const defaultProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/completer-extension:base-service',
+  description: 'Adds context and kernel completion providers.',
   requires: [ICompletionProviderManager],
   autoStart: true,
   activate: (
@@ -41,6 +42,7 @@ const defaultProvider: JupyterFrontEndPlugin<void> = {
 
 const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
   id: COMPLETION_MANAGER_PLUGIN,
+  description: 'Provides the completion provider manager.',
   requires: [ISettingRegistry],
   optional: [IFormRendererRegistry],
   provides: ICompletionProviderManager,

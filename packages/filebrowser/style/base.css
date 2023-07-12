@@ -115,11 +115,6 @@
   outline: 0;
 }
 
-.jp-DirListing:focus-visible {
-  outline: 1px solid var(--jp-brand-color1);
-  outline-offset: -2px;
-}
-
 .jp-DirListing-header {
   flex: 0 0 auto;
   display: flex;
@@ -279,6 +274,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
   user-select: none;
+}
+
+.jp-DirListing-itemText:focus {
+  outline-width: 2px;
+  outline-color: var(--jp-inverse-layout-color1);
+  outline-style: solid;
+  outline-offset: 1px;
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText:focus {
+  outline-color: var(--jp-layout-color1);
 }
 
 .jp-DirListing-itemModified {
