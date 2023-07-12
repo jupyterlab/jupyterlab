@@ -60,7 +60,9 @@ if [[ $GROUP == integrity ]]; then
     # Validate the project
     jlpm install --immutable  --immutable-cache
     jlpm dlx yarn-berry-deduplicate --strategy fewerHighest
-    jlpm install --immutable  --immutable-cache
+    # Here we should not be stringent as yarn may clean
+    # output of `yarn-berry-deduplicate`
+    jlpm install
     if [[ $(git status --porcelain | wc -l) != '0' ]]; then
         git diff
         exit 1
