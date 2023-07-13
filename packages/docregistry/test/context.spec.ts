@@ -94,6 +94,17 @@ describe('docregistry/context', () => {
         await context.initialize(true);
         expect(called).toBe(true);
       });
+
+      it('should not contain the file content attribute', async () => {
+        let called = false;
+        context.fileChanged.connect((sender, args) => {
+          // @ts-expect-error content is omitted
+          expect(args['content']).toBeUndefined();
+          called = true;
+        });
+        await context.initialize(true);
+        expect(called).toBe(true);
+      });
     });
 
     describe('#saving', () => {
@@ -250,6 +261,8 @@ describe('docregistry/context', () => {
         void context.initialize(true);
         await context.ready;
         expect(context.contentsModel!.path).toBe(path);
+        // @ts-expect-error content is omitted
+        expect(context.contentsModel!['content']).toBeUndefined();
       });
     });
 
