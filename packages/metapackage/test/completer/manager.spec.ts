@@ -70,6 +70,11 @@ class FooCompletionProvider implements ICompletionProvider {
   }
 
   async modelFactory(context: ICompletionContext): Promise<Completer.IModel> {
+    if (!(this instanceof FooCompletionProvider)) {
+      throw new Error(
+        'The context `this` should be an instance of `FooCompletionProvider`.'
+      );
+    }
     return new CustomCompleterModel();
   }
 }
