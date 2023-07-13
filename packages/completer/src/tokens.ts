@@ -113,7 +113,7 @@ export interface ICompletionProvider<
    * completion items should be shown.
    *
    * @param  completerIsVisible - Current visibility status of the
-   *  completer widget0
+   *  completer widget
    * @param  changed - changed text.
    * @param  context - The context of the completer (optional).
    */
