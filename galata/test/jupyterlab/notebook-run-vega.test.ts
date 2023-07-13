@@ -7,36 +7,35 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import * as fs from 'fs';
 import * as path from 'path';
 
 const fileName = 'vega_notebook.ipynb';
 
 const PNG_MIME_TYPE = 'image/png';
 
-test.use({ tmpPath: 'notebook-run-vega-test' });
-
 async function nbDiskContent(
   page: IJupyterLabPageFixture,
   nbPath: string
 ): Promise<string> {
   await page.notebook.save();
-  return fs.readFileSync(nbPath).toString('utf8');
+  // Use the `files` API as figure out the local path is though.
+  const response = await page.request.fetch(`/files/${nbPath}`);
+  if (!response.ok()) {
+    return '';
+  }
+  const buffer = await response.body();
+  return buffer.toString();
 }
 
-test.describe.serial('Notebook Run Vega', () => {
+test.describe('Notebook Run Vega', () => {
   test.beforeEach(async ({ page, request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
     );
-    await page.filebrowser.openDirectory(tmpPath);
-  });
 
-  test.afterEach(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteFile(tmpPath);
+    await page.filebrowser.openDirectory(tmpPath);
   });
 
   test('Run notebook with Vega cell in default theme', async ({
