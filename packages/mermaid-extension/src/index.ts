@@ -71,13 +71,12 @@ const contextCommands: JupyterFrontEndPlugin<void> = {
       node.classList.contains(MERMAID_CLASS);
 
     app.commands.addCommand(CommandIDs.copySource, {
-      label: 'Copy Mermaid Diagram Source',
+      label: 'Mermaid Copy Diagram Source',
       execute: async (args?: any) => {
         const node = app.contextMenuHitTest(isMermaid);
         if (!node) {
           return;
         }
-        console.warn(node);
         const code = node.querySelector(`.${MERMAID_CODE_CLASS}`);
         if (!code || !code.textContent) {
           return;
@@ -86,10 +85,9 @@ const contextCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
-    app.contextMenu.addItem({
-      selector: `.${MERMAID_CLASS}`,
-      command: CommandIDs.copySource
-    });
+    const options = { selector: `.${MERMAID_CLASS}`, rank: 13 };
+    app.contextMenu.addItem({ command: CommandIDs.copySource, ...options });
+    app.contextMenu.addItem({ type: 'separator', ...options });
   }
 };
 

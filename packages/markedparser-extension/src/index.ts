@@ -50,9 +50,8 @@ export interface IRenderOptions {
 export function createMarkdownParser(options: IRenderOptions) {
   Private.initializeMarked(options);
   return {
-    render: async (content: string): Promise<string> => {
-      // presently, only markdown fenced code blocks can be extended
-      return await Private.render(content, options);
+    render: (content: string): Promise<string> => {
+      return Private.render(content, options);
     }
   };
 }
