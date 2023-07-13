@@ -13,6 +13,7 @@ import {
   DETAILS_CLASS,
   IMermaidManager,
   MERMAID_CLASS,
+  MERMAID_CODE_CLASS,
   MERMAID_DARK_THEME,
   MERMAID_DEFAULT_THEME,
   SUMMARY_CLASS,
@@ -80,13 +81,13 @@ export class MermaidManager implements IMermaidManager {
     const el = document.createElement('div');
     document.body.appendChild(el);
     try {
-      const result = await _mermaid.render(id, text, el);
+      const { svg } = await _mermaid.render(id, text, el);
       const parser = new DOMParser();
-      const doc = parser.parseFromString(result.svg, 'image/svg+xml');
+      const doc = parser.parseFromString(svg, 'image/svg+xml');
 
-      const info: IMermaidManager.IRenderInfo = { svg: result.svg };
-      const svg = doc.querySelector('svg');
-      const { maxWidth } = svg?.style || {};
+      const info: IMermaidManager.IRenderInfo = { text, svg };
+      const svgEl = doc.querySelector('svg');
+      const { maxWidth } = svgEl?.style || {};
       info.width = maxWidth ? parseFloat(maxWidth) : null;
       const firstTitle = doc.querySelector('title');
       const firstDesc = doc.querySelector('desc');
@@ -144,6 +145,20 @@ export class MermaidManager implements IMermaidManager {
   }
 
   /**
+   * Provide a code block with the mermaid source.
+   */
+  makeMermaidCode(text: string): HTMLElement {
+    // append the source
+    const pre = document.createElement('pre');
+    const code = document.createElement('code');
+    code.innerText = text;
+    pre.appendChild(code);
+    code.className = MERMAID_CODE_CLASS;
+    code.textContent = text;
+    return pre;
+  }
+
+  /**
    * Get the parser message element from a failed parse.
    *
    * This doesn't do much of anything if the text is successfully parsed.
@@ -161,11 +176,7 @@ export class MermaidManager implements IMermaidManager {
     result.className = DETAILS_CLASS;
     const summary = document.createElement('summary');
     summary.className = SUMMARY_CLASS;
-    const pre = document.createElement('pre');
-    const code = document.createElement('code');
-    code.innerText = text;
-    pre.appendChild(code);
-    summary.appendChild(pre);
+    summary.appendChild(this.makeMermaidCode(text));
     result.appendChild(summary);
 
     const warning = document.createElement('pre');
@@ -197,7 +208,9 @@ export class MermaidManager implements IMermaidManager {
       img.setAttribute('alt', info.accessibleTitle);
     }
 
-    // add accessible caption
+    figure.appendChild(this.makeMermaidCode(info.text));
+
+    // add accessible caption, with fallback to raw mermaid source
     if (info.accessibleDescription) {
       const caption = document.createElement('figcaption');
       caption.className = 'sr-only';

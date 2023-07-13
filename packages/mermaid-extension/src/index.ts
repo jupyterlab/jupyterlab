@@ -14,10 +14,19 @@ import { IThemeManager } from '@jupyterlab/apputils';
 import {
   IMermaidManager,
   IMermaidMarkdown,
+  MERMAID_CLASS,
+  MERMAID_CODE_CLASS,
   MermaidManager,
   MermaidMarkdown,
   RenderedMermaid
 } from '@jupyterlab/mermaid';
+
+/**
+ * A namespace for mermaid text-based diagram commands.
+ */
+export namespace CommandIDs {
+  export const copySource = 'mermaid:copy-source';
+}
 
 /**
  * A plugin for the core rendering/cachine of mermaid text-based diagrams
@@ -49,4 +58,39 @@ const markdown: JupyterFrontEndPlugin<IMermaidMarkdown> = {
   }
 };
 
-export default [core, markdown];
+/**
+ * Contextual commands for mermaid text-based diagrams.
+ */
+const contextCommands: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/mermaid-extension:context-commands',
+  description: 'Provides context menu commands for mermaid diagrams.',
+  autoStart: true,
+  requires: [IMermaidManager],
+  activate: (app: JupyterFrontEnd, mermaid: IMermaidManager) => {
+    const isMermaid = (node: HTMLElement) =>
+      node.classList.contains(MERMAID_CLASS);
+
+    app.commands.addCommand(CommandIDs.copySource, {
+      label: 'Copy Mermaid Diagram Source',
+      execute: async (args?: any) => {
+        const node = app.contextMenuHitTest(isMermaid);
+        if (!node) {
+          return;
+        }
+        console.warn(node);
+        const code = node.querySelector(`.${MERMAID_CODE_CLASS}`);
+        if (!code || !code.textContent) {
+          return;
+        }
+        await navigator.clipboard.writeText(code.textContent);
+      }
+    });
+
+    app.contextMenu.addItem({
+      selector: `.${MERMAID_CLASS}`,
+      command: CommandIDs.copySource
+    });
+  }
+};
+
+export default [core, markdown, contextCommands];

@@ -37,6 +37,10 @@
   color: var(--jp-warn-color2);
 }
 
+.jp-RenderedMermaid:not(.jp-mod-warning) pre {
+  display: none;
+}
+
 .jp-RenderedMermaid-Summary > pre {
   display: inline-block;
   white-space: normal;

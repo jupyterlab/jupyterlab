@@ -14,6 +14,7 @@ export const MERMAID_DARK_THEME = 'dark';
 
 // DOM
 export const MERMAID_CLASS = 'jp-RenderedMermaid';
+export const MERMAID_CODE_CLASS = 'mermaid';
 export const WARNING_CLASS = 'jp-mod-warning';
 export const DETAILS_CLASS = 'jp-RenderedMermaid-Details';
 export const SUMMARY_CLASS = 'jp-RenderedMermaid-Summary';
@@ -64,6 +65,8 @@ export namespace IMermaidManager {
    * The results of a successful rendering of a mermaid text-based diagram.
    */
   export interface IRenderInfo {
+    /** the original source of the diagram. */
+    text: string;
     /** The raw rendered SVG. */
     svg: string;
     /** The extracted accessible description, if found. */
