@@ -26,11 +26,35 @@ const FENCE = '```~~~';
 /**
  * An internal interface for fenced code block renderers.
  */
-interface IFencedBlockRenderer {
+export interface IFencedBlockRenderer {
   languages: string[];
   rank: number;
   walk: (text: string) => Promise<void>;
   render: (text: string) => string | null;
+}
+
+/**
+ * Options
+ */
+export interface IRenderOptions {
+  languages: IEditorLanguageRegistry;
+  blocks: IFencedBlockRenderer[];
+}
+
+/**
+ * Create a markdown parser
+ *
+ * @param languages Editor languages
+ * @returns Markdown parser
+ */
+export function createMarkdownParser(options: IRenderOptions) {
+  Private.initializeMarked(options);
+  return {
+    render: async (content: string): Promise<string> => {
+      // presently, only markdown fenced code blocks can be extended
+      return await Private.render(content, options);
+    }
+  };
 }
 
 /**
@@ -48,17 +72,10 @@ const plugin: JupyterFrontEndPlugin<IMarkdownParser> = {
     languages: IEditorLanguageRegistry,
     mermaidMarkdown: IMermaidMarkdown | null
   ) => {
-    return {
-      render: async (content: string): Promise<string> => {
-        // presently, only markdown blocks get rendered
-        let blocks: IFencedBlockRenderer[] = [];
-        if (mermaidMarkdown) {
-          blocks.push(mermaidMarkdown);
-        }
-
-        return await Private.render(content, { languages, blocks });
-      }
-    };
+    return createMarkdownParser({
+      languages,
+      blocks: mermaidMarkdown ? [mermaidMarkdown] : []
+    });
   }
 };
 
@@ -77,14 +94,6 @@ namespace Private {
   let _languages: IEditorLanguageRegistry | null = null;
   let _markedOptions: marked.MarkedOptions = {};
   let _highlights = new LruCache<string, string>();
-
-  /**
-   * Options
-   */
-  export interface IRenderOptions {
-    languages: IEditorLanguageRegistry;
-    blocks: IFencedBlockRenderer[];
-  }
 
   export async function render(
     content: string,
