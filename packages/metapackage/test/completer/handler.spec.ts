@@ -8,6 +8,9 @@ import {
   Completer,
   CompleterModel,
   CompletionHandler,
+  CompletionTriggerKind,
+  ICompletionContext,
+  ICompletionProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { ISharedText, SourceChange, YFile } from '@jupyter/ydoc';
@@ -51,6 +54,32 @@ class TestCompletionHandler extends CompletionHandler {
   onCompletionSelected(widget: Completer, value: string): void {
     super.onCompletionSelected(widget, value);
     this.methods.push('onCompletionSelected');
+  }
+}
+
+class FooCompletionProvider implements ICompletionProvider {
+  methods: CompletionTriggerKind[] = [];
+
+  constructor(private _continuousHint: boolean) {}
+
+  identifier: string = 'FooCompletionProvider';
+  renderer = null;
+
+  async isApplicable(context: ICompletionContext): Promise<boolean> {
+    return true;
+  }
+
+  async fetch(
+    request: CompletionHandler.IRequest,
+    context: ICompletionContext,
+    trigger: CompletionTriggerKind
+  ): Promise<CompletionHandler.ICompletionItemsReply> {
+    this.methods.push(trigger);
+    return Promise.resolve({ start: 0, end: 0, items: [] });
+  }
+
+  shouldShowContinuousHint(completerIsVisible: boolean, changed: any) {
+    return this._continuousHint;
   }
 }
 
@@ -314,6 +343,88 @@ describe('@jupyterlab/completer', () => {
           line,
           column: column + 6
         });
+      });
+    });
+
+    describe('#CompletionTriggerKind', () => {
+      it('should use CompletionTriggerKind.TriggerCharacter', () => {
+        const provider = new FooCompletionProvider(true);
+        const reconciliator = new ProviderReconciliator({
+          context: null as any,
+          providers: [provider],
+          timeout: 0
+        });
+
+        const handler = new CompletionHandler({
+          reconciliator,
+          completer: new Completer({ editor: null })
+        });
+        handler.editor = createEditorWidget().editor;
+
+        expect(provider.methods.length).toEqual(0);
+
+        handler.editor.model.sharedModel.setSource('foo.');
+        // @ts-ignore
+        handler._makeRequest(
+          { line: 0, column: 3 },
+          CompletionTriggerKind.TriggerCharacter
+        );
+
+        expect(provider.methods).toEqual(
+          expect.arrayContaining([CompletionTriggerKind.TriggerCharacter])
+        );
+      });
+
+      it('should use CompletionTriggerKind.Invoked', () => {
+        const provider = new FooCompletionProvider(true);
+        const reconciliator = new ProviderReconciliator({
+          context: null as any,
+          providers: [provider],
+          timeout: 0
+        });
+
+        const handler = new CompletionHandler({
+          reconciliator,
+          completer: new Completer({ editor: null })
+        });
+        handler.editor = createEditorWidget().editor;
+
+        expect(provider.methods.length).toEqual(0);
+
+        handler.editor.model.sharedModel.setSource('foo.');
+        // @ts-ignore
+        handler._makeRequest(
+          { line: 0, column: 3 },
+          CompletionTriggerKind.Invoked
+        );
+
+        expect(provider.methods).toEqual(
+          expect.arrayContaining([CompletionTriggerKind.Invoked])
+        );
+      });
+
+      it('should call model change handler if model exists', () => {
+        const completer = new Completer({
+          editor: null,
+          model: new TestCompleterModel()
+        });
+        const handler = new TestCompletionHandler({ completer, reconciliator });
+        const editor = createEditorWidget().editor;
+        const model = completer.model as TestCompleterModel;
+
+        handler.editor = editor;
+        expect(model.methods).toEqual(
+          expect.not.arrayContaining(['handleTextChange'])
+        );
+        editor.model.sharedModel.setSource('bar');
+        editor.setCursorPosition({ line: 0, column: 2 });
+        // This signal is emitted (again) because the cursor position that
+        // a natural user would create need to be recreated here.
+        // (editor.model.value.changed as any).emit({ type: 'set', value: 'bar' }); @todo remove?
+        (editor.model.sharedModel.changed as any).emit([]);
+        expect(model.methods).toEqual(
+          expect.arrayContaining(['handleTextChange'])
+        );
       });
     });
 
