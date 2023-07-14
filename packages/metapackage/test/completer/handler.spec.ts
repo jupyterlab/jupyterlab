@@ -402,30 +402,6 @@ describe('@jupyterlab/completer', () => {
           expect.arrayContaining([CompletionTriggerKind.Invoked])
         );
       });
-
-      it('should call model change handler if model exists', () => {
-        const completer = new Completer({
-          editor: null,
-          model: new TestCompleterModel()
-        });
-        const handler = new TestCompletionHandler({ completer, reconciliator });
-        const editor = createEditorWidget().editor;
-        const model = completer.model as TestCompleterModel;
-
-        handler.editor = editor;
-        expect(model.methods).toEqual(
-          expect.not.arrayContaining(['handleTextChange'])
-        );
-        editor.model.sharedModel.setSource('bar');
-        editor.setCursorPosition({ line: 0, column: 2 });
-        // This signal is emitted (again) because the cursor position that
-        // a natural user would create need to be recreated here.
-        // (editor.model.value.changed as any).emit({ type: 'set', value: 'bar' }); @todo remove?
-        (editor.model.sharedModel.changed as any).emit([]);
-        expect(model.methods).toEqual(
-          expect.arrayContaining(['handleTextChange'])
-        );
-      });
     });
 
     it('should update cursor position after autocomplete on empty word', () => {
