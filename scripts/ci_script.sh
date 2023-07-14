@@ -59,8 +59,14 @@ if [[ $GROUP == integrity ]]; then
     jlpm run integrity --force
     # Validate the project
     jlpm install --immutable  --immutable-cache
-    # Use print to not update the yarn.lock only fail
-    jlpm dlx yarn-berry-deduplicate --strategy fewerHighest --fail --print
+    jlpm dlx yarn-berry-deduplicate --strategy fewerHighest
+    # Here we should not be stringent as yarn may clean
+    # output of `yarn-berry-deduplicate`
+    jlpm install
+    if [[ "$(git status --porcelain | wc -l | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")" != "0" ]]; then
+        git diff
+        exit 1
+    fi
     # Run a browser check in dev mode
     jlpm run build
     python -m jupyterlab.browser_check --dev-mode
