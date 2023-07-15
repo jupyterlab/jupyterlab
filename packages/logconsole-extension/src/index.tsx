@@ -23,7 +23,6 @@ import {
   LoggerRegistry,
   LogLevel
 } from '@jupyterlab/logconsole';
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -41,7 +40,7 @@ import {
   ReactWidget
 } from '@jupyterlab/ui-components';
 import { UUID } from '@lumino/coreutils';
-import { DockLayout, Widget } from '@lumino/widgets';
+import { DockLayout } from '@lumino/widgets';
 import * as React from 'react';
 import { LogConsoleStatus } from './status';
 
@@ -65,7 +64,7 @@ const logConsolePlugin: JupyterFrontEndPlugin<ILoggerRegistry> = {
   id: LOG_CONSOLE_PLUGIN_ID,
   description: 'Provides the logger registry.',
   provides: ILoggerRegistry,
-  requires: [ILabShell, IRenderMimeRegistry, INotebookTracker, ITranslator],
+  requires: [ILabShell, IRenderMimeRegistry, ITranslator],
   optional: [ICommandPalette, ILayoutRestorer, ISettingRegistry, IStatusBar],
   autoStart: true
 };
@@ -77,7 +76,6 @@ function activateLogConsole(
   app: JupyterFrontEnd,
   labShell: ILabShell,
   rendermime: IRenderMimeRegistry,
-  nbtracker: INotebookTracker,
   translator: ITranslator,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null,
@@ -129,12 +127,7 @@ function activateLogConsole(
   const createLogConsoleWidget = (options: ILogConsoleOptions = {}) => {
     logConsolePanel = new LogConsolePanel(loggerRegistry, translator);
 
-    logConsolePanel.source =
-      options.source !== undefined
-        ? options.source
-        : nbtracker.currentWidget
-        ? nbtracker.currentWidget.context.path
-        : null;
+    logConsolePanel.source = options.source ?? labShell.currentPath ?? null;
 
     logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
     logConsoleWidget.addClass('jp-LogConsole');
@@ -262,18 +255,7 @@ function activateLogConsole(
     });
   }
 
-  function setSource(newValue: Widget | null) {
-    if (logConsoleWidget && newValue === logConsoleWidget) {
-      // Do not change anything if we are just focusing on ourselves
-      return;
-    }
-
-    let source: string | null;
-    if (newValue && nbtracker.has(newValue)) {
-      source = (newValue as NotebookPanel).context.path;
-    } else {
-      source = null;
-    }
+  function setSource(source: string | null) {
     if (logConsolePanel) {
       logConsolePanel.source = source;
     }
@@ -282,8 +264,10 @@ function activateLogConsole(
   void app.restored.then(() => {
     // Set source only after app is restored in order to allow restorer to
     // restore previous source first, which may set the renderer
-    setSource(labShell.currentWidget);
-    labShell.currentChanged.connect((_, { newValue }) => setSource(newValue));
+    labShell.currentPathChanged.connect((_, { newValue }) =>
+      setSource(newValue)
+    );
+    setSource(labShell.currentPath ?? null);
   });
 
   if (settingRegistry) {
@@ -317,7 +301,7 @@ export class LogLevelSwitcher extends ReactWidget {
    */
   constructor(widget: LogConsolePanel, translator?: ITranslator) {
     super();
-    this.translator = translator || nullTranslator;
+    this.translator = translator ?? nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this.addClass('jp-LogConsole-toolbarLogLevel');
     this._logConsole = widget;

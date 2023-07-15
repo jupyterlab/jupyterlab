@@ -80,6 +80,7 @@ The table of contents behavior can be modified via settings which can be set in 
 * **numberingH1** : Whether to number the first-level headings (``h1``) or not.
 * **numberHeaders** : Whether to number the headings or not.
 * **syncCollapseState** : Whether to synchronize the cell and the table of contents collapse state or not.
+* **baseNumbering** : Starting point for heading numbering (default: 1).
 
 .. note::
 

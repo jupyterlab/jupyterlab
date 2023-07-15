@@ -6,7 +6,8 @@
 Get Started
 ===========
 
-JupyterLab is a next-generation web-based user interface for Project Jupyter.
+`JupyterLab <https://jupyterlab.readthedocs.io/en/latest/>`_ is a next-generation web-based user interface for
+`Project Jupyter <https://docs.jupyter.org/en/latest/>`_.
 
 .. image:: ../images/interface-jupyterlab.png
    :align: center

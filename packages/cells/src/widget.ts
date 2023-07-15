@@ -9,7 +9,7 @@ import { EditorView } from '@codemirror/view';
 
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import { DOMUtils, ISessionContext } from '@jupyterlab/apputils';
 
 import { ActivityMonitor, IChangedArgs, URLExt } from '@jupyterlab/coreutils';
 
@@ -43,7 +43,7 @@ import { TableOfContentsUtils } from '@jupyterlab/toc';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { addIcon } from '@jupyterlab/ui-components';
+import { addIcon, collapseIcon, expandIcon } from '@jupyterlab/ui-components';
 
 import { JSONObject, PromiseDelegate, UUID } from '@lumino/coreutils';
 
@@ -1023,7 +1023,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
     output.toggleScrolling.connect(() => {
       this.outputsScrolled = !this.outputsScrolled;
     });
-
+    output.initialize.connect(() => {
+      this.updatePromptOverlayIcon();
+    });
     // Defer setting placeholder as OutputArea must be instantiated before initializing the DOM
     this.placeholder = options.placeholder ?? true;
 
@@ -1295,8 +1297,41 @@ export class CodeCell extends Cell<ICodeCellModel> {
     if (this.syncScrolled) {
       this.saveScrolledState();
     }
+    this.updatePromptOverlayIcon();
   }
 
+  /**
+   * Update the Prompt Overlay Icon
+   */
+  updatePromptOverlayIcon(): void {
+    const overlay = DOMUtils.findElement(
+      this.node,
+      'jp-OutputArea-promptOverlay'
+    );
+    if (!overlay) {
+      return;
+    }
+    // If you are changing this, don't forget about svg.
+    const ICON_HEIGHT = 16 + 4 + 4; // 4px for padding
+    if (overlay.clientHeight <= ICON_HEIGHT) {
+      overlay.firstChild?.remove();
+      return;
+    }
+    let overlayTitle: string;
+    if (this._outputsScrolled) {
+      expandIcon.element({
+        container: overlay
+      });
+      overlayTitle = 'Expand Output';
+    } else {
+      collapseIcon.element({
+        container: overlay
+      });
+      overlayTitle = 'Collapse Output';
+    }
+    const trans = this.translator.load('jupyterlab');
+    overlay.title = trans.__(overlayTitle);
+  }
   /**
    * Save view collapse state to model
    */
@@ -1434,6 +1469,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
     if (this._outputPlaceholder && this.outputHidden) {
       this._outputPlaceholder.text = this.getOutputPlaceholderText() ?? '';
     }
+    // This is to hide/show icon on single line output.
+    this.updatePromptOverlayIcon();
   }
 
   /**

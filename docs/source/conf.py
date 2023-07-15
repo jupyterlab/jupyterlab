@@ -276,7 +276,11 @@ html_theme_options = {
     "navbar_start": ["navbar-logo", "version-switcher"],
     "footer_start": ["copyright.html"],
     "switcher": {
-        "json_url": "https://jupyterlab.readthedocs.io/en/latest/_static/switcher.json",
+        # Trick to get the documentation version switcher to always points to the latest version without being corrected by the integrity check;
+        # otherwise older versions won't list newer versions
+        "json_url": "/".join(
+            ("https://jupyterlab.readthedocs.io/en", "latest", "_static/switcher.json")
+        ),
         "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
     },
 }
@@ -300,7 +304,7 @@ html_sidebars = {
 html_context = {
     "github_user": "jupyterlab",  # Username
     "github_repo": "jupyterlab",  # Repo name
-    "github_version": "master",  # Version
+    "github_version": "main",  # Version
     "doc_path": "docs/source/",  # Path in the checkout to the docs root
 }
 

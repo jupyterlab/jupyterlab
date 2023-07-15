@@ -13,6 +13,8 @@ import {
   mimeTypeService,
   rendermime
 } from './utils';
+import { Drive } from '@jupyterlab/services';
+import { UUID } from '@lumino/coreutils';
 
 class TestPanel extends ConsolePanel {
   methods: string[] = [];
@@ -31,34 +33,49 @@ class TestPanel extends ConsolePanel {
 const contentFactory = createConsolePanelFactory();
 
 describe('console/panel', () => {
-  let panel: TestPanel;
-  const manager = new ServiceManagerMock();
-
-  beforeAll(async () => {
-    return await manager.ready;
-  });
-
-  beforeEach(() => {
-    panel = new TestPanel({
-      manager,
-      contentFactory,
-      rendermime,
-      mimeTypeService,
-      sessionContext: createSimpleSessionContext()
-    });
-  });
-
-  afterEach(() => {
-    panel.dispose();
-  });
-
   describe('ConsolePanel', () => {
+    let panel: TestPanel;
+    const manager = new ServiceManagerMock();
+
+    beforeAll(async () => {
+      return await manager.ready;
+    });
+
+    beforeEach(() => {
+      panel = new TestPanel({
+        manager,
+        contentFactory,
+        rendermime,
+        mimeTypeService,
+        sessionContext: createSimpleSessionContext()
+      });
+    });
+
+    afterEach(() => {
+      panel.dispose();
+    });
+
     describe('#constructor()', () => {
       it('should create a new console panel', () => {
         expect(panel).toBeInstanceOf(ConsolePanel);
         expect(Array.from(panel.node.classList)).toEqual(
           expect.arrayContaining(['jp-ConsolePanel'])
         );
+      });
+
+      it('should set the session context path to local path', () => {
+        manager.contents.addDrive(new Drive({ name: 'TestDrive' }));
+        const localPath = `${UUID.uuid4()}.txt`;
+        const panel = new TestPanel({
+          manager,
+          contentFactory,
+          rendermime,
+          mimeTypeService,
+          path: `TestDrive:${localPath}`
+        });
+
+        expect(panel.sessionContext.path).toEqual(localPath);
+        panel.dispose();
       });
     });
 

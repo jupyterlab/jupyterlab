@@ -203,6 +203,11 @@ test.describe('Notebook Search', () => {
 
     await page.click('text=Search Cell Outputs');
 
+    // If the notebook is not fully loaded yet a confirmation dialog will show up
+    if (await page.locator('.jp-Dialog').isVisible()) {
+      await page.click('.jp-Dialog .jp-mod-accept');
+    }
+
     await page.waitForSelector('text=1/29');
 
     const cell = await page.notebook.getCell(5);
@@ -453,6 +458,11 @@ test.describe('Notebook Search', () => {
     await page.keyboard.press('Control+f');
 
     await page.fill('[placeholder="Find"]', 'with');
+
+    // Wait until search has settled before entering a cell for edition
+    // as this can lead to selection of active result near that cell
+    // (rather than at the beginning of the notebook)
+    await page.waitForSelector('text=1/21');
 
     await page.notebook.setCell(5, 'code', 'with');
 

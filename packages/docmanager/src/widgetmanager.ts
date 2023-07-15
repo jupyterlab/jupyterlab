@@ -394,14 +394,20 @@ export class DocumentWidgetManager implements IDisposable {
       const buttons = [
         Dialog.cancelButton(),
         Dialog.okButton({
-          label: isDirty ? trans.__('Close and save') : trans.__('Close')
+          label: isDirty ? trans.__('Close and save') : trans.__('Close'),
+          ariaLabel: isDirty
+            ? trans.__('Close and save Document')
+            : trans.__('Close Document')
         })
       ];
       if (isDirty) {
         buttons.splice(
           1,
           0,
-          Dialog.warnButton({ label: trans.__('Close without saving') })
+          Dialog.warnButton({
+            label: trans.__('Close without saving'),
+            ariaLabel: trans.__('Close Document without saving')
+          })
         );
       }
 
@@ -440,7 +446,10 @@ export class DocumentWidgetManager implements IDisposable {
         body: trans.__('Save changes in "%1" before closing?', fileName),
         buttons: [
           Dialog.cancelButton(),
-          Dialog.warnButton({ label: trans.__('Discard') }),
+          Dialog.warnButton({
+            label: trans.__('Discard'),
+            ariaLabel: trans.__('Discard changes to file')
+          }),
           Dialog.okButton({ label: saveLabel })
         ]
       });
