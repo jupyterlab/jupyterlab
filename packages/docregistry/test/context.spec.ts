@@ -8,7 +8,7 @@ import {
   TextModelFactory
 } from '@jupyterlab/docregistry';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
-import { Contents, ServiceManager } from '@jupyterlab/services';
+import { Contents, Drive, ServiceManager } from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
@@ -25,6 +25,7 @@ describe('docregistry/context', () => {
 
   beforeAll(() => {
     manager = new ServiceManagerMock();
+    manager.contents.addDrive(new Drive({ name: 'TestDrive' }));
     return manager.ready;
   });
 
@@ -53,6 +54,17 @@ describe('docregistry/context', () => {
         });
         expect(context).toBeInstanceOf(Context);
       });
+
+      it('should set the session path with local path', () => {
+        const localPath = `${UUID.uuid4()}.txt`;
+        context = new Context({
+          manager,
+          factory,
+          path: `TestDrive:${localPath}`
+        });
+
+        expect(context.sessionContext.path).toEqual(localPath);
+      });
     });
 
     describe('#pathChanged', () => {
@@ -77,6 +89,17 @@ describe('docregistry/context', () => {
         context.fileChanged.connect((sender, args) => {
           expect(sender).toBe(context);
           expect(args.path).toBe(path);
+          called = true;
+        });
+        await context.initialize(true);
+        expect(called).toBe(true);
+      });
+
+      it('should not contain the file content attribute', async () => {
+        let called = false;
+        context.fileChanged.connect((sender, args) => {
+          // @ts-expect-error content is omitted
+          expect(args['content']).toBeUndefined();
           called = true;
         });
         await context.initialize(true);
@@ -238,6 +261,8 @@ describe('docregistry/context', () => {
         void context.initialize(true);
         await context.ready;
         expect(context.contentsModel!.path).toBe(path);
+        // @ts-expect-error content is omitted
+        expect(context.contentsModel!['content']).toBeUndefined();
       });
     });
 
