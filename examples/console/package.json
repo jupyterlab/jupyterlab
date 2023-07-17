@@ -11,7 +11,7 @@
     "@jupyterlab/application": "^4.1.0-alpha.0",
     "@jupyterlab/codemirror": "^4.1.0-alpha.0",
     "@jupyterlab/console": "^4.1.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.0.2",
+    "@jupyterlab/coreutils": "^6.1.0-alpha.0",
     "@jupyterlab/rendermime": "^4.1.0-alpha.0",
     "@jupyterlab/services": "^7.1.0-alpha.0",
     "@jupyterlab/theme-light-extension": "^4.1.0-alpha.0",

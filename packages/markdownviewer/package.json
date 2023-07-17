@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^4.2.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.0.2",
+    "@jupyterlab/coreutils": "^6.1.0-alpha.0",
     "@jupyterlab/docregistry": "^4.1.0-alpha.0",
     "@jupyterlab/rendermime": "^4.1.0-alpha.0",
     "@jupyterlab/toc": "^6.1.0-alpha.0",

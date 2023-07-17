@@ -46,7 +46,7 @@
     "@jupyterlab/cells": "^4.1.0-alpha.0",
     "@jupyterlab/codeeditor": "^4.1.0-alpha.0",
     "@jupyterlab/codemirror": "^4.1.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.0.2",
+    "@jupyterlab/coreutils": "^6.1.0-alpha.0",
     "@jupyterlab/docregistry": "^4.1.0-alpha.0",
     "@jupyterlab/documentsearch": "^4.1.0-alpha.0",
     "@jupyterlab/lsp": "^4.1.0-alpha.0",

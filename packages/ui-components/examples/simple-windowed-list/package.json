@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.1.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.0.2",
+    "@jupyterlab/coreutils": "^6.1.0-alpha.0",
     "@jupyterlab/observables": "^5.1.0-alpha.0",
     "@jupyterlab/theme-light-extension": "^4.1.0-alpha.0",
     "@jupyterlab/ui-components": "^4.1.0-alpha.0",

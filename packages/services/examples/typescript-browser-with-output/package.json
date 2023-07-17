@@ -16,7 +16,7 @@
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.2",
+    "@jupyterlab/coreutils": "^6.1.0-alpha.0",
     "@jupyterlab/outputarea": "^4.1.0-alpha.0",
     "@jupyterlab/rendermime": "^4.1.0-alpha.0",
     "@jupyterlab/services": "^7.1.0-alpha.0"

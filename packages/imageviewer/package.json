@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^4.2.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.0.2",
+    "@jupyterlab/coreutils": "^6.1.0-alpha.0",
     "@jupyterlab/docregistry": "^4.1.0-alpha.0",
     "@lumino/coreutils": "^2.1.1",
     "@lumino/messaging": "^2.0.0",

@@ -42,7 +42,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.2",
+    "@jupyterlab/coreutils": "^6.1.0-alpha.0",
     "@jupyterlab/docregistry": "^4.1.0-alpha.0",
     "@jupyterlab/translation": "^4.1.0-alpha.0",
     "@jupyterlab/ui-components": "^4.1.0-alpha.0",

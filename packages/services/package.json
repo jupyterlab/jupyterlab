@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@jupyter/ydoc": "^1.0.2",
-    "@jupyterlab/coreutils": "^6.0.2",
+    "@jupyterlab/coreutils": "^6.1.0-alpha.0",
     "@jupyterlab/nbformat": "^4.1.0-alpha.0",
     "@jupyterlab/settingregistry": "^4.1.0-alpha.0",
     "@jupyterlab/statedb": "^4.1.0-alpha.0",

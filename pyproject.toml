@@ -220,7 +220,6 @@ ignore = "tests examples"
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
-npm-cmd = "npm publish --tag latest"
 release-message = "[ci skip] Publish {version}"
 tag-message = "[ci skip] Release {tag_name}"
 

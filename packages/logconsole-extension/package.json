@@ -36,7 +36,7 @@
   "dependencies": {
     "@jupyterlab/application": "^4.1.0-alpha.0",
     "@jupyterlab/apputils": "^4.2.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.0.2",
+    "@jupyterlab/coreutils": "^6.1.0-alpha.0",
     "@jupyterlab/logconsole": "^4.1.0-alpha.0",
     "@jupyterlab/rendermime": "^4.1.0-alpha.0",
     "@jupyterlab/settingregistry": "^4.1.0-alpha.0",
