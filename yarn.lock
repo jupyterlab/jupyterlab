@@ -4338,10 +4338,10 @@ __metadata:
     prettier: ~3.0.0
     stylelint: ^15.10.1
     stylelint-config-prettier: ^9.0.3
-    stylelint-config-recommended: ^8.0.0
-    stylelint-config-standard: ^26.0.0
+    stylelint-config-recommended: ^13.0.0
+    stylelint-config-standard: ^34.0.0
     stylelint-csstree-validator: ^3.0.0
-    stylelint-prettier: ^2.0.0
+    stylelint-prettier: ^4.0.0
     typedoc: ~0.24.7
     typedoc-plugin-mdn-links: ^3.0.3
   languageName: unknown
@@ -17771,9 +17771,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stylelint-prettier@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "stylelint-prettier@npm:2.0.0"
+"stylelint-prettier@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "stylelint-prettier@npm:4.0.0"
   dependencies:
     prettier-linter-helpers: ^1.0.0
   peerDependencies:
