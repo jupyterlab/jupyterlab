@@ -843,9 +843,9 @@ function addCommands(
     isEnabled: isWritable,
     execute: async () => {
       // Checks that shell.currentWidget is valid:
+      const widget = shell.currentWidget;
+      const context = docManager.contextForWidget(widget!);
       if (isEnabled()) {
-        const widget = shell.currentWidget;
-        const context = docManager.contextForWidget(widget!);
         if (!context) {
           return showDialog({
             title: trans.__('Cannot Save'),
