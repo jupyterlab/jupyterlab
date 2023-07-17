@@ -1,6 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { MainAreaWidget, Notification, setToolbar } from '@jupyterlab/apputils';
+import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IObservableList } from '@jupyterlab/observables';
@@ -628,9 +628,6 @@ export class DocumentWidget<
           if (!roi) {
             this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
           }
-          Notification.warning(
-            this._trans.__(`%1 is a read-only document.`, this.title.label)
-          );
         }
       }
     }

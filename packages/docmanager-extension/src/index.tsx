@@ -824,6 +824,11 @@ function addCommands(
           'In collaborative mode, the document is saved automatically after every change'
         );
       }
+      if (!isWritable()) {
+        return trans.__(
+          `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+        );
+      }
     }
 
     return trans.__('Save and create checkpoint');
@@ -927,6 +932,16 @@ function addCommands(
             if (newName !== oldName) {
               await context.rename(newName);
             }
+          }
+        }
+      } else {
+        if (context) {
+          if (context.model.readOnly) {
+            return showDialog({
+              title: trans.__('Cannot Save'),
+              body: trans.__('Document is read-only'),
+              buttons: [Dialog.okButton()]
+            });
           }
         }
       }
