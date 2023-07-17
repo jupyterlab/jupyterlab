@@ -3,29 +3,27 @@
   "version": "0.0.1",
   "private": true,
   "files": [],
-  "workspaces": {
-    "packages": [
-      "dev_mode",
-      "examples/*",
-      "examples/federated/*",
-      "packages/*",
-      "packages/services/examples/node",
-      "packages/services/examples/browser",
-      "packages/services/examples/typescript-browser-with-output",
-      "packages/ui-components/examples/*",
-      "builder",
-      "buildutils",
-      "buildutils/template",
-      "buildutils/test-template",
-      "galata",
-      "galata/extension",
-      "tests",
-      "tests/test-*",
-      "testutils",
-      "jupyterlab/tests/mock_packages/extension",
-      "jupyterlab/tests/mock_packages/interop/*"
-    ]
-  },
+  "workspaces": [
+    "dev_mode",
+    "examples/*",
+    "examples/federated/*",
+    "packages/*",
+    "packages/services/examples/node",
+    "packages/services/examples/browser",
+    "packages/services/examples/typescript-browser-with-output",
+    "packages/ui-components/examples/*",
+    "builder",
+    "buildutils",
+    "buildutils/template",
+    "buildutils/test-template",
+    "galata",
+    "galata/extension",
+    "tests",
+    "tests/test-*",
+    "testutils",
+    "jupyterlab/tests/mock_packages/extension",
+    "jupyterlab/tests/mock_packages/interop/*"
+  ],
   "scripts": {
     "after:publish:assets": "jlpm && npm run build:utils && node buildutils/lib/publish --skip-publish",
     "analyze": "npm run analyze:dev",
@@ -37,7 +35,7 @@
     "build:all": "lerna run build:all",
     "postbuild:all": "npm run build:testutils && npm run build:galata",
     "build:builder": "cd builder && npm run build",
-    "build:core": "cd jupyterlab/staging && jlpm && (jlpm dlx yarn-berry-deduplicate -s fewerHighest || jlpm) && npm run build",
+    "build:core": "cd jupyterlab/staging && jlpm && (jlpm dlx yarn-berry-deduplicate -s fewerHighest || jlpm) && jlpm && npm run build",
     "build:dev": "npm run integrity && npm run build:all && cd dev_mode && npm run build",
     "build:dev:prod": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod",
     "build:dev:prod:minimize": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod:minimize",
@@ -68,7 +66,7 @@
     "coverage": "lerna run coverage --scope \"@jupyterlab/test-*\" --stream --concurrency 1",
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",
-    "deduplicate": "jlpm dlx yarn-berry-deduplicate -s fewerHighest",
+    "deduplicate": "jlpm dlx yarn-berry-deduplicate -s fewerHighest && jlpm install",
     "docs": "typedoc --options typedoc.js",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --cache --fix .",
@@ -127,7 +125,7 @@
     "stylelint-prettier": "^2.0.0"
   },
   "devDependencies": {
-    "lerna": "^6.4.1",
+    "lerna": "^7.0.2",
     "typedoc": "~0.24.7",
     "typedoc-plugin-mdn-links": "^3.0.3"
   }
