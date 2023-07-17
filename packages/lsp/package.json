@@ -40,9 +40,6 @@
     "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
-  "resolutions": {
-    "vscode-languageserver-protocol": "^3.17.0"
-  },
   "dependencies": {
     "@jupyterlab/apputils": "^4.2.0-alpha.0",
     "@jupyterlab/codeeditor": "^4.1.0-alpha.0",
