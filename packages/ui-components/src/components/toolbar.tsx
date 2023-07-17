@@ -1,6 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Button } from '@jupyter/react-components';
+import {
+  addJupyterLabThemeChangeListener,
+  allComponents,
+  // jpToolbar,
+  provideJupyterDesignSystem
+} from '@jupyter/web-components';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { find, map, some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -10,10 +17,12 @@ import { AttachedProperty } from '@lumino/properties';
 import { Layout, PanelLayout, Widget } from '@lumino/widgets';
 import { Throttler } from '@lumino/polling';
 import * as React from 'react';
-import { Button } from './button';
 import { ellipsesIcon, LabIcon } from '../icon';
 import { classes } from '../utils';
 import { ReactWidget, UseSignal } from './vdom';
+
+provideJupyterDesignSystem().register([allComponents]);
+addJupyterLabThemeChangeListener();
 
 /**
  * The class name added to toolbars.
@@ -165,7 +174,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * Construct a new toolbar widget.
    */
   constructor(options: Toolbar.IOptions = {}) {
-    super();
+    super({ node: document.createElement('jp-toolbar') });
     this.addClass(TOOLBAR_CLASS);
     this.layout = options.layout ?? new ToolbarLayout();
   }
