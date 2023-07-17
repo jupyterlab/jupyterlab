@@ -126,7 +126,7 @@
     "stylelint-prettier": "^4.0.0"
   },
   "devDependencies": {
-    "lerna": "^7.0.2",
+    "lerna": "^7.1.4",
     "typedoc": "~0.24.7",
     "typedoc-plugin-mdn-links": "^3.0.3"
   }
