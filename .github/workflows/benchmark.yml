@@ -25,8 +25,8 @@ jobs:
       - name: Get hashes for schedule event
         if: ${{ github.event_name == 'schedule' }}
         run: |
-          echo "OLD_REF_SHA=$(git rev-parse 'master@{7 days ago}')" >> $GITHUB_ENV
-          echo "NEW_REF_SHA=$(git rev-parse 'master')" >> $GITHUB_ENV
+          echo "OLD_REF_SHA=$(git rev-parse 'main@{7 days ago}')" >> $GITHUB_ENV
+          echo "NEW_REF_SHA=$(git rev-parse 'main')" >> $GITHUB_ENV
 
       - name: Get hashes for PR review event
         if: ${{ github.event_name == 'pull_request_review' }}

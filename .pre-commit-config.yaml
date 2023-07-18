@@ -27,7 +27,7 @@ repos:
         exclude: (.bumpversion.cfg|yarn.js)
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.22.0
+    rev: 0.23.2
     hooks:
       - id: check-github-workflows
 
@@ -36,8 +36,9 @@ repos:
     hooks:
       - id: black
 
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.260
+  # Check ruff version is aligned with the one in pyproject.toml
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.0.276
     hooks:
       - id: ruff
         args: ["--fix"]

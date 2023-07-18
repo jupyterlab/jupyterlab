@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
+import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import * as path from 'path';
 
@@ -14,21 +14,21 @@ function getSelectionRange(textarea: HTMLTextAreaElement) {
   };
 }
 
+test.beforeEach(async ({ page, tmpPath }) => {
+  await page.contents.uploadFile(
+    path.resolve(__dirname, `./notebooks/${fileName}`),
+    `${tmpPath}/${fileName}`
+  );
+
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  await page.notebook.activate(fileName);
+});
+
+test.afterEach(async ({ page, tmpPath }) => {
+  await page.contents.deleteDirectory(tmpPath);
+});
+
 test.describe('Notebook Search', () => {
-  test.beforeEach(async ({ page, tmpPath }) => {
-    await page.contents.uploadFile(
-      path.resolve(__dirname, `./notebooks/${fileName}`),
-      `${tmpPath}/${fileName}`
-    );
-
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-  });
-
-  test.afterEach(async ({ page, tmpPath }) => {
-    await page.contents.deleteDirectory(tmpPath);
-  });
-
   test('Search', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
@@ -111,8 +111,8 @@ test.describe('Notebook Search', () => {
       end: 28
     });
 
-    // Expect both matches to be found (xfail)
-    // await page.waitForSelector('text=1/2');
+    // Expect the first match to be highlighted
+    await page.waitForSelector('text=1/2');
 
     // Enter first cell again
     await page.notebook.enterCellEditingMode(0);
@@ -203,6 +203,11 @@ test.describe('Notebook Search', () => {
 
     await page.click('text=Search Cell Outputs');
 
+    // If the notebook is not fully loaded yet a confirmation dialog will show up
+    if (await page.locator('.jp-Dialog').isVisible()) {
+      await page.click('.jp-Dialog .jp-mod-accept');
+    }
+
     await page.waitForSelector('text=1/29');
 
     const cell = await page.notebook.getCell(5);
@@ -235,11 +240,8 @@ test.describe('Notebook Search', () => {
 
   test('Search in multiple selected cells', async ({ page }) => {
     await page.keyboard.press('Control+f');
-
     await page.fill('[placeholder="Find"]', 'with');
-
     await page.click('button[title="Show Search Filters"]');
-
     await page.click('text=Search in 1 Selected Cell');
 
     // Bring focus to first cell without switching away from command mode
@@ -264,13 +266,45 @@ test.describe('Notebook Search', () => {
 
     // Expect updated text
     await page.waitForSelector('text=Search in 2 Selected Cells');
-    // Expect 15 matches (note: should be 1/15, but this is xfail for now)
-    await page.waitForSelector('text=-/15');
+
+    // Expect 15 matches; this is 6/15, not 1/15 because current match is set
+    // in second cell and when selection is extended, it does not move; keeping
+    // the current match when extending the selection is desired as user may use
+    // it as a reference, especially when it was set as closest to the cursor.
+    await page.waitForSelector('text=6/15');
 
     const nbPanel = await page.notebook.getNotebookInPanel();
     expect(await nbPanel.screenshot()).toMatchSnapshot(
       'search-in-two-selected-cells.png'
     );
+  });
+
+  test('Search in multiple selected cells from edit mode', async ({ page }) => {
+    // This is testing focus handling when extending the selection after
+    // switching focus away from cell editor, which needs to protect against
+    // race conditions and CodeMirror6 focus issues when highlights get added.
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'with');
+    await page.click('button[title="Show Search Filters"]');
+    await page.click('text=Search in 1 Selected Cell');
+    await page.waitForSelector('text=1/4');
+
+    // Bring focus to first cell without switching to edit mode
+    let cell = await page.notebook.getCell(0);
+    await (await cell.$('.jp-Editor')).click();
+
+    // Switch back to command mode
+    await page.keyboard.press('Escape');
+
+    // Select two cells below
+    await page.keyboard.press('Shift+ArrowDown');
+    await page.keyboard.press('Shift+ArrowDown');
+
+    // Expect the filter text to be updated
+    await page.waitForSelector('text=Search in 3 Selected Cells');
+
+    // Expect 19 matches
+    await page.waitForSelector('text=1/19');
   });
 
   test('Search in selected text', async ({ page }) => {
@@ -364,19 +398,37 @@ test.describe('Notebook Search', () => {
 
     await page.waitForSelector('text=1/21');
 
-    const cell = await page.notebook.getCell(5);
-    await cell.click();
-    await page.keyboard.press('Escape');
-    await cell.scrollIntoViewIfNeeded();
-
     // Click previous button
     await page.click('button[title="Previous Match"]');
+    // Should cycle back
+    await page.waitForSelector('text=21/21');
+
+    // Click previous button twice
+    await page.click('button[title="Previous Match"]');
+    await page.click('button[title="Previous Match"]');
+    // Should move up by two
     await page.waitForSelector('text=19/21');
 
     const hit = await page.notebook.getCell(2);
     expect(await hit.screenshot()).toMatchSnapshot(
       'highlight-previous-element.png'
     );
+  });
+
+  test('Search from cursor', async ({ page }) => {
+    const cell = await page.notebook.getCell(5);
+    await cell.click();
+    await page.keyboard.press('Escape');
+    await cell.scrollIntoViewIfNeeded();
+
+    // Open search box
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'with');
+    await page.waitForSelector('text=20/21');
+
+    // Click previous button
+    await page.click('button[title="Previous Match"]');
+    await page.waitForSelector('text=19/21');
   });
 
   test('Highlight on markdown rendered state change', async ({ page }) => {
@@ -406,6 +458,11 @@ test.describe('Notebook Search', () => {
     await page.keyboard.press('Control+f');
 
     await page.fill('[placeholder="Find"]', 'with');
+
+    // Wait until search has settled before entering a cell for edition
+    // as this can lead to selection of active result near that cell
+    // (rather than at the beginning of the notebook)
+    await page.waitForSelector('text=1/21');
 
     await page.notebook.setCell(5, 'code', 'with');
 
@@ -469,12 +526,140 @@ test.describe('Notebook Search', () => {
     await page.keyboard.press('d');
     await page.keyboard.press('d');
 
-    await page.waitForSelector('text=-/19');
+    await page.waitForSelector('text=1/19');
 
     const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot(
       'search-on-deleted-cell.png'
     );
+  });
+
+  test('Toggle search in selection with shortcut', async ({ page }) => {
+    const filterCheckbox = page.getByLabel('Search in 1 Selected Cell');
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    await expect(filterCheckbox).not.toBeChecked();
+    // Toggle search in selection on
+    await page.keyboard.press('Alt+l');
+    await expect(filterCheckbox).toBeChecked();
+    // Toggle search in selection off
+    await page.keyboard.press('Alt+l');
+    await expect(filterCheckbox).not.toBeChecked();
+  });
+});
+
+test.describe('Auto search in multiple selection', async () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/documentsearch-extension:plugin': {
+        autoSearchInSelection: 'multiple-selected'
+      }
+    }
+  });
+
+  test('Toggles search in cell selection', async ({ page }) => {
+    // Bring focus to first cell without switching away from command mode
+    let cell = await page.notebook.getCell(0);
+    await (await cell.$('.jp-InputPrompt')).click();
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled when only 1 cell is selected
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+    // Close search box
+    await page.keyboard.press('Escape');
+
+    // Select a cell below
+    await page.keyboard.press('Shift+ArrowDown');
+    // Open search box (filters should already be shown)
+    await page.keyboard.press('Control+f');
+    // Expect search in selection to be enabled since 2 cells are selected
+    await expect(page.getByLabel('Search in 2 Selected Cells')).toBeChecked();
+  });
+
+  test('Toggles search in line selection', async ({ page }) => {
+    // Activate third cell
+    const cell = await page.notebook.getCell(2);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Select 1st line
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.press('Shift+End');
+
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled when only 1 cell is selected
+    // As only one line is selected, the filter proposes to search in the cell.
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+
+    // Select 1st and 2nd line
+    await editor.click();
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.press('Shift+End');
+    await page.keyboard.press('Shift+ArrowDown');
+    // Open search box (filters should already be shown)
+    await page.keyboard.press('Control+f');
+    // Expect search in selection to be enabled since 2 lines are selected
+    await expect(page.getByLabel('Search in 2 Selected Lines')).toBeChecked();
+  });
+});
+
+test.describe('Auto search in any selection', async () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/documentsearch-extension:plugin': {
+        autoSearchInSelection: 'any-selected'
+      }
+    }
+  });
+
+  test('Toggles search in cell selection', async ({ page }) => {
+    // Bring focus to first cell without switching away from command mode
+    let cell = await page.notebook.getCell(0);
+    await (await cell.$('.jp-InputPrompt')).click();
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled as while there is an >active<
+    // cell, no cells are >selected<; the label is not ideal but it may be
+    // preferred as-is for consistency.
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+  });
+
+  test('Toggles search in line selection', async ({ page }) => {
+    // Activate third cell
+    const cell = await page.notebook.getCell(2);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled as no character is selected.
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+
+    // Select 1st line
+    await editor.click();
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.press('Shift+End');
+
+    // Open search box (filters should already be shown)
+    await page.keyboard.press('Control+f');
+    // Expect search in selection to be enabled as 1 line is selected.
+    await expect(page.getByLabel('Search in 1 Selected Line')).toBeChecked();
   });
 });

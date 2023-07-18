@@ -694,6 +694,19 @@ export class WindowedList<
   }
 
   /**
+   * Whether the parent is hidden or not.
+   *
+   * This should be set externally if a container is hidden to
+   * stop updating the widget size when hidden.
+   */
+  get isParentHidden(): boolean {
+    return this._isParentHidden;
+  }
+  set isParentHidden(v: boolean) {
+    this._isParentHidden = v;
+  }
+
+  /**
    * Widget layout
    */
   get layout(): WindowedLayout {
@@ -815,6 +828,8 @@ export class WindowedList<
     super.onAfterAttach(msg);
     if (this._viewModel.windowingActive) {
       this._addListeners();
+    } else {
+      this._applyNoWindowingStyles();
     }
     this.viewModel.height = this.node.getBoundingClientRect().height;
   }
@@ -905,10 +920,17 @@ export class WindowedList<
     if (this.viewModel.windowingActive) {
       // Throttle update request
       if (this._scrollRepaint === null) {
+        this._needsUpdate = false;
         this._scrollRepaint = window.requestAnimationFrame(() => {
           this._scrollRepaint = null;
           this._update();
+          if (this._needsUpdate) {
+            this.update();
+          }
         });
+      } else {
+        // Force re rendering if some changes happen during rendering.
+        this._needsUpdate = true;
       }
     } else {
       this._update();
@@ -931,13 +953,16 @@ export class WindowedList<
     this._windowElement.style.position = 'absolute';
   }
 
+  private _applyNoWindowingStyles() {
+    this._windowElement.style.position = 'relative';
+    this._windowElement.style.top = '0px';
+  }
+
   private _removeListeners() {
     this.node.removeEventListener('scroll', this);
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
-    this._innerElement.style.height = '100%';
-    this._windowElement.style.position = 'relative';
-    this._windowElement.style.top = '0px';
+    this._applyNoWindowingStyles();
   }
 
   private _update(): void {
@@ -1029,6 +1054,10 @@ export class WindowedList<
   private _onWidgetResize(entries: ResizeObserverEntry[]): void {
     this._resetScrollToItem();
 
+    if (this.isHidden || this.isParentHidden) {
+      return;
+    }
+
     const newSizes: { index: number; size: number }[] = [];
     for (let entry of entries) {
       // Update size only if item is attached to the DOM
@@ -1052,9 +1081,9 @@ export class WindowedList<
         this.scrollToItem(...this._scrollToItem).catch(reason => {
           console.log(reason);
         });
-      } else {
-        this.update();
       }
+
+      this.update();
     }
   }
 
@@ -1076,7 +1105,9 @@ export class WindowedList<
 
   protected _viewModel: T;
   private _innerElement: HTMLDivElement;
+  private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
+  private _needsUpdate = false;
   private _windowElement: HTMLDivElement;
   private _resetScrollToItemTimeout: number | null;
   private _resizeObserver: ResizeObserver | null;

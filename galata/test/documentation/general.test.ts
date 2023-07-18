@@ -132,6 +132,9 @@ test.describe('General', () => {
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toBeEmpty();
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
+    ).not.toHaveClass(/lm-mod-hidden/);
 
     expect(
       await page.screenshot({
@@ -437,7 +440,7 @@ test.describe('General', () => {
       '[aria-label="File Browser Section"] >> text=notebooks'
     );
     await page.dblclick('text=Data.ipynb');
-
+    await page.menu.clickMenuItem('Edit>Clear Outputs of All Cells');
     await page.notebook.setCell(
       1,
       'code',

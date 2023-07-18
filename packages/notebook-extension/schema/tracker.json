@@ -798,9 +798,9 @@
     },
     "windowingMode": {
       "title": "Windowing mode",
-      "description": "'defer': Wait for idle CPU cycles to attach out of viewport cells - 'full': Attach to the DOM only cells in viewport - 'none': Attach all cells to the viewport",
+      "description": "'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells - 'full': Best performance with side effects - Attach to the DOM only cells in viewport - 'none': Worst performance without side effects - Attach all cells to the viewport",
       "enum": ["defer", "full", "none"],
-      "default": "full"
+      "default": "defer"
     }
   },
   "additionalProperties": false,

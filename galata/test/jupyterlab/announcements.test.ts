@@ -65,6 +65,7 @@ test.describe('Update available', () => {
     await galata.Mock.mockSettings(page, settings, {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/apputils-extension:notification': {
+        checkForUpdates: true,
         fetchNews: 'true'
       }
     });
@@ -115,6 +116,7 @@ test.describe('Update available', () => {
     await galata.Mock.mockSettings(page, settings, {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/apputils-extension:notification': {
+        checkForUpdates: true,
         fetchNews: 'true'
       }
     });

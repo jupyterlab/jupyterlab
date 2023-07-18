@@ -161,7 +161,9 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         if ((settings?.get('fetchNews').composite ?? 'false') === 'true') {
           try {
             const response = await requestAPI<{
-              news: (Notification.INotification & { link: [string, string] })[];
+              news: (Notification.INotification & {
+                link?: [string, string];
+              })[];
             }>(NEWS_API_URL);
 
             for (const { link, message, type, options } of response.news) {
@@ -220,7 +222,9 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         if ((settings?.get('checkForUpdates').composite as boolean) ?? true) {
           const response = await requestAPI<{
             notification:
-              | (Notification.INotification & { link: [string, string] })
+              | (Notification.INotification & {
+                  link?: [string, string];
+                })
               | null;
           }>(UPDATE_API_URL);
 
