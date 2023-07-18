@@ -30,7 +30,7 @@ as well as the `JupyterLab API <https://jupyterlab.readthedocs.io/en/latest/api/
 written in Typescript).
 
 This is how basic compatibility features work: both apps use the same building
-blocks and methods. For instance, both Lab and Notebook 7 accept Lumino widgets
+blocks and methods. For instance, both JupyterLab and Notebook 7 accept Lumino widgets
 as interface components, both apps allow you to add them to the interface by
 specifying an "area" to place them into, and extensions for both use the same
 basic JupyterFrontendPlugin class.
