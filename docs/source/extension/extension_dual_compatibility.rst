@@ -1,6 +1,8 @@
 .. Copyright (c) Jupyter Development Team.
 .. Distributed under the terms of the Modified BSD License.
 
+.. _dual_compatible_extensions:
+
 Building Lab 4 / Notebook 7 Compatible Jupyter Extensions
 
 Jupyter Notebook 7 is built with components from JupyterLab, and since
