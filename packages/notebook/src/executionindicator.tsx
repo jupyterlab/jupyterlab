@@ -606,8 +606,8 @@ export namespace ExecutionIndicator {
 
   export function createExecutionIndicatorItem(
     panel: NotebookPanel,
-    translator: ITranslator,
-    loadSettings: Promise<ISettingRegistry.ISettings> | undefined
+    translator?: ITranslator,
+    loadSettings?: Promise<ISettingRegistry.ISettings>
   ): Widget {
     const toolbarItem = new ExecutionIndicator(translator);
     toolbarItem.model.displayOption = {
