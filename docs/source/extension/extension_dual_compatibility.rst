@@ -7,7 +7,8 @@ Building JupyterLab 4 / Notebook 7 (And More!) Compatible Jupyter Extensions
 
 Jupyter Notebook 7 is built with components from JupyterLab, and since
 both use the same building blocks, that means your extension can work
-on both with little or no modification depending on its design.
+on both (or any other frontend built with JupyterLab components) with
+little or no modification depending on its design.
 
 This guide will give you an overview of compatibility features, then a
 tutorial and reference code covering some of the topics mentioned here.
