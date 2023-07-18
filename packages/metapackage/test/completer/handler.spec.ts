@@ -16,7 +16,6 @@ import {
 import { Widget } from '@lumino/widgets';
 import { ISharedText, SourceChange, YFile } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-//import { simulate } from 'simulate-event';
 
 function createEditorWidget(): CodeEditorWrapper {
   const model = new CodeEditor.Model({ sharedModel: new YFile() });
