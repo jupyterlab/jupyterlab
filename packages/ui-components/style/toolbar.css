@@ -5,67 +5,40 @@
 
 :root {
   --jp-private-toolbar-height: calc(
-    28px + var(--jp-border-width)
+    31px + var(--jp-border-width)
   ); /* leave 28px for content */
 }
 
+.jp-MainAreaWidget > .jp-Toolbar {
+  border-radius: 0;
+}
+
 .jp-Toolbar {
+  --design-unit: 3.5;
+
   color: var(--jp-ui-font-color1);
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: row;
   border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   box-shadow: var(--jp-toolbar-box-shadow);
   background: var(--jp-toolbar-background);
   min-height: var(--jp-toolbar-micro-height);
   padding: 2px;
   z-index: 8;
-  overflow-x: hidden;
 }
 
 /* Toolbar items */
 
-.jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
-  flex-grow: 1;
-  flex-shrink: 1;
-}
-
-.jp-Toolbar-item.jp-Toolbar-kernelStatus {
-  display: inline-block;
-  width: 32px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 16px;
-}
-
 .jp-Toolbar > .jp-Toolbar-item {
-  flex: 0 0 auto;
-  display: flex;
-  padding-left: 1px;
-  padding-right: 1px;
-  font-size: var(--jp-ui-font-size1);
-  line-height: var(--jp-private-toolbar-height);
-  height: 100%;
+  /* Increase density for toolbar items */
+  --density: -4;
+  --toolbar-item-gap: calc(
+    (var(--design-unit) + calc(var(--density) + 2)) * 1px
+  );
 }
 
-/* Toolbar buttons */
-
-/* This is the div we use to wrap the react component into a Widget */
-div.jp-ToolbarButton {
-  color: transparent;
-  border: none;
-  box-sizing: border-box;
-  outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding: 0;
-  margin: 0;
-}
-
-button.jp-ToolbarButtonComponent,
 .jp-ToolbarLabelComponent {
   background: var(--jp-layout-color1);
+  background-color: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
   border: none;
   box-sizing: border-box;
   outline: none;
@@ -79,33 +52,15 @@ button.jp-ToolbarButtonComponent,
   display: flex;
   align-items: center;
   text-align: center;
-  font-size: 14px;
+  font-size: var(--jp-ui-font-size0);
   min-width: unset;
   min-height: unset;
-}
-
-button.jp-ToolbarButtonComponent:disabled {
-  opacity: 0.4;
-}
-
-button.jp-ToolbarButtonComponent > span {
-  padding: 0;
-  flex: 0 0 auto;
-}
-
-button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
-  font-size: var(--jp-ui-font-size1);
-  line-height: 100%;
-  padding-left: 2px;
-  color: var(--jp-ui-font-color1);
-  font-family: var(--jp-ui-font-family);
-}
-
-.jp-ToolbarLabelComponent {
-  background-color: var(--jp-brand-color1);
-  color: var(--jp-ui-inverse-font-color1);
-  font-size: var(--jp-ui-font-size0);
   user-select: none;
+}
+
+jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
+  flex-grow: 1;
+  flex-shrink: 1;
 }
 
 #jp-main-dock-panel[data-mode='single-document']

@@ -4,8 +4,8 @@
 import { Button } from '@jupyter/react-components';
 import {
   addJupyterLabThemeChangeListener,
-  allComponents,
-  // jpToolbar,
+  jpButton,
+  jpToolbar,
   provideJupyterDesignSystem
 } from '@jupyter/web-components';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -21,7 +21,7 @@ import { ellipsesIcon, LabIcon } from '../icon';
 import { classes } from '../utils';
 import { ReactWidget, UseSignal } from './vdom';
 
-provideJupyterDesignSystem().register([allComponents]);
+provideJupyterDesignSystem().register([jpButton(), jpToolbar()]);
 addJupyterLabThemeChangeListener();
 
 /**
@@ -672,6 +672,7 @@ export function ToolbarButtonComponent(
 
   return (
     <Button
+      appearance="stealth"
       className={
         props.className
           ? props.className + ' jp-ToolbarButtonComponent'
@@ -696,14 +697,10 @@ export function ToolbarButtonComponent(
             // add some extra classes for proper support of icons-as-css-background
             classes(props.iconClass, 'jp-Icon')
           }
-          className="jp-ToolbarButtonComponent-icon"
-          tag="span"
-          stylesheet="toolbarButton"
+          tag={null}
         />
       )}
-      {props.label && (
-        <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
-      )}
+      {props.label ?? ''}
     </Button>
   );
 }
