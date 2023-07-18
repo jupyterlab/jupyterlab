@@ -3,7 +3,7 @@
 
 .. _dual_compatible_extensions:
 
-Building JupyterLab 4 / Notebook 7 Compatible Jupyter Extensions
+Building JupyterLab 4 / Notebook 7 (And More!) Compatible Jupyter Extensions
 
 Jupyter Notebook 7 is built with components from JupyterLab, and since
 both use the same building blocks, that means your extension can work
@@ -86,7 +86,7 @@ will be able to seamlessly run it in either JupyterLab or Notebook 7.
 
 Keep in mind that some features for JupyterLab are not available in Notebook 7:
 
-- The "main" area in JupyterLab does not exist in Notebook 7
+- The "main" area in Notebook 7 cannot be used the same way as in JupyterLab
 - Notebook 7 does not have a status bar
 
 See `this example <https://www.youtube.com/watch?v=mqotG1MkHa4>`_ of a
