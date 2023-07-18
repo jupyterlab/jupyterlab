@@ -76,6 +76,7 @@
 }
 
 .lm-CommandPalette-wrapper {
+  /* stylelint-disable-next-line csstree/validator */
   overflow: overlay;
   padding: 0 9px;
   background-color: var(--jp-input-active-background);
