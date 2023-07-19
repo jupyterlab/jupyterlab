@@ -43,6 +43,21 @@
   padding: 0 6px;
 }
 
+@media screen and (max-width: 360px) {
+  .jp-StatusBar-TextItem {
+    display: none;
+  }
+
+  .jp-StatusBar-TextItem.priority-zoom {
+    display: block;
+  }
+
+  .jp-StatusBar-Item .jp-StatusBar-GroupItem {
+    display: none;
+    margin: 0;
+  }
+}
+
 .jp-mod-highlighted:hover {
   background-color: var(--jp-layout-color3);
 }
