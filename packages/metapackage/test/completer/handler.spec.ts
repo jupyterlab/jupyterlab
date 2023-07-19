@@ -8,8 +8,12 @@ import {
   Completer,
   CompleterModel,
   CompletionHandler,
+  CompletionTriggerKind,
+  ICompletionContext,
+  ICompletionProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
+import { Widget } from '@lumino/widgets';
 import { ISharedText, SourceChange, YFile } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
@@ -51,6 +55,32 @@ class TestCompletionHandler extends CompletionHandler {
   onCompletionSelected(widget: Completer, value: string): void {
     super.onCompletionSelected(widget, value);
     this.methods.push('onCompletionSelected');
+  }
+}
+
+class FooCompletionProvider implements ICompletionProvider {
+  methods: CompletionTriggerKind[] = [];
+
+  constructor(private _continuousHint: boolean) {}
+
+  identifier: string = 'FooCompletionProvider';
+  renderer = null;
+
+  async isApplicable(context: ICompletionContext): Promise<boolean> {
+    return true;
+  }
+
+  async fetch(
+    request: CompletionHandler.IRequest,
+    context: ICompletionContext,
+    trigger: CompletionTriggerKind
+  ): Promise<CompletionHandler.ICompletionItemsReply> {
+    this.methods.push(trigger);
+    return Promise.resolve({ start: 0, end: 0, items: [] });
+  }
+
+  shouldShowContinuousHint(completerIsVisible: boolean, changed: any) {
+    return this._continuousHint;
   }
 }
 
@@ -314,6 +344,64 @@ describe('@jupyterlab/completer', () => {
           line,
           column: column + 6
         });
+      });
+    });
+
+    describe('#CompletionTriggerKind', () => {
+      let anchor: CodeEditorWrapper;
+      let provider: FooCompletionProvider;
+      let handler: CompletionHandler;
+
+      beforeAll(async () => {
+        anchor = createEditorWidget();
+        Widget.attach(anchor, document.body);
+
+        provider = new FooCompletionProvider(true);
+        handler = new CompletionHandler({
+          reconciliator: new ProviderReconciliator({
+            context: null as any,
+            providers: [provider],
+            timeout: 0
+          }),
+          completer: new Completer({
+            editor: null,
+            model: new CompleterModel()
+          })
+        });
+
+        handler.editor = anchor.editor;
+        handler.autoCompletion = true;
+      });
+
+      afterAll(() => {
+        anchor.dispose();
+        handler.completer.dispose();
+        handler.dispose();
+      });
+
+      it('should use CompletionTriggerKind.Invoked', () => {
+        expect(provider.methods.length).toEqual(0);
+
+        handler.editor!.model.sharedModel.setSource('foo.');
+        anchor.node.focus();
+        anchor.editor.setCursorPosition({ line: 0, column: 4 });
+        handler.invoke();
+
+        expect(provider.methods).toEqual(
+          expect.arrayContaining([CompletionTriggerKind.Invoked])
+        );
+      });
+
+      it('should use CompletionTriggerKind.TriggerCharacter', () => {
+        // this test depends on the previous one ('should use CompletionTriggerKind.Invoked').
+        expect(provider.methods.length).toEqual(1);
+
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+
+        expect(provider.methods.length).toEqual(2);
+        expect(provider.methods).toEqual(
+          expect.arrayContaining([CompletionTriggerKind.TriggerCharacter])
+        );
       });
     });
 
