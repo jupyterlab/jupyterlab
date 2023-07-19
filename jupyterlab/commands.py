@@ -2332,11 +2332,10 @@ def _log_multiple_compat_errors(logger, errors_map):
     if outdated:
         logger.warn(
             "\n        ".join(
-                ["\n   The following extension are outdated:"]
-                + outdated
-                + [
-                    '\n   Consider running "jupyter labextension update --all" '
-                    "to check for updates.\n"
+                [
+                    "\n   The following extensions are outdated:",
+                    *outdated,
+                    '\n   Consider checking if an update is available for these packages.\n',
                 ]
             )
         )
