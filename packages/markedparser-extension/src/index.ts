@@ -24,7 +24,7 @@ import type { marked, Renderer } from 'marked';
 const FENCE = '```~~~';
 
 /**
- * An internal interface for fenced code block renderers.
+ * An interface for fenced code block renderers.
  */
 export interface IFencedBlockRenderer {
   languages: string[];
@@ -37,8 +37,8 @@ export interface IFencedBlockRenderer {
  * Options
  */
 export interface IRenderOptions {
-  languages: IEditorLanguageRegistry;
-  blocks: IFencedBlockRenderer[];
+  /** handlers for fenced code blocks */
+  blocks?: IFencedBlockRenderer[];
 }
 
 /**
@@ -47,11 +47,14 @@ export interface IRenderOptions {
  * @param languages Editor languages
  * @returns Markdown parser
  */
-export function createMarkdownParser(options: IRenderOptions) {
+export function createMarkdownParser(
+  languages: IEditorLanguageRegistry,
+  options?: IRenderOptions
+) {
   Private.initializeMarked(options);
   return {
     render: (content: string): Promise<string> => {
-      return Private.render(content, options);
+      return Private.render(content, languages, options);
     }
   };
 }
@@ -71,8 +74,7 @@ const plugin: JupyterFrontEndPlugin<IMarkdownParser> = {
     languages: IEditorLanguageRegistry,
     mermaidMarkdown: IMermaidMarkdown | null
   ) => {
-    return createMarkdownParser({
-      languages,
+    return createMarkdownParser(languages, {
       blocks: mermaidMarkdown ? [mermaidMarkdown] : []
     });
   }
@@ -96,7 +98,8 @@ namespace Private {
 
   export async function render(
     content: string,
-    options: IRenderOptions
+    languages: IEditorLanguageRegistry,
+    options?: IRenderOptions
   ): Promise<string> {
     if (!_marked) {
       _marked = await initializeMarked(options);
@@ -108,7 +111,7 @@ namespace Private {
    * Load marked lazily and exactly once.
    */
   export async function initializeMarked(
-    options: IRenderOptions
+    options?: IRenderOptions
   ): Promise<typeof marked> {
     if (_marked) {
       return _marked;
@@ -118,10 +121,9 @@ namespace Private {
       return await _initializing.promise;
     }
 
-    _languages = options.languages;
-
     // order blocks by `rank`
-    _blocks = options.blocks.sort(
+    _blocks = options?.blocks || [];
+    _blocks = _blocks.sort(
       (a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity)
     );
 
