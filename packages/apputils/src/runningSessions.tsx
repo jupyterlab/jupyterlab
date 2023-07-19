@@ -37,8 +37,26 @@ const HALF_SPACING = 4;
 function RunningSessionsComponent(
   props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> {
+  const keydownHandler = (event: React.KeyboardEvent<HTMLImageElement>) => {
+    if (
+      event.key === 'Enter' ||
+      event.key === 'Spacebar' ||
+      event.key === ' '
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      props.handleClick();
+    } else {
+      return;
+    }
+  };
   return (
-    <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
+    <GroupItem
+      tabIndex={0}
+      spacing={HALF_SPACING}
+      onClick={props.handleClick}
+      onKeyDown={keydownHandler}
+    >
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
         <terminalIcon.react left={'1px'} top={'3px'} stylesheet={'statusBar'} />
