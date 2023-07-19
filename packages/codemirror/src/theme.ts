@@ -72,6 +72,10 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor:
       'var(--jp-search-selected-match-background-color) !important',
     color: 'var(--jp-search-selected-match-color) !important'
+  },
+
+  '.cm-tooltip': {
+    backgroundColor: 'var(--jp-layout-color1)'
   }
 });
 
