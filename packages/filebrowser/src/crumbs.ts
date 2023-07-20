@@ -196,7 +196,7 @@ export class BreadCrumbs extends Widget {
           index < 0 &&
           !node.classList.contains(BREADCRUMB_ROOT_CLASS)
         ) {
-          destination = destination = node.title;
+          destination = node.title;
         }
         this._model
           .cd(destination)
