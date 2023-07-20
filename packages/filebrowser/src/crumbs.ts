@@ -341,7 +341,7 @@ export namespace BreadCrumbs {
     translator?: ITranslator;
 
     /**
-     * Show the full fill path
+     * Show the full file browser path in breadcrumbs
      */
     fullPath?: boolean;
   }
@@ -458,7 +458,7 @@ namespace Private {
   export function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
     const items: HTMLElement[] = [];
     // The maximum number of directories that will be shown in the crumbs
-    let MAX_DIRECTORIES = 2;
+    const MAX_DIRECTORIES = 2;
 
     // Make separators for after each directory, one at the beginning, and one
     // after a possible ellipsis.
