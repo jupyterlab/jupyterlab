@@ -290,7 +290,6 @@ const resources: JupyterFrontEndPlugin<void> = {
     translator: ITranslator,
     labShell: ILabShell | null,
     palette: ICommandPalette | null,
-    restorer: ILayoutRestorer | null
   ): void => {
     const trans = translator.load('jupyterlab');
     const category = trans.__('Help');
