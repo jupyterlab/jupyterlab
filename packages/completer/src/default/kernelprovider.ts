@@ -16,7 +16,7 @@ export const KERNEL_PROVIDER_ID = 'CompletionProvider:kernel';
 export class KernelCompleterProvider implements ICompletionProvider {
   readonly identifier = KERNEL_PROVIDER_ID;
 
-  readonly rank: number = 500;
+  readonly rank: number = 550;
 
   readonly renderer = null;
 
