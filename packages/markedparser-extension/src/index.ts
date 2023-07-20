@@ -210,10 +210,9 @@ namespace Private {
    * Apply and cache syntax highlighting for code blocks.
    */
   async function highlight(token: marked.Tokens.Code): Promise<void> {
-    const languages = _languages as IEditorLanguageRegistry;
     const { lang, text } = token;
-    if (!lang) {
-      // no language, no highlight
+    if (!lang || !_languages) {
+      // no language(s), no highlight
       return;
     }
     const key = `${lang}${FENCE}${text}${FENCE}`;
@@ -223,7 +222,7 @@ namespace Private {
     }
     const el = document.createElement('div');
     try {
-      await languages.highlight(text, languages.findBest(lang), el);
+      await _languages.highlight(text, _languages.findBest(lang), el);
       const html = `<pre><code class="language-${lang}">${el.innerHTML}</code></pre>`;
       _highlights.set(key, html);
     } catch (err) {
