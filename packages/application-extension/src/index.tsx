@@ -330,7 +330,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isToggled: () => !labShell.rightCollapsed,
         isEnabled: () => !labShell.isEmpty('right')
       });
-      //WIP
+
       commands.addCommand(CommandIDs.focusFirstElementInRightSidebar, {
         label: trans.__('Focus Right Sidebar First Element'),
         execute: () => {
