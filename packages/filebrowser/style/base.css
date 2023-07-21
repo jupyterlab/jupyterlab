@@ -27,7 +27,7 @@
   row-gap: min(1.5vh, 12px);
   border-bottom: none;
   height: auto;
-  margin: min(1vh, 8px) min(1.5vh, 12px) 0;
+  margin: min(1vh, 8px) min(1.5vw, 12px) 0;
   box-shadow: none;
   padding: 0;
   justify-content: flex-start;
@@ -128,7 +128,7 @@
 }
 
 .jp-DirListing-headerItem {
-  padding: min(1vh, 4px) min(1vw, 12px) min(1vw, 2px);
+  padding: min(1vh, 4px) min(1vw, 12px) min(0.5vh, 2px);
   font-weight: 500;
 }
 
