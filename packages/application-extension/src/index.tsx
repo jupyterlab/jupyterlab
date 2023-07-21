@@ -334,9 +334,15 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.focusFirstElementInRightSidebar, {
         label: trans.__('Focus Right Sidebar First Element'),
         execute: () => {
-          let rightSidBarFirstElement = document.getElementById('tab-key-1-1');
-          if (rightSidBarFirstElement) {
-            rightSidBarFirstElement.focus();
+          let dataId = Array.from(labShell.widgets('right'))[0].id;
+          let rightSidBarFirstElement = document.querySelector(
+            "[data-id='" + dataId + "']"
+          );
+          if (rightSidBarFirstElement?.id) {
+            let focusElement = document.getElementById(
+              rightSidBarFirstElement.id
+            );
+            focusElement?.focus();
           }
         }
       });
