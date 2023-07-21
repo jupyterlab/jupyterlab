@@ -161,12 +161,6 @@ function activateCsv(
   let searchProviderInitialized = false;
 
   factory.widgetCreated.connect(async (sender, widget) => {
-    if (searchRegistry && !searchProviderInitialized) {
-      const { CSVSearchProvider } = await import('./searchprovider');
-      searchRegistry.add('csv', CSVSearchProvider);
-      searchProviderInitialized = true;
-    }
-
     // Track the widget.
     void tracker.add(widget);
     // Notify the widget tracker if restore data needs to update.
@@ -179,7 +173,16 @@ function activateCsv(
       widget.title.iconClass = ft.iconClass!;
       widget.title.iconLabel = ft.iconLabel!;
     }
-    // Set the theme for the new widget.
+
+    // Delay await to execute `widget.title` setters (above) synchronously
+    if (searchRegistry && !searchProviderInitialized) {
+      const { CSVSearchProvider } = await import('./searchprovider');
+      searchRegistry.add('csv', CSVSearchProvider);
+      searchProviderInitialized = true;
+    }
+
+    // Set the theme for the new widget; requires `.content` to be loaded.
+    await widget.content.ready;
     widget.content.style = style;
     widget.content.rendererConfig = rendererConfig;
   });
@@ -194,7 +197,8 @@ function activateCsv(
     rendererConfig = isLight
       ? Private.LIGHT_TEXT_CONFIG
       : Private.DARK_TEXT_CONFIG;
-    tracker.forEach(grid => {
+    tracker.forEach(async grid => {
+      await grid.content.ready;
       grid.content.style = style;
       grid.content.rendererConfig = rendererConfig;
     });
@@ -311,12 +315,6 @@ function activateTsv(
   let searchProviderInitialized = false;
 
   factory.widgetCreated.connect(async (sender, widget) => {
-    if (searchRegistry && !searchProviderInitialized) {
-      const { CSVSearchProvider } = await import('./searchprovider');
-      searchRegistry.add('tsv', CSVSearchProvider);
-      searchProviderInitialized = true;
-    }
-
     // Track the widget.
     void tracker.add(widget);
     // Notify the widget tracker if restore data needs to update.
@@ -329,7 +327,16 @@ function activateTsv(
       widget.title.iconClass = ft.iconClass!;
       widget.title.iconLabel = ft.iconLabel!;
     }
-    // Set the theme for the new widget.
+
+    // Delay await to execute `widget.title` setters (above) synchronously
+    if (searchRegistry && !searchProviderInitialized) {
+      const { CSVSearchProvider } = await import('./searchprovider');
+      searchRegistry.add('tsv', CSVSearchProvider);
+      searchProviderInitialized = true;
+    }
+
+    // Set the theme for the new widget; requires `.content` to be loaded.
+    await widget.content.ready;
     widget.content.style = style;
     widget.content.rendererConfig = rendererConfig;
   });
@@ -344,7 +351,8 @@ function activateTsv(
     rendererConfig = isLight
       ? Private.LIGHT_TEXT_CONFIG
       : Private.DARK_TEXT_CONFIG;
-    tracker.forEach(grid => {
+    tracker.forEach(async grid => {
+      await grid.content.ready;
       grid.content.style = style;
       grid.content.rendererConfig = rendererConfig;
     });

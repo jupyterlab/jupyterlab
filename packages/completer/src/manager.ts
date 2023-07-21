@@ -216,7 +216,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     const modelFactory = provider?.modelFactory;
     let model: Completer.IModel;
     if (modelFactory) {
-      model = await modelFactory(completerContext);
+      model = await modelFactory.call(provider, completerContext);
     } else {
       model = new CompleterModel();
     }
