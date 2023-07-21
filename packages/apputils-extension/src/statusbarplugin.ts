@@ -25,6 +25,7 @@ import { Title, Widget } from '@lumino/widgets';
  */
 export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
   id: '@jupyterlab/apputils-extension:kernel-status',
+  description: 'Provides the kernel status indicator model.',
   autoStart: true,
   requires: [IStatusBar],
   provides: IKernelStatusModel,
@@ -116,6 +117,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
  */
 export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:running-sessions-status',
+  description: 'Add the running sessions and terminals status bar item.',
   autoStart: true,
   requires: [IStatusBar, ITranslator],
   activate: (

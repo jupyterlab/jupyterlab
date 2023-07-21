@@ -1,16 +1,16 @@
 {
   "name": "@jupyterlab/example-federated-middle",
-  "version": "3.0.0-alpha.22",
+  "version": "3.0.2",
   "private": true,
   "scripts": {
     "build": "npm run clean && build-labextension --core-path ../core_package .",
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-middle"
   },
   "dependencies": {
-    "@lumino/coreutils": "^2.0.0"
+    "@lumino/coreutils": "^2.1.1"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0-alpha.22",
+    "@jupyterlab/builder": "^4.0.2",
     "rimraf": "~3.0.0"
   },
   "publishConfig": {

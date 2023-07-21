@@ -68,6 +68,7 @@ export const rendererFactory: IRenderMime.IRendererFactory = {
 
 const extension: IRenderMime.IExtension = {
   id: '@jupyterlab/javascript-extension:factory',
+  description: 'Adds renderer for JavaScript content.',
   rendererFactory,
   rank: 0,
   dataType: 'string'

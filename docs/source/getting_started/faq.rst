@@ -16,13 +16,45 @@ General
    JupyterLab? <https://jupyterlab.readthedocs.io>`__
 -  :ref:`How can you report a bug or issue? <issue>`
 
+Usage
+-----
+
+Notebook
+^^^^^^^^
+
+My notebook is displaying cell outputs in an `iframe <https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe>`__. They are reset when scrolling back and forth.
+
+    Since JupyterLab v4, notebook rendering is optimized to display only the cells needed.
+    This has side effects with iframes.
+
+    The current workaround is to set the settings *Notebook* => *Windowing mode* to ``defer`` or ``none``.
+    It will negatively impact the performance of JupyterLab when opening long notebooks and/or lots of files.
+
+My notebook injects customized CSS that results in unexpected scrolling issues (e.g. it fails to scroll to the active cell).
+
+    Since JupyterLab v4, notebook rendering is optimized to display only the cells needed.
+    It does not support changing element CSS `margin <https://developer.mozilla.org/en-US/docs/Web/CSS/margin>`__
+    (in particular for cells).
+
+    The workaround is to prefer injecting customized `padding <https://developer.mozilla.org/en-US/docs/Web/CSS/padding>`__ rather than *margin*.
+    If you can not avoid changing the margins, you can set the settings *Notebook* => *Windowing mode* to ``defer`` or ``none``.
+    It will negatively impact the performance of JupyterLab when opening long notebooks and/or lots of files.
+
+Tips and Tricks
+---------------
+
+- How do I start JupyterLab with a clean workspace every time?
+
+Add ``'c.ServerApp.default_url = '/lab?reset'`` to your ``jupyter_server_config.py``.
+See `How to create a jupyter_server_config.py <https://jupyter-server.readthedocs.io/en/latest/users/configuration.html>`__ for more information.
+
 
 Development
 -----------
 
 
 -  `How can you
-   contribute? <https://github.com/jupyterlab/jupyterlab/blob/master/CONTRIBUTING.md>`__
+   contribute? <https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md>`__
 -  :ref:`How can you extend or customize JupyterLab? <user_extensions>`
 -  In the classic Notebook, `I could use custom Javascript outputted by a cell to programmatically
    control the Notebook <https://stackoverflow.com/a/32769976/907060>`__. Can I do the same thing in JupyterLab?
@@ -34,11 +66,3 @@ Development
    API from the Javascript renderer, because this would tie the kernel and the notebook output to JupyterLab
    and make it hard for other frontends to support it.
    If you have comments or suggestions on changes here, please comment on `this issue <https://github.com/jupyterlab/jupyterlab/issues/4623>`__.
-
-
-Tips and Tricks
----------------
-
-- How do I start JupyterLab with a clean workspace every time?
-
-Add ``'c.ServerApp.default_url = '/lab?reset'`` to your ``jupyter_server_config.py``. See `How to create a jupyter_server_config.py <https://jupyter-server.readthedocs.io/en/latest/users/configuration.html>`__ for more information.

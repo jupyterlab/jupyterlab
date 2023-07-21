@@ -3,6 +3,6 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-LSPExtension-FormGroup-content > * {
-  margin-right: 25px;
+.jp-LSPExtension-FormGroup-content > select {
+  margin: 0 12px;
 }

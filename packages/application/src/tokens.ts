@@ -7,14 +7,17 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject, Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
-import { JupyterFrontEnd } from '.';
+import { JupyterFrontEnd } from './frontend';
 
 /**
  * A token for which a plugin can provide to respond to connection failures
  * to the application server.
  */
 export const IConnectionLost = new Token<IConnectionLost>(
-  '@jupyterlab/apputils:IConnectionLost'
+  '@jupyterlab/application:IConnectionLost',
+  `A service for invoking the dialog shown
+  when JupyterLab has lost its connection to the server. Use this if, for some reason,
+  you want to bring up the "connection lost" dialog under new circumstances.`
 );
 
 /**
@@ -35,7 +38,10 @@ export type IConnectionLost = (
  * The application status token.
  */
 export const ILabStatus = new Token<ILabStatus>(
-  '@jupyterlab/application:ILabStatus'
+  '@jupyterlab/application:ILabStatus',
+  `A service for interacting with the application busy/dirty
+  status. Use this if you want to set the application "busy" favicon, or to set
+  the application "dirty" status, which asks the user for confirmation before leaving the application page.`
 );
 
 /**
@@ -80,7 +86,10 @@ export interface ILabStatus {
 /**
  * The URL Router token.
  */
-export const IRouter = new Token<IRouter>('@jupyterlab/application:IRouter');
+export const IRouter = new Token<IRouter>(
+  '@jupyterlab/application:IRouter',
+  'The URL router used by the application. Use this to add custom URL-routing for your extension (e.g., to invoke a command if the user navigates to a sub-path).'
+);
 
 /**
  * A static class that routes URLs within the application.

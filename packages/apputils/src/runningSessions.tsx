@@ -89,7 +89,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
     this._serviceManager = opts.serviceManager;
     this._handleClick = opts.onClick;
     this.translator = opts.translator || nullTranslator;
-    this._trans = this.translator.load('jupyterload');
+    this._trans = this.translator.load('jupyterlab');
 
     this._serviceManager.sessions.runningChanged.connect(
       this._onSessionsRunningChanged,

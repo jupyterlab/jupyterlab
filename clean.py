@@ -11,11 +11,13 @@ here = os.path.abspath(os.path.dirname(__file__))
 if os.name == "nt":
     for root, dnames, _ in os.walk(here):
         if "node_modules" in dnames:
-            subprocess.check_call(["rmdir", "/s", "/q", "node_modules"], cwd=root, shell=True)
+            subprocess.check_call(
+                ["rmdir", "/s", "/q", "node_modules"], cwd=root, shell=True  # noqa S602 S607
+            )
             dnames.remove("node_modules")
 
 
-subprocess.check_call("python -m pip uninstall -y jupyterlab".split(), cwd=here)
+subprocess.check_call("python -m pip uninstall -y jupyterlab".split(), cwd=here)  # noqa S603
 
 
 def resolve_pattern(pat):
@@ -36,4 +38,4 @@ with open(os.path.join(here, ".cleanignore")) as f:
     git_clean_exclude = [f"--exclude={pat}" for line in f for pat in resolve_pattern(line)]
 
 git_clean_command = ["git", "clean", "-dfx", *git_clean_exclude]
-subprocess.check_call(git_clean_command, cwd=here)
+subprocess.check_call(git_clean_command, cwd=here)  # noqa S603

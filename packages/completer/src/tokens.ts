@@ -12,6 +12,15 @@ import { CompletionHandler } from './handler';
 import { Completer } from './widget';
 
 /**
+ * The type of completion request.
+ */
+export enum CompletionTriggerKind {
+  Invoked = 1,
+  TriggerCharacter = 2,
+  TriggerForIncompleteCompletions = 3
+}
+
+/**
  * The context which will be passed to the `fetch` function
  * of a provider.
  */
@@ -66,10 +75,12 @@ export interface ICompletionProvider<
    *
    * @param request - the completion request text and details
    * @param context - additional information about context of completion request
+   * @param trigger - Who triggered the request (optional).
    */
   fetch(
     request: CompletionHandler.IRequest,
-    context: ICompletionContext
+    context: ICompletionContext,
+    trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply<T>>;
 
   /**
@@ -102,12 +113,14 @@ export interface ICompletionProvider<
    * completion items should be shown.
    *
    * @param  completerIsVisible - Current visibility status of the
-   *  completer widget0
+   *  completer widget
    * @param  changed - changed text.
+   * @param  context - The context of the completer (optional).
    */
   shouldShowContinuousHint?(
     completerIsVisible: boolean,
-    changed: SourceChange
+    changed: SourceChange,
+    context?: ICompletionContext
   ): boolean;
 }
 
@@ -115,7 +128,8 @@ export interface ICompletionProvider<
  * The exported token used to register new provider.
  */
 export const ICompletionProviderManager = new Token<ICompletionProviderManager>(
-  '@jupyterlab/completer:ICompletionProviderManager'
+  '@jupyterlab/completer:ICompletionProviderManager',
+  'A service for the completion providers management.'
 );
 
 export interface ICompletionProviderManager {
@@ -160,9 +174,11 @@ export interface IProviderReconciliator {
    * the result of this provider will be ignore.
    *
    * @param {CompletionHandler.IRequest} request - The completion request.
+   * @param trigger - Who triggered the request (optional).
    */
   fetch(
-    request: CompletionHandler.IRequest
+    request: CompletionHandler.IRequest,
+    trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply | null>;
 
   /**

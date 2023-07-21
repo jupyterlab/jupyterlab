@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/galata",
-  "version": "5.0.0-alpha.22",
+  "version": "5.0.2",
   "description": "JupyterLab UI Testing Framework",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -44,16 +44,17 @@
     "test:update": "jlpm test:base:update && jlpm test:benchmark:update"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.22",
-    "@jupyterlab/apputils": "^4.0.0-alpha.22",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.22",
-    "@jupyterlab/docmanager": "^4.0.0-alpha.22",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.22",
-    "@jupyterlab/notebook": "^4.0.0-alpha.22",
-    "@jupyterlab/services": "^7.0.0-alpha.22",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.22",
-    "@lumino/coreutils": "^2.0.0",
-    "@playwright/test": "^1.31.0",
+    "@jupyterlab/application": "^4.0.2",
+    "@jupyterlab/apputils": "^4.1.2",
+    "@jupyterlab/coreutils": "^6.0.2",
+    "@jupyterlab/debugger": "^4.0.2",
+    "@jupyterlab/docmanager": "^4.0.2",
+    "@jupyterlab/nbformat": "^4.0.2",
+    "@jupyterlab/notebook": "^4.0.2",
+    "@jupyterlab/services": "^7.0.2",
+    "@jupyterlab/settingregistry": "^4.0.2",
+    "@lumino/coreutils": "^2.1.1",
+    "@playwright/test": "^1.32.2",
     "@stdlib/stats": "~0.0.13",
     "fs-extra": "^10.1.0",
     "json5": "^2.2.3",
@@ -65,7 +66,7 @@
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~5.0.2"
+    "typescript": "~5.0.4"
   },
   "publishConfig": {
     "access": "public"

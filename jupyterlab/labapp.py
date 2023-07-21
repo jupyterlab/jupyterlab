@@ -467,6 +467,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         {"LabApp": {"dev_mode": True}},
         "Start the app in dev mode for running from source.",
     )
+    flags["skip-dev-build"] = (
+        {"LabApp": {"skip_dev_build": True}},
+        "Skip the initial install and JS build of the app in dev mode.",
+    )
     flags["watch"] = ({"LabApp": {"watch": True}}, "Start the app in watch mode.")
     flags["splice-source"] = (
         {"LabApp": {"splice_source": True}},
@@ -482,7 +486,12 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
     flags["collaborative"] = (
         {"LabApp": {"collaborative": True}},
-        "Whether to enable collaborative mode.",
+        """To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
+        You can install it using pip for example:
+
+            python -m pip install jupyter_collaboration
+
+        This flag is now deprecated and will be removed in JupyterLab v5.""",
     )
 
     subcommands = {
@@ -555,6 +564,12 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
     watch = Bool(False, config=True, help="Whether to serve the app in watch mode")
 
+    skip_dev_build = Bool(
+        False,
+        config=True,
+        help="Whether to skip the initial install and JS build of the app in dev mode",
+    )
+
     splice_source = Bool(False, config=True, help="Splice source packages into app directory.")
 
     expose_app_in_browser = Bool(
@@ -563,7 +578,16 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         help="Whether to expose the global app instance to browser via window.jupyterapp",
     )
 
-    collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
+    collaborative = Bool(
+        False,
+        config=True,
+        help="""To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
+        You can install it using pip for example:
+
+            python -m pip install jupyter_collaboration
+
+        This flag is now deprecated and will be removed in JupyterLab v5.""",
+    )
 
     news_url = Unicode(
         "https://jupyterlab.github.io/assets/feed.xml",
@@ -713,7 +737,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.log.info(CORE_NOTE.strip())
             ensure_core(self.log)
         elif self.dev_mode:
-            if not self.watch:
+            if not (self.watch or self.skip_dev_build):
                 ensure_dev(self.log)
                 self.log.info(DEV_NOTE)
         else:
@@ -850,6 +874,8 @@ To enable real-time collaboration, you must install the extension `jupyter_colla
 You can install it using pip for example:
 
   python -m pip install jupyter_collaboration
+
+This flag is now deprecated and will be removed in JupyterLab v5.
 """
                 )
                 sys.exit(1)

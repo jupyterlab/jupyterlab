@@ -30,8 +30,8 @@ lab_splice_command = " ".join(
         "lab",
         "--ServerApp.base_url={base_url}lab-spliced",
         *common,
+        ">jupyterlab-spliced.log 2>&1",
     ]
-    + [">jupyterlab-spliced.log 2>&1"]
 )
 
 
@@ -47,5 +47,6 @@ c.ServerApp.log_level = logging.DEBUG
 
 c.LabApp.dev_mode = True
 c.LabApp.extensions_in_dev_mode = True
+c.LabApp.skip_dev_build = True
 
 c.ContentsManager.allow_hidden = True

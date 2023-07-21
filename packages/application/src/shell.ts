@@ -64,7 +64,8 @@ const ACTIVITY_CLASS = 'jp-Activity';
  * The JupyterLab application shell token.
  */
 export const ILabShell = new Token<ILabShell>(
-  '@jupyterlab/application:ILabShell'
+  '@jupyterlab/application:ILabShell',
+  'A service for interacting with the JupyterLab shell. The top-level ``application`` object also has a reference to the shell, but it has a restricted interface in order to be agnostic to different shell implementations on the application. Use this to get more detailed information about currently active widgets and layout state.'
 );
 
 /**
@@ -466,16 +467,23 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       // Stop watching the title of the previously current widget
       if (oldValue) {
         oldValue.title.changed.disconnect(this._updateTitlePanelTitle, this);
+
+        if (oldValue instanceof DocumentWidget) {
+          oldValue.context.pathChanged.disconnect(
+            this._updateCurrentPath,
+            this
+          );
+        }
       }
 
       // Start watching the title of the new current widget
       if (newValue) {
         newValue.title.changed.connect(this._updateTitlePanelTitle, this);
         this._updateTitlePanelTitle();
-      }
 
-      if (newValue && newValue instanceof DocumentWidget) {
-        newValue.context.pathChanged.connect(this._updateCurrentPath, this);
+        if (newValue instanceof DocumentWidget) {
+          newValue.context.pathChanged.connect(this._updateCurrentPath, this);
+        }
       }
       this._updateCurrentPath();
     });
@@ -517,6 +525,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   get currentChanged(): ISignal<this, ILabShell.IChangedArgs> {
     return this._currentChanged;
+  }
+
+  /**
+   * Current document path.
+   */
+  // FIXME deprecation `undefined` is to ensure backward compatibility in 4.x
+  get currentPath(): string | null | undefined {
+    return this._currentPath;
   }
 
   /**

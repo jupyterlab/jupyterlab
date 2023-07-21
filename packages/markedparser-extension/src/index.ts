@@ -16,27 +16,38 @@ import { IMarkdownParser } from '@jupyterlab/rendermime';
 import { marked } from 'marked';
 
 /**
+ * Create a markdown parser
+ *
+ * @param languages Editor languages
+ * @returns Markdown parser
+ */
+export function createMarkdownParser(languages: IEditorLanguageRegistry) {
+  Private.initializeMarked(languages);
+  return {
+    render: (content: string): Promise<string> =>
+      new Promise<string>((resolve, reject) => {
+        marked(content, (err: any, content: string) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(content);
+          }
+        });
+      })
+  };
+}
+
+/**
  * The markdown parser plugin.
  */
 const plugin: JupyterFrontEndPlugin<IMarkdownParser> = {
   id: '@jupyterlab/markedparser-extension:plugin',
+  description: 'Provides the Markdown parser.',
   autoStart: true,
   provides: IMarkdownParser,
   requires: [IEditorLanguageRegistry],
   activate: (app: JupyterFrontEnd, languages: IEditorLanguageRegistry) => {
-    Private.initializeMarked(languages);
-    return {
-      render: (content: string): Promise<string> =>
-        new Promise<string>((resolve, reject) => {
-          marked(content, (err: any, content: string) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(content);
-            }
-          });
-        })
-    };
+    return createMarkdownParser(languages);
   }
 };
 

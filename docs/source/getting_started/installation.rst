@@ -8,6 +8,13 @@ Installation
 
 JupyterLab can be installed using ``conda``, ``mamba``, ``pip``, ``pipenv`` or ``docker``.
 
+.. warning::
+    New versions of JupyterLab may break backwards compatibility with extensions and other
+    Jupyter customizations. As noted in :ref:`versioning_notes`, JupyterLab development and
+    release cycles follow semantic versioning, so we recommend planning your installation and
+    upgrade procedures to account for possible breaking changes that may disrupt your usage
+    of JupyterLab and any related tools that are critical to your workflows.
+
 conda
 -----
 
@@ -107,22 +114,6 @@ minimum versions listed above.  IE 11+ or Edge 14 do not support
 CSS Variables, and are not directly supported at this time.
 A tool like `postcss <https://postcss.org/>`__ can be used to convert the CSS files in the
 ``jupyterlab/build`` directory manually if desired.
-
-Usage with private NPM registry
--------------------------------
-
-To install some extensions, you will need access to an NPM packages registry. Some companies do not allow
-reaching directly public registry and have a private registry. To use it, you need to configure ``npm``
-**and** ``yarn`` to point to that registry (ask your corporate IT department for the correct URL):
-
-.. code::
-
-    npm config set registry https://registry.company.com/
-    yarn config set registry https://registry.company.com/
-
-JupyterLab will pick up that registry automatically. You can check which registry URL is used by JupyterLab by running::
-
-    python -c "from jupyterlab.commands import AppOptions; print(AppOptions().registry)"
 
 Installation problems
 ---------------------

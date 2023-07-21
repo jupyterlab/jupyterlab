@@ -83,6 +83,7 @@
 
 .Toastify__toast {
   min-height: unset;
+  padding: 4px;
   font-size: var(--jp-ui-font-size1);
   border-width: var(--jp-border-width);
   border-radius: var(--jp-border-radius);
@@ -91,10 +92,20 @@
   cursor: default;
 }
 
+.Toastify__toast-body {
+  display: flex;
+  flex-grow: 1;
+}
+
 .jp-Notification-Toast-Close {
-  align-self: start;
   padding: 0;
+  position: absolute;
+  right: 0.1px;
   cursor: pointer;
+}
+
+.jp-Notification-Toast-Close-Margin {
+  margin-right: 4px;
 }
 
 .jp-toastContainer .jp-Notification-Toast-Close:hover {
@@ -131,6 +142,10 @@
   text-decoration: underline;
 }
 
+.jp-toast-message {
+  padding-inline-end: 16px;
+}
+
 /* p elements are added by the markdown rendering.
  * Removing its default margin allows to reduce toast size.
  */
@@ -163,6 +178,7 @@
   flex-direction: row;
   flex-wrap: nowrap;
   flex: 0 0 auto;
+  padding-block-start: 8px;
 }
 
 .jp-toast-spacer {

@@ -105,25 +105,27 @@
   padding-right: 0;
 }
 
-.jp-extensionmanager-view .pagination li {
+.jp-extensionmanager-pagination li {
   display: inline-block;
 }
 
-.jp-extensionmanager-view .pagination li a {
+/* stylelint-disable selector-max-type */
+.jp-extensionmanager-pagination li > a {
   padding: 0 5px;
+  cursor: pointer;
 }
+/* stylelint-enable selector-max-type */
 
-.jp-extensionmanager-view .pagination li.active a {
+.jp-extensionmanager-pagination li.active > a {
   background: var(--jp-brand-color1);
-  color: #fff;
+  color: var(--jp-layout-color1);
 }
 
-.jp-extensionmanager-view .pagination li a:hover {
+.jp-extensionmanager-pagination li > a:hover {
   background-color: var(--jp-layout-color2);
-  color: unset;
 }
 
-.jp-extensionmanager-view .pagination .break a {
+.jp-extensionmanager-pagination .break > a {
   cursor: default;
 }
 
@@ -288,7 +290,8 @@
 .jp-extensionmanager-entry-buttons {
   display: flex;
   flex-direction: row;
-  padding-top: 4px;
+  padding-block-start: 4px;
+  justify-content: flex-end;
 }
 
 /*

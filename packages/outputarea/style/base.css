@@ -59,6 +59,10 @@
   -ms-user-select: text;
 }
 
+.jp-OutputArea .jp-RenderedText {
+  padding-left: 1ch;
+}
+
 /**
  * Prompt overlay.
  */
@@ -69,6 +73,17 @@
   width: var(--jp-cell-prompt-width);
   height: 100%;
   opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-OutputArea-promptOverlay .jp-icon-output {
+  display: none;
+}
+
+.jp-OutputArea-promptOverlay:hover .jp-icon-output {
+  display: initial;
 }
 
 .jp-OutputArea-promptOverlay:hover {
