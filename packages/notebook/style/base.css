@@ -141,8 +141,7 @@
   outline: none;
   border: none;
   border-radius: 2px;
-  box-shadow: 0 0 0 1px var(--jp-inverse-layout-color4);
-  transition: 0.1s;
+  box-shadow: 0 0 0 1px var(--jp-brand-color1);
 }
 
 /* Edit mode */
