@@ -214,9 +214,11 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * Signal emitted when an output area is requesting an input.
+   * Signal emitted when an output area is requesting an input. The signal
+   * carries the input widget that this class creates in response to the input
+   * request.
    */
-  get inputRequested(): ISignal<OutputArea, void> {
+  get inputRequested(): ISignal<OutputArea, IStdin> {
     return this._inputRequested;
   }
 
@@ -457,7 +459,7 @@ export class OutputArea extends Widget {
     }
     this.layout.addWidget(panel);
 
-    this._inputRequested.emit();
+    this._inputRequested.emit(input);
 
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
@@ -728,7 +730,7 @@ export class OutputArea extends Widget {
    */
   private _maxNumberOutputs: number;
   private _minHeightTimeout: number | null = null;
-  private _inputRequested = new Signal<OutputArea, void>(this);
+  private _inputRequested = new Signal<OutputArea, IStdin>(this);
   private _toggleScrolling = new Signal<OutputArea, void>(this);
   private _initialize = new Signal<OutputArea, void>(this);
   private _outputTracker = new WidgetTracker<Widget>({

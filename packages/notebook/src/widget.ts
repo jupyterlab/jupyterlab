@@ -679,9 +679,15 @@ export class StaticNotebook extends WindowedList {
     cell.syncCollapse = true;
     cell.syncEditable = true;
     cell.syncScrolled = true;
-    cell.outputArea.inputRequested.connect(() => {
+    cell.outputArea.inputRequested.connect((_, stdin) => {
       this._onInputRequested(cell).catch(reason => {
         console.error('Failed to scroll to cell requesting input.', reason);
+      });
+      stdin.disposed.connect(() => {
+        // The input field is removed from the DOM after the user presses Enter.
+        // This causes focus to be lost if we don't explicitly re-focus
+        // somewhere else.
+        cell.node.focus();
       });
     });
     return cell;
@@ -1835,9 +1841,6 @@ export class Notebook extends StaticNotebook {
         if (event.currentTarget === document) {
           this._evtDocumentMousemove(event as MouseEvent);
         }
-        break;
-      case 'keydown':
-        this._ensureFocus(true);
         break;
       case 'dblclick':
         this._evtDblClick(event as MouseEvent);
