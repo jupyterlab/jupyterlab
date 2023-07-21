@@ -2084,34 +2084,39 @@ export namespace NotebookActions {
   /**
    * If the notebook has an active cell, focus it.
    *
-   * @param notebook - The target notebook widget.
-   * @param options - An object of options, such as whether the function should
-   * wait for the active cell to be ready before focusing it.
+   * @param notebook The target notebook widget
+   * @param options Optional options to change the behavior of this function
+   * @param options.waitUntilReady If true, do not call focus until activeCell.ready is resolved
+   * @param options.preventScroll If true, do not scroll the active cell into view
    *
    * @returns a promise that resolves when focus has been called on the active
    * cell's node.
    *
    * #### Notes
-   * Waits until after the active cell has been attached by default, unless
-   * called with { shouldWait: false }
+   * By default, waits until after the active cell has been attached unless
+   * called with { waitUntilReady: false }
    */
   export async function focusActiveCell(
     notebook: Notebook,
     options: {
-      shouldWait?: boolean;
-    } = { shouldWait: true }
+      waitUntilReady?: boolean;
+      preventScroll?: boolean;
+    } = { waitUntilReady: true, preventScroll: false }
   ): Promise<void> {
     const { activeCell } = notebook;
+    const { waitUntilReady, preventScroll } = options;
     if (!activeCell) {
       return;
     }
-    if (options.shouldWait) {
+    if (waitUntilReady) {
       await activeCell.ready;
     }
     if (notebook.isDisposed || activeCell.isDisposed) {
       return;
     }
-    activeCell.node.focus();
+    activeCell.node.focus({
+      preventScroll
+    });
   }
 }
 

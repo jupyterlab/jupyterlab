@@ -1367,8 +1367,8 @@ export class Notebook extends StaticNotebook {
         // palette, then the command palette opens before
         // activeCell.node.focus() is called, which closes the command palette.
         // To the end user, it looks as if all the keyboard shortcut did was
-        // focus the active cell.
-        shouldWait: false
+        // move focus from the cell editor to the cell as a whole.
+        waitUntilReady: false
       });
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
@@ -2120,7 +2120,9 @@ export class Notebook extends StaticNotebook {
       activeCell &&
       !activeCell.node.contains(document.activeElement)
     ) {
-      void NotebookActions.focusActiveCell(this);
+      void NotebookActions.focusActiveCell(this, {
+        preventScroll: true
+      });
     }
   }
 
