@@ -45,6 +45,7 @@
 }
 
 .jp-SideBar .lm-TabBar-tab {
+  /* stylelint-disable-next-line csstree/validator */
   padding: min(2vw, 16px) 0;
   border: none;
   overflow: visible;

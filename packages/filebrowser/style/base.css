@@ -24,9 +24,11 @@
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
   flex-wrap: wrap;
+  /* stylelint-disable-next-line csstree/validator */
   row-gap: min(1.5vh, 12px);
   border-bottom: none;
   height: auto;
+  /* stylelint-disable-next-line csstree/validator */
   margin: min(1vh, 8px) min(1.5vw, 12px) 0;
   box-shadow: none;
   padding: 0;
@@ -41,6 +43,7 @@
 
 .jp-BreadCrumbs {
   flex: 0 0 auto;
+  /* stylelint-disable-next-line csstree/validator */
   margin: min(1vh, 8px) min(1vw, 12px);
 }
 
@@ -128,6 +131,7 @@
 }
 
 .jp-DirListing-headerItem {
+  /* stylelint-disable-next-line csstree/validator */
   padding: min(1vh, 4px) min(1vw, 12px) min(0.5vh, 2px);
   font-weight: 500;
 }
@@ -205,6 +209,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+  /* stylelint-disable-next-line csstree/validator */
   padding: min(1vh, 4px) min(1vw, 12px);
   -webkit-user-select: none;
   -moz-user-select: none;
