@@ -212,28 +212,62 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 | The Stdin output
 |----------------------------------------------------------------------------*/
 
+.jp-OutputArea-stdin-item {
+  margin-top: 5px;
+}
+
+.jp-Stdin {
+  margin: var(--jp-widgets-margin);
+  box-sizing: border-box;
+  color: var(--jp-widgets-color);
+  overflow: visible;
+  width: var(--jp-widgets-inline-width);
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
+  align-items: baseline;
+}
+
+#Added div to hold label and input
+.jp-Stdin > div {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  width: var(--jp-widgets-inline-width);
+  margin: var(--jp-widgets-margin);
+  box-sizing: border-box;
+  color: var(--jp-widgets-color);
+  overflow: visible;
+}
+
 .jp-Stdin-prompt {
-  color: var(--jp-content-font-color0);
-  padding-right: var(--jp-code-padding);
-  vertical-align: baseline;
-  flex: 0 0 auto;
+  color: var(--jp-widgets-label-color);
+  font-size: var(--jp-widgets-font-size);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: var(--jp-widgets-inline-height);
+  color: var(--jp-widgets-label-color);
+  text-align: right;
+  margin-right: calc( var(--jp-widgets-inline-margin) * 2 );
+  width: var(--jp-widgets-inline-label-width);
+  flex-shrink: 0;
 }
 
 .jp-Stdin-input {
-  font-family: var(--jp-code-font-family);
-  font-size: inherit;
-  color: inherit;
-  background-color: inherit;
-  width: 42%;
-  min-width: 200px;
-
-  /* make sure input baseline aligns with prompt */
-  vertical-align: baseline;
-
-  /* padding + margin = 0.5em between prompt and cursor */
-  padding: 0 0.25em;
-  margin: 0 0.25em;
-  flex: 0 0 70%;
+  box-sizing: border-box;
+  border: var(--jp-widgets-input-border-width) solid var(--jp-widgets-input-border-color);
+  background-color: var(--jp-widgets-input-background-color);
+  color: var(--jp-widgets-input-color);
+  font-size: var(--jp-widgets-font-size);
+  flex-grow: 1;
+  min-width: 0;
+  flex-shrink: 1;
+  outline: none !important;
+  padding: var(--jp-widgets-input-padding) calc( var(--jp-widgets-input-padding) * 2);
+  height: var(--jp-widgets-inline-height);
+  line-height: var(--jp-widgets-inline-height);
 }
 
 .jp-Stdin-input::placeholder {
