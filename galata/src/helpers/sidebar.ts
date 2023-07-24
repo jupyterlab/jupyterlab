@@ -12,7 +12,10 @@ import { MenuHelper } from './menu';
  * Sidebar helpers
  */
 export class SidebarHelper {
-  constructor(readonly page: Page, readonly menu: MenuHelper) {}
+  constructor(
+    readonly page: Page,
+    readonly menu: MenuHelper
+  ) {}
 
   /**
    * Whether a sidebar is opened or not
