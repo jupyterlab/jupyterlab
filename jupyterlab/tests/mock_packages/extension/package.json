@@ -2,23 +2,8 @@
   "name": "@jupyterlab/mock-extension",
   "version": "4.1.0-alpha.0",
   "private": true,
-  "resolutions": {
-    "@jupyterlab/apputils": "file:./../../../../packages/apputils",
-    "@jupyterlab/builder": "file:./../../../../builder",
-    "@jupyterlab/coreutils": "file:./../../../../packages/coreutils",
-    "@jupyterlab/launcher": "file:./../../../../packages/launcher",
-    "@jupyterlab/nbformat": "file:./../../../../packages/nbformat",
-    "@jupyterlab/observables": "file:./../../../../packages/observables",
-    "@jupyterlab/rendermime-interfaces": "file:./../../../../packages/rendermime-interfaces",
-    "@jupyterlab/services": "file:./../../../../packages/services",
-    "@jupyterlab/settingregistry": "file:./../../../../packages/settingregistry",
-    "@jupyterlab/statedb": "file:./../../../../packages/statedb",
-    "@jupyterlab/statusbar": "file:./../../../../packages/statusbar",
-    "@jupyterlab/translation": "file:./../../../../packages/translation",
-    "@jupyterlab/ui-components": "file:./../../../../packages/ui-components"
-  },
   "dependencies": {
-    "@jupyterlab/launcher": "^4.1.0-alpha.0"
+    "@jupyterlab/launcher": "^4.0.0 || ^4.1.0-alpha.0"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.1.0-alpha.0"

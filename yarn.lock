@@ -3640,7 +3640,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/launcher@^4.1.0-alpha.0, @jupyterlab/launcher@workspace:packages/launcher":
+"@jupyterlab/launcher@^4.0.0 || ^4.1.0-alpha.0, @jupyterlab/launcher@^4.1.0-alpha.0, @jupyterlab/launcher@workspace:packages/launcher":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/launcher@workspace:packages/launcher"
   dependencies:
@@ -4023,7 +4023,7 @@ __metadata:
   resolution: "@jupyterlab/mock-extension@workspace:jupyterlab/tests/mock_packages/extension"
   dependencies:
     "@jupyterlab/builder": ^4.1.0-alpha.0
-    "@jupyterlab/launcher": ^4.1.0-alpha.0
+    "@jupyterlab/launcher": ^4.0.0 || ^4.1.0-alpha.0
   languageName: unknown
   linkType: soft
 
