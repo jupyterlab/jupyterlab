@@ -794,8 +794,15 @@ export namespace EditorExtensionRegistry {
       Object.freeze({
         name: 'tooltips',
         factory: () =>
-          // we need absolute due to use of `contain: layout` in lumino
-          createImmutableExtension(tooltips({ position: 'absolute' }))
+          // we need `absolute` due to use of `contain: layout` in lumino;
+          // we attach to body to ensure cursor collaboration tooltip is
+          // visible in first line of the editor.
+          createImmutableExtension(
+            tooltips({
+              position: 'absolute',
+              parent: document.body
+            })
+          )
       }),
       Object.freeze({
         name: 'allowMultipleSelections',
