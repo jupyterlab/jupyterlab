@@ -47,7 +47,6 @@
 .jp-PluginList {
   min-width: 175px;
   max-width: 275px;
-  background-color: var(--jp-layout-color2);
 }
 
 .jp-PluginList-wrapper {
