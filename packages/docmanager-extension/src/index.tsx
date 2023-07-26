@@ -957,10 +957,10 @@ function addCommands(
             paths.add(context.path);
             promises.push(context.save());
           } else {
-            showDialog({
+            void showDialog({
               title: trans.__(`Cannot Save %1`, context.path),
               body: trans.__(
-                `%1 is permissioned as readonly. Use "save as..." instead`,
+                `%1 is permissioned as readonly. Use "save as..." instead.`,
                 context.contentsModel?.type
               ),
               buttons: [Dialog.okButton()]
