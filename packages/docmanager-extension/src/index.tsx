@@ -934,16 +934,6 @@ function addCommands(
             }
           }
         }
-      } else {
-        if (context) {
-          if (context.model.readOnly) {
-            return showDialog({
-              title: trans.__('Cannot Save'),
-              body: trans.__('Document is read-only'),
-              buttons: [Dialog.okButton()]
-            });
-          }
-        }
       }
     }
   });
@@ -962,9 +952,20 @@ function addCommands(
       const paths = new Set<string>(); // Cache so we don't double save files.
       for (const widget of shell.widgets('main')) {
         const context = docManager.contextForWidget(widget);
-        if (context && !context.model.readOnly && !paths.has(context.path)) {
-          paths.add(context.path);
-          promises.push(context.save());
+        if (context && !paths.has(context.path)) {
+          if (context.contentsModel?.writable) {
+            paths.add(context.path);
+            promises.push(context.save());
+          } else {
+            showDialog({
+              title: trans.__(`Cannot Save %1`, context.path),
+              body: trans.__(
+                `%1 is permissioned as readonly. Use "save as..." instead`,
+                context.contentsModel?.type
+              ),
+              buttons: [Dialog.okButton()]
+            });
+          }
         }
       }
       return Promise.all(promises);
