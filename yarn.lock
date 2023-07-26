@@ -3879,7 +3879,7 @@ __metadata:
     "@types/d3": ^7.4.0
     "@types/dompurify": ^2.4.0
     "@types/marked": ^5.0.0
-    marked: ^5.1.1
+    marked: ^5.1.2
     marked-gfm-heading-id: ^3.0.4
     marked-mangle: ^1.1.0
     rimraf: ~3.0.0
@@ -14727,7 +14727,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"marked@npm:^5.1.1":
+"marked@npm:^5.1.2":
   version: 5.1.2
   resolution: "marked@npm:5.1.2"
   bin:
