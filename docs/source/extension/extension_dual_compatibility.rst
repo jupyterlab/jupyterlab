@@ -47,11 +47,29 @@ one app that are not available in other apps, you will need to decide
 how to handle those features in the other apps.
 
 The technical solutions to compatibility basically offer ways to disable
-features for some apps, or to check for the presense of a particular app
+features for some apps, or to check for the presence of a particular app
 and then adjust behaviors accordingly.
 
 There are also design patterns and approaches that will make it easier to
 achieve compatibility in your extensions.
+
+You can read more about those below. Here are some general tips for making
+your extensions compatible:
+
+- Use common features where possible, these offer compatibility without
+  any extra effort
+- Organize your code: Keep app-specific features out of your main classes
+  and widgets and isolate those features wherever possible (consider
+  designing your extension so that it has core classes and widgets that
+  work in all apps in one place, with app-specific features and classes
+  elsewhere)
+- Decide what approach to take with any extension features that rely on
+  capabilities that only exist in one app. There are several options here:
+    - You can disable those features in other apps, which will allow
+      your extension to load even if an optional feature is missing
+    - You can modify those features so that they do different things
+      in each app (for instance, if your extension adds a widget to the main
+      area in JupyterLab, modify it to use the right area in Notebook 7)
 
 Using Only Common Features
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -76,44 +94,25 @@ unless special steps are taken (more on these further down). The status bar in
 JupyterLab is an example of a feature that is available in JupyterLab but not in
 Notebook 7.
 
+Using Plugin Metadata with Multiple Plugins
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+JupyterLab's extension system is designed so that plugins can depend on and
+reuse features from one another. A key part of this approach is JupyterLab's
+provider-consumer pattern, and it's what enables many compatibility solutions.
+
+By using plugin metadata and designing your extension to export multiple
+plugins, you can either disable app-specific features entirely, or test for
+the presence of particular applications (and app-specific features), then
+modify your extension's behaviors accordingly.
+
+SAMPLE CODE SNIPPET(S) 1
+SAMPLE CODE SNIPPET(S) 2 etc, multiple examples
 
 
 
 
-
-
-- Design your extension with optional extra features that only work
-  inside of a specific app
-- Test for a specific
-- disable certain features on a per-app basis, or 
-
-
-
-
-
-ways to design your extension that will
-allow it to work
-
-
-
-
-
-
-The design and capabiilies of your extension will determine what efforts you
-will need to take 
-
-Compatibility can be effortless for small extensions that only use common
-features of both JuyterLab and Notebook. More complex extensions that use
-
-
-
-Compatibility for small extensions that only use common features of both JuyterLab
-and Notebook is very easy. But when 
-
-For small or limited-scope extensions that only use 
-
-
-Basic compatibility
+___________________
 
 "Do Nothing" Compatibility
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -172,8 +171,6 @@ Status Bar (Notebook 7 does not have a status bar), etc.
 See `this example <https://www.youtube.com/watch?v=mqotG1MkHa4>`_ of a
 compatible top-bar-icon-widget that works in both JupyterLab and Notebook 7
 out of the box.
-
-
 
 
 
