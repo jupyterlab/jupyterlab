@@ -734,7 +734,10 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
    * @param model Search document model
    * @param translator Application translator object
    */
-  constructor(model: SearchDocumentModel, protected translator?: ITranslator) {
+  constructor(
+    model: SearchDocumentModel,
+    protected translator?: ITranslator
+  ) {
     super(model);
     this.addClass(OVERLAY_CLASS);
     this._searchInput = React.createRef<HTMLTextAreaElement>();
