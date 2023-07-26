@@ -180,7 +180,7 @@ Producer/Co
 
 The Producer/Consumer Approach
 
-JupyterLab components are designed to be 
+JupyterLab components are designed to be
 
 
 
@@ -194,7 +194,7 @@ Can also make your own extensions follow this pattern.
 Enabling App-Specific Behaviors
 
 When you want to turn on certain features only for one specific app, you can use
-plugin metadata and export a list of plugins, each of which 
+plugin metadata and export a list of plugins, each of which
 
 
 
@@ -203,7 +203,7 @@ plugin metadata and export a list of plugins, each of which
 The Multi-Plugin Approach for App-Specific Behaviors
 
 When you want to turn on certain features only for one specific app, you can use
-plugin metadata and export a list of plugins, each of which 
+plugin metadata and export a list of plugins, each of which
 
 
 One way to selectively enable app-specific features is to export a list of
@@ -218,5 +218,3 @@ The example below adds a widget to the main area in JupyterLab, but adds to a
 different area in Notebook 7 (since there's no main area in Notebook 7).
 
 LINK/REPO
-
-
