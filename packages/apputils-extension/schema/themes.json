@@ -114,19 +114,19 @@
     },
     "adaptive-theme": {
       "type": "boolean",
-      "title": "Adaptive theme",
+      "title": "Adaptive Theme",
       "description": "Synchronize styling theme with system settings",
       "default": false
     },
     "preferred-light-theme": {
       "type": "string",
-      "title": "Preferred light theme",
+      "title": "Preferred Light Theme",
       "description": "Application-level visual light styling theme. Ignored when Adaptive Theme is disabled.",
       "default": "JupyterLab Light"
     },
     "preferred-dark-theme": {
       "type": "string",
-      "title": "Preferred dark theme",
+      "title": "Preferred Dark Theme",
       "description": "Application-level visual dark styling theme. Ignored when Adaptive Theme is disabled.",
       "default": "JupyterLab Dark"
     },
