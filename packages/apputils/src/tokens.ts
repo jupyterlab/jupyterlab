@@ -127,7 +127,7 @@ export interface IThemeManager {
   readonly lightThemes: ReadonlyArray<string>;
 
   /**
-   * Get the names of the registered light themes.
+   * Get the names of the registered dark themes.
    */
   readonly darkThemes: ReadonlyArray<string>;
 

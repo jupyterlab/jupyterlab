@@ -115,7 +115,7 @@
     "adaptive-theme": {
       "type": "boolean",
       "title": "Adaptive theme",
-      "description": "Sync styling theme with system settings",
+      "description": "Synchronize styling theme with system settings",
       "default": false
     },
     "preferred-light-theme": {
