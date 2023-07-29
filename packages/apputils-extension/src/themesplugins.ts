@@ -177,7 +177,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
       label: trans.__('Synchronize with System Settings'),
       isToggled: () => manager.isToggledAdaptiveTheme(),
       execute: () => {
-        manager.toggleAdaptiveTheme();
+        manager.toggleAdaptiveTheme().catch(console.warn);
       }
     });
 
