@@ -391,6 +391,11 @@ export class NotebookToCModel extends TableOfContentsModel<
     if (!this._runningCells.includes(args.cell)) {
       this._runningCells.push(args.cell);
     }
+    this._errorCells.forEach((cell, index) => {
+      if (cell === args.cell) {
+        this._errorCells.splice(index, 1);
+      }
+    });
 
     this.updateRunningStatus(this.headings);
     this.stateChanged.emit();
