@@ -31,6 +31,9 @@ RECOMMENDED_TO_OVERRIDE = [
     ".github/workflows/binder-on-pr.yml",
     ".github/workflows/build.yml",
     ".github/workflows/check-release.yml",
+    ".github/workflows/enforce-label.yml",
+    ".github/workflows/prep-release.yml",
+    ".github/workflows/publish-release.yml",
     ".github/workflows/update-integration-tests.yml",
     "binder/postBuild",
     ".eslintignore",
@@ -103,7 +106,9 @@ def update_extension(  # noqa
         else:
             python_name = data["name"]
             if "@" in python_name:
-                python_name = python_name[1:].replace("/", "_").replace("-", "_")
+                python_name = python_name[1:]
+            # Clean up the name to be valid package module name
+            python_name = python_name.replace("/", "_").replace("-", "_")
 
     output_dir = target / "_temp_extension"
     if output_dir.exists():
@@ -171,6 +176,8 @@ def update_extension(  # noqa
             data["scripts"][key] = value
         if "install-ext" in data["scripts"]:
             del data["scripts"]["install-ext"]
+        if "prepare" in data["scripts"]:
+            del data["scripts"]["prepare"]
     else:
         warnings.append("package.json scripts must be updated manually")
 
