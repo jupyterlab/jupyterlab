@@ -59,6 +59,19 @@ export interface ICompletionProvider<
   readonly identifier: string;
 
   /**
+   * Rank used to order completion results from different completion providers.
+   *
+   * #### Note: The default providers (CompletionProvider:context and
+   * CompletionProvider:kernel) use a rank of ≈500. If you want to give
+   * priority to your provider, use a rank of 1000 or above.
+   *
+   * The rank is optional for backwards compatibility. If the rank is `undefined`,
+   * it will assign a rank of [1, 499] making the provider available but with a
+   * lower priority.
+   */
+  readonly rank?: number;
+
+  /**
    * Renderer for provider's completions (optional).
    */
   readonly renderer?: Completer.IRenderer | null;

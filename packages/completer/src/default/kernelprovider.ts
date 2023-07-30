@@ -14,6 +14,12 @@ export const KERNEL_PROVIDER_ID = 'CompletionProvider:kernel';
  * A kernel connector for completion handlers.
  */
 export class KernelCompleterProvider implements ICompletionProvider {
+  readonly identifier = KERNEL_PROVIDER_ID;
+
+  readonly rank: number = 550;
+
+  readonly renderer = null;
+
   /**
    * The kernel completion provider is applicable only if the kernel is available.
    * @param context - additional information about context of completion request
@@ -134,7 +140,4 @@ export class KernelCompleterProvider implements ICompletionProvider {
         (delta.insert === '.' || (!visible && delta.insert.trim().length > 0))
     );
   }
-
-  readonly identifier = KERNEL_PROVIDER_ID;
-  readonly renderer = null;
 }
