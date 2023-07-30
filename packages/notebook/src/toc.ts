@@ -505,8 +505,6 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
     // Connect model signals to notebook panel
 
-    let headingToElement = new WeakMap<INotebookHeading, Element | null>();
-
     const onActiveHeadingChanged = (
       model: NotebookToCModel,
       heading: INotebookHeading | null
@@ -518,19 +516,19 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
             return;
           }
 
-          const el = headingToElement.get(heading);
+          findHeadingElement(heading).then(el => {
+            if (el) {
+              const widgetBox = widget.content.node.getBoundingClientRect();
+              const elementBox = el.getBoundingClientRect();
 
-          if (el) {
-            const widgetBox = widget.content.node.getBoundingClientRect();
-            const elementBox = el.getBoundingClientRect();
-
-            if (
-              elementBox.top > widgetBox.bottom ||
-              elementBox.bottom < widgetBox.top
-            ) {
-              el.scrollIntoView({ block: 'center' });
+              if (
+                elementBox.top > widgetBox.bottom ||
+                elementBox.bottom < widgetBox.top
+              ) {
+                el.scrollIntoView({ block: 'center' });
+              }
             }
-          }
+          });
         };
 
         const cell = heading.cellRef;
@@ -555,37 +553,30 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
     };
 
-    const findHeadingElement = (cell: Cell): void => {
-      model.getCellHeadings(cell).forEach(async heading => {
-        const elementId = await getIdForHeading(heading, this.parser!);
+    const findHeadingElement = async (
+      heading: INotebookHeading
+    ): Promise<Element | null> => {
+      const elementId = await getIdForHeading(heading, this.parser!);
 
-        const selector = elementId
-          ? `h${heading.level}[id="${elementId}"]`
-          : `h${heading.level}`;
+      const selector = elementId
+        ? `h${heading.level}[id="${elementId}"]`
+        : `h${heading.level}`;
 
-        if (heading.outputIndex !== undefined) {
-          // Code cell
-          headingToElement.set(
-            heading,
-            TableOfContentsUtils.addPrefix(
-              (heading.cellRef as CodeCell).outputArea.widgets[
-                heading.outputIndex
-              ].node,
-              selector,
-              heading.prefix ?? ''
-            )
-          );
-        } else {
-          headingToElement.set(
-            heading,
-            TableOfContentsUtils.addPrefix(
-              heading.cellRef.node,
-              selector,
-              heading.prefix ?? ''
-            )
-          );
-        }
-      });
+      if (heading.outputIndex !== undefined) {
+        // Code cell
+        return TableOfContentsUtils.addPrefix(
+          (heading.cellRef as CodeCell).outputArea.widgets[heading.outputIndex]
+            .node,
+          selector,
+          heading.prefix ?? ''
+        );
+      } else {
+        return TableOfContentsUtils.addPrefix(
+          heading.cellRef.node,
+          selector,
+          heading.prefix ?? ''
+        );
+      }
     };
 
     const onHeadingsChanged = (model: NotebookToCModel) => {
@@ -594,13 +585,6 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       }
       // Clear all numbering items
       TableOfContentsUtils.clearNumbering(widget.content.node);
-
-      // Create a new mapping
-      headingToElement = new WeakMap<INotebookHeading, Element | null>();
-
-      widget.content.widgets.forEach(cell => {
-        findHeadingElement(cell);
-      });
     };
 
     const onHeadingCollapsed = (
@@ -638,9 +622,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     };
 
     const onCellInViewportChanged = (_: unknown, cell: Cell) => {
-      if (cell.inViewport) {
-        findHeadingElement(cell);
-      } else {
+      if (!cell.inViewport) {
         // Needed to remove prefix in cell outputs
         TableOfContentsUtils.clearNumbering(cell.node);
       }
