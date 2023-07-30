@@ -516,19 +516,23 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
             return;
           }
 
-          findHeadingElement(heading).then(el => {
-            if (el) {
-              const widgetBox = widget.content.node.getBoundingClientRect();
-              const elementBox = el.getBoundingClientRect();
+          findHeadingElement(heading)
+            .then(el => {
+              if (el) {
+                const widgetBox = widget.content.node.getBoundingClientRect();
+                const elementBox = el.getBoundingClientRect();
 
-              if (
-                elementBox.top > widgetBox.bottom ||
-                elementBox.bottom < widgetBox.top
-              ) {
-                el.scrollIntoView({ block: 'center' });
+                if (
+                  elementBox.top > widgetBox.bottom ||
+                  elementBox.bottom < widgetBox.top
+                ) {
+                  el.scrollIntoView({ block: 'center' });
+                }
               }
-            }
-          });
+            })
+            .catch(reason => {
+              console.error('Fail to find the element of the heading.');
+            });
         };
 
         const cell = heading.cellRef;
