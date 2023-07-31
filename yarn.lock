@@ -2229,7 +2229,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/builder@^4.1.0-alpha.0, @jupyterlab/builder@workspace:builder":
+"@jupyterlab/builder@^4.0.0 || ^4.1.0-alpha.0, @jupyterlab/builder@^4.1.0-alpha.0, @jupyterlab/builder@workspace:builder":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/builder@workspace:builder"
   dependencies:
@@ -4022,7 +4022,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mock-extension@workspace:jupyterlab/tests/mock_packages/extension"
   dependencies:
-    "@jupyterlab/builder": ^4.1.0-alpha.0
+    "@jupyterlab/builder": ^4.0.0 || ^4.1.0-alpha.0
     "@jupyterlab/launcher": ^4.0.0 || ^4.1.0-alpha.0
   languageName: unknown
   linkType: soft
