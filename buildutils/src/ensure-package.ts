@@ -121,9 +121,17 @@ export async function ensurePackage(
       seenDeps[name] = await getDependency(name);
     }
     if (devDeps[name] !== seenDeps[name]) {
-      messages.push(`Updated devDependency: ${name}@${seenDeps[name]}`);
+      const oneOf =
+        devDeps[name].includes('||') &&
+        devDeps[name]
+          .split(/\|\|/)
+          .map(v => v.trim())
+          .includes(seenDeps[name]);
+      if (!oneOf) {
+        messages.push(`Updated devDependency: ${name}@${seenDeps[name]}`);
+        devDeps[name] = seenDeps[name];
+      }
     }
-    devDeps[name] = seenDeps[name];
   });
 
   await Promise.all(promises);

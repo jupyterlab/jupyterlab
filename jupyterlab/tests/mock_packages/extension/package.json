@@ -6,7 +6,7 @@
     "@jupyterlab/launcher": "^4.0.0 || ^4.1.0-alpha.0"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.1.0-alpha.0"
+    "@jupyterlab/builder": "^4.0.0 || ^4.1.0-alpha.0"
   },
   "jupyterlab": {
     "extension": true,
