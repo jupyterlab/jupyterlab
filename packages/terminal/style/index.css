@@ -7,5 +7,4 @@
 @import url('~@lumino/widgets/style/index.css');
 @import url('~@jupyterlab/apputils/style/index.css');
 @import url('~xterm/css/xterm.css');
-
 @import url('./base.css');

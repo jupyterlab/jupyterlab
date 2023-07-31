@@ -124,15 +124,18 @@ export namespace URLExt {
     return value
       .replace(/^\?/, '')
       .split('&')
-      .reduce((acc, val) => {
-        const [key, value] = val.split('=');
+      .reduce(
+        (acc, val) => {
+          const [key, value] = val.split('=');
 
-        if (key.length > 0) {
-          acc[key] = decodeURIComponent(value || '');
-        }
+          if (key.length > 0) {
+            acc[key] = decodeURIComponent(value || '');
+          }
 
-        return acc;
-      }, {} as { [key: string]: string });
+          return acc;
+        },
+        {} as { [key: string]: string }
+      );
   }
 
   /**
