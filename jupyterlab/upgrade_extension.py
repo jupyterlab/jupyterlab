@@ -108,7 +108,7 @@ def update_extension(  # noqa
             if "@" in python_name:
                 python_name = python_name[1:]
             # Clean up the name to be valid package module name
-            python_name = python_name.replace("/", "_").replace("-", "_")
+        python_name = python_name.replace("/", "_").replace("-", "_")
 
     output_dir = target / "_temp_extension"
     if output_dir.exists():
@@ -184,6 +184,24 @@ def update_extension(  # noqa
     # Set the output directory
     data["jupyterlab"]["outputDir"] = temp_data["jupyterlab"]["outputDir"]
 
+    # Set linters
+    ## Map package.json key to previous config file
+    linters = {
+        "eslintConfig": ".eslintrc.js",
+        "eslintIgnore": ".eslintignore",
+        "prettier": ".prettierrc",
+        "stylelint": ".stylelintrc",
+    }
+
+    for key, file in linters.items():
+        if key in temp_data:
+            data[key] = temp_data[key]
+
+            linter_file = target / file
+            if linter_file.exists():
+                linter_file.unlink()
+                warnings.append(f"DELETED {file}")
+
     # Look for resolutions in JupyterLab metadata and upgrade those as well
     root_jlab_package = files("jupyterlab").joinpath("staging/package.json")
     with root_jlab_package.open() as fid:
@@ -219,7 +237,7 @@ def update_extension(  # noqa
     # At the end, list the files that were: added, overridden, skipped
     for p in output_dir.rglob("*"):
         relpath = p.relative_to(output_dir)
-        if relpath.name == "package.json":
+        if str(relpath) == "package.json":
             continue
         if p.is_dir():
             continue
