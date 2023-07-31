@@ -149,8 +149,8 @@ Feedback and Formal complaints
 We welcome your feedback and formal complaints on the accessibility status of JupyterLab.
 Please let us know if you encounter accessibility barriers on JupyterLab:
 
-* `Write an issue on jupyter/accessibility <jupyter-accessibility-repo-issues>`_
-* `Write an issue on jupyterlab/jupyterlab <jupyterlab-repo-issues>`_ and request it be labeled `tag:Accessibility <https://github.com/jupyterlab/jupyterlab/labels/tag%3AAccessibility>`_
+* `Write an issue on jupyter/accessibility <https://github.com/jupyter/accessibility/issues/new>`_
+* `Write an issue on jupyterlab/jupyterlab <https://github.com/jupyterlab/jupyterlab/issues/new>`_ and request it be labeled `tag:Accessibility <https://github.com/jupyterlab/jupyterlab/labels/tag%3AAccessibility>`_
 * If you are interested in being part of any potential research or organized feedback initiatives, please reach out via one of the many JupyterLab community channels. Gauging community interest in user research participation helps us gain the support to make it happen.
 
 .. warning::
