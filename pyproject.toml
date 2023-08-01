@@ -117,7 +117,7 @@ dev = [
     "hatch",
     "bump2version",
     "ruff==0.0.276",
-    "black[jupyter]==23.3.0"
+    "black[jupyter]==23.7.0"
 ]
 
 [tool.check-wheel-contents]
