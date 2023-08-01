@@ -6,6 +6,7 @@
  */
 
 export * from './adapters/adapter';
+export * from './adapters/editorAdapter';
 export * from './connection_manager';
 export * from './extractors';
 export * from './feature';

@@ -25,6 +25,7 @@ import {
   ISocketConnectionOptions
 } from '../tokens';
 import { VirtualDocument } from '../virtual/document';
+import { EditorAdapter } from './editorAdapter';
 
 type IButton = Dialog.IButton;
 const createButton = Dialog.createButton;
@@ -91,6 +92,10 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     this.widget.context.saveState.connect(this.onSaveState, this);
     this.connectionManager.closed.connect(this.onConnectionClosed, this);
     this.widget.disposed.connect(this.dispose, this);
+
+    this._editorToAdapter = new WeakMap();
+    this.editorAdded.connect(this._onEditorAdded, this);
+    this.editorRemoved.connect(this._onEditorRemoved, this);
   }
 
   /**
@@ -263,6 +268,8 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     if (this._isDisposed) {
       return;
     }
+    this.editorAdded.disconnect(this._onEditorAdded, this);
+    this.editorRemoved.disconnect(this._onEditorRemoved, this);
     this._isDisposed = true;
     this.disconnect();
     this._virtualDocument = null;
@@ -592,6 +599,32 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   private _isConnected: boolean;
   private _updateFinished: Promise<void>;
   private _virtualDocument: VirtualDocument | null = null;
+  private _editorToAdapter: WeakMap<Document.IEditor, EditorAdapter>;
+
+  private _onEditorAdded(
+    sender: WidgetLSPAdapter<T>,
+    change: IEditorChangedData
+  ): void {
+    const { editor } = change;
+    const editorAdapter = new EditorAdapter({
+      editorReady: editor.ready,
+      getEditor: editor.getEditor,
+      path: this.documentPath,
+      adapter: this,
+      extensions: this.options.featureManager.extensionFactories()
+    });
+    this._editorToAdapter.set(editor, editorAdapter);
+  }
+
+  private _onEditorRemoved(
+    sender: WidgetLSPAdapter<T>,
+    change: IEditorChangedData
+  ): void {
+    const { editor } = change;
+    const adapter = this._editorToAdapter.get(editor);
+    adapter?.dispose();
+    this._editorToAdapter.delete(editor);
+  }
 
   /**
    * Callback called when a foreign document is closed,

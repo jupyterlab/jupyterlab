@@ -6,6 +6,7 @@ import mergeWith from 'lodash.mergewith';
 
 import { ClientCapabilities } from './lsp';
 import { IFeature, ILSPFeatureManager } from './tokens';
+import { EditorAdapter } from './adapters/editorAdapter';
 
 /**
  * Class to manager the registered features of the language servers.
@@ -52,6 +53,20 @@ export class FeatureManager implements ILSPFeatureManager {
       capabilities = mergeWith(capabilities, feature.capabilities);
     }
     return capabilities;
+  }
+
+  /**
+   * Get the extension factories of all clients.
+   */
+  extensionFactories(): EditorAdapter.ILSPEditorExtensionFactory[] {
+    const factories: EditorAdapter.ILSPEditorExtensionFactory[] = [];
+    for (const feature of this.features) {
+      if (!feature.extensionFactory) {
+        continue;
+      }
+      factories.push(feature.extensionFactory);
+    }
+    return factories;
   }
 
   private _featuresRegistered: Signal<ILSPFeatureManager, IFeature>;

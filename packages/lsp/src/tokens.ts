@@ -27,6 +27,7 @@ import {
 import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { EditorAdapter } from './adapters/editorAdapter';
 export { IDocumentInfo };
 
 /**
@@ -498,6 +499,11 @@ export interface IFeature {
    * LSP capabilities implemented by the feature.
    */
   capabilities?: ClientCapabilities;
+
+  /**
+   * LSP capabilities implemented by the feature.
+   */
+  extensionFactory?: EditorAdapter.ILSPEditorExtensionFactory;
 }
 
 /**
@@ -512,20 +518,25 @@ export interface ILSPFeatureManager {
   readonly features: IFeature[];
 
   /**
+   * Signal emitted when a feature is registered
+   */
+  featuresRegistered: ISignal<ILSPFeatureManager, IFeature>;
+
+  /**
    * Register the new feature (frontend capability)
    * for one or more code editor implementations.
    */
   register(feature: IFeature): void;
 
   /**
-   * Signal emitted when a feature is registered
-   */
-  featuresRegistered: ISignal<ILSPFeatureManager, IFeature>;
-
-  /**
    * Get capabilities of all registered features
    */
   clientCapabilities(): ClientCapabilities;
+
+  /**
+   * Get the extension factories of all clients.
+   */
+  extensionFactories(): EditorAdapter.ILSPEditorExtensionFactory[];
 }
 
 /**
