@@ -244,7 +244,7 @@ and by using it in your extension, you act as the consumer.
 
 
 
-Practically speaking, JupyterLab provides 
+Practically speaking, JupyterLab provides
 
 JupyterLab provides a list
 
