@@ -71,6 +71,3 @@ detailed descriptions of each release.
 The extension developer API is evolving, and we also are currently iterating on UI/UX improvements.
 We appreciate feedback on our `GitHub issues page <https://github.com/jupyterlab/jupyterlab/issues>`__
 as we evolve towards a stable extension development API.
-
-JupyterLab will eventually replace the classic Jupyter Notebook.
-Throughout this transition, the same notebook document format will be supported by both the classic Notebook and JupyterLab.
