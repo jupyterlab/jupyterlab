@@ -7,6 +7,7 @@ import {
   classes,
   DockPanelSvg,
   LabIcon,
+  SidePanel,
   TabBarSvg,
   tabIcon,
   TabPanelSvg
@@ -17,6 +18,7 @@ import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import {
+  AccordionPanel,
   BoxLayout,
   BoxPanel,
   DockLayout,
@@ -276,6 +278,16 @@ export namespace ILabShell {
      * The collection of widgets held by the sidebar.
      */
     readonly widgets: Array<Widget> | null;
+
+    /**
+     * Vertical sizes of the widgets situated in the sidebar.
+     */
+    readonly sizes: Array<number> | null;
+
+    /**
+     * Expansion states of the widgets situated in the sidebar.
+     */
+    readonly expansionStates: Array<boolean>;
   }
 }
 
@@ -1910,6 +1922,20 @@ namespace Private {
     }
 
     /**
+     * Handles a movement to the handles of a widget
+     */
+    private _onHandleMoved(): void {
+      return this._refreshVisibility();
+    }
+
+    /**
+     * Handles changes to the expansion status of a widget
+     */
+    private _onExpansionToggle(sender: AccordionPanel, index: number): void {
+      return this._refreshVisibility();
+    }
+
+    /**
      * Expand the sidebar.
      *
      * #### Notes
@@ -1967,7 +1993,6 @@ namespace Private {
       // Store the parent id in the title dataset
       // in order to dispatch click events to the right widget.
       title.dataset = { id: widget.id };
-
       if (title.icon instanceof LabIcon) {
         // bind an appropriate style to the icon
         title.icon = title.icon.bindprops({
@@ -1982,7 +2007,10 @@ namespace Private {
           stylesheet: 'sideBar'
         });
       }
-
+      // @ts-expect-error sometimes widget is an Accordion Panel
+      widget.content?.expansionToggled?.connect(this._onExpansionToggle, this);
+      // @ts-expect-error sometimes widget is a SidePanel
+      widget.content?.handleMoved?.connect(this._onHandleMoved, this);
       this._refreshVisibility();
     }
 
@@ -1993,11 +2021,35 @@ namespace Private {
       const collapsed = this._sideBar.currentTitle === null;
       const widgets = Array.from(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
+      let sizes = new Array<number>();
+      let expansionStates = new Array<boolean>();
+      Object.entries(this).forEach(([key, value]) => {
+        if (value) {
+          Object.values(value).forEach(panel => {
+            if (
+              panel instanceof AccordionPanel ||
+              panel instanceof SplitPanel
+            ) {
+              sizes = panel.relativeSizes() as number[];
+            }
+          });
+        }
+      });
+      this._stackedPanel.widgets.forEach(w => {
+        if (w instanceof SidePanel) {
+          w.widgets.forEach(wi => {
+            expansionStates.push(wi.isHidden);
+          });
+        }
+      });
+
       return {
         collapsed,
         currentWidget,
         visible: !this._isHiddenByUser,
-        widgets
+        widgets,
+        sizes,
+        expansionStates
       };
     }
 
@@ -2013,6 +2065,30 @@ namespace Private {
       }
       if (!data.visible) {
         this.hide();
+      }
+      if (data.sizes) {
+        Object.entries(this).forEach(([key, value]) => {
+          if (value) {
+            Object.values(value).forEach(panel => {
+              if (
+                panel instanceof AccordionPanel ||
+                panel instanceof SplitPanel
+              ) {
+                panel.setRelativeSizes(data.sizes as number[]);
+              }
+            });
+          }
+        });
+      }
+      if (data.expansionStates) {
+        data.expansionStates.reverse();
+        this._stackedPanel.widgets.forEach(w => {
+          if (w instanceof SidePanel) {
+            w.widgets.forEach(wi => {
+              wi.setHidden(data.expansionStates.pop() as boolean);
+            });
+          }
+        });
       }
     }
 
