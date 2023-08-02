@@ -310,7 +310,9 @@ ignore = [
 # N806 Variable `tM` in function should be lowercase
 # N816 Variable `comparatorTrimReplace` in global scope should not be mixedCase
 # PLC1901 test can be simplified as an empty string is falsey
-"jupyterlab/semver.py" = ["C901", "EM101", "EM102", "N806", "N816", "PLC1901"]
+# PLR1714 Consider merging multiple comparisons
+# PLR5501 Use `elif` instead of `else` then `if`, to reduce indentation
+"jupyterlab/semver.py" = ["C901", "EM101", "EM102", "N806", "N816", "PLC1901", "PLR1714", "PLR5501"]
 # T201 `print` found
 "jupyterlab/upgrade_extension.py" = ["T201"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
