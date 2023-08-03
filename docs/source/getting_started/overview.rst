@@ -81,3 +81,4 @@ Jupyter Notebook in the ecosystem, visit the
    issue
    faq
    changelog
+   accessibility
