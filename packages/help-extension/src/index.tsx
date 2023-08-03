@@ -196,10 +196,11 @@ const jupyterForum: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin to add to open resources in IFrames or new browser tabs.
+ * A plugin to open resources in IFrames or new browser tabs.
  */
 const open: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:open',
+  description: 'Add command to open websites as panel or browser tab.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ILayoutRestorer],
@@ -280,7 +281,7 @@ const open: JupyterFrontEndPlugin<void> = {
  */
 const resources: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:resources',
-  description: 'Adds commands to Jupyter reference documentation websites.',
+  description: 'Adds menu entries to Jupyter reference documentation websites.',
   autoStart: true,
   requires: [IMainMenu, ITranslator],
   optional: [ILabShell, ICommandPalette],
