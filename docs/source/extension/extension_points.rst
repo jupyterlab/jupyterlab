@@ -356,7 +356,7 @@ This requires you to define a keyboard shortcut for ``apputils:run-all-enabled``
 
 In this example ``my-command-1`` and ``my-command-2`` are passed in ``args``
 of ``apputils:run-all-enabled`` command as ``commands`` list.
-You can optionally pass the command arguemnts of ``my-command-1`` and ``my-command-2`` in ``args``
+You can optionally pass the command arguments of ``my-command-1`` and ``my-command-2`` in ``args``
 of ``apputils:run-all-enabled`` command as ``args`` list.
 
 Launcher
@@ -621,23 +621,12 @@ Here is an example of using the ``closeAndCleaners`` semantic menu item:
 .. code:: typescript
 
     mainMenu.fileMenu.closeAndCleaners.add({
-      tracker,
-      action: 'Shutdown',
-      name: 'My Activity',
-      closeAndCleanup: current => {
-        current.close();
-        return current.shutdown();
-      }
+      id: 'notebook:close-and-shutdown',
+      isEnabled: (w: Widget) => tracker.currentWidget !== null && tracker.has(w)
     });
 
 In this example, ``tracker`` is a :ref:`widget-tracker`, which allows the menu
-item to determine whether to delegate the menu command to your activity,
-``name`` is a name given to your activity in the menu label,
-``action`` is a verb given to the cleanup operation in the menu label,
-and ``closeAndCleanup`` is the actual function that performs the cleanup operation.
-So if the current application activity is held in the ``tracker``,
-then the menu item will show ``Shutdown My Activity``, and delegate to the
-``closeAndCleanup`` function that was provided.
+item to determine whether to delegate the menu command to your activity, and ``id`` is a the command identifier.
 
 More examples for how to register semantic menu items are found throughout the JupyterLab code base.
 The available semantic menu items are:

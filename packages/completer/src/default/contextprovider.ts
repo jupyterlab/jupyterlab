@@ -11,6 +11,12 @@ export const CONTEXT_PROVIDER_ID = 'CompletionProvider:context';
  * A context connector for completion handlers.
  */
 export class ContextCompleterProvider implements ICompletionProvider {
+  readonly identifier = CONTEXT_PROVIDER_ID;
+
+  readonly rank: number = 500;
+
+  readonly renderer = null;
+
   /**
    * The context completion provider is applicable on all cases.
    * @param context - additional information about context of completion request
@@ -36,9 +42,6 @@ export class ContextCompleterProvider implements ICompletionProvider {
       resolve(Private.contextHint(editor!));
     });
   }
-
-  readonly identifier = CONTEXT_PROVIDER_ID;
-  readonly renderer = null;
 }
 
 /**

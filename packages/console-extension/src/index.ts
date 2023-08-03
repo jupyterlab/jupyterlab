@@ -663,7 +663,14 @@ async function activateConsole(
           'Are you sure you want to close "%1"?',
           current.title.label
         ),
-        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+        buttons: [
+          Dialog.cancelButton({
+            ariaLabel: trans.__('Cancel console Shut Down')
+          }),
+          Dialog.warnButton({
+            ariaLabel: trans.__('Confirm console Shut Down')
+          })
+        ]
       }).then(result => {
         if (result.button.accept) {
           return commands

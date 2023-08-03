@@ -23,7 +23,10 @@ export abstract class TableOfContentsModel<
    * @param widget The widget to search in
    * @param configuration Default model configuration
    */
-  constructor(protected widget: T, configuration?: TableOfContents.IConfig) {
+  constructor(
+    protected widget: T,
+    configuration?: TableOfContents.IConfig
+  ) {
     super();
     this._activeHeading = null;
     this._activeHeadingChanged = new Signal<
