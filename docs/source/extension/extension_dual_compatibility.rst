@@ -96,8 +96,8 @@ Using Plugin Metadata to Drive Compatibility
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 JupyterLab's extension system is designed so that plugins can depend on and
-reuse features from one another. A key part of this approach is JupyterLab's
-provider-consumer pattern, and it's what enables the compatibility solutions
+reuse features from one another. A key part of this approach is [JupyterLab's
+provider-consumer pattern](LINK), and it's what enables the compatibility solutions
 discussed here.
 
 Each plugin uses some properties (the "requires" and "optional" properties) to
@@ -106,10 +106,21 @@ loaded into JupyterLab. When your plugin requests features, the system sends
 them to your plugin's activate function if they're available.
 
 You can build compatible extensions by taking advantage of these plugin
-properties. When you designate a feature in the "requires" list of your plugin,
-JupyterLab will only load your plugin if that feature is available. By designating
-a feature in the "optional" list, JupyterLab will pass you an object for it (if it's
-available) or null if it's not.
+properties, and how the plugin system uses them:
+
+- When you designate a feature in the "requires" list of your
+  plugin, JupyterLab will only load your plugin if that feature is available.
+- By designating a feature in the "optional" list, JupyterLab will pass you
+  an object for it (if it's available) or null if it's not.
+
+So, these capabilities form the backbone of extension compatibility: You can
+use them to make checks in your extensions that will allow them to function in
+both JupyterLab and Jupyter Notebook 7 (and others).
+
+
+
+
+
 
 Take a look at this example plugin:
 
