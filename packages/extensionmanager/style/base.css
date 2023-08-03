@@ -190,7 +190,7 @@
 }
 
 .jp-extensionmanager-entry-name a:visited {
-  color: var(--jp-content-link-visited-color);
+  color: var(--jp-content-font-color3);
   text-decoration: underline;
 }
 
