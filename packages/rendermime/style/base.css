@@ -32,18 +32,19 @@
 }
 
 .jp-RenderedText pre a:link {
-  text-decoration: none;
+  text-decoration: underline;
   color: var(--jp-content-link-color);
 }
 
 .jp-RenderedText pre a:hover {
   text-decoration: underline;
   color: var(--jp-content-link-color);
+  font-weight: bold;
 }
 
 .jp-RenderedText pre a:visited {
-  text-decoration: none;
-  color: var(--jp-content-link-color);
+  text-decoration: underline;
+  color: var(--jp-content-link-visited-color);
 }
 
 /* console foregrounds and backgrounds */
@@ -256,18 +257,19 @@
 }
 
 .jp-RenderedHTMLCommon a:link {
-  text-decoration: none;
+  text-decoration: underline;
   color: var(--jp-content-link-color);
 }
 
 .jp-RenderedHTMLCommon a:hover {
   text-decoration: underline;
   color: var(--jp-content-link-color);
+  font-weight: bold;
 }
 
 .jp-RenderedHTMLCommon a:visited {
-  text-decoration: none;
-  color: var(--jp-content-link-color);
+  text-decoration: underline;
+  color: var(--jp-content-link-visited-color);
 }
 
 /* Headings */

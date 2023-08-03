@@ -44,11 +44,13 @@
 
 .jp-extensionmanager-disclaimer a {
   color: var(--jp-content-link-color);
+  text-decoration: underline;
 }
 
 .jp-extensionmanager-disclaimer a:hover {
   color: var(--jp-content-link-color);
   text-decoration: underline;
+  font-weight: bold;
 }
 
 .jp-extensionmanager-disclaimer .jp-Button {
@@ -184,17 +186,18 @@
 
 .jp-extensionmanager-entry-name a:link {
   color: var(--jp-content-link-color);
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 .jp-extensionmanager-entry-name a:visited {
-  color: var(--jp-content-link-color);
-  text-decoration: none;
+  color: var(--jp-content-link-visited-color);
+  text-decoration: underline;
 }
 
 .jp-extensionmanager-entry-name a:hover {
   color: var(--jp-content-link-color);
   text-decoration: underline;
+  font-weight: bold;
 }
 
 .jp-extensionmanager-loader,

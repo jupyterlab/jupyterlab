@@ -140,6 +140,7 @@
 .Toastify__toast-body a:hover {
   color: var(--jp-content-link-color);
   text-decoration: underline;
+  font-weight: bold;
 }
 
 .jp-toast-message {
