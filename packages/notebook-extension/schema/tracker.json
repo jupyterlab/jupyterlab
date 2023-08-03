@@ -368,12 +368,12 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "notebook:access-last-history",
-      "keys": ["Shift ArrowUp"],
+      "keys": ["Alt ArrowUp"],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
       "command": "notebook:access-next-history",
-      "keys": ["Shift ArrowDown"],
+      "keys": ["Alt ArrowDown"],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {

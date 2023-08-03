@@ -3398,7 +3398,8 @@ function addCommands(
         sessionDialogs,
         translator
       );
-
+    }
+  });
   commands.addCommand(CommandIDs.accessLastHistory, {
     label: 'Access Last History',
     execute: args => {

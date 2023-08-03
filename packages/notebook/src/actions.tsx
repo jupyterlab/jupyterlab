@@ -2339,6 +2339,7 @@ namespace Private {
 
           const deletedCells = notebook.model?.deletedCells ?? [];
           executionScheduled.emit({ notebook, cell });
+          console.log('---', cell.model?.sharedModel.source);
           let ran = false;
           try {
             const reply = await CodeCell.execute(

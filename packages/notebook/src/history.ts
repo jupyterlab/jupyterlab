@@ -35,7 +35,8 @@ export interface INotebookHistory extends IDisposable {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(placeholder: string): Promise<string>;
+  back(placeholder: string): string;
+  // back(placeholder: string): Promise<string>;
 
   /**
    * Get the next item in the console history.
@@ -77,6 +78,12 @@ export class NotebookHistory implements INotebookHistory {
     this.sessionContext = options.sessionContext;
     void this._handleKernel();
     this.sessionContext.kernelChanged.connect(this._handleKernel, this);
+    this.sessionContext.propertyChanged.connect(value =>
+      console.log('propertyChanged: ', value)
+    );
+    this.sessionContext.sessionChanged.connect(value =>
+      console.log('sessionChanged: ', value)
+    );
   }
 
   /**
@@ -98,14 +105,14 @@ export class NotebookHistory implements INotebookHistory {
     const prev = this._editor;
     if (prev) {
       prev.edgeRequested.disconnect(this.onEdgeRequest, this);
-      prev.model.value.changed.disconnect(this.onTextChange, this);
+      prev.model.sharedModel.changed.disconnect(this.onTextChange, this);
     }
 
     this._editor = value;
 
     if (value) {
       value.edgeRequested.connect(this.onEdgeRequest, this);
-      value.model.value.changed.connect(this.onTextChange, this);
+      value.model.sharedModel.changed.connect(this.onTextChange, this);
     }
   }
 
@@ -141,7 +148,7 @@ export class NotebookHistory implements INotebookHistory {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(placeholder: string): Promise<string> {
+  back(placeholder: string): string {
     if (!this._hasSession) {
       this._hasSession = true;
       this._placeholder = placeholder;
@@ -153,8 +160,24 @@ export class NotebookHistory implements INotebookHistory {
     --this._cursor;
     this._cursor = Math.max(0, this._cursor);
     const content = this._filtered[this._cursor];
-    return Promise.resolve(content);
+    console.log('this._cursor: ', this._cursor);
+    return content;
   }
+  // back(placeholder: string): Promise<string> {
+  //   if (!this._hasSession) {
+  //     this._hasSession = true;
+  //     this._placeholder = placeholder;
+  //     // Filter the history with the placeholder string.
+  //     this.setFilter(placeholder);
+  //     this._cursor = this._filtered.length - 1;
+  //   }
+
+  //   --this._cursor;
+  //   this._cursor = Math.max(0, this._cursor);
+  //   const content = this._filtered[this._cursor];
+  //   console.log('this._cursor: ', this._cursor)
+  //   return Promise.resolve(content);
+  // }
 
   /**
    * Get the next item in the console history.
@@ -251,36 +274,36 @@ export class NotebookHistory implements INotebookHistory {
     location: CodeEditor.EdgeLocation
   ): void {
     const model = editor.model;
-    const source = model.value.text;
+    const source = model.sharedModel.getSource();
 
     if (location === 'top' || location === 'topLine') {
-      void this.back(source).then(value => {
-        if (this.isDisposed || !value) {
-          return;
-        }
-        if (model.value.text === value) {
-          return;
-        }
-        this._setByHistory = true;
-        model.value.text = value;
-        let columnPos = 0;
-        columnPos = value.indexOf('\n');
-        if (columnPos < 0) {
-          columnPos = value.length;
-        }
-        editor.setCursorPosition({ line: 0, column: columnPos });
-      });
+      // void this.back(source).then(value => {
+      //   if (this.isDisposed || !value) {
+      //     return;
+      //   }
+      //   if (source === value) {
+      //     return;
+      //   }
+      //   this._setByHistory = true;
+      //   model.sharedModel.setSource(value);
+      //   let columnPos = 0;
+      //   columnPos = value.indexOf('\n');
+      //   if (columnPos < 0) {
+      //     columnPos = value.length;
+      //   }
+      //   editor.setCursorPosition({ line: 0, column: columnPos });
+      // });
     } else {
       void this.forward(source).then(value => {
         if (this.isDisposed) {
           return;
         }
         const text = value || this.placeholder;
-        if (model.value.text === text) {
+        if (source === text) {
           return;
         }
         this._setByHistory = true;
-        model.value.text = text;
+        model.sharedModel.setSource(text);
         const pos = editor.getPositionAt(text.length);
         if (pos) {
           editor.setCursorPosition(pos);
@@ -298,10 +321,10 @@ export class NotebookHistory implements INotebookHistory {
       this._history.length = 0;
       return;
     }
-
-    return kernel.requestHistory(Private.initialRequest).then(v => {
+    const history = kernel.requestHistory(Private.initialRequest).then(v => {
       this.onHistory(v);
     });
+    return history;
   }
 
   /**
@@ -318,6 +341,11 @@ export class NotebookHistory implements INotebookHistory {
 
     for (let i = 0; i < this._history.length; i++) {
       current = this._history[i];
+      console.log('filterStr.length', filterStr.length);
+      console.log(
+        'current.slice(0, filterStr.length)',
+        current.slice(0, filterStr.length)
+      );
       if (
         current !== last &&
         filterStr === current.slice(0, filterStr.length)

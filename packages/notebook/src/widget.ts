@@ -355,14 +355,17 @@ export class StaticNotebook extends WindowedList {
     }
     this._renderingLayoutChanged.emit(this._renderingLayout ?? 'default');
   }
-  accessLastHistory(): void {
-    console.log(this._history);
-    // this._history.back(this.content.activeCell);
-  }
+  // accessLastHistory(): void {
+  //   console.log(this._history);
+  //   this._history?.back(this.model?.activeCell?);
+  //     // content?.activeCell);
+  //   // this._history?.back('placeholder');
+  //     // this.content?.activeCell);
+  // }
 
-  accessNextHistory(): void {
-    // this._history.forward(this.content.activeCell);
-  }
+  // accessNextHistory(): void {
+  //   // this._history.forward(this.content.activeCell);
+  // }
 
   /**
    * Dispose of the resources held by the widget.
@@ -999,7 +1002,7 @@ export class StaticNotebook extends WindowedList {
   private _idleCallBack: number | null;
   private _mimetype: string;
   private _mimetypeService: IEditorMimeTypeService;
-  private _history: INotebookHistory | undefined;
+  readonly _history: INotebookHistory | undefined;
   private _modelChanged: Signal<this, void>;
   private _modelContentChanged: Signal<this, void>;
   private _notebookConfig: StaticNotebook.INotebookConfig;
@@ -1299,7 +1302,31 @@ export class Notebook extends StaticNotebook {
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.selectionChanged.connect(this._updateSelectedCells, this);
+    this.modelChanged.connect(value => {
+      console.log('Notebook.mode.stateChanged: ', value);
+    });
     this.addFooter();
+  }
+
+  accessLastHistory(): void {
+    const activeCell = this.activeCell;
+    const activeCellText = activeCell?.node.textContent;
+    let output: string | null | undefined = activeCellText;
+    if (activeCell) {
+      output = this._history?.back(activeCellText || '');
+    }
+    console.log(output);
+    // if (output && output instanceof Promise) {
+    //   console.log(output.then(value=>value))
+    // }
+    // activeCell.editor.
+    // content?.activeCell);
+    // this._history?.back('placeholder');
+    // this.content?.activeCell);
+  }
+
+  accessNextHistory(): void {
+    // this._history.forward(this.content.activeCell);
   }
 
   /**
