@@ -9,6 +9,11 @@ Extension Migration Guide
 JupyterLab 3.x to 4.x
 ---------------------
 
+Because of significant type changes from JupyterLab 3.x to 4.x, we recommend **publishing a new major version**
+of your extension to work with each major version of JupyterLab. For examples of extensions that use different
+major versions for Lab 3 and Lab 4, see `jupyterlab-vim <https://github.com/jupyterlab-contrib/jupyterlab-vim>`_
+and `jupyter-ai <https://github.com/jupyterlab/jupyter-ai>`_.
+
 Upgrading extension using the upgrade script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
