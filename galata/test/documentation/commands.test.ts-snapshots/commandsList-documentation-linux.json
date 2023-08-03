@@ -619,6 +619,14 @@
     "shortcuts": []
   },
   {
+    "id": "documentsearch:toggleSearchInSelection",
+    "label": "Search in Selection",
+    "caption": "",
+    "shortcuts": [
+      "Alt L"
+    ]
+  },
+  {
     "id": "editmenu:clear-all",
     "label": "Clear All",
     "caption": "",
