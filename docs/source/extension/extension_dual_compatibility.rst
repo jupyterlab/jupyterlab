@@ -226,9 +226,3 @@ that are provided by other plugins that have been loaded into JupyterLab. Jupyte
 itself is a provider of many of these "service objects" through its built-in extension
 plugins. The IStatusBar, for instance, is provided by one of JupyterLab's bundled plugins,
 and by using it in your extension, you act as the consumer.
-
-
-
-
-
-
