@@ -117,12 +117,13 @@ So, these capabilities form the backbone of extension compatibility: You can
 use them to make checks in your extensions that will allow them to function in
 both JupyterLab and Jupyter Notebook 7 (and others).
 
+Testing for Optional Features
+.............................
 
+Making an app-specific feature optional and checking if it's available before
+using it is one technique you can use to make your extensions compatible.
 
-
-
-
-Take a look at this example plugin:
+Take a look at a snippet from [this example](LINK) extension:
 
 ..
    TODO: use a pointer/reference to the code with the docs toolkit
@@ -188,46 +189,27 @@ JupyterLab and Jupyter Notebook 7:
     }
   }
 
+Using Required Features to Switch Behaviors
+...........................................
+
+Another pattern you can follow is to export a list of plugins from your
+extension, then use different "requires" features to select different
+behaviors based on which app the extension is currently running in.
+
+Here's a snippet from a sample extension which adds a "clap" button to
+the status bar in JupyterLab, or to the top area in Jupyter Notebook 7:
+
+FOO
+
+As you can see above, this extension exports multiple plugins in a list,
+and each plugin uses different "requires" features to switch between
+different layout areas depending on the app it's being loaded into.
+
+You can see the full example extension code [here](LINK).
 
 
 
 
-
-
-
-The IStatusBar, for instance, is
-provided by one of JupyterLab's bundled plugins, and by using it in your
-extension, you act as the consumer.
-
-
-By using these properties
-to request and test for the availability of certain features, you can
-
-
-
-
-Take a look at this example
-plugin:
-
-.. code::
-
-  const plugin: JupyterFrontEndPlugin<void> = {
-    id: 'shout_button_message:plugin',
-    description: 'An extension that adds a button to the right toolbar',
-    autoStart: true,
-    // The IStatusBar is marked optional here. If it's available, it will
-    // be provided to the plugin as an argument to the activate function
-    // (shown below), and if not it will be null.
-    optional: [IStatusBar],
-    activate: (app: JupyterFrontEnd, statusBar: IStatusBar | null) => {
-      console.log('JupyterLab extension shout_button_message is activated!');
-
-      // Create a ShoutWidget and add it to the interface in the right sidebar
-      const shoutWidget: ShoutWidget = new ShoutWidget(statusBar);
-      shoutWidget.id = 'JupyterShoutWidget';  // Widgets need an id
-      app.shell.add(shoutWidget, 'right');
-    }
-  };
 
 
 
@@ -250,60 +232,3 @@ and by using it in your extension, you act as the consumer.
 
 
 
-
-
-
-
-
-Practically speaking, JupyterLab provides
-
-JupyterLab provides a list
-
-
-
-
-Using Plugin Metadata and Multiple Plugins
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-JupyterLab's extension system is designed so that plugins can depend on and
-reuse features from one another. A key part of this approach is JupyterLab's
-provider-consumer pattern, and it's what enables many compatibility solutions.
-
-By using plugin metadata and designing your extension to export multiple
-plugins, you can either disable app-specific features entirely, or test for
-the presence of particular applications (and app-specific features), then
-modify your extension's behaviors accordingly.
-
-SAMPLE CODE SNIPPET(S) 1
-SAMPLE CODE SNIPPET(S) 2 etc, multiple examples
-
-
-
-
-
-
-The Producer/Consumer Approach
-
-JupyterLab components are designed to be
-
-
-
-
-The Multi-Plugin Approach for App-Specific Behaviors
-
-When you want to turn on certain features only for one specific app, you can use
-plugin metadata and export a list of plugins, each of which
-
-
-One way to selectively enable app-specific features is to export a list of
-plugins from your extension, then use the "requires" plugin property to request
-JupyterLab-only or Notebook-7 only features (testing for ILabShell or INotebookShell
-is an easy way to check if your extension is running in JupyterLab or Notebook). When
-your extension loads in Notebook 7, any JupyterLab-only features will not load:
-
-SAMPLE CODE/REPO LINK
-
-The example below adds a widget to the main area in JupyterLab, but adds to a
-different area in Notebook 7 (since there's no main area in Notebook 7).
-
-LINK/REPO
