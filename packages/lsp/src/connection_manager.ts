@@ -43,6 +43,13 @@ export class DocumentConnectionManager
   }
 
   /**
+   * The active widget adapter.
+   */
+  get currentAdapter(): WidgetLSPAdapter<IDocumentWidget> | null {
+    return this._currentAdapter;
+  }
+
+  /**
    * Map between the URI of the virtual document and its connection
    * to the language server
    */
@@ -118,6 +125,48 @@ export class DocumentConnectionManager
     Map<VirtualDocument.uri, VirtualDocument>
   > {
     return this._documentsChanged;
+  }
+
+  /**
+   * Signal emitted when the current adapter changes.
+   *
+   * Emits null when there is no current adapter.
+   */
+  get currentAdapterChanged(): ISignal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget> | null
+  > {
+    return this._currentAdapterChanged;
+  }
+
+  /**
+   * Signal emitted when an adapter is added.
+   */
+  get adapterAdded(): ISignal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget>
+  > {
+    return this._adapterAdded;
+  }
+
+  /**
+   * Signal emitted when an adapter is removed.
+   */
+  get adapterRemoved(): ISignal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget>
+  > {
+    return this._adapterRemoved;
+  }
+
+  /**
+   * Signal emitted when an adapter changed.
+   */
+  get adapterChanged(): ISignal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget>
+  > {
+    return this._adapterChanged;
   }
 
   /**
@@ -199,6 +248,17 @@ export class DocumentConnectionManager
   }
 
   /**
+   * Update the active adapter.
+   *
+   * @param  path - path to the inner document of the adapter or null.
+   */
+  updateCurrentAdapter(path: string | null): void {
+    const adapter = path ? this.adapters.get(path) ?? null : null;
+    this._currentAdapter = adapter;
+    this._currentAdapterChanged.emit(adapter);
+  }
+
+  /**
    * Register a widget adapter with this manager
    *
    * @param  path - path to the inner document of the adapter
@@ -209,12 +269,22 @@ export class DocumentConnectionManager
     adapter: WidgetLSPAdapter<IDocumentWidget>
   ): void {
     this.adapters.set(path, adapter);
+
+    adapter.widget.context.pathChanged.connect((context, newPath) => {
+      this.adapters.delete(path);
+      this.adapters.set(newPath, adapter);
+      this._adapterChanged.emit(adapter);
+    });
+
     adapter.disposed.connect(() => {
       if (adapter.virtualDocument) {
         this.documents.delete(adapter.virtualDocument.uri);
       }
       this.adapters.delete(path);
+      this._adapterRemoved.emit(adapter);
     });
+
+    this._adapterAdded.emit(adapter);
   }
 
   /**
@@ -523,10 +593,31 @@ export class DocumentConnectionManager
     Map<VirtualDocument.uri, VirtualDocument>
   > = new Signal(this);
 
+  private _currentAdapterChanged: Signal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget> | null
+  > = new Signal(this);
+
+  private _adapterAdded: Signal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget>
+  > = new Signal(this);
+
+  private _adapterRemoved: Signal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget>
+  > = new Signal(this);
+
+  private _adapterChanged: Signal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget>
+  > = new Signal(this);
+
   /**
    * Set of ignored languages
    */
   private _ignoredLanguages: Set<string>;
+  private _currentAdapter: WidgetLSPAdapter<IDocumentWidget> | null = null;
 }
 
 export namespace DocumentConnectionManager {

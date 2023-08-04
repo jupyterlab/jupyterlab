@@ -358,6 +358,11 @@ export interface IDocumentConnectionData {
  */
 export interface ILSPDocumentConnectionManager {
   /**
+   * The active widget adapter.
+   */
+  currentAdapter: WidgetLSPAdapter<IDocumentWidget> | null;
+
+  /**
    * The mapping of document uri to the  connection to language server.
    */
   connections: Map<VirtualDocument.uri, ILSPConnection>;
@@ -398,6 +403,38 @@ export interface ILSPDocumentConnectionManager {
   documentsChanged: ISignal<
     ILSPDocumentConnectionManager,
     Map<VirtualDocument.uri, VirtualDocument>
+  >;
+
+  /**
+   * Signal emitted when the current adapter changes.
+   */
+  currentAdapterChanged: ISignal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget> | null
+  >;
+
+  /**
+   * Signal emitted when an adapter is added.
+   */
+  adapterAdded: ISignal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget>
+  >;
+
+  /**
+   * Signal emitted when an adapter is removed.
+   */
+  adapterRemoved: ISignal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget>
+  >;
+
+  /**
+   * Signal emitted when an adapter changes.
+   */
+  adapterChanged: ISignal<
+    ILSPDocumentConnectionManager,
+    WidgetLSPAdapter<IDocumentWidget>
   >;
 
   /**
@@ -471,6 +508,13 @@ export interface ILSPDocumentConnectionManager {
    * Disconnect the signals of requested virtual document uri.
    */
   unregisterDocument(uri: string): void;
+
+  /**
+   * Update the active adapter.
+   *
+   * @param  path - path to the inner document of the adapter or null.
+   */
+  updateCurrentAdapter(path: string | null): void;
 
   /**
    * Register a widget adapter.
