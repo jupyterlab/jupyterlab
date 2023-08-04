@@ -43,9 +43,9 @@ export class DocumentConnectionManager
   }
 
   /**
-   * The active widget adapter.
+   * The path of the active widget adapter.
    */
-  get currentAdapter(): WidgetLSPAdapter<IDocumentWidget> | null {
+  get currentAdapter(): string | null {
     return this._currentAdapter;
   }
 
@@ -134,7 +134,7 @@ export class DocumentConnectionManager
    */
   get currentAdapterChanged(): ISignal<
     ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget> | null
+    string | null
   > {
     return this._currentAdapterChanged;
   }
@@ -253,9 +253,8 @@ export class DocumentConnectionManager
    * @param  path - path to the inner document of the adapter or null.
    */
   updateCurrentAdapter(path: string | null): void {
-    const adapter = path ? this.adapters.get(path) ?? null : null;
-    this._currentAdapter = adapter;
-    this._currentAdapterChanged.emit(adapter);
+    this._currentAdapter = path;
+    this._currentAdapterChanged.emit(path);
   }
 
   /**
@@ -595,7 +594,7 @@ export class DocumentConnectionManager
 
   private _currentAdapterChanged: Signal<
     ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget> | null
+    string | null
   > = new Signal(this);
 
   private _adapterAdded: Signal<
@@ -617,7 +616,7 @@ export class DocumentConnectionManager
    * Set of ignored languages
    */
   private _ignoredLanguages: Set<string>;
-  private _currentAdapter: WidgetLSPAdapter<IDocumentWidget> | null = null;
+  private _currentAdapter: string | null = null;
 }
 
 export namespace DocumentConnectionManager {

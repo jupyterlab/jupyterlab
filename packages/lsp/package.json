@@ -52,7 +52,6 @@
     "@lumino/disposable": "^2.1.2",
     "@lumino/signaling": "^2.1.2",
     "lodash.mergewith": "^4.6.1",
-    "typescript": "~5.0.4",
     "vscode-jsonrpc": "^6.0.0",
     "vscode-languageserver-protocol": "^3.17.0",
     "vscode-ws-jsonrpc": "~1.0.2"

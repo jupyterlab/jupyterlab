@@ -358,9 +358,9 @@ export interface IDocumentConnectionData {
  */
 export interface ILSPDocumentConnectionManager {
   /**
-   * The active widget adapter.
+   * The path of the active widget adapter.
    */
-  currentAdapter: WidgetLSPAdapter<IDocumentWidget> | null;
+  currentAdapter: string | null;
 
   /**
    * The mapping of document uri to the  connection to language server.
@@ -408,10 +408,7 @@ export interface ILSPDocumentConnectionManager {
   /**
    * Signal emitted when the current adapter changes.
    */
-  currentAdapterChanged: ISignal<
-    ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget> | null
-  >;
+  currentAdapterChanged: ISignal<ILSPDocumentConnectionManager, string | null>;
 
   /**
    * Signal emitted when an adapter is added.

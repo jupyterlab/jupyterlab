@@ -52,7 +52,7 @@ export class EditorAdapter implements IDisposable {
   /**
    * Setup the editor.
    */
-  private async _injectExtensions(): Promise<void> {
+  private _injectExtensions(): void {
     const editor = this._editor();
     if (!editor || editor.isDisposed) {
       return;
@@ -70,6 +70,7 @@ export class EditorAdapter implements IDisposable {
       if (!ext) {
         return;
       }
+
       editor.injectExtension(ext.instance(editor));
     });
   }

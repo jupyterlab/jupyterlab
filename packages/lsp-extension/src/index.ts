@@ -7,7 +7,8 @@
 
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  LabShell
 } from '@jupyterlab/application';
 import {
   CodeExtractorsManager,
@@ -23,6 +24,7 @@ import {
   TLanguageServerConfigurations,
   TLanguageServerId
 } from '@jupyterlab/lsp';
+import { DocumentWidget } from '@jupyterlab/docregistry';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
@@ -302,6 +304,29 @@ function addRunningSessionManager(
     )
   });
 }
+
+const currentAdapter: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/lsp-extension:currentAdapter',
+  description: 'Provides the language server settings.',
+  autoStart: true,
+  requires: [ILSPDocumentConnectionManager],
+  activate: (
+    app: JupyterFrontEnd<LabShell>,
+    connectionManager: ILSPDocumentConnectionManager
+  ) => {
+    app.shell.currentChanged.connect((_, args) => {
+      let newValue = args.newValue;
+
+      if (!newValue || !(newValue instanceof DocumentWidget)) {
+        console.log('No current widget');
+        return;
+      }
+
+      connectionManager.updateCurrentAdapter(newValue.context.path);
+    });
+  }
+};
+
 /**
  * Export the plugin as default.
  */
@@ -309,5 +334,6 @@ export default [
   plugin,
   featurePlugin,
   settingsPlugin,
-  codeExtractorManagerPlugin
+  codeExtractorManagerPlugin,
+  currentAdapter
 ];
