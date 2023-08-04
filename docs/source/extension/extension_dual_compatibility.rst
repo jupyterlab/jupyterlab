@@ -117,6 +117,12 @@ So, these capabilities form the backbone of extension compatibility: You can
 use them to make checks in your extensions that will allow them to function in
 both JupyterLab and Jupyter Notebook 7 (and others).
 
+JupyterLab itself is a [provider](LINK) of many features through its built-in plugins,
+which you can read more about in the [Common Extension Points document](LINK). It's
+a good idea to use these extension points while you're building your extensions (and
+by doing so you're acting as the "consumer" in JupyterLab's [provider-consumer pattern
+](LINK)).
+
 Testing for Optional Features
 .............................
 
@@ -208,28 +214,8 @@ different layout areas depending on the app it's being loaded into.
 
 You can read the full example extension code [in the examples repo](LINK).
 
+Further Reading
+---------------
 
-
-
-
-
-
-
-JupyterLab itself is a provider of manyof these "service objects" through its built-in extension
-plugins. The IStatusBar, for instance, is provided by one of JupyterLab's bundled plugins,
-and by using it in your extension, you act as the consumer.
-
-
-
-
-In summary, plugins from your extension can request features (required or optional)
-that are provided by other plugins that have been loaded into JupyterLab. JupyterLab
-itself is a provider of many of these "service objects" through its built-in extension
-plugins. The IStatusBar, for instance, is provided by one of JupyterLab's bundled plugins,
-and by using it in your extension, you act as the consumer.
-
-
-
-
-
-
+For an explanation of JupyterLab's plugin system and the provider-consumer pattern,
+read the [Provider Consumer Pattern document](LINK).
