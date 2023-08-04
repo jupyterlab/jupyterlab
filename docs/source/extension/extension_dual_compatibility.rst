@@ -123,7 +123,8 @@ Testing for Optional Features
 Making an app-specific feature optional and checking if it's available before
 using it is one technique you can use to make your extensions compatible.
 
-Take a look at a snippet from [this example](LINK) extension:
+Take a look at a snippet from [this example extension](LINK) in the examples
+repo (you can read the full extension example code there):
 
 ..
    TODO: use a pointer/reference to the code with the docs toolkit
@@ -196,7 +197,7 @@ Another pattern you can follow is to export a list of plugins from your
 extension, then use different "requires" features to select different
 behaviors based on which app the extension is currently running in.
 
-Here's a snippet from a sample extension which adds a "clap" button to
+Here's a snippet from [this sample extension](LINK) which adds a "clap" button to
 the status bar in JupyterLab, or to the top area in Jupyter Notebook 7:
 
 FOO
@@ -205,7 +206,7 @@ As you can see above, this extension exports multiple plugins in a list,
 and each plugin uses different "requires" features to switch between
 different layout areas depending on the app it's being loaded into.
 
-You can see the full example extension code [here](LINK).
+You can read the full example extension code [in the examples repo](LINK).
 
 
 
