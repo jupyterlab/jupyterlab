@@ -41,7 +41,7 @@ test.describe('ToC Running indicator', () => {
       await page.sidebar.getTabPosition('table-of-contents')
     );
     const executed = page.notebook.run();
-    await tocPanel.waitForSelector('[data-running="-1"]');
+    await tocPanel.waitForSelector('[data-running="-0.5"]');
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicator-error.png'
     );
