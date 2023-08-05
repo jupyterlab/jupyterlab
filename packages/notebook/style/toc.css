@@ -30,13 +30,13 @@
   background-color: var(--jp-inverse-layout-color3);
 }
 
-.jp-tocItem-content[data-running='-1']::after {
+.jp-tocItem-content[data-running='-0.5']::after {
   content: '⚠';
   color: var(--jp-error-color1);
 }
 
 .jp-tocItem-content[data-running='0'],
 .jp-tocItem-content[data-running='1'],
-.jp-tocItem-content[data-running='-1'] {
+.jp-tocItem-content[data-running='-0.5'] {
   margin-right: 12px;
 }

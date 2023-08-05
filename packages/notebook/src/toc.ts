@@ -21,11 +21,11 @@ export enum RunningStatus {
   /**
    * Cell is idle
    */
-  Idle = -2,
+  Idle = -1,
   /**
    * Cell execution is unsuccessful
    */
-  Error = -1,
+  Error = -0.5,
   /**
    * Cell execution is scheduled
    */
