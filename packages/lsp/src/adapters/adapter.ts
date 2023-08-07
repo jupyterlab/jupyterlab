@@ -610,7 +610,7 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
       editorReady: editor.ready,
       getEditor: editor.getEditor,
       path: this.documentPath,
-      adapter: this,
+      widgetAdapter: this,
       extensions: this.options.featureManager.extensionFactories()
     });
     this._editorToAdapter.set(editor, editorAdapter);

@@ -25,7 +25,7 @@ export class EditorAdapter implements IDisposable {
   constructor(options: EditorAdapter.IOptions) {
     this._path = options.path;
     this._editor = options.getEditor;
-    this._adapter = options.adapter;
+    this._widgetAdapter = options.widgetAdapter;
     this._extensions = options.extensions;
 
     void options.editorReady().then(() => {
@@ -62,7 +62,7 @@ export class EditorAdapter implements IDisposable {
       const ext = factory.factory({
         path: this._path,
         editor: editor,
-        adapter: this._adapter,
+        widgetAdapter: this._widgetAdapter,
         model: editor.model,
         inline: true
       });
@@ -77,7 +77,7 @@ export class EditorAdapter implements IDisposable {
 
   private _path: string;
   private _editor: () => CodeEditor.IEditor | null;
-  private _adapter: WidgetLSPAdapter<any>;
+  private _widgetAdapter: WidgetLSPAdapter<any>;
   private _extensions: EditorAdapter.ILSPEditorExtensionFactory[];
 }
 
@@ -107,7 +107,7 @@ export namespace EditorAdapter {
     /**
      * The widget lsp adapter.
      */
-    adapter: WidgetLSPAdapter<any>;
+    widgetAdapter: WidgetLSPAdapter<any>;
 
     /**
      * The list of CodeMirror extension factories
@@ -140,6 +140,6 @@ export namespace EditorAdapter {
     /**
      * The widget lsp adapter.
      */
-    adapter: WidgetLSPAdapter<any>;
+    widgetAdapter: WidgetLSPAdapter<any>;
   }
 }
