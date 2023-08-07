@@ -8,7 +8,7 @@ If you're making changes to the JupyterLab source code and you're concerned
 about `accessibility <https://en.wikipedia.org/wiki/Accessibility>`__, this page
 is for you.
 
-Looking for other ways to `contribute to accessibility
+Looking for other ways to `contribute to accessibility on Jupyter projects
 <https://jupyter-accessibility.readthedocs.io/en/latest/contribute/guide.html>`__?
 
 Where to start
@@ -25,7 +25,7 @@ are a good place to start.
 
 If you want to more fully immerse yourself in the work of making JupyterLab (or
 other Jupyter projects) more accessibile, then a good place to start would be to
-join the `accessibility community call
+join the `bi-weekly accessibility meeting
 <https://jupyter-accessibility.readthedocs.io/en/latest/community/index.html#team-meetings-and-notes>`__
 that happens every other week. If you cannot attend the call, you can peruse the
 meeting notes and find links to other resources on the `Jupyter Accessibility
@@ -43,6 +43,7 @@ JupyterLab is a web application, therefore the following two standards apply:
   <https://www.w3.org/WAI/standards-guidelines/wcag/>`__
 - ARIA - `Accessible Rich Internet Applications
   <https://www.w3.org/WAI/standards-guidelines/aria/>`__
+- ATAG - `Authoring Tool Accessibility Guidelines `<https://www.w3.org/WAI/standards-guidelines/atag/>`__
 
 These are good places to familiarize yourself with accessibility best practices
 for developing web sites (WCAG) and web applications (ARIA). Note that although
@@ -135,7 +136,7 @@ Altogether, the form will look something like this before you submit it:
 - JupyterLab repo: `a11ydev/jupyterlab`
 - JupyterLab ref: `jl-a11y-fix`
 - External package reo: `a11ydev/lumino`
-- Extrenal package ref: `lm-a11y-fix`
+- External package ref: `lm-a11y-fix`
 
 GitPod
 ^^^^^^
