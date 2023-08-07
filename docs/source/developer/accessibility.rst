@@ -1,8 +1,8 @@
 .. Copyright (c) Jupyter Development Team.
 .. Distributed under the terms of the Modified BSD License.
 
-JupyterLab Accessibility: Developer's Guide
-===========================================
+Accessibility: A JupyterLab Developer's Guide
+=============================================
 
 If you're making changes to the JupyterLab source code and you're concerned
 about `accessibility <https://en.wikipedia.org/wiki/Accessibility>`__, this page
@@ -13,6 +13,8 @@ Looking for other ways to `contribute to accessibility on Jupyter projects
 
 Where to start
 --------------
+
+Thank you for being interested in improving JupyterLab's accessibility. Whether you are making accessibility-specific fixes or considering the accessibility impacts of another contribution, the work you do betters JupyterLab for everyone who uses it.
 
 A common question when accessibility-minded developers come to JupyterLab is:
 where do I get started?
@@ -79,10 +81,17 @@ needs a color value, please use one of the variables defined.
 Upstream fixes in Lumino
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-JupyterLab does not use React, Vue, or Angular; it uses a front-end framework
-that was built specifically for it called Lumino. So some of the accessibility
-issues tracked in the JupyterLab GitHub repo actually need to be fixed in the
-Lumino repo.
+JupyterLab does uses a front-end framework that was built specifically for it
+called Lumino. Lumino is similar in some ways to React, Vue, and Angular, but it
+also provides a number of UI widgets like menu bars, tab bars, and dock panels.
+As a result, some of the accessibility issues tracked in the JupyterLab GitHub
+repo actually need to be fixed in the Lumino repo. A good resource for learning
+Lumino: `PhosphorJS (now Lumino) Mentor Sessions
+<https://www.youtube.com/playlist?list=PLFx5GKe0BTjQyCKtiK9TI-ekSuSn_8a3J>`__.
+PhosphorJS was Lumino's previous name. There is a page with `notes from the
+PhorphosJS sessions
+<https://gist.github.com/blink1073/1c21ec077acbb9178e01e14936ddda1b>`__ that
+also has a link to some additional videos that were not uploaded to YouTube.
 
 It's not always obvious when an accessibility issue should be fixed in the
 JupyterLab versus Lumino codebase. Generally speaking, if you can fix the issue
@@ -139,6 +148,19 @@ Altogether, the form will look something like this before you submit it:
 - JupyterLab ref: `jl-a11y-fix`
 - External package reo: `a11ydev/lumino`
 - External package ref: `lm-a11y-fix`
+
+Manual Testing
+^^^^^^^^^^^^^^
+
+Many accessibility issues become most clear when caught in action. Automated testing can be good at this, but you may also be able to find the impacts of accessibility of a contribution.
+
+One of the most approachable ways to try this is to try and complete a task related to your fix or contribution using an accessibility accommodation or setting. Common options include:
+
+- Using a `screen reader`<https://en.wikipedia.org/wiki/Screen_reader>__.
+- Zooming the page up to 400% via your browser.
+- Unplugging or not using your mouse. Navigate only with the keyboard.
+
+While testing, take note of what happens and compare it to what you can do to complete the task without your chosen accessibility accommodation. If there is anything you cannot complete, then you have a blocking accessibility issue. Even though your use of assistive tech or an accessibility accommodation will likely differ from someone who uses them regularly, knowing the results is helpful to tell if JupyterLab is behaving as you expect.
 
 GitPod
 ^^^^^^
