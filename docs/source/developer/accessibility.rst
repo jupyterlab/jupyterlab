@@ -60,7 +60,7 @@ implement a button using divs and aria attributes does not mean that you should!
 only use ARIA when you cannot  use existing HTML elements (button, input, nav,
 aside, etc.) to achieve the UX that you desire.
 
-Finally, there is much more accessibility knowledge on the Internet than there is in JupyterLab or Project Jupyter alone. Whatever you decide to work on, consider exploring accessibility resources in other spaces for similar or equivalent efforts. Accessibility communities tend to be generous with the resources they provide to improve web accessibility. Many times, searching for the name of the task or issue appended with `accessibility` in a search engine will give you several results and chance to learn from the broader community right away. 
+Finally, there is much more accessibility knowledge on the Internet than there is in JupyterLab or Project Jupyter alone. Whatever you decide to work on, consider exploring accessibility resources in other spaces for similar or equivalent efforts. Accessibility communities tend to be generous with the resources they provide to improve web accessibility. Many times, searching for the name of the task or issue appended with `accessibility` in a search engine will give you several results and chance to learn from the broader community right away.
 
 The rest of this section contains other best practices.
 
