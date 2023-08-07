@@ -307,7 +307,7 @@ function addRunningSessionManager(
 
 const currentAdapter: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/lsp-extension:currentAdapter',
-  description: 'Provides the language server settings.',
+  description: 'Provides the current `WidgetLSPAdapter`.',
   autoStart: true,
   requires: [ILSPDocumentConnectionManager],
   activate: (
