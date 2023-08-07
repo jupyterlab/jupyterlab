@@ -612,10 +612,11 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.runAllEnabled, {
       label: trans.__('Run All Enabled Commands Passed as Args'),
       execute: async args => {
-        const commands: string[] = args.commands as string[];
+        const commands: string[] = (args.commands as string[]) ?? [];
         const commandArgs: any = args.args;
         const argList = Array.isArray(args);
-        const errorIfNotEnabled: boolean = args.errorIfNotEnabled as boolean;
+        const errorIfNotEnabled: boolean =
+          (args.errorIfNotEnabled as boolean) ?? false;
         for (let i = 0; i < commands.length; i++) {
           const cmd = commands[i];
           const arg = argList ? commandArgs[i] : commandArgs;
@@ -627,6 +628,15 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
             }
           }
         }
+      },
+      isEnabled: args => {
+        const commands: string[] = (args.commands as string[]) ?? [];
+        const commandArgs: any = args.args;
+        const argList = Array.isArray(args);
+
+        return commands.some((cmd, idx) =>
+          app.commands.isEnabled(cmd, argList ? commandArgs[idx] : commandArgs)
+        );
       }
     });
 

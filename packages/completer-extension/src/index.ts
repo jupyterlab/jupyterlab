@@ -78,13 +78,16 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
 
     app.restored
       .then(() => {
-        const availableProviders = [...manager.getProviders().keys()];
+        const availableProviders = [...manager.getProviders().entries()];
+        const availableProviderIDs = availableProviders.map(
+          ([key, value]) => key
+        );
         settings.transform(COMPLETION_MANAGER_PLUGIN, {
           fetch: plugin => {
             const schema = plugin.schema.properties!;
             const defaultValue: { [key: string]: number } = {};
-            availableProviders.forEach((item, index) => {
-              defaultValue[item] = (index + 1) * 100;
+            availableProviders.forEach(([key, value], index) => {
+              defaultValue[key] = value.rank ?? (index + 1) * 10;
             });
             schema[AVAILABLE_PROVIDERS]['default'] = defaultValue;
             return plugin;
@@ -93,9 +96,9 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
         const settingsPromise = settings.load(COMPLETION_MANAGER_PLUGIN);
         settingsPromise
           .then(settingValues => {
-            updateSetting(settingValues, availableProviders);
+            updateSetting(settingValues, availableProviderIDs);
             settingValues.changed.connect(newSettings => {
-              updateSetting(newSettings, availableProviders);
+              updateSetting(newSettings, availableProviderIDs);
             });
           })
           .catch(console.error);

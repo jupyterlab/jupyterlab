@@ -15,8 +15,8 @@
       },
       "additionalProperties": false,
       "default": {
-        "CompletionProvider:context": 100,
-        "CompletionProvider:kernel": 200
+        "CompletionProvider:context": 500,
+        "CompletionProvider:kernel": 550
       }
     },
     "providerTimeout": {

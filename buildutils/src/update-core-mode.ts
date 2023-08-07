@@ -67,6 +67,7 @@ utils.run('jlpm', { cwd: staging });
 utils.run('jlpm dlx yarn-berry-deduplicate --strategy fewerHighest', {
   cwd: staging
 });
+utils.run('jlpm', { cwd: staging });
 
 // Build the core assets.
 utils.run('jlpm run build:prod:release', { cwd: staging });

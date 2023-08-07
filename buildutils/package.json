@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/buildutils",
-  "version": "4.0.2",
+  "version": "4.1.0-alpha.0",
   "description": "JupyterLab - Build Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -56,7 +56,7 @@
     "semver": "^7.3.2",
     "sort-package-json": "~1.53.1",
     "typescript": "~5.0.4",
-    "verdaccio": "^5.20.1"
+    "verdaccio": "^5.25.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.1",

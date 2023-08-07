@@ -80,7 +80,10 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   // note: it could be using namespace/IOptions pattern,
   // but I do not know how to make it work with the generic type T
   // (other than using 'any' in the IOptions interface)
-  constructor(public widget: T, protected options: IAdapterOptions) {
+  constructor(
+    public widget: T,
+    protected options: IAdapterOptions
+  ) {
     this._connectionManager = options.connectionManager;
     this._isConnected = false;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
