@@ -272,7 +272,7 @@ namespace Private {
   /**
    * Sandbox exceptions for trusted HTML.
    */
-  export const trusted: IFrame.SandboxExceptions[] = ['allow-scripts'];
+  export const trusted: IFrame.SandboxExceptions[] = ['allow-scripts', 'allow-popups'];
 
   /**
    * Namespace for TrustedButton.
