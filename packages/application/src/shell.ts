@@ -7,7 +7,6 @@ import {
   classes,
   DockPanelSvg,
   LabIcon,
-  SidePanel,
   TabBarSvg,
   tabIcon,
   TabPanelSvg
@@ -280,14 +279,21 @@ export namespace ILabShell {
     readonly widgets: Array<Widget> | null;
 
     /**
-     * Vertical sizes of the widgets situated in the sidebar.
+     * The collection of widgets states held by the sidebar.
      */
-    readonly sizes: Array<number> | null;
+    readonly widgetStates: {
+      [id: string]: {
+        /**
+         * Vertical sizes of the widgets.
+         */
+        readonly sizes: Array<number> | null;
 
-    /**
-     * Expansion states of the widgets situated in the sidebar.
-     */
-    readonly expansionStates: Array<boolean>;
+        /**
+         * Expansion states of the widgets.
+         */
+        readonly expansionStates: Array<boolean> | null;
+      };
+    };
   }
 }
 
@@ -2021,35 +2027,31 @@ namespace Private {
       const collapsed = this._sideBar.currentTitle === null;
       const widgets = Array.from(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
-      let sizes = new Array<number>();
+      const widgetStates: {
+        [id: string]: {
+          sizes: number[] | null;
+          expansionStates: boolean[] | null;
+        };
+      } = {};
       let expansionStates = new Array<boolean>();
-      Object.entries(this).forEach(([key, value]) => {
-        if (value) {
-          Object.values(value).forEach(panel => {
-            if (
-              panel instanceof AccordionPanel ||
-              panel instanceof SplitPanel
-            ) {
-              sizes = panel.relativeSizes() as number[];
-            }
-          });
-        }
-      });
       this._stackedPanel.widgets.forEach(w => {
-        if (w instanceof SidePanel) {
+        if (w instanceof SplitPanel) {
           w.widgets.forEach(wi => {
             expansionStates.push(wi.isHidden);
           });
+          expansionStates.reverse();
+          widgetStates[w.id] = {
+            sizes: w.relativeSizes() as number[],
+            expansionStates
+          };
         }
       });
-
       return {
         collapsed,
         currentWidget,
         visible: !this._isHiddenByUser,
         widgets,
-        sizes,
-        expansionStates
+        widgetStates
       };
     }
 
@@ -2066,27 +2068,15 @@ namespace Private {
       if (!data.visible) {
         this.hide();
       }
-      if (data.sizes) {
-        Object.entries(this).forEach(([key, value]) => {
-          if (value) {
-            Object.values(value).forEach(panel => {
-              if (
-                panel instanceof AccordionPanel ||
-                panel instanceof SplitPanel
-              ) {
-                panel.setRelativeSizes(data.sizes as number[]);
-              }
-            });
-          }
-        });
-      }
-      if (data.expansionStates) {
-        data.expansionStates.reverse();
+      if (data.widgetStates) {
         this._stackedPanel.widgets.forEach(w => {
-          if (w instanceof SidePanel) {
+          if (w instanceof SplitPanel) {
             w.widgets.forEach(wi => {
-              wi.setHidden(data.expansionStates.pop() as boolean);
+              wi.setHidden(
+                data.widgetStates[w.id].expansionStates!.pop() as boolean
+              );
             });
+            w.setRelativeSizes(data.widgetStates[w.id].sizes as number[]);
           }
         });
       }

@@ -448,8 +448,7 @@ export class LayoutRestorer implements ILayoutRestorer {
     }
     const dehydrated: Private.ISideArea = {
       collapsed: area.collapsed,
-      visible: area.visible,
-      expansionStates: area.expansionStates
+      visible: area.visible
     };
     if (area.currentWidget) {
       const current = Private.nameProperty.get(area.currentWidget);
@@ -462,8 +461,13 @@ export class LayoutRestorer implements ILayoutRestorer {
         .map(widget => Private.nameProperty.get(widget))
         .filter(name => !!name);
     }
-    if (area.sizes) {
-      dehydrated.sizes = area.sizes;
+    if (area.widgetStates) {
+      dehydrated.widgetStates = area.widgetStates as {
+        [id: string]: {
+          sizes: number[] | null;
+          expansionStates: boolean[] | null;
+        };
+      };
     }
     return dehydrated;
   }
@@ -484,8 +488,12 @@ export class LayoutRestorer implements ILayoutRestorer {
         currentWidget: null,
         visible: true,
         widgets: null,
-        sizes: null,
-        expansionStates: [true]
+        widgetStates: {
+          ['null']: {
+            sizes: null,
+            expansionStates: null
+          }
+        }
       };
     }
     const internal = this._widgets;
@@ -501,15 +509,18 @@ export class LayoutRestorer implements ILayoutRestorer {
             internal.has(`${name}`) ? internal.get(`${name}`) : null
           )
           .filter(widget => !!widget);
-    const sizes = area.sizes as number[];
-    const expansionStates = area.expansionStates as boolean[];
+    const widgetStates = area.widgetStates as {
+      [id: string]: {
+        sizes: number[] | null;
+        expansionStates: boolean[] | null;
+      };
+    };
     return {
       collapsed,
       currentWidget: currentWidget!,
       widgets: widgets as Widget[] | null,
       visible: area.visible ?? true,
-      sizes,
-      expansionStates
+      widgetStates: widgetStates
     };
   }
 
