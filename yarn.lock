@@ -2359,7 +2359,7 @@ __metadata:
     remove-dependency: ./lib/remove-dependency.js
     update-dependency: ./lib/update-dependency.js
     update-dist-tag: ./lib/update-dist-tag.js
-    update-yarn-lock: ./lib/yarn.utils.js
+    update-staging-lock: ./lib/update-staging-lock.js
   languageName: unknown
   linkType: soft
 
