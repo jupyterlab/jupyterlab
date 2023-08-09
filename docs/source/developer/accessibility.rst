@@ -89,7 +89,7 @@ repo actually need to be fixed in the Lumino repo. A good resource for learning
 Lumino: `PhosphorJS (now Lumino) Mentor Sessions
 <https://www.youtube.com/playlist?list=PLFx5GKe0BTjQyCKtiK9TI-ekSuSn_8a3J>`__.
 PhosphorJS was Lumino's previous name. There is a page with `notes from the
-PhorphosJS sessions
+PhosphorJS sessions
 <https://gist.github.com/blink1073/1c21ec077acbb9178e01e14936ddda1b>`__ that
 also has a link to some additional videos that were not uploaded to YouTube.
 
