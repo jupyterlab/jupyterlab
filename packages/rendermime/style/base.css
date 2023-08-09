@@ -44,7 +44,7 @@
 
 .jp-RenderedText pre a:visited {
   text-decoration: underline;
-  color: var(--jp-content-font-color3);
+  color: var(--jp-content-link-visited-color);
 }
 
 /* console foregrounds and backgrounds */
