@@ -355,7 +355,7 @@ namespace Private {
               (props.htmlDocument.trusted = !props.htmlDocument.trusted)
             }
             tooltip={trans.__(`Whether the HTML file is trusted.
-Trusting the file allows links and scripts to run in it,
+Trusting the file allows opening pop-ups and running scripts
 which may result in security risks.
 Only enable for files you trust.`)}
             label={
