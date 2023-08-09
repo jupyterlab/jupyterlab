@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ServerConnection } from '@jupyterlab/services';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
 import { Token } from '@lumino/coreutils';
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter } from './adapters/adapter';
+import { EditorAdapter, WidgetLSPAdapter } from './adapters';
 import { IForeignCodeExtractor } from './extractors/types';
 import {
   AnyCompletion,
@@ -26,8 +27,7 @@ import {
 
 import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import { EditorAdapter } from './adapters/editorAdapter';
+
 export { IDocumentInfo };
 
 /**
@@ -358,11 +358,6 @@ export interface IDocumentConnectionData {
  */
 export interface ILSPDocumentConnectionManager {
   /**
-   * The path of the active widget adapter.
-   */
-  currentAdapter: string | null;
-
-  /**
    * The mapping of document uri to the  connection to language server.
    */
   connections: Map<VirtualDocument.uri, ILSPConnection>;
@@ -375,7 +370,7 @@ export interface ILSPDocumentConnectionManager {
   /**
    * The mapping of document uri to the widget adapter.
    */
-  adapters: Map<string, WidgetLSPAdapter<IDocumentWidget>>;
+  adapters: Map<string, WidgetLSPAdapter>;
 
   /**
    * Signal emitted when a connection is connected.
@@ -403,35 +398,6 @@ export interface ILSPDocumentConnectionManager {
   documentsChanged: ISignal<
     ILSPDocumentConnectionManager,
     Map<VirtualDocument.uri, VirtualDocument>
-  >;
-
-  /**
-   * Signal emitted when the current adapter changes.
-   */
-  currentAdapterChanged: ISignal<ILSPDocumentConnectionManager, string | null>;
-
-  /**
-   * Signal emitted when an adapter is added.
-   */
-  adapterAdded: ISignal<
-    ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget>
-  >;
-
-  /**
-   * Signal emitted when an adapter is removed.
-   */
-  adapterRemoved: ISignal<
-    ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget>
-  >;
-
-  /**
-   * Signal emitted when an adapter changes.
-   */
-  adapterChanged: ISignal<
-    ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget>
   >;
 
   /**
@@ -507,22 +473,12 @@ export interface ILSPDocumentConnectionManager {
   unregisterDocument(uri: string): void;
 
   /**
-   * Update the active adapter.
-   *
-   * @param  path - path to the inner document of the adapter or null.
-   */
-  updateCurrentAdapter(path: string | null): void;
-
-  /**
    * Register a widget adapter.
    *
    * @param  path - path to current document widget of input adapter
    * @param  adapter - the adapter need to be registered
    */
-  registerAdapter(
-    path: string,
-    adapter: WidgetLSPAdapter<IDocumentWidget>
-  ): void;
+  registerAdapter(path: string, adapter: WidgetLSPAdapter): void;
 }
 
 /**
@@ -604,6 +560,78 @@ export interface ILSPCodeExtractorsManager {
 }
 
 /**
+ * A tracker that tracks WidgetLSPAdapters.
+ *
+ * @typeparam T - The type of widget being tracked. Defaults to `WidgetLSPAdapter`.
+ */
+export interface IWidgetLSPAdapterTracker<
+  T extends WidgetLSPAdapter = WidgetLSPAdapter
+> extends IDisposable {
+  /**
+   * A signal emitted when an adapter is added.
+   */
+  readonly adapterAdded: ISignal<this, T>;
+
+  /**
+   * The current adapter is the most recently focused or added adapter.
+   *
+   * #### Notes
+   * It is the most recently focused adapter, or the most recently added
+   * adapter if no adapter has taken focus.
+   */
+  readonly currentAdapter: T | null;
+
+  /**
+   * A signal emitted when the current instance changes.
+   *
+   * #### Notes
+   * If the last instance being tracked is disposed, `null` will be emitted.
+   */
+  readonly currentChanged: ISignal<this, T | null>;
+
+  /**
+   * The number of instances held by the tracker.
+   */
+  readonly size: number;
+
+  /**
+   * A signal emitted when a adapter is updated.
+   */
+  readonly adapterUpdated: ISignal<this, T>;
+
+  /**
+   * Find the first instance in the tracker that satisfies a filter function.
+   *
+   * @param - fn The filter function to call on each instance.
+   *
+   * #### Notes
+   * If nothing is found, the value returned is `undefined`.
+   */
+  find(fn: (obj: T) => boolean): T | undefined;
+
+  /**
+   * Iterate through each instance in the tracker.
+   *
+   * @param fn - The function to call on each instance.
+   */
+  forEach(fn: (obj: T) => void): void;
+
+  /**
+   * Filter the instances in the tracker based on a predicate.
+   *
+   * @param fn - The function by which to filter.
+   */
+  filter(fn: (obj: T) => boolean): T[];
+
+  /**
+   * Check if this tracker has the specified instance.
+   *
+   * @param obj - The object whose existence is being checked.
+   */
+  has(obj: T): boolean;
+}
+
+/**
  * @alpha
  *
  * The virtual documents and language server connections manager
@@ -640,6 +668,18 @@ export const ILSPFeatureManager = new Token<ILSPFeatureManager>(
 export const ILSPCodeExtractorsManager = new Token<ILSPCodeExtractorsManager>(
   '@jupyterlab/lsp:ILSPCodeExtractorsManager',
   'Provides the code extractor manager. This token is required in your extension to register code extractor allowing the creation of multiple virtual document from an opened document.'
+);
+
+/**
+ * @alpha
+ *
+ * The WidgetLSPAdapter tracker. Require this token in your extension to
+ * track WidgetLSPAdapters.
+ *
+ */
+export const IWidgetLSPAdapterTracker = new Token<IWidgetLSPAdapterTracker>(
+  '@jupyterlab/lsp:IWidgetLSPAdapterTracker',
+  'Provides the WidgetLSPAdapter tracker. This token is required in your extension to track WidgetLSPAdapters.'
 );
 
 /**

@@ -2,10 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter } from './adapters/adapter';
+import { WidgetLSPAdapter, WidgetLSPAdapterTracker } from './adapters';
 import { LSPConnection } from './connection';
 import { ClientCapabilities } from './lsp';
 import { AskServersToSendTraceNotifications } from './plugin';
@@ -16,6 +15,7 @@ import {
   ILSPConnection,
   ILSPDocumentConnectionManager,
   ISocketConnectionOptions,
+  IWidgetLSPAdapterTracker,
   TLanguageServerConfigurations,
   TLanguageServerId,
   TServerKeys
@@ -39,14 +39,8 @@ export class DocumentConnectionManager
     this.adapters = new Map();
     this._ignoredLanguages = new Set();
     this.languageServerManager = options.languageServerManager;
+    this._adapterTracker = options.adapterTracker as WidgetLSPAdapterTracker;
     Private.setLanguageServerManager(options.languageServerManager);
-  }
-
-  /**
-   * The path of the active widget adapter.
-   */
-  get currentAdapter(): string | null {
-    return this._currentAdapter;
   }
 
   /**
@@ -58,7 +52,7 @@ export class DocumentConnectionManager
   /**
    * Map between the path of the document and its adapter
    */
-  readonly adapters: Map<string, WidgetLSPAdapter<IDocumentWidget>>;
+  readonly adapters: Map<string, WidgetLSPAdapter>;
 
   /**
    * Map between the URI of the virtual document and the document itself.
@@ -125,48 +119,6 @@ export class DocumentConnectionManager
     Map<VirtualDocument.uri, VirtualDocument>
   > {
     return this._documentsChanged;
-  }
-
-  /**
-   * Signal emitted when the current adapter changes.
-   *
-   * Emits null when there is no current adapter.
-   */
-  get currentAdapterChanged(): ISignal<
-    ILSPDocumentConnectionManager,
-    string | null
-  > {
-    return this._currentAdapterChanged;
-  }
-
-  /**
-   * Signal emitted when an adapter is added.
-   */
-  get adapterAdded(): ISignal<
-    ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget>
-  > {
-    return this._adapterAdded;
-  }
-
-  /**
-   * Signal emitted when an adapter is removed.
-   */
-  get adapterRemoved(): ISignal<
-    ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget>
-  > {
-    return this._adapterRemoved;
-  }
-
-  /**
-   * Signal emitted when an adapter changed.
-   */
-  get adapterChanged(): ISignal<
-    ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget>
-  > {
-    return this._adapterChanged;
   }
 
   /**
@@ -248,31 +200,18 @@ export class DocumentConnectionManager
   }
 
   /**
-   * Update the active adapter.
-   *
-   * @param  path - path to the inner document of the adapter or null.
-   */
-  updateCurrentAdapter(path: string | null): void {
-    this._currentAdapter = path;
-    this._currentAdapterChanged.emit(path);
-  }
-
-  /**
    * Register a widget adapter with this manager
    *
    * @param  path - path to the inner document of the adapter
    * @param  adapter - the adapter to be registered
    */
-  registerAdapter(
-    path: string,
-    adapter: WidgetLSPAdapter<IDocumentWidget>
-  ): void {
+  registerAdapter(path: string, adapter: WidgetLSPAdapter): void {
     this.adapters.set(path, adapter);
+    this._adapterTracker.add(adapter);
 
     adapter.widget.context.pathChanged.connect((context, newPath) => {
       this.adapters.delete(path);
       this.adapters.set(newPath, adapter);
-      this._adapterChanged.emit(adapter);
     });
 
     adapter.disposed.connect(() => {
@@ -280,10 +219,7 @@ export class DocumentConnectionManager
         this.documents.delete(adapter.virtualDocument.uri);
       }
       this.adapters.delete(path);
-      this._adapterRemoved.emit(adapter);
     });
-
-    this._adapterAdded.emit(adapter);
   }
 
   /**
@@ -592,31 +528,11 @@ export class DocumentConnectionManager
     Map<VirtualDocument.uri, VirtualDocument>
   > = new Signal(this);
 
-  private _currentAdapterChanged: Signal<
-    ILSPDocumentConnectionManager,
-    string | null
-  > = new Signal(this);
-
-  private _adapterAdded: Signal<
-    ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget>
-  > = new Signal(this);
-
-  private _adapterRemoved: Signal<
-    ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget>
-  > = new Signal(this);
-
-  private _adapterChanged: Signal<
-    ILSPDocumentConnectionManager,
-    WidgetLSPAdapter<IDocumentWidget>
-  > = new Signal(this);
-
   /**
    * Set of ignored languages
    */
   private _ignoredLanguages: Set<string>;
-  private _currentAdapter: string | null = null;
+  private _adapterTracker: WidgetLSPAdapterTracker;
 }
 
 export namespace DocumentConnectionManager {
@@ -625,6 +541,11 @@ export namespace DocumentConnectionManager {
      * The language server manager instance.
      */
     languageServerManager: ILanguageServerManager;
+
+    /**
+     * The WidgetLSPAdapter's tracker.
+     */
+    adapterTracker: IWidgetLSPAdapterTracker;
   }
 
   /**

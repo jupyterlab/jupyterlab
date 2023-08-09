@@ -75,8 +75,9 @@ export interface IAdapterOptions {
  * as this would make the logic of inspections caching impossible to maintain, thus the WidgetAdapter
  * has to handle that, keeping multiple connections and multiple virtual documents.
  */
-export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
-  implements IDisposable
+export abstract class WidgetLSPAdapter<
+  T extends IDocumentWidget = IDocumentWidget
+> implements IDisposable
 {
   // note: it could be using namespace/IOptions pattern,
   // but I do not know how to make it work with the generic type T

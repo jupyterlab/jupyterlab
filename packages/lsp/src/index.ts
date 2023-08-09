@@ -5,8 +5,7 @@
  * @module lsp
  */
 
-export * from './adapters/adapter';
-export * from './adapters/editorAdapter';
+export * from './adapters';
 export * from './connection_manager';
 export * from './extractors';
 export * from './feature';

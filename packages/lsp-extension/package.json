@@ -37,7 +37,6 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.1.0-alpha.1",
-    "@jupyterlab/docregistry": "^4.1.0-alpha.1",
     "@jupyterlab/lsp": "^4.1.0-alpha.1",
     "@jupyterlab/running": "^4.1.0-alpha.1",
     "@jupyterlab/settingregistry": "^4.1.0-alpha.1",

@@ -18,13 +18,14 @@ import {
   ILSPConnection,
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
+  IWidgetLSPAdapterTracker,
   LanguageServerManager,
   LanguageServersExperimental,
   TextForeignCodeExtractor,
   TLanguageServerConfigurations,
-  TLanguageServerId
+  TLanguageServerId,
+  WidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
-import { DocumentWidget } from '@jupyterlab/docregistry';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
@@ -45,7 +46,7 @@ const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
   activate,
   id: '@jupyterlab/lsp-extension:plugin',
   description: 'Provides the language server connection manager.',
-  requires: [ITranslator],
+  requires: [ITranslator, IWidgetLSPAdapterTracker],
   optional: [IRunningSessionManagers],
   provides: ILSPDocumentConnectionManager,
   autoStart: true
@@ -101,13 +102,15 @@ const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManage
 function activate(
   app: JupyterFrontEnd,
   translator: ITranslator,
+  tracker: IWidgetLSPAdapterTracker,
   runningSessionManagers: IRunningSessionManagers | null
 ): ILSPDocumentConnectionManager {
   const languageServerManager = new LanguageServerManager({
     settings: app.serviceManager.serverSettings
   });
   const connectionManager = new DocumentConnectionManager({
-    languageServerManager
+    languageServerManager,
+    adapterTracker: tracker
   });
 
   // Add a sessions manager if the running extension is available
@@ -305,25 +308,12 @@ function addRunningSessionManager(
   });
 }
 
-const currentAdapter: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/lsp-extension:currentAdapter',
-  description: 'Provides the current `WidgetLSPAdapter`.',
+const currentAdapter: JupyterFrontEndPlugin<IWidgetLSPAdapterTracker> = {
+  id: '@jupyterlab/lsp-extension:tracker',
+  description: 'Provides the `WidgetLSPAdapter`s tracker.',
   autoStart: true,
-  requires: [ILSPDocumentConnectionManager],
-  activate: (
-    app: JupyterFrontEnd<LabShell>,
-    connectionManager: ILSPDocumentConnectionManager
-  ) => {
-    app.shell.currentChanged.connect((_, args) => {
-      let newValue = args.newValue;
-
-      if (!newValue || !(newValue instanceof DocumentWidget)) {
-        console.log('No current widget');
-        return;
-      }
-
-      connectionManager.updateCurrentAdapter(newValue.context.path);
-    });
+  activate: (app: JupyterFrontEnd<LabShell>): IWidgetLSPAdapterTracker => {
+    return new WidgetLSPAdapterTracker({ shell: app.shell });
   }
 };
 
