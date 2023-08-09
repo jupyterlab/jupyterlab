@@ -6,9 +6,18 @@ The JupyterLab Plugin System
 
 JupyterLab's plugin system is designed so that plugins can depend on and
 reuse features from one another. A key part of this approach is JupyterLab's
-**provider-consumer pattern**: One plugin "provides" object(s) (called service
-objects) to the system, and other plugins "consume" those objects by using
-them in an extension to add extra features and customizations to JupyterLab.
+**provider-consumer pattern**.
+
+The Provider-Consumer Pattern
+-----------------------------
+
+.. 
+    TODO add to glossary, provider-consumer, service objects, tokens
+
+In the provider-consumer pattern, one plugin "provides" object(s) (called
+**service objects**) to the system, and other plugins "consume" those objects
+by using them in an extension to add extra features and customizations
+to JupyterLab.
 
 Each plugin uses some properties (the "requires" and "optional" properties) to
 request features it wants which are provided by other plugins that have been
@@ -39,8 +48,29 @@ will only load your plugin if that feature is available. By designating a
 feature in the "optional" list, JupyterLab will pass you an object for it
 (if it's available) or null if it's not.
 
+So in summary: The plugins that make up your extension ask for features using
+the "required" and "optional" properties, then JupyterLab gives them to your
+plugin as arguments to your "activate" function (which is called by JupyterLab
+when your extension is loaded).
+
+
+
+
+Every plugin needs an "activate" function, which will be called by JupyterLab
+when your extension is loaded. When JupyterLab calls your plugin's "activate"
+function, it will always pass an application as the first argument, then it
+will pass any "required" objects in the order you specify them, then any
+"optional" objects in the order you specify them.
+
+In your plugin's "activate" function (which is called by JupyterLab when
+your extension is loaded), you need to 
 make sure to add args to actrivate
 you provide a token and get a service object back
+
+
+
+
+
 
 JupyterLab itself is a [provider](LINK) of many features through its built-in plugins,
 which you can read more about in the [Common Extension Points document](LINK). It's
