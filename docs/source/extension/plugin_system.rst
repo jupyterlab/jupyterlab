@@ -4,9 +4,9 @@
 The JupyterLab Plugin System
 ============================
 
-JupyterLab's extension system is designed so that plugins can depend on and
+JupyterLab's plugin system is designed so that plugins can depend on and
 reuse features from one another. A key part of this approach is JupyterLab's
-provider-consumer pattern.
+**provider-consumer pattern**.
 
 Each plugin uses some properties (the "requires" and "optional" properties) to
 request features it wants which are provided by other plugins that have been

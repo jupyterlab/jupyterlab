@@ -204,18 +204,67 @@ extension, then use different "requires" features to select different
 behaviors based on which app the extension is currently running in.
 
 Here's a snippet from [this sample extension](LINK) which adds a "clap" button to
-the status bar in JupyterLab, or to the top area in Jupyter Notebook 7:
+the top area in JupyterLab, or to the right sidebar in Jupyter Notebook 7 (you can
+read the full extension example code there):
 
-FOO
+.. code::
+  /**
+  * Initialization data for the clap_button extension.
+  */
+  const pluginJupyterLab: JupyterFrontEndPlugin<void> = {
+    id: 'clap_button:pluginLab',
+    description: 'Adds a clap button to the top area (JupyterLab) or right area (Jupyter Notebook 7)',
+    autoStart: true,
+    requires: [ILabShell],
+    activate: (app: JupyterFrontEnd) => {
+      console.log('JupyterLab extension clap_button is activated!');
+
+      // Create a ClapWidget and add it to the interface in the top area
+      const clapWidget: ClapWidget = new ClapWidget();
+      clapWidget.id = 'JupyterLabClapWidget';  // Widgets need an id
+      app.shell.add(clapWidget, 'top');
+    }
+  };
+
+  /**
+  * Initialization data for the clap_button extension.
+  */
+  const pluginJupyterNotebook: JupyterFrontEndPlugin<void> = {
+    id: 'clap_button:pluginNotebook',
+    description: 'Adds a clap button to the top area (JupyterLab) or right area (Jupyter Notebook 7)',
+    autoStart: true,
+    requires: [INotebookShell],
+    activate: (app: JupyterFrontEnd) => {
+      console.log('Jupyter Notebook extension clap_button is activated!');
+
+      // Create a ClapWidget and add it to the interface in the top area
+      const clapWidget: ClapWidget = new ClapWidget();
+      clapWidget.id = 'JupyterNotebookClapWidget';  // Widgets need an id
+      app.shell.add(clapWidget, 'right');
+    }
+  };
+
+  const plugins: JupyterFrontEndPlugin<void>[] = [pluginJupyterLab, pluginJupyterNotebook];
+
+  export default plugins;
 
 As you can see above, this extension exports multiple plugins in a list,
 and each plugin uses different "requires" features to switch between
-different layout areas depending on the app it's being loaded into.
+different behaviors (in this case, different layout areas) depending on
+the app it's being loaded into. The first plugin requires "ILabShell"
+(available in JupyterLab), and the second plugin requires "INotebookShell"
+(available in Jupyter Notebook 7).
 
-You can read the full example extension code [in the examples repo](LINK).
+This approach (testing the shell at plugin load time) is not the preferred
+method for making compatible extensions since it is less granular, less
+universal (as the shell is specific to a given app generally) and offers
+only very broad behavior switching, though it can be used to make specialized
+features that target one particular app in your extensions. In general, you
+should prefer the "Testing for Optional Features" approach and target the
+"Common Extension Points" mentioned above.
 
 Further Reading
 ---------------
 
 For an explanation of JupyterLab's plugin system and the provider-consumer pattern,
-read the [Provider Consumer Pattern document](LINK).
+read the :ref:`Plugin System document <plugin_system>`.
