@@ -81,7 +81,7 @@ needs a color value, please use one of the variables defined.
 Upstream fixes in Lumino
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-JupyterLab does uses a front-end framework that was built specifically for it
+JupyterLab uses a front-end framework that was built specifically for it
 called Lumino. Lumino is similar in some ways to React, Vue, and Angular, but it
 also provides a number of UI widgets like menu bars, tab bars, and dock panels.
 As a result, some of the accessibility issues tracked in the JupyterLab GitHub
