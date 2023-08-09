@@ -34,18 +34,25 @@ const RENDER_TIMEOUT = 1000;
 const CSS_CLASS = 'jp-HTMLViewer';
 
 const UNTRUSTED_LINK_STYLE = (options: { warning: string }) => `<style>
-a {
+a[target="_blank"],
+area[target="_blank"],
+form[target="_blank"] {
   cursor: not-allowed !important;
 }
-a:hover::after {
+a[target="_blank"]:hover::after,
+area[target="_blank"]:hover::after,
+form[target="_blank"]:hover::after {
   content: "${options.warning}";
+  box-sizing: border-box;
   position: fixed;
   top: 0;
   left: 0;
+  width: 100%;
   z-index: 1000;
   border: 2px solid #e65100;
   background-color: #ffb74d;
   color: black;
+  text-align: center;
 }
 </style>`;
 
