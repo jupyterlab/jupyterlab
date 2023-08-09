@@ -58,6 +58,7 @@ input[formtarget="_blank"][type="submit"]:hover::after {
   border: 2px solid #e65100;
   background-color: #ffb74d;
   color: black;
+  font-family: system-ui, -apple-system, blinkmacsystemfont, 'Segoe UI', helvetica, arial, sans-serif;
   text-align: center;
 }
 </style>`;
@@ -202,7 +203,7 @@ export class HTMLViewer
     if (!this.trusted) {
       const warning = this.translator
         .load('jupyterlab')
-        .__('Action disabled as the file is untrusted.');
+        .__('Action disabled as the file is not trusted.');
       doc.body.insertAdjacentHTML(
         'beforeend',
         UNTRUSTED_LINK_STYLE({ warning })
