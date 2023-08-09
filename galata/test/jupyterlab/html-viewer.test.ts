@@ -35,7 +35,7 @@ test.describe('HTML Viewer', () => {
       for (const link of document.querySelectorAll('a')) {
         count +=
           window.getComputedStyle(link, '::after').content ==
-          '"Link blocked as the file is untrusted."'
+          '"Action disabled as the file is untrusted."'
             ? 1
             : 0;
       }
@@ -55,7 +55,7 @@ test.describe('HTML Viewer', () => {
       for (const link of document.querySelectorAll('a')) {
         count +=
           window.getComputedStyle(link, '::after').content ==
-          '"Link blocked as the file is untrusted."'
+          '"Action disabled as the file is untrusted."'
             ? 1
             : 0;
       }
