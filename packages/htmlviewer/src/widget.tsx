@@ -33,6 +33,22 @@ const RENDER_TIMEOUT = 1000;
  */
 const CSS_CLASS = 'jp-HTMLViewer';
 
+const UNTRUSTED_LINK_STYLE = (options: { warning: string }) => `<style>
+a {
+  cursor: not-allowed !important;
+}
+a:hover::after {
+  content: "${options.warning}";
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  border: 2px solid #e65100;
+  background-color: #ffb74d;
+  color: black;
+}
+</style>`;
+
 /**
  * A viewer widget for HTML documents.
  *
@@ -88,8 +104,7 @@ export class HTMLViewer
     } else {
       this.content.sandbox = Private.untrusted;
     }
-    // eslint-disable-next-line
-    this.content.url = this.content.url; // Force a refresh.
+    this.update(); // Force a refresh.
     this._trustedChanged.emit(value);
   }
 
@@ -130,7 +145,7 @@ export class HTMLViewer
    */
   private async _renderModel(): Promise<void> {
     let data = this.context.model.toString();
-    data = await this._setBase(data);
+    data = await this._setupDocument(data);
 
     // Set the new iframe url.
     const blob = new Blob([data], { type: 'text/html' });
@@ -153,7 +168,7 @@ export class HTMLViewer
    * Set a <base> element in the HTML string so that the iframe
    * can correctly dereference relative links.
    */
-  private async _setBase(data: string): Promise<string> {
+  private async _setupDocument(data: string): Promise<string> {
     const doc = this._parser.parseFromString(data, 'text/html');
     let base = doc.querySelector('base');
     if (!base) {
@@ -169,6 +184,17 @@ export class HTMLViewer
     // (e.g. CSS and scripts).
     base.href = baseUrl;
     base.target = '_self';
+
+    // Inject dynamic style for links if the document is not trusted
+    if (!this.trusted) {
+      const warning = this.translator
+        .load('jupyterlab')
+        .__('Link blocked as the file is untrusted.');
+      doc.body.insertAdjacentHTML(
+        'beforeend',
+        UNTRUSTED_LINK_STYLE({ warning })
+      );
+    }
     return doc.documentElement.innerHTML;
   }
 
@@ -272,7 +298,10 @@ namespace Private {
   /**
    * Sandbox exceptions for trusted HTML.
    */
-  export const trusted: IFrame.SandboxExceptions[] = ['allow-scripts', 'allow-popups'];
+  export const trusted: IFrame.SandboxExceptions[] = [
+    'allow-scripts',
+    'allow-popups'
+  ];
 
   /**
    * Namespace for TrustedButton.
@@ -313,7 +342,7 @@ namespace Private {
               (props.htmlDocument.trusted = !props.htmlDocument.trusted)
             }
             tooltip={trans.__(`Whether the HTML file is trusted.
-Trusting the file allows scripts to run in it,
+Trusting the file allows links and scripts to run in it,
 which may result in security risks.
 Only enable for files you trust.`)}
             label={
