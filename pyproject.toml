@@ -86,9 +86,9 @@ docs = [
 docs-screenshots = [
     "altair==5.0.1",
     "ipython==8.14.0",
-    "ipywidgets==8.0.6",
+    "ipywidgets==8.1.0",
     "jupyterlab-geojson==3.4.0",
-    "jupyterlab-language-pack-zh-CN==4.0.post0",
+    "jupyterlab-language-pack-zh-CN==4.0.post1",
     "matplotlib==3.7.2",
     "nbconvert>=7.0.0",
     "pandas==2.0.3",
@@ -116,8 +116,8 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.276",
-    "black[jupyter]==23.3.0"
+    "ruff==0.0.282",
+    "black[jupyter]==23.7.0"
 ]
 
 [tool.check-wheel-contents]
@@ -310,7 +310,9 @@ ignore = [
 # N806 Variable `tM` in function should be lowercase
 # N816 Variable `comparatorTrimReplace` in global scope should not be mixedCase
 # PLC1901 test can be simplified as an empty string is falsey
-"jupyterlab/semver.py" = ["C901", "EM101", "EM102", "N806", "N816", "PLC1901"]
+# PLR1714 Consider merging multiple comparisons
+# PLR5501 Use `elif` instead of `else` then `if`, to reduce indentation
+"jupyterlab/semver.py" = ["C901", "EM101", "EM102", "N806", "N816", "PLC1901", "PLR1714", "PLR5501"]
 # T201 `print` found
 "jupyterlab/upgrade_extension.py" = ["T201"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`

@@ -206,4 +206,4 @@ if __name__ == "__main__":
             BrowserApp.test_browser = False
             sys.argv.remove(option)
 
-        BrowserApp.launch_instance()
+    BrowserApp.launch_instance()
