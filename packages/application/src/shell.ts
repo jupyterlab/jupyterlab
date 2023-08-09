@@ -7,6 +7,7 @@ import {
   classes,
   DockPanelSvg,
   LabIcon,
+  SidePanel,
   TabBarSvg,
   tabIcon,
   TabPanelSvg
@@ -2033,16 +2034,11 @@ namespace Private {
           expansionStates: boolean[] | null;
         };
       } = {};
-      let expansionStates = new Array<boolean>();
-      this._stackedPanel.widgets.forEach(w => {
-        if (w instanceof SplitPanel) {
-          w.widgets.forEach(wi => {
-            expansionStates.push(wi.isHidden);
-          });
-          expansionStates.reverse();
+      this._stackedPanel.widgets.forEach((w: SidePanel) => {
+        if (w.id && w.content instanceof SplitPanel) {
           widgetStates[w.id] = {
-            sizes: w.relativeSizes() as number[],
-            expansionStates
+            sizes: w.content.relativeSizes() as number[],
+            expansionStates: w.content.widgets.map(wi => wi.isVisible)
           };
         }
       });
@@ -2069,14 +2065,21 @@ namespace Private {
         this.hide();
       }
       if (data.widgetStates) {
-        this._stackedPanel.widgets.forEach(w => {
-          if (w instanceof SplitPanel) {
-            w.widgets.forEach(wi => {
-              wi.setHidden(
-                data.widgetStates[w.id].expansionStates!.pop() as boolean
-              );
+        this._stackedPanel.widgets.forEach((w: SidePanel) => {
+          if (w.id && w.content instanceof SplitPanel) {
+            const state = data.widgetStates[w.id];
+            w.content.widgets.forEach((wi, widx) => {
+              const expansion = (state.expansionStates ?? [])[widx];
+              if (
+                typeof expansion === 'boolean' &&
+                w.content instanceof AccordionPanel
+              ) {
+                expansion ? w.content.expand(widx) : w.content.collapse(widx);
+              }
             });
-            w.setRelativeSizes(data.widgetStates[w.id].sizes as number[]);
+            if (state.sizes) {
+              w.content.setRelativeSizes(state.sizes);
+            }
           }
         });
       }
