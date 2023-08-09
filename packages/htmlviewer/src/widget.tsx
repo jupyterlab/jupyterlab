@@ -36,12 +36,18 @@ const CSS_CLASS = 'jp-HTMLViewer';
 const UNTRUSTED_LINK_STYLE = (options: { warning: string }) => `<style>
 a[target="_blank"],
 area[target="_blank"],
-form[target="_blank"] {
+form[target="_blank"],
+button[formtarget="_blank"],
+input[formtarget="_blank"][type="image"],
+input[formtarget="_blank"][type="submit"] {
   cursor: not-allowed !important;
 }
 a[target="_blank"]:hover::after,
 area[target="_blank"]:hover::after,
-form[target="_blank"]:hover::after {
+form[target="_blank"]:hover::after,
+button[formtarget="_blank"]:hover::after,
+input[formtarget="_blank"][type="image"]:hover::after,
+input[formtarget="_blank"][type="submit"]:hover::after {
   content: "${options.warning}";
   box-sizing: border-box;
   position: fixed;
@@ -196,7 +202,7 @@ export class HTMLViewer
     if (!this.trusted) {
       const warning = this.translator
         .load('jupyterlab')
-        .__('Link blocked as the file is untrusted.');
+        .__('Action disabled as the file is untrusted.');
       doc.body.insertAdjacentHTML(
         'beforeend',
         UNTRUSTED_LINK_STYLE({ warning })
