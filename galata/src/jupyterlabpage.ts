@@ -226,6 +226,8 @@ export interface IJupyterLabPage {
    * Factory for active activity tab xpath
    *
    * @returns The selector
+   *
+   * @deprecated You should use locator selector `getByRole('main').locator('[role="tab"][aria-selected="true"]')`
    */
   xpBuildActiveActivityTabSelector(): string;
 
@@ -233,6 +235,9 @@ export interface IJupyterLabPage {
    * Factory for activity panel xpath by id
    * @param id Panel id
    * @returns The selector
+   *
+   * @deprecated You should use locator selector `getByRole('main').getByRole('tabpanel', { name })`
+   *   where `name` is the name of the tab.
    */
   xpBuildActivityPanelSelector(id: string): string;
 
@@ -241,6 +246,8 @@ export interface IJupyterLabPage {
    *
    * @param name Activity name
    * @returns The selector
+   *
+   * @deprecated You should use locator selector `getByRole('main').getByRole('tab', { name })`
    */
   xpBuildActivityTabSelector(name: string): string;
 
@@ -249,6 +256,8 @@ export interface IJupyterLabPage {
    *
    * @param className Class name
    * @returns The selector
+   *
+   * @deprecated You should use locator CSS selector `locator('.className')`
    */
   xpContainsClass(className: string): string;
 }
@@ -627,6 +636,8 @@ export class JupyterLabPage implements IJupyterLabPage {
 
   /**
    * Factory for active activity tab xpath
+   *
+   * @deprecated You should use locator selector `getByRole('main').locator('[role="tab"][aria-selected="true"]')`
    */
   xpBuildActiveActivityTabSelector(): string {
     return Utils.xpBuildActiveActivityTabSelector();
@@ -635,6 +646,9 @@ export class JupyterLabPage implements IJupyterLabPage {
   /**
    * Factory for activity panel xpath by id
    * @param id Panel id
+   *
+   * @deprecated You should use locator selector `getByRole('main').getByRole('tabpanel', { name })`
+   *   where `name` is the name of the tab.
    */
   xpBuildActivityPanelSelector(id: string): string {
     return Utils.xpBuildActivityPanelSelector(id);
@@ -643,6 +657,8 @@ export class JupyterLabPage implements IJupyterLabPage {
   /**
    * Factory for activity tab xpath by name
    * @param name Activity name
+   *
+   * @deprecated You should use locator selector `getByRole('main').getByRole('tab', { name })`
    */
   xpBuildActivityTabSelector(name: string): string {
     return Utils.xpBuildActivityTabSelector(name);
@@ -651,6 +667,8 @@ export class JupyterLabPage implements IJupyterLabPage {
   /**
    * Factory for element containing a given class xpath
    * @param className Class name
+   *
+   * @deprecated You should use locator CSS selector `locator('.className')`
    */
   xpContainsClass(className: string): string {
     return Utils.xpContainsClass(className);
