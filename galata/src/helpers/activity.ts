@@ -46,7 +46,9 @@ export class ActivityHelper {
     const tab = await this.getTab(name);
     return (
       (tab &&
-        (await tab.evaluate((tab: Element) => tab.ariaSelected === 'true'))) ??
+        (await tab.evaluate((tab: Element) =>
+          tab.classList.contains('lm-mod-current')
+        ))) ??
       false
     );
   }
@@ -69,9 +71,7 @@ export class ActivityHelper {
   getTabLocator(name?: string): Locator {
     return name
       ? this.page.getByRole('main').getByRole('tab', { name })
-      : this.page
-          .getByRole('main')
-          .locator('[role="tab"][aria-selected="true"]');
+      : this.page.getByRole('main').locator('.lm-mod-current[role="tab"]');
   }
 
   /**
