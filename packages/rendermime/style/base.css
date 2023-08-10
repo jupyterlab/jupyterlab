@@ -263,7 +263,7 @@
 .jp-RenderedHTMLCommon a:hover {
   text-decoration: underline;
   color: var(--jp-content-link-hover-color);
-  
+
 }
 
 .jp-RenderedHTMLCommon a:visited {
