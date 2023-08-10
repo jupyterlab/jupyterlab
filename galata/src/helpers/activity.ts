@@ -13,7 +13,7 @@ export class ActivityHelper {
   /**
    * JupyterLab launcher selector
    *
-   * @deprecated You should use locator selector `getByRole('main').getByRole('tab', {name: 'Launcher'})`
+   * @deprecated You should use locator selector {@link launcher}
    */
   get launcherSelector(): string {
     return Utils.xpBuildActivityTabSelector('Launcher');
@@ -71,7 +71,7 @@ export class ActivityHelper {
   getTabLocator(name?: string): Locator {
     return name
       ? this.page.getByRole('main').getByRole('tab', { name })
-      : this.page.getByRole('main').locator('.lm-mod-current[role="tab"]');
+      : this.page.getByRole('main').locator('.jp-mod-current[role="tab"]');
   }
 
   /**

@@ -227,7 +227,7 @@ export interface IJupyterLabPage {
    *
    * @returns The selector
    *
-   * @deprecated You should use locator selector `getByRole('main').locator('[role="tab"][aria-selected="true"]')`
+   * @deprecated You should use locator selector `getByRole('main').locator('.jp-mod-current[role="tab"]')`
    */
   xpBuildActiveActivityTabSelector(): string;
 
@@ -637,7 +637,7 @@ export class JupyterLabPage implements IJupyterLabPage {
   /**
    * Factory for active activity tab xpath
    *
-   * @deprecated You should use locator selector `getByRole('main').locator('[role="tab"][aria-selected="true"]')`
+   * @deprecated You should use locator selector `getByRole('main').locator('.jp-mod-current[role="tab"]')`
    */
   xpBuildActiveActivityTabSelector(): string {
     return Utils.xpBuildActiveActivityTabSelector();

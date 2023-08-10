@@ -262,12 +262,12 @@ export function xpBuildActivityPanelSelector(id: string): string {
  *
  * @returns Selector
  *
- * @deprecated You should use locator selector `getByRole('main').locator('[role="tab"][aria-selected="true"]')`
+ * @deprecated You should use locator selector `getByRole('main').locator('.jp-mod-current[role="tab"]')`
  */
 export function xpBuildActiveActivityTabSelector(): string {
   return `//div[contains(@role, "main")]/ul/li[${xpContainsClass(
     'lm-TabBar-tab'
-  )} and ${xpContainsClass('lm-mod-current')} and ./div[${xpContainsClass(
+  )} and ${xpContainsClass('jp-mod-current')} and ./div[${xpContainsClass(
     'lm-TabBar-tabLabel'
   )}]]`;
 }
