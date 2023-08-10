@@ -33,7 +33,10 @@ export class NotebookViewModel extends WindowedListModel {
   /**
    * Construct a notebook windowed list model.
    */
-  constructor(protected cells: Cell[], options?: WindowedList.IModelOptions) {
+  constructor(
+    protected cells: Cell[],
+    options?: WindowedList.IModelOptions
+  ) {
     super(options);
     // Set default cell size
     this._estimatedWidgetSize = NotebookViewModel.DEFAULT_CELL_SIZE;

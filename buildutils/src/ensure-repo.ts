@@ -43,7 +43,7 @@ const URL_CONFIG = {
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
-  '@jupyterlab/buildutils': ['path', 'webpack'],
+  '@jupyterlab/buildutils': ['assert', 'fs', 'path', 'webpack'],
   '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
   '@jupyterlab/testing': ['fs', 'path'],
@@ -854,27 +854,6 @@ export async function ensureIntegrity(): Promise<boolean> {
 
   // Handle buildutils
   ensureBuildUtils();
-
-  // Handle the pyproject.toml file
-  const pyprojectPath = path.resolve('.', 'pyproject.toml');
-  const curr = utils.getPythonVersion();
-  let tag = 'latest';
-  if (!/\d+\.\d+\.\d+$/.test(curr)) {
-    tag = 'next';
-  }
-  const publishCommand = `npm publish --tag ${tag}`;
-  let pyprojectText = fs.readFileSync(pyprojectPath, { encoding: 'utf8' });
-  if (pyprojectText.indexOf(publishCommand) === -1) {
-    pyprojectText = pyprojectText.replace(
-      /npm publish --tag [a-z]+/,
-      publishCommand
-    );
-    fs.writeFileSync(pyprojectPath, pyprojectText, { encoding: 'utf8' });
-    if (!messages['top']) {
-      messages['top'] = [];
-    }
-    messages['top'].push('Update npm publish command in pyproject.toml');
-  }
 
   // Handle the federated example application
   pkgMessages = ensureFederatedExample();

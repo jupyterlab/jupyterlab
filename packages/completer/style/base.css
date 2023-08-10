@@ -202,7 +202,7 @@
     transform: translateX(0);
   }
 
-  to {
+  100% {
     transform: translateX(400%);
   }
 }

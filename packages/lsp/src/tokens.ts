@@ -131,7 +131,7 @@ export interface ILanguageServerManager extends IDisposable {
    *
    * Enable the language server services
    */
-  enable(): void;
+  enable(): Promise<void>;
 
   /**
    * @alpha
@@ -408,6 +408,11 @@ export interface ILSPDocumentConnectionManager {
    * A promise that is fulfilled when the connection manager is ready.
    */
   readonly ready: Promise<void>;
+
+  /**
+   * Initial configuration for the language servers.
+   */
+  initialConfigurations: TLanguageServerConfigurations;
 
   /**
    * Handles the settings that do not require an existing connection
@@ -778,8 +783,8 @@ export interface IServerRequestHandler<
 export type ClientRequests<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
 > = {
-  readonly // has async request(params) returning a promise with result.
-  [key in T]: IClientRequestHandler<key>;
+  // has async request(params) returning a promise with result.
+  readonly [key in T]: IClientRequestHandler<key>;
 };
 
 /**
@@ -789,8 +794,8 @@ export type ClientRequests<
 export type ServerRequests<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > = {
-  readonly // has async request(params) returning a promise with result.
-  [key in T]: IServerRequestHandler<key>;
+  // has async request(params) returning a promise with result.
+  readonly [key in T]: IServerRequestHandler<key>;
 };
 
 /**

@@ -77,7 +77,7 @@ test.describe('Debugger', () => {
     await createNotebook(page);
 
     const runButton = await page.waitForSelector(
-      '.jp-Toolbar-item >> [data-command="runmenu:run"]'
+      '.jp-Toolbar-item >> [data-command="notebook:run-cell-and-select-next"]'
     );
 
     // Inject mouse pointer

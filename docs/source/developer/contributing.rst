@@ -1022,16 +1022,12 @@ them out against your copy of JupyterLab, you can easily do so using the
 ``link`` command:
 
 1. Make your changes and then build the external package
-2. Register a link to the modified external package
-
-   -  navigate to the external package dir and run ``jlpm link``
-
-3. Link JupyterLab to modded package
+2. Link JupyterLab to modded package
 
    -  navigate to top level of your JupyterLab repo, then run
-      ``jlpm link "<package-of-interest>"``
+      ``jlpm link <path-to-external-repo> --all``
 
-You can then (re)build JupyterLab (eg ``jlpm run build``) and your
+3. You can then (re)build JupyterLab (eg ``jlpm run build``) and your
 changes should be picked up by the build.
 
 To restore JupyterLab to its original state, you use the ``unlink``
@@ -1040,13 +1036,13 @@ command:
 1. Unlink JupyterLab and modded package
 
    -  navigate to top level of your JupyterLab repo, then run
-      ``jlpm unlink "<package-of-interest>"``
+      ``jlpm unlink <path-to-external-repo> --all``
 
 2. Reinstall original version of the external package in JupyterLab
 
    -  run ``jlpm install --check-files``
 
-You can then (re)build JupyterLab and everything should be back to
+3. You can then (re)build JupyterLab and everything should be back to
 default.
 
 Possible Linking Pitfalls
