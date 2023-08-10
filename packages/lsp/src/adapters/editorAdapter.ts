@@ -14,7 +14,7 @@ import { Signal } from '@lumino/signaling';
 import { WidgetLSPAdapter } from './adapter';
 
 /**
- * A handler for a CodeEditor.IEditor.
+ * The CodeEditor.IEditor adapter.
  */
 export class EditorAdapter implements IDisposable {
   /**
@@ -23,13 +23,11 @@ export class EditorAdapter implements IDisposable {
    * @param options The instantiation options for a EditorAdapter.
    */
   constructor(options: EditorAdapter.IOptions) {
-    this._path = options.path;
-    this._editor = options.getEditor;
     this._widgetAdapter = options.widgetAdapter;
     this._extensions = options.extensions;
 
-    void options.editorReady().then(() => {
-      this._injectExtensions();
+    void options.editorReady().then(editor => {
+      this._injectExtensions(editor);
     });
   }
 
@@ -52,15 +50,14 @@ export class EditorAdapter implements IDisposable {
   /**
    * Setup the editor.
    */
-  private _injectExtensions(): void {
-    const editor = this._editor();
-    if (!editor || editor.isDisposed) {
+  private _injectExtensions(editor: CodeEditor.IEditor): void {
+    if (editor.isDisposed) {
       return;
     }
 
     this._extensions.forEach(factory => {
       const ext = factory.factory({
-        path: this._path,
+        path: this._widgetAdapter.widget.context.path,
         editor: editor,
         widgetAdapter: this._widgetAdapter,
         model: editor.model,
@@ -75,8 +72,6 @@ export class EditorAdapter implements IDisposable {
     });
   }
 
-  private _path: string;
-  private _editor: () => CodeEditor.IEditor | null;
   private _widgetAdapter: WidgetLSPAdapter<any>;
   private _extensions: EditorAdapter.ILSPEditorExtensionFactory[];
 }
@@ -95,19 +90,9 @@ export namespace EditorAdapter {
     editorReady(): Promise<CodeEditor.IEditor>;
 
     /**
-     * Get the code editor to handle.
-     */
-    getEditor(): CodeEditor.IEditor | null;
-
-    /**
-     * A path to a source file.
-     */
-    path: string;
-
-    /**
      * The widget lsp adapter.
      */
-    widgetAdapter: WidgetLSPAdapter<any>;
+    widgetAdapter: WidgetLSPAdapter;
 
     /**
      * The list of CodeMirror extension factories

@@ -500,7 +500,7 @@ export interface IFeature {
   capabilities?: ClientCapabilities;
 
   /**
-   * LSP capabilities implemented by the feature.
+   * CM extension factory linked to the LSP feature.
    */
   extensionFactory?: EditorAdapter.ILSPEditorExtensionFactory;
 }
@@ -519,7 +519,7 @@ export interface ILSPFeatureManager {
   /**
    * Signal emitted when a feature is registered
    */
-  featuresRegistered: ISignal<ILSPFeatureManager, IFeature>;
+  featureRegistered: ISignal<ILSPFeatureManager, IFeature>;
 
   /**
    * Register the new feature (frontend capability)

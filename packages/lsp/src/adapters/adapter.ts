@@ -609,8 +609,6 @@ export abstract class WidgetLSPAdapter<
     const { editor } = change;
     const editorAdapter = new EditorAdapter({
       editorReady: editor.ready,
-      getEditor: editor.getEditor,
-      path: this.documentPath,
       widgetAdapter: this,
       extensions: this.options.featureManager.extensionFactories()
     });
