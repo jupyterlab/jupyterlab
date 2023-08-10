@@ -54,12 +54,11 @@
 }
 
 .jp-About-externalLinks > .jp-Button-flat {
-  text-decoration: underline;
+  text-decoration: none;
 }
 .jp-About-externalLinks > .jp-Button-flat:hover {
   color: var(--jp-content-link-color);
   text-decoration: underline;
-  font-weight: bold;
 }
 
 .jp-About-copyright {
