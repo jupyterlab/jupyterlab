@@ -473,6 +473,8 @@ export interface ILSPDocumentConnectionManager {
   unregisterDocument(uri: string): void;
 
   /**
+   * @deprecated
+   *
    * Register a widget adapter.
    *
    * @param  path - path to current document widget of input adapter

@@ -4,7 +4,7 @@
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter, WidgetLSPAdapterTracker } from './adapters';
+import { WidgetLSPAdapter } from './adapters';
 import { LSPConnection } from './connection';
 import { ClientCapabilities } from './lsp';
 import { AskServersToSendTraceNotifications } from './plugin';
@@ -39,8 +39,12 @@ export class DocumentConnectionManager
     this.adapters = new Map();
     this._ignoredLanguages = new Set();
     this.languageServerManager = options.languageServerManager;
-    this._adapterTracker = options.adapterTracker as WidgetLSPAdapterTracker;
     Private.setLanguageServerManager(options.languageServerManager);
+
+    options.adapterTracker.adapterAdded.connect((_, adapter) => {
+      const path = adapter.widget.context.path;
+      this.registerAdapter(path, adapter);
+    });
   }
 
   /**
@@ -200,6 +204,8 @@ export class DocumentConnectionManager
   }
 
   /**
+   * @deprecated
+   *
    * Register a widget adapter with this manager
    *
    * @param  path - path to the inner document of the adapter
@@ -207,7 +213,6 @@ export class DocumentConnectionManager
    */
   registerAdapter(path: string, adapter: WidgetLSPAdapter): void {
     this.adapters.set(path, adapter);
-    this._adapterTracker.add(adapter);
 
     adapter.widget.context.pathChanged.connect((context, newPath) => {
       this.adapters.delete(path);
@@ -532,7 +537,6 @@ export class DocumentConnectionManager
    * Set of ignored languages
    */
   private _ignoredLanguages: Set<string>;
-  private _adapterTracker: WidgetLSPAdapterTracker;
 }
 
 export namespace DocumentConnectionManager {
