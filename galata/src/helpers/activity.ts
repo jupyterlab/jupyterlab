@@ -20,7 +20,7 @@ export class ActivityHelper {
   }
 
   /**
-   * JupyterLab launcher
+   * JupyterLab launcher tab
    */
   get launcher(): Locator {
     return this.page.getByRole('main').getByRole('tab', { name: 'Launcher' });
@@ -43,14 +43,22 @@ export class ActivityHelper {
    * @returns Active status
    */
   async isTabActive(name: string): Promise<boolean> {
-    const tab = await this.getTab(name);
-    return (
-      (tab &&
-        (await tab.evaluate((tab: Element) =>
-          tab.classList.contains('lm-mod-current')
-        ))) ??
-      false
-    );
+    if (await Utils.isInSimpleMode(this.page)) {
+      const activeTab = await this.page
+        .locator('#jp-title-panel-title')
+        .getByRole('textbox')
+        .inputValue();
+      return activeTab === name;
+    } else {
+      const tab = await this.getTab(name);
+      return (
+        (tab &&
+          (await tab.evaluate((tab: Element) =>
+            tab.classList.contains('jp-mod-current')
+          ))) ??
+        false
+      );
+    }
   }
 
   /**

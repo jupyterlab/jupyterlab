@@ -3,7 +3,7 @@
 
 import type { Notification } from '@jupyterlab/apputils';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import type { ElementHandle, Page, Response } from '@playwright/test';
+import type { ElementHandle, Locator, Page, Response } from '@playwright/test';
 import { ContentsHelper } from './contents';
 import type { IPluginNameToInterfaceMap } from './extension';
 import {
@@ -93,7 +93,14 @@ export interface IJupyterLabPage {
   readonly theme: ThemeHelper;
 
   /**
+   * JupyterLab launcher tab
+   */
+  readonly launcher: Locator;
+
+  /**
    * Selector for launcher tab
+   *
+   * @deprecated You should use locator selector {@link launcher}
    */
   readonly launcherSelector: string;
 
@@ -375,7 +382,16 @@ export class JupyterLabPage implements IJupyterLabPage {
   readonly debugger: DebuggerHelper;
 
   /**
+   * JupyterLab launcher tab
+   */
+  get launcher(): Locator {
+    return this.activity.launcher;
+  }
+
+  /**
    * Selector for launcher tab
+   *
+   * @deprecated You should use locator selector {@link launcher}
    */
   get launcherSelector(): string {
     return this.activity.launcherSelector;
@@ -489,14 +505,9 @@ export class JupyterLabPage implements IJupyterLabPage {
   /**
    * Whether JupyterLab is in simple mode or not
    */
-  isInSimpleMode = async (): Promise<boolean> => {
-    const toggle = await this.page.$(
-      '#jp-single-document-mode button.jp-switch'
-    );
-    const checked = (await toggle?.getAttribute('aria-checked')) === 'true';
-
-    return checked;
-  };
+  isInSimpleMode(): Promise<boolean> {
+    return Utils.isInSimpleMode(this.page);
+  }
 
   /**
    * Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of the

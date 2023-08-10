@@ -237,7 +237,7 @@ export function xpContainsClass(className: string): string {
  * @deprecated You should use locator selector `getByRole('main').getByRole('tab', { name })`
  */
 export function xpBuildActivityTabSelector(name: string): string {
-  return `//div[contains(@role, "main")]/ul/li[${xpContainsClass(
+  return `//div[contains(@role, "main")]//ul/li[${xpContainsClass(
     'lm-TabBar-tab'
   )} and ./div[text()="${name}" and ${xpContainsClass('lm-TabBar-tabLabel')}]]`;
 }
@@ -265,9 +265,17 @@ export function xpBuildActivityPanelSelector(id: string): string {
  * @deprecated You should use locator selector `getByRole('main').locator('.jp-mod-current[role="tab"]')`
  */
 export function xpBuildActiveActivityTabSelector(): string {
-  return `//div[contains(@role, "main")]/ul/li[${xpContainsClass(
+  return `//div[contains(@role, "main")]//ul/li[${xpContainsClass(
     'lm-TabBar-tab'
   )} and ${xpContainsClass('jp-mod-current')} and ./div[${xpContainsClass(
     'lm-TabBar-tabLabel'
   )}]]`;
+}
+
+/**
+ * Whether JupyterLab is in simple mode or not
+ */
+export function isInSimpleMode(page: Page): Promise<boolean> {
+  const toggle = page.getByRole('switch', { name: 'Simple' });
+  return toggle.isChecked();
 }
