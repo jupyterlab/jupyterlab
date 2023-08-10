@@ -312,6 +312,7 @@ const currentAdapter: JupyterFrontEndPlugin<IWidgetLSPAdapterTracker> = {
   id: '@jupyterlab/lsp-extension:tracker',
   description: 'Provides the `WidgetLSPAdapter`s tracker.',
   autoStart: true,
+  provides: IWidgetLSPAdapterTracker,
   activate: (app: JupyterFrontEnd<LabShell>): IWidgetLSPAdapterTracker => {
     return new WidgetLSPAdapterTracker({ shell: app.shell });
   }
