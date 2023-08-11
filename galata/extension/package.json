@@ -40,9 +40,9 @@
     "@jupyterlab/nbformat": "^4.0.4",
     "@jupyterlab/notebook": "^4.0.4",
     "@jupyterlab/settingregistry": "^4.0.4",
-    "@lumino/algorithm": "^2.0.0",
-    "@lumino/coreutils": "^2.1.1",
-    "@lumino/signaling": "^2.1.1"
+    "@lumino/algorithm": "^2.0.1",
+    "@lumino/coreutils": "^2.1.2",
+    "@lumino/signaling": "^2.1.2"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.0.4",

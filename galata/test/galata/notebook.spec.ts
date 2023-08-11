@@ -130,7 +130,7 @@ test.describe('Notebook Tests', () => {
     await page.notebook.revertChanges();
     await page.notebook.close();
 
-    expect(await page.waitForSelector(page.launcherSelector)).toBeTruthy();
+    await expect(page.launcher).toBeVisible();
   });
 });
 

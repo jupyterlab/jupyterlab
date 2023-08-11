@@ -45,7 +45,7 @@
     "@jupyterlab/settingregistry": "^4.0.4",
     "@jupyterlab/translation": "^4.0.4",
     "@jupyterlab/ui-components": "^4.0.4",
-    "@lumino/coreutils": "^2.1.1"
+    "@lumino/coreutils": "^2.1.2"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
