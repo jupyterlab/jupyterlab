@@ -130,6 +130,14 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   word-break: break-all;
   word-wrap: break-word;
   white-space: pre-wrap;
+
+  /* Styling fixes */
+  width: var(--jp-widgets-inline-width);
+  display: flex;
+  align-items: center;
+  opacity: .8;
+  margin-left: 3.7em;
+  padding: 1em;
 }
 
 /* tables */
@@ -234,6 +242,16 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   padding: 0 0.25em;
   margin: 0 0.25em;
   flex: 0 0 70%;
+
+  /* input box Styling fixes */
+  padding: var(--jp-widgets-input-padding);
+  color: var(--jp-widgets-input-color);
+  font-size: var(--jp-widgets-font-size);
+  width: var(--jp-widgets-inline-width);
+  margin: var(--jp-widgets-margin);
+  margin-left: 1em;
+  border: var(--jp-widgets-input-border-width) solid var(--jp-widgets-input-border-color);
+  height: 20px;
 }
 
 .jp-Stdin-input::placeholder {
