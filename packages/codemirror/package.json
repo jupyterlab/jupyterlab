@@ -68,9 +68,9 @@
     "@lezer/generator": "^1.2.2",
     "@lezer/highlight": "^1.1.4",
     "@lezer/markdown": "^1.0.2",
-    "@lumino/coreutils": "^2.1.1",
-    "@lumino/disposable": "^2.1.1",
-    "@lumino/signaling": "^2.1.1",
+    "@lumino/coreutils": "^2.1.2",
+    "@lumino/disposable": "^2.1.2",
+    "@lumino/signaling": "^2.1.2",
     "yjs": "^13.5.40"
   },
   "devDependencies": {
