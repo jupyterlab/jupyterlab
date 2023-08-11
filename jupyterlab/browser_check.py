@@ -21,7 +21,7 @@ from jupyter_server.utils import pathname2url, urljoin
 from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
 from tornado.websocket import WebSocketClosedError
-from traitlets import Bool
+from traitlets import Bool, Unicode
 
 from .labapp import LabApp, get_app_dir
 from .tests.test_app import TestEnv
@@ -170,7 +170,7 @@ class BrowserApp(LabApp):
     open_browser = False
 
     serverapp_config = {"base_url": "/foo/"}
-    default_url = "/lab?reset"
+    default_url = Unicode("/lab?reset", config=True, help="The default URL to redirect to from `/`")
     ip = "127.0.0.1"
     flags = test_flags
     aliases = test_aliases
