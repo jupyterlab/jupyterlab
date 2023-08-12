@@ -110,7 +110,7 @@ export class FileBrowserHelper {
     );
     if (fileItem) {
       await fileItem.click({ clickCount: 2 });
-      await this.page.waitForSelector(Utils.xpBuildActivityTabSelector(name), {
+      await this.page.getByRole('main').getByRole('tab', { name }).waitFor({
         state: 'visible'
       });
     } else {
