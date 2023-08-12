@@ -104,17 +104,17 @@ export interface IThemeManager {
   /**
    * Get the name of the preferred light theme.
    */
-  readonly preferredLightTheme: string | null;
+  readonly preferredLightTheme?: string | undefined;
 
   /**
    * Get the name of the preferred dark theme.
    */
-  readonly preferredDarkTheme: string | null;
+  readonly preferredDarkTheme?: string | undefined;
 
   /**
    * Get the name of the preferred theme.
    */
-  readonly preferredTheme: string | null;
+  readonly preferredTheme?: string | null | undefined;
 
   /**
    * The names of the registered themes.
@@ -124,12 +124,12 @@ export interface IThemeManager {
   /**
    * Get the names of the registered light themes.
    */
-  readonly lightThemes: ReadonlyArray<string>;
+  readonly lightThemes?: ReadonlyArray<string> | undefined;
 
   /**
    * Get the names of the registered dark themes.
    */
-  readonly darkThemes: ReadonlyArray<string>;
+  readonly darkThemes?: ReadonlyArray<string> | undefined;
 
   /**
    * A signal fired when the application theme changes.
