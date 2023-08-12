@@ -704,7 +704,6 @@ export class OutputArea extends Widget {
     executionCount: number | null = null
   ): Panel {
     const panel = new Private.OutputPanel();
-
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
     const prompt = this.contentFactory.createOutputPrompt();
@@ -754,10 +753,17 @@ export class SimplifiedOutputArea extends OutputArea {
    */
   protected createOutputItem(model: IOutputModel): Widget | null {
     const output = this.createRenderedMimetype(model);
-    if (output) {
-      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+
+    if (!output) {
+      return null;
     }
-    return output;
+
+    const panel = new Private.OutputPanel();
+    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
+
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+    return panel;
   }
 }
 

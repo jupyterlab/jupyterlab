@@ -4,6 +4,16 @@
 
 # JupyterLab Changelog
 
+## v4.1
+
+### 4.1.0 - Highlights
+
+#### Moved plugins
+
+Some internal JupyterLab plugins have been re-organized to allow for better flexibility for deployments and downstream applications like Notebook 7. This might affect users that disable specific plugins with the `jupyter labextension disable` command or the `disabledExtensions` config option.
+
+- The `help:open` command is not defined in the `@jupyterlab/help-extension:resources` plugin anymore, but has been moved to a new `@jupyterlab/help-extension:open` plugin instead.
+
 ## v4.0
 
 ### 4.0.0 - Highlights

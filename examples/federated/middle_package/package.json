@@ -7,10 +7,10 @@
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-middle"
   },
   "dependencies": {
-    "@lumino/coreutils": "^2.1.1"
+    "@lumino/coreutils": "^2.1.2"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.2",
+    "@jupyterlab/builder": "^4.1.0-alpha.0",
     "rimraf": "~3.0.0"
   },
   "publishConfig": {
