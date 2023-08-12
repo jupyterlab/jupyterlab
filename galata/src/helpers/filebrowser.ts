@@ -10,7 +10,10 @@ import * as Utils from '../utils';
  * File Browser Helpers
  */
 export class FileBrowserHelper {
-  constructor(readonly page: Page, readonly contents: ContentsHelper) {}
+  constructor(
+    readonly page: Page,
+    readonly contents: ContentsHelper
+  ) {}
 
   /**
    * Create the selector for a file in the file browser
@@ -107,7 +110,7 @@ export class FileBrowserHelper {
     );
     if (fileItem) {
       await fileItem.click({ clickCount: 2 });
-      await this.page.waitForSelector(Utils.xpBuildActivityTabSelector(name), {
+      await this.page.getByRole('main').getByRole('tab', { name }).waitFor({
         state: 'visible'
       });
     } else {

@@ -619,6 +619,14 @@
     "shortcuts": []
   },
   {
+    "id": "documentsearch:toggleSearchInSelection",
+    "label": "Search in Selection",
+    "caption": "",
+    "shortcuts": [
+      "Alt L"
+    ]
+  },
+  {
     "id": "editmenu:clear-all",
     "label": "Clear All",
     "caption": "",
@@ -2223,7 +2231,9 @@
     "id": "viewmenu:line-numbering",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Shift L"
+    ]
   },
   {
     "id": "viewmenu:match-brackets",

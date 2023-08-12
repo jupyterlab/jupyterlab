@@ -51,12 +51,26 @@ export interface ICompletionContext {
  * The interface to implement a completer provider.
  */
 export interface ICompletionProvider<
-  T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+  T extends
+    CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
 > {
   /**
    * Unique identifier of the provider
    */
   readonly identifier: string;
+
+  /**
+   * Rank used to order completion results from different completion providers.
+   *
+   * #### Note: The default providers (CompletionProvider:context and
+   * CompletionProvider:kernel) use a rank of ≈500. If you want to give
+   * priority to your provider, use a rank of 1000 or above.
+   *
+   * The rank is optional for backwards compatibility. If the rank is `undefined`,
+   * it will assign a rank of [1, 499] making the provider available but with a
+   * lower priority.
+   */
+  readonly rank?: number;
 
   /**
    * Renderer for provider's completions (optional).

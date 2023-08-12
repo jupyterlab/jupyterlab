@@ -121,8 +121,8 @@ a:hover {
 }
 
 .jp-InputGroup input:focus {
-  box-shadow: inset 0 0 0 var(--jp-border-width)
-      var(--jp-input-active-box-shadow-color),
+  box-shadow:
+    inset 0 0 0 var(--jp-border-width) var(--jp-input-active-box-shadow-color),
     inset 0 0 0 3px var(--jp-input-active-box-shadow-color);
 }
 
