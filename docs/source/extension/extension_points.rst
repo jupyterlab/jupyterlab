@@ -396,7 +396,7 @@ In JupyterLab, the application shell consists of:
 6.  A ``bottom`` area for things like status bars.
 7.  A ``header`` area for custom elements.
 
-.. image:: ./images/extension_frontend_shell.PNG
+.. image:: ./images/extension_frontend_shell.png
    :align: center
    :class: jp-screenshot shadow
    :alt:
