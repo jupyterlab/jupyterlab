@@ -142,7 +142,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
         const theme = args['theme'] as string;
         const displayName = manager.getDisplayName(theme);
         return args['isPalette']
-          ? trans.__('Use Theme: %1', displayName)
+          ? trans.__('Set Preferred Light Theme: %1', displayName)
           : displayName;
       },
       isToggled: args => args['theme'] === manager.preferredLightTheme,
@@ -160,7 +160,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
         const theme = args['theme'] as string;
         const displayName = manager.getDisplayName(theme);
         return args['isPalette']
-          ? trans.__('Use Theme: %1', displayName)
+          ? trans.__('Set Preferred Dark Theme: %1', displayName)
           : displayName;
       },
       isToggled: args => args['theme'] === manager.preferredDarkTheme,
@@ -174,7 +174,11 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
     });
 
     commands.addCommand(CommandIDs.toggleAdaptiveTheme, {
-      label: trans.__('Synchronize with System Settings'),
+      // Avoid lengthy option text in menu
+      label: args =>
+        args['isPalette']
+          ? trans.__('Synchronize Styling Theme with System Settings')
+          : trans.__('Synchronize with System Settings'),
       isToggled: () => manager.isToggledAdaptiveTheme(),
       execute: () => {
         manager.toggleAdaptiveTheme().catch(console.warn);
@@ -310,7 +314,11 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         });
 
         // toggle adaptive theme
-        palette.addItem({ command: CommandIDs.toggleAdaptiveTheme, category });
+        palette.addItem({
+          command: CommandIDs.toggleAdaptiveTheme,
+          args: { isPalette },
+          category
+        });
 
         // toggle scrollbar theming
         palette.addItem({ command: CommandIDs.themeScrollbars, category });

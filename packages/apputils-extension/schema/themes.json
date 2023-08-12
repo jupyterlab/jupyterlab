@@ -115,19 +115,19 @@
     "adaptive-theme": {
       "type": "boolean",
       "title": "Adaptive Theme",
-      "description": "Synchronize styling theme with system settings",
+      "description": "Synchronize visual styling theme with system settings",
       "default": false
     },
     "preferred-light-theme": {
       "type": "string",
       "title": "Preferred Light Theme",
-      "description": "Application-level visual light styling theme. Ignored when Adaptive Theme is disabled.",
+      "description": "Application-level light visual styling theme. Ignored when Adaptive Theme is disabled.",
       "default": "JupyterLab Light"
     },
     "preferred-dark-theme": {
       "type": "string",
       "title": "Preferred Dark Theme",
-      "description": "Application-level visual dark styling theme. Ignored when Adaptive Theme is disabled.",
+      "description": "Application-level dark visual styling theme. Ignored when Adaptive Theme is disabled.",
       "default": "JupyterLab Dark"
     },
     "theme-scrollbars": {
