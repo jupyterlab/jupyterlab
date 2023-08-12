@@ -46,7 +46,7 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor: 'var(--jp-editor-selected-background)'
   },
 
-  '&.cm-focused .cm-selectionBackground': {
+  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground': {
     backgroundColor: 'var(--jp-editor-selected-focused-background)'
   },
 

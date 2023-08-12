@@ -4,6 +4,7 @@
 import { SourceChange } from '@jupyter/ydoc';
 import { CompletionHandler } from './handler';
 import {
+  CompletionTriggerKind,
   ICompletionContext,
   ICompletionProvider,
   IProviderReconciliator
@@ -31,14 +32,15 @@ export class ProviderReconciliator implements IProviderReconciliator {
    * @param {CompletionHandler.IRequest} request - The completion request.
    */
   public async fetch(
-    request: CompletionHandler.IRequest
+    request: CompletionHandler.IRequest,
+    trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply | null> {
     const current = ++this._fetching;
     let promises: Promise<CompletionHandler.ICompletionItemsReply | null>[] =
       [];
     for (const provider of this._providers) {
       let promise: Promise<CompletionHandler.ICompletionItemsReply | null>;
-      promise = provider.fetch(request, this._context).then(reply => {
+      promise = provider.fetch(request, this._context, trigger).then(reply => {
         if (current !== this._fetching) {
           return Promise.reject(void 0);
         }
