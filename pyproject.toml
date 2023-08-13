@@ -286,7 +286,7 @@ ignore = [
 # S105 Possible hardcoded password: `""`
 "galata/jupyter_server_test_config.py" = ["F821", "S104", "S105"]
 # T201 `print` found
-"jupyterlab/browser_check.py" = ["T201"]
+"jupyterlab/browser_check.py" = ["RUF012", "T201"]
 # C901 method is too complex
 "jupyterlab/commands.py" = ["C901"]
 # B028 No explicit `stacklevel` keyword argument found
