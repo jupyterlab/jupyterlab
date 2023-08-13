@@ -303,10 +303,14 @@ class PyPIExtensionManager(ExtensionManager):
             )
 
             action_info = json.loads(result.stdout.decode("utf-8"))
-            pkg_action = next(iter(filter(
-                    lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
-                    action_info.get("install", []),
-                )))
+            pkg_action = next(
+                iter(
+                    filter(
+                        lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
+                        action_info.get("install", []),
+                    )
+                )
+            )
         except CalledProcessError as e:
             self.log.debug(f"Fail to get installation report: {e.stderr}", exc_info=e)
         except Exception as err:
