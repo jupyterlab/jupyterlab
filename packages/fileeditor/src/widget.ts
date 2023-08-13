@@ -224,7 +224,7 @@ export class FileEditorWidget extends DocumentWidget<FileEditor> {
     let firstLine: string;
     if (positionOrRange.includes(',')) {
       // Only respect range start for now.
-      firstLine = positionOrRange.split(',')[0] || '1';
+      firstLine = positionOrRange.split(',')[0] || '0';
     } else {
       firstLine = positionOrRange;
     }
@@ -232,7 +232,7 @@ export class FileEditorWidget extends DocumentWidget<FileEditor> {
     // Reveal the line
     return this.context.ready.then(() => {
       const position = {
-        line: parseInt(firstLine, 10) - 1,
+        line: parseInt(firstLine, 10),
         column: 0
       };
       this.content.editor.setCursorPosition(position);

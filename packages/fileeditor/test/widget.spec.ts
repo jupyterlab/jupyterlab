@@ -209,7 +209,11 @@ describe('fileeditorcodewrapper', () => {
 
         await documentWidget.setFragment('#line=2');
         let cursor = widget.editor.getCursorPosition();
-        expect(cursor.line).toBe(1);
+        expect(cursor.line).toBe(2);
+
+        await documentWidget.setFragment('#line=0');
+        cursor = widget.editor.getCursorPosition();
+        expect(cursor.line).toBe(0);
       });
       it('should set fragment for a range', async () => {
         await context.initialize(true);
@@ -222,7 +226,7 @@ describe('fileeditorcodewrapper', () => {
 
         await documentWidget.setFragment('#line=2,3');
         cursor = widget.editor.getCursorPosition();
-        expect(cursor.line).toBe(1);
+        expect(cursor.line).toBe(2);
       });
     });
   });

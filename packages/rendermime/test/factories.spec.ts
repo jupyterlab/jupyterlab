@@ -609,7 +609,7 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(
-          '<pre>prefix <a href="~/jupyterlab/a_file.py#line=1">~/jupyterlab/a_file.py:1</a> suffix\nprefix <a href="~/jupyterlab/b_file.py#line=1">~/jupyterlab/b_file.py:1</a> suffix</pre>'
+          '<pre>prefix <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a> suffix\nprefix <a href="~/jupyterlab/b_file.py#line=0">~/jupyterlab/b_file.py:1</a> suffix</pre>'
         );
       });
 
@@ -622,7 +622,7 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(
-          '<pre>File "<a href="/home/user/jupyterlab/a_file.py#line=1">/home/user/jupyterlab/a_file.py", line 1</a>, in &lt;module&gt;</pre>'
+          '<pre>File "<a href="/home/user/jupyterlab/a_file.py#line=0">/home/user/jupyterlab/a_file.py", line 1</a>, in &lt;module&gt;</pre>'
         );
       });
 
@@ -634,7 +634,7 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...options });
         await w.renderModel(model);
         expect(w.node.innerHTML).toBe(
-          '<pre>File <a href="~/jupyterlab/a_file.py#line=1">~/jupyterlab/a_file.py:1</a></pre>'
+          '<pre>File <a href="~/jupyterlab/a_file.py#line=0">~/jupyterlab/a_file.py:1</a></pre>'
         );
       });
 

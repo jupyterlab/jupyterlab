@@ -603,8 +603,8 @@ class PathLinker implements ILinker {
 
     // Store line using RFC 5147 fragment locator for text/plain files.
     // It could be expanded to other formats, e.g. based on file extension.
-    const line = locators['line'];
-    let locator: string = typeof line !== 'undefined' ? `line=${line}` : '';
+    const line = parseInt(locators['line'], 10);
+    let locator: string = typeof line !== 'undefined' ? `line=${line - 1}` : '';
     anchor.dataset.locator = locator;
 
     anchor.appendChild(document.createTextNode(label));
