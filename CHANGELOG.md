@@ -101,6 +101,44 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.5
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.4...7113c486f9146c84ec83197bbaa4e11d7217bac5))
+
+### Enhancements made
+
+- Bump lumino packages [#14951](https://github.com/jupyterlab/jupyterlab/pull/14951) ([@fcollonval](https://github.com/fcollonval))
+
+### Bugs fixed
+
+- Fix View Menu "Show line number" does not show its corresponding shortcut  [#14740](https://github.com/jupyterlab/jupyterlab/pull/14740) ([@FoSuCloud](https://github.com/FoSuCloud))
+- Allow opening links in new tabs when HTML is trusted [#14933](https://github.com/jupyterlab/jupyterlab/pull/14933) ([@yuvipanda](https://github.com/yuvipanda))
+- Make the DOM structure of linked output views more similar to outputs [#14911](https://github.com/jupyterlab/jupyterlab/pull/14911) ([@SylvainCorlay](https://github.com/SylvainCorlay))
+- Custom script to upgrade `staging/yarn.lock` [#14926](https://github.com/jupyterlab/jupyterlab/pull/14926) ([@fcollonval](https://github.com/fcollonval))
+- Fix incorrect indentation browser_check.py [#14921](https://github.com/jupyterlab/jupyterlab/pull/14921) ([@mctoohey](https://github.com/mctoohey))
+
+### Maintenance and upkeep improvements
+
+- Check backward dep [#14953](https://github.com/jupyterlab/jupyterlab/pull/14953) ([@fcollonval](https://github.com/fcollonval))
+- Ensure not breaking backward compatibility [#14699](https://github.com/jupyterlab/jupyterlab/pull/14699) ([@fcollonval](https://github.com/fcollonval))
+- Make the browser check `default_url` configurable [#14944](https://github.com/jupyterlab/jupyterlab/pull/14944) ([@jtpio](https://github.com/jtpio))
+- Fix broken link [#14937](https://github.com/jupyterlab/jupyterlab/pull/14937) ([@fcollonval](https://github.com/fcollonval))
+- Remove docker ignore file [#14936](https://github.com/jupyterlab/jupyterlab/pull/14936) ([@fcollonval](https://github.com/fcollonval))
+- Rename readthedoc config [#14927](https://github.com/jupyterlab/jupyterlab/pull/14927) ([@fcollonval](https://github.com/fcollonval))
+
+### Documentation improvements
+
+- Fix broken link [#14937](https://github.com/jupyterlab/jupyterlab/pull/14937) ([@fcollonval](https://github.com/fcollonval))
+- Custom script to upgrade `staging/yarn.lock` [#14926](https://github.com/jupyterlab/jupyterlab/pull/14926) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-08-03&to=2023-08-13&type=c))
+
+[@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-08-03..2023-08-13&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-08-03..2023-08-13&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-08-03..2023-08-13&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-08-03..2023-08-13&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-08-03..2023-08-13&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-08-03..2023-08-13&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-08-03..2023-08-13&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-08-03..2023-08-13&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.4
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.3...66dfed2e428d969679ab09d8806c7b8e65a9b496))
@@ -151,8 +189,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-07-13&to=2023-08-03&type=c))
 
 [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-07-13..2023-08-03&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-07-13..2023-08-03&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-07-13..2023-08-03&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-07-13..2023-08-03&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-07-13..2023-08-03&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-07-13..2023-08-03&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-07-13..2023-08-03&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-07-13..2023-08-03&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.3
 
