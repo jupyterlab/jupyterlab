@@ -753,9 +753,9 @@ const sourceViewer: JupyterFrontEndPlugin<IDebugger.ISourceViewer> = {
       }
     });
 
-    return {
+    return Object.freeze({
       open: openSource
-    };
+    });
   }
 };
 

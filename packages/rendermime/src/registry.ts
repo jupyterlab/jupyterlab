@@ -418,7 +418,7 @@ export namespace RenderMimeRegistry {
           };
         } catch (error) {
           // The file seems like should be on the server but is not.
-          console.warn(`Could nor resolve location of ${path} on server`);
+          console.warn(`Could not resolve location of ${path} on server`);
           return null;
         }
       }
