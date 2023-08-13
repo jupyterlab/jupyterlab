@@ -211,20 +211,26 @@ export class FileEditorWidget extends DocumentWidget<FileEditor> {
   /**
    * Set URI fragment identifier for text files
    */
-  setFragment(fragment: string): void {
-    const parseFragments = fragment.split('=');
+  async setFragment(fragment: string): Promise<void> {
+    const parsedFragments = fragment.split('=');
 
     // TODO: expand to allow more schemes of Fragment Identification Syntax
     // reference: https://datatracker.ietf.org/doc/html/rfc5147#section-3
-    if (parseFragments[0] !== '#line') {
+    if (parsedFragments[0] !== '#line') {
       return;
     }
 
-    // A range of lines can be provided, only respect first for now.
-    let firstLine = parseFragments[1].split(',')[0];
+    const positionOrRange = parsedFragments[1];
+    let firstLine: string;
+    if (positionOrRange.includes(',')) {
+      // Only respect range start for now.
+      firstLine = positionOrRange.split(',')[0] || '1';
+    } else {
+      firstLine = positionOrRange;
+    }
 
     // Reveal the line
-    void this.context.ready.then(() => {
+    return this.context.ready.then(() => {
       const position = {
         line: parseInt(firstLine, 10) - 1,
         column: 0
