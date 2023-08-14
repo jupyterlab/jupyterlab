@@ -19,6 +19,8 @@ import { IMarkdownParser } from '@jupyterlab/rendermime';
 import { IMermaidMarkdown } from '@jupyterlab/mermaid';
 
 import type { marked, Renderer } from 'marked';
+import type { MarkedExtension, MarkedOptions } from 'MarkedOptions';
+import type { Token, Tokens } from 'Tokens';
 
 // highlight cache key separator
 const FENCE = '```~~~';
@@ -93,7 +95,7 @@ namespace Private {
   let _marked: typeof marked | null = null;
   let _blocks: IFencedBlockRenderer[] = [];
   let _languages: IEditorLanguageRegistry | null = null;
-  let _markedOptions: marked.MarkedOptions = {};
+  let _markedOptions: MarkedOptions = {};
   let _highlights = new LruCache<string, string>();
 
   export async function render(
@@ -164,7 +166,7 @@ namespace Private {
     _marked: typeof marked
   ): Promise<void> {
     // load marked plugins
-    const plugins: marked.MarkedExtension[] = await Promise.all([
+    const plugins: MarkedExtension[] = await Promise.all([
       (async () => (await import('marked-gfm-heading-id')).gfmHeadingId())(),
       (async () => (await import('marked-mangle')).mangle())()
     ]);
@@ -209,7 +211,7 @@ namespace Private {
   /**
    * Apply and cache syntax highlighting for code blocks.
    */
-  async function highlight(token: marked.Tokens.Code): Promise<void> {
+  async function highlight(token: Tokens.Code): Promise<void> {
     const { lang, text } = token;
     if (!lang || !_languages) {
       // no language(s), no highlight
@@ -235,7 +237,7 @@ namespace Private {
   /**
    * After parsing, lazily load and render or highlight code blocks
    */
-  async function walkTokens(token: marked.Token): Promise<void> {
+  async function walkTokens(token: Token): Promise<void> {
     switch (token.type) {
       case 'code':
         if (token.lang) {
@@ -246,7 +248,7 @@ namespace Private {
             }
           }
         }
-        await highlight(token);
+        await highlight(token as Tokens.Code);
     }
   }
 }
