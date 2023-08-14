@@ -262,7 +262,6 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   flex-grow: 1;
   min-width: 0;
   flex-shrink: 1;
-  outline: none !important;
   padding: var(--jp-widgets-input-padding)
     calc(var(--jp-widgets-input-padding) * 2);
   height: var(--jp-widgets-inline-height);
