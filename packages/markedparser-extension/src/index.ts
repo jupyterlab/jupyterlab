@@ -53,7 +53,6 @@ export function createMarkdownParser(
   languages: IEditorLanguageRegistry,
   options?: IRenderOptions
 ) {
-  Private.initializeMarked(options);
   return {
     render: (content: string): Promise<string> => {
       return Private.render(content, languages, options);
