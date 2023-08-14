@@ -131,9 +131,15 @@ namespace Private {
     _initializing = new PromiseDelegate();
 
     // load marked lazily, and exactly once
-    const { marked, Renderer } = await import('marked');
+    const [{ marked, Renderer }, plugins] = await Promise.all([
+      import('marked'),
+      loadMarkedPlugins()
+    ]);
 
-    await initializeMarkedPlugins(marked);
+    // use load marked plugins
+    for (const plugin of plugins) {
+      marked.use(plugin);
+    }
 
     // finish marked configuration
     _markedOptions = {
@@ -161,18 +167,12 @@ namespace Private {
    * As of writing, both of these features would work without plugins, but emit
    * deprecation warnings.
    */
-  async function initializeMarkedPlugins(
-    _marked: typeof marked
-  ): Promise<void> {
-    // load marked plugins
-    const plugins: MarkedExtension[] = await Promise.all([
+  async function loadMarkedPlugins(): Promise<MarkedExtension[]> {
+    // use loaded marked plugins
+    return Promise.all([
       (async () => (await import('marked-gfm-heading-id')).gfmHeadingId())(),
       (async () => (await import('marked-mangle')).mangle())()
     ]);
-
-    for (const plugin of plugins) {
-      _marked.use(plugin);
-    }
   }
 
   /**
