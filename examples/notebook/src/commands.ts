@@ -190,7 +190,7 @@ export const setupCommands = (
     caption: 'Restart the kernel',
     icon: args => (args.toolbar ? refreshIcon : undefined),
     execute: () =>
-      sessionContextDialogs.restart(nbWidget.context.sessionContext)
+      sessionContextDialogs.restart(nbWidget.context.sessionContext, false)
   });
   commands.addCommand(COMMAND_IDS.switchKernel, {
     label: 'Switch Kernel',

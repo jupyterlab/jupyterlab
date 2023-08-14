@@ -223,7 +223,7 @@ export namespace ToolbarItems {
       icon: fastForwardIcon,
       onClick: () => {
         const dialogs_ = dialogs ?? new SessionContextDialogs({ translator });
-        void dialogs_.restart(panel.sessionContext).then(restarted => {
+        void dialogs_.restart(panel.sessionContext, false).then(restarted => {
           if (restarted) {
             void NotebookActions.runAll(
               panel.content,

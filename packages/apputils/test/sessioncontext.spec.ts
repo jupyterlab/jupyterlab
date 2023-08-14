@@ -627,7 +627,7 @@ describe('@jupyterlab/apputils', () => {
         });
         await sessionContext.initialize();
         await sessionContext!.session?.kernel?.info;
-        const restart = sessionContextDialogs.restart(sessionContext);
+        const restart = sessionContextDialogs.restart(sessionContext, false);
 
         await acceptDialog();
         expect(await restart).toBe(true);
@@ -644,7 +644,7 @@ describe('@jupyterlab/apputils', () => {
           }
         });
 
-        const restart = sessionContextDialogs.restart(sessionContext);
+        const restart = sessionContextDialogs.restart(sessionContext, false);
         await dismissDialog();
         expect(await restart).toBe(false);
         expect(called).toBe(false);
@@ -653,7 +653,7 @@ describe('@jupyterlab/apputils', () => {
       it('should start the same kernel as the previously started kernel', async () => {
         await sessionContext.initialize();
         await sessionContext.shutdown();
-        await sessionContextDialogs.restart(sessionContext);
+        await sessionContextDialogs.restart(sessionContext, false);
         expect(sessionContext?.session?.kernel).toBeTruthy();
       });
     });

@@ -633,7 +633,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return sessionDialogs.restart(current.console.sessionContext);
+      return sessionDialogs.restart(current.console.sessionContext, false);
     },
     isEnabled
   });

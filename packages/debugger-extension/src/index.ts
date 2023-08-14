@@ -224,7 +224,7 @@ const notebooks: JupyterFrontEndPlugin<IDebugger.IHandler> = {
         }
 
         const { content, sessionContext } = widget;
-        const restarted = await sessionDialogs.restart(sessionContext);
+        const restarted = await sessionDialogs.restart(sessionContext, false);
         if (!restarted) {
           return;
         }

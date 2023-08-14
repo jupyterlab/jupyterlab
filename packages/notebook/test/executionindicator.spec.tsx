@@ -111,7 +111,7 @@ describe('@jupyterlab/notebook', () => {
         content: widget,
         context: ipySessionContext
       });
-      await ipySessionContext.restartKernel();
+      await ipySessionContext.restartKernel(false);
     });
 
     afterEach(() => {

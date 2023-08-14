@@ -218,8 +218,8 @@ export interface ISessionContext extends IObservableDisposable {
    *
    * @returns A promise that resolves when the kernel is restarted.
    */
-  restartKernel(): Promise<void>;
-
+  restartKernel(inPlace: boolean): Promise<void>;
+  // TODO: add config argument / type
   /**
    * Kill the kernel and shutdown the session.
    *
@@ -315,7 +315,7 @@ export namespace ISessionContext {
      * kernel name and resolves with `true`. If no kernel has been started,
      * this is a no-op, and resolves with `false`.
      */
-    restart(session: ISessionContext): Promise<boolean>;
+    restart(session: ISessionContext, inPlace: boolean): Promise<boolean>;
   }
 
   /**
@@ -707,7 +707,7 @@ export class SessionContext implements ISessionContext {
    *
    * @returns A promise that resolves when the kernel is restarted.
    */
-  async restartKernel(): Promise<void> {
+  async restartKernel(inPlace: boolean): Promise<void> {
     const kernel = this.session?.kernel || null;
     if (this._isRestarting) {
       return;
@@ -716,7 +716,7 @@ export class SessionContext implements ISessionContext {
     this._isReady = false;
     this._statusChanged.emit('restarting');
     try {
-      await this.session?.kernel?.restart();
+      await this.session?.kernel?.restart(inPlace);
       this._isReady = true;
     } catch (e) {
       console.error(e);
@@ -1396,7 +1396,10 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
    * If there is no kernel, we start a kernel with the last run
    * kernel name and resolves with `true`.
    */
-  async restart(sessionContext: ISessionContext): Promise<boolean> {
+  async restart(
+    sessionContext: ISessionContext,
+    inPlace: boolean = false
+  ): Promise<boolean> {
     const trans = this._translator.load('jupyterlab');
 
     await sessionContext.initialize();
@@ -1419,12 +1422,14 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       label: trans.__('Restart'),
       ariaLabel: trans.__('Confirm Kernel Restart')
     });
+
+    const kernelRestartMessage = inPlace
+      ? 'Do you want to restart the kernel of %1 in place? All variables will be lost but you will not lose your task.'
+      : 'Do you want to restart the kernel of %1? All variables will be lost.';
+
     const result = await showDialog({
       title: trans.__('Restart Kernel?'),
-      body: trans.__(
-        'Do you want to restart the kernel of %1? All variables will be lost.',
-        sessionContext.name
-      ),
+      body: trans.__(kernelRestartMessage, sessionContext.name),
       buttons: [
         Dialog.cancelButton({ ariaLabel: trans.__('Cancel Kernel Restart') }),
         restartBtn
@@ -1435,7 +1440,7 @@ export class SessionContextDialogs implements ISessionContext.IDialogs {
       return false;
     }
     if (result.button.accept) {
-      await sessionContext.restartKernel();
+      await sessionContext.restartKernel(inPlace);
       return true;
     }
     return false;

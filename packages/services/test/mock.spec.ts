@@ -79,7 +79,7 @@ describe('mock', () => {
     describe('.restart()', () => {
       it('should be a no-op', async () => {
         const kernel = new Mock.KernelMock({});
-        await expect(kernel.restart()).resolves.not.toThrow();
+        await expect(kernel.restart(false)).resolves.not.toThrow();
       });
     });
 

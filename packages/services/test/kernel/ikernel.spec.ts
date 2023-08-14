@@ -374,7 +374,7 @@ describe('Kernel.IKernel', () => {
         find: () => kernel.status === 'restarting'
       });
       await kernel.requestKernelInfo();
-      await kernel.restart();
+      await kernel.restart(false);
       await expect(emission).resolves.not.toThrow();
       await kernel.requestKernelInfo();
       await kernel.shutdown();
@@ -653,34 +653,34 @@ describe('Kernel.IKernel', () => {
       const kernel = await kernelManager.startNew();
       await kernel.info;
       await kernel.requestKernelInfo();
-      await kernel.restart();
+      await kernel.restart(false);
       await expect(kernel.requestKernelInfo()).resolves.not.toThrow();
       await kernel.shutdown();
     });
 
     it('should fail if the kernel does not restart', async () => {
       handleRequest(defaultKernel, 500, {});
-      const restart = defaultKernel.restart();
+      const restart = defaultKernel.restart(false);
       await expect(restart).rejects.toThrow();
     });
 
     it('should throw an error for an invalid response', async () => {
       const { id, name } = defaultKernel;
       handleRequest(defaultKernel, 205, { id, name });
-      await expect(defaultKernel.restart()).rejects.toThrow(
+      await expect(defaultKernel.restart(false)).rejects.toThrow(
         /Invalid response: 205 Reset Content/
       );
     });
 
     it('should throw an error for an error response', async () => {
       handleRequest(defaultKernel, 500, {});
-      const restart = defaultKernel.restart();
+      const restart = defaultKernel.restart(false);
       await expect(restart).rejects.toThrow();
     });
 
     it('should throw an error for an invalid id', async () => {
       handleRequest(defaultKernel, 200, {});
-      const restart = defaultKernel.restart();
+      const restart = defaultKernel.restart(false);
       await expect(restart).rejects.toThrow();
     });
 
@@ -690,7 +690,7 @@ describe('Kernel.IKernel', () => {
       await kernel.requestKernelInfo();
       const comm = kernel.createComm('test');
       const future = kernel.requestExecute({ code: 'foo' });
-      await kernel.restart();
+      await kernel.restart(false);
       await kernel.requestKernelInfo();
       expect(future.isDisposed).toBe(true);
       expect(comm.isDisposed).toBe(true);

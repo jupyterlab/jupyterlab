@@ -634,7 +634,7 @@ export namespace Commands {
           widget => widget.sessionContext.session?.path === current.context.path
         );
         if (widget) {
-          return sessionDialogs.restart(widget.sessionContext);
+          return sessionDialogs.restart(widget.sessionContext, false);
         }
       },
       label: trans.__('Restart Kernel'),

@@ -74,7 +74,8 @@ export namespace Toolbar {
       icon: refreshIcon,
       onClick: () => {
         void (dialogs ?? new SessionContextDialogs({ translator })).restart(
-          sessionContext
+          sessionContext,
+          false
         );
       },
       tooltip: trans.__('Restart the kernel')

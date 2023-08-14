@@ -34,6 +34,7 @@ import { ServerConnection } from '@jupyterlab/services';
 import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
+  circleEmptyIcon,
   fastForwardIcon,
   RankedMenu,
   refreshIcon,
@@ -82,6 +83,8 @@ export namespace CommandIDs {
   export const reconnectToKernel = 'kernelmenu:reconnect-to-kernel';
 
   export const restartKernel = 'kernelmenu:restart';
+
+  export const restartKernelInPlace = 'kernelmenu:restart-in-place';
 
   export const restartKernelAndClear = 'kernelmenu:restart-and-clear';
 
@@ -496,6 +499,19 @@ function createKernelMenu(
       trans
     ),
     icon: args => (args.toolbar ? refreshIcon : undefined)
+  });
+
+  commands.addCommand(CommandIDs.restartKernelInPlace, {
+    ...createSemanticCommand(
+      app,
+      menu.kernelUsers.restartKernel,
+      {
+        label: trans.__('Restart Kernel In Place…'),
+        caption: trans.__('Restart the kernel in place')
+      },
+      trans
+    ),
+    icon: args => (args.toolbar ? circleEmptyIcon : undefined)
   });
 
   commands.addCommand(

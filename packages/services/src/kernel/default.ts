@@ -472,14 +472,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * The promise will be rejected if the request fails or the response is
    * invalid.
    */
-  async restart(): Promise<void> {
+  async restart(inPlace: boolean): Promise<void> {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
     this._updateStatus('restarting');
     this._clearKernelState();
     this._kernelSession = RESTARTING_KERNEL_SESSION;
-    await restapi.restartKernel(this.id, this.serverSettings);
+    await restapi.restartKernel(this.id, this.serverSettings, inPlace);
     // Reconnect to the kernel to address cases where kernel ports
     // have changed during the restart.
     await this.reconnect();

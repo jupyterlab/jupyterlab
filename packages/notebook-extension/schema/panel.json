@@ -13,21 +13,18 @@
       { "name": "cut", "command": "notebook:cut-cell", "rank": 21 },
       { "name": "copy", "command": "notebook:copy-cell", "rank": 22 },
       { "name": "paste", "command": "notebook:paste-cell-below", "rank": 23 },
+      { "name": "run", "command": "runmenu:run", "rank": 30 },
+      { "name": "interrupt", "command": "kernelmenu:interrupt", "rank": 31 },
+      { "name": "restart", "command": "kernelmenu:restart", "rank": 32 },
       {
-        "name": "run",
-        "command": "notebook:run-cell-and-select-next",
-        "rank": 30
+        "name": "restart-in-place",
+        "command": "notebook:restart-kernel-in-place",
+        "rank": 33
       },
-      {
-        "name": "interrupt",
-        "command": "notebook:interrupt-kernel",
-        "rank": 31
-      },
-      { "name": "restart", "command": "notebook:restart-kernel", "rank": 32 },
       {
         "name": "restart-and-run",
-        "command": "notebook:restart-run-all",
-        "rank": 33
+        "command": "runmenu:restart-and-run-all",
+        "rank": 34
       },
       { "name": "cellType", "rank": 40 },
       { "name": "spacer", "type": "spacer", "rank": 100 },

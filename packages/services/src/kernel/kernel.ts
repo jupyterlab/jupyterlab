@@ -201,7 +201,7 @@ export interface IKernelConnection extends IObservableDisposable {
    * The promise will be rejected if the kernel status is `'dead'` or if the
    * request fails or the response is invalid.
    */
-  restart(): Promise<void>;
+  restart(inPlace: boolean): Promise<void>;
 
   /**
    * Send a `kernel_info_request` message.

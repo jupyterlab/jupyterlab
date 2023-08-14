@@ -126,13 +126,14 @@ export type IKernelOptions = Partial<Pick<IModel, 'name'>>;
  */
 export async function restartKernel(
   id: string,
-  settings: ServerConnection.ISettings = ServerConnection.makeSettings()
+  settings: ServerConnection.ISettings = ServerConnection.makeSettings(),
+  inPlace: boolean
 ): Promise<void> {
   const url = URLExt.join(
     settings.baseUrl,
     KERNEL_SERVICE_URL,
     encodeURIComponent(id),
-    'restart'
+    inPlace ? 'restart-in-place' : 'restart'
   );
   const init = { method: 'POST' };
 

@@ -94,6 +94,7 @@ import {
   addAboveIcon,
   addBelowIcon,
   buildIcon,
+  circleEmptyIcon,
   copyIcon,
   cutIcon,
   duplicateIcon,
@@ -138,6 +139,8 @@ namespace CommandIDs {
   export const restart = 'notebook:restart-kernel';
 
   export const restartClear = 'notebook:restart-clear-output';
+
+  export const restartInPlace = 'notebook:restart-kernel-in-place';
 
   export const restartAndRunToSelected = 'notebook:restart-and-run-to-selected';
 
@@ -2327,11 +2330,24 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return sessionDialogs.restart(current.sessionContext);
+        return sessionDialogs.restart(current.sessionContext, false);
       }
     },
     isEnabled: args => (args.toolbar ? true : isEnabled()),
     icon: args => (args.toolbar ? refreshIcon : undefined)
+  });
+  commands.addCommand(CommandIDs.restartInPlace, {
+    label: trans.__('Restart Kernel In Place…'),
+    caption: trans.__('Restart the kernel in place'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return sessionDialogs.restart(current.sessionContext, true);
+      }
+    },
+    icon: args => (args.toolbar ? circleEmptyIcon : undefined),
+    isEnabled
   });
   commands.addCommand(CommandIDs.shutdown, {
     label: trans.__('Shut Down Kernel'),
@@ -3409,6 +3425,7 @@ function populatePalette(
     CommandIDs.restart,
     CommandIDs.restartClear,
     CommandIDs.restartRunAll,
+    CommandIDs.restartInPlace,
     CommandIDs.runAll,
     CommandIDs.renderAllMarkdown,
     CommandIDs.runAllAbove,
