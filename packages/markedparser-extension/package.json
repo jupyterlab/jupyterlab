@@ -38,9 +38,9 @@
   "dependencies": {
     "@jupyterlab/application": "^4.1.0-alpha.0",
     "@jupyterlab/codemirror": "^4.1.0-alpha.0",
-    "@jupyterlab/rendermime": "^4.1.0-alpha.0",
     "@jupyterlab/coreutils": "^6.1.0-alpha.0",
     "@jupyterlab/mermaid": "^4.1.0-alpha.0",
+    "@jupyterlab/rendermime": "^4.1.0-alpha.0",
     "@lumino/coreutils": "^2.1.2",
     "marked": "^7.0.2",
     "marked-gfm-heading-id": "^3.0.6",
