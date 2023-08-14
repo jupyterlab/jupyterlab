@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/markedparser-extension",
-  "version": "4.0.2",
+  "version": "4.1.0-alpha.0",
   "description": "JupyterLab - Markdown parser provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,20 +36,19 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.2",
-    "@jupyterlab/codemirror": "^4.0.2",
-    "@jupyterlab/coreutils": "^6.0.2",
-    "@jupyterlab/mermaid": "^4.0.2",
-    "@jupyterlab/rendermime": "^4.0.2",
-    "@lumino/coreutils": "^2.1.1",
-    "marked": "^5.1.2",
-    "marked-gfm-heading-id": "^3.0.4",
-    "marked-mangle": "^1.1.0"
+    "@jupyterlab/application": "^4.1.0-alpha.0",
+    "@jupyterlab/codemirror": "^4.1.0-alpha.0",
+    "@jupyterlab/rendermime": "^4.1.0-alpha.0",
+    "@jupyterlab/coreutils": "^6.1.0-alpha.0",
+    "@jupyterlab/mermaid": "^4.1.0-alpha.0",
+    "@lumino/coreutils": "^2.1.2",
+    "marked": "^7.0.2",
+    "marked-gfm-heading-id": "^3.0.6",
+    "marked-mangle": "^1.1.2"
   },
   "devDependencies": {
     "@types/d3": "^7.4.0",
     "@types/dompurify": "^2.4.0",
-    "@types/marked": "^5.0.0",
     "rimraf": "~3.0.0",
     "typedoc": "~0.24.7",
     "typescript": "~5.0.4"

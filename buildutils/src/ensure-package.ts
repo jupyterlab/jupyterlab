@@ -71,6 +71,10 @@ export async function ensurePackage(
   const backwardVersions = options.backwardVersions ?? {};
   const isPrivate = data.private == true;
 
+  const hasBackwardCompatibilities = Object.keys(backwardVersions).includes(
+    data.name
+  );
+
   // Verify dependencies are consistent.
   let promises = Object.keys(deps).map(async name => {
     if (differentVersions.indexOf(name) !== -1) {
@@ -90,7 +94,7 @@ export async function ensurePackage(
 
       if (!oneOf) {
         if (
-          Object.keys(backwardVersions).includes(data.name) &&
+          hasBackwardCompatibilities &&
           Object.keys(backwardVersions[data.name]).includes(name)
         ) {
           messages.push(
@@ -107,6 +111,24 @@ export async function ensurePackage(
         }
       }
     }
+
+    if (
+      hasBackwardCompatibilities &&
+      Object.keys(backwardVersions[data.name]).includes(name)
+    ) {
+      const oneOf = deps[name]
+        .split(/\|\|/)
+        .map(v => v.trim())
+        .includes(backwardVersions[data.name][name]);
+      if (!oneOf) {
+        messages.push(
+          `Updated backward dependency: ${name}@${
+            backwardVersions[data.name][name]
+          } || ${deps[name]}`
+        );
+        deps[name] = `${backwardVersions[data.name][name]} || ${deps[name]}`;
+      }
+    }
   });
 
   await Promise.all(promises);
@@ -121,9 +143,17 @@ export async function ensurePackage(
       seenDeps[name] = await getDependency(name);
     }
     if (devDeps[name] !== seenDeps[name]) {
-      messages.push(`Updated devDependency: ${name}@${seenDeps[name]}`);
+      const oneOf =
+        devDeps[name].includes('||') &&
+        devDeps[name]
+          .split(/\|\|/)
+          .map(v => v.trim())
+          .includes(seenDeps[name]);
+      if (!oneOf) {
+        messages.push(`Updated devDependency: ${name}@${seenDeps[name]}`);
+        devDeps[name] = seenDeps[name];
+      }
     }
-    devDeps[name] = seenDeps[name];
   });
 
   await Promise.all(promises);
