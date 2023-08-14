@@ -46,6 +46,7 @@ const MISSING: Dict<string[]> = {
   '@jupyterlab/buildutils': ['assert', 'fs', 'path', 'webpack'],
   '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
+  '@jupyterlab/markedparser-extension': ['Tokens', 'MarkedOptions'],
   '@jupyterlab/testing': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
