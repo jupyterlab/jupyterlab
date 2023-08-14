@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Option, Select } from '@jupyter/react-components';
 import {
   Toolbar as AppToolbar,
   Dialog,
@@ -22,7 +23,6 @@ import {
   copyIcon,
   cutIcon,
   fastForwardIcon,
-  HTMLSelect,
   pasteIcon,
   ReactWidget,
   runIcon,
@@ -333,13 +333,18 @@ export class CellTypeSwitcher extends ReactWidget {
   /**
    * Handle `change` events for the HTMLSelect component.
    */
-  handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
+  handleChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+    value: string
+  ): void => {
     if (event.target.value !== '-') {
       NotebookActions.changeCellType(
         this._notebook,
         event.target.value as nbformat.CellType
       );
       this._notebook.activate();
+    } else {
+      event.target.value = value;
     }
   };
 
@@ -366,19 +371,22 @@ export class CellTypeSwitcher extends ReactWidget {
       }
     }
     return (
-      <HTMLSelect
+      <Select
         className={TOOLBAR_CELLTYPE_DROPDOWN_CLASS}
-        onChange={this.handleChange}
+        onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
+          this.handleChange(event, value)
+        }
         onKeyDown={this.handleKeyDown}
         value={value}
         aria-label={this._trans.__('Cell type')}
         title={this._trans.__('Select the cell type')}
+        minimal
       >
-        <option value="-">-</option>
-        <option value="code">{this._trans.__('Code')}</option>
-        <option value="markdown">{this._trans.__('Markdown')}</option>
-        <option value="raw">{this._trans.__('Raw')}</option>
-      </HTMLSelect>
+        <Option value="-">-</Option>
+        <Option value="code">{this._trans.__('Code')}</Option>
+        <Option value="markdown">{this._trans.__('Markdown')}</Option>
+        <Option value="raw">{this._trans.__('Raw')}</Option>
+      </Select>
     );
   }
 

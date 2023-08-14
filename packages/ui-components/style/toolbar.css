@@ -28,6 +28,11 @@
 /* Toolbar items */
 
 .jp-Toolbar > .jp-Toolbar-item {
+  /* Center the items in toolbar */
+  height: 100%;
+  display: flex;
+  align-items: center;
+
   /* Increase density for toolbar items */
   --density: -4;
   --toolbar-item-gap: calc(

@@ -22,6 +22,7 @@
 
   /* disable paint containment from lumino 2.0 default strict CSS containment */
   contain: style size !important;
+  overflow: initial;
 }
 
 .jp-Toolbar-item.jp-Notebook-toolbarCellType .jp-select-wrapper.jp-mod-focused {
@@ -29,7 +30,11 @@
   box-shadow: none;
 }
 
-.jp-Notebook-toolbarCellTypeDropdown select {
+.jp-Notebook-toolbarCellType {
+  overflow: initial;
+}
+
+.jp-Notebook-toolbarCellTypeDropdown {
   height: 24px;
   font-size: var(--jp-ui-font-size1);
   line-height: 14px;
@@ -37,8 +42,8 @@
   display: block;
 }
 
-.jp-Notebook-toolbarCellTypeDropdown span {
-  top: 5px !important;
+.jp-Notebook-toolbarCellTypeDropdown::part(listbox) {
+  width: auto;
 }
 
 .jp-Toolbar-responsive-popup {

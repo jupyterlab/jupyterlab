@@ -2052,7 +2052,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/react-components@npm:0.10.1":
+"@jupyter/react-components@npm:0.10.1, @jupyter/react-components@npm:^0.10.1":
   version: 0.10.1
   resolution: "@jupyter/react-components@npm:0.10.1"
   dependencies:
@@ -4281,6 +4281,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/notebook@workspace:packages/notebook"
   dependencies:
+    "@jupyter/react-components": ^0.10.1
     "@jupyter/ydoc": ^1.1.1
     "@jupyterlab/apputils": ^4.2.0-alpha.3
     "@jupyterlab/cells": ^4.1.0-alpha.3

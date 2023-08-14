@@ -16,7 +16,6 @@
 .jp-Notebook-ExecutionIndicator {
   position: relative;
   display: inline-block;
-  height: 100%;
   z-index: 9997;
 }
 
