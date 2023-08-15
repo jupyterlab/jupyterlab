@@ -217,11 +217,11 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 }
 
 .jp-Stdin {
-  margin: var(--jp-widgets-margin);
+  margin: 2px;
   box-sizing: border-box;
-  color: var(--jp-widgets-color);
+  color: var(--jp-content-font-color1);
   overflow: visible;
-  width: var(--jp-widgets-inline-width);
+  width: 300px;
   flex-direction: row;
   align-content: center;
   justify-content: center;
@@ -229,43 +229,41 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 }
 
 .jp-Stdin > div {
+  box-sizing: border-box;
   display: flex;
   flex-direction: row;
   align-items: baseline;
-  width: var(--jp-widgets-inline-width);
-  margin: var(--jp-widgets-margin);
-  box-sizing: border-box;
-  color: var(--jp-widgets-color);
+  width: 300px;
+  margin: 2px;
+  color: var(--jp-content-font-color1);
   overflow: visible;
 }
 
 .jp-Stdin-prompt {
-  font-size: var(--jp-widgets-font-size);
+  font-size: var(--jp-ui-font-size1);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: var(--jp-widgets-inline-height);
-  color: var(--jp-widgets-label-color);
+  line-height: 28px;
+  color: var(--jp-content-font-color1);
   text-align: right;
-  margin-right: calc(var(--jp-widgets-inline-margin) * 2);
-  width: var(--jp-widgets-inline-label-width);
+  margin-right: 8px;
+  width: 80px;
   flex-shrink: 0;
 }
 
 .jp-Stdin-input {
   box-sizing: border-box;
-  border: var(--jp-widgets-input-border-width) solid
-    var(--jp-widgets-input-border-color);
-  background-color: var(--jp-widgets-input-background-color);
-  color: var(--jp-widgets-input-color);
-  font-size: var(--jp-widgets-font-size);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
   flex-grow: 1;
   min-width: 0;
   flex-shrink: 1;
-  padding: var(--jp-widgets-input-padding)
-    calc(var(--jp-widgets-input-padding) * 2);
-  height: var(--jp-widgets-inline-height);
-  line-height: var(--jp-widgets-inline-height);
+  padding: 4px 8px;
+  height: 28px;
+  line-height: 28px;
 }
 
 .jp-Stdin-input::placeholder {
