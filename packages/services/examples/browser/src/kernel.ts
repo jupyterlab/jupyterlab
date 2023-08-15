@@ -49,7 +49,7 @@ export async function main(): Promise<void> {
   }
 
   log('Restarting kernel');
-  await kernel.restart();
+  await kernel.restart(false);
 
   log('Shutting down kernel');
   await kernel.shutdown();

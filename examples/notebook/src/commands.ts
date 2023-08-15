@@ -314,7 +314,7 @@ export const setupCommands = (
     icon: args => (args.toolbar ? fastForwardIcon : undefined),
     execute: () => {
       void sessionContextDialogs
-        .restart(nbWidget.sessionContext)
+        .restart(nbWidget.sessionContext, false)
         .then(restarted => {
           if (restarted) {
             void NotebookActions.runAll(
