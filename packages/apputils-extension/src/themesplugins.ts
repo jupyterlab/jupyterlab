@@ -139,6 +139,9 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.changePreferredLightTheme, {
       label: args => {
+        if (args.theme === undefined) {
+          return trans.__('Switch to the provided light `theme`.');
+        }
         const theme = args['theme'] as string;
         const displayName = manager.getDisplayName(theme);
         return args['isPalette']
@@ -157,6 +160,9 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.changePreferredDarkTheme, {
       label: args => {
+        if (args.theme === undefined) {
+          return trans.__('Switch to the provided dark `theme`.');
+        }
         const theme = args['theme'] as string;
         const displayName = manager.getDisplayName(theme);
         return args['isPalette']
