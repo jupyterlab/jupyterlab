@@ -8,7 +8,7 @@
 # [JupyterLab](https://jupyterlab.readthedocs.io)
 
 [![PyPI version](https://badge.fury.io/py/jupyterlab.svg)](https://badge.fury.io/py/jupyterlab)
-[![Downloads](https://pepy.tech/badge/jupyterlab/month)](https://pepy.tech/project/jupyterlab/month)
+[![Downloads](https://static.pepy.tech/badge/jupyterlab/month)](https://pepy.tech/project/jupyterlab)
 [![Build Status](https://github.com/jupyterlab/jupyterlab/workflows/Linux%20Tests/badge.svg)](https://github.com/jupyterlab/jupyterlab/actions?query=branch%3Amain+workflow%3A%22Linux+Tests%22)
 [![Build Status](https://github.com/jupyterlab/jupyterlab/workflows/Windows%20Tests/badge.svg)](https://github.com/jupyterlab/jupyterlab/actions?query=branch%3Amain+workflow%3A%22Windows+Tests%22)
 [![Documentation Status](https://readthedocs.org/projects/jupyterlab/badge/?version=stable)](http://jupyterlab.readthedocs.io/en/stable/)
