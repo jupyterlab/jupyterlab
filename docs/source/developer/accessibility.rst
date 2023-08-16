@@ -14,7 +14,7 @@ Looking for other ways to `contribute to accessibility on Jupyter projects
 Where to start
 --------------
 
-Thank you for being interested in improving JupyterLab's accessibility. Whether you are making accessibility-specific fixes or considering the accessibility impacts of another contribution, the work you do betters JupyterLab for everyone who uses it.
+Thank you for being interested in improving JupyterLab's accessibility. Whether making accessibility-specific fixes or considering the accessibility impacts of another contribution, your work betters JupyterLab for everyone who uses it.
 
 A common question when accessibility-minded developers come to JupyterLab is:
 where do I get started?
@@ -27,7 +27,7 @@ are a good place to start.
 
 If you want to more fully immerse yourself in the work of making JupyterLab (or
 other Jupyter projects) more accessibile, then a good place to start would be to
-join the `bi-weekly accessibility meeting
+join the `Jupyter accessibility meeting
 <https://jupyter-accessibility.readthedocs.io/en/latest/community/index.html#team-meetings-and-notes>`__
 that happens every other week. If you cannot attend the call, you can peruse the
 meeting notes and find links to other resources on the `Jupyter Accessibility
@@ -39,7 +39,7 @@ Looking for a `frontend developer's orientation to the JupyterLab codebase
 Best practices while developing
 -------------------------------
 
-JupyterLab is a web application, therefore the following two standards apply:
+JupyterLab is a web application. Therefore the following standards apply:
 
 - WCAG - `Web Content Accessibility Guidelines
   <https://www.w3.org/WAI/standards-guidelines/wcag/>`__
@@ -64,7 +64,7 @@ aside, etc.) to achieve the UX that you desire.
 
 Finally, there is much more accessibility knowledge on the Internet than there is in JupyterLab or Project Jupyter alone. Whatever you decide to work on, consider exploring accessibility resources in other spaces for similar or equivalent efforts. Accessibility communities tend to be generous with the resources they provide to improve web accessibility. Many times, searching for the name of the task or issue appended with `accessibility` in a search engine will give you several results and chance to learn from the broader community right away.
 
-The rest of this section contains other best practices.
+The rest of this section contains best practices specific to JupyterLab and its development.
 
 Use color variables from the CSS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -84,8 +84,8 @@ Upstream fixes in Lumino
 JupyterLab uses a front-end framework that was built specifically for it
 called Lumino. Lumino is similar in some ways to React, Vue, and Angular, but it
 also provides a number of UI widgets like menu bars, tab bars, and dock panels.
-As a result, some of the accessibility issues tracked in the JupyterLab GitHub
-repo actually need to be fixed in the Lumino repo. A good resource for learning
+As a result, some of the accessibility issues reported in the JupyterLab GitHub
+repo need to be fixed in the Lumino repo. A good resource for learning
 Lumino: `PhosphorJS (now Lumino) Mentor Sessions
 <https://www.youtube.com/playlist?list=PLFx5GKe0BTjQyCKtiK9TI-ekSuSn_8a3J>`__.
 PhosphorJS was Lumino's previous name. There is a page with `notes from the
