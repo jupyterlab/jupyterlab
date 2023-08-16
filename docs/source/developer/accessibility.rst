@@ -14,7 +14,9 @@ Looking for other ways to `contribute to accessibility on Jupyter projects
 Where to start
 --------------
 
-Thank you for being interested in improving JupyterLab's accessibility. Whether making accessibility-specific fixes or considering the accessibility impacts of another contribution, your work betters JupyterLab for everyone who uses it.
+Thank you for being interested in improving JupyterLab's accessibility. Whether
+making accessibility-specific fixes or considering the accessibility impacts of
+another contribution, your work betters JupyterLab for everyone who uses it.
 
 A common question when accessibility-minded developers come to JupyterLab is:
 where do I get started?
@@ -45,7 +47,8 @@ JupyterLab is a web application. Therefore the following standards apply:
   <https://www.w3.org/WAI/standards-guidelines/wcag/>`__
 - ARIA - `Accessible Rich Internet Applications
   <https://www.w3.org/WAI/standards-guidelines/aria/>`__
-- ATAG - `Authoring Tool Accessibility Guidelines `<https://www.w3.org/WAI/standards-guidelines/atag/>`__
+- ATAG - `Authoring Tool Accessibility Guidelines
+  `<https://www.w3.org/WAI/standards-guidelines/atag/>`__
 
 These are good places to familiarize yourself with accessibility best practices
 for developing web sites (WCAG) and web applications (ARIA). Note that although
@@ -62,7 +65,14 @@ implement a button using divs and aria attributes does not mean that you should!
 only use ARIA when you cannot  use existing HTML elements (button, input, nav,
 aside, etc.) to achieve the UX that you desire.
 
-Finally, there is much more accessibility knowledge on the Internet than there is in JupyterLab or Project Jupyter alone. Whatever you decide to work on, consider exploring accessibility resources in other spaces for similar or equivalent efforts. Accessibility communities tend to be generous with the resources they provide to improve web accessibility. Many times, searching for the name of the task or issue appended with `accessibility` in a search engine will give you several results and chance to learn from the broader community right away.
+Finally, there is much more accessibility knowledge on the Internet than there
+is in JupyterLab or Project Jupyter alone. Whatever you decide to work on,
+consider exploring accessibility resources in other spaces for similar or
+equivalent efforts. Accessibility communities tend to be generous with the
+resources they provide to improve web accessibility. Many times, searching for
+the name of the task or issue appended with `accessibility` in a search engine
+will give you several results and chance to learn from the broader community
+right away.
 
 The rest of this section contains best practices specific to JupyterLab and its development.
 
@@ -94,19 +104,22 @@ PhosphorJS sessions
 also has a link to some additional videos that were not uploaded to YouTube.
 
 It's not always obvious when an accessibility issue should be fixed in the
-JupyterLab versus Lumino codebase. Generally speaking, if you can fix the issue
-in Lumino, it's better to fix it in Lumino because then the fix will be absorbed
-in more places. However, for that same reason, because Lumino is used by more
-codebases than just JupyterLab—specifically, by JupyterLab extensions—one should
-be careful making changes to Lumino that might break downstream
-consumers/extensions. So an additional rule of thumb is: if you can't make the
-fix in Lumino without breaking dependants, then it might be better to make the
-fix in JupyterLab. In this case, you might take a two-track approach, where you
-fix the accessibility issue in JupyterLab and also submit a breaking fix in
-Lumino that targets a future, breaking version of Lumino.
+JupyterLab versus Lumino codebase. Some guidance to help you identify where your
+change should be made:
 
-Testing
--------
+- Generally speaking, if you can fix the issue in Lumino, it's better to fix it
+  in Lumino because then the fix will be absorbed in more places.
+- However, for that same reason, because Lumino is used by more codebases than
+  just JupyterLab—specifically, by JupyterLab extensions—one should be careful
+  making changes to Lumino that might break downstream consumers/extensions.
+- So an additional rule of thumb is: if you can't make the fix in Lumino without
+  breaking dependants, then it might be better to make the fix in JupyterLab. In
+  this case, you might take a two-track approach, where you fix the
+  accessibility issue in JupyterLab and also submit a breaking fix in Lumino
+  that targets a future, breaking version of Lumino.
+
+Regression Testing
+------------------
 
 If you fix an accessibility issue in the source code but you don't add a test
 with your fix, then there's a strong chance that your fix will be undone by
@@ -149,20 +162,28 @@ Altogether, the form will look something like this before you submit it:
 - External package reo: `a11ydev/lumino`
 - External package ref: `lm-a11y-fix`
 
-[Detailed testing instructions for how to use the GitHub workflow](https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/main/testing/jupyterlab/README.md#running-the-accessibility-tests-)
+`Detailed testing instructions for how to use the GitHub workflow
+<https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/main/testing/jupyterlab/README.md#running-the-accessibility-tests->`__
 
-Manual Testing
-^^^^^^^^^^^^^^
+PR Review and Manual Testing
+----------------------------
 
-Many accessibility issues become most clear when caught in action. Automated testing can be good at this, but you may also be able to find the impacts of accessibility of a contribution.
-
-One of the most approachable ways to try this is to try and complete a task related to your fix or contribution using an accessibility accommodation or setting. Common options include:
+When reviewing code, documentation, or other contributions, you can use manual
+testing to help prevent accessibility bugs. Typically you try and complete a
+task related to your fix or contribution using an accessibility accommodation or
+setting. Common options include:
 
 - Using a `screen reader`<https://en.wikipedia.org/wiki/Screen_reader>__.
 - Zooming the page up to 400% via your browser.
 - Unplugging or not using your mouse. Navigate only with the keyboard.
+- [Emulating vision deficiencies](https://learn.microsoft.com/en-us/microsoft-edge/devtools-guide-chromium/accessibility/emulate-vision-deficiencies#open-the-rendering-tool) (Chrome, Edge, and Firefox all provide built-in tools to do this.)
 
-While testing, take note of what happens and compare it to what you can do to complete the task without your chosen accessibility accommodation. If there is anything you cannot complete, then you have a blocking accessibility issue. Even though your use of assistive tech or an accessibility accommodation will likely differ from someone who uses them regularly, knowing the results is helpful to tell if JupyterLab is behaving as you expect.
+While testing, take note of what happens and compare it to what you can do to
+complete the task without your chosen accessibility accommodation. If there is
+anything you cannot complete, then you have a blocking accessibility issue. Even
+though your use of assistive tech or an accessibility accommodation will likely
+differ from someone who uses them regularly, knowing the results is helpful to
+tell if JupyterLab is behaving as you expect.
 
 GitPod
 ^^^^^^
