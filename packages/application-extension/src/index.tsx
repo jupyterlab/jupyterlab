@@ -104,8 +104,7 @@ namespace CommandIDs {
 
   export const toggleSideTabBar: string = 'application:toggle-side-tabbar';
 
-  export const focusFirstElementInRightSidebar: string =
-    'application:focusFirstElementInRightSidebar';
+  export const focusSidebarElement: string = 'application:focusSidebarElement';
 
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
@@ -331,18 +330,114 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isEnabled: () => !labShell.isEmpty('right')
       });
 
-      commands.addCommand(CommandIDs.focusFirstElementInRightSidebar, {
-        label: trans.__('Focus Right Sidebar First Element'),
-        execute: () => {
-          let dataId = Array.from(labShell.widgets('right'))[0].id;
-          let rightSidBarFirstElement = document.querySelector(
-            "[data-id='" + dataId + "']"
-          );
-          if (rightSidBarFirstElement?.id) {
-            let focusElement = document.getElementById(
-              rightSidBarFirstElement.id
+      commands.addCommand(CommandIDs.focusSidebarElement, {
+        label: trans.__('Default: Focus Left Tab Bar First Element'),
+        execute: args => {
+          let dataId;
+          let focusSidebarElement;
+          if (args.side === 'left') {
+            switch (args.index) {
+              case '0':
+                dataId = Array.from(labShell.widgets('left'))[0].id;
+                focusSidebarElement = document.querySelector(
+                  "[data-id='" + dataId + "']"
+                );
+                if (focusSidebarElement?.id) {
+                  let focusElement = document.getElementById(
+                    focusSidebarElement.id
+                  );
+                  focusElement?.focus();
+                }
+                break;
+              case '1':
+                dataId = Array.from(labShell.widgets('left'))[1].id;
+                focusSidebarElement = document.querySelector(
+                  "[data-id='" + dataId + "']"
+                );
+                if (focusSidebarElement?.id) {
+                  let focusElement = document.getElementById(
+                    focusSidebarElement.id
+                  );
+                  focusElement?.focus();
+                }
+                break;
+              case '2':
+                dataId = Array.from(labShell.widgets('left'))[2].id;
+                focusSidebarElement = document.querySelector(
+                  "[data-id='" + dataId + "']"
+                );
+                if (focusSidebarElement?.id) {
+                  let focusElement = document.getElementById(
+                    focusSidebarElement.id
+                  );
+                  focusElement?.focus();
+                }
+                break;
+              case '3':
+                dataId = Array.from(labShell.widgets('left'))[3].id;
+                focusSidebarElement = document.querySelector(
+                  "[data-id='" + dataId + "']"
+                );
+                if (focusSidebarElement?.id) {
+                  let focusElement = document.getElementById(
+                    focusSidebarElement.id
+                  );
+                  focusElement?.focus();
+                }
+                break;
+              default:
+                dataId = Array.from(labShell.widgets('left'))[0].id;
+                focusSidebarElement = document.querySelector(
+                  "[data-id='" + dataId + "']"
+                );
+                if (focusSidebarElement?.id) {
+                  let focusElement = document.getElementById(
+                    focusSidebarElement.id
+                  );
+                  focusElement?.focus();
+                }
+                break;
+            }
+          } else if (args.side === 'right') {
+            switch (args.index) {
+              case '0':
+                dataId = Array.from(labShell.widgets('right'))[0].id;
+                focusSidebarElement = document.querySelector(
+                  "[data-id='" + dataId + "']"
+                );
+                if (focusSidebarElement?.id) {
+                  let focusElement = document.getElementById(
+                    focusSidebarElement.id
+                  );
+                  focusElement?.focus();
+                }
+                break;
+              case '1':
+                dataId = Array.from(labShell.widgets('right'))[1].id;
+                focusSidebarElement = document.querySelector(
+                  "[data-id='" + dataId + "']"
+                );
+                if (focusSidebarElement?.id) {
+                  let focusElement = document.getElementById(
+                    focusSidebarElement.id
+                  );
+                  focusElement?.focus();
+                }
+                break;
+              default:
+                return;
+            }
+          } else {
+            dataId = Array.from(labShell.widgets('left'))[0].id;
+            focusSidebarElement = document.querySelector(
+              "[data-id='" + dataId + "']"
             );
-            focusElement?.focus();
+            if (focusSidebarElement?.id) {
+              let focusElement = document.getElementById(
+                focusSidebarElement.id
+              );
+              focusElement?.focus();
+            }
           }
         }
       });
@@ -462,7 +557,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.closeAll,
         CommandIDs.closeOtherTabs,
         CommandIDs.closeRightTabs,
-        CommandIDs.focusFirstElementInRightSidebar,
+        CommandIDs.focusSidebarElement,
         CommandIDs.toggleHeader,
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,

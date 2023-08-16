@@ -48,9 +48,58 @@
       "selector": "body"
     },
     {
-      "command": "application:focusFirstElementInRightSidebar",
-      "keys": ["Alt Shift Z"],
-      "selector": "body"
+      "command": "application:focusSidebarElement",
+      "keys": ["Alt 1"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": "0"
+      }
+    },
+    {
+      "command": "application:focusSidebarElement",
+      "keys": ["Alt 2"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": "1"
+      }
+    },
+    {
+      "command": "application:focusSidebarElement",
+      "keys": ["Alt 3"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": "2"
+      }
+    },
+    {
+      "command": "application:focusSidebarElement",
+      "keys": ["Alt 4"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": "3"
+      }
+    },
+    {
+      "command": "application:focusSidebarElement",
+      "keys": ["Alt Shift 1"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": "0"
+      }
+    },
+    {
+      "command": "application:focusSidebarElement",
+      "keys": ["Alt Shift 2"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": "1"
+      }
     }
   ],
   "jupyter.lab.menus": {
