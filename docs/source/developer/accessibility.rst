@@ -149,6 +149,7 @@ Altogether, the form will look something like this before you submit it:
 - External package reo: `a11ydev/lumino`
 - External package ref: `lm-a11y-fix`
 
+[Detailed testing instructions for how to use the GitHub workflow](https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/main/testing/jupyterlab/README.md#running-the-accessibility-tests-)
 Manual Testing
 ^^^^^^^^^^^^^^
 
