@@ -150,8 +150,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - run: |
-          jlpm
-          jlpm run docs
+          node ./jupyterlab/staging/yarn.js install
+          node ./jupyterlab/staging/yarn.js run docs
       - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
         with:
           ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
