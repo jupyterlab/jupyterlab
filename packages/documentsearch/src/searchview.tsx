@@ -55,6 +55,7 @@ const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
 interface ISearchInputProps {
   placeholder: string;
+  type: string;
   title: string;
   initialValue: string;
   inputRef?: React.RefObject<HTMLTextAreaElement>;
@@ -151,7 +152,8 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
   return (
     <div className={wrapperClass}>
       <SearchInput
-        placeholder={trans.__('Find')}
+        placeholder={trans.__('Find and Replace')}
+        type="text"
         onChange={e => props.onChange(e)}
         onKeyDown={e => props.onKeydown(e)}
         inputRef={props.inputRef}
@@ -215,6 +217,7 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <div className={INPUT_WRAPPER_CLASS}>
         <SearchInput
           placeholder={trans.__('Replace')}
+          type="text"
           initialValue={props.replaceText ?? ''}
           onKeyDown={e => props.onReplaceKeydown(e)}
           onChange={e => props.onChange(e)}
