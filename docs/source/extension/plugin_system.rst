@@ -11,7 +11,7 @@ reuse features from one another. A key part of this approach is JupyterLab's
 The Provider-Consumer Pattern
 -----------------------------
 
-.. 
+..
     TODO add to glossary, provider-consumer, service objects, tokens
 
 In the provider-consumer pattern, one plugin "provides" an object (called a
@@ -103,7 +103,7 @@ FOO
 XXXXXXXXXXXXXXXXXX
 
 In your plugin's "activate" function (which is called by JupyterLab when
-your extension is loaded), you need to 
+your extension is loaded), you need to
 make sure to add args to actrivate
 you provide a token and get a service object back
 
