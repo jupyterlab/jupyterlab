@@ -78,8 +78,14 @@ How Requesting Features Works
 
 When you designate a feature in the "requires" list of your plugin, JupyterLab
 will only load your plugin if that feature is available (it will fail to load
-otherwise). By designating a feature in the "optional" list, JupyterLab will
+otherwise).
+
+By designating a feature in the "optional" list, JupyterLab will
 pass you an object for it (if it's available) or null if it's not.
+
+Both of these behaviors can be used to enable compatibility with multiple
+Jupyter applications (like JupyterLab + Jupyter Notebook 7), which you can
+read more about in the [Compatibility Guide](LINK).
 
 Making Your Plugin a Provider
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
