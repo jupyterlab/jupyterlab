@@ -28,8 +28,8 @@ def configure_jupyter_server(c):
     # Add test helpers extension shipped with JupyterLab.
     # You can replace the following line by the two following one
     #   import jupyterlab
-    #   c.LabApp.extra_labextensions_path = str(Path(jupyterlab.__file__).parent / "galata")
-    c.LabApp.extra_labextensions_path = str(Path(__file__).parent)
+    #   c.LabServerApp.extra_labextensions_path = str(Path(jupyterlab.__file__).parent / "galata")
+    c.LabServerApp.extra_labextensions_path = str(Path(__file__).parent)
 
     c.ServerApp.root_dir = os.environ.get(
         "JUPYTERLAB_GALATA_ROOT_DIR", mkdtemp(prefix="galata-test-")
