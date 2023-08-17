@@ -149,7 +149,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - run: |
+          jlpm
+          jlpm run docs
       - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
         with:
-          ignore_glob: "packages/ui-components/docs/source/ui_components.rst images"
-          ignore_links: "../api/*.* .*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.*"
+          ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
+          ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.*"
