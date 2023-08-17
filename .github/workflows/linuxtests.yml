@@ -151,6 +151,7 @@ jobs:
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - run: |
           node ./jupyterlab/staging/yarn.js install
+          node ./jupyterlab/staging/yarn.js run build:packages
           node ./jupyterlab/staging/yarn.js run docs
       - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
         with:
