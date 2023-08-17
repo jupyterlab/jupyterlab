@@ -162,9 +162,10 @@ export class TopNav extends React.Component<ITopNavProps> {
           <Symbols />
           <InputGroup
             className="jp-Shortcuts-Search"
+            aria-labelledby='Search Shortcuts'
             type="text"
             onChange={event => this.props.updateSearchQuery(event)}
-            placeholder={trans.__('Search…')}
+            placeholder={trans.__('Search Shortcuts…')}
             rightIcon="ui-components:search"
           />
           <AdvancedOptions

@@ -360,7 +360,7 @@ class Header extends ReactWidget {
           )}
         </div>
         <FilterBox
-          placeholder={this.trans.__('Search')}
+          placeholder={this.trans.__('Search Extension Manager')}
           disabled={!this.model.isDisclaimed}
           updateFilter={(fn, query) => {
             this.model.query = query ?? '';
