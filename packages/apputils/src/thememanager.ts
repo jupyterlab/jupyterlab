@@ -83,7 +83,7 @@ export class ThemeManager implements IThemeManager {
     if (!this.isToggledAdaptiveTheme()) {
       return this.theme;
     }
-    if (this.isOSColorSchemeDark()) {
+    if (this.isSystemColorSchemeDark()) {
       return this.preferredDarkTheme;
     }
     return this.preferredLightTheme;
@@ -122,9 +122,9 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
-   * Test if the preferred OS color scheme is dark
+   * Test if the system's preferred color scheme is dark
    */
-  isOSColorSchemeDark(): boolean {
+  isSystemColorSchemeDark(): boolean {
     return (
       window.matchMedia &&
       window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -423,7 +423,7 @@ export class ThemeManager implements IThemeManager {
 
     let theme = settings.composite['theme'] as string;
     if (this.isToggledAdaptiveTheme()) {
-      if (this.isOSColorSchemeDark()) {
+      if (this.isSystemColorSchemeDark()) {
         theme = this.preferredDarkTheme;
       } else {
         theme = this.preferredLightTheme;
