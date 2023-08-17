@@ -107,7 +107,7 @@ todo_include_todos = False
 # build js docs and stage them to the build directory
 def build_api_docs(out_dir: Path):
     """build js api docs"""
-    docs = HERE.parent
+    docs = HERE
     root = docs.parent
     docs_api = docs / "api"
     api_index = docs_api / "index.html"

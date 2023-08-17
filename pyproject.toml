@@ -164,7 +164,7 @@ exclude = [
     "/buildutils",
     "/dist",
     "/docs/build",
-    "/docs/api",
+    "/docs/source/api",
     "/design",
     "/dev_mode",
     "/examples",
