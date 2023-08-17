@@ -14,17 +14,20 @@ The Provider-Consumer Pattern
 .. 
     TODO add to glossary, provider-consumer, service objects, tokens
 
-In the provider-consumer pattern, one plugin "provides" object(s) (called
-**service objects**) to the system, and other plugins "consume" those objects
-by using them in an extension to add extra features and customizations
-to JupyterLab.
+In the provider-consumer pattern, one plugin "provides" an object (called a
+**service object**) to the system, and other plugins "consume" that object
+by using it in an extension to add extra features and customizations
+to JupyterLab (and an extension consists of one or more plugins).
+
+How Plugin Metadata Drives the Provider-Consumer Pattern
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Each plugin uses some properties (the "requires" and "optional" properties) to
 request features it wants which are provided by other plugins that have been
 loaded into JupyterLab. When your plugin requests features, the system sends
 them to your plugin's activate function if they're available.
 
-See the example plugin below, which is a "consumer" of the "IStatusBar".
+See the example plugin below, which is a "consumer" of the "IStatusBar":
 
 .. code::
 
@@ -43,24 +46,61 @@ See the example plugin below, which is a "consumer" of the "IStatusBar".
     }
   };
 
+Here, you can see the "optional" property, which is a list of optional
+features this plugin wants (with just a single item, IStatusBar). You
+can also see the "activate" property of the plugin, which is a callable
+(function) that the plugin system will call for you when your plugin is
+loaded.
+
+About the "activate" function
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It's important to note that the arguments to your "activate" callable will depend on what
+things you request in your "optional" and "requires" plugin properties, so
+remember to add arguments for any service objects you request into your
+activate function's arguments.
+
+When JupyterLab calls your plugin's "activate" function, it will always
+pass an application as the first argument, then it will pass any "required"
+objects (in the order you specify them), then any "optional" objects (again,
+in the order you specify them).
+
+By returning an object from your activate function, you become a "provider"
+in Jupyter's provider-consumer pattern, and other plugins can use ("consume")
+this object (the "service object") in their extensions. Read more about this
+in the XXXX section below.
+
+..
+  TODO expand the return from activate section here
+
+How Requesting Features Works
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 When you designate a feature in the "requires" list of your plugin, JupyterLab
-will only load your plugin if that feature is available. By designating a
-feature in the "optional" list, JupyterLab will pass you an object for it
-(if it's available) or null if it's not.
+will only load your plugin if that feature is available (it will fail to load
+otherwise). By designating a feature in the "optional" list, JupyterLab will
+pass you an object for it (if it's available) or null if it's not.
 
-So in summary: The plugins that make up your extension ask for features using
-the "required" and "optional" properties, then JupyterLab gives them to your
-plugin as arguments to your "activate" function (which is called by JupyterLab
-when your extension is loaded).
+Making Your Plugin a Provider
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To make your plugin a "provider" of service objects that other plugins can use,
+you need to list a "Token" in your plugin's "provides" property, then return an
+object from your plugin's "activate" callable.
+
+See this example:
+
+FOO
 
 
 
 
-Every plugin needs an "activate" function, which will be called by JupyterLab
-when your extension is loaded. When JupyterLab calls your plugin's "activate"
-function, it will always pass an application as the first argument, then it
-will pass any "required" objects in the order you specify them, then any
-"optional" objects in the order you specify them.
+
+
+
+
+
+XXXXXXXXXXXXXXXXXX
 
 In your plugin's "activate" function (which is called by JupyterLab when
 your extension is loaded), you need to 
@@ -94,3 +134,21 @@ that are provided by other plugins that have been loaded into JupyterLab. Jupyte
 itself is a provider of many of these "service objects" through its built-in extension
 plugins. The IStatusBar, for instance, is provided by one of JupyterLab's bundled plugins,
 and by using it in your extension, you act as the consumer.
+
+
+
+
+How the whole system works, all the parts
+
+big idea is for sharing and reuse of functionality between/among plugins
+  remember meeting idea about consuming commands...
+
+define a plugin object, export from your extension/module
+
+plugin obj has required, optional, and activate
+
+activate is called by the system on load
+
+activate args change, are dependent on whatg you ask for: app, req, opts
+
+tokens....
