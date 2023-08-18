@@ -216,7 +216,6 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
       <div className={INPUT_WRAPPER_CLASS}>
         <SearchInput
           placeholder={trans.__('Replace')}
-          type="text"
           initialValue={props.replaceText ?? ''}
           onKeyDown={e => props.onReplaceKeydown(e)}
           onChange={e => props.onChange(e)}
