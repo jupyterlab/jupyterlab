@@ -165,7 +165,7 @@ export class TopNav extends React.Component<ITopNavProps> {
             aria-label={trans.__('Search Shortcuts')}
             type="text"
             onChange={event => this.props.updateSearchQuery(event)}
-            placeholder={trans.__('Search Shortcuts…')}
+            placeholder={trans.__('Search…')}
             rightIcon="ui-components:search"
           />
           <AdvancedOptions
