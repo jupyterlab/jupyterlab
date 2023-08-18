@@ -152,7 +152,6 @@ function SearchEntry(props: ISearchEntryProps): JSX.Element {
     <div className={wrapperClass}>
       <SearchInput
         placeholder={trans.__('Find')}
-        type="text"
         onChange={e => props.onChange(e)}
         onKeyDown={e => props.onKeydown(e)}
         inputRef={props.inputRef}
