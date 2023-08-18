@@ -218,7 +218,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
                   <div className="jp-inputFieldWrapper jp-FormGroup-contentItem">
                     <input
                       className="form-control"
-                      aria-label={props.trans.__('Form control')}
+                      aria-label={props.trans.__('Server name')}
                       type="text"
                       required={true}
                       value={currentServerName}
