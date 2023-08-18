@@ -55,7 +55,6 @@ const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
 interface ISearchInputProps {
   placeholder: string;
-  type?: string;
   title: string;
   initialValue: string;
   inputRef?: React.RefObject<HTMLTextAreaElement>;
