@@ -333,18 +333,13 @@ export class CellTypeSwitcher extends ReactWidget {
   /**
    * Handle `change` events for the HTMLSelect component.
    */
-  handleChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-    value: string
-  ): void => {
+  handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     if (event.target.value !== '-') {
       NotebookActions.changeCellType(
         this._notebook,
         event.target.value as nbformat.CellType
       );
       this._notebook.activate();
-    } else {
-      event.target.value = value;
     }
   };
 
@@ -374,12 +369,13 @@ export class CellTypeSwitcher extends ReactWidget {
       <Select
         className={TOOLBAR_CELLTYPE_DROPDOWN_CLASS}
         onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-          this.handleChange(event, value)
+          this.handleChange(event)
         }
         onKeyDown={this.handleKeyDown}
         value={value}
         aria-label={this._trans.__('Cell type')}
         title={this._trans.__('Select the cell type')}
+        autowidth
         minimal
       >
         <Option value="-">-</Option>

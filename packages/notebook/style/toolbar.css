@@ -25,27 +25,6 @@
   overflow: initial;
 }
 
-.jp-Toolbar-item.jp-Notebook-toolbarCellType .jp-select-wrapper.jp-mod-focused {
-  border: none;
-  box-shadow: none;
-}
-
-.jp-Notebook-toolbarCellType {
-  overflow: initial;
-}
-
-.jp-Notebook-toolbarCellTypeDropdown {
-  height: 24px;
-  font-size: var(--jp-ui-font-size1);
-  line-height: 14px;
-  border-radius: 0;
-  display: block;
-}
-
-.jp-Notebook-toolbarCellTypeDropdown::part(listbox) {
-  width: auto;
-}
-
 .jp-Toolbar-responsive-popup {
   position: absolute;
   height: fit-content;
