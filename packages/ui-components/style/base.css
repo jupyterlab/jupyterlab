@@ -28,13 +28,11 @@ body {
 
 /* Disable native link decoration styles everywhere outside of dialog boxes */
 a {
-  text-decoration: unset;
-  color: unset;
+  text-decoration: underline;
 }
 
 a:hover {
-  text-decoration: unset;
-  color: unset;
+  color: var(--jp-ui-font-color0);
 }
 
 /* Accessibility for links inside dialog box text */
