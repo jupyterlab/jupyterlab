@@ -69,6 +69,17 @@ jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
   flex-shrink: 1;
 }
 
+.jp-Toolbar-responsive-popup {
+  position: absolute;
+  height: fit-content;
+  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background: var(--jp-toolbar-background);
+  z-index: 1;
+  right: 0;
+  top: 0;
+}
+
 #jp-main-dock-panel[data-mode='single-document']
   .jp-MainAreaWidget
   > .jp-Toolbar.jp-Toolbar-micro {

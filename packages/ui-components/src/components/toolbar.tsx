@@ -538,7 +538,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     const widgetName = Private.nameProperty.get(widget);
     this._widgetWidths![widgetName] = widget.hasClass(TOOLBAR_SPACER_CLASS)
       ? 2
-      : widget.node.clientWidth;
+      : // Add button margin and toolbar items gap = 2 * (4 + 1.5)
+        widget.node.clientWidth + 11;
   }
 
   private _getWidgetWidth(widget: Widget): number {
@@ -898,7 +899,8 @@ class ToolbarPopup extends Widget {
    *  Construct a new ToolbarPopup
    */
   constructor() {
-    super();
+    super({ node: document.createElement('jp-toolbar') });
+    this.addClass('jp-Toolbar');
     this.addClass('jp-Toolbar-responsive-popup');
     this.layout = new PanelLayout();
     Widget.attach(this, document.body);
