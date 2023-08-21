@@ -1000,6 +1000,36 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#runCells()', () => {
+      beforeEach(() => {
+        // Make sure all cells have valid code.
+        widget.widgets[2].model.sharedModel.setSource('a = 1');
+      });
+
+      it('should change to command mode', async () => {
+        widget.mode = 'edit';
+        const result = await NotebookActions.runCells(
+          widget,
+          [widget.widgets[2]],
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(widget.mode).toBe('command');
+      });
+
+      it('should preserve the existing selection', async () => {
+        const next = widget.widgets[2];
+        widget.select(next);
+        const result = await NotebookActions.runCells(
+          widget,
+          [widget.widgets[1]],
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(widget.isSelected(widget.widgets[2])).toBe(true);
+      });
+    });
+
     describe('#runAll()', () => {
       beforeEach(() => {
         // Make sure all cells have valid code.

@@ -555,6 +555,8 @@ export namespace NotebookActions {
    * @param translator - The application translator.
    *
    * #### Notes
+   * The existing selection will be preserved.
+   * The mode will be changed to command.
    * An execution error will prevent the remaining code cells from executing.
    * All markdown cells will be rendered.
    */
@@ -728,6 +730,7 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const lastIndex = notebook.widgets.length;
 
     const promise = Private.runCells(
       notebook,
@@ -736,6 +739,9 @@ export namespace NotebookActions {
       sessionDialogs,
       translator
     );
+
+    notebook.activeCellIndex = lastIndex;
+    notebook.deselectAll();
 
     Private.handleRunState(notebook, state, true);
     return promise;
@@ -799,6 +805,8 @@ export namespace NotebookActions {
       sessionDialogs,
       translator
     );
+
+    notebook.deselectAll();
 
     Private.handleRunState(notebook, state, true);
     return promise;
@@ -2223,6 +2231,8 @@ namespace Private {
     translator?: ITranslator
   ): Promise<boolean> {
     const lastCell = cells[-1];
+    notebook.mode = 'command';
+
     return Promise.all(
       cells.map(cell =>
         runCell(notebook, cell, sessionContext, sessionDialogs, translator)
