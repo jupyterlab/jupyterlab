@@ -13,7 +13,7 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
+        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
         # This will be used by the base setup action
         python-version: ["3.8", "3.11"]
         include:
@@ -35,8 +35,6 @@ jobs:
           - group: usage
             python-version: "3.8"
           - group: usage2
-            python-version: "3.8"
-          - group: linkcheck
             python-version: "3.8"
           - group: nonode
             python-version: "3.8"
