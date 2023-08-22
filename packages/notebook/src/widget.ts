@@ -1310,7 +1310,7 @@ export class Notebook extends StaticNotebook {
 
   accessLastHistory(): void {
     const activeCell = this.activeCell;
-    const activeCellText = activeCell?.node.textContent;
+    const activeCellText = activeCell?.model.sharedModel.getSource();
     let output: string | null | undefined = activeCellText;
     if (activeCell) {
       output = this._history?.back(activeCellText || '');

@@ -1,11 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Cell } from '@jupyterlab/cells';
 import { ISessionContext } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { KernelMessage } from '@jupyterlab/services';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
+import { NotebookActions } from './actions';
+import { StaticNotebook } from './widget';
 
 /**
  * The definition of a console history manager object.
@@ -25,6 +28,8 @@ export interface INotebookHistory extends IDisposable {
    * The placeholder text that a history session began with.
    */
   readonly placeholder: string;
+
+  readonly kernelSession: string;
 
   /**
    * Get the previous item in the console history.
@@ -59,7 +64,7 @@ export interface INotebookHistory extends IDisposable {
    * being added is the same as the last item in history, it is ignored as well
    * so that the console's history will consist of no contiguous repetitions.
    */
-  push(item: string): void;
+  // push(item: string): void;
 
   /**
    * Reset the history navigation state, i.e., start a new history session.
@@ -78,12 +83,10 @@ export class NotebookHistory implements INotebookHistory {
     this.sessionContext = options.sessionContext;
     void this._handleKernel();
     this.sessionContext.kernelChanged.connect(this._handleKernel, this);
-    this.sessionContext.propertyChanged.connect(value =>
-      console.log('propertyChanged: ', value)
-    );
-    this.sessionContext.sessionChanged.connect(value =>
-      console.log('sessionChanged: ', value)
-    );
+    NotebookActions.executed.connect(value => {
+      console.log('value: ', value);
+    });
+    NotebookActions.executed.connect(this._onExecuted, this);
   }
 
   /**
@@ -121,6 +124,10 @@ export class NotebookHistory implements INotebookHistory {
    */
   get placeholder(): string {
     return this._placeholder;
+  }
+
+  get kernelSession(): string {
+    return this._kernelSession;
   }
 
   /**
@@ -161,6 +168,7 @@ export class NotebookHistory implements INotebookHistory {
     this._cursor = Math.max(0, this._cursor);
     const content = this._filtered[this._cursor];
     console.log('this._cursor: ', this._cursor);
+    console.log(content);
     return content;
   }
   // back(placeholder: string): Promise<string> {
@@ -213,12 +221,12 @@ export class NotebookHistory implements INotebookHistory {
    * being added is the same as the last item in history, it is ignored as well
    * so that the console's history will consist of no contiguous repetitions.
    */
-  push(item: string): void {
-    if (item && item !== this._history[this._history.length - 1]) {
-      this._history.push(item);
-    }
-    this.reset();
-  }
+  // push(item: string): void {
+  //   if (item && item !== this._history[this._history.length - 1]) {
+  //     this._history.push(item);
+  //   }
+  //   this.reset();
+  // }
 
   /**
    * Reset the history navigation state, i.e., start a new history session.
@@ -239,16 +247,24 @@ export class NotebookHistory implements INotebookHistory {
    * [session: number, line: number, input: string]
    * Contiguous duplicates are stripped out of the API response.
    */
-  protected onHistory(value: KernelMessage.IHistoryReplyMsg): void {
+  protected onHistory(
+    value: KernelMessage.IHistoryReplyMsg,
+    cell?: Cell
+  ): void {
     this._history.length = 0;
-    let last = '';
-    let current = '';
+    let last = ['', '', ''];
+    let current = ['', '', ''];
+    let kernelSession = '';
     if (value.content.status === 'ok') {
       for (let i = 0; i < value.content.history.length; i++) {
-        current = (value.content.history[i] as string[])[2];
+        current = value.content.history[i] as string[];
         if (current !== last) {
+          kernelSession = (value.content.history[i] as string[])[0];
           this._history.push((last = current));
         }
+      }
+      if (current[2] == cell?.model.sharedModel.getSource()) {
+        this._kernelSession = kernelSession;
       }
     }
     // Reset the history navigation cursor back to the bottom.
@@ -316,15 +332,45 @@ export class NotebookHistory implements INotebookHistory {
    * Handle the current kernel changing.
    */
   private async _handleKernel(): Promise<void> {
+    // ??????? should I make kernel a class attribute?
     const kernel = this.sessionContext.session?.kernel;
     if (!kernel) {
       this._history.length = 0;
       return;
     }
-    const history = kernel.requestHistory(Private.initialRequest).then(v => {
-      this.onHistory(v);
-    });
-    return history;
+    return this._retrieveHistory();
+  }
+
+  private async _onExecuted(
+    _: unknown,
+    args: { notebook: StaticNotebook; cell: Cell }
+  ): Promise<void> {
+    // ??????? should I make kernel a class attribute?
+    const cell = args['cell'];
+    console.log(cell);
+    const kernel = this.sessionContext.session?.kernel;
+    if (kernel) {
+      const history = kernel.requestHistory(Private.initialRequest);
+      const onHistory = history.then(v => {
+        this.onHistory(v, cell);
+      });
+      console.log(this._history[-1]);
+      console.log(cell.model.sharedModel.getSource());
+      console.log(history);
+      return onHistory;
+    }
+    return;
+  }
+
+  private async _retrieveHistory(): Promise<void> {
+    const kernel = this.sessionContext.session?.kernel;
+    if (kernel) {
+      const history = kernel.requestHistory(Private.initialRequest).then(v => {
+        this.onHistory(v);
+      });
+      return history;
+    }
+    return;
   }
 
   /**
@@ -338,17 +384,25 @@ export class NotebookHistory implements INotebookHistory {
 
     let last = '';
     let current = '';
-
     for (let i = 0; i < this._history.length; i++) {
-      current = this._history[i];
+      console.log(this._history[i][2]);
+      console.log(this.kernelSession);
+      if (this._history[i][0] !== this.kernelSession) {
+        continue;
+      }
+      current = this._history[i][2] as string;
       console.log('filterStr.length', filterStr.length);
       console.log(
         'current.slice(0, filterStr.length)',
         current.slice(0, filterStr.length)
       );
+      console.log(
+        'filterStr !== current.slice(0, filterStr.length)',
+        filterStr !== current.slice(0, filterStr.length)
+      );
       if (
         current !== last &&
-        filterStr === current.slice(0, filterStr.length)
+        filterStr !== current.slice(0, filterStr.length)
       ) {
         this._filtered.push((last = current));
       }
@@ -359,8 +413,9 @@ export class NotebookHistory implements INotebookHistory {
 
   private _cursor = 0;
   private _hasSession = false;
-  private _history: string[] = [];
+  private _history: Array<Array<string>> = [];
   private _placeholder: string = '';
+  private _kernelSession: string = '';
   private _setByHistory = false;
   private _isDisposed = false;
   private _editor: CodeEditor.IEditor | null = null;
