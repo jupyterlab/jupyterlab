@@ -118,53 +118,6 @@ change should be made:
   accessibility issue in JupyterLab and also submit a breaking fix in Lumino
   that targets a future, breaking version of Lumino.
 
-Regression Testing
-------------------
-
-If you fix an accessibility issue in the source code but you don't add a test
-with your fix, then there's a strong chance that your fix will be undone by
-accident by some future changes to the codebase.
-
-Sometimes it's straightforward to unit-test an accessibility fix, such as when
-`enabling keyboard shortcuts on a toolbar button
-<https://github.com/jupyterlab/jupyterlab/pull/5769>`__. But often it's
-difficult to unit-test accessibility fixes.
-
-Therefore there is an effort underway to use Playwright to write user level
-`accessibility tests to JupyterLab
-<https://github.com/Quansight-Labs/jupyter-a11y-testing/tree/main/testing/jupyterlab>`__.
-Here's how you can use it in your development process, once you've identified an
-accessibility issue and how to fix it:
-
-1. Fork the _jupyter-a11y-testing_ repo.
-2. Create a new git branch. Add a test using one of the existing JupyterLab
-   regression tests in the repo as a model. The idea is that this test should
-   fail without your accessibility fix but pass after your fix is merged.
-3. On your fork of jupyter-a11y-testing, using the instructions at the link
-   above, manually dispatch the workflow to run your new test and verify that it
-   fails.
-4. Open a PR on Lumino or JupyterLab or both that contains your accessibility
-   fix.
-5. Using your _jupyter-a11y-testing_ fork, manually dispatch the workflow again,
-   but this time configure the workflow so that it builds JupyterLab with your
-   code fixes applied. For example, if your GitHub username is `a11ydev` and the
-   name of your JupyterLab branch is `jl-a11y-fix`, then in the workflow form
-   you would put `a11ydev/jupyterlab` as the repo and `a11y-fix` as the
-   ref/branch/tag/SHA. If instead (or also) you have a fix for Lumino in a
-   branch named `lm-a11y-fix`, then you would put `a11ydev/lumino` in the field
-   for the external package repo and the name of your Lumino branch in the field
-   for the external package ref.
-
-Altogether, the form will look something like this before you submit it:
-
-- JupyterLab repo: `a11ydev/jupyterlab`
-- JupyterLab ref: `jl-a11y-fix`
-- External package reo: `a11ydev/lumino`
-- External package ref: `lm-a11y-fix`
-
-`Detailed testing instructions for how to use the GitHub workflow
-<https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/main/testing/jupyterlab/README.md#running-the-accessibility-tests->`__
-
 PR Review and Manual Testing
 ----------------------------
 
@@ -173,7 +126,7 @@ testing to help prevent accessibility bugs. Typically you try and complete a
 task related to your fix or contribution using an accessibility accommodation or
 setting. Common options include:
 
-- Using a `screen reader`<https://en.wikipedia.org/wiki/Screen_reader>__.
+- Using a `screen reader <https://en.wikipedia.org/wiki/Screen_reader>`__.
 - Zooming the page up to 400% via your browser.
 - Unplugging or not using your mouse. Navigate only with the keyboard.
 - [Emulating vision deficiencies](https://learn.microsoft.com/en-us/microsoft-edge/devtools-guide-chromium/accessibility/emulate-vision-deficiencies#open-the-rendering-tool) (Chrome, Edge, and Firefox all provide built-in tools to do this.)
