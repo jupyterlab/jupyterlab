@@ -5,6 +5,7 @@ Use this page to navigate to in-depth guides, tutorials, and how-tos for using [
 ```{toctree}
 :maxdepth: 2
 announcements
+accessibility
 interface
 urls
 files
