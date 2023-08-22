@@ -71,6 +71,10 @@ export async function ensurePackage(
   const backwardVersions = options.backwardVersions ?? {};
   const isPrivate = data.private == true;
 
+  const hasBackwardCompatibilities = Object.keys(backwardVersions).includes(
+    data.name
+  );
+
   // Verify dependencies are consistent.
   let promises = Object.keys(deps).map(async name => {
     if (differentVersions.indexOf(name) !== -1) {
@@ -90,7 +94,7 @@ export async function ensurePackage(
 
       if (!oneOf) {
         if (
-          Object.keys(backwardVersions).includes(data.name) &&
+          hasBackwardCompatibilities &&
           Object.keys(backwardVersions[data.name]).includes(name)
         ) {
           messages.push(
@@ -105,6 +109,24 @@ export async function ensurePackage(
           messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
           deps[name] = seenDeps[name];
         }
+      }
+    }
+
+    if (
+      hasBackwardCompatibilities &&
+      Object.keys(backwardVersions[data.name]).includes(name)
+    ) {
+      const oneOf = deps[name]
+        .split(/\|\|/)
+        .map(v => v.trim())
+        .includes(backwardVersions[data.name][name]);
+      if (!oneOf) {
+        messages.push(
+          `Updated backward dependency: ${name}@${
+            backwardVersions[data.name][name]
+          } || ${deps[name]}`
+        );
+        deps[name] = `${backwardVersions[data.name][name]} || ${deps[name]}`;
       }
     }
   });

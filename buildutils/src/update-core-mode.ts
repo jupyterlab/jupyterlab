@@ -6,6 +6,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as utils from './utils';
+import { upgradeLock } from './update-staging-lock';
 
 // Run integrity to update the dev_mode package.json
 utils.run('jlpm integrity');
@@ -63,7 +64,10 @@ fs.copySync(
   path.join('.', 'jupyterlab', 'staging', 'yarn.lock')
 );
 process.env.YARN_UNSAFE_HTTP_WHITELIST = '0.0.0.0';
-utils.run('jlpm', { cwd: staging });
+upgradeLock('@jupyterlab/*', {
+  lock: path.join(staging, 'yarn.lock'),
+  cwd: staging
+});
 utils.run('jlpm dlx yarn-berry-deduplicate --strategy fewerHighest', {
   cwd: staging
 });
