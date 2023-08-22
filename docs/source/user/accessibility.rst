@@ -27,13 +27,13 @@ Keyboard navigation lies at the core of JupyterLab's accessibility approach, all
 Keyboard Shortcuts
 -----------------------------------
 
-JupyterLab offers an extensive set of keyboard shortcuts that empower users to navigate through various functions and tools. From executing code cells to managing tabs, these shortcuts streamline workflows and enhance accessibility for users who rely on keyboard input. 
+JupyterLab offers an extensive set of keyboard shortcuts that empower users to navigate through various functions and tools. From executing code cells to managing tabs, these shortcuts streamline workflows and enhance accessibility for users who rely on keyboard input.
 
 For a comprehensive list of available shortcuts, users can explore the advanced settings by navigating to `Settings > Advanced Settings` in the JupyterLab main menu.
 
 .. figure:: ./desktop/quansight_labs/documentation/keyboard_shortcut_final.png
    :alt: an image showing how to add a shortcut in the advanced settings panel.
-   
+
 Within JupyterLab's Advanced Settings, default keyboard shortcuts are unmodifiable, though users can craft and modify their own shortcuts to align with their unique workflows. In order to create a new keyboard shortcut use the `add` button and enter the information requested,
 Please note that the information can be removed and edited afterwards.
 
@@ -116,7 +116,7 @@ Please feel free to contribute to any of the listed projects, all the feedback w
 Further Resources
 -----------------------------------
 
--  `Jupyter accessibility documentation <https://jupyter-accessibility.readthedocs.io/en/latest/index.html>`_ 
+-  `Jupyter accessibility documentation <https://jupyter-accessibility.readthedocs.io/en/latest/index.html>`_
 
 -  `Jupyter accessibility community meeting <https://github.com/jupyter/accessibility/tree/main/docs/community/meeting-minutes>`_
 
