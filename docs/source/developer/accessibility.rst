@@ -129,7 +129,9 @@ setting. Common options include:
 - Using a `screen reader <https://en.wikipedia.org/wiki/Screen_reader>`__.
 - Zooming the page up to 400% via your browser.
 - Unplugging or not using your mouse. Navigate only with the keyboard.
-- [Emulating vision deficiencies](https://learn.microsoft.com/en-us/microsoft-edge/devtools-guide-chromium/accessibility/emulate-vision-deficiencies#open-the-rendering-tool) (Chrome, Edge, and Firefox all provide built-in tools to do this.)
+- `Emulating vision deficiencies
+  <https://learn.microsoft.com/en-us/microsoft-edge/devtools-guide-chromium/accessibility/emulate-vision-deficiencies#open-the-rendering-tool>`__
+  (Chrome, Edge, and Firefox all provide built-in tools to do this.)
 
 While testing, take note of what happens and compare it to what you can do to
 complete the task without your chosen accessibility accommodation. If there is
