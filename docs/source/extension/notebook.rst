@@ -84,7 +84,7 @@ the DockPanel. The **NotebookPanel** contains:
 -  a
    `Toolbar <../api/classes/ui_components.Toolbar-1.html>`__
 -  a `Notebook
-   widget <../api/classes/api/classes/notebook.Notebook-1.html>`__.
+   widget <../api/classes/notebook.Notebook-1.html>`__.
 
 The NotebookPanel also adds completion logic.
 
