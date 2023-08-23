@@ -102,6 +102,7 @@ namespace Private {
     languages: IEditorLanguageRegistry,
     options?: IRenderOptions
   ): Promise<string> {
+    _languages = languages;
     if (!_marked) {
       _marked = await initializeMarked(options);
     }
