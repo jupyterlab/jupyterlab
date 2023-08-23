@@ -10,16 +10,13 @@
       "path": "../application"
     },
     {
-      "path": "../codemirror"
-    },
-    {
-      "path": "../coreutils"
+      "path": "../apputils"
     },
     {
       "path": "../mermaid"
     },
     {
-      "path": "../rendermime"
+      "path": "../rendermime-interfaces"
     }
   ]
 }

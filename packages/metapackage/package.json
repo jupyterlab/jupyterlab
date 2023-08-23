@@ -91,6 +91,8 @@
     "@jupyterlab/markdownviewer-extension": "^4.1.0-alpha.0",
     "@jupyterlab/markedparser-extension": "^4.1.0-alpha.0",
     "@jupyterlab/mathjax-extension": "^4.1.0-alpha.0",
+    "@jupyterlab/mermaid": "^4.1.0-alpha.0",
+    "@jupyterlab/mermaid-extension": "^4.1.0-alpha.0",
     "@jupyterlab/metadataform": "^4.1.0-alpha.0",
     "@jupyterlab/metadataform-extension": "^4.1.0-alpha.0",
     "@jupyterlab/nbconvert-css": "^4.1.0-alpha.0",
