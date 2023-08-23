@@ -37,7 +37,7 @@ const core: JupyterFrontEndPlugin<IMermaidManager> = {
   autoStart: true,
   optional: [IThemeManager],
   provides: IMermaidManager,
-  activate: (app: JupyterFrontEnd, themes: IThemeManager) => {
+  activate: (app: JupyterFrontEnd, themes: IThemeManager | null) => {
     const manager = new MermaidManager({ themes });
     RenderedMermaid.manager = manager;
     return manager;
