@@ -201,9 +201,8 @@ export class HTMLViewer
 
     // Inject dynamic style for links if the document is not trusted
     if (!this.trusted) {
-      const warning = this.translator
-        .load('jupyterlab')
-        .__('Action disabled as the file is not trusted.');
+      const trans = this.translator.load('jupyterlab');
+      const warning = trans.__('Action disabled as the file is not trusted.');
       doc.body.insertAdjacentHTML(
         'beforeend',
         UNTRUSTED_LINK_STYLE({ warning })
