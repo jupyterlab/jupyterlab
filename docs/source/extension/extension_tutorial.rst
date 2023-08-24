@@ -101,7 +101,7 @@ This will create a new folder for your extension in your current directory.
 
     mkdir my_first_extension
     cd my_first_extension
-    copier copy --UNSAFE https://github.com/jupyterlab/extension-template .
+    copier copy https://github.com/jupyterlab/extension-template .
 
 When prompted, enter values like the following for all of the template
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
