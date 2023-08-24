@@ -48,7 +48,7 @@ JupyterLab is a web application. Therefore the following standards apply:
 - ARIA - `Accessible Rich Internet Applications
   <https://www.w3.org/WAI/standards-guidelines/aria/>`__
 - ATAG - `Authoring Tool Accessibility Guidelines
-  `<https://www.w3.org/WAI/standards-guidelines/atag/>`__
+  <https://www.w3.org/WAI/standards-guidelines/atag/>`__
 
 These are good places to familiarize yourself with accessibility best practices
 for developing web sites (WCAG) and web applications (ARIA). Note that although
@@ -74,7 +74,8 @@ the name of the task or issue appended with `accessibility` in a search engine
 will give you several results and chance to learn from the broader community
 right away.
 
-The rest of this section contains best practices specific to JupyterLab and its development.
+The rest of this section contains best practices specific to JupyterLab and its
+development.
 
 Use color variables from the CSS
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -91,12 +92,12 @@ needs a color value, please use one of the variables defined.
 Upstream fixes in Lumino
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-JupyterLab uses a front-end framework that was built specifically for it
-called Lumino. Lumino is similar in some ways to React, Vue, and Angular, but it
-also provides a number of UI widgets like menu bars, tab bars, and dock panels.
-As a result, some of the accessibility issues reported in the JupyterLab GitHub
-repo need to be fixed in the Lumino repo. A good resource for learning
-Lumino: `PhosphorJS (now Lumino) Mentor Sessions
+JupyterLab uses a front-end framework that was built specifically for it called
+Lumino. Lumino is similar in some ways to React, Vue, and Angular, but it also
+provides a number of UI widgets like menu bars, tab bars, and dock panels. As a
+result, some of the accessibility issues reported in the JupyterLab GitHub repo
+need to be fixed in the Lumino repo. A good resource for learning Lumino:
+`PhosphorJS (now Lumino) Mentor Sessions
 <https://www.youtube.com/playlist?list=PLFx5GKe0BTjQyCKtiK9TI-ekSuSn_8a3J>`__.
 PhosphorJS was Lumino's previous name. There is a page with `notes from the
 PhosphorJS sessions
