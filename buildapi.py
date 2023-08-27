@@ -35,4 +35,5 @@ def builder(target_name, version, *args, **kwargs):
 
     if Version(npm_version) != Version(py_version):
         msg = "Version mismatch, please run `npm run prepare:python-release`"
+        msg += f"; NPM {npm_version} / Python {py_version}"
         raise ValueError(msg)

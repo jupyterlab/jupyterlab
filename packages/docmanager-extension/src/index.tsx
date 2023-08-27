@@ -569,7 +569,7 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(
     commands: CommandRegistry,
-    fileChanged: ISignal<any, Contents.IModel>
+    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>
   ): Widget {
     return addCommandToolbarButtonClass(
       ReactWidget.create(
@@ -794,7 +794,10 @@ function addCommands(
           body: new RevertConfirmWidget(targetCheckpoint, trans, type),
           buttons: [
             Dialog.cancelButton(),
-            Dialog.warnButton({ label: trans.__('Revert') })
+            Dialog.warnButton({
+              label: trans.__('Revert'),
+              ariaLabel: trans.__('Revert to Checkpoint')
+            })
           ]
         }).then(result => {
           if (context.isDisposed) {

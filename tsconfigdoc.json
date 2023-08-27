@@ -185,6 +185,12 @@
       "path": "./packages/mathjax-extension"
     },
     {
+      "path": "./packages/mermaid"
+    },
+    {
+      "path": "./packages/mermaid-extension"
+    },
+    {
       "path": "./packages/metadataform"
     },
     {

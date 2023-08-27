@@ -73,16 +73,22 @@
   width: var(--jp-cell-prompt-width);
   height: 100%;
   opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-OutputArea-promptOverlay .jp-icon-output {
+  display: none;
+}
+
+.jp-OutputArea-promptOverlay:hover .jp-icon-output {
+  display: initial;
 }
 
 .jp-OutputArea-promptOverlay:hover {
   background: var(--jp-layout-color2);
   box-shadow: inset 0 0 1px var(--jp-inverse-layout-color0);
-  cursor: zoom-out;
-}
-
-.jp-mod-outputsScrolled .jp-OutputArea-promptOverlay:hover {
-  cursor: zoom-in;
 }
 
 /**
@@ -268,7 +274,7 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 /*-----------------------------------------------------------------------------
 | Mobile
 |----------------------------------------------------------------------------*/
-@media only screen and (max-width: 760px) {
+@media only screen and (width <= 760px) {
   .jp-OutputPrompt {
     display: table-row;
     text-align: left;

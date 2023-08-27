@@ -31,6 +31,9 @@ RECOMMENDED_TO_OVERRIDE = [
     ".github/workflows/binder-on-pr.yml",
     ".github/workflows/build.yml",
     ".github/workflows/check-release.yml",
+    ".github/workflows/enforce-label.yml",
+    ".github/workflows/prep-release.yml",
+    ".github/workflows/publish-release.yml",
     ".github/workflows/update-integration-tests.yml",
     "binder/postBuild",
     ".eslintignore",
@@ -103,7 +106,9 @@ def update_extension(  # noqa
         else:
             python_name = data["name"]
             if "@" in python_name:
-                python_name = python_name[1:].replace("/", "_").replace("-", "_")
+                python_name = python_name[1:]
+            # Clean up the name to be valid package module name
+        python_name = python_name.replace("/", "_").replace("-", "_")
 
     output_dir = target / "_temp_extension"
     if output_dir.exists():
@@ -144,7 +149,12 @@ def update_extension(  # noqa
     }
 
     template = "https://github.com/jupyterlab/extension-template"
-    copier.run_auto(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True)
+    if tuple(copier.__version__.split('.')) < ('8', '0', '0'):
+        copier.run_auto(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True)
+    else:
+        copier.run_copy(
+            template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True, unsafe=True
+        )
 
     # From the created package.json grab the devDependencies
     with (output_dir / "package.json").open() as fid:
@@ -166,11 +176,31 @@ def update_extension(  # noqa
             data["scripts"][key] = value
         if "install-ext" in data["scripts"]:
             del data["scripts"]["install-ext"]
+        if "prepare" in data["scripts"]:
+            del data["scripts"]["prepare"]
     else:
         warnings.append("package.json scripts must be updated manually")
 
     # Set the output directory
     data["jupyterlab"]["outputDir"] = temp_data["jupyterlab"]["outputDir"]
+
+    # Set linters
+    ## Map package.json key to previous config file
+    linters = {
+        "eslintConfig": ".eslintrc.js",
+        "eslintIgnore": ".eslintignore",
+        "prettier": ".prettierrc",
+        "stylelint": ".stylelintrc",
+    }
+
+    for key, file in linters.items():
+        if key in temp_data:
+            data[key] = temp_data[key]
+
+            linter_file = target / file
+            if linter_file.exists():
+                linter_file.unlink()
+                warnings.append(f"DELETED {file}")
 
     # Look for resolutions in JupyterLab metadata and upgrade those as well
     root_jlab_package = files("jupyterlab").joinpath("staging/package.json")
@@ -207,7 +237,7 @@ def update_extension(  # noqa
     # At the end, list the files that were: added, overridden, skipped
     for p in output_dir.rglob("*"):
         relpath = p.relative_to(output_dir)
-        if relpath.name == "package.json":
+        if str(relpath) == "package.json":
             continue
         if p.is_dir():
             continue
@@ -308,8 +338,9 @@ if __name__ == "__main__":
     answer_file = Path(args.path) / ".copier-answers.yml"
 
     if answer_file.exists():
-        print(
-            "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
-        )
+        msg = "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
+        if tuple(copier.__version__.split('.')) >= ('8', '0', '0'):
+            msg += " --UNSAFE"
+        print(msg)
     else:
         update_extension(args.path, args.vcs_ref, args.no_input is False)

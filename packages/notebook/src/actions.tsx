@@ -2061,7 +2061,10 @@ export namespace NotebookActions {
       title: trans.__('Trust this notebook?'),
       buttons: [
         Dialog.cancelButton(),
-        Dialog.warnButton({ label: trans.__('Trust') })
+        Dialog.warnButton({
+          label: trans.__('Trust'),
+          ariaLabel: trans.__('Confirm Trusting this notebook')
+        })
       ] // FIXME?
     }).then(result => {
       if (result.button.accept) {

@@ -13,5 +13,4 @@
 @import url('~@jupyterlab/docregistry/style/index.css');
 @import url('~@jupyterlab/lsp/style/index.css');
 @import url('~@jupyterlab/toc/style/index.css');
-
 @import url('./base.css');

@@ -323,7 +323,11 @@ export class DirListing extends Widget {
    * Sort the items using a sort condition.
    */
   sort(state: DirListing.ISortState): void {
-    this._sortedItems = Private.sort(this.model.items(), state);
+    this._sortedItems = Private.sort(
+      this.model.items(),
+      state,
+      this._sortNotebooksFirst
+    );
     this._sortState = state;
     this.update();
   }
@@ -934,6 +938,18 @@ export class DirListing extends Widget {
       this.translator,
       this._hiddenColumns
     );
+  }
+
+  /**
+   * Update the setting to sort notebooks above files.
+   * This sorts the items again if the internal value is modified.
+   */
+  setNotebooksFirstSorting(isEnabled: boolean) {
+    let previousValue = this._sortNotebooksFirst;
+    this._sortNotebooksFirst = isEnabled;
+    if (this._sortNotebooksFirst !== previousValue) {
+      this.sort(this._sortState);
+    }
   }
 
   /**
@@ -2054,6 +2070,7 @@ export class DirListing extends Widget {
   private _inRename = false;
   private _isDirty = false;
   private _hiddenColumns = new Set<DirListing.ToggleableColumn>();
+  private _sortNotebooksFirst = false;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
 }
@@ -2770,38 +2787,80 @@ namespace Private {
    */
   export function sort(
     items: Iterable<Contents.IModel>,
-    state: DirListing.ISortState
+    state: DirListing.ISortState,
+    sortNotebooksFirst: boolean = false
   ): Contents.IModel[] {
     const copy = Array.from(items);
     const reverse = state.direction === 'descending' ? 1 : -1;
 
+    /**
+     * Compares two items and returns whether they should have a fixed priority.
+     * The fixed priority enables to always sort the directories above the other files. And to sort the notebook above other files if the `sortNotebooksFirst` is true.
+     */
+    function isPriorityOverridden(a: Contents.IModel, b: Contents.IModel) {
+      if (sortNotebooksFirst) {
+        return a.type !== b.type;
+      }
+      return (a.type === 'directory') !== (b.type === 'directory');
+    }
+
+    /**
+     * Returns the priority of a file.
+     */
+    function getPriority(item: Contents.IModel): number {
+      if (item.type === 'directory') {
+        return 2;
+      }
+      if (item.type === 'notebook' && sortNotebooksFirst) {
+        return 1;
+      }
+      return 0;
+    }
+
+    function compare(
+      compare: (a: Contents.IModel, b: Contents.IModel) => number
+    ) {
+      return (a: Contents.IModel, b: Contents.IModel) => {
+        // Group directory first, then notebooks, then files
+        if (isPriorityOverridden(a, b)) {
+          return getPriority(b) - getPriority(a);
+        }
+
+        const compared = compare(a, b);
+
+        if (compared !== 0) {
+          return compared * reverse;
+        }
+
+        // Default sorting is alphabetical ascending
+        return a.name.localeCompare(b.name);
+      };
+    }
+
     if (state.key === 'last_modified') {
-      // Sort by last modified (grouping directories first)
-      copy.sort((a, b) => {
-        const t1 = a.type === 'directory' ? 0 : 1;
-        const t2 = b.type === 'directory' ? 0 : 1;
-
-        const valA = new Date(a.last_modified).getTime();
-        const valB = new Date(b.last_modified).getTime();
-
-        return t1 - t2 || (valA - valB) * reverse;
-      });
+      // Sort by last modified
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return (
+            new Date(a.last_modified).getTime() -
+            new Date(b.last_modified).getTime()
+          );
+        })
+      );
     } else if (state.key === 'file_size') {
-      // Sort by size (grouping directories first)
-      copy.sort((a, b) => {
-        const t1 = a.type === 'directory' ? 0 : 1;
-        const t2 = b.type === 'directory' ? 0 : 1;
-
-        return t1 - t2 || ((a.size ?? 0) - (b.size ?? 0)) * reverse;
-      });
+      // Sort by size
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return (a.size ?? 0) - (b.size ?? 0);
+        })
+      );
     } else {
-      // Sort by name (grouping directories first)
-      copy.sort((a, b) => {
-        const t1 = a.type === 'directory' ? 0 : 1;
-        const t2 = b.type === 'directory' ? 0 : 1;
-
-        return t1 - t2 || b.name.localeCompare(a.name) * reverse;
-      });
+      // Sort by name
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return b.name.localeCompare(a.name);
+        })
+      );
     }
     return copy;
   }
