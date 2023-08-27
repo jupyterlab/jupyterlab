@@ -63,10 +63,9 @@
 
 .jp-sortable-table-tr > td {
   border-left: var(--jp-border-width) solid var(--jp-border-color3);
-}
 
-.jp-sortable-table-tr:hover > td {
-  border-color: var(--jp-border-color2);
+  /* this serves to boost border color when background changes on hover */
+  mix-blend-mode: multiply;
 }
 
 .jp-sortable-table th {
