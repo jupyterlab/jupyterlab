@@ -85,8 +85,12 @@ class AvailableList extends ReactWidget {
             sortKey={'plugin-id'}
             rows={this.model.available
               .filter(pkg => {
-                const pattern = new RegExp(this.model.query.toLowerCase());
-                return pattern.test(pkg.id) || pattern.test(pkg.extension);
+                const pattern = new RegExp(this.model.query, 'i');
+                return (
+                  pattern.test(pkg.id) ||
+                  pattern.test(pkg.extension) ||
+                  (pkg.tokenLabel && pattern.test(pkg.tokenLabel))
+                );
               })
               .map(data => {
                 return {
