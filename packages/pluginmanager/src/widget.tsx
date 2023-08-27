@@ -272,6 +272,7 @@ class Header extends ReactWidget {
           updateFilter={(fn, query) => {
             this.model.query = query ?? '';
           }}
+          initialQuery={this.model.query}
           useFuzzyFilter={false}
         />
         <div

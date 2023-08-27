@@ -81,7 +81,14 @@ export interface IActionReply {
  */
 export namespace PluginListModel {
   export interface IConfigurableState {
+    /**
+     * The plugin list search query.
+     */
     query?: string;
+    /**
+     * Whether the warning is disclaimed or not.
+     */
+    isDisclaimed?: boolean;
   }
   /** A subset of `JupyterLab.IInfo` interface (defined to reduce API surface) */
   export interface IPluginData {
@@ -124,6 +131,7 @@ export class PluginListModel extends VDomModel {
     this._serverSettings =
       options.serverSettings || ServerConnection.makeSettings();
     this._query = options.query || '';
+    this._isDisclaimed = options.isDisclaimed ?? false;
     this._extraLockedPlugins = options.extraLockedPlugins ?? [];
     this.refresh()
       .then(() => this._ready.resolve())
@@ -353,6 +361,7 @@ export class PluginListModel extends VDomModel {
     if (v !== this._isDisclaimed) {
       this._isDisclaimed = v;
       this.stateChanged.emit();
+      this._trackerDataChanged.emit(void 0);
     }
   }
 
@@ -461,5 +470,5 @@ export class PluginListModel extends VDomModel {
   private _pluginData: PluginListModel.IPluginData;
   private _extraLockedPlugins: string[];
   private _trans: TranslationBundle;
-  private _isDisclaimed: boolean = false;
+  private _isDisclaimed: boolean;
 }

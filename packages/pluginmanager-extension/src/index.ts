@@ -111,8 +111,8 @@ const pluginmanager: JupyterFrontEndPlugin<void> = {
     // Register commands.
     commands.addCommand(CommandIDs.open, {
       label: widgetLabel,
-      execute: () => {
-        const main = createWidget();
+      execute: args => {
+        const main = createWidget(args);
         shell.add(main, 'main', { type: 'Plugins' });
 
         // add to tracker so it can be restored, and update when choices change
@@ -153,9 +153,10 @@ const pluginmanager: JupyterFrontEndPlugin<void> = {
         command: CommandIDs.open,
         name: _ => 'plugins',
         args: widget => {
-          const { query } = widget.content.model;
+          const { query, isDisclaimed } = widget.content.model;
           const args: PluginListModel.IConfigurableState = {
-            query
+            query,
+            isDisclaimed
           };
           return args as ReadonlyJSONObject;
         }
