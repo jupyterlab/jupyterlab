@@ -8,6 +8,10 @@ const FIRST_PLUGIN_SELECTOR =
   '.jp-pluginmanager-AvailableList tr:first-child input[type="checkbox"]';
 const DISCLAIMER_SELECTOR = '.jp-pluginmanager-Disclaimer-checkbox';
 
+test.use({
+  viewport: { height: 720, width: 1280 }
+});
+
 test.describe('Advanced Plugin Manager', () => {
   test('Opens with a specific search query', async ({ page }) => {
     await page.evaluate(async () => {
@@ -25,7 +29,7 @@ test.describe('Advanced Plugin Manager', () => {
 
     // Taking a snapshot after filtering to reduce noise as plugins are developed
     expect(await pluginManager.screenshot()).toMatchSnapshot(
-      'plugin-manager-search-notebook.png'
+      'plugin_manager_search_notebook.png'
     );
   });
 
@@ -72,7 +76,7 @@ test.describe('Advanced Plugin Manager', () => {
     });
     await expect(dialog).toHaveCount(1);
     expect(await dialog.screenshot()).toMatchSnapshot(
-      'plugin-manager-plugin-in-use-warning.png'
+      'plugin_manager_plugin_in_use_warning.png'
     );
   });
 
@@ -95,7 +99,7 @@ test.describe('Advanced Plugin Manager', () => {
     });
     await expect(dialog).toHaveCount(1);
     expect(await dialog.screenshot()).toMatchSnapshot(
-      'plugin-manager-plugin-required-warning.png'
+      'plugin_manager_plugin_required_warning.png'
     );
   });
 
@@ -114,12 +118,11 @@ test.describe('Advanced Plugin Manager', () => {
     const lockIcon = page.locator('[data-icon="pluginmanager:lock"]');
     await expect(lockIcon).toHaveCount(1);
 
-    await page.sidebar.close('left');
     const pluginRow = page.locator(
       '[data-key="@jupyterlab/pluginmanager-extension:plugin"]'
     );
     expect(await pluginRow.screenshot()).toMatchSnapshot(
-      'plugin-manager-plugin-locked.png'
+      'plugin_manager_plugin_locked.png'
     );
   });
 });
