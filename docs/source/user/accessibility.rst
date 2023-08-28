@@ -35,7 +35,7 @@ JupyterLab offers an extensive set of keyboard shortcuts that empower users to n
 For a comprehensive list of available shortcuts, users can explore the advanced settings by navigating to `Settings > Advanced Settings` in the JupyterLab main menu.
 
 .. figure:: ./desktop/quansight_labs/documentation/keyboard_shortcut_final.png
-   :alt: an image showing how to add a shortcut in the advanced settings panel.
+   :alt: The JupyterLab Advanced Settings Editor with the Keyboard Shortcuts section open. Under a selected keyboard shortcut listing there is a Add button to add another shortcut.
 
 Within JupyterLab's Advanced Settings, default keyboard shortcuts are unmodifiable, though users can craft and modify their own shortcuts to align with their unique workflows. In order to create a new keyboard shortcut use the `add` button and enter the information requested,
 Please note that the information can be removed and edited afterwards.
