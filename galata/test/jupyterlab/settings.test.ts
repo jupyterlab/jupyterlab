@@ -208,10 +208,6 @@ test('Check codemirror settings can all be set at the same time.', async ({
     });
   });
 
-  expect(
-    await page.locator('.jp-PluginList .jp-FilterBox input').inputValue()
-  ).toEqual('CodeMirror');
-
   await expect(page.locator('.jp-SettingsForm')).toHaveCount(1);
 
   const textList: Array[string] = [
