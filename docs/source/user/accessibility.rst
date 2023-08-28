@@ -44,7 +44,7 @@ Please note that the information can be removed and edited afterwards.
 Command Palette
 -----------------------------------
 
-The Command Palette acts as a command center, offering a text-based interface for executing commands. It can be accessed from the `View` menu or using the keyboard shortcut `Ctrl + Shift + C`. This feature not only aids keyboard-centric users but also promotes efficiency and
+The `Command Palette <https://jupyterlab.readthedocs.io/en/latest/user/commands.html#command-palette>`_ acts as a list of all commands in JupyterLab, offering a text-based interface for executing commands. It can be accessed from the `View` menu or using the keyboard shortcut `Ctrl + Shift + C`. Using the shortcut `Ctrl + Shift + C` will change focus to the command palette no matter where users are in JupyterLab, so it may also be useful to move out of keyboard traps. This feature not only aids keyboard-centric users but also promotes efficiency and
 accessibility, as users can swiftly access functionalities without navigating complex menus.
 
 
