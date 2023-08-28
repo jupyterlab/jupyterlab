@@ -49,7 +49,7 @@ accessibility, as users can swiftly access functionalities without navigating co
 
 
 .. figure:: ./desktop/quansight_labs/documentation/command_palette.png
-   :alt: an image showing the activated command palette modal.
+   :alt: JupyterLab notebook editor with the modal command palette opened. There is a list filter at the top and a truncated list of commands with shortcuts below.
 
 -----------------------------------
 Screen Reader Support
