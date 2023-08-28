@@ -29,11 +29,11 @@ Keyboard Shortcuts
 
 JupyterLab offers an extensive set of keyboard shortcuts that empower users to navigate through various functions and tools. From executing code cells to managing tabs, these shortcuts streamline workflows and enhance accessibility for users who rely on keyboard input. 
 
-For a comprehensive list of available shortcuts, users can explore the advanced settings by navigating to `Settings > Advanced Settings` in the JupyterLab main menu.
+For a comprehensive list of available shortcuts, `users can check out this resource <https://jupyterlab.readthedocs.io/en/stable/user/commands.html#commands-list>`_, or explore the advanced settings by navigating to `Settings > Advanced Settings` in the JupyterLab main menu.
 
-.. figure:: ./desktop/quansight_labs/documentation/keyboard_shortcut_final.png
+.. figure:: ./images/accessibility/keyboard_shortcuts.png
    :alt: an image showing how to add a shortcut in the advanced settings panel.
-   
+
 Within JupyterLab's Advanced Settings, default keyboard shortcuts are unmodifiable, though users can craft and modify their own shortcuts to align with their unique workflows. In order to create a new keyboard shortcut use the `add` button and enter the information requested,
 Please note that the information can be removed and edited afterwards.
 
@@ -42,10 +42,9 @@ Command Palette
 -----------------------------------
 
 The Command Palette acts as a command center, offering a text-based interface for executing commands. It can be accessed from the `View` menu or using the keyboard shortcut `Ctrl + Shift + C`. This feature not only aids keyboard-centric users but also promotes efficiency and
-accessibility, as users can swiftly access functionalities without navigating complex menus.
+accessibility, as users can swiftly access functionalities without navigating complex menus. It can also be accessed from the left side bar panel if users go to Settings/Advanced Settings Editor/Command Palette and uncheck the Modal Command Palette option.
 
-
-.. figure:: ./desktop/quansight_labs/documentation/command_palette.png
+.. figure:: ./images/accessibility/Command_Palette.png
    :alt: an image showing the activated command palette modal.
 
 -----------------------------------
