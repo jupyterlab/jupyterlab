@@ -119,6 +119,92 @@ change should be made:
   accessibility issue in JupyterLab and also submit a breaking fix in Lumino
   that targets a future, breaking version of Lumino.
 
+Automated Regression Testing
+----------------------------
+
+If you fix an accessibility issue in the source code but you don't add a test
+with your fix, then there's a strong chance that your fix will be undone
+accidentally by some future changes to the codebase.
+
+Sometimes it's straightforward to unit-test an accessibility fix, such as when
+`enabling keyboard shortcuts on a toolbar button
+<https://github.com/jupyterlab/jupyterlab/pull/5769>`__. But often it's
+difficult to unit-test accessibility fixes.
+
+Therefore there is an effort underway to use Playwright to write user-level
+`accessibility tests to JupyterLab
+<https://github.com/Quansight-Labs/jupyter-a11y-testing/tree/main/testing/jupyterlab>`__.
+To illustrate how to use it within your development process, let's walk through
+an example.
+
+This example will involve three separate GitHub repos:
+
+1. `Quansight-Labs/jupyter-a11y-testing
+   <https://github.com/Quansight-Labs/jupyter-a11y-testing>`__
+2. `jupyterlab/lumino <https://github.com/jupyterlab/lumino>`__
+3. `jupyterlab/jupyterlab <https://github.com/jupyterlab/jupyterlab>`__
+
+This is a real world example, taken from actual past work.
+
+Let's say you do an accessibility audit of the start page of the JupyterLab UI
+and find a tab trap in the top menu bar, meaning the user can press the tab key
+to get into the menu bar but cannot not get out using only the keyboard and
+standard keyboard shortcuts.
+
+You dig in further and discover that the `tab trap bug is in the
+jupyterlab/lumino repo <https://github.com/jupyterlab/lumino/pull/373>`__, so
+you fork the juptyerlab/lumino repo and create a new branch called
+`fix-tab-trap` in order to open a pull request.
+
+You decide that you want to write a regression test. Now, this is one of those
+cases where you can write a unit test for your accessibility fix. However, the
+unit test would not really prevent a reappearance of the issue that you decided
+you want to fix once and for all, which is tab-key navigation on the JupyterLab
+start page.
+
+So you decide that you want to `add a test to the
+Quansight-Labs/jupyter-a11y-testing repo
+<https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/f36bf5b2e8cb87613c637fc5aa03401c92ec58d0/testing/jupyterlab/tests/regression-tests/no-tab-trap-initial-page.test.ts>`.
+This test checks that are no tab traps on the JupyterLab start page by opening
+JupyterLab in Playwright and using it to press the tab key repeatedly. So as
+with the Lumino repo before, you fork the Quansight-Labs/jupyter-a11y-testing
+repo, and create a branch called `test-tab-trap` in order to open a pull
+request. The important thing in this step is that you save your test file with a
+`.test.ts` extension in the appropriate tests folder.
+
+Now, you want to run your test. You want to run it against the JupyterLab UI,
+incorporating your fix to Lumino. Here's how you would do that.
+
+Let's pretend that your GitHub username is `a11ydev` and you've forked the
+Lumino and testing repos and created the following branches on those forks, one
+with your bug fix and the other with your test:
+
+1. `a11ydev/lumino:fix-tab-trap`
+2. `a11ydev/jupyter-a11y-testing:test-tab-trap`
+
+Go to your testing fork on GitHub. Make sure that you are on your
+`test-tab-trap` branch, which contains your .test.ts file. Then go to Actions
+and click on the workflow titled "Run accessibility tests on JupyterLab." Click
+"Run workflow." This will open a form to configure the workflow.
+
+Here's how you should fill out the form:
+
+1. Use workflow from: `test-tab-trap`
+2. JupyterLab repo: `jupyterlab/jupyterlab`
+3. Branch/tag/SHA: `main`
+4. Test suite: leave blank
+5. External package repo: `a11ydev/lumino`
+6. External package ref: `fix-tab-trap`
+
+Then press the "Run workflow" button. A GitHub action should then build
+JupyterLab from source, linking your Lumino fork and branch, and then run the
+test suite, including your test, and then show the test results (hopefully with
+your test passing).
+
+There are more `detailed instructions for how to use the GitHub workflow
+<https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/main/testing/jupyterlab/README.md#running-the-accessibility-tests->`__
+in the testing repo.
+
 PR Review and Manual Testing
 ----------------------------
 
