@@ -103,7 +103,7 @@ Current Known Issues
 -----------------------------------
 
 As part of our accessibility commitment, we want to acknowledge and address the current known issues in JupyterLab's accessibility journey. While we are actively working to enhance the platform's accessibility features, some challenges may persist. Please refer to the following
-links for seeing the current state and discussions taking place in the community,
+links for seeing the current state and discussions taking place in the community.
 
 -  `JupyterLab accessibility issues <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3Atag%3AAccessibility>`_
 
