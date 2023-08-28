@@ -1,3 +1,6 @@
+.. Copyright (c) Jupyter Development Team.
+.. Distributed under the terms of the Modified BSD License.
+
 ==============================
 JupyterLab Accessibility Documentation
 ==============================
@@ -27,12 +30,12 @@ Keyboard navigation lies at the core of JupyterLab's accessibility approach, all
 Keyboard Shortcuts
 -----------------------------------
 
-JupyterLab offers an extensive set of keyboard shortcuts that empower users to navigate through various functions and tools. From executing code cells to managing tabs, these shortcuts streamline workflows and enhance accessibility for users who rely on keyboard input. 
+JupyterLab offers an extensive set of keyboard shortcuts that empower users to navigate through various functions and tools. From executing code cells to managing tabs, these shortcuts streamline workflows and enhance accessibility for users who rely on keyboard input.
 
 For a comprehensive list of available shortcuts, `users can check out this resource <https://jupyterlab.readthedocs.io/en/stable/user/commands.html#commands-list>`_, or explore the advanced settings by navigating to `Settings > Advanced Settings` in the JupyterLab main menu.
 
 .. figure:: ./images/accessibility/keyboard_shortcuts.png
-   :alt: an image showing how to add a shortcut in the advanced settings panel.
+   :alt: The JupyterLab Advanced Settings Editor with the Keyboard Shortcuts section open. Under a selected keyboard shortcut listing there is a Add button to add another shortcut.
 
 Within JupyterLab's Advanced Settings, default keyboard shortcuts are unmodifiable, though users can craft and modify their own shortcuts to align with their unique workflows. In order to create a new keyboard shortcut use the `add` button and enter the information requested,
 Please note that the information can be removed and edited afterwards.
@@ -41,17 +44,17 @@ Please note that the information can be removed and edited afterwards.
 Command Palette
 -----------------------------------
 
-The Command Palette acts as a command center, offering a text-based interface for executing commands. It can be accessed from the `View` menu or using the keyboard shortcut `Ctrl + Shift + C`. This feature not only aids keyboard-centric users but also promotes efficiency and
-accessibility, as users can swiftly access functionalities without navigating complex menus. It can also be accessed from the left side bar panel if users go to Settings/Advanced Settings Editor/Command Palette and uncheck the Modal Command Palette option.
+The `Command Palette <https://jupyterlab.readthedocs.io/en/latest/user/commands.html#command-palette>`_ acts as a list of all commands in JupyterLab, offering a text-based interface for executing commands. It can be accessed from the `View` menu or using the keyboard shortcut `Ctrl + Shift + C`. Using the shortcut `Ctrl + Shift + C` will change focus to the command palette no matter where users are in JupyterLab, so it may also be useful to move out of keyboard traps. This feature not only aids keyboard-centric users but also promotes efficiency and
+accessibility, as users can swiftly access functionalities without navigating complex menus.
 
 .. figure:: ./images/accessibility/Command_Palette.png
-   :alt: an image showing the activated command palette modal.
+   :alt: JupyterLab notebook editor with the modal command palette opened. There is a list filter at the top and a truncated list of commands with shortcuts below.
 
 -----------------------------------
 Screen Reader Support
 -----------------------------------
 
-While JupyterLab has taken strides to support screen reader compatibility, it's important to note that there hasn't been any extensive testing of this feature. Presently, screen readers such as `NVDA <https://www.nvaccess.org/download/>`_ and `JAWS <https://www.freedomscientific.com/products/software/jaws/>`_ on Windows, as well as `VoiceOver <https://support.apple.com/en-ng/guide/voiceover/vo2682/mac#:~:text=You%20can%20also%20turn%20VoiceOver,then%20press%20the%20Space%20bar.>`_ on macOS, provide some level of compatibility. However, challenges exist, such as reading images without labels, equations, and links.
+While JupyterLab has taken strides to support screen reader compatibility, it's important to note that there hasn't been any extensive testing of this feature. Presently, screen readers such as `NVDA <https://www.nvaccess.org/download/>`_ and `JAWS <https://www.freedomscientific.com/products/software/jaws/>`_ on Windows, as well as `VoiceOver <https://support.apple.com/en-ng/guide/voiceover/welcome/mac>`_ on macOS, provide some level of compatibility. However, challenges exist, such as reading images without labels, equations, and links.
 
 --------------------------------------------
 Tab Navigation and Tab Trapping
@@ -99,7 +102,7 @@ Current Known Issues
 -----------------------------------
 
 As part of our accessibility commitment, we want to acknowledge and address the current known issues in JupyterLab's accessibility journey. While we are actively working to enhance the platform's accessibility features, some challenges may persist. Please refer to the following
-links for seeing the current state and discussions taking place in the community,
+links for seeing the current state and discussions taking place in the community.
 
 -  `JupyterLab accessibility issues <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3Atag%3AAccessibility>`_
 
@@ -115,7 +118,7 @@ Please feel free to contribute to any of the listed projects, all the feedback w
 Further Resources
 -----------------------------------
 
--  `Jupyter accessibility documentation <https://jupyter-accessibility.readthedocs.io/en/latest/index.html>`_ 
+-  `Jupyter accessibility documentation <https://jupyter-accessibility.readthedocs.io/en/latest/index.html>`_
 
 -  `Jupyter accessibility community meeting <https://github.com/jupyter/accessibility/tree/main/docs/community/meeting-minutes>`_
 
