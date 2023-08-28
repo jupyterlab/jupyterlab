@@ -55,7 +55,7 @@ accessibility, as users can swiftly access functionalities without navigating co
 Screen Reader Support
 -----------------------------------
 
-While JupyterLab has taken strides to support screen reader compatibility, it's important to note that there hasn't been any extensive testing of this feature. Presently, screen readers such as `NVDA <https://www.nvaccess.org/download/>`_ and `JAWS <https://www.freedomscientific.com/products/software/jaws/>`_ on Windows, as well as `VoiceOver <https://support.apple.com/en-ng/guide/voiceover/vo2682/mac#:~:text=You%20can%20also%20turn%20VoiceOver,then%20press%20the%20Space%20bar.>`_ on macOS, provide some level of compatibility. However, challenges exist, such as reading images without labels, equations, and links.
+While JupyterLab has taken strides to support screen reader compatibility, it's important to note that there hasn't been any extensive testing of this feature. Presently, screen readers such as `NVDA <https://www.nvaccess.org/download/>`_ and `JAWS <https://www.freedomscientific.com/products/software/jaws/>`_ on Windows, as well as `VoiceOver <https://support.apple.com/en-ng/guide/voiceover/welcome/mac>`_ on macOS, provide some level of compatibility. However, challenges exist, such as reading images without labels, equations, and links.
 
 --------------------------------------------
 Tab Navigation and Tab Trapping
