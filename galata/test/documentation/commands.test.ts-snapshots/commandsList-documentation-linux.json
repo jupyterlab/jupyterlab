@@ -118,8 +118,26 @@
     ]
   },
   {
+    "id": "apputils:adaptive-theme",
+    "label": "Synchronize with System Settings",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:change-dark-theme",
+    "label": "Switch to the provided dark `theme`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "apputils:change-font",
     "label": "waiting for fonts",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:change-light-theme",
+    "label": "Switch to the provided light `theme`.",
     "caption": "",
     "shortcuts": []
   },
