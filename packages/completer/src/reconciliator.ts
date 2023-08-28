@@ -79,7 +79,8 @@ export class ProviderReconciliator implements IProviderReconciliator {
     if (this._providers[0].shouldShowContinuousHint) {
       return this._providers[0].shouldShowContinuousHint(
         completerIsVisible,
-        changed
+        changed,
+        this._context
       );
     }
     return this._defaultShouldShowContinuousHint(completerIsVisible, changed);
