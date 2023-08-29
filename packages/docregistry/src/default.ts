@@ -510,7 +510,7 @@ export abstract class ABCWidgetFactory<
         | IObservableList<DocumentRegistry.IToolbarItem>)
     | undefined;
   private _isDisposed = false;
-  _translator: ITranslator;
+  private _translator: ITranslator;
   private _name: string;
   private _label: string;
   private _autoStartDefault: boolean;
