@@ -53,7 +53,7 @@
       "selector": "body",
       "args": {
         "side": "left",
-        "index": "0"
+        "index": 0
       }
     },
     {
