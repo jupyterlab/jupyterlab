@@ -1,8 +1,9 @@
 .. Copyright (c) Jupyter Development Team.
 .. Distributed under the terms of the Modified BSD License.
 
-Accessibility: A JupyterLab Developer's Guide
-=============================================
+Accessibility
+=============
+**A JupyterLab Developer's Guide**
 
 If you're making changes to the JupyterLab source code and you're concerned
 about `accessibility <https://en.wikipedia.org/wiki/Accessibility>`__, this page
