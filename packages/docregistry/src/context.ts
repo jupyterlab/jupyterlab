@@ -813,8 +813,7 @@ export class Context<
           return Promise.reject(error);
         }
       }
-    }
-    if (
+    } else if (
       typeof model.content === 'string' &&
       typeof options.content === 'string'
     ) {
