@@ -1,9 +1,8 @@
 .. Copyright (c) Jupyter Development Team.
 .. Distributed under the terms of the Modified BSD License.
 
-Accessibility
-=============
-**A JupyterLab Developer's Guide**
+Accessibility: A JupyterLab Developer's Guide
+=============================================
 
 If you're making changes to the JupyterLab source code and you're concerned
 about `accessibility <https://en.wikipedia.org/wiki/Accessibility>`__, this page
@@ -42,7 +41,8 @@ Looking for a `frontend developer's orientation to the JupyterLab codebase
 Best practices while developing
 -------------------------------
 
-JupyterLab is a web application. Therefore the following standards apply:
+JupyterLab is a web application and authoring tool. Therefore the following
+standards apply:
 
 - WCAG - `Web Content Accessibility Guidelines
   <https://www.w3.org/WAI/standards-guidelines/wcag/>`__
@@ -105,9 +105,9 @@ PhosphorJS sessions
 <https://gist.github.com/blink1073/1c21ec077acbb9178e01e14936ddda1b>`__ that
 also has a link to some additional videos that were not uploaded to YouTube.
 
-It's not always obvious when an accessibility issue should be fixed in the
-JupyterLab versus Lumino codebase. Some guidance to help you identify where your
-change should be made:
+It's not always obvious when an accessibility issue should be fixed in
+JupyterLab or Lumino. Some guidance to help you identify where your change
+should be made:
 
 - Generally speaking, if you can fix the issue in Lumino, it's better to fix it
   in Lumino because then the fix will be absorbed in more places.
@@ -118,7 +118,7 @@ change should be made:
   breaking dependants, then it might be better to make the fix in JupyterLab. In
   this case, you might take a two-track approach, where you fix the
   accessibility issue in JupyterLab and also submit a breaking fix in Lumino
-  that targets a future, breaking version of Lumino.
+  that targets a future, major, API-breaking release/version of Lumino.
 
 Automated Regression Testing
 ----------------------------
@@ -132,8 +132,9 @@ Sometimes it's straightforward to unit-test an accessibility fix, such as when
 <https://github.com/jupyterlab/jupyterlab/pull/5769>`__. But often it's
 difficult to unit-test accessibility fixes.
 
-Therefore there is an effort underway to use Playwright to write user-level
-`accessibility tests to JupyterLab
+Therefore there is an effort underway to use `Playwright
+<https://playwright.dev>`__ to write user-level `accessibility tests to
+JupyterLab
 <https://github.com/Quansight-Labs/jupyter-a11y-testing/tree/main/testing/jupyterlab>`__.
 To illustrate how to use it within your development process, let's walk through
 an example.
@@ -153,48 +154,50 @@ to get into the menu bar but cannot easily get past it using only the keyboard.
 
 You dig in further and discover that the `tab trap bug is in the
 jupyterlab/lumino repo <https://github.com/jupyterlab/lumino/pull/373>`__, so
-you fork the juptyerlab/lumino repo, create a new branch called `fix-tab-trap`,
-and open a pull request.
+you fork the juptyerlab/lumino repo, create a new branch called
+``fix-tab-trap``, and open a pull request.
 
 You decide that you want to write a test. This is one of those cases where you
 can fairly easily write a unit test. However, the unit test would not really
 prevent a reappearance of the issue that you decided you want to fix once and
-for all, which is a tab trap anywhere on the JupyterLab start page.
+for all, namely: you don't want any tab traps anywhere on the JupyterLab start
+page.
 
 So you decide that you want to `add a regression test to the
 Quansight-Labs/jupyter-a11y-testing repo
-<https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/f36bf5b2e8cb87613c637fc5aa03401c92ec58d0/testing/jupyterlab/tests/regression-tests/no-tab-trap-initial-page.test.ts>`.
-This test checks that are no tab traps on the JupyterLab start page by opening
-JupyterLab in Playwright and using it to press the tab key repeatedly. So as
-with the Lumino repo before, you fork the Quansight-Labs/jupyter-a11y-testing
-repo, create a branch called `test-tab-trap`, and open a pull request. The
-important thing in this step is that you save your test file with a `.test.ts`
-extension next to the other regression test files.
+<https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/f36bf5b2e8cb87613c637fc5aa03401c92ec58d0/testing/jupyterlab/tests/regression-tests/no-tab-trap-initial-page.test.ts>`__.
+This test checks that are no tab traps on the JupyterLab start page by using
+Playwright to open JupyterLab and press the tab key repeatedly. So as with the
+Lumino repo before, you fork the Quansight-Labs/jupyter-a11y-testing repo,
+create a branch called ``test-tab-trap``, and open a pull request. The important
+thing in this step is that you save your test file with a ``.test.ts`` extension
+next to the other regression test files.
 
 Now you want to run your test. Specifically you want to run the test against a
 build of JupyterLab that incorporates your Lumino fix. Here's how you would do
 that.
 
-Let's pretend that your GitHub username is `a11ydev` and you've forked the
+Let's pretend that your GitHub username is *a11ydev* and you've forked the
 Lumino and testing repos and created the following branches on those forks, one
 with your bug fix and the other with your test:
 
-1. `a11ydev/lumino:fix-tab-trap`
-2. `a11ydev/jupyter-a11y-testing:test-tab-trap`
+1. ``a11ydev/lumino:fix-tab-trap``
+2. ``a11ydev/jupyter-a11y-testing:test-tab-trap``
 
-Go to your testing fork on GitHub. Make sure that you are on your
-`test-tab-trap` branch, which contains your .test.ts file. Then go to Actions
-and click on the workflow titled "Run accessibility tests on JupyterLab." Click
-"Run workflow." This will open a form to configure the workflow.
+On GitHub, go to your fork of the testing repo, *a11ydev/jupyter-a11y-testing*.
+Make sure that you are on your `test-tab-trap` branch, which contains the
+.test.ts file that you added. Then go to Actions and click on the workflow
+titled "Run accessibility tests on JupyterLab." Click "Run workflow." This will
+open a form to configure the workflow.
 
 Here's how you should fill out the form:
 
-1. Use workflow from: `test-tab-trap`
-2. JupyterLab repo: `jupyterlab/jupyterlab`
-3. Branch/tag/SHA: `main`
+1. Use workflow from: ``test-tab-trap``
+2. JupyterLab repo: ``jupyterlab/jupyterlab``
+3. Branch/tag/SHA: ``main``
 4. Test suite: leave blank
-5. External package repo: `a11ydev/lumino`
-6. External package ref: `fix-tab-trap`
+5. External package repo: ``a11ydev/lumino``
+6. External package ref: ``fix-tab-trap``
 
 Then press the "Run workflow" button. A GitHub action should then build
 JupyterLab from source, linking your Lumino fork and branch, then run the test
@@ -210,8 +213,8 @@ earlier with Lumino: fork the repo, create a branch with your fix, and then
 enter your fork and branch in the workflow config form before running the
 workflow. That should cause it to build a version of JupyterLab based on your
 changes and then run the test suite against it. The workflow is flexible enough
-to allow you to test changes in just JupyterLab, or just Lumino, or both at the
-same time, if needed.
+to allow you to test against changes in JupyterLab or Lumino or both at the same
+time if needed.
 
 There are more `detailed instructions for how to use the GitHub workflow
 <https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/main/testing/jupyterlab/README.md#running-the-accessibility-tests->`__
@@ -244,11 +247,12 @@ GitPod
 
 If you have a `GitPod <https://www.gitpod.io/>`__ account and you have submitted
 a PR to JupyterLab, you can manually test it by copying the GitHub URL to your
-PR and then by going to gitpod.io/#<full-url-to-your-GitHub-PR>. Your PR must be
-in the jupyterlab/jupyterlab repo—in other words, your PR's URL must look like
-https://github.com/jupyterlab/jupyterlab/pull/<number>. GitPod will build
-JupyterLab from source with your PR applied and then will allow you to load the
-UI in your browser.
+PR and concatenating it to ``gitpod.io/#``, like so:
+
+:samp:`https://gitpod.io/#https://github.com/jupyterlab/jupyterlab/pull/{your-pr-number}`
+
+GitPod will build JupyterLab from source with your PR applied and set up a
+tunnel so that you can load the UI in your browser at localhost:8888.
 
 Useful tools for development
 ----------------------------
