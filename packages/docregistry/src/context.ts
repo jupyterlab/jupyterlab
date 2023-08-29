@@ -592,9 +592,14 @@ export class Context<
       this._saveState.emit('completed');
     } catch (err) {
       // If the save has been canceled by the user, throw the error
-      // so that whoever called save() can decide what to do.
+      // so that whoever called save() can decide what to do
+      // or if the content is the same, throw the error
       const { name } = err;
-      if (name === 'ModalCancelError' || name === 'ModalDuplicateError') {
+      if (
+        name === 'ModalCancelError' ||
+        name === 'ModalDuplicateError' ||
+        name === 'DuplicateContentError'
+      ) {
         throw err;
       }
 
@@ -681,7 +686,7 @@ export class Context<
   ): Promise<Contents.IModel> {
     const path = this._path;
     // Make sure the file has not changed on disk.
-    const promise = this._manager.contents.get(path, { content: false });
+    const promise = this._manager.contents.get(path, { content: true });
     return promise.then(
       model => {
         if (this.isDisposed) {
@@ -764,6 +769,11 @@ export class Context<
     if (this._timeConflictModalIsOpen) {
       const error = new Error('Modal is already displayed');
       error.name = 'ModalDuplicateError';
+      return Promise.reject(error);
+    }
+    if (model.content === options.content) {
+      const error = new Error('Duplicate Content');
+      error.name = 'DuplicateContentError';
       return Promise.reject(error);
     }
     const body = this._trans.__(
