@@ -67,8 +67,14 @@ export class ActivityHelper {
    * @param name Activity name
    * @returns Handle on the tab or null if the tab is not found
    */
-  getTab(name?: string): Promise<ElementHandle<Element> | null> {
-    return this.getTabLocator(name).elementHandle();
+  async getTab(name?: string): Promise<ElementHandle<Element> | null> {
+    let handle: ElementHandle<Element> | null = null;
+    try {
+      handle = await this.getTabLocator(name).elementHandle({ timeout: 500 });
+    } catch {
+      handle = null;
+    }
+    return handle;
   }
 
   /**
@@ -104,7 +110,14 @@ export class ActivityHelper {
       locator = page.getByRole('main').locator(`[role="tabpanel"][id="${id}"]`);
     }
 
-    return locator.elementHandle();
+    let handle: ElementHandle<Element> | null = null;
+    try {
+      handle = await locator.elementHandle({ timeout: 500 });
+    } catch {
+      handle = null;
+    }
+
+    return handle;
   }
 
   /**

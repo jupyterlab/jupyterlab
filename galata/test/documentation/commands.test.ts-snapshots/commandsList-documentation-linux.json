@@ -1351,6 +1351,12 @@
     "shortcuts": []
   },
   {
+    "id": "mermaid:copy-source",
+    "label": "Mermaid Copy Diagram Source",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:change-cell-to-code",
     "label": "Change to Code Cell Type",
     "caption": "",
