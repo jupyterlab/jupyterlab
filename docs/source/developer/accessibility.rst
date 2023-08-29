@@ -268,7 +268,7 @@ accessibility work in JupyterLab:
   <https://chrome.google.com/webstore/detail/axe-devtools-web-accessib/lhdoppojpmngadmnindnejefpokejbdd>`__,
   extension for Chrome Dev Tools
 - `Color Contrast Analyzer <https://www.tpgi.com/color-contrast-checker/>`__,
-  desktop App for Windows and Mac
+  desktop app for Windows and Mac
 - `Polypane <https://polypane.app/>`__, desktop browser with some dev tools
   built in (note it's not free but it does have a free trial)
 - `Axe Accessibility Linter
