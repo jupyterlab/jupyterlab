@@ -1449,7 +1449,17 @@ export namespace WindowedList {
      * Windowed list layout
      */
     layout?: WindowedLayout;
+
+    /**
+     * A renderer for the elements of the windowed list.
+     */
+    renderer?: IRenderer;
   }
+
+  /**
+   * A windowed list element renderer.
+   */
+  export interface IRenderer {}
 
   /**
    * Item list metadata
