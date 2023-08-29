@@ -148,32 +148,31 @@ This is a real world example, taken from actual past work.
 
 Let's say you do an accessibility audit of the start page of the JupyterLab UI
 and find a tab trap in the top menu bar, meaning the user can press the tab key
-to get into the menu bar but cannot not get out using only the keyboard and
-standard keyboard shortcuts.
+to get into the menu bar but cannot easily get past it using only the keyboard.
 
 You dig in further and discover that the `tab trap bug is in the
 jupyterlab/lumino repo <https://github.com/jupyterlab/lumino/pull/373>`__, so
-you fork the juptyerlab/lumino repo and create a new branch called
-`fix-tab-trap` in order to open a pull request.
+you fork the juptyerlab/lumino repo, create a new branch called `fix-tab-trap`,
+and open a pull request.
 
-You decide that you want to write a regression test. Now, this is one of those
-cases where you can write a unit test for your accessibility fix. However, the
-unit test would not really prevent a reappearance of the issue that you decided
-you want to fix once and for all, which is tab-key navigation on the JupyterLab
-start page.
+You decide that you want to write a test. This is one of those cases where you
+can fairly easily write a unit test. However, the unit test would not really
+prevent a reappearance of the issue that you decided you want to fix once and
+for all, which is a tab trap anywhere on the JupyterLab start page.
 
-So you decide that you want to `add a test to the
+So you decide that you want to `add a regression test to the
 Quansight-Labs/jupyter-a11y-testing repo
 <https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/f36bf5b2e8cb87613c637fc5aa03401c92ec58d0/testing/jupyterlab/tests/regression-tests/no-tab-trap-initial-page.test.ts>`.
 This test checks that are no tab traps on the JupyterLab start page by opening
 JupyterLab in Playwright and using it to press the tab key repeatedly. So as
 with the Lumino repo before, you fork the Quansight-Labs/jupyter-a11y-testing
-repo, and create a branch called `test-tab-trap` in order to open a pull
-request. The important thing in this step is that you save your test file with a
-`.test.ts` extension in the appropriate tests folder.
+repo, create a branch called `test-tab-trap`, and open a pull request. The
+important thing in this step is that you save your test file with a `.test.ts`
+extension next to the other regression test files.
 
-Now, you want to run your test. You want to run it against the JupyterLab UI,
-incorporating your fix to Lumino. Here's how you would do that.
+Now you want to run your test. Specifically you want to run the test against a
+build of JupyterLab that incorporates your Lumino fix. Here's how you would do
+that.
 
 Let's pretend that your GitHub username is `a11ydev` and you've forked the
 Lumino and testing repos and created the following branches on those forks, one
@@ -197,9 +196,21 @@ Here's how you should fill out the form:
 6. External package ref: `fix-tab-trap`
 
 Then press the "Run workflow" button. A GitHub action should then build
-JupyterLab from source, linking your Lumino fork and branch, and then run the
-test suite, including your test, and then show the test results (hopefully with
-your test passing).
+JupyterLab from source, linking your Lumino fork and branch, then run the test
+suite, including your test, and then finally show the test results, hopefully
+with your test passing.
+
+Note that in this example you did not fork the jupyterlab/jupyterlab repo or
+change the branch name to something other than "main" in the workflow config
+form. This is because you did not need to modify the JupyterLab codebase in
+order to fix this issue. But if you were working on an issue that required you
+to modify the JupyterLab codebase, you would do the same thing that you did
+earlier with Lumino: fork the repo, create a branch with your fix, and then
+enter your fork and branch in the workflow config form before running the
+workflow. That should cause it to build a version of JupyterLab based on your
+changes and then run the test suite against it. The workflow is flexible enough
+to allow you to test changes in just JupyterLab, or just Lumino, or both at the
+same time, if needed.
 
 There are more `detailed instructions for how to use the GitHub workflow
 <https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/main/testing/jupyterlab/README.md#running-the-accessibility-tests->`__
