@@ -366,8 +366,8 @@ used by JupyterLab core itself.
 The Advanced Plugin Manager enables listing and disabling individual plugins,
 but may have been disabled by your system administrator.
 
-Funcitonally, toggling an extension from the plugin manager is equivallent to
-running ``jupyter labextension enable/disable``.
+Functionally, toggling an extension from the plugin manager is equivalent to
+running the ``jupyter labextension enable`` or ``jupyter labextension disable`` commands.
 
 
 .. image:: ../images/plugin-manager-search-notebook.png
@@ -378,7 +378,7 @@ running ``jupyter labextension enable/disable``.
 Locking and Unlocking Plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Administrators may locked specific plugins with:
+Administrators may lock specific plugins with:
 
 .. code:: bash
 
@@ -402,7 +402,7 @@ Managing Extensions with ``jupyter labextension``
 -------------------------------------------------
 
 The ``jupyter labextension`` command enables you to list all installed extensions,
-or disable any extension. It also bring helper commands for developers. See the
+or disable any extension. It also brings helper commands for developers. See the
 help with ``jupyter labextension --help``.
 
 Listing installed extensions
