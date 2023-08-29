@@ -48,6 +48,9 @@
 
 .jp-sortable-table > thead {
   box-shadow: var(--jp-toolbar-box-shadow);
+
+  /* move to a new stacking context to exclude from `mix-blend-mode` */
+  z-index: 1;
 }
 
 .jp-sortable-table > tbody {
