@@ -117,7 +117,7 @@ Fill in the information as mentioned in the body of the changelog PR, for exampl
 | ------------------------------------- | ---------- |
 | The target branch                     | main       |
 | The URL of the draft GitHub release   |            |
-| Comma separated list of steps to skip | ensure-sha |
+| Comma separated list of steps to skip |            |
 
 The "Publish Release" workflow:
 
