@@ -331,7 +331,8 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
 
       commands.addCommand(CommandIDs.focusSidebarElement, {
-        label: trans.__('Default: Focus Left Tab Bar First Element'),
+        label: trans.__('Focus Sidebar Element'),
+        caption: trans.__('By default focuses first element of left sidebar'),
         execute: args => {
           let dataId;
           let focusSidebarElement;
