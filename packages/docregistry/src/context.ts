@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ICodeCell } from '@jupyterlab/nbformat';
 import {
   Dialog,
   ISessionContext,
@@ -771,10 +772,57 @@ export class Context<
       error.name = 'ModalDuplicateError';
       return Promise.reject(error);
     }
-    if (model.content === options.content) {
-      const error = new Error('Duplicate Content');
-      error.name = 'DuplicateContentError';
-      return Promise.reject(error);
+    if (
+      typeof model.content === 'object' &&
+      typeof options.content === 'object'
+    ) {
+      if (
+        Object.keys(options.content).includes('cells') &&
+        Object.keys(model.content).includes('cells')
+      ) {
+        const sortedModelCells = model.content.cells.map(
+          (notSorted: ICodeCell) =>
+            Object.keys(notSorted)
+              .sort()
+              .reduce(
+                (acc, key) => ({
+                  ...acc,
+                  [key]: notSorted[key]
+                }),
+                {}
+              )
+        );
+        const sortedOptionsCells = options.content.cells.map(
+          (notSorted: ICodeCell) =>
+            Object.keys(notSorted)
+              .sort()
+              .reduce(
+                (acc, key) => ({
+                  ...acc,
+                  [key]: notSorted[key]
+                }),
+                {}
+              )
+        );
+        if (
+          JSON.stringify(sortedModelCells) ===
+          JSON.stringify(sortedOptionsCells)
+        ) {
+          const error = new Error('Duplicate Content');
+          error.name = 'DuplicateContentError';
+          return Promise.reject(error);
+        }
+      }
+    }
+    if (
+      typeof model.content === 'string' &&
+      typeof options.content === 'string'
+    ) {
+      if (model.content === options.content) {
+        const error = new Error('Duplicate Content');
+        error.name = 'DuplicateContentError';
+        return Promise.reject(error);
+      }
     }
     const body = this._trans.__(
       `"%1" has changed on disk since the last time it was opened or saved.
