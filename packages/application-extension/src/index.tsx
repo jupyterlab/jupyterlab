@@ -334,113 +334,18 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         label: trans.__('Focus Sidebar Element'),
         caption: trans.__('By default focuses first element of left sidebar'),
         execute: args => {
-          let dataId;
-          let focusSidebarElement;
-          if (args.side === 'left') {
-            switch (args.index) {
-              case '0':
-                dataId = Array.from(labShell.widgets('left'))[0].id;
-                focusSidebarElement = document.querySelector(
-                  "[data-id='" + dataId + "']"
-                );
-                if (focusSidebarElement?.id) {
-                  let focusElement = document.getElementById(
-                    focusSidebarElement.id
-                  );
-                  focusElement?.focus();
-                }
-                break;
-              case '1':
-                dataId = Array.from(labShell.widgets('left'))[1].id;
-                focusSidebarElement = document.querySelector(
-                  "[data-id='" + dataId + "']"
-                );
-                if (focusSidebarElement?.id) {
-                  let focusElement = document.getElementById(
-                    focusSidebarElement.id
-                  );
-                  focusElement?.focus();
-                }
-                break;
-              case '2':
-                dataId = Array.from(labShell.widgets('left'))[2].id;
-                focusSidebarElement = document.querySelector(
-                  "[data-id='" + dataId + "']"
-                );
-                if (focusSidebarElement?.id) {
-                  let focusElement = document.getElementById(
-                    focusSidebarElement.id
-                  );
-                  focusElement?.focus();
-                }
-                break;
-              case '3':
-                dataId = Array.from(labShell.widgets('left'))[3].id;
-                focusSidebarElement = document.querySelector(
-                  "[data-id='" + dataId + "']"
-                );
-                if (focusSidebarElement?.id) {
-                  let focusElement = document.getElementById(
-                    focusSidebarElement.id
-                  );
-                  focusElement?.focus();
-                }
-                break;
-              default:
-                dataId = Array.from(labShell.widgets('left'))[0].id;
-                focusSidebarElement = document.querySelector(
-                  "[data-id='" + dataId + "']"
-                );
-                if (focusSidebarElement?.id) {
-                  let focusElement = document.getElementById(
-                    focusSidebarElement.id
-                  );
-                  focusElement?.focus();
-                }
-                break;
-            }
-          } else if (args.side === 'right') {
-            switch (args.index) {
-              case '0':
-                dataId = Array.from(labShell.widgets('right'))[0].id;
-                focusSidebarElement = document.querySelector(
-                  "[data-id='" + dataId + "']"
-                );
-                if (focusSidebarElement?.id) {
-                  let focusElement = document.getElementById(
-                    focusSidebarElement.id
-                  );
-                  focusElement?.focus();
-                }
-                break;
-              case '1':
-                dataId = Array.from(labShell.widgets('right'))[1].id;
-                focusSidebarElement = document.querySelector(
-                  "[data-id='" + dataId + "']"
-                );
-                if (focusSidebarElement?.id) {
-                  let focusElement = document.getElementById(
-                    focusSidebarElement.id
-                  );
-                  focusElement?.focus();
-                }
-                break;
-              default:
-                return;
-            }
-          } else {
-            dataId = Array.from(labShell.widgets('left'))[0].id;
-            focusSidebarElement = document.querySelector(
-              "[data-id='" + dataId + "']"
-            );
-            if (focusSidebarElement?.id) {
-              let focusElement = document.getElementById(
-                focusSidebarElement.id
-              );
-              focusElement?.focus();
-            }
+          const index = parseInt(args.index, 10);
+          const widgets = Array.from(labShell.widgets(args.side));
+          if (index >= widgets.length) {
+             throw Error(`No item with index ${index} in ${args.side} sidebar`);
           }
-        }
+          const dataId = widgets[index].id;
+          const focusElement = document.querySelector(
+            "[data-id='" + dataId + "']"
+          );
+          if (focusElement) {
+            focusElement.focus();
+          }
       });
 
       commands.addCommand(CommandIDs.toggleSideTabBar, {
