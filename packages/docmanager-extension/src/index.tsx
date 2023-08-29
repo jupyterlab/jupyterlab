@@ -19,6 +19,7 @@ import {
   ICommandPalette,
   InputDialog,
   ISessionContextDialogs,
+  Notification,
   ReactWidget,
   SessionContextDialogs,
   showDialog,
@@ -957,14 +958,13 @@ function addCommands(
             paths.add(context.path);
             promises.push(context.save());
           } else {
-            void showDialog({
-              title: trans.__(`Cannot Save %1`, context.path),
-              body: trans.__(
+            Notification.warning(
+              trans.__(
                 `%1 is permissioned as readonly. Use "save as..." instead.`,
-                context.contentsModel?.type
+                context.path
               ),
-              buttons: [Dialog.okButton()]
-            });
+              { autoClose: 5000 }
+            );
           }
         }
       }
