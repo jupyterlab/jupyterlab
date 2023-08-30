@@ -58,7 +58,7 @@ commander
 
     // Handle dry runs.
     if (opts.dryRun) {
-      utils.run(`bumpversion --dry-run --verbose ${spec}`);
+      utils.run(`bumpversion --allow-dirty --dry-run --verbose ${spec}`);
       return;
     }
 
@@ -97,7 +97,7 @@ commander
     }
 
     // Bump the version.
-    utils.run(`bumpversion ${spec}`);
+    utils.run(`bumpversion --allow-dirty ${spec}`);
 
     // Run the post-bump script.
     utils.postbump(commit);
