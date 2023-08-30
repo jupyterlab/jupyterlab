@@ -113,11 +113,11 @@ On the [Actions](https://github.com/jupyterlab/jupyterlab/actions) page, select 
 
 Fill in the information as mentioned in the body of the changelog PR, for example:
 
-| Input                                 | Value      |
-| ------------------------------------- | ---------- |
-| The target branch                     | main       |
-| The URL of the draft GitHub release   |            |
-| Comma separated list of steps to skip |            |
+| Input                                 | Value |
+| ------------------------------------- | ----- |
+| The target branch                     | main  |
+| The URL of the draft GitHub release   |       |
+| Comma separated list of steps to skip |       |
 
 The "Publish Release" workflow:
 
