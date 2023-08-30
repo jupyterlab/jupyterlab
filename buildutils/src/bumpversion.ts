@@ -84,14 +84,7 @@ commander
     if (opts.force) {
       cmd += ' --yes';
     }
-    const oldVersion = utils.run(
-      'git rev-parse HEAD',
-      {
-        stdio: 'pipe',
-        encoding: 'utf8'
-      },
-      true
-    );
+
     // For a major release, we bump 10 minor versions so that we do
     // not conflict with versions during minor releases of the top
     // level package.
@@ -101,19 +94,6 @@ commander
       }
     } else {
       utils.run(cmd);
-    }
-
-    const newVersion = utils.run(
-      'git rev-parse HEAD',
-      {
-        stdio: 'pipe',
-        encoding: 'utf8'
-      },
-      true
-    );
-    if (oldVersion === newVersion) {
-      // lerna didn't version anything, so we assume the user aborted
-      throw new Error('Lerna aborted');
     }
 
     // Bump the version.
