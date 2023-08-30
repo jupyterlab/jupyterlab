@@ -783,6 +783,7 @@ export class Context<
         const sortedModelCells = model.content.cells.map(
           (notSorted: ICodeCell) =>
             Object.keys(notSorted)
+              .filter(f => f !== 'metadata')
               .sort()
               .reduce(
                 (acc, key) => ({
@@ -795,6 +796,7 @@ export class Context<
         const sortedOptionsCells = options.content.cells.map(
           (notSorted: ICodeCell) =>
             Object.keys(notSorted)
+              .filter(f => f !== 'metadata')
               .sort()
               .reduce(
                 (acc, key) => ({
