@@ -346,6 +346,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           if (focusElement) {
             focusElement.focus();
           }
+        }
       });
 
       commands.addCommand(CommandIDs.toggleSideTabBar, {
