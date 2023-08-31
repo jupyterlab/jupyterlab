@@ -6,8 +6,6 @@
 import { program as commander } from 'commander';
 import * as utils from './utils';
 
-const METAPACKAGE = '@jupyterlab/metapackage';
-
 // Specify the program signature.
 commander
   .description('Create a patch release')
@@ -39,9 +37,9 @@ commander
       cmd += ' --yes';
     }
 
-    const oldVersion = utils.getJSVersion(METAPACKAGE);
+    const oldVersion = utils.getJSVersion('metapackage');
     utils.run(cmd);
-    const newVersion = utils.getJSVersion(METAPACKAGE);
+    const newVersion = utils.getJSVersion('metapackage');
 
     if (oldVersion === newVersion) {
       // lerna didn't version anything, so we assume the user aborted
