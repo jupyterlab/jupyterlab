@@ -104,7 +104,8 @@ namespace CommandIDs {
 
   export const toggleSideTabBar: string = 'application:toggle-side-tabbar';
 
-  export const focusSidebarElement: string = 'application:focusSidebarElement';
+  export const activateSidebarWidget: string =
+    'application:activate-sidebar-widget';
 
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
@@ -330,9 +331,9 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isEnabled: () => !labShell.isEmpty('right')
       });
 
-      commands.addCommand(CommandIDs.focusSidebarElement, {
-        label: trans.__('Focus Sidebar Element'),
-        caption: trans.__('By default focuses first element of left sidebar'),
+      commands.addCommand(CommandIDs.activateSidebarWidget, {
+        label: trans.__('Open Sidebar Element'),
+        caption: trans.__('By default opens first element of left sidebar'),
         execute: args => {
           const index = parseInt(args.index as string, 10);
           if (args.side != 'left' && args.side != 'right') {
@@ -342,9 +343,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           if (index >= widgets.length) {
             throw Error(`No item with index ${index} in ${args.side} sidebar`);
           }
-          const dataId = widgets[index].id;
+          const widgetId = widgets[index].id;
+          // activate widget to show the associated content
+          labShell.activateById(widgetId);
           const focusElement = document.querySelector(
-            "[data-id='" + dataId + "']"
+            "[data-id='" + widgetId + "']"
           );
           if (focusElement) {
             if ((focusElement as HTMLElement).focus) {
@@ -469,7 +472,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.closeAll,
         CommandIDs.closeOtherTabs,
         CommandIDs.closeRightTabs,
-        CommandIDs.focusSidebarElement,
+        CommandIDs.activateSidebarWidget,
         CommandIDs.toggleHeader,
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
