@@ -780,35 +780,29 @@ export class Context<
         Object.keys(options.content).includes('cells') &&
         Object.keys(model.content).includes('cells')
       ) {
-        const sortedModelCells = model.content.cells.map(
-          (notSorted: ICodeCell) =>
-            Object.keys(notSorted)
-              .filter(f => f !== 'metadata')
-              .sort()
-              .reduce(
-                (acc, key) => ({
-                  ...acc,
-                  [key]: notSorted[key]
-                }),
-                {}
-              )
-        );
-        const sortedOptionsCells = options.content.cells.map(
-          (notSorted: ICodeCell) =>
-            Object.keys(notSorted)
-              .filter(f => f !== 'metadata')
-              .sort()
-              .reduce(
-                (acc, key) => ({
-                  ...acc,
-                  [key]: notSorted[key]
-                }),
-                {}
-              )
-        );
+        // sort any type of object/type recursively
+        // if ICodeCell changes in the future sortKeysAndValues
+        // will continue to work
+        const sortKeysAndValues = (obj: any | ICodeCell): any => {
+          if (typeof obj !== 'object' || obj === null) {
+            return obj;
+          }
+
+          if (Array.isArray(obj)) {
+            return obj.map(item => sortKeysAndValues(item));
+          }
+
+          const sortedKeys = Object.keys(obj).sort();
+
+          return sortedKeys.reduce((sortedObj: any, key) => {
+            sortedObj[key] = sortKeysAndValues(obj[key]);
+            return sortedObj;
+          }, {});
+        };
+
         if (
-          JSON.stringify(sortedModelCells) ===
-          JSON.stringify(sortedOptionsCells)
+          JSON.stringify(sortKeysAndValues(model.content.cells)) ===
+          JSON.stringify(sortKeysAndValues(options.content.cells))
         ) {
           const error = new Error('Duplicate Content');
           error.name = 'DuplicateContentError';
