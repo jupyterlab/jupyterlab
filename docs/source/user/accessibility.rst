@@ -12,7 +12,7 @@ Welcome to the JupyterLab Accessibility Documentation. This page contains inform
 Key Accessibility Features
 --------------------------
 
-These features are implemented to help users navigate, interact and customize their experience in Jupyterlab. 
+These features are implemented to help users navigate, interact and customize their experience in Jupyterlab.
 
 This documentation is designed to help you:
 
