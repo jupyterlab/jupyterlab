@@ -334,17 +334,22 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         label: trans.__('Focus Sidebar Element'),
         caption: trans.__('By default focuses first element of left sidebar'),
         execute: args => {
-          const index = parseInt(args.index, 10);
+          const index = parseInt(args.index as string, 10);
+          if (args.side != 'left' && args.side != 'right') {
+            throw Error(`Unspported sidebar: ${args.side}`);
+          }
           const widgets = Array.from(labShell.widgets(args.side));
           if (index >= widgets.length) {
-             throw Error(`No item with index ${index} in ${args.side} sidebar`);
+            throw Error(`No item with index ${index} in ${args.side} sidebar`);
           }
           const dataId = widgets[index].id;
           const focusElement = document.querySelector(
             "[data-id='" + dataId + "']"
           );
           if (focusElement) {
-            focusElement.focus();
+            if ((focusElement as HTMLElement).focus) {
+              (focusElement as HTMLElement).focus();
+            }
           }
         }
       });
