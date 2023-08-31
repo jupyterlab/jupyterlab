@@ -296,9 +296,8 @@ export class CompletionHandler implements IDisposable {
     }
     if (
       this._autoCompletion &&
-      (this._reconciliator as IProviderReconciliator)
-        .shouldShowContinuousHint &&
-      (this._reconciliator as IProviderReconciliator).shouldShowContinuousHint(
+      this._reconciliator.shouldShowContinuousHint &&
+      this._reconciliator.shouldShowContinuousHint(
         this.completer.isVisible,
         changed
       )
@@ -498,7 +497,8 @@ export namespace CompletionHandler {
    * A reply to a completion items fetch request.
    */
   export interface ICompletionItemsReply<
-    T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends
+      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
   > {
     /**
      * The starting index for the substring being replaced by completion.
