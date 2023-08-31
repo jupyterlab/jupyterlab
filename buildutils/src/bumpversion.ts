@@ -6,6 +6,8 @@
 import { program as commander } from 'commander';
 import * as utils from './utils';
 
+const METAPACKAGE = '@jupyterlab/metapackage';
+
 // Specify the program signature.
 commander
   .description('Update the version and publish')
@@ -85,6 +87,8 @@ commander
       cmd += ' --yes';
     }
 
+    const oldVersion = utils.getJSVersion(METAPACKAGE);
+
     // For a major release, we bump 10 minor versions so that we do
     // not conflict with versions during minor releases of the top
     // level package.
@@ -94,6 +98,12 @@ commander
       }
     } else {
       utils.run(cmd);
+    }
+
+    const newVersion = utils.getJSVersion(METAPACKAGE);
+    if (spec !== 'major' && oldVersion === newVersion) {
+      // lerna didn't version anything, so we assume the user aborted
+      throw new Error('Lerna aborted');
     }
 
     // Bump the version.

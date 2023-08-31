@@ -6,6 +6,8 @@
 import { program as commander } from 'commander';
 import * as utils from './utils';
 
+const METAPACKAGE = '@jupyterlab/metapackage';
+
 // Specify the program signature.
 commander
   .description('Create a patch release')
@@ -37,7 +39,14 @@ commander
       cmd += ' --yes';
     }
 
+    const oldVersion = utils.getJSVersion(METAPACKAGE);
     utils.run(cmd);
+    const newVersion = utils.getJSVersion(METAPACKAGE);
+
+    if (oldVersion === newVersion) {
+      // lerna didn't version anything, so we assume the user aborted
+      throw new Error('Lerna aborted');
+    }
 
     // Patch the python version
     utils.run('bumpversion patch --allow-dirty'); // switches to alpha
