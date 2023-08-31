@@ -9,22 +9,25 @@ JupyterLab Accessibility Documentation
 Introduction
 ----------------
 
-Welcome to the JupyterLab Accessibility Documentation, the guide for making the most of JupyterLab's inclusive features. As part of our commitment to providing an accessible and user-friendly environment, this documentation aims to empower users with insights, tips, and tools for enhancing accessibility within the JupyterLab interface.
-
-In this guide, there is a wealth of information about key accessibility features, customization options, and best practices for navigating and interacting with JupyterLab. We are working towards ensuring that all users, regardless of their abilities, can seamlessly engage with
-JupyterLab's powerful capabilities.
+Welcome to the JupyterLab Accessibility Documentation. This page contains information about key accessibility features, customization options, and best practices for navigating and interacting with JupyterLab. This is part of ongoing efforts to improve the user experience for disabled users.
 
 -----------------------------------
 Key Accessibility Features
 -----------------------------------
 
-These features are carefully crafted to provide seamless navigation, interaction, and customization options making JupyterLab a versatile platform that caters to diverse user needs.
+These features are implemented to help users navigate, interact and customize their experience in Jupyterlab. 
+
+This documentation is designed to help you:
+
+* Maximize the potential of JupyterLab's built-in accessibility settings
+* Identify and understand aspects of JupyterLab lacking accessibility support
+* Understand what to anticipate when using keyboard navigation and screen readers in JupyterLab
 
 -----------------------------------
 Keyboard Navigation
 -----------------------------------
 
-Keyboard navigation lies at the core of JupyterLab's accessibility approach, allowing users to efficiently interact with the interface using keystrokes. It has naturally evolved to provide a quicker alternative to mouse-based interactions by the use of multiple accessibility tools throughout the interface that will be discussed in this section.
+JupyterLab has taken steps to enhance keyboard navigation, including aspects related to accessibility. There are currently no specialized keyboard navigation settings in JupyterLab as it's quite similar to any other webpage in your browser.
 
 -----------------------------------
 Keyboard Shortcuts
@@ -32,22 +35,21 @@ Keyboard Shortcuts
 
 JupyterLab offers an extensive set of keyboard shortcuts that empower users to navigate through various functions and tools. From executing code cells to managing tabs, these shortcuts streamline workflows and enhance accessibility for users who rely on keyboard input.
 
-For a comprehensive list of available shortcuts, `users can check out this resource <https://jupyterlab.readthedocs.io/en/stable/user/commands.html#commands-list>`_, or explore the advanced settings by navigating to `Settings > Advanced Settings` in the JupyterLab main menu.
+For a comprehensive list of available shortcuts, `users can check out this resource <https://jupyterlab.readthedocs.io/en/stable/user/commands.html#commands-list>`_, or explore the advanced settings by navigating to `Settings > Advanced Settings` in the JupyterLab main menu. This PR talks about `display shortcuts <https://github.com/jupyterlab/jupyterlab/pull/14053>`_,
 
-.. figure:: ./images/accessibility/keyboard_shortcuts.png
+.. image:: ./images/accessibility/keyboard_shortcuts.png
    :alt: The JupyterLab Advanced Settings Editor with the Keyboard Shortcuts section open. Under a selected keyboard shortcut listing there is a Add button to add another shortcut.
 
-Within JupyterLab's Advanced Settings, default keyboard shortcuts are unmodifiable, though users can craft and modify their own shortcuts to align with their unique workflows. In order to create a new keyboard shortcut use the `add` button and enter the information requested,
+Within JupyterLab's Advanced Settings, default keyboard shortcuts are unmodifiable, though users can modify their own shortcuts to align with their unique workflows. In order to create a new keyboard shortcut use the `add` button and enter the information requested,
 Please note that the information can be removed and edited afterwards.
 
 -----------------------------------
 Command Palette
 -----------------------------------
 
-The `Command Palette <https://jupyterlab.readthedocs.io/en/latest/user/commands.html#command-palette>`_ acts as a list of all commands in JupyterLab, offering a text-based interface for executing commands. It can be accessed from the `View` menu or using the keyboard shortcut `Ctrl + Shift + C`. Using the shortcut `Ctrl + Shift + C` will change focus to the command palette no matter where users are in JupyterLab, so it may also be useful to move out of keyboard traps. This feature not only aids keyboard-centric users but also promotes efficiency and
-accessibility, as users can swiftly access functionalities without navigating complex menus.
+The `Command Palette <https://jupyterlab.readthedocs.io/en/latest/user/commands.html#command-palette>`_ acts as a list of all commands in JupyterLab, offering a text-based interface for executing commands. It can be accessed from the `View` menu or using the keyboard shortcut `Ctrl + Shift + C`. Using the shortcut `Ctrl + Shift + C` will change focus to the command palette no matter where users are in JupyterLab, so it may also be useful to move out of keyboard traps. This feature aids efficiency and accessibility, as users can swiftly access functionalities without navigating complex menus.
 
-.. figure:: ./images/accessibility/Command_Palette.png
+.. image:: ./images/accessibility/command_palette.png
    :alt: JupyterLab notebook editor with the modal command palette opened. There is a list filter at the top and a truncated list of commands with shortcuts below.
 
 -----------------------------------
@@ -60,7 +62,7 @@ While JupyterLab has taken strides to support screen reader compatibility, it's 
 Tab Navigation and Tab Trapping
 --------------------------------------------
 
-The JupyterLab interface allows users to cycle through focusable elements using the `Arrow keys`, `Tab key` and `Shift key`. This sequential navigation allows the exploration of buttons, input fields, and interactive components in a given order.
+The JupyterLab interface allows users to cycle through focusable elements using the :kbd:`Arrow keys`, :kbd:`Tab key` and :kbd:`Shift key`. This sequential navigation allows the exploration of buttons, input fields, and interactive components in a given order.
 
 In the main UI sections, including the notebook, console, sidebars and terminal, it is possible for users to become trapped within a specific area, limiting keyboard navigation. This is a work in progress and multiple efforts are being made to reduce the number of tab traps.
 
@@ -72,9 +74,9 @@ Colour Themes
 
 While JupyterLab provides default themes, it's important to note that these themes are not compliant with the `Web Content Accessibility Guidelines (WCAG) 2.0 <https://www.w3.org/TR/WCAG20/>`_. This means that some users might experience challenges in terms of colour contrast or readability.
 
-Nevertheless, `Jupyterlab Accessible Themes <https://github.com/Quansight-Labs/jupyterlab-accessible-themes>`_, a third-party extension provides an additional avenue for enhancing color accessibility in JupyterLab. This extension introduces two WCAG-compliant accessible themes to the JupyterLab ecosystem. Please note that this extension is compatible with JupyterLab 3.0.
+Nevertheless, `Jupyterlab Theme Editor <https://github.com/jupyterlab-contrib/jupyterlab-theme-editor>`_, and `Jupyterlab Accessible Themes <https://github.com/Quansight-Labs/jupyterlab-accessible-themes>`_, a third-party extension provides an additional avenue for improving color accessibility in JupyterLab. This extension introduces two WCAG-compliant accessible themes to the JupyterLab ecosystem. Please note that this extension is compatible with JupyterLab 3.0.
 
-In addition to accessible third-party themes, JupyterLab grants users the freedom to create and apply custom themes. There are plenty of resources for developing a new theme including `this detailed blog post
+In addition to accessible third-party themes, JupyterLab helps users to create and apply custom themes. There are plenty of resources for developing a new theme including `this detailed blog post
 <https://labs.quansight.org/blog/2020/12/jupyterlab-winter-theme>`_ and
 the `Extension Development Guide
 <https://jupyterlab.readthedocs.io/en/latest/extension/extension_dev.html>`_
@@ -83,19 +85,12 @@ the `Extension Development Guide
 Text Scaling
 -----------------------------------
 
-JupyterLab allows text scaling customization via the advanced settings for improving the legibility of certain parts of the interface like files. This enhances the experience for users with visual impairment. For changing the font size options, please navigate via the main menu to
+JupyterLab allows text scaling customization via the advanced settings for improving the legibility of certain parts of the interface like files. This improves the experience for users with visual impairment. For changing the font size options, please navigate via the main menu to
 `Settings > Advanced Settings` and locate the text editor settings on the left panel to make the necessary adjustments.
 
 It's important to note that changes made in this setting will exclusively impact either the Markdown viewer or the text editor, based on the selected configuration. Notably, adjustments here won't influence the font size in the notebook area or in the rest of the interface.
 
-However, users have the zoom browser functionality to increase the size of not only the text size but also the interface elements of JupyterLab. This dynamic approach is a fast route to improve readability and increase workflow efficiency in specific contexts. Take into account that some parts of the interface may fail if the zoom is greater than 200%.
-
------------------------------------
-Focus Indicators
------------------------------------
-
-Currently, JupyterLab does not provide focus indicators that fully adhere to Web Content Accessibility Guidelines (WCAG) standards. While keyboard navigation remains functional, the absence of WCAG-compliant focus indicators may impact the visual cues for users with accessibility needs.
-
+However, users have the zoom browser functionality to increase the size of the interface elements of JupyterLab. This approach helps to improve readability in specific contexts. Take into account that the limit for font size is 100%.
 
 -----------------------------------
 Current Known Issues
@@ -110,7 +105,7 @@ links for seeing the current state and discussions taking place in the community
 
 -  `JupyterLab and Notebook accessibility audits <https://jupyter-accessibility.readthedocs.io/en/latest/audits/index.html>`_
 
-Please feel free to contribute to any of the listed projects, all the feedback will help to enhance JupyterLab's accessibility and ensure it accommodates diverse user needs.
+Please feel free to contribute to any of the listed projects, all the feedback will help to improve JupyterLab's accessibility.
 
 
 
