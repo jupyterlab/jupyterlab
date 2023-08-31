@@ -169,6 +169,12 @@
       "path": "../mathjax-extension"
     },
     {
+      "path": "../mermaid"
+    },
+    {
+      "path": "../mermaid-extension"
+    },
+    {
       "path": "../metadataform"
     },
     {

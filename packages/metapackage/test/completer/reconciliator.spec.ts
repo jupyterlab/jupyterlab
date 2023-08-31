@@ -213,7 +213,7 @@ describe('completer/reconciliator', () => {
         fooProvider2.shouldShowContinuousHint = jest.fn();
         const reconciliator = new ProviderReconciliator({
           ...defaultOptions,
-          providers: [fooProvider1, fooProvider1]
+          providers: [fooProvider1, fooProvider2]
         });
         reconciliator.shouldShowContinuousHint(true, null as any);
         expect(fooProvider1.shouldShowContinuousHint).toHaveBeenCalledTimes(1);

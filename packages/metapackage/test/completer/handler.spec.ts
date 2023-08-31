@@ -59,7 +59,7 @@ class TestCompletionHandler extends CompletionHandler {
 }
 
 class FooCompletionProvider implements ICompletionProvider {
-  methods: CompletionTriggerKind[] = [];
+  triggers: CompletionTriggerKind[] = [];
 
   constructor(private _continuousHint: boolean) {}
 
@@ -75,11 +75,15 @@ class FooCompletionProvider implements ICompletionProvider {
     context: ICompletionContext,
     trigger: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply> {
-    this.methods.push(trigger);
+    this.triggers.push(trigger);
     return Promise.resolve({ start: 0, end: 0, items: [] });
   }
 
-  shouldShowContinuousHint(completerIsVisible: boolean, changed: any) {
+  shouldShowContinuousHint(
+    completerIsVisible: boolean,
+    changed: SourceChange,
+    context?: ICompletionContext
+  ) {
     return this._continuousHint;
   }
 }
@@ -347,19 +351,21 @@ describe('@jupyterlab/completer', () => {
       });
     });
 
-    describe('#CompletionTriggerKind', () => {
+    describe('#autoCompletion', () => {
       let anchor: CodeEditorWrapper;
       let provider: FooCompletionProvider;
       let handler: CompletionHandler;
+      let context: symbol;
 
       beforeAll(async () => {
         anchor = createEditorWidget();
         Widget.attach(anchor, document.body);
+        context = Symbol();
 
         provider = new FooCompletionProvider(true);
         handler = new CompletionHandler({
           reconciliator: new ProviderReconciliator({
-            context: null as any,
+            context: context as any,
             providers: [provider],
             timeout: 0
           }),
@@ -379,28 +385,44 @@ describe('@jupyterlab/completer', () => {
         handler.dispose();
       });
 
-      it('should use CompletionTriggerKind.Invoked', () => {
-        expect(provider.methods.length).toEqual(0);
+      it('should use Invoked for invoke()', () => {
+        expect(provider.triggers.length).toEqual(0);
 
         handler.editor!.model.sharedModel.setSource('foo.');
         anchor.node.focus();
         anchor.editor.setCursorPosition({ line: 0, column: 4 });
         handler.invoke();
 
-        expect(provider.methods).toEqual(
+        expect(provider.triggers).toEqual(
           expect.arrayContaining([CompletionTriggerKind.Invoked])
         );
       });
 
-      it('should use CompletionTriggerKind.TriggerCharacter', () => {
-        // this test depends on the previous one ('should use CompletionTriggerKind.Invoked').
-        expect(provider.methods.length).toEqual(1);
+      it('should use TriggerCharacter for typed text', () => {
+        // this test depends on the previous one ('should use Invoked for invoke()').
+        expect(provider.triggers.length).toEqual(1);
 
         handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
 
-        expect(provider.methods.length).toEqual(2);
-        expect(provider.methods).toEqual(
+        expect(provider.triggers.length).toEqual(2);
+        expect(provider.triggers).toEqual(
           expect.arrayContaining([CompletionTriggerKind.TriggerCharacter])
+        );
+      });
+
+      it('should pass context to `shouldShowContinuousHint()`', () => {
+        handler.editor!.model.sharedModel.setSource('foo.');
+        anchor.node.focus();
+        anchor.editor.setCursorPosition({ line: 0, column: 4 });
+        provider.shouldShowContinuousHint = jest.fn();
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+        expect(provider.shouldShowContinuousHint).toHaveBeenCalledTimes(1);
+        expect(provider.shouldShowContinuousHint).toHaveBeenLastCalledWith(
+          false,
+          {
+            sourceChange: [{ retain: 4 }, { insert: 'a' }]
+          } as SourceChange,
+          context
         );
       });
     });

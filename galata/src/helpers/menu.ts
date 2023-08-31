@@ -21,9 +21,12 @@ export class MenuHelper {
     for (let i = 0; i < numOpenMenus; ++i) {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(100);
-      await page.waitForFunction((menuCount: number) => {
-        return document.querySelectorAll('.lm-Menu').length === menuCount;
-      }, numOpenMenus - (i + 1));
+      await page.waitForFunction(
+        (menuCount: number) => {
+          return document.querySelectorAll('.lm-Menu').length === menuCount;
+        },
+        numOpenMenus - (i + 1)
+      );
     }
   }
 

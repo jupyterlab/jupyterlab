@@ -223,7 +223,7 @@ module.exports = {
   },
   name: '@jupyterlab',
   plugin: ['typedoc-plugin-mdn-links'],
-  out: 'docs/api',
+  out: 'docs/source/api',
   readme: 'README.md',
   theme: 'default',
   titleLink: 'https://jupyterlab.readthedocs.io/en/latest',
