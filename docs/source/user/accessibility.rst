@@ -32,13 +32,8 @@ JupyterLab offers an extensive set of keyboard shortcuts that empower users to n
 
 For a comprehensive list of available shortcuts, `users can check out this resource <https://jupyterlab.readthedocs.io/en/stable/user/commands.html#commands-list>`_, or explore the advanced settings by navigating to `Settings > Advanced Settings` in the JupyterLab main menu. This PR talks about `display shortcuts <https://github.com/jupyterlab/jupyterlab/pull/14053>`_,
 
-<<<<<<< HEAD
 .. image:: ./images/accessibility/keyboard_shortcuts.png
    :alt: The JupyterLab Advanced Settings Editor with the Keyboard Shortcuts section open. Under a selected keyboard shortcut listing there is a Add button to add another shortcut.
-=======
-.. figure:: ./images/accessibility/keyboard_shortcuts.png
-   :alt: The JupyterLab Advanced Settings Editor with the Keyboard Shortcuts section open. Under a selected keyboard shortcut listing there is a button to add another shortcut.
->>>>>>> 4d9cd950b009e78b358d947c0e41194542b80b65
 
 Within JupyterLab's Advanced Settings, default keyboard shortcuts are unmodifiable, though users can modify their own shortcuts to align with their unique workflows. In order to create a new keyboard shortcut use the `add` button and enter the information requested,
 Please note that the information can be removed and edited afterwards.
