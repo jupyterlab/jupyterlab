@@ -74,7 +74,7 @@ Pypi = "https://pypi.org/project/jupyterlab"
 
 [project.optional-dependencies]
 docs = [
-    "sphinx>=1.8",
+    "sphinx>=1.8,<7.2.0",
     "sphinx-copybutton",
     "pydata-sphinx-theme>=0.13.0",
     "pytest",
@@ -164,7 +164,7 @@ exclude = [
     "/buildutils",
     "/dist",
     "/docs/build",
-    "/docs/api",
+    "/docs/source/api",
     "/design",
     "/dev_mode",
     "/examples",
