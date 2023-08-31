@@ -734,14 +734,12 @@ export class WindowedList<
    * @param options Constructor options
    */
   constructor(options: WindowedList.IOptions<T>) {
-    // TODO probably needs to be able to customize outer HTML tag (could be ul / ol / table, ...)
-    const node = document.createElement('div');
+    const renderer = options.renderer ?? new WindowedList.Renderer();
+    const node = renderer.createOuter();
     node.className = 'jp-WindowedPanel-outer';
     const innerElement = node.appendChild(document.createElement('div'));
     innerElement.className = 'jp-WindowedPanel-inner';
-    const windowContainer = innerElement.appendChild(
-      document.createElement('div')
-    );
+    const windowContainer = innerElement.appendChild(renderer.createWindow());
     windowContainer.className = 'jp-WindowedPanel-window';
     super({ node });
     super.layout = options.layout ?? new WindowedLayout();
@@ -781,7 +779,7 @@ export class WindowedList<
   /**
    * Viewport
    */
-  get viewportNode(): HTMLDivElement {
+  get viewportNode(): HTMLElement {
     return this._windowElement;
   }
 
@@ -1187,7 +1185,7 @@ export class WindowedList<
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
   private _needsUpdate = false;
-  private _windowElement: HTMLDivElement;
+  private _windowElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
   private _resizeObserver: ResizeObserver | null;
   private _scrollRepaint: number | null;
@@ -1544,7 +1542,28 @@ export namespace WindowedList {
   /**
    * A windowed list element renderer.
    */
-  export interface IRenderer {}
+  export interface IRenderer {
+    /**
+     * Create the outer, root element
+     */
+    createOuter(): HTMLElement;
+
+    /**
+     * Create the "window" element (widget nodes are added and removed from this
+     * node as the user scrolls)
+     */
+    createWindow(): HTMLElement;
+  }
+
+  export class Renderer implements IRenderer {
+    createOuter() {
+      return document.createElement('div');
+    }
+
+    createWindow() {
+      return document.createElement('div');
+    }
+  }
 
   /**
    * Item list metadata

@@ -34,6 +34,7 @@ import { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookHistory } from './history';
 import { INotebookModel } from './model';
+import { NotebookRenderer } from './renderer';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
 
@@ -202,7 +203,8 @@ export class StaticNotebook extends WindowedList {
           (options.notebookConfig?.windowingMode ??
             StaticNotebook.defaultNotebookConfig.windowingMode) === 'full'
       }),
-      layout: new NotebookWindowedLayout()
+      layout: new NotebookWindowedLayout(),
+      renderer: new NotebookRenderer()
     });
     this.addClass(NB_CLASS);
     this.cellsArray = cells;
