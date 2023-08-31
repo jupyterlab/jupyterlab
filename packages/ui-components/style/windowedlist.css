@@ -12,7 +12,7 @@
   position: relative;
 }
 
-.jp-WindowedPanel-window {
+.jp-WindowedPanel-viewport {
   position: absolute;
   left: 0;
   right: 0;

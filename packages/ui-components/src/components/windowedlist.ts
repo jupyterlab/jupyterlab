@@ -739,19 +739,20 @@ export class WindowedList<
     node.className = 'jp-WindowedPanel-outer';
     const innerElement = node.appendChild(document.createElement('div'));
     innerElement.className = 'jp-WindowedPanel-inner';
-    const windowContainer = innerElement.appendChild(renderer.createWindow());
-    windowContainer.className = 'jp-WindowedPanel-window';
+    const viewport = innerElement.appendChild(renderer.createViewport());
+    viewport.className = 'jp-WindowedPanel-viewport';
     super({ node });
     super.layout = options.layout ?? new WindowedLayout();
-    this._viewModel = options.model;
+
     this._innerElement = innerElement;
     this._isScrolling = null;
-    this._windowElement = windowContainer;
+    this._resizeObserver = null;
     this._scrollToItem = null;
     this._scrollRepaint = null;
     this._scrollUpdateWasRequested = false;
     this._updater = new Throttler(() => this.update(), 50);
-    this._resizeObserver = null;
+    this._viewModel = options.model;
+    this._viewport = viewport;
 
     this._viewModel.stateChanged.connect(this.onStateChanged, this);
   }
@@ -780,7 +781,7 @@ export class WindowedList<
    * Viewport
    */
   get viewportNode(): HTMLElement {
-    return this._windowElement;
+    return this._viewport;
   }
 
   /**
@@ -1027,12 +1028,12 @@ export class WindowedList<
       );
     }
     this.node.addEventListener('scroll', this, passiveIfSupported);
-    this._windowElement.style.position = 'absolute';
+    this._viewport.style.position = 'absolute';
   }
 
   private _applyNoWindowingStyles() {
-    this._windowElement.style.position = 'relative';
-    this._windowElement.style.top = '0px';
+    this._viewport.style.position = 'relative';
+    this._viewport.style.top = '0px';
   }
 
   private _removeListeners() {
@@ -1095,15 +1096,15 @@ export class WindowedList<
             startIndex,
             stopIndex
           );
-          this._windowElement.style.top = `${top}px`;
-          this._windowElement.style.minHeight = `${minHeight}px`;
+          this._viewport.style.top = `${top}px`;
+          this._viewport.style.minHeight = `${minHeight}px`;
         } else {
           // Update inner container height
           this._innerElement.style.height = `0px`;
 
-          // Update position of window container
-          this._windowElement.style.top = `0px`;
-          this._windowElement.style.minHeight = `0px`;
+          // Update position of viewport node
+          this._viewport.style.top = `0px`;
+          this._viewport.style.minHeight = `0px`;
         }
 
         // Update scroll
@@ -1115,7 +1116,7 @@ export class WindowedList<
     }
 
     let index2 = -1;
-    for (const w of this.viewportNode.children) {
+    for (const w of this._viewport.children) {
       const currentIdx = parseInt(
         (w as HTMLElement).dataset.windowedListIndex!,
         10
@@ -1185,13 +1186,13 @@ export class WindowedList<
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
   private _needsUpdate = false;
-  private _windowElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
   private _resizeObserver: ResizeObserver | null;
   private _scrollRepaint: number | null;
   private _scrollToItem: [number, WindowedList.ScrollToAlign] | null;
   private _scrollUpdateWasRequested: boolean;
   private _updater: Throttler;
+  private _viewport: HTMLElement;
 }
 
 /**
@@ -1544,15 +1545,14 @@ export namespace WindowedList {
    */
   export interface IRenderer {
     /**
-     * Create the outer, root element
+     * Create the outer, root element of the windowed list.
      */
     createOuter(): HTMLElement;
 
     /**
-     * Create the "window" element (widget nodes are added and removed from this
-     * node as the user scrolls)
+     * Create the viewport element into which virtualized children are added.
      */
-    createWindow(): HTMLElement;
+    createViewport(): HTMLElement;
   }
 
   export class Renderer implements IRenderer {
@@ -1560,7 +1560,7 @@ export namespace WindowedList {
       return document.createElement('div');
     }
 
-    createWindow() {
+    createViewport() {
       return document.createElement('div');
     }
   }

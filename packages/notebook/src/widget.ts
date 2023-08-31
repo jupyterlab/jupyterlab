@@ -34,7 +34,6 @@ import { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 import { INotebookHistory } from './history';
 import { INotebookModel } from './model';
-import { NotebookRenderer } from './renderer';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
 
@@ -204,7 +203,7 @@ export class StaticNotebook extends WindowedList {
             StaticNotebook.defaultNotebookConfig.windowingMode) === 'full'
       }),
       layout: new NotebookWindowedLayout(),
-      renderer: new NotebookRenderer()
+      renderer: StaticNotebook.defaultRenderer
     });
     this.addClass(NB_CLASS);
     this.cellsArray = cells;
@@ -1093,6 +1092,27 @@ export namespace StaticNotebook {
      */
     readonly raw: Record<string, any>;
   }
+
+  /**
+   * The renderer class for static notebooks.
+   */
+  class Renderer implements WindowedList.IRenderer {
+    createOuter() {
+      return document.createElement('div');
+    }
+
+    createViewport() {
+      const el = document.createElement('div');
+      el.setAttribute('role', 'feed');
+      el.setAttribute('aria-label', 'Cells');
+      return el;
+    }
+  }
+
+  /**
+   * Default windowed list renderer for static notebooks.
+   */
+  export const defaultRenderer = new Renderer();
 
   /**
    * Default configuration options for cell editors.
