@@ -1308,25 +1308,30 @@ export class Notebook extends StaticNotebook {
     this.addFooter();
   }
 
+  /**
+   * Access previous item in ipython kernel for current kernel
+   */
   accessLastHistory(): void {
     const activeCell = this.activeCell;
-    const activeCellText = activeCell?.model.sharedModel.getSource();
-    let output: string | null | undefined = activeCellText;
     if (activeCell) {
-      output = this._history?.back(activeCellText || '');
+      if (this._history) {
+        const lastHistory = this._history.back(activeCell);
+        this._history.updateEditor(activeCell, LastHistory);
+      }
     }
-    console.log(output);
-    // if (output && output instanceof Promise) {
-    //   console.log(output.then(value=>value))
-    // }
-    // activeCell.editor.
-    // content?.activeCell);
-    // this._history?.back('placeholder');
-    // this.content?.activeCell);
   }
 
+  /**
+   * Access next item in ipython kernel for current kernel
+   */
   accessNextHistory(): void {
-    // this._history.forward(this.content.activeCell);
+    const activeCell = this.activeCell;
+    if (activeCell) {
+      if (this._history) {
+        const nexthistory = this._history.forward(activeCell);
+        this._history.updateEditor(activeCell, nextHistory);
+      }
+    }
   }
 
   /**
@@ -2829,6 +2834,9 @@ export class Notebook extends StaticNotebook {
     this._selectedCells = this.widgets.filter(cell =>
       this.isSelectedOrActive(cell)
     );
+    if (this._history) {
+      this._history.reset();
+    }
   }
   private _selectedCells: Cell[] = [];
 }

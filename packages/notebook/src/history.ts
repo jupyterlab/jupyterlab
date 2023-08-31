@@ -9,6 +9,7 @@ import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { NotebookActions } from './actions';
 import { StaticNotebook } from './widget';
+import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 
 /**
  * The definition of a console history manager object.
@@ -40,8 +41,8 @@ export interface INotebookHistory extends IDisposable {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(placeholder: string): string;
-  // back(placeholder: string): Promise<string>;
+  // back(placeholder: string): string;
+  back(activeCell: Cell): Promise<string>;
 
   /**
    * Get the next item in the console history.
@@ -52,7 +53,8 @@ export interface INotebookHistory extends IDisposable {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  forward(placeholder: string): Promise<string>;
+  forward(activeCell: Cell): Promise<string>;
+  // forward(placeholder: string): string;
 
   /**
    * Add a new item to the bottom of history.
@@ -70,6 +72,8 @@ export interface INotebookHistory extends IDisposable {
    * Reset the history navigation state, i.e., start a new history session.
    */
   reset(): void;
+
+  updateEditor(activeCell: Cell, update: Promise<string>): void;
 }
 
 /**
@@ -83,9 +87,6 @@ export class NotebookHistory implements INotebookHistory {
     this.sessionContext = options.sessionContext;
     void this._handleKernel();
     this.sessionContext.kernelChanged.connect(this._handleKernel, this);
-    NotebookActions.executed.connect(value => {
-      console.log('value: ', value);
-    });
     NotebookActions.executed.connect(this._onExecuted, this);
   }
 
@@ -100,6 +101,7 @@ export class NotebookHistory implements INotebookHistory {
   get editor(): CodeEditor.IEditor | null {
     return this._editor;
   }
+
   set editor(value: CodeEditor.IEditor | null) {
     if (this._editor === value) {
       return;
@@ -107,14 +109,12 @@ export class NotebookHistory implements INotebookHistory {
 
     const prev = this._editor;
     if (prev) {
-      prev.edgeRequested.disconnect(this.onEdgeRequest, this);
       prev.model.sharedModel.changed.disconnect(this.onTextChange, this);
     }
 
     this._editor = value;
 
     if (value) {
-      value.edgeRequested.connect(this.onEdgeRequest, this);
       value.model.sharedModel.changed.connect(this.onTextChange, this);
     }
   }
@@ -126,6 +126,9 @@ export class NotebookHistory implements INotebookHistory {
     return this._placeholder;
   }
 
+  /**
+   * Kernel session number for filtering
+   */
   get kernelSession(): string {
     return this._kernelSession;
   }
@@ -147,92 +150,86 @@ export class NotebookHistory implements INotebookHistory {
   }
 
   /**
+   * Set placeholder and editor. Start session if one is not already started.
+   *
+   * @param activeCell - The currently selected Cell in the notebook.
+   */
+  protected checkSession(activeCell: Cell): void {
+    if (!this._hasSession) {
+      this._hasSession = true;
+      this.editor = activeCell.editor;
+      this._placeholder = this._editor?.model.sharedModel.getSource() || '';
+      // Filter the history with the placeholder string.
+      this.setFilter(this._placeholder);
+      this._cursor = this._filtered.length - 1;
+    }
+  }
+
+  /**
    * Get the previous item in the console history.
    *
-   * @param placeholder - The placeholder string that gets temporarily added
-   * to the history only for the duration of one history session. If multiple
-   * placeholders are sent within a session, only the first one is accepted.
+   * @param activeCell - The currently selected Cell in the notebook.
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(placeholder: string): string {
-    if (!this._hasSession) {
-      this._hasSession = true;
-      this._placeholder = placeholder;
-      // Filter the history with the placeholder string.
-      this.setFilter(placeholder);
-      this._cursor = this._filtered.length - 1;
-    }
-
+  back(activeCell: Cell): Promise<string> {
+    this.checkSession(activeCell);
     --this._cursor;
     this._cursor = Math.max(0, this._cursor);
     const content = this._filtered[this._cursor];
     console.log('this._cursor: ', this._cursor);
-    console.log(content);
-    return content;
-  }
-  // back(placeholder: string): Promise<string> {
-  //   if (!this._hasSession) {
-  //     this._hasSession = true;
-  //     this._placeholder = placeholder;
-  //     // Filter the history with the placeholder string.
-  //     this.setFilter(placeholder);
-  //     this._cursor = this._filtered.length - 1;
-  //   }
-
-  //   --this._cursor;
-  //   this._cursor = Math.max(0, this._cursor);
-  //   const content = this._filtered[this._cursor];
-  //   console.log('this._cursor: ', this._cursor)
-  //   return Promise.resolve(content);
-  // }
-
-  /**
-   * Get the next item in the console history.
-   *
-   * @param placeholder - The placeholder string that gets temporarily added
-   * to the history only for the duration of one history session. If multiple
-   * placeholders are sent within a session, only the first one is accepted.
-   *
-   * @returns A Promise for console command text or `undefined` if unavailable.
-   */
-  forward(placeholder: string): Promise<string> {
-    if (!this._hasSession) {
-      this._hasSession = true;
-      this._placeholder = placeholder;
-      // Filter the history with the placeholder string.
-      this.setFilter(placeholder);
-      this._cursor = this._filtered.length;
-    }
-
-    ++this._cursor;
-    this._cursor = Math.min(this._filtered.length - 1, this._cursor);
-    const content = this._filtered[this._cursor];
     return Promise.resolve(content);
   }
 
   /**
-   * Add a new item to the bottom of history.
+   * Get the next item in the console history.
    *
-   * @param item The item being added to the bottom of history.
+   * @param activeCell - The currently selected Cell in the notebook.
    *
-   * #### Notes
-   * If the item being added is undefined or empty, it is ignored. If the item
-   * being added is the same as the last item in history, it is ignored as well
-   * so that the console's history will consist of no contiguous repetitions.
+   * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  // push(item: string): void {
-  //   if (item && item !== this._history[this._history.length - 1]) {
-  //     this._history.push(item);
-  //   }
-  //   this.reset();
-  // }
+  forward(activeCell: Cell): Promise<string> {
+    this.checkSession(activeCell);
+    ++this._cursor;
+    this._cursor = Math.min(this._filtered.length - 1, this._cursor);
+    const content = this._filtered[this._cursor];
+    // return content;
+    return Promise.resolve(content);
+  }
+
+  /**
+   * Get the next item in the console history.
+   *
+   * @param activeCell - The currently selected Cell in the notebook.
+   * @param update - the promise returned from back or forward
+   */
+  updateEditor(activeCell: Cell, update: Promise<string>): void {
+    if (activeCell) {
+      void update.then(value => {
+        const model = activeCell.editor?.model;
+        const source = model?.sharedModel.getSource();
+        if (this.isDisposed || !value) {
+          return;
+        }
+        if (source === value) {
+          return;
+        }
+        this._setByHistory = true;
+        model?.sharedModel.setSource(value);
+        let columnPos = 0;
+        columnPos = value.indexOf('\n');
+        if (columnPos < 0) {
+          columnPos = value.length;
+        }
+        activeCell.editor?.setCursorPosition({ line: 0, column: columnPos });
+      });
+    }
+  }
 
   /**
    * Reset the history navigation state, i.e., start a new history session.
    */
   reset(): void {
-    this._cursor = this._history.length;
     this._hasSession = false;
     this._placeholder = '';
   }
@@ -263,12 +260,11 @@ export class NotebookHistory implements INotebookHistory {
           this._history.push((last = current));
         }
       }
+      // set the kernel session for filtering
       if (current[2] == cell?.model.sharedModel.getSource()) {
         this._kernelSession = kernelSession;
       }
     }
-    // Reset the history navigation cursor back to the bottom.
-    this._cursor = this._history.length;
   }
 
   /**
@@ -283,94 +279,37 @@ export class NotebookHistory implements INotebookHistory {
   }
 
   /**
-   * Handle an edge requested signal.
-   */
-  protected onEdgeRequest(
-    editor: CodeEditor.IEditor,
-    location: CodeEditor.EdgeLocation
-  ): void {
-    const model = editor.model;
-    const source = model.sharedModel.getSource();
-
-    if (location === 'top' || location === 'topLine') {
-      // void this.back(source).then(value => {
-      //   if (this.isDisposed || !value) {
-      //     return;
-      //   }
-      //   if (source === value) {
-      //     return;
-      //   }
-      //   this._setByHistory = true;
-      //   model.sharedModel.setSource(value);
-      //   let columnPos = 0;
-      //   columnPos = value.indexOf('\n');
-      //   if (columnPos < 0) {
-      //     columnPos = value.length;
-      //   }
-      //   editor.setCursorPosition({ line: 0, column: columnPos });
-      // });
-    } else {
-      void this.forward(source).then(value => {
-        if (this.isDisposed) {
-          return;
-        }
-        const text = value || this.placeholder;
-        if (source === text) {
-          return;
-        }
-        this._setByHistory = true;
-        model.sharedModel.setSource(text);
-        const pos = editor.getPositionAt(text.length);
-        if (pos) {
-          editor.setCursorPosition(pos);
-        }
-      });
-    }
-  }
-
-  /**
    * Handle the current kernel changing.
    */
   private async _handleKernel(): Promise<void> {
-    // ??????? should I make kernel a class attribute?
-    const kernel = this.sessionContext.session?.kernel;
-    if (!kernel) {
+    this._kernel = this.sessionContext.session?.kernel;
+    if (!this._kernel) {
       this._history.length = 0;
       return;
     }
     return this._retrieveHistory();
   }
 
+  /**
+   * handle a cell execution
+   */
   private async _onExecuted(
     _: unknown,
     args: { notebook: StaticNotebook; cell: Cell }
   ): Promise<void> {
-    // ??????? should I make kernel a class attribute?
     const cell = args['cell'];
-    console.log(cell);
-    const kernel = this.sessionContext.session?.kernel;
-    if (kernel) {
-      const history = kernel.requestHistory(Private.initialRequest);
-      const onHistory = history.then(v => {
-        this.onHistory(v, cell);
-      });
-      console.log(this._history[-1]);
-      console.log(cell.model.sharedModel.getSource());
-      console.log(history);
-      return onHistory;
-    }
-    return;
+    this._retrieveHistory(cell);
   }
 
-  private async _retrieveHistory(): Promise<void> {
-    const kernel = this.sessionContext.session?.kernel;
-    if (kernel) {
-      const history = kernel.requestHistory(Private.initialRequest).then(v => {
-        this.onHistory(v);
-      });
-      return history;
-    }
-    return;
+  /**
+   * retrieve the history from the kernel
+   *
+   * @param cell - The string to use when filtering the data.
+   */
+  private async _retrieveHistory(cell?: Cell): Promise<void> {
+    return this._kernel?.requestHistory(Private.initialRequest).then(v => {
+      this.onHistory(v, cell);
+    });
   }
 
   /**
@@ -385,29 +324,14 @@ export class NotebookHistory implements INotebookHistory {
     let last = '';
     let current = '';
     for (let i = 0; i < this._history.length; i++) {
-      console.log(this._history[i][2]);
-      console.log(this.kernelSession);
       if (this._history[i][0] !== this.kernelSession) {
         continue;
       }
       current = this._history[i][2] as string;
-      console.log('filterStr.length', filterStr.length);
-      console.log(
-        'current.slice(0, filterStr.length)',
-        current.slice(0, filterStr.length)
-      );
-      console.log(
-        'filterStr !== current.slice(0, filterStr.length)',
-        filterStr !== current.slice(0, filterStr.length)
-      );
-      if (
-        current !== last &&
-        filterStr !== current.slice(0, filterStr.length)
-      ) {
+      if (current !== last && filterStr !== current) {
         this._filtered.push((last = current));
       }
     }
-
     this._filtered.push(filterStr);
   }
 
@@ -420,6 +344,7 @@ export class NotebookHistory implements INotebookHistory {
   private _isDisposed = false;
   private _editor: CodeEditor.IEditor | null = null;
   private _filtered: string[] = [];
+  private _kernel: IKernelConnection | null | undefined = null;
 }
 
 /**
