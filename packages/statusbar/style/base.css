@@ -43,7 +43,7 @@
   padding: 0 6px;
 }
 
-/* @media screen and (max-width: 320px) {
+@media screen and (max-width: 320px) {
   .jp-StatusBar-TextItem {
     display: none;
   }
@@ -56,7 +56,7 @@
     display: none;
     margin: 0;
   }
-} */
+}
 
 .jp-mod-highlighted:hover {
   background-color: var(--jp-layout-color3);
