@@ -65,6 +65,15 @@ interface ISearchInputProps {
   autoUpdate: boolean;
 }
 
+/**
+ * Provides information about keybindings for display in tooltips.
+ */
+export interface ISearchKeyBindings {
+  readonly next?: CommandRegistry.IKeyBinding;
+  readonly previous?: CommandRegistry.IKeyBinding;
+  readonly toggleSearchInSelection?: CommandRegistry.IKeyBinding;
+}
+
 function SearchInput(props: ISearchInputProps): JSX.Element {
   const [rows, setRows] = useState<number>(1);
 
@@ -266,23 +275,15 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
 }
 
 interface IUpDownProps {
-  commands: CommandRegistry;
+  keyBindings?: ISearchKeyBindings;
   onHighlightPrevious: () => void;
   onHighlightNext: () => void;
   trans: TranslationBundle;
 }
 
 function UpDownButtons(props: IUpDownProps) {
-  // Getting the key bindings for the next and previous commands
-  const nextBinding = props.commands.keyBindings.find(
-    (binding: { command: string }) =>
-      binding.command === 'documentsearch:highlightNext'
-  );
-
-  const prevBinding = props.commands.keyBindings.find(
-    binding =>
-      binding.command === 'documentsearch:highlightPrevious'
-  );
+  const nextBinding = props.keyBindings?.next;
+  const prevBinding = props.keyBindings?.previous;
 
   const nextKeys = nextBinding
     ? CommandRegistry.formatKeystroke(nextBinding.keys)
@@ -527,6 +528,10 @@ interface ISearchOverlayProps {
    * Callback on search expression change.
    */
   onSearchChanged: (q: string) => void;
+  /**
+   * Provides information about keybindings for display.
+   */
+  keyBindings?: ISearchKeyBindings;
 }
 
 class SearchOverlay extends React.Component<ISearchOverlayProps> {
@@ -620,6 +625,14 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
         trans={trans}
       />
     ) : null;
+
+    const selectionBinding = this.props.keyBindings?.toggleSearchInSelection;
+    const selectionKeys = selectionBinding
+      ? CommandRegistry.formatKeystroke(selectionBinding.keys)
+      : '';
+
+    const selectionKeyHint = selectionKeys ? ` (${selectionKeys})` : '';
+
     const filter = hasFilters ? (
       <div className={SEARCH_OPTIONS_CLASS}>
         {Object.keys(filters).map(name => {
@@ -628,7 +641,10 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
             <FilterSelection
               key={name}
               title={filter.title}
-              description={filter.description}
+              description={
+                filter.description +
+                (name == 'selection' ? selectionKeyHint : '')
+              }
               isEnabled={!showReplace || filter.supportReplace}
               onToggle={async () => {
                 await this.props.onFilterChanged(
@@ -698,7 +714,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
               this.props.onHighlightNext();
             }}
             trans={trans}
-            commands={this.props.commands}
+            keyBindings={this.props.keyBindings}
           />
           <button
             className={BUTTON_WRAPPER_CLASS}
@@ -756,19 +772,19 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
    * Search document widget constructor.
    *
    * @param model Search document model
-   * @param commands Application command registry
    * @param translator Application translator object
+   * @param keyBindings Search keybindings
    *
    */
   constructor(
     model: SearchDocumentModel,
-    commands: CommandRegistry,
-    protected translator?: ITranslator
+    protected translator?: ITranslator,
+    keyBindings?: ISearchKeyBindings
   ) {
     super(model);
     this.addClass(OVERLAY_CLASS);
     this._searchInput = React.createRef<HTMLTextAreaElement>();
-    this._commands = commands;
+    this._keyBindings = keyBindings;
   }
 
   /**
@@ -915,6 +931,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         onReplaceAll={() => {
           void this.model.replaceAllMatches();
         }}
+        keyBindings={this._keyBindings}
       ></SearchOverlay>
     );
   }
@@ -923,5 +940,5 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
   private _showReplace = false;
   private _showFilters = false;
   private _closed = new Signal<this, void>(this);
-  protected _commands: CommandRegistry;
+  private _keyBindings?: ISearchKeyBindings;
 }
