@@ -50,7 +50,13 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
         item,
         align: 'right',
         rank: 2,
-        isActive: () => !!item.model.editor
+        isActive: () => {
+          let zoom = ((window.outerWidth - 10) / window.innerWidth) * 100;
+          if (!!item.model.editor && zoom < 400) {
+            return true;
+          }
+          return false;
+        }
       });
     }
 

@@ -423,10 +423,18 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
       item,
       align: 'right',
       rank: 4,
-      isActive: () =>
-        !!shell.currentWidget &&
-        !!tracker.currentWidget &&
-        shell.currentWidget === tracker.currentWidget
+      isActive: () => {
+        let zoom = ((window.outerWidth - 10) / window.innerWidth) * 100;
+        if (
+          !!shell.currentWidget &&
+          !!tracker.currentWidget &&
+          shell.currentWidget === tracker.currentWidget &&
+          zoom < 400
+        ) {
+          return true;
+        }
+        return false;
+      }
     });
   }
 };
