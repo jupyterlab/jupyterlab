@@ -109,7 +109,7 @@ def build_api_docs(out_dir: Path):
     """build js api docs"""
     docs = HERE.parent
     root = docs.parent
-    docs_api = docs / "api"
+    docs_api = docs / "source" / "api"
     api_index = docs_api / "index.html"
     # is this an okay way to specify jlpm
     # without installing jupyterlab first?
@@ -276,7 +276,11 @@ html_theme_options = {
     "navbar_start": ["navbar-logo", "version-switcher"],
     "footer_start": ["copyright.html"],
     "switcher": {
-        "json_url": "https://jupyterlab.readthedocs.io/en/latest/_static/switcher.json",
+        # Trick to get the documentation version switcher to always points to the latest version without being corrected by the integrity check;
+        # otherwise older versions won't list newer versions
+        "json_url": "/".join(
+            ("https://jupyterlab.readthedocs.io/en", "latest", "_static/switcher.json")
+        ),
         "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
     },
 }

@@ -756,7 +756,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
    * Search document widget constructor.
    *
    * @param model Search document model
-   * @param commands
+   * @param commands Application command registry
    * @param translator Application translator object
    *
    */

@@ -46,6 +46,10 @@ export namespace TabBarSvg {
      * @returns A virtual element representing the tab close icon.
      */
     renderCloseIcon(data: TabBar.IRenderData<any>): VirtualElement {
+      const trans = (TabBarSvg.translator ?? nullTranslator).load('jupyterlab');
+      const title = data.title.label
+        ? trans.__('Close %1', data.title.label)
+        : trans.__('Close tab');
       const className = classes(
         'jp-icon-hover lm-TabBar-tabCloseIcon',
         LabIconStyle.styleClass({
@@ -57,7 +61,7 @@ export namespace TabBarSvg {
 
       return hpass(
         'div',
-        { className },
+        { className, title },
         closeIcon
       ) as unknown as VirtualElement;
     }

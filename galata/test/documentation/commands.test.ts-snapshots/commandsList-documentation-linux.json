@@ -619,6 +619,14 @@
     "shortcuts": []
   },
   {
+    "id": "documentsearch:toggleSearchInSelection",
+    "label": "Search in Selection",
+    "caption": "",
+    "shortcuts": [
+      "Alt L"
+    ]
+  },
+  {
     "id": "editmenu:clear-all",
     "label": "Clear All",
     "caption": "",
@@ -865,6 +873,12 @@
   {
     "id": "filebrowser:toggle-navigate-to-current-directory",
     "label": "Show Active File in File Browser",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-sort-notebooks-first",
+    "label": "Sort Notebooks Above Files",
     "caption": "",
     "shortcuts": []
   },
@@ -1333,6 +1347,12 @@
   {
     "id": "mathjax:scale",
     "label": "Mathjax Scale Reset",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "mermaid:copy-source",
+    "label": "Mermaid Copy Diagram Source",
     "caption": "",
     "shortcuts": []
   },
@@ -2217,7 +2237,9 @@
     "id": "viewmenu:line-numbering",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Shift L"
+    ]
   },
   {
     "id": "viewmenu:match-brackets",

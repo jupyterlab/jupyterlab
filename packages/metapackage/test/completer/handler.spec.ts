@@ -8,8 +8,12 @@ import {
   Completer,
   CompleterModel,
   CompletionHandler,
+  CompletionTriggerKind,
+  ICompletionContext,
+  ICompletionProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
+import { Widget } from '@lumino/widgets';
 import { ISharedText, SourceChange, YFile } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
@@ -51,6 +55,36 @@ class TestCompletionHandler extends CompletionHandler {
   onCompletionSelected(widget: Completer, value: string): void {
     super.onCompletionSelected(widget, value);
     this.methods.push('onCompletionSelected');
+  }
+}
+
+class FooCompletionProvider implements ICompletionProvider {
+  triggers: CompletionTriggerKind[] = [];
+
+  constructor(private _continuousHint: boolean) {}
+
+  identifier: string = 'FooCompletionProvider';
+  renderer = null;
+
+  async isApplicable(context: ICompletionContext): Promise<boolean> {
+    return true;
+  }
+
+  async fetch(
+    request: CompletionHandler.IRequest,
+    context: ICompletionContext,
+    trigger: CompletionTriggerKind
+  ): Promise<CompletionHandler.ICompletionItemsReply> {
+    this.triggers.push(trigger);
+    return Promise.resolve({ start: 0, end: 0, items: [] });
+  }
+
+  shouldShowContinuousHint(
+    completerIsVisible: boolean,
+    changed: SourceChange,
+    context?: ICompletionContext
+  ) {
+    return this._continuousHint;
   }
 }
 
@@ -314,6 +348,82 @@ describe('@jupyterlab/completer', () => {
           line,
           column: column + 6
         });
+      });
+    });
+
+    describe('#autoCompletion', () => {
+      let anchor: CodeEditorWrapper;
+      let provider: FooCompletionProvider;
+      let handler: CompletionHandler;
+      let context: symbol;
+
+      beforeAll(async () => {
+        anchor = createEditorWidget();
+        Widget.attach(anchor, document.body);
+        context = Symbol();
+
+        provider = new FooCompletionProvider(true);
+        handler = new CompletionHandler({
+          reconciliator: new ProviderReconciliator({
+            context: context as any,
+            providers: [provider],
+            timeout: 0
+          }),
+          completer: new Completer({
+            editor: null,
+            model: new CompleterModel()
+          })
+        });
+
+        handler.editor = anchor.editor;
+        handler.autoCompletion = true;
+      });
+
+      afterAll(() => {
+        anchor.dispose();
+        handler.completer.dispose();
+        handler.dispose();
+      });
+
+      it('should use Invoked for invoke()', () => {
+        expect(provider.triggers.length).toEqual(0);
+
+        handler.editor!.model.sharedModel.setSource('foo.');
+        anchor.node.focus();
+        anchor.editor.setCursorPosition({ line: 0, column: 4 });
+        handler.invoke();
+
+        expect(provider.triggers).toEqual(
+          expect.arrayContaining([CompletionTriggerKind.Invoked])
+        );
+      });
+
+      it('should use TriggerCharacter for typed text', () => {
+        // this test depends on the previous one ('should use Invoked for invoke()').
+        expect(provider.triggers.length).toEqual(1);
+
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+
+        expect(provider.triggers.length).toEqual(2);
+        expect(provider.triggers).toEqual(
+          expect.arrayContaining([CompletionTriggerKind.TriggerCharacter])
+        );
+      });
+
+      it('should pass context to `shouldShowContinuousHint()`', () => {
+        handler.editor!.model.sharedModel.setSource('foo.');
+        anchor.node.focus();
+        anchor.editor.setCursorPosition({ line: 0, column: 4 });
+        provider.shouldShowContinuousHint = jest.fn();
+        handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
+        expect(provider.shouldShowContinuousHint).toHaveBeenCalledTimes(1);
+        expect(provider.shouldShowContinuousHint).toHaveBeenLastCalledWith(
+          false,
+          {
+            sourceChange: [{ retain: 4 }, { insert: 'a' }]
+          } as SourceChange,
+          context
+        );
       });
     });
 

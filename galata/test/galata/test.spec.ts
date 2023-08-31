@@ -5,5 +5,5 @@
 import { expect, test } from '@jupyterlab/galata';
 
 test('should display the launcher', async ({ page }) => {
-  expect(await page.waitForSelector(page.launcherSelector)).toBeTruthy();
+  await expect(page.launcher).toBeVisible();
 });

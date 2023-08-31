@@ -137,6 +137,9 @@ namespace CommandIDs {
 
   export const toggleFileSize = 'filebrowser:toggle-file-size';
 
+  export const toggleSortNotebooksFirst =
+    'filebrowser:toggle-sort-notebooks-first';
+
   export const search = 'filebrowser:search';
 
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
@@ -218,7 +221,8 @@ const browser: JupyterFrontEndPlugin<void> = {
             showLastModifiedColumn: true,
             showFileSizeColumn: false,
             showHiddenFiles: false,
-            showFileCheckboxes: false
+            showFileCheckboxes: false,
+            sortNotebooksFirst: false
           };
           const fileBrowserModelConfig = {
             filterDirectories: true
@@ -1209,7 +1213,15 @@ function addCommands(
         return;
       }
 
-      Clipboard.copyToSystem(item.value.path);
+      if (PageConfig.getOption('copyAbsolutePath') === 'true') {
+        const absolutePath = PathExt.join(
+          PageConfig.getOption('serverRoot') ?? '',
+          item.value.path
+        );
+        Clipboard.copyToSystem(absolutePath);
+      } else {
+        Clipboard.copyToSystem(item.value.path);
+      }
     },
     isVisible: () =>
       // So long as this command only handles one file at time, don't show it
@@ -1238,6 +1250,22 @@ function addCommands(
     execute: () => {
       const value = !browser.showLastModifiedColumn;
       const key = 'showLastModifiedColumn';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleSortNotebooksFirst, {
+    label: trans.__('Sort Notebooks Above Files'),
+    isToggled: () => browser.sortNotebooksFirst,
+    execute: () => {
+      const value = !browser.sortNotebooksFirst;
+      const key = 'sortNotebooksFirst';
       if (settingRegistry) {
         return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)

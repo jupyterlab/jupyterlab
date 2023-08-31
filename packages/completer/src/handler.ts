@@ -10,7 +10,7 @@ import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
 
-import { IProviderReconciliator } from './tokens';
+import { CompletionTriggerKind, IProviderReconciliator } from './tokens';
 import { Completer } from './widget';
 
 /**
@@ -189,7 +189,10 @@ export class CompletionHandler implements IDisposable {
 
     const editor = this._editor;
     if (editor) {
-      this._makeRequest(editor.getCursorPosition()).catch(reason => {
+      this._makeRequest(
+        editor.getCursorPosition(),
+        CompletionTriggerKind.Invoked
+      ).catch(reason => {
         console.warn('Invoke request bailed', reason);
       });
     }
@@ -293,14 +296,16 @@ export class CompletionHandler implements IDisposable {
     }
     if (
       this._autoCompletion &&
-      (this._reconciliator as IProviderReconciliator)
-        .shouldShowContinuousHint &&
-      (this._reconciliator as IProviderReconciliator).shouldShowContinuousHint(
+      this._reconciliator.shouldShowContinuousHint &&
+      this._reconciliator.shouldShowContinuousHint(
         this.completer.isVisible,
         changed
       )
     ) {
-      void this._makeRequest(editor.getCursorPosition());
+      void this._makeRequest(
+        editor.getCursorPosition(),
+        CompletionTriggerKind.TriggerCharacter
+      );
     }
     const { start, end } = editor.getSelection();
     if (start.column !== end.column || start.line !== end.line) {
@@ -333,7 +338,10 @@ export class CompletionHandler implements IDisposable {
   /**
    * Make a completion request.
    */
-  private _makeRequest(position: CodeEditor.IPosition): Promise<void> {
+  private _makeRequest(
+    position: CodeEditor.IPosition,
+    trigger: CompletionTriggerKind
+  ): Promise<void> {
     const editor = this.editor;
 
     if (!editor) {
@@ -345,7 +353,7 @@ export class CompletionHandler implements IDisposable {
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };
     return this._reconciliator
-      .fetch(request)
+      .fetch(request, trigger)
       .then(reply => {
         if (!reply) {
           return;
@@ -489,7 +497,8 @@ export namespace CompletionHandler {
    * A reply to a completion items fetch request.
    */
   export interface ICompletionItemsReply<
-    T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends
+      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
   > {
     /**
      * The starting index for the substring being replaced by completion.

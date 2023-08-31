@@ -12,6 +12,15 @@ import { CompletionHandler } from './handler';
 import { Completer } from './widget';
 
 /**
+ * The type of completion request.
+ */
+export enum CompletionTriggerKind {
+  Invoked = 1,
+  TriggerCharacter = 2,
+  TriggerForIncompleteCompletions = 3
+}
+
+/**
  * The context which will be passed to the `fetch` function
  * of a provider.
  */
@@ -42,12 +51,26 @@ export interface ICompletionContext {
  * The interface to implement a completer provider.
  */
 export interface ICompletionProvider<
-  T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+  T extends
+    CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
 > {
   /**
    * Unique identifier of the provider
    */
   readonly identifier: string;
+
+  /**
+   * Rank used to order completion results from different completion providers.
+   *
+   * #### Note: The default providers (CompletionProvider:context and
+   * CompletionProvider:kernel) use a rank of ≈500. If you want to give
+   * priority to your provider, use a rank of 1000 or above.
+   *
+   * The rank is optional for backwards compatibility. If the rank is `undefined`,
+   * it will assign a rank of [1, 499] making the provider available but with a
+   * lower priority.
+   */
+  readonly rank?: number;
 
   /**
    * Renderer for provider's completions (optional).
@@ -66,10 +89,12 @@ export interface ICompletionProvider<
    *
    * @param request - the completion request text and details
    * @param context - additional information about context of completion request
+   * @param trigger - Who triggered the request (optional).
    */
   fetch(
     request: CompletionHandler.IRequest,
-    context: ICompletionContext
+    context: ICompletionContext,
+    trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply<T>>;
 
   /**
@@ -102,12 +127,14 @@ export interface ICompletionProvider<
    * completion items should be shown.
    *
    * @param  completerIsVisible - Current visibility status of the
-   *  completer widget0
+   *  completer widget
    * @param  changed - changed text.
+   * @param  context - The context of the completer (optional).
    */
   shouldShowContinuousHint?(
     completerIsVisible: boolean,
-    changed: SourceChange
+    changed: SourceChange,
+    context?: ICompletionContext
   ): boolean;
 }
 
@@ -161,9 +188,11 @@ export interface IProviderReconciliator {
    * the result of this provider will be ignore.
    *
    * @param {CompletionHandler.IRequest} request - The completion request.
+   * @param trigger - Who triggered the request (optional).
    */
   fetch(
-    request: CompletionHandler.IRequest
+    request: CompletionHandler.IRequest,
+    trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply | null>;
 
   /**

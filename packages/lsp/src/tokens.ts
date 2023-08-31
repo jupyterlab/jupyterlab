@@ -94,6 +94,13 @@ export interface ILanguageServerManager extends IDisposable {
   /**
    * @alpha
    *
+   * Get server connection settings.
+   */
+  readonly settings: ServerConnection.ISettings;
+
+  /**
+   * @alpha
+   *
    * A promise that is fulfilled when the connection manager is ready.
    */
   readonly ready: Promise<void>;
@@ -124,7 +131,7 @@ export interface ILanguageServerManager extends IDisposable {
    *
    * Enable the language server services
    */
-  enable(): void;
+  enable(): Promise<void>;
 
   /**
    * @alpha
@@ -403,6 +410,11 @@ export interface ILSPDocumentConnectionManager {
   readonly ready: Promise<void>;
 
   /**
+   * Initial configuration for the language servers.
+   */
+  initialConfigurations: TLanguageServerConfigurations;
+
+  /**
    * Handles the settings that do not require an existing connection
    * with a language server (or can influence to which server the
    * connection will be created, e.g. `rank`).
@@ -410,6 +422,11 @@ export interface ILSPDocumentConnectionManager {
    * This function should be called **before** initialization of servers.
    */
   updateConfiguration(allServerSettings: TLanguageServerConfigurations): void;
+
+  /**
+   * Enable or disable the logging of language server communication.
+   */
+  updateLogging(logAllCommunication: boolean, setTrace: lsp.TraceValues): void;
 
   /**
    * Handles the settings that the language servers accept using
@@ -766,8 +783,8 @@ export interface IServerRequestHandler<
 export type ClientRequests<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
 > = {
-  readonly // has async request(params) returning a promise with result.
-  [key in T]: IClientRequestHandler<key>;
+  // has async request(params) returning a promise with result.
+  readonly [key in T]: IClientRequestHandler<key>;
 };
 
 /**
@@ -777,8 +794,8 @@ export type ClientRequests<
 export type ServerRequests<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > = {
-  readonly // has async request(params) returning a promise with result.
-  [key in T]: IServerRequestHandler<key>;
+  // has async request(params) returning a promise with result.
+  readonly [key in T]: IServerRequestHandler<key>;
 };
 
 /**
@@ -850,6 +867,20 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    * message..
    */
   errorSignal: ISignal<ILSPConnection, any>;
+
+  /**
+   * @alpha
+   *
+   * Check if a capability is available in the server capabilities.
+   */
+  provides(capability: keyof lsp.ServerCapabilities): boolean;
+
+  /**
+   * @alpha
+   *
+   * Lists server capabilities.
+   */
+  serverCapabilities: lsp.ServerCapabilities;
 
   /**
    * @alpha

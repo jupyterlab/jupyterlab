@@ -21,7 +21,14 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 
+/**
+ * Class added to widgets that can be searched (have a search provider).
+ */
 const SEARCHABLE_CLASS = 'jp-mod-searchable';
+/**
+ * Class added to widgets with open search view (not necessarily focused).
+ */
+const SEARCH_ACTIVE_CLASS = 'jp-mod-search-active';
 
 namespace CommandIDs {
   /**
@@ -44,7 +51,21 @@ namespace CommandIDs {
    * End search in a document
    */
   export const end = 'documentsearch:end';
+  /**
+   * Toggle search in selection
+   */
+  export const toggleSearchInSelection =
+    'documentsearch:toggleSearchInSelection';
 }
+
+/**
+ * When automatic selection search filter logic should be active.
+ *
+ * - `multiple-selected`: when multiple lines/cells are selected
+ * - `any-selected`: when any number of characters/cells are selected
+ * - `never`: never
+ */
+type AutoSearchInSelection = 'never' | 'multiple-selected' | 'any-selected';
 
 const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/documentsearch-extension:labShellWidgetListener',
@@ -108,6 +129,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     const trans = translator.load('jupyterlab');
 
     let searchDebounceTime = 500;
+    let autoSearchInSelection: AutoSearchInSelection = 'never';
 
     // Create registry
     const registry: SearchProviderRegistry = new SearchProviderRegistry(
@@ -121,6 +143,8 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
         searchDebounceTime = settings.get('searchDebounceTime')
           .composite as number;
+        autoSearchInSelection = settings.get('autoSearchInSelection')
+          .composite as AutoSearchInSelection;
       };
 
       Promise.all([loadSettings, app.restored])
@@ -168,11 +192,14 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
 
         searchViews.set(widgetId, newView);
         // find next, previous and end are now enabled
-        [CommandIDs.findNext, CommandIDs.findPrevious, CommandIDs.end].forEach(
-          id => {
-            app.commands.notifyCommandChanged(id);
-          }
-        );
+        [
+          CommandIDs.findNext,
+          CommandIDs.findPrevious,
+          CommandIDs.end,
+          CommandIDs.toggleSearchInSelection
+        ].forEach(id => {
+          app.commands.notifyCommandChanged(id);
+        });
 
         /**
          * Activate the target widget when the search panel is closing
@@ -180,6 +207,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         newView.closed.connect(() => {
           if (!widget.isDisposed) {
             widget.activate();
+            widget.removeClass(SEARCH_ACTIVE_CLASS);
           }
         });
 
@@ -189,13 +217,15 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         newView.disposed.connect(() => {
           if (!widget.isDisposed) {
             widget.activate();
+            widget.removeClass(SEARCH_ACTIVE_CLASS);
           }
           searchViews.delete(widgetId);
           // find next, previous and end are now disabled
           [
             CommandIDs.findNext,
             CommandIDs.findPrevious,
-            CommandIDs.end
+            CommandIDs.end,
+            CommandIDs.toggleSearchInSelection
           ].forEach(id => {
             app.commands.notifyCommandChanged(id);
           });
@@ -215,6 +245,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
 
       if (!searchView.isAttached) {
         Widget.attach(searchView, widget.node);
+        widget.addClass(SEARCH_ACTIVE_CLASS);
         if (widget instanceof MainAreaWidget) {
           // Offset the position of the search widget to not cover the toolbar nor the content header.
           // TODO this does not update once the search widget is displayed.
@@ -233,7 +264,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     app.commands.addCommand(CommandIDs.search, {
       label: trans.__('Find…'),
       isEnabled: isEnabled,
-      execute: args => {
+      execute: async args => {
         const searchWidget = getSearchWidget(app.shell.currentWidget);
         if (searchWidget) {
           const searchText = args['searchText'] as string;
@@ -243,6 +274,24 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
             searchWidget.setSearchText(
               searchWidget.model.suggestedInitialQuery
             );
+          }
+          const selectionState = searchWidget.model.selectionState;
+
+          let enableSelectionMode = false;
+          switch (autoSearchInSelection) {
+            case 'multiple-selected':
+              enableSelectionMode = selectionState === 'multiple';
+              break;
+            case 'any-selected':
+              enableSelectionMode =
+                selectionState === 'multiple' || selectionState === 'single';
+              break;
+            case 'never':
+              // no-op
+              break;
+          }
+          if (enableSelectionMode) {
+            await searchWidget.model.setFilter('selection', true);
           }
           searchWidget.focusSearchInput();
         }
@@ -318,13 +367,36 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       }
     });
 
+    app.commands.addCommand(CommandIDs.toggleSearchInSelection, {
+      label: trans.__('Search in Selection'),
+      isEnabled: () =>
+        !!app.shell.currentWidget &&
+        searchViews.has(app.shell.currentWidget.id) &&
+        'selection' in
+          searchViews.get(app.shell.currentWidget.id)!.model.filtersDefinition,
+      execute: async () => {
+        const currentWidget = app.shell.currentWidget;
+        if (!currentWidget) {
+          return;
+        }
+        const model = searchViews.get(currentWidget.id)?.model;
+        if (!model) {
+          return;
+        }
+
+        const currentValue = model.filters['selection'];
+        return model.setFilter('selection', !currentValue);
+      }
+    });
+
     // Add the command to the palette.
     if (palette) {
       [
         CommandIDs.search,
         CommandIDs.findNext,
         CommandIDs.findPrevious,
-        CommandIDs.end
+        CommandIDs.end,
+        CommandIDs.toggleSearchInSelection
       ].forEach(command => {
         palette.addItem({
           command,

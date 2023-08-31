@@ -31,6 +31,7 @@
 .jp-Completer-docpanel {
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   width: 400px;
+  flex-shrink: 0;
   overflow-y: scroll;
   overflow-x: auto;
   padding: 8px;
@@ -202,7 +203,7 @@
     transform: translateX(0);
   }
 
-  to {
+  100% {
     transform: translateX(400%);
   }
 }
