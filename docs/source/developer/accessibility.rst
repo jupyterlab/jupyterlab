@@ -158,10 +158,10 @@ you fork the jupyterlab/lumino repo, create a new branch called
 ``fix-tab-trap``, and open a pull request.
 
 You decide that you want to write a test. This is one of those cases where you
-can fairly easily write a unit test. However, the unit test would not really
-prevent a reappearance of the issue that you decided you want to fix once and
-for all, namely: you don't want any tab traps anywhere on the JupyterLab start
-page.
+can fairly easily write a unit test. However, a unit test would only check the
+top menu bar, so it would not prevent a reappearance of the issue that you
+decided you want to fix once and for all, namely: you don't want any tab traps
+anywhere on the JupyterLab start page.
 
 So you decide that you want to `add a regression test to the
 Quansight-Labs/jupyter-a11y-testing repo
