@@ -25,6 +25,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   constructor() {
     this._providers = new Map();
     this._panelHandlers = new Map();
+    this._mostRecentContext = new Map();
     this._activeProvidersChanged = new Signal<ICompletionProviderManager, void>(
       this
     );
@@ -77,6 +78,9 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       );
     } else {
       this._providers.set(identifier, provider);
+      this._panelHandlers.forEach((handler, id) => {
+        this.updateCompleter(this._mostRecentContext.get(id)!);
+      });
     }
   }
 
@@ -119,17 +123,41 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     const { widget, editor } = newCompleterContext;
     const id = widget.id;
     const handler = this._panelHandlers.get(id);
+
+    const firstProvider = [...this._activeProviders][0];
+    const provider = this._providers.get(firstProvider);
+
+    let renderer =
+      provider?.renderer ??
+      Completer.getDefaultRenderer(newCompleterContext.sanitizer);
+    const modelFactory = provider?.modelFactory;
+    let model: Completer.IModel;
+    if (modelFactory) {
+      model = await modelFactory.call(provider, newCompleterContext);
+    } else {
+      model = new CompleterModel();
+    }
+
+    this._mostRecentContext.set(widget.id, newCompleterContext);
     if (!handler) {
       // Create a new handler.
-      const handler = await this.generateHandler(newCompleterContext);
+      const handler = await this.generateHandler(
+        newCompleterContext,
+        model,
+        renderer
+      );
       this._panelHandlers.set(widget.id, handler);
       widget.disposed.connect(old => {
         this.disposeHandler(old.id, handler);
       });
     } else {
       // Update existing handler.
+      handler.completer.model?.dispose();
+      handler.completer.model = model;
+      handler.completer.renderer = renderer;
       handler.completer.showDocsPanel = this._showDoc;
       handler.autoCompletion = this._autoCompletion;
+
       if (editor) {
         handler.editor = editor;
         handler.reconciliator = await this.generateReconciliator(
@@ -205,22 +233,10 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    * Helper to generate a completer handler from provided context.
    */
   private async generateHandler(
-    completerContext: ICompletionContext
+    completerContext: ICompletionContext,
+    model: Completer.IModel,
+    renderer: Completer.IRenderer
   ): Promise<CompletionHandler> {
-    const firstProvider = [...this._activeProviders][0];
-    const provider = this._providers.get(firstProvider);
-
-    let renderer =
-      provider?.renderer ??
-      Completer.getDefaultRenderer(completerContext.sanitizer);
-    const modelFactory = provider?.modelFactory;
-    let model: Completer.IModel;
-    if (modelFactory) {
-      model = await modelFactory.call(provider, completerContext);
-    } else {
-      model = new CompleterModel();
-    }
-
     const { sanitizer } = completerContext;
     const completer = new Completer({ model, renderer, sanitizer });
     completer.showDocsPanel = this._showDoc;
@@ -248,7 +264,13 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private _panelHandlers: Map<string, CompletionHandler>;
 
   /**
-   * The set of activated provider
+   * The completer context map, the keys are id of widget and
+   * values are the most recent context objects.
+   */
+  private _mostRecentContext: Map<string, ICompletionContext>;
+
+  /**
+   * The set of activated providers
    */
   private _activeProviders = new Set([KERNEL_PROVIDER_ID, CONTEXT_PROVIDER_ID]);
 
