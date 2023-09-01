@@ -3,6 +3,8 @@
 
 import { act } from 'react-dom/test-utils';
 
+import { Button } from '@jupyter/web-components';
+
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import {
@@ -199,10 +201,10 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('Variables');
       });
       it('should have two buttons', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(2);
-        expect(buttons[0].title).toBe('Tree View');
-        expect(buttons[1].title).toBe('Table View');
+        expect((buttons[0] as Button).title).toBe('Tree View');
+        expect((buttons[1] as Button).title).toBe('Table View');
       });
     });
     describe('Callstack toolbar', () => {
@@ -224,7 +226,7 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('Callstack');
       });
       it('should have six buttons', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(6);
       });
     });
@@ -247,7 +249,7 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('Breakpoints');
       });
       it('should have two buttons', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(2);
       });
     });
@@ -271,7 +273,7 @@ describe('Debugger', () => {
       });
 
       it('should have one button', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(1);
       });
     });
