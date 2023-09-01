@@ -64,7 +64,7 @@
   user-select: none;
 }
 
-jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
+.jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
   flex-grow: 1;
   flex-shrink: 1;
 }
