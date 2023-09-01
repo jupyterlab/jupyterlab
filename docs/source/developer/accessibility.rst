@@ -52,8 +52,8 @@ standards apply:
   <https://www.w3.org/WAI/standards-guidelines/atag/>`__
 
 These are good places to familiarize yourself with accessibility best practices
-for developing web sites (WCAG) and web applications (ARIA). Note that although
-WCAG was created primarily for static web sites, the guidelines are nonetheless
+for developing websites (WCAG) and web applications (ARIA). Note that although
+WCAG was created primarily for static websites, the guidelines are nonetheless
 applicable to web apps like JupyterLab.
 
 One resource that is often particularly helpful for developers looking for
@@ -63,7 +63,7 @@ examples of how to implement UI elements—such as menus, dialogs, breadcrumbs,
 and more—in a more accessible way. However, be careful! Just because you can
 implement a button using divs and aria attributes does not mean that you should!
 (Most likely you should just use the button tag.) As a best practice, you should
-only use ARIA when you cannot  use existing HTML elements (button, input, nav,
+only use ARIA when you cannot use existing HTML elements (button, input, nav,
 aside, etc.) to achieve the UX that you desire.
 
 Finally, there is much more accessibility knowledge on the Internet than there
@@ -72,7 +72,7 @@ consider exploring accessibility resources in other spaces for similar or
 equivalent efforts. Accessibility communities tend to be generous with the
 resources they provide to improve web accessibility. Many times, searching for
 the name of the task or issue appended with `accessibility` in a search engine
-will give you several results and chance to learn from the broader community
+will give you several results and a chance to learn from the broader community
 right away.
 
 The rest of this section contains best practices specific to JupyterLab and its
@@ -173,7 +173,7 @@ create a branch called ``test-tab-trap``, and open a pull request. The important
 thing in this step is that you save your test file with a ``.test.ts`` extension
 next to the other regression test files.
 
-Now you want to run your test. Specifically you want to run the test against a
+Now you want to run your test. Specifically, you want to run the test against a
 build of JupyterLab that incorporates your Lumino fix. Here's how you would do
 that.
 
