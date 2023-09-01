@@ -22,13 +22,13 @@ A common question when accessibility-minded developers come to JupyterLab is:
 where do I get started?
 
 If you don't have a lot of time to immerse yourself in the big picture of
-JupyterLab accessibility work, then the GitHub issues labelled `good first issue
+JupyterLab accessibility work, then the GitHub issues labeled `good first issue
 and accessibility
 <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22+label%3Atag%3AAccessibility>`__
 are a good place to start.
 
 If you want to more fully immerse yourself in the work of making JupyterLab (or
-other Jupyter projects) more accessibile, then a good place to start would be to
+other Jupyter projects) more accessible, then a good place to start would be to
 join the `Jupyter accessibility meeting
 <https://jupyter-accessibility.readthedocs.io/en/latest/community/index.html#team-meetings-and-notes>`__
 that happens every other week. If you cannot attend the call, you can peruse the
@@ -154,7 +154,7 @@ to get into the menu bar but cannot easily get past it using only the keyboard.
 
 You dig in further and discover that the `tab trap bug is in the
 jupyterlab/lumino repo <https://github.com/jupyterlab/lumino/pull/373>`__, so
-you fork the juptyerlab/lumino repo, create a new branch called
+you fork the jupyterlab/lumino repo, create a new branch called
 ``fix-tab-trap``, and open a pull request.
 
 You decide that you want to write a test. This is one of those cases where you
@@ -166,9 +166,9 @@ page.
 So you decide that you want to `add a regression test to the
 Quansight-Labs/jupyter-a11y-testing repo
 <https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/f36bf5b2e8cb87613c637fc5aa03401c92ec58d0/testing/jupyterlab/tests/regression-tests/no-tab-trap-initial-page.test.ts>`__.
-This test checks that are no tab traps on the JupyterLab start page by using
-Playwright to open JupyterLab and press the tab key repeatedly. So as with the
-Lumino repo before, you fork the Quansight-Labs/jupyter-a11y-testing repo,
+This test checks that there are no tab traps on the JupyterLab start page by
+using Playwright to open JupyterLab and press the tab key repeatedly. So as with
+the Lumino repo before, you fork the Quansight-Labs/jupyter-a11y-testing repo,
 create a branch called ``test-tab-trap``, and open a pull request. The important
 thing in this step is that you save your test file with a ``.test.ts`` extension
 next to the other regression test files.
