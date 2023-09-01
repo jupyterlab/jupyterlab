@@ -203,7 +203,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.close, {
       label: () => trans.__('Close Tab'),
-      commandDialog: () => trans.__('Close Tab'),
+      // commandDialog: () => trans.__('Close Tab'),
       isEnabled: () => {
         const widget = contextMenuWidget();
         return !!widget && widget.title.closable;
@@ -299,14 +299,11 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleLeftArea, {
         label: trans.__('Show Left Sidebar'),
-        commandDialog: trans.__('Test-1'),
         execute: () => {
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
-            let doc = document.querySelectorAll('#Test-1');
-            for (let i = 0; i < doc.length; i++) {
-              doc[i]!.innerHTML = 'Test screen reader';
-            }
+            let doc = document.getElementById('showleftsidebar');
+            doc?.focus();
           } else {
             labShell.collapseLeft();
             if (labShell.currentWidget) {
