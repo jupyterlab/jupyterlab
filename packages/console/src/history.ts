@@ -194,7 +194,6 @@ export class ConsoleHistory implements IConsoleHistory {
    * so that the console's history will consist of no contiguous repetitions.
    */
   push(item: string): void {
-    console.log('---- push', item);
     if (item && item !== this._history[this._history.length - 1]) {
       this._history.push(item);
     }
@@ -221,7 +220,6 @@ export class ConsoleHistory implements IConsoleHistory {
    * Contiguous duplicates are stripped out of the API response.
    */
   protected onHistory(value: KernelMessage.IHistoryReplyMsg): void {
-    console.log('--------', value);
     this._history.length = 0;
     let last = '';
     let current = '';

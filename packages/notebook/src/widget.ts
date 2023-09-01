@@ -355,17 +355,6 @@ export class StaticNotebook extends WindowedList {
     }
     this._renderingLayoutChanged.emit(this._renderingLayout ?? 'default');
   }
-  // accessLastHistory(): void {
-  //   console.log(this._history);
-  //   this._history?.back(this.model?.activeCell?);
-  //     // content?.activeCell);
-  //   // this._history?.back('placeholder');
-  //     // this.content?.activeCell);
-  // }
-
-  // accessNextHistory(): void {
-  //   // this._history.forward(this.content.activeCell);
-  // }
 
   /**
    * Dispose of the resources held by the widget.
@@ -1009,12 +998,6 @@ export class StaticNotebook extends WindowedList {
   private _notebookModel: INotebookModel | null;
   private _renderingLayout: RenderingLayout | undefined;
   private _renderingLayoutChanged = new Signal<this, RenderingLayout>(this);
-  // private _fullyRendered = new Signal<this, boolean>(this);
-  // private _placeholderCellRendered = new Signal<this, Cell>(this);
-  // private _observer: IntersectionObserver;
-  // private _renderedCellsCount = 0;
-  // private _toRenderMap: Map<string, { index: number; cell: Cell }>;
-  // private _cellsArray: Array<Cell>;
 }
 
 /**
@@ -1061,7 +1044,7 @@ export namespace StaticNotebook {
     translator?: ITranslator;
 
     /**
-     * TODO
+     * The kernel history retrieval object
      */
     history?: INotebookHistory;
   }
@@ -1302,9 +1285,6 @@ export class Notebook extends StaticNotebook {
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.selectionChanged.connect(this._updateSelectedCells, this);
-    this.modelChanged.connect(value => {
-      console.log('Notebook.mode.stateChanged: ', value);
-    });
     this.addFooter();
   }
 
