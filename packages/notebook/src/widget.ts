@@ -1316,7 +1316,7 @@ export class Notebook extends StaticNotebook {
     if (activeCell) {
       if (this._history) {
         const lastHistory = this._history.back(activeCell);
-        this._history.updateEditor(activeCell, LastHistory);
+        this._history.updateEditor(activeCell, lastHistory);
       }
     }
   }
@@ -1328,7 +1328,7 @@ export class Notebook extends StaticNotebook {
     const activeCell = this.activeCell;
     if (activeCell) {
       if (this._history) {
-        const nexthistory = this._history.forward(activeCell);
+        const nextHistory = this._history.forward(activeCell);
         this._history.updateEditor(activeCell, nextHistory);
       }
     }

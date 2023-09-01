@@ -232,6 +232,7 @@ export class NotebookHistory implements INotebookHistory {
   reset(): void {
     this._hasSession = false;
     this._placeholder = '';
+    this._retrieveHistory();
   }
 
   /**
@@ -261,8 +262,10 @@ export class NotebookHistory implements INotebookHistory {
         }
       }
       // set the kernel session for filtering
-      if (current[2] == cell?.model.sharedModel.getSource()) {
-        this._kernelSession = kernelSession;
+      if (!this.kernelSession) {
+        if (current[2] == cell?.model.sharedModel.getSource()) {
+          this._kernelSession = kernelSession;
+        }
       }
     }
   }
@@ -324,9 +327,6 @@ export class NotebookHistory implements INotebookHistory {
     let last = '';
     let current = '';
     for (let i = 0; i < this._history.length; i++) {
-      if (this._history[i][0] !== this.kernelSession) {
-        continue;
-      }
       current = this._history[i][2] as string;
       if (current !== last && filterStr !== current) {
         this._filtered.push((last = current));
