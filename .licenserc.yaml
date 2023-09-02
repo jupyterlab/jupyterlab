@@ -37,6 +37,7 @@ header:
     - 'jupyterlab/staging'
     - 'packages/codemirror/test/foo.grammar'
     - 'packages/extensionmanager-extension/examples/listings/settings/@jupyterlab/extensionmanager-extension/plugin.jupyterlab-settings'
+    - 'scripts/release_template.txt'
     - 'typedoc-theme'
     - 'LICENSE'
     - 'yarn.lock'
