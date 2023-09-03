@@ -79,7 +79,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     } else {
       this._providers.set(identifier, provider);
       this._panelHandlers.forEach((handler, id) => {
-        this.updateCompleter(this._mostRecentContext.get(id)!);
+        void this.updateCompleter(this._mostRecentContext.get(id)!);
       });
     }
   }
