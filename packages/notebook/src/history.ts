@@ -299,7 +299,7 @@ export class NotebookHistory implements INotebookHistory {
     args: { notebook: StaticNotebook; cell: Cell }
   ): Promise<void> {
     const cell = args['cell'];
-    this._retrieveHistory(cell);
+    await this._retrieveHistory(cell);
   }
 
   /**
