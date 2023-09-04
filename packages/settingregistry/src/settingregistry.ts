@@ -678,7 +678,6 @@ export class SettingRegistry implements ISettingRegistry {
         schemaPath: ''
       } as ISchemaValidator.IError
     ];
-    }
   }
 
   /**
