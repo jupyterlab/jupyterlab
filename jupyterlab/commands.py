@@ -1053,7 +1053,7 @@ class _AppHandler:
 
         found = None
         for name, source in linked.items():
-            if name == path or source == path:
+            if path in (name, source):
                 found = name
 
         if found:
@@ -1061,7 +1061,7 @@ class _AppHandler:
         else:
             local = config.setdefault("local_extensions", {})
             for name, source in local.items():
-                if name == path or source == path:
+                if path in (name, source):
                     found = name
             if found:
                 del local[found]
