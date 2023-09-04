@@ -368,6 +368,7 @@ export interface ILSPDocumentConnectionManager {
   documents: Map<VirtualDocument.uri, VirtualDocument>;
 
   /**
+   * @deprecated
    * The mapping of document uri to the widget adapter.
    */
   adapters: Map<string, WidgetLSPAdapter>;

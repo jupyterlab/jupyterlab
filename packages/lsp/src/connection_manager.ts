@@ -54,6 +54,7 @@ export class DocumentConnectionManager
   readonly connections: Map<VirtualDocument.uri, LSPConnection>;
 
   /**
+   * @deprecated
    * Map between the path of the document and its adapter
    */
   readonly adapters: Map<string, WidgetLSPAdapter>;

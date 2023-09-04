@@ -308,7 +308,7 @@ function addRunningSessionManager(
   });
 }
 
-const currentAdapter: JupyterFrontEndPlugin<IWidgetLSPAdapterTracker> = {
+const adapterTrackerPlugin: JupyterFrontEndPlugin<IWidgetLSPAdapterTracker> = {
   id: '@jupyterlab/lsp-extension:tracker',
   description: 'Provides the `WidgetLSPAdapter`s tracker.',
   autoStart: true,
@@ -326,5 +326,5 @@ export default [
   featurePlugin,
   settingsPlugin,
   codeExtractorManagerPlugin,
-  currentAdapter
+  adapterTrackerPlugin
 ];
