@@ -367,16 +367,6 @@
   },
   "jupyter.lab.shortcuts": [
     {
-      "command": "notebook:access-last-history",
-      "keys": ["Alt ArrowUp"],
-      "selector": ".jp-Notebook.jp-mod-editMode"
-    },
-    {
-      "command": "notebook:access-next-history",
-      "keys": ["Alt ArrowDown"],
-      "selector": ".jp-Notebook.jp-mod-editMode"
-    },
-    {
       "command": "notebook:change-cell-to-code",
       "keys": ["Y"],
       "selector": ".jp-Notebook:focus"
@@ -444,6 +434,16 @@
     {
       "command": "notebook:enter-command-mode",
       "keys": ["Ctrl M"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:access-previous-history-entry",
+      "keys": ["Alt ArrowUp"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:access-next-history-entry",
+      "keys": ["Alt ArrowDown"],
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
