@@ -193,7 +193,6 @@ export class NotebookHistory implements INotebookHistory {
     ++this._cursor;
     this._cursor = Math.min(this._filtered.length - 1, this._cursor);
     const content = this._filtered[this._cursor];
-    // return content;
     return Promise.resolve(content);
   }
 
