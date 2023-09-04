@@ -149,6 +149,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       this._panelHandlers.set(widget.id, handler);
       widget.disposed.connect(old => {
         this.disposeHandler(old.id, handler);
+        this._mostRecentContext.delete(id);
       });
     } else {
       // Update existing handler.
