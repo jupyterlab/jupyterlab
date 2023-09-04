@@ -597,7 +597,7 @@ export class SettingRegistry implements ISettingRegistry {
           // Apply a transformation to the plugin if necessary.
           await this._load(await this._transform('fetch', plugin));
         } catch (errors) {
-          /* Ignore preload timeout errors silently. */
+          /* Ignore silently if no transformers. */
           if (errors[0]?.keyword !== 'unset') {
             console.warn('Ignored setting registry preload errors.', errors);
           }
