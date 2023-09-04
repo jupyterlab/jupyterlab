@@ -10,16 +10,9 @@ import { WidgetLSPAdapter } from './adapter';
 import { IWidgetLSPAdapterTracker } from '../tokens';
 
 /**
- * A class that keeps track of widget instances on an Application shell.
+ * A class that keeps track of widget adapter instances.
  *
- * @typeparam T - The type of widget being tracked. Defaults to `Widget`.
- *
- * #### Notes
- * The API surface area of this concrete implementation is substantially larger
- * than the widget tracker interface it implements. The interface is intended
- * for export by JupyterLab plugins that create widgets and have clients who may
- * wish to keep track of newly created widgets. This class, however, can be used
- * internally by plugins to restore state as well.
+ * @typeparam T - The type of widget being tracked. Defaults to `WidgetLSPAdapter`.
  */
 export class WidgetLSPAdapterTracker<
   T extends WidgetLSPAdapter = WidgetLSPAdapter
