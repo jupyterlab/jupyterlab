@@ -2089,8 +2089,8 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function accessLastHistory(notebook: Notebook): any {
-    notebook.accessLastHistory();
+  export function accessPreviousHistory(notebook: Notebook): any {
+    notebook.accessPreviousHistory();
   }
 
   /**

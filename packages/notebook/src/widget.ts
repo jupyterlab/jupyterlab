@@ -1291,7 +1291,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Access previous item in ipython kernel for current kernel
    */
-  accessLastHistory(): void {
+  accessPreviousHistory(): void {
     const activeCell = this.activeCell;
     if (activeCell) {
       if (this._history) {

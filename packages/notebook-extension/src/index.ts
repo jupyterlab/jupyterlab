@@ -316,7 +316,7 @@ namespace CommandIDs {
 
   export const tocRunCells = 'toc:run-cells';
 
-  export const accessLastHistory = 'notebook:access-last-history';
+  export const accessPreviousHistory = 'notebook:access-last-history';
 
   export const accessNextHistory = 'notebook:access-next-history';
 }
@@ -3400,12 +3400,12 @@ function addCommands(
       );
     }
   });
-  commands.addCommand(CommandIDs.accessLastHistory, {
+  commands.addCommand(CommandIDs.accessPreviousHistory, {
     label: 'Access Last History',
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.accessLastHistory(current.content);
+        return NotebookActions.accessPreviousHistory(current.content);
       }
     }
   });
@@ -3454,7 +3454,7 @@ function populatePalette(
     CommandIDs.toggleCollapseCmd,
     CommandIDs.collapseAllCmd,
     CommandIDs.expandAllCmd,
-    CommandIDs.accessLastHistory,
+    CommandIDs.accessPreviousHistory,
     CommandIDs.accessNextHistory
   ].forEach(command => {
     palette.addItem({ command, category });
