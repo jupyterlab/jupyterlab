@@ -668,15 +668,16 @@ export class SettingRegistry implements ISettingRegistry {
         ];
       }
       return transformed;
-    } else {
-      throw [
-        {
-          instancePath: '',
-          keyword: 'unset',
-          message: `${plugin.id} has no transformers yet.`,
-          schemaPath: ''
-        } as ISchemaValidator.IError
-      ];
+    }
+    // If the plugin has no transformers, throw an error and bail.
+    throw [
+      {
+        instancePath: '',
+        keyword: 'unset',
+        message: `${plugin.id} has no transformers yet.`,
+        schemaPath: ''
+      } as ISchemaValidator.IError
+    ];
     }
   }
 
