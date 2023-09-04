@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /*
  * Copyright (c) Jupyter Development Team.
- * Copyright (c) Bloomberg Finance LP.
  * Distributed under the terms of the Modified BSD License.
+ * Copyright (c) Bloomberg Finance LP.
  */
 
 import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';

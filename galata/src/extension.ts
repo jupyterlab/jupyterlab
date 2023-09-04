@@ -1,7 +1,7 @@
 /*
  * Copyright (c) Jupyter Development Team.
- * Copyright (c) Bloomberg Finance LP.
  * Distributed under the terms of the Modified BSD License.
+ * Copyright (c) Bloomberg Finance LP.
  */
 
 // This export the types (and only the types) from extension/token.ts
