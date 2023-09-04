@@ -226,7 +226,7 @@ describe('completer/manager', () => {
         const handler = manager['_panelHandlers'].get(
           widget.id
         ) as CompletionHandler;
-        // no custom renderer shall be set at this point
+        // no custom model shall be set at this point
         expect(handler.completer.model).not.toBeInstanceOf(
           CustomCompleterModel
         );
