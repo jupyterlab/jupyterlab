@@ -120,7 +120,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   async updateCompleter(
     newCompleterContext: ICompletionContext
   ): Promise<void> {
-    const { widget, editor } = newCompleterContext;
+    const { widget, editor, sanitizer } = newCompleterContext;
     const id = widget.id;
     const handler = this._panelHandlers.get(id);
 
@@ -128,8 +128,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     const provider = this._providers.get(firstProvider);
 
     let renderer =
-      provider?.renderer ??
-      Completer.getDefaultRenderer(newCompleterContext.sanitizer);
+      provider?.renderer ?? Completer.getDefaultRenderer(sanitizer);
     const modelFactory = provider?.modelFactory;
     let model: Completer.IModel;
     if (modelFactory) {
@@ -139,24 +138,30 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     }
 
     this._mostRecentContext.set(widget.id, newCompleterContext);
+
+    const options = {
+      model,
+      renderer,
+      sanitizer,
+      showDoc: this._showDoc
+    };
     if (!handler) {
       // Create a new handler.
-      const handler = await this.generateHandler(
-        newCompleterContext,
-        model,
-        renderer
-      );
+      const handler = await this._generateHandler(newCompleterContext, options);
       this._panelHandlers.set(widget.id, handler);
       widget.disposed.connect(old => {
         this.disposeHandler(old.id, handler);
         this._mostRecentContext.delete(id);
       });
     } else {
-      // Update existing handler.
-      handler.completer.model?.dispose();
-      handler.completer.model = model;
-      handler.completer.renderer = renderer;
-      handler.completer.showDocsPanel = this._showDoc;
+      // Update existing completer.
+      const completer = handler.completer;
+      completer.model?.dispose();
+      completer.model = options.model;
+      completer.renderer = options.renderer;
+      completer.showDocsPanel = options.showDoc;
+
+      // Update other handler attributes.
       handler.autoCompletion = this._autoCompletion;
 
       if (editor) {
@@ -233,14 +238,11 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Helper to generate a completer handler from provided context.
    */
-  private async generateHandler(
+  private async _generateHandler(
     completerContext: ICompletionContext,
-    model: Completer.IModel,
-    renderer: Completer.IRenderer
+    options: Completer.IOptions
   ): Promise<CompletionHandler> {
-    const { sanitizer } = completerContext;
-    const completer = new Completer({ model, renderer, sanitizer });
-    completer.showDocsPanel = this._showDoc;
+    const completer = new Completer(options);
     completer.hide();
     Widget.attach(completer, document.body);
     const reconciliator = await this.generateReconciliator(completerContext);
