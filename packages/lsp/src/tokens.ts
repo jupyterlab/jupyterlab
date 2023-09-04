@@ -500,7 +500,7 @@ export interface IFeature {
   capabilities?: ClientCapabilities;
 
   /**
-   * CM extension factory linked to the LSP feature.
+   * Editor extension factory linked to the LSP feature.
    */
   extensionFactory?: EditorAdapter.ILSPEditorExtensionFactory;
 }
