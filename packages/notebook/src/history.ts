@@ -177,7 +177,6 @@ export class NotebookHistory implements INotebookHistory {
     --this._cursor;
     this._cursor = Math.max(0, this._cursor);
     const content = this._filtered[this._cursor];
-    console.log('this._cursor: ', this._cursor);
     return Promise.resolve(content);
   }
 
