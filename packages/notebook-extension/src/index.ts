@@ -316,9 +316,9 @@ namespace CommandIDs {
 
   export const tocRunCells = 'toc:run-cells';
 
-  export const accessPreviousHistory = 'notebook:access-last-history';
+  export const accessPreviousHistory = 'notebook:access-previous-history-entry';
 
-  export const accessNextHistory = 'notebook:access-next-history';
+  export const accessNextHistory = 'notebook:access-next-history-entry';
 }
 
 /**
@@ -3401,7 +3401,7 @@ function addCommands(
     }
   });
   commands.addCommand(CommandIDs.accessPreviousHistory, {
-    label: 'Access Last History',
+    label: 'Access Previous Kernel History Entry',
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
@@ -3410,7 +3410,7 @@ function addCommands(
     }
   });
   commands.addCommand(CommandIDs.accessNextHistory, {
-    label: 'Access Next History',
+    label: 'Access Next Kernel History Entry',
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
