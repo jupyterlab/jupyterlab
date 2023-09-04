@@ -505,15 +505,18 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
             </React.Fragment>
           );
         } else {
-          return (
-            <Tag
-              className={
+          let attributes = {};
+          if (Tag !== React.Fragment) {
+            attributes = {
+              className:
                 className || styleProps
                   ? classes(className, LabIconStyle.styleClass(styleProps))
-                  : undefined
-              }
-              title={title}
-            >
+                  : undefined,
+              title: title
+            };
+          }
+          return (
+            <Tag {...attributes}>
               {svgComponent}
               {label}
             </Tag>
