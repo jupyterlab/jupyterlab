@@ -132,6 +132,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    * Get the index of editor from the cursor position in the virtual
    * document.
+   * @deprecated This is error-prone and will be removed in JupyterLab 5.0, use `getEditorIndex()` with `virtualDocument.getEditorAtVirtualLine(position)` instead.
    *
    * @param position - the position of cursor in the virtual document.
    */

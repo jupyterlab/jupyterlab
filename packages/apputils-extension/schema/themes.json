@@ -14,6 +14,10 @@
               "items": [
                 { "type": "separator" },
                 {
+                  "command": "apputils:adaptive-theme"
+                },
+                { "type": "separator" },
+                {
                   "command": "apputils:theme-scrollbars"
                 },
                 { "type": "separator" },
@@ -105,8 +109,26 @@
     "theme": {
       "type": "string",
       "title": "Selected Theme",
-      "description": "Application-level visual styling theme",
+      "description": "Application-level visual styling theme. Ignored when Adaptive Theme is enabled.",
       "default": "JupyterLab Light"
+    },
+    "adaptive-theme": {
+      "type": "boolean",
+      "title": "Adaptive Theme",
+      "description": "Synchronize visual styling theme with system settings",
+      "default": false
+    },
+    "preferred-light-theme": {
+      "type": "string",
+      "title": "Preferred Light Theme",
+      "description": "Application-level light visual styling theme. Ignored when Adaptive Theme is disabled.",
+      "default": "JupyterLab Light"
+    },
+    "preferred-dark-theme": {
+      "type": "string",
+      "title": "Preferred Dark Theme",
+      "description": "Application-level dark visual styling theme. Ignored when Adaptive Theme is disabled.",
+      "default": "JupyterLab Dark"
     },
     "theme-scrollbars": {
       "type": "boolean",
