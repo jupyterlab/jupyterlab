@@ -443,6 +443,8 @@ describe('@jupyterlab/ui-components', () => {
         });
         Widget.attach(widget, document.body);
         await framePromise();
+        await widget.renderPromise;
+
         const button = widget.node.firstChild as HTMLElement;
         expect(button.classList.contains('foo')).toBe(true);
         expect(button.querySelector('.iconFoo')).toBeDefined();
@@ -476,6 +478,7 @@ describe('@jupyterlab/ui-components', () => {
           });
           Widget.attach(button, document.body);
           await framePromise();
+          await button.renderPromise;
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           expect(called).toBe(true);
           button.dispose();
