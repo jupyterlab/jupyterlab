@@ -1,6 +1,8 @@
-// Copyright (c) Jupyter Development Team.
-// Copyright (c) Bloomberg Finance LP.
-// Distributed under the terms of the Modified BSD License.
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Copyright (c) Bloomberg Finance LP.
+ * Distributed under the terms of the Modified BSD License.
+ */
 /**
  * @packageDocumentation
  * @module galata
