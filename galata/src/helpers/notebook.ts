@@ -1122,13 +1122,18 @@ export class NotebookHelper {
 
     await this.clickToolbarItem('cellType');
     const selectInput = await nbPanel.$(
-      'div.jp-Notebook-toolbarCellTypeDropdown select'
+      'jp-select.jp-Notebook-toolbarCellTypeDropdown'
     );
     if (!selectInput) {
       return false;
     }
 
-    await selectInput.selectOption(cellType);
+    const listbox = await selectInput.$('[role="listbox"]');
+    await Utils.waitForCondition(async (): Promise<boolean> => {
+      return (await listbox?.getAttribute('hidden')) === null;
+    });
+
+    await (await selectInput.$(`jp-option[value="${cellType}"]`))?.click();
 
     // Wait for the new cell to be rendered
     let cell: ElementHandle | null;
