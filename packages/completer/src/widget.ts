@@ -72,7 +72,7 @@ export class Completer extends Widget {
   /**
    * Cache style constraints from CSS.
    */
-  _updateConstraints() {
+  protected _updateConstraints() {
     const tempNode = document.createElement('div');
     tempNode.classList.add(LIST_CLASS);
     tempNode.style.visibility = 'hidden';

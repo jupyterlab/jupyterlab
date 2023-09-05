@@ -26,7 +26,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fix License Header
-        uses: apache/skywalking-eyes/header@v0.4.0
+        # pin to include https://github.com/apache/skywalking-eyes/pull/168
+        uses: apache/skywalking-eyes/header@e19b828cea6a6027cceae78f05d81317347d21be
         with:
           mode: fix
 
