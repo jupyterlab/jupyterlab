@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
-
 import {
   IConfigurableExtension,
   IEditorExtensionFactory
@@ -11,7 +9,9 @@ import {
 import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
+
 import { WidgetLSPAdapter } from './adapter';
+import { Document } from '../tokens';
 
 /**
  * The CodeEditor.IEditor adapter.
@@ -26,8 +26,8 @@ export class EditorAdapter implements IDisposable {
     this._widgetAdapter = options.widgetAdapter;
     this._extensions = options.extensions;
 
-    void options.editorReady().then(editor => {
-      this._injectExtensions(editor);
+    void options.editor.ready().then(editor => {
+      this._injectExtensions(options.editor);
     });
   }
 
@@ -50,8 +50,9 @@ export class EditorAdapter implements IDisposable {
   /**
    * Setup the editor.
    */
-  private _injectExtensions(editor: CodeEditor.IEditor): void {
-    if (editor.isDisposed) {
+  private _injectExtensions(editor: Document.IEditor): void {
+    const codeEditor = editor.getEditor()!;
+    if (codeEditor.isDisposed) {
       return;
     }
 
@@ -60,7 +61,7 @@ export class EditorAdapter implements IDisposable {
         path: this._widgetAdapter.widget.context.path,
         editor: editor,
         widgetAdapter: this._widgetAdapter,
-        model: editor.model,
+        model: codeEditor.model,
         inline: true
       });
 
@@ -68,7 +69,7 @@ export class EditorAdapter implements IDisposable {
         return;
       }
 
-      editor.injectExtension(ext.instance(editor));
+      codeEditor.injectExtension(ext.instance(codeEditor));
     });
   }
 
@@ -87,7 +88,7 @@ export namespace EditorAdapter {
     /**
      * Promise resolving when the editor is ready.
      */
-    editorReady(): Promise<CodeEditor.IEditor>;
+    editor: Document.IEditor;
 
     /**
      * The widget lsp adapter.
@@ -121,7 +122,7 @@ export namespace EditorAdapter {
     /**
      * The code editor.
      */
-    editor: CodeEditor.IEditor;
+    editor: Document.IEditor;
     /**
      * The widget lsp adapter.
      */
