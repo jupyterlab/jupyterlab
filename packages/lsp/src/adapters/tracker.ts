@@ -217,6 +217,10 @@ export namespace WidgetLSPAdapterTracker {
   export interface IOptions {
     /**
      * The JupyterLab shell for tracking all widgets.
+     *
+     * TODO: Change the type to `JupyterFrontEnd.IShell` to maximize
+     * compatibility with other lab-base applications (for example, Notebook).
+     * We need https://github.com/jupyterlab/jupyterlab/issues/14782
      */
     shell: LabShell;
   }
