@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Jupyter Development Team.
+# Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
 # Generate a GitHub token at https://github.com/settings/tokens
