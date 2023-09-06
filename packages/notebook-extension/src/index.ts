@@ -3401,7 +3401,7 @@ function addCommands(
     }
   });
   commands.addCommand(CommandIDs.accessPreviousHistory, {
-    label: 'Access Previous Kernel History Entry',
+    label: trans.__('Access Previous Kernel History Entry'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
@@ -3410,7 +3410,7 @@ function addCommands(
     }
   });
   commands.addCommand(CommandIDs.accessNextHistory, {
-    label: 'Access Next Kernel History Entry',
+    label: trans.__('Access Next Kernel History Entry'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
