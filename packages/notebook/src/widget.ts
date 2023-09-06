@@ -1289,32 +1289,6 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Access previous item in ipython kernel for current kernel
-   */
-  accessPreviousHistory(): void {
-    const activeCell = this.activeCell;
-    if (activeCell) {
-      if (this._history) {
-        const lastHistory = this._history.back(activeCell);
-        this._history.updateEditor(activeCell, lastHistory);
-      }
-    }
-  }
-
-  /**
-   * Access next item in ipython kernel for current kernel
-   */
-  accessNextHistory(): void {
-    const activeCell = this.activeCell;
-    if (activeCell) {
-      if (this._history) {
-        const nextHistory = this._history.forward(activeCell);
-        this._history.updateEditor(activeCell, nextHistory);
-      }
-    }
-  }
-
-  /**
    * List of selected and active cells
    */
   get selectedCells(): Cell[] {

@@ -42,7 +42,7 @@ export interface INotebookHistory extends IDisposable {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(activeCell: Cell): Promise<string>;
+  back(activeCell: Cell): string;
 
   /**
    * Get the next item in the console history.
@@ -51,7 +51,7 @@ export interface INotebookHistory extends IDisposable {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  forward(activeCell: Cell): Promise<string>;
+  forward(activeCell: Cell): string;
 
   /**
    * Reset the history navigation state, i.e., start a new history session.
@@ -64,7 +64,7 @@ export interface INotebookHistory extends IDisposable {
    * @param activeCell - The currently selected Cell in the notebook.
    * @param update - the promise returned from back or forward
    */
-  updateEditor(activeCell: Cell, update: Promise<string>): void;
+  updateEditor(activeCell: Cell, update: string): void;
 }
 
 /**
@@ -163,12 +163,12 @@ export class NotebookHistory implements INotebookHistory {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(activeCell: Cell): Promise<string> {
+  back(activeCell: Cell): string {
     this.checkSession(activeCell);
     --this._cursor;
     this._cursor = Math.max(0, this._cursor);
     const content = this._filtered[this._cursor];
-    return Promise.resolve(content);
+    return content;
   }
 
   /**
@@ -178,12 +178,12 @@ export class NotebookHistory implements INotebookHistory {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  forward(activeCell: Cell): Promise<string> {
+  forward(activeCell: Cell): string {
     this.checkSession(activeCell);
     ++this._cursor;
     this._cursor = Math.min(this._filtered.length - 1, this._cursor);
     const content = this._filtered[this._cursor];
-    return Promise.resolve(content);
+    return content;
   }
 
   /**
@@ -192,26 +192,24 @@ export class NotebookHistory implements INotebookHistory {
    * @param activeCell - The currently selected Cell in the notebook.
    * @param update - the promise returned from back or forward
    */
-  updateEditor(activeCell: Cell, update: Promise<string>): void {
+  updateEditor(activeCell: Cell, update: string): void {
     if (activeCell) {
-      void update.then(value => {
-        const model = activeCell.editor?.model;
-        const source = model?.sharedModel.getSource();
-        if (this.isDisposed || !value) {
-          return;
-        }
-        if (source === value) {
-          return;
-        }
-        this._setByHistory = true;
-        model?.sharedModel.setSource(value);
-        let columnPos = 0;
-        columnPos = value.indexOf('\n');
-        if (columnPos < 0) {
-          columnPos = value.length;
-        }
-        activeCell.editor?.setCursorPosition({ line: 0, column: columnPos });
-      });
+      const model = activeCell.editor?.model;
+      const source = model?.sharedModel.getSource();
+      if (this.isDisposed || !update) {
+        return;
+      }
+      if (source === update) {
+        return;
+      }
+      this._setByHistory = true;
+      model?.sharedModel.setSource(update);
+      let columnPos = 0;
+      columnPos = update.indexOf('\n');
+      if (columnPos < 0) {
+        columnPos = update.length;
+      }
+      activeCell.editor?.setCursorPosition({ line: 0, column: columnPos });
     }
   }
 
@@ -221,7 +219,7 @@ export class NotebookHistory implements INotebookHistory {
   reset(): void {
     this._hasSession = false;
     this._placeholder = '';
-    this._retrieveHistory();
+    void this._retrieveHistory().catch();
   }
 
   /**
@@ -279,7 +277,8 @@ export class NotebookHistory implements INotebookHistory {
       this._history.length = 0;
       return;
     }
-    return this._retrieveHistory();
+    await this._retrieveHistory().catch();
+    return;
   }
 
   /**
@@ -290,7 +289,7 @@ export class NotebookHistory implements INotebookHistory {
     args: { notebook: StaticNotebook; cell: Cell }
   ): Promise<void> {
     const cell = args['cell'];
-    await this._retrieveHistory(cell);
+    await this._retrieveHistory(cell).catch();
   }
 
   /**
@@ -299,9 +298,11 @@ export class NotebookHistory implements INotebookHistory {
    * @param cell - The string to use when filtering the data.
    */
   private async _retrieveHistory(cell?: Cell): Promise<void> {
-    return this._kernel?.requestHistory(Private.initialRequest).then(v => {
-      this.onHistory(v, cell);
-    });
+    return await this._kernel
+      ?.requestHistory(Private.initialRequest)
+      .then(v => {
+        this.onHistory(v, cell);
+      });
   }
 
   /**
