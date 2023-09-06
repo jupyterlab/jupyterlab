@@ -319,12 +319,9 @@ test.describe('Debugger', () => {
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
-
-    await expect(
-      page.locator(
-        '[aria-label="side panel content"] >> text=Source/tmp/ipykernel_'
-      )
-    ).toBeVisible();
+    await expect(page.locator('.jp-DebuggerSources-header-path')).toContainText(
+      '/tmp/ipykernel_'
+    );
 
     // Don't compare screenshot as the kernel id varies
     // Need to set precisely the path
@@ -333,7 +330,7 @@ test.describe('Debugger', () => {
       path: 'test/documentation/screenshots/debugger-source.png'
     });
 
-    await page.click('button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]');
   });
 });
 
