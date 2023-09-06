@@ -86,7 +86,7 @@ export namespace EditorAdapter {
    */
   export interface IOptions {
     /**
-     * Promise resolving when the editor is ready.
+     * Editor wrapper enabling revealing the editor when detached (out of view).
      */
     editor: Document.IEditor;
 
