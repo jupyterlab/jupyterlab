@@ -130,7 +130,7 @@ test('Toolbar items act on owner widget', async ({ page }) => {
 
   // When clicking on toolbar item of the first file
   await (
-    await panel1.$('button[data-command="notebook:insert-cell-below"]')
+    await panel1.$('jp-button[data-command="notebook:insert-cell-below"]')
   ).click();
 
   // Then the first file is activated and the action is performed

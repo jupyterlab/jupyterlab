@@ -40,6 +40,21 @@ export class FileBrowserHelper {
   }
 
   /**
+   * Close the file browser side panel.
+   */
+  async closeFileBrowser(): Promise<void> {
+    const sidePanel = this.page.locator('.jp-SidePanel.jp-FileBrowser');
+    if (await sidePanel.isVisible()) {
+      await this.page
+        .locator('.jp-SideBar li[title="File Browser (Ctrl+Shift+F)"]')
+        .click();
+      await Utils.waitForCondition(async (): Promise<boolean> => {
+        return !(await sidePanel.isVisible());
+      });
+    }
+  }
+
+  /**
    * Reveal a file in the file browser.
    *
    * It will open intermediate folders if needed.
@@ -211,7 +226,7 @@ export class FileBrowserHelper {
   async refresh(): Promise<void> {
     const page = this.page;
     const item = await page.$(
-      `xpath=//div[@id='filebrowser']//button[${Utils.xpContainsClass(
+      `xpath=//div[@id='filebrowser']//jp-button[${Utils.xpContainsClass(
         'jp-ToolbarButtonComponent'
       )} and .//*[@data-icon='ui-components:refresh']]`
     );

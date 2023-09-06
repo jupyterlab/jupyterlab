@@ -105,7 +105,7 @@ test.describe('Debugger Tests', () => {
 
     await page.activity.closePanel(`${globalVar} - ${notebookName}`);
 
-    await page.locator('button[title="Continue (F9)"]').click();
+    await page.locator('jp-button[title="Continue (F9)"]').click();
     await expect(variablesPanel).not.toContain('ul');
     await page.debugger.waitForVariables();
 
