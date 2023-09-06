@@ -30,49 +30,40 @@ export interface INotebookHistory extends IDisposable {
    */
   readonly placeholder: string;
 
+  /**
+   * The session number of the current kernel session
+   */
   readonly kernelSession: string;
 
   /**
    * Get the previous item in the console history.
    *
-   * @param placeholder - The placeholder string that gets temporarily added
-   * to the history only for the duration of one history session. If multiple
-   * placeholders are sent within a session, only the first one is accepted.
+   * @param activeCell - The currently selected Cell in the notebook.
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  // back(placeholder: string): string;
   back(activeCell: Cell): Promise<string>;
 
   /**
    * Get the next item in the console history.
    *
-   * @param placeholder - The placeholder string that gets temporarily added
-   * to the history only for the duration of one history session. If multiple
-   * placeholders are sent within a session, only the first one is accepted.
+   * @param activeCell - The currently selected Cell in the notebook.
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
   forward(activeCell: Cell): Promise<string>;
-  // forward(placeholder: string): string;
-
-  /**
-   * Add a new item to the bottom of history.
-   *
-   * @param item The item being added to the bottom of history.
-   *
-   * #### Notes
-   * If the item being added is undefined or empty, it is ignored. If the item
-   * being added is the same as the last item in history, it is ignored as well
-   * so that the console's history will consist of no contiguous repetitions.
-   */
-  // push(item: string): void;
 
   /**
    * Reset the history navigation state, i.e., start a new history session.
    */
   reset(): void;
 
+  /**
+   * Get the next item in the console history.
+   *
+   * @param activeCell - The currently selected Cell in the notebook.
+   * @param update - the promise returned from back or forward
+   */
   updateEditor(activeCell: Cell, update: Promise<string>): void;
 }
 
