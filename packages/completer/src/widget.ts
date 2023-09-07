@@ -160,6 +160,16 @@ export class Completer extends Widget {
   }
 
   /**
+   * The completer used by the completer widget.
+   */
+  get renderer(): Completer.IRenderer {
+    return this._renderer;
+  }
+  set renderer(renderer: Completer.IRenderer) {
+    this._renderer = renderer;
+  }
+
+  /**
    * Enable/disable the document panel.
    */
   set showDocsPanel(showDoc: boolean) {
