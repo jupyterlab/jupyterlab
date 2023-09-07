@@ -20,16 +20,6 @@ describe('.Renderer', () => {
     });
   });
 
-  //   describe('#renderLabel()', () => {
-  //     it('should render the label element for a tab', () => {
-  //       let renderer = new TabBarSvg.Renderer();
-  //       let vNode = renderer.renderLabel({ title, current: true, zIndex: 1 });
-  //       let label = VirtualDOM.realize(vNode);
-  //       expect(label.className).toContain('lm-TabBar-tabCloseIcon');
-  //       expect(label.title).toEqual(title.label);
-  //     });
-  //   });
-
   describe('#renderCloseIcon()', () => {
     it('should render the close icon and check the title element matches the title', () => {
       let renderer = new TabBarSvg.Renderer();
@@ -40,7 +30,7 @@ describe('.Renderer', () => {
       });
       let icon = VirtualDOM.realize(vNode);
       expect(icon.className).toContain('lm-TabBar-tabCloseIcon');
-      expect(icon.title).toEqual(title.label);
+      expect(icon.title).toEqual('Close ' + title.label);
     });
   });
 });
