@@ -74,15 +74,13 @@ describe('filebrowser/browser', () => {
       });
     });
 
-    test.describe('Low Vision Support Test', () => {
+    describe('Low Vision Support Test', () => {
       test.use({
         viewport: {
           height: 1280,
           width: 1024
         }
       });
-
-      // test to create screenshots
 
       test('should take snapshot at 400% zoom', async ({ page }) => {
         await page.goto();
