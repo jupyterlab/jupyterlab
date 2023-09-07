@@ -545,7 +545,8 @@ test.describe('Notebook level and cell type metadata', () => {
     await page.goto(baseURL);
     await page.notebook.openByPath(`${tmpPath}/${nbFile}`);
 
-    await page.filebrowser.closeFileBrowser();
+    await page.sidebar.close('left');
+
     // Create a Markdown cell and select it.
     await page.notebook.addCell('markdown', 'Markdown cell');
     await page.notebook.selectCells((await page.notebook.getCellCount()) - 1);

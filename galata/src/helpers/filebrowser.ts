@@ -40,21 +40,6 @@ export class FileBrowserHelper {
   }
 
   /**
-   * Close the file browser side panel.
-   */
-  async closeFileBrowser(): Promise<void> {
-    const sidePanel = this.page.locator('.jp-SidePanel.jp-FileBrowser');
-    if (await sidePanel.isVisible()) {
-      await this.page
-        .locator('.jp-SideBar li[title="File Browser (Ctrl+Shift+F)"]')
-        .click();
-      await Utils.waitForCondition(async (): Promise<boolean> => {
-        return !(await sidePanel.isVisible());
-      });
-    }
-  }
-
-  /**
    * Reveal a file in the file browser.
    *
    * It will open intermediate folders if needed.
