@@ -24,6 +24,11 @@ export class ProviderReconciliator implements IProviderReconciliator {
     this._timeout = options.timeout;
   }
 
+  /**
+   * Check for the providers which are applicable with the current context
+   *
+   * @return  List of applicable providers
+   */
   async applicableProviders(): Promise<Array<ICompletionProvider>> {
     const isApplicablePromises = this._providers.map(p =>
       p.isApplicable(this._context)
@@ -39,7 +44,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
    *
    * @param {CompletionHandler.IRequest} request - The completion request.
    */
-  public async fetch(
+  async fetch(
     request: CompletionHandler.IRequest,
     trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply | null> {

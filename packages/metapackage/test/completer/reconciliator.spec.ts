@@ -103,7 +103,7 @@ describe('completer/reconciliator', () => {
           ...defaultOptions,
           providers: [fooProvider1, fooProvider2]
         });
-        void reconciliator.fetch({ offset: 0, text: '' });
+        await reconciliator.fetch({ offset: 0, text: '' });
         expect(fooProvider1.fetch).toHaveBeenCalled();
         expect(fooProvider2.fetch).toHaveBeenCalled();
       });
@@ -215,7 +215,7 @@ describe('completer/reconciliator', () => {
           ...defaultOptions,
           providers: [fooProvider1, fooProvider2]
         });
-        reconciliator.shouldShowContinuousHint(true, null as any);
+        await reconciliator.shouldShowContinuousHint(true, null as any);
         expect(fooProvider1.shouldShowContinuousHint).toHaveBeenCalledTimes(1);
         expect(fooProvider2.shouldShowContinuousHint).toHaveBeenCalledTimes(0);
       });

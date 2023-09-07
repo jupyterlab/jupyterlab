@@ -47,7 +47,7 @@ class TestCompleterModel extends CompleterModel {
 class TestCompletionHandler extends CompletionHandler {
   methods: string[] = [];
 
-  onTextChanged(str: ISharedText, changed: SourceChange): void {
+  async onTextChanged(str: ISharedText, changed: SourceChange): Promise<void> {
     super.onTextChanged(str, changed);
     this.methods.push('onTextChanged');
   }
@@ -385,45 +385,50 @@ describe('@jupyterlab/completer', () => {
         handler.dispose();
       });
 
-      it('should use Invoked for invoke()', () => {
+      it('should use Invoked for invoke()', async () => {
         expect(provider.triggers.length).toEqual(0);
 
         handler.editor!.model.sharedModel.setSource('foo.');
         anchor.node.focus();
         anchor.editor.setCursorPosition({ line: 0, column: 4 });
         handler.invoke();
-
+        // Need to wait for next tick to finish applicable providers check
+        await new Promise(process.nextTick);
         expect(provider.triggers).toEqual(
           expect.arrayContaining([CompletionTriggerKind.Invoked])
         );
       });
 
-      it('should use TriggerCharacter for typed text', () => {
+      it('should use TriggerCharacter for typed text', async () => {
         // this test depends on the previous one ('should use Invoked for invoke()').
         expect(provider.triggers.length).toEqual(1);
 
         handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
-
+        await new Promise(process.nextTick);
         expect(provider.triggers.length).toEqual(2);
         expect(provider.triggers).toEqual(
           expect.arrayContaining([CompletionTriggerKind.TriggerCharacter])
         );
       });
 
-      it('should pass context to `shouldShowContinuousHint()`', () => {
+      it('should pass context to `shouldShowContinuousHint()`', async () => {
         handler.editor!.model.sharedModel.setSource('foo.');
+        await new Promise(process.nextTick);
         anchor.node.focus();
         anchor.editor.setCursorPosition({ line: 0, column: 4 });
-        provider.shouldShowContinuousHint = jest.fn();
+        const spy = jest.spyOn(provider, 'shouldShowContinuousHint');
+
         handler.editor!.model.sharedModel.updateSource(4, 4, 'a');
-        expect(provider.shouldShowContinuousHint).toHaveBeenCalledTimes(1);
-        expect(provider.shouldShowContinuousHint).toHaveBeenLastCalledWith(
+        await new Promise(process.nextTick);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenLastCalledWith(
           false,
           {
             sourceChange: [{ retain: 4 }, { insert: 'a' }]
           } as SourceChange,
           context
         );
+        spy.mockClear();
       });
     });
 
