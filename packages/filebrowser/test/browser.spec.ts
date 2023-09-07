@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import expect from 'expect';
+// import expect from 'expect';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
@@ -14,6 +14,7 @@ import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { simulate } from 'simulate-event';
 import { FileBrowser, FilterFileBrowserModel } from '../src';
+import { expect, test } from '@jupyterlab/galata';
 
 const ITEM_CLASS = 'jp-DirListing-item';
 const EDITOR_CLASS = 'jp-DirListing-editor';
@@ -70,6 +71,25 @@ describe('filebrowser/browser', () => {
     describe('#constructor', () => {
       it('should return new FileBrowser instance', () => {
         expect(fileBrowser).toBeInstanceOf(FileBrowser);
+      });
+    });
+
+    test.describe('Low Vision Support Test', () => {
+      test.use({
+        viewport: {
+          height: 1280,
+          width: 1024
+        }
+      });
+
+      test('should take snapshot at 400% zoom', async ({ page }) => {
+        await page.goto();
+        await page.evaluate('document.body.style.zoom=4.0');
+
+        const imageName = 'low-vision-high-zoom.png';
+        expect(await page.screenshot()).toMatchSnapshot(
+          imageName.toLowerCase()
+        );
       });
     });
 
