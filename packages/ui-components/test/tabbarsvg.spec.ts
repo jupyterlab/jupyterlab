@@ -26,7 +26,7 @@ describe('.Renderer', () => {
       let vNode = renderer.renderLabel({ title, current: true, zIndex: 1 });
       let label = VirtualDOM.realize(vNode);
       expect(label.className).toContain('lm-TabBar-tabLabel');
-      expect(label.textContent).toEqual(title.label);
+      expect(label.title).toEqual(title.label);
     });
   });
 });
