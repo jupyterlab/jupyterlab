@@ -283,7 +283,10 @@ export class CompletionHandler implements IDisposable {
   /**
    * Handle a text changed signal from an editor.
    */
-  protected onTextChanged(str: ISharedText, changed: SourceChange): void {
+  protected async onTextChanged(
+    str: ISharedText,
+    changed: SourceChange
+  ): Promise<void> {
     const model = this.completer.model;
     if (!model || !this._enabled) {
       return;
@@ -297,10 +300,10 @@ export class CompletionHandler implements IDisposable {
     if (
       this._autoCompletion &&
       this._reconciliator.shouldShowContinuousHint &&
-      this._reconciliator.shouldShowContinuousHint(
+      (await this._reconciliator.shouldShowContinuousHint(
         this.completer.isVisible,
         changed
-      )
+      ))
     ) {
       void this._makeRequest(
         editor.getCursorPosition(),
