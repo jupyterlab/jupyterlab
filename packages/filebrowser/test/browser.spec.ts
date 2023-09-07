@@ -82,6 +82,8 @@ describe('filebrowser/browser', () => {
         }
       });
 
+      // test to create screenshots
+
       test('should take snapshot at 400% zoom', async ({ page }) => {
         await page.goto();
         await page.evaluate('document.body.style.zoom=4.0');
