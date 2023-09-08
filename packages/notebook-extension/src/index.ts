@@ -3402,19 +3402,19 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.accessPreviousHistory, {
     label: trans.__('Access Previous Kernel History Entry'),
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.accessPreviousHistory(current.content);
+        return await NotebookActions.accessPreviousHistory(current.content);
       }
     }
   });
   commands.addCommand(CommandIDs.accessNextHistory, {
     label: trans.__('Access Next Kernel History Entry'),
-    execute: args => {
+    execute: async args => {
       const current = getCurrent(tracker, shell, args);
       if (current) {
-        return NotebookActions.accessNextHistory(current.content);
+        return await NotebookActions.accessNextHistory(current.content);
       }
     }
   });

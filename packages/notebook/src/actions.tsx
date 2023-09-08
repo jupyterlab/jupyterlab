@@ -2089,11 +2089,13 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function accessPreviousHistory(notebook: Notebook): void {
+  export async function accessPreviousHistory(
+    notebook: Notebook
+  ): Promise<void> {
     const activeCell = notebook.activeCell;
     if (activeCell) {
       if (notebook._history) {
-        const previousHistory = notebook._history.back(activeCell);
+        const previousHistory = await notebook._history.back(activeCell);
         notebook._history.updateEditor(activeCell, previousHistory);
       }
     }
@@ -2104,11 +2106,11 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function accessNextHistory(notebook: Notebook): void {
+  export async function accessNextHistory(notebook: Notebook): Promise<void> {
     const activeCell = notebook.activeCell;
     if (activeCell) {
       if (notebook._history) {
-        const nextHistory = notebook._history.back(activeCell);
+        const nextHistory = await notebook._history.forward(activeCell);
         notebook._history.updateEditor(activeCell, nextHistory);
       }
     }

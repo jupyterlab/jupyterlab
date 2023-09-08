@@ -42,7 +42,7 @@ export interface INotebookHistory extends IDisposable {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(activeCell: Cell): string;
+  back(activeCell: Cell): Promise<string>;
 
   /**
    * Get the next item in the console history.
@@ -51,7 +51,7 @@ export interface INotebookHistory extends IDisposable {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  forward(activeCell: Cell): string;
+  forward(activeCell: Cell): Promise<string>;
 
   /**
    * Reset the history navigation state, i.e., start a new history session.
@@ -145,8 +145,9 @@ export class NotebookHistory implements INotebookHistory {
    *
    * @param activeCell - The currently selected Cell in the notebook.
    */
-  protected checkSession(activeCell: Cell): void {
+  protected async checkSession(activeCell: Cell): Promise<void> {
     if (!this._hasSession) {
+      await this._retrieveHistory();
       this._hasSession = true;
       this.editor = activeCell.editor;
       this._placeholder = this._editor?.model.sharedModel.getSource() || '';
@@ -163,8 +164,8 @@ export class NotebookHistory implements INotebookHistory {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(activeCell: Cell): string {
-    this.checkSession(activeCell);
+  async back(activeCell: Cell): Promise<string> {
+    await this.checkSession(activeCell);
     --this._cursor;
     this._cursor = Math.max(0, this._cursor);
     const content = this._filtered[this._cursor];
@@ -178,8 +179,8 @@ export class NotebookHistory implements INotebookHistory {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  forward(activeCell: Cell): string {
-    this.checkSession(activeCell);
+  async forward(activeCell: Cell): Promise<string> {
+    await this.checkSession(activeCell);
     ++this._cursor;
     this._cursor = Math.min(this._filtered.length - 1, this._cursor);
     const content = this._filtered[this._cursor];
@@ -219,7 +220,6 @@ export class NotebookHistory implements INotebookHistory {
   reset(): void {
     this._hasSession = false;
     this._placeholder = '';
-    void this._retrieveHistory().catch();
   }
 
   /**
