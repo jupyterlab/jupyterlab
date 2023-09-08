@@ -48,7 +48,7 @@ class TestCompletionHandler extends CompletionHandler {
   methods: string[] = [];
 
   async onTextChanged(str: ISharedText, changed: SourceChange): Promise<void> {
-    super.onTextChanged(str, changed);
+    void super.onTextChanged(str, changed);
     this.methods.push('onTextChanged');
   }
 
@@ -428,7 +428,7 @@ describe('@jupyterlab/completer', () => {
           } as SourceChange,
           context
         );
-        spy.mockClear();
+        spy.mockRestore();
       });
     });
 

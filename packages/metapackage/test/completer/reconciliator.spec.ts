@@ -220,5 +220,25 @@ describe('completer/reconciliator', () => {
         expect(fooProvider2.shouldShowContinuousHint).toHaveBeenCalledTimes(0);
       });
     });
+    describe('#applicableProviders()', () => {
+      it('should call `isApplicable` of all providers', async () => {
+        const fooProvider1 = new FooCompletionProvider();
+        const spy1 = jest.spyOn(fooProvider1, 'isApplicable');
+        const fooProvider2 = new FooCompletionProvider();
+        const spy2 = jest.spyOn(fooProvider2, 'isApplicable');
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [fooProvider1, fooProvider2]
+        });
+        const applicableProvides = await reconciliator.applicableProviders();
+        expect(spy1).toHaveBeenCalledTimes(1);
+        expect(spy2).toHaveBeenCalledTimes(1);
+        expect(applicableProvides).toEqual(
+          expect.arrayContaining([fooProvider1, fooProvider2])
+        );
+        spy1.mockRestore();
+        spy2.mockRestore();
+      });
+    });
   });
 });
