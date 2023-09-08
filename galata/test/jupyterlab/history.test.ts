@@ -16,18 +16,40 @@ test.describe('make a notebook', () => {
     await page.notebook.createNew(fileName);
   });
   test('attempting', async ({ page }) => {
-    await page.notebook.addCell('code', 'print("history expected")');
+    await page.notebook.setCell(0, 'code', '1 + 2');
+    await page.notebook.addCell('code', '2 + 3');
     // await page.notebook.runCell(1, true)
-    await page.notebook.addCell('code', '2 ** 3');
+    await page.notebook.addCell('code', '3 + 4');
     await page.notebook.run();
     // const output = (await page.notebook.getCellTextOutput(1))[0]
     // expect(output).toBe("1");
+    const timeout = 1000;
+
+    await page.waitForTimeout(timeout);
     await page.notebook.enterCellEditingMode(2);
     await page.keyboard.press('Alt+ArrowUp');
+    await page.keyboard.press('End');
+    await page.keyboard.press('Enter');
     // await page.notebook.leaveCellEditingMode(2);
-    // const new_text = await (await page.notebook.getCell(2)).getAttribute('');
-    // await page.pause()
-    // expect(new_text).toBe('print("history expected")')
+    await page.waitForTimeout(timeout);
+
+    // await page.notebook.enterCellEditingMode(1);
+    // await page.notebook.leaveCellEditingMode(1);
+
+    // await page.notebook.enterCellEditingMode(2);
+    // await page.waitForTimeout(timeout)
+    await page.keyboard.press('Alt+ArrowUp');
+    await page.waitForTimeout(timeout);
+    await page.keyboard.press('Alt+ArrowDown');
+    await page.waitForTimeout(timeout);
+    await page.keyboard.press('Alt+ArrowUp');
+    await page.waitForTimeout(timeout);
+    await page.keyboard.press('Alt+ArrowUp');
+    // await page.waitForCondition(()=>{return }, 100)
+    await page.waitForTimeout(timeout);
+    await page.keyboard.press('Alt+ArrowUp');
+    // input should now be the same as first cell
+
     const imageName = 'history.png';
     const nbPanel = await page.notebook.getNotebookInPanel();
 
