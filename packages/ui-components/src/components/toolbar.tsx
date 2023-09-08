@@ -468,49 +468,53 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     const toolbarPadding = 2;
     let width = opener.isHidden ? toolbarPadding : toolbarPadding + openerWidth;
 
-    this._getWidgetsToRemove(width, toolbarWidth, openerWidth).then(values => {
-      let { width, widgetsToRemove } = values;
-      while (widgetsToRemove.length > 0) {
-        const widget = widgetsToRemove.pop() as Widget;
-        width -= this._getWidgetWidth(widget);
-        opener.addWidget(widget);
-      }
-      if (opener.widgetCount() > 0) {
-        const widgetsToAdd = [];
-        let index = 0;
-        let widget = opener.widgetAt(index);
-        const widgetCount = opener.widgetCount();
-
-        width += this._getWidgetWidth(widget);
-
-        if (widgetCount === 1 && width - openerWidth <= toolbarWidth) {
-          width -= openerWidth;
+    this._getWidgetsToRemove(width, toolbarWidth, openerWidth)
+      .then(values => {
+        let { width, widgetsToRemove } = values;
+        while (widgetsToRemove.length > 0) {
+          const widget = widgetsToRemove.pop() as Widget;
+          width -= this._getWidgetWidth(widget);
+          opener.addWidget(widget);
         }
+        if (opener.widgetCount() > 0) {
+          const widgetsToAdd = [];
+          let index = 0;
+          let widget = opener.widgetAt(index);
+          const widgetCount = opener.widgetCount();
 
-        while (width < toolbarWidth && index < widgetCount) {
-          widgetsToAdd.push(widget);
-          index++;
-          widget = opener.widgetAt(index);
-          if (widget) {
-            width += this._getWidgetWidth(widget);
-          } else {
-            break;
+          width += this._getWidgetWidth(widget);
+
+          if (widgetCount === 1 && width - openerWidth <= toolbarWidth) {
+            width -= openerWidth;
+          }
+
+          while (width < toolbarWidth && index < widgetCount) {
+            widgetsToAdd.push(widget);
+            index++;
+            widget = opener.widgetAt(index);
+            if (widget) {
+              width += this._getWidgetWidth(widget);
+            } else {
+              break;
+            }
+          }
+
+          while (widgetsToAdd.length > 0) {
+            const widget = widgetsToAdd.shift()!;
+            this.addItem(Private.nameProperty.get(widget), widget);
           }
         }
 
-        while (widgetsToAdd.length > 0) {
-          const widget = widgetsToAdd.shift()!;
-          this.addItem(Private.nameProperty.get(widget), widget);
+        if (opener.widgetCount() > 0) {
+          opener.updatePopup();
+          opener.show();
+        } else {
+          opener.hide();
         }
-      }
-
-      if (opener.widgetCount() > 0) {
-        opener.updatePopup();
-        opener.show();
-      } else {
-        opener.hide();
-      }
-    });
+      })
+      .catch(msg => {
+        console.error('Error while computing the ReactiveToolbar', msg);
+      });
   }
 
   private async _getWidgetsToRemove(
