@@ -3,9 +3,6 @@
   "include": ["src/**/*", "test/*"],
   "references": [
     {
-      "path": "../application"
-    },
-    {
       "path": "../apputils"
     },
     {

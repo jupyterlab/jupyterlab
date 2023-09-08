@@ -1,13 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { LabShell } from '@jupyterlab/application';
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { WidgetLSPAdapter } from './adapter';
-import { IWidgetLSPAdapterTracker } from '../tokens';
+import { IShell, IWidgetLSPAdapterTracker } from '../tokens';
 
 /**
  * A class that keeps track of widget adapter instances.
@@ -199,7 +198,7 @@ export class WidgetLSPAdapterTracker<
   }
 
   private _isDisposed = false;
-  private _shell: LabShell;
+  private _shell: IShell;
   private _current: T | null = null;
   private _adapters = new Set<T>();
   private _adapterAdded = new Signal<this, T>(this);
@@ -217,11 +216,7 @@ export namespace WidgetLSPAdapterTracker {
   export interface IOptions {
     /**
      * The JupyterLab shell for tracking all widgets.
-     *
-     * TODO: Change the type to `JupyterFrontEnd.IShell` to maximize
-     * compatibility with other lab-base applications (for example, Notebook).
-     * We need https://github.com/jupyterlab/jupyterlab/issues/14782
      */
-    shell: LabShell;
+    shell: IShell;
   }
 }

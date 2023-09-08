@@ -4,6 +4,7 @@
 import { ServerConnection } from '@jupyterlab/services';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
+import { FocusTracker, Widget } from '@lumino/widgets';
 import { Token } from '@lumino/coreutils';
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -560,6 +561,24 @@ export interface ILSPCodeExtractorsManager {
     extractor: IForeignCodeExtractor,
     hostLanguage: LanguageIdentifier | null
   ): void;
+}
+
+/**
+ * An interface with the necessary properties from `JupyterFrontEnd.IShell`
+ * for the `WidgetLSPAdapterTracker`. Used to track the active DocumentWidget.
+ *
+ * For more info see https://github.com/jupyterlab/jupyterlab/pull/14920#discussion_r1316507818
+ * and https://github.com/jupyterlab/jupyterlab/pull/14920#discussion_r1305019718 .
+ */
+export interface IShell {
+  /**
+   * The active widget in the shell's main area.
+   */
+  readonly activeWidget: Widget | null;
+  /**
+   * A signal emitted when main area's current focus changes.
+   */
+  readonly currentChanged: ISignal<this, FocusTracker.IChangedArgs<Widget>>;
 }
 
 /**
