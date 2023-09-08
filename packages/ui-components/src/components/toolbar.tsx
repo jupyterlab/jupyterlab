@@ -459,43 +459,22 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   }
 
   private _onResize() {
-    if (this.parent && this.parent.isAttached) {
-      const toolbarWidth = this.node.clientWidth;
-      const opener = this.popupOpener;
-      const openerWidth = 30;
-      const toolbarPadding = 2;
-      const layout = this.layout as ToolbarLayout;
+    if (!(this.parent && this.parent.isAttached)) {
+      return;
+    }
+    const toolbarWidth = this.node.clientWidth;
+    const opener = this.popupOpener;
+    const openerWidth = 30;
+    const toolbarPadding = 2;
+    let width = opener.isHidden ? toolbarPadding : toolbarPadding + openerWidth;
 
-      let width = opener.isHidden
-        ? toolbarPadding
-        : toolbarPadding + openerWidth;
-      let index = 0;
-      const widgetsToRemove = [];
-      const toIndex = layout.widgets.length - 1;
-
-      while (index < toIndex) {
-        const widget = layout.widgets[index];
-        this._saveWidgetWidth(widget);
-        width += this._getWidgetWidth(widget);
-        if (
-          widgetsToRemove.length === 0 &&
-          opener.isHidden &&
-          width + openerWidth > toolbarWidth
-        ) {
-          width += openerWidth;
-        }
-        if (width > toolbarWidth) {
-          widgetsToRemove.push(widget);
-        }
-        index++;
-      }
-
+    this._getWidgetsToRemove(width, toolbarWidth, openerWidth).then(values => {
+      let { width, widgetsToRemove } = values;
       while (widgetsToRemove.length > 0) {
         const widget = widgetsToRemove.pop() as Widget;
         width -= this._getWidgetWidth(widget);
         opener.addWidget(widget);
       }
-
       if (opener.widgetCount() > 0) {
         const widgetsToAdd = [];
         let index = 0;
@@ -531,11 +510,50 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       } else {
         opener.hide();
       }
-    }
+    });
   }
 
-  private _saveWidgetWidth(widget: Widget) {
+  private async _getWidgetsToRemove(
+    width: number,
+    toolbarWidth: number,
+    openerWidth: number
+  ) {
+    const opener = this.popupOpener;
+    const layout = this.layout as ToolbarLayout;
+    const toIndex = layout.widgets.length - 1;
+
+    const widgetsToRemove = [];
+
+    let index = 0;
+    while (index < toIndex) {
+      const widget = layout.widgets[index];
+      await this._saveWidgetWidth(widget);
+      width += this._getWidgetWidth(widget);
+      if (
+        widgetsToRemove.length === 0 &&
+        opener.isHidden &&
+        width + openerWidth > toolbarWidth
+      ) {
+        width += openerWidth;
+      }
+      if (width > toolbarWidth) {
+        widgetsToRemove.push(widget);
+      }
+      index++;
+    }
+
+    return {
+      width: width,
+      widgetsToRemove: widgetsToRemove
+    };
+  }
+
+  private async _saveWidgetWidth(widget: Widget) {
+    if (widget instanceof ReactWidget) {
+      await widget.renderPromise;
+    }
     const widgetName = Private.nameProperty.get(widget);
+
     this._widgetWidths![widgetName] = widget.hasClass(TOOLBAR_SPACER_CLASS)
       ? 2
       : // Add button margin and toolbar items gap = 2 * (4 + 1.5)
