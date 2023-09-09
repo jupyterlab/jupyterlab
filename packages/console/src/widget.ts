@@ -730,7 +730,11 @@ export class CodeConsole extends Widget {
     }
     this._banner!.model.sharedModel.setSource(info.banner);
     const lang = info.language_info as nbformat.ILanguageInfoMetadata;
-    this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
+    const mimetypes = this._mimeTypeService.getMimeTypeByLanguage(lang);
+    this._mimetype =
+      Array.isArray(mimetypes) && mimetypes.length !== 0
+        ? mimetypes[0]
+        : mimetypes;
     if (this.promptCell) {
       this.promptCell.model.mimeType = this._mimetype;
     }

@@ -676,8 +676,12 @@ const main: JupyterFrontEndPlugin<void> = {
       }
       const info = (await kernel.info).language_info;
       const name = info.name;
-      const mimeType =
+      const mimeTypes =
         editorServices.mimeTypeService.getMimeTypeByLanguage({ name }) ?? '';
+      const mimeType =
+        Array.isArray(mimeTypes) && mimeTypes.length !== 0
+          ? mimeTypes[0]
+          : mimeTypes;
       return mimeType;
     };
 
