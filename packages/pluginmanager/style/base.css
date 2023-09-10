@@ -58,20 +58,30 @@
   overflow-x: hidden;
 }
 
-.jp-sortable-table th,
-.jp-sortable-table td {
+.jp-sortable-table-tr > th,
+.jp-sortable-table-tr > td {
+  position: relative;
   padding: 4px 12px 2px;
   height: 18px;
 }
 
-.jp-sortable-table-tr > td {
+.jp-sortable-table-tr > td::before,
+.jp-sortable-table-tr > th::before {
   border-left: var(--jp-border-width) solid var(--jp-border-color3);
+
+  /* border is implemented via pseudo-element to enable selective blending */
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
 
   /* this serves to boost border color when background changes on hover */
   mix-blend-mode: multiply;
 }
 
-.jp-sortable-table th {
+.jp-sortable-table-tr > th {
   font-weight: 500;
   text-align: left;
   border-width: var(--jp-border-width) 0;
@@ -86,15 +96,15 @@
   user-select: none;
 }
 
-.jp-sortable-table th:not(:first-child) {
-  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+.jp-sortable-table-tr > th:not(:first-child) {
+  border-left-color: var(--jp-border-color2);
 }
 
-.jp-sortable-table th:hover {
+.jp-sortable-table-tr > th:hover {
   background: var(--jp-layout-color2);
 }
 
-.jp-sortable-table > tbody > tr:hover {
+.jp-sortable-table-tr:hover {
   background: var(--jp-layout-color2);
 }
 
@@ -119,10 +129,10 @@
   height: auto;
 }
 
-.jp-sortable-table > thead th:not(.jp-sorted-header) .jp-sort-icon {
+.jp-sortable-table-tr > th:not(.jp-sorted-header) .jp-sort-icon {
   opacity: 0;
 }
 
-.jp-sortable-table > thead th:not(.jp-sorted-header):hover .jp-sort-icon {
+.jp-sortable-table-tr > th:not(.jp-sorted-header):hover .jp-sort-icon {
   opacity: 0.5;
 }

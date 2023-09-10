@@ -117,7 +117,7 @@ export function Table<T>(props: Table.IOptions<T>) {
   return (
     <table className={TABLE_CLASS}>
       <thead>
-        <tr>{columnsHeaders}</tr>
+        <tr className={'jp-sortable-table-tr'}>{columnsHeaders}</tr>
       </thead>
       <tbody>{elements}</tbody>
     </table>
