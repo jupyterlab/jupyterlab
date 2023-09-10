@@ -825,9 +825,9 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             handlers.append(ext_handler)
 
             # Add plugin manager handlers
-            lock_rules = {
-                rule for rule, value in page_config.get("lockedExtensions", {}).items() if value
-            }
+            lock_rules = frozenset(
+                {rule for rule, value in page_config.get("lockedExtensions", {}).items() if value}
+            )
             handlers.append(
                 (
                     plugins_handler_path,
