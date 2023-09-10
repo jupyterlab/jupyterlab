@@ -12,7 +12,7 @@ export function PluginRequiredMessage(props: {
   return (
     <>
       {props.trans.__(
-        'The plugin %1 cannot be disabled as it is required by other plugins:',
+        'The plugin "%1" cannot be disabled as it is required by other plugins:',
         props.plugin.id
       )}
       <ul>
@@ -33,7 +33,7 @@ export function PluginInUseMessage(props: {
   return (
     <div className={'jp-pluginmanager-PluginInUseMessage'}>
       {props.trans.__(
-        'While the plugin %1 is not required by other enabled plugins, some plugins provide optional features depending on it. These plugins are:',
+        'While the plugin "%1" is not required by other enabled plugins, some plugins provide optional features depending on it. These plugins are:',
         props.plugin.id
       )}
       <ul>
