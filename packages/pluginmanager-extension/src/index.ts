@@ -16,7 +16,6 @@ import {
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   CommandToolbarButton,
@@ -24,7 +23,11 @@ import {
   refreshIcon
 } from '@jupyterlab/ui-components';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { PluginListModel, Plugins } from '@jupyterlab/pluginmanager';
+import {
+  IPluginManager,
+  PluginListModel,
+  Plugins
+} from '@jupyterlab/pluginmanager';
 
 /**
  * The command IDs used by the pluginmanager plugin.
@@ -40,16 +43,16 @@ const PLUGIN_ID = '@jupyterlab/pluginmanager-extension:plugin';
 /**
  * A plugin for managing status of other plugins.
  */
-const pluginmanager: JupyterFrontEndPlugin<void> = {
+const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
   id: PLUGIN_ID,
   description: 'Enable or disable individual plugins.',
   autoStart: true,
   requires: [],
-  optional: [ITranslator, IMainMenu, ICommandPalette, ILayoutRestorer],
+  optional: [ITranslator, ICommandPalette, ILayoutRestorer],
+  provides: IPluginManager,
   activate: (
     app: JupyterLab,
     translator: ITranslator | null,
-    menu: IMainMenu | null,
     palette: ICommandPalette | null,
     restorer: ILayoutRestorer | null
   ) => {
@@ -143,11 +146,6 @@ const pluginmanager: JupyterFrontEndPlugin<void> = {
       palette.addItem({ command: CommandIDs.open, category });
     }
 
-    if (menu) {
-      const settingsMenu = menu.settingsMenu;
-      settingsMenu.addItem({ command: CommandIDs.open });
-    }
-
     if (restorer) {
       void restorer.restore(tracker, {
         command: CommandIDs.open,
@@ -162,6 +160,11 @@ const pluginmanager: JupyterFrontEndPlugin<void> = {
         }
       });
     }
+    return {
+      open: () => {
+        return app.commands.execute(CommandIDs.open);
+      }
+    };
   }
 };
 
