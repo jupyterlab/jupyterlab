@@ -7,7 +7,7 @@ import json
 import re
 from dataclasses import dataclass, field, fields, replace
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, FrozenSet, List, Optional, Set, Tuple, Union
 
 import tornado
 from jupyterlab_server.translation_utils import translator
@@ -132,7 +132,7 @@ class PluginManagerOptions:
     lock_all: bool = False
 
 
-@dataclass
+@dataclass(frozen=True)
 class ExtensionManagerOptions(PluginManagerOptions):
     """Extension manager options.
 
