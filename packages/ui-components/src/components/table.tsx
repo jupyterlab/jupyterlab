@@ -3,8 +3,8 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
 import React, { ReactElement, useState } from 'react';
+import { caretDownIcon, caretUpIcon } from '../icon';
 
 export const TABLE_CLASS = 'jp-sortable-table';
 
@@ -49,7 +49,9 @@ export namespace Table {
 }
 
 /**
- * Sortable table component.
+ * Sortable table component for small datasets.
+ *
+ * For large datasets use `DataGrid` from `@lumino/datagrid`.
  */
 export function Table<T>(props: Table.IOptions<T>) {
   const [sortState, setSortState] = useState<Table.ISortState>({

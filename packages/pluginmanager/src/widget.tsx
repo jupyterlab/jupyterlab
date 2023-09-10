@@ -4,18 +4,15 @@
  */
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import { FilterBox, LabIcon, ReactWidget } from '@jupyterlab/ui-components';
+import {
+  FilterBox,
+  stopIcon as lockIcon,
+  ReactWidget,
+  Table
+} from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
 import * as React from 'react';
 import { Action, IEntry, PluginListModel } from './model';
-import { Table } from './table';
-
-import lockSvgStr from '../style/icons/lock.svg';
-
-const lockIcon = new LabIcon({
-  name: 'pluginmanager:lock',
-  svgstr: lockSvgStr
-});
 
 /**
  * A namespace for plugins panel.
