@@ -272,40 +272,33 @@ export namespace JupyterLab {
     isConnected: boolean;
   }
 
+  /*
+   * A read-only subset of the `Token`.
+   */
+  interface IToken extends Readonly<Pick<Token<any>, 'name' | 'description'>> {
+    // no-op
+  }
+
   /**
    * A readonly subset of lumino plugin bundle (excluding activation function,
-   * service, and state information).
+   * service, and state information, and runtime token details).
    */
-  interface ILuminoPluginData {
-    /**
-     * The human readable ID of the plugin.
-     */
-    readonly id: string;
-
-    /**
-     * The description of the plugin.
-     */
-    readonly description: string;
-
-    /**
-     * Whether the plugin should be activated on application start.
-     */
-    readonly autoStart: boolean;
+  interface ILuminoPluginData extends Readonly<Pick<JupyterFrontEndPlugin<void>, 'id' | 'description' | 'autoStart'>> {
 
     /**
      * The types of required services for the plugin, or `[]`.
      */
-    readonly requires: Token<any>[];
+    readonly requires: IToken[];
 
     /**
      * The types of optional services for the the plugin, or `[]`.
      */
-    readonly optional: Token<any>[];
+    readonly optional: IToken[];
 
     /**
      * The type of service provided by the plugin, or `null`.
      */
-    readonly provides: Token<any> | null;
+    readonly provides: IToken | null;
   }
 
   /**

@@ -114,7 +114,7 @@ class AvailableList extends ReactWidget {
                 label: this.trans.__('Description'),
                 renderCell: (row: IEntry) => <>{row.description}</>,
                 sort: (a: IEntry, b: IEntry) =>
-                  a.description.localeCompare(b.description),
+                  a.description && b.description ? a.description.localeCompare(b.description) : undefined,
                 isHidden: true
               },
               {

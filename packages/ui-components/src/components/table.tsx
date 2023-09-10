@@ -42,7 +42,7 @@ export namespace Table {
     id: string;
     label: string;
     renderCell(data: T): ReactElement;
-    sort(a: T, b: T): number;
+    sort(a: T, b: T): number | undefined;
     isAvailable?(): boolean;
     isHidden?: boolean;
   }
