@@ -114,7 +114,9 @@ class AvailableList extends ReactWidget {
                 label: this.trans.__('Description'),
                 renderCell: (row: IEntry) => <>{row.description}</>,
                 sort: (a: IEntry, b: IEntry) =>
-                  a.description && b.description ? a.description.localeCompare(b.description) : undefined,
+                  a.description && b.description
+                    ? a.description.localeCompare(b.description)
+                    : undefined,
                 isHidden: true
               },
               {
@@ -123,15 +125,15 @@ class AvailableList extends ReactWidget {
                 renderCell: (row: IEntry) => {
                   switch (row.autoStart) {
                     case 'defer':
-                      return this.trans.__('Defer')
+                      return this.trans.__('Defer');
                     case true:
-                      return this.trans.__('Yes')
+                      return this.trans.__('Yes');
                     case false:
-                    case undefined:  // The default is `false`.
+                    case undefined: // The default is `false`.
                       return this.trans.__('No');
                     default:
                       const leftover: never = row.autoStart;
-                      throw new Error(`Unknown value: ${leftover}`)
+                      throw new Error(`Unknown value: ${leftover}`);
                   }
                 },
                 sort: (a: IEntry, b: IEntry) =>
@@ -178,6 +180,17 @@ class AvailableList extends ReactWidget {
                       type="checkbox"
                       checked={row.enabled}
                       disabled={row.locked || !this.model.isDisclaimed}
+                      title={
+                        row.locked || !this.model.isDisclaimed
+                          ? row.locked
+                            ? this.trans.__('This plugin is locked.')
+                            : this.trans.__(
+                                'To enable/disable, please acknowledge the disclaimer.'
+                              )
+                          : row.enabled
+                          ? this.trans.__('Disable %1 plugin', row.id)
+                          : this.trans.__('Enable %1 plugin', row.id)
+                      }
                       onChange={(
                         event: React.ChangeEvent<HTMLInputElement>
                       ) => {
@@ -195,7 +208,7 @@ class AvailableList extends ReactWidget {
                       <lockIcon.react
                         tag="span"
                         title={this.trans.__(
-                          'This plugin was locked by system administrator or is a cricital dependency and cannot be enabled/disabled.'
+                          'This plugin was locked by system administrator or is a critical dependency and cannot be enabled/disabled.'
                         )}
                       />
                     ) : (
