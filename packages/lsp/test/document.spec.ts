@@ -137,7 +137,6 @@ describe('@jupyterlab/lsp', () => {
         document.dispose();
         expect(document.foreignDocuments.size).toEqual(0);
         expect(document['sourceLines'].size).toEqual(0);
-        expect(document['unusedDocuments'].size).toEqual(0);
         expect(document['unusedStandaloneDocuments'].size).toEqual(0);
         expect(document['virtualLines'].size).toEqual(0);
       });
