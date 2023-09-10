@@ -3,13 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { VDomRenderer } from '@jupyterlab/apputils';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
-import {
-  FilterBox,
-  lockIcon,
-  ReactWidget,
-  Table
-} from '@jupyterlab/ui-components';
+import { FilterBox, lockIcon, Table } from '@jupyterlab/ui-components';
 import { Panel } from '@lumino/widgets';
 import * as React from 'react';
 import { Action, IEntry, PluginListModel } from './model';
@@ -51,14 +47,13 @@ export class Plugins extends Panel {
   protected trans: TranslationBundle;
 }
 
-class AvailableList extends ReactWidget {
+class AvailableList extends VDomRenderer<PluginListModel> {
   constructor(
-    protected model: PluginListModel,
+    model: PluginListModel,
     protected trans: TranslationBundle
   ) {
-    super();
+    super(model);
     this.addClass('jp-pluginmanager-AvailableList');
-    model.stateChanged.connect(this.update, this);
   }
 
   render(): JSX.Element {
@@ -243,13 +238,12 @@ class AvailableList extends ReactWidget {
   }
 }
 
-class Disclaimer extends ReactWidget {
+class Disclaimer extends VDomRenderer<PluginListModel> {
   constructor(
-    protected model: PluginListModel,
+    model: PluginListModel,
     protected trans: TranslationBundle
   ) {
-    super();
-    model.stateChanged.connect(this.update, this);
+    super(model);
     this.addClass('jp-pluginmanager-Disclaimer');
   }
   render(): JSX.Element {
@@ -278,13 +272,12 @@ class Disclaimer extends ReactWidget {
   }
 }
 
-class Header extends ReactWidget {
+class Header extends VDomRenderer<PluginListModel> {
   constructor(
-    protected model: PluginListModel,
+    model: PluginListModel,
     protected trans: TranslationBundle
   ) {
-    super();
-    model.stateChanged.connect(this.update, this);
+    super(model);
     this.addClass('jp-pluginmanager-Header');
   }
 
