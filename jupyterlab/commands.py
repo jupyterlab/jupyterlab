@@ -2343,11 +2343,11 @@ def _is_disabled(name, disabled=None):
     return False
 
 
-@dataclass
+@dataclass(frozen=True)
 class LockStatus:
     entire_extension_locked: bool
     # locked plugins are only given if extension is not locked as a whole
-    locked_plugins: Optional[Set[str]] = None
+    locked_plugins: Optional[FrozenSet[str]] = None
 
 
 def _is_locked(name, locked=None) -> LockStatus:

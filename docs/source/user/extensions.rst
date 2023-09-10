@@ -390,7 +390,7 @@ To unlock a locked plugin:
 
     jupyter labextension unlock my-extension:plugin
 
-The locked plugins appear on the pluigin list with a lock icon and cannot be enabled/disabled from the user interface:
+The locked plugins appear on the plugin list with a lock icon and cannot be enabled/disabled from the user interface:
 
 .. image:: ../images/plugin-manager-plugin-locked.png
    :align: center

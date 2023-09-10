@@ -39,7 +39,7 @@ export interface IEntry extends JupyterLab.IPluginInfo {
    * The check is performed on the server side, this field is only to show users
    * an indicator of the lock status.
    */
-  locked: boolean;
+  readonly locked: boolean;
 
   /**
    * Token name (if any) excluding the plugin prefix (unless none)
@@ -51,14 +51,14 @@ interface IPluginManagerStatus {
   /**
    * Whether to lock (prevent enabling/disabling) all plugins.
    */
-  allLocked: boolean;
+  readonly allLocked: boolean;
   /**
    * A list of plugins or extensions that cannot be toggled.
    *
    * If extension name is provided, all its plugins will be disabled.
    * The plugin names need to follow colon-separated format of `extension:plugin`.
    */
-  lockRules: string[];
+  readonly lockRules: string[];
 }
 
 /**
@@ -92,7 +92,7 @@ export namespace PluginListModel {
   }
   /** A subset of `JupyterLab.IInfo` interface (defined to reduce API surface) */
   export interface IPluginData {
-    availablePlugins: JupyterLab.IPluginInfo[];
+    readonly availablePlugins: JupyterLab.IPluginInfo[];
   }
   /**
    * The initialization options for a plugins list model.
@@ -187,7 +187,7 @@ export class PluginListModel extends VDomModel {
           dependants,
           trans: this._trans
         }),
-        buttons: [Dialog.okButton({ label: this._trans.__('Ok') })]
+        buttons: [Dialog.okButton()]
       });
       return;
     }
@@ -201,7 +201,7 @@ export class PluginListModel extends VDomModel {
         }),
         buttons: [
           Dialog.okButton({ label: this._trans.__('Disable anyway') }),
-          Dialog.cancelButton({ label: this._trans.__('Cancel') })
+          Dialog.cancelButton()
         ]
       });
       if (!userConfirmation.button.accept) {

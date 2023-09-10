@@ -112,9 +112,9 @@ export async function main() {
       allPlugins.push({
         id: plugin.id,
         description: plugin.description,
-        requires: plugin.requires || [],
-        optional: plugin.optional || [],
-        provides: plugin.provides || null,
+        requires: plugin.requires ?? [],
+        optional: plugin.optional ?? [],
+        provides: plugin.provides ?? null,
         autoStart: plugin.autoStart,
         enabled: !isDisabled,
         extension: extension.__scope__

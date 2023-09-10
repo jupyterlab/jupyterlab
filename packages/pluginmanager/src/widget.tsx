@@ -69,9 +69,10 @@ class AvailableList extends ReactWidget {
       <>
         {this.model.statusError !== null ? (
           <ErrorMessage>
-            {`Error querying installed extensions${
+            {this.trans.__(
+              'Error querying installed extensions%1', 
               this.model.statusError ? `: ${this.model.statusError}` : '.'
-            }`}
+            )}
           </ErrorMessage>
         ) : this.model.isLoading ? (
           <div className="jp-pluginmanager-loader">

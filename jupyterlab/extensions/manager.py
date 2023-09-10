@@ -117,7 +117,7 @@ class ActionResult:
     needs_restart: List[str] = field(default_factory=list)
 
 
-@dataclass
+@dataclass(frozen=True)
 class PluginManagerOptions:
     """Plugin manager options.
 
@@ -128,7 +128,7 @@ class PluginManagerOptions:
             The plugin names need to follow colon-separated format of `extension:plugin`.
     """
 
-    lock_rules: Set[str] = field(default_factory=set)
+    lock_rules: FrozenSet[str] = field(default_factory=frozenset)
     lock_all: bool = False
 
 
@@ -215,7 +215,7 @@ class PluginManager(LoggingConfigurable):
             "allLocked": self.options.lock_all,
         }
 
-    def _find_locked(self, plugins_or_extensions: List[str]) -> Set[str]:
+    def _find_locked(self, plugins_or_extensions: List[str]) -> FrozenSet[str]:
         """Find a subset of plugins (or extensions) which are locked"""
         if self.options.lock_all:
             return set(plugins_or_extensions)
