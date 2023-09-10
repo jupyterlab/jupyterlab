@@ -6,7 +6,7 @@
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import {
   FilterBox,
-  stopIcon as lockIcon,
+  lockIcon,
   ReactWidget,
   Table
 } from '@jupyterlab/ui-components';
@@ -120,11 +120,20 @@ class AvailableList extends ReactWidget {
               {
                 id: 'autostart',
                 label: this.trans.__('Autostart?'),
-                renderCell: (row: IEntry) => (
-                  <>
-                    {row.autoStart ? this.trans.__('Yes') : this.trans.__('No')}
-                  </>
-                ),
+                renderCell: (row: IEntry) => {
+                  switch (row.autoStart) {
+                    case 'defer':
+                      return this.trans.__('Defer')
+                    case true:
+                      return this.trans.__('Yes')
+                    case false:
+                    case undefined:  // The default is `false`.
+                      return this.trans.__('No');
+                    default:
+                      const leftover: never = row.autoStart;
+                      throw new Error(`Unknown value: ${leftover}`)
+                  }
+                },
                 sort: (a: IEntry, b: IEntry) =>
                   a.autoStart === b.autoStart ? 0 : a.autoStart ? -1 : 1
               },

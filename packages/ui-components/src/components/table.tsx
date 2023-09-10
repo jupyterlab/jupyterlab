@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, ReactNode, useState } from 'react';
 import { caretDownIcon, caretUpIcon } from '../icon';
 
 export const TABLE_CLASS = 'jp-sortable-table';
@@ -26,7 +26,7 @@ export namespace Table {
     rows: IRow<T>[];
     columns: IColumn<T>[];
     onRowClick?: React.MouseEventHandler<HTMLTableRowElement>;
-    blankIndicator: () => ReactElement;
+    blankIndicator: () => ReactNode;
   }
   /**
    * Table row with data to display.
@@ -41,7 +41,7 @@ export namespace Table {
   export interface IColumn<T> {
     id: string;
     label: string;
-    renderCell(data: T): ReactElement;
+    renderCell(data: T): ReactNode;
     sort(a: T, b: T): number | undefined;
     isAvailable?(): boolean;
     isHidden?: boolean;
