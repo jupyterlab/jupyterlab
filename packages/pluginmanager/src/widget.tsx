@@ -316,12 +316,6 @@ class Header extends ReactWidget {
   }
 }
 
-function ErrorMessage(props: ErrorMessage.IProperties) {
+function ErrorMessage(props: React.PropsWithChildren) {
   return <div className="jp-pluginmanager-error">{props.children}</div>;
-}
-
-namespace ErrorMessage {
-  export interface IProperties {
-    children: React.ReactNode;
-  }
 }
