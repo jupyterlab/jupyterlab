@@ -147,6 +147,10 @@ export class PluginListModel extends VDomModel {
    * Contains an error message if an error occurred when querying plugin status.
    */
   statusError: string | null = null;
+  /**
+   * Contains an error message if an error occurred when enabling/disabling plugin.
+   */
+  actionError: string | null = null;
 
   get isLoading(): boolean {
     return this._isLoading;
@@ -264,6 +268,8 @@ export class PluginListModel extends VDomModel {
    * @param entry The plugin to perform the action on.
    */
   private _performAction(action: string, entry: IEntry): Promise<IActionReply> {
+    this.actionError = null;
+
     const actionRequest = this._requestAPI<IActionReply>(
       {},
       {
@@ -275,14 +281,10 @@ export class PluginListModel extends VDomModel {
       }
     );
 
-    actionRequest.then(
-      _ => {
-        this.actionError = null;
-      },
-      reason => {
-        this.actionError = reason.toString();
-      }
-    );
+    actionRequest.catch(reason => {
+      this.actionError = reason.toString();
+    });
+
     this._addPendingAction(actionRequest);
     return actionRequest;
   }
@@ -459,7 +461,6 @@ export class PluginListModel extends VDomModel {
     return data;
   }
 
-  actionError: string | null = null;
   private _trackerDataChanged: Signal<PluginListModel, void> = new Signal(this);
   private _available: Map<string, IEntry>;
   private _isLoading = false;
