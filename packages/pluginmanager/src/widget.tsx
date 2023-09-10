@@ -70,7 +70,7 @@ class AvailableList extends ReactWidget {
         {this.model.statusError !== null ? (
           <ErrorMessage>
             {this.trans.__(
-              'Error querying installed extensions%1', 
+              'Error querying installed extensions%1',
               this.model.statusError ? `: ${this.model.statusError}` : '.'
             )}
           </ErrorMessage>

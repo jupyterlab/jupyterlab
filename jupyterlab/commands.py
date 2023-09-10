@@ -23,7 +23,7 @@ from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Event
-from typing import Optional, Set
+from typing import Optional
 from urllib.error import URLError
 from urllib.request import Request, quote, urljoin, urlopen
 
