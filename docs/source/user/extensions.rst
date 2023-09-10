@@ -357,6 +357,8 @@ all jupyterlab organization extensions.
      ]
    }
 
+.. _plugin_manager:
+
 Managing Plugins with Plugin Manager
 ------------------------------------
 
@@ -374,6 +376,8 @@ running the ``jupyter labextension enable`` or ``jupyter labextension disable`` 
    :align: center
    :class: jp-screenshot
    :alt: An example search result in the plugin extension listing.
+
+.. _locking_plugins:
 
 Locking and Unlocking Plugins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
