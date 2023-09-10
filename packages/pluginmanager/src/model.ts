@@ -152,8 +152,55 @@ export class PluginListModel extends VDomModel {
    */
   actionError: string | null = null;
 
+  /**
+   * Whether plugin data is still getting loaded.
+   */
   get isLoading(): boolean {
     return this._isLoading;
+  }
+
+  /**
+   * Whether the warning is disclaimed or not.
+   */
+  get isDisclaimed(): boolean {
+    return this._isDisclaimed;
+  }
+  set isDisclaimed(v: boolean) {
+    if (v !== this._isDisclaimed) {
+      this._isDisclaimed = v;
+      this.stateChanged.emit();
+      this._trackerDataChanged.emit(void 0);
+    }
+  }
+
+  /**
+   * The search query.
+   *
+   * Setting its value triggers a new search.
+   */
+  get query(): string {
+    return this._query;
+  }
+  set query(value: string) {
+    if (this._query !== value) {
+      this._query = value;
+      this.stateChanged.emit();
+      this._trackerDataChanged.emit(void 0);
+    }
+  }
+
+  /**
+   * A promise that resolves when the trackable data changes
+   */
+  get trackerDataChanged(): ISignal<PluginListModel, void> {
+    return this._trackerDataChanged;
+  }
+
+  /**
+   * A promise that resolves when the plugins were fetched from the server
+   */
+  get ready(): Promise<void> {
+    return this._ready.promise;
   }
 
   /**
@@ -163,7 +210,7 @@ export class PluginListModel extends VDomModel {
    */
   async enable(entry: IEntry): Promise<void> {
     if (!this.isDisclaimed) {
-      throw new Error('User has not confirmed the dislaimer');
+      throw new Error('User has not confirmed the disclaimer');
     }
     await this._performAction('enable', entry);
     entry.enabled = true;
@@ -177,7 +224,7 @@ export class PluginListModel extends VDomModel {
    */
   async disable(entry: IEntry): Promise<void> {
     if (!this.isDisclaimed) {
-      throw new Error('User has not confirmed the dislaimer');
+      throw new Error('User has not confirmed the disclaimer');
     }
     const { dependants, optionalDependants } = this.getDependants(entry);
     if (dependants.length > 0) {
@@ -351,50 +398,6 @@ export class PluginListModel extends VDomModel {
       this._isLoading = false;
       this.stateChanged.emit();
     }
-  }
-
-  /**
-   * Whether the warning is disclaimed or not.
-   */
-  get isDisclaimed(): boolean {
-    return this._isDisclaimed;
-  }
-  set isDisclaimed(v: boolean) {
-    if (v !== this._isDisclaimed) {
-      this._isDisclaimed = v;
-      this.stateChanged.emit();
-      this._trackerDataChanged.emit(void 0);
-    }
-  }
-
-  /**
-   * The search query.
-   *
-   * Setting its value triggers a new search.
-   */
-  get query(): string {
-    return this._query;
-  }
-  set query(value: string) {
-    if (this._query !== value) {
-      this._query = value;
-      this.stateChanged.emit();
-      this._trackerDataChanged.emit(void 0);
-    }
-  }
-
-  /**
-   * A promise that resolves when the trackable data changes
-   */
-  get trackerDataChanged(): ISignal<PluginListModel, void> {
-    return this._trackerDataChanged;
-  }
-
-  /**
-   * A promise that resolves when the plugins were fetched from the server
-   */
-  get ready(): Promise<void> {
-    return this._ready.promise;
   }
 
   private _isLocked(pluginId: string, status: IPluginManagerStatus): boolean {
