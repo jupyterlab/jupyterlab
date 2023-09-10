@@ -567,7 +567,7 @@
   {
     "id": "docmanager:save",
     "label": "Save ",
-    "caption": "Save and create checkpoint",
+    "caption": "document is permissioned readonly; \"save\" is disabled, use \"save as...\" instead",
     "shortcuts": [
       "Ctrl S"
     ]

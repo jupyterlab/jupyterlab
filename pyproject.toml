@@ -74,7 +74,7 @@ Pypi = "https://pypi.org/project/jupyterlab"
 
 [project.optional-dependencies]
 docs = [
-    "sphinx>=1.8,<7.2.0",
+    "sphinx>=1.8,<7.3.0",
     "sphinx-copybutton",
     "pydata-sphinx-theme>=0.13.0",
     "pytest",
@@ -85,13 +85,13 @@ docs = [
 ]
 docs-screenshots = [
     "altair==5.0.1",
-    "ipython==8.14.0",
+    "ipython==8.15.0",
     "ipywidgets==8.1.0",
     "jupyterlab-geojson==3.4.0",
-    "jupyterlab-language-pack-zh-CN==4.0.post1",
+    "jupyterlab-language-pack-zh-CN==4.0.post2",
     "matplotlib==3.7.2",
     "nbconvert>=7.0.0",
-    "pandas==2.0.3",
+    "pandas==2.1.0",
     "scipy==1.11.1",
     "vega_datasets==0.9.0",
 ]
@@ -116,7 +116,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.282",
+    "ruff==0.0.287",
     "black[jupyter]==23.7.0"
 ]
 
