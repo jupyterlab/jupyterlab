@@ -7,5 +7,4 @@
 import '@jupyterlab/ui-components/style/index.js';
 import '@jupyterlab/apputils/style/index.js';
 import '@jupyterlab/application/style/index.js';
-import '@jupyterlab/mainmenu/style/index.js';
 import '@jupyterlab/pluginmanager/style/index.js';

@@ -302,6 +302,7 @@
       "@jupyterlab/mermaid",
       "@jupyterlab/metadataform",
       "@jupyterlab/notebook",
+      "@jupyterlab/pluginmanager",
       "@jupyterlab/rendermime",
       "@jupyterlab/rendermime-interfaces",
       "@jupyterlab/services",
