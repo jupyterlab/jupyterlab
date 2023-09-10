@@ -513,8 +513,18 @@
     },
     {
       "command": "notebook:move-cursor-up",
+      "keys": ["ArrowUp"],
+      "selector": ".jp-Notebook-footer"
+    },
+    {
+      "command": "notebook:move-cursor-up",
       "keys": ["K"],
       "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:move-cursor-up",
+      "keys": ["K"],
+      "selector": ".jp-Notebook-footer"
     },
     {
       "command": "notebook:move-cursor-heading-above-or-collapse",
