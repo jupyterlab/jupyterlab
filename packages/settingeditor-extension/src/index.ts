@@ -70,7 +70,12 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     IFormRendererRegistry,
     ILabStatus
   ],
-  optional: [ILayoutRestorer, ICommandPalette, IJSONSettingEditorTracker],
+  optional: [
+    ILayoutRestorer,
+    ICommandPalette,
+    IJSONSettingEditorTracker,
+    IPluginManager
+  ],
   autoStart: true,
   provides: ISettingEditorTracker,
   activate
