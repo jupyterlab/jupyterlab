@@ -29,7 +29,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
    *
    * @return  List of applicable providers
    */
-  async applicableProviders(): Promise<Array<ICompletionProvider>> {
+  protected async applicableProviders(): Promise<Array<ICompletionProvider>> {
     const isApplicablePromises = this._providers.map(p =>
       p.isApplicable(this._context)
     );

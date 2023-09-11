@@ -230,7 +230,7 @@ describe('completer/reconciliator', () => {
           ...defaultOptions,
           providers: [fooProvider1, fooProvider2]
         });
-        const applicableProvides = await reconciliator.applicableProviders();
+        const applicableProvides = await reconciliator['applicableProviders']();
         expect(spy1).toHaveBeenCalledTimes(1);
         expect(spy2).toHaveBeenCalledTimes(1);
         expect(applicableProvides).toEqual(
