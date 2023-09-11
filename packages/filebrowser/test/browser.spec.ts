@@ -75,15 +75,19 @@ describe('filebrowser/browser', () => {
     });
 
     describe('Low Vision Support Test', () => {
-      test.use({
-        viewport: {
-          height: 1280,
-          width: 1024
-        }
+      //setting the required viewport for screenshot
+      test.beforeEach(() => {
+        test.use({
+          viewport: {
+            height: 1280,
+            width: 1024
+          }
+        });
       });
 
       test('should take snapshot at 400% zoom', async ({ page }) => {
         await page.goto();
+        // await browser.setViewportSize({width:1280, height: 1024})
         await page.evaluate('document.body.style.zoom=4.0');
 
         const imageName = 'low-vision-high-zoom.png';
