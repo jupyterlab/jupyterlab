@@ -57,10 +57,10 @@ test.describe('Advanced Plugin Manager', () => {
     page
   }) => {
     await page.evaluate(async () => {
-      // The comamnd palette should not be required by any plugins,
+      // The command paltte should not be required by any plugins,
       // but is used by many. There are multiple plugins starting
       // with `@jupyterlab/apputils-extension:palette`,
-      // so instead we use the token name for fitlering.
+      // so instead we use the token name for filtering.
       await window.jupyterapp.commands.execute('pluginmanager:open', {
         query: 'ICommandPalette'
       });
@@ -115,7 +115,7 @@ test.describe('Advanced Plugin Manager', () => {
     await disclaimerCheckbox.check();
     expect(await pluginCheckbox.isDisabled()).toEqual(true);
 
-    const lockIcon = page.locator('[data-icon="pluginmanager:lock"]');
+    const lockIcon = page.locator('[data-icon="ui-components:lock"]');
     await expect(lockIcon).toHaveCount(1);
 
     const pluginRow = page.locator(
