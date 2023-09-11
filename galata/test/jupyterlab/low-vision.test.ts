@@ -14,7 +14,6 @@ test.describe('Low Vision Support Test', () => {
     await page.goto();
     await page.evaluate('document.body.style.zoom=4.0');
 
-    const imageName = 'low-vision-high-zoom.png';
-    expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
+    expect(await page.screenshot()).toMatchSnapshot('low-vision-high-zoom.png');
   });
 });
