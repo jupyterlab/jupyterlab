@@ -75,7 +75,7 @@ describe('filebrowser/browser', () => {
     });
 
     describe('Low Vision Support Test', () => {
-      ({
+      test.use({
         viewport: {
           height: 1280,
           width: 1024
