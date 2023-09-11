@@ -75,13 +75,11 @@ describe('filebrowser/browser', () => {
     });
 
     describe('Low Vision Support Test', () => {
-      beforeEach(() => {
-        test.use({
-          viewport: {
-            height: 1280,
-            width: 1024
-          }
-        });
+      ({
+        viewport: {
+          height: 1280,
+          width: 1024
+        }
       });
 
       test('should take snapshot at 400% zoom', async ({ page }) => {
