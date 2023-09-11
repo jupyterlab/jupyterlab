@@ -14,7 +14,7 @@ import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { simulate } from 'simulate-event';
 import { FileBrowser, FilterFileBrowserModel } from '../src';
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 const ITEM_CLASS = 'jp-DirListing-item';
 const EDITOR_CLASS = 'jp-DirListing-editor';
@@ -29,6 +29,15 @@ class TestFileBrowser extends FileBrowser {
   }
 }
 
+//setting the required viewport for screenshot
+test.use({
+  autoGoto: false,
+  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
+  viewport: {
+    width: 1280,
+    height: 1024
+  }
+});
 describe('filebrowser/browser', () => {
   let manager: IDocumentManager;
   let serviceManager: ServiceManager.IManager;
@@ -75,19 +84,8 @@ describe('filebrowser/browser', () => {
     });
 
     describe('Low Vision Support Test', () => {
-      //setting the required viewport for screenshot
-      test.beforeEach(() => {
-        test.use({
-          viewport: {
-            height: 1280,
-            width: 1024
-          }
-        });
-      });
-
       test('should take snapshot at 400% zoom', async ({ page }) => {
         await page.goto();
-        // await browser.setViewportSize({width:1280, height: 1024})
         await page.evaluate('document.body.style.zoom=4.0');
 
         const imageName = 'low-vision-high-zoom.png';
