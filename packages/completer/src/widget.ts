@@ -338,7 +338,6 @@ export class Completer extends Widget {
 
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
-
     // Add the documentation panel
     if (this._showDoc) {
       let docPanel = document.createElement('div');
@@ -347,7 +346,7 @@ export class Completer extends Widget {
       node.appendChild(docPanel);
       this._docPanelExpanded = false;
     }
-    const resolvedItem = this.model?.resolveItem(this._activeIndex);
+    const resolvedItem = this.model?.resolveItem(items[this._activeIndex]);
     this._updateDocPanel(resolvedItem);
 
     if (this.isHidden) {
@@ -560,9 +559,13 @@ export class Completer extends Widget {
     let completionList = this.node.querySelector(`.${LIST_CLASS}`) as Element;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
     this._indexChanged.emit(this._activeIndex);
+    const visibleCompletionItems = this.model?.completionItems();
 
-    const resolvedItem = this.model?.resolveItem(this._activeIndex);
-    this._updateDocPanel(resolvedItem);
+    const activeCompletionItem = visibleCompletionItems?.[this._activeIndex];
+    if (activeCompletionItem) {
+      const resolvedItem = this.model?.resolveItem(activeCompletionItem);
+      this._updateDocPanel(resolvedItem);
+    }
   }
 
   /**
@@ -1038,7 +1041,7 @@ export namespace Completer {
      * promise of resolved completion item.
      */
     resolveItem(
-      activeIndex: number
+      activeIndex: number | CompletionHandler.ICompletionItem
     ): Promise<CompletionHandler.ICompletionItem | null> | undefined;
 
     /**

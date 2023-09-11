@@ -404,26 +404,30 @@ export class CompleterModel implements Completer.IModel {
 
   /**
    * Lazy load missing data of item at `activeIndex`.
-   * @param {number} activeIndex - index of item
+   * @param {number} activeIndex - the item or its index
    * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
    * Return a promise of `null` if another `resolveItem` is called (but still updates the
    * underlying completion item with resolved data). Otherwise return the
    * promise of resolved completion item.
    */
   resolveItem(
-    activeIndex: number
+    indexOrValue: number | CompletionHandler.ICompletionItem | undefined
   ): Promise<CompletionHandler.ICompletionItem | null> | undefined {
+    if (!indexOrValue) {
+      return undefined;
+    }
+    if (typeof indexOrValue === 'number') {
+      return this._resolveItemByIndex(indexOrValue);
+    } else {
+      return this._resolveItemByValue(indexOrValue);
+    }
+  }
+
+  private _resolveItemByValue(
+    completionItem: CompletionHandler.ICompletionItem
+  ): Promise<CompletionHandler.ICompletionItem | null> {
     const current = ++this._resolvingItem;
     let resolvedItem: Promise<CompletionHandler.ICompletionItem>;
-    if (!this.completionItems) {
-      return undefined;
-    }
-
-    let completionItems = this._completionItems;
-    if (!completionItems || !completionItems[activeIndex]) {
-      return undefined;
-    }
-    let completionItem = completionItems[activeIndex];
     if (completionItem.resolve) {
       let patch: Completer.IPatch | undefined;
       if (completionItem.insertText) {
@@ -457,6 +461,20 @@ export class CompleterModel implements Completer.IModel {
         // Failed to resolve missing data, return the original item.
         return Promise.resolve(completionItem);
       });
+  }
+  private _resolveItemByIndex(
+    activeIndex: number
+  ): Promise<CompletionHandler.ICompletionItem | null> | undefined {
+    if (!this.completionItems) {
+      return undefined;
+    }
+
+    let completionItems = this.completionItems();
+    if (!completionItems || !completionItems[activeIndex]) {
+      return undefined;
+    }
+    let completionItem = completionItems[activeIndex];
+    return this._resolveItemByValue(completionItem);
   }
 
   /**
