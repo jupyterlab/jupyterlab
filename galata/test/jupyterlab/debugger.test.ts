@@ -64,6 +64,8 @@ test.describe('Debugger Tests', () => {
     expect(await sourcesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-sources.png'
     );
+
+    await page.click('jp-button[title^=Continue]');
   });
 
   test('Rich variables inspector', async ({ page, tmpPath }) => {
