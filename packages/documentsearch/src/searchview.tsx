@@ -21,6 +21,7 @@ import {
   wordIcon
 } from '@jupyterlab/ui-components';
 import { ISignal, Signal } from '@lumino/signaling';
+import { CommandRegistry } from '@lumino/commands';
 import { UseSignal } from '@jupyterlab/apputils';
 import { Message } from '@lumino/messaging';
 import * as React from 'react';
@@ -62,6 +63,15 @@ interface ISearchInputProps {
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   autoFocus: boolean;
   autoUpdate: boolean;
+}
+
+/**
+ * Provides information about keybindings for display in tooltips.
+ */
+export interface ISearchKeyBindings {
+  readonly next?: CommandRegistry.IKeyBinding;
+  readonly previous?: CommandRegistry.IKeyBinding;
+  readonly toggleSearchInSelection?: CommandRegistry.IKeyBinding;
 }
 
 function SearchInput(props: ISearchInputProps): JSX.Element {
@@ -265,19 +275,33 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
 }
 
 interface IUpDownProps {
+  keyBindings?: ISearchKeyBindings;
   onHighlightPrevious: () => void;
   onHighlightNext: () => void;
   trans: TranslationBundle;
 }
 
 function UpDownButtons(props: IUpDownProps) {
+  const nextBinding = props.keyBindings?.next;
+  const prevBinding = props.keyBindings?.previous;
+
+  const nextKeys = nextBinding
+    ? CommandRegistry.formatKeystroke(nextBinding.keys)
+    : '';
+  const prevKeys = prevBinding
+    ? CommandRegistry.formatKeystroke(prevBinding.keys)
+    : '';
+
+  const prevShortcut = prevKeys ? ` (${prevKeys})` : '';
+  const nextShortcut = nextKeys ? ` (${nextKeys})` : '';
+
   return (
     <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightPrevious()}
         tabIndex={0}
-        title={props.trans.__('Previous Match')}
+        title={`${props.trans.__('Previous Match')}${prevShortcut}`}
       >
         <caretUpEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -288,7 +312,7 @@ function UpDownButtons(props: IUpDownProps) {
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightNext()}
         tabIndex={0}
-        title={props.trans.__('Next Match')}
+        title={`${props.trans.__('Next Match')}${nextShortcut}`}
       >
         <caretDownEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -504,6 +528,10 @@ interface ISearchOverlayProps {
    * Callback on search expression change.
    */
   onSearchChanged: (q: string) => void;
+  /**
+   * Provides information about keybindings for display.
+   */
+  keyBindings?: ISearchKeyBindings;
 }
 
 class SearchOverlay extends React.Component<ISearchOverlayProps> {
@@ -597,6 +625,14 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
         trans={trans}
       />
     ) : null;
+
+    const selectionBinding = this.props.keyBindings?.toggleSearchInSelection;
+    const selectionKeys = selectionBinding
+      ? CommandRegistry.formatKeystroke(selectionBinding.keys)
+      : '';
+
+    const selectionKeyHint = selectionKeys ? ` (${selectionKeys})` : '';
+
     const filter = hasFilters ? (
       <div className={SEARCH_OPTIONS_CLASS}>
         {Object.keys(filters).map(name => {
@@ -605,7 +641,10 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
             <FilterSelection
               key={name}
               title={filter.title}
-              description={filter.description}
+              description={
+                filter.description +
+                (name == 'selection' ? selectionKeyHint : '')
+              }
               isEnabled={!showReplace || filter.supportReplace}
               onToggle={async () => {
                 await this.props.onFilterChanged(
@@ -675,6 +714,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
               this.props.onHighlightNext();
             }}
             trans={trans}
+            keyBindings={this.props.keyBindings}
           />
           <button
             className={BUTTON_WRAPPER_CLASS}
@@ -733,14 +773,18 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
    *
    * @param model Search document model
    * @param translator Application translator object
+   * @param keyBindings Search keybindings
+   *
    */
   constructor(
     model: SearchDocumentModel,
-    protected translator?: ITranslator
+    protected translator?: ITranslator,
+    keyBindings?: ISearchKeyBindings
   ) {
     super(model);
     this.addClass(OVERLAY_CLASS);
     this._searchInput = React.createRef<HTMLTextAreaElement>();
+    this._keyBindings = keyBindings;
   }
 
   /**
@@ -887,6 +931,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         onReplaceAll={() => {
           void this.model.replaceAllMatches();
         }}
+        keyBindings={this._keyBindings}
       ></SearchOverlay>
     );
   }
@@ -895,4 +940,5 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
   private _showReplace = false;
   private _showFilters = false;
   private _closed = new Signal<this, void>(this);
+  private _keyBindings?: ISearchKeyBindings;
 }
