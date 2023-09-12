@@ -806,14 +806,12 @@ export class VirtualDocument implements IDisposable {
     const usedDocuments = new Set<VirtualDocument>();
     for (const line of this.sourceLines.values()) {
       for (const block of line.foreignDocumentsMap.values()) {
-        usedDocuments.add(block.virtualDocument as VirtualDocument);
+        usedDocuments.add(block.virtualDocument);
       }
     }
 
     const documentIDs = new Map<VirtualDocument, string[]>();
-    for (const [id, document] of (
-      this.foreignDocuments as Map<string, VirtualDocument>
-    ).entries()) {
+    for (const [id, document] of this.foreignDocuments.entries()) {
       const ids = documentIDs.get(document);
       if (typeof ids !== 'undefined') {
         documentIDs.set(document, [...ids, id]);
