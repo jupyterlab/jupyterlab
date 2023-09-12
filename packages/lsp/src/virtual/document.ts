@@ -924,7 +924,7 @@ export class VirtualDocument implements IDisposable {
 
   /**
    * When this counter goes down to 0, the document will be destroyed and the associated connection will be closed;
-   * This is meant to reduce the number of open connections when a a foreign code snippet was removed from the document.
+   * This is meant to reduce the number of open connections when a foreign code snippet was removed from the document.
    *
    * Note: top level virtual documents are currently immortal (unless killed by other means); it might be worth
    * implementing culling of unused documents, but if and only if JupyterLab will also implement culling of
