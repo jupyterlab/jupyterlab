@@ -207,11 +207,11 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private async generateReconciliator(
     completerContext: ICompletionContext
   ): Promise<ProviderReconciliator> {
-    let providers: Array<ICompletionProvider> = [];
+    const providers: Array<ICompletionProvider> = [];
     //TODO Update list with rank
     for (const id of this._activeProviders) {
       const provider = this._providers.get(id);
-      if (provider && (await provider.isApplicable(completerContext))) {
+      if (provider) {
         providers.push(provider);
       }
     }
