@@ -22,10 +22,6 @@ body {
   min-height: 27px;
 }
 
-.jp-Toolbar-kernelName {
-  color: var(--jp-ui-font-color1);
-}
-
 .jp-CodeCell {
   display: flex;
   flex-direction: column;

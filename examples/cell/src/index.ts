@@ -7,11 +7,8 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
   'example/'
 );
 
-import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/cells/style/index.css';
-import '@jupyterlab/theme-light-extension/style/theme.css';
-import '@jupyterlab/completer/style/index.css';
-import '../index.css';
+// Import style through JS file to deduplicate them.
+import './style';
 
 import {
   Toolbar as AppToolbar,

@@ -24,8 +24,3 @@ body {
 .notebookCommandPalette {
   min-width: 225px;
 }
-
-.jp-Notebook-toolbarCellTypeDropdown {
-  background-color: var(--jp-toolbar-background);
-  color: var(--jp-ui-font-color1);
-}
