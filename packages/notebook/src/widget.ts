@@ -1096,7 +1096,7 @@ export namespace StaticNotebook {
   /**
    * The renderer class for static notebooks.
    */
-  class Renderer implements WindowedList.IRenderer {
+  class Renderer extends WindowedList.Renderer {
     createOuter() {
       return document.createElement('div');
     }
