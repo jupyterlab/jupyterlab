@@ -31,7 +31,7 @@ test.describe('Debugger', () => {
 
     expect(
       await page.screenshot({
-        clip: { x: 1030, y: 62, width: 210, height: 28 }
+        clip: { x: 1030, y: 62, width: 210, height: 32 }
       })
     ).toMatchSnapshot('debugger_kernel.png');
   });
@@ -46,7 +46,7 @@ test.describe('Debugger', () => {
     await setSidebarWidth(page, 251, 'right');
 
     expect(
-      await page.screenshot({ clip: { y: 62, x: 780, width: 210, height: 28 } })
+      await page.screenshot({ clip: { y: 62, x: 780, width: 210, height: 32 } })
     ).toMatchSnapshot('debugger_activate.png');
   });
 
@@ -76,19 +76,21 @@ test.describe('Debugger', () => {
 
     await createNotebook(page);
 
-    const runButton = await page.waitForSelector(
-      '.jp-Toolbar-item >> [data-command="notebook:run-cell-and-select-next"]'
-    );
+    const runButton = await page
+      .locator('.jp-Toolbar-item')
+      .locator('[data-command="notebook:run-cell-and-select-next"]')
+      .getByRole('button')
+      .elementHandle();
 
     // Inject mouse pointer
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [await positionMouseOver(runButton)]
+      [await positionMouseOver(runButton!)]
     );
-    await runButton.focus();
-    await runButton.hover();
+    await runButton!.focus();
+    await runButton!.hover();
 
     expect(
       await page.screenshot({ clip: { y: 62, x: 400, width: 190, height: 60 } })
@@ -132,7 +134,7 @@ test.describe('Debugger', () => {
 
     await expect(
       page.locator('jp-button.jp-PauseOnExceptions')
-    ).not.toHaveClass(/lm-mod-toggled/);
+    ).toHaveAttribute('aria-pressed', 'false');
     await page.locator('jp-button.jp-PauseOnExceptions').click();
     const menu = page.locator('.jp-PauseOnExceptions-menu');
     await expect(menu).toBeVisible();
@@ -143,9 +145,9 @@ test.describe('Debugger', () => {
       .locator('li div.lm-Menu-itemLabel:text("userUnhandled")')
       .click();
 
-    await expect(page.locator('jp-button.jp-PauseOnExceptions')).toHaveClass(
-      /lm-mod-toggled/
-    );
+    await expect(
+      page.locator('jp-button.jp-PauseOnExceptions')
+    ).toHaveAttribute('aria-pressed', 'true');
 
     await page.notebook.enterCellEditingMode(0);
     const keyboard = page.keyboard;

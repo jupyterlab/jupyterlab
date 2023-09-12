@@ -210,25 +210,19 @@ export class FileBrowserHelper {
    */
   async refresh(): Promise<void> {
     const page = this.page;
-    const item = await page.$(
-      `xpath=//div[@id='filebrowser']//jp-button[${Utils.xpContainsClass(
-        'jp-ToolbarButtonComponent'
-      )} and .//*[@data-icon='ui-components:refresh']]`
-    );
+    const item = page
+      .locator('#filebrowser')
+      .locator('.jp-ToolbarButtonComponent[data-icon="ui-components:refresh"]');
 
-    if (item) {
-      // wait for network response or timeout
-      await Promise.race([
-        page.waitForTimeout(2000),
-        this.contents.waitForAPIResponse(async () => {
-          await item.click();
-        })
-      ]);
-      // wait for DOM rerender
-      await page.waitForTimeout(200);
-    } else {
-      throw new Error('Could not find refresh toolbar item');
-    }
+    // wait for network response or timeout
+    this.contents.waitForAPIResponse(
+      async () => {
+        await item.click();
+      },
+      { timeout: 2000 }
+    );
+    // wait for DOM rerender
+    await page.waitForTimeout(200);
   }
 
   protected async _openDirectory(dirName: string): Promise<boolean> {
