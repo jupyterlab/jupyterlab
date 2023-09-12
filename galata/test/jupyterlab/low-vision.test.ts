@@ -10,10 +10,11 @@ test.use({
 });
 
 test.describe('Low Vision Support Test', () => {
-  test('should take snapshot at 400% zoom', async ({ page }) => {
+  test('400% Zoom Mode', async ({ page }) => {
     await page.goto();
     await page.evaluate('document.body.style.zoom=4.0');
 
-    expect(await page.screenshot()).toMatchSnapshot('low-vision-high-zoom.png');
+    const imageName = 'low-vision-400-zoom.png';
+    expect(await page).toHaveScreenshot(imageName.toLowerCase());
   });
 });
