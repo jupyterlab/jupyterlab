@@ -1342,12 +1342,12 @@ export namespace WindowedList {
   /**
    * The default renderer class for windowed lists.
    */
-  class Renderer implements IRenderer {
-    createOuter() {
+  export class Renderer implements IRenderer {
+    createOuter(): HTMLElement {
       return document.createElement('div');
     }
 
-    createViewport() {
+    createViewport(): HTMLElement {
       return document.createElement('div');
     }
   }
