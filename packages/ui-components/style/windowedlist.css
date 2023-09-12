@@ -12,6 +12,10 @@
   position: relative;
 }
 
+.jp-WindowedPanel-scrollbar {
+  background-color: red;
+}
+
 .jp-WindowedPanel-viewport {
   position: absolute;
   left: 0;

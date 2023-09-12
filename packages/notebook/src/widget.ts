@@ -203,7 +203,8 @@ export class StaticNotebook extends WindowedList {
             StaticNotebook.defaultNotebookConfig.windowingMode) === 'full'
       }),
       layout: new NotebookWindowedLayout(),
-      renderer: StaticNotebook.defaultRenderer
+      renderer: StaticNotebook.defaultRenderer,
+      scrollbar: true
     });
     this.addClass(NB_CLASS);
     this.cellsArray = cells;

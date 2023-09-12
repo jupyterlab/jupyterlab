@@ -737,10 +737,18 @@ export class WindowedList<
     const renderer = options.renderer ?? WindowedList.defaultRenderer;
     const node = renderer.createOuter();
     node.className = 'jp-WindowedPanel-outer';
+
+    if (options.scrollbar) {
+      const scrollbar = node.appendChild(renderer.createScrollbar());
+      scrollbar.className = 'jp-WindowedPanel-scrollbar';
+    }
+
     const innerElement = node.appendChild(document.createElement('div'));
     innerElement.className = 'jp-WindowedPanel-inner';
+
     const viewport = innerElement.appendChild(renderer.createViewport());
     viewport.className = 'jp-WindowedPanel-viewport';
+
     super({ node });
     super.layout = options.layout ?? new WindowedLayout();
 
@@ -1347,6 +1355,10 @@ export namespace WindowedList {
       return document.createElement('div');
     }
 
+    createScrollbar(): HTMLElement {
+      return document.createElement('div');
+    }
+
     createViewport(): HTMLElement {
       return document.createElement('div');
     }
@@ -1556,6 +1568,11 @@ export namespace WindowedList {
      * A renderer for the elements of the windowed list.
      */
     renderer?: IRenderer;
+
+    /**
+     * Whether the windowed list should display a scrollbar UI.
+     */
+    scrollbar?: boolean;
   }
 
   /**
@@ -1566,6 +1583,11 @@ export namespace WindowedList {
      * Create the outer, root element of the windowed list.
      */
     createOuter(): HTMLElement;
+
+    /**
+     * Create the virtual scrollbar element.
+     */
+    createScrollbar(): HTMLElement;
 
     /**
      * Create the viewport element into which virtualized children are added.
