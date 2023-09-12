@@ -25,20 +25,34 @@ export class ProviderReconciliator implements IProviderReconciliator {
   }
 
   /**
+   * Check for the providers which are applicable with the current context
+   *
+   * @return  List of applicable providers
+   */
+  protected async applicableProviders(): Promise<Array<ICompletionProvider>> {
+    const isApplicablePromises = this._providers.map(p =>
+      p.isApplicable(this._context)
+    );
+    const applicableProviders = await Promise.all(isApplicablePromises);
+    return this._providers.filter((_, idx) => applicableProviders[idx]);
+  }
+
+  /**
    * Fetch response from multiple providers, If a provider can not return
    * the response for a completer request before timeout,
    * the result of this provider will be ignored.
    *
    * @param {CompletionHandler.IRequest} request - The completion request.
    */
-  public async fetch(
+  async fetch(
     request: CompletionHandler.IRequest,
     trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply | null> {
     const current = ++this._fetching;
     let promises: Promise<CompletionHandler.ICompletionItemsReply | null>[] =
       [];
-    for (const provider of this._providers) {
+    const applicableProviders = await this.applicableProviders();
+    for (const provider of applicableProviders) {
       let promise: Promise<CompletionHandler.ICompletionItemsReply | null>;
       promise = provider.fetch(request, this._context, trigger).then(reply => {
         if (current !== this._fetching) {
@@ -72,12 +86,16 @@ export class ProviderReconciliator implements IProviderReconciliator {
    * @param completerIsVisible - The visible status of completer widget.
    * @param changed - CodeMirror changed argument.
    */
-  public shouldShowContinuousHint(
+  async shouldShowContinuousHint(
     completerIsVisible: boolean,
     changed: SourceChange
-  ): boolean {
-    if (this._providers[0].shouldShowContinuousHint) {
-      return this._providers[0].shouldShowContinuousHint(
+  ): Promise<boolean> {
+    const applicableProviders = await this.applicableProviders();
+    if (applicableProviders.length === 0) {
+      return false;
+    }
+    if (applicableProviders[0].shouldShowContinuousHint) {
+      return applicableProviders[0].shouldShowContinuousHint(
         completerIsVisible,
         changed,
         this._context

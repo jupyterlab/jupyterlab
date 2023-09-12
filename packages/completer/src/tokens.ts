@@ -206,5 +206,5 @@ export interface IProviderReconciliator {
   shouldShowContinuousHint(
     completerIsVisible: boolean,
     changed: SourceChange
-  ): boolean;
+  ): Promise<boolean>;
 }
