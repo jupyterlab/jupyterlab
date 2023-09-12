@@ -14,7 +14,9 @@
 }
 
 .jp-Toolbar {
+  /* Increase density for toolbar */
   --design-unit: 3.5;
+  --toolbar-item-gap: 0;
 
   color: var(--jp-ui-font-color1);
   border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
@@ -36,9 +38,6 @@
 
   /* Increase density for toolbar items */
   --density: -4;
-  --toolbar-item-gap: calc(
-    (var(--design-unit) + calc(var(--density) + 2)) * 1px
-  );
 }
 
 .jp-ToolbarLabelComponent {

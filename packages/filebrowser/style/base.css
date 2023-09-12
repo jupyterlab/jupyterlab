@@ -74,8 +74,6 @@
   padding-left: 0;
   align-items: center;
   height: unset;
-
-  --toolbar-item-gap: 0;
 }
 
 .jp-FileBrowser-toolbar > .jp-Toolbar-item .jp-ToolbarButtonComponent {
