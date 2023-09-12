@@ -560,12 +560,9 @@ export class Completer extends Widget {
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
     this._indexChanged.emit(this._activeIndex);
     const visibleCompletionItems = this.model?.completionItems();
-
     const activeCompletionItem = visibleCompletionItems?.[this._activeIndex];
-    if (activeCompletionItem) {
-      const resolvedItem = this.model?.resolveItem(activeCompletionItem);
-      this._updateDocPanel(resolvedItem);
-    }
+    const resolvedItem = this.model?.resolveItem(activeCompletionItem);
+    this._updateDocPanel(resolvedItem);
   }
 
   /**
@@ -1045,7 +1042,7 @@ export namespace Completer {
      * promise of resolved completion item.
      */
     resolveItem(
-      activeIndex: number | CompletionHandler.ICompletionItem
+      activeIndex: number | CompletionHandler.ICompletionItem | undefined
     ): Promise<CompletionHandler.ICompletionItem | null> | undefined;
 
     /**
@@ -1226,9 +1223,11 @@ export namespace Completer {
      * Get a heuristic for the width of an item.
      */
     itemWidthHeuristic(item: CompletionHandler.ICompletionItem): number {
-      return (
-        item.label.replace(/<\?mark>/g, '').length + (item.type?.length || 0)
-      );
+      // Get the label text for both escaped and unescaped text.
+      const labelText = item.label
+        .replace(/<(\/)?mark>/g, '')
+        .replace(/&lt;(\/)?mark&gt;/g, '');
+      return labelText.length + (item.type?.length || 0);
     }
 
     /**

@@ -1278,6 +1278,33 @@ describe('completer/widget', () => {
         model.handleTextChange(current);
         expect(widget.sizeCache).toEqual(undefined);
       });
+
+      it('should update the documentation panel of selected item', async () => {
+        let args = '';
+        const spy = jest
+          .spyOn(widget as any, '_updateDocPanel')
+          .mockImplementation(async (item: any) => {
+            if (item) {
+              args = (await item).insertText;
+            }
+          });
+        const current: Completer.ITextState = {
+          ...position,
+          text: 'c13'
+        };
+        model.handleTextChange(current);
+
+        await new Promise(process.nextTick);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(args).toEqual('candx 13');
+
+        // Cycle to the second item
+        widget['_cycle']('down');
+        await new Promise(process.nextTick);
+        expect(spy).toHaveBeenCalledTimes(2);
+        expect(args).toEqual('candidate 13');
+        spy.mockRestore();
+      });
     });
   });
 });

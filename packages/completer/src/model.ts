@@ -416,8 +416,8 @@ export class CompleterModel implements Completer.IModel {
   resolveItem(
     indexOrValue: number | CompletionHandler.ICompletionItem | undefined
   ): Promise<CompletionHandler.ICompletionItem | null> | undefined {
-    if (!indexOrValue) {
-      return undefined;
+    if (indexOrValue === undefined) {
+      return;
     }
     if (typeof indexOrValue === 'number') {
       return this._resolveItemByIndex(indexOrValue);
