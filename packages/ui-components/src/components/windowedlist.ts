@@ -734,7 +734,7 @@ export class WindowedList<
    * @param options Constructor options
    */
   constructor(options: WindowedList.IOptions<T>) {
-    const renderer = options.renderer ?? new WindowedList.Renderer();
+    const renderer = options.renderer ?? WindowedList.defaultRenderer;
     const node = renderer.createOuter();
     node.className = 'jp-WindowedPanel-outer';
     const innerElement = node.appendChild(document.createElement('div'));
@@ -1340,6 +1340,24 @@ export class WindowedLayout extends PanelLayout {
  */
 export namespace WindowedList {
   /**
+   * The default renderer class for windowed lists.
+   */
+  class Renderer implements IRenderer {
+    createOuter() {
+      return document.createElement('div');
+    }
+
+    createViewport() {
+      return document.createElement('div');
+    }
+  }
+
+  /**
+   * The default renderer for windowed lists.
+   */
+  export const defaultRenderer = new Renderer();
+
+  /**
    * Windowed list model interface
    */
   export interface IModel extends IDisposable {
@@ -1553,16 +1571,6 @@ export namespace WindowedList {
      * Create the viewport element into which virtualized children are added.
      */
     createViewport(): HTMLElement;
-  }
-
-  export class Renderer implements IRenderer {
-    createOuter() {
-      return document.createElement('div');
-    }
-
-    createViewport() {
-      return document.createElement('div');
-    }
   }
 
   /**
