@@ -748,11 +748,7 @@ export class StaticNotebook extends WindowedList {
     if (!info) {
       return;
     }
-    const mimetypes = this._mimetypeService.getMimeTypeByLanguage(info);
-    this._mimetype =
-      Array.isArray(mimetypes) && mimetypes.length !== 0
-        ? mimetypes[0]
-        : mimetypes;
+    this._mimetype = this._mimetypeService.getMimeTypeByLanguage(info);
     for (const widget of this.widgets) {
       if (widget.model.type === 'code') {
         widget.model.mimeType = this._mimetype;
