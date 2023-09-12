@@ -715,7 +715,7 @@ export function ToolbarButtonComponent(
     >
       {(props.icon || props.iconClass) && (
         <LabIcon.resolveReact
-          icon={props.pressed ? props.pressedIcon : props.icon}
+          icon={props.pressed ? props.pressedIcon ?? props.icon : props.icon}
           iconClass={
             // add some extra classes for proper support of icons-as-css-background
             classes(props.iconClass, 'jp-Icon')
@@ -1097,9 +1097,13 @@ namespace Private {
 
     const label = commands.label(id, args);
     let className = commands.className(id, args);
-    // Add the boolean state classes.
-    if (commands.isToggled(id, args)) {
-      className += ' lm-mod-toggled';
+    // Add the boolean state classes and aria attributes.
+    let pressed;
+    if (commands.isToggleable(id, args)) {
+      pressed = commands.isToggled(id, args);
+      if (pressed) {
+        className += ' lm-mod-toggled';
+      }
     }
     if (!commands.isVisible(id, args)) {
       className += ' lm-mod-hidden';
@@ -1126,7 +1130,8 @@ namespace Private {
       tooltip: options.caption ?? tooltip,
       onClick,
       enabled,
-      label: options.label ?? label
+      label: options.label ?? label,
+      pressed
     };
   }
 

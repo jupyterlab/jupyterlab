@@ -21,6 +21,11 @@
   margin-right: 0;
 }
 
+.jp-DebuggerBugButton[aria-pressed='true'] {
+  /* Undo default toolkit style */
+  box-shadow: none;
+}
+
 .jp-DebuggerBugButton[aria-pressed='true'] path {
   fill: var(--jp-warn-color0);
 }
