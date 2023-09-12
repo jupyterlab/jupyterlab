@@ -403,11 +403,14 @@ export class CompleterModel implements Completer.IModel {
   }
 
   /**
-   * Lazy load missing data of item at `activeIndex`.
-   * @param {number} activeIndex - the item or its index
+   * Lazy load missing data of an item.
+   * @param indexOrValue - the item or its index
+   * @remarks
+   * Resolving item by index will be deprecated in
+   * the next major release.
+   *
    * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
-   * Return a promise of `null` if another `resolveItem` is called (but still updates the
-   * underlying completion item with resolved data). Otherwise return the
+   *  Return a promise of `null` if another `resolveItem` is called. Otherwise return the
    * promise of resolved completion item.
    */
   resolveItem(
@@ -423,6 +426,12 @@ export class CompleterModel implements Completer.IModel {
     }
   }
 
+  /**
+   * Lazy load missing data of a completion item.
+   *
+   * @param  completionItem - the item to be resolved
+   * @return See `resolveItem` method
+   */
   private _resolveItemByValue(
     completionItem: CompletionHandler.ICompletionItem
   ): Promise<CompletionHandler.ICompletionItem | null> {
@@ -462,6 +471,14 @@ export class CompleterModel implements Completer.IModel {
         return Promise.resolve(completionItem);
       });
   }
+
+  /**
+   * Lazy load missing data of a completion item by its index.
+   *
+   * @param  activeIndex - the index of item in the completion items list.
+   * @deprecated
+   * @return See `resolveItem` method
+   */
   private _resolveItemByIndex(
     activeIndex: number
   ): Promise<CompletionHandler.ICompletionItem | null> | undefined {
