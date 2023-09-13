@@ -1,6 +1,8 @@
-// Copyright (c) Jupyter Development Team.
-// Copyright (c) Bloomberg Finance LP.
-// Distributed under the terms of the Modified BSD License.
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ * Copyright (c) Bloomberg Finance LP.
+ */
 
 import * as path from 'path';
 
@@ -130,7 +132,7 @@ test.describe('Notebook Tests', () => {
     await page.notebook.revertChanges();
     await page.notebook.close();
 
-    expect(await page.waitForSelector(page.launcherSelector)).toBeTruthy();
+    await expect(page.launcher).toBeVisible();
   });
 });
 

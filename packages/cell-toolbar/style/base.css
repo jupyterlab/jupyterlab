@@ -32,7 +32,7 @@
 }
 
 /* Overrides for mobile view hiding cell toolbar */
-@media only screen and (max-width: 760px) {
+@media only screen and (width <= 760px) {
   .jp-cell-menu.jp-cell-toolbar {
     display: none;
   }

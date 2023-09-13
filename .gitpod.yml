@@ -20,6 +20,7 @@ tasks:
       export MAMBA_EXE=/workspace/bin/micromamba
       $(/workspace/bin/micromamba shell hook --shell=bash)
       export JUPYTER_PREFER_ENV_PATH=1
+      export TZ=UTC
       micromamba activate
       EOT
       source /workspace/bin/activate-env.sh

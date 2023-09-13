@@ -449,8 +449,8 @@ def _get_labextension_metadata(module):  # noqa
             )
         except subprocess.CalledProcessError:
             msg = (
-                "The Python package `{}` is not a valid package, "
-                "it is missing the `setup.py` file.".format(module)
+                f"The Python package `{module}` is not a valid package, "
+                "it is missing the `setup.py` file."
             )
             raise FileNotFoundError(msg) from None
 

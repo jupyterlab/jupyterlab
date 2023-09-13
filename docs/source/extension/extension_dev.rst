@@ -181,7 +181,7 @@ MIME Renderer Plugins
 MIME Renderer plugins are a convenience for creating a plugin
 that can render mime data in a notebook and files of the given mime type. MIME renderer plugins are more declarative and more restricted than standard plugins.
 A mime renderer plugin is an object with the fields listed in the
-`rendermime-interfaces IExtension <../api/interfaces/rendermime_interfaces.irendermime.iextension.html>`__
+`rendermime-interfaces IExtension <../api/interfaces/rendermime_interfaces.IRenderMime.IExtension.html>`__
 object.
 
 JupyterLab has a `pdf mime renderer extension <https://github.com/jupyterlab/jupyterlab/tree/main/packages/pdf-extension>`__, for example. In core JupyterLab, this is used to view pdf files and view pdf data mime data in a notebook.
