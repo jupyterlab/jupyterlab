@@ -1285,7 +1285,7 @@ describe('completer/widget', () => {
           .spyOn(widget as any, '_updateDocPanel')
           .mockImplementation(async (item: any) => {
             if (item) {
-              args = (await item).insertText;
+              args = (await item).label;
             }
           });
         const current: Completer.ITextState = {
