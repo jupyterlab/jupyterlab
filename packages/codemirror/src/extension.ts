@@ -813,11 +813,7 @@ export namespace EditorExtensionRegistry {
             EditorView.contentAttributes.of({
               tabIndex: '-1'
             })
-          ),
-        schema: {
-          type: 'boolean',
-          title: trans.__('Tab Focusable')
-        }
+          )
       }),
       Object.freeze({
         name: 'tabSize',
