@@ -45,7 +45,7 @@ export class SettingConnector extends DataConnector<
   async list(
     query: 'active' | 'all' | 'ids' = 'all'
   ): Promise<{ ids: string[]; values?: ISettingRegistry.IPlugin[] }> {
-    const { isDeferred, isDisabled } = PageConfig.Extension;
+    const { isDisabled } = PageConfig.Extension;
     const { ids, values } = await this._connector.list(
       query === 'ids' ? 'ids' : undefined
     );
@@ -59,8 +59,8 @@ export class SettingConnector extends DataConnector<
     }
 
     return {
-      ids: ids.filter(id => !isDeferred(id) && !isDisabled(id)),
-      values: values.filter(({ id }) => !isDeferred(id) && !isDisabled(id))
+      ids: ids.filter(id => !isDisabled(id)),
+      values: values.filter(({ id }) => !isDisabled(id))
     };
   }
 

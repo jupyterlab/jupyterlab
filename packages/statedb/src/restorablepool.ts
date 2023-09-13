@@ -13,8 +13,9 @@ import { IObjectPool, IRestorable } from './interfaces';
  * @typeparam T - The type of object being tracked.
  */
 export class RestorablePool<
-  T extends IObservableDisposable = IObservableDisposable
-> implements IObjectPool<T>, IRestorable<T>
+    T extends IObservableDisposable = IObservableDisposable
+  >
+  implements IObjectPool<T>, IRestorable<T>
 {
   /**
    * Create a new restorable pool.

@@ -638,9 +638,11 @@ export namespace Method {
 
   /** Client requests */
   export enum ClientRequest {
+    CODE_ACTION = 'textDocument/codeAction',
     COMPLETION = 'textDocument/completion',
     COMPLETION_ITEM_RESOLVE = 'completionItem/resolve',
     DEFINITION = 'textDocument/definition',
+    DOCUMENT_COLOR = 'textDocument/documentColor',
     DOCUMENT_HIGHLIGHT = 'textDocument/documentHighlight',
     DOCUMENT_SYMBOL = 'textDocument/documentSymbol',
     HOVER = 'textDocument/hover',
@@ -649,7 +651,14 @@ export namespace Method {
     REFERENCES = 'textDocument/references',
     RENAME = 'textDocument/rename',
     SIGNATURE_HELP = 'textDocument/signatureHelp',
-    TYPE_DEFINITION = 'textDocument/typeDefinition'
+    TYPE_DEFINITION = 'textDocument/typeDefinition',
+    LINKED_EDITING_RANGE = 'textDocument/linkedEditingRange',
+    INLINE_VALUE = 'textDocument/inlineValue',
+    INLAY_HINT = 'textDocument/inlayHint',
+    WORKSPACE_SYMBOL = 'workspace/symbol',
+    WORKSPACE_SYMBOL_RESOLVE = 'workspaceSymbol/resolve',
+    FORMATTING = 'textDocument/formatting',
+    RANGE_FORMATTING = 'textDocument/rangeFormatting'
   }
 }
 
@@ -700,9 +709,11 @@ export interface IServerResult {
  * Interface describing the request sent to the client.
  */
 export interface IClientRequestParams {
+  [Method.ClientRequest.CODE_ACTION]: lsp.CodeActionParams;
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: lsp.CompletionParams;
   [Method.ClientRequest.DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.DOCUMENT_COLOR]: lsp.DocumentColorParams;
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.TextDocumentPositionParams;
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbolParams;
   [Method.ClientRequest.HOVER]: lsp.TextDocumentPositionParams;
@@ -712,15 +723,23 @@ export interface IClientRequestParams {
   [Method.ClientRequest.RENAME]: lsp.RenameParams;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.TextDocumentPositionParams;
   [Method.ClientRequest.TYPE_DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.INLINE_VALUE]: lsp.InlineValueParams;
+  [Method.ClientRequest.INLAY_HINT]: lsp.InlayHintParams;
+  [Method.ClientRequest.WORKSPACE_SYMBOL]: lsp.WorkspaceSymbolParams;
+  [Method.ClientRequest.WORKSPACE_SYMBOL_RESOLVE]: lsp.WorkspaceSymbol;
+  [Method.ClientRequest.FORMATTING]: lsp.DocumentFormattingParams;
+  [Method.ClientRequest.RANGE_FORMATTING]: lsp.DocumentRangeFormattingParams;
 }
 
 /**
  * Interface describing the responses received from the client.
  */
 export interface IClientResult {
+  [Method.ClientRequest.CODE_ACTION]: (lsp.Command | lsp.CodeAction)[] | null;
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: AnyCompletion;
   [Method.ClientRequest.DEFINITION]: AnyLocation;
+  [Method.ClientRequest.DOCUMENT_COLOR]: lsp.ColorInformation[];
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.DocumentHighlight[];
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbol[];
   [Method.ClientRequest.HOVER]: lsp.Hover | null;
@@ -730,6 +749,15 @@ export interface IClientResult {
   [Method.ClientRequest.RENAME]: lsp.WorkspaceEdit;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.SignatureHelp;
   [Method.ClientRequest.TYPE_DEFINITION]: AnyLocation;
+  [Method.ClientRequest.INLINE_VALUE]: lsp.InlineValue[] | null;
+  [Method.ClientRequest.INLAY_HINT]: lsp.InlayHint[] | null;
+  [Method.ClientRequest.WORKSPACE_SYMBOL]:
+    | lsp.SymbolInformation[]
+    | lsp.WorkspaceSymbol[]
+    | null;
+  [Method.ClientRequest.WORKSPACE_SYMBOL_RESOLVE]: lsp.WorkspaceSymbol[];
+  [Method.ClientRequest.FORMATTING]: lsp.TextEdit[] | null;
+  [Method.ClientRequest.RANGE_FORMATTING]: lsp.TextEdit[] | null;
 }
 
 /**
@@ -783,8 +811,8 @@ export interface IServerRequestHandler<
 export type ClientRequests<
   T extends keyof IClientRequestParams = keyof IClientRequestParams
 > = {
-  readonly // has async request(params) returning a promise with result.
-  [key in T]: IClientRequestHandler<key>;
+  // has async request(params) returning a promise with result.
+  readonly [key in T]: IClientRequestHandler<key>;
 };
 
 /**
@@ -794,8 +822,8 @@ export type ClientRequests<
 export type ServerRequests<
   T extends keyof IServerRequestParams = keyof IServerRequestParams
 > = {
-  readonly // has async request(params) returning a promise with result.
-  [key in T]: IServerRequestHandler<key>;
+  // has async request(params) returning a promise with result.
+  readonly [key in T]: IServerRequestHandler<key>;
 };
 
 /**

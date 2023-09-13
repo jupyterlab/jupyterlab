@@ -33,6 +33,36 @@ const RENDER_TIMEOUT = 1000;
  */
 const CSS_CLASS = 'jp-HTMLViewer';
 
+const UNTRUSTED_LINK_STYLE = (options: { warning: string }) => `<style>
+a[target="_blank"],
+area[target="_blank"],
+form[target="_blank"],
+button[formtarget="_blank"],
+input[formtarget="_blank"][type="image"],
+input[formtarget="_blank"][type="submit"] {
+  cursor: not-allowed !important;
+}
+a[target="_blank"]:hover::after,
+area[target="_blank"]:hover::after,
+form[target="_blank"]:hover::after,
+button[formtarget="_blank"]:hover::after,
+input[formtarget="_blank"][type="image"]:hover::after,
+input[formtarget="_blank"][type="submit"]:hover::after {
+  content: "${options.warning}";
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  border: 2px solid #e65100;
+  background-color: #ffb74d;
+  color: black;
+  font-family: system-ui, -apple-system, blinkmacsystemfont, 'Segoe UI', helvetica, arial, sans-serif;
+  text-align: center;
+}
+</style>`;
+
 /**
  * A viewer widget for HTML documents.
  *
@@ -88,8 +118,7 @@ export class HTMLViewer
     } else {
       this.content.sandbox = Private.untrusted;
     }
-    // eslint-disable-next-line
-    this.content.url = this.content.url; // Force a refresh.
+    this.update(); // Force a refresh.
     this._trustedChanged.emit(value);
   }
 
@@ -130,7 +159,7 @@ export class HTMLViewer
    */
   private async _renderModel(): Promise<void> {
     let data = this.context.model.toString();
-    data = await this._setBase(data);
+    data = await this._setupDocument(data);
 
     // Set the new iframe url.
     const blob = new Blob([data], { type: 'text/html' });
@@ -153,7 +182,7 @@ export class HTMLViewer
    * Set a <base> element in the HTML string so that the iframe
    * can correctly dereference relative links.
    */
-  private async _setBase(data: string): Promise<string> {
+  private async _setupDocument(data: string): Promise<string> {
     const doc = this._parser.parseFromString(data, 'text/html');
     let base = doc.querySelector('base');
     if (!base) {
@@ -169,6 +198,16 @@ export class HTMLViewer
     // (e.g. CSS and scripts).
     base.href = baseUrl;
     base.target = '_self';
+
+    // Inject dynamic style for links if the document is not trusted
+    if (!this.trusted) {
+      const trans = this.translator.load('jupyterlab');
+      const warning = trans.__('Action disabled as the file is not trusted.');
+      doc.body.insertAdjacentHTML(
+        'beforeend',
+        UNTRUSTED_LINK_STYLE({ warning })
+      );
+    }
     return doc.documentElement.innerHTML;
   }
 
@@ -272,7 +311,10 @@ namespace Private {
   /**
    * Sandbox exceptions for trusted HTML.
    */
-  export const trusted: IFrame.SandboxExceptions[] = ['allow-scripts'];
+  export const trusted: IFrame.SandboxExceptions[] = [
+    'allow-scripts',
+    'allow-popups'
+  ];
 
   /**
    * Namespace for TrustedButton.
@@ -313,7 +355,7 @@ namespace Private {
               (props.htmlDocument.trusted = !props.htmlDocument.trusted)
             }
             tooltip={trans.__(`Whether the HTML file is trusted.
-Trusting the file allows scripts to run in it,
+Trusting the file allows opening pop-ups and running scripts
 which may result in security risks.
 Only enable for files you trust.`)}
             label={
