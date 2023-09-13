@@ -1131,9 +1131,9 @@ export class NotebookHelper {
     if (select) {
       await select.selectOption(cellType);
     } else {
-      await selectInput.evaluate(el => {
+      await selectInput.evaluate((el, cellType) => {
         (el as any).value = cellType;
-      });
+      }, cellType);
     }
 
     // Wait for the new cell to be rendered

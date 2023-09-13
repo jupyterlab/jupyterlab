@@ -2052,7 +2052,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/react-components@npm:^0.13.1":
+"@jupyter/react-components@npm:^0.13.2":
   version: 0.13.2
   resolution: "@jupyter/react-components@npm:0.13.2"
   dependencies:
@@ -2063,7 +2063,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/web-components@npm:^0.13.1, @jupyter/web-components@npm:^0.13.2":
+"@jupyter/web-components@npm:^0.13.2":
   version: 0.13.2
   resolution: "@jupyter/web-components@npm:0.13.2"
   dependencies:
@@ -3031,7 +3031,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-cell@workspace:examples/cell"
   dependencies:
-    "@jupyter/web-components": ^0.13.1
+    "@jupyter/web-components": ^0.13.2
     "@jupyter/ydoc": ^1.1.1
     "@jupyterlab/application": ^4.1.0-alpha.3
     "@jupyterlab/apputils": ^4.2.0-alpha.3
@@ -3061,7 +3061,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-console@workspace:examples/console"
   dependencies:
-    "@jupyter/web-components": ^0.13.1
+    "@jupyter/web-components": ^0.13.2
     "@jupyter/ydoc": ^1.1.1
     "@jupyterlab/application": ^4.1.0-alpha.3
     "@jupyterlab/codemirror": ^4.1.0-alpha.3
@@ -3179,7 +3179,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
-    "@jupyter/web-components": ^0.13.1
+    "@jupyter/web-components": ^0.13.2
     "@jupyterlab/application": ^4.1.0-alpha.3
     "@jupyterlab/apputils": ^4.2.0-alpha.3
     "@jupyterlab/codemirror": ^4.1.0-alpha.3
@@ -3210,7 +3210,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
-    "@jupyter/web-components": ^0.13.1
+    "@jupyter/web-components": ^0.13.2
     "@jupyter/ydoc": ^1.1.1
     "@jupyterlab/application": ^4.1.0-alpha.3
     "@jupyterlab/apputils": ^4.2.0-alpha.3
@@ -3299,7 +3299,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-terminal@workspace:examples/terminal"
   dependencies:
-    "@jupyter/web-components": ^0.13.1
+    "@jupyter/web-components": ^0.13.2
     "@jupyterlab/application": ^4.1.0-alpha.3
     "@jupyterlab/coreutils": ^6.1.0-alpha.3
     "@jupyterlab/services": ^7.1.0-alpha.3
@@ -4286,7 +4286,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/notebook@workspace:packages/notebook"
   dependencies:
-    "@jupyter/react-components": ^0.13.1
+    "@jupyter/react-components": ^0.13.2
     "@jupyter/ydoc": ^1.1.1
     "@jupyterlab/apputils": ^4.2.0-alpha.3
     "@jupyterlab/cells": ^4.1.0-alpha.3
@@ -5004,8 +5004,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/ui-components@workspace:packages/ui-components"
   dependencies:
-    "@jupyter/react-components": ^0.13.1
-    "@jupyter/web-components": ^0.13.1
+    "@jupyter/react-components": ^0.13.2
+    "@jupyter/web-components": ^0.13.2
     "@jupyterlab/coreutils": ^6.1.0-alpha.3
     "@jupyterlab/observables": ^5.1.0-alpha.3
     "@jupyterlab/rendermime-interfaces": ^3.9.0-alpha.2
