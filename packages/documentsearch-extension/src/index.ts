@@ -12,6 +12,7 @@ import {
 } from '@jupyterlab/application';
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 import {
+  ISearchKeyBindings,
   ISearchProviderRegistry,
   SearchDocumentModel,
   SearchDocumentView,
@@ -19,6 +20,7 @@ import {
 } from '@jupyterlab/documentsearch';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
+import { CommandRegistry } from '@lumino/commands';
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -110,6 +112,63 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
   }
 };
 
+type KeyBindingsCache = Record<
+  'next' | 'previous' | 'toggleSearchInSelection',
+  CommandRegistry.IKeyBinding | undefined
+>;
+
+/**
+ * Exposes the current keybindings to search box view.
+ */
+class SearchKeyBindings implements ISearchKeyBindings {
+  constructor(private _commandRegistry: CommandRegistry) {
+    this._cache = this._buildCache();
+    this._commandRegistry.keyBindingChanged.connect(this._rebuildCache, this);
+  }
+
+  get next() {
+    return this._cache.next;
+  }
+
+  get previous() {
+    return this._cache.previous;
+  }
+
+  get toggleSearchInSelection() {
+    return this._cache.toggleSearchInSelection;
+  }
+
+  private _rebuildCache() {
+    this._cache = this._buildCache();
+  }
+
+  private _buildCache(): KeyBindingsCache {
+    const next = this._commandRegistry.keyBindings.find(
+      binding => binding.command === CommandIDs.findNext
+    );
+    const previous = this._commandRegistry.keyBindings.find(
+      binding => binding.command === CommandIDs.findPrevious
+    );
+    const toggleSearchInSelection = this._commandRegistry.keyBindings.find(
+      binding => binding.command === CommandIDs.toggleSearchInSelection
+    );
+    return {
+      next,
+      previous,
+      toggleSearchInSelection
+    };
+  }
+
+  dispose() {
+    this._commandRegistry.keyBindingChanged.disconnect(
+      this._rebuildCache,
+      this
+    );
+  }
+
+  private _cache: KeyBindingsCache;
+}
+
 /**
  * Initialization data for the document-search extension.
  */
@@ -183,7 +242,13 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           searchDebounceTime
         );
 
-        const newView = new SearchDocumentView(searchModel, translator);
+        const keyBingingsInfo = new SearchKeyBindings(app.commands);
+
+        const newView = new SearchDocumentView(
+          searchModel,
+          translator,
+          keyBingingsInfo
+        );
 
         searchViews.set(widgetId, newView);
         // find next, previous and end are now enabled
@@ -233,6 +298,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
           newView.dispose();
           searchModel.dispose();
           searchProvider.dispose();
+          keyBingingsInfo.dispose();
         });
 
         searchView = newView;
