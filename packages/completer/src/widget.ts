@@ -1225,7 +1225,8 @@ export namespace Completer {
      * Get a heuristic for the width of an item.
      */
     itemWidthHeuristic(item: CompletionHandler.ICompletionItem): number {
-      // Get the label text for both escaped and unescaped text.
+      // Get the label text without HTML markup (`<mark>` is the only markup
+      // that is allowed in processed items, everything else gets escaped).
       const labelText = item.label.replace(/<(\/)?mark>/g, '');
       return labelText.length + (item.type?.length || 0);
     }

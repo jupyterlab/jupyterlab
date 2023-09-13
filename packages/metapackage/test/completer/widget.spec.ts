@@ -1307,4 +1307,23 @@ describe('completer/widget', () => {
       });
     });
   });
+  describe('Completer.Renderer', () => {
+    describe('#itemWidthHeuristic()', () => {
+      let renderer: Completer.Renderer;
+      beforeEach(() => {
+        renderer = new Completer.Renderer();
+      });
+      it('returns a sum of characters in label and type info', () => {
+        let width = renderer.itemWidthHeuristic({
+          label: 'test',
+          type: 'variable'
+        });
+        expect(width).toBe(12);
+      });
+      it('disregards <mark> markup', () => {
+        let width = renderer.itemWidthHeuristic({ label: '<mark>test</mark>' });
+        expect(width).toBe(4);
+      });
+    });
+  });
 });
