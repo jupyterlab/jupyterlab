@@ -185,7 +185,7 @@ with your bug fix and the other with your test:
 
 On GitHub, go to your fork of the testing repo, *a11ydev/jupyter-a11y-testing*.
 Make sure that you are on your `test-tab-trap` branch, which contains the
-.test.ts file that you added. Then go to Actions and click on the workflow
+``.test.ts`` file that you added. Then go to Actions and click on the workflow
 titled "Run accessibility tests on JupyterLab." Click "Run workflow." This will
 open a form to configure the workflow.
 
