@@ -157,8 +157,7 @@ jupyterlab/lumino repo <https://github.com/jupyterlab/lumino/pull/373>`__, so
 you fork the jupyterlab/lumino repo, create a new branch called
 ``fix-tab-trap``, and open a pull request.
 
-You decide that you want to write a test. This is one of those cases where you
-can fairly easily write a unit test. However, a unit test would only check the
+You decide that you want to write a test. This is one of those cases where writing a unit test would be a straightforward task. However, a unit test would only check the
 top menu bar, so it would not prevent a reappearance of the issue that you
 decided you want to fix once and for all, namely: you don't want any tab traps
 anywhere on the JupyterLab start page.
@@ -206,8 +205,7 @@ with your test passing.
 
 Note that in this example you did not fork the jupyterlab/jupyterlab repo or
 change the branch name to something other than "main" in the workflow config
-form. This is because you did not need to modify the JupyterLab codebase in
-order to fix this issue. But if you were working on an issue that required you
+form. This is because you did not need to modify the JupyterLab codebase to fix this issue. But if you were working on an issue that required you
 to modify the JupyterLab codebase, you would do the same thing that you did
 earlier with Lumino: fork the repo, create a branch with your fix, and then
 enter your fork and branch in the workflow config form before running the
@@ -216,9 +214,7 @@ changes and then run the test suite against it. The workflow is flexible enough
 to allow you to test against changes in JupyterLab or Lumino or both at the same
 time if needed.
 
-There are more `detailed instructions for how to use the GitHub workflow
-<https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/main/testing/jupyterlab/README.md#running-the-accessibility-tests->`__
-in the testing repo.
+.. note:: There are more `detailed instructions for how to use the GitHub workflow <https://github.com/Quansight-Labs/jupyter-a11y-testing/blob/main/testing/jupyterlab/README.md#running-the-accessibility-tests->`__ in the testing repo.
 
 PR Review and Manual Testing
 ----------------------------
