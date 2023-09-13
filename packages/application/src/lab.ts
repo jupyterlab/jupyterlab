@@ -283,8 +283,10 @@ export namespace JupyterLab {
    * A readonly subset of lumino plugin bundle (excluding activation function,
    * service, and state information, and runtime token details).
    */
-  interface ILuminoPluginData extends Readonly<Pick<JupyterFrontEndPlugin<void>, 'id' | 'description' | 'autoStart'>> {
-
+  interface ILuminoPluginData
+    extends Readonly<
+      Pick<JupyterFrontEndPlugin<void>, 'id' | 'description' | 'autoStart'>
+    > {
     /**
      * The types of required services for the plugin, or `[]`.
      */
