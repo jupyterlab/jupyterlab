@@ -1,0 +1,58 @@
+{
+  "name": "@jupyterlab/mermaid-extension",
+  "version": "4.1.0-alpha.1",
+  "description": "JupyterLab - Mermaid Viewer",
+  "homepage": "https://github.com/jupyterlab/jupyterlab",
+  "bugs": {
+    "url": "https://github.com/jupyterlab/jupyterlab/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jupyterlab/jupyterlab.git"
+  },
+  "license": "BSD-3-Clause",
+  "author": "Project Jupyter",
+  "sideEffects": [
+    "style/*.css",
+    "style/index.js"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "directories": {
+    "lib": "lib/"
+  },
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "style/*.css",
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "docs": "typedoc src",
+    "watch": "tsc -b --watch"
+  },
+  "dependencies": {
+    "@jupyterlab/application": "^4.1.0-alpha.1",
+    "@jupyterlab/apputils": "^4.2.0-alpha.1",
+    "@jupyterlab/mermaid": "^4.1.0-alpha.1",
+    "@jupyterlab/rendermime-interfaces": "^3.8.3-alpha.0"
+  },
+  "devDependencies": {
+    "rimraf": "~3.0.0",
+    "typedoc": "~0.24.7",
+    "typescript": "~5.0.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "mimeExtension": "lib/mime.js"
+  },
+  "styleModule": "style/index.js"
+}

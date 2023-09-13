@@ -71,6 +71,7 @@ import lineFormSvgstr from '../../style/icons/statusbar/line-form.svg';
 import linkSvgstr from '../../style/icons/toolbar/link.svg';
 import listSvgstr from '../../style/icons/statusbar/list.svg';
 import markdownSvgstr from '../../style/icons/filetype/markdown.svg';
+import mermaidSvgstr from '../../style/icons/filetype/mermaid.svg';
 import moveDownSvgstr from '../../style/icons/toolbar/move-down.svg';
 import moveUpSvgstr from '../../style/icons/toolbar/move-up.svg';
 import newFolderSvgstr from '../../style/icons/toolbar/new-folder.svg';
@@ -174,6 +175,7 @@ export const lineFormIcon = new LabIcon({ name: 'ui-components:line-form', svgst
 export const linkIcon = new LabIcon({ name: 'ui-components:link', svgstr: linkSvgstr });
 export const listIcon = new LabIcon({ name: 'ui-components:list', svgstr: listSvgstr });
 export const markdownIcon = new LabIcon({ name: 'ui-components:markdown', svgstr: markdownSvgstr });
+export const mermaidIcon = new LabIcon({ name: 'ui-components:mermaid', svgstr: mermaidSvgstr });
 export const moveDownIcon = new LabIcon({ name: 'ui-components:move-down', svgstr: moveDownSvgstr });
 export const moveUpIcon = new LabIcon({ name: 'ui-components:move-up', svgstr: moveUpSvgstr });
 export const newFolderIcon = new LabIcon({ name: 'ui-components:new-folder', svgstr: newFolderSvgstr });

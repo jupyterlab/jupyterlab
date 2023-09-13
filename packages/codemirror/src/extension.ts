@@ -26,7 +26,8 @@ import {
   keymap,
   lineNumbers,
   rectangularSelection,
-  scrollPastEnd
+  scrollPastEnd,
+  tooltips
 } from '@codemirror/view';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
@@ -829,6 +830,19 @@ export namespace EditorExtensionRegistry {
           type: 'number',
           title: trans.__('Tab size')
         }
+      }),
+      Object.freeze({
+        name: 'tooltips',
+        factory: () =>
+          // we need `absolute` due to use of `contain: layout` in lumino;
+          // we attach to body to ensure cursor collaboration tooltip is
+          // visible in first line of the editor.
+          createImmutableExtension(
+            tooltips({
+              position: 'absolute',
+              parent: document.body
+            })
+          )
       }),
       Object.freeze({
         name: 'allowMultipleSelections',

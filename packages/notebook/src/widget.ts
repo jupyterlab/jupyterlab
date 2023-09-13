@@ -893,8 +893,19 @@ export class StaticNotebook extends WindowedList {
       cellIdx++;
     }
 
+    // If the notebook is not fully rendered
     if (cellIdx < this.cellsArray.length) {
-      this._scheduleCellRenderOnIdle();
+      // If we are defering the cell rendering and the rendered cells do
+      // not fill the viewport yet
+      if (
+        this.notebookConfig.windowingMode === 'defer' &&
+        this.viewportNode.clientHeight < this.node.clientHeight
+      ) {
+        // Spend more time rendering cells to fill the viewport
+        await this._runOnIdleTime();
+      } else {
+        this._scheduleCellRenderOnIdle();
+      }
     } else {
       if (this._idleCallBack) {
         window.cancelIdleCallback(this._idleCallBack);

@@ -80,7 +80,10 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   // note: it could be using namespace/IOptions pattern,
   // but I do not know how to make it work with the generic type T
   // (other than using 'any' in the IOptions interface)
-  constructor(public widget: T, protected options: IAdapterOptions) {
+  constructor(
+    public widget: T,
+    protected options: IAdapterOptions
+  ) {
     this._connectionManager = options.connectionManager;
     this._isConnected = false;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
@@ -336,8 +339,8 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
 
   /**
    * Get the index of editor from the cursor position in the virtual
-   * document. Since there is only one editor, this method always return
-   * 0
+   * document.
+   * @deprecated This is error-prone and will be removed in JupyterLab 5.0, use `getEditorIndex()` with `virtualDocument.getEditorAtVirtualLine(position)` instead.
    *
    * @param position - the position of cursor in the virtual document.
    * @return - index of the virtual editor

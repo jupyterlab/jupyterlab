@@ -72,7 +72,7 @@ export class Completer extends Widget {
   /**
    * Cache style constraints from CSS.
    */
-  _updateConstraints() {
+  protected _updateConstraints() {
     const tempNode = document.createElement('div');
     tempNode.classList.add(LIST_CLASS);
     tempNode.style.visibility = 'hidden';
@@ -157,6 +157,16 @@ export class Completer extends Widget {
       this._model.stateChanged.connect(this.onModelStateChanged, this);
       this._model.queryChanged.connect(this.onModelQueryChanged, this);
     }
+  }
+
+  /**
+   * The completer used by the completer widget.
+   */
+  get renderer(): Completer.IRenderer {
+    return this._renderer;
+  }
+  set renderer(renderer: Completer.IRenderer) {
+    this._renderer = renderer;
   }
 
   /**
@@ -1104,7 +1114,8 @@ export namespace Completer {
    * A renderer for completer widget nodes.
    */
   export interface IRenderer<
-    T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends
+      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
   > {
     /**
      * Create an item node (an `li` element) from a ICompletionItem

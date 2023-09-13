@@ -34,9 +34,12 @@ class DelayedContentsManager extends ContentsManagerMock {
       const delay = this._delay;
       this._delay -= 500;
       void super.get(path, options).then(contents => {
-        setTimeout(() => {
-          resolve(contents);
-        }, Math.max(delay, 0));
+        setTimeout(
+          () => {
+            resolve(contents);
+          },
+          Math.max(delay, 0)
+        );
       });
     });
   }
