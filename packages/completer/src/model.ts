@@ -426,7 +426,7 @@ export class CompleterModel implements Completer.IModel {
    * @param indexOrValue - the item or its index
    * @remarks
    * Resolving item by index will be deprecated in
-   * the next major release.
+   * the JupyterLab 5.0 and removed in JupyterLab 6.0.
    *
    * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
    *  Return a promise of `null` if another `resolveItem` is called. Otherwise return the
