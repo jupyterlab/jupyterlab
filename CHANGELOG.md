@@ -101,6 +101,61 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.6
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.5...3064ad495cd9a456737d78082d2fee6f83e131bb))
+
+### Enhancements made
+
+- Add more LSP request types [#15064](https://github.com/jupyterlab/jupyterlab/pull/15064) ([@krassowski](https://github.com/krassowski))
+- Expose `processedItemsCache` as a protected in `CompleterModel` [#15025](https://github.com/jupyterlab/jupyterlab/pull/15025) ([@krassowski](https://github.com/krassowski))
+- Fix `filebrowser.open` and add ability to provide a factory [#14983](https://github.com/jupyterlab/jupyterlab/pull/14983) ([@fcollonval](https://github.com/fcollonval))
+- Use config compatible with notebook 7 [#14978](https://github.com/jupyterlab/jupyterlab/pull/14978) ([@fcollonval](https://github.com/fcollonval))
+
+### Bugs fixed
+
+- Fix return type of `getMimeTypeByLanguage()` [#15101](https://github.com/jupyterlab/jupyterlab/pull/15101) ([@krassowski](https://github.com/krassowski))
+- Fix documentation panel display logic of the completer [#15106](https://github.com/jupyterlab/jupyterlab/pull/15106) ([@trungleduc](https://github.com/trungleduc))
+- Check applicable provider in ProviderReconciliator [#15094](https://github.com/jupyterlab/jupyterlab/pull/15094) ([@trungleduc](https://github.com/trungleduc))
+- Completer: switch renderer & model on update, update on providers change [#15065](https://github.com/jupyterlab/jupyterlab/pull/15065) ([@krassowski](https://github.com/krassowski))
+- Fix `_updateConstraints` missing `protected`/`private` classifier. [#15066](https://github.com/jupyterlab/jupyterlab/pull/15066) ([@krassowski](https://github.com/krassowski))
+- `HoverBox`: adjust `right` when moving node to fit within window [#15052](https://github.com/jupyterlab/jupyterlab/pull/15052) ([@krassowski](https://github.com/krassowski))
+- fixes codemirror settings [#15009](https://github.com/jupyterlab/jupyterlab/pull/15009) ([@andrewfulton9](https://github.com/andrewfulton9))
+- Pass completion context to `shouldShowContinuousHint()` [#15015](https://github.com/jupyterlab/jupyterlab/pull/15015) ([@krassowski](https://github.com/krassowski))
+- Fix translation syntax to extract it by the parser [#14979](https://github.com/jupyterlab/jupyterlab/pull/14979) ([@fcollonval](https://github.com/fcollonval))
+- added title to Close tab icon [#14973](https://github.com/jupyterlab/jupyterlab/pull/14973) ([@j264415](https://github.com/j264415))
+
+### Maintenance and upkeep improvements
+
+- Install playwright browser in jupyterlab.browser_check [#15117](https://github.com/jupyterlab/jupyterlab/pull/15117) ([@brichet](https://github.com/brichet))
+- Enable Playwright trace [#15087](https://github.com/jupyterlab/jupyterlab/pull/15087) ([@jtpio](https://github.com/jtpio))
+- Bump ruff from 0.0.282 to 0.0.286 [#15056](https://github.com/jupyterlab/jupyterlab/pull/15056) ([@dependabot\[bot\]](https://github.com/apps/dependabot))
+- React on galata update comment, fix binder URL in docs [#15070](https://github.com/jupyterlab/jupyterlab/pull/15070) ([@krassowski](https://github.com/krassowski))
+- Deprecate LSP adapter `getEditorIndexAt()` method [#15028](https://github.com/jupyterlab/jupyterlab/pull/15028) ([@krassowski](https://github.com/krassowski))
+- Fix pepy.tech links [#14982](https://github.com/jupyterlab/jupyterlab/pull/14982) ([@fcollonval](https://github.com/fcollonval))
+- simplify binder python baseline [#14971](https://github.com/jupyterlab/jupyterlab/pull/14971) ([@bollwyvl](https://github.com/bollwyvl))
+- Restore welcome test [#14946](https://github.com/jupyterlab/jupyterlab/pull/14946) ([@fcollonval](https://github.com/fcollonval))
+- Bump black\[jupyter\] from 23.3.0 to 23.7.0 [#14893](https://github.com/jupyterlab/jupyterlab/pull/14893) ([@dependabot\[bot\]](https://github.com/apps/dependabot))
+
+### Documentation improvements
+
+- React on galata update comment, fix binder URL in docs [#15070](https://github.com/jupyterlab/jupyterlab/pull/15070) ([@krassowski](https://github.com/krassowski))
+- Remove `--UNSAFE` flag in the extension tutorial docs [#15007](https://github.com/jupyterlab/jupyterlab/pull/15007) ([@jtpio](https://github.com/jtpio))
+- Fix more links [#14989](https://github.com/jupyterlab/jupyterlab/pull/14989) ([@fcollonval](https://github.com/fcollonval))
+- Fix pepy.tech links [#14982](https://github.com/jupyterlab/jupyterlab/pull/14982) ([@fcollonval](https://github.com/fcollonval))
+
+### API and Breaking Changes
+
+- Check applicable provider in ProviderReconciliator [#15094](https://github.com/jupyterlab/jupyterlab/pull/15094) ([@trungleduc](https://github.com/trungleduc))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-08-13&to=2023-09-14&type=c))
+
+[@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2023-08-13..2023-09-14&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2023-08-13..2023-09-14&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2023-08-13..2023-09-14&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-08-13..2023-09-14&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-08-13..2023-09-14&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-08-13..2023-09-14&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-08-13..2023-09-14&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-08-13..2023-09-14&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-08-13..2023-09-14&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-08-13..2023-09-14&type=Issues) | [@tonyfast](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atonyfast+updated%3A2023-08-13..2023-09-14&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-08-13..2023-09-14&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.5
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.4...7113c486f9146c84ec83197bbaa4e11d7217bac5))
@@ -136,8 +191,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-08-03&to=2023-08-13&type=c))
 
 [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-08-03..2023-08-13&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-08-03..2023-08-13&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-08-03..2023-08-13&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-08-03..2023-08-13&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-08-03..2023-08-13&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-08-03..2023-08-13&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-08-03..2023-08-13&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-08-03..2023-08-13&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.4
 
