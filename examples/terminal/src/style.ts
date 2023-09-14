@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { applyJupyterTheme } from '@jupyter/web-components';
 
 import '@jupyterlab/application/style/index.css';
