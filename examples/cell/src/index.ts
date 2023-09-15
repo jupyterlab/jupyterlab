@@ -139,7 +139,11 @@ function main(): void {
   sessionContext.kernelChanged.connect(() => {
     void sessionContext.session?.kernel?.info.then(info => {
       const lang = info.language_info;
-      const mimeType = mimeService.getMimeTypeByLanguage(lang);
+      const mimeTypes = mimeService.getMimeTypeByLanguage(lang);
+      const mimeType =
+        Array.isArray(mimeTypes) && mimeTypes.length !== 0
+          ? mimeTypes[0]
+          : mimeTypes;
       cellWidget.model.mimeType = mimeType;
     });
   });
