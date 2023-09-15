@@ -212,7 +212,9 @@ export class FileBrowserHelper {
     const page = this.page;
     const item = page
       .locator('#filebrowser')
-      .locator('.jp-ToolbarButtonComponent[data-icon="ui-components:refresh"]');
+      .locator(
+        '.jp-ToolbarButtonComponent[data-command="filebrowser:refresh"]'
+      );
 
     // wait for network response or timeout
     await this.contents.waitForAPIResponse(
