@@ -215,7 +215,7 @@ export class FileBrowserHelper {
       .locator('.jp-ToolbarButtonComponent[data-icon="ui-components:refresh"]');
 
     // wait for network response or timeout
-    this.contents.waitForAPIResponse(
+    await this.contents.waitForAPIResponse(
       async () => {
         await item.click();
       },
