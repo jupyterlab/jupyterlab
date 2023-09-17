@@ -341,14 +341,16 @@ export class Completer extends Widget {
       this._activeIndex
     ] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
+
+    const resolvedItem = this.model?.resolveItem(items[this._activeIndex]);
+
     // Add the documentation panel
     if (this._showDoc) {
       this._docPanel.innerText = '';
       node.appendChild(this._docPanel);
       this._docPanelExpanded = false;
+      this._updateDocPanel(resolvedItem, active);
     }
-    const resolvedItem = this.model?.resolveItem(items[this._activeIndex]);
-    this._updateDocPanel(resolvedItem, active);
 
     if (this.isHidden) {
       this.show();
@@ -569,7 +571,9 @@ export class Completer extends Widget {
     const activeCompletionItem = visibleCompletionItems?.[this._activeIndex];
     if (activeCompletionItem) {
       const resolvedItem = this.model?.resolveItem(activeCompletionItem);
-      this._updateDocPanel(resolvedItem, active);
+      if (this._showDoc) {
+        this._updateDocPanel(resolvedItem, active);
+      }
     }
   }
 
