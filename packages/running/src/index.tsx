@@ -412,9 +412,11 @@ class Section extends PanelWithToolbar {
     const button = this._button;
     button.enabled = this._manager.running().length > 0;
     if (button.enabled) {
-      button.node.querySelector('button')?.classList.remove('jp-mod-disabled');
+      button.node
+        .querySelector('jp-button')
+        ?.classList.remove('jp-mod-disabled');
     } else {
-      button.node.querySelector('button')?.classList.add('jp-mod-disabled');
+      button.node.querySelector('jp-button')?.classList.add('jp-mod-disabled');
     }
   }
 
