@@ -11,6 +11,7 @@ import {
   LanguageServerManager,
   WidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
+import { ServerConnection } from '@jupyterlab/services';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { NotebookAdapter } from '@jupyterlab/notebook';
@@ -18,8 +19,45 @@ import { LabShell } from '@jupyterlab/application';
 
 import { signalToPromise } from '@jupyterlab/testing';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
+
 import { Widget } from '@lumino/widgets';
 import { PromiseDelegate } from '@lumino/coreutils';
+
+const spy = jest.spyOn(ServerConnection, 'makeRequest');
+const specs = {
+  /* eslint-disable */
+  pyls: {
+    argv: [''],
+    display_name: 'pyls',
+    env: {},
+    languages: ['python'],
+    mime_types: ['text/python', 'text/x-ipython'],
+    version: 2
+  }
+  /* eslint-enable  */
+};
+const sessions = {
+  /* eslint-disable */
+  pyls: {
+    handler_count: 0,
+    last_handler_message_at: null,
+    last_server_message_at: null,
+    spec: specs.pyls,
+    status: 'not_started'
+  }
+  /* eslint-enable  */
+};
+spy.mockImplementation((status, method, setting) => {
+  return Promise.resolve({
+    ok: true,
+    status: 200,
+    json: () => ({
+      sessions,
+      specs,
+      version: 2
+    })
+  }) as any;
+});
 
 describe('@jupyterlab/lsp', () => {
   describe('WidgetLSPAdapterTracker', () => {
