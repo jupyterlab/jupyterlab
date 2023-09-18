@@ -371,7 +371,7 @@ export class Completer extends Widget {
     }
     return {
       width: this._sizeCache.width + this._sizeCache.docPanelWidth,
-      height: this._sizeCache.height + this._sizeCache.docPanelHeight
+      height: Math.max(this._sizeCache.height, this._sizeCache.docPanelHeight)
     };
   }
 
