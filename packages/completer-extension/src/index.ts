@@ -12,6 +12,7 @@ import {
 import {
   CompletionProviderManager,
   ContextCompleterProvider,
+  HistoryInlineCompletionProvider,
   ICompletionProviderManager,
   KernelCompleterProvider
 } from '@jupyterlab/completer';
@@ -21,12 +22,13 @@ import {
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
 import type { FieldProps } from '@rjsf/utils';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { renderAvailableProviders } from './renderer';
 
 const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:manager';
 
-const defaultProvider: JupyterFrontEndPlugin<void> = {
+const defaultProviders: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/completer-extension:base-service',
   description: 'Adds context and kernel completion providers.',
   requires: [ICompletionProviderManager],
@@ -37,6 +39,26 @@ const defaultProvider: JupyterFrontEndPlugin<void> = {
   ): void => {
     completionManager.registerProvider(new ContextCompleterProvider());
     completionManager.registerProvider(new KernelCompleterProvider());
+  }
+};
+
+const inlineHistoryProvider: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/completer-extension:inline-history',
+  description:
+    'Adds inline completion provider suggesting code from execution history.',
+  requires: [ICompletionProviderManager],
+  optional: [ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    completionManager: ICompletionProviderManager,
+    translator: ITranslator | null
+  ): void => {
+    completionManager.registerInlineProvider(
+      new HistoryInlineCompletionProvider({
+        translator: translator ?? nullTranslator
+      })
+    );
   }
 };
 
@@ -124,5 +146,9 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [manager, defaultProvider];
+const plugins: JupyterFrontEndPlugin<any>[] = [
+  manager,
+  defaultProviders,
+  inlineHistoryProvider
+];
 export default plugins;

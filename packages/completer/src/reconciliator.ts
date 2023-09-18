@@ -7,6 +7,8 @@ import {
   CompletionTriggerKind,
   ICompletionContext,
   ICompletionProvider,
+  IInlineCompletionProvider,
+  InlineCompletionTriggerKind,
   IProviderReconciliator
 } from './tokens';
 import { Completer } from './widget';
@@ -20,6 +22,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
    */
   constructor(options: ProviderReconciliator.IOptions) {
     this._providers = options.providers;
+    this._inlineProviders = options.inlineProviders;
     this._context = options.context;
     this._timeout = options.timeout;
   }
@@ -35,6 +38,35 @@ export class ProviderReconciliator implements IProviderReconciliator {
     );
     const applicableProviders = await Promise.all(isApplicablePromises);
     return this._providers.filter((_, idx) => applicableProviders[idx]);
+  }
+
+  async fetchInline(
+    request: CompletionHandler.IRequest,
+    trigger: InlineCompletionTriggerKind
+  ): Promise<CompletionHandler.IInlineCompletionReply[] | null> {
+    let promises: Promise<CompletionHandler.IInlineCompletionReply>[] = [];
+    const current = ++this._fetching;
+    for (const provider of this._inlineProviders) {
+      let promise: Promise<CompletionHandler.IInlineCompletionReply | null>;
+      promise = provider
+        .fetch(request, { ...this._context, triggerKind: trigger })
+        .then(reply => {
+          if (current !== this._fetching) {
+            return Promise.reject(void 0);
+          }
+          return {
+            completions: reply,
+            provider
+          };
+        });
+      const timeoutPromise = new Promise<null>(resolve => {
+        return setTimeout(() => resolve(null), this._timeout);
+      });
+      promise = Promise.race([promise, timeoutPromise]);
+      // Wrap promise and return error in case of failure.
+      promises.push(promise.catch(p => p));
+    }
+    return Promise.all(promises);
   }
 
   /**
@@ -65,10 +97,9 @@ export class ProviderReconciliator implements IProviderReconciliator {
         return { ...reply, items };
       });
 
-      const timeoutPromise =
-        new Promise<CompletionHandler.ICompletionItemsReply | null>(resolve => {
-          return setTimeout(() => resolve(null), this._timeout);
-        });
+      const timeoutPromise = new Promise<null>(resolve => {
+        return setTimeout(() => resolve(null), this._timeout);
+      });
       promise = Promise.race([promise, timeoutPromise]);
       // Wrap promise and return error in case of failure.
       promises.push(promise.catch(p => p));
@@ -226,6 +257,11 @@ export class ProviderReconciliator implements IProviderReconciliator {
   private _providers: Array<ICompletionProvider>;
 
   /**
+   * List of inline providers.
+   */
+  private _inlineProviders: Array<IInlineCompletionProvider>;
+
+  /**
    * Current completer context.
    */
   private _context: ICompletionContext;
@@ -254,6 +290,10 @@ export namespace ProviderReconciliator {
      * List of completion providers, assumed to contain at least one provider.
      */
     providers: ICompletionProvider[];
+    /**
+     * List of inline completion providers, may be empty.
+     */
+    inlineProviders: IInlineCompletionProvider[];
     /**
      * How long should we wait for each of the providers to resolve `fetch` promise
      */

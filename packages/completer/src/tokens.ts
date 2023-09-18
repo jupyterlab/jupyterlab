@@ -21,8 +21,7 @@ export enum CompletionTriggerKind {
 }
 
 /**
- * The context which will be passed to the `fetch` function
- * of a provider.
+ * The context which will be passed to the completion provider.
  */
 export interface ICompletionContext {
   /**
@@ -48,7 +47,7 @@ export interface ICompletionContext {
 }
 
 /**
- * The interface to implement a completer provider.
+ * The interface to implement a completion provider.
  */
 export interface ICompletionProvider<
   T extends
@@ -139,6 +138,116 @@ export interface ICompletionProvider<
 }
 
 /**
+ * Describes how an inline completion provider was triggered.
+ * @alpha
+ */
+export enum InlineCompletionTriggerKind {
+  /**
+   * Completion was triggered explicitly by a user gesture.
+   * Return multiple completion items to enable cycling through them.
+   */
+  Invoke = 0,
+  /**
+   * Completion was triggered automatically while editing.
+   * It is sufficient to return a single completion item in this case.
+   */
+  Automatic = 1
+}
+
+/**
+ * The context which will be passed to the inline completion provider.
+ * @alpha
+ */
+export interface IInlineCompletionContext {
+  /**
+   * The widget (notebook, console, code editor) which invoked
+   * the inline completer
+   */
+  widget: Widget;
+
+  /**
+   * The session extracted from widget for convenience.
+   */
+  session?: Session.ISessionConnection | null;
+
+  triggerKind: InlineCompletionTriggerKind;
+
+  // selectedCompletionInfo?: ISelectedCompletionInfo;
+}
+
+/**
+ * LSP 3.18-compliant inline completion API subset.
+ */
+interface IInlineCompletionItemLSP {
+  /**
+   * The text to replace the range with. Must be set.
+   * Is used both for the preview and the accept operation.
+   */
+  insertText: string;
+
+  /**
+   * A text that is used to decide if this inline completion should be
+   * shown. When `falsy` the insertText is used.
+   *
+   * An inline completion is shown if the text to replace is a prefix of the
+   * filter text.
+   */
+  filterText?: string;
+}
+
+/**
+ * An inline completion item represents a text snippet that is proposed inline
+ * to complete text that is being typed.
+ * @alpha
+ */
+export interface IInlineCompletionItem extends IInlineCompletionItemLSP {
+  token?: string;
+  /**
+   * Whether generation of `insertText` is still ongoing. If your provider supports streaming,
+   * you can set this to true, which will result in the provider's `stream()` method being called
+   * with `token` which has to be set for incomplete completions.
+   */
+  isIncomplete?: boolean;
+}
+
+export interface IInlineCompletionList<
+  T extends IInlineCompletionItem = IInlineCompletionItem
+> {
+  /**
+   * The inline completion items.
+   */
+  items: T[];
+}
+
+/**
+ * The interface to implement an inline completion provider.
+ */
+export interface IInlineCompletionProvider<
+  T extends IInlineCompletionItem = IInlineCompletionItem
+> {
+  fetch(
+    request: CompletionHandler.IRequest,
+    context: IInlineCompletionContext
+  ): Promise<IInlineCompletionList<T>>;
+
+  /**
+   * Name of the provider to be displayed in the UI.
+   */
+  name: string;
+
+  /**
+   * Unique identifier, cannot change on runtime.
+   */
+  identifier: string;
+
+  // TODO implement streaming support later on
+  stream?(token: string): {
+    done: boolean;
+    response: T;
+  };
+}
+
+/**
  * The exported token used to register new provider.
  */
 export const ICompletionProviderManager = new Token<ICompletionProviderManager>(
@@ -153,6 +262,11 @@ export interface ICompletionProviderManager {
    * @param {ICompletionProvider} provider - the provider to be registered.
    */
   registerProvider(provider: ICompletionProvider): void;
+
+  /**
+   * Register an inline completer provider with the manager.
+   */
+  registerInlineProvider(provider: IInlineCompletionProvider): void;
 
   /**
    * Invoke the completer in the widget with provided id.
@@ -194,6 +308,14 @@ export interface IProviderReconciliator {
     request: CompletionHandler.IRequest,
     trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply | null>;
+
+  /**
+   * TODO - document me
+   */
+  fetchInline(
+    request: CompletionHandler.IRequest,
+    trigger?: InlineCompletionTriggerKind
+  ): Promise<CompletionHandler.IInlineCompletionReply[] | null>;
 
   /**
    * Check if completer should make request to fetch completion responses

@@ -10,8 +10,15 @@ import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
 
-import { CompletionTriggerKind, IProviderReconciliator } from './tokens';
+import {
+  CompletionTriggerKind,
+  IInlineCompletionList,
+  IInlineCompletionProvider,
+  InlineCompletionTriggerKind,
+  IProviderReconciliator
+} from './tokens';
 import { Completer } from './widget';
+import { InlineCompleter } from './inline';
 
 /**
  * A class added to editors that can host a completer.
@@ -32,6 +39,7 @@ export class CompletionHandler implements IDisposable {
    */
   constructor(options: CompletionHandler.IOptions) {
     this.completer = options.completer;
+    this.inlineCompleter = options.inlineCompleter;
     this.completer.selected.connect(this.onCompletionSelected, this);
     this.completer.visibilityChanged.connect(this.onVisibilityChanged, this);
     this._reconciliator = options.reconciliator;
@@ -41,6 +49,7 @@ export class CompletionHandler implements IDisposable {
    * The completer widget managed by the handler.
    */
   readonly completer: Completer;
+  readonly inlineCompleter: InlineCompleter;
 
   set reconciliator(reconciliator: IProviderReconciliator) {
     this._reconciliator = reconciliator;
@@ -83,6 +92,7 @@ export class CompletionHandler implements IDisposable {
       model.sharedModel.changed.connect(this.onTextChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
+      this.inlineCompleter.editor = editor;
     }
   }
 
@@ -310,6 +320,13 @@ export class CompletionHandler implements IDisposable {
         CompletionTriggerKind.TriggerCharacter
       );
     }
+    // TOOD: what condition?
+    //if (true) {
+    void this._makeInlineRequest(
+      editor.getCursorPosition(),
+      InlineCompletionTriggerKind.Automatic
+    );
+    //}
     const { start, end } = editor.getSelection();
     if (start.column !== end.column || start.line !== end.line) {
       return;
@@ -351,10 +368,8 @@ export class CompletionHandler implements IDisposable {
       return Promise.reject(new Error('No active editor'));
     }
 
-    const text = editor.model.sharedModel.getSource();
-    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
+    const request = this._composeRequest(editor, position);
     const state = this.getState(editor, position);
-    const request: CompletionHandler.IRequest = { text, offset };
     return this._reconciliator
       .fetch(request, trigger)
       .then(reply => {
@@ -374,6 +389,39 @@ export class CompletionHandler implements IDisposable {
       .catch(p => {
         /* Fails silently. */
       });
+  }
+
+  private async _makeInlineRequest(
+    position: CodeEditor.IPosition,
+    trigger: InlineCompletionTriggerKind
+  ) {
+    const editor = this.editor;
+
+    if (!editor) {
+      return Promise.reject(new Error('No active editor'));
+    }
+    const request = this._composeRequest(editor, position);
+
+    const result = await this._reconciliator.fetchInline(request, trigger);
+
+    if (!result) {
+      return;
+    }
+    const model = this.inlineCompleter.model;
+    if (!model) {
+      return;
+    }
+    model.cursor = position;
+    model.setCompletionReply(result);
+  }
+
+  private _composeRequest(
+    editor: CodeEditor.IEditor,
+    position: CodeEditor.IPosition
+  ): CompletionHandler.IRequest {
+    const text = editor.model.sharedModel.getSource();
+    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
+    return { text, offset };
   }
 
   /**
@@ -420,6 +468,8 @@ export namespace CompletionHandler {
      * The completion widget the handler will connect to.
      */
     completer: Completer;
+
+    inlineCompleter: InlineCompleter;
 
     /**
      * The reconciliator that will fetch and merge completions from active providers.
@@ -515,6 +565,17 @@ export namespace CompletionHandler {
      * A list of completion items. default to CompletionHandler.ICompletionItems
      */
     items: Array<T>;
+  }
+
+  export interface IInlineCompletionReply {
+    /**
+     * The completion candidates list.
+     */
+    completions: IInlineCompletionList;
+    /**
+     * The source provider.
+     */
+    provider: Omit<IInlineCompletionProvider, 'fetch'>;
   }
 
   /**

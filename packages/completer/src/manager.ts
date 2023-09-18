@@ -11,19 +11,26 @@ import { CompleterModel } from './model';
 import {
   ICompletionContext,
   ICompletionProvider,
-  ICompletionProviderManager
+  ICompletionProviderManager,
+  IInlineCompletionProvider
 } from './tokens';
+import { InlineCompleter } from './inline';
 import { Completer } from './widget';
 
 /**
- * A manager for completer provider.
+ * A manager for completion provider.
  */
 export class CompletionProviderManager implements ICompletionProviderManager {
+  // it might be good to hook inline completer here for two reasons:
+  // - we will be able to suppress invoke easily
+  // - we will not duplicate the widget (_panelHandlers) logic
+
   /**
    * Construct a new completer manager.
    */
   constructor() {
     this._providers = new Map();
+    this._inlineProviders = new Map();
     this._panelHandlers = new Map();
     this._mostRecentContext = new Map();
     this._activeProvidersChanged = new Signal<ICompletionProviderManager, void>(
@@ -74,10 +81,24 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     const identifier = provider.identifier;
     if (this._providers.has(identifier)) {
       console.warn(
-        `Completion service with identifier ${identifier} is already registered`
+        `Completion provider with identifier ${identifier} is already registered`
       );
     } else {
       this._providers.set(identifier, provider);
+      this._panelHandlers.forEach((handler, id) => {
+        void this.updateCompleter(this._mostRecentContext.get(id)!);
+      });
+    }
+  }
+
+  registerInlineProvider(provider: IInlineCompletionProvider): void {
+    const identifier = provider.identifier;
+    if (this._inlineProviders.has(identifier)) {
+      console.warn(
+        `Completion provider with identifier ${identifier} is already registered`
+      );
+    } else {
+      this._inlineProviders.set(identifier, provider);
       this._panelHandlers.forEach((handler, id) => {
         void this.updateCompleter(this._mostRecentContext.get(id)!);
       });
@@ -141,6 +162,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
 
     const options = {
       model,
+      editor,
       renderer,
       sanitizer,
       showDoc: this._showDoc
@@ -185,6 +207,10 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     }
   }
 
+  invokeInline(id: string): void {
+    // TODO (with appropriate trigger)
+  }
+
   /**
    * Activate `select` command in the widget with provided id.
    *
@@ -207,6 +233,9 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private async generateReconciliator(
     completerContext: ICompletionContext
   ): Promise<ProviderReconciliator> {
+    // TODO: maybe mirror the settings pattern
+    const inlineProviders = [...this._inlineProviders.values()];
+
     const providers: Array<ICompletionProvider> = [];
     //TODO Update list with rank
     for (const id of this._activeProviders) {
@@ -218,6 +247,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     return new ProviderReconciliator({
       context: completerContext,
       providers,
+      inlineProviders,
       timeout: this._timeout
     });
   }
@@ -231,6 +261,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private disposeHandler(id: string, handler: CompletionHandler) {
     handler.completer.model?.dispose();
     handler.completer.dispose();
+    handler.inlineCompleter.model?.dispose();
+    handler.inlineCompleter.dispose();
     handler.dispose();
     this._panelHandlers.delete(id);
   }
@@ -243,11 +275,17 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     options: Completer.IOptions
   ): Promise<CompletionHandler> {
     const completer = new Completer(options);
+    const inlineCompleter = new InlineCompleter({
+      ...options,
+      model: new InlineCompleter.Model()
+    });
     completer.hide();
     Widget.attach(completer, document.body);
+    Widget.attach(inlineCompleter, document.body);
     const reconciliator = await this.generateReconciliator(completerContext);
     const handler = new CompletionHandler({
       completer,
+      inlineCompleter,
       reconciliator: reconciliator
     });
     handler.editor = completerContext.editor;
@@ -256,9 +294,14 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * The completer provider map, the keys are id of provider
+   * The completion provider map, the keys are id of provider
    */
   private readonly _providers: Map<string, ICompletionProvider>;
+
+  /**
+   * The inline completion provider map, the keys are id of provider
+   */
+  private readonly _inlineProviders: Map<string, IInlineCompletionProvider>;
 
   /**
    * The completer handler map, the keys are id of widget and
@@ -278,7 +321,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private _activeProviders = new Set([KERNEL_PROVIDER_ID, CONTEXT_PROVIDER_ID]);
 
   /**
-   * Timeout value for the completer provider.
+   * Timeout value for the completion provider.
    */
   private _timeout: number;
 

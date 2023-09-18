@@ -120,6 +120,7 @@ class ServerRequestHandler<
 export const Provider: { [key: string]: keyof lsp.ServerCapabilities } = {
   TEXT_DOCUMENT_SYNC: 'textDocumentSync',
   COMPLETION: 'completionProvider',
+  //INLINE_COMPLETION: 'inlineCompletionProvider',
   HOVER: 'hoverProvider',
   SIGNATURE_HELP: 'signatureHelpProvider',
   DECLARATION: 'declarationProvider',
