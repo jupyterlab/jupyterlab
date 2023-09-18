@@ -89,8 +89,8 @@ export class WidgetLSPAdapterTracker<
    * @param adapter - The adapter being added.
    *
    * #### Notes.
-   * The newly added adapter becomes the current adapter unless the focus tracker
-   * already had a focused adapter.
+   * The newly added adapter becomes the current adapter unless the shell
+   * already had a DocumentWidget as the activeWidget.
    */
   add(adapter: T): void {
     if (adapter.isDisposed) {
