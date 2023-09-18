@@ -116,7 +116,7 @@ def update_extension(  # noqa
 
     # Build up the template answers and run the template engine
     author = data.get("author", "<author_name>")
-    author_email = "<author_email>"
+    author_email = ""
     if isinstance(author, dict):
         author_name = author.get("name", "<author_name>")
         author_email = author.get("email", author_email)
