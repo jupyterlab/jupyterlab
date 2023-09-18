@@ -55,8 +55,13 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor: 'var(--jp-layout-color2)'
   },
 
-  '.cm-gutter, .cm-activeLine': {
+  '.cm-gutter': {
     backgroundColor: 'var(--jp-layout-color2)'
+  },
+
+  '.cm-activeLine': {
+    backgroundColor:
+      'color-mix(in srgb, var(--jp-layout-color3) 25%, transparent)'
   },
 
   '.cm-lineNumbers': {
