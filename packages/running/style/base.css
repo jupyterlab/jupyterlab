@@ -28,7 +28,7 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-RunningSessions > .jp-SidePanel-toolbar {
+.jp-RunningSessions > .jp-SidePanel-toolbar::part(positioning-region) {
   justify-content: flex-end;
 }
 
