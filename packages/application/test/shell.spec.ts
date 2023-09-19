@@ -517,4 +517,15 @@ describe('LabShell', () => {
       expect(widget.isVisible).toBe(false);
     });
   });
+
+  describe('#menuHandler', () => {
+    it('should have a role of navigation and aria label of main', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const menu = document.getElementById('jp-menu-panel');
+      expect(menu?.getAttribute('role')).toEqual('navigation');
+      expect(menu?.getAttribute('aria-label')).toEqual('main');
+    });
+  });
 });
