@@ -14,7 +14,11 @@ import {
   ProviderReconciliator
 } from '@jupyterlab/completer';
 import { Context } from '@jupyterlab/docregistry';
-import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
+import {
+  INotebookModel,
+  NotebookModelFactory,
+  NotebookPanel
+} from '@jupyterlab/notebook';
 import { ServiceManager } from '@jupyterlab/services';
 import { createStandaloneCell } from '@jupyter/ydoc';
 
@@ -49,9 +53,11 @@ class TestCellModel extends CellModel {
 
 class CustomCompleterModel extends CompleterModel {}
 
+class CustomRenderer extends Completer.Renderer {}
+
 class FooCompletionProvider implements ICompletionProvider {
   identifier: string = SAMPLE_PROVIDER_ID;
-  renderer = null;
+  renderer = new CustomRenderer();
   fetch(
     request: CompletionHandler.IRequest,
     context: ICompletionContext
@@ -70,6 +76,11 @@ class FooCompletionProvider implements ICompletionProvider {
   }
 
   async modelFactory(context: ICompletionContext): Promise<Completer.IModel> {
+    if (!(this instanceof FooCompletionProvider)) {
+      throw new Error(
+        'The context `this` should be an instance of `FooCompletionProvider`.'
+      );
+    }
     return new CustomCompleterModel();
   }
 }
@@ -116,8 +127,14 @@ describe('completer/manager', () => {
       });
       it('should not register a provider twice', () => {
         manager.registerProvider(new FooCompletionProvider());
+        jest.spyOn(console, 'warn').mockImplementation();
         manager.registerProvider(new FooCompletionProvider());
         expect(manager.getProviders().size).toBe(2);
+        expect(console.warn).toHaveBeenLastCalledWith(
+          expect.stringContaining(
+            'CompletionProvider:sample is already registered'
+          )
+        );
       });
     });
 
@@ -142,7 +159,7 @@ describe('completer/manager', () => {
         expect(manager['_activeProviders'].has(DEFAULT_PROVIDER_ID)).toBe(true);
         expect(manager['_activeProviders'].has(SAMPLE_PROVIDER_ID)).toBe(true);
       });
-      it('should skip unavailble providers', () => {
+      it('should skip unavailable providers', () => {
         manager.registerProvider(new FooCompletionProvider());
         manager.activateProvider(['randomId']);
         expect(manager['_activeProviders'].size).toBe(2);
@@ -151,39 +168,21 @@ describe('completer/manager', () => {
       });
     });
 
-    describe('#generateHandler()', () => {
-      it('should create a handler with connector proxy', async () => {
-        const handler = (await manager['generateHandler'](
-          {}
-        )) as CompletionHandler;
-        expect(handler).toBeInstanceOf(CompletionHandler);
-      });
-
-      it('should create a handler with a custom model', async () => {
-        manager.registerProvider(new FooCompletionProvider());
-        manager.activateProvider([SAMPLE_PROVIDER_ID]);
-        const handler = (await manager['generateHandler'](
-          {}
-        )) as CompletionHandler;
-        expect(handler.completer.model).toBeInstanceOf(CustomCompleterModel);
-      });
-    });
-
-    describe('#updateHandler()', () => {
-      it('should create a new handler for the notebook panel', async () => {
+    describe('#updateCompleter()', () => {
+      let completerContext: ICompletionContext;
+      let widget: NotebookPanel;
+      beforeEach(() => {
         const context = contextFactory();
-        const widget = NBTestUtils.createNotebookPanel(context);
-        const completerContext = { widget };
+        widget = NBTestUtils.createNotebookPanel(context);
+        completerContext = { widget };
+      });
 
+      it('should create a new handler for the notebook panel', async () => {
         await manager.updateCompleter(completerContext);
         expect(manager['_panelHandlers'].has(widget.id)).toBe(true);
       });
 
       it('should update the handler of a widget', async () => {
-        const context = contextFactory();
-        const widget = NBTestUtils.createNotebookPanel(context);
-        const completerContext = { widget };
-
         await manager.updateCompleter(completerContext);
         const cell = new Cell({
           contentFactory: NBTestUtils.createBaseCellFactory(),
@@ -200,6 +199,46 @@ describe('completer/manager', () => {
         const handler = manager['_panelHandlers'].get(widget.id);
         manager.updateCompleter(newCompleterContext).catch(console.error);
         expect(handler.editor).toBe(newCompleterContext.editor);
+      });
+
+      it('should update renderer if providers changed', async () => {
+        // create the completer
+        await manager.updateCompleter(completerContext);
+        const handler = manager['_panelHandlers'].get(
+          widget.id
+        ) as CompletionHandler;
+        // no custom renderer shall be set at this point
+        expect(handler.completer.renderer).not.toBeInstanceOf(CustomRenderer);
+
+        // change providers
+        const provider = new FooCompletionProvider();
+        manager.registerProvider(provider);
+        manager.activateProvider([provider.identifier]);
+
+        // update after providers changed
+        await manager.updateCompleter(completerContext);
+        expect(handler.completer.renderer).toBeInstanceOf(CustomRenderer);
+      });
+
+      it('should update model if providers changed', async () => {
+        // create the completer
+        await manager.updateCompleter(completerContext);
+        const handler = manager['_panelHandlers'].get(
+          widget.id
+        ) as CompletionHandler;
+        // no custom model shall be set at this point
+        expect(handler.completer.model).not.toBeInstanceOf(
+          CustomCompleterModel
+        );
+
+        // change providers
+        const provider = new FooCompletionProvider();
+        manager.registerProvider(provider);
+        manager.activateProvider([provider.identifier]);
+
+        // update after providers changed
+        await manager.updateCompleter(completerContext);
+        expect(handler.completer.model).toBeInstanceOf(CustomCompleterModel);
       });
     });
   });

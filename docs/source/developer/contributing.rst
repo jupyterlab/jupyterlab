@@ -47,6 +47,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    repo
    components
    patterns
+   Accessibility <accessibility>
    internationalization
    css
    performance
@@ -142,7 +143,7 @@ and the issues it solves before a pull request is opened. A triager will
 ensure that your issue meets our definition of ready before we can merge
 any pull requests that relate to it.
 
-Pull requests must target the development branch (= ``master``) even if
+Pull requests must target the development branch (= ``main``) even if
 it aims at addressing an issue seen in a stable release. Once the pull
 request is merged on the development branch, it will be backported to
 the stable branch using a bot action (or manually if the bot action
@@ -287,10 +288,10 @@ a local environment, directly from the Web browser:
    allows to prototype JupyterLab extensions from within JupyterLab and
    can be run without installation in the browser using Binder.
 
-Using `Binder <https://mybinder.org>`__, you can test the current master branch and your
+Using `Binder <https://mybinder.org>`__, you can test the current main branch and your
 changes within the browser as well. We recommend you have at least 8 GB of RAM for this.
-To build and launch an instance of the latest JupyterLab master, open
-`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/>`__
+To build and launch an instance of the latest JupyterLab main, open
+`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/main?urlpath=lab-dev/>`__
 in a new tab. The build takes about 7 minutes to complete.
 
 To test your own branch hosted on GitHub, enter it on https://mybinder.org.
@@ -643,6 +644,9 @@ Main reasons for UI test failures are:
    - ``please update documentation snapshots``: A bot will push a new commit to your PR updating
      documentation test snapshots.
    - ``please update snapshots``: Combine the two previous comments effects.
+
+    The bot will react with +1 emoji to indicate that the run started and then comment
+    back once it concluded.
 
 For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.
@@ -1022,16 +1026,12 @@ them out against your copy of JupyterLab, you can easily do so using the
 ``link`` command:
 
 1. Make your changes and then build the external package
-2. Register a link to the modified external package
-
-   -  navigate to the external package dir and run ``jlpm link``
-
-3. Link JupyterLab to modded package
+2. Link JupyterLab to modded package
 
    -  navigate to top level of your JupyterLab repo, then run
-      ``jlpm link "<package-of-interest>"``
+      ``jlpm link <path-to-external-repo> --all``
 
-You can then (re)build JupyterLab (eg ``jlpm run build``) and your
+3. You can then (re)build JupyterLab (eg ``jlpm run build``) and your
 changes should be picked up by the build.
 
 To restore JupyterLab to its original state, you use the ``unlink``
@@ -1040,13 +1040,13 @@ command:
 1. Unlink JupyterLab and modded package
 
    -  navigate to top level of your JupyterLab repo, then run
-      ``jlpm unlink "<package-of-interest>"``
+      ``jlpm unlink <path-to-external-repo> --all``
 
 2. Reinstall original version of the external package in JupyterLab
 
    -  run ``jlpm install --check-files``
 
-You can then (re)build JupyterLab and everything should be back to
+3. You can then (re)build JupyterLab and everything should be back to
 default.
 
 Possible Linking Pitfalls

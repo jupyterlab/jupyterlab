@@ -72,7 +72,7 @@ export class Completer extends Widget {
   /**
    * Cache style constraints from CSS.
    */
-  _updateConstraints() {
+  protected _updateConstraints() {
     const tempNode = document.createElement('div');
     tempNode.classList.add(LIST_CLASS);
     tempNode.style.visibility = 'hidden';
@@ -157,6 +157,16 @@ export class Completer extends Widget {
       this._model.stateChanged.connect(this.onModelStateChanged, this);
       this._model.queryChanged.connect(this.onModelQueryChanged, this);
     }
+  }
+
+  /**
+   * The completer used by the completer widget.
+   */
+  get renderer(): Completer.IRenderer {
+    return this._renderer;
+  }
+  set renderer(renderer: Completer.IRenderer) {
+    this._renderer = renderer;
   }
 
   /**
@@ -328,7 +338,6 @@ export class Completer extends Widget {
 
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
-
     // Add the documentation panel
     if (this._showDoc) {
       let docPanel = document.createElement('div');
@@ -337,7 +346,7 @@ export class Completer extends Widget {
       node.appendChild(docPanel);
       this._docPanelExpanded = false;
     }
-    const resolvedItem = this.model?.resolveItem(this._activeIndex);
+    const resolvedItem = this.model?.resolveItem(items[this._activeIndex]);
     this._updateDocPanel(resolvedItem);
 
     if (this.isHidden) {
@@ -550,9 +559,12 @@ export class Completer extends Widget {
     let completionList = this.node.querySelector(`.${LIST_CLASS}`) as Element;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
     this._indexChanged.emit(this._activeIndex);
-
-    const resolvedItem = this.model?.resolveItem(this._activeIndex);
-    this._updateDocPanel(resolvedItem);
+    const visibleCompletionItems = this.model?.completionItems();
+    const activeCompletionItem = visibleCompletionItems?.[this._activeIndex];
+    if (activeCompletionItem) {
+      const resolvedItem = this.model?.resolveItem(activeCompletionItem);
+      this._updateDocPanel(resolvedItem);
+    }
   }
 
   /**
@@ -1021,14 +1033,18 @@ export namespace Completer {
     setCompletionItems(items: CompletionHandler.ICompletionItems): void;
 
     /**
-     * Lazy load missing data of item at `activeIndex`.
-     * @param {number} activeIndex - index of item
+     * Lazy load missing data of an item.
+     * @param indexOrValue - the item or its index
+     * @remarks
+     * Resolving item by index will be deprecated in
+     * the next major release.
+     *
      * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
      *  Return a promise of `null` if another `resolveItem` is called. Otherwise return the
      * promise of resolved completion item.
      */
     resolveItem(
-      activeIndex: number
+      activeIndex: number | CompletionHandler.ICompletionItem
     ): Promise<CompletionHandler.ICompletionItem | null> | undefined;
 
     /**
@@ -1104,7 +1120,8 @@ export namespace Completer {
    * A renderer for completer widget nodes.
    */
   export interface IRenderer<
-    T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends
+      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
   > {
     /**
      * Create an item node (an `li` element) from a ICompletionItem
@@ -1208,9 +1225,10 @@ export namespace Completer {
      * Get a heuristic for the width of an item.
      */
     itemWidthHeuristic(item: CompletionHandler.ICompletionItem): number {
-      return (
-        item.label.replace(/<\?mark>/g, '').length + (item.type?.length || 0)
-      );
+      // Get the label text without HTML markup (`<mark>` is the only markup
+      // that is allowed in processed items, everything else gets escaped).
+      const labelText = item.label.replace(/<(\/)?mark>/g, '');
+      return labelText.length + (item.type?.length || 0);
     }
 
     /**

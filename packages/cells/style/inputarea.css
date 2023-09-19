@@ -55,7 +55,7 @@
 /*-----------------------------------------------------------------------------
 | Mobile
 |----------------------------------------------------------------------------*/
-@media only screen and (max-width: 760px) {
+@media only screen and (width <= 760px) {
   .jp-InputArea-editor {
     display: table-row;
     margin-left: var(--jp-notebook-padding);

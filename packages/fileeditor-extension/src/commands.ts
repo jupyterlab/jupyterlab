@@ -1278,7 +1278,7 @@ export namespace Commands {
 
     // Add a code runner to the run menu.
     if (consoleTracker) {
-      addCodeRunnersToRunMenu(menu, consoleTracker);
+      addCodeRunnersToRunMenu(menu, consoleTracker, isEnabled);
     }
   }
 
@@ -1303,24 +1303,26 @@ export namespace Commands {
    */
   export function addCodeRunnersToRunMenu(
     menu: IMainMenu,
-    consoleTracker: IConsoleTracker
+    consoleTracker: IConsoleTracker,
+    isEnabled: () => boolean
   ): void {
-    const isEnabled = (current: IDocumentWidget<FileEditor>) =>
+    const isEnabled_ = (current: IDocumentWidget<FileEditor>) =>
+      isEnabled() &&
       current.context &&
       !!consoleTracker.find(
         widget => widget.sessionContext.session?.path === current.context.path
       );
     menu.runMenu.codeRunners.restart.add({
       id: CommandIDs.restartConsole,
-      isEnabled
+      isEnabled: isEnabled_
     });
     menu.runMenu.codeRunners.run.add({
       id: CommandIDs.runCode,
-      isEnabled
+      isEnabled: isEnabled_
     });
     menu.runMenu.codeRunners.runAll.add({
       id: CommandIDs.runAllCode,
-      isEnabled
+      isEnabled: isEnabled_
     });
   }
 

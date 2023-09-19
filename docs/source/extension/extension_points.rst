@@ -383,7 +383,7 @@ Jupyter Front-End Shell
 -----------------------
 
 The Jupyter front-end
-`shell <../api/interfaces/application.jupyterfrontend.ishell.html>`__
+`shell <../api/interfaces/application.JupyterFrontEnd.IShell.html>`__
 is used to add and interact with content in the application. The ``IShell``
 interface provides an ``add()`` method for adding widgets to the application.
 In JupyterLab, the application shell consists of:

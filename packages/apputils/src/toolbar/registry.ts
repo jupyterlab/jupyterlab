@@ -143,6 +143,7 @@ export function createDefaultFactory(
           command: tId,
           args: tArgs,
           label: tLabel,
+          caption: tCaption,
           icon: tIcon
         } = toolbarItem;
         const id = tId ?? '';
@@ -156,7 +157,8 @@ export function createDefaultFactory(
           id,
           args,
           icon,
-          label
+          label,
+          caption: tCaption as string
         });
       }
       case 'spacer':

@@ -46,7 +46,7 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor: 'var(--jp-editor-selected-background)'
   },
 
-  '&.cm-focused .cm-selectionBackground': {
+  '&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground': {
     backgroundColor: 'var(--jp-editor-selected-focused-background)'
   },
 
@@ -55,8 +55,13 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor: 'var(--jp-layout-color2)'
   },
 
-  '.cm-gutter, .cm-activeLine': {
+  '.cm-gutter': {
     backgroundColor: 'var(--jp-layout-color2)'
+  },
+
+  '.cm-activeLine': {
+    backgroundColor:
+      'color-mix(in srgb, var(--jp-layout-color3) 25%, transparent)'
   },
 
   '.cm-lineNumbers': {
@@ -72,6 +77,10 @@ export const jupyterEditorTheme = EditorView.theme({
     backgroundColor:
       'var(--jp-search-selected-match-background-color) !important',
     color: 'var(--jp-search-selected-match-color) !important'
+  },
+
+  '.cm-tooltip': {
+    backgroundColor: 'var(--jp-layout-color1)'
   }
 });
 

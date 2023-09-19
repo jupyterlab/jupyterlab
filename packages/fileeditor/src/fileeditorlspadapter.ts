@@ -174,6 +174,7 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
    * Get the index of editor from the cursor position in the virtual
    * document. Since there is only one editor, this method always return
    * 0
+   * @deprecated This is error-prone and will be removed in JupyterLab 5.0, use `getEditorIndex()` with `virtualDocument.getEditorAtVirtualLine(position)` instead.
    *
    * @param position - the position of cursor in the virtual document.
    * @return  {number} - index of the virtual editor
