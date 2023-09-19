@@ -17,7 +17,7 @@ test.describe('test kernel history keybindings', () => {
     await page.notebook.enterCellEditingMode(2);
     await page.keyboard.press('Alt+ArrowUp');
     // test fails without this wait
-    await page.waitForTimeout(5);
+    await page.waitForTimeout(50);
     // input: 3+4
     await page.keyboard.press('Alt+ArrowDown');
     // input 2+3
