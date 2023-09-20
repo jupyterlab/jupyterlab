@@ -268,7 +268,9 @@ html_theme_options = {
         },
     ],
     "logo": {
-        "alt_text": "Lumino",
+        "image_light": "_static/logo-rectangle.svg",
+        "image_dark": "_static/logo-rectangle-dark.svg",
+        "alt_text": "JupyterLab",
     },
     "use_edit_page_button": True,
     "navbar_align": "left",
