@@ -272,7 +272,6 @@ html_theme_options = {
     },
     "use_edit_page_button": True,
     "navbar_align": "left",
-    "navbar_end": ["navbar-icon-links.html", "search-field.html"],
     "navbar_start": ["navbar-logo", "version-switcher"],
     "footer_start": ["copyright.html"],
     "switcher": {
