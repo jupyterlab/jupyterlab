@@ -90,6 +90,7 @@ test.describe('Debugger', () => {
       [await positionMouseOver(runButton!)]
     );
     await runButton!.focus();
+    await runButton!.focus();
     await runButton!.hover();
 
     expect(
