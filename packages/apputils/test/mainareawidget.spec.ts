@@ -23,6 +23,25 @@ describe('@jupyterlab/apputils', () => {
         expect(widget.hasClass('jp-MainAreaWidget')).toBe(true);
         expect(widget.toolbar).toBe(toolbar);
       });
+
+      it('toolbar should have an aria label of notebook actions and a role of navigation', () => {
+        const content = new Widget();
+        const toolbar = new Toolbar();
+        const widget = new MainAreaWidget({ content, toolbar });
+        expect(widget.toolbar.node.getAttribute('aria-label')).toEqual(
+          'notebook actions'
+        );
+        expect(widget.toolbar.node.getAttribute('role')).toEqual('navigation');
+      });
+
+      it('content should have an aria-label of notebook content and a role of region', () => {
+        const content = new Widget();
+        const widget = new MainAreaWidget({ content });
+        expect(widget.content.node.getAttribute('aria-label')).toEqual(
+          'notebook content'
+        );
+        expect(widget.content.node.getAttribute('role')).toEqual('region');
+      });
     });
 
     describe('contentHeader', () => {

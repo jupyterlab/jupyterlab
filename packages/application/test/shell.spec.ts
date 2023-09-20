@@ -518,14 +518,58 @@ describe('LabShell', () => {
     });
   });
 
-  describe('#menuHandler', () => {
-    it('should have a role of navigation and aria label of main', () => {
+  describe('#ariaLabelsAndRoles', () => {
+    it('menu handler should have a role of navigation and aria label of main', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'main');
       const menu = document.getElementById('jp-menu-panel');
       expect(menu?.getAttribute('role')).toEqual('navigation');
       expect(menu?.getAttribute('aria-label')).toEqual('main');
+    });
+
+    it('top handler should have a role of banner', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const topHandler = document.getElementById('jp-top-panel');
+      expect(topHandler?.getAttribute('role')).toEqual('banner');
+    });
+
+    it('bottom panel should have a role of content info', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const bottomPanel = document.getElementById('jp-bottom-panel');
+      expect(bottomPanel?.getAttribute('role')).toEqual('contentinfo');
+    });
+
+    it('left handler should have a role of compelementary and aria label of main sidebar', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const leftHandler = document.getElementById('jp-mod-left');
+      expect(leftHandler?.getAttribute('role')).toEqual('complementary');
+      expect(leftHandler?.getAttribute('aria-label')).toEqual('main sidebar');
+    });
+
+    it('right handler should have a role of complementary and aria label of altenate sidebar', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const rightHandler = document.getElementById('jp-mod-right');
+      expect(rightHandler?.getAttribute('role')).toEqual('complementary');
+      expect(rightHandler?.getAttribute('aria-label')).toEqual(
+        'alternate sidebar'
+      );
+    });
+
+    it('dock panel should have a role of main', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      const dock = document.getElementById('jp-main-dock-panel');
+      expect(dock?.getAttribute('role')).toEqual('main');
     });
   });
 });
