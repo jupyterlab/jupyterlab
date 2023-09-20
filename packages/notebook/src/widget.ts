@@ -1097,7 +1097,7 @@ export namespace StaticNotebook {
   /**
    * The renderer class for static notebooks.
    */
-  class Renderer extends WindowedList.Renderer {
+  class Renderer extends WindowedList.Renderer<ICellModel> {
     createOuter() {
       return document.createElement('div');
     }
@@ -1107,6 +1107,12 @@ export namespace StaticNotebook {
       el.setAttribute('role', 'feed');
       el.setAttribute('aria-label', 'Cells');
       return el;
+    }
+
+    createScrollbarItem(index: number, item: ICellModel): HTMLLIElement {
+      const li = document.createElement('li');
+      li.appendChild(document.createTextNode(`${index + 1}`));
+      return li;
     }
   }
 

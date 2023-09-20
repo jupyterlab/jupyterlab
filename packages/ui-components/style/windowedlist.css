@@ -5,15 +5,13 @@
 
 .jp-WindowedPanel-outer {
   position: relative;
-  overflow-y: auto;
+  overflow: auto;
+  transform: none;
 }
 
 .jp-WindowedPanel-inner {
   position: relative;
-}
-
-.jp-WindowedPanel-scrollbar {
-  background-color: red;
+  overflow: auto;
 }
 
 .jp-WindowedPanel-viewport {
@@ -21,4 +19,41 @@
   left: 0;
   right: 0;
   overflow: visible;
+}
+
+.jp-WindowedPanel-outer.jp-mod-virtual-scrollbar .jp-WindowedPanel-inner {
+  height: 100%;
+  overflow: auto;
+  width: calc(100% - 50px);
+}
+
+.jp-WindowedListScrollbar {
+  background-color: inherit;
+  border-left: 1px solid var(--jp-layout-color3);
+  display: block;
+  position: absolute;
+  overflow-y: auto;
+  top: var(--jp-private-toolbar-height);
+  bottom: 0;
+  right: 0;
+  width: 50px;
+  z-index: 1;
+}
+
+ul.jp-WindowedListScrollbar-content {
+  background-color: var(--jp-layout-color1);
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul.jp-WindowedListScrollbar-content li {
+  border-bottom: 1px solid var(--jp-layout-color3);
+  padding: 3px;
+  text-align: center;
+}
+
+ul.jp-WindowedListScrollbar-content li:hover {
+  cursor: pointer;
+  background-color: var(--jp-layout-color2);
 }

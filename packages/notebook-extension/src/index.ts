@@ -108,7 +108,8 @@ import {
   pasteIcon,
   refreshIcon,
   runIcon,
-  stopIcon
+  stopIcon,
+  tableRowsIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -319,6 +320,8 @@ namespace CommandIDs {
   export const accessPreviousHistory = 'notebook:access-previous-history-entry';
 
   export const accessNextHistory = 'notebook:access-next-history-entry';
+
+  export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
 }
 
 /**
@@ -3379,7 +3382,6 @@ function addCommands(
       }
     }
   });
-
   commands.addCommand(CommandIDs.tocRunCells, {
     label: trans.__('Select and Run Cell(s) for this Heading'),
     execute: args => {
@@ -3438,6 +3440,24 @@ function addCommands(
         return await NotebookActions.accessNextHistory(current.content);
       }
     }
+  });
+  commands.addCommand(CommandIDs.virtualScrollbar, {
+    label: trans.__('Scrollbar'),
+    caption: trans.__('Toggle Virtual Scrollbar'),
+    isToggleable: true,
+    isToggled: args => {
+      const current = getCurrent(tracker, shell, args);
+      return current?.content.scrollbar ?? false;
+    },
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        current.content.scrollbar = !current.content.scrollbar;
+      }
+    },
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    icon: args => (args.toolbar ? tableRowsIcon : undefined)
   });
 }
 

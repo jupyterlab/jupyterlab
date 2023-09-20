@@ -721,7 +721,8 @@ export abstract class WindowedListModel implements WindowedList.IModel {
  * Windowed list widget
  */
 export class WindowedList<
-  T extends WindowedList.IModel = WindowedList.IModel
+  T extends WindowedList.IModel = WindowedList.IModel,
+  U = any
 > extends Widget {
   /**
    * Default widget size
@@ -733,28 +734,26 @@ export class WindowedList<
    *
    * @param options Constructor options
    */
-  constructor(options: WindowedList.IOptions<T>) {
+  constructor(options: WindowedList.IOptions<U, T>) {
     const renderer = options.renderer ?? WindowedList.defaultRenderer;
-    const node = renderer.createOuter();
-    node.className = 'jp-WindowedPanel-outer';
 
-    if (options.scrollbar) {
-      const scrollbar = node.appendChild(renderer.createScrollbar());
-      scrollbar.className = 'jp-WindowedPanel-scrollbar';
-    }
+    const node = renderer.createOuter();
+    node.classList.add('jp-WindowedPanel-outer');
 
     const innerElement = node.appendChild(document.createElement('div'));
     innerElement.className = 'jp-WindowedPanel-inner';
 
     const viewport = innerElement.appendChild(renderer.createViewport());
-    viewport.className = 'jp-WindowedPanel-viewport';
+    viewport.classList.add('jp-WindowedPanel-viewport');
 
     super({ node });
     super.layout = options.layout ?? new WindowedLayout();
+    this.renderer = renderer;
 
     this._innerElement = innerElement;
     this._isScrolling = null;
     this._resizeObserver = null;
+    this._scrollbar = new WindowedList.Scrollbar(options.model, renderer);
     this._scrollToItem = null;
     this._scrollRepaint = null;
     this._scrollUpdateWasRequested = false;
@@ -762,6 +761,11 @@ export class WindowedList<
     this._viewModel = options.model;
     this._viewport = viewport;
 
+    if (options.scrollbar) {
+      node.classList.add('jp-mod-virtual-scrollbar');
+    }
+
+    this._scrollbar.scrolled.connect(this.onScrolled, this);
     this._viewModel.stateChanged.connect(this.onStateChanged, this);
   }
 
@@ -792,11 +796,38 @@ export class WindowedList<
     return this._viewport;
   }
 
+  get scrollbar(): boolean {
+    return this._scrollbar.isVisible;
+  }
+  set scrollbar(enabled: boolean) {
+    if (this.scrollbar === enabled) {
+      return;
+    }
+    if (enabled) {
+      this._scrollbar.show();
+      this.node.classList.add('jp-mod-virtual-scrollbar');
+    } else {
+      this._scrollbar.hide();
+      this.node.classList.remove('jp-mod-virtual-scrollbar');
+    }
+    this.update();
+  }
+
+  /**
+   * The renderer for this windowed list. Set at instantiation.
+   */
+  protected renderer: WindowedList.IRenderer<U>;
+
   /**
    * Windowed list view model
    */
   protected get viewModel(): T {
     return this._viewModel;
+  }
+
+  dispose(): void {
+    this._scrollbar.dispose();
+    super.dispose();
   }
 
   /**
@@ -923,6 +954,8 @@ export class WindowedList<
     if (this._viewModel.windowingActive) {
       this._removeListeners();
     }
+    Widget.detach(this._scrollbar);
+    super.onBeforeDetach(msg);
   }
 
   /**
@@ -971,6 +1004,10 @@ export class WindowedList<
     super.onResize(msg);
   }
 
+  protected onScrolled(sender: unknown, index: number): void {
+    this.scrollToItem(index);
+  }
+
   /**
    * Callback on view model change
    *
@@ -1003,6 +1040,13 @@ export class WindowedList<
    * The default implementation of this handler is a no-op.
    */
   protected onUpdateRequest(msg: Message): void {
+    if (this.scrollbar) {
+      // Hide the native scrollbar.
+      this.node.style.width = 'calc(100% + 25px)';
+      this._scrollbar.update();
+    } else {
+      this.node.style.width = 'calc(100%)';
+    }
     if (this.viewModel.windowingActive) {
       // Throttle update request
       if (this._scrollRepaint === null) {
@@ -1190,12 +1234,13 @@ export class WindowedList<
   }
 
   protected _viewModel: T;
-  private _innerElement: HTMLDivElement;
+  private _innerElement: HTMLElement;
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
   private _needsUpdate = false;
   private _resetScrollToItemTimeout: number | null;
   private _resizeObserver: ResizeObserver | null;
+  private _scrollbar: WindowedList.Scrollbar;
   private _scrollRepaint: number | null;
   private _scrollToItem: [number, WindowedList.ScrollToAlign] | null;
   private _scrollUpdateWasRequested: boolean;
@@ -1350,18 +1395,104 @@ export namespace WindowedList {
   /**
    * The default renderer class for windowed lists.
    */
-  export class Renderer implements IRenderer {
+  export class Renderer<T = any> implements IRenderer<T> {
+    /**
+     * Create the outer, root element of the windowed list.
+     */
     createOuter(): HTMLElement {
       return document.createElement('div');
     }
 
-    createScrollbar(): HTMLElement {
-      return document.createElement('div');
+    /**
+     * Create the virtual scrollbar element.
+     */
+    createScrollbar(): HTMLUListElement {
+      return document.createElement('ul');
     }
 
+    /**
+     * Create an individual item rendered in the scrollbar.
+     */
+    createScrollbarItem(index: number, item: T): HTMLLIElement {
+      const li = document.createElement('li');
+      li.appendChild(document.createTextNode(`${index}`));
+      return li;
+    }
+
+    /**
+     * Create the viewport element into which virtualized children are added.
+     */
     createViewport(): HTMLElement {
       return document.createElement('div');
     }
+  }
+
+  export class Scrollbar<T = any> extends Widget {
+    constructor(model: IModel<T>, renderer: IRenderer<T>) {
+      super();
+      this.model = model;
+      this.renderer = renderer;
+      this.content = this.node.appendChild(renderer.createScrollbar());
+      this.content.className = 'jp-WindowedListScrollbar-content';
+      this.addClass('jp-WindowedListScrollbar');
+    }
+
+    get scrolled(): ISignal<this, number> {
+      return this._scrolled;
+    }
+
+    handleEvent(event: Event): void {
+      switch (event.type) {
+        case 'pointerdown':
+          this._evtPointerDown(event as PointerEvent);
+          break;
+      }
+    }
+
+    protected onAfterAttach(msg: Message): void {
+      super.onAfterAttach(msg);
+      this.node.addEventListener('pointerdown', this);
+    }
+
+    protected onBeforeAttach(msg: Message): void {
+      this.node.removeEventListener('pointerdown', this);
+      super.onBeforeDetach(msg);
+    }
+
+    protected onUpdateRequest(msg: Message): void {
+      const { content, renderer } = this;
+
+      while (content.firstChild) {
+        content.removeChild(content.firstChild);
+      }
+
+      const list = this.model.itemsList;
+      if (list?.length) {
+        for (let index = 0; index < list.length; index += 1) {
+          const item = renderer.createScrollbarItem(index, list.get(index));
+          item.dataset.index = `${index}`;
+          content.appendChild(item);
+        }
+      }
+    }
+
+    protected content: HTMLUListElement;
+    protected model: IModel<T>;
+    protected renderer: IRenderer<T>;
+
+    private _evtPointerDown(event: PointerEvent): void {
+      let target = event.target as HTMLElement;
+      while (target && target.parentElement) {
+        if (target.hasAttribute('data-index')) {
+          const index = parseInt(target.getAttribute('data-index')!, 10);
+          this._scrolled.emit(index);
+          return;
+        }
+        target = target.parentElement;
+      }
+    }
+
+    private _scrolled = new Signal<this, number>(this);
   }
 
   /**
@@ -1372,7 +1503,7 @@ export namespace WindowedList {
   /**
    * Windowed list model interface
    */
-  export interface IModel extends IDisposable {
+  export interface IModel<T = any> extends IDisposable {
     /**
      * Provide a best guess for the widget size at position index
      *
@@ -1416,6 +1547,7 @@ export namespace WindowedList {
       align?: ScrollToAlign,
       margin?: number
     ): number;
+
     /**
      * Compute the items range to display.
      *
@@ -1449,6 +1581,7 @@ export namespace WindowedList {
      * Items list to be rendered
      */
     itemsList: {
+      get(index: number): T;
       length: number;
       changed: ISignal<any, IObservableList.IChangedArgs<any>>;
     } | null;
@@ -1553,12 +1686,13 @@ export namespace WindowedList {
    * Windowed list view constructor options
    */
   export interface IOptions<
-    T extends WindowedList.IModel = WindowedList.IModel
+    T = any,
+    U extends WindowedList.IModel<T> = WindowedList.IModel<T>
   > {
     /**
      * Windowed list model to display
      */
-    model: T;
+    model: U;
     /**
      * Windowed list layout
      */
@@ -1567,7 +1701,7 @@ export namespace WindowedList {
     /**
      * A renderer for the elements of the windowed list.
      */
-    renderer?: IRenderer;
+    renderer?: IRenderer<T>;
 
     /**
      * Whether the windowed list should display a scrollbar UI.
@@ -1578,7 +1712,7 @@ export namespace WindowedList {
   /**
    * A windowed list element renderer.
    */
-  export interface IRenderer {
+  export interface IRenderer<T = any> {
     /**
      * Create the outer, root element of the windowed list.
      */
@@ -1587,7 +1721,12 @@ export namespace WindowedList {
     /**
      * Create the virtual scrollbar element.
      */
-    createScrollbar(): HTMLElement;
+    createScrollbar(): HTMLUListElement;
+
+    /**
+     * Create an individual item rendered in the scrollbar.
+     */
+    createScrollbarItem(index: number, item: T): HTMLLIElement;
 
     /**
      * Create the viewport element into which virtualized children are added.
