@@ -465,7 +465,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     const toolbarWidth = this.node.clientWidth;
     const opener = this.popupOpener;
     const openerWidth = 30;
-    const toolbarPadding = 2;
+    // left and right padding.
+    const toolbarPadding = 2 + 5;
     let width = opener.isHidden ? toolbarPadding : toolbarPadding + openerWidth;
 
     this._getWidgetsToRemove(width, toolbarWidth, openerWidth)
@@ -560,8 +561,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
 
     this._widgetWidths![widgetName] = widget.hasClass(TOOLBAR_SPACER_CLASS)
       ? 2
-      : // Add button margin and toolbar items gap = 2 * (4 + 1.5)
-        widget.node.clientWidth + 11;
+      : widget.node.clientWidth;
   }
 
   private _getWidgetWidth(widget: Widget): number {

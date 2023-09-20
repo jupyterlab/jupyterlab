@@ -45,8 +45,6 @@ test.describe('Debugger', () => {
     await page.waitForCondition(() => page.debugger.isOpen());
     await setSidebarWidth(page, 251, 'right');
 
-    await page.sidebar.close('left');
-
     expect(
       await page.screenshot({ clip: { y: 62, x: 780, width: 210, height: 32 } })
     ).toMatchSnapshot('debugger_activate.png');
