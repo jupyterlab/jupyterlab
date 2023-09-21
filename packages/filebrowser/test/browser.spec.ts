@@ -77,14 +77,6 @@ describe('filebrowser/browser', () => {
         expect(toolbar.getAttribute('aria-label')).toEqual('file browser');
         expect(toolbar.getAttribute('role')).toEqual('navigation');
       });
-
-      it('file browser should have an aria label of file browser and a role of navigation', () => {
-        const toolbar = fileBrowser.node;
-        expect(toolbar.getAttribute('aria-label')).toEqual(
-          'File Browser Section'
-        );
-        expect(toolbar.getAttribute('role')).toEqual('region');
-      });
     });
 
     describe('#createNewDirectory', () => {

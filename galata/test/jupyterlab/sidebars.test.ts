@@ -124,4 +124,50 @@ test.describe('Sidebars', () => {
       'left'
     );
   });
+
+  test('Check Running Session button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('jp-running-sessions');
+    const runningSessions = document.getElementById('jp-running-sessions');
+    expect(runningSessions?.getAttribute('aria-label')).toEqual(
+      'Running Sessions section'
+    );
+    expect(runningSessions?.getAttribute('role')).toEqual('region');
+  });
+
+  test('Check Extension Manager button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('extensionmanager.main-view');
+    const extensionManager = document.getElementById(
+      'extensionmanager.main-view'
+    );
+    expect(extensionManager?.getAttribute('aria-label')).toEqual(
+      'Extension Manager section'
+    );
+    expect(extensionManager?.getAttribute('role')).toEqual('region');
+  });
+
+  test('Check File Browser button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('filebrowser');
+    const fileBrowser = document.getElementById('filebrowser');
+    expect(fileBrowser?.getAttribute('aria-label')).toEqual(
+      'File Browser Section'
+    );
+    expect(fileBrowser?.getAttribute('role')).toEqual('region');
+  });
+
+  test('Check Debugger button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.open('right');
+    const debuggerButton = document.querySelector('Debugger');
+    expect(debuggerButton?.getAttribute('aria-label')).toEqual(
+      'File Browser Section'
+    );
+    expect(debuggerButton?.getAttribute('role')).toEqual('region');
+  });
 });
