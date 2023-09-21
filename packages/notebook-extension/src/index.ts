@@ -129,7 +129,10 @@ import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
-import { CellTagListWidget } from './celltaglist';
+import {
+  CellTagListModel,
+  CellTagListView, CellTagListWidget
+} from './celltaglist';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -1063,6 +1066,38 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
   }
 };
 
+export const cellTagListPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:cell-tag-list',
+  description: 'Filter and collapse cells using tags.',
+  autoStart: true,
+  optional: [INotebookTracker, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    translator: ITranslator
+  ): void => {
+    const trans = translator.load('jupyterlab');
+    const { shell } = app;
+    const isEnabled = (): boolean => Private.isEnabled(shell, tracker);
+    app.commands.addCommand(CommandIDs.filterCells, {
+      label: trans.__('Filter Cells'),
+      caption: trans.__('Filter cells with tags'),
+      execute: args => {
+        const current = getCurrent(tracker, shell, args);
+        if (current) {
+          const model = new CellTagListModel(current);
+          return showDialog({
+            body: new CellTagListView(model),
+            buttons: []
+          });
+        }
+      },
+      isEnabled: args => (args.toolbar ? true : isEnabled()),
+      icon: args => (args.toolbar ? filterIcon : undefined)
+    });
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -1087,7 +1122,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   languageServerPlugin,
   updateRawMimetype,
   customMetadataEditorFields,
-  activeCellTool
+  activeCellTool,
+  cellTagListPlugin
 ];
 export default plugins;
 
@@ -3495,7 +3531,8 @@ function populatePalette(
     CommandIDs.collapseAllCmd,
     CommandIDs.expandAllCmd,
     CommandIDs.accessPreviousHistory,
-    CommandIDs.accessNextHistory
+    CommandIDs.accessNextHistory,
+    CommandIDs.filterCells
   ].forEach(command => {
     palette.addItem({ command, category });
   });
