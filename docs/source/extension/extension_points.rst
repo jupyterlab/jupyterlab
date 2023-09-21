@@ -1006,8 +1006,8 @@ Occasionally, LSP extensions include a CodeMirror extension to modify the code e
               }).catch(e => console.error);
           }});
 
-          // Create a conditional CodeMirror extension.
-          return EditorExtensionRegistry.createConditionalExtension(ext);
+          // Wrap the CodeMirror extension in the extension registry object.
+          return EditorExtensionRegistry.createImmutableExtension(ext);
         }
       }
 
