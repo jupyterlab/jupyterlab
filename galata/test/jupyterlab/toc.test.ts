@@ -36,6 +36,16 @@ test.describe('Table of Contents', () => {
   });
 
   test('Open Table of Contents panel', async ({ page }) => {
+    const toc = document.getElementById('table-of-contents');
+    expect(toc?.getAttribute('role')).toEqual('region');
+    expect(toc?.getAttribute('aria-label')).toEqual(
+      'Table of Contents section'
+    );
+  });
+
+  test('Check table of contents has correct aria label and role', async ({
+    page
+  }) => {
     const imageName = 'toc-panel.png';
     const tocPanel = await page.sidebar.getContentPanel(
       await page.sidebar.getTabPosition('table-of-contents')
