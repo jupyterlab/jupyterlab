@@ -548,7 +548,7 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'left');
-      const leftHandler = document.getElementById('jp-mod-left');
+      const leftHandler = document.getElementsByClassName('jp-mod-left');
       expect(leftHandler?.getAttribute('role')).toEqual('complementary');
       expect(leftHandler?.getAttribute('aria-label')).toEqual('main sidebar');
     });
@@ -557,7 +557,7 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'right');
-      const rightHandler = document.getElementById('jp-mod-right');
+      const rightHandler = document.getElementsByClassName('jp-mod-right');
       expect(rightHandler?.getAttribute('role')).toEqual('complementary');
       expect(rightHandler?.getAttribute('aria-label')).toEqual(
         'alternate sidebar'
