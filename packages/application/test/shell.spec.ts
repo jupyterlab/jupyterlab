@@ -549,8 +549,10 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'left');
       const leftHandler = document.getElementsByClassName('jp-mod-left');
-      expect(leftHandler?.getAttribute('role')).toEqual('complementary');
-      expect(leftHandler?.getAttribute('aria-label')).toEqual('main sidebar');
+      expect(leftHandler[0]?.getAttribute('role')).toEqual('complementary');
+      expect(leftHandler[0]?.getAttribute('aria-label')).toEqual(
+        'main sidebar'
+      );
     });
 
     it('right handler should have a role of complementary and aria label of altenate sidebar', () => {
@@ -558,8 +560,8 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'right');
       const rightHandler = document.getElementsByClassName('jp-mod-right');
-      expect(rightHandler?.getAttribute('role')).toEqual('complementary');
-      expect(rightHandler?.getAttribute('aria-label')).toEqual(
+      expect(rightHandler[0]?.getAttribute('role')).toEqual('complementary');
+      expect(rightHandler[0]?.getAttribute('aria-label')).toEqual(
         'alternate sidebar'
       );
     });
