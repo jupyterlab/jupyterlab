@@ -100,6 +100,7 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  filterIcon,
   IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
@@ -128,6 +129,7 @@ import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
+import { CellTagListWidget } from './celltaglist';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -319,6 +321,7 @@ namespace CommandIDs {
   export const accessPreviousHistory = 'notebook:access-previous-history-entry';
 
   export const accessNextHistory = 'notebook:access-next-history-entry';
+  export const filterCells = 'notebook:filter-cells-with-tags';
 }
 
 /**
@@ -3438,6 +3441,22 @@ function addCommands(
         return await NotebookActions.accessNextHistory(current.content);
       }
     }
+  });
+  app.commands.addCommand(CommandIDs.filterCells, {
+    label: trans.__('Filter Cells'),
+    caption: trans.__('Filter cells with tags'),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        return showDialog({
+          body: new CellTagListWidget(current),
+          buttons: []
+        });
+      }
+    },
+    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    icon: args => (args.toolbar ? filterIcon : undefined)
   });
 }
 
