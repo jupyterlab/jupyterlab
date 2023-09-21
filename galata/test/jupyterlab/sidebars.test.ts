@@ -170,4 +170,15 @@ test.describe('Sidebars', () => {
     );
     expect(debuggerButton?.getAttribute('role')).toEqual('region');
   });
+
+  test('Check Table of Contents button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('table-of-contents');
+    const fileBrowser = document.getElementById('table-of-contents');
+    expect(fileBrowser?.getAttribute('aria-label')).toEqual(
+      'Table of Contents section'
+    );
+    expect(fileBrowser?.getAttribute('role')).toEqual('region');
+  });
 });

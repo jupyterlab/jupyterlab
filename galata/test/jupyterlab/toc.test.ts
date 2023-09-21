@@ -43,17 +43,6 @@ test.describe('Table of Contents', () => {
     );
   });
 
-  test('Check table of contents has correct aria label and role', async ({
-    page
-  }) => {
-    const imageName = 'toc-panel.png';
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
-    );
-
-    expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
-  });
-
   test('Toggle list', async ({ page }) => {
     await page.notebook.selectCells(0);
 
