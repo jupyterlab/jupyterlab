@@ -4,7 +4,7 @@
 import { Palette } from '../src/palette';
 import { CommandPalette } from '@lumino/widgets';
 
-describe('contents', () => {
+describe('palette', () => {
   let palette: Palette;
   let commandPalette: CommandPalette;
 
@@ -12,7 +12,7 @@ describe('contents', () => {
     palette = new Palette(commandPalette);
   });
 
-  describe('#constructor', () => {
+  describe('#ariaLabelsAndRoles', () => {
     it('should return new FileBrowser instance', () => {
       palette.activate();
       const node = document.getElementById('command-palette');

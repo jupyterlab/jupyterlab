@@ -26,6 +26,15 @@ test.describe('Debugger Tests', () => {
     );
   });
 
+  test('Check sidebar has correct aria label and role', async ({ page }) => {
+    await page.sidebar.getTab('jp-debugger-sidebar');
+    const debuggerSidebar = document.getElementById('jp-debugger-sidebar');
+    expect(debuggerSidebar?.getAttribute('role')).toEqual('region');
+    expect(debuggerSidebar?.getAttribute('aria-label')).toEqual(
+      'Debugger section'
+    );
+  });
+
   test('Open Debugger on right', async ({ page }) => {
     await page.sidebar.openTab('jp-debugger-sidebar');
     expect(await page.sidebar.isTabOpen('jp-debugger-sidebar')).toBeTruthy();
