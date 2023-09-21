@@ -2,6 +2,7 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ReactWidget } from '@jupyterlab/apputils';
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 // Get the current widget and activate unless the args specify otherwise.
 
@@ -29,8 +30,9 @@ export function CellTagListComponent(props: IProps) {
     if (event.target.checked) {
       updatedList = [...checked, event.target.value];
       notebookPanel?.content.widgets.forEach(cell => {
-        if (cell.model.getMetadata('tags').includes(event.target.value))
+        if (cell.model.getMetadata('tags').includes(event.target.value)) {
           cell.inputHidden;
+        }
       });
     } else {
       updatedList.splice(checked.indexOf(event.target.value), 1);
@@ -73,6 +75,28 @@ export class CellTagListWidget extends ReactWidget {
     return (
       <>
         <CellTagListComponent notebookPanel={this.notebookPanel} />
+      </>
+    );
+  }
+}
+export class CellTagListModel extends VDomModel {
+  public notebookPanel;
+  constructor(notebookPanel: NotebookPanel) {
+    super();
+    this.notebookPanel = notebookPanel;
+  }
+}
+
+export class CellTagListView extends VDomRenderer<CellTagListModel> {
+  constructor(model: CellTagListModel) {
+    super(model);
+    this.model = model;
+  }
+
+  render() {
+    return (
+      <>
+        <CellTagListComponent notebookPanel={this.model.notebookPanel} />
       </>
     );
   }
