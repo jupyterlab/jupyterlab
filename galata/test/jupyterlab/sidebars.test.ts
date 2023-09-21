@@ -129,7 +129,7 @@ test.describe('Sidebars', () => {
     page
   }) => {
     await page.sidebar.openTab('jp-running-sessions');
-    const runningSessions = document.getElementById('jp-running-sessions');
+    const runningSessions = page.locator('#jp-running-sessions');
     expect(runningSessions?.getAttribute('aria-label')).toEqual(
       'Running Sessions section'
     );
@@ -140,9 +140,7 @@ test.describe('Sidebars', () => {
     page
   }) => {
     await page.sidebar.openTab('extensionmanager.main-view');
-    const extensionManager = document.getElementById(
-      'extensionmanager.main-view'
-    );
+    const extensionManager = page.locator('#extensionmanager.main-view');
     expect(extensionManager?.getAttribute('aria-label')).toEqual(
       'Extension Manager section'
     );
@@ -153,7 +151,7 @@ test.describe('Sidebars', () => {
     page
   }) => {
     await page.sidebar.openTab('filebrowser');
-    const fileBrowser = document.getElementById('filebrowser');
+    const fileBrowser = page.locator('#filebrowser');
     expect(fileBrowser?.getAttribute('aria-label')).toEqual(
       'File Browser Section'
     );
@@ -164,7 +162,7 @@ test.describe('Sidebars', () => {
     page
   }) => {
     await page.sidebar.open('right');
-    const debuggerButton = document.querySelector('Debugger');
+    const debuggerButton = page.getByTitle('Debugger');
     expect(debuggerButton?.getAttribute('aria-label')).toEqual(
       'File Browser Section'
     );
@@ -175,7 +173,7 @@ test.describe('Sidebars', () => {
     page
   }) => {
     await page.sidebar.openTab('table-of-contents');
-    const fileBrowser = document.getElementById('table-of-contents');
+    const fileBrowser = page.locator('#table-of-contents');
     expect(fileBrowser?.getAttribute('aria-label')).toEqual(
       'Table of Contents section'
     );
