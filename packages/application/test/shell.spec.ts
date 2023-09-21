@@ -531,7 +531,7 @@ describe('LabShell', () => {
     it('top handler should have a role of banner', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.add(widget, 'main');
+      shell.add(widget, 'top');
       const topHandler = document.getElementById('jp-top-panel');
       expect(topHandler?.getAttribute('role')).toEqual('banner');
     });
@@ -547,7 +547,7 @@ describe('LabShell', () => {
     it('left handler should have a role of compelementary and aria label of main sidebar', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.add(widget, 'main');
+      shell.add(widget, 'left');
       const leftHandler = document.getElementById('jp-mod-left');
       expect(leftHandler?.getAttribute('role')).toEqual('complementary');
       expect(leftHandler?.getAttribute('aria-label')).toEqual('main sidebar');
@@ -556,7 +556,7 @@ describe('LabShell', () => {
     it('right handler should have a role of complementary and aria label of altenate sidebar', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      shell.add(widget, 'main');
+      shell.add(widget, 'right');
       const rightHandler = document.getElementById('jp-mod-right');
       expect(rightHandler?.getAttribute('role')).toEqual('complementary');
       expect(rightHandler?.getAttribute('aria-label')).toEqual(

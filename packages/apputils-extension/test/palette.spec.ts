@@ -1,10 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JupyterServer } from '@jupyterlab/testing';
 import { Palette } from '../src/palette';
 import { CommandPalette } from '@lumino/widgets';
-import { Widget } from '@lumino/widgets';
 
 describe('contents', () => {
   let palette: Palette;
