@@ -658,27 +658,36 @@ export namespace ToolbarButtonComponent {
 export function ToolbarButtonComponent(
   props: ToolbarButtonComponent.IProps
 ): JSX.Element {
+  const actualOnClick = props.actualOnClick ?? false;
+
   // In some browsers, a button click event moves the focus from the main
   // content to the button (see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Clicking_and_focus).
   // We avoid a click event by calling preventDefault in mousedown, and
   // we bind the button action to `mousedown`.
-  const handleMouseDown = (event: React.MouseEvent) => {
-    // Fire action only when left button is pressed.
-    if (event.button === 0) {
-      event.preventDefault();
-      props.onClick?.();
-    }
-  };
+  const handleMouseDown = actualOnClick
+    ? undefined
+    : (event: React.MouseEvent) => {
+        // Fire action only when left button is pressed.
+        if (event.button === 0) {
+          event.preventDefault();
+          props.onClick?.();
+        }
+      };
+
+  const handleClick = actualOnClick
+    ? (event: React.MouseEvent) => {
+        if (event.button === 0) {
+          props.onClick?.();
+        }
+      }
+    : (event: React.MouseEvent) => {
+        // Prevent the toolbar widget to steal focus
+        event.stopPropagation();
+      };
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;
     if (key === 'Enter' || key === ' ') {
-      props.onClick?.();
-    }
-  };
-
-  const handleClick = (event: React.MouseEvent) => {
-    if (event.button === 0) {
       props.onClick?.();
     }
   };
@@ -705,10 +714,8 @@ export function ToolbarButtonComponent(
       aria-disabled={props.enabled === false}
       {...props.dataset}
       disabled={props.enabled === false}
-      onClick={props.actualOnClick ?? false ? handleClick : undefined}
-      onMouseDown={
-        !(props.actualOnClick ?? false) ? handleMouseDown : undefined
-      }
+      onClick={handleClick}
+      onMouseDown={handleMouseDown}
       onKeyDown={handleKeyDown}
       title={getTooltip()}
       minimal
