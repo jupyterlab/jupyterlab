@@ -36,11 +36,12 @@ test.describe('Table of Contents', () => {
   });
 
   test('Open Table of Contents panel', async ({ page }) => {
-    const toc = document.getElementById('table-of-contents');
-    expect(toc?.getAttribute('role')).toEqual('region');
-    expect(toc?.getAttribute('aria-label')).toEqual(
-      'Table of Contents section'
+    const imageName = 'toc-panel.png';
+    const tocPanel = await page.sidebar.getContentPanel(
+      await page.sidebar.getTabPosition('table-of-contents')
     );
+
+    expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Toggle list', async ({ page }) => {
