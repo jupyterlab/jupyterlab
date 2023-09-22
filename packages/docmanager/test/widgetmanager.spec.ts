@@ -129,8 +129,9 @@ describe('@jupyterlab/docmanager', () => {
       it('docuemnt widget should have aria label and role', () => {
         const content = new Widget();
         const widget = new DocumentWidget({ content, context });
+        manager.createWidget(widgetFactory, context);
 
-        expect(widget.node.getAttribute('role')).toEqual('region');
+        expect(document.getElementById).toEqual('region');
       });
     });
 
