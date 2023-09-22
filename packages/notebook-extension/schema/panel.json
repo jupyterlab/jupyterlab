@@ -32,7 +32,7 @@
       {
         "name": "filter-cells",
         "command": "notebook:filter-cells-with-tags",
-        "rank": 34
+        "rank": 36
       },
       { "name": "cellType", "rank": 40 },
       { "name": "spacer", "type": "spacer", "rank": 100 },
