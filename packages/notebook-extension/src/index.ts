@@ -89,7 +89,7 @@ import {
 } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
-import { IStatusBar } from '@jupyterlab/statusbar';
+import { IStatusBar /*showPopup*/ } from '@jupyterlab/statusbar';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
@@ -122,7 +122,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Menu, Panel, Widget } from '@lumino/widgets';
+import { Menu, Panel, /*PanelLayout,*/ Widget } from '@lumino/widgets';
 import { logNotebookOutput } from './nboutput';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
@@ -131,7 +131,7 @@ import {
 } from './tool-widgets/metadataEditorFields';
 import {
   CellTagListModel,
-  CellTagListView, CellTagListWidget
+  CellTagListView
 } from './celltaglist';
 
 /**
@@ -1079,17 +1079,47 @@ export const cellTagListPlugin: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
     const { shell } = app;
     const isEnabled = (): boolean => Private.isEnabled(shell, tracker);
+    let map = new WeakMap<Notebook, CellTagListModel>();
+    let count = 0;
     app.commands.addCommand(CommandIDs.filterCells, {
       label: trans.__('Filter Cells'),
       caption: trans.__('Filter cells with tags'),
+
       execute: args => {
+        count = count + 1;
         const current = getCurrent(tracker, shell, args);
         if (current) {
-          const model = new CellTagListModel(current);
-          return showDialog({
-            body: new CellTagListView(model),
+          /*const idx = Array.from(current.toolbar.names()).findIndex(
+            name => name === 'filter-cells'
+          );
+          const filterIconWidget = (current?.toolbar.layout as PanelLayout)
+            .widgets[idx];*/
+
+          let model = map.get(current.content);
+
+          //console.log('model is ', model);
+          if (!model) {
+            model = new CellTagListModel(current, []);
+          }
+          map.set(current.content, model);
+          console.log('count is ', count);
+          console.log('checkedList', model.checkedList);
+          console.log('tagList', model.tagList);
+          const view = new CellTagListView(model);
+          showDialog({
+            body: view,
             buttons: []
           });
+
+          /*const popup = showPopup({
+            body: view,
+            anchor: filterIconWidget,
+            hasDynamicSize: true,
+            startHidden: true
+          });
+
+            popup.launch();
+            */
         }
       },
       isEnabled: args => (args.toolbar ? true : isEnabled()),
@@ -3477,23 +3507,7 @@ function addCommands(
         return await NotebookActions.accessNextHistory(current.content);
       }
     }
-  });
-  app.commands.addCommand(CommandIDs.filterCells, {
-    label: trans.__('Filter Cells'),
-    caption: trans.__('Filter cells with tags'),
-    execute: args => {
-      const current = getCurrent(tracker, shell, args);
-
-      if (current) {
-        return showDialog({
-          body: new CellTagListWidget(current),
-          buttons: []
-        });
-      }
-    },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
-    icon: args => (args.toolbar ? filterIcon : undefined)
-  });
+  })
 }
 
 /**
@@ -3529,10 +3543,7 @@ function populatePalette(
     CommandIDs.trust,
     CommandIDs.toggleCollapseCmd,
     CommandIDs.collapseAllCmd,
-    CommandIDs.expandAllCmd,
-    CommandIDs.accessPreviousHistory,
-    CommandIDs.accessNextHistory,
-    CommandIDs.filterCells
+    CommandIDs.expandAllCmd
   ].forEach(command => {
     palette.addItem({ command, category });
   });
