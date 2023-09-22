@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-// import expect from 'expect';
+import expect from 'expect';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
