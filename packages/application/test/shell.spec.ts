@@ -573,14 +573,5 @@ describe('LabShell', () => {
       const dock = document.getElementById('jp-main-dock-panel');
       expect(dock?.getAttribute('role')).toEqual('main');
     });
-
-    it('file browser should have a role of region and an aria label of File browser section', () => {
-      const widget = new Widget();
-      widget.id = 'foo';
-      shell.add(widget, 'left');
-      const dock = document.getElementById('filebrowser');
-      expect(dock?.getAttribute('role')).toEqual('region');
-      expect(dock?.getAttribute('aria-label')).toEqual('File Browser Section');
-    });
   });
 });

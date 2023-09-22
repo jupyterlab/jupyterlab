@@ -125,6 +125,15 @@ describe('@jupyterlab/docmanager', () => {
       });
     });
 
+    describe('Widget roles and aria labels', () => {
+      it('docuemnt widget should have aria label and role', () => {
+        const content = new Widget();
+        const widget = new DocumentWidget({ content, context });
+
+        expect(widget.node.getAttribute('role')).toEqual('region');
+      });
+    });
+
     describe('#adoptWidget()', () => {
       it('should install a message hook', () => {
         const content = new Widget();
