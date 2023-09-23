@@ -310,18 +310,23 @@ export class OutputArea extends Widget {
     return this._toggleScrolling;
   }
 
+  get initialize(): ISignal<OutputArea, void> {
+    return this._initialize;
+  }
+
   /**
    * Add overlay allowing to toggle scrolling.
    */
   private _addPromptOverlay() {
     const overlay = document.createElement('div');
     overlay.className = OUTPUT_PROMPT_OVERLAY;
-    const trans = this._translator.load('jupyterlab');
-    overlay.title = trans.__('Toggle output scrolling');
     overlay.addEventListener('click', () => {
       this._toggleScrolling.emit();
     });
     this.node.appendChild(overlay);
+    requestAnimationFrame(() => {
+      this._initialize.emit();
+    });
   }
 
   /**
@@ -699,7 +704,6 @@ export class OutputArea extends Widget {
     executionCount: number | null = null
   ): Panel {
     const panel = new Private.OutputPanel();
-
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
     const prompt = this.contentFactory.createOutputPrompt();
@@ -725,6 +729,7 @@ export class OutputArea extends Widget {
   private _minHeightTimeout: number | null = null;
   private _inputRequested = new Signal<OutputArea, void>(this);
   private _toggleScrolling = new Signal<OutputArea, void>(this);
+  private _initialize = new Signal<OutputArea, void>(this);
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
@@ -748,10 +753,17 @@ export class SimplifiedOutputArea extends OutputArea {
    */
   protected createOutputItem(model: IOutputModel): Widget | null {
     const output = this.createRenderedMimetype(model);
-    if (output) {
-      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+
+    if (!output) {
+      return null;
     }
-    return output;
+
+    const panel = new Private.OutputPanel();
+    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
+
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+    return panel;
   }
 }
 

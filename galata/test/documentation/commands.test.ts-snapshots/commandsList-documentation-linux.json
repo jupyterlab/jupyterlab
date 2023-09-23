@@ -118,8 +118,26 @@
     ]
   },
   {
+    "id": "apputils:adaptive-theme",
+    "label": "Synchronize with System Settings",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:change-dark-theme",
+    "label": "Switch to the provided dark `theme`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "apputils:change-font",
     "label": "waiting for fonts",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:change-light-theme",
+    "label": "Switch to the provided light `theme`.",
     "caption": "",
     "shortcuts": []
   },
@@ -549,7 +567,7 @@
   {
     "id": "docmanager:save",
     "label": "Save ",
-    "caption": "Save and create checkpoint",
+    "caption": "document is permissioned readonly; \"save\" is disabled, use \"save as...\" instead",
     "shortcuts": [
       "Ctrl S"
     ]
@@ -617,6 +635,14 @@
     "label": "Find and Replace…",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "documentsearch:toggleSearchInSelection",
+    "label": "Search in Selection",
+    "caption": "",
+    "shortcuts": [
+      "Alt L"
+    ]
   },
   {
     "id": "editmenu:clear-all",
@@ -865,6 +891,12 @@
   {
     "id": "filebrowser:toggle-navigate-to-current-directory",
     "label": "Show Active File in File Browser",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-sort-notebooks-first",
+    "label": "Sort Notebooks Above Files",
     "caption": "",
     "shortcuts": []
   },
@@ -1333,6 +1365,12 @@
   {
     "id": "mathjax:scale",
     "label": "Mathjax Scale Reset",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "mermaid:copy-source",
+    "label": "Mermaid Copy Diagram Source",
     "caption": "",
     "shortcuts": []
   },
@@ -2217,7 +2255,9 @@
     "id": "viewmenu:line-numbering",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Shift L"
+    ]
   },
   {
     "id": "viewmenu:match-brackets",

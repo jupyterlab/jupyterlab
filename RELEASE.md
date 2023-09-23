@@ -113,11 +113,11 @@ On the [Actions](https://github.com/jupyterlab/jupyterlab/actions) page, select 
 
 Fill in the information as mentioned in the body of the changelog PR, for example:
 
-| Input                                 | Value      |
-| ------------------------------------- | ---------- |
-| The target branch                     | main       |
-| The URL of the draft GitHub release   |            |
-| Comma separated list of steps to skip | ensure-sha |
+| Input                                 | Value |
+| ------------------------------------- | ----- |
+| The target branch                     | main  |
+| The URL of the draft GitHub release   |       |
+| Comma separated list of steps to skip |       |
 
 The "Publish Release" workflow:
 
@@ -311,7 +311,7 @@ To seed the latest version of the extension template (first commit), you
 can execute (assuming you are editing the first commit):
 
 ```sh
-copier copy https://github.com/jupyterlab/extension-template .
+copier copy --UNSAFE https://github.com/jupyterlab/extension-template .
 # Fix any conflicts
 git commit --amend '-S'
 ```
@@ -330,7 +330,7 @@ updating package versions, then do the next steps instead.
 git checkout --orphan name-of-branch
 git rm -rf .
 git clean -dfx
-copier https://github.com/jupyterlab/extension-template .
+copier copy --UNSAFE https://github.com/jupyterlab/extension-template .
 ```
 
 - Create a new PR in JupyterLab.

@@ -15,11 +15,12 @@ and share what area of the project you are interested in working on. Please also
 Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
 
 You can help make it better by:
-- `submitting bug reports <https://github.com/jupyterlab/jupyterlab/issues/new/choose>`__,
-- `proposing new features <https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md>`__,
-- `translating the application <https://crowdin.com/project/jupyterlab>`__,
-- `improving the documentation <https://jupyterlab.readthedocs.io/en/latest>`__,
-- improving the code base and fixing bug (see below)
+
+* `submitting bug reports <https://github.com/jupyterlab/jupyterlab/issues/new/choose>`__,
+* `proposing new features <https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md>`__,
+* `translating the application <https://crowdin.com/project/jupyterlab>`__,
+* `improving the documentation <https://jupyterlab.readthedocs.io/en/latest>`__,
+* improving the code base and fixing bug (see below)
 
 
 We have labeled some issues as `good first
@@ -46,6 +47,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    repo
    components
    patterns
+   Accessibility <accessibility>
    internationalization
    css
    performance
@@ -141,7 +143,7 @@ and the issues it solves before a pull request is opened. A triager will
 ensure that your issue meets our definition of ready before we can merge
 any pull requests that relate to it.
 
-Pull requests must target the development branch (= ``master``) even if
+Pull requests must target the development branch (= ``main``) even if
 it aims at addressing an issue seen in a stable release. Once the pull
 request is merged on the development branch, it will be backported to
 the stable branch using a bot action (or manually if the bot action
@@ -250,6 +252,17 @@ pass without a reply that unblocks it.
 Our expectation is that every new issue should be examined within a week of
 its creation.
 
+Triagers should label easier/lower complexity issues as ``good first issue`` to
+facilitate beginner contributions. A good first issue should have:
+
+* A clear, easily understood description with screen shots and expectations that do not require much familiarity with the project
+* Links, either in the description or in comments, to documentation and source code files that are relevant to the issue
+* Recommended points of contact, either by GitHub username or on other forums (Discourse, etc) where a contributor can get help
+
+Unless an issue is time-sensitive, such as if it is a release blocker
+for an imminent release, experienced Jupyter contributors should avoid
+picking up recent issues with the ``good first issue`` label.
+
 Tagging Issues with Labels
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -275,10 +288,10 @@ a local environment, directly from the Web browser:
    allows to prototype JupyterLab extensions from within JupyterLab and
    can be run without installation in the browser using Binder.
 
-Using `Binder <https://mybinder.org>`__, you can test the current master branch and your
+Using `Binder <https://mybinder.org>`__, you can test the current main branch and your
 changes within the browser as well. We recommend you have at least 8 GB of RAM for this.
-To build and launch an instance of the latest JupyterLab master, open
-`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/>`__
+To build and launch an instance of the latest JupyterLab main, open
+`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/main?urlpath=lab-dev/>`__
 in a new tab. The build takes about 7 minutes to complete.
 
 To test your own branch hosted on GitHub, enter it on https://mybinder.org.
@@ -288,7 +301,7 @@ about 7 minutes again.
 Setting up a local development environment
 ------------------------------------------
 This section explains how to set up a local development environment. We assume you use GNU/Linux,
-macOS, or Windows Subsystem for Linux.
+macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__ and then using the Anaconda command prompt for all installation steps.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -631,6 +644,9 @@ Main reasons for UI test failures are:
    - ``please update documentation snapshots``: A bot will push a new commit to your PR updating
      documentation test snapshots.
    - ``please update snapshots``: Combine the two previous comments effects.
+
+    The bot will react with +1 emoji to indicate that the run started and then comment
+    back once it concluded.
 
 For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.
@@ -1010,16 +1026,12 @@ them out against your copy of JupyterLab, you can easily do so using the
 ``link`` command:
 
 1. Make your changes and then build the external package
-2. Register a link to the modified external package
-
-   -  navigate to the external package dir and run ``jlpm link``
-
-3. Link JupyterLab to modded package
+2. Link JupyterLab to modded package
 
    -  navigate to top level of your JupyterLab repo, then run
-      ``jlpm link "<package-of-interest>"``
+      ``jlpm link <path-to-external-repo> --all``
 
-You can then (re)build JupyterLab (eg ``jlpm run build``) and your
+3. You can then (re)build JupyterLab (eg ``jlpm run build``) and your
 changes should be picked up by the build.
 
 To restore JupyterLab to its original state, you use the ``unlink``
@@ -1028,13 +1040,13 @@ command:
 1. Unlink JupyterLab and modded package
 
    -  navigate to top level of your JupyterLab repo, then run
-      ``jlpm unlink "<package-of-interest>"``
+      ``jlpm unlink <path-to-external-repo> --all``
 
 2. Reinstall original version of the external package in JupyterLab
 
    -  run ``jlpm install --check-files``
 
-You can then (re)build JupyterLab and everything should be back to
+3. You can then (re)build JupyterLab and everything should be back to
 default.
 
 Possible Linking Pitfalls

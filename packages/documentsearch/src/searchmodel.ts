@@ -9,7 +9,8 @@ import {
   IFilter,
   IFilters,
   IReplaceOptionsSupport,
-  ISearchProvider
+  ISearchProvider,
+  SelectionState
 } from './tokens';
 
 /**
@@ -119,6 +120,18 @@ export class SearchDocumentModel
    */
   get suggestedInitialQuery(): string {
     return this.searchProvider.getInitialQuery();
+  }
+
+  /**
+   * Whether the selection includes a single item or multiple items;
+   * this is used by the heuristic auto-enabling "search in selection" mode.
+   *
+   * Returns `undefined` if the provider does not expose this information.
+   */
+  get selectionState(): SelectionState | undefined {
+    return this.searchProvider.getSelectionState
+      ? this.searchProvider.getSelectionState()
+      : undefined;
   }
 
   /**

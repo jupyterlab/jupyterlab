@@ -356,7 +356,7 @@ This requires you to define a keyboard shortcut for ``apputils:run-all-enabled``
 
 In this example ``my-command-1`` and ``my-command-2`` are passed in ``args``
 of ``apputils:run-all-enabled`` command as ``commands`` list.
-You can optionally pass the command arguemnts of ``my-command-1`` and ``my-command-2`` in ``args``
+You can optionally pass the command arguments of ``my-command-1`` and ``my-command-2`` in ``args``
 of ``apputils:run-all-enabled`` command as ``args`` list.
 
 Launcher
@@ -383,7 +383,7 @@ Jupyter Front-End Shell
 -----------------------
 
 The Jupyter front-end
-`shell <../api/interfaces/application.jupyterfrontend.ishell.html>`__
+`shell <../api/interfaces/application.JupyterFrontEnd.IShell.html>`__
 is used to add and interact with content in the application. The ``IShell``
 interface provides an ``add()`` method for adding widgets to the application.
 In JupyterLab, the application shell consists of:
@@ -621,23 +621,12 @@ Here is an example of using the ``closeAndCleaners`` semantic menu item:
 .. code:: typescript
 
     mainMenu.fileMenu.closeAndCleaners.add({
-      tracker,
-      action: 'Shutdown',
-      name: 'My Activity',
-      closeAndCleanup: current => {
-        current.close();
-        return current.shutdown();
-      }
+      id: 'notebook:close-and-shutdown',
+      isEnabled: (w: Widget) => tracker.currentWidget !== null && tracker.has(w)
     });
 
 In this example, ``tracker`` is a :ref:`widget-tracker`, which allows the menu
-item to determine whether to delegate the menu command to your activity,
-``name`` is a name given to your activity in the menu label,
-``action`` is a verb given to the cleanup operation in the menu label,
-and ``closeAndCleanup`` is the actual function that performs the cleanup operation.
-So if the current application activity is held in the ``tracker``,
-then the menu item will show ``Shutdown My Activity``, and delegate to the
-``closeAndCleanup`` function that was provided.
+item to determine whether to delegate the menu command to your activity, and ``id`` is a the command identifier.
 
 More examples for how to register semantic menu items are found throughout the JupyterLab code base.
 The available semantic menu items are:
@@ -962,10 +951,70 @@ Here is an example for making requests to the language server.
       const virtualDocument = adapter.virtualDocument;
 
       // Get the LSP connection of the virtual document.
-      const connection = manager.connections.get(document.uri);
+      const connection = manager.connections.get(virtualDocument.uri);
       ...
       // Send completion request to the language server
       const response = await connection.clientRequests['textDocument/completion'].request(params);
       ...
+    }
+  };
+
+Occasionally, LSP extensions include a CodeMirror extension to modify the code editor. In those cases, you can follow this example:
+
+.. code:: typescript
+
+  const renamePlugin: JupyterFrontEndPlugin<void> = {
+    id,
+    autoStart: true,
+    requires: [ILSPDocumentConnectionManager, ILSPFeatureManager, IWidgetLSPAdapterTracker],
+    activate: (app: JupyterFrontEnd, connectionManager: ILSPDocumentConnectionManager, featureManager: ILSPFeatureManager, tracker: IWidgetLSPAdapterTracker) => {
+      const FEATURE_ID = "rename_symbol";
+      const extensionFactory: EditorAdapter.ILSPEditorExtensionFactory = {
+        name: FEATURE_ID,
+        factory: (options) =>  {
+          const { editor, widgetAdapter } = options;
+
+          // Get the editor
+          const ceEditor: CodeEditor.IEditor | null = editor.getEditor();
+          if (!ceEditor) {
+            return null;
+          }
+
+          // Get the associated virtual document of the opened document
+          if (!widgetAdapter.virtualDocument) {
+            return null;
+          }
+
+          // Get the LSP connection of the virtual document.
+          const connection = connectionManager.connections.get(widgetAdapter.virtualDocument.uri);
+          if (!connection || !connection.provides('renameProvider')) {
+            return null;
+          }
+
+          // Create a CodeMirror extension that listens for double click, gets the
+          // selected code and makes a LSP request to rename it and prints the results.
+          const ext = EditorView.domEventHandlers({ dblclick: (e, view) => {
+            const range = ceEditor.getSelection();
+              const res = connection.clientRequests['textDocument/rename'].request({
+                newName: "test",
+                position: { line: range.start.line, character: range.start.column },
+                textDocument: { uri: widgetAdapter.virtualDocument!.uri }
+              });
+
+              res.then(value => {
+                console.debug(value);
+              }).catch(e => console.error);
+          }});
+
+          // Wrap the CodeMirror extension in the extension registry object.
+          return EditorExtensionRegistry.createImmutableExtension(ext);
+        }
+      }
+
+      // Register the extension with the LSP feature
+      featureManager.register({
+        id: FEATURE_ID,
+        extensionFactory
+      });
     }
   };

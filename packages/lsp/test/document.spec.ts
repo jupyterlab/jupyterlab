@@ -137,7 +137,6 @@ describe('@jupyterlab/lsp', () => {
         document.dispose();
         expect(document.foreignDocuments.size).toEqual(0);
         expect(document['sourceLines'].size).toEqual(0);
-        expect(document['unusedDocuments'].size).toEqual(0);
         expect(document['unusedStandaloneDocuments'].size).toEqual(0);
         expect(document['virtualLines'].size).toEqual(0);
       });
@@ -237,6 +236,34 @@ describe('@jupyterlab/lsp', () => {
         const md: VirtualDocument =
           document['chooseForeignDocument'](rawCellExtractor);
         expect(md.uri).toBe('test.ipynb.python-text.txt');
+      });
+    });
+    describe('#closeExpiredDocuments', () => {
+      it('should close expired foreign documents', async () => {
+        // We start with a notebook having a code cell, a raw cell and a markdown cell
+        // this means we have two foreign documents which can expire: one for markdown
+        // cell and one for raw cell.
+        expect(new Set(document.foreignDocuments.keys())).toEqual(
+          new Set(['text', 'markdown'])
+        );
+        const newNotebookState = [
+          {
+            value: 'test line in markdown 1\ntest line in markdown 2',
+            ceEditor: {} as Document.IEditor,
+            type: 'markdown'
+          }
+        ];
+        // If user just removed the last raw cell we do expire the virtual document
+        // associated immediately (because if they are just cutting and pasting
+        // cells we may be able to recycle connections). However if user keeps modifying
+        // the notebook, we ultimately discard the virtual document as expired.
+        for (let i = 0; i < 10; i++) {
+          await document.updateManager.updateDocuments(newNotebookState);
+          document.closeExpiredDocuments();
+        }
+        expect(new Set(document.foreignDocuments.keys())).toEqual(
+          new Set(['markdown'])
+        );
       });
     });
     describe('#openForeign', () => {

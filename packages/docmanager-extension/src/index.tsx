@@ -19,6 +19,7 @@ import {
   ICommandPalette,
   InputDialog,
   ISessionContextDialogs,
+  Notification,
   ReactWidget,
   SessionContextDialogs,
   showDialog,
@@ -569,7 +570,7 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(
     commands: CommandRegistry,
-    fileChanged: ISignal<any, Contents.IModel>
+    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>
   ): Widget {
     return addCommandToolbarButtonClass(
       ReactWidget.create(
@@ -824,6 +825,11 @@ function addCommands(
           'In collaborative mode, the document is saved automatically after every change'
         );
       }
+      if (!isWritable()) {
+        return trans.__(
+          `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+        );
+      }
     }
 
     return trans.__('Save and create checkpoint');
@@ -838,9 +844,9 @@ function addCommands(
     isEnabled: isWritable,
     execute: async () => {
       // Checks that shell.currentWidget is valid:
+      const widget = shell.currentWidget;
+      const context = docManager.contextForWidget(widget!);
       if (isEnabled()) {
-        const widget = shell.currentWidget;
-        const context = docManager.contextForWidget(widget!);
         if (!context) {
           return showDialog({
             title: trans.__('Cannot Save'),
@@ -947,9 +953,19 @@ function addCommands(
       const paths = new Set<string>(); // Cache so we don't double save files.
       for (const widget of shell.widgets('main')) {
         const context = docManager.contextForWidget(widget);
-        if (context && !context.model.readOnly && !paths.has(context.path)) {
-          paths.add(context.path);
-          promises.push(context.save());
+        if (context && !paths.has(context.path)) {
+          if (context.contentsModel?.writable) {
+            paths.add(context.path);
+            promises.push(context.save());
+          } else {
+            Notification.warning(
+              trans.__(
+                `%1 is permissioned as readonly. Use "save as..." instead.`,
+                context.path
+              ),
+              { autoClose: 5000 }
+            );
+          }
         }
       }
       return Promise.all(promises);
