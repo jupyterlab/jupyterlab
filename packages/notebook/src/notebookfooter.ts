@@ -11,6 +11,11 @@ import { NotebookActions } from './actions';
 const NOTEBOOK_FOOTER_CLASS = 'jp-Notebook-footer';
 
 /**
+ * The data attribute added to a widget that can be traversed with up/down arrow and j/k shortcuts.
+ */
+const TRAVERSABLE = 'jpTraversable';
+
+/**
  * A footer widget added after the last cell of the notebook.
  */
 export class NotebookFooter extends Widget {
@@ -19,6 +24,7 @@ export class NotebookFooter extends Widget {
    */
   constructor(protected notebook: Notebook) {
     super({ node: document.createElement('button') });
+    this.node.dataset[TRAVERSABLE] = 'true';
     const trans = notebook.translator.load('jupyterlab');
     this.addClass(NOTEBOOK_FOOTER_CLASS);
     this.node.innerText = trans.__('Click to add a cell.');
