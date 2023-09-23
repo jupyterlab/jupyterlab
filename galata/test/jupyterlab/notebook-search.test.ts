@@ -363,7 +363,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/21');
 
     // Click next button
-    await page.click('button[title="Next Match"]');
+    await page.click('button[title^="Next Match"]');
 
     const cell = await page.notebook.getCell(0);
 
@@ -381,7 +381,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/21');
 
     // Click next button
-    await page.click('button[title="Next Match"]', {
+    await page.click('button[title^="Next Match"]', {
       clickCount: 4
     });
 
@@ -399,13 +399,13 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/21');
 
     // Click previous button
-    await page.click('button[title="Previous Match"]');
+    await page.click('button[title^="Previous Match"]');
     // Should cycle back
     await page.waitForSelector('text=21/21');
 
     // Click previous button twice
-    await page.click('button[title="Previous Match"]');
-    await page.click('button[title="Previous Match"]');
+    await page.click('button[title^="Previous Match"]');
+    await page.click('button[title^="Previous Match"]');
     // Should move up by two
     await page.waitForSelector('text=19/21');
 
@@ -427,7 +427,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=20/21');
 
     // Click previous button
-    await page.click('button[title="Previous Match"]');
+    await page.click('button[title^="Previous Match"]');
     await page.waitForSelector('text=19/21');
   });
 
@@ -440,7 +440,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/21');
 
     // Click next button
-    await page.click('button[title="Next Match"]', {
+    await page.click('button[title^="Next Match"]', {
       clickCount: 4
     });
 
@@ -547,6 +547,24 @@ test.describe('Notebook Search', () => {
     // Toggle search in selection off
     await page.keyboard.press('Alt+l');
     await expect(filterCheckbox).not.toBeChecked();
+  });
+
+  test('Show shortcuts in tooltips', async ({ page }) => {
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+
+    await expect(
+      page.locator('button[title="Next Match (Ctrl+G)"]')
+    ).toHaveCount(1);
+    await expect(
+      page.locator('button[title="Previous Match (Ctrl+Shift+G)"]')
+    ).toHaveCount(1);
+    await expect(
+      page.locator(
+        'label[title="Search only in the selected cells or text (depending on edit/command mode). (Alt+L)"]'
+      )
+    ).toHaveCount(1);
   });
 });
 

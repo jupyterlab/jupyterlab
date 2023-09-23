@@ -25,6 +25,7 @@ import {
   ISocketConnectionOptions
 } from '../tokens';
 import { VirtualDocument } from '../virtual/document';
+import { EditorAdapter } from './editorAdapter';
 
 type IButton = Dialog.IButton;
 const createButton = Dialog.createButton;
@@ -74,8 +75,9 @@ export interface IAdapterOptions {
  * as this would make the logic of inspections caching impossible to maintain, thus the WidgetAdapter
  * has to handle that, keeping multiple connections and multiple virtual documents.
  */
-export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
-  implements IDisposable
+export abstract class WidgetLSPAdapter<
+  T extends IDocumentWidget = IDocumentWidget
+> implements IDisposable
 {
   // note: it could be using namespace/IOptions pattern,
   // but I do not know how to make it work with the generic type T
@@ -91,6 +93,10 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     this.widget.context.saveState.connect(this.onSaveState, this);
     this.connectionManager.closed.connect(this.onConnectionClosed, this);
     this.widget.disposed.connect(this.dispose, this);
+
+    this._editorToAdapter = new WeakMap();
+    this.editorAdded.connect(this._onEditorAdded, this);
+    this.editorRemoved.connect(this._onEditorRemoved, this);
   }
 
   /**
@@ -263,6 +269,8 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     if (this._isDisposed) {
       return;
     }
+    this.editorAdded.disconnect(this._onEditorAdded, this);
+    this.editorRemoved.disconnect(this._onEditorRemoved, this);
     this._isDisposed = true;
     this.disconnect();
     this._virtualDocument = null;
@@ -339,8 +347,8 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
 
   /**
    * Get the index of editor from the cursor position in the virtual
-   * document. Since there is only one editor, this method always return
-   * 0
+   * document.
+   * @deprecated This is error-prone and will be removed in JupyterLab 5.0, use `getEditorIndex()` with `virtualDocument.getEditorAtVirtualLine(position)` instead.
    *
    * @param position - the position of cursor in the virtual document.
    * @return - index of the virtual editor
@@ -592,6 +600,30 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   private _isConnected: boolean;
   private _updateFinished: Promise<void>;
   private _virtualDocument: VirtualDocument | null = null;
+  private _editorToAdapter: WeakMap<Document.IEditor, EditorAdapter>;
+
+  private _onEditorAdded(
+    sender: WidgetLSPAdapter<T>,
+    change: IEditorChangedData
+  ): void {
+    const { editor } = change;
+    const editorAdapter = new EditorAdapter({
+      editor: editor,
+      widgetAdapter: this,
+      extensions: this.options.featureManager.extensionFactories()
+    });
+    this._editorToAdapter.set(editor, editorAdapter);
+  }
+
+  private _onEditorRemoved(
+    sender: WidgetLSPAdapter<T>,
+    change: IEditorChangedData
+  ): void {
+    const { editor } = change;
+    const adapter = this._editorToAdapter.get(editor);
+    adapter?.dispose();
+    this._editorToAdapter.delete(editor);
+  }
 
   /**
    * Callback called when a foreign document is closed,
