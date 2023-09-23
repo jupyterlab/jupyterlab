@@ -13,10 +13,6 @@
   flex-grow: 1;
 }
 
-.jp-PropertyInspector-content option {
-  background-color: var(--jp-layout-color1);
-}
-
 .jp-PropertyInspector-placeholder {
   display: flex;
   align-items: center;
