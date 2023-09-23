@@ -1261,9 +1261,6 @@ export namespace StaticNotebook {
  * A notebook widget that supports interactivity.
  */
 export class Notebook extends StaticNotebook {
-
-  public footer: NotebookFooter;
-
   /**
    * Construct a notebook widget.
    */
@@ -1274,7 +1271,7 @@ export class Notebook extends StaticNotebook {
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.selectionChanged.connect(this._updateSelectedCells, this);
-    this.footer = this.addFooter();
+    this.addFooter();
   }
 
   /**
@@ -1287,10 +1284,9 @@ export class Notebook extends StaticNotebook {
   /**
    * Adds a footer to the notebook.
    */
-  protected addFooter(): NotebookFooter {
+  protected addFooter(): void {
     const info = new NotebookFooter(this);
     (this.layout as NotebookWindowedLayout).footer = info;
-    return info;
   }
 
   /**

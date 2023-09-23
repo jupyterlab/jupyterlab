@@ -45,28 +45,12 @@ export class NotebookFooter extends Widget {
     NotebookActions.insertBelow(this.notebook);
   }
 
-  /**
-   * When an event (such as a keydown keyboard event) occurs that triggers selection of the widget above the footer,
-   * blur the footer and switch to command mode.
-   * Returns whether the footer was blurred.
-   */
-  public onSelectAbove(): boolean {
-    if (document.activeElement !== this.node) {
-      // short-circuit if the footer is not currently focused
-      return false;
-    }
-    this.node.blur();
-    this.notebook.mode = 'command';
-    return true;
-  }
-
   /*
    * Handle `after-detach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.node.addEventListener('click', this);
-    this.node.addEventListener('keydown', this);
   }
 
   /**
@@ -74,7 +58,6 @@ export class NotebookFooter extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
-    this.node.removeEventListener('keydown', this);
     super.onBeforeDetach(msg);
   }
 }
