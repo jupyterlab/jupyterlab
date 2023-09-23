@@ -48,7 +48,6 @@ export class NotebookFooter extends Widget {
   /**
    * When an event (such as a keydown keyboard event) occurs that triggers selection of the widget above the footer,
    * blur the footer and switch to command mode.
-   * Returns whether the footer was blurred
    * Returns whether the footer was blurred.
    */
   public onSelectAbove(): boolean {
