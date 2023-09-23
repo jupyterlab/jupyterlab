@@ -11,6 +11,6 @@ dependencies:
 - pytest-tornasync
 - pytest-check-links
 - pip
-- nodejs
+- nodejs=18
 - jsx-lexer
 - myst-parser
