@@ -10,6 +10,7 @@ import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { CompletionHandler } from './handler';
 import { Completer } from './widget';
+import { InlineCompleter } from './inline';
 
 /**
  * The type of completion request.
@@ -248,6 +249,21 @@ export interface IInlineCompletionProvider<
 }
 
 /**
+ * Inline completer factory
+ */
+export interface IInlineCompleterFactory {
+  factory(options: InlineCompleter.IOptions): InlineCompleter;
+}
+
+/**
+ * Token allowing to override (or disable) inline completer widget factory.
+ */
+export const IInlineCompleterFactory = new Token<IInlineCompleterFactory>(
+  '@jupyterlab/completer:IInlineCompleterFactory',
+  'A factory of inline completer widgets.'
+);
+
+/**
  * The exported token used to register new provider.
  */
 export const ICompletionProviderManager = new Token<ICompletionProviderManager>(
@@ -283,6 +299,14 @@ export interface ICompletionProviderManager {
   select(id: string): void;
 
   /**
+   * Switch to next or previous completion of inline completer
+   *
+   * @param {string} id - the id of notebook panel, console panel or code editor.
+   * @param direction - the cycling direction
+   */
+  cycleInline(id: string, direction: 'next' | 'previous'): void;
+
+  /**
    * Update completer handler of a widget with new context.
    *
    * @param newCompleterContext - The completion context.
@@ -310,12 +334,14 @@ export interface IProviderReconciliator {
   ): Promise<CompletionHandler.ICompletionItemsReply | null>;
 
   /**
-   * TODO - document me
+   * Returns a list of promises to enable showing results from
+   * the provider which resolved fastest, even if other providers
+   * are still generating.
    */
   fetchInline(
     request: CompletionHandler.IRequest,
     trigger?: InlineCompletionTriggerKind
-  ): Promise<CompletionHandler.IInlineCompletionReply[] | null>;
+  ): Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>[];
 
   /**
    * Check if completer should make request to fetch completion responses

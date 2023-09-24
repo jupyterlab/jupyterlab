@@ -206,3 +206,36 @@
     transform: translateX(400%);
   }
 }
+
+.jp-GhostText {
+  opacity: 0.5; /* or color? */
+  white-space: pre;
+}
+
+.jp-GhostText-hiding {
+  opacity: 0;
+  background-color: grey;
+  display: inline-block;
+  vertical-align: top;
+  animation: jp-GhostText-hide 300ms 700ms ease-out forwards;
+}
+
+@keyframes jp-GhostText-hide {
+  0% {
+    font-size: unset;
+  }
+
+  100% {
+    font-size: 0;
+  }
+}
+
+.jp-InlineCompleter {
+  box-shadow: var(--jp-elevation-z6);
+  background: var(--jp-layout-color1);
+  color: var(--jp-content-font-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  display: flex;
+  flex-direction: row;
+  padding: 8px 4px;
+}

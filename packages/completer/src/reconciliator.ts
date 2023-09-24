@@ -7,6 +7,7 @@ import {
   CompletionTriggerKind,
   ICompletionContext,
   ICompletionProvider,
+  IInlineCompletionList,
   IInlineCompletionProvider,
   InlineCompletionTriggerKind,
   IProviderReconciliator
@@ -40,23 +41,25 @@ export class ProviderReconciliator implements IProviderReconciliator {
     return this._providers.filter((_, idx) => applicableProviders[idx]);
   }
 
-  async fetchInline(
+  fetchInline(
     request: CompletionHandler.IRequest,
     trigger: InlineCompletionTriggerKind
-  ): Promise<CompletionHandler.IInlineCompletionReply[] | null> {
-    let promises: Promise<CompletionHandler.IInlineCompletionReply>[] = [];
-    const current = ++this._fetching;
+  ): Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>[] {
+    let promises: Promise<
+      IInlineCompletionList<CompletionHandler.IInlineItem>
+    >[] = [];
     for (const provider of this._inlineProviders) {
-      let promise: Promise<CompletionHandler.IInlineCompletionReply | null>;
+      let promise: Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>;
       promise = provider
         .fetch(request, { ...this._context, triggerKind: trigger })
-        .then(reply => {
-          if (current !== this._fetching) {
-            return Promise.reject(void 0);
-          }
+        .then(completionList => {
           return {
-            completions: reply,
-            provider
+            ...completionList,
+            items: completionList.items.map(item => {
+              const newItem = item as CompletionHandler.IInlineItem;
+              newItem.provider = provider;
+              return newItem;
+            })
           };
         });
       const timeoutPromise = new Promise<null>(resolve => {
@@ -66,7 +69,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
       // Wrap promise and return error in case of failure.
       promises.push(promise.catch(p => p));
     }
-    return Promise.all(promises);
+    return promises;
   }
 
   /**

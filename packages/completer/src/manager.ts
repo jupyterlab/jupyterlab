@@ -8,17 +8,24 @@ import { CONTEXT_PROVIDER_ID } from './default/contextprovider';
 import { KERNEL_PROVIDER_ID } from './default/kernelprovider';
 import { CompletionHandler } from './handler';
 import { CompleterModel } from './model';
+import { InlineCompleter } from './inline';
 import {
   ICompletionContext,
   ICompletionProvider,
   ICompletionProviderManager,
+  IInlineCompleterFactory,
   IInlineCompletionProvider
 } from './tokens';
-import { InlineCompleter } from './inline';
 import { Completer } from './widget';
 
+export namespace CompletionProviderManager {
+  export interface IOptions {
+    inlineCompleterFactory?: IInlineCompleterFactory | null;
+  }
+}
+
 /**
- * A manager for completion provider.
+ * A manager for completion providers.
  */
 export class CompletionProviderManager implements ICompletionProviderManager {
   // it might be good to hook inline completer here for two reasons:
@@ -28,7 +35,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Construct a new completer manager.
    */
-  constructor() {
+  constructor(options?: CompletionProviderManager.IOptions) {
     this._providers = new Map();
     this._inlineProviders = new Map();
     this._panelHandlers = new Map();
@@ -36,6 +43,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     this._activeProvidersChanged = new Signal<ICompletionProviderManager, void>(
       this
     );
+    this._inlineCompleterFactory = options?.inlineCompleterFactory ?? null;
   }
 
   /**
@@ -211,6 +219,13 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     // TODO (with appropriate trigger)
   }
 
+  cycleInline(id: string, direction: 'next' | 'previous'): void {
+    const handler = this._panelHandlers.get(id);
+    if (handler && handler.inlineCompleter) {
+      handler.inlineCompleter.cycle(direction);
+    }
+  }
+
   /**
    * Activate `select` command in the widget with provided id.
    *
@@ -261,8 +276,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private disposeHandler(id: string, handler: CompletionHandler) {
     handler.completer.model?.dispose();
     handler.completer.dispose();
-    handler.inlineCompleter.model?.dispose();
-    handler.inlineCompleter.dispose();
+    handler.inlineCompleter?.model?.dispose();
+    handler.inlineCompleter?.dispose();
     handler.dispose();
     this._panelHandlers.delete(id);
   }
@@ -275,13 +290,17 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     options: Completer.IOptions
   ): Promise<CompletionHandler> {
     const completer = new Completer(options);
-    const inlineCompleter = new InlineCompleter({
-      ...options,
-      model: new InlineCompleter.Model()
-    });
+    const inlineCompleter = this._inlineCompleterFactory
+      ? this._inlineCompleterFactory.factory({
+          ...options,
+          model: new InlineCompleter.Model()
+        })
+      : undefined;
     completer.hide();
     Widget.attach(completer, document.body);
-    Widget.attach(inlineCompleter, document.body);
+    if (inlineCompleter) {
+      Widget.attach(inlineCompleter, document.body);
+    }
     const reconciliator = await this.generateReconciliator(completerContext);
     const handler = new CompletionHandler({
       completer,
@@ -336,4 +355,6 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private _autoCompletion: boolean;
 
   private _activeProvidersChanged: Signal<ICompletionProviderManager, void>;
+
+  private _inlineCompleterFactory: IInlineCompleterFactory | null;
 }

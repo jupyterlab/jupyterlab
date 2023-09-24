@@ -9,6 +9,7 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Message } from '@lumino/messaging';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { SourceChange } from '@jupyter/ydoc';
 
 import {
   Decoration,
@@ -16,7 +17,14 @@ import {
   EditorView,
   WidgetType
 } from '@codemirror/view';
-import { StateEffect, StateField } from '@codemirror/state';
+import { StateEffect, StateField, Text, Transaction } from '@codemirror/state';
+import { IInlineCompletionList } from './tokens';
+import { Toolbar } from '@jupyterlab/ui-components';
+
+const INLINE_COMPLETER_CLASS = 'jp-InlineCompleter';
+const TRANSIENT_LINE_SPACER_CLASS = 'jp-GhostText-hiding';
+const GHOST_TEXT_CLASS = 'jp-GhostText';
+
 /**
  * Widget allowing user to choose among inline completions,
  * typically by pressing next/previous buttons, and showing
@@ -24,16 +32,23 @@ import { StateEffect, StateField } from '@codemirror/state';
  * inline completion provider name.
  */
 export class InlineCompleter extends Widget {
-  // TODO populate this with next/previous buttons, maybe create extension point to add custom buttons (per provider?)
-  // TODO: filtering or rejecting on text change, accepting via key press
+  // TODO maybe create extension point to add custom buttons (per provider?)
+  // TODO: accepting via key press
+
   constructor(options: InlineCompleter.IOptions) {
     super({ node: document.createElement('div') });
     this.model = options.model ?? null;
     this.editor = options.editor ?? null;
-    this.addClass('jp-InlineCompleter');
+    this.addClass(INLINE_COMPLETER_CLASS);
     this._ghostManager = createGhostManager();
+    this.node.appendChild(this._suggestionsCounter);
+    // TODO: attaching toolbar this does not work great here, using box layout introduces a different problem.
+    this.node.appendChild(this.toolbar.node);
   }
+  toolbar = new Toolbar<Widget>();
   private _ghostManager: IGhostTextManager;
+
+  private _suggestionsCounter = document.createElement('div');
 
   /**
    * The editor used by the completion widget.
@@ -56,23 +71,84 @@ export class InlineCompleter extends Widget {
       return;
     }
     if (this._model) {
-      this._model.stateChanged.disconnect(this.onModelStateChanged, this);
-      //this._model.queryChanged.disconnect(this.onModelQueryChanged, this);
+      this._model.suggestionsChanged.disconnect(
+        this._onModelSuggestionsChanged,
+        this
+      );
+      this._model.filterTextChanged.disconnect(
+        this._onModelFilterTextChanged,
+        this
+      );
     }
     this._model = model;
     if (this._model) {
-      this._model.stateChanged.connect(this.onModelStateChanged, this);
-      //this._model.queryChanged.connect(this.onModelQueryChanged, this);
+      this._model.suggestionsChanged.connect(
+        this._onModelSuggestionsChanged,
+        this
+      );
+      this._model.filterTextChanged.connect(
+        this._onModelFilterTextChanged,
+        this
+      );
     }
   }
 
-  protected onModelStateChanged(): void {
-    if (this.isAttached) {
+  cycle(direction: 'next' | 'previous'): void {
+    const items = this.model?.completions?.items;
+    if (!items) {
+      return;
+    }
+    if (direction === 'next') {
+      const proposed = this._current + 1;
+      this._current = proposed === items.length ? 0 : proposed;
+    } else {
+      const proposed = this._current - 1;
+      this._current = proposed === -1 ? items.length - 1 : proposed;
+    }
+    this._render();
+  }
+
+  private _onModelSuggestionsChanged(
+    _emitter: InlineCompleter.IModel,
+    reason: 'set' | 'append'
+  ): void {
+    if (!this.isAttached) {
+      return;
+    }
+    if (reason == 'set') {
+      this._current = 0;
       this.update();
     }
+    this._render();
   }
 
-  private _setText(text: string) {
+  private _onModelFilterTextChanged(
+    _emitter: InlineCompleter.IModel,
+    mapping: Map<number, number>
+  ): void {
+    const completions = this.model?.completions;
+    if (!completions) {
+      return;
+    }
+    this._current = mapping.get(this._current) ?? 0;
+    this._render();
+  }
+
+  private _current: number = 0;
+
+  private _render(): void {
+    const completions = this.model?.completions;
+    if (!completions) {
+      return;
+    }
+    this._setText(completions.items[this._current]);
+    this._suggestionsCounter.innerText =
+      this._current + 1 + '/' + completions.items.length;
+  }
+
+  private _setText(item: CompletionHandler.IInlineItem) {
+    const text = item.insertText;
+
     const editor = this._editor;
     const model = this._model;
     if (!model || !editor) {
@@ -81,44 +157,40 @@ export class InlineCompleter extends Widget {
     }
 
     const view = (editor as CodeMirrorEditor).editor;
-    this._ghostManager.clearGhosts(view);
     this._ghostManager.placeGhost(view, {
       from: editor.getOffsetAt(model.cursor),
       content: text
     });
   }
 
-  /**
-   * Handle `update-request` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
+  protected updateVisibility() {
     const model = this._model;
     if (!model) {
       return;
     }
-    let reply = model.completionReply();
+    let reply = model.completions;
 
-    // If there are no items, reset and bail.
-    if (!reply || !reply.length) {
+    // If there are no items, hide.
+    if (!reply || !reply.items) {
       if (!this.isHidden) {
-        //this.reset();
         this.hide();
-        //this._visibilityChanged.emit(undefined);
       }
       return;
     }
 
     if (this.isHidden) {
       this.show();
-      this._setGeometry();
-      //this._visibilityChanged.emit(undefined);
-    } else {
-      this._setGeometry();
     }
-    const first = reply[0].completions.items;
-    if (first.length) {
-      this._setText(first[0].insertText);
-    }
+  }
+
+  /**
+   * Handle `update-request` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    this.updateVisibility();
+    //this.toolbar.update();
+    this._setGeometry();
   }
 
   private _setGeometry() {
@@ -138,7 +210,7 @@ export class InlineCompleter extends Widget {
     HoverBox.setGeometry({
       anchor,
       host: host,
-      maxHeight: 20,
+      maxHeight: 40,
       minHeight: 20,
       node: node,
       privilege: 'above',
@@ -167,12 +239,23 @@ class GhostTextWidget extends WidgetType {
     return (this.content.match(/\n/g) || '').length;
   }
 
+  updateDOM(dom: HTMLElement, _view: EditorView): boolean {
+    dom.innerText = this.content;
+    return true;
+  }
+
   toDOM() {
     let wrap = document.createElement('span');
-    // TODO proper class styling
-    wrap.style.whiteSpace = 'pre';
-    wrap.style.color = 'grey';
+    wrap.classList.add(GHOST_TEXT_CLASS);
     wrap.innerText = this.content;
+    return wrap;
+  }
+}
+
+class TransientLineSpacerWidget extends GhostTextWidget {
+  toDOM() {
+    const wrap = super.toDOM();
+    wrap.classList.add(TRANSIENT_LINE_SPACER_CLASS);
     return wrap;
   }
 }
@@ -190,55 +273,196 @@ export interface IGhostText {
   content: string;
 }
 
+enum GhostAction {
+  Set,
+  Remove,
+  FilterAndUpdate
+}
+
+interface IGhostActionData {
+  /* Action to perform on editor transaction */
+  action: GhostAction;
+  /* Spec of the ghost text to set on transaction */
+  spec?: IGhostText;
+}
+
 export function createGhostManager(): IGhostTextManager {
   const addMark = StateEffect.define<IGhostText>({
     map: ({ from, content }, change) => ({
       from: change.mapPos(from),
       to: change.mapPos(from + content.length),
-      content,
-      _isGhostText: true
+      content
     })
   });
 
   const removeMark = StateEffect.define<null>();
+
+  /**
+   * Decide what should be done for transaction effects.
+   */
+  function chooseAction(tr: Transaction): IGhostActionData | null {
+    // This function can short-circuit because at any time there is no more than one ghost text.
+    for (let e of tr.effects) {
+      if (e.is(addMark)) {
+        return {
+          action: GhostAction.Set,
+          spec: e.value
+        };
+      } else if (e.is(removeMark)) {
+        return {
+          action: GhostAction.Remove
+        };
+      }
+    }
+    if (tr.docChanged || tr.selection) {
+      return {
+        action: GhostAction.FilterAndUpdate
+      };
+    }
+    return null;
+  }
+
+  function createWidget(spec: IGhostText, tr: Transaction) {
+    const ghost = Decoration.widget({
+      widget: new GhostTextWidget(spec.content),
+      side: 1,
+      ghostSpec: spec
+    });
+    // Widget decorations can only have zero-length ranges
+    return ghost.range(
+      Math.min(spec.from, tr.newDoc.length),
+      Math.min(spec.from, tr.newDoc.length)
+    );
+  }
+
+  function createLineSpacer(
+    spec: IGhostText,
+    tr: Transaction,
+    timeout: number = 1000
+  ) {
+    const timeoutInfo = {
+      elapsed: false
+    };
+    setTimeout(() => {
+      timeoutInfo.elapsed = true;
+    }, timeout);
+    const ghost = Decoration.widget({
+      widget: new TransientLineSpacerWidget(spec.content),
+      side: 1,
+      timeoutInfo
+    });
+    // Widget decorations can only have zero-length ranges
+    return ghost.range(
+      Math.min(spec.from, tr.newDoc.length),
+      Math.min(spec.from, tr.newDoc.length)
+    );
+  }
 
   const markField = StateField.define<DecorationSet>({
     create() {
       return Decoration.none;
     },
     update(marks, tr) {
-      marks = marks.map(tr.changes);
-      for (let e of tr.effects) {
-        if (e.is(addMark)) {
-          const ghost = Decoration.widget({
-            widget: new GhostTextWidget(e.value.content),
-            side: 1
-          });
-          marks = marks.update({
-            add: [
-              ghost.range(
-                Math.min(e.value.from, tr.newDoc.length),
-                Math.min(
-                  e.value.from + e.value.content.length,
-                  tr.newDoc.length
-                )
-              )
-            ]
-          });
-        } else if (e.is(removeMark)) {
-          marks = marks.update({
-            filter: (_from, _to, value) => {
-              return value.spec._isGhostText;
-            }
+      const data = chooseAction(tr);
+      // remove spacers after timeout
+      marks = marks.update({
+        filter: (_from, _to, value) => {
+          if (value.spec.widget instanceof TransientLineSpacerWidget) {
+            return !value.spec.timeoutInfo.elapsed;
+          }
+          return true;
+        }
+      });
+      if (!data) {
+        return marks.map(tr.changes);
+      }
+      switch (data.action) {
+        case GhostAction.Set: {
+          const spec = data.spec!;
+          const newWidget = createWidget(spec, tr);
+          return marks.update({
+            add: [newWidget],
+            filter: (_from, _to, value) => value === newWidget.value
           });
         }
+        case GhostAction.Remove:
+          return marks.update({
+            filter: () => false
+          });
+        case GhostAction.FilterAndUpdate: {
+          let cursor = marks.iter();
+          // skip over spacer if any
+          while (
+            cursor.value &&
+            cursor.value.spec.widget instanceof TransientLineSpacerWidget
+          ) {
+            cursor.next();
+          }
+          if (!cursor.value) {
+            // short-circuit if no widgets are present, or if only spacer was present
+            return marks.map(tr.changes);
+          }
+          const originalSpec = cursor.value!.spec.ghostSpec as IGhostText;
+          const spec = { ...originalSpec };
+          let shouldRemoveGhost = false;
+          tr.changes.iterChanges(
+            (
+              fromA: number,
+              toA: number,
+              fromB: number,
+              toB: number,
+              inserted: Text
+            ) => {
+              if (shouldRemoveGhost) {
+                return;
+              }
+              if (fromA === toA && fromB !== toB) {
+                // text was inserted without modifying old text
+                for (
+                  let lineNumber = 0;
+                  lineNumber < inserted.lines;
+                  lineNumber++
+                ) {
+                  const lineContent = inserted.lineAt(lineNumber).text;
+                  const line =
+                    lineNumber > 0 ? '\n' + lineContent : lineContent;
+                  if (spec.content.startsWith(line)) {
+                    spec.content = spec.content.slice(line.length);
+                    spec.from += line.length;
+                  } else {
+                    shouldRemoveGhost = true;
+                    break;
+                  }
+                }
+              } else if (fromB === toB && fromA !== toA) {
+                // text was removed
+                shouldRemoveGhost = true;
+              } else {
+                // text was replaced
+                shouldRemoveGhost = true;
+                // TODO: could check if the previous spec matches
+              }
+            }
+          );
+          // removing multi-line widget would cause the code cell to jump; instead
+          // we add a temporary spacer widget which will be removed in a future update
+          // allowing a slight delay between getting a new suggestion and reducing cell height
+          const newWidget = shouldRemoveGhost
+            ? createLineSpacer(originalSpec, tr)
+            : createWidget(spec, tr);
+          marks = marks.update({
+            add: [newWidget],
+            filter: (_from, _to, value) => value === newWidget.value
+          });
+          if (shouldRemoveGhost) {
+            marks = marks.map(tr.changes);
+          }
+          return marks;
+        }
       }
-      return marks;
     },
     provide: f => EditorView.decorations.from(f)
   });
-
-  //const views = new Set<EditorView>();
 
   return {
     placeGhost(view: EditorView, text: IGhostText) {
@@ -258,7 +482,6 @@ export function createGhostManager(): IGhostTextManager {
         );
       }
       view.dispatch({ effects });
-      //views.add(view);
     },
     clearGhosts(view: EditorView) {
       const effects: StateEffect<unknown>[] = [removeMark.of(null)];
@@ -285,28 +508,54 @@ export namespace InlineCompleter {
    */
   export interface IModel extends IDisposable {
     /**
-     * A signal emitted when state of the completer model changes.
+     * A signal emitted when new suggestions are set on the model.
      */
-    readonly stateChanged: ISignal<IModel, void>;
+    readonly suggestionsChanged: ISignal<IModel, 'set' | 'append'>;
+
+    /**
+     * A signal emitted when filter text is updated.
+     * Emits a mapping from old to new index for items after filtering.
+     */
+    readonly filterTextChanged: ISignal<IModel, Map<number, number>>;
 
     /**
      * Original placement of cursor
      */
     cursor: CodeEditor.IPosition;
 
-    // TODO: not happy with this being named reply
-    setCompletionReply(reply: CompletionHandler.IInlineCompletionReply[]): void;
+    setCompletions(
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
+    ): void;
 
-    completionReply(): CompletionHandler.IInlineCompletionReply[];
+    appendCompletions(
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
+    ): void;
+
+    completions: IInlineCompletionList<CompletionHandler.IInlineItem> | null;
+
+    handleTextChange(change: SourceChange): void;
   }
 
   /**
    * Model for inline completions.
    */
   export class Model implements InlineCompleter.IModel {
-    setCompletionReply(reply: CompletionHandler.IInlineCompletionReply[]) {
-      this._reply = reply;
-      this.stateChanged.emit();
+    setCompletions(
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
+    ) {
+      this._completions = reply;
+      this.suggestionsChanged.emit('set');
+    }
+
+    appendCompletions(
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
+    ) {
+      if (!this._completions) {
+        console.warn('No completions to append to');
+        return;
+      }
+      this._completions.items.push(...reply.items);
+      this.suggestionsChanged.emit('append');
     }
 
     get cursor(): CodeEditor.IPosition {
@@ -317,8 +566,8 @@ export namespace InlineCompleter {
       this._cursor = value;
     }
 
-    completionReply() {
-      return this._reply;
+    get completions() {
+      return this._completions;
     }
 
     /**
@@ -326,6 +575,43 @@ export namespace InlineCompleter {
      */
     get isDisposed(): boolean {
       return this._isDisposed;
+    }
+
+    handleTextChange(sourceChange: SourceChange) {
+      const completions = this._completions;
+      if (!completions) {
+        return;
+      }
+      const originalPositions: Map<CompletionHandler.IInlineItem, number> =
+        new Map(completions.items.map((item, index) => [item, index]));
+      for (let change of sourceChange.sourceChange ?? []) {
+        const insert = change.insert;
+        if (insert) {
+          const items = completions.items.filter(item => {
+            const filterText = item.filterText ?? item.insertText;
+            if (!filterText.startsWith(insert)) {
+              return false;
+            }
+            item.filterText = filterText.substring(insert.length);
+            item.insertText = item.insertText.substring(insert.length);
+            return true;
+          });
+          if (items.length === 0) {
+            // all items from this provider were filtered out
+            this._completions = null;
+          }
+          completions.items = items;
+        } else {
+          this._completions = null;
+        }
+      }
+      const indexMap = new Map(
+        completions.items.map((item, newIndex) => [
+          originalPositions.get(item)!,
+          newIndex
+        ])
+      );
+      this.filterTextChanged.emit(indexMap);
     }
 
     /**
@@ -340,9 +626,11 @@ export namespace InlineCompleter {
       Signal.clearData(this);
     }
 
-    stateChanged = new Signal<this, void>(this);
+    suggestionsChanged = new Signal<this, 'set' | 'append'>(this);
+    filterTextChanged = new Signal<this, Map<number, number>>(this);
     private _isDisposed = false;
-    private _reply: CompletionHandler.IInlineCompletionReply[] = [];
+    private _completions: IInlineCompletionList<CompletionHandler.IInlineItem> | null =
+      null;
     private _cursor: CodeEditor.IPosition;
   }
 }

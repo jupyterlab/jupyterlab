@@ -12,7 +12,7 @@ import { Signal } from '@lumino/signaling';
 
 import {
   CompletionTriggerKind,
-  IInlineCompletionList,
+  IInlineCompletionItem,
   IInlineCompletionProvider,
   InlineCompletionTriggerKind,
   IProviderReconciliator
@@ -49,7 +49,7 @@ export class CompletionHandler implements IDisposable {
    * The completer widget managed by the handler.
    */
   readonly completer: Completer;
-  readonly inlineCompleter: InlineCompleter;
+  readonly inlineCompleter: InlineCompleter | undefined;
 
   set reconciliator(reconciliator: IProviderReconciliator) {
     this._reconciliator = reconciliator;
@@ -92,7 +92,9 @@ export class CompletionHandler implements IDisposable {
       model.sharedModel.changed.connect(this.onTextChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
-      this.inlineCompleter.editor = editor;
+      if (this.inlineCompleter) {
+        this.inlineCompleter.editor = editor;
+      }
     }
   }
 
@@ -297,17 +299,17 @@ export class CompletionHandler implements IDisposable {
     str: ISharedText,
     changed: SourceChange
   ): Promise<void> {
-    const model = this.completer.model;
-    if (!model || !this._enabled) {
+    if (!this._enabled) {
       return;
     }
 
-    // If there is a text selection, no completion is allowed.
+    const model = this.completer.model;
     const editor = this.editor;
     if (!editor) {
       return;
     }
     if (
+      model &&
       this._autoCompletion &&
       this._reconciliator.shouldShowContinuousHint &&
       (await this._reconciliator.shouldShowContinuousHint(
@@ -320,20 +322,28 @@ export class CompletionHandler implements IDisposable {
         CompletionTriggerKind.TriggerCharacter
       );
     }
-    // TOOD: what condition?
-    //if (true) {
-    void this._makeInlineRequest(
-      editor.getCursorPosition(),
-      InlineCompletionTriggerKind.Automatic
-    );
-    //}
-    const { start, end } = editor.getSelection();
-    if (start.column !== end.column || start.line !== end.line) {
-      return;
+
+    const inlineModel = this.inlineCompleter?.model;
+    if (inlineModel) {
+      // Dispatch the text change to inline completer
+      // (this happens before request is sent )
+      inlineModel.handleTextChange(changed);
+      // TOOD: what condition?
+      void this._makeInlineRequest(
+        editor.getCursorPosition(),
+        InlineCompletionTriggerKind.Automatic
+      );
     }
 
-    // Dispatch the text change.
-    model.handleTextChange(this.getState(editor, editor.getCursorPosition()));
+    if (model) {
+      // If there is a text selection, no completion is allowed.
+      const { start, end } = editor.getSelection();
+      if (start.column !== end.column || start.line !== end.line) {
+        return;
+      }
+      // Dispatch the text change.
+      model.handleTextChange(this.getState(editor, editor.getCursorPosition()));
+    }
   }
 
   /**
@@ -400,20 +410,40 @@ export class CompletionHandler implements IDisposable {
     if (!editor) {
       return Promise.reject(new Error('No active editor'));
     }
+    if (!this.inlineCompleter) {
+      return Promise.reject(new Error('No inline completer'));
+    }
+
     const request = this._composeRequest(editor, position);
 
-    const result = await this._reconciliator.fetchInline(request, trigger);
-
-    if (!result) {
-      return;
-    }
     const model = this.inlineCompleter.model;
     if (!model) {
       return;
     }
     model.cursor = position;
-    model.setCompletionReply(result);
+
+    const current = ++this._fetchingInline;
+    const promises = this._reconciliator.fetchInline(request, trigger);
+
+    let first = true;
+    for (const promise of promises) {
+      promise.then(result => {
+        if (!result) {
+          return;
+        }
+        if (current !== this._fetchingInline) {
+          return;
+        }
+        if (first) {
+          model.setCompletions(result);
+          first = false;
+        } else {
+          model.appendCompletions(result);
+        }
+      });
+    }
   }
+  private _fetchingInline = 0;
 
   private _composeRequest(
     editor: CodeEditor.IEditor,
@@ -469,7 +499,10 @@ export namespace CompletionHandler {
      */
     completer: Completer;
 
-    inlineCompleter: InlineCompleter;
+    /**
+     * The inline completer widget; when absent inline completion is disabled.
+     */
+    inlineCompleter?: InlineCompleter;
 
     /**
      * The reconciliator that will fetch and merge completions from active providers.
@@ -567,11 +600,7 @@ export namespace CompletionHandler {
     items: Array<T>;
   }
 
-  export interface IInlineCompletionReply {
-    /**
-     * The completion candidates list.
-     */
-    completions: IInlineCompletionList;
+  export interface IInlineItem extends IInlineCompletionItem {
     /**
      * The source provider.
      */

@@ -26,6 +26,12 @@
     },
     {
       "path": "../ui-components"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }
