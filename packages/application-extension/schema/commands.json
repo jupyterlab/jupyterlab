@@ -46,6 +46,22 @@
       "command": "application:toggle-presentation-mode",
       "keys": [""],
       "selector": "body"
+    },
+    {
+      "command": "application:display-sidebars-shortcut-numbers",
+      "keys": ["Alt"],
+      "selector": "body",
+      "args": {
+        "side": "left"
+      }
+    },
+    {
+      "command": "application:display-sidebars-shortcut-numbers",
+      "keys": ["Alt Shift"],
+      "selector": "body",
+      "args": {
+        "side": "right"
+      }
     }
   ],
   "jupyter.lab.menus": {
