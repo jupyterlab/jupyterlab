@@ -341,7 +341,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           }
           const widgets = Array.from(labShell.widgets(args.side));
           if (index >= widgets.length) {
-            throw Error(`No item with index ${index} in ${args.side} sidebar`);
+            return;
           }
           const widgetId = widgets[index].id;
           // activate widget to show the associated content
