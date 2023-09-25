@@ -143,6 +143,7 @@ test.describe('Sidebars', () => {
     page
   }) => {
     await page.sidebar.open('left');
+    await page.locator('#extensionmanager.main-view').click();
     const extensionManagerWidget = page.locator('#extensionmanager.main-view');
     const extensionManagerElementAriaLabel =
       await extensionManagerWidget.getAttribute('aria-label');
@@ -171,7 +172,7 @@ test.describe('Sidebars', () => {
     page
   }) => {
     await page.sidebar.open('right');
-    const debuggerWidget = page.getByTitle('Debugger');
+    const debuggerWidget = page.locator('#jp-debugger-sidebar');
     const debuggerElementAriaLabel = await debuggerWidget.getAttribute(
       'aria-label'
     );
