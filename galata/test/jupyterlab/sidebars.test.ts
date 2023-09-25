@@ -135,52 +135,64 @@ test.describe('Sidebars', () => {
     const runningSessionsElementRole = await runningSessionsWidget.getAttribute(
       'role'
     );
-
     expect(runningSessionsElementAriaLabel).toEqual('Running Sessions section');
     expect(runningSessionsElementRole).toEqual('region');
   });
 
-  // test('Check Extension Manager button on sidebar has correct aria label and role', async ({
-  //   page
-  // }) => {
-  //   await page.sidebar.open('extensionmanager.main-view');
-  //   const extensionManager = page.locator('#extensionmanager.main-view');
-  //   expect(extensionManager?.getAttribute('aria-label')).toEqual(
-  //     'Extension Manager section'
-  //   );
-  //   expect(extensionManager?.getAttribute('role')).toEqual('region');
-  // });
+  test('Check Extension Manager button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.open('left');
+    const extensionManagerWidget = page.locator('#extensionmanager.main-view');
+    const extensionManagerElementAriaLabel =
+      await extensionManagerWidget.getAttribute('aria-label');
+    const extensionManagerElementRole =
+      await extensionManagerWidget.getAttribute('role');
+    expect(extensionManagerElementAriaLabel).toEqual(
+      'Extension Manager section'
+    );
+    expect(extensionManagerElementRole).toEqual('region');
+  });
 
-  // test('Check File Browser button on sidebar has correct aria label and role', async ({
-  //   page
-  // }) => {
-  //   await page.sidebar.openTab('filebrowser');
-  //   const fileBrowser = page.locator('#filebrowser');
-  //   expect(fileBrowser?.getAttribute('aria-label')).toEqual(
-  //     'File Browser Section'
-  //   );
-  //   expect(fileBrowser?.getAttribute('role')).toEqual('region');
-  // });
+  test('Check File Browser button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.open('left');
+    const fileBrowserWidget = page.locator('#filebrowser');
+    const fileBrowserElementAriaLabel = await fileBrowserWidget.getAttribute(
+      'aria-label'
+    );
+    const fileBrowserElementRole = await fileBrowserWidget.getAttribute('role');
+    expect(fileBrowserElementAriaLabel).toEqual('File Browser Section');
+    expect(fileBrowserElementRole).toEqual('region');
+  });
 
-  // test('Check Debugger button on sidebar has correct aria label and role', async ({
-  //   page
-  // }) => {
-  //   await page.sidebar.open('right');
-  //   const debuggerButton = page.getByTitle('Debugger');
-  //   expect(debuggerButton?.getAttribute('aria-label')).toEqual(
-  //     'File Browser Section'
-  //   );
-  //   expect(debuggerButton?.getAttribute('role')).toEqual('region');
-  // });
+  test('Check Debugger button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.open('right');
+    const debuggerWidget = page.getByTitle('Debugger');
+    const debuggerElementAriaLabel = await debuggerWidget.getAttribute(
+      'aria-label'
+    );
+    const debuggerElementRole = await debuggerWidget.getAttribute('role');
+    expect(debuggerElementAriaLabel).toEqual('Debugger Section');
+    expect(debuggerElementRole).toEqual('region');
+  });
 
-  // test('Check Table of Contents button on sidebar has correct aria label and role', async ({
-  //   page
-  // }) => {
-  //   await page.sidebar.openTab('table-of-contents');
-  //   const fileBrowser = page.locator('#table-of-contents');
-  //   expect(fileBrowser?.getAttribute('aria-label')).toEqual(
-  //     'Table of Contents section'
-  //   );
-  //   expect(fileBrowser?.getAttribute('role')).toEqual('region');
-  // });
+  test('Check Table of Contents button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.open('left');
+    const tableOfContentsWidget = page.locator('#table-of-contents');
+    const tableOfContentsElementAriaLabel =
+      await tableOfContentsWidget.getAttribute('aria-label');
+    const tableOfContentsElementRole = await tableOfContentsWidget.getAttribute(
+      'role'
+    );
+    expect(tableOfContentsElementAriaLabel).toEqual(
+      'Table of Contents section'
+    );
+    expect(tableOfContentsElementRole).toEqual('region');
+  });
 });
