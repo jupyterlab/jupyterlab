@@ -126,7 +126,7 @@ describe('@jupyterlab/docmanager', () => {
     });
 
     describe('Widget roles and aria labels', () => {
-      it('docuemnt widget should have aria label and role', () => {
+      it('document widget should have aria label and role', () => {
         const content = new Widget();
         const widget = new DocumentWidget({ content, context });
         manager.createWidget(widgetFactory, context);
