@@ -21,10 +21,14 @@ import {
 } from '@jupyterlab/completer';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
+  caretLeftIcon,
+  caretRightIcon,
+  checkIcon,
   IFormRenderer,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
 import type { FieldProps } from '@rjsf/utils';
+import { CommandRegistry } from '@lumino/commands';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { renderAvailableProviders } from './renderer';
@@ -34,6 +38,7 @@ const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:manager';
 namespace CommandIDs {
   export const nextInline = 'inline-completer:next';
   export const previousInline = 'inline-completer:previous';
+  export const acceptInline = 'inline-completer:accept';
 }
 
 const defaultProviders: JupyterFrontEndPlugin<void> = {
@@ -80,24 +85,46 @@ const inlineCompleter: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
     app: JupyterFrontEnd,
     translator: ITranslator | null
   ): IInlineCompleterFactory => {
-    //const trans = (translator || nullTranslator).load('jupyterlab');
+    const trans = (translator || nullTranslator).load('jupyterlab');
     return {
       factory: options => {
         const inlineCompleter = new InlineCompleter(options);
+        const describeShortcut = (commandID: string): string => {
+          const binding = app.commands.keyBindings.find(
+            binding => binding.command === commandID
+          );
+          const keys = binding
+            ? CommandRegistry.formatKeystroke(binding.keys)
+            : '';
+          return keys ? ` (${keys})` : '';
+        };
         inlineCompleter.toolbar.addItem(
-          'previous',
+          'previous-inline-completion',
           new CommandToolbarButton({
             commands: app.commands,
-            id: CommandIDs.previousInline
-            //icon: ,
-            //label: trans.__('Previous (shortcut)')
+            id: CommandIDs.previousInline,
+            icon: caretLeftIcon,
+            label:
+              trans.__('Previous') + describeShortcut(CommandIDs.previousInline)
           })
         );
         inlineCompleter.toolbar.addItem(
-          'next',
+          'next-inline-completion',
           new CommandToolbarButton({
             commands: app.commands,
-            id: CommandIDs.nextInline
+            icon: caretRightIcon,
+            id: CommandIDs.nextInline,
+            label: trans.__('Next') + describeShortcut(CommandIDs.nextInline)
+          })
+        );
+        inlineCompleter.toolbar.addItem(
+          'accept-inline-completion',
+          new CommandToolbarButton({
+            commands: app.commands,
+            icon: checkIcon,
+            id: CommandIDs.acceptInline,
+            label:
+              trans.__('Accept') + describeShortcut(CommandIDs.acceptInline)
           })
         );
         return inlineCompleter;
@@ -122,14 +149,22 @@ const inlineCompleterCommands: JupyterFrontEndPlugin<void> = {
       execute: () => {
         completionManager.cycleInline(app.shell.currentWidget!.id!, 'next');
       },
-      label: () => trans.__('Next'),
+      label: trans.__('Next Inline Completion'),
       isEnabled: () => !!app.shell.currentWidget
     });
     app.commands.addCommand(CommandIDs.previousInline, {
       execute: () => {
         completionManager.cycleInline(app.shell.currentWidget!.id!, 'previous');
       },
-      label: () => trans.__('Previous'),
+      label: trans.__('Previous Inline Completion'),
+      isEnabled: () => !!app.shell.currentWidget
+    });
+    app.commands.addCommand(CommandIDs.acceptInline, {
+      execute: () => {
+        // TODO
+        completionManager.cycleInline(app.shell.currentWidget!.id!, 'previous');
+      },
+      label: trans.__('Accept Inline Completion'),
       isEnabled: () => !!app.shell.currentWidget
     });
   }

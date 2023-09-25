@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { Widget } from '@lumino/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 import { CompletionHandler } from './handler';
 import { HoverBox } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
@@ -41,14 +41,18 @@ export class InlineCompleter extends Widget {
     this.editor = options.editor ?? null;
     this.addClass(INLINE_COMPLETER_CLASS);
     this._ghostManager = createGhostManager();
-    this.node.appendChild(this._suggestionsCounter);
-    // TODO: attaching toolbar this does not work great here, using box layout introduces a different problem.
-    this.node.appendChild(this.toolbar.node);
+    const layout = (this.layout = new PanelLayout());
+    layout.addWidget(this._suggestionsCounter);
+    layout.addWidget(this.toolbar);
+    layout.addWidget(this._providerWidget);
   }
-  toolbar = new Toolbar<Widget>();
-  private _ghostManager: IGhostTextManager;
 
-  private _suggestionsCounter = document.createElement('div');
+  /**
+   * Toolbar with buttons such as previous/next/accept.
+   */
+  get toolbar() {
+    return this._toolbar;
+  }
 
   /**
    * The editor used by the completion widget.
@@ -134,16 +138,18 @@ export class InlineCompleter extends Widget {
     this._render();
   }
 
-  private _current: number = 0;
-
   private _render(): void {
     const completions = this.model?.completions;
     if (!completions) {
       return;
     }
-    this._setText(completions.items[this._current]);
-    this._suggestionsCounter.innerText =
+    const candidate = completions.items[this._current];
+    this._setText(candidate);
+    this._suggestionsCounter.node.innerText =
       this._current + 1 + '/' + completions.items.length;
+    // TODO: consider adding an extension point for providers
+    // to render anything they want, like links to docs
+    this._providerWidget.node.innerText = candidate.provider.name;
   }
 
   private _setText(item: CompletionHandler.IInlineItem) {
@@ -189,7 +195,6 @@ export class InlineCompleter extends Widget {
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
     this.updateVisibility();
-    //this.toolbar.update();
     this._setGeometry();
   }
 
@@ -222,8 +227,14 @@ export class InlineCompleter extends Widget {
       }
     });
   }
+
+  private _current: number = 0;
+  private _ghostManager: IGhostTextManager;
   private _editor: CodeEditor.IEditor | null | undefined = null;
   private _model: InlineCompleter.IModel | null = null;
+  private _toolbar = new Toolbar<Widget>();
+  private _suggestionsCounter = new Widget();
+  private _providerWidget = new Widget();
 }
 
 class GhostTextWidget extends WidgetType {

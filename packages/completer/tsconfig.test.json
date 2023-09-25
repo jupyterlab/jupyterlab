@@ -9,6 +9,9 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../codemirror"
+    },
+    {
       "path": "../coreutils"
     },
     {
@@ -21,13 +24,10 @@
       "path": "../statedb"
     },
     {
-      "path": "../ui-components"
-    },
-    {
-      "path": "../codemirror"
-    },
-    {
       "path": "../translation"
+    },
+    {
+      "path": "../ui-components"
     },
     {
       "path": "."

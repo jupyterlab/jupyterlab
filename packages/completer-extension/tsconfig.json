@@ -16,10 +16,10 @@
       "path": "../settingregistry"
     },
     {
-      "path": "../ui-components"
+      "path": "../translation"
     },
     {
-      "path": "../translation"
+      "path": "../ui-components"
     }
   ]
 }

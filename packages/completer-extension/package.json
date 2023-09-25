@@ -43,6 +43,7 @@
     "@jupyterlab/settingregistry": "^4.1.0-alpha.1",
     "@jupyterlab/translation": "^4.1.0-alpha.1",
     "@jupyterlab/ui-components": "^4.1.0-alpha.1",
+    "@lumino/commands": "^2.1.3",
     "@lumino/coreutils": "^2.1.2",
     "@rjsf/utils": "^5.1.0",
     "react": "^18.2.0"

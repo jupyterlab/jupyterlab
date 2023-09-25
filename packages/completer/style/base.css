@@ -237,5 +237,11 @@
   border: var(--jp-border-width) solid var(--jp-border-color1);
   display: flex;
   flex-direction: row;
-  padding: 8px 4px;
+  align-items: center;
+  padding: 4px 8px;
+}
+
+.jp-InlineCompleter > .jp-Toolbar {
+  box-shadow: none;
+  border-bottom: none;
 }

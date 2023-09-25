@@ -1,0 +1,24 @@
+{
+  "title": "Inline Completer",
+  "description": "Inline completer settings.",
+  "jupyter.lab.shortcuts": [
+    {
+      "command": "inline-completer:next",
+      "keys": ["Alt", "]"],
+      "selector": ".jp-mod-completer-enabled"
+    },
+    {
+      "command": "inline-completer:previous",
+      "keys": ["Alt", "["],
+      "selector": ".jp-mod-completer-enabled"
+    },
+    {
+      "command": "inline-completer:accept",
+      "keys": ["Alt", "End"],
+      "selector": ".jp-mod-completer-enabled"
+    }
+  ],
+  "properties": {},
+  "additionalProperties": false,
+  "type": "object"
+}
