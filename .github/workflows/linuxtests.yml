@@ -147,14 +147,3 @@ jobs:
         with:
           ignore_glob: "packages/ui-components/docs/source/ui_components.rst images"
           ignore_links: "../api/*.* .*/images/[\\w-]+.png https://docs.github.com/en/.* https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906 https://jupyterlab.github.io https://registry.npmjs.org/.* https://mybinder.org/v2/gh/jupyterlab/.*"
-
-  pre-commit:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v2
-      - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
-      - name: Install Jupyterlab
-        run: pip install -e .
-      - uses: pre-commit/action@v2.0.0
