@@ -143,7 +143,7 @@ test.describe('Sidebars', () => {
     page
   }) => {
     await page.sidebar.open('left');
-    await page.locator('#extensionmanager.main-view').click();
+    await page.getByTitle('Extension Manager').click();
     const extensionManagerWidget = page.locator('#extensionmanager.main-view');
     const extensionManagerElementAriaLabel =
       await extensionManagerWidget.getAttribute('aria-label');
@@ -177,7 +177,7 @@ test.describe('Sidebars', () => {
       'aria-label'
     );
     const debuggerElementRole = await debuggerWidget.getAttribute('role');
-    expect(debuggerElementAriaLabel).toEqual('Debugger Section');
+    expect(debuggerElementAriaLabel).toEqual('Debugger section');
     expect(debuggerElementRole).toEqual('region');
   });
 
