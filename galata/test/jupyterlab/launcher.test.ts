@@ -13,7 +13,7 @@ test.describe('Dynamic Text Spacing', () => {
       window.getComputedStyle(el).getPropertyValue('min-height')
     );
 
-    // await expect(height).toBe('var(--jp-private-launcher-card-label-height)');
+    await expect(height).toBe('var(--jp-private-launcher-card-label-height)');
     const imageName = 'launcher-card-label-height.png';
     expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
