@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { NotebookPanel } from '@jupyterlab/notebook';
 import React from 'react';
 import PropTypes from 'prop-types';
