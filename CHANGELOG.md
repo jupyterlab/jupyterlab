@@ -8,6 +8,35 @@
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 3.6.6
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.6.5...b86cc202967e8231560f5d67f3daa747a7d3ad79))
+
+### Maintenance and upkeep improvements
+
+- Remove pre-commit job [#15154](https://github.com/jupyterlab/jupyterlab/pull/15154) ([@fcollonval](https://github.com/fcollonval))
+- Install playwright browser in jupyterlab.browser_check [#15117](https://github.com/jupyterlab/jupyterlab/pull/15117) ([@brichet](https://github.com/brichet))
+- Fix pepy.tech links [#14982](https://github.com/jupyterlab/jupyterlab/pull/14982) ([@fcollonval](https://github.com/fcollonval))
+- Fix broken link [#14937](https://github.com/jupyterlab/jupyterlab/pull/14937) ([@fcollonval](https://github.com/fcollonval))
+- Rename readthedoc config [#14927](https://github.com/jupyterlab/jupyterlab/pull/14927) ([@fcollonval](https://github.com/fcollonval))
+- Update the `jupyter labextension list` compat message [#14680](https://github.com/jupyterlab/jupyterlab/pull/14680) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Install playwright browser in jupyterlab.browser_check [#15117](https://github.com/jupyterlab/jupyterlab/pull/15117) ([@brichet](https://github.com/brichet))
+- Fix pepy.tech links [#14982](https://github.com/jupyterlab/jupyterlab/pull/14982) ([@fcollonval](https://github.com/fcollonval))
+- Create JupyterLab 3.4.4 accessibility statement [#14856](https://github.com/jupyterlab/jupyterlab/pull/14856) ([@isabela-pf](https://github.com/isabela-pf))
+- Update docs to `jupyter_server_config.py` [#13208](https://github.com/jupyterlab/jupyterlab/pull/13208) ([@jtpio](https://github.com/jtpio))
+- Update the `jupyter labextension list` compat message [#14680](https://github.com/jupyterlab/jupyterlab/pull/14680) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-06-26&to=2023-09-26&type=c))
+
+[@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2023-06-26..2023-09-26&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2023-06-26..2023-09-26&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2023-06-26..2023-09-26&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2023-06-26..2023-09-26&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-06-26..2023-09-26&type=Issues) | [@g547315](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ag547315+updated%3A2023-06-26..2023-09-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-06-26..2023-09-26&type=Issues) | [@isabela-pf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aisabela-pf+updated%3A2023-06-26..2023-09-26&type=Issues) | [@j264415](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aj264415+updated%3A2023-06-26..2023-09-26&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-06-26..2023-09-26&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-06-26..2023-09-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-06-26..2023-09-26&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-06-26..2023-09-26&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-06-26..2023-09-26&type=Issues) | [@tonyfast](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atonyfast+updated%3A2023-06-26..2023-09-26&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-06-26..2023-09-26&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 3.6.5
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v3.6.4...86e69ddae07dfaa5166c85361658e298dc16210c))
@@ -27,8 +56,6 @@
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-05-31&to=2023-06-26&type=c))
 
 [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2023-05-31..2023-06-26&type=Issues) | [@brijsiyag](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrijsiyag+updated%3A2023-05-31..2023-06-26&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2023-05-31..2023-06-26&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-05-31..2023-06-26&type=Issues) | [@GabrielaVives](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AGabrielaVives+updated%3A2023-05-31..2023-06-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-05-31..2023-06-26&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2023-05-31..2023-06-26&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-05-31..2023-06-26&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-05-31..2023-06-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-05-31..2023-06-26&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-05-31..2023-06-26&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-05-31..2023-06-26&type=Issues) | [@tonyfast](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atonyfast+updated%3A2023-05-31..2023-06-26&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-05-31..2023-06-26&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 3.6.4
 
