@@ -16,6 +16,11 @@
       "command": "inline-completer:accept",
       "keys": ["Alt", "End"],
       "selector": ".jp-mod-completer-enabled"
+    },
+    {
+      "command": "inline-completer:invoke",
+      "keys": ["Alt", "\\"],
+      "selector": ".jp-mod-completer-enabled"
     }
   ],
   "properties": {},

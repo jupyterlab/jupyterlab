@@ -112,6 +112,45 @@ export class InlineCompleter extends Widget {
     this._render();
   }
 
+  invoke(): void {
+    this._ghostManager;
+  }
+
+  accept(): void {
+    const model = this.model;
+    const candidate = this.current;
+    const editor = this._editor;
+    if (!editor || !model || !candidate) {
+      return;
+    }
+    const position = model.cursor;
+    const value = candidate.insertText;
+    const cursorBeforeChange = editor.getOffsetAt(editor.getCursorPosition());
+    const requestPosition = editor.getOffsetAt(position);
+    const start = requestPosition;
+    const end = cursorBeforeChange;
+    // we need to update the shared model in a single transaction so that the undo manager works as expected
+    editor.model.sharedModel.updateSource(
+      requestPosition,
+      cursorBeforeChange,
+      value
+    );
+    if (cursorBeforeChange <= end && cursorBeforeChange >= start) {
+      editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
+    }
+    model.reset();
+    this._ghostManager.clearGhosts((editor as CodeMirrorEditor).editor);
+    this.update();
+  }
+
+  get current(): CompletionHandler.IInlineItem | null {
+    const completions = this.model?.completions;
+    if (!completions) {
+      return null;
+    }
+    return completions.items[this._current];
+  }
+
   private _onModelSuggestionsChanged(
     _emitter: InlineCompleter.IModel,
     reason: 'set' | 'append'
@@ -134,6 +173,11 @@ export class InlineCompleter extends Widget {
     if (!completions) {
       return;
     }
+    // TODO: should _current be in the model? There is a case to be made that there are two views:
+    // completer tooltip widget and ghost text which could be separated and draw from the same model
+    // in which case `_current` belongs to model which avoids exposing the position mapping in the
+    // signal. The question is: would there ever be a second view which could be out of sync and let
+    // user select a different "current" item, like in the sidebar? Well, yes it makes sense.
     this._current = mapping.get(this._current) ?? 0;
     this._render();
   }
@@ -150,6 +194,7 @@ export class InlineCompleter extends Widget {
     // TODO: consider adding an extension point for providers
     // to render anything they want, like links to docs
     this._providerWidget.node.innerText = candidate.provider.name;
+    // TODO: add loading indicator if completions are being retrieved.
   }
 
   private _setText(item: CompletionHandler.IInlineItem) {
@@ -534,6 +579,11 @@ export namespace InlineCompleter {
      */
     cursor: CodeEditor.IPosition;
 
+    /**
+     * Reset completer model.
+     */
+    reset(): void;
+
     setCompletions(
       reply: IInlineCompletionList<CompletionHandler.IInlineItem>
     ): void;
@@ -579,6 +629,10 @@ export namespace InlineCompleter {
 
     get completions() {
       return this._completions;
+    }
+
+    reset() {
+      this._completions = null;
     }
 
     /**

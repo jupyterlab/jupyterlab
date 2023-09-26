@@ -39,6 +39,7 @@ namespace CommandIDs {
   export const nextInline = 'inline-completer:next';
   export const previousInline = 'inline-completer:previous';
   export const acceptInline = 'inline-completer:accept';
+  export const invokeInline = 'inline-completer:invoke';
 }
 
 const defaultProviders: JupyterFrontEndPlugin<void> = {
@@ -145,27 +146,34 @@ const inlineCompleterCommands: JupyterFrontEndPlugin<void> = {
     translator: ITranslator | null
   ): void => {
     const trans = (translator || nullTranslator).load('jupyterlab');
+    const isEnabled = () => !!app.shell.currentWidget;
     app.commands.addCommand(CommandIDs.nextInline, {
       execute: () => {
         completionManager.cycleInline(app.shell.currentWidget!.id!, 'next');
       },
       label: trans.__('Next Inline Completion'),
-      isEnabled: () => !!app.shell.currentWidget
+      isEnabled
     });
     app.commands.addCommand(CommandIDs.previousInline, {
       execute: () => {
         completionManager.cycleInline(app.shell.currentWidget!.id!, 'previous');
       },
       label: trans.__('Previous Inline Completion'),
-      isEnabled: () => !!app.shell.currentWidget
+      isEnabled
     });
     app.commands.addCommand(CommandIDs.acceptInline, {
       execute: () => {
-        // TODO
-        completionManager.cycleInline(app.shell.currentWidget!.id!, 'previous');
+        completionManager.acceptInline(app.shell.currentWidget!.id!);
       },
       label: trans.__('Accept Inline Completion'),
-      isEnabled: () => !!app.shell.currentWidget
+      isEnabled
+    });
+    app.commands.addCommand(CommandIDs.invokeInline, {
+      execute: () => {
+        completionManager.invokeInline(app.shell.currentWidget!.id!);
+      },
+      label: trans.__('Invoke Inline Completer'),
+      isEnabled
     });
   }
 };

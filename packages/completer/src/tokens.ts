@@ -299,12 +299,29 @@ export interface ICompletionProviderManager {
   select(id: string): void;
 
   /**
-   * Switch to next or previous completion of inline completer
+   * Invoke inline completer.
+   * @experimental
    *
-   * @param {string} id - the id of notebook panel, console panel or code editor.
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  invokeInline(id: string): void;
+
+  /**
+   * Switch to next or previous completion of inline completer.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
    * @param direction - the cycling direction
    */
   cycleInline(id: string, direction: 'next' | 'previous'): void;
+
+  /**
+   * Accept active inline completion.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  acceptInline(id: string): void;
 
   /**
    * Update completer handler of a widget with new context.

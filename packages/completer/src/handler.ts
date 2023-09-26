@@ -128,6 +128,21 @@ export class CompletionHandler implements IDisposable {
   }
 
   /**
+   * Invoke the inline completer on explicit user request.
+   */
+  invokeInline(): void {
+    const editor = this._editor;
+    if (editor) {
+      this._makeInlineRequest(
+        editor.getCursorPosition(),
+        InlineCompletionTriggerKind.Invoke
+      ).catch(reason => {
+        console.warn('Inline invoke request bailed', reason);
+      });
+    }
+  }
+
+  /**
    * Invoke the handler and launch a completer.
    */
   invoke(): void {
@@ -326,13 +341,14 @@ export class CompletionHandler implements IDisposable {
     const inlineModel = this.inlineCompleter?.model;
     if (inlineModel) {
       // Dispatch the text change to inline completer
-      // (this happens before request is sent )
+      // (this happens before request is sent)
       inlineModel.handleTextChange(changed);
-      // TOOD: what condition?
-      void this._makeInlineRequest(
-        editor.getCursorPosition(),
-        InlineCompletionTriggerKind.Automatic
-      );
+      if (this._continuousInline) {
+        void this._makeInlineRequest(
+          editor.getCursorPosition(),
+          InlineCompletionTriggerKind.Automatic
+        );
+      }
     }
 
     if (model) {
@@ -414,6 +430,12 @@ export class CompletionHandler implements IDisposable {
       return Promise.reject(new Error('No inline completer'));
     }
 
+    const line = editor.getLine(position.line);
+    if (typeof line === 'undefined' || position.column < line.length) {
+      // only auto-trigger on end of line
+      return;
+    }
+
     const request = this._composeRequest(editor, position);
 
     const model = this.inlineCompleter.model;
@@ -484,6 +506,7 @@ export class CompletionHandler implements IDisposable {
   private _enabled = false;
   private _isDisposed = false;
   private _autoCompletion = false;
+  private _continuousInline = true;
 }
 
 /**

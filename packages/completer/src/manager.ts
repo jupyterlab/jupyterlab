@@ -28,10 +28,6 @@ export namespace CompletionProviderManager {
  * A manager for completion providers.
  */
 export class CompletionProviderManager implements ICompletionProviderManager {
-  // it might be good to hook inline completer here for two reasons:
-  // - we will be able to suppress invoke easily
-  // - we will not duplicate the widget (_panelHandlers) logic
-
   /**
    * Construct a new completer manager.
    */
@@ -215,17 +211,6 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     }
   }
 
-  invokeInline(id: string): void {
-    // TODO (with appropriate trigger)
-  }
-
-  cycleInline(id: string, direction: 'next' | 'previous'): void {
-    const handler = this._panelHandlers.get(id);
-    if (handler && handler.inlineCompleter) {
-      handler.inlineCompleter.cycle(direction);
-    }
-  }
-
   /**
    * Activate `select` command in the widget with provided id.
    *
@@ -235,6 +220,46 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     const handler = this._panelHandlers.get(id);
     if (handler) {
       handler.completer.selectActive();
+    }
+  }
+
+  /**
+   * Invoke inline completer.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  invokeInline(id: string): void {
+    const handler = this._panelHandlers.get(id);
+    if (handler && handler.inlineCompleter) {
+      handler.invokeInline();
+    }
+  }
+
+  /**
+   * Switch to next or previous completion of inline completer.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   * @param direction - the cycling direction.
+   */
+  cycleInline(id: string, direction: 'next' | 'previous'): void {
+    const handler = this._panelHandlers.get(id);
+    if (handler && handler.inlineCompleter) {
+      handler.inlineCompleter.cycle(direction);
+    }
+  }
+
+  /**
+   * Accept active inline completion.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  acceptInline(id: string): void {
+    const handler = this._panelHandlers.get(id);
+    if (handler && handler.inlineCompleter) {
+      handler.inlineCompleter.accept();
     }
   }
 
