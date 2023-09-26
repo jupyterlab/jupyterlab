@@ -13,7 +13,7 @@ describe('palette', () => {
   });
 
   describe('#ariaLabelsAndRoles', () => {
-    it('should return new FileBrowser instance', () => {
+    it('command palette should have aria-label and role for accessibility', () => {
       palette.activate();
       const node = document.getElementById('command-palette');
       expect(node?.getAttribute('aria-label')).toEqual(
