@@ -57,6 +57,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       v.id = 'extensionmanager.main-view';
       v.title.icon = extensionIcon;
       v.title.caption = trans.__('Extension Manager');
+      v.node.setAttribute('data-testid', 'extension-manager-section');
       v.node.setAttribute('role', 'region');
       v.node.setAttribute('aria-label', trans.__('Extension Manager section'));
       if (restorer) {
