@@ -4,22 +4,22 @@
   "jupyter.lab.shortcuts": [
     {
       "command": "inline-completer:next",
-      "keys": ["Alt", "]"],
+      "keys": ["Alt ]"],
       "selector": ".jp-mod-completer-enabled"
     },
     {
       "command": "inline-completer:previous",
-      "keys": ["Alt", "["],
+      "keys": ["Alt ["],
       "selector": ".jp-mod-completer-enabled"
     },
     {
       "command": "inline-completer:accept",
-      "keys": ["Alt", "End"],
+      "keys": ["Alt End"],
       "selector": ".jp-mod-completer-enabled"
     },
     {
       "command": "inline-completer:invoke",
-      "keys": ["Alt", "\\"],
+      "keys": ["Alt \\"],
       "selector": ".jp-mod-completer-enabled"
     }
   ],
