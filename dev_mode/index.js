@@ -206,7 +206,9 @@ export async function main() {
     availablePlugins: allPlugins
   });
   register.forEach(function(item) { lab.registerPluginModule(item); });
-  lab.start({ ignorePlugins });
+
+  const bubblingKeydown = PageConfig.getOption('bubbling_keydown') || false
+  lab.start({ ignorePlugins, bubblingKeydown });
 
   // Expose global app instance when in dev mode or when toggled explicitly.
   var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
