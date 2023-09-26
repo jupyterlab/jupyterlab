@@ -8,7 +8,7 @@ test.describe('Dynamic Text Spacing', () => {
     await page.goto();
     await page.waitForSelector('.jp-LauncherCard-label');
 
-    let element = page.locator('div.jp-LauncherCard-label.min-height');
+    let element = page.locator('div.jp-LauncherCard-label');
     let height = await element.evaluate(el =>
       window.getComputedStyle(el).getPropertyValue('min-height')
     );
