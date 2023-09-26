@@ -9,11 +9,14 @@ test.describe('Dynamic Text Spacing', () => {
     await page.waitForSelector('.jp-LauncherCard-label');
 
     let element = page.locator('div.jp-LauncherCard-label');
-    let height = await element.evaluate(el =>
-      window.getComputedStyle(el).getPropertyValue('min-height')
-    );
-
-    await expect(height).toBe('var(--jp-private-launcher-card-label-height)');
+    for (let i = 0; i < (await element.count()); i++) {
+      let height = await element
+        .nth(i)
+        .evaluate(el =>
+          window.getComputedStyle(el).getPropertyValue('min-height')
+        );
+      await expect(height).toBe('5.231em');
+    }
     const imageName = 'launcher-card-label-height.png';
     expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
