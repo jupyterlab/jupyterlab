@@ -8,15 +8,9 @@ test.describe('Dynamic Text Spacing', () => {
     await page.goto();
     await page.waitForSelector('.jp-LauncherCard-label');
 
-    let element = page.locator('div.jp-LauncherCard-label');
-    for (let i = 0; i < (await element.count()); i++) {
-      let height = await element
-        .nth(i)
-        .evaluate(el =>
-          window.getComputedStyle(el).getPropertyValue('min-height')
-        );
-      await expect(height).toContain('2.462em, 2.154em');
-    }
+    const element = page.locator('div.jp-LauncherCard-label');
+    await expect(element).toHaveCSS('min-height', '2.462em');
+
     const imageName = 'launcher-card-label-height.png';
     expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
