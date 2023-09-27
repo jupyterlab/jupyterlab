@@ -68,7 +68,7 @@ in the order you specify them).
 By returning an object from your activate function, you become a "provider"
 in Jupyter's provider-consumer pattern, and other plugins can use ("consume")
 this object (the "service object") in their extensions. Read more about this
-in the XXXX section below.
+in the "Making Your Plugin a Provider" section below.
 
 ..
   TODO expand the return from activate section here
@@ -94,10 +94,11 @@ To make your plugin a "provider" of service objects that other plugins can use,
 you need to list a "Token" in your plugin's "provides" property, then return an
 object from your plugin's "activate" callable.
 
-See this example:
+..
+  TODO edit link when folders are renamed from compat_4a etc.
 
-FOO
-
+Take a look at a snippet from [this example extension](https://github.com/ericsnekbytes/extension-examples/tree/provider_consumer_example/compat_4a) in the examples
+repo (you can read the full extension example code there):
 
 
 

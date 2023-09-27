@@ -21,8 +21,8 @@ How Compatibility Works
 
 At a high level, extensions for JupyterLab and Jupyter Notebook both
 typically start from a template project. You can download and start modifying
-a template project with Copier [ADD LINK HERE]. Once your template is ready,
-you can start adding components and features to build your extension.
+a template project with Copier (read more at [the extension tutorial(https://jupyterlab.readthedocs.io/en/latest/extension/extension_tutorial.html)]).
+Once your template is ready, you can start adding components and features to build your extension.
 
 An extension for JupyterLab (and for Notebook 7) is made up of a `series <https://jupyterlab.readthedocs.io/en/latest/extension/extension_dev.html>`_
 of bundled `plugins <https://lumino.readthedocs.io/en/latest/api/interfaces/application.IPlugin.html#requires>`_,
@@ -80,11 +80,9 @@ with both JupyterLab and Notebook 7 (both apps have a top area that can hold the
 widget, so it will be visible in both JupyterLab and Notebook 7 upon install and
 after launch).
 
-See `this example <https://www.youtube.com/watch?v=mqotG1MkHa4>`_ of a
+See `this example video <https://www.youtube.com/watch?v=mqotG1MkHa4>`_ of a
 compatible top-bar-text-widget that works in both JupyterLab and Notebook 7
-out of the box.
-
-SAMPLE CODE IS HERE link to examples repo
+out of the box, and [read the full extension example code here](https://github.com/ericsnekbytes/extension-examples/tree/toparea_text_widget_example/toparea-text-widget).
 
 Note that using features that are not common to both JupyterLab and Notebook 7 (or
 other apps) will break compatibility in apps where that feature is not available
@@ -96,8 +94,8 @@ Using Plugin Metadata to Drive Compatibility
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 JupyterLab's extension system is designed so that plugins can depend on and
-reuse features from one another. A key part of this approach is [JupyterLab's
-provider-consumer pattern](LINK), and it's what enables the compatibility solutions
+reuse features from one another. A key part of this approach is :ref:`JupyterLab's
+provider-consumer pattern <plugin_system>`, and it's what enables the compatibility solutions
 discussed here.
 
 Each plugin uses some properties (the "requires" and "optional" properties) to
@@ -117,11 +115,10 @@ So, these capabilities form the backbone of extension compatibility: You can
 use them to make checks in your extensions that will allow them to function in
 both JupyterLab and Jupyter Notebook 7 (and others).
 
-JupyterLab itself is a [provider](LINK) of many features through its built-in plugins,
-which you can read more about in the [Common Extension Points document](LINK). It's
-a good idea to use these extension points while you're building your extensions (and
-by doing so you're acting as the "consumer" in JupyterLab's [provider-consumer pattern
-](LINK)).
+JupyterLab itself is a :ref:`provider <plugin_system>` of many features through its built-in plugins,
+which you can read more about in the [Common Extension Points document](https://jupyterlab.readthedocs.io/en/latest/extension/extension_points.html).
+It's a good idea to use these extension points while you're building your extensions (and
+by doing so you're acting as the "consumer" in JupyterLab's :ref:`provider-consumer pattern <plugin_system>`.
 
 Testing for Optional Features
 .............................
@@ -129,7 +126,7 @@ Testing for Optional Features
 Making an app-specific feature optional and checking if it's available before
 using it is one technique you can use to make your extensions compatible.
 
-Take a look at a snippet from [this example extension](LINK) in the examples
+Take a look at a snippet from [this example extension](https://github.com/ericsnekbytes/extension-examples/tree/shout_button_message_example/shout-button-message) in the examples
 repo (you can read the full extension example code there):
 
 ..
@@ -203,9 +200,10 @@ Another pattern you can follow is to export a list of plugins from your
 extension, then use different "requires" features to select different
 behaviors based on which app the extension is currently running in.
 
-Here's a snippet from [this sample extension](LINK) which adds a "clap" button to
-the top area in JupyterLab, or to the right sidebar in Jupyter Notebook 7 (you can
-read the full extension example code there):
+Here's a snippet from [this sample extension](https://github.com/ericsnekbytes/extension-examples/tree/clap_button_message_example/clap-button-message)
+which adds a "clap" button to the top area in JupyterLab, or to the
+right sidebar in Jupyter Notebook 7 (you can read the full extension
+example code there):
 
 .. code::
   /**
