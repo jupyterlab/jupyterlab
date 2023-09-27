@@ -12,9 +12,9 @@
 
 /* stylelint-disable selector-max-type */
 
-.jp-FormGroup-content fieldset .jp-inputFieldWrapper input,
-.jp-FormGroup-content fieldset .jp-inputFieldWrapper select,
-.jp-FormGroup-content fieldset .jp-inputFieldWrapper textarea {
+.jp-FormGroup-content fieldset .jp-inputFieldWrapper > input,
+.jp-FormGroup-content fieldset .jp-inputFieldWrapper > select,
+.jp-FormGroup-content fieldset .jp-inputFieldWrapper > textarea {
   font-size: var(--jp-content-font-size2);
   border-color: var(--jp-input-border-color);
   border-style: solid;
@@ -24,6 +24,10 @@
   background: none;
   color: var(--jp-ui-font-color0);
   height: inherit;
+}
+
+.jp-FormGroup-content .jp-inputFieldWrapper > select > option {
+  background-color: var(--jp-layout-color1);
 }
 
 .jp-FormGroup-content fieldset input[type='checkbox'] {

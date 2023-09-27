@@ -52,6 +52,11 @@ const CODE_RUNNER = 'jpCodeRunner';
 const UNDOER = 'jpUndoer';
 
 /**
+ * The data attribute added to a widget that can be traversed with up/down arrow and j/k shortcuts.
+ */
+const TRAVERSABLE = 'jpTraversable';
+
+/**
  * The class name added to notebook widgets.
  */
 const NB_CLASS = 'jp-Notebook';
@@ -218,6 +223,7 @@ export class StaticNotebook extends WindowedList {
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[UNDOER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
+    this.node.dataset[TRAVERSABLE] = 'true';
     this.rendermime = options.rendermime;
     this.translator = options.translator || nullTranslator;
     this.contentFactory = options.contentFactory;

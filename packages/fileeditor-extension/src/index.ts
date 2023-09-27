@@ -51,7 +51,9 @@ import { ILauncher } from '@jupyterlab/launcher';
 import {
   ILSPCodeExtractorsManager,
   ILSPDocumentConnectionManager,
-  ILSPFeatureManager
+  ILSPFeatureManager,
+  IWidgetLSPAdapterTracker,
+  WidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
@@ -235,9 +237,9 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
     IEditorTracker,
     ILSPDocumentConnectionManager,
     ILSPFeatureManager,
-    ILSPCodeExtractorsManager
+    ILSPCodeExtractorsManager,
+    IWidgetLSPAdapterTracker
   ],
-
   activate: activateFileEditorLanguageServer,
   autoStart: true
 };
@@ -666,7 +668,8 @@ function activateFileEditorLanguageServer(
   editors: IEditorTracker,
   connectionManager: ILSPDocumentConnectionManager,
   featureManager: ILSPFeatureManager,
-  extractorManager: ILSPCodeExtractorsManager
+  extractorManager: ILSPCodeExtractorsManager,
+  adapterTracker: IWidgetLSPAdapterTracker
 ): void {
   editors.widgetAdded.connect(async (_, editor) => {
     const adapter = new FileEditorAdapter(editor, {
@@ -675,6 +678,6 @@ function activateFileEditorLanguageServer(
       foreignCodeExtractorsManager: extractorManager,
       docRegistry: app.docRegistry
     });
-    connectionManager.registerAdapter(editor.context.path, adapter);
+    (adapterTracker as WidgetLSPAdapterTracker).add(adapter);
   });
 }
