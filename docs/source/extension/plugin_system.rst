@@ -91,7 +91,8 @@ Making Your Plugin a Provider
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To make your plugin a "provider" of service objects that other plugins can use,
-you need to list a "Token" in your plugin's "provides" property, then return an
+you need to list a ["Token"](https://lumino.readthedocs.io/en/latest/api/classes/coreutils.Token.html#constructor)
+in your plugin's "provides" property, then return an
 object from your plugin's "activate" callable.
 
 ..
