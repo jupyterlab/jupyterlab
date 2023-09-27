@@ -5,6 +5,8 @@ import type * as lsp from 'vscode-languageserver-protocol';
 
 export type ClientCapabilities = lsp.ClientCapabilities;
 
+export type ServerCapabilities = lsp.ServerCapabilities;
+
 export enum DiagnosticSeverity {
   Error = 1,
   Warning = 2,
