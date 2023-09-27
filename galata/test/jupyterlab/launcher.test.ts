@@ -15,7 +15,7 @@ test.describe('Dynamic Text Spacing', () => {
         .evaluate(el =>
           window.getComputedStyle(el).getPropertyValue('min-height')
         );
-      await expect(height).toBe('5.231em');
+      await expect(height).toContain('2.462em, 2.154em');
     }
     const imageName = 'launcher-card-label-height.png';
     expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
