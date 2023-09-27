@@ -85,7 +85,7 @@ pass you an object for it (if it's available) or null if it's not.
 
 Both of these behaviors can be used to enable compatibility with multiple
 Jupyter applications (like JupyterLab + Jupyter Notebook 7), which you can
-read more about in the [Compatibility Guide](LINK).
+read more about in the :ref:`Compatibility Guide <extension_dual_compatibility>`.
 
 Making Your Plugin a Provider
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -97,8 +97,8 @@ object from your plugin's "activate" callable.
 ..
   TODO edit link when folders are renamed from compat_4a etc.
 
-Take a look at a snippet from [this example extension](https://github.com/ericsnekbytes/extension-examples/tree/provider_consumer_example/compat_4a) in the examples
-repo (you can read the full extension example code there):
+Take a look at [this example extension](https://github.com/ericsnekbytes/extension-examples/tree/provider_consumer_example/compat_4a) in the examples
+repo (you can read the full extension example code there).
 
 
 
