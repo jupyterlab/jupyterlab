@@ -9,7 +9,7 @@
 
   /* override strict containment added via Lumino PR
    [#506](https://github.com/jupyterlab/lumino/pull/506) */
-  contain: none !important;
+  contain: size style !important;
 }
 
 .jp-skiplink {
