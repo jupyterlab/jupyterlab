@@ -142,6 +142,7 @@
   border: none;
   border-radius: 2px;
   box-shadow: 0 0 0 1px var(--jp-brand-color1);
+  z-index: 1;
 }
 
 /* Edit mode */
