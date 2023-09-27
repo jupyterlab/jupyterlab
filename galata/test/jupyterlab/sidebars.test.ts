@@ -143,9 +143,7 @@ test.describe('Sidebars', () => {
     page
   }) => {
     await page.sidebar.open('left');
-    const extensionManagerWidget = page.getByTestId(
-      'extension-manager-section'
-    );
+    const extensionManagerWidget = page.locator('#extensionmanager.main-view');
     const extensionManagerElementAriaLabel =
       await extensionManagerWidget.getAttribute('aria-label');
     const extensionManagerElementRole =
