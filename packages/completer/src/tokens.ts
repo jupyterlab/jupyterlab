@@ -252,7 +252,7 @@ export interface IInlineCompletionProvider<
  * Inline completer factory
  */
 export interface IInlineCompleterFactory {
-  factory(options: InlineCompleter.IOptions): InlineCompleter;
+  factory(options: Omit<InlineCompleter.IOptions, 'trans'>): InlineCompleter;
 }
 
 /**

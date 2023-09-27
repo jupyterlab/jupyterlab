@@ -447,7 +447,7 @@ export class CompletionHandler implements IDisposable {
     const current = ++this._fetchingInline;
     const promises = this._reconciliator.fetchInline(request, trigger);
 
-    let first = true;
+    let i = 0;
     for (const promise of promises) {
       promise.then(result => {
         if (!result) {
@@ -456,11 +456,10 @@ export class CompletionHandler implements IDisposable {
         if (current !== this._fetchingInline) {
           return;
         }
-        if (first) {
-          model.setCompletions(result);
-          first = false;
+        if (++i === 1) {
+          model.setCompletions(result, promises.length - i);
         } else {
-          model.appendCompletions(result);
+          model.appendCompletions(result, promises.length - i);
         }
       });
     }

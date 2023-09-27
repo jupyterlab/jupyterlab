@@ -1,46 +1,37 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
 import { PanelLayout, Widget } from '@lumino/widgets';
-import { CompletionHandler } from './handler';
-import { HoverBox } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Message } from '@lumino/messaging';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { HoverBox } from '@jupyterlab/ui-components';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { SourceChange } from '@jupyter/ydoc';
-
-import {
-  Decoration,
-  DecorationSet,
-  EditorView,
-  WidgetType
-} from '@codemirror/view';
-import { StateEffect, StateField, Text, Transaction } from '@codemirror/state';
+import { fileIcon, Toolbar } from '@jupyterlab/ui-components';
+import { TranslationBundle } from '@jupyterlab/translation';
 import { IInlineCompletionList } from './tokens';
-import { Toolbar } from '@jupyterlab/ui-components';
+import { CompletionHandler } from './handler';
+import { GhostTextManager } from './ghost';
 
 const INLINE_COMPLETER_CLASS = 'jp-InlineCompleter';
-const TRANSIENT_LINE_SPACER_CLASS = 'jp-GhostText-hiding';
-const GHOST_TEXT_CLASS = 'jp-GhostText';
 
 /**
- * Widget allowing user to choose among inline completions,
+ * Widget enabling user to choose among inline completions,
  * typically by pressing next/previous buttons, and showing
  * additional metadata about active completion, such as
  * inline completion provider name.
  */
 export class InlineCompleter extends Widget {
   // TODO maybe create extension point to add custom buttons (per provider?)
-  // TODO: accepting via key press
-
   constructor(options: InlineCompleter.IOptions) {
     super({ node: document.createElement('div') });
     this.model = options.model ?? null;
     this.editor = options.editor ?? null;
     this.addClass(INLINE_COMPLETER_CLASS);
-    this._ghostManager = createGhostManager();
+    this._ghostManager = new GhostTextManager();
+    this._trans = options.trans;
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(this._suggestionsCounter);
     layout.addWidget(this.toolbar);
@@ -112,10 +103,6 @@ export class InlineCompleter extends Widget {
     this._render();
   }
 
-  invoke(): void {
-    this._ghostManager;
-  }
-
   accept(): void {
     const model = this.model;
     const candidate = this.current;
@@ -129,7 +116,7 @@ export class InlineCompleter extends Widget {
     const requestPosition = editor.getOffsetAt(position);
     const start = requestPosition;
     const end = cursorBeforeChange;
-    // we need to update the shared model in a single transaction so that the undo manager works as expected
+    // update the shared model in a single transaction so that the undo manager works as expected
     editor.model.sharedModel.updateSource(
       requestPosition,
       cursorBeforeChange,
@@ -151,15 +138,120 @@ export class InlineCompleter extends Widget {
     return completions.items[this._current];
   }
 
-  private _onModelSuggestionsChanged(
-    _emitter: InlineCompleter.IModel,
-    reason: 'set' | 'append'
-  ): void {
-    if (!this.isAttached) {
+  /**
+   * Handle `update-request` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    const model = this._model;
+    if (!model) {
       return;
     }
-    if (reason == 'set') {
-      this._current = 0;
+    let reply = model.completions;
+
+    // If there are no items, hide.
+    if (!reply || !reply.items || reply.items.length === 0) {
+      if (!this.isHidden) {
+        this.hide();
+      }
+      return;
+    }
+
+    if (this.isHidden) {
+      this.show();
+    }
+    this._setGeometry();
+  }
+
+  /**
+   * Handle the DOM events for the widget.
+   *
+   * @param event - The DOM event sent to the widget.
+   *
+   * #### Notes
+   * This method implements the DOM `EventListener` interface and is
+   * called in response to events on the dock panel's node. It should
+   * not be called directly by user code.
+   */
+  handleEvent(event: Event): void {
+    if (this.isHidden || !this._editor) {
+      return;
+    }
+    switch (event.type) {
+      case 'pointerdown':
+        this._evtPointerdown(event as PointerEvent);
+        break;
+      case 'scroll':
+        this._evtScroll(event as MouseEvent);
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Handle `after-attach` messages for the widget.
+   */
+  protected onAfterAttach(msg: Message): void {
+    document.addEventListener('scroll', this, true);
+    document.addEventListener('pointerdown', this, true);
+  }
+
+  /**
+   * Handle `before-detach` messages for the widget.
+   */
+  protected onBeforeDetach(msg: Message): void {
+    document.removeEventListener('scroll', this, true);
+    document.removeEventListener('pointerdown', this, true);
+  }
+
+  /**
+   * Handle pointerdown events for the widget.
+   */
+  private _evtPointerdown(event: PointerEvent) {
+    if (this.isHidden || !this._editor) {
+      return;
+    }
+    const target = event.target as HTMLElement;
+    if (this.node.contains(target)) {
+      return true;
+    }
+    this.hide();
+  }
+
+  /**
+   * Handle scroll events for the widget
+   */
+  private _evtScroll(event: MouseEvent) {
+    if (this.isHidden || !this._editor) {
+      return;
+    }
+
+    const { node } = this;
+
+    // All scrolls except scrolls in the actual hover box node may cause the
+    // referent editor that anchors the node to move, so the only scroll events
+    // that can safely be ignored are ones that happen inside the hovering node.
+    if (node.contains(event.target as HTMLElement)) {
+      return;
+    }
+
+    // Set the geometry of the node asynchronously.
+    requestAnimationFrame(() => {
+      this._setGeometry();
+    });
+  }
+
+  private _onModelSuggestionsChanged(
+    _emitter: InlineCompleter.IModel,
+    args: ISuggestionsChangedArgs
+  ): void {
+    if (!this.isAttached) {
+      this.update();
+      return;
+    }
+    if (args.event == 'set') {
+      this._current = args.indexMap!.get(this._current) ?? 0;
       this.update();
     }
     this._render();
@@ -170,31 +262,30 @@ export class InlineCompleter extends Widget {
     mapping: Map<number, number>
   ): void {
     const completions = this.model?.completions;
-    if (!completions) {
+    if (!completions || !completions.items || completions.items.length === 0) {
       return;
     }
-    // TODO: should _current be in the model? There is a case to be made that there are two views:
-    // completer tooltip widget and ghost text which could be separated and draw from the same model
-    // in which case `_current` belongs to model which avoids exposing the position mapping in the
-    // signal. The question is: would there ever be a second view which could be out of sync and let
-    // user select a different "current" item, like in the sidebar? Well, yes it makes sense.
     this._current = mapping.get(this._current) ?? 0;
     this._render();
   }
 
   private _render(): void {
     const completions = this.model?.completions;
-    if (!completions) {
+    if (!completions || !completions.items || completions.items.length === 0) {
       return;
     }
     const candidate = completions.items[this._current];
     this._setText(candidate);
-    this._suggestionsCounter.node.innerText =
-      this._current + 1 + '/' + completions.items.length;
-    // TODO: consider adding an extension point for providers
-    // to render anything they want, like links to docs
-    this._providerWidget.node.innerText = candidate.provider.name;
-    // TODO: add loading indicator if completions are being retrieved.
+    this._suggestionsCounter.node.innerText = this._trans.__(
+      '%1/%2',
+      this._current + 1,
+      completions.items.length
+    );
+    this._providerWidget.node.title = this._trans.__(
+      'Provider: %1',
+      candidate.provider.name
+    );
+    fileIcon.render(this._providerWidget.node);
   }
 
   private _setText(item: CompletionHandler.IInlineItem) {
@@ -203,7 +294,6 @@ export class InlineCompleter extends Widget {
     const editor = this._editor;
     const model = this._model;
     if (!model || !editor) {
-      console.log('bail on set text');
       return;
     }
 
@@ -212,35 +302,6 @@ export class InlineCompleter extends Widget {
       from: editor.getOffsetAt(model.cursor),
       content: text
     });
-  }
-
-  protected updateVisibility() {
-    const model = this._model;
-    if (!model) {
-      return;
-    }
-    let reply = model.completions;
-
-    // If there are no items, hide.
-    if (!reply || !reply.items) {
-      if (!this.isHidden) {
-        this.hide();
-      }
-      return;
-    }
-
-    if (this.isHidden) {
-      this.show();
-    }
-  }
-
-  /**
-   * Handle `update-request` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    super.onUpdateRequest(msg);
-    this.updateVisibility();
-    this._setGeometry();
   }
 
   private _setGeometry() {
@@ -256,16 +317,23 @@ export class InlineCompleter extends Widget {
       (editor.host.closest('.jp-MainAreaWidget > .lm-Widget') as HTMLElement) ||
       editor.host;
 
-    const anchor = editor.getCoordinateForPosition(model.cursor) as DOMRect;
+    let anchor: DOMRect;
+    try {
+      anchor = editor.getCoordinateForPosition(model.cursor) as DOMRect;
+    } catch {
+      // if coordinate is no longer in editor (e.g. after deleting a line), hide widget
+      this.hide();
+      return;
+    }
     HoverBox.setGeometry({
       anchor,
       host: host,
       maxHeight: 40,
       minHeight: 20,
       node: node,
-      privilege: 'above',
+      privilege: 'forceAbove',
       outOfViewDisplay: {
-        top: 'stick-inside',
+        top: 'stick-outside',
         bottom: 'stick-inside',
         left: 'stick-inside',
         right: 'stick-outside'
@@ -274,276 +342,33 @@ export class InlineCompleter extends Widget {
   }
 
   private _current: number = 0;
-  private _ghostManager: IGhostTextManager;
+  private _ghostManager: GhostTextManager;
   private _editor: CodeEditor.IEditor | null | undefined = null;
   private _model: InlineCompleter.IModel | null = null;
   private _toolbar = new Toolbar<Widget>();
   private _suggestionsCounter = new Widget();
   private _providerWidget = new Widget();
-}
-
-class GhostTextWidget extends WidgetType {
-  constructor(readonly content: string) {
-    super();
-  }
-
-  eq(other: GhostTextWidget) {
-    return other.content == this.content;
-  }
-
-  get lineBreaks() {
-    return (this.content.match(/\n/g) || '').length;
-  }
-
-  updateDOM(dom: HTMLElement, _view: EditorView): boolean {
-    dom.innerText = this.content;
-    return true;
-  }
-
-  toDOM() {
-    let wrap = document.createElement('span');
-    wrap.classList.add(GHOST_TEXT_CLASS);
-    wrap.innerText = this.content;
-    return wrap;
-  }
-}
-
-class TransientLineSpacerWidget extends GhostTextWidget {
-  toDOM() {
-    const wrap = super.toDOM();
-    wrap.classList.add(TRANSIENT_LINE_SPACER_CLASS);
-    return wrap;
-  }
+  private _trans: TranslationBundle;
 }
 
 /**
- *
+ * Map between old and new inline completion position in the list.
  */
-export interface IGhostTextManager {
-  placeGhost(view: EditorView, text: IGhostText): void;
-  clearGhosts(view: EditorView): void;
-}
+type IndexMap = Map<number, number>;
 
-export interface IGhostText {
-  from: number;
-  content: string;
-}
-
-enum GhostAction {
-  Set,
-  Remove,
-  FilterAndUpdate
-}
-
-interface IGhostActionData {
-  /* Action to perform on editor transaction */
-  action: GhostAction;
-  /* Spec of the ghost text to set on transaction */
-  spec?: IGhostText;
-}
-
-export function createGhostManager(): IGhostTextManager {
-  const addMark = StateEffect.define<IGhostText>({
-    map: ({ from, content }, change) => ({
-      from: change.mapPos(from),
-      to: change.mapPos(from + content.length),
-      content
-    })
-  });
-
-  const removeMark = StateEffect.define<null>();
-
+interface ISuggestionsChangedArgs {
   /**
-   * Decide what should be done for transaction effects.
+   * Whether completions were set (new query) or appended (for existing query)
    */
-  function chooseAction(tr: Transaction): IGhostActionData | null {
-    // This function can short-circuit because at any time there is no more than one ghost text.
-    for (let e of tr.effects) {
-      if (e.is(addMark)) {
-        return {
-          action: GhostAction.Set,
-          spec: e.value
-        };
-      } else if (e.is(removeMark)) {
-        return {
-          action: GhostAction.Remove
-        };
-      }
-    }
-    if (tr.docChanged || tr.selection) {
-      return {
-        action: GhostAction.FilterAndUpdate
-      };
-    }
-    return null;
-  }
-
-  function createWidget(spec: IGhostText, tr: Transaction) {
-    const ghost = Decoration.widget({
-      widget: new GhostTextWidget(spec.content),
-      side: 1,
-      ghostSpec: spec
-    });
-    // Widget decorations can only have zero-length ranges
-    return ghost.range(
-      Math.min(spec.from, tr.newDoc.length),
-      Math.min(spec.from, tr.newDoc.length)
-    );
-  }
-
-  function createLineSpacer(
-    spec: IGhostText,
-    tr: Transaction,
-    timeout: number = 1000
-  ) {
-    const timeoutInfo = {
-      elapsed: false
-    };
-    setTimeout(() => {
-      timeoutInfo.elapsed = true;
-    }, timeout);
-    const ghost = Decoration.widget({
-      widget: new TransientLineSpacerWidget(spec.content),
-      side: 1,
-      timeoutInfo
-    });
-    // Widget decorations can only have zero-length ranges
-    return ghost.range(
-      Math.min(spec.from, tr.newDoc.length),
-      Math.min(spec.from, tr.newDoc.length)
-    );
-  }
-
-  const markField = StateField.define<DecorationSet>({
-    create() {
-      return Decoration.none;
-    },
-    update(marks, tr) {
-      const data = chooseAction(tr);
-      // remove spacers after timeout
-      marks = marks.update({
-        filter: (_from, _to, value) => {
-          if (value.spec.widget instanceof TransientLineSpacerWidget) {
-            return !value.spec.timeoutInfo.elapsed;
-          }
-          return true;
-        }
-      });
-      if (!data) {
-        return marks.map(tr.changes);
-      }
-      switch (data.action) {
-        case GhostAction.Set: {
-          const spec = data.spec!;
-          const newWidget = createWidget(spec, tr);
-          return marks.update({
-            add: [newWidget],
-            filter: (_from, _to, value) => value === newWidget.value
-          });
-        }
-        case GhostAction.Remove:
-          return marks.update({
-            filter: () => false
-          });
-        case GhostAction.FilterAndUpdate: {
-          let cursor = marks.iter();
-          // skip over spacer if any
-          while (
-            cursor.value &&
-            cursor.value.spec.widget instanceof TransientLineSpacerWidget
-          ) {
-            cursor.next();
-          }
-          if (!cursor.value) {
-            // short-circuit if no widgets are present, or if only spacer was present
-            return marks.map(tr.changes);
-          }
-          const originalSpec = cursor.value!.spec.ghostSpec as IGhostText;
-          const spec = { ...originalSpec };
-          let shouldRemoveGhost = false;
-          tr.changes.iterChanges(
-            (
-              fromA: number,
-              toA: number,
-              fromB: number,
-              toB: number,
-              inserted: Text
-            ) => {
-              if (shouldRemoveGhost) {
-                return;
-              }
-              if (fromA === toA && fromB !== toB) {
-                // text was inserted without modifying old text
-                for (
-                  let lineNumber = 0;
-                  lineNumber < inserted.lines;
-                  lineNumber++
-                ) {
-                  const lineContent = inserted.lineAt(lineNumber).text;
-                  const line =
-                    lineNumber > 0 ? '\n' + lineContent : lineContent;
-                  if (spec.content.startsWith(line)) {
-                    spec.content = spec.content.slice(line.length);
-                    spec.from += line.length;
-                  } else {
-                    shouldRemoveGhost = true;
-                    break;
-                  }
-                }
-              } else if (fromB === toB && fromA !== toA) {
-                // text was removed
-                shouldRemoveGhost = true;
-              } else {
-                // text was replaced
-                shouldRemoveGhost = true;
-                // TODO: could check if the previous spec matches
-              }
-            }
-          );
-          // removing multi-line widget would cause the code cell to jump; instead
-          // we add a temporary spacer widget which will be removed in a future update
-          // allowing a slight delay between getting a new suggestion and reducing cell height
-          const newWidget = shouldRemoveGhost
-            ? createLineSpacer(originalSpec, tr)
-            : createWidget(spec, tr);
-          marks = marks.update({
-            add: [newWidget],
-            filter: (_from, _to, value) => value === newWidget.value
-          });
-          if (shouldRemoveGhost) {
-            marks = marks.map(tr.changes);
-          }
-          return marks;
-        }
-      }
-    },
-    provide: f => EditorView.decorations.from(f)
-  });
-
-  return {
-    placeGhost(view: EditorView, text: IGhostText) {
-      const effects: StateEffect<unknown>[] = [addMark.of(text)];
-
-      if (!view.state.field(markField, false)) {
-        effects.push(StateEffect.appendConfig.of([markField]));
-        effects.push(
-          StateEffect.appendConfig.of([
-            EditorView.domEventHandlers({
-              blur: () => {
-                const effects: StateEffect<unknown>[] = [removeMark.of(null)];
-                view.dispatch({ effects });
-              }
-            })
-          ])
-        );
-      }
-      view.dispatch({ effects });
-    },
-    clearGhosts(view: EditorView) {
-      const effects: StateEffect<unknown>[] = [removeMark.of(null)];
-      view.dispatch({ effects });
-    }
-  };
+  event: 'set' | 'append';
+  /**
+   * Number of providers that is expected to still report inline suggestions.
+   */
+  expecting: number;
+  /**
+   * Map between old and new inline indices, only present for `set` event.
+   */
+  indexMap?: IndexMap;
 }
 
 export namespace InlineCompleter {
@@ -557,6 +382,10 @@ export namespace InlineCompleter {
      * The model for the completer widget.
      */
     model?: IModel;
+    /**
+     * JupyterLab translation bundle.
+     */
+    trans: TranslationBundle;
   }
 
   /**
@@ -566,13 +395,13 @@ export namespace InlineCompleter {
     /**
      * A signal emitted when new suggestions are set on the model.
      */
-    readonly suggestionsChanged: ISignal<IModel, 'set' | 'append'>;
+    readonly suggestionsChanged: ISignal<IModel, ISuggestionsChangedArgs>;
 
     /**
      * A signal emitted when filter text is updated.
      * Emits a mapping from old to new index for items after filtering.
      */
-    readonly filterTextChanged: ISignal<IModel, Map<number, number>>;
+    readonly filterTextChanged: ISignal<IModel, IndexMap>;
 
     /**
      * Original placement of cursor
@@ -585,11 +414,13 @@ export namespace InlineCompleter {
     reset(): void;
 
     setCompletions(
-      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
+      awaiting: number
     ): void;
 
     appendCompletions(
-      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
+      awaiting: number
     ): void;
 
     completions: IInlineCompletionList<CompletionHandler.IInlineItem> | null;
@@ -602,21 +433,36 @@ export namespace InlineCompleter {
    */
   export class Model implements InlineCompleter.IModel {
     setCompletions(
-      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
+      awaiting: number
     ) {
+      const previousPositions: Map<string, number> = new Map(
+        this._completions?.items?.map((item, index) => [item.insertText, index])
+      );
       this._completions = reply;
-      this.suggestionsChanged.emit('set');
+      const indexMap = new Map(
+        reply.items.map((item, newIndex) => [
+          previousPositions.get(item.insertText)!,
+          newIndex
+        ])
+      );
+      this.suggestionsChanged.emit({
+        event: 'set',
+        expecting: awaiting,
+        indexMap
+      });
     }
 
     appendCompletions(
-      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
+      awaiting: number
     ) {
       if (!this._completions) {
         console.warn('No completions to append to');
         return;
       }
       this._completions.items.push(...reply.items);
-      this.suggestionsChanged.emit('append');
+      this.suggestionsChanged.emit({ event: 'append', expecting: awaiting });
     }
 
     get cursor(): CodeEditor.IPosition {
@@ -644,7 +490,11 @@ export namespace InlineCompleter {
 
     handleTextChange(sourceChange: SourceChange) {
       const completions = this._completions;
-      if (!completions) {
+      if (
+        !completions ||
+        !completions.items ||
+        completions.items.length === 0
+      ) {
         return;
       }
       const originalPositions: Map<CompletionHandler.IInlineItem, number> =
@@ -691,8 +541,8 @@ export namespace InlineCompleter {
       Signal.clearData(this);
     }
 
-    suggestionsChanged = new Signal<this, 'set' | 'append'>(this);
-    filterTextChanged = new Signal<this, Map<number, number>>(this);
+    suggestionsChanged = new Signal<this, ISuggestionsChangedArgs>(this);
+    filterTextChanged = new Signal<this, IndexMap>(this);
     private _isDisposed = false;
     private _completions: IInlineCompletionList<CompletionHandler.IInlineItem> | null =
       null;

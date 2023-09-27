@@ -325,6 +325,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     Widget.attach(completer, document.body);
     if (inlineCompleter) {
       Widget.attach(inlineCompleter, document.body);
+      inlineCompleter.hide();
     }
     const reconciliator = await this.generateReconciliator(completerContext);
     const handler = new CompletionHandler({

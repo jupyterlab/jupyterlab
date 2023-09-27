@@ -29,6 +29,7 @@ export class HistoryInlineCompletionProvider
   get name(): string {
     return this._trans.__('History');
   }
+
   async fetch(
     request: CompletionHandler.IRequest,
     context: IInlineCompletionContext,

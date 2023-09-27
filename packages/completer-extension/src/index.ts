@@ -28,7 +28,6 @@ import {
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
 import type { FieldProps } from '@rjsf/utils';
-import { CommandRegistry } from '@lumino/commands';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 import { renderAvailableProviders } from './renderer';
@@ -89,24 +88,17 @@ const inlineCompleter: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
     const trans = (translator || nullTranslator).load('jupyterlab');
     return {
       factory: options => {
-        const inlineCompleter = new InlineCompleter(options);
-        const describeShortcut = (commandID: string): string => {
-          const binding = app.commands.keyBindings.find(
-            binding => binding.command === commandID
-          );
-          const keys = binding
-            ? CommandRegistry.formatKeystroke(binding.keys)
-            : '';
-          return keys ? ` (${keys})` : '';
-        };
+        const inlineCompleter = new InlineCompleter({
+          ...options,
+          trans: trans
+        });
         inlineCompleter.toolbar.addItem(
           'previous-inline-completion',
           new CommandToolbarButton({
             commands: app.commands,
-            id: CommandIDs.previousInline,
             icon: caretLeftIcon,
-            label:
-              trans.__('Previous') + describeShortcut(CommandIDs.previousInline)
+            id: CommandIDs.previousInline,
+            label: trans.__('Previous')
           })
         );
         inlineCompleter.toolbar.addItem(
@@ -115,7 +107,7 @@ const inlineCompleter: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
             commands: app.commands,
             icon: caretRightIcon,
             id: CommandIDs.nextInline,
-            label: trans.__('Next') + describeShortcut(CommandIDs.nextInline)
+            label: trans.__('Next')
           })
         );
         inlineCompleter.toolbar.addItem(
@@ -124,8 +116,7 @@ const inlineCompleter: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
             commands: app.commands,
             icon: checkIcon,
             id: CommandIDs.acceptInline,
-            label:
-              trans.__('Accept') + describeShortcut(CommandIDs.acceptInline)
+            label: trans.__('Accept')
           })
         );
         return inlineCompleter;

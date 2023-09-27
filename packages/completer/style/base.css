@@ -212,11 +212,15 @@
   white-space: pre;
 }
 
-.jp-GhostText-hiding {
+.jp-GhostText-lineSpacer,
+.jp-GhostText-letterSpacer {
   opacity: 0;
-  background-color: grey;
   display: inline-block;
   vertical-align: top;
+  max-width: 0;
+}
+
+.jp-GhostText-lineSpacer {
   animation: jp-GhostText-hide 300ms 700ms ease-out forwards;
 }
 
@@ -231,17 +235,26 @@
 }
 
 .jp-InlineCompleter {
-  box-shadow: var(--jp-elevation-z6);
+  box-shadow: var(--jp-elevation-z2);
   background: var(--jp-layout-color1);
   color: var(--jp-content-font-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 4px 8px;
+  padding: 0 8px;
 }
 
 .jp-InlineCompleter > .jp-Toolbar {
   box-shadow: none;
   border-bottom: none;
+}
+
+.jp-InlineCompleter .jp-ToolbarButtonComponent-label {
+  display: none;
+}
+
+[data-command='inline-completer:next'] > .jp-ToolbarButtonComponent-icon,
+[data-command='inline-completer:previous'] > .jp-ToolbarButtonComponent-icon {
+  scale: 1.5;
 }
