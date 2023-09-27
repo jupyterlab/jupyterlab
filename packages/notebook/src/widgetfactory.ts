@@ -80,7 +80,8 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
   ): NotebookPanel {
     const translator = (context as any).translator;
     const history = new NotebookHistory({
-      sessionContext: context.sessionContext
+      sessionContext: context.sessionContext,
+      translator: translator
     });
     const nbOptions = {
       rendermime: source

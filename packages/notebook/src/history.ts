@@ -5,6 +5,7 @@ import { Cell } from '@jupyterlab/cells';
 import { ISessionContext } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { KernelMessage } from '@jupyterlab/services';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { NotebookActions } from './actions';
@@ -19,6 +20,11 @@ export interface INotebookHistory extends IDisposable {
    * The session context used by the foreign handler.
    */
   readonly sessionContext: ISessionContext;
+
+  /**
+   * Translator to be used for warnings.
+   */
+  readonly translator: ITranslator;
 
   /**
    * The current editor used by the history widget.
@@ -76,6 +82,7 @@ export class NotebookHistory implements INotebookHistory {
    */
   constructor(options: NotebookHistory.IOptions) {
     this.sessionContext = options.sessionContext;
+    this.translator = options.translator || nullTranslator;
     void this._handleKernel();
     this.sessionContext.kernelChanged.connect(this._handleKernel, this);
     NotebookActions.executed.connect(this._onExecuted, this);
@@ -85,6 +92,11 @@ export class NotebookHistory implements INotebookHistory {
    * The client session used by the foreign handler.
    */
   readonly sessionContext: ISessionContext;
+
+  /**
+   * Translator to be used for warnings
+   */
+  readonly translator: ITranslator;
 
   /**
    * The current editor used by the history manager.
@@ -302,6 +314,13 @@ export class NotebookHistory implements INotebookHistory {
       ?.requestHistory(Private.initialRequest)
       .then(v => {
         this.onHistory(v, cell);
+      })
+      .catch(() => {
+        console.warn(
+          this.translator
+            .load('jupyterlab')
+            .__('History was unable to be retrieved')
+        );
       });
   }
 
@@ -349,6 +368,11 @@ export namespace NotebookHistory {
      * The client session used by the foreign handler.
      */
     sessionContext: ISessionContext;
+
+    /**
+     * The application language translator.
+     */
+    translator: ITranslator;
   }
 }
 
