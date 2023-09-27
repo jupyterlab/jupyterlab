@@ -85,7 +85,6 @@ export class NotebookHistory implements INotebookHistory {
     this.translator = options.translator || nullTranslator;
     void this._handleKernel();
     this.sessionContext.kernelChanged.connect(this._handleKernel, this);
-    NotebookActions.executed.connect(this._onExecuted, this);
   }
 
   /**
@@ -291,17 +290,6 @@ export class NotebookHistory implements INotebookHistory {
     }
     await this._retrieveHistory().catch();
     return;
-  }
-
-  /**
-   * handle a cell execution
-   */
-  private async _onExecuted(
-    _: unknown,
-    args: { notebook: StaticNotebook; cell: Cell }
-  ): Promise<void> {
-    const cell = args['cell'];
-    await this._retrieveHistory(cell).catch();
   }
 
   /**
