@@ -2092,6 +2092,9 @@ export namespace NotebookActions {
   export async function accessPreviousHistory(
     notebook: Notebook
   ): Promise<void> {
+    if (!notebook.notebookConfig.accessKernelHistory) {
+      return;
+    }
     const activeCell = notebook.activeCell;
     if (activeCell) {
       if (notebook._history) {
@@ -2107,6 +2110,9 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    */
   export async function accessNextHistory(notebook: Notebook): Promise<void> {
+    if (!notebook.notebookConfig.accessKernelHistory) {
+      return;
+    }
     const activeCell = notebook.activeCell;
     if (activeCell) {
       if (notebook._history) {

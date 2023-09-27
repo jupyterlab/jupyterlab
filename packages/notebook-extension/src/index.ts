@@ -1838,7 +1838,9 @@ function activateNotebookHandler(
       windowingMode: settings.get('windowingMode').composite as
         | 'defer'
         | 'full'
-        | 'none'
+        | 'none',
+      accessKernelHistory: settings.get('accessKernelHistory')
+        .composite as boolean
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {

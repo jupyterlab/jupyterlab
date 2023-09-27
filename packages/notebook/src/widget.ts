@@ -1197,6 +1197,7 @@ export namespace StaticNotebook {
      * - 'none': Attach all cells to the viewport
      */
     windowingMode: 'defer' | 'full' | 'none';
+    accessKernelHistory: boolean;
   }
 
   /**
@@ -1216,7 +1217,8 @@ export namespace StaticNotebook {
     sideBySideRightMarginOverride: '10px',
     sideBySideOutputRatio: 1,
     overscanCount: 1,
-    windowingMode: 'full'
+    windowingMode: 'full',
+    accessKernelHistory: false
   };
 
   /**
