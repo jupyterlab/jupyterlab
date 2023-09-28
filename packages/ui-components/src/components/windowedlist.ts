@@ -735,6 +735,7 @@ export class WindowedList<
    * @param options Constructor options
    */
   constructor(options: WindowedList.IOptions<U, T>) {
+    console.log('hello, constructor');
     const renderer = options.renderer ?? WindowedList.defaultRenderer;
 
     const node = renderer.createOuter();
@@ -823,13 +824,6 @@ export class WindowedList<
    */
   protected get viewModel(): T {
     return this._viewModel;
-  }
-
-  dispose(): void {
-    super.dispose();
-    if (!this._scrollbar.isDisposed) {
-      this._scrollbar.dispose();
-    }
   }
 
   /**
@@ -934,6 +928,12 @@ export class WindowedList<
     return this._isScrolling.promise;
   }
 
+  dispose(): void {
+    this._scrollbar.dispose();
+    this.layout.dispose();
+    super.dispose();
+  }
+
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
@@ -946,7 +946,7 @@ export class WindowedList<
     }
     this.viewModel.height = this.node.getBoundingClientRect().height;
     const style = window.getComputedStyle(this.node);
-    this.viewModel.paddingTop = parseFloat(style.paddingTop);
+    this.viewModel.paddingTop = parseFloat(style.paddingTop)
   }
 
   /**
@@ -956,9 +956,7 @@ export class WindowedList<
     if (this._viewModel.windowingActive) {
       this._removeListeners();
     }
-    if (this._scrollbar.isAttached) {
-      Widget.detach(this._scrollbar);
-    }
+    MessageLoop.sendMessage(this._scrollbar, msg);
     super.onBeforeDetach(msg);
   }
 

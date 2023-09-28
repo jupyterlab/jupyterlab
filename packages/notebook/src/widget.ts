@@ -204,7 +204,7 @@ export class StaticNotebook extends WindowedList {
       }),
       layout: new NotebookWindowedLayout(),
       renderer: StaticNotebook.defaultRenderer,
-      scrollbar: true
+      scrollbar: false
     });
     this.addClass(NB_CLASS);
     this.cellsArray = cells;
