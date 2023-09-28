@@ -826,8 +826,10 @@ export class WindowedList<
   }
 
   dispose(): void {
-    this._scrollbar.dispose();
     super.dispose();
+    if (!this._scrollbar.isDisposed) {
+      this._scrollbar.dispose();
+    }
   }
 
   /**
@@ -954,7 +956,9 @@ export class WindowedList<
     if (this._viewModel.windowingActive) {
       this._removeListeners();
     }
-    Widget.detach(this._scrollbar);
+    if (this._scrollbar.isAttached) {
+      Widget.detach(this._scrollbar);
+    }
     super.onBeforeDetach(msg);
   }
 
