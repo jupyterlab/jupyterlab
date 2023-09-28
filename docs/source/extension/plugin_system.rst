@@ -92,8 +92,8 @@ Making Your Plugin a Provider
 
 To make your plugin a "provider" of service objects that other plugins can use,
 you need to list a ["Token"](https://lumino.readthedocs.io/en/latest/api/classes/coreutils.Token.html#constructor)
-in your plugin's "provides" property, then return an
-object from your plugin's "activate" callable.
+in your plugin's "provides" property, then return an object from your plugin's
+"activate" callable.
 
 ..
   TODO edit link when folders are renamed from compat_4a etc.
@@ -101,8 +101,8 @@ object from your plugin's "activate" callable.
 Take a look at [this example extension](https://github.com/ericsnekbytes/extension-examples/tree/provider_consumer_example/compat_4a) in the examples
 repo (you can read the full extension example code there).
 
-
-
+TODO make sure to note the package.json singleton stuff here
+TODO expand code explanation
 
 
 
