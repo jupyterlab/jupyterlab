@@ -31,7 +31,7 @@ describe('@jupyterlab/apputils', () => {
         expect(widget.toolbar.node.getAttribute('aria-label')).toEqual(
           'notebook actions'
         );
-        expect(widget.toolbar.node.getAttribute('role')).toEqual('navigation');
+        expect(widget.toolbar.node.getAttribute('role')).toEqual('toolbar');
       });
 
       it('content should have an aria-label of notebook content and a role of region', () => {

@@ -518,7 +518,7 @@ describe('LabShell', () => {
     });
   });
 
-  describe('#ariaLabelsAndRoles', () => {
+  describe('#accessibility', () => {
     it('menu handler should have a role of navigation and aria label of main', () => {
       const widget = new Widget();
       widget.id = 'foo';
