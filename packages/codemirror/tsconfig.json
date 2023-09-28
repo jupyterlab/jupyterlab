@@ -10,6 +10,9 @@
       "path": "../codeeditor"
     },
     {
+      "path": "../completer"
+    },
+    {
       "path": "../coreutils"
     },
     {
@@ -20,9 +23,6 @@
     },
     {
       "path": "../translation"
-    },
-    {
-      "path": "../completer"
     }
   ]
 }
