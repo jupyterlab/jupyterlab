@@ -82,7 +82,7 @@ after launch).
 
 See `this example video <https://www.youtube.com/watch?v=mqotG1MkHa4>`_ of a
 compatible top-bar-text-widget that works in both JupyterLab and Notebook 7
-out of the box, and [read the full extension example code here](https://github.com/ericsnekbytes/extension-examples/tree/toparea_text_widget_example/toparea-text-widget).
+out of the box, and [read the full extension example code here](https://github.com/jupyterlab/extension-examples/tree/main/toparea-text-widget).
 
 Note that using features that are not common to both JupyterLab and Notebook 7 (or
 other apps) will break compatibility in apps where that feature is not available
@@ -126,7 +126,7 @@ Testing for Optional Features
 Making an app-specific feature optional and checking if it's available before
 using it is one technique you can use to make your extensions compatible.
 
-Take a look at a snippet from [this example extension](https://github.com/ericsnekbytes/extension-examples/tree/shout_button_message_example/shout-button-message) in the examples
+Take a look at a snippet from [this example extension](https://github.com/jupyterlab/extension-examples/tree/main/shout-button-message) in the examples
 repo (you can read the full extension example code there):
 
 ..
@@ -200,7 +200,7 @@ Another pattern you can follow is to export a list of plugins from your
 extension, then use different "requires" features to select different
 behaviors based on which app the extension is currently running in.
 
-Here's a snippet from [this sample extension](https://github.com/ericsnekbytes/extension-examples/tree/clap_button_message_example/clap-button-message)
+Here's a snippet from [this sample extension](https://github.com/jupyterlab/extension-examples/tree/main/clap-button-message)
 which adds a "clap" button to the top area in JupyterLab, or to the
 right sidebar in Jupyter Notebook 7 (you can read the full extension
 example code there):

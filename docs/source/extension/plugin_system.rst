@@ -98,7 +98,7 @@ in your plugin's "provides" property, then return an object from your plugin's
 ..
   TODO edit link when folders are renamed from compat_4a etc.
 
-Take a look at [this example extension](https://github.com/ericsnekbytes/extension-examples/tree/provider_consumer_example/compat_4a) in the examples
+Take a look at [this example extension](https://github.com/jupyterlab/extension-examples/tree/main/step_counter) in the examples
 repo (you can read the full extension example code there).
 
 TODO make sure to note the package.json singleton stuff here
