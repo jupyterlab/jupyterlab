@@ -8,8 +8,6 @@ import { KernelMessage } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
-import { NotebookActions } from './actions';
-import { StaticNotebook } from './widget';
 import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 
 /**
