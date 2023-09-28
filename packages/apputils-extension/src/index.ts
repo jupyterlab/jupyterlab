@@ -651,7 +651,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
 
         if (!included && currentWidget instanceof MainAreaWidget) {
           const currentNode =
-            currentWidget.content.node ?? app.shell.currentWidget?.node;
+            currentWidget.content.node ?? currentWidget?.node;
           currentNode?.focus();
         }
         const options = { commands, trans };
