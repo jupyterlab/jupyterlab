@@ -38,12 +38,12 @@
 
 .jp-RenderedText pre a:hover {
   text-decoration: underline;
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-hover-color);
 }
 
 .jp-RenderedText pre a:visited {
   text-decoration: none;
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-visited-color);
 }
 
 /* console foregrounds and backgrounds */
@@ -262,12 +262,12 @@
 
 .jp-RenderedHTMLCommon a:hover {
   text-decoration: underline;
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-hover-color);
 }
 
 .jp-RenderedHTMLCommon a:visited {
   text-decoration: none;
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-visited-color);
 }
 
 /* Headings */
