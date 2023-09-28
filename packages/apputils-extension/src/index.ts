@@ -646,14 +646,12 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
         'Show relevant keyboard shortcuts for the current active widget'
       ),
       execute: args => {
-        const included = app.shell.currentWidget?.node.contains(
-          document.activeElement
-        );
+        const currentWidget = app.shell.currentWidget;
+        const included = currentWidget?.node.contains(document.activeElement);
 
-        if (!included) {
+        if (!included && currentWidget instanceof MainAreaWidget) {
           const currentNode =
-            (app.shell.currentWidget as MainAreaWidget)?.content.node ??
-            app.shell.currentWidget?.node;
+            currentWidget.content.node ?? app.shell.currentWidget?.node;
           currentNode?.focus();
         }
         const options = { commands, trans };
