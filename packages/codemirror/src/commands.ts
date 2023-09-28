@@ -5,6 +5,7 @@
 
 import { indentMore, insertTab } from '@codemirror/commands';
 import { EditorState, Transaction } from '@codemirror/state';
+import { COMPLETER_ENABLED_CLASS } from '@jupyterlab/completer';
 
 /**
  * CodeMirror commands namespace
@@ -14,9 +15,14 @@ export namespace StateCommands {
    * Indent or insert a tab as appropriate.
    */
   export function indentMoreOrInsertTab(target: {
+    dom: HTMLElement;
     state: EditorState;
     dispatch: (transaction: Transaction) => void;
   }): boolean {
+    if (target.dom.parentElement?.classList.contains(COMPLETER_ENABLED_CLASS)) {
+      return false;
+    }
+
     const arg = { state: target.state, dispatch: target.dispatch };
     const from = target.state.selection.main.from;
     const to = target.state.selection.main.to;

@@ -16,7 +16,7 @@ import { Completer } from './widget';
 /**
  * A class added to editors that can host a completer.
  */
-const COMPLETER_ENABLED_CLASS: string = 'jp-mod-completer-enabled';
+export const COMPLETER_ENABLED_CLASS: string = 'jp-mod-completer-enabled';
 
 /**
  * A class added to editors that have an active completer.

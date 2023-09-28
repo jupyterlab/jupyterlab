@@ -18,6 +18,9 @@
       "path": "../translation"
     },
     {
+      "path": "../completer"
+    },
+    {
       "path": "."
     },
     {

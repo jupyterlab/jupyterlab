@@ -60,6 +60,7 @@
     "@codemirror/view": "^6.9.6",
     "@jupyter/ydoc": "^1.0.2",
     "@jupyterlab/codeeditor": "^4.1.0-alpha.1",
+    "@jupyterlab/completer": "^4.1.0-alpha.1",
     "@jupyterlab/coreutils": "^6.1.0-alpha.1",
     "@jupyterlab/documentsearch": "^4.1.0-alpha.1",
     "@jupyterlab/nbformat": "^4.1.0-alpha.1",
