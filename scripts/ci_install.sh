@@ -35,6 +35,11 @@ yarn --version
 node -p process.versions
 jlpm config
 
+jupyter --paths
+ls ~/.jupyter
+mkdir ~/.jupyter/labconfig
+echo '{"bubbling_keydown": true}' >> ~/.jupyter/labconfig/page_config.json
+
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
     pip install build
