@@ -1045,7 +1045,7 @@ export class WindowedList<
       this.node.style.width = 'calc(100% + 25px)';
       this._renderScrollbar();
     } else {
-      this.node.style.width = 'calc(100%)';
+      this.node.style.width = '100%';
     }
     if (this.viewModel.windowingActive) {
       // Throttle update request
