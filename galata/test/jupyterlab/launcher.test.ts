@@ -22,7 +22,14 @@ test.describe('Dynamic Text Spacing', () => {
           window.getComputedStyle(el).getPropertyValue('min-height')
         );
       expect(height).toContain(
-        2.462 * parseFloat(element[i].getComputedStyle(element['font-size']))
+        2.462 *
+          parseFloat(
+            await element
+              .nth(i)
+              .evaluate(el =>
+                window.getComputedStyle(el).getPropertyValue('font-size')
+              )
+          )
       );
     }
     const imageName = 'launcher-card-label-height.png';
