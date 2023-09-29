@@ -153,7 +153,7 @@ and select “New Console for Notebook”:
 
 .. _kernel_history:
 
-You can iterate through the kernel history in a document cell using ``Alt Up-Arrow`` and ``Alt Down-Arrow``.
+You can iterate through the kernel history in a document cell using ``Alt Up-Arrow`` and ``Alt Down-Arrow``. To use this feature, enable it in the notebook settings.
 
 .. _cell-toolbar:
 
