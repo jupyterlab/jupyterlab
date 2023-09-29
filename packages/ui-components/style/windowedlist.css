@@ -43,20 +43,20 @@
   z-index: 1;
 }
 
-ul.jp-WindowedPanel-scrollbar-content {
+ol.jp-WindowedPanel-scrollbar-content {
   background-color: var(--jp-layout-color1);
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
-ul.jp-WindowedPanel-scrollbar-content li {
+ol.jp-WindowedPanel-scrollbar-content li {
   border-bottom: 1px solid var(--jp-layout-color3);
   padding: 3px;
   text-align: center;
 }
 
-ul.jp-WindowedPanel-scrollbar-content li:hover {
+ol.jp-WindowedPanel-scrollbar-content li:hover {
   cursor: pointer;
   background-color: var(--jp-layout-color2);
 }
