@@ -267,7 +267,26 @@ export interface IInlineCompletionProvider<
  * Inline completer factory
  */
 export interface IInlineCompleterFactory {
-  factory(options: Omit<InlineCompleter.IOptions, 'trans'>): InlineCompleter;
+  factory(options: IInlineCompleterFactory.IOptions): InlineCompleter;
+}
+
+/**
+ * A namespace for inline completer factory statics.
+ */
+export namespace IInlineCompleterFactory {
+  /**
+   * The subset of inline completer widget initialization options provided to the factory.
+   */
+  export interface IOptions {
+    /**
+     * The semantic parent of the completer widget, its referent editor.
+     */
+    editor?: CodeEditor.IEditor | null;
+    /**
+     * The model for the completer widget.
+     */
+    model?: InlineCompleter.IModel;
+  }
 }
 
 /**

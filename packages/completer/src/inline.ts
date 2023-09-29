@@ -11,7 +11,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { SourceChange } from '@jupyter/ydoc';
 import { fileIcon, Toolbar } from '@jupyterlab/ui-components';
 import { TranslationBundle } from '@jupyterlab/translation';
-import { IInlineCompletionList } from './tokens';
+import { IInlineCompleterFactory, IInlineCompletionList } from './tokens';
 import { CompletionHandler } from './handler';
 import { GhostTextManager } from './ghost';
 
@@ -375,16 +375,14 @@ interface ISuggestionsChangedArgs {
   indexMap?: IndexMap;
 }
 
+/**
+ * A namespace for inline completer statics.
+ */
 export namespace InlineCompleter {
-  export interface IOptions {
-    /**
-     * The semantic parent of the completer widget, its referent editor.
-     */
-    editor?: CodeEditor.IEditor | null;
-    /**
-     * The model for the completer widget.
-     */
-    model?: IModel;
+  /**
+   * The initialization options for inline completer widget.
+   */
+  export interface IOptions extends IInlineCompleterFactory.IOptions {
     /**
      * JupyterLab translation bundle.
      */
@@ -416,18 +414,36 @@ export namespace InlineCompleter {
      */
     reset(): void;
 
+    // TODO:
+    // - maybe merge the two methods and add a third argument.
+    // - maybe accept an object on second argument, say `IProgress`.
+    // - maybe move the awaiting/progress info to separate method
+    //   (the downside would be that we could then end up rendering twice/
+    //   would need to be very careful about the order these two would be called).
+    /**
+     * Set completions clearing existing ones.
+     */
     setCompletions(
       reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
       awaiting: number
     ): void;
 
+    /**
+     * Append completions while preserving new ones.
+     */
     appendCompletions(
       reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
       awaiting: number
     ): void;
 
-    completions: IInlineCompletionList<CompletionHandler.IInlineItem> | null;
+    /**
+     * Current inline completions.
+     */
+    readonly completions: IInlineCompletionList<CompletionHandler.IInlineItem> | null;
 
+    /**
+     * Handle a source change.
+     */
     handleTextChange(change: SourceChange): void;
   }
 
