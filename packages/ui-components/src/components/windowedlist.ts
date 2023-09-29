@@ -1258,8 +1258,7 @@ export class WindowedList<
     while (target && target.parentElement) {
       if (target.hasAttribute('data-index')) {
         const index = parseInt(target.getAttribute('data-index')!, 10);
-        this.scrollToItem(index);
-        return;
+        return void this.scrollToItem(index);
       }
       target = target.parentElement;
     }
