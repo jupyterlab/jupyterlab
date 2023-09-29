@@ -568,7 +568,11 @@ export namespace Commands {
           const spec = languages.findByName(name);
           if (spec) {
             if (Array.isArray(spec.mime)) {
-              widget.content.model.mimeType = spec.mime[0] as string;
+              if (spec.mime.length == 0) {
+                widget.content.model.mimeType = 'text/plain';
+              } else {
+                widget.content.model.mimeType = spec.mime[0] as string;
+              }
             } else {
               widget.content.model.mimeType = spec.mime as string;
             }
