@@ -19,7 +19,7 @@ test.describe('Dynamic Text Spacing', () => {
       let height = await element
         .nth(i)
         .evaluate(el =>
-          parseFloat(window.getComputedStyle(el).getPropertyValue('min-height'))
+          parseInt(window.getComputedStyle(el).getPropertyValue('min-height'))
         );
       await expect(height).toContain('2.462em');
     }
