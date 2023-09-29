@@ -354,6 +354,7 @@ export interface IProviderReconciliator {
    * Returns a list of promises to enable showing results from
    * the provider which resolved fastest, even if other providers
    * are still generating.
+   * The result may be null if the request timed out.
    */
   fetchInline(
     request: CompletionHandler.IRequest,

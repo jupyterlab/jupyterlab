@@ -13,6 +13,7 @@ import { Signal } from '@lumino/signaling';
 import {
   CompletionTriggerKind,
   IInlineCompletionItem,
+  IInlineCompletionList,
   IInlineCompletionProvider,
   InlineCompletionTriggerKind,
   IProviderReconciliator
@@ -447,21 +448,35 @@ export class CompletionHandler implements IDisposable {
     const current = ++this._fetchingInline;
     const promises = this._reconciliator.fetchInline(request, trigger);
 
-    let i = 0;
+    let completed = new Set<
+      Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>
+    >();
     for (const promise of promises) {
-      promise.then(result => {
-        if (!result) {
-          return;
-        }
-        if (current !== this._fetchingInline) {
-          return;
-        }
-        if (++i === 1) {
-          model.setCompletions(result, promises.length - i);
-        } else {
-          model.appendCompletions(result, promises.length - i);
-        }
-      });
+      promise
+        .then(result => {
+          if (!result) {
+            return;
+          }
+          if (current !== this._fetchingInline) {
+            return;
+          }
+          completed.add(promise);
+          const remaining = promises.length - completed.size;
+          if (completed.size === 1) {
+            model.setCompletions(result, remaining);
+          } else {
+            model.appendCompletions(result, remaining);
+          }
+        })
+        .catch(e => {
+          // Mark the provider promise as completed.
+          completed.add(promise);
+          // Let the model know that we are awaiting for fewer providers now.
+          const remaining = promises.length - completed.size;
+          model.appendCompletions({ items: [] }, remaining);
+          // Emit warning for debugging.
+          console.warn(e);
+        });
     }
   }
   private _fetchingInline = 0;

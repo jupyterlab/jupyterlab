@@ -139,31 +139,6 @@ export class InlineCompleter extends Widget {
   }
 
   /**
-   * Handle `update-request` messages.
-   */
-  protected onUpdateRequest(msg: Message): void {
-    super.onUpdateRequest(msg);
-    const model = this._model;
-    if (!model) {
-      return;
-    }
-    let reply = model.completions;
-
-    // If there are no items, hide.
-    if (!reply || !reply.items || reply.items.length === 0) {
-      if (!this.isHidden) {
-        this.hide();
-      }
-      return;
-    }
-
-    if (this.isHidden) {
-      this.show();
-    }
-    this._setGeometry();
-  }
-
-  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -187,6 +162,31 @@ export class InlineCompleter extends Widget {
       default:
         break;
     }
+  }
+
+  /**
+   * Handle `update-request` messages.
+   */
+  protected onUpdateRequest(msg: Message): void {
+    super.onUpdateRequest(msg);
+    const model = this._model;
+    if (!model) {
+      return;
+    }
+    let reply = model.completions;
+
+    // If there are no items, hide.
+    if (!reply || !reply.items || reply.items.length === 0) {
+      if (!this.isHidden) {
+        this.hide();
+      }
+      return;
+    }
+
+    if (this.isHidden) {
+      this.show();
+    }
+    this._setGeometry();
   }
 
   /**
@@ -266,7 +266,10 @@ export class InlineCompleter extends Widget {
       return;
     }
     this._current = mapping.get(this._current) ?? 0;
-    this._render();
+    // Because the signal will be emitted during `EditorView.update` we want to
+    // wait for the update to complete before calling `this._render()`. As there
+    // is no API to check if update is done, we instead defer to next engine tick.
+    setTimeout(() => this._render(), 0);
   }
 
   private _render(): void {
@@ -377,7 +380,6 @@ export namespace InlineCompleter {
      * The semantic parent of the completer widget, its referent editor.
      */
     editor?: CodeEditor.IEditor | null;
-
     /**
      * The model for the completer widget.
      */
@@ -404,7 +406,7 @@ export namespace InlineCompleter {
     readonly filterTextChanged: ISignal<IModel, IndexMap>;
 
     /**
-     * Original placement of cursor
+     * Original placement of cursor.
      */
     cursor: CodeEditor.IPosition;
 
@@ -517,7 +519,9 @@ export namespace InlineCompleter {
           }
           completions.items = items;
         } else {
-          this._completions = null;
+          if (!change.retain) {
+            this._completions = null;
+          }
         }
       }
       const indexMap = new Map(
