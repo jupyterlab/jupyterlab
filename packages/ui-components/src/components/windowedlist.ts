@@ -1437,8 +1437,8 @@ export namespace WindowedList {
     /**
      * Create the virtual scrollbar element.
      */
-    createScrollbar(): HTMLUListElement {
-      return document.createElement('ul');
+    createScrollbar(): HTMLOListElement {
+      return document.createElement('ol');
     }
 
     /**
@@ -1684,7 +1684,7 @@ export namespace WindowedList {
     /**
      * Create the virtual scrollbar element.
      */
-    createScrollbar(): HTMLUListElement;
+    createScrollbar(): HTMLOListElement;
 
     /**
      * Create an individual item rendered in the scrollbar.
