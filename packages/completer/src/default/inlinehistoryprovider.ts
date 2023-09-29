@@ -19,7 +19,7 @@ import {
 export class HistoryInlineCompletionProvider
   implements IInlineCompletionProvider
 {
-  identifier = 'history';
+  readonly identifier = 'history';
 
   constructor(protected options: HistoryInlineCompletionProvider.IOptions) {
     const translator = options.translator || nullTranslator;

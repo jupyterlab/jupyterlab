@@ -234,12 +234,12 @@ export interface IInlineCompletionProvider<
   /**
    * Name of the provider to be displayed in the UI.
    */
-  name: string;
+  readonly name: string;
 
   /**
    * Unique identifier, cannot change on runtime.
    */
-  identifier: string;
+  readonly identifier: string;
 
   // TODO implement streaming support later on
   stream?(token: string): {
