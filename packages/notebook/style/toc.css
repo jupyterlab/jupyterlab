@@ -31,7 +31,8 @@
 }
 
 .jp-tocItem-content[data-running='-0.5']::after {
-  content: '⚠';
+  /* \FE0E forces the preceding unicode to be rendered as text */
+  content: '\26A0 \FE0E';
   color: var(--jp-error-color1);
 }
 
