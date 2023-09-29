@@ -11,9 +11,9 @@
 @import url('~@jupyterlab/codeeditor/style/index.css');
 @import url('~@jupyterlab/docregistry/style/index.css');
 @import url('~@jupyterlab/application/style/index.css');
-@import url('~@jupyterlab/completer/style/index.css');
 @import url('~@jupyterlab/documentsearch/style/index.css');
 @import url('~@jupyterlab/codemirror/style/index.css');
+@import url('~@jupyterlab/completer/style/index.css');
 @import url('~@jupyterlab/filebrowser/style/index.css');
 @import url('~@jupyterlab/toc/style/index.css');
 @import url('~@jupyterlab/console/style/index.css');

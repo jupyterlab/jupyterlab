@@ -8,6 +8,11 @@ import { IEditorFactoryService } from './factory';
 import { IEditorMimeTypeService } from './mimetype';
 
 /**
+ * A class added to editors that can host a completer.
+ */
+export const COMPLETER_ENABLED_CLASS: string = 'jp-mod-completer-enabled';
+
+/**
  * Code editor services token.
  */
 export const IEditorServices = new Token<IEditorServices>(

@@ -5,7 +5,7 @@
 
 import { indentMore, insertTab } from '@codemirror/commands';
 import { EditorState, Transaction } from '@codemirror/state';
-import { COMPLETER_ENABLED_CLASS } from '@jupyterlab/completer';
+import { COMPLETER_ENABLED_CLASS } from '@jupyterlab/codeeditor';
 
 /**
  * CodeMirror commands namespace
