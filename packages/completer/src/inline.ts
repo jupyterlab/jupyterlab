@@ -303,7 +303,8 @@ export class InlineCompleter extends Widget {
     const view = (editor as CodeMirrorEditor).editor;
     this._ghostManager.placeGhost(view, {
       from: editor.getOffsetAt(model.cursor),
-      content: text
+      content: text,
+      providerId: item.provider.identifier
     });
   }
 

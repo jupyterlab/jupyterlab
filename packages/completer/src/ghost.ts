@@ -25,6 +25,10 @@ export interface IGhostText {
    * The content of the ghost text.
    */
   content: string;
+  /**
+   * The identifier of the completion provider.
+   */
+  providerId: string;
 }
 
 export class GhostTextManager {
@@ -61,7 +65,7 @@ export class GhostTextManager {
 }
 
 class GhostTextWidget extends WidgetType {
-  constructor(readonly content: string) {
+  constructor(protected options: Omit<IGhostText, 'from'>) {
     super();
   }
 
@@ -78,9 +82,14 @@ class GhostTextWidget extends WidgetType {
     return true;
   }
 
+  get content() {
+    return this.options.content;
+  }
+
   toDOM() {
     let wrap = document.createElement('span');
     wrap.classList.add(GHOST_TEXT_CLASS);
+    wrap.dataset.providedBy = this.options.providerId;
     wrap.innerText = this.content;
     return wrap;
   }
@@ -104,6 +113,10 @@ class TransientLineSpacerWidget extends TransientSpacerWidget {
 }
 
 class TransientLetterSpacerWidget extends TransientSpacerWidget {
+  get content() {
+    return this.options.content[0];
+  }
+
   toDOM() {
     const wrap = super.toDOM();
     wrap.classList.add(TRANSIENT_LETTER_SPACER_CLASS);
@@ -126,10 +139,11 @@ namespace Private {
   }
 
   export const addMark = StateEffect.define<IGhostText>({
-    map: ({ from, content }, change) => ({
+    map: ({ from, content, providerId }, change) => ({
       from: change.mapPos(from),
       to: change.mapPos(from + content.length),
-      content
+      content,
+      providerId
     })
   });
 
@@ -162,7 +176,7 @@ namespace Private {
 
   function createWidget(spec: IGhostText, tr: Transaction) {
     const ghost = Decoration.widget({
-      widget: new GhostTextWidget(spec.content),
+      widget: new GhostTextWidget(spec),
       side: 1,
       ghostSpec: spec
     });
@@ -191,12 +205,12 @@ namespace Private {
     }, timeout);
 
     const characterSpacer = Decoration.widget({
-      widget: new TransientLetterSpacerWidget(spec.content[0]),
+      widget: new TransientLetterSpacerWidget(spec),
       side: 1,
       timeoutInfo
     });
     const lineSpacer = Decoration.widget({
-      widget: new TransientLineSpacerWidget(spec.content),
+      widget: new TransientLineSpacerWidget(spec),
       side: 1,
       timeoutInfo
     });
