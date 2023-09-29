@@ -167,13 +167,14 @@ export interface IInlineCompletionContext {
   widget: Widget;
 
   /**
+   * Describes how an inline completion provider was triggered.
+   */
+  triggerKind: InlineCompletionTriggerKind;
+
+  /**
    * The session extracted from widget for convenience.
    */
   session?: Session.ISessionConnection | null;
-
-  triggerKind: InlineCompletionTriggerKind;
-
-  // selectedCompletionInfo?: ISelectedCompletionInfo;
 }
 
 /**
@@ -221,25 +222,39 @@ export interface IInlineCompletionList<
 }
 
 /**
- * The interface to implement an inline completion provider.
+ * The inline completion provider information used in widget rendering.
  */
-export interface IInlineCompletionProvider<
-  T extends IInlineCompletionItem = IInlineCompletionItem
-> {
-  fetch(
-    request: CompletionHandler.IRequest,
-    context: IInlineCompletionContext
-  ): Promise<IInlineCompletionList<T>>;
-
+export interface IInlineCompletionProviderInfo {
   /**
-   * Name of the provider to be displayed in the UI.
+   * Name of the provider to be displayed in the user interface.
    */
   readonly name: string;
 
   /**
    * Unique identifier, cannot change on runtime.
+   *
+   * The identifier is also added on data attribute of ghost text widget,
+   * allowing different providers to style the ghost text differently.
    */
   readonly identifier: string;
+}
+
+/**
+ * The interface extensions should implement to provide inline completions.
+ */
+export interface IInlineCompletionProvider<
+  T extends IInlineCompletionItem = IInlineCompletionItem
+> extends IInlineCompletionProviderInfo {
+  /**
+   * The method called when user requests inline completions.
+   *
+   * The implicit request (on typing) vs explicit invocation are distinguished
+   * by the value of `triggerKind` in the provided `context`.
+   */
+  fetch(
+    request: CompletionHandler.IRequest,
+    context: IInlineCompletionContext
+  ): Promise<IInlineCompletionList<T>>;
 
   // TODO implement streaming support later on
   stream?(token: string): {

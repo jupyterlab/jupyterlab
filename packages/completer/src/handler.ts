@@ -14,7 +14,7 @@ import {
   CompletionTriggerKind,
   IInlineCompletionItem,
   IInlineCompletionList,
-  IInlineCompletionProvider,
+  IInlineCompletionProviderInfo,
   InlineCompletionTriggerKind,
   IProviderReconciliator
 } from './tokens';
@@ -448,7 +448,7 @@ export class CompletionHandler implements IDisposable {
     const current = ++this._fetchingInline;
     const promises = this._reconciliator.fetchInline(request, trigger);
 
-    let completed = new Set<
+    const completed = new Set<
       Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>
     >();
     for (const promise of promises) {
@@ -639,9 +639,9 @@ export namespace CompletionHandler {
 
   export interface IInlineItem extends IInlineCompletionItem {
     /**
-     * The source provider.
+     * The source provider information.
      */
-    provider: Omit<IInlineCompletionProvider, 'fetch'>;
+    provider: IInlineCompletionProviderInfo;
   }
 
   /**
