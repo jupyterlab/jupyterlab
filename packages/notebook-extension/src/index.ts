@@ -1113,14 +1113,14 @@ export const cellTagListPlugin: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
     const { shell } = app;
     const isEnabled = (): boolean => Private.isEnabled(shell, tracker);
-    let map = new WeakMap<Notebook, CellTagListModel>();
-    let count = 0;
+    let notebookModelMap = new WeakMap<Notebook, CellTagListModel>();
+
     app.commands.addCommand(CommandIDs.filterCells, {
       label: trans.__('Filter Cells'),
       caption: trans.__('Filter cells with tags'),
 
       execute: args => {
-        count = count + 1;
+        //console.log('notebookModelMap:', notebookModelMap);
         const current = getCurrent(tracker, shell, args);
         if (current) {
           /*const idx = Array.from(current.toolbar.names()).findIndex(
@@ -1129,16 +1129,19 @@ export const cellTagListPlugin: JupyterFrontEndPlugin<void> = {
           const filterIconWidget = (current?.toolbar.layout as PanelLayout)
             .widgets[idx];*/
 
-          let model = map.get(current.content);
+          let model = notebookModelMap.get(current.content);
 
-          //console.log('model is ', model);
           if (!model) {
-            model = new CellTagListModel(current, []);
+            model = new CellTagListModel(current);
+            model.checkedDict = {};
+            model.tagList.forEach(item => {
+              if (model) {
+                model.checkedDict[item] = false;
+              }
+            });
           }
-          map.set(current.content, model);
-          console.log('count is ', count);
-          console.log('checkedList', model.checkedList);
-          console.log('tagList', model.tagList);
+          notebookModelMap.set(current.content, model);
+
           const view = new CellTagListView(model);
           showDialog({
             body: view,
