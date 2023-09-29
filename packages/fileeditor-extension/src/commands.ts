@@ -569,7 +569,9 @@ export namespace Commands {
           const spec = languages.findByName(name);
           if (spec) {
             if (Array.isArray(spec.mime)) {
-              widget.content.model.mimeType = spec.mime[0] as string ?? IEditorMimeTypeService.defaultMimeType;
+              widget.content.model.mimeType =
+                (spec.mime[0] as string) ??
+                IEditorMimeTypeService.defaultMimeType;
             } else {
               widget.content.model.mimeType = spec.mime as string;
             }
