@@ -21,17 +21,21 @@ test.describe('Dynamic Text Spacing', () => {
         .evaluate(el =>
           window.getComputedStyle(el).getPropertyValue('min-height')
         );
-      expect(height).toContain(
+      expect(height).toEqual(
         2.462 *
           parseFloat(
             await element
               .nth(i)
               .evaluate(el =>
-                window.getComputedStyle(el).getPropertyValue('font-size')
+                window
+                  .getComputedStyle(el)
+                  .getPropertyValue('font-size')
+                  .toString()
               )
           )
       );
     }
+    // I'd convert the value to a string first then use toEqual
     const imageName = 'launcher-card-label-height.png';
     expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
