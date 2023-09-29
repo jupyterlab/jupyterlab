@@ -1,12 +1,8 @@
 name: Docker Tests
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-  release:
-    types: [published]
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
   docker:
