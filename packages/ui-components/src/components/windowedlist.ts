@@ -735,13 +735,23 @@ export class WindowedList<
    * @param options Constructor options
    */
   constructor(options: WindowedList.IOptions<U, T>) {
-    console.log('hello, constructor');
     const renderer = options.renderer ?? WindowedList.defaultRenderer;
 
-    const node = renderer.createOuter();
-    node.classList.add('jp-WindowedPanel-outer');
+    const node = document.createElement('div');
+    node.className = 'jp-WindowedPanel';
 
-    const innerElement = node.appendChild(document.createElement('div'));
+    const scrollbar = node.appendChild(document.createElement('div'));
+    scrollbar.classList.add('jp-WindowedPanel-scrollbar');
+
+    const list = scrollbar.appendChild(renderer.createScrollbar());
+    list.classList.add('jp-WindowedPanel-scrollbar-content');
+
+    const outerElement = node.appendChild(renderer.createOuter());
+    outerElement.classList.add('jp-WindowedPanel-outer');
+
+    const innerElement = outerElement.appendChild(
+      document.createElement('div')
+    );
     innerElement.className = 'jp-WindowedPanel-inner';
 
     const viewport = innerElement.appendChild(renderer.createViewport());
@@ -754,7 +764,6 @@ export class WindowedList<
     this._innerElement = innerElement;
     this._isScrolling = null;
     this._resizeObserver = null;
-    this._scrollbar = new WindowedList.Scrollbar(options.model, renderer);
     this._scrollToItem = null;
     this._scrollRepaint = null;
     this._scrollUpdateWasRequested = false;
@@ -766,7 +775,6 @@ export class WindowedList<
       node.classList.add('jp-mod-virtual-scrollbar');
     }
 
-    this._scrollbar.scrolled.connect(this.onScrolled, this);
     this._viewModel.stateChanged.connect(this.onStateChanged, this);
   }
 
@@ -798,20 +806,14 @@ export class WindowedList<
   }
 
   get scrollbar(): boolean {
-    return this._scrollbar.isVisible;
+    return this.node.classList.contains('jp-mod-virtual-scrollbar');
   }
   set scrollbar(enabled: boolean) {
-    if (this.scrollbar === enabled) {
-      return;
-    }
     if (enabled) {
-      this._scrollbar.show();
       this.node.classList.add('jp-mod-virtual-scrollbar');
     } else {
-      this._scrollbar.hide();
       this.node.classList.remove('jp-mod-virtual-scrollbar');
     }
-    this.update();
   }
 
   /**
@@ -841,6 +843,11 @@ export class WindowedList<
    */
   handleEvent(event: Event): void {
     switch (event.type) {
+      case 'pointerdown':
+        event.preventDefault();
+        event.stopPropagation();
+        this._evtPointerDown(event as PointerEvent);
+        break;
       case 'scroll':
         this.onScroll(event);
         break;
@@ -928,12 +935,6 @@ export class WindowedList<
     return this._isScrolling.promise;
   }
 
-  dispose(): void {
-    this._scrollbar.dispose();
-    this.layout.dispose();
-    super.dispose();
-  }
-
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
@@ -956,7 +957,8 @@ export class WindowedList<
     if (this._viewModel.windowingActive) {
       this._removeListeners();
     }
-    MessageLoop.sendMessage(this._scrollbar, msg);
+    const scrollbar = this.node.querySelector('.jp-WindowedPanel-scrollbar')!;
+    scrollbar.removeEventListener('pointerdown', this);
     super.onBeforeDetach(msg);
   }
 
@@ -1006,10 +1008,6 @@ export class WindowedList<
     super.onResize(msg);
   }
 
-  protected onScrolled(sender: unknown, index: number): void {
-    this.scrollToItem(index);
-  }
-
   /**
    * Callback on view model change
    *
@@ -1042,10 +1040,10 @@ export class WindowedList<
    * The default implementation of this handler is a no-op.
    */
   protected onUpdateRequest(msg: Message): void {
+    // Hide the native scrollbar if necessary.
     if (this.scrollbar) {
-      // Hide the native scrollbar.
       this.node.style.width = 'calc(100% + 25px)';
-      this._scrollbar.update();
+      this._renderScrollbar();
     } else {
       this.node.style.width = 'calc(100%)';
     }
@@ -1081,7 +1079,8 @@ export class WindowedList<
         () => this._resizeObserver?.unobserve(widget.node)
       );
     }
-    this.node.addEventListener('scroll', this, passiveIfSupported);
+    const outer = this.node.querySelector('.jp-WindowedPanel-outer');
+    outer!.addEventListener('scroll', this, passiveIfSupported);
     this._viewport.style.position = 'absolute';
   }
 
@@ -1091,7 +1090,8 @@ export class WindowedList<
   }
 
   private _removeListeners() {
-    this.node.removeEventListener('scroll', this);
+    const outer = this.node.querySelector('.jp-WindowedPanel-outer');
+    outer!.removeEventListener('scroll', this);
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
     this._applyNoWindowingStyles();
@@ -1235,6 +1235,36 @@ export class WindowedList<
     }
   }
 
+  private _renderScrollbar(): void {
+    const { node, renderer, viewModel } = this;
+    const content = node.querySelector('.jp-WindowedPanel-scrollbar-content')!;
+
+    while (content.firstChild) {
+      content.removeChild(content.firstChild);
+    }
+
+    const list = viewModel.itemsList;
+    if (list?.length) {
+      for (let index = 0; index < list.length; index += 1) {
+        const item = renderer.createScrollbarItem(index, list.get(index));
+        item.dataset.index = `${index}`;
+        content.appendChild(item);
+      }
+    }
+  }
+
+  private _evtPointerDown(event: PointerEvent): void {
+    let target = event.target as HTMLElement;
+    while (target && target.parentElement) {
+      if (target.hasAttribute('data-index')) {
+        const index = parseInt(target.getAttribute('data-index')!, 10);
+        this.scrollToItem(index);
+        return;
+      }
+      target = target.parentElement;
+    }
+  }
+
   protected _viewModel: T;
   private _innerElement: HTMLElement;
   private _isParentHidden: boolean;
@@ -1242,7 +1272,6 @@ export class WindowedList<
   private _needsUpdate = false;
   private _resetScrollToItemTimeout: number | null;
   private _resizeObserver: ResizeObserver | null;
-  private _scrollbar: WindowedList.Scrollbar;
   private _scrollRepaint: number | null;
   private _scrollToItem: [number, WindowedList.ScrollToAlign] | null;
   private _scrollUpdateWasRequested: boolean;
@@ -1427,74 +1456,6 @@ export namespace WindowedList {
     createViewport(): HTMLElement {
       return document.createElement('div');
     }
-  }
-
-  export class Scrollbar<T = any> extends Widget {
-    constructor(model: IModel<T>, renderer: IRenderer<T>) {
-      super();
-      this.model = model;
-      this.renderer = renderer;
-      this.content = this.node.appendChild(renderer.createScrollbar());
-      this.content.className = 'jp-WindowedListScrollbar-content';
-      this.addClass('jp-WindowedListScrollbar');
-    }
-
-    get scrolled(): ISignal<this, number> {
-      return this._scrolled;
-    }
-
-    handleEvent(event: Event): void {
-      switch (event.type) {
-        case 'pointerdown':
-          this._evtPointerDown(event as PointerEvent);
-          break;
-      }
-    }
-
-    protected onAfterAttach(msg: Message): void {
-      super.onAfterAttach(msg);
-      this.node.addEventListener('pointerdown', this);
-    }
-
-    protected onBeforeAttach(msg: Message): void {
-      this.node.removeEventListener('pointerdown', this);
-      super.onBeforeDetach(msg);
-    }
-
-    protected onUpdateRequest(msg: Message): void {
-      const { content, renderer } = this;
-
-      while (content.firstChild) {
-        content.removeChild(content.firstChild);
-      }
-
-      const list = this.model.itemsList;
-      if (list?.length) {
-        for (let index = 0; index < list.length; index += 1) {
-          const item = renderer.createScrollbarItem(index, list.get(index));
-          item.dataset.index = `${index}`;
-          content.appendChild(item);
-        }
-      }
-    }
-
-    protected content: HTMLUListElement;
-    protected model: IModel<T>;
-    protected renderer: IRenderer<T>;
-
-    private _evtPointerDown(event: PointerEvent): void {
-      let target = event.target as HTMLElement;
-      while (target && target.parentElement) {
-        if (target.hasAttribute('data-index')) {
-          const index = parseInt(target.getAttribute('data-index')!, 10);
-          this._scrolled.emit(index);
-          return;
-        }
-        target = target.parentElement;
-      }
-    }
-
-    private _scrolled = new Signal<this, number>(this);
   }
 
   /**

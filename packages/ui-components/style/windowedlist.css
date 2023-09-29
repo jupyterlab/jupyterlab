@@ -4,6 +4,7 @@
  */
 
 .jp-WindowedPanel-outer {
+  height: 100%;
   position: relative;
   overflow: auto;
   transform: none;
@@ -11,7 +12,6 @@
 
 .jp-WindowedPanel-inner {
   position: relative;
-  overflow: auto;
 }
 
 .jp-WindowedPanel-viewport {
@@ -21,39 +21,42 @@
   overflow: visible;
 }
 
-.jp-WindowedPanel-outer.jp-mod-virtual-scrollbar .jp-WindowedPanel-inner {
+.jp-WindowedPanel-scrollbar {
+  display: none;
+}
+
+.jp-WindowedPanel.jp-mod-virtual-scrollbar .jp-WindowedPanel-inner {
   height: 100%;
-  overflow: auto;
   width: calc(100% - 50px);
 }
 
-.jp-WindowedListScrollbar {
+.jp-WindowedPanel.jp-mod-virtual-scrollbar .jp-WindowedPanel-scrollbar {
   background-color: inherit;
   border-left: 1px solid var(--jp-layout-color3);
   display: block;
-  position: absolute;
+  position: fixed;
   overflow-y: auto;
-  top: var(--jp-private-toolbar-height);
+  top: 0;
   bottom: 0;
-  right: 0;
+  right: 25px;
   width: 50px;
   z-index: 1;
 }
 
-ul.jp-WindowedListScrollbar-content {
+ul.jp-WindowedPanel-scrollbar-content {
   background-color: var(--jp-layout-color1);
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
-ul.jp-WindowedListScrollbar-content li {
+ul.jp-WindowedPanel-scrollbar-content li {
   border-bottom: 1px solid var(--jp-layout-color3);
   padding: 3px;
   text-align: center;
 }
 
-ul.jp-WindowedListScrollbar-content li:hover {
+ul.jp-WindowedPanel-scrollbar-content li:hover {
   cursor: pointer;
   background-color: var(--jp-layout-color2);
 }

@@ -44,7 +44,6 @@
 .jp-Notebook {
   padding: var(--jp-notebook-padding);
   outline: none;
-  overflow: auto;
   background: var(--jp-layout-color0);
 }
 
