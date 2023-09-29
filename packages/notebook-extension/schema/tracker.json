@@ -424,7 +424,7 @@
     {
       "command": "notebook:delete-cell",
       "keys": ["D", "D"],
-      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(:read-write)"
+      "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {
       "command": "notebook:enter-command-mode",
@@ -611,7 +611,7 @@
     {
       "command": "notebook:select-all",
       "keys": ["Accel A"],
-      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(:read-write)"
+      "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {
       "command": "notebook:split-cell-at-cursor",
