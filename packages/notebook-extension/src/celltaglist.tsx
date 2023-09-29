@@ -8,8 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
-// Get the current widget and activate unless the args specify otherwise.
-
+/* Get the current widget and activate unless the args specify otherwise */
 export function getNotebookTagList(notebookPanel: NotebookPanel) {
   let tagList: Array<string> = [];
   notebookPanel?.content.widgets.forEach(cell => {
@@ -23,49 +22,82 @@ export function getNotebookTagList(notebookPanel: NotebookPanel) {
   return tagList;
 }
 
+/* Check if 2 arrays have at least one common element and return true if that's the case*/
+export function isContentShared(array1: Array<string>, array2: Array<string>) {
+  let isIncluded: boolean[] = [];
+  array2.forEach(item => {
+    isIncluded.push(array1.includes(item));
+  });
+  return isIncluded.some(item => item);
+}
+
+/* Check is the cells of the input notebook have to be filtered and update the hidden cells state respectively  */
+export function updateFilteredCells(
+  notebookPanel: NotebookPanel,
+  checkedList: Array<string>
+) {
+  notebookPanel?.content.widgets.forEach(cell => {
+    let isFiltered = isContentShared(
+      cell.model.getMetadata('tags'),
+      checkedList
+    ); /* IsFiltered is true when the list of tags of a cell includes at least one the checked tags */
+    if (isFiltered === false && cell.inputHidden === false) {
+      cell.inputHidden = true;
+    }
+    if (isFiltered === true && cell.inputHidden === true) {
+      cell.inputHidden = false;
+    }
+  });
+}
+
 interface IProps {
   model: CellTagListModel;
 }
 export function CellTagListComponent(props: IProps) {
   let { model } = props;
-  const notebookPanel = model.notebookPanel;
+  //const notebookPanel = model.notebookPanel;
+  const checkedDict = { ...model.checkedDict };
+  const updatedCheckedDict = checkedDict;
+  const checkedList: Array<string> = [];
 
   const handleCheck = (event: any) => {
-    let updatedList = [...model.checkedList];
-
     if (event.target.checked) {
-      updatedList = [...model.checkedList, event.target.value];
-      notebookPanel?.content.widgets.forEach(cell => {
-        let isCollapsed = false;
-        if (cell.model.getMetadata('tags').includes(event.target.value)) {
-          cell.setHidden(!isCollapsed);
-        }
-      });
+      updatedCheckedDict[event.target.value] =
+        !updatedCheckedDict[event.target.value];
+      checkedList.push(event.target.value);
+      updateFilteredCells(model.notebookPanel, checkedList);
     } else {
-      updatedList.splice(model.checkedList.indexOf(event.target.value), 1);
-      notebookPanel?.content.widgets.forEach(cell => {
-        let isCollapsed = true;
-        cell.setHidden(!isCollapsed);
-      });
+      updatedCheckedDict[event.target.value] =
+        !updatedCheckedDict[event.target.value];
+      checkedList.splice(checkedList.indexOf(event.target.value), 1);
+      updateFilteredCells(model.notebookPanel, checkedList);
     }
 
-    model.setCheckedList(updatedList);
-    model.stateChanged;
+    model.setCheckedDict(updatedCheckedDict);
   };
 
   let isChecked = (item: any) =>
-    model.checkedList.includes(item) ? 'checked-item' : 'not-checked-item';
+    updatedCheckedDict[item] === true ? 'checked-item' : 'not-checked-item';
 
-  // Return classes based on whether item is checked
+  let tagList = [];
+  for (let key in updatedCheckedDict) {
+    tagList.push(key);
+  }
 
   return (
     <div className="tag-list-component">
       <h3>Select cell tags</h3>
-      {model.tagList.map((item, index) => {
+      {tagList.map((item, index) => {
+        //console.log('item:', item);
         return (
           <ul key={index}>
             <div className="tag-list-item">
-              <input type="checkbox" value={item} onChange={handleCheck} />
+              <input
+                type="checkbox"
+                value={item}
+                onChange={handleCheck}
+                defaultChecked={model.checkedDict[item]}
+              />
               <span className={isChecked(item)}>{item}</span>
             </div>
           </ul>
@@ -82,16 +114,15 @@ CellTagListComponent.propTypes = {
 export class CellTagListModel extends VDomModel {
   public notebookPanel: NotebookPanel;
   public tagList: Array<string>;
-  public checkedList: Array<string>;
+  public checkedDict: { [tag: string]: boolean };
 
-  constructor(notebookPanel: NotebookPanel, checkedList: Array<string>) {
+  constructor(notebookPanel: NotebookPanel) {
     super();
     this.notebookPanel = notebookPanel;
     this.tagList = getNotebookTagList(notebookPanel);
-    this.checkedList = checkedList;
   }
-  setCheckedList(list: Array<string>) {
-    this.checkedList = list;
+  setCheckedDict(dict: { [tag: string]: boolean }) {
+    this.checkedDict = dict;
   }
 }
 
