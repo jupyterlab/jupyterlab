@@ -476,7 +476,7 @@ export namespace InlineCompleter {
       reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
       awaiting: number
     ) {
-      if (!this._completions) {
+      if (!this._completions || !this._completions.items) {
         console.warn('No completions to append to');
         return;
       }

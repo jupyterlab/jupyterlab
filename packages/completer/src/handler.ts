@@ -454,7 +454,7 @@ export class CompletionHandler implements IDisposable {
     for (const promise of promises) {
       promise
         .then(result => {
-          if (!result) {
+          if (!result || !result.items) {
             return;
           }
           if (current !== this._fetchingInline) {
