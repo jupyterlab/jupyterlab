@@ -530,6 +530,9 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
             ) {
               el.scrollIntoView({ block: 'center' });
             }
+          } else {
+            console.debug('scrolling to heading: using fallback strategy');
+            widget.content.scrollToItem(widget.content.activeCellIndex);
           }
         };
 
@@ -548,7 +551,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
             })
             .catch(reason => {
               console.error(
-                'Fail to scroll to cell to display the required heading.'
+                `Fail to scroll to cell to display the required heading (${reason}).`
               );
             });
         }
