@@ -12,6 +12,7 @@ import {
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { historyIcon, LabIcon } from '@jupyterlab/ui-components';
 
 /**
  * An example inline completion provider using history to populate suggestions.
@@ -28,6 +29,10 @@ export class HistoryInlineCompletionProvider
 
   get name(): string {
     return this._trans.__('History');
+  }
+
+  get icon(): LabIcon.ILabIcon {
+    return historyIcon;
   }
 
   async fetch(

@@ -4,6 +4,7 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IRenderMime } from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
+import { LabIcon } from '@jupyterlab/ui-components';
 import { SourceChange } from '@jupyter/ydoc';
 import { Token } from '@lumino/coreutils';
 import { ISignal } from '@lumino/signaling';
@@ -237,6 +238,11 @@ export interface IInlineCompletionProviderInfo {
    * allowing different providers to style the ghost text differently.
    */
   readonly identifier: string;
+
+  /**
+   * The icon representing the provider in the user interface.
+   */
+  readonly icon?: LabIcon.ILabIcon;
 }
 
 /**

@@ -9,7 +9,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { HoverBox } from '@jupyterlab/ui-components';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { SourceChange } from '@jupyter/ydoc';
-import { fileIcon, Toolbar } from '@jupyterlab/ui-components';
+import { kernelIcon, Toolbar } from '@jupyterlab/ui-components';
 import { TranslationBundle } from '@jupyterlab/translation';
 import { IInlineCompleterFactory, IInlineCompletionList } from './tokens';
 import { CompletionHandler } from './handler';
@@ -288,7 +288,8 @@ export class InlineCompleter extends Widget {
       'Provider: %1',
       candidate.provider.name
     );
-    fileIcon.render(this._providerWidget.node);
+    const icon = candidate.provider.icon ?? kernelIcon;
+    icon.render(this._providerWidget.node);
   }
 
   private _setText(item: CompletionHandler.IInlineItem) {
