@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 24 24">
-  <path d="M6.139 6.916h15.475v14.402H6.139z" style="fill:#eee;stroke:#444;stroke-linejoin:round"/>
-  <path fill="#616161" d="M18.885 13H7.984v2h10.901v-2ZM7.984 11H20V9H7.984v2Zm0 8H20v-2H7.984v2Z" class="jp-icon-selectable"/>
-  <path fill="#616161" d="M3 3v2h10V3H3Z" class="jp-icon-selectable" transform="matrix(.82216 0 0 1 .534 0)"/>
+  <path d="M6 8h16v14.3H6z" style="fill:#eee;stroke:#444;stroke-linejoin:round"/>
+  <path fill="#616161" d="M18 14.1H8v2h11v-2ZM8 12.1H20V10.1H8v2Zm0 8H20v-2H8v3Z" class="jp-icon-selectable"/>
+  <path fill="#616161" d="M3 3v2h10V3H3Z" class="jp-icon-selectable" transform="matrix(.8 0 0 1 .5 0)"/>
 </svg>
