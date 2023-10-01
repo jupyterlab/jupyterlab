@@ -23,7 +23,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
    */
   constructor(options: ProviderReconciliator.IOptions) {
     this._providers = options.providers;
-    this._inlineProviders = options.inlineProviders;
+    this._inlineProviders = options.inlineProviders ?? [];
     this._context = options.context;
     this._timeout = options.timeout;
   }
@@ -296,7 +296,7 @@ export namespace ProviderReconciliator {
     /**
      * List of inline completion providers, may be empty.
      */
-    inlineProviders: IInlineCompletionProvider[];
+    inlineProviders?: IInlineCompletionProvider[];
     /**
      * How long should we wait for each of the providers to resolve `fetch` promise
      */
