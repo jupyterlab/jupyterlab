@@ -27,12 +27,15 @@ import {
   IFormRenderer,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
-import type { FieldProps } from '@rjsf/utils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import type { FieldProps } from '@rjsf/utils';
+import { CommandRegistry } from '@lumino/commands';
 
 import { renderAvailableProviders } from './renderer';
 
 const COMPLETION_MANAGER_PLUGIN = '@jupyterlab/completer-extension:manager';
+const INLINE_COMPLETER_PLUGIN =
+  '@jupyterlab/completer-extension:inline-completer';
 
 namespace CommandIDs {
   export const nextInline = 'inline-completer:next';
@@ -75,8 +78,8 @@ const inlineHistoryProvider: JupyterFrontEndPlugin<void> = {
   }
 };
 
-const inlineCompleter: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
-  id: '@jupyterlab/completer-extension:inline-completer',
+const inlineCompleterFactory: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
+  id: '@jupyterlab/completer-extension:inline-completer-factory',
   description: 'Provides a factory for inline completer.',
   provides: IInlineCompleterFactory,
   optional: [ITranslator],
@@ -92,13 +95,23 @@ const inlineCompleter: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
           ...options,
           trans: trans
         });
+        const describeShortcut = (commandID: string): string => {
+          const binding = app.commands.keyBindings.find(
+            binding => binding.command === commandID
+          );
+          const keys = binding
+            ? CommandRegistry.formatKeystroke(binding.keys)
+            : '';
+          return keys ? `${keys}` : '';
+        };
         inlineCompleter.toolbar.addItem(
           'previous-inline-completion',
           new CommandToolbarButton({
             commands: app.commands,
             icon: caretLeftIcon,
             id: CommandIDs.previousInline,
-            label: trans.__('Previous')
+            label: describeShortcut(CommandIDs.previousInline),
+            caption: trans.__('Previous')
           })
         );
         inlineCompleter.toolbar.addItem(
@@ -107,7 +120,8 @@ const inlineCompleter: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
             commands: app.commands,
             icon: caretRightIcon,
             id: CommandIDs.nextInline,
-            label: trans.__('Next')
+            label: describeShortcut(CommandIDs.nextInline),
+            caption: trans.__('Next')
           })
         );
         inlineCompleter.toolbar.addItem(
@@ -116,7 +130,8 @@ const inlineCompleter: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
             commands: app.commands,
             icon: checkIcon,
             id: CommandIDs.acceptInline,
-            label: trans.__('Accept')
+            label: describeShortcut(CommandIDs.acceptInline),
+            caption: trans.__('Accept')
           })
         );
         return inlineCompleter;
@@ -125,47 +140,83 @@ const inlineCompleter: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
   }
 };
 
-const inlineCompleterCommands: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/completer-extension:inline-completer-commands',
-  description: 'Register inline completer commands.',
-  requires: [ICompletionProviderManager],
+const inlineCompleter: JupyterFrontEndPlugin<void> = {
+  id: INLINE_COMPLETER_PLUGIN,
+  description: 'Provides a factory for inline completer.',
+  requires: [
+    ICompletionProviderManager,
+    IInlineCompleterFactory,
+    ISettingRegistry
+  ],
   optional: [ITranslator],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     completionManager: ICompletionProviderManager,
+    factory: IInlineCompleterFactory,
+    settings: ISettingRegistry,
     translator: ITranslator | null
   ): void => {
+    completionManager.setInlineCompleterFactory(factory);
     const trans = (translator || nullTranslator).load('jupyterlab');
-    const isEnabled = () => !!app.shell.currentWidget;
+    const isEnabled = () =>
+      !!app.shell.currentWidget && !!completionManager.inline;
     app.commands.addCommand(CommandIDs.nextInline, {
       execute: () => {
-        completionManager.cycleInline(app.shell.currentWidget!.id!, 'next');
+        completionManager.inline?.cycle(app.shell.currentWidget!.id!, 'next');
       },
       label: trans.__('Next Inline Completion'),
       isEnabled
     });
     app.commands.addCommand(CommandIDs.previousInline, {
       execute: () => {
-        completionManager.cycleInline(app.shell.currentWidget!.id!, 'previous');
+        completionManager.inline?.cycle(
+          app.shell.currentWidget!.id!,
+          'previous'
+        );
       },
       label: trans.__('Previous Inline Completion'),
       isEnabled
     });
     app.commands.addCommand(CommandIDs.acceptInline, {
       execute: () => {
-        completionManager.acceptInline(app.shell.currentWidget!.id!);
+        completionManager.inline?.accept(app.shell.currentWidget!.id!);
       },
       label: trans.__('Accept Inline Completion'),
       isEnabled
     });
     app.commands.addCommand(CommandIDs.invokeInline, {
       execute: () => {
-        completionManager.invokeInline(app.shell.currentWidget!.id!);
+        completionManager.inline?.accept(app.shell.currentWidget!.id!);
       },
       label: trans.__('Invoke Inline Completer'),
       isEnabled
     });
+
+    const updateSettings = (settings: ISettingRegistry.ISettings) => {
+      const defaults = InlineCompleter.defaultSettings;
+      completionManager.inline?.configure({
+        showWidget:
+          (settings.composite.showWidget as boolean) ?? defaults.showWidget,
+        showShortcuts:
+          (settings.composite.showShortcuts as boolean) ??
+          defaults.showShortcuts
+      });
+    };
+
+    app.restored
+      .then(() => {
+        const settingsPromise = settings.load(INLINE_COMPLETER_PLUGIN);
+        settingsPromise
+          .then(settingValues => {
+            updateSettings(settingValues);
+            settingValues.changed.connect(newSettings => {
+              updateSettings(newSettings);
+            });
+          })
+          .catch(console.error);
+      })
+      .catch(console.error);
   }
 };
 
@@ -173,22 +224,19 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
   id: COMPLETION_MANAGER_PLUGIN,
   description: 'Provides the completion provider manager.',
   requires: [ISettingRegistry],
-  optional: [IFormRendererRegistry, IInlineCompleterFactory],
+  optional: [IFormRendererRegistry],
   provides: ICompletionProviderManager,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     settings: ISettingRegistry,
-    editorRegistry: IFormRendererRegistry | null,
-    inlineCompleterFactory: IInlineCompleterFactory | null
+    editorRegistry: IFormRendererRegistry | null
   ): ICompletionProviderManager => {
     const AVAILABLE_PROVIDERS = 'availableProviders';
     const PROVIDER_TIMEOUT = 'providerTimeout';
     const SHOW_DOCUMENT_PANEL = 'showDocumentationPanel';
     const CONTINUOUS_HINTING = 'autoCompletion';
-    const manager = new CompletionProviderManager({
-      inlineCompleterFactory
-    });
+    const manager = new CompletionProviderManager();
     const updateSetting = (
       settingValues: ISettingRegistry.ISettings,
       availableProviders: string[]
@@ -260,7 +308,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   manager,
   defaultProviders,
   inlineHistoryProvider,
-  inlineCompleterCommands,
+  inlineCompleterFactory,
   inlineCompleter
 ];
 export default plugins;

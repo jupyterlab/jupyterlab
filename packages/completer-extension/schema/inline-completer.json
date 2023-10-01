@@ -23,7 +23,20 @@
       "selector": ".jp-mod-completer-enabled"
     }
   ],
-  "properties": {},
+  "properties": {
+    "showWidget": {
+      "title": "Show widget",
+      "description": "Whether to show the inline completer widget.",
+      "type": "boolean",
+      "default": true
+    },
+    "showShortcuts": {
+      "title": "Show shortcuts in the widget",
+      "description": "Whether to show shortcuts in the inline completer widget.",
+      "type": "boolean",
+      "default": true
+    }
+  },
   "additionalProperties": false,
   "type": "object"
 }

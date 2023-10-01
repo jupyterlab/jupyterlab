@@ -325,6 +325,11 @@ export interface ICompletionProviderManager {
   registerInlineProvider(provider: IInlineCompletionProvider): void;
 
   /**
+   * Set inline completer factory.
+   */
+  setInlineCompleterFactory(factory: IInlineCompleterFactory): void;
+
+  /**
    * Invoke the completer in the widget with provided id.
    *
    * @param {string} id - the id of notebook panel, console panel or code editor.
@@ -339,31 +344,6 @@ export interface ICompletionProviderManager {
   select(id: string): void;
 
   /**
-   * Invoke inline completer.
-   * @experimental
-   *
-   * @param id - the id of notebook panel, console panel or code editor.
-   */
-  invokeInline(id: string): void;
-
-  /**
-   * Switch to next or previous completion of inline completer.
-   * @experimental
-   *
-   * @param id - the id of notebook panel, console panel or code editor.
-   * @param direction - the cycling direction
-   */
-  cycleInline(id: string, direction: 'next' | 'previous'): void;
-
-  /**
-   * Accept active inline completion.
-   * @experimental
-   *
-   * @param id - the id of notebook panel, console panel or code editor.
-   */
-  acceptInline(id: string): void;
-
-  /**
    * Update completer handler of a widget with new context.
    *
    * @param newCompleterContext - The completion context.
@@ -374,6 +354,60 @@ export interface ICompletionProviderManager {
    * Signal emitted when active providers list is changed.
    */
   activeProvidersChanged: ISignal<ICompletionProviderManager, void>;
+
+  /**
+   * Inline completer actions.
+   */
+  inline: IInlineCompleterActions | null;
+}
+
+export interface IInlineCompleterActions {
+  /**
+   * Invoke inline completer.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  invoke(id: string): void;
+
+  /**
+   * Switch to next or previous completion of inline completer.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   * @param direction - the cycling direction
+   */
+  cycle(id: string, direction: 'next' | 'previous'): void;
+
+  /**
+   * Accept active inline completion.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  accept(id: string): void;
+
+  /**
+   * Configure the inline completer.
+   * @experimental
+   *
+   * @param settings - the new settings values.
+   */
+  configure(settings: IInlineCompleterSettings): void;
+}
+
+/**
+ * Inline completer user-configurable settings.
+ */
+export interface IInlineCompleterSettings {
+  /**
+   * Whether to show the inline completer widget.
+   */
+  showWidget: boolean;
+  /**
+   * Whether to show shortcuts in the inline completer widget.
+   */
+  showShortcuts: boolean;
 }
 
 export interface IProviderReconciliator {

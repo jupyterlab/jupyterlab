@@ -11,7 +11,11 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { SourceChange } from '@jupyter/ydoc';
 import { kernelIcon, Toolbar } from '@jupyterlab/ui-components';
 import { TranslationBundle } from '@jupyterlab/translation';
-import { IInlineCompleterFactory, IInlineCompletionList } from './tokens';
+import {
+  IInlineCompleterFactory,
+  IInlineCompleterSettings,
+  IInlineCompletionList
+} from './tokens';
 import { CompletionHandler } from './handler';
 import { GhostTextManager } from './ghost';
 
@@ -36,6 +40,7 @@ export class InlineCompleter extends Widget {
     layout.addWidget(this._suggestionsCounter);
     layout.addWidget(this.toolbar);
     layout.addWidget(this._providerWidget);
+    this._updateShortcutsVisibility();
   }
 
   /**
@@ -139,6 +144,20 @@ export class InlineCompleter extends Widget {
   }
 
   /**
+   * Change user-configurable settings.
+   */
+  configure(settings: IInlineCompleterSettings) {
+    this._showWidget = settings.showWidget;
+    if (!this._showWidget) {
+      this.hide();
+    }
+    if (settings.showShortcuts !== this._showShortcuts) {
+      this._showShortcuts = settings.showShortcuts;
+      this._updateShortcutsVisibility();
+    }
+  }
+
+  /**
    * Handle the DOM events for the widget.
    *
    * @param event - The DOM event sent to the widget.
@@ -170,7 +189,7 @@ export class InlineCompleter extends Widget {
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
     const model = this._model;
-    if (!model) {
+    if (!model || !this._showWidget) {
       return;
     }
     let reply = model.completions;
@@ -279,6 +298,10 @@ export class InlineCompleter extends Widget {
     }
     const candidate = completions.items[this._current];
     this._setText(candidate);
+
+    if (!this._showWidget) {
+      return;
+    }
     this._suggestionsCounter.node.innerText = this._trans.__(
       '%1/%2',
       this._current + 1,
@@ -314,7 +337,7 @@ export class InlineCompleter extends Widget {
     const model = this._model;
     const editor = this._editor;
 
-    if (!editor || !model || !model.cursor) {
+    if (!editor || !model || !model.cursor || !this._showWidget) {
       return;
     }
 
@@ -346,6 +369,10 @@ export class InlineCompleter extends Widget {
     });
   }
 
+  private _updateShortcutsVisibility() {
+    this.node.dataset.showShortcuts = this._showShortcuts + '';
+  }
+
   private _current: number = 0;
   private _ghostManager: GhostTextManager;
   private _editor: CodeEditor.IEditor | null | undefined = null;
@@ -354,6 +381,8 @@ export class InlineCompleter extends Widget {
   private _suggestionsCounter = new Widget();
   private _providerWidget = new Widget();
   private _trans: TranslationBundle;
+  private _showShortcuts = InlineCompleter.defaultSettings.showShortcuts;
+  private _showWidget = InlineCompleter.defaultSettings.showWidget;
 }
 
 /**
@@ -389,6 +418,14 @@ export namespace InlineCompleter {
      */
     trans: TranslationBundle;
   }
+
+  /**
+   * Defaults for runtime user-configurable settings.
+   */
+  export const defaultSettings: IInlineCompleterSettings = {
+    showWidget: true,
+    showShortcuts: true
+  };
 
   /**
    * Model for inline completions.

@@ -250,7 +250,8 @@
   border-bottom: none;
 }
 
-.jp-InlineCompleter .jp-ToolbarButtonComponent-label {
+.jp-InlineCompleter[data-show-shortcuts='false']
+  .jp-ToolbarButtonComponent-label {
   display: none;
 }
 

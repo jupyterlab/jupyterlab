@@ -13,16 +13,12 @@ import {
   ICompletionContext,
   ICompletionProvider,
   ICompletionProviderManager,
+  IInlineCompleterActions,
   IInlineCompleterFactory,
+  IInlineCompleterSettings,
   IInlineCompletionProvider
 } from './tokens';
 import { Completer } from './widget';
-
-export namespace CompletionProviderManager {
-  export interface IOptions {
-    inlineCompleterFactory?: IInlineCompleterFactory | null;
-  }
-}
 
 /**
  * A manager for completion providers.
@@ -31,7 +27,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   /**
    * Construct a new completer manager.
    */
-  constructor(options?: CompletionProviderManager.IOptions) {
+  constructor() {
     this._providers = new Map();
     this._inlineProviders = new Map();
     this._panelHandlers = new Map();
@@ -39,7 +35,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     this._activeProvidersChanged = new Signal<ICompletionProviderManager, void>(
       this
     );
-    this._inlineCompleterFactory = options?.inlineCompleterFactory ?? null;
+    this._inlineCompleterFactory = null;
   }
 
   /**
@@ -224,44 +220,46 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * Invoke inline completer.
-   * @experimental
-   *
-   * @param id - the id of notebook panel, console panel or code editor.
+   * Set inline completer factory.
    */
-  invokeInline(id: string): void {
-    const handler = this._panelHandlers.get(id);
-    if (handler && handler.inlineCompleter) {
-      handler.invokeInline();
+  setInlineCompleterFactory(factory: IInlineCompleterFactory) {
+    this._inlineCompleterFactory = factory;
+    this._panelHandlers.forEach((handler, id) => {
+      void this.updateCompleter(this._mostRecentContext.get(id)!);
+    });
+    if (this.inline) {
+      return;
     }
+    this.inline = {
+      invoke: (id: string) => {
+        const handler = this._panelHandlers.get(id);
+        if (handler && handler.inlineCompleter) {
+          handler.invokeInline();
+        }
+      },
+      cycle: (id: string, direction: 'next' | 'previous') => {
+        const handler = this._panelHandlers.get(id);
+        if (handler && handler.inlineCompleter) {
+          handler.inlineCompleter.cycle(direction);
+        }
+      },
+      accept: (id: string) => {
+        const handler = this._panelHandlers.get(id);
+        if (handler && handler.inlineCompleter) {
+          handler.inlineCompleter.accept();
+        }
+      },
+      configure: (settings: IInlineCompleterSettings) => {
+        this._inlineCompleterSettings = settings;
+        this._panelHandlers.forEach(handler => {
+          if (handler.inlineCompleter) {
+            handler.inlineCompleter.configure(settings);
+          }
+        });
+      }
+    };
   }
-
-  /**
-   * Switch to next or previous completion of inline completer.
-   * @experimental
-   *
-   * @param id - the id of notebook panel, console panel or code editor.
-   * @param direction - the cycling direction.
-   */
-  cycleInline(id: string, direction: 'next' | 'previous'): void {
-    const handler = this._panelHandlers.get(id);
-    if (handler && handler.inlineCompleter) {
-      handler.inlineCompleter.cycle(direction);
-    }
-  }
-
-  /**
-   * Accept active inline completion.
-   * @experimental
-   *
-   * @param id - the id of notebook panel, console panel or code editor.
-   */
-  acceptInline(id: string): void {
-    const handler = this._panelHandlers.get(id);
-    if (handler && handler.inlineCompleter) {
-      handler.inlineCompleter.accept();
-    }
-  }
+  inline: IInlineCompleterActions | null = null;
 
   /**
    * Helper function to generate a `ProviderReconciliator` with provided context.
@@ -326,6 +324,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     if (inlineCompleter) {
       Widget.attach(inlineCompleter, document.body);
       inlineCompleter.hide();
+      inlineCompleter.configure(this._inlineCompleterSettings);
     }
     const reconciliator = await this.generateReconciliator(completerContext);
     const handler = new CompletionHandler({
@@ -381,6 +380,6 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private _autoCompletion: boolean;
 
   private _activeProvidersChanged: Signal<ICompletionProviderManager, void>;
-
   private _inlineCompleterFactory: IInlineCompleterFactory | null;
+  private _inlineCompleterSettings = InlineCompleter.defaultSettings;
 }
