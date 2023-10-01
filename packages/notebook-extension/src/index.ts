@@ -3442,13 +3442,8 @@ function addCommands(
     }
   });
   commands.addCommand(CommandIDs.virtualScrollbar, {
-    label: trans.__('Scrollbar'),
+    label: trans.__('Virtual Scrollbar'),
     caption: trans.__('Toggle Virtual Scrollbar'),
-    isToggleable: true,
-    isToggled: args => {
-      const current = getCurrent(tracker, shell, args);
-      return current?.content.scrollbar ?? false;
-    },
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
