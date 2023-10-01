@@ -1,6 +1,8 @@
 {
   "title": "Inline Completer",
   "description": "Inline completer settings.",
+  "jupyter.lab.setting-icon": "completer:inline",
+  "jupyter.lab.setting-icon-label": "Inline Completer",
   "jupyter.lab.shortcuts": [
     {
       "command": "inline-completer:next",

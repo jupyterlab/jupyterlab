@@ -11,6 +11,7 @@ export * from './widget';
 export * from './tokens';
 export * from './manager';
 export * from './reconciliator';
+export * from './icons';
 export * from './inline';
 export * from './default/contextprovider';
 export * from './default/kernelprovider';

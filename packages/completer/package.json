@@ -30,6 +30,7 @@
     "lib/default/*.js.map",
     "lib/default/*.js",
     "style/*.css",
+    "style/**/*.svg",
     "style/index.js",
     "src/**/*.{ts,tsx}"
   ],
