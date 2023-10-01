@@ -46,19 +46,21 @@ export class HistoryInlineCompletionProvider
       throw new Error('No kernel for completion request.');
     }
 
+    const multiLinePrefix = request.text.slice(0, request.offset);
+    const linePrefix = multiLinePrefix.split('\n').slice(-1)[0];
+
     const historyRequest: KernelMessage.IHistoryRequestMsg['content'] = {
       output: false,
       raw: true,
-      hist_access_type: 'tail',
-      n: 500
+      hist_access_type: 'search',
+      pattern: linePrefix + '*',
+      unique: true,
+      n: 100
     };
 
-    // TODO: cache results
     const reply = await kernel.requestHistory(historyRequest);
 
     const items = [];
-    const multiLinePrefix = request.text.slice(0, request.offset);
-    const linePrefix = multiLinePrefix.split('\n').slice(-1)[0];
     if (linePrefix === '') {
       return { items: [] };
     }
