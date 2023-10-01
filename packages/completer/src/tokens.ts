@@ -6,7 +6,8 @@ import { IRenderMime } from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { SourceChange } from '@jupyter/ydoc';
-import { Token } from '@lumino/coreutils';
+import { JSONValue, Token } from '@lumino/coreutils';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { CompletionHandler } from './handler';
@@ -243,6 +244,11 @@ export interface IInlineCompletionProviderInfo {
    * The icon representing the provider in the user interface.
    */
   readonly icon?: LabIcon.ILabIcon;
+
+  /**
+   * Settings schema contributed by provider for user customization.
+   */
+  readonly schema?: ISettingRegistry.IProperty;
 }
 
 /**
@@ -261,6 +267,13 @@ export interface IInlineCompletionProvider<
     request: CompletionHandler.IRequest,
     context: IInlineCompletionContext
   ): Promise<IInlineCompletionList<T>>;
+
+  /**
+   * Optional method called when user changes settings.
+   *
+   * This is only called if `schema` for settings is present.
+   */
+  configure?(settings: { [property: string]: JSONValue }): void;
 
   // TODO implement streaming support later on
   stream?(token: string): {
@@ -358,7 +371,12 @@ export interface ICompletionProviderManager {
   /**
    * Inline completer actions.
    */
-  inline: IInlineCompleterActions | null;
+  inline?: IInlineCompleterActions;
+
+  /**
+   * Inline providers information.
+   */
+  inlineProviders?: IInlineCompletionProviderInfo[];
 }
 
 export interface IInlineCompleterActions {
@@ -408,6 +426,15 @@ export interface IInlineCompleterSettings {
    * Whether to show shortcuts in the inline completer widget.
    */
   showShortcuts: boolean;
+  /**
+   * Provider settings.
+   */
+  providers: {
+    [providerId: string]: {
+      enabled: boolean;
+      [property: string]: JSONValue;
+    };
+  };
 }
 
 export interface IProviderReconciliator {

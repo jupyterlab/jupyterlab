@@ -424,7 +424,8 @@ export namespace InlineCompleter {
    */
   export const defaultSettings: IInlineCompleterSettings = {
     showWidget: true,
-    showShortcuts: true
+    showShortcuts: true,
+    providers: {}
   };
 
   /**

@@ -16,7 +16,8 @@ import {
   IInlineCompleterActions,
   IInlineCompleterFactory,
   IInlineCompleterSettings,
-  IInlineCompletionProvider
+  IInlineCompletionProvider,
+  IInlineCompletionProviderInfo
 } from './tokens';
 import { Completer } from './widget';
 
@@ -251,15 +252,36 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       },
       configure: (settings: IInlineCompleterSettings) => {
         this._inlineCompleterSettings = settings;
-        this._panelHandlers.forEach(handler => {
+        this._panelHandlers.forEach((handler, handlerId) => {
+          for (const [
+            providerId,
+            provider
+          ] of this._inlineProviders.entries()) {
+            if (provider.configure) {
+              provider.configure(settings.providers[providerId]);
+            }
+          }
           if (handler.inlineCompleter) {
             handler.inlineCompleter.configure(settings);
           }
+          // trigger update to regenerate reconciliator
+          void this.updateCompleter(this._mostRecentContext.get(handlerId)!);
         });
       }
     };
   }
-  inline: IInlineCompleterActions | null = null;
+
+  /**
+   * Inline completer actions.
+   */
+  inline?: IInlineCompleterActions;
+
+  /**
+   * Inline providers information.
+   */
+  get inlineProviders(): IInlineCompletionProviderInfo[] {
+    return [...this._inlineProviders.values()];
+  }
 
   /**
    * Helper function to generate a `ProviderReconciliator` with provided context.
@@ -271,11 +293,19 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private async generateReconciliator(
     completerContext: ICompletionContext
   ): Promise<ProviderReconciliator> {
-    // TODO: maybe mirror the settings pattern
-    const inlineProviders = [...this._inlineProviders.values()];
+    const enabledProviders: string[] = [];
+    for (const [id, providerSettings] of Object.entries(
+      this._inlineCompleterSettings.providers
+    )) {
+      if ((providerSettings as any).enabled === true) {
+        enabledProviders.push(id);
+      }
+    }
+    const inlineProviders = [...this._inlineProviders.values()].filter(
+      provider => enabledProviders.includes(provider.identifier)
+    );
 
     const providers: Array<ICompletionProvider> = [];
-    //TODO Update list with rank
     for (const id of this._activeProviders) {
       const provider = this._providers.get(id);
       if (provider) {

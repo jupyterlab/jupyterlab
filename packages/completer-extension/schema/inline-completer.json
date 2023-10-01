@@ -3,6 +3,7 @@
   "description": "Inline completer settings.",
   "jupyter.lab.setting-icon": "completer:inline",
   "jupyter.lab.setting-icon-label": "Inline Completer",
+  "jupyter.lab.transform": true,
   "jupyter.lab.shortcuts": [
     {
       "command": "inline-completer:next",
@@ -26,6 +27,10 @@
     }
   ],
   "properties": {
+    "providers": {
+      "title": "Inline completion providers",
+      "type": "object"
+    },
     "showWidget": {
       "title": "Show widget",
       "description": "Whether to show the inline completer widget.",

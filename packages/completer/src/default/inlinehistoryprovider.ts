@@ -6,6 +6,7 @@ import type {
   InlineCompletionTriggerKind
 } from '../tokens';
 import type { CompletionHandler } from '../handler';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { KernelMessage } from '@jupyterlab/services';
 import {
   ITranslator,
@@ -20,7 +21,7 @@ import { historyIcon, LabIcon } from '@jupyterlab/ui-components';
 export class HistoryInlineCompletionProvider
   implements IInlineCompletionProvider
 {
-  readonly identifier = 'history';
+  readonly identifier = '@jupyterlab/inline-completer:history';
 
   constructor(protected options: HistoryInlineCompletionProvider.IOptions) {
     const translator = options.translator || nullTranslator;
@@ -33,6 +34,29 @@ export class HistoryInlineCompletionProvider
 
   get icon(): LabIcon.ILabIcon {
     return historyIcon;
+  }
+
+  get schema(): ISettingRegistry.IProperty {
+    return {
+      properties: {
+        maxSuggestions: {
+          title: this._trans.__('Maximum number of suggestions'),
+          description: this._trans.__(
+            'The maximum number of suggestions to retrieve from history.'
+          ),
+          type: 'number'
+        }
+      },
+      default: {
+        // make this provider opt-in
+        enabled: false,
+        maxSuggestions: 100
+      }
+    };
+  }
+
+  configure(settings: { maxSuggestions: number }): void {
+    this._maxSuggestions = settings.maxSuggestions ?? 100;
   }
 
   async fetch(
@@ -55,7 +79,7 @@ export class HistoryInlineCompletionProvider
       hist_access_type: 'search',
       pattern: linePrefix + '*',
       unique: true,
-      n: 100
+      n: this._maxSuggestions
     };
 
     const reply = await kernel.requestHistory(historyRequest);
@@ -86,6 +110,7 @@ export class HistoryInlineCompletionProvider
   }
 
   private _trans: TranslationBundle;
+  private _maxSuggestions: number = 100;
 }
 
 export namespace HistoryInlineCompletionProvider {

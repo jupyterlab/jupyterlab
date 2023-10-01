@@ -16,6 +16,7 @@ import {
   HistoryInlineCompletionProvider,
   ICompletionProviderManager,
   IInlineCompleterFactory,
+  IInlineCompleterSettings,
   InlineCompleter,
   KernelCompleterProvider
 } from '@jupyterlab/completer';
@@ -197,15 +198,55 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
       const defaults = InlineCompleter.defaultSettings;
       completionManager.inline?.configure({
         showWidget:
-          (settings.composite.showWidget as boolean) ?? defaults.showWidget,
+          (settings.composite
+            .showWidget as IInlineCompleterSettings['showWidget']) ??
+          defaults.showWidget,
         showShortcuts:
-          (settings.composite.showShortcuts as boolean) ??
-          defaults.showShortcuts
+          (settings.composite
+            .showShortcuts as IInlineCompleterSettings['showShortcuts']) ??
+          defaults.showShortcuts,
+        providers:
+          (settings.composite
+            .providers as IInlineCompleterSettings['providers']) ??
+          defaults.providers
       });
     };
 
     app.restored
       .then(() => {
+        const availableProviders = completionManager.inlineProviders ?? [];
+        settings.transform(INLINE_COMPLETER_PLUGIN, {
+          fetch: plugin => {
+            const schema = plugin.schema.properties!;
+            const providers: {
+              [property: string]: ISettingRegistry.IProperty;
+            } = {};
+            for (const provider of availableProviders) {
+              providers[provider.identifier] = {
+                title: trans.__('%1 provider', provider.name),
+                properties: {
+                  // Each provider can be enabled or disabled.
+                  ...(provider.schema?.properties ?? {}),
+                  enabled: {
+                    title: trans.__('Enabled'),
+                    description: trans.__('Whether the provider is enabled.'),
+                    type: 'boolean'
+                  }
+                },
+                default: {
+                  // By default all providers are opt-out, but
+                  // any provider can configure itself to be opt-in.
+                  enabled: true,
+                  ...((provider.schema?.default as object) ?? {})
+                },
+                type: 'object'
+              };
+            }
+            schema['providers']['properties'] = providers;
+            return plugin;
+          }
+        });
+
         const settingsPromise = settings.load(INLINE_COMPLETER_PLUGIN);
         settingsPromise
           .then(settingValues => {
