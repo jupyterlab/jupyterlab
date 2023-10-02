@@ -105,6 +105,7 @@ export class InlineCompleter extends Widget {
       const proposed = this._current - 1;
       this._current = proposed === -1 ? items.length - 1 : proposed;
     }
+    this._updateStreamTracking();
     this._render();
   }
 
@@ -142,6 +143,23 @@ export class InlineCompleter extends Widget {
     }
     return completions.items[this._current];
   }
+
+  private _updateStreamTracking() {
+    if (this._lastItem) {
+      this._lastItem.streamed.disconnect(this._onStreamed, this);
+    }
+    const current = this.current;
+    if (current) {
+      current.streamed.connect(this._onStreamed, this);
+    }
+    this._lastItem = current;
+  }
+
+  private _onStreamed() {
+    this._render();
+  }
+
+  private _lastItem: CompletionHandler.IInlineItem | null = null;
 
   /**
    * Change user-configurable settings.
@@ -271,6 +289,7 @@ export class InlineCompleter extends Widget {
     }
     if (args.event == 'set') {
       this._current = args.indexMap!.get(this._current) ?? 0;
+      this._updateStreamTracking();
       this.update();
     }
     this._render();
@@ -285,6 +304,7 @@ export class InlineCompleter extends Widget {
       return;
     }
     this._current = mapping.get(this._current) ?? 0;
+    this._updateStreamTracking();
     // Because the signal will be emitted during `EditorView.update` we want to
     // wait for the update to complete before calling `this._render()`. As there
     // is no API to check if update is done, we instead defer to next engine tick.

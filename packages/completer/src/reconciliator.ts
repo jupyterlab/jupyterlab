@@ -13,6 +13,7 @@ import {
   IProviderReconciliator
 } from './tokens';
 import { Completer } from './widget';
+import { Signal } from '@lumino/signaling';
 
 /**
  * The reconciliator which is used to fetch and merge responses from multiple completion providers.
@@ -57,7 +58,9 @@ export class ProviderReconciliator implements IProviderReconciliator {
             ...completionList,
             items: completionList.items.map(item => {
               const newItem = item as CompletionHandler.IInlineItem;
+              newItem.streamed = new Signal(item);
               newItem.provider = provider;
+              void this._stream(newItem, provider);
               return newItem;
             })
           };
@@ -70,6 +73,24 @@ export class ProviderReconciliator implements IProviderReconciliator {
       promises.push(promise.catch(p => p));
     }
     return promises;
+  }
+
+  private async _stream(
+    item: CompletionHandler.IInlineItem,
+    provider: IInlineCompletionProvider
+  ) {
+    if (!item.isIncomplete || !provider.stream || !item.token) {
+      return;
+    }
+    const token = item.token;
+    item.token = undefined;
+    for await (const reply of provider.stream(token)) {
+      const updated = reply.response;
+      item.insertText = updated.insertText;
+      (item.streamed as Signal<CompletionHandler.IInlineItem, void>).emit();
+    }
+    item.isIncomplete = false;
+    (item.streamed as Signal<CompletionHandler.IInlineItem, void>).emit();
   }
 
   /**

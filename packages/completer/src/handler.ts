@@ -8,7 +8,7 @@ import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import {
   CompletionTriggerKind,
@@ -642,6 +642,10 @@ export namespace CompletionHandler {
      * The source provider information.
      */
     provider: IInlineCompletionProviderInfo;
+    /**
+     * Signal emitted when the item gets updated by streaming.
+     */
+    streamed: ISignal<any, void>;
   }
 
   /**

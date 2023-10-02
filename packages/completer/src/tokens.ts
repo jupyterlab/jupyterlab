@@ -275,11 +275,10 @@ export interface IInlineCompletionProvider<
    */
   configure?(settings: { [property: string]: JSONValue }): void;
 
-  // TODO implement streaming support later on
-  stream?(token: string): {
-    done: boolean;
-    response: T;
-  };
+  /**
+   * Optional method to stream remainder of the `insertText`.
+   */
+  stream?(token: string): AsyncGenerator<{ response: T }>;
 }
 
 /**
