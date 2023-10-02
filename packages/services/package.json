@@ -46,7 +46,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter/ydoc": "^1.0.2",
+    "@jupyter/ydoc": "^1.1.1",
     "@jupyterlab/coreutils": "^6.1.0-alpha.1",
     "@jupyterlab/nbformat": "^4.1.0-alpha.1",
     "@jupyterlab/settingregistry": "^4.1.0-alpha.1",
