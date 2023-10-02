@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Need to fetch enough nodes to get the common ancestor - but don't want to fetch everything
           fetch-depth: 100
@@ -212,7 +212,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get hashes for PR review event
         if: ${{ github.event_name == 'pull_request_review' }}
