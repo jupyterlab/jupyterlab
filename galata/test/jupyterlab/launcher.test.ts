@@ -32,7 +32,7 @@ test.describe('Dynamic Text Spacing', () => {
                     .getComputedStyle(el)
                     .getPropertyValue('font-size')
                     .toString(),
-                ' px'
+                +'px'
               )
           )
       );
