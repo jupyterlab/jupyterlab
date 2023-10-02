@@ -84,7 +84,7 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
-    "altair==5.0.1",
+    "altair==5.1.1",
     "ipython==8.15.0",
     "ipywidgets==8.1.0",
     "jupyterlab-geojson==3.4.0",
