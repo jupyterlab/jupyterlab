@@ -98,5 +98,88 @@ in your plugin's "provides" property, then return an object from your plugin's
 ..
   TODO edit link when folders are renamed from compat_4a etc.
 
-Take a look at [this example extension](https://github.com/jupyterlab/extension-examples/tree/main/step_counter)
-in the examples repo (you can read the full extension example code there).
+Take a look at a snippet from [this example extension](https://github.com/jupyterlab/extension-examples/tree/main/step_counter)
+in the examples repo (you can read the full extension example code there):
+
+.. code::
+
+  // This plugin is a "provider" in JupyterLab's provider-consumer pattern.
+  // For a plugin to become a provider, it must list the token it wants to
+  // provide a service object for in its "provides" list, and then it has
+  // to return that object (in this case, an instance of the example Counter
+  // class defined above) from the function supplied as its activate property.
+  // It also needs to supply the interface (the one the service object
+  // implements) to JupyterFrontEndPlugin when it's defined.
+  const plugin: JupyterFrontEndPlugin<StepCounterItem> = {
+    id: 'step_counter:provider_plugin',
+    description: 'Provider plugin for the step_counter\'s "counter" service object.',
+    autoStart: true,
+    provides: StepCounter,
+    // The activate function here will be called by JupyterLab when the plugin loads
+    activate: (app: JupyterFrontEnd) => {
+      console.log('JupyterLab extension (step_counter/provider plugin) is activated!');
+      const counter = new Counter();
+
+      // Since this plugin "provides" the "StepCounter" service, make sure to
+      // return the object you want to use as the "service object" here (when
+      // other plugins request the StepCounter service, it is this object
+      // that will be supplied)
+      return counter;
+    }
+  };
+
+Here, you can see that this plugin lists a "StepCounter" token object as its
+"provides" property, which tells JupyterLab that it is a "provider" of a
+service object.
+
+It also returns a "Counter" instance: this is the service object it "provides"
+for the StepCounter service.
+
+When your plugin becomes a provider, you need to define a lumino "Token" object
+that JupyterLab will use to identify the service. Here's how the StepCounter
+Token was defined:
+
+.. code::
+
+  // The token is used to identify a particular "service" in
+  // JupyterLab's extension system (here the StepCounter token
+  // identifies the example "Step Counter Service", which is used
+  // to store and increment step count data in JupyterLab). Any
+  // plugin can use this token in their "requires" or "activates"
+  // list to request the service object associated with this token!
+  const StepCounter = new Token<StepCounterItem>(
+    'step_counter:StepCounter',
+    'A service for counting steps.'
+  );
+
+Note that StepCounter is a Lumino Token object. The StepCounter defined
+here also passes the "StepCounterItem" interface in the Token definition.
+
+When you provide an interface to your Token definition in this way, you're
+telling JupyterLab to type check the service object it gets from any provider
+plugin associated with this service, to make sure it conforms to that
+interface. This helps ensure that any provider plugin (even a substitute
+provider that someone else makes later) provides a compatible service object
+(in this case, a StepCounterItem object), and it helps enable the plugin
+swappability and subsitution in JupyterLab.
+
+Here's the interface the token uses:
+
+.. code::
+
+  // The StepCounterItem interface is used as part of JupyterLab's
+  // provider-consumer pattern. This interface is supplied to the
+  // token instance (the StepCounter token), and JupyterLab will
+  // use it to type-check any service-object associated with the
+  // token that a provider plugin supplies to check that it conforms
+  // to the interface.
+  interface StepCounterItem {
+    // registerStatusItem(id: string, statusItem: IStatusBar.IItem): IDisposable;
+    getStepCount(): number;
+    incrementStepCount(count: number): void;
+    countChanged: Signal<any, number>;
+  }
+
+This means that anyone who makes a provider plugin for the StepCounter service
+must return an object that has a getStepCount method, incrementStepCount method,
+and a countChanges Signal (a Lumino Signal object).
