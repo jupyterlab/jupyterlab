@@ -1034,6 +1034,16 @@ export namespace IDebugger {
     }
 
     /**
+     * Structure storing the expansion states of variables.
+     */
+    export interface IVariableExpansionStates {
+      [variableName: string]: {
+        collapseState: boolean;
+        children?: IVariableExpansionStates;
+      };
+    }
+
+    /**
      * The variables UI model.
      */
     export interface IVariables {
@@ -1063,6 +1073,23 @@ export namespace IDebugger {
        * @param variable The variable to expand.
        */
       expandVariable(variable: IDebugger.IVariable): void;
+
+      /**
+       * Variables tree expansion states.
+       */
+      variableExpansionStates: IVariableExpansionStates;
+
+      /**
+       * Get the expanison states tree.
+       */
+      getVariableExpansionStates(): IDebugger.Model.IVariableExpansionStates;
+
+      /**
+       * Set the expansion states tree.
+       */
+      setVariableExpasionStates(
+        states: IDebugger.Model.IVariableExpansionStates
+      ): void;
     }
   }
 }

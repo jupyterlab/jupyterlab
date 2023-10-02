@@ -35,8 +35,6 @@ export class VariablesModel implements IDebugger.Model.IVariables {
    * Signal emitted when the current variable has been expanded.
    */
   get variableExpanded(): ISignal<this, IDebugger.IVariable> {
-    console.log('Current Variable expanded signal');
-    // doesn't happen for individual variables, takes place for when the whole debugging sessions is initialized
     return this._variableExpanded;
   }
 
@@ -44,7 +42,6 @@ export class VariablesModel implements IDebugger.Model.IVariables {
     return this._selectedVariable;
   }
   set selectedVariable(selection: IDebugger.IVariableSelection | null) {
-    // console.log("Selected variable: ", selection) // this picks the individual variable which is selected
     this._selectedVariable = selection;
   }
 
@@ -57,8 +54,25 @@ export class VariablesModel implements IDebugger.Model.IVariables {
     this._variableExpanded.emit(variable);
   }
 
+  /**
+   * Get the expanison states tree.
+   */
+  getVariableExpansionStates(): IDebugger.Model.IVariableExpansionStates {
+    return this.variableExpansionStates;
+  }
+
+  /**
+   * Set the expansion states tree.
+   */
+  setVariableExpasionStates(
+    expansionStates: IDebugger.Model.IVariableExpansionStates
+  ) {
+    this.variableExpansionStates = expansionStates;
+  }
+
   private _selectedVariable: IDebugger.IVariableSelection | null = null;
   private _state: IDebugger.IScope[] = [];
   private _variableExpanded = new Signal<this, IDebugger.IVariable>(this);
   private _changed = new Signal<this, void>(this);
+  variableExpansionStates: IDebugger.Model.IVariableExpansionStates;
 }

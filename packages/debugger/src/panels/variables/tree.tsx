@@ -44,11 +44,11 @@ export class VariablesBodyTree extends ReactWidget {
     this._service = options.service;
     this._translator = options.translator;
     this._hoverChanged = new Signal(this);
-    this._variableExpansionStates = {};
+    this._variableExpanded = new Signal<this, IDebugger.IVariable>(this);
+    this._variableExpansionStates = options.model.variableExpansionStates = {};
 
     const model = (this.model = options.model);
     model.changed.connect(this._updateScopes, this);
-    model.variableExpanded.connect(this._variableExpanded, this);
 
     this.addClass('jp-DebuggerVariables-body');
   }
@@ -87,7 +87,12 @@ export class VariablesBodyTree extends ReactWidget {
             this._hoverChanged.emit(data);
           }}
           collapserIcon={collapserIcon}
-          variableExpansionStates={this._variableExpansionStates}
+          onVariableExpanded={(variable: IDebugger.IVariable) => {
+            this._variableExpanded.emit(variable);
+            this.variableExpansionStates();
+          }}
+          variableExpansionStates={this.variableExpansionStates()}
+          updateVariableExpansionStates={this.updateVariableExpansionStates}
         />
         <TreeButtons
           commands={this._commands}
@@ -131,34 +136,69 @@ export class VariablesBodyTree extends ReactWidget {
   }
 
   /**
+   * Get children
+   */
+  private _getChildren(variable: IDebugger.IVariable): IDebugger.IVariable[] {
+    // add logic to extract children from a variable
+    return [];
+  }
+
+  /**
    * Get the expanison states tree.
    */
-  variableExpansionStates(): IVariableExpansionStates {
+  variableExpansionStates(): IDebugger.Model.IVariableExpansionStates {
+    let expansionStates: IDebugger.Model.IVariableExpansionStates = {};
+
+    const scope =
+      this._scopes.find(scope => scope.name === this._scope) ?? this._scopes[0];
+
+    if (scope.variables) {
+      expansionStates = this.buildTree(scope.variables);
+    }
+
+    console.log(expansionStates);
     return this._variableExpansionStates;
   }
 
   /**
    * Set the expansion states tree.
    */
-  setVariableExpasionStates(states: IVariableExpansionStates) {
+  setVariableExpasionStates(states: IDebugger.Model.IVariableExpansionStates) {
     this._variableExpansionStates = states;
-    // to do: set them on the variables themselves
   }
 
   /**
-   * Update expansion tree of variables when signal is emitted.
-   *
-   * @param sender
-   * @param variable The variable being expanded.
+   * Update variable expansion states tree, once a variable's expansion state is changed.
    */
-  private _variableExpanded(
-    sender: VariablesModel,
-    variable: IDebugger.IVariable
-  ): void {
-    console.log('Variable expansion status: ', variable, variable.expanded);
-    // if (variable.expanded) {
-    //   this._variableExpansionStates = [variable.expanded] }
-    this.update();
+  updateVariableExpansionStates(
+    variable: IDebugger.IVariable,
+    expanded: boolean
+  ): IDebugger.Model.IVariableExpansionStates {
+    const newVariableState = {
+      collapseState: expanded,
+      children: this._variableExpansionStates[variable.name].children
+    };
+
+    this._variableExpansionStates[variable.name] = newVariableState;
+
+    return this._variableExpansionStates;
+  }
+
+  /**
+   * Build tree structure of the variables,
+   */
+  buildTree(
+    variables: IDebugger.IVariable[]
+  ): IDebugger.Model.IVariableExpansionStates {
+    variables.forEach(variable => {
+      const childrenVariables = this._getChildren(variable);
+      this._variableExpansionStates[variable.name] = {
+        collapseState: false,
+        children: this.buildTree(childrenVariables) || []
+      };
+    });
+
+    return this._variableExpansionStates;
   }
 
   protected model: IDebugger.Model.IVariables;
@@ -169,12 +209,8 @@ export class VariablesBodyTree extends ReactWidget {
   private _service: IDebugger;
   private _translator: ITranslator | undefined;
   private _hoverChanged: Signal<VariablesBodyTree, IHoverData>;
-  private _variableExpansionStates: {
-    [variableName: string]: {
-      collapseState: boolean;
-      children?: IVariableExpansionStates;
-    };
-  };
+  private _variableExpanded = new Signal<this, IDebugger.IVariable>(this);
+  private _variableExpansionStates: IDebugger.Model.IVariableExpansionStates;
 }
 
 interface IHoverData {
@@ -347,7 +383,18 @@ interface IVariablesBranchProps {
   /**
    * Variables tree expansion states;
    */
-  variableExpansionStates: IVariableExpansionStates;
+  variableExpansionStates: IDebugger.Model.IVariableExpansionStates;
+  /**
+   * Callback on variable expansion.
+   */
+  onVariableExpanded: (variable: IDebugger.IVariable) => void;
+  /**
+   * Update variables expansion tree when a variable's collapse status is changed.
+   */
+  updateVariableExpansionStates: (
+    variable: IDebugger.IVariable,
+    expanded: boolean
+  ) => IDebugger.Model.IVariableExpansionStates;
 }
 
 /**
@@ -368,7 +415,9 @@ const VariablesBranch = (props: IVariablesBranchProps): JSX.Element => {
     handleSelectVariable,
     onHoverChanged,
     collapserIcon,
-    variableExpansionStates
+    onVariableExpanded,
+    variableExpansionStates,
+    updateVariableExpansionStates
   } = props;
   const [variables, setVariables] = useState(data);
 
@@ -395,7 +444,9 @@ const VariablesBranch = (props: IVariablesBranchProps): JSX.Element => {
               onSelect={handleSelectVariable}
               onHoverChanged={onHoverChanged}
               collapserIcon={collapserIcon}
+              onVariableExpanded={onVariableExpanded}
               variableExpansionStates={variableExpansionStates}
+              updateVariableExpansionStates={updateVariableExpansionStates}
             />
           );
         })}
@@ -440,9 +491,20 @@ interface IVariableComponentProps {
    */
   collapserIcon: JSX.Element;
   /**
+   * Callback on variable expansion.
+   */
+  onVariableExpanded: (variable: IDebugger.IVariable) => void;
+  /**
    * Variables tree expansion states;
    */
-  variableExpansionStates: IVariableExpansionStates;
+  variableExpansionStates: IDebugger.Model.IVariableExpansionStates;
+  /**
+   * Update variables expansion tree when a variable's collapse status is changed.
+   */
+  updateVariableExpansionStates: (
+    variable: IDebugger.IVariable,
+    expanded: boolean
+  ) => IDebugger.Model.IVariableExpansionStates;
 }
 
 function _prepareDetail(variable: IDebugger.IVariable) {
@@ -473,7 +535,9 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
     onSelect,
     onHoverChanged,
     collapserIcon,
-    variableExpansionStates
+    onVariableExpanded,
+    variableExpansionStates,
+    updateVariableExpansionStates
   } = props;
   const [variable] = useState(data);
   const [expanded, setExpanded] = useState<boolean>();
@@ -484,7 +548,8 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
   const expandable =
     variable.variablesReference !== 0 || variable.type === 'function';
 
-  // emit signal a variable was expanded -- trigger save of layout
+  let currentVariableExpansionStates = variableExpansionStates;
+
   const onVariableClicked = async (e: React.MouseEvent): Promise<void> => {
     if (!expandable) {
       return;
@@ -495,9 +560,11 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
     );
     setExpanded(!expanded);
     setVariables(variables);
-    // variablesModel.variableExpanded.emit(variable); -- save new expansion tree state
-    console.log('Variable clicked: ', variables);
-    console.log('Variable cicked state: ', !expanded);
+    onVariableExpanded(variable);
+    currentVariableExpansionStates = updateVariableExpansionStates(
+      variable,
+      !expanded
+    );
   };
 
   return (
@@ -549,7 +616,9 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
           handleSelectVariable={onSelect}
           onHoverChanged={onHoverChanged}
           collapserIcon={collapserIcon}
-          variableExpansionStates={variableExpansionStates}
+          onVariableExpanded={onVariableExpanded}
+          variableExpansionStates={currentVariableExpansionStates}
+          updateVariableExpansionStates={updateVariableExpansionStates}
         />
       )}
     </li>
@@ -583,16 +652,6 @@ namespace VariablesBodyTree {
     /**
      * Variables tree expansion states;
      */
-    variableExpansionStates: IVariableExpansionStates;
+    variableExpansionStates: IDebugger.Model.IVariableExpansionStates;
   }
-}
-
-/**
- * Structure storing the expansion states of variables.
- */
-interface IVariableExpansionStates {
-  [variableName: string]: {
-    collapseState: boolean;
-    children?: IVariableExpansionStates;
-  };
 }
