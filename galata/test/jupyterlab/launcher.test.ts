@@ -24,14 +24,12 @@ test.describe('Dynamic Text Spacing', () => {
       expect(height).toEqual(
         2.462 *
           parseFloat(
-            await element
-              .nth(i)
-              .evaluate(el =>
-                window
-                  .getComputedStyle(el)
-                  .getPropertyValue('font-size')
-                  .toString()
-              )
+            await element.nth(i).evaluate(el =>
+              window
+                .getComputedStyle(el)
+                .getPropertyValue('font-size' + 'px')
+                .toString()
+            )
           )
       );
     }
