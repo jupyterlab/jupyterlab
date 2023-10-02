@@ -38,7 +38,7 @@ test.describe('Table of Contents scrolling to heading', () => {
   test('Notebook scrolls to heading', async ({ page }) => {
     await page.notebook.selectCells(0);
 
-    const tocPanel = await page.sidebar.getContentPanel(
+    await page.sidebar.getContentPanel(
       await page.sidebar.getTabPosition('table-of-contents')
     );
 
