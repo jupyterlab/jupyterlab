@@ -3,9 +3,16 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { indentMore, insertTab } from '@codemirror/commands';
+import {
+  indentMore,
+  insertNewlineAndIndent,
+  insertTab
+} from '@codemirror/commands';
 import { EditorState, Transaction } from '@codemirror/state';
-import { COMPLETER_ENABLED_CLASS } from '@jupyterlab/codeeditor';
+import {
+  COMPLETER_ACTIVE_CLASS,
+  COMPLETER_ENABLED_CLASS
+} from '@jupyterlab/codeeditor';
 
 /**
  * CodeMirror commands namespace
@@ -36,5 +43,22 @@ export namespace StateCommands {
     } else {
       return insertTab(arg);
     }
+  }
+
+  /**
+   * Insert new line if completer is not active.
+   */
+  export function completerOrInsertNewLine(target: {
+    dom: HTMLElement;
+    state: EditorState;
+    dispatch: (transaction: Transaction) => void;
+  }): boolean {
+    if (target.dom.parentElement?.classList.contains(COMPLETER_ACTIVE_CLASS)) {
+      // return true to avoid handling the default Enter from codemirror defaultKeymap.
+      return true;
+    }
+
+    const arg = { state: target.state, dispatch: target.dispatch };
+    return insertNewlineAndIndent(arg);
   }
 }

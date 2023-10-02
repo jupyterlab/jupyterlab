@@ -684,6 +684,10 @@ export namespace EditorExtensionRegistry {
       Object.freeze({
         name: 'keymap',
         default: [
+          {
+            key: 'Enter',
+            run: StateCommands.completerOrInsertNewLine
+          },
           ...defaultKeymap,
           {
             key: 'Tab',
