@@ -146,6 +146,7 @@ async def run_browser(url):
             os.makedirs(osp.join(target))
         await run_async_process(["npm", "init", "-y"], cwd=target)
         await run_async_process(["npm", "install", "playwright@^1.9.2"], cwd=target)
+    await run_async_process(["npx", "playwright", "install"], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
@@ -157,6 +158,7 @@ def run_browser_sync(url):
         os.makedirs(target)
         subprocess.call(["npm", "init", "-y"], cwd=target)  # noqa S603 S607
         subprocess.call(["npm", "install", "playwright@^1.9.2"], cwd=target)  # noqa S603 S607
+    subprocess.call(["npx", "playwright", "install"], cwd=target)  # noqa S603 S607
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     return subprocess.check_call(["node", "browser-test.js", url], cwd=target)  # noqa S603 S607
 

@@ -499,22 +499,22 @@
     {
       "command": "notebook:move-cursor-down",
       "keys": ["ArrowDown"],
-      "selector": ".jp-Notebook:focus"
+      "selector": "[data-jp-traversable]:focus"
     },
     {
       "command": "notebook:move-cursor-down",
       "keys": ["J"],
-      "selector": ".jp-Notebook:focus"
+      "selector": "[data-jp-traversable]:focus"
     },
     {
       "command": "notebook:move-cursor-up",
       "keys": ["ArrowUp"],
-      "selector": ".jp-Notebook:focus"
+      "selector": "[data-jp-traversable]:focus"
     },
     {
       "command": "notebook:move-cursor-up",
       "keys": ["K"],
-      "selector": ".jp-Notebook:focus"
+      "selector": "[data-jp-traversable]:focus"
     },
     {
       "command": "notebook:move-cursor-heading-above-or-collapse",
