@@ -1163,7 +1163,8 @@ export class WindowedList<
 
         // Update scroll
         if (this._scrollUpdateWasRequested) {
-          this.node.scrollTop = this.viewModel.scrollOffset;
+          const outer = this.node.querySelector('.jp-WindowedPanel-outer');
+          outer!.scrollTop = this.viewModel.scrollOffset;
           this._scrollUpdateWasRequested = false;
         }
       }
