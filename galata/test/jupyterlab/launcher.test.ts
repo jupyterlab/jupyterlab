@@ -21,18 +21,16 @@ test.describe('Dynamic Text Spacing', () => {
         .evaluate(el =>
           window.getComputedStyle(el).getPropertyValue('min-height')
         );
-      expect(height).toEqual(
+      expect(height + 'px').toEqual(
         2.462 *
           parseFloat(
             await element
               .nth(i)
-              .evaluate(
-                el =>
-                  window
-                    .getComputedStyle(el)
-                    .getPropertyValue('font-size')
-                    .toString(),
-                +'px'
+              .evaluate(el =>
+                window
+                  .getComputedStyle(el)
+                  .getPropertyValue('font-size')
+                  .toString()
               )
           )
       );
