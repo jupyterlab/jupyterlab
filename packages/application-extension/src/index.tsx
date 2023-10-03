@@ -303,7 +303,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
             let doc = document.getElementById('showleftsidebar');
-            doc?.focus();
+            doc!.innerHTML = 'Test Screen Reader';
           } else {
             labShell.collapseLeft();
             if (labShell.currentWidget) {
