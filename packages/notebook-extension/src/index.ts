@@ -1613,6 +1613,7 @@ function activateNotebookHandler(
       updateConfig(settings);
       settings.changed.connect(() => {
         updateConfig(settings);
+        commands.notifyCommandChanged(CommandIDs.virtualScrollbar);
       });
 
       const updateSessionSettings = (
@@ -1707,6 +1708,14 @@ function activateNotebookHandler(
             .catch(console.error);
         }
       });
+      addCommands(
+        app,
+        tracker,
+        translator,
+        sessionDialogs,
+        settings,
+        isEnabled
+      );
     })
     .catch((reason: Error) => {
       console.warn(reason.message);
@@ -1716,6 +1725,7 @@ function activateNotebookHandler(
         kernelShutdown: factory.shutdownOnClose,
         autoStartDefault: factory.autoStartDefault
       });
+      addCommands(app, tracker, translator, sessionDialogs, null, isEnabled);
     });
 
   if (formRegistry) {
@@ -1755,8 +1765,6 @@ function activateNotebookHandler(
     collaborative: true
   });
   registry.addModelFactory(modelFactory);
-
-  addCommands(app, tracker, translator, sessionDialogs, isEnabled);
 
   if (palette) {
     populatePalette(palette, translator);
@@ -2103,6 +2111,7 @@ function addCommands(
   tracker: NotebookTracker,
   translator: ITranslator,
   sessionDialogs: ISessionContextDialogs,
+  settings: ISettingRegistry.ISettings | null,
   isEnabled: () => boolean
 ): void {
   const trans = translator.load('jupyterlab');
@@ -3443,7 +3452,7 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.virtualScrollbar, {
     label: trans.__('Virtual Scrollbar'),
-    caption: trans.__('Toggle Virtual Scrollbar'),
+    caption: trans.__('Virtual Scrollbar (enabled with windowing mode: full)'),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
@@ -3451,7 +3460,9 @@ function addCommands(
         current.content.scrollbar = !current.content.scrollbar;
       }
     },
-    isEnabled: args => (args.toolbar ? true : isEnabled()),
+    isEnabled: args =>
+      (args.toolbar ? true : isEnabled()) &&
+      (settings?.composite.windowingMode === 'full' ?? false),
     icon: args => (args.toolbar ? tableRowsIcon : undefined)
   });
 }

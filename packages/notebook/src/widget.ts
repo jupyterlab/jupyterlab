@@ -193,18 +193,19 @@ export class StaticNotebook extends WindowedList {
    */
   constructor(options: StaticNotebook.IOptions) {
     const cells = new Array<Cell>();
+    const windowingActive =
+      (options.notebookConfig?.windowingMode ??
+        StaticNotebook.defaultNotebookConfig.windowingMode) === 'full';
     super({
       model: new NotebookViewModel(cells, {
         overscanCount:
           options.notebookConfig?.overscanCount ??
           StaticNotebook.defaultNotebookConfig.overscanCount,
-        windowingActive:
-          (options.notebookConfig?.windowingMode ??
-            StaticNotebook.defaultNotebookConfig.windowingMode) === 'full'
+        windowingActive
       }),
       layout: new NotebookWindowedLayout(),
       renderer: StaticNotebook.defaultRenderer,
-      scrollbar: true
+      scrollbar: windowingActive
     });
     this.addClass(NB_CLASS);
     this.cellsArray = cells;
