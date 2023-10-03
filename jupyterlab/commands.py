@@ -1053,7 +1053,7 @@ class _AppHandler:
 
         found = None
         for name, source in linked.items():
-            if name == path or source == path:
+            if path in {name, source}:
                 found = name
 
         if found:
@@ -1061,7 +1061,7 @@ class _AppHandler:
         else:
             local = config.setdefault("local_extensions", {})
             for name, source in local.items():
-                if name == path or source == path:
+                if path in {name, source}:
                     found = name
             if found:
                 del local[found]
@@ -2328,7 +2328,7 @@ def _log_multiple_compat_errors(logger, errors_map):
                 [
                     "\n   The following extensions are outdated:",
                     *outdated,
-                    '\n   Consider running "jupyter labextension update --all" to check for updates.\n',
+                    '\n   Consider checking if an update is available for these packages.\n',
                 ]
             )
         )

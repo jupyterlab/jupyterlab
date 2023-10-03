@@ -29,38 +29,25 @@ commander
     utils.prebump();
 
     // Version the changed
-    let cmd = `lerna version patch -m \"[ci skip] New version\" --no-push`;
+    let cmd = `lerna version patch --no-git-tag-version --no-push`;
     if (options.all) {
       cmd += ' --force-publish=*';
     }
     if (options.force) {
       cmd += ' --yes';
     }
-    const oldVersion = utils.run(
-      'git rev-parse HEAD',
-      {
-        stdio: 'pipe',
-        encoding: 'utf8'
-      },
-      true
-    );
+
+    const oldVersion = utils.getJSVersion('metapackage');
     utils.run(cmd);
-    const newVersion = utils.run(
-      'git rev-parse HEAD',
-      {
-        stdio: 'pipe',
-        encoding: 'utf8'
-      },
-      true
-    );
+    const newVersion = utils.getJSVersion('metapackage');
+
     if (oldVersion === newVersion) {
-      console.debug('aborting');
       // lerna didn't version anything, so we assume the user aborted
       throw new Error('Lerna aborted');
     }
 
     // Patch the python version
-    utils.run('bumpversion patch'); // switches to alpha
+    utils.run('bumpversion patch --allow-dirty'); // switches to alpha
     utils.run('bumpversion release --allow-dirty'); // switches to beta
     utils.run('bumpversion release --allow-dirty'); // switches to rc.
     utils.run('bumpversion release --allow-dirty'); // switches to final.

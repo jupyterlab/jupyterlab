@@ -39,13 +39,6 @@ const AJV_DEFAULT_OPTIONS: Partial<AjvOptions> = {
 };
 
 /**
- * The default number of milliseconds before a `load()` call to the registry
- * will wait before timing out if it requires a transformation that has not been
- * registered.
- */
-const DEFAULT_TRANSFORM_TIMEOUT = 1000;
-
-/**
  * The ASCII record separator character.
  */
 const RECORD_SEPARATOR = String.fromCharCode(30);
@@ -280,7 +273,6 @@ export class SettingRegistry implements ISettingRegistry {
   constructor(options: SettingRegistry.IOptions) {
     this.connector = options.connector;
     this.validator = options.validator || new DefaultSchemaValidator();
-    this._timeout = options.timeout || DEFAULT_TRANSFORM_TIMEOUT;
 
     // Plugins with transformation may not be loaded if the transformation function is
     // not yet available. To avoid fetching again the associated data when the transformation
@@ -605,8 +597,8 @@ export class SettingRegistry implements ISettingRegistry {
           // Apply a transformation to the plugin if necessary.
           await this._load(await this._transform('fetch', plugin));
         } catch (errors) {
-          /* Ignore preload timeout errors silently. */
-          if (errors[0]?.keyword !== 'timeout') {
+          /* Ignore silently if no transformers. */
+          if (errors[0]?.keyword !== 'unset') {
             console.warn('Ignored setting registry preload errors.', errors);
           }
         }
@@ -653,13 +645,10 @@ export class SettingRegistry implements ISettingRegistry {
    */
   private async _transform(
     phase: ISettingRegistry.IPlugin.Phase,
-    plugin: ISettingRegistry.IPlugin,
-    started = new Date().getTime()
+    plugin: ISettingRegistry.IPlugin
   ): Promise<ISettingRegistry.IPlugin> {
-    const elapsed = new Date().getTime() - started;
     const id = plugin.id;
     const transformers = this._transformers;
-    const timeout = this._timeout;
 
     if (!plugin.schema['jupyter.lab.transform']) {
       return plugin;
@@ -678,25 +667,14 @@ export class SettingRegistry implements ISettingRegistry {
           } as ISchemaValidator.IError
         ];
       }
-
       return transformed;
     }
-
-    // If the timeout has not been exceeded, stall and try again in 250ms.
-    if (elapsed < timeout) {
-      await new Promise<void>(resolve => {
-        setTimeout(() => {
-          resolve();
-        }, 250);
-      });
-      return this._transform(phase, plugin, started);
-    }
-
+    // If the plugin has no transformers, throw an error and bail.
     throw [
       {
         instancePath: '',
-        keyword: 'timeout',
-        message: `Transforming ${plugin.id} timed out.`,
+        keyword: 'unset',
+        message: `${plugin.id} has no transformers yet.`,
         schemaPath: ''
       } as ISchemaValidator.IError
     ];
@@ -719,7 +697,6 @@ export class SettingRegistry implements ISettingRegistry {
 
   private _pluginChanged = new Signal<this, string>(this);
   private _ready = Promise.resolve();
-  private _timeout: number;
   private _transformers: {
     [plugin: string]: {
       [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform;

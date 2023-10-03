@@ -5,6 +5,9 @@ extends:
   - stylelint-config-standard
   - stylelint-prettier/recommended
 
+plugins:
+  - stylelint-csstree-validator
+
 rules:
   import-notation: null
   # TODO: fix all of these rules violated in stylelint-config-recommended
@@ -41,3 +44,4 @@ rules:
   selector-max-compound-selectors: 4
   # TODO: decrease to 0
   selector-max-universal: 1
+  csstree/validator: true

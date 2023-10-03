@@ -66,7 +66,11 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
+<<<<<<< HEAD
     conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=18 git copier=8 jinja2-time
+=======
+    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c nodefaults jupyterlab=4 nodejs=18 git copier=7 jinja2-time
+>>>>>>> upstream/main
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
@@ -101,7 +105,11 @@ This will create a new folder for your extension in your current directory.
 
     mkdir my_first_extension
     cd my_first_extension
+<<<<<<< HEAD
     copier copy --UNSAFE https://github.com/jupyterlab/extension-template .
+=======
+    copier copy https://github.com/jupyterlab/extension-template .
+>>>>>>> upstream/main
 
 When prompted, enter values like the following for all of the template
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we

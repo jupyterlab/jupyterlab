@@ -52,6 +52,8 @@
   "@jupyterlab/markdownviewer:IMarkdownViewerTracker": "A widget tracker for markdown\n  document viewers. Use this if you want to iterate over and interact with rendered markdown documents.",
   "@jupyterlab/rendermime:IMarkdownParser": "A service for rendering markdown syntax as HTML content.",
   "@jupyterlab/rendermime:ILatexTypesetter": "A service for the LaTeX typesetter for the application. Use this if you want to typeset math in your extension.",
+  "@jupyterlab/mermaid:IMermaidManager": "a manager for rendering mermaid text-based diagrams",
+  "@jupyterlab/mermaid:IMermaidMarkdown": "a manager for rendering mermaid text-based diagrams in markdown fenced code blocks",
   "@jupyterlab/metadataform:IMetadataFormProvider": "A service to register new metadata editor widgets.",
   "@jupyterlab/notebook:IContentFactory": "A factory object that creates new notebooks.\n    Use this if you want to create and host notebooks in your own UI elements.",
   "@jupyterlab/notebook:INotebookTracker": "A widget tracker for notebooks.\n  Use this if you want to be able to iterate over and interact with notebooks\n  created by the application.",

@@ -68,7 +68,12 @@ export async function ensurePackage(
   const cssImports = options.cssImports || [];
   const cssModuleImports = options.cssModuleImports || [];
   const differentVersions = options.differentVersions || [];
+  const backwardVersions = options.backwardVersions ?? {};
   const isPrivate = data.private == true;
+
+  const hasBackwardCompatibilities = Object.keys(backwardVersions).includes(
+    data.name
+  );
 
   // Verify dependencies are consistent.
   let promises = Object.keys(deps).map(async name => {
@@ -88,9 +93,40 @@ export async function ensurePackage(
           .includes(seenDeps[name]);
 
       if (!oneOf) {
-        messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
+        if (
+          hasBackwardCompatibilities &&
+          Object.keys(backwardVersions[data.name]).includes(name)
+        ) {
+          messages.push(
+            `Updated dependency: ${name}@${
+              backwardVersions[data.name][name]
+            } || ${seenDeps[name]}`
+          );
+          deps[name] = `${backwardVersions[data.name][name]} || ${
+            seenDeps[name]
+          }`;
+        } else {
+          messages.push(`Updated dependency: ${name}@${seenDeps[name]}`);
+          deps[name] = seenDeps[name];
+        }
+      }
+    }
 
-        deps[name] = seenDeps[name];
+    if (
+      hasBackwardCompatibilities &&
+      Object.keys(backwardVersions[data.name]).includes(name)
+    ) {
+      const oneOf = deps[name]
+        .split(/\|\|/)
+        .map(v => v.trim())
+        .includes(backwardVersions[data.name][name]);
+      if (!oneOf) {
+        messages.push(
+          `Updated backward dependency: ${name}@${
+            backwardVersions[data.name][name]
+          } || ${deps[name]}`
+        );
+        deps[name] = `${backwardVersions[data.name][name]} || ${deps[name]}`;
       }
     }
   });
@@ -107,9 +143,17 @@ export async function ensurePackage(
       seenDeps[name] = await getDependency(name);
     }
     if (devDeps[name] !== seenDeps[name]) {
-      messages.push(`Updated devDependency: ${name}@${seenDeps[name]}`);
+      const oneOf =
+        devDeps[name].includes('||') &&
+        devDeps[name]
+          .split(/\|\|/)
+          .map(v => v.trim())
+          .includes(seenDeps[name]);
+      if (!oneOf) {
+        messages.push(`Updated devDependency: ${name}@${seenDeps[name]}`);
+        devDeps[name] = seenDeps[name];
+      }
     }
-    devDeps[name] = seenDeps[name];
   });
 
   await Promise.all(promises);
@@ -203,12 +247,13 @@ export async function ensurePackage(
       // Template the CSS index file.
       const cssIndexContents = [
         utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
-        ...cssImports.map(x => `@import url('~${x}');`),
-        ''
+        ...cssImports.map(x => `@import url('~${x}');`)
       ];
       if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
-        cssIndexContents.push("@import url('./base.css');\n");
+        cssIndexContents.push("@import url('./base.css');");
       }
+      // Add final line return
+      cssIndexContents.push('');
 
       // write out cssIndexContents, if needed
       const cssIndexPath = path.join(pkgPath, 'style/index.css');
@@ -216,7 +261,7 @@ export async function ensurePackage(
         fs.ensureFileSync(cssIndexPath);
       }
       messages.push(
-        ...ensureFile(cssIndexPath, cssIndexContents.join('\n'), false)
+        ...(await ensureFile(cssIndexPath, cssIndexContents.join('\n'), false))
       );
 
       // Template the style module index file.
@@ -235,7 +280,7 @@ export async function ensurePackage(
         fs.ensureFileSync(jsIndexPath);
       }
       messages.push(
-        ...ensureFile(jsIndexPath, jsIndexContents.join('\n'), false)
+        ...(await ensureFile(jsIndexPath, jsIndexContents.join('\n'), false))
       );
     } else {
       if (
@@ -721,7 +766,9 @@ export async function ensureUiComponents(
     HEADER_TEMPLATE + ICON_IMPORTS_TEMPLATE,
     { funcName, svgImportStatements, labiconConstructions }
   );
-  messages.push(...ensureFile(iconImportsPath, iconImportsContents, false));
+  messages.push(
+    ...(await ensureFile(iconImportsPath, iconImportsContents, false))
+  );
 
   /* support for deprecated icon CSS classes */
   const iconCSSDir = path.join(pkgPath, 'style');
@@ -755,7 +802,9 @@ export async function ensureUiComponents(
     HEADER_TEMPLATE + ICON_CSS_CLASSES_TEMPLATE,
     { funcName, iconCSSUrls, iconCSSDeclarations }
   );
-  messages.push(...ensureFile(iconCSSClassesPath, iconCSSClassesContent));
+  messages.push(
+    ...(await ensureFile(iconCSSClassesPath, iconCSSClassesContent))
+  );
 
   return messages;
 }
@@ -813,6 +862,11 @@ export interface IEnsurePackageOptions {
    * Packages which are allowed to have multiple versions pulled in
    */
   differentVersions?: string[];
+
+  /**
+   * Older versions supported by core packages in addition to the latest.
+   */
+  backwardVersions?: Record<string, Record<string, string>>;
 }
 
 /**
@@ -831,11 +885,11 @@ export interface IEnsurePackageOptions {
  *
  * @returns a string array with 0 or 1 messages.
  */
-function ensureFile(
+async function ensureFile(
   fpath: string,
   contents: string,
   prettify: boolean = true
-): string[] {
+): Promise<string[]> {
   const messages: string[] = [];
 
   if (!fs.existsSync(fpath)) {
@@ -848,7 +902,7 @@ function ensureFile(
 
   // (maybe) run the newly generated contents through prettier before comparing
   let formatted = prettify
-    ? prettier.format(contents, { filepath: fpath, singleQuote: true })
+    ? await prettier.format(contents, { filepath: fpath, singleQuote: true })
     : contents;
 
   const prev = fs.readFileSync(fpath, { encoding: 'utf8' });
