@@ -21,7 +21,7 @@ jobs:
         run: git config --global hub.protocol https
 
       - name: Checkout the branch from the PR that triggered the job
-        run: hub pr checkout ${{ github.event.pull_request.number }}
+        run: gh pr checkout ${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
