@@ -59,6 +59,7 @@
   "@jupyterlab/notebook:INotebookTracker": "A widget tracker for notebooks.\n  Use this if you want to be able to iterate over and interact with notebooks\n  created by the application.",
   "@jupyterlab/notebook:INotebookTools": "A service for the \"Notebook Tools\" panel in the\n  right sidebar. Use this to add your own functionality to the panel.",
   "@jupyterlab/notebook:INotebookWidgetFactory": "A service to create the notebook viewer.",
+  "@jupyterlab/pluginmanager:IPluginManager": "A canary for plugin manager presence, with a method to open the plugin manager widget.",
   "@jupyterlab/rendermime:IRenderMimeRegistry": "A service for the rendermime registry for the application. Use this to create renderers for various mime-types in your extension. Many times it will be easier to create a \"mime renderer extension\" rather than using this service directly.",
   "@jupyterlab/running:IRunningSessionManagers": "A service to add running session managers.",
   "@jupyterlab/settingeditor:ISettingEditorTracker": "A widget tracker for the interactive setting editor.\n  Use this if you want to be able to iterate over and interact with setting editors\n  created by the application.",

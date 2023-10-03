@@ -1984,6 +1984,18 @@
     ]
   },
   {
+    "id": "pluginmanager:open",
+    "label": "Advanced Plugin Manager",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "pluginmanager:refresh",
+    "label": "Refresh Plugin List",
+    "caption": "Refresh plugins list",
+    "shortcuts": []
+  },
+  {
     "id": "property-inspector:show-panel",
     "label": "Property Inspector",
     "caption": "",
