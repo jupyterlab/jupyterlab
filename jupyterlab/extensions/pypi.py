@@ -3,29 +3,28 @@
 
 """Extension manager using pip as package manager and PyPi.org as packages source."""
 
-import tornado
 import asyncio
+import http.client
 import io
 import json
 import math
 import re
 import sys
 import xmlrpc.client
-import http.client
-
-from urllib.parse import urlparse
 from datetime import datetime, timedelta, timezone
-from os import environ
 from functools import partial
 from itertools import groupby
+from os import environ
 from pathlib import Path
 from subprocess import CalledProcessError, run
 from tarfile import TarFile
 from typing import Any, Callable, Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 from zipfile import ZipFile
 
-from tornado.curl_httpclient import CurlAsyncHTTPClient
+import tornado
 from async_lru import alru_cache
+from tornado.curl_httpclient import CurlAsyncHTTPClient
 from traitlets import CFloat, CInt, Unicode, config, observe
 
 from jupyterlab.extensions.manager import (
@@ -55,14 +54,10 @@ proxy_config = {}
 if http_proxy_url:
     http_proxy = urlparse(http_proxy_url)
     proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
-    proxy_config = {
-        'proxy_host': proxy_host,
-        'proxy_port': int(proxy_port) if proxy_port else None
-    }
+    proxy_config = {'proxy_host': proxy_host, 'proxy_port': int(proxy_port) if proxy_port else None}
 
     xmlrpc_transport_override = ProxiedTransport()
-    xmlrpc_transport_override.set_proxy(proxy_config["proxy_host"],
-                                        proxy_config["proxy_port"])
+    xmlrpc_transport_override.set_proxy(proxy_config["proxy_host"], proxy_config["proxy_port"])
 
 
 async def _fetch_package_metadata(name: str, latest_version: str, base_url: str) -> dict:
@@ -70,7 +65,7 @@ async def _fetch_package_metadata(name: str, latest_version: str, base_url: str)
     response = await http_client.fetch(
         base_url + f"/{name}/{latest_version}/json",
         headers={"Content-Type": "application/json"},
-        **proxy_config
+        **proxy_config,
     )
     data = json.loads(response.body).get("info")
 
@@ -122,7 +117,9 @@ class PyPIExtensionManager(ExtensionManager):
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
         self._http_client = CurlAsyncHTTPClient()
-        self._rpc_client = xmlrpc.client.ServerProxy(self.base_url, transport=xmlrpc_transport_override)
+        self._rpc_client = xmlrpc.client.ServerProxy(
+            self.base_url, transport=xmlrpc_transport_override
+        )
         self.__last_all_packages_request_time = datetime.now(tz=timezone.utc) - timedelta(
             seconds=self.cache_timeout * 1.01
         )
@@ -130,7 +127,9 @@ class PyPIExtensionManager(ExtensionManager):
 
         self.log.debug(f"Extensions list will be fetched from {self.base_url}.")
         if xmlrpc_transport_override:
-            self.log.info(f"Extensions will be fetched using proxy, proxy host and port: {xmlrpc_transport_override.proxy}")
+            self.log.info(
+                f"Extensions will be fetched using proxy, proxy host and port: {xmlrpc_transport_override.proxy}"
+            )
 
     @property
     def metadata(self) -> ExtensionManagerMetadata:
@@ -150,7 +149,7 @@ class PyPIExtensionManager(ExtensionManager):
             response = await http_client.fetch(
                 self.base_url + f"/{pkg}/json",
                 headers={"Content-Type": "application/json"},
-                **proxy_config
+                **proxy_config,
             )
             data = json.loads(response.body).get("info")
         except Exception:
@@ -341,12 +340,10 @@ class PyPIExtensionManager(ExtensionManager):
             )
 
             action_info = json.loads(result.stdout.decode("utf-8"))
-            pkg_action = list(
-                filter(
+            pkg_action = next(iter(filter(
                     lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
                     action_info.get("install", []),
-                )
-            )[0]
+                )))
         except CalledProcessError as e:
             self.log.debug(f"Fail to get installation report: {e.stderr}", exc_info=e)
         except Exception as err:
