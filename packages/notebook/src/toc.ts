@@ -512,7 +512,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
       heading: INotebookHeading | null
     ) => {
       if (heading) {
-        const onCellInViewport = (cell: Cell): void => {
+        const onCellInViewport = async (cell: Cell): Promise<void> => {
           if (!cell.inViewport) {
             // Bail early
             return;
@@ -532,7 +532,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
             }
           } else {
             console.debug('scrolling to heading: using fallback strategy');
-            widget.content.scrollToItem(widget.content.activeCellIndex);
+            await widget.content.scrollToItem(widget.content.activeCellIndex);
           }
         };
 
@@ -547,7 +547,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           widget.content
             .scrollToItem(idx)
             .then(() => {
-              onCellInViewport(cell);
+              return onCellInViewport(cell);
             })
             .catch(reason => {
               console.error(
