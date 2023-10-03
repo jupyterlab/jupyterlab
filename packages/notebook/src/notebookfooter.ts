@@ -38,6 +38,11 @@ export class NotebookFooter extends Widget {
       case 'click':
         this.onClick();
         break;
+      case 'keydown':
+        if ((event as KeyboardEvent).key === 'ArrowUp') {
+          this.onArrowUp();
+          break;
+        }
     }
   }
 
@@ -51,12 +56,21 @@ export class NotebookFooter extends Widget {
     NotebookActions.insertBelow(this.notebook);
   }
 
+  /**
+   * On arrow up key pressed (keydown keyboard event).
+   * @deprecated To be removed in v5, this is a no-op
+   */
+  protected onArrowUp(): void {
+    // The specific behavior has been removed in https://github.com/jupyterlab/jupyterlab/pull/14796
+  }
+
   /*
    * Handle `after-detach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     this.node.addEventListener('click', this);
+    this.node.addEventListener('keydown', this);
   }
 
   /**
@@ -64,6 +78,7 @@ export class NotebookFooter extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     this.node.removeEventListener('click', this);
+    this.node.removeEventListener('keydown', this);
     super.onBeforeDetach(msg);
   }
 }
