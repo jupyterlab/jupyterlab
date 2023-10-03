@@ -2022,6 +2022,12 @@
     ]
   },
   {
+    "id": "notebook:toggle-virtual-scrollbar",
+    "label": "Virtual Scrollbar",
+    "caption": "Virtual Scrollbar (enabled with windowing mode: full)",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:trust",
     "label": "Trust Notebook",
     "caption": "",
