@@ -637,6 +637,15 @@ export namespace CompletionHandler {
     items: Array<T>;
   }
 
+  /**
+   * Stream event type.
+   */
+  export const enum StraemEvent {
+    opened,
+    update,
+    closed
+  }
+
   export interface IInlineItem extends IInlineCompletionItem {
     /**
      * The source provider information.
@@ -645,7 +654,15 @@ export namespace CompletionHandler {
     /**
      * Signal emitted when the item gets updated by streaming.
      */
-    streamed: ISignal<any, void>;
+    stream: ISignal<IInlineItem, StraemEvent>;
+    /**
+     * Most recent streamed token if any.
+     */
+    lastStreamed?: string;
+    /**
+     * Whether streaming is in progress.
+     */
+    streaming: boolean;
   }
 
   /**

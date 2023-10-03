@@ -12,6 +12,8 @@ import { StateEffect, StateField, Text, Transaction } from '@codemirror/state';
 const TRANSIENT_LINE_SPACER_CLASS = 'jp-GhostText-lineSpacer';
 const TRANSIENT_LETTER_SPACER_CLASS = 'jp-GhostText-letterSpacer';
 const GHOST_TEXT_CLASS = 'jp-GhostText';
+const STREAMED_TOKEN_CLASS = 'jp-GhostText-streamedToken';
+const STREAMING_INDICATOR_CLASS = 'jp-GhostText-streamingIndicator';
 
 /**
  * Ghost text content and placement.
@@ -29,6 +31,14 @@ export interface IGhostText {
    * The identifier of the completion provider.
    */
   providerId: string;
+  /**
+   * The tokens added in the last stream update, must be a suffix of the content.
+   */
+  addedPart?: string;
+  /**
+   * Whether streaming is in progress.
+   */
+  streaming?: boolean;
 }
 
 export class GhostTextManager {
@@ -69,8 +79,13 @@ class GhostTextWidget extends WidgetType {
     super();
   }
 
+  isSpacer = false;
+
   eq(other: GhostTextWidget) {
-    return other.content == this.content;
+    return (
+      other.content == this.content &&
+      other.options.streaming === this.options.streaming
+    );
   }
 
   get lineBreaks() {
@@ -78,7 +93,7 @@ class GhostTextWidget extends WidgetType {
   }
 
   updateDOM(dom: HTMLElement, _view: EditorView): boolean {
-    dom.innerText = this.content;
+    this._updateDOM(dom);
     return true;
   }
 
@@ -89,9 +104,31 @@ class GhostTextWidget extends WidgetType {
   toDOM() {
     let wrap = document.createElement('span');
     wrap.classList.add(GHOST_TEXT_CLASS);
+    wrap.dataset.animation = 'slide'; // TODO expose as a setting and add option 'none'
     wrap.dataset.providedBy = this.options.providerId;
-    wrap.innerText = this.content;
+    this._updateDOM(wrap);
     return wrap;
+  }
+
+  private _updateDOM(dom: HTMLElement) {
+    const content = this.content;
+    const addition = this.options.addedPart;
+    if (addition && !this.isSpacer) {
+      dom.innerText = content.substring(0, content.length - addition.length);
+      const addedPart = document.createElement('span');
+      addedPart.className = STREAMED_TOKEN_CLASS;
+      addedPart.innerText = addition;
+      dom.appendChild(addedPart);
+    } else {
+      // just set text
+      dom.innerText = content;
+    }
+    // Add "streaming-in-progress" indicator
+    if (!this.isSpacer && this.options.streaming) {
+      const streamingIndicator = document.createElement('span');
+      streamingIndicator.className = STREAMING_INDICATOR_CLASS;
+      dom.appendChild(streamingIndicator);
+    }
   }
 }
 
@@ -101,7 +138,7 @@ class GhostTextWidget extends WidgetType {
  * but without spacer they would see the editor collapse in height and then elongate again.
  */
 class TransientSpacerWidget extends GhostTextWidget {
-  // no-op
+  isSpacer = true;
 }
 
 class TransientLineSpacerWidget extends TransientSpacerWidget {
@@ -139,11 +176,13 @@ namespace Private {
   }
 
   export const addMark = StateEffect.define<IGhostText>({
-    map: ({ from, content, providerId }, change) => ({
+    map: ({ from, content, providerId, addedPart, streaming }, change) => ({
       from: change.mapPos(from),
       to: change.mapPos(from + content.length),
       content,
-      providerId
+      providerId,
+      addedPart,
+      streaming
     })
   });
 
@@ -327,7 +366,13 @@ namespace Private {
             filter: (_from, _to, value) => newValues.includes(value)
           });
           if (shouldRemoveGhost) {
-            marks = marks.map(tr.changes);
+            // TODO this can error out when deleting text, ideally a clean solution would be used.
+            try {
+              marks = marks.map(tr.changes);
+            } catch (e) {
+              console.warn(e);
+              return Decoration.none;
+            }
           }
           return marks;
         }

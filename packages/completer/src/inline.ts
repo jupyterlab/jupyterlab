@@ -146,17 +146,28 @@ export class InlineCompleter extends Widget {
 
   private _updateStreamTracking() {
     if (this._lastItem) {
-      this._lastItem.streamed.disconnect(this._onStreamed, this);
+      this._lastItem.stream.disconnect(this._onStream, this);
     }
     const current = this.current;
     if (current) {
-      current.streamed.connect(this._onStreamed, this);
+      current.stream.connect(this._onStream, this);
     }
     this._lastItem = current;
   }
 
-  private _onStreamed() {
-    this._render();
+  private _onStream(
+    _emitter: CompletionHandler.IInlineItem,
+    _change: CompletionHandler.StraemEvent
+  ) {
+    // TODO handle stuck streams, i.e. if we connected and received 'opened'
+    // but then did not receive 'closed' for a long time we should disconnect
+    // and update widget with an 'timed out' status.
+    const completions = this.model?.completions;
+    if (!completions || !completions.items || completions.items.length === 0) {
+      return;
+    }
+    const candidate = completions.items[this._current];
+    this._setText(candidate);
   }
 
   private _lastItem: CompletionHandler.IInlineItem | null = null;
@@ -299,6 +310,8 @@ export class InlineCompleter extends Widget {
     _emitter: InlineCompleter.IModel,
     mapping: Map<number, number>
   ): void {
+    // TODO: cancel stream cursor position changes or when text changes
+    // TODO hide hoverbox on cursor movement
     const completions = this.model?.completions;
     if (!completions || !completions.items || completions.items.length === 0) {
       return;
@@ -348,7 +361,9 @@ export class InlineCompleter extends Widget {
     this._ghostManager.placeGhost(view, {
       from: editor.getOffsetAt(model.cursor),
       content: text,
-      providerId: item.provider.identifier
+      providerId: item.provider.identifier,
+      addedPart: item.lastStreamed,
+      streaming: item.streaming
     });
   }
 

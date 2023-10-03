@@ -58,7 +58,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
             ...completionList,
             items: completionList.items.map(item => {
               const newItem = item as CompletionHandler.IInlineItem;
-              newItem.streamed = new Signal(item);
+              newItem.stream = new Signal(newItem);
               newItem.provider = provider;
               void this._stream(newItem, provider);
               return newItem;
@@ -82,15 +82,31 @@ export class ProviderReconciliator implements IProviderReconciliator {
     if (!item.isIncomplete || !provider.stream || !item.token) {
       return;
     }
+    const streamed = item.stream as Signal<
+      CompletionHandler.IInlineItem,
+      CompletionHandler.StraemEvent
+    >;
     const token = item.token;
     item.token = undefined;
+
+    // Notify that streaming started.
+    item.streaming = true;
+    streamed.emit(CompletionHandler.StraemEvent.opened);
+
     for await (const reply of provider.stream(token)) {
       const updated = reply.response;
+      const addition = updated.insertText.substring(item.insertText.length);
+      // Stream an update.
       item.insertText = updated.insertText;
-      (item.streamed as Signal<CompletionHandler.IInlineItem, void>).emit();
+      item.lastStreamed = addition;
+      streamed.emit(CompletionHandler.StraemEvent.update);
     }
+
+    // Notify that streaming is no longer in progress.
     item.isIncomplete = false;
-    (item.streamed as Signal<CompletionHandler.IInlineItem, void>).emit();
+    item.lastStreamed = undefined;
+    item.streaming = false;
+    streamed.emit(CompletionHandler.StraemEvent.closed);
   }
 
   /**
