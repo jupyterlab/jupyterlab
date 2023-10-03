@@ -102,6 +102,8 @@
     "@jupyterlab/observables": "^5.1.0-alpha.1",
     "@jupyterlab/outputarea": "^4.1.0-alpha.1",
     "@jupyterlab/pdf-extension": "^4.1.0-alpha.1",
+    "@jupyterlab/pluginmanager": "^4.1.0-alpha.1",
+    "@jupyterlab/pluginmanager-extension": "^4.1.0-alpha.1",
     "@jupyterlab/property-inspector": "^4.1.0-alpha.1",
     "@jupyterlab/rendermime": "^4.1.0-alpha.1",
     "@jupyterlab/rendermime-extension": "^4.1.0-alpha.1",
