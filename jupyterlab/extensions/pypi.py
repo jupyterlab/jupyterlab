@@ -3,6 +3,7 @@
 
 """Extension manager using pip as package manager and PyPi.org as packages source."""
 
+import tornado
 import asyncio
 import io
 import json
@@ -10,7 +11,11 @@ import math
 import re
 import sys
 import xmlrpc.client
+import http.client
+
+from urllib.parse import urlparse
 from datetime import datetime, timedelta, timezone
+from os import environ
 from functools import partial
 from itertools import groupby
 from pathlib import Path
@@ -19,7 +24,7 @@ from tarfile import TarFile
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from zipfile import ZipFile
 
-import tornado
+from tornado.curl_httpclient import CurlAsyncHTTPClient
 from async_lru import alru_cache
 from traitlets import CFloat, CInt, Unicode, config, observe
 
@@ -31,11 +36,41 @@ from jupyterlab.extensions.manager import (
 )
 
 
+class ProxiedTransport(xmlrpc.client.Transport):
+    def set_proxy(self, host, port=None, headers=None):
+        self.proxy = host, port
+        self.proxy_headers = headers
+
+    def make_connection(self, host):
+        connection = http.client.HTTPConnection(*self.proxy)
+        connection.set_tunnel(host, headers=self.proxy_headers)
+        self._connection = host, connection
+        return connection
+
+
+xmlrpc_transport_override = None
+
+http_proxy_url = environ.get('http_proxy') or environ.get('HTTP_PROXY')
+proxy_config = {}
+if http_proxy_url:
+    http_proxy = urlparse(http_proxy_url)
+    proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
+    proxy_config = {
+        'proxy_host': proxy_host,
+        'proxy_port': int(proxy_port) if proxy_port else None
+    }
+
+    xmlrpc_transport_override = ProxiedTransport()
+    xmlrpc_transport_override.set_proxy(proxy_config["proxy_host"],
+                                        proxy_config["proxy_port"])
+
+
 async def _fetch_package_metadata(name: str, latest_version: str, base_url: str) -> dict:
-    http_client = tornado.httpclient.AsyncHTTPClient()
+    http_client = CurlAsyncHTTPClient()
     response = await http_client.fetch(
         base_url + f"/{name}/{latest_version}/json",
         headers={"Content-Type": "application/json"},
+        **proxy_config
     )
     data = json.loads(response.body).get("info")
 
@@ -86,14 +121,16 @@ class PyPIExtensionManager(ExtensionManager):
         self._fetch_package_metadata = _fetch_package_metadata
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
-        self._http_client = tornado.httpclient.AsyncHTTPClient()
-        self._rpc_client = xmlrpc.client.ServerProxy(self.base_url)
+        self._http_client = CurlAsyncHTTPClient()
+        self._rpc_client = xmlrpc.client.ServerProxy(self.base_url, transport=xmlrpc_transport_override)
         self.__last_all_packages_request_time = datetime.now(tz=timezone.utc) - timedelta(
             seconds=self.cache_timeout * 1.01
         )
         self.__all_packages_cache = None
 
         self.log.debug(f"Extensions list will be fetched from {self.base_url}.")
+        if xmlrpc_transport_override:
+            self.log.info(f"Extensions will be fetched using proxy, proxy host and port: {xmlrpc_transport_override.proxy}")
 
     @property
     def metadata(self) -> ExtensionManagerMetadata:
@@ -109,10 +146,11 @@ class PyPIExtensionManager(ExtensionManager):
             The latest available version
         """
         try:
-            http_client = tornado.httpclient.AsyncHTTPClient()
+            http_client = CurlAsyncHTTPClient()
             response = await http_client.fetch(
                 self.base_url + f"/{pkg}/json",
                 headers={"Content-Type": "application/json"},
+                **proxy_config
             )
             data = json.loads(response.body).get("info")
         except Exception:
@@ -303,12 +341,12 @@ class PyPIExtensionManager(ExtensionManager):
             )
 
             action_info = json.loads(result.stdout.decode("utf-8"))
-            pkg_action = next(
+            pkg_action = list(
                 filter(
                     lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
                     action_info.get("install", []),
                 )
-            )
+            )[0]
         except CalledProcessError as e:
             self.log.debug(f"Fail to get installation report: {e.stderr}", exc_info=e)
         except Exception as err:
@@ -332,7 +370,7 @@ class PyPIExtensionManager(ExtensionManager):
             try:
                 download_url: str = pkg_action.get("download_info", {}).get("url")
                 if download_url is not None:
-                    response = await self._http_client.fetch(download_url)
+                    response = await self._http_client.fetch(download_url, **proxy_config)
                     if download_url.endswith(".whl"):
                         with ZipFile(io.BytesIO(response.body)) as wheel:
                             for name in filter(
