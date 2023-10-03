@@ -2602,6 +2602,7 @@ __metadata:
     "@jupyterlab/coreutils": ^6.1.0-alpha.1
     "@jupyterlab/rendermime": ^4.1.0-alpha.1
     "@jupyterlab/services": ^7.1.0-alpha.1
+    "@jupyterlab/settingregistry": ^4.1.0-alpha.1
     "@jupyterlab/statedb": ^4.1.0-alpha.1
     "@jupyterlab/testing": ^4.1.0-alpha.1
     "@jupyterlab/translation": ^4.1.0-alpha.1

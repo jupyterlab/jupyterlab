@@ -43,6 +43,11 @@ export interface IGhostText {
 
 export class GhostTextManager {
   /**
+   * Typing animation.
+   */
+  static streamingAnimation: 'none' | 'uncover' = 'uncover';
+
+  /**
    * Place ghost text in an editor.
    */
   placeGhost(view: EditorView, text: IGhostText): void {
@@ -104,7 +109,7 @@ class GhostTextWidget extends WidgetType {
   toDOM() {
     let wrap = document.createElement('span');
     wrap.classList.add(GHOST_TEXT_CLASS);
-    wrap.dataset.animation = 'slide'; // TODO expose as a setting and add option 'none'
+    wrap.dataset.animation = GhostTextManager.streamingAnimation;
     wrap.dataset.providedBy = this.options.providerId;
     this._updateDOM(wrap);
     return wrap;

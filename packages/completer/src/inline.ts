@@ -184,6 +184,7 @@ export class InlineCompleter extends Widget {
       this._showShortcuts = settings.showShortcuts;
       this._updateShortcutsVisibility();
     }
+    GhostTextManager.streamingAnimation = settings.streamingAnimation;
   }
 
   /**
@@ -460,6 +461,7 @@ export namespace InlineCompleter {
   export const defaultSettings: IInlineCompleterSettings = {
     showWidget: true,
     showShortcuts: true,
+    streamingAnimation: 'uncover',
     providers: {}
   };
 

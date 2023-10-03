@@ -42,6 +42,13 @@
       "description": "Whether to show shortcuts in the inline completer widget.",
       "type": "boolean",
       "default": true
+    },
+    "streamingAnimation": {
+      "title": "Streaming animation",
+      "description": "Transition effect used when streaming tokens from model.",
+      "type": "string",
+      "enum": ["none", "uncover"],
+      "default": "uncover"
     }
   },
   "additionalProperties": false,

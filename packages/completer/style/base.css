@@ -234,11 +234,11 @@
   }
 }
 
-.jp-GhostText[data-animation='slide'] {
+.jp-GhostText[data-animation='uncover'] {
   position: relative;
 }
 
-.jp-GhostText[data-animation='slide'] .jp-GhostText-streamedToken {
+.jp-GhostText[data-animation='uncover'] .jp-GhostText-streamedToken {
   animation: jp-GhostText-typing 2s forwards;
   display: inline-flex;
   overflow: hidden;

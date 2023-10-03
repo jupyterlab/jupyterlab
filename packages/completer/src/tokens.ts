@@ -426,6 +426,10 @@ export interface IInlineCompleterSettings {
    */
   showShortcuts: boolean;
   /**
+   * Transition effect used when streaming tokens from model.
+   */
+  streamingAnimation: 'none' | 'uncover';
+  /**
    * Provider settings.
    */
   providers: {

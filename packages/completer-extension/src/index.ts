@@ -195,21 +195,9 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
     });
 
     const updateSettings = (settings: ISettingRegistry.ISettings) => {
-      const defaults = InlineCompleter.defaultSettings;
-      completionManager.inline?.configure({
-        showWidget:
-          (settings.composite
-            .showWidget as IInlineCompleterSettings['showWidget']) ??
-          defaults.showWidget,
-        showShortcuts:
-          (settings.composite
-            .showShortcuts as IInlineCompleterSettings['showShortcuts']) ??
-          defaults.showShortcuts,
-        providers:
-          (settings.composite
-            .providers as IInlineCompleterSettings['providers']) ??
-          defaults.providers
-      });
+      completionManager.inline?.configure(
+        settings.composite as unknown as IInlineCompleterSettings
+      );
     };
 
     app.restored
