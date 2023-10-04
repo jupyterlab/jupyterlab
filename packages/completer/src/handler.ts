@@ -486,8 +486,9 @@ export class CompletionHandler implements IDisposable {
     position: CodeEditor.IPosition
   ): CompletionHandler.IRequest {
     const text = editor.model.sharedModel.getSource();
+    const mimeType = editor.model.mimeType;
     const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
-    return { text, offset };
+    return { text, offset, mimeType };
   }
 
   /**
@@ -678,6 +679,11 @@ export namespace CompletionHandler {
      * The text being completed.
      */
     text: string;
+
+    /**
+     * The MIME type under the cursor.
+     */
+    mimeType: string;
   }
 
   /**
