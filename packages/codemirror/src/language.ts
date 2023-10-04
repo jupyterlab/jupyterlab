@@ -27,7 +27,7 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
     // Add default language text/plain -> No expressions to parse
     this.addLanguage({
       name: 'none',
-      mime: IEditorMimeTypeService.defaultMimeType,
+      mime: 'text/plain',
       support: new LanguageSupport(
         // Create a dummy parser that as no expression to parse
         LRLanguage.define({ parser: buildParser('@top Program { }') })
