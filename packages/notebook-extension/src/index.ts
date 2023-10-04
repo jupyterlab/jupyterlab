@@ -3460,10 +3460,13 @@ function addCommands(
         current.content.scrollbar = !current.content.scrollbar;
       }
     },
+    icon: args => (args.toolbar ? tableRowsIcon : undefined),
     isEnabled: args =>
       (args.toolbar ? true : isEnabled()) &&
       (settings?.composite.windowingMode === 'full' ?? false),
-    icon: args => (args.toolbar ? tableRowsIcon : undefined)
+    isVisible: args =>
+      (args.toolbar ? true : isEnabled()) &&
+      (settings?.composite.windowingMode === 'full' ?? false)
   });
 }
 
