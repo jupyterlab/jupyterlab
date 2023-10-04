@@ -1122,6 +1122,50 @@ export const cellTagListPlugin: JupyterFrontEndPlugin<void> = {
       execute: args => {
         //console.log('notebookModelMap:', notebookModelMap);
         const current = getCurrent(tracker, shell, args);
+
+        function isContentShared(array1: Array<string>, array2: Array<string>) {
+          let isIncluded: boolean[] = [];
+          array2.forEach(item => {
+            isIncluded.push(array1.includes(item));
+          });
+          return isIncluded.some(item => item);
+        }
+
+        /* Check is the cells of the input notebook have to be filtered and update the hidden cells state respectively  */
+        function updateFilteredCells(model: CellTagListModel | undefined) {
+          if (model) {
+            const checkedList: Array<string> = [];
+
+            for (let key in model.checkedDict) {
+              let value = model.checkedDict[key];
+              if (value === true) {
+                checkedList.push(key);
+              }
+            }
+            model.notebookPanel?.content.widgets.forEach(cell => {
+              let isFiltered = isContentShared(
+                cell.model.getMetadata('tags'),
+                checkedList
+              ); /* IsFiltered is true when the list of tags of a cell includes at least one the checked tags */
+              if (isFiltered === false && cell.inputHidden === false) {
+                cell.inputHidden = true;
+              }
+              if (isFiltered === true && cell.inputHidden === true) {
+                cell.inputHidden = false;
+              }
+            });
+          }
+        }
+        function clearFilters(model: CellTagListModel | undefined) {
+          if (model) {
+            for (let key in model.checkedDict) {
+              model.checkedDict[key] = false;
+            }
+            model.notebookPanel?.content.widgets.forEach(cell => {
+              cell.inputHidden = false;
+            });
+          }
+        }
         if (current) {
           /*const idx = Array.from(current.toolbar.names()).findIndex(
             name => name === 'filter-cells'
@@ -1140,12 +1184,27 @@ export const cellTagListPlugin: JupyterFrontEndPlugin<void> = {
               }
             });
           }
-          notebookModelMap.set(current.content, model);
 
+          notebookModelMap.set(current.content, model);
+          const selectButton = Dialog.okButton({
+            label: trans.__('Select Cell(s) With Current Tag(s)'),
+            actions: ['select']
+          });
+          const clearButton = Dialog.okButton({
+            label: trans.__('Clear Filter(s)'),
+            actions: ['clear']
+          });
           const view = new CellTagListView(model);
           showDialog({
             body: view,
-            buttons: []
+            buttons: [Dialog.cancelButton(), selectButton, clearButton]
+          }).then(result => {
+            if (result.button.actions.includes('select')) {
+              updateFilteredCells(model);
+            }
+            if (result.button.actions.includes('clear')) {
+              clearFilters(model);
+            }
           });
 
           /*const popup = showPopup({
