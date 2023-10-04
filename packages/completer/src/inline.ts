@@ -57,6 +57,8 @@ export class InlineCompleter extends Widget {
     return this._editor;
   }
   set editor(newValue: CodeEditor.IEditor | null | undefined) {
+    // TODO also cancel on cursor movement
+    this.model?.reset();
     this._editor = newValue;
   }
 
@@ -234,8 +236,8 @@ export class InlineCompleter extends Widget {
 
     if (this.isHidden) {
       this.show();
+      this._setGeometry();
     }
-    this._setGeometry();
   }
 
   /**
@@ -299,11 +301,11 @@ export class InlineCompleter extends Widget {
       this.update();
       return;
     }
-    if (args.event == 'set') {
+    if (args.event === 'set') {
       this._current = args.indexMap!.get(this._current) ?? 0;
-      this._updateStreamTracking();
-      this.update();
     }
+    this._updateStreamTracking();
+    this.update();
     this._render();
   }
 
@@ -323,6 +325,7 @@ export class InlineCompleter extends Widget {
     // wait for the update to complete before calling `this._render()`. As there
     // is no API to check if update is done, we instead defer to next engine tick.
     setTimeout(() => this._render(), 0);
+    this._setGeometry();
   }
 
   private _render(): void {
@@ -430,11 +433,11 @@ interface ISuggestionsChangedArgs {
   /**
    * Whether completions were set (new query) or appended (for existing query)
    */
-  event: 'set' | 'append';
+  event: 'set' | 'append' | 'clear';
   /**
    * Number of providers that is expected to still report inline suggestions.
    */
-  expecting: number;
+  expecting?: number;
   /**
    * Map between old and new inline indices, only present for `set` event.
    */
@@ -574,6 +577,7 @@ export namespace InlineCompleter {
 
     reset() {
       this._completions = null;
+      this.suggestionsChanged.emit({ event: 'clear' });
     }
 
     /**
