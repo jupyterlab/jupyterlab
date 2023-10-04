@@ -209,7 +209,7 @@
 
 .jp-GhostText {
   color: var(--jp-ui-font-color3);
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 .jp-GhostText-lineSpacer,
