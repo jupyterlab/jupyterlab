@@ -70,9 +70,6 @@ in Jupyter's provider-consumer pattern, and other plugins can use ("consume")
 this object (the "service object") in their extensions. Read more about this
 in the "Making Your Plugin a Provider" section below.
 
-..
-  TODO expand the return from activate section here
-
 How Requesting Features Works
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -94,9 +91,6 @@ To make your plugin a "provider" of service objects that other plugins can use,
 you need to list a ["Token"](https://lumino.readthedocs.io/en/latest/api/classes/coreutils.Token.html#constructor)
 in your plugin's "provides" property, then return an object from your plugin's
 "activate" callable.
-
-..
-  TODO edit link when folders are renamed from compat_4a etc.
 
 Take a look at a snippet from [this example extension](https://github.com/jupyterlab/extension-examples/tree/main/step_counter)
 in the examples repo (you can read the full extension example code there):
