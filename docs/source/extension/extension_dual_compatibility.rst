@@ -136,7 +136,7 @@ repo (you can read the full extension example code there):
 
   const plugin: JupyterFrontEndPlugin<void> = {
     id: 'shout_button_message:plugin',
-    description: 'An extension that adds a button to the right toolbar',
+    description: 'An extension that adds a button and message to the right toolbar, with optional status bar widget in JupyterLab.',
     autoStart: true,
     // The IStatusBar is marked optional here. If it's available, it will
     // be provided to the plugin as an argument to the activate function
@@ -168,7 +168,6 @@ JupyterLab and Jupyter Notebook 7:
 
 .. code::
 
-  // The widget's constructor
   constructor(statusBar: any) {
     super();
 
@@ -206,12 +205,13 @@ right sidebar in Jupyter Notebook 7 (you can read the full extension
 example code there):
 
 .. code::
+
   /**
-  * Initialization data for the clap_button extension.
+  * Initialization data for the clap_button JupyterLab extension.
   */
   const pluginJupyterLab: JupyterFrontEndPlugin<void> = {
     id: 'clap_button:pluginLab',
-    description: 'Adds a clap button to the top area (JupyterLab) or right area (Jupyter Notebook 7)',
+    description: 'Adds a clap button to the top area JupyterLab',
     autoStart: true,
     requires: [ILabShell],
     activate: (app: JupyterFrontEnd) => {
@@ -219,25 +219,25 @@ example code there):
 
       // Create a ClapWidget and add it to the interface in the top area
       const clapWidget: ClapWidget = new ClapWidget();
-      clapWidget.id = 'JupyterLabClapWidget';  // Widgets need an id
+      clapWidget.id = 'JupyterLabClapWidgetLab';  // Widgets need an id
       app.shell.add(clapWidget, 'top');
     }
   };
 
   /**
-  * Initialization data for the clap_button extension.
+  * Initialization data for the clap_button Jupyter Notebook extension.
   */
   const pluginJupyterNotebook: JupyterFrontEndPlugin<void> = {
     id: 'clap_button:pluginNotebook',
-    description: 'Adds a clap button to the top area (JupyterLab) or right area (Jupyter Notebook 7)',
+    description: 'Adds a clap button to the right sidebar of Jupyter Notebook 7',
     autoStart: true,
     requires: [INotebookShell],
     activate: (app: JupyterFrontEnd) => {
       console.log('Jupyter Notebook extension clap_button is activated!');
 
-      // Create a ClapWidget and add it to the interface in the top area
+      // Create a ClapWidget and add it to the interface in the right area
       const clapWidget: ClapWidget = new ClapWidget();
-      clapWidget.id = 'JupyterNotebookClapWidget';  // Widgets need an id
+      clapWidget.id = 'JupyterNotebookClapWidgetNotebook';  // Widgets need an id
       app.shell.add(clapWidget, 'right');
     }
   };
