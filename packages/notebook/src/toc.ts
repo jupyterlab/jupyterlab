@@ -542,7 +542,12 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         widget.content.activeCellIndex = idx;
 
         if (cell.inViewport) {
-          onCellInViewport(cell);
+          onCellInViewport(cell)
+            .catch(reason => {
+              console.error(
+                `Fail to scroll to cell to display the required heading (${reason}).`
+              );
+            });
         } else {
           widget.content
             .scrollToItem(idx)
