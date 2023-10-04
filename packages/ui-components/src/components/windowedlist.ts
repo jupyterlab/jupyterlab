@@ -814,6 +814,7 @@ export class WindowedList<
     } else {
       this.node.classList.remove('jp-mod-virtual-scrollbar');
     }
+    this.update();
   }
 
   /**
@@ -1040,12 +1041,16 @@ export class WindowedList<
    * The default implementation of this handler is a no-op.
    */
   protected onUpdateRequest(msg: Message): void {
-    // Hide the native scrollbar if necessary.
+    // Hide the native scrollbar if necessary and update dimensions.
     if (this.scrollbar) {
       this.node.style.width = 'calc(100% + 25px)';
+      const scrollbar = this.node.querySelector('.jp-WindowedPanel-scrollbar');
+      const scrollbarWidth = scrollbar!.getBoundingClientRect().width;
+      this._innerElement.style.width = `calc(100% - ${scrollbarWidth}px)`;
       this._renderScrollbar();
     } else {
       this.node.style.width = '100%';
+      this._innerElement.style.width = 'auto';
     }
     if (this.viewModel.windowingActive) {
       // Throttle update request
