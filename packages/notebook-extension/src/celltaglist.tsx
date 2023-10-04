@@ -23,32 +23,6 @@ export function getNotebookTagList(notebookPanel: NotebookPanel) {
 }
 
 /* Check if 2 arrays have at least one common element and return true if that's the case*/
-export function isContentShared(array1: Array<string>, array2: Array<string>) {
-  let isIncluded: boolean[] = [];
-  array2.forEach(item => {
-    isIncluded.push(array1.includes(item));
-  });
-  return isIncluded.some(item => item);
-}
-
-/* Check is the cells of the input notebook have to be filtered and update the hidden cells state respectively  */
-export function updateFilteredCells(
-  notebookPanel: NotebookPanel,
-  checkedList: Array<string>
-) {
-  notebookPanel?.content.widgets.forEach(cell => {
-    let isFiltered = isContentShared(
-      cell.model.getMetadata('tags'),
-      checkedList
-    ); /* IsFiltered is true when the list of tags of a cell includes at least one the checked tags */
-    if (isFiltered === false && cell.inputHidden === false) {
-      cell.inputHidden = true;
-    }
-    if (isFiltered === true && cell.inputHidden === true) {
-      cell.inputHidden = false;
-    }
-  });
-}
 
 interface IProps {
   model: CellTagListModel;
@@ -58,19 +32,14 @@ export function CellTagListComponent(props: IProps) {
   //const notebookPanel = model.notebookPanel;
   const checkedDict = { ...model.checkedDict };
   const updatedCheckedDict = checkedDict;
-  const checkedList: Array<string> = [];
 
   const handleCheck = (event: any) => {
     if (event.target.checked) {
       updatedCheckedDict[event.target.value] =
         !updatedCheckedDict[event.target.value];
-      checkedList.push(event.target.value);
-      updateFilteredCells(model.notebookPanel, checkedList);
     } else {
       updatedCheckedDict[event.target.value] =
         !updatedCheckedDict[event.target.value];
-      checkedList.splice(checkedList.indexOf(event.target.value), 1);
-      updateFilteredCells(model.notebookPanel, checkedList);
     }
 
     model.setCheckedDict(updatedCheckedDict);
