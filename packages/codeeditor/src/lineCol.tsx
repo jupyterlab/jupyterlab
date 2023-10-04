@@ -16,6 +16,7 @@ import {
 } from '@jupyterlab/ui-components';
 import React from 'react';
 import { CodeEditor } from './editor';
+import { DOMUtils } from '@jupyterlab/apputils';
 
 /**
  * A namespace for LineFormComponent statics.
@@ -94,6 +95,7 @@ class LineFormComponent extends React.Component<
    * Render the LineFormComponent.
    */
   render() {
+    const textInputId = DOMUtils.createDomID() + '-line-number-input';
     return (
       <div className="jp-lineFormSearch">
         <form name="lineColumnForm" onSubmit={this._handleSubmit} noValidate>
@@ -106,6 +108,7 @@ class LineFormComponent extends React.Component<
           >
             <input
               type="text"
+              id={textInputId}
               className="jp-lineFormInput"
               onChange={this._handleChange}
               onFocus={this._handleFocus}
@@ -127,7 +130,7 @@ class LineFormComponent extends React.Component<
               />
             </div>
           </div>
-          <label className="jp-lineFormCaption">
+          <label className="jp-lineFormCaption" htmlFor={textInputId}>
             {this._trans.__(
               'Go to line number between 1 and %1',
               this.props.maxLine
