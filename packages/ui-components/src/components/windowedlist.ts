@@ -805,6 +805,9 @@ export class WindowedList<
     return this._viewport;
   }
 
+  /**
+   * Flag to enable virtual scrollbar.
+   */
   get scrollbar(): boolean {
     return this.node.classList.contains('jp-mod-virtual-scrollbar');
   }
