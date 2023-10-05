@@ -841,8 +841,8 @@ function addCommands(
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
     caption,
     icon: args => (args.toolbar ? saveIcon : undefined),
-    isEnabled: isWritable,
-    execute: async () => {
+    isEnabled: args => (args.isKeybinding ? true : isWritable()),
+    execute: async args => {
       // Checks that shell.currentWidget is valid:
       const widget = shell.currentWidget;
       const context = docManager.contextForWidget(widget!);
@@ -859,6 +859,15 @@ function addCommands(
           }
 
           if (context.model.readOnly) {
+            if (args.isKeybinding) {
+              return Notification.warning(
+                trans.__(
+                  `%1 is permissioned as readonly. Use "save as..." instead.`,
+                  context.path
+                ),
+                { autoClose: 5000 }
+              );
+            }
             return showDialog({
               title: trans.__('Cannot Save'),
               body: trans.__('Document is read-only'),
