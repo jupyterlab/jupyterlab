@@ -13,6 +13,7 @@ import {
 import {
   CodeEditor,
   CodeViewerWidget,
+  IEditorMimeTypeService,
   IEditorServices
 } from '@jupyterlab/codeeditor';
 import {
@@ -567,7 +568,13 @@ export namespace Commands {
         if (name && widget) {
           const spec = languages.findByName(name);
           if (spec) {
-            widget.content.model.mimeType = spec.mime as string;
+            if (Array.isArray(spec.mime)) {
+              widget.content.model.mimeType =
+                (spec.mime[0] as string) ??
+                IEditorMimeTypeService.defaultMimeType;
+            } else {
+              widget.content.model.mimeType = spec.mime as string;
+            }
           }
         }
       },
