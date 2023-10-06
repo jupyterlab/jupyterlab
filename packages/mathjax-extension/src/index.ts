@@ -121,7 +121,8 @@ namespace Private {
     if (!_loading) {
       _loading = new PromiseDelegate();
 
-      await import('mathjax-full/js/input/tex/require/RequireConfiguration');
+      void import('mathjax-full/js/input/tex/require/RequireConfiguration');
+
       const [
         { mathjax },
         { CHTML },
