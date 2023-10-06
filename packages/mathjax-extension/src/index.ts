@@ -38,8 +38,9 @@ namespace CommandArgs {
  */
 export class MathJaxTypesetter implements ILatexTypesetter {
   protected async _ensureInitialized() {
-    if (!this._mathDocument) {
+    if (!this._initialized) {
       this._mathDocument = await Private.ensureMathDocument();
+      this._initialized = true;
     }
   }
 
