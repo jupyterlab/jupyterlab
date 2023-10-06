@@ -83,6 +83,7 @@ export class NotebookHistory implements INotebookHistory {
     this.translator = options.translator || nullTranslator;
     void this._handleKernel();
     this.sessionContext.kernelChanged.connect(this._handleKernel, this);
+    this.toRequest = this.requestBatchSize;
   }
 
   /**
@@ -94,6 +95,16 @@ export class NotebookHistory implements INotebookHistory {
    * Translator to be used for warnings
    */
   readonly translator: ITranslator;
+
+  /**
+   * The number of history items to request.
+   */
+  private toRequest: number;
+
+  /**
+   * The number of history items to increase a batch size by per subsequent request.
+   */
+  private requestBatchSize: number = 10;
 
   /**
    * The current editor used by the history manager.
@@ -176,6 +187,9 @@ export class NotebookHistory implements INotebookHistory {
   async back(activeCell: Cell): Promise<string> {
     await this.checkSession(activeCell);
     --this._cursor;
+    if (this._cursor < 0) {
+      await this.fetchBatch();
+    }
     this._cursor = Math.max(0, this._cursor);
     const content = this._filtered[this._cursor];
     return content;
@@ -229,6 +243,39 @@ export class NotebookHistory implements INotebookHistory {
   reset(): void {
     this._hasSession = false;
     this._placeholder = '';
+    this.toRequest = this.requestBatchSize;
+  }
+
+  /**
+   * Fetches a subsequent batch of history. Updates the filtered history and cursor to correct place in history,
+   * accounting for potentially new history items above it.
+   */
+  async fetchBatch() {
+    this.toRequest += this.requestBatchSize;
+    let oldFilteredReversed = this._filtered.slice().reverse();
+    let oldHistory = this._history.slice();
+    await this._retrieveHistory().then(() => {
+      this.setFilter(this._placeholder);
+      let cursorOffset = 0;
+      let filteredReversed = this._filtered.slice().reverse();
+      for (let i = 0; i < oldFilteredReversed.length; i++) {
+        let item = oldFilteredReversed[i];
+        for (let ij = i + cursorOffset; ij < filteredReversed.length; ij++) {
+          if (item === filteredReversed[ij]) {
+            break;
+          } else {
+            cursorOffset += 1;
+          }
+        }
+      }
+      this._cursor =
+        this._filtered.length - (oldFilteredReversed.length + 1) - cursorOffset;
+    });
+    if (this._cursor < 0) {
+      if (this._history.length > oldHistory.length) {
+        await this.fetchBatch();
+      }
+    }
   }
 
   /**
@@ -297,7 +344,7 @@ export class NotebookHistory implements INotebookHistory {
    */
   private async _retrieveHistory(cell?: Cell): Promise<void> {
     return await this._kernel
-      ?.requestHistory(Private.initialRequest)
+      ?.requestHistory(request(this.toRequest))
       .then(v => {
         this.onHistory(v, cell);
       })
@@ -362,14 +409,11 @@ export namespace NotebookHistory {
   }
 }
 
-/**
- * A namespace for private data.
- */
-namespace Private {
-  export const initialRequest: KernelMessage.IHistoryRequestMsg['content'] = {
+function request(n: number): KernelMessage.IHistoryRequestMsg['content'] {
+  return {
     output: false,
     raw: true,
     hist_access_type: 'tail',
-    n: 500
+    n: n
   };
 }
