@@ -148,8 +148,6 @@ namespace Private {
       async: true,
       // enable all built-in GitHub-flavored Markdown opinions
       gfm: true,
-      // santizing is applied by the sanitizer
-      sanitize: false,
       // asynchronously prepare for any special tokens, like highlighting and mermaid
       walkTokens,
       // use custom renderer
