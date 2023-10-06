@@ -37,7 +37,7 @@ test.describe('Dynamic Text Spacing', () => {
 
       expect(height).toEqual(expectedValue + 'px');
     }
-    // I'd convert the value to a string first then use toEqual
+
     const imageName = 'launcher-card-label-height.png';
     expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
