@@ -11,9 +11,6 @@ import math
 import re
 import sys
 import xmlrpc.client
-import tornado
-import httpx
-
 from datetime import datetime, timedelta, timezone
 from functools import partial
 from itertools import groupby
@@ -25,6 +22,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
+import httpx
+import tornado
 from async_lru import alru_cache
 from traitlets import CFloat, CInt, Unicode, config, observe
 
@@ -34,6 +33,7 @@ from jupyterlab.extensions.manager import (
     ExtensionManagerMetadata,
     ExtensionPackage,
 )
+
 
 class ProxiedTransport(xmlrpc.client.Transport):
     def set_proxy(self, host, port=None, headers=None):
@@ -60,7 +60,7 @@ if http_proxy_url:
         "http://": f"http://{proxy_host}:{proxy_port}",
         "https://": f"http://{proxy_host}:{proxy_port}",
     }
-    
+
     xmlrpc_transport_override = ProxiedTransport()
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
@@ -71,7 +71,7 @@ async def _fetch_package_metadata(name: str, latest_version: str, base_url: str)
             base_url + f"/{name}/{latest_version}/json",
             headers={"Content-Type": "application/json"},
         )
-    
+
         data = json.loads(response.text).get("info")
 
         # Keep minimal information to limit cache size
@@ -89,6 +89,7 @@ async def _fetch_package_metadata(name: str, latest_version: str, base_url: str)
                 "summary",
             ]
         }
+
 
 class PyPIExtensionManager(ExtensionManager):
     """Extension manager using pip as package manager and PyPi.org as packages source."""
@@ -150,8 +151,7 @@ class PyPIExtensionManager(ExtensionManager):
         try:
             async with httpx.AsyncClient(proxies=proxies) as httpx_client:
                 response = await httpx_client.get(
-                    self.base_url + f"/{pkg}/json",
-                    headers={"Content-Type": "application/json"}
+                    self.base_url + f"/{pkg}/json", headers={"Content-Type": "application/json"}
                 )
                 data = json.loads(response.text).get("info")
         except Exception:
