@@ -71,7 +71,6 @@ async def _fetch_package_metadata(name: str, latest_version: str, base_url: str)
             base_url + f"/{name}/{latest_version}/json",
             headers={"Content-Type": "application/json"},
         )
-    
         data = json.loads(response.text).get("info")
 
         # Keep minimal information to limit cache size
@@ -495,3 +494,4 @@ class PyPIExtensionManager(ExtensionManager):
             Normalized name
         """
         return name.replace("@", "").replace("/", "-").replace("_", "-")
+
