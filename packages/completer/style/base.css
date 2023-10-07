@@ -287,6 +287,20 @@
   padding: 0 8px;
 }
 
+.jp-InlineCompleter[data-display='onHover'] {
+  opacity: 0;
+  transition: opacity 0.1s linear;
+}
+
+.jp-InlineCompleter[data-display='onHover']:hover,
+.jp-InlineCompleter-hover[data-display='onHover'] {
+  opacity: 1;
+}
+
+.jp-InlineCompleter[data-display='never'] {
+  display: none;
+}
+
 .jp-InlineCompleter > .jp-Toolbar {
   box-shadow: none;
   border-bottom: none;

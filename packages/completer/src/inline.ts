@@ -20,6 +20,7 @@ import { CompletionHandler } from './handler';
 import { GhostTextManager } from './ghost';
 
 const INLINE_COMPLETER_CLASS = 'jp-InlineCompleter';
+const HOVER_CLASS = 'jp-InlineCompleter-hover';
 
 /**
  * Widget enabling user to choose among inline completions,
@@ -185,9 +186,7 @@ export class InlineCompleter extends Widget {
    */
   configure(settings: IInlineCompleterSettings) {
     this._showWidget = settings.showWidget;
-    if (!this._showWidget) {
-      this.hide();
-    }
+    this.node.dataset.display = this._showWidget;
     if (settings.showShortcuts !== this._showShortcuts) {
       this._showShortcuts = settings.showShortcuts;
       this._updateShortcutsVisibility();
@@ -227,7 +226,7 @@ export class InlineCompleter extends Widget {
   protected onUpdateRequest(msg: Message): void {
     super.onUpdateRequest(msg);
     const model = this._model;
-    if (!model || !this._showWidget) {
+    if (!model) {
       return;
     }
     let reply = model.completions;
@@ -342,8 +341,11 @@ export class InlineCompleter extends Widget {
     // Because the signal will be emitted during `EditorView.update` we want to
     // wait for the update to complete before calling `this._render()`. As there
     // is no API to check if update is done, we instead defer to next engine tick.
-    setTimeout(() => this._render(), 0);
-    this._setGeometry();
+    setTimeout(() => {
+      this._render();
+      // (reading layout to get coordinate to position hoverbox is not allowed either)
+      this._setGeometry();
+    }, 0);
   }
 
   private _render(): void {
@@ -354,7 +356,7 @@ export class InlineCompleter extends Widget {
     const candidate = completions.items[this._current];
     this._setText(candidate);
 
-    if (!this._showWidget) {
+    if (this._showWidget === 'never') {
       return;
     }
     this._suggestionsCounter.node.innerText = this._trans.__(
@@ -385,8 +387,27 @@ export class InlineCompleter extends Widget {
       content: text,
       providerId: item.provider.identifier,
       addedPart: item.lastStreamed,
-      streaming: item.streaming
+      streaming: item.streaming,
+      onPointerOver: this._onPointerOverGhost.bind(this),
+      onPointerLeave: this._onPointerLeaveGhost.bind(this)
     });
+  }
+
+  private _onPointerOverGhost() {
+    if (this._clearHoverTimeout !== null) {
+      window.clearTimeout(this._clearHoverTimeout);
+      this._clearHoverTimeout = null;
+    }
+    this.node.classList.add(HOVER_CLASS);
+  }
+
+  private _onPointerLeaveGhost() {
+    // Remove after a small delay to avoid flicker when moving cursor
+    // between the lines or around the edges of the ghost text.
+    this._clearHoverTimeout = window.setTimeout(
+      () => this.node.classList.remove(HOVER_CLASS),
+      500
+    );
   }
 
   private _setGeometry() {
@@ -394,7 +415,7 @@ export class InlineCompleter extends Widget {
     const model = this._model;
     const editor = this._editor;
 
-    if (!editor || !model || !model.cursor || !this._showWidget) {
+    if (!editor || !model || !model.cursor) {
       return;
     }
 
@@ -430,6 +451,7 @@ export class InlineCompleter extends Widget {
     this.node.dataset.showShortcuts = this._showShortcuts + '';
   }
 
+  private _clearHoverTimeout: number | null = null;
   private _current: number = 0;
   private _editor: CodeEditor.IEditor | null | undefined = null;
   private _ghostManager: GhostTextManager;
@@ -481,7 +503,7 @@ export namespace InlineCompleter {
    * Defaults for runtime user-configurable settings.
    */
   export const defaultSettings: IInlineCompleterSettings = {
-    showWidget: true,
+    showWidget: 'onHover',
     showShortcuts: true,
     streamingAnimation: 'uncover',
     providers: {}

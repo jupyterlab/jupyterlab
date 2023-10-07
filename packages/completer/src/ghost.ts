@@ -39,6 +39,14 @@ export interface IGhostText {
    * Whether streaming is in progress.
    */
   streaming?: boolean;
+  /**
+   * Callback to execute when pointer enters the boundary of the ghost text.
+   */
+  onPointerOver?: () => void;
+  /**
+   * Callback to execute when pointer leaves the boundary of the ghost text.
+   */
+  onPointerLeave?: () => void;
 }
 
 export class GhostTextManager {
@@ -90,7 +98,7 @@ export class GhostTextManager {
 }
 
 class GhostTextWidget extends WidgetType {
-  constructor(protected options: Omit<IGhostText, 'from'>) {
+  constructor(protected readonly options: Omit<IGhostText, 'from'>) {
     super();
   }
 
@@ -118,6 +126,12 @@ class GhostTextWidget extends WidgetType {
 
   toDOM() {
     let wrap = document.createElement('span');
+    if (this.options.onPointerOver) {
+      wrap.addEventListener('pointerover', this.options.onPointerOver);
+    }
+    if (this.options.onPointerLeave) {
+      wrap.addEventListener('pointerleave', this.options.onPointerLeave);
+    }
     wrap.classList.add(GHOST_TEXT_CLASS);
     wrap.dataset.animation = GhostTextManager.streamingAnimation;
     wrap.dataset.providedBy = this.options.providerId;
@@ -144,6 +158,15 @@ class GhostTextWidget extends WidgetType {
       streamingIndicator.className = STREAMING_INDICATOR_CLASS;
       dom.appendChild(streamingIndicator);
     }
+  }
+  destroy(dom: HTMLElement) {
+    if (this.options.onPointerOver) {
+      dom.removeEventListener('pointerover', this.options.onPointerOver);
+    }
+    if (this.options.onPointerLeave) {
+      dom.removeEventListener('pointerleave', this.options.onPointerLeave);
+    }
+    super.destroy(dom);
   }
 }
 
@@ -204,13 +227,10 @@ namespace Private {
   }
 
   export const addMark = StateEffect.define<IGhostText>({
-    map: ({ from, content, providerId, addedPart, streaming }, change) => ({
-      from: change.mapPos(from),
-      to: change.mapPos(from + content.length),
-      content,
-      providerId,
-      addedPart,
-      streaming
+    map: (old, change) => ({
+      ...old,
+      from: change.mapPos(old.from),
+      to: change.mapPos(old.from + old.content.length)
     })
   });
 

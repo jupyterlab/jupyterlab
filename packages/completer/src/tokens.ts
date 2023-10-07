@@ -420,7 +420,7 @@ export interface IInlineCompleterSettings {
   /**
    * Whether to show the inline completer widget.
    */
-  showWidget: boolean;
+  showWidget: 'always' | 'onHover' | 'never';
   /**
    * Whether to show shortcuts in the inline completer widget.
    */
