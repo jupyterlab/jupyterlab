@@ -141,8 +141,12 @@ class GhostTextWidget extends WidgetType {
 
   private _updateDOM(dom: HTMLElement) {
     const content = this.content;
-    const addition = this.options.addedPart;
+    let addition = this.options.addedPart;
     if (addition && !this.isSpacer) {
+      if (addition.startsWith('\n')) {
+        // Show the new line straight away to ensure proper positioning.
+        addition = addition.substring(1);
+      }
       dom.innerText = content.substring(0, content.length - addition.length);
       const addedPart = document.createElement('span');
       addedPart.className = STREAMED_TOKEN_CLASS;
