@@ -11,6 +11,9 @@ import math
 import re
 import sys
 import xmlrpc.client
+import tornado
+import httpx
+
 from datetime import datetime, timedelta, timezone
 from functools import partial
 from itertools import groupby
@@ -22,9 +25,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 from zipfile import ZipFile
 
-import tornado
 from async_lru import alru_cache
-from tornado.curl_httpclient import CurlAsyncHTTPClient
 from traitlets import CFloat, CInt, Unicode, config, observe
 
 from jupyterlab.extensions.manager import (
@@ -33,7 +34,6 @@ from jupyterlab.extensions.manager import (
     ExtensionManagerMetadata,
     ExtensionPackage,
 )
-
 
 class ProxiedTransport(xmlrpc.client.Transport):
     def set_proxy(self, host, port=None, headers=None):
@@ -50,41 +50,45 @@ class ProxiedTransport(xmlrpc.client.Transport):
 xmlrpc_transport_override = None
 
 http_proxy_url = environ.get('http_proxy') or environ.get('HTTP_PROXY')
-proxy_config = {}
+proxies = {}
+
 if http_proxy_url:
     http_proxy = urlparse(http_proxy_url)
     proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
-    proxy_config = {'proxy_host': proxy_host, 'proxy_port': int(proxy_port) if proxy_port else None}
 
+    proxies = {
+        "http://": f"http://{proxy_host}:{proxy_port}",
+        "https://": f"http://{proxy_host}:{proxy_port}",
+    }
+    
     xmlrpc_transport_override = ProxiedTransport()
-    xmlrpc_transport_override.set_proxy(proxy_config["proxy_host"], proxy_config["proxy_port"])
+    xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
 
 async def _fetch_package_metadata(name: str, latest_version: str, base_url: str) -> dict:
-    http_client = CurlAsyncHTTPClient()
-    response = await http_client.fetch(
-        base_url + f"/{name}/{latest_version}/json",
-        headers={"Content-Type": "application/json"},
-        **proxy_config,
-    )
-    data = json.loads(response.body).get("info")
+    async with httpx.AsyncClient(proxies=proxies) as httpx_client:
+        response = await httpx_client.get(
+            base_url + f"/{name}/{latest_version}/json",
+            headers={"Content-Type": "application/json"},
+        )
+    
+        data = json.loads(response.text).get("info")
 
-    # Keep minimal information to limit cache size
-    return {
-        k: data.get(k)
-        for k in [
-            "author",
-            "bugtrack_url",
-            "docs_url",
-            "home_page",
-            "license",
-            "package_url",
-            "project_url",
-            "project_urls",
-            "summary",
-        ]
-    }
-
+        # Keep minimal information to limit cache size
+        return {
+            k: data.get(k)
+            for k in [
+                "author",
+                "bugtrack_url",
+                "docs_url",
+                "home_page",
+                "license",
+                "package_url",
+                "project_url",
+                "project_urls",
+                "summary",
+            ]
+        }
 
 class PyPIExtensionManager(ExtensionManager):
     """Extension manager using pip as package manager and PyPi.org as packages source."""
@@ -116,7 +120,6 @@ class PyPIExtensionManager(ExtensionManager):
         self._fetch_package_metadata = _fetch_package_metadata
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
-        self._http_client = CurlAsyncHTTPClient()
         self._rpc_client = xmlrpc.client.ServerProxy(
             self.base_url, transport=xmlrpc_transport_override
         )
@@ -145,13 +148,12 @@ class PyPIExtensionManager(ExtensionManager):
             The latest available version
         """
         try:
-            http_client = CurlAsyncHTTPClient()
-            response = await http_client.fetch(
-                self.base_url + f"/{pkg}/json",
-                headers={"Content-Type": "application/json"},
-                **proxy_config,
-            )
-            data = json.loads(response.body).get("info")
+            async with httpx.AsyncClient(proxies=proxies) as httpx_client:
+                response = await httpx_client.get(
+                    self.base_url + f"/{pkg}/json",
+                    headers={"Content-Type": "application/json"}
+                )
+                data = json.loads(response.text).get("info")
         except Exception:
             return None
         else:
@@ -369,9 +371,10 @@ class PyPIExtensionManager(ExtensionManager):
             try:
                 download_url: str = pkg_action.get("download_info", {}).get("url")
                 if download_url is not None:
-                    response = await self._http_client.fetch(download_url, **proxy_config)
+                    async with httpx.AsyncClient(proxies=proxies) as httpx_client:
+                        response = await httpx_client.get(download_url, proxies=proxies)
                     if download_url.endswith(".whl"):
-                        with ZipFile(io.BytesIO(response.body)) as wheel:
+                        with ZipFile(io.BytesIO(response.text)) as wheel:
                             for name in filter(
                                 lambda f: Path(f).name == "package.json",
                                 wheel.namelist(),
@@ -381,7 +384,7 @@ class PyPIExtensionManager(ExtensionManager):
                                 if jlab_metadata is not None:
                                     break
                     elif download_url.endswith("tar.gz"):
-                        with TarFile(io.BytesIO(response.body)) as sdist:
+                        with TarFile(io.BytesIO(response.text)) as sdist:
                             for name in filter(
                                 lambda f: Path(f).name == "package.json",
                                 sdist.getnames(),
