@@ -34,13 +34,18 @@ export class InlineCompleter extends Widget {
     this.model = options.model ?? null;
     this.editor = options.editor ?? null;
     this.addClass(INLINE_COMPLETER_CLASS);
-    this._ghostManager = new GhostTextManager();
+    this._ghostManager = new GhostTextManager({
+      onBlur: this._onEditorBlur.bind(this)
+    });
     this._trans = options.trans;
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(this._suggestionsCounter);
     layout.addWidget(this.toolbar);
     layout.addWidget(this._providerWidget);
     this._updateShortcutsVisibility();
+    // Allow the node to receive focus, which prevents removing the ghost text
+    // when user mis-clicks on the tooltip instead of the button in the tooltip.
+    this.node.tabIndex = 0;
   }
 
   /**
@@ -168,11 +173,14 @@ export class InlineCompleter extends Widget {
     if (!completions || !completions.items || completions.items.length === 0) {
       return;
     }
+
+    if (this.isHidden) {
+      return;
+    }
+
     const candidate = completions.items[this._current];
     this._setText(candidate);
   }
-
-  private _lastItem: CompletionHandler.IInlineItem | null = null;
 
   /**
    * Change user-configurable settings.
@@ -291,6 +299,15 @@ export class InlineCompleter extends Widget {
     requestAnimationFrame(() => {
       this._setGeometry();
     });
+  }
+
+  private _onEditorBlur(event: FocusEvent) {
+    if (this.node.contains(event.relatedTarget as HTMLElement)) {
+      // Cancel removing ghost text if our node is receiving focus
+      return false;
+    }
+    // Hide the widget if editor was blurred.
+    this.hide();
   }
 
   private _onModelSuggestionsChanged(
@@ -413,15 +430,16 @@ export class InlineCompleter extends Widget {
   }
 
   private _current: number = 0;
-  private _ghostManager: GhostTextManager;
   private _editor: CodeEditor.IEditor | null | undefined = null;
+  private _ghostManager: GhostTextManager;
+  private _lastItem: CompletionHandler.IInlineItem | null = null;
   private _model: InlineCompleter.IModel | null = null;
-  private _toolbar = new Toolbar<Widget>();
-  private _suggestionsCounter = new Widget();
   private _providerWidget = new Widget();
-  private _trans: TranslationBundle;
   private _showShortcuts = InlineCompleter.defaultSettings.showShortcuts;
   private _showWidget = InlineCompleter.defaultSettings.showWidget;
+  private _suggestionsCounter = new Widget();
+  private _trans: TranslationBundle;
+  private _toolbar = new Toolbar<Widget>();
 }
 
 /**

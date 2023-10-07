@@ -42,6 +42,10 @@ export interface IGhostText {
 }
 
 export class GhostTextManager {
+  constructor(protected options: GhostTextManager.IOptions) {
+    // no-op
+  }
+
   /**
    * Typing animation.
    */
@@ -58,11 +62,17 @@ export class GhostTextManager {
       effects.push(
         StateEffect.appendConfig.of([
           EditorView.domEventHandlers({
-            blur: () => {
+            blur: (event: FocusEvent) => {
+              if (this.options.onBlur(event) === false) {
+                return true;
+              }
               const effects: StateEffect<unknown>[] = [
                 Private.removeMark.of(null)
               ];
-              view.dispatch({ effects });
+              // Only execute it after editor update has completed.
+              setTimeout(() => {
+                view.dispatch({ effects });
+              }, 0);
             }
           })
         ])
@@ -134,6 +144,19 @@ class GhostTextWidget extends WidgetType {
       streamingIndicator.className = STREAMING_INDICATOR_CLASS;
       dom.appendChild(streamingIndicator);
     }
+  }
+}
+
+export namespace GhostTextManager {
+  /**
+   * The initialization options for ghost text manager.
+   */
+  export interface IOptions {
+    /**
+     * Callback for editor `blur` event.
+     * Returning true will prevent the default action of removing current ghost.
+     */
+    onBlur(event: FocusEvent): boolean;
   }
 }
 

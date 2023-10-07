@@ -21,6 +21,9 @@
       "path": "../services"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../statedb"
     },
     {
@@ -28,9 +31,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../settingregistry"
     },
     {
       "path": "."
