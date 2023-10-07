@@ -62,7 +62,6 @@ export class InlineCompleter extends Widget {
     return this._editor;
   }
   set editor(newValue: CodeEditor.IEditor | null | undefined) {
-    // TODO also cancel on cursor movement
     this.model?.reset();
     this._editor = newValue;
   }
@@ -139,7 +138,6 @@ export class InlineCompleter extends Widget {
       editor.setCursorPosition(editor.getPositionAt(start + value.length)!);
     }
     model.reset();
-    this._ghostManager.clearGhosts((editor as CodeMirrorEditor).editor);
     this.update();
   }
 
@@ -320,6 +318,11 @@ export class InlineCompleter extends Widget {
     }
     if (args.event === 'set') {
       this._current = args.indexMap!.get(this._current) ?? 0;
+    } else if (args.event === 'clear') {
+      const editor = this.editor;
+      if (editor) {
+        this._ghostManager.clearGhosts((editor as CodeMirrorEditor).editor);
+      }
     }
     this._updateStreamTracking();
     this.update();
@@ -330,8 +333,6 @@ export class InlineCompleter extends Widget {
     _emitter: InlineCompleter.IModel,
     mapping: Map<number, number>
   ): void {
-    // TODO: cancel stream cursor position changes or when text changes
-    // TODO hide hoverbox on cursor movement
     const completions = this.model?.completions;
     if (!completions || !completions.items || completions.items.length === 0) {
       return;
@@ -542,6 +543,11 @@ export namespace InlineCompleter {
      * Handle a source change.
      */
     handleTextChange(change: SourceChange): void;
+
+    /**
+     * Handle cursor selection change.
+     */
+    handleSelectionChange(range: CodeEditor.IRange): void;
   }
 
   /**
@@ -646,6 +652,25 @@ export namespace InlineCompleter {
         ])
       );
       this.filterTextChanged.emit(indexMap);
+    }
+
+    handleSelectionChange(range: CodeEditor.IRange) {
+      const initialCursor = this.cursor;
+      if (!initialCursor) {
+        return;
+      }
+      const { start, end } = range;
+      if (start.column !== end.column || start.line !== end.line) {
+        // Cancel if user started selecting text.
+        this.reset();
+      }
+      if (
+        start.line !== initialCursor.line ||
+        start.column < initialCursor.column
+      ) {
+        // Cancel if user moved cursor to next line or receded to before the origin
+        this.reset();
+      }
     }
 
     /**

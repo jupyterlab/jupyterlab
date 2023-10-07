@@ -257,6 +257,12 @@ export class CompletionHandler implements IDisposable {
       return;
     }
 
+    const inlineModel = this.inlineCompleter?.model;
+    if (inlineModel) {
+      // Dispatch selection change.
+      inlineModel.handleSelectionChange(editor.getSelection());
+    }
+
     const host = editor.host;
 
     // If there is no model, return.
