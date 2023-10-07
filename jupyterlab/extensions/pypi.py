@@ -494,4 +494,3 @@ class PyPIExtensionManager(ExtensionManager):
             Normalized name
         """
         return name.replace("@", "").replace("/", "-").replace("_", "-")
-
