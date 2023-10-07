@@ -316,6 +316,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
       context: completerContext,
       providers,
       inlineProviders,
+      inlineProvidersSettings: this._inlineCompleterSettings.providers,
       timeout: this._timeout
     });
   }

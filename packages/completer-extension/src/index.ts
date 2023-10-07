@@ -213,11 +213,31 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
               providers[provider.identifier] = {
                 title: trans.__('%1 provider', provider.name),
                 properties: {
-                  // Each provider can be enabled or disabled.
                   ...(provider.schema?.properties ?? {}),
+                  timeout: {
+                    title: trans.__('Timeout'),
+                    description: trans.__(
+                      'Timeout for %1 provider (in milliseconds).',
+                      provider.name
+                    ),
+                    type: 'number',
+                    minimum: 0
+                  },
+                  debouncerDelay: {
+                    title: trans.__('Debouncer delay'),
+                    minimum: 0,
+                    description: trans.__(
+                      'Time since the last key press to wait before requesting completions from %1 provider (in milliseconds).',
+                      provider.name
+                    ),
+                    type: 'number'
+                  },
                   enabled: {
                     title: trans.__('Enabled'),
-                    description: trans.__('Whether the provider is enabled.'),
+                    description: trans.__(
+                      'Whether to fetch completions %1 provider.',
+                      provider.name
+                    ),
                     type: 'boolean'
                   }
                 },
@@ -225,6 +245,8 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
                   // By default all providers are opt-out, but
                   // any provider can configure itself to be opt-in.
                   enabled: true,
+                  timeout: 5000,
+                  debouncerDelay: 0,
                   ...((provider.schema?.default as object) ?? {})
                 },
                 type: 'object'

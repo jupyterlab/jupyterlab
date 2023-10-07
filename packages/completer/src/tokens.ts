@@ -435,6 +435,8 @@ export interface IInlineCompleterSettings {
   providers: {
     [providerId: string]: {
       enabled: boolean;
+      debouncerDelay: number;
+      timeout: number;
       [property: string]: JSONValue;
     };
   };
