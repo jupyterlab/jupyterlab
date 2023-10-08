@@ -38,10 +38,6 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.1.0-alpha.1",
-    "@jupyterlab/completer": "^4.1.0-alpha.1",
-    "@jupyterlab/settingregistry": "^4.1.0-alpha.1",
-    "@jupyterlab/ui-components": "^4.1.0-alpha.1",
     "@jupyterlab/application": "^4.1.0-alpha.2",
     "@jupyterlab/completer": "^4.1.0-alpha.2",
     "@jupyterlab/settingregistry": "^4.1.0-alpha.2",
