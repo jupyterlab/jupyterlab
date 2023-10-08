@@ -48,6 +48,11 @@ test.describe('Print layout', () => {
 
     await newPage.goto(printedNotebookURL, { waitUntil: 'networkidle' });
 
+    // Wait until MathJax loading message disappears
+    const mathJaxMessage = newPage.locator('#MathJax_Message');
+    await expect(mathJaxMessage).toHaveCount(1);
+    await mathJaxMessage.waitFor({ state: 'hidden' });
+
     expect(await newPage.screenshot()).toMatchSnapshot('printed-notebook.png');
   });
 });
