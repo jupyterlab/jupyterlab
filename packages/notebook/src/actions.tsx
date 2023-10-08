@@ -840,7 +840,7 @@ export namespace NotebookActions {
 
     const promise = Private.runCells(
       notebook,
-      notebook.widgets.slice(notebook.activeCellIndex, undefined),
+      notebook.widgets.slice(notebook.activeCellIndex),
       sessionContext,
       sessionDialogs,
       translator
