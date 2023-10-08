@@ -65,7 +65,6 @@ import {
 import { find, map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
-import { posix } from 'path';
 
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
@@ -1215,7 +1214,7 @@ function addCommands(
       }
 
       if (PageConfig.getOption('copyAbsolutePath') === 'true') {
-        const absolutePath = posix.join(
+        const absolutePath = PathExt.joinWithLeadingSlash(
           PageConfig.getOption('serverRoot') ?? '',
           item.value.path
         );
