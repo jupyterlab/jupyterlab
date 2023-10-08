@@ -53,7 +53,9 @@ import { ILauncher } from '@jupyterlab/launcher';
 import {
   ILSPCodeExtractorsManager,
   ILSPDocumentConnectionManager,
-  ILSPFeatureManager
+  ILSPFeatureManager,
+  IWidgetLSPAdapterTracker,
+  WidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IMetadataFormProvider } from '@jupyterlab/metadataform';
@@ -891,7 +893,8 @@ const languageServerPlugin: JupyterFrontEndPlugin<void> = {
     INotebookTracker,
     ILSPDocumentConnectionManager,
     ILSPFeatureManager,
-    ILSPCodeExtractorsManager
+    ILSPCodeExtractorsManager,
+    IWidgetLSPAdapterTracker
   ],
   activate: activateNotebookLanguageServer,
   autoStart: true
@@ -2054,7 +2057,8 @@ function activateNotebookLanguageServer(
   notebooks: INotebookTracker,
   connectionManager: ILSPDocumentConnectionManager,
   featureManager: ILSPFeatureManager,
-  codeExtractorManager: ILSPCodeExtractorsManager
+  codeExtractorManager: ILSPCodeExtractorsManager,
+  adapterTracker: IWidgetLSPAdapterTracker
 ): void {
   notebooks.widgetAdded.connect(async (_, notebook) => {
     const adapter = new NotebookAdapter(notebook, {
@@ -2062,7 +2066,7 @@ function activateNotebookLanguageServer(
       featureManager,
       foreignCodeExtractorsManager: codeExtractorManager
     });
-    connectionManager.registerAdapter(notebook.context.path, adapter);
+    (adapterTracker as WidgetLSPAdapterTracker).add(adapter);
   });
 }
 

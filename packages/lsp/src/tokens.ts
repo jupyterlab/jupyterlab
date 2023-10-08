@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ServerConnection } from '@jupyterlab/services';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
+import { FocusTracker, Widget } from '@lumino/widgets';
 import { Token } from '@lumino/coreutils';
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter } from './adapters/adapter';
+import { EditorAdapter, WidgetLSPAdapter } from './adapters';
 import { IForeignCodeExtractor } from './extractors/types';
 import {
   AnyCompletion,
@@ -26,7 +28,7 @@ import {
 
 import type * as rpc from 'vscode-jsonrpc';
 import type * as lsp from 'vscode-languageserver-protocol';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+
 export { IDocumentInfo };
 
 /**
@@ -367,9 +369,10 @@ export interface ILSPDocumentConnectionManager {
   documents: Map<VirtualDocument.uri, VirtualDocument>;
 
   /**
+   * @deprecated
    * The mapping of document uri to the widget adapter.
    */
-  adapters: Map<string, WidgetLSPAdapter<IDocumentWidget>>;
+  adapters: Map<string, WidgetLSPAdapter>;
 
   /**
    * Signal emitted when a connection is connected.
@@ -472,15 +475,14 @@ export interface ILSPDocumentConnectionManager {
   unregisterDocument(uri: string): void;
 
   /**
+   * @deprecated
+   *
    * Register a widget adapter.
    *
    * @param  path - path to current document widget of input adapter
    * @param  adapter - the adapter need to be registered
    */
-  registerAdapter(
-    path: string,
-    adapter: WidgetLSPAdapter<IDocumentWidget>
-  ): void;
+  registerAdapter(path: string, adapter: WidgetLSPAdapter): void;
 }
 
 /**
@@ -498,6 +500,11 @@ export interface IFeature {
    * LSP capabilities implemented by the feature.
    */
   capabilities?: ClientCapabilities;
+
+  /**
+   * Editor extension factory linked to the LSP feature.
+   */
+  extensionFactory?: EditorAdapter.ILSPEditorExtensionFactory;
 }
 
 /**
@@ -512,20 +519,25 @@ export interface ILSPFeatureManager {
   readonly features: IFeature[];
 
   /**
+   * Signal emitted when a feature is registered
+   */
+  featureRegistered: ISignal<ILSPFeatureManager, IFeature>;
+
+  /**
    * Register the new feature (frontend capability)
    * for one or more code editor implementations.
    */
   register(feature: IFeature): void;
 
   /**
-   * Signal emitted when a feature is registered
-   */
-  featuresRegistered: ISignal<ILSPFeatureManager, IFeature>;
-
-  /**
    * Get capabilities of all registered features
    */
   clientCapabilities(): ClientCapabilities;
+
+  /**
+   * Get the extension factories of all clients.
+   */
+  extensionFactories(): EditorAdapter.ILSPEditorExtensionFactory[];
 }
 
 /**
@@ -549,6 +561,96 @@ export interface ILSPCodeExtractorsManager {
     extractor: IForeignCodeExtractor,
     hostLanguage: LanguageIdentifier | null
   ): void;
+}
+
+/**
+ * An interface with the necessary properties from `JupyterFrontEnd.IShell`
+ * for the `WidgetLSPAdapterTracker`. Used to track the active DocumentWidget.
+ *
+ * For more info see https://github.com/jupyterlab/jupyterlab/pull/14920#discussion_r1316507818
+ * and https://github.com/jupyterlab/jupyterlab/pull/14920#discussion_r1305019718 .
+ */
+export interface IShell {
+  /**
+   * The active widget in the shell's main area.
+   */
+  readonly activeWidget: Widget | null;
+  /**
+   * A signal emitted when main area's current focus changes.
+   */
+  readonly currentChanged: ISignal<this, FocusTracker.IChangedArgs<Widget>>;
+}
+
+/**
+ * A tracker that tracks WidgetLSPAdapters.
+ *
+ * @typeparam T - The type of widget being tracked. Defaults to `WidgetLSPAdapter`.
+ */
+export interface IWidgetLSPAdapterTracker<
+  T extends WidgetLSPAdapter = WidgetLSPAdapter
+> extends IDisposable {
+  /**
+   * A signal emitted when an adapter is added.
+   */
+  readonly adapterAdded: ISignal<this, T>;
+
+  /**
+   * The current adapter is the most recently focused or added adapter.
+   *
+   * #### Notes
+   * It is the most recently focused adapter, or the most recently added
+   * adapter if no adapter has taken focus.
+   */
+  readonly currentAdapter: T | null;
+
+  /**
+   * A signal emitted when the current instance changes.
+   *
+   * #### Notes
+   * If the last instance being tracked is disposed, `null` will be emitted.
+   */
+  readonly currentChanged: ISignal<this, T | null>;
+
+  /**
+   * The number of instances held by the tracker.
+   */
+  readonly size: number;
+
+  /**
+   * A signal emitted when a adapter is updated.
+   */
+  readonly adapterUpdated: ISignal<this, T>;
+
+  /**
+   * Find the first instance in the tracker that satisfies a filter function.
+   *
+   * @param - fn The filter function to call on each instance.
+   *
+   * #### Notes
+   * If nothing is found, the value returned is `undefined`.
+   */
+  find(fn: (obj: T) => boolean): T | undefined;
+
+  /**
+   * Iterate through each instance in the tracker.
+   *
+   * @param fn - The function to call on each instance.
+   */
+  forEach(fn: (obj: T) => void): void;
+
+  /**
+   * Filter the instances in the tracker based on a predicate.
+   *
+   * @param fn - The function by which to filter.
+   */
+  filter(fn: (obj: T) => boolean): T[];
+
+  /**
+   * Check if this tracker has the specified instance.
+   *
+   * @param obj - The object whose existence is being checked.
+   */
+  has(obj: T): boolean;
 }
 
 /**
@@ -588,6 +690,18 @@ export const ILSPFeatureManager = new Token<ILSPFeatureManager>(
 export const ILSPCodeExtractorsManager = new Token<ILSPCodeExtractorsManager>(
   '@jupyterlab/lsp:ILSPCodeExtractorsManager',
   'Provides the code extractor manager. This token is required in your extension to register code extractor allowing the creation of multiple virtual document from an opened document.'
+);
+
+/**
+ * @alpha
+ *
+ * The WidgetLSPAdapter tracker. Require this token in your extension to
+ * track WidgetLSPAdapters.
+ *
+ */
+export const IWidgetLSPAdapterTracker = new Token<IWidgetLSPAdapterTracker>(
+  '@jupyterlab/lsp:IWidgetLSPAdapterTracker',
+  'Provides the WidgetLSPAdapter tracker. This token is required in your extension to track WidgetLSPAdapters.'
 );
 
 /**
@@ -638,9 +752,11 @@ export namespace Method {
 
   /** Client requests */
   export enum ClientRequest {
+    CODE_ACTION = 'textDocument/codeAction',
     COMPLETION = 'textDocument/completion',
     COMPLETION_ITEM_RESOLVE = 'completionItem/resolve',
     DEFINITION = 'textDocument/definition',
+    DOCUMENT_COLOR = 'textDocument/documentColor',
     DOCUMENT_HIGHLIGHT = 'textDocument/documentHighlight',
     DOCUMENT_SYMBOL = 'textDocument/documentSymbol',
     HOVER = 'textDocument/hover',
@@ -649,7 +765,14 @@ export namespace Method {
     REFERENCES = 'textDocument/references',
     RENAME = 'textDocument/rename',
     SIGNATURE_HELP = 'textDocument/signatureHelp',
-    TYPE_DEFINITION = 'textDocument/typeDefinition'
+    TYPE_DEFINITION = 'textDocument/typeDefinition',
+    LINKED_EDITING_RANGE = 'textDocument/linkedEditingRange',
+    INLINE_VALUE = 'textDocument/inlineValue',
+    INLAY_HINT = 'textDocument/inlayHint',
+    WORKSPACE_SYMBOL = 'workspace/symbol',
+    WORKSPACE_SYMBOL_RESOLVE = 'workspaceSymbol/resolve',
+    FORMATTING = 'textDocument/formatting',
+    RANGE_FORMATTING = 'textDocument/rangeFormatting'
   }
 }
 
@@ -700,9 +823,11 @@ export interface IServerResult {
  * Interface describing the request sent to the client.
  */
 export interface IClientRequestParams {
+  [Method.ClientRequest.CODE_ACTION]: lsp.CodeActionParams;
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: lsp.CompletionParams;
   [Method.ClientRequest.DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.DOCUMENT_COLOR]: lsp.DocumentColorParams;
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.TextDocumentPositionParams;
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbolParams;
   [Method.ClientRequest.HOVER]: lsp.TextDocumentPositionParams;
@@ -712,15 +837,23 @@ export interface IClientRequestParams {
   [Method.ClientRequest.RENAME]: lsp.RenameParams;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.TextDocumentPositionParams;
   [Method.ClientRequest.TYPE_DEFINITION]: lsp.TextDocumentPositionParams;
+  [Method.ClientRequest.INLINE_VALUE]: lsp.InlineValueParams;
+  [Method.ClientRequest.INLAY_HINT]: lsp.InlayHintParams;
+  [Method.ClientRequest.WORKSPACE_SYMBOL]: lsp.WorkspaceSymbolParams;
+  [Method.ClientRequest.WORKSPACE_SYMBOL_RESOLVE]: lsp.WorkspaceSymbol;
+  [Method.ClientRequest.FORMATTING]: lsp.DocumentFormattingParams;
+  [Method.ClientRequest.RANGE_FORMATTING]: lsp.DocumentRangeFormattingParams;
 }
 
 /**
  * Interface describing the responses received from the client.
  */
 export interface IClientResult {
+  [Method.ClientRequest.CODE_ACTION]: (lsp.Command | lsp.CodeAction)[] | null;
   [Method.ClientRequest.COMPLETION_ITEM_RESOLVE]: lsp.CompletionItem;
   [Method.ClientRequest.COMPLETION]: AnyCompletion;
   [Method.ClientRequest.DEFINITION]: AnyLocation;
+  [Method.ClientRequest.DOCUMENT_COLOR]: lsp.ColorInformation[];
   [Method.ClientRequest.DOCUMENT_HIGHLIGHT]: lsp.DocumentHighlight[];
   [Method.ClientRequest.DOCUMENT_SYMBOL]: lsp.DocumentSymbol[];
   [Method.ClientRequest.HOVER]: lsp.Hover | null;
@@ -730,6 +863,15 @@ export interface IClientResult {
   [Method.ClientRequest.RENAME]: lsp.WorkspaceEdit;
   [Method.ClientRequest.SIGNATURE_HELP]: lsp.SignatureHelp;
   [Method.ClientRequest.TYPE_DEFINITION]: AnyLocation;
+  [Method.ClientRequest.INLINE_VALUE]: lsp.InlineValue[] | null;
+  [Method.ClientRequest.INLAY_HINT]: lsp.InlayHint[] | null;
+  [Method.ClientRequest.WORKSPACE_SYMBOL]:
+    | lsp.SymbolInformation[]
+    | lsp.WorkspaceSymbol[]
+    | null;
+  [Method.ClientRequest.WORKSPACE_SYMBOL_RESOLVE]: lsp.WorkspaceSymbol[];
+  [Method.ClientRequest.FORMATTING]: lsp.TextEdit[] | null;
+  [Method.ClientRequest.RANGE_FORMATTING]: lsp.TextEdit[] | null;
 }
 
 /**

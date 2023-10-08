@@ -1111,7 +1111,7 @@ describe('completer/widget', () => {
         anchor.dispose();
       });
 
-      it('should not fix nor cache dimensions when items are few', () => {
+      it('should compute height based on number of items', () => {
         window.HTMLElement.prototype.getBoundingClientRect =
           betterGetBoundingClientRectMock;
         let anchor = createEditorWidget();
@@ -1131,8 +1131,50 @@ describe('completer/widget', () => {
         Widget.attach(widget, document.body);
         expect(widget.sizeCache).toBe(undefined);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(widget.sizeCache).toEqual(undefined);
+        expect(widget.sizeCache).toEqual({
+          width: 150,
+          height: 3 * 20
+        });
         widget.dispose();
+        expect(widget.sizeCache).toBe(undefined);
+        anchor.dispose();
+      });
+
+      it('should account for documentation panel width if shown', async () => {
+        window.HTMLElement.prototype.getBoundingClientRect =
+          betterGetBoundingClientRectMock;
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+
+        Widget.attach(anchor, document.body);
+        model.setCompletionItems(
+          Array.from({ length: 3 }, (_, i) => {
+            return { label: `candidate ${i}`, documentation: 'text' };
+          })
+        );
+
+        let widget = new LogWidget({
+          editor: anchor.editor,
+          model
+        });
+        widget.showDocsPanel = true;
+        Widget.attach(widget, document.body);
+        expect(widget.sizeCache).toBe(undefined);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(widget.sizeCache).toEqual({
+          width: 550, // 150 (items) + 400 (documentation panel)
+          height: 300
+        });
+        widget.showDocsPanel = false;
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(widget.sizeCache).toEqual({
+          width: 150,
+          height: 60 // 3* 20
+        });
+        widget.dispose();
+        expect(widget.sizeCache).toBe(undefined);
         anchor.dispose();
       });
 
@@ -1158,7 +1200,7 @@ describe('completer/widget', () => {
 
         // First "page":
         //  - 300px/20px = 15 items at each "page",
-        //  - we add one item in case if height heuristic is inacurate.
+        //  - we add one item in case if height heuristic is inaccurate.
         let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
         expect(items).toHaveLength(15 + 1);
 
@@ -1277,6 +1319,53 @@ describe('completer/widget', () => {
         };
         model.handleTextChange(current);
         expect(widget.sizeCache).toEqual(undefined);
+      });
+
+      it('should update the documentation panel of selected item', async () => {
+        let args = '';
+        const spy = jest
+          .spyOn(widget as any, '_updateDocPanel')
+          .mockImplementation(async (item: any) => {
+            if (item) {
+              args = (await item).label;
+            }
+          });
+        widget.showDocsPanel = true;
+        const current: Completer.ITextState = {
+          ...position,
+          text: 'c13'
+        };
+        model.handleTextChange(current);
+
+        await new Promise(process.nextTick);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(args).toEqual('candx 13');
+
+        // Cycle to the second item
+        widget['_cycle']('down');
+        await new Promise(process.nextTick);
+        expect(spy).toHaveBeenCalledTimes(2);
+        expect(args).toEqual('candidate 13');
+        spy.mockRestore();
+      });
+    });
+  });
+  describe('Completer.Renderer', () => {
+    describe('#itemWidthHeuristic()', () => {
+      let renderer: Completer.Renderer;
+      beforeEach(() => {
+        renderer = new Completer.Renderer();
+      });
+      it('returns a sum of characters in label and type info', () => {
+        let width = renderer.itemWidthHeuristic({
+          label: 'test',
+          type: 'variable'
+        });
+        expect(width).toBe(12);
+      });
+      it('disregards <mark> markup', () => {
+        let width = renderer.itemWidthHeuristic({ label: '<mark>test</mark>' });
+        expect(width).toBe(4);
       });
     });
   });

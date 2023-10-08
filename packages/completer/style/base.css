@@ -1,6 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2016, Jupyter Development Team.
-|
+| Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
@@ -64,6 +63,7 @@
   min-width: 150px;
   display: grid;
   grid-template-columns: min-content 1fr min-content;
+  position: relative;
 }
 
 .jp-Completer-item .jp-Completer-match {
@@ -186,7 +186,6 @@
   position: absolute;
   overflow: hidden;
   top: 0;
-  margin-left: -8px;
 }
 
 .jp-Completer-loading-bar {
