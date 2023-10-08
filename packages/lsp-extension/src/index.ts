@@ -310,7 +310,7 @@ function addRunningSessionManager(
 
 const adapterTrackerPlugin: JupyterFrontEndPlugin<IWidgetLSPAdapterTracker> = {
   id: '@jupyterlab/lsp-extension:tracker',
-  description: 'Provides the ``WidgetLSPAdapter``s tracker.',
+  description: 'Provides the tracker of `WidgetLSPAdapter`.',
   autoStart: true,
   provides: IWidgetLSPAdapterTracker,
   activate: (app: JupyterFrontEnd<LabShell>): IWidgetLSPAdapterTracker => {
