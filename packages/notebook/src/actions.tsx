@@ -837,6 +837,7 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const lastIndex = notebook.widgets.length;
 
     const promise = Private.runCells(
       notebook,
@@ -845,6 +846,9 @@ export namespace NotebookActions {
       sessionDialogs,
       translator
     );
+
+    notebook.activeCellIndex = lastIndex;
+    notebook.deselectAll();
 
     Private.handleRunState(notebook, state, true);
     return promise;
