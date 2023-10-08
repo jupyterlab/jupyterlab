@@ -1177,6 +1177,58 @@ describe('completer/widget', () => {
         anchor.dispose();
       });
 
+      it('should show/hide the documentation panel depending on documentation presence', async () => {
+        window.HTMLElement.prototype.getBoundingClientRect =
+          betterGetBoundingClientRectMock;
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+        Widget.attach(anchor, document.body);
+
+        let widget = new LogWidget({
+          editor: anchor.editor,
+          model
+        });
+        widget.showDocsPanel = true;
+        Widget.attach(widget, document.body);
+
+        const expectedSizeNoDocs = {
+          width: 150, // (no documentation panel width here)
+          height: 20
+        };
+        const expectedSizeDocs = {
+          width: 550, // 150 (items) + 400 (documentation panel)
+          height: 300 // (min documentation panel height)
+        };
+
+        // no documentation
+        model.setCompletionItems([{ label: 'test' }]);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(widget.sizeCache).toEqual(expectedSizeNoDocs);
+        let panel = widget.node.querySelector(
+          `.${DOC_PANEL_CLASS}`
+        ) as HTMLElement;
+        expect(panel.style.display).toBe('none');
+
+        // documentation
+        model.setCompletionItems([
+          { label: 'test', documentation: 'test doc' }
+        ]);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(widget.sizeCache).toEqual(expectedSizeDocs);
+        panel = widget.node.querySelector(`.${DOC_PANEL_CLASS}`) as HTMLElement;
+        expect(panel.style.display).toBe('');
+
+        // no documentation again
+        model.setCompletionItems([{ label: 'test' }]);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(widget.sizeCache).toEqual(expectedSizeNoDocs);
+        panel = widget.node.querySelector(`.${DOC_PANEL_CLASS}`) as HTMLElement;
+        expect(panel.style.display).toBe('none');
+      });
+
       it('should render completions lazily in chunks', async () => {
         window.HTMLElement.prototype.getBoundingClientRect =
           betterGetBoundingClientRectMock;
