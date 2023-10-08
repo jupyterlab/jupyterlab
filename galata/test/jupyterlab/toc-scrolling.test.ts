@@ -22,8 +22,6 @@ test.describe('Table of Contents scrolling to heading', () => {
     await page.notebook.activate(fileName);
 
     await page.sidebar.openTab('table-of-contents');
-
-    // await page.click('.jp-toc-numberingButton');
   });
 
   test.afterEach(async ({ page }) => {
