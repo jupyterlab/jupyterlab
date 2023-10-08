@@ -349,6 +349,7 @@ export class Completer extends Widget {
       this._docPanel.innerText = '';
       node.appendChild(this._docPanel);
       this._docPanelExpanded = false;
+      this._docPanel.style.display = 'none';
       this._updateDocPanel(resolvedItem, active);
     }
 
