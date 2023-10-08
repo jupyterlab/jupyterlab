@@ -15,6 +15,7 @@ export * from './sidepanel';
 export * from './spinner';
 export * from './styling';
 export * from './switch';
+export * from './table';
 export * from './toolbar';
 export * from './vdom';
 export * from './windowedlist';
