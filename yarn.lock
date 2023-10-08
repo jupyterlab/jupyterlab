@@ -3906,6 +3906,7 @@ __metadata:
   dependencies:
     "@jupyterlab/application": ^4.0.6
     "@jupyterlab/rendermime": ^4.0.6
+    "@lumino/coreutils": ^2.1.2
     mathjax-full: ^3.2.2
     rimraf: ~3.0.0
     typedoc: ~0.24.7
