@@ -92,7 +92,7 @@
     "@jupyterlab/property-inspector": "~4.1.0-alpha.2",
     "@jupyterlab/rendermime": "~4.1.0-alpha.2",
     "@jupyterlab/rendermime-extension": "~4.1.0-alpha.2",
-    "@jupyterlab/rendermime-interfaces": "~3.8.3-alpha.1",
+    "@jupyterlab/rendermime-interfaces": "~3.9.0-alpha.1",
     "@jupyterlab/running": "~4.1.0-alpha.2",
     "@jupyterlab/running-extension": "~4.1.0-alpha.2",
     "@jupyterlab/services": "~7.1.0-alpha.2",
