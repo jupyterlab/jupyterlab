@@ -70,6 +70,7 @@ import launcherSvgstr from '../../style/icons/filetype/launcher.svg';
 import lineFormSvgstr from '../../style/icons/statusbar/line-form.svg';
 import linkSvgstr from '../../style/icons/toolbar/link.svg';
 import listSvgstr from '../../style/icons/statusbar/list.svg';
+import lockSvgstr from '../../style/icons/lock.svg';
 import markdownSvgstr from '../../style/icons/filetype/markdown.svg';
 import mermaidSvgstr from '../../style/icons/filetype/mermaid.svg';
 import moveDownSvgstr from '../../style/icons/toolbar/move-down.svg';
@@ -174,6 +175,7 @@ export const launcherIcon = new LabIcon({ name: 'ui-components:launcher', svgstr
 export const lineFormIcon = new LabIcon({ name: 'ui-components:line-form', svgstr: lineFormSvgstr });
 export const linkIcon = new LabIcon({ name: 'ui-components:link', svgstr: linkSvgstr });
 export const listIcon = new LabIcon({ name: 'ui-components:list', svgstr: listSvgstr });
+export const lockIcon = new LabIcon({ name: 'ui-components:lock', svgstr: lockSvgstr });
 export const markdownIcon = new LabIcon({ name: 'ui-components:markdown', svgstr: markdownSvgstr });
 export const mermaidIcon = new LabIcon({ name: 'ui-components:mermaid', svgstr: mermaidSvgstr });
 export const moveDownIcon = new LabIcon({ name: 'ui-components:move-down', svgstr: moveDownSvgstr });
