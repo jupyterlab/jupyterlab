@@ -1,4 +1,4 @@
-import { simulate } from 'simulate-event';
+import { simulate as simulateEvent } from 'simulate-event';
 
 import { ServiceManager, Session } from '@jupyterlab/services';
 
@@ -14,6 +14,37 @@ import {
 } from '@jupyterlab/docregistry';
 
 import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
+
+// Add a simple polyfill for `PointerEvent` which is not yet supported by jsdom
+// see https://github.com/jsdom/jsdom/pull/2666
+if (!global.PointerEvent) {
+  class PointerEvent extends MouseEvent {
+    // no-op
+  }
+  global.PointerEvent = PointerEvent as any;
+}
+
+const POINTER_EVENTS = [
+  'pointerdown',
+  'pointerenter',
+  'pointerleave',
+  'pointermove',
+  'pointerout',
+  'pointerover',
+  'pointerup'
+];
+
+/**
+ * Extends `simulate` from no longer actively developed `simulate-event`
+ * with a subset of `pointer` events.
+ */
+export function simulate(element: EventTarget, type: string, options?: any) {
+  if (POINTER_EVENTS.includes(type)) {
+    element.dispatchEvent(new PointerEvent(type, options));
+  } else {
+    simulateEvent(element, type, options);
+  }
+}
 
 /**
  * Test a single emission from a signal.
