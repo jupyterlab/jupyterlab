@@ -7,7 +7,8 @@
 
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  LabShell
 } from '@jupyterlab/application';
 import {
   CodeExtractorsManager,
@@ -17,11 +18,13 @@ import {
   ILSPConnection,
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
+  IWidgetLSPAdapterTracker,
   LanguageServerManager,
   LanguageServersExperimental,
   TextForeignCodeExtractor,
   TLanguageServerConfigurations,
-  TLanguageServerId
+  TLanguageServerId,
+  WidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -43,7 +46,7 @@ const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
   activate,
   id: '@jupyterlab/lsp-extension:plugin',
   description: 'Provides the language server connection manager.',
-  requires: [ITranslator],
+  requires: [ITranslator, IWidgetLSPAdapterTracker],
   optional: [IRunningSessionManagers],
   provides: ILSPDocumentConnectionManager,
   autoStart: true
@@ -99,13 +102,15 @@ const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManage
 function activate(
   app: JupyterFrontEnd,
   translator: ITranslator,
+  tracker: IWidgetLSPAdapterTracker,
   runningSessionManagers: IRunningSessionManagers | null
 ): ILSPDocumentConnectionManager {
   const languageServerManager = new LanguageServerManager({
     settings: app.serviceManager.serverSettings
   });
   const connectionManager = new DocumentConnectionManager({
-    languageServerManager
+    languageServerManager,
+    adapterTracker: tracker
   });
 
   // Add a sessions manager if the running extension is available
@@ -302,6 +307,17 @@ function addRunningSessionManager(
     )
   });
 }
+
+const adapterTrackerPlugin: JupyterFrontEndPlugin<IWidgetLSPAdapterTracker> = {
+  id: '@jupyterlab/lsp-extension:tracker',
+  description: 'Provides the tracker of `WidgetLSPAdapter`.',
+  autoStart: true,
+  provides: IWidgetLSPAdapterTracker,
+  activate: (app: JupyterFrontEnd<LabShell>): IWidgetLSPAdapterTracker => {
+    return new WidgetLSPAdapterTracker({ shell: app.shell });
+  }
+};
+
 /**
  * Export the plugin as default.
  */
@@ -309,5 +325,6 @@ export default [
   plugin,
   featurePlugin,
   settingsPlugin,
-  codeExtractorManagerPlugin
+  codeExtractorManagerPlugin,
+  adapterTrackerPlugin
 ];

@@ -1,6 +1,8 @@
-// Copyright (c) Jupyter Development Team.
-// Copyright (c) Bloomberg Finance LP.
-// Distributed under the terms of the Modified BSD License.
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ * Copyright (c) Bloomberg Finance LP.
+ */
 
 // This export the types (and only the types) from extension/token.ts
 // Required for typedoc to be happy otherwise we could have used `from '@jupyterlab/extension/lib/token';`

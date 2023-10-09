@@ -47,6 +47,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    repo
    components
    patterns
+   Accessibility <accessibility>
    internationalization
    css
    performance
@@ -142,7 +143,7 @@ and the issues it solves before a pull request is opened. A triager will
 ensure that your issue meets our definition of ready before we can merge
 any pull requests that relate to it.
 
-Pull requests must target the development branch (= ``master``) even if
+Pull requests must target the development branch (= ``main``) even if
 it aims at addressing an issue seen in a stable release. Once the pull
 request is merged on the development branch, it will be backported to
 the stable branch using a bot action (or manually if the bot action
@@ -287,10 +288,10 @@ a local environment, directly from the Web browser:
    allows to prototype JupyterLab extensions from within JupyterLab and
    can be run without installation in the browser using Binder.
 
-Using `Binder <https://mybinder.org>`__, you can test the current master branch and your
+Using `Binder <https://mybinder.org>`__, you can test the current main branch and your
 changes within the browser as well. We recommend you have at least 8 GB of RAM for this.
-To build and launch an instance of the latest JupyterLab master, open
-`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/>`__
+To build and launch an instance of the latest JupyterLab main, open
+`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/main?urlpath=lab-dev/>`__
 in a new tab. The build takes about 7 minutes to complete.
 
 To test your own branch hosted on GitHub, enter it on https://mybinder.org.
@@ -352,11 +353,53 @@ With Homebrew:
 Using automation to set up a local development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While there is a lot to learn by following the steps above, they can be automated to save time. This section shows how
-to do that using Vagrant as an example.
-
-The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
+While there is a lot to learn by following the steps above, they can be automated to save time. The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
 re-build the environment, better standardisation ("baseline", reproducible environments).
+This section shows how to do that using Docker and Vagrant.
+
+**Setup using Docker**
+""""""""""""""""""""""""
+
+To start a JupyterLab development container in a UNIX system with docker installed:
+
+1. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab>`__.
+
+2. Start the container:
+
+.. code:: bash
+
+   git clone https://github.com/<your-github-username>/jupyterlab.git
+   cd jupyterlab
+   bash docker/start.sh
+
+The above command will build the docker image if it does not exist, then start the container with JupyterLab running in watch mode. The port 8888 is exposed and the current JupyterLab repo is mounted into the container. Then you can start developing JupyterLab with your favorite IDE, JupyterLab will be rebuilt on the fly.
+
+Other available commands:
+
+.. code:: bash
+
+   bash docker/start.sh dev  # Same as calling bash docker/start.sh
+   bash docker/start.sh stop  # Stop the running container
+   bash docker/start.sh clean  # Remove the docker image
+   bash docker/start.sh build  # Rebuild the docker image
+
+   # Log into the container's shell with the JupyterLab environment activated.
+   # It's useful to run the tests or install dependencies.
+   bash docker/start.sh shell
+
+To add TypeScript dependencies to the project, you need to log into the container's shell, install the dependencies to update the package.json and yarn.lock files, and then rebuild the docker image.
+
+.. code:: bash
+
+   bash docker/start.sh shell
+   # In the container shell
+   jlpm add ...
+   exit
+   # Back to host shell
+   bash docker/start.sh build
+
+**Setup using Vagrant**
+""""""""""""""""""""""""""""
 
 A practical example can be found `there <https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant>`_ and
 includes a ``Vagrantfile``, the bootstrap files and additional documentation.
@@ -643,6 +686,9 @@ Main reasons for UI test failures are:
    - ``please update documentation snapshots``: A bot will push a new commit to your PR updating
      documentation test snapshots.
    - ``please update snapshots``: Combine the two previous comments effects.
+
+    The bot will react with +1 emoji to indicate that the run started and then comment
+    back once it concluded.
 
 For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.

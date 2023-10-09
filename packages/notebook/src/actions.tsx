@@ -854,6 +854,13 @@ export namespace NotebookActions {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
+    const footer = (notebook.layout as NotebookWindowedLayout).footer;
+    if (footer && document.activeElement === footer.node) {
+      footer.node.blur();
+      notebook.mode = 'command';
+      return;
+    }
+
     if (notebook.activeCellIndex === 0) {
       return;
     }
