@@ -74,6 +74,10 @@
 | Mobile
 |----------------------------------------------------------------------------*/
 @media only screen and (width <= 760px) {
+  .jp-InputArea {
+    flex-direction: column;
+  }
+
   .jp-InputArea-editor {
     margin-left: var(--jp-notebook-padding);
   }

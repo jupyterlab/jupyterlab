@@ -287,13 +287,16 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 | Mobile
 |----------------------------------------------------------------------------*/
 @media only screen and (width <= 760px) {
+  .jp-OutputArea-child {
+    flex-direction: column;
+  }
+
   .jp-OutputPrompt {
-    display: table-row;
+    flex: 0 0 auto;
     text-align: left;
   }
 
   .jp-OutputArea-child .jp-OutputArea-output {
-    display: table-row;
     margin-left: var(--jp-notebook-padding);
   }
 }
