@@ -55,7 +55,7 @@
     "@jupyterlab/lsp": "^4.1.0-alpha.2",
     "@jupyterlab/mainmenu": "^4.1.0-alpha.2",
     "@jupyterlab/observables": "^5.1.0-alpha.2",
-    "@jupyterlab/rendermime-interfaces": "^3.8.3-alpha.1",
+    "@jupyterlab/rendermime-interfaces": "^3.9.0-alpha.1",
     "@jupyterlab/services": "^7.1.0-alpha.2",
     "@jupyterlab/settingregistry": "^4.1.0-alpha.2",
     "@jupyterlab/statusbar": "^4.1.0-alpha.2",

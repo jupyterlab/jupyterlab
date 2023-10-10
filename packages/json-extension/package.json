@@ -35,7 +35,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^4.2.0-alpha.2",
     "@jupyterlab/codemirror": "^4.1.0-alpha.2",
-    "@jupyterlab/rendermime-interfaces": "^3.8.3-alpha.1",
+    "@jupyterlab/rendermime-interfaces": "^3.9.0-alpha.1",
     "@jupyterlab/translation": "^4.1.0-alpha.2",
     "@jupyterlab/ui-components": "^4.1.0-alpha.2",
     "@lezer/highlight": "^1.1.4",
