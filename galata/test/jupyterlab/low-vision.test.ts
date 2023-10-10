@@ -10,11 +10,13 @@ test.use({
 });
 
 test.describe('Low Vision Support Test', () => {
-  test('400% Zoom Mode', async ({ page }) => {
+  test('Visability of menu-bar at 400-zoom', async ({ page }) => {
     await page.goto();
     await page.evaluate('document.body.style.zoom=4.0');
 
-    const imageName = 'low-vision-400-zoom.png';
-    expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
+    const imageName = 'visability-of-menu-bar-at-400-zoom.png';
+    expect(
+      await page.screenshot({ clip: { x: 0, y: 0, width: 1280, height: 100 } })
+    ).toMatchSnapshot(imageName.toLowerCase());
   });
 });
