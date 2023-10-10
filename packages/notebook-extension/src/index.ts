@@ -138,7 +138,8 @@ import {
 } from './tool-widgets/metadataEditorFields';
 import {
   CellTagListModel,
-  CellTagListView
+  CellTagListView,
+  FilterButtonWidget
 } from './celltaglist';
 
 /**
@@ -1100,20 +1101,36 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
   }
 };
 
-export const cellTagListPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extension:cell-tag-list',
+export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:filter-cells-with-tags',
   description: 'Filter and collapse cells using tags.',
   autoStart: true,
-  optional: [INotebookTracker, ITranslator],
+  optional: [INotebookTracker, IFormRendererRegistry, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
-    translator: ITranslator
+    formRegistry: IFormRendererRegistry,
+    translator_: ITranslator | undefined
   ): void => {
-    const trans = translator.load('jupyterlab');
-    const { shell } = app;
+    const translator = translator_ ?? nullTranslator;
+    const trans = translator?.load('jupyterlab');
+    const { shell, commands } = app;
     const isEnabled = (): boolean => Private.isEnabled(shell, tracker);
     let notebookModelMap = new WeakMap<Notebook, CellTagListModel>();
+    const component: IFormRenderer = {
+      fieldRenderer: () => {
+        return new FilterButtonWidget(
+          commands,
+          CommandIDs.filterCells,
+          'Filter cells with tags',
+          'Open filtering tool'
+        ).render();
+      }
+    };
+    formRegistry.addRenderer(
+      '@jupyterlab/notebook-extension:filter-cells-with-tags.renderer',
+      component
+    );
 
     app.commands.addCommand(CommandIDs.filterCells, {
       label: trans.__('Filter Cells'),
@@ -1156,23 +1173,25 @@ export const cellTagListPlugin: JupyterFrontEndPlugin<void> = {
             });
           }
         }
-        function clearFilters(model: CellTagListModel | undefined) {
+
+        function clearCheckedList(model: CellTagListModel | undefined) {
           if (model) {
             for (let key in model.checkedDict) {
               model.checkedDict[key] = false;
             }
+          }
+        }
+
+        function clearFilters(model: CellTagListModel | undefined) {
+          clearCheckedList(model);
+          if (model) {
             model.notebookPanel?.content.widgets.forEach(cell => {
               cell.inputHidden = false;
             });
           }
         }
-        if (current) {
-          /*const idx = Array.from(current.toolbar.names()).findIndex(
-            name => name === 'filter-cells'
-          );
-          const filterIconWidget = (current?.toolbar.layout as PanelLayout)
-            .widgets[idx];*/
 
+        if (current) {
           let model = notebookModelMap.get(current.content);
 
           if (!model) {
@@ -1186,6 +1205,7 @@ export const cellTagListPlugin: JupyterFrontEndPlugin<void> = {
           }
 
           notebookModelMap.set(current.content, model);
+          console.log('model.checkedList:', model.checkedDict);
           const selectButton = Dialog.okButton({
             label: trans.__('Select Cell(s) With Current Tag(s)'),
             actions: ['select']
@@ -1206,16 +1226,6 @@ export const cellTagListPlugin: JupyterFrontEndPlugin<void> = {
               clearFilters(model);
             }
           });
-
-          /*const popup = showPopup({
-            body: view,
-            anchor: filterIconWidget,
-            hasDynamicSize: true,
-            startHidden: true
-          });
-
-            popup.launch();
-            */
         }
       },
       isEnabled: args => (args.toolbar ? true : isEnabled()),
@@ -1250,7 +1260,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   updateRawMimetype,
   customMetadataEditorFields,
   activeCellTool,
-  cellTagListPlugin
+  filterCellsWithTags
 ];
 export default plugins;
 
