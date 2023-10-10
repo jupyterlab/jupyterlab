@@ -266,7 +266,7 @@ test.describe('Workspace in doc mode', () => {
         left: {
           collapsed: false,
           visible: true,
-          current: 'running-sessions',
+          current: 'filebrowser',
           widgets: [
             'filebrowser',
             'running-sessions',
@@ -276,7 +276,7 @@ test.describe('Workspace in doc mode', () => {
           widgetStates: {
             ['jp-running-sessions']: {
               sizes: [0.25, 0.25, 0.25, 0.25],
-              expansionStates: [true, true, true, true]
+              expansionStates: [false, false, false, false]
             },
             ['extensionmanager.main-view']: {
               sizes: [
@@ -289,11 +289,10 @@ test.describe('Workspace in doc mode', () => {
         right: {
           collapsed: true,
           visible: true,
-          current: 'debugger-sidebar',
           widgets: ['jp-property-inspector', 'debugger-sidebar'],
           widgetStates: {
             ['jp-debugger-sidebar']: {
-              sizes: [1, 0, 0, 0, 0],
+              sizes: [0.2, 0.2, 0.2, 0.2, 0.2],
               expansionStates: [false, false, false, false, false]
             }
           }
