@@ -33,6 +33,7 @@ import '@jupyterlab/mermaid-extension/style/index.js';
 import '@jupyterlab/metadataform-extension/style/index.js';
 import '@jupyterlab/notebook-extension/style/index.js';
 import '@jupyterlab/pdf-extension/style/index.js';
+import '@jupyterlab/pluginmanager-extension/style/index.js';
 import '@jupyterlab/rendermime-extension/style/index.js';
 import '@jupyterlab/running-extension/style/index.js';
 import '@jupyterlab/settingeditor-extension/style/index.js';

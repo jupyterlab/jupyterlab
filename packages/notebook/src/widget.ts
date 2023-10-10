@@ -216,7 +216,7 @@ export class StaticNotebook extends WindowedList {
 
     this._editorConfig = StaticNotebook.defaultEditorConfig;
     this._notebookConfig = StaticNotebook.defaultNotebookConfig;
-    this._mimetype = 'text/plain';
+    this._mimetype = IEditorMimeTypeService.defaultMimeType;
     this._notebookModel = null;
     this._modelChanged = new Signal<this, void>(this);
     this._modelContentChanged = new Signal<this, void>(this);
@@ -548,7 +548,7 @@ export class StaticNotebook extends WindowedList {
       }
     }
     if (!newValue) {
-      this._mimetype = 'text/plain';
+      this._mimetype = IEditorMimeTypeService.defaultMimeType;
       return;
     }
     this._updateMimetype();
