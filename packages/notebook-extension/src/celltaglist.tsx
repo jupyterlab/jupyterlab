@@ -5,8 +5,57 @@
 
 import { NotebookPanel } from '@jupyterlab/notebook';
 import React from 'react';
-import PropTypes from 'prop-types';
-import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+//import PropTypes from 'prop-types';
+import { ReactWidget, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { CommandRegistry } from '@lumino/commands';
+
+interface IPropsFilterButton {
+  onClick: () => void;
+  sectionLabel: string;
+  buttonLabel: string;
+}
+
+export function FilterButtonComponent(props: IPropsFilterButton) {
+  return (
+    <div>
+      <p> {props.sectionLabel}</p>
+      <button type="button" onClick={props.onClick}>
+        {props.buttonLabel}
+      </button>
+    </div>
+  );
+}
+
+export class FilterButtonWidget extends ReactWidget {
+  private _commands: CommandRegistry;
+  private _commandID: string;
+  private _buttonLabel: string;
+  private _sectionLabel: string;
+  constructor(
+    commands: CommandRegistry,
+    commandID: string,
+    sectionLabel: string,
+    buttonLabel: string
+  ) {
+    super();
+    this._commands = commands;
+    this._commandID = commandID;
+    this._sectionLabel = sectionLabel;
+    this._buttonLabel = buttonLabel;
+  }
+  onClick = () => this._commands.execute(this._commandID);
+  render() {
+    return (
+      <>
+        <FilterButtonComponent
+          onClick={this.onClick}
+          sectionLabel={this._sectionLabel}
+          buttonLabel={this._buttonLabel}
+        />
+      </>
+    );
+  }
+}
 
 /* Get the current widget and activate unless the args specify otherwise */
 export function getNotebookTagList(notebookPanel: NotebookPanel) {
@@ -24,12 +73,11 @@ export function getNotebookTagList(notebookPanel: NotebookPanel) {
 
 /* Check if 2 arrays have at least one common element and return true if that's the case*/
 
-interface IProps {
+interface IPropsTagList {
   model: CellTagListModel;
 }
-export function CellTagListComponent(props: IProps) {
+export function CellTagListComponent(props: IPropsTagList) {
   let { model } = props;
-  //const notebookPanel = model.notebookPanel;
   const checkedDict = { ...model.checkedDict };
   const updatedCheckedDict = checkedDict;
 
@@ -55,9 +103,7 @@ export function CellTagListComponent(props: IProps) {
 
   return (
     <div className="tag-list-component">
-      <h3>Select cell tags</h3>
       {tagList.map((item, index) => {
-        //console.log('item:', item);
         return (
           <ul key={index}>
             <div className="tag-list-item">
@@ -75,10 +121,6 @@ export function CellTagListComponent(props: IProps) {
     </div>
   );
 }
-
-CellTagListComponent.propTypes = {
-  tagList: PropTypes.array
-};
 
 export class CellTagListModel extends VDomModel {
   public notebookPanel: NotebookPanel;
