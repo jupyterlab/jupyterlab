@@ -667,7 +667,6 @@ export abstract class WidgetLSPAdapter<
    */
   private async _connect(virtualDocument: VirtualDocument) {
     let language = virtualDocument.language;
-    console.log('connection', language);
 
     let capabilities: ClientCapabilities = {
       textDocument: {
@@ -697,7 +696,6 @@ export abstract class WidgetLSPAdapter<
     };
 
     let connection = await this.connectionManager.connect(options);
-    console.log('connection', connection);
 
     if (connection) {
       await this.onConnected({ virtualDocument, connection });
@@ -736,19 +734,37 @@ export abstract class WidgetLSPAdapter<
     await this.updateFinished;
   }
 
-  private _shouldUpdateVirtualDocument(): boolean {
+  private _shouldUpdateVirtualDocument(languages: string[]): boolean {
     const { languageServerManager } = this.connectionManager;
-
+    let matchedServer = false;
+    for (const language of languages) {
+      if (languageServerManager.getMatchingServers({ language })) {
+        matchedServer = true;
+        break;
+      }
+    }
     return (
       languageServerManager.isEnabled &&
-      languageServerManager.getMatchingServers({ language: this.language }) &&
+      matchedServer &&
       this.options.featureManager.features.length > 0
     );
   }
 
   private _onLspSessionOrFeatureChanged(): void {
+    if (!this._virtualDocument) {
+      return;
+    }
+
+    const languages = [
+      this._virtualDocument.language,
+      ...[...this._virtualDocument.foreignDocuments.values()].map(
+        it => it.language
+      )
+    ];
+
     const { model } = this.widget.context;
-    if (this._shouldUpdateVirtualDocument()) {
+
+    if (this._shouldUpdateVirtualDocument(languages)) {
       model.contentChanged.connect(this._onContentChanged, this);
     } else {
       model.contentChanged.disconnect(this._onContentChanged, this);
