@@ -14,6 +14,8 @@ test.describe('Notebook Layout on Mobile', () => {
 
   test('Execute code cell', async ({ page }) => {
     await page.sidebar.close('left');
+    // TODO: calling `setCell` just once leads to very flaky test
+    await page.notebook.setCell(0, 'code', 'print("hello")');
     await page.notebook.setCell(0, 'code', 'print("hello")');
     await page.notebook.addCell('code', '2 * 3');
     await page.notebook.runCellByCell();
