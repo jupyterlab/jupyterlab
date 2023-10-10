@@ -296,8 +296,8 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
     text-align: left;
   }
 
-  .jp-OutputArea-child .jp-OutputArea-output {
-    margin-left: var(--jp-notebook-padding);
+  .jp-OutputArea-promptOverlay {
+    display: none;
   }
 }
 

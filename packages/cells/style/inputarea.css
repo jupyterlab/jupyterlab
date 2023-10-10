@@ -79,7 +79,7 @@
   }
 
   .jp-InputArea-editor {
-    margin-left: var(--jp-notebook-padding);
+    margin-left: var(--jp-code-padding);
   }
 
   .jp-InputPrompt {
