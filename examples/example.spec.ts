@@ -5,7 +5,7 @@
 
 import { ConsoleMessage, expect, test } from '@playwright/test';
 
-const URL = process.env['BASE_URL'];
+const URL = `${process.env['BASE_URL']}`;
 
 test.setTimeout(120000);
 
@@ -22,15 +22,7 @@ test('should load the example', async ({ page }) => {
     const text = msg.text();
     console.log(msg.type(), '>>', text);
 
-    if (
-      msg.type() === 'error' &&
-      // Ignore 404 for MathJax fonts
-      msg
-        .location()
-        .url.match(
-          /js\/output\/chtml\/fonts\/tex-woff-v2\/MathJax_(Zero|Math-Italic|Main-Regular)\.woff$/
-        ) === null
-    ) {
+    if (msg.type() === 'error') {
       errorLogs += 1;
     }
 
