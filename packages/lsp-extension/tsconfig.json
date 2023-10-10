@@ -23,6 +23,9 @@
     },
     {
       "path": "../ui-components"
+    },
+    {
+      "path": "../apputils"
     }
   ]
 }
