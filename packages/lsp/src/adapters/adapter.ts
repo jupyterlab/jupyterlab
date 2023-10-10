@@ -97,6 +97,14 @@ export abstract class WidgetLSPAdapter<
     this._editorToAdapter = new WeakMap();
     this.editorAdded.connect(this._onEditorAdded, this);
     this.editorRemoved.connect(this._onEditorRemoved, this);
+    this._connectionManager.languageServerManager.sessionsChanged.connect(
+      this._onLspSessionOrFeatureChanged,
+      this
+    );
+    this.options.featureManager.featureRegistered.connect(
+      this._onLspSessionOrFeatureChanged,
+      this
+    );
   }
 
   /**
@@ -271,6 +279,14 @@ export abstract class WidgetLSPAdapter<
     }
     this.editorAdded.disconnect(this._onEditorAdded, this);
     this.editorRemoved.disconnect(this._onEditorRemoved, this);
+    this._connectionManager.languageServerManager.sessionsChanged.disconnect(
+      this._onLspSessionOrFeatureChanged,
+      this
+    );
+    this.options.featureManager.featureRegistered.disconnect(
+      this._onLspSessionOrFeatureChanged,
+      this
+    );
     this._isDisposed = true;
     this.disconnect();
     this._virtualDocument = null;
@@ -531,10 +547,9 @@ export abstract class WidgetLSPAdapter<
    * Create the virtual document using current path and language.
    */
   protected initVirtual(): void {
-    const { model } = this.widget.context;
     this._virtualDocument?.dispose();
     this._virtualDocument = this.createVirtualDocument();
-    model.contentChanged.connect(this._onContentChanged, this);
+    this._onLspSessionOrFeatureChanged();
   }
 
   /**
@@ -652,6 +667,7 @@ export abstract class WidgetLSPAdapter<
    */
   private async _connect(virtualDocument: VirtualDocument) {
     let language = virtualDocument.language;
+    console.log('connection', language);
 
     let capabilities: ClientCapabilities = {
       textDocument: {
@@ -681,6 +697,7 @@ export abstract class WidgetLSPAdapter<
     };
 
     let connection = await this.connectionManager.connect(options);
+    console.log('connection', connection);
 
     if (connection) {
       await this.onConnected({ virtualDocument, connection });
@@ -717,5 +734,24 @@ export abstract class WidgetLSPAdapter<
     }
     this._updateFinished = promise.catch(console.warn);
     await this.updateFinished;
+  }
+
+  private _shouldUpdateVirtualDocument(): boolean {
+    const { languageServerManager } = this.connectionManager;
+
+    return (
+      languageServerManager.isEnabled &&
+      languageServerManager.getMatchingServers({ language: this.language }) &&
+      this.options.featureManager.features.length > 0
+    );
+  }
+
+  private _onLspSessionOrFeatureChanged(): void {
+    const { model } = this.widget.context;
+    if (this._shouldUpdateVirtualDocument()) {
+      model.contentChanged.connect(this._onContentChanged, this);
+    } else {
+      model.contentChanged.disconnect(this._onContentChanged, this);
+    }
   }
 }
