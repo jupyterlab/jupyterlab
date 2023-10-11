@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/help-extension",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "description": "JupyterLab - Help Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,13 +38,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.6",
-    "@jupyterlab/apputils": "^4.1.6",
-    "@jupyterlab/coreutils": "^6.0.6",
-    "@jupyterlab/mainmenu": "^4.0.6",
-    "@jupyterlab/services": "^7.0.6",
-    "@jupyterlab/translation": "^4.0.6",
-    "@jupyterlab/ui-components": "^4.0.6",
+    "@jupyterlab/application": "^4.0.7",
+    "@jupyterlab/apputils": "^4.1.7",
+    "@jupyterlab/coreutils": "^6.0.7",
+    "@jupyterlab/mainmenu": "^4.0.7",
+    "@jupyterlab/services": "^7.0.7",
+    "@jupyterlab/translation": "^4.0.7",
+    "@jupyterlab/ui-components": "^4.0.7",
     "@lumino/coreutils": "^2.1.2",
     "@lumino/signaling": "^2.1.2",
     "@lumino/virtualdom": "^2.0.1",

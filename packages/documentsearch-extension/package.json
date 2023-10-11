@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/documentsearch-extension",
-  "version": "4.0.6",
+  "version": "4.0.7",
   "description": "JupyterLab - Document Search Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,11 +34,11 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.6",
-    "@jupyterlab/apputils": "^4.1.6",
-    "@jupyterlab/documentsearch": "^4.0.6",
-    "@jupyterlab/settingregistry": "^4.0.6",
-    "@jupyterlab/translation": "^4.0.6",
+    "@jupyterlab/application": "^4.0.7",
+    "@jupyterlab/apputils": "^4.1.7",
+    "@jupyterlab/documentsearch": "^4.0.7",
+    "@jupyterlab/settingregistry": "^4.0.7",
+    "@jupyterlab/translation": "^4.0.7",
     "@lumino/widgets": "^2.3.0"
   },
   "devDependencies": {
