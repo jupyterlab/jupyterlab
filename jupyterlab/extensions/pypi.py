@@ -57,8 +57,8 @@ if http_proxy_url:
     proxy_host, _, proxy_port = http_proxy.netloc.partition(":")
 
     proxies = {
-        "http://": f"http://{proxy_host}:{proxy_port}",
-        "https://": f"http://{proxy_host}:{proxy_port}",
+        "http://": http_proxy_url,
+        "https://": https_proxy_url,
     }
 
     xmlrpc_transport_override = ProxiedTransport()
