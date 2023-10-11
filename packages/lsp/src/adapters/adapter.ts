@@ -734,37 +734,34 @@ export abstract class WidgetLSPAdapter<
     await this.updateFinished;
   }
 
-  private _shouldUpdateVirtualDocument(languages: string[]): boolean {
+  /**
+   * Check if the virtual document should be updated on content
+   * changed signal. Returns `true` if two following conditions are
+   * are satisfied:
+   *  - The LSP feature is enabled.
+   *  - The LSP features list is not empty.
+   */
+  private _shouldUpdateVirtualDocument(): boolean {
     const { languageServerManager } = this.connectionManager;
-    let matchedServer = false;
-    for (const language of languages) {
-      if (languageServerManager.getMatchingServers({ language })) {
-        matchedServer = true;
-        break;
-      }
-    }
     return (
       languageServerManager.isEnabled &&
-      matchedServer &&
       this.options.featureManager.features.length > 0
     );
   }
 
+  /**
+   * Connect the virtual document update handler with the content
+   * updated signal.This method is invoked at startup and when
+   * the LSP server status changed or when a LSP feature is registered.
+   */
   private _onLspSessionOrFeatureChanged(): void {
     if (!this._virtualDocument) {
       return;
     }
 
-    const languages = [
-      this._virtualDocument.language,
-      ...[...this._virtualDocument.foreignDocuments.values()].map(
-        it => it.language
-      )
-    ];
-
     const { model } = this.widget.context;
 
-    if (this._shouldUpdateVirtualDocument(languages)) {
+    if (this._shouldUpdateVirtualDocument()) {
       model.contentChanged.connect(this._onContentChanged, this);
     } else {
       model.contentChanged.disconnect(this._onContentChanged, this);
