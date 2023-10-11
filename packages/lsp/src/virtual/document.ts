@@ -461,12 +461,18 @@ export class VirtualDocument implements IDisposable {
    * Clear the virtual document and all related stuffs
    */
   clear(): void {
+    this.unusedStandaloneDocuments.forEach(item =>
+      item.forEach(doc => doc.dispose())
+    );
+    this.unusedStandaloneDocuments.clear();
+
     for (let document of this.foreignDocuments.values()) {
       document.clear();
+      if (document.standalone) {
+        let set = this.unusedStandaloneDocuments.get(document.language);
+        set.push(document);
+      }
     }
-
-    // TODO - deep clear (assure that there is no memory leak)
-    this.unusedStandaloneDocuments.clear();
 
     this.virtualLines.clear();
     this.sourceLines.clear();
@@ -794,6 +800,8 @@ export class VirtualDocument implements IDisposable {
    * Close all foreign documents.
    */
   closeAllForeignDocuments(): void {
+    console.log('closing');
+
     for (let document of this.foreignDocuments.values()) {
       this.closeForeign(document);
     }
@@ -976,11 +984,18 @@ export class VirtualDocument implements IDisposable {
     } else {
       // if (previous document does not exists) or (extractor produces standalone documents
       // and no old standalone document could be reused): create a new document
-      foreignDocument = this.openForeign(
-        extractor.language,
-        extractor.standalone,
-        extractor.fileExtension
+      let unusedStandalone = this.unusedStandaloneDocuments.get(
+        extractor.language
       );
+      if (extractor.standalone && unusedStandalone.length > 0) {
+        foreignDocument = unusedStandalone.pop()!;
+      } else {
+        foreignDocument = this.openForeign(
+          extractor.language,
+          extractor.standalone,
+          extractor.fileExtension
+        );
+      }
     }
     return foreignDocument;
   }
