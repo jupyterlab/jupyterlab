@@ -100,7 +100,6 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
-  filterIcon,
   IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
@@ -1194,8 +1193,8 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
           });
         }
       },
-      isEnabled: args => (args.toolbar ? true : isEnabled()),
-      icon: args => (args.toolbar ? filterIcon : undefined)
+      isEnabled: args => (args.toolbar ? true : isEnabled())
+      //icon: args => (args.toolbar ? filterIcon : undefined)
     });
   }
 };
