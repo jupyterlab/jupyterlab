@@ -154,7 +154,7 @@ class PyPIExtensionManager(ExtensionManager):
                 response = await httpx_client.get(
                     self.base_url + f"/{pkg}/json", headers={"Content-Type": "application/json"}
                 )
-                data = json.loads(response.text).get("info")
+                data = json.loads(response.content).get("info")
         except Exception:
             return None
         else:
