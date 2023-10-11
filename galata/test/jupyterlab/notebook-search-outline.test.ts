@@ -8,13 +8,6 @@ const TEST_NEEDLE = 'come';
 
 test.use({ tmpPath: 'test-search' });
 
-function getSelectionRange(textarea: HTMLTextAreaElement) {
-  return {
-    start: textarea.selectionStart,
-    end: textarea.selectionEnd
-  };
-}
-
 test.beforeAll(async ({ request, tmpPath }) => {
   const contents = galata.newContentsHelper(request);
   await contents.uploadFile(
