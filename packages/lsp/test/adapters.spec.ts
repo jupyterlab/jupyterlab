@@ -215,7 +215,7 @@ describe('@jupyterlab/lsp', () => {
     });
   });
 
-  describe('WidgetLSPAdapter1', () => {
+  describe('WidgetLSPAdapter', () => {
     let shell: LabShell;
     let adapterTracker: WidgetLSPAdapterTracker;
 
