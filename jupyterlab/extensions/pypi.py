@@ -50,7 +50,7 @@ class ProxiedTransport(xmlrpc.client.Transport):
 xmlrpc_transport_override = None
 
 http_proxy_url = environ.get('http_proxy') or environ.get('HTTP_PROXY')
-proxies = {}
+proxies = None
 
 if http_proxy_url:
     http_proxy = urlparse(http_proxy_url)
