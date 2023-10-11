@@ -1145,7 +1145,7 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
           array2.forEach(item => {
             isIncluded.push(array1.includes(item));
           });
-          return isIncluded.some(item => item);
+          return isIncluded.every(item => item);
         }
 
         /* Check is the cells of the input notebook have to be filtered and update the hidden cells state respectively  */
