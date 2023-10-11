@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { KernelMessage } from './kernel';
+import { deserialize, serialize } from './kernel/serialize';
 
 let WEBSOCKET: typeof WebSocket;
 
@@ -11,6 +13,20 @@ if (typeof window === 'undefined') {
   WEBSOCKET = require('ws');
 } else {
   WEBSOCKET = WebSocket;
+}
+
+interface ISerializer {
+  /**
+   * Serialize a kernel message for transport.
+   */
+  serialize(
+    msg: KernelMessage.IMessage,
+    protocol?: string
+  ): string | ArrayBuffer;
+  /**
+   * Deserialize and return the unpacked message.
+   */
+  deserialize(data: ArrayBuffer, protocol?: string): KernelMessage.IMessage;
 }
 
 /**
@@ -87,6 +103,11 @@ export namespace ServerConnection {
      * The `WebSocket` object constructor.
      */
     readonly WebSocket: typeof WebSocket;
+
+    /**
+     * Serializer used to serialize/deserialize kernel messages.
+     */
+    readonly serializer: ISerializer;
   }
 
   /**
@@ -238,6 +259,7 @@ namespace Private {
         (typeof process !== 'undefined' &&
           process?.env?.JEST_WORKER_ID !== undefined) ||
         URLExt.getHostName(pageBaseUrl) !== URLExt.getHostName(wsUrl),
+      serializer: { serialize, deserialize },
       ...options,
       baseUrl,
       wsUrl
