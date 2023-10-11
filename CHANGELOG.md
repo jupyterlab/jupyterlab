@@ -101,6 +101,55 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.7
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.6...277bd0b0dbf28688149ed2bc62830b7d67e6ad21))
+
+### Enhancements made
+
+- Add the standard SQL mimetype [#15180](https://github.com/jupyterlab/jupyterlab/pull/15180) ([@brichet](https://github.com/brichet))
+
+### Bugs fixed
+
+- Restore horizontal scrolling of outputs for Firefox [#15171](https://github.com/jupyterlab/jupyterlab/pull/15171) ([@fcollonval](https://github.com/fcollonval))
+- Fix text wrapping in the search box [#15080](https://github.com/jupyterlab/jupyterlab/pull/15080) ([@eliaslma](https://github.com/eliaslma))
+- Fix completer documentation panel hiding and animation [#15238](https://github.com/jupyterlab/jupyterlab/pull/15238) ([@krassowski](https://github.com/krassowski))
+- Fix clicking in the TOC does not scroll [#15184](https://github.com/jupyterlab/jupyterlab/pull/15184) ([@parmentelat](https://github.com/parmentelat))
+- Hide completer when changing notebook tabs [#14534](https://github.com/jupyterlab/jupyterlab/pull/14534) ([@nishikantparmariam](https://github.com/nishikantparmariam))
+- Backport of MathJax double init/font URL fix and binder/log updates [#15231](https://github.com/jupyterlab/jupyterlab/pull/15231) ([@bollwyvl](https://github.com/bollwyvl))
+- Restore syntax highlighting for mimetypes with more than one identifier [#15175](https://github.com/jupyterlab/jupyterlab/pull/15175) ([@jans-code](https://github.com/jans-code))
+- Fix completer width inflation and jitter [#15132](https://github.com/jupyterlab/jupyterlab/pull/15132) ([@krassowski](https://github.com/krassowski))
+- Fix Show Keyboard Shortcuts command [#15170](https://github.com/jupyterlab/jupyterlab/pull/15170) ([@jtpio](https://github.com/jtpio))
+- Blur footer for any key that triggers a 'select above', not just ArrowUp [#14796](https://github.com/jupyterlab/jupyterlab/pull/14796) ([@smacke](https://github.com/smacke))
+- Fix background-color in `<select>` elements in dark theme [#15098](https://github.com/jupyterlab/jupyterlab/pull/15098) ([@Rmarieta](https://github.com/Rmarieta))
+- Fix selection in active line [#15129](https://github.com/jupyterlab/jupyterlab/pull/15129) ([@krassowski](https://github.com/krassowski))
+- Remove `unusedDocuments`, fix culling of foreign documents [#15105](https://github.com/jupyterlab/jupyterlab/pull/15105) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Fix completer tests after transition to pointer events [#15237](https://github.com/jupyterlab/jupyterlab/pull/15237) ([@krassowski](https://github.com/krassowski))
+- Bump postcss from 8.4.25 to 8.4.31 [#15218](https://github.com/jupyterlab/jupyterlab/pull/15218) ([@dependabot\[bot\]](https://github.com/apps/dependabot))
+- Switch from hub to gh CLI [#15213](https://github.com/jupyterlab/jupyterlab/pull/15213) ([@fcollonval](https://github.com/fcollonval))
+- Restore removed API [#15204](https://github.com/jupyterlab/jupyterlab/pull/15204) ([@fcollonval](https://github.com/fcollonval))
+- Bump actions/checkout from 3 to 4 [#15189](https://github.com/jupyterlab/jupyterlab/pull/15189) ([@dependabot\[bot\]](https://github.com/apps/dependabot))
+- Bump iterative/setup-cml from 1 to 2 [#15186](https://github.com/jupyterlab/jupyterlab/pull/15186) ([@dependabot\[bot\]](https://github.com/apps/dependabot))
+- Add a valid email in update extension [#15133](https://github.com/jupyterlab/jupyterlab/pull/15133) ([@brichet](https://github.com/brichet))
+- Added test to check close tab button has a title [#15086](https://github.com/jupyterlab/jupyterlab/pull/15086) ([@m158261](https://github.com/m158261))
+
+### Documentation improvements
+
+- Fix typo in `Notification.dismiss` [#15197](https://github.com/jupyterlab/jupyterlab/pull/15197) ([@krassowski](https://github.com/krassowski))
+- Restore dark/light toggle, remove duplicated search box [#15141](https://github.com/jupyterlab/jupyterlab/pull/15141) ([@krassowski](https://github.com/krassowski))
+- New docs page: developer/accessibility.html [#14426](https://github.com/jupyterlab/jupyterlab/pull/14426) ([@gabalafou](https://github.com/gabalafou))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-09-14&to=2023-10-11&type=c))
+
+[@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2023-09-14..2023-10-11&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-09-14..2023-10-11&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-09-14..2023-10-11&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2023-09-14..2023-10-11&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-09-14..2023-10-11&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-09-14..2023-10-11&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-09-14..2023-10-11&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-09-14..2023-10-11&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-09-14..2023-10-11&type=Issues) | [@parmentelat](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aparmentelat+updated%3A2023-09-14..2023-10-11&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-09-14..2023-10-11&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.6
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.5...3064ad495cd9a456737d78082d2fee6f83e131bb))
@@ -153,8 +202,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-08-13&to=2023-09-14&type=c))
 
 [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2023-08-13..2023-09-14&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2023-08-13..2023-09-14&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2023-08-13..2023-09-14&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-08-13..2023-09-14&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-08-13..2023-09-14&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-08-13..2023-09-14&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-08-13..2023-09-14&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-08-13..2023-09-14&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-08-13..2023-09-14&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-08-13..2023-09-14&type=Issues) | [@tonyfast](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atonyfast+updated%3A2023-08-13..2023-09-14&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-08-13..2023-09-14&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.5
 
