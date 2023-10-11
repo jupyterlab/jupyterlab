@@ -375,7 +375,7 @@ class PyPIExtensionManager(ExtensionManager):
                     async with httpx.AsyncClient(proxies=proxies) as httpx_client:
                         response = await httpx_client.get(download_url, proxies=proxies)
                     if download_url.endswith(".whl"):
-                        with ZipFile(io.BytesIO(response.text)) as wheel:
+                        with ZipFile(io.BytesIO(response.content)) as wheel:
                             for name in filter(
                                 lambda f: Path(f).name == "package.json",
                                 wheel.namelist(),
