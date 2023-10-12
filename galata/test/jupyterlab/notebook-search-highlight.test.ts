@@ -3,7 +3,7 @@
 import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
-const TEST_FILENAME = 'search_outline_notebook.ipynb';
+const TEST_FILENAME = 'search_highlight_notebook.ipynb';
 const TEST_NEEDLE = 'come';
 
 test.use({ tmpPath: 'test-search' });
@@ -24,8 +24,8 @@ test.beforeEach(async ({ page, tmpPath }) => {
 test('Open and close Search dialog, then add new code cell', async ({
   page
 }) => {
-  const imageName1 = 'notebook-search-outline-1.png';
-  const imageName2 = 'notebook-search-outline-2.png';
+  const imageName1 = 'notebook-search-highlight-1.png';
+  const imageName2 = 'notebook-search-highlight-2.png';
 
   // search for our needle
   await page.evaluate(async searchText => {
@@ -52,7 +52,7 @@ test('Open and close Search dialog, then add new code cell', async ({
 
   // wait an arbitrary amount of extra time
   // and expect the outlining to be still gone
-  // but because of #14871, text is outlined again
+  // but because of #14871, text is highlightd again
   setTimeout(async () => {
     expect(await tabHandle.screenshot()).toMatchSnapshot(imageName2);
   }, 1000);
