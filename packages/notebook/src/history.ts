@@ -214,7 +214,7 @@ export class NotebookHistory implements INotebookHistory {
    * Get the next item in the console history.
    *
    * @param activeCell - The currently selected Cell in the notebook.
-   * @param update - the promise returned from back or forward
+   * @param update - the result from back or forward
    */
   updateEditor(activeCell: Cell, update: string): void {
     if (activeCell) {
