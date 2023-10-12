@@ -302,7 +302,7 @@ function Card(
             <img
               src={item.kernelIconUrl}
               className="jp-Launcher-kernelIcon"
-              alt={trans.__('Kernal Icon')}
+              alt={trans.__('Kernel Icon')}
             />
           ) : (
             <div className="jp-LauncherCard-noKernelIcon">
