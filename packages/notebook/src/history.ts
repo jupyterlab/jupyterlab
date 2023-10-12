@@ -81,8 +81,9 @@ export class NotebookHistory implements INotebookHistory {
   constructor(options: NotebookHistory.IOptions) {
     this.sessionContext = options.sessionContext;
     this.translator = options.translator || nullTranslator;
-    void this._handleKernel();
-    this.sessionContext.kernelChanged.connect(this._handleKernel, this);
+    void this._handleKernel().then(() => {
+      this.sessionContext.kernelChanged.connect(this._handleKernel, this);
+    });
     this.toRequest = this.requestBatchSize;
   }
 
