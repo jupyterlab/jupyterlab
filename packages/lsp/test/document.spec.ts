@@ -53,6 +53,7 @@ describe('@jupyterlab/lsp', () => {
     let extractorManager: ILSPCodeExtractorsManager;
     let markdownCellExtractor: TextForeignCodeExtractor;
     let rawCellExtractor: TextForeignCodeExtractor;
+    let standaloneCellExtractor: TextForeignCodeExtractor;
     beforeAll(() => {
       extractorManager = new CodeExtractorsManager();
 
@@ -70,6 +71,13 @@ describe('@jupyterlab/lsp', () => {
         cellType: ['raw']
       });
       extractorManager.register(rawCellExtractor, null);
+      standaloneCellExtractor = new TextForeignCodeExtractor({
+        language: 'standalone-text',
+        isStandalone: true,
+        file_extension: 'txt',
+        cellType: ['standalone-raw']
+      });
+      extractorManager.register(standaloneCellExtractor, null);
     });
     beforeEach(() => {
       document = new VirtualDocument({
@@ -237,6 +245,29 @@ describe('@jupyterlab/lsp', () => {
           document['_chooseForeignDocument'](rawCellExtractor);
         expect(md.uri).toBe('test.ipynb.python-text.txt');
       });
+      it('should use unused virtual document if availble', () => {
+        document.appendCodeBlock({
+          value: 'test line in raw 1\ntest line in raw 2',
+          ceEditor: {} as Document.IEditor,
+          type: 'standalone-raw'
+        });
+        document.clear();
+        expect(
+          document['unusedStandaloneDocuments'].get(
+            standaloneCellExtractor.language
+          ).length
+        ).toEqual(1);
+
+        const openForeignSpy = jest.spyOn(document as any, 'openForeign');
+        document['_chooseForeignDocument'](standaloneCellExtractor);
+
+        expect(
+          document['unusedStandaloneDocuments'].get(
+            standaloneCellExtractor.language
+          ).length
+        ).toEqual(0);
+        expect(openForeignSpy).toHaveBeenCalledTimes(0);
+      });
     });
     describe('#closeExpiredDocuments', () => {
       it('should close expired foreign documents', async () => {
@@ -337,6 +368,44 @@ describe('@jupyterlab/lsp', () => {
           line: 0
         });
         expect(position).toEqual({ ch: 2, line: 0 });
+      });
+    });
+    describe('#transformVirtualToRoot', () => {
+      it('should return the position in root', async () => {
+        await document.updateManager.updateDocuments([
+          {
+            value: 'new line',
+            ceEditor: {} as Document.IEditor,
+            type: 'code'
+          }
+        ]);
+        const position = document.transformVirtualToRoot({
+          isVirtual: true,
+          ch: 2,
+          line: 0
+        });
+        expect(position).toEqual({ ch: 2, line: 0 });
+      });
+    });
+    describe('#clear', () => {
+      it('should clear everything', () => {
+        document.clear();
+        expect(document['unusedStandaloneDocuments'].size).toEqual(0);
+        expect(document['virtualLines'].size).toEqual(0);
+        expect(document['virtualLines'].size).toEqual(0);
+        expect(document['sourceLines'].size).toEqual(0);
+        expect(document['lastVirtualLine']).toEqual(0);
+        expect(document['lastSourceLine']).toEqual(0);
+        expect(document['lineBlocks']).toEqual([]);
+      });
+      it('should keep unused document', () => {
+        document.appendCodeBlock({
+          value: 'test line in raw 1\ntest line in raw 2',
+          ceEditor: {} as Document.IEditor,
+          type: 'standalone-raw'
+        });
+        document.clear();
+        expect(document['unusedStandaloneDocuments'].size).toEqual(1);
       });
     });
   });
