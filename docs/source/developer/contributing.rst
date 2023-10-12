@@ -378,7 +378,7 @@ Other available commands:
 
 .. code:: bash
 
-   bash docker/start.sh dev  # Same as calling bash docker/start.sh
+   bash docker/start.sh dev 4567 # Start JupyterLab dev container at port 4567
    bash docker/start.sh stop  # Stop the running container
    bash docker/start.sh clean  # Remove the docker image
    bash docker/start.sh build  # Rebuild the docker image
