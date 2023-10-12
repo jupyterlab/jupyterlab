@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import {
@@ -73,13 +74,13 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
   get mimeType(): string {
     const mimeTypeFromModel = this.editor.model.mimeType;
     const codeMirrorMimeType: string = Array.isArray(mimeTypeFromModel)
-      ? mimeTypeFromModel[0] ?? 'text/plain'
+      ? mimeTypeFromModel[0] ?? IEditorMimeTypeService.defaultMimeType
       : mimeTypeFromModel;
     const contentsModel = this.editor.context.contentsModel;
 
     // when MIME type is not known it defaults to 'text/plain',
     // so if it is different we can accept it as it is
-    if (codeMirrorMimeType != 'text/plain') {
+    if (codeMirrorMimeType != IEditorMimeTypeService.defaultMimeType) {
       return codeMirrorMimeType;
     } else if (contentsModel) {
       // a script that does not have a MIME type known by the editor

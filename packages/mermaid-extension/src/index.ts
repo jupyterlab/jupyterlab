@@ -20,6 +20,7 @@ import {
   MermaidMarkdown,
   RenderedMermaid
 } from '@jupyterlab/mermaid';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 /**
  * A namespace for mermaid text-based diagram commands.
@@ -66,12 +67,18 @@ const contextCommands: JupyterFrontEndPlugin<void> = {
   description: 'Provides context menu commands for mermaid diagrams.',
   autoStart: true,
   requires: [IMermaidManager],
-  activate: (app: JupyterFrontEnd, mermaid: IMermaidManager) => {
+  optional: [ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    mermaid: IMermaidManager,
+    translator: ITranslator | null
+  ) => {
     const isMermaid = (node: HTMLElement) =>
       node.classList.contains(MERMAID_CLASS);
 
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
     app.commands.addCommand(CommandIDs.copySource, {
-      label: 'Mermaid Copy Diagram Source',
+      label: trans.__('Mermaid Copy Diagram Source'),
       execute: async (args?: any) => {
         const node = app.contextMenuHitTest(isMermaid);
         if (!node) {
