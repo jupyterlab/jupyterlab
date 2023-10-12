@@ -225,16 +225,16 @@ describe('@jupyterlab/lsp', () => {
         expect(foreignDocumentsMap.size).toEqual(1);
       });
     });
-    describe('#chooseForeignDocument', () => {
+    describe('#_chooseForeignDocument', () => {
       it('should select the foreign document for markdown cell', () => {
-        const md: VirtualDocument = document['chooseForeignDocument'](
+        const md: VirtualDocument = document['_chooseForeignDocument'](
           markdownCellExtractor
         );
         expect(md.uri).toBe('test.ipynb.python-markdown.md');
       });
       it('should select the foreign document for raw cell', () => {
         const md: VirtualDocument =
-          document['chooseForeignDocument'](rawCellExtractor);
+          document['_chooseForeignDocument'](rawCellExtractor);
         expect(md.uri).toBe('test.ipynb.python-text.txt');
       });
     });
@@ -282,14 +282,14 @@ describe('@jupyterlab/lsp', () => {
       it('should emit the `foreignDocumentClosed` signal', () => {
         const cb = jest.fn();
         document.foreignDocumentClosed.connect(cb);
-        const md: VirtualDocument = document['chooseForeignDocument'](
+        const md: VirtualDocument = document['_chooseForeignDocument'](
           markdownCellExtractor
         );
         document.closeForeign(md);
         expect(cb).toHaveBeenCalled();
       });
       it('should close correctly foreign documents', () => {
-        const md: VirtualDocument = document['chooseForeignDocument'](
+        const md: VirtualDocument = document['_chooseForeignDocument'](
           markdownCellExtractor
         );
         md.closeAllForeignDocuments = jest.fn();
@@ -312,7 +312,7 @@ describe('@jupyterlab/lsp', () => {
         );
       });
       it('should get the markdown content of the document', () => {
-        const md = document['chooseForeignDocument'](markdownCellExtractor);
+        const md = document['_chooseForeignDocument'](markdownCellExtractor);
 
         expect(md.value).toContain(
           'test line in markdown 1\ntest line in markdown 2'
