@@ -13,6 +13,11 @@ GID=$(id -g)
 RSYNC_CMD="rsync -ar /home/$DEV_USER/jupyterlab_cache/node_modules/. /home/$DEV_USER/jupyterlab/node_modules"
 CMD=$1 # possible command: build, clean, dev, shell
 
+PORT=8888 # Optional, only used for the `dev` command
+re='^[0-9]+$'
+if [[ $2 =~ $re ]] ; then
+    PORT=$2
+fi
 
 stringmd5() {
     echo "md5sum,md5" | tr ',' '\n' | while read -r cmd; do
@@ -55,7 +60,7 @@ if [[ $CMD == 'build' ]]; then
     fi
     stop_contaniner
     if [[ $CMD == 'dev' || $CMD == '' || $CMD == 'dev-detach' ]]; then
-        DOCKER_CMD="$RSYNC_CMD && jupyter lab --dev-mode --watch --ip 0.0.0.0"
+        DOCKER_CMD="$RSYNC_CMD && jupyter lab --dev-mode --extensions-in-dev-mode --watch --ip 0.0.0.0 --port $PORT"
     else
         DOCKER_CMD="$RSYNC_CMD && bash"
     fi
@@ -63,5 +68,5 @@ if [[ $CMD == 'build' ]]; then
     if [[ $CMD == 'dev-detach' ]]; then
         RUN_MODE="-d"
     fi
-    docker run $RUN_MODE --name $DEV_CONTAINER --rm -p 8888:8888 -v $ROOT_DIR:/home/$DEV_USER/jupyterlab --entrypoint "/bin/bash" $IMAGE_TAG -i -c "$DOCKER_CMD"
+    docker run $RUN_MODE --name $DEV_CONTAINER --rm -p $PORT:$PORT -v $ROOT_DIR:/home/$DEV_USER/jupyterlab --entrypoint "/bin/bash" $IMAGE_TAG -i -c "$DOCKER_CMD"
 fi
