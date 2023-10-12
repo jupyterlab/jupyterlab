@@ -405,7 +405,7 @@ export namespace NotebookHistory {
     /**
      * The application language translator.
      */
-    translator: ITranslator;
+    translator?: ITranslator;
   }
 }
 
