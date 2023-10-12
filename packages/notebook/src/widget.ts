@@ -991,7 +991,7 @@ export class StaticNotebook extends WindowedList {
   private _idleCallBack: number | null;
   private _mimetype: string;
   private _mimetypeService: IEditorMimeTypeService;
-  readonly _history: INotebookHistory | undefined;
+  protected readonly _history: INotebookHistory | undefined;
   private _modelChanged: Signal<this, void>;
   private _modelContentChanged: Signal<this, void>;
   private _notebookConfig: StaticNotebook.INotebookConfig;
