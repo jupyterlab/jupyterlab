@@ -1740,6 +1740,12 @@
     ]
   },
   {
+    "id": "notebook:filter-cells-with-tags",
+    "label": "Filter Cells",
+    "caption": "Filter cells with tags",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:get-kernel",
     "label": "Get Kernel",
     "caption": "",
