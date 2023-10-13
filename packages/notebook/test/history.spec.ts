@@ -102,7 +102,7 @@ describe('@jupyterlab/notebook', () => {
         let activeCell = widget.widgets[-1];
         widget.select(activeCell);
         for (let i = 0; i < 12; i++) {
-          widget.history?.back(activeCell).catch();
+          await widget.history?.back(activeCell);
         }
         expect(activeCell.model.sharedModel.source).toBe(
           'print(this is input 0)'
