@@ -2097,9 +2097,9 @@ export namespace NotebookActions {
     }
     const activeCell = notebook.activeCell;
     if (activeCell) {
-      if (notebook._history) {
-        const previousHistory = await notebook._history.back(activeCell);
-        notebook._history.updateEditor(activeCell, previousHistory);
+      if (notebook.history) {
+        const previousHistory = await notebook.history.back(activeCell);
+        notebook.history.updateEditor(activeCell, previousHistory);
       }
     }
   }
@@ -2115,9 +2115,9 @@ export namespace NotebookActions {
     }
     const activeCell = notebook.activeCell;
     if (activeCell) {
-      if (notebook._history) {
-        const nextHistory = await notebook._history.forward(activeCell);
-        notebook._history.updateEditor(activeCell, nextHistory);
+      if (notebook.history) {
+        const nextHistory = await notebook.history.forward(activeCell);
+        notebook.history.updateEditor(activeCell, nextHistory);
       }
     }
   }

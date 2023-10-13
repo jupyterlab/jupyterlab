@@ -235,7 +235,7 @@ export class StaticNotebook extends WindowedList {
     this._updateNotebookConfig();
     this._mimetypeService = options.mimeTypeService;
     this.renderingLayout = options.notebookConfig?.renderingLayout;
-    this._history = options.history;
+    this.history = options.history;
   }
 
   get cellCollapsed(): ISignal<this, Cell> {
@@ -991,7 +991,7 @@ export class StaticNotebook extends WindowedList {
   private _idleCallBack: number | null;
   private _mimetype: string;
   private _mimetypeService: IEditorMimeTypeService;
-  protected readonly _history: INotebookHistory | undefined;
+  readonly history: INotebookHistory | undefined;
   private _modelChanged: Signal<this, void>;
   private _modelContentChanged: Signal<this, void>;
   private _notebookConfig: StaticNotebook.INotebookConfig;
@@ -2790,8 +2790,8 @@ export class Notebook extends StaticNotebook {
     this._selectedCells = this.widgets.filter(cell =>
       this.isSelectedOrActive(cell)
     );
-    if (this._history) {
-      this._history.reset();
+    if (this.history) {
+      this.history.reset();
     }
   }
   private _selectedCells: Cell[] = [];
