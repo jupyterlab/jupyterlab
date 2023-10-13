@@ -6,7 +6,7 @@ import { expect, galata, test } from '@jupyterlab/galata';
 test.use({
   autoGoto: false,
   mockState: galata.DEFAULT_DOCUMENTATION_STATE,
-  viewport: { width: 1280, height: 1024 }
+  viewport: { height: 1024, width: 1280 }
 });
 
 test.describe('Low Vision Support Test', () => {
