@@ -71,15 +71,14 @@ export function getNotebookTagList(notebookPanel: NotebookPanel) {
   return tagList;
 }
 
-/* Check if 2 arrays have at least one common element and return true if that's the case*/
-
 interface IPropsTagList {
   model: CellTagListModel;
 }
+
 export function CellTagListComponent(props: IPropsTagList) {
   let { model } = props;
-  const checkedDict = { ...model.checkedDict };
-  const updatedCheckedDict = checkedDict;
+  model.setNotebookTagList(model.notebookPanel);
+  const updatedCheckedDict = { ...model.checkedDict };
 
   const handleCheck = (event: any) => {
     if (event.target.checked) {
@@ -89,21 +88,15 @@ export function CellTagListComponent(props: IPropsTagList) {
       updatedCheckedDict[event.target.value] =
         !updatedCheckedDict[event.target.value];
     }
-
-    model.setCheckedDict(updatedCheckedDict);
+    model.setUpdatedCheckedDict(updatedCheckedDict);
   };
 
   let isChecked = (item: any) =>
     updatedCheckedDict[item] === true ? 'checked-item' : 'not-checked-item';
 
-  let tagList = [];
-  for (let key in updatedCheckedDict) {
-    tagList.push(key);
-  }
-
   return (
     <div className="tag-list-component">
-      {tagList.map((item, index) => {
+      {model.tagList.map((item, index) => {
         return (
           <ul key={index}>
             <div className="tag-list-item">
@@ -126,14 +119,20 @@ export class CellTagListModel extends VDomModel {
   public notebookPanel: NotebookPanel;
   public tagList: Array<string>;
   public checkedDict: { [tag: string]: boolean };
+  public updatedCheckedDict: { [tag: string]: boolean };
 
   constructor(notebookPanel: NotebookPanel) {
     super();
     this.notebookPanel = notebookPanel;
-    this.tagList = getNotebookTagList(notebookPanel);
+    this.tagList = getNotebookTagList(this.notebookPanel);
   }
-  setCheckedDict(dict: { [tag: string]: boolean }) {
-    this.checkedDict = dict;
+
+  setUpdatedCheckedDict(dict: { [tag: string]: boolean }) {
+    this.updatedCheckedDict = dict;
+  }
+
+  setNotebookTagList(notebookPanel: NotebookPanel) {
+    this.tagList = getNotebookTagList(notebookPanel);
   }
 }
 

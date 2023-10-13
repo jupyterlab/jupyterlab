@@ -1136,9 +1136,9 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
       caption: trans.__('Filter cells with tags'),
 
       execute: args => {
-        //console.log('notebookModelMap:', notebookModelMap);
         const current = getCurrent(tracker, shell, args);
 
+        /* Check if one array is included into another one and return true if that's the case*/
         function isContentShared(array1: Array<string>, array2: Array<string>) {
           let isIncluded: boolean[] = [];
           array2.forEach(item => {
@@ -1147,13 +1147,14 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
           return isIncluded.every(item => item);
         }
 
-        /* Check is the cells of the input notebook have to be filtered and update the hidden cells state respectively  */
+        /* Check is the cells of the input notebook have to be filtered
+        Update the hidden cells state respectively and update model.checkedDict  */
         function updateFilteredCells(model: CellTagListModel | undefined) {
           if (model) {
             const checkedList: Array<string> = [];
 
-            for (let key in model.checkedDict) {
-              let value = model.checkedDict[key];
+            for (let key in model.updatedCheckedDict) {
+              let value = model.updatedCheckedDict[key];
               if (value === true) {
                 checkedList.push(key);
               }
@@ -1170,23 +1171,19 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
                 cell.inputHidden = false;
               }
             });
+            model.checkedDict = model.updatedCheckedDict;
           }
         }
-
-        function clearCheckedList(model: CellTagListModel | undefined) {
-          if (model) {
-            for (let key in model.checkedDict) {
-              model.checkedDict[key] = false;
-            }
-          }
-        }
-
+        /* Uncollapse all cells, set all tags to false in checklist and update model.checkedDict */
         function clearFilters(model: CellTagListModel | undefined) {
-          clearCheckedList(model);
           if (model) {
             model.notebookPanel?.content.widgets.forEach(cell => {
               cell.inputHidden = false;
             });
+            for (let key in model.updatedCheckedDict) {
+              model.updatedCheckedDict[key] = false;
+            }
+            model.checkedDict = model.updatedCheckedDict;
           }
         }
 
@@ -1194,8 +1191,12 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
           let model = notebookModelMap.get(current.content);
 
           if (!model) {
+            current.content.widgets.forEach(cell => {
+              cell.inputHidden = false;
+            });
             model = new CellTagListModel(current);
             model.checkedDict = {};
+            model.updatedCheckedDict = {};
             model.tagList.forEach(item => {
               if (model) {
                 model.checkedDict[item] = false;
@@ -1204,7 +1205,6 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
           }
 
           notebookModelMap.set(current.content, model);
-          console.log('model.checkedList:', model.checkedDict);
           const selectButton = Dialog.okButton({
             label: trans.__('Select Cell(s) With Current Tag(s)'),
             actions: ['select']
@@ -1228,7 +1228,6 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
         }
       },
       isEnabled: args => (args.toolbar ? true : isEnabled())
-      //icon: args => (args.toolbar ? filterIcon : undefined)
     });
   }
 };
