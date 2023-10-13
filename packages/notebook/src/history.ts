@@ -251,7 +251,7 @@ export class NotebookHistory implements INotebookHistory {
    * Fetches a subsequent batch of history. Updates the filtered history and cursor to correct place in history,
    * accounting for potentially new history items above it.
    */
-  async fetchBatch() {
+  private async fetchBatch() {
     this.toRequest += this.requestBatchSize;
     let oldFilteredReversed = this._filtered.slice().reverse();
     let oldHistory = this._history.slice();
