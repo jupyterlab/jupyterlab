@@ -64,6 +64,7 @@
 
 .jp-Notebook .jp-Cell .jp-InputPrompt {
   cursor: move;
+  float: left;
 }
 
 /*-----------------------------------------------------------------------------
@@ -457,4 +458,13 @@ div.jp-Cell-Placeholder-content-2 {
 
 div.jp-Cell-Placeholder-content-3 {
   top: 140px;
+}
+
+/*-----------------------------------------------------------------------------
+| Printing
+|----------------------------------------------------------------------------*/
+@media print {
+  .jp-Notebook .jp-Cell .jp-InputPrompt {
+    float: none;
+  }
 }

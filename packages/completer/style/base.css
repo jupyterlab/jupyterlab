@@ -181,8 +181,8 @@
 
 .jp-Completer-loading-bar-container {
   height: 2px;
-  width: 100%;
-  background-color: var(--jp-layout-color2);
+  width: calc(100% - var(--jp-private-completer-item-height));
+  left: var(--jp-private-completer-item-height);
   position: absolute;
   overflow: hidden;
   top: 0;
@@ -191,7 +191,7 @@
 .jp-Completer-loading-bar {
   height: 100%;
   width: 50%;
-  background-color: var(--jp-layout-color4);
+  background-color: var(--jp-accent-color2);
   position: absolute;
   left: -50%;
   animation: jp-Completer-loading 2s ease-in 0.5s infinite;
