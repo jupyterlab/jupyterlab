@@ -188,7 +188,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
     });
     app.commands.addCommand(CommandIDs.invokeInline, {
       execute: () => {
-        completionManager.inline?.accept(app.shell.currentWidget!.id!);
+        completionManager.inline?.invoke(app.shell.currentWidget!.id!);
       },
       label: trans.__('Invoke Inline Completer'),
       isEnabled
