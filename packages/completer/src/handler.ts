@@ -651,7 +651,7 @@ export namespace CompletionHandler {
   /**
    * Stream event type.
    */
-  export const enum StraemEvent {
+  export enum StraemEvent {
     opened,
     update,
     closed
