@@ -44,6 +44,7 @@ export class InlineCompleter extends Widget {
     layout.addWidget(this.toolbar);
     layout.addWidget(this._providerWidget);
     this._updateShortcutsVisibility();
+    this._updateDisplay();
     // Allow the node to receive focus, which prevents removing the ghost text
     // when user mis-clicks on the tooltip instead of the button in the tooltip.
     this.node.tabIndex = 0;
@@ -186,7 +187,7 @@ export class InlineCompleter extends Widget {
    */
   configure(settings: IInlineCompleterSettings) {
     this._showWidget = settings.showWidget;
-    this.node.dataset.display = this._showWidget;
+    this._updateDisplay();
     if (settings.showShortcuts !== this._showShortcuts) {
       this._showShortcuts = settings.showShortcuts;
       this._updateShortcutsVisibility();
@@ -273,6 +274,7 @@ export class InlineCompleter extends Widget {
       return true;
     }
     this.hide();
+    this.model?.reset();
   }
 
   /**
@@ -449,6 +451,10 @@ export class InlineCompleter extends Widget {
 
   private _updateShortcutsVisibility() {
     this.node.dataset.showShortcuts = this._showShortcuts + '';
+  }
+
+  private _updateDisplay() {
+    this.node.dataset.display = this._showWidget;
   }
 
   private _clearHoverTimeout: number | null = null;

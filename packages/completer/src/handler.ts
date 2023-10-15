@@ -689,7 +689,7 @@ export namespace CompletionHandler {
     /**
      * The MIME type under the cursor.
      */
-    mimeType: string;
+    mimeType?: string;
   }
 
   /**
