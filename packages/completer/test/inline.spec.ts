@@ -68,12 +68,9 @@ describe('completer/inline', () => {
 
     describe('#accept()', () => {
       it('should update editor source', () => {
-        model.setCompletions(
-          {
-            items: suggestionsAbc
-          },
-          0
-        );
+        model.setCompletions({
+          items: suggestionsAbc
+        });
         completer.accept();
         expect(editorWidget.editor.model.sharedModel.source).toBe(
           'suggestion a'
@@ -84,55 +81,40 @@ describe('completer/inline', () => {
     describe('#current', () => {
       it('preserves active completion when results change order', () => {
         Widget.attach(completer, document.body);
-        model.setCompletions(
-          {
-            items: suggestionsAbc
-          },
-          0
-        );
+        model.setCompletions({
+          items: suggestionsAbc
+        });
         completer.cycle('previous');
         expect(completer.current?.insertText).toBe('suggestion c');
-        model.setCompletions(
-          {
-            items: suggestionsAbc.slice().reverse()
-          },
-          0
-        );
+        model.setCompletions({
+          items: suggestionsAbc.slice().reverse()
+        });
         expect(completer.current?.insertText).toBe('suggestion c');
       });
 
       it('switches to a first item if the previous current has disappeared', () => {
         Widget.attach(completer, document.body);
-        model.setCompletions(
-          {
-            items: suggestionsAbc
-          },
-          0
-        );
+        model.setCompletions({
+          items: suggestionsAbc
+        });
         completer.cycle('previous');
         expect(completer.current?.insertText).toBe('suggestion c');
-        model.setCompletions(
-          {
-            items: [
-              {
-                ...itemDefaults,
-                insertText: 'suggestion b'
-              }
-            ]
-          },
-          0
-        );
+        model.setCompletions({
+          items: [
+            {
+              ...itemDefaults,
+              insertText: 'suggestion b'
+            }
+          ]
+        });
         expect(completer.current?.insertText).toBe('suggestion b');
       });
 
       it('preserves active completion when prefix is typed', () => {
         Widget.attach(completer, document.body);
-        model.setCompletions(
-          {
-            items: suggestionsAbc
-          },
-          0
-        );
+        model.setCompletions({
+          items: suggestionsAbc
+        });
         completer.cycle('previous');
         expect(completer.current?.insertText).toBe('suggestion c');
         model.handleTextChange({ sourceChange: [{ insert: 'sugg' }] });
@@ -141,12 +123,9 @@ describe('completer/inline', () => {
 
       it('discards when a non-prefix is typed', () => {
         Widget.attach(completer, document.body);
-        model.setCompletions(
-          {
-            items: suggestionsAbc
-          },
-          0
-        );
+        model.setCompletions({
+          items: suggestionsAbc
+        });
         completer.cycle('previous');
         expect(completer.current?.insertText).toBe('suggestion c');
         model.handleTextChange({ sourceChange: [{ insert: 'not a prefix' }] });
@@ -176,12 +155,9 @@ describe('completer/inline', () => {
 
     describe('#cycle()', () => {
       it('should cycle forward with "next"', () => {
-        model.setCompletions(
-          {
-            items: suggestionsAbc
-          },
-          0
-        );
+        model.setCompletions({
+          items: suggestionsAbc
+        });
         expect(completer.current?.insertText).toBe('suggestion a');
         completer.cycle('next');
         expect(completer.current?.insertText).toBe('suggestion b');
@@ -192,12 +168,9 @@ describe('completer/inline', () => {
       });
 
       it('should cycle backward with "previous"', () => {
-        model.setCompletions(
-          {
-            items: suggestionsAbc
-          },
-          0
-        );
+        model.setCompletions({
+          items: suggestionsAbc
+        });
         expect(completer.current?.insertText).toBe('suggestion a');
         completer.cycle('previous');
         expect(completer.current?.insertText).toBe('suggestion c');
@@ -212,7 +185,7 @@ describe('completer/inline', () => {
       it('hides completer on pointer down', () => {
         Widget.attach(editorWidget, document.body);
         Widget.attach(completer, document.body);
-        model.setCompletions({ items: suggestionsAbc }, 0);
+        model.setCompletions({ items: suggestionsAbc });
         MessageLoop.sendMessage(completer, Widget.Msg.UpdateRequest);
         expect(completer.isHidden).toBe(false);
         simulate(editorWidget.node, 'pointerdown');
@@ -223,7 +196,7 @@ describe('completer/inline', () => {
       it('does not hide when pointer clicks on the widget', () => {
         Widget.attach(editorWidget, document.body);
         Widget.attach(completer, document.body);
-        model.setCompletions({ items: suggestionsAbc }, 0);
+        model.setCompletions({ items: suggestionsAbc });
         MessageLoop.sendMessage(completer, Widget.Msg.UpdateRequest);
         expect(completer.isHidden).toBe(false);
         simulate(completer.node, 'pointerdown');
@@ -270,17 +243,17 @@ describe('completer/inline', () => {
         const callback = jest.fn();
         model.suggestionsChanged.connect(callback);
         expect(callback).toHaveBeenCalledTimes(0);
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         expect(callback).toHaveBeenCalledTimes(1);
         model.suggestionsChanged.disconnect(callback);
       });
       it('should set completions', () => {
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         expect(model.completions?.items).toHaveLength(3);
       });
       it('should override existing completions', () => {
-        model.setCompletions({ items: options }, 0);
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
+        model.setCompletions({ items: options });
         expect(model.completions?.items).toHaveLength(3);
       });
     });
@@ -288,16 +261,16 @@ describe('completer/inline', () => {
     describe('#appendCompletions()', () => {
       it('should emit `suggestionsChanged` signal', () => {
         const callback = jest.fn();
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         model.suggestionsChanged.connect(callback);
         expect(callback).toHaveBeenCalledTimes(0);
-        model.appendCompletions({ items: options }, 0);
+        model.appendCompletions({ items: options });
         expect(callback).toHaveBeenCalledTimes(1);
         model.suggestionsChanged.disconnect(callback);
       });
       it('should append completions', () => {
-        model.setCompletions({ items: options }, 0);
-        model.appendCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
+        model.appendCompletions({ items: options });
         expect(model.completions?.items).toHaveLength(6);
       });
     });
@@ -306,7 +279,7 @@ describe('completer/inline', () => {
       it('should emit `filterTextChanged` signal', () => {
         const callback = jest.fn();
         model.filterTextChanged.connect(callback);
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         expect(callback).toHaveBeenCalledTimes(0);
         ytext.insert(0, 'test');
         model.handleTextChange({ sourceChange: ytext.toDelta() });
@@ -314,21 +287,21 @@ describe('completer/inline', () => {
         model.filterTextChanged.disconnect(callback);
       });
       it('should filter by prefix', () => {
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         ytext.insert(0, 'text');
         model.handleTextChange({ sourceChange: ytext.toDelta() });
         expect(model.completions?.items).toHaveLength(1);
         expect(model.completions?.items[0].insertText).toBe(' b');
       });
       it('should nullify completions on prefix mismatch', () => {
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         expect(model.completions).toBeTruthy();
         ytext.insert(0, 'insertion');
         model.handleTextChange({ sourceChange: ytext.toDelta() });
         expect(model.completions).toBeNull();
       });
       it('should nullify completions on backspace/deletion', () => {
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         expect(model.completions).toBeTruthy();
         model.handleTextChange({ sourceChange: [{ delete: 1 }] });
         expect(model.completions).toBeNull();
@@ -338,7 +311,7 @@ describe('completer/inline', () => {
     describe('#handleSelectionChange()', () => {
       it('should reset on cursor moving to a different line', () => {
         model.cursor = { line: 0, column: 0 };
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         expect(model.completions).toBeTruthy();
         const secondLine = { line: 1, column: 0 };
         model.handleSelectionChange({ start: secondLine, end: secondLine });
@@ -347,7 +320,7 @@ describe('completer/inline', () => {
 
       it('should reset on cursor moving backwards in the same line', () => {
         model.cursor = { line: 0, column: 5 };
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         expect(model.completions).toBeTruthy();
         const oneBack = { line: 0, column: 4 };
         model.handleSelectionChange({ start: oneBack, end: oneBack });
@@ -356,7 +329,7 @@ describe('completer/inline', () => {
 
       it('should reset on character selection', () => {
         model.cursor = { line: 0, column: 5 };
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         expect(model.completions).toBeTruthy();
         model.handleSelectionChange({
           start: { line: 0, column: 5 },
@@ -367,7 +340,7 @@ describe('completer/inline', () => {
 
       it('should reset on line selection', () => {
         model.cursor = { line: 0, column: 5 };
-        model.setCompletions({ items: options }, 0);
+        model.setCompletions({ items: options });
         expect(model.completions).toBeTruthy();
         model.handleSelectionChange({
           start: { line: 0, column: 5 },

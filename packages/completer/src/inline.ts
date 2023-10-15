@@ -21,6 +21,7 @@ import { GhostTextManager } from './ghost';
 
 const INLINE_COMPLETER_CLASS = 'jp-InlineCompleter';
 const HOVER_CLASS = 'jp-InlineCompleter-hover';
+const PROGRESS_BAR_CLASS = 'jp-InlineCompleter-progressBar';
 
 /**
  * Widget enabling user to choose among inline completions,
@@ -29,7 +30,6 @@ const HOVER_CLASS = 'jp-InlineCompleter-hover';
  * inline completion provider name.
  */
 export class InlineCompleter extends Widget {
-  // TODO maybe create extension point to add custom buttons (per provider?)
   constructor(options: InlineCompleter.IOptions) {
     super({ node: document.createElement('div') });
     this.model = options.model ?? null;
@@ -43,6 +43,9 @@ export class InlineCompleter extends Widget {
     layout.addWidget(this._suggestionsCounter);
     layout.addWidget(this.toolbar);
     layout.addWidget(this._providerWidget);
+    this._progressBar = document.createElement('div');
+    this._progressBar.className = PROGRESS_BAR_CLASS;
+    this.node.appendChild(this._progressBar);
     this._updateShortcutsVisibility();
     this._updateDisplay();
     // Allow the node to receive focus, which prevents removing the ghost text
@@ -87,6 +90,7 @@ export class InlineCompleter extends Widget {
         this._onModelFilterTextChanged,
         this
       );
+      this._model.provisionProgress.disconnect(this._onProvisionProgress, this);
     }
     this._model = model;
     if (this._model) {
@@ -98,6 +102,7 @@ export class InlineCompleter extends Widget {
         this._onModelFilterTextChanged,
         this
       );
+      this._model.provisionProgress.connect(this._onProvisionProgress, this);
     }
   }
 
@@ -350,6 +355,21 @@ export class InlineCompleter extends Widget {
     }, 0);
   }
 
+  private _onProvisionProgress(
+    _emitter: InlineCompleter.IModel,
+    progress: InlineCompleter.IProvisionProgress
+  ): void {
+    requestAnimationFrame(() => {
+      if (progress.pendingProviders === 0) {
+        this._progressBar.style.display = 'none';
+      } else {
+        this._progressBar.style.display = '';
+        this._progressBar.style.width =
+          (100 * progress.pendingProviders) / progress.totalProviders + '%';
+      }
+    });
+  }
+
   private _render(): void {
     const completions = this.model?.completions;
     if (!completions || !completions.items || completions.items.length === 0) {
@@ -469,6 +489,7 @@ export class InlineCompleter extends Widget {
   private _suggestionsCounter = new Widget();
   private _trans: TranslationBundle;
   private _toolbar = new Toolbar<Widget>();
+  private _progressBar: HTMLElement;
 }
 
 /**
@@ -481,10 +502,6 @@ interface ISuggestionsChangedArgs {
    * Whether completions were set (new query) or appended (for existing query)
    */
   event: 'set' | 'append' | 'clear';
-  /**
-   * Number of providers that is expected to still report inline suggestions.
-   */
-  expecting?: number;
   /**
    * Map between old and new inline indices, only present for `set` event.
    */
@@ -516,6 +533,22 @@ export namespace InlineCompleter {
   };
 
   /**
+   * Progress in generation of completion candidates by providers.
+   */
+  export interface IProvisionProgress {
+    /**
+     * The number of providers to yet provide a reply.
+     * Excludes providers which resolved/rejected their promise, or timed out.
+     */
+    pendingProviders: number;
+
+    /**
+     * The number of providers from which inline completions were requested.
+     */
+    totalProviders: number;
+  }
+
+  /**
    * Model for inline completions.
    */
   export interface IModel extends IDisposable {
@@ -531,6 +564,11 @@ export namespace InlineCompleter {
     readonly filterTextChanged: ISignal<IModel, IndexMap>;
 
     /**
+     * A signal emitted when new information about progress is available.
+     */
+    readonly provisionProgress: ISignal<IModel, IProvisionProgress>;
+
+    /**
      * Original placement of cursor.
      */
     cursor: CodeEditor.IPosition;
@@ -540,27 +578,24 @@ export namespace InlineCompleter {
      */
     reset(): void;
 
-    // TODO:
-    // - maybe merge the two methods and add a third argument.
-    // - maybe accept an object on second argument, say `IProgress`.
-    // - maybe move the awaiting/progress info to separate method
-    //   (the downside would be that we could then end up rendering twice/
-    //   would need to be very careful about the order these two would be called).
     /**
      * Set completions clearing existing ones.
      */
     setCompletions(
-      reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
-      awaiting: number
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
     ): void;
 
     /**
      * Append completions while preserving new ones.
      */
     appendCompletions(
-      reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
-      awaiting: number
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
     ): void;
+
+    /**
+     * Notify model about progress in generation of completion candidates by providers.
+     */
+    notifyProgress(providerProgress: IProvisionProgress): void;
 
     /**
      * Current inline completions.
@@ -583,8 +618,7 @@ export namespace InlineCompleter {
    */
   export class Model implements InlineCompleter.IModel {
     setCompletions(
-      reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
-      awaiting: number
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
     ) {
       const previousPositions: Map<string, number> = new Map(
         this._completions?.items?.map((item, index) => [item.insertText, index])
@@ -598,21 +632,23 @@ export namespace InlineCompleter {
       );
       this.suggestionsChanged.emit({
         event: 'set',
-        expecting: awaiting,
         indexMap
       });
     }
 
     appendCompletions(
-      reply: IInlineCompletionList<CompletionHandler.IInlineItem>,
-      awaiting: number
+      reply: IInlineCompletionList<CompletionHandler.IInlineItem>
     ) {
       if (!this._completions || !this._completions.items) {
         console.warn('No completions to append to');
         return;
       }
       this._completions.items.push(...reply.items);
-      this.suggestionsChanged.emit({ event: 'append', expecting: awaiting });
+      this.suggestionsChanged.emit({ event: 'append' });
+    }
+
+    notifyProgress(progress: IProvisionProgress) {
+      this.provisionProgress.emit(progress);
     }
 
     get cursor(): CodeEditor.IPosition {
@@ -715,6 +751,7 @@ export namespace InlineCompleter {
 
     suggestionsChanged = new Signal<this, ISuggestionsChangedArgs>(this);
     filterTextChanged = new Signal<this, IndexMap>(this);
+    provisionProgress = new Signal<this, IProvisionProgress>(this);
     private _isDisposed = false;
     private _completions: IInlineCompletionList<CompletionHandler.IInlineItem> | null =
       null;

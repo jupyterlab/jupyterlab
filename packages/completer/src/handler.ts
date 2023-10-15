@@ -467,21 +467,25 @@ export class CompletionHandler implements IDisposable {
             return;
           }
           completed.add(promise);
-          const remaining = promises.length - completed.size;
           if (completed.size === 1) {
-            model.setCompletions(result, remaining);
+            model.setCompletions(result);
           } else {
-            model.appendCompletions(result, remaining);
+            model.appendCompletions(result);
           }
         })
         .catch(e => {
+          // Emit warning for debugging.
+          console.warn(e);
+        })
+        .finally(() => {
           // Mark the provider promise as completed.
           completed.add(promise);
           // Let the model know that we are awaiting for fewer providers now.
           const remaining = promises.length - completed.size;
-          model.appendCompletions({ items: [] }, remaining);
-          // Emit warning for debugging.
-          console.warn(e);
+          model.notifyProgress({
+            pendingProviders: remaining,
+            totalProviders: promises.length
+          });
         });
     }
   }

@@ -291,6 +291,14 @@
   padding: 0 8px;
 }
 
+.jp-InlineCompleter-progressBar {
+  height: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: var(--jp-accent-color2);
+}
+
 .jp-InlineCompleter[data-display='onHover'] {
   opacity: 0;
   transition: opacity 0.1s linear;
@@ -308,6 +316,7 @@
 .jp-InlineCompleter > .jp-Toolbar {
   box-shadow: none;
   border-bottom: none;
+  background: none;
 }
 
 .jp-InlineCompleter[data-show-shortcuts='false']
