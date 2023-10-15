@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 import { YFile } from '@jupyter/ydoc';
