@@ -17,6 +17,7 @@ import {
   ICompletionProviderManager,
   IInlineCompleterFactory,
   IInlineCompleterSettings,
+  IInlineCompletionProviderInfo,
   InlineCompleter,
   KernelCompleterProvider
 } from '@jupyterlab/completer';
@@ -203,14 +204,40 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
     app.restored
       .then(() => {
         const availableProviders = completionManager.inlineProviders ?? [];
+        const composeDefaults = (provider: IInlineCompletionProviderInfo) => {
+          return {
+            // By default all providers are opt-out, but
+            // any provider can configure itself to be opt-in.
+            enabled: true,
+            timeout: 5000,
+            debouncerDelay: 0,
+            ...((provider.schema?.default as object) ?? {})
+          };
+        };
         settings.transform(INLINE_COMPLETER_PLUGIN, {
+          compose: plugin => {
+            const providers: IInlineCompleterSettings['providers'] =
+              (plugin.data.composite[
+                'providers'
+              ] as IInlineCompleterSettings['providers']) ?? {};
+            for (const provider of availableProviders) {
+              const defaults = composeDefaults(provider);
+              providers[provider.identifier] = {
+                ...defaults,
+                ...(providers[provider.identifier] ?? {})
+              };
+            }
+            // Add fallback defaults in composite settings values
+            plugin.data['composite']['providers'] = providers;
+            return plugin;
+          },
           fetch: plugin => {
             const schema = plugin.schema.properties!;
-            const providers: {
+            const providersSchema: {
               [property: string]: ISettingRegistry.IProperty;
             } = {};
             for (const provider of availableProviders) {
-              providers[provider.identifier] = {
+              providersSchema[provider.identifier] = {
                 title: trans.__('%1 provider', provider.name),
                 properties: {
                   ...(provider.schema?.properties ?? {}),
@@ -241,18 +268,12 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
                     type: 'boolean'
                   }
                 },
-                default: {
-                  // By default all providers are opt-out, but
-                  // any provider can configure itself to be opt-in.
-                  enabled: true,
-                  timeout: 5000,
-                  debouncerDelay: 0,
-                  ...((provider.schema?.default as object) ?? {})
-                },
+                default: composeDefaults(provider),
                 type: 'object'
               };
             }
-            schema['providers']['properties'] = providers;
+            // Populate schema for providers settings
+            schema['providers']['properties'] = providersSchema;
             return plugin;
           }
         });
