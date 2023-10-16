@@ -176,3 +176,35 @@ function reduceItem(
   }
   return null;
 }
+
+test.describe('Top menu keyboard navigation', () => {
+  test('navigate to open launcher with keyboard', async ({ page }) => {
+    await page.goto();
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#tab-key-2-1')).toBeFocused();
+  });
+
+  test('navigate to close launcher with keyboard', async ({ page }) => {
+    await page.goto();
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('Shift+Tab');
+    }
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('Shift+Tab');
+    }
+    await page.keyboard.press('Enter');
+    for (let i = 0; i < 4; i++) {
+      await page.keyboard.press('ArrowDown');
+    }
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#tab-key-2-0')).toBeFocused();
+  });
+});
