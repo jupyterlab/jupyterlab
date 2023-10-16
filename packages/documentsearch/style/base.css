@@ -11,6 +11,7 @@
   font-family: var(--jp-ui-font-family);
   padding: 2px 1px;
   resize: none;
+  white-space: pre;
 }
 
 .jp-DocumentSearch-overlay {
