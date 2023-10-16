@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import { expect, test } from '@jupyterlab/galata';
 
 test.describe('Low Vision / Zoom Support', () => {
   test('Should show visibility of menu bar at 400% zoom', async ({ page }) => {
