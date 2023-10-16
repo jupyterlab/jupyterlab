@@ -2016,6 +2016,7 @@ export class Notebook extends StaticNotebook {
 
     if (activeCell) {
       activeCell.addClass(ACTIVE_CLASS);
+      activeCell.addClass(SELECTED_CLASS);
       // Set tab index to 0 on the active cell so that if the user tabs away from
       // the notebook then tabs back, they will return to the cell where they
       // left off.
@@ -2699,6 +2700,22 @@ export class Notebook extends StaticNotebook {
     } else {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
+
+      // Prevents the parent element to get the focus.
+      event.preventDefault();
+
+      // Focuses on a cell (if possible), or on the footer element.
+      if (this._activeCell && this._activeCell.node.checkVisibility()) {
+        this._activeCell.node.focus({
+          preventScroll: true
+        });
+      } else {
+        // If the active cell is not visible (because of full windowing), set the focus
+        // on the footer (always visible) to set focus on Notebook widget.
+        (this.layout as NotebookWindowedLayout).footer?.node.focus({
+          preventScroll: true
+        });
+      }
     }
   }
 
