@@ -3,14 +3,8 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 
-test.use({
-  autoGoto: false,
-  mockState: galata.DEFAULT_DOCUMENTATION_STATE,
-  viewport: { height: 1024, width: 1280 }
-});
-
 test.describe('Low Vision Support Test', () => {
-  test('Visability of menu-bar at 400-zoom', async ({ page }) => {
+  test('Should show visability of menu-bar at 400-zoom', async ({ page }) => {
     await page.goto();
     await page.evaluate('document.body.style.zoom=4.0');
 
