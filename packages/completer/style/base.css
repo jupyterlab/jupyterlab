@@ -301,12 +301,17 @@
 
 .jp-InlineCompleter[data-display='onHover'] {
   opacity: 0;
-  transition: opacity 0.1s linear;
+  transition:
+    visibility 0s linear 0.1s,
+    opacity 0.1s linear;
+  visibility: hidden;
 }
 
 .jp-InlineCompleter[data-display='onHover']:hover,
 .jp-InlineCompleter-hover[data-display='onHover'] {
   opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
 }
 
 .jp-InlineCompleter[data-display='never'] {
