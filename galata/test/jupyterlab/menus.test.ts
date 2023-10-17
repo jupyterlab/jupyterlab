@@ -191,7 +191,7 @@ test.describe('Top menu keyboard navigation', () => {
 
   test('navigate to close launcher with keyboard', async ({ page }) => {
     await page.goto();
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 3; i++) {
       await page.keyboard.press('Shift+Tab');
     }
     await page.keyboard.press('Enter');
@@ -206,5 +206,20 @@ test.describe('Top menu keyboard navigation', () => {
     }
     await page.keyboard.press('Enter');
     await expect(page.locator('#tab-key-2-0')).toBeFocused();
+  });
+
+  test('navigate to change to light mode with keyboard', async ({ page }) => {
+    await page.goto();
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('Shift+Tab');
+    }
+    for (let i = 0; i < 6; i++) {
+      await page.keyboard.press('ArrowRight');
+    }
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('Enter');
+    }
+    const locator = page.locator('body');
+    await expect(locator).toHaveJSProperty('data-jp-theme-light', false);
   });
 });
