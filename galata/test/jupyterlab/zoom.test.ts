@@ -11,8 +11,6 @@ test.describe('Low Vision / Zoom Support', () => {
   //   );
   // });
 
-  const { firefox } = require('playwright');
-
   test('Should show visibility of menu bar at 400% zoom', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 256 });
     await page.evaluate('document.body.style.zoom = 4.0');
