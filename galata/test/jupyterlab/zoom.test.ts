@@ -10,8 +10,11 @@ test.describe('Low Vision / Zoom Support', () => {
   //     'launch-screen-at-400-zoom.png'
   //   );
   // });
+  const { firefox } = require('playwright');
 
   test('Should show visibility of menu bar at 400% zoom', async ({ page }) => {
+    let browser = await firefox.launch();
+    page = await browser.newPage();
     await page.setViewportSize({ width: 1280, height: 1024 });
     await page.evaluate('document.body.style.zoom = 4.0');
     expect(
