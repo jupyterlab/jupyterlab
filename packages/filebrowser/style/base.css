@@ -214,7 +214,7 @@
   flex-direction: row;
   align-items: center;
   /* stylelint-disable-next-line csstree/validator */
-  padding: min(1vh, 4px) min(1vw, 12px); /* this is to allow at least 2 notebook directory listed to be seen within the file-browser tab at 400% */
+  padding: min(1vh, 4px) min(1vw, 12px); /* Using min() and vw/vh allows the padding to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
