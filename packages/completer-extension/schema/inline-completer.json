@@ -35,7 +35,11 @@
       "title": "Show widget",
       "description": "When to show the inline completer widget.",
       "type": "string",
-      "enum": ["always", "onHover", "never"],
+      "oneOf": [
+        { "const": "always", "title": "Always" },
+        { "const": "onHover", "title": "On hover" },
+        { "const": "never", "title": "Never" }
+      ],
       "default": "onHover"
     },
     "showShortcuts": {
@@ -48,7 +52,10 @@
       "title": "Streaming animation",
       "description": "Transition effect used when streaming tokens from model.",
       "type": "string",
-      "enum": ["none", "uncover"],
+      "oneOf": [
+        { "const": "none", "title": "None" },
+        { "const": "uncover", "title": "Uncover" }
+      ],
       "default": "uncover"
     }
   },
