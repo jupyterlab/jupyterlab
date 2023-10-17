@@ -33,7 +33,7 @@
   border-bottom: none;
   height: auto;
   /* stylelint-disable-next-line csstree/validator */
-  margin: min(1vh, 8px) min(1.5vw, 12px) 0; /* this is to allow at least 2 notebook directory listed to be seen within the file-browser tab at 400% */
+  margin: min(1vh, 8px) min(1.5vw, 12px) 0; /* Using min() and vw/vh allows the margins to shrink when the screen is small or when the user zooms in, which should allow at least 2 files or folders to be seen within the file browser at 400% zoom */
   box-shadow: none;
   padding: 0;
   justify-content: flex-start;
