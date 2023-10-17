@@ -28,7 +28,7 @@
   row-gap: min(
     1.5vh,
     12px
-  ); /* this is to allow at least 2 notebook directory listed to be seen within the file-browser tab at 400% */
+  ); /* Using min() and vh allows the row-gap to shrink when the screen is small or when the user zooms in, which should allow at least 2 files or folders to be seen within the file browser at 400% zoom */
 
   border-bottom: none;
   height: auto;
