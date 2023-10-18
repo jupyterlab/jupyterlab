@@ -24,34 +24,6 @@ const fetchMod = ((window as any).fetch = require('node-fetch'));
 (window as any).Response = fetchMod.Response;
 
 globalThis.Image = (window as any).Image;
-globalThis.Range = function Range() {
-  /* no-op */
-} as any;
-
-// HACK: Polyfill that allows CodeMirror to render in a JSDOM env.
-const createContextualFragment = (html: string) => {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return div.children[0]; // so hokey it's not even funny
-};
-
-globalThis.Range.prototype.createContextualFragment = (html: string) =>
-  createContextualFragment(html) as any;
-
-(window as any).document.createRange = function createRange() {
-  return {
-    setEnd: () => {
-      /* no-op */
-    },
-    setStart: () => {
-      /* no-op */
-    },
-    getBoundingClientRect: () => ({ right: 0 }),
-    getClientRects: (): DOMRect[] => [],
-    createContextualFragment
-  };
-};
-// end CodeMirror HACK
 
 window.focus = () => {
   /* JSDom throws "Not Implemented" */
