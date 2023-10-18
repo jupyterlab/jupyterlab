@@ -42,9 +42,12 @@
 }
 
 .jp-Notebook {
-  padding: var(--jp-notebook-padding);
   outline: none;
   background: var(--jp-layout-color0);
+}
+
+.jp-Notebook .jp-WindowedPanel-viewport {
+  padding: var(--jp-notebook-padding);
 }
 
 .jp-Notebook.jp-mod-scrollPastEnd::after {
