@@ -137,7 +137,7 @@ test.describe('Inline Completer', () => {
 
       // Ghost text should be updated from "ggestion" to "estion"
       await page.keyboard.type('gg');
-      expect(ghostText).toHaveText(/estion.*/);
+      await expect(ghostText).toHaveText(/estion.*/);
 
       const cellEditor = await page.notebook.getCellInput(2);
       const imageName = 'editor-with-ghost-text.png';
