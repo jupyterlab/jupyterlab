@@ -43,6 +43,11 @@ export namespace FileDialog {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Default path to open
+     */
+    defaultPath?: string;
   }
 
   /**
@@ -86,7 +91,12 @@ export namespace FileDialog {
       focusNodeSelector: options.focusNodeSelector,
       host: options.host,
       renderer: options.renderer,
-      body: new OpenDialog(options.manager, options.filter, translator)
+      body: new OpenDialog(
+        options.manager,
+        options.filter,
+        translator,
+        options.defaultPath
+      )
     };
     const dialog = new Dialog(dialogOptions);
     return dialog.launch();
@@ -125,6 +135,7 @@ class OpenDialog
     manager: IDocumentManager,
     filter?: (value: Contents.IModel) => Partial<IScore> | null,
     translator?: ITranslator,
+    defaultPath?: string,
     filterDirectories?: boolean
   ) {
     super();
@@ -138,6 +149,7 @@ class OpenDialog
       filter,
       {},
       translator,
+      defaultPath,
       filterDirectories
     );
 
@@ -235,6 +247,7 @@ namespace Private {
     filter?: (value: Contents.IModel) => Partial<IScore> | null,
     options: IFileBrowserFactory.IOptions = {},
     translator?: ITranslator,
+    defaultPath?: string,
     filterDirectories?: boolean
   ): FileBrowser => {
     translator = translator || nullTranslator;
@@ -246,6 +259,11 @@ namespace Private {
       refreshInterval: options.refreshInterval,
       filterDirectories
     });
+
+    if (defaultPath) {
+      model.cd(defaultPath);
+    }
+
     const widget = new FileBrowser({
       id,
       model,
