@@ -3,14 +3,7 @@
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import { CodeCell } from '@jupyterlab/cells';
-import {
-  Notebook,
-  NotebookActions,
-  NotebookModel,
-  StaticNotebook
-} from '@jupyterlab/notebook';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { Notebook, NotebookActions, NotebookModel } from '@jupyterlab/notebook';
 import { JupyterServer } from '@jupyterlab/testing';
 import * as utils from './utils';
 
@@ -25,43 +18,26 @@ afterAll(async () => {
 });
 
 describe('@jupyterlab/notebook', () => {
-  let rendermime: IRenderMimeRegistry;
-
   describe('NotebookActions', () => {
     let widget: Notebook;
     let sessionContext: ISessionContext;
-    let ipySessionContext: ISessionContext;
 
     beforeAll(async function () {
-      rendermime = utils.defaultRenderMime();
-
       async function createContext(options?: Partial<SessionContext.IOptions>) {
         const context = await createSessionContext(options);
         await context.initialize();
         await context.session?.kernel?.info;
         return context;
       }
-      [sessionContext, ipySessionContext] = await Promise.all([
-        createContext(),
-        createContext({ kernelPreference: { name: 'ipython' } })
-      ]);
+      sessionContext = await createContext({
+        kernelPreference: { name: 'ipython' }
+      });
     }, 30000);
 
     beforeEach(() => {
-      widget = new Notebook({
-        rendermime,
-        contentFactory: utils.createNotebookFactory(),
-        mimeTypeService: utils.mimeTypeService,
-        notebookConfig: {
-          ...StaticNotebook.defaultNotebookConfig,
-          windowingMode: 'none'
-        }
-      });
+      widget = utils.createNotebook(sessionContext);
       const model = new NotebookModel();
-      model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
-      model.sharedModel.clearUndoHistory();
-
       widget.activeCellIndex = 0;
     });
 
@@ -72,19 +48,11 @@ describe('@jupyterlab/notebook', () => {
     });
 
     afterAll(async () => {
-      await Promise.all([
-        sessionContext.shutdown(),
-        ipySessionContext.shutdown()
-      ]);
+      await Promise.all([sessionContext.shutdown()]);
     });
 
     describe('#history', () => {
-      it('should emit when Markdown and code cells are run', async () => {
-        for (let i = 0; i < 12; i++) {
-          let cell = widget.widgets[i] as CodeCell;
-          let source = 'print(this is input ${i})';
-          cell.model.sharedModel.setSource(source);
-        }
+      it('should iterate back through history', async () => {
         let emitted = 0;
         let failed = 0;
         NotebookActions.executed.connect((_, args) => {
@@ -95,17 +63,36 @@ describe('@jupyterlab/notebook', () => {
           }
         });
 
-        await NotebookActions.run(widget, sessionContext);
-        expect(emitted).toBe(12);
+        for (let i = 0; i < 15; i++) {
+          let source = `print("this is input ${i}")`;
+          if (widget.widgets[i]) {
+            let activeCell = widget.widgets[i];
+            widget.select(activeCell);
+            activeCell.model.sharedModel.setSource(source);
+          } else {
+            widget.model!.sharedModel.insertCell(i, {
+              cell_type: 'code',
+              source: source
+            });
+          }
+        }
+
+        await NotebookActions.runAll(widget, sessionContext);
+        expect(emitted).toBe(15);
         expect(failed).toBe(0);
 
-        let activeCell = widget.widgets[-1];
+        let activeCell = widget.widgets[widget.widgets.length - 1];
         widget.select(activeCell);
+
         for (let i = 0; i < 12; i++) {
-          await widget.history?.back(activeCell);
+          let update = await widget.history?.back(activeCell);
+          if (update) {
+            widget.history?.updateEditor(activeCell, update);
+          }
         }
-        expect(activeCell.model.sharedModel.source).toBe(
-          'print(this is input 0)'
+
+        expect(activeCell.model.sharedModel.getSource()).toBe(
+          'print("this is input 2")'
         );
       });
     });

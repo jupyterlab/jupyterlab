@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Clipboard, SessionContextDialogs } from '@jupyterlab/apputils';
+import {
+  Clipboard,
+  ISessionContext,
+  SessionContextDialogs
+} from '@jupyterlab/apputils';
 import { Cell, CodeCellModel } from '@jupyterlab/cells';
 import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
 import {
@@ -26,6 +30,7 @@ import { INotebookModel, NotebookModel } from './model';
 import { NotebookModelFactory } from './modelfactory';
 import { NotebookPanel } from './panel';
 import { Notebook, StaticNotebook } from './widget';
+import { NotebookHistory } from './history';
 import { NotebookWidgetFactory } from './widgetfactory';
 
 export const DEFAULT_CONTENT: INotebookContent = defaultContent;
@@ -173,7 +178,10 @@ export namespace NBTestUtils {
   /**
    * Create a notebook widget.
    */
-  export function createNotebook(): Notebook {
+  export function createNotebook(sessionContext?: ISessionContext): Notebook {
+    let history = sessionContext
+      ? { history: new NotebookHistory({ sessionContext: sessionContext }) }
+      : {};
     return new Notebook({
       rendermime: defaultRenderMime(),
       contentFactory: createNotebookFactory(),
@@ -181,7 +189,8 @@ export namespace NBTestUtils {
       notebookConfig: {
         ...StaticNotebook.defaultNotebookConfig,
         windowingMode: 'none'
-      }
+      },
+      ...history
     });
   }
 
@@ -192,7 +201,7 @@ export namespace NBTestUtils {
     context: Context<INotebookModel>
   ): NotebookPanel {
     return new NotebookPanel({
-      content: createNotebook(),
+      content: createNotebook(context.sessionContext),
       context
     });
   }
