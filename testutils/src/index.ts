@@ -25,7 +25,8 @@ export {
   waitForDialog,
   acceptDialog,
   dangerDialog,
-  dismissDialog
+  dismissDialog,
+  simulate
 } from './common';
 
 export { flakyIt } from './flakyIt';
