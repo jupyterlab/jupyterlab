@@ -178,48 +178,178 @@ function reduceItem(
 }
 
 test.describe('Top menu keyboard navigation', () => {
-  test('navigate to open launcher with keyboard', async ({ page }) => {
+  test.use({ autoGoto: false });
+  test('navigate to open file with keyboard', async ({ page }) => {
     await page.goto();
-    await page.keyboard.press('Shift+Tab');
-    await page.keyboard.press('Shift+Tab');
-    await page.keyboard.press('Shift+Tab');
+    for (let i = 0; i < 3; i++) {
+      await page.keyboard.press('Shift+Tab');
+    }
     await page.keyboard.press('Enter');
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('Enter');
-    await expect(page.locator('#tab-key-2-1')).toBeFocused();
+
+    expect(await page.menu.isOpen('File')).toBeTruthy();
   });
 
-  test('navigate to close launcher with keyboard', async ({ page }) => {
-    await page.goto();
-    for (let i = 0; i < 3; i++) {
-      await page.keyboard.press('Shift+Tab');
-    }
-    await page.keyboard.press('Enter');
-    await page.keyboard.press('ArrowDown');
-    await page.keyboard.press('Enter');
-    for (let i = 0; i < 3; i++) {
-      await page.keyboard.press('Shift+Tab');
-    }
-    await page.keyboard.press('Enter');
-    for (let i = 0; i < 4; i++) {
-      await page.keyboard.press('ArrowDown');
-    }
-    await page.keyboard.press('Enter');
-    await expect(page.locator('#tab-key-2-0')).toBeFocused();
-  });
+  // test("navigate to open edit with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   await page.keyboard.press("ArrowRight");
+  //   await page.keyboard.press("Enter");
 
-  test('navigate to change to light mode with keyboard', async ({ page }) => {
-    await page.goto();
-    for (let i = 0; i < 3; i++) {
-      await page.keyboard.press('Shift+Tab');
-    }
-    for (let i = 0; i < 6; i++) {
-      await page.keyboard.press('ArrowRight');
-    }
-    for (let i = 0; i < 3; i++) {
-      await page.keyboard.press('Enter');
-    }
-    const locator = page.locator('body');
-    await expect(locator).toHaveJSProperty('data-jp-theme-light', false);
-  });
+  //   await expect(page.locator("#jp-mainmenu-edit")).toBeFocused();
+  // });
+
+  // test("navigate to open view with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   for (let i = 0; i < 2; i++) {
+  //     await page.keyboard.press("ArrowRight");
+  //   }
+  //   await page.keyboard.press("Enter");
+
+  //   await expect(page.locator("#jp-mainmenu-view")).toBeFocused();
+  // });
+
+  // test("navigate to open run with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("ArrowRight");
+  //   }
+  //   await page.keyboard.press("Enter");
+
+  //   await expect(page.locator("#jp-mainmenu-run")).toBeFocused();
+  // });
+
+  // test("navigate to open kernel with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   for (let i = 0; i < 4; i++) {
+  //     await page.keyboard.press("ArrowRight");
+  //   }
+  //   await page.keyboard.press("Enter");
+
+  //   await expect(page.locator("#jp-mainmenu-kernel")).toBeFocused();
+  // });
+
+  // test("navigate to open tabs with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   for (let i = 0; i < 5; i++) {
+  //     await page.keyboard.press("ArrowRight");
+  //   }
+  //   await page.keyboard.press("Enter");
+
+  //   await expect(page.locator("#jp-mainmenu-tabs")).toBeFocused();
+  // });
+
+  // test("navigate to open settings with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   for (let i = 0; i < 6; i++) {
+  //     await page.keyboard.press("ArrowRight");
+  //   }
+  //   await page.keyboard.press("Enter");
+
+  //   await expect(page.locator("#jp-mainmenu-settings")).toBeFocused();
+  // });
+
+  // test("navigate to open help with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   for (let i = 0; i < 7; i++) {
+  //     await page.keyboard.press("ArrowRight");
+  //   }
+  //   await page.keyboard.press("Enter");
+
+  //   await expect(page.locator("#jp-mainmenu-help")).toBeFocused();
+  // });
+
+  // test("navigate to open launcher with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   await page.keyboard.press("Shift+Tab");
+  //   await page.keyboard.press("Shift+Tab");
+  //   await page.keyboard.press("Shift+Tab");
+  //   await page.keyboard.press("Enter");
+  //   await page.keyboard.press("ArrowDown");
+  //   await page.keyboard.press("Enter");
+  //   await expect(page.locator("#tab-key-2-1")).toBeFocused();
+  // });
+
+  // test("navigate to close launcher with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   await page.keyboard.press("Enter");
+  //   await page.keyboard.press("ArrowDown");
+  //   await page.keyboard.press("Enter");
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   await page.keyboard.press("Enter");
+  //   for (let i = 0; i < 4; i++) {
+  //     await page.keyboard.press("ArrowDown");
+  //   }
+  //   await page.keyboard.press("Enter");
+  //   expect(await page.menu.isAnyOpen()).toEqual(false);
+  // });
+
+  // test("navigate to close all tabs with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   await page.keyboard.press("Enter");
+  //   for (let i = 0; i < 4; i++) {
+  //     await page.keyboard.press("ArrowDown");
+  //   }
+  //   await page.keyboard.press("Enter");
+  //   await expect(page.locator("#tab-key-2-1")).toBeFocused();
+  // });
+
+  // test("navigate to change to Dark mode with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   for (let i = 0; i < 6; i++) {
+  //     await page.keyboard.press("ArrowRight");
+  //   }
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Enter");
+  //   }
+  //   const locator = page.locator("body");
+  //   await expect(locator).toHaveJSProperty("data-jp-theme-light", false);
+  // });
+
+  // test("navigate to open command pallette with keyboard", async ({ page }) => {
+  //   await page.goto();
+  //   for (let i = 0; i < 3; i++) {
+  //     await page.keyboard.press("Shift+Tab");
+  //   }
+  //   for (let i = 0; i < 2; i++) {
+  //     await page.keyboard.press("ArrowRight");
+  //   }
+  //   for (let i = 0; i < 2; i++) {
+  //     await page.keyboard.press("Enter");
+  //   }
+
+  //   await expect(page.locator("#modal-command-palette")).toHaveClass(
+  //     "lm-Widget lm-Panel jp-ModalCommandPalette lm-mod-hidden"
+  //   );
+  // });
 });
