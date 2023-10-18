@@ -2738,7 +2738,7 @@ __metadata:
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1-alpha.0
     "@types/jest": ^29.2.0
-    canvas: ^2.9.1
+    canvas: ^2.11.2
     csv-spectrum: ^1.0.0
     jest: ^29.2.0
     rimraf: ~3.0.0
@@ -2809,7 +2809,7 @@ __metadata:
     "@lumino/widgets": ^2.3.1-alpha.0
     "@types/jest": ^29.2.0
     "@vscode/debugprotocol": ^1.51.0
-    canvas: ^2.9.1
+    canvas: ^2.11.2
     jest: ^29.2.0
     react: ^18.2.0
     rimraf: ~3.0.0
@@ -4754,7 +4754,7 @@ __metadata:
     "@lumino/messaging": ^2.0.1
     "@lumino/widgets": ^2.3.1-alpha.0
     "@types/jest": ^29.2.0
-    canvas: ^2.9.1
+    canvas: ^2.11.2
     jest: ^29.2.0
     rimraf: ~3.0.0
     typedoc: ~0.24.7
@@ -8898,15 +8898,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"canvas@npm:^2.9.1":
-  version: 2.11.0
-  resolution: "canvas@npm:2.11.0"
+"canvas@npm:^2.11.2":
+  version: 2.11.2
+  resolution: "canvas@npm:2.11.2"
   dependencies:
     "@mapbox/node-pre-gyp": ^1.0.0
     nan: ^2.17.0
     node-gyp: latest
     simple-get: ^3.0.3
-  checksum: a69a6e0c90014a1b02e52c4c38a627d1a01ffe9539047bec84105cb3554907a947cf39b4a333be43fc1583dd142b641bb5480a4e23f59c6098618c33bf78f67f
+  checksum: 61e554aef80022841dc836964534082ec21435928498032562089dfb7736215f039c7d99ee546b0cf10780232d9bf310950f8b4d489dc394e0fb6f6adfc97994
   languageName: node
   linkType: hard
 
