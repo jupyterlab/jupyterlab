@@ -1010,6 +1010,7 @@ export class WindowedList<
       void this._updater.invoke();
     }
     super.onResize(msg);
+    this._updater.invoke();
   }
 
   /**
