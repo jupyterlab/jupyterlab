@@ -13,7 +13,7 @@
             "title": "Cell tool",
             "type": "null"
           },
-          "_FILTERING-TOOL": {
+          "_TAG-FILTERING-TOOL": {
             "title": "Filter cells with tags",
             "type": "null"
           },
@@ -109,7 +109,7 @@
         "_CELL-TOOL": {
           "customRenderer": "@jupyterlab/notebook-extension:active-cell-tool.renderer"
         },
-        "_FILTERING-TOOL": {
+        "_TAG-FILTERING-TOOL": {
           "customRenderer": "@jupyterlab/notebook-extension:filter-cells-with-tags.renderer"
         },
         "/raw_mimetype": {
