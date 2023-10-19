@@ -332,6 +332,7 @@ namespace CommandIDs {
 
   export const accessNextHistory = 'notebook:access-next-history-entry';
   export const filterCells = 'notebook:filter-cells-with-tags';
+  export const filterCellsWithTags = 'notebook:filter-cells-with-tags';
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
 }
@@ -1100,7 +1101,7 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
   }
 };
 
-export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
+export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:filter-cells-with-tags',
   description: 'Filter and collapse cells using tags.',
   autoStart: true,
@@ -1115,32 +1116,33 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
     const trans = translator?.load('jupyterlab');
     const { shell, commands } = app;
     const isEnabled = (): boolean => Private.isEnabled(shell, tracker);
-    let notebookModelMap = new WeakMap<Notebook, CellTagListModel>();
-    const component: IFormRenderer = {
+    const notebookModelMap = new WeakMap<Notebook, CellTagListModel>();
+
+    const filterButton: IFormRenderer = {
       fieldRenderer: () => {
         return new FilterButtonWidget(
           commands,
-          CommandIDs.filterCells,
-          'Filter cells with tags',
-          'Open filtering tool'
+          CommandIDs.filterCellsWithTags,
+          '',
+          'Filter with tags'
         ).render();
       }
     };
     formRegistry.addRenderer(
       '@jupyterlab/notebook-extension:filter-cells-with-tags.renderer',
-      component
+      filterButton
     );
 
-    app.commands.addCommand(CommandIDs.filterCells, {
+    app.commands.addCommand(CommandIDs.filterCellsWithTags, {
       label: trans.__('Filter Cells'),
-      caption: trans.__('Filter cells with tags'),
+      caption: trans.__('Filter cells'),
 
       execute: args => {
         const current = getCurrent(tracker, shell, args);
 
         /* Check if one array is included into another one and return true if that's the case*/
         function isContentShared(array1: Array<string>, array2: Array<string>) {
-          let isIncluded: boolean[] = [];
+          const isIncluded: boolean[] = [];
           array2.forEach(item => {
             isIncluded.push(array1.includes(item));
           });
@@ -1151,27 +1153,30 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
         Update the hidden cells state respectively and update model.checkedDict  */
         function updateFilteredCells(model: CellTagListModel | undefined) {
           if (model) {
-            const checkedList: Array<string> = [];
-
-            for (let key in model.updatedCheckedDict) {
-              let value = model.updatedCheckedDict[key];
+            const tagCheckedList: Array<string> = [];
+            for (const key in model.updatedTagCheckedDict) {
+              const value = model.updatedTagCheckedDict[key];
               if (value === true) {
-                checkedList.push(key);
+                tagCheckedList.push(key);
               }
             }
             model.notebookPanel?.content.widgets.forEach(cell => {
-              let isFiltered = isContentShared(
-                cell.model.getMetadata('tags'),
-                checkedList
-              ); /* IsFiltered is true when the list of tags of a cell includes at least one the checked tags */
-              if (isFiltered === false && cell.inputHidden === false) {
+              const cellTagList = cell.model
+                .getMetadata('tags')
+                .concat(cell.model.type);
+              const isTagFiltered = isContentShared(
+                cellTagList,
+                tagCheckedList
+              ); /* IsTagFiltered is true when the list of tags of a cell includes at least one the checked tags */
+
+              if (isTagFiltered === false && cell.inputHidden === false) {
                 cell.inputHidden = true;
               }
-              if (isFiltered === true && cell.inputHidden === true) {
+              if (isTagFiltered === true && cell.inputHidden === true) {
                 cell.inputHidden = false;
               }
             });
-            model.checkedDict = model.updatedCheckedDict;
+            model.tagCheckedDict = model.updatedTagCheckedDict;
           }
         }
         /* Uncollapse all cells, set all tags to false in checklist and update model.checkedDict */
@@ -1180,10 +1185,10 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
             model.notebookPanel?.content.widgets.forEach(cell => {
               cell.inputHidden = false;
             });
-            for (let key in model.updatedCheckedDict) {
-              model.updatedCheckedDict[key] = false;
+            for (const key in model.updatedTagCheckedDict) {
+              model.updatedTagCheckedDict[key] = false;
             }
-            model.checkedDict = model.updatedCheckedDict;
+            model.tagCheckedDict = model.updatedTagCheckedDict;
           }
         }
 
@@ -1195,16 +1200,16 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
               cell.inputHidden = false;
             });
             model = new CellTagListModel(current);
-            model.checkedDict = {};
-            model.updatedCheckedDict = {};
+            model.tagCheckedDict = {};
+            model.updatedTagCheckedDict = {};
             model.tagList.forEach(item => {
               if (model) {
-                model.checkedDict[item] = false;
+                model.tagCheckedDict[item] = false;
               }
             });
           }
-
           notebookModelMap.set(current.content, model);
+
           const selectButton = Dialog.okButton({
             label: trans.__('Select Cell(s) With Current Tag(s)'),
             actions: ['select']
@@ -1217,14 +1222,16 @@ export const filterCellsWithTags: JupyterFrontEndPlugin<void> = {
           showDialog({
             body: view,
             buttons: [Dialog.cancelButton(), selectButton, clearButton]
-          }).then(result => {
-            if (result.button.actions.includes('select')) {
-              updateFilteredCells(model);
-            }
-            if (result.button.actions.includes('clear')) {
-              clearFilters(model);
-            }
-          });
+          })
+            .then(result => {
+              if (result.button.actions.includes('select')) {
+                updateFilteredCells(model);
+              }
+              if (result.button.actions.includes('clear')) {
+                clearFilters(model);
+              }
+            })
+            .catch(error => window.alert('No button has been pressed!'));
         }
       },
       isEnabled: args => (args.toolbar ? true : isEnabled())
@@ -1258,7 +1265,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   updateRawMimetype,
   customMetadataEditorFields,
   activeCellTool,
-  filterCellsWithTags
+  filterCellsPlugin
 ];
 export default plugins;
 

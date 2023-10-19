@@ -59,7 +59,7 @@ export class FilterButtonWidget extends ReactWidget {
 
 /* Get the current widget and activate unless the args specify otherwise */
 export function getNotebookTagList(notebookPanel: NotebookPanel) {
-  let tagList: Array<string> = [];
+  const tagList: Array<string> = [];
   notebookPanel?.content.widgets.forEach(cell => {
     const tags: any = cell.model.getMetadata('tags');
     for (let i = 0; i < tags.length; i++) {
@@ -71,14 +71,25 @@ export function getNotebookTagList(notebookPanel: NotebookPanel) {
   return tagList;
 }
 
-interface IPropsTagList {
+export function getCellsTypeList(notebookPanel: NotebookPanel) {
+  const typeList: Array<string> = [];
+  notebookPanel?.content.widgets.forEach(cell => {
+    const type = cell.model.type;
+    if (!typeList.includes(type)) {
+      typeList.push(type);
+    }
+  });
+  return typeList;
+}
+
+interface IProps {
   model: CellTagListModel;
 }
 
-export function CellTagListComponent(props: IPropsTagList) {
+export function CellTagListComponent(props: IProps) {
   let { model } = props;
   model.setNotebookTagList(model.notebookPanel);
-  const updatedCheckedDict = { ...model.checkedDict };
+  const updatedCheckedDict = { ...model.tagCheckedDict };
 
   const handleCheck = (event: any) => {
     if (event.target.checked) {
@@ -88,9 +99,9 @@ export function CellTagListComponent(props: IPropsTagList) {
       updatedCheckedDict[event.target.value] =
         !updatedCheckedDict[event.target.value];
     }
-    model.setUpdatedCheckedDict(updatedCheckedDict);
   };
 
+  model.updateTagCheckedDict(updatedCheckedDict);
   let isChecked = (item: any) =>
     updatedCheckedDict[item] === true ? 'checked-item' : 'not-checked-item';
 
@@ -104,7 +115,7 @@ export function CellTagListComponent(props: IPropsTagList) {
                 type="checkbox"
                 value={item}
                 onChange={handleCheck}
-                defaultChecked={model.checkedDict[item]}
+                defaultChecked={model.tagCheckedDict[item]}
               />
               <span className={isChecked(item)}>{item}</span>
             </div>
@@ -118,21 +129,23 @@ export function CellTagListComponent(props: IPropsTagList) {
 export class CellTagListModel extends VDomModel {
   public notebookPanel: NotebookPanel;
   public tagList: Array<string>;
-  public checkedDict: { [tag: string]: boolean };
-  public updatedCheckedDict: { [tag: string]: boolean };
+  public tagCheckedDict: { [key: string]: boolean };
+  public updatedTagCheckedDict: { [key: string]: boolean };
 
   constructor(notebookPanel: NotebookPanel) {
     super();
     this.notebookPanel = notebookPanel;
     this.tagList = getNotebookTagList(this.notebookPanel);
+    this.tagList = this.tagList.concat(getCellsTypeList(this.notebookPanel));
   }
 
-  setUpdatedCheckedDict(dict: { [tag: string]: boolean }) {
-    this.updatedCheckedDict = dict;
+  updateTagCheckedDict(dict: { [key: string]: boolean }) {
+    this.updatedTagCheckedDict = dict;
   }
 
   setNotebookTagList(notebookPanel: NotebookPanel) {
     this.tagList = getNotebookTagList(notebookPanel);
+    this.tagList = this.tagList.concat(getCellsTypeList(notebookPanel));
   }
 }
 
@@ -141,10 +154,10 @@ export class CellTagListView extends VDomRenderer<CellTagListModel> {
     super(model);
     this.model = model;
   }
-
   render() {
     return (
       <>
+        <h3> Filter cells with tags</h3>
         <CellTagListComponent model={this.model} />
       </>
     );
