@@ -2034,7 +2034,7 @@ export class Notebook extends StaticNotebook {
       // tabIndex=0 to the computed tabbable cell.
       // The cell with tab index = 0 is focused if a cell was already focused before
       // the update.
-      if (activeCell.isAttached && activeCell.node.checkVisibility()) {
+      if (activeCell.isAttached && activeCell.isVisible) {
         activeCell.node.tabIndex = 0;
         this._tabbableCell = undefined;
         if (this._keepFocusOnACell) {
@@ -2127,7 +2127,7 @@ export class Notebook extends StaticNotebook {
           if (
             candidateCell !== cell &&
             candidateCell?.isAttached &&
-            candidateCell?.node.checkVisibility()
+            candidateCell?.isVisible
           ) {
             this._tabbableCell = candidateCell;
             break;
@@ -2790,7 +2790,7 @@ export class Notebook extends StaticNotebook {
       if (
         this._activeCell &&
         this._activeCell.isAttached &&
-        this._activeCell.node.checkVisibility()
+        this._activeCell.isVisible
       ) {
         this._activeCell.node.focus({ preventScroll: true });
       } else if (this._tabbableCell) {

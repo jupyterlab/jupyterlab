@@ -1071,75 +1071,75 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#selectAbove()', () => {
-      it('should select the cell above the active cell', () => {
+      it('should select the cell above the active cell', async () => {
         widget.activeCellIndex = 1;
-        NotebookActions.selectAbove(widget);
+        await NotebookActions.selectAbove(widget);
         expect(widget.activeCellIndex).toBe(0);
       });
 
-      it('should be a no-op if there is no model', () => {
+      it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        NotebookActions.selectAbove(widget);
+        await NotebookActions.selectAbove(widget);
         expect(widget.activeCellIndex).toBe(-1);
       });
 
-      it('should not wrap around to the bottom', () => {
-        NotebookActions.selectAbove(widget);
+      it('should not wrap around to the bottom', async () => {
+        await NotebookActions.selectAbove(widget);
         expect(widget.activeCellIndex).toBe(0);
       });
 
-      it('should preserve the mode', () => {
+      it('should preserve the mode', async () => {
         widget.activeCellIndex = 2;
-        NotebookActions.selectAbove(widget);
+        await NotebookActions.selectAbove(widget);
         expect(widget.mode).toBe('command');
         widget.mode = 'edit';
-        NotebookActions.selectAbove(widget);
+        await NotebookActions.selectAbove(widget);
         expect(widget.mode).toBe('edit');
       });
 
-      it('should skip collapsed cells in edit mode', () => {
+      it('should skip collapsed cells in edit mode', async () => {
         widget.activeCellIndex = 3;
         widget.mode = 'edit';
         widget.widgets[1].inputHidden = true;
         widget.widgets[2].inputHidden = true;
         widget.widgets[3].inputHidden = false;
-        NotebookActions.selectAbove(widget);
+        await NotebookActions.selectAbove(widget);
         expect(widget.activeCellIndex).toBe(0);
       });
     });
 
     describe('#selectBelow()', () => {
-      it('should select the cell below the active cell', () => {
-        NotebookActions.selectBelow(widget);
+      it('should select the cell below the active cell', async () => {
+        await NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).toBe(1);
       });
 
-      it('should be a no-op if there is no model', () => {
+      it('should be a no-op if there is no model', async () => {
         widget.model = null;
-        NotebookActions.selectBelow(widget);
+        await NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).toBe(-1);
       });
 
-      it('should not wrap around to the top', () => {
+      it('should not wrap around to the top', async () => {
         widget.activeCellIndex = widget.widgets.length - 1;
-        NotebookActions.selectBelow(widget);
+        await NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).not.toBe(0);
       });
 
-      it('should preserve the mode', () => {
+      it('should preserve the mode', async () => {
         widget.activeCellIndex = 2;
-        NotebookActions.selectBelow(widget);
+        await NotebookActions.selectBelow(widget);
         expect(widget.mode).toBe('command');
         widget.mode = 'edit';
-        NotebookActions.selectBelow(widget);
+        await NotebookActions.selectBelow(widget);
         expect(widget.mode).toBe('edit');
       });
 
-      it('should not change if in edit mode and no non-collapsed cells below', () => {
+      it('should not change if in edit mode and no non-collapsed cells below', async () => {
         widget.activeCellIndex = widget.widgets.length - 2;
         widget.mode = 'edit';
         widget.widgets[widget.widgets.length - 1].inputHidden = true;
-        NotebookActions.selectBelow(widget);
+        await NotebookActions.selectBelow(widget);
         expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
       });
     });

@@ -185,6 +185,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
       widget instanceof CodeCell &&
       widget.node.parentElement
     ) {
+      widget.show();
       // We don't remove code cells to preserve outputs internal state
       widget.node.style.display = '';
 
@@ -246,6 +247,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
       !widget.node.classList.contains(DROP_SOURCE_CLASS) &&
       widget !== this._willBeRemoved
     ) {
+      widget.hide();
       // We don't remove code cells to preserve outputs internal state
       // Transform does not work because the widget height is kept (at lease in FF)
       widget.node.style.display = 'none';
