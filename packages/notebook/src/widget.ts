@@ -1279,6 +1279,13 @@ export class Notebook extends StaticNotebook {
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.selectionChanged.connect(this._updateSelectedCells, this);
+
+    // Handle a cell being detached by windowing.
+    (this.layout as NotebookWindowedLayout).beforeWidgetDetached.connect(
+      this.onBeforeCellDetached,
+      this
+    );
+
     this.addFooter();
   }
 
@@ -1455,6 +1462,10 @@ export class Notebook extends StaticNotebook {
     if (this.isDisposed) {
       return;
     }
+    (this.layout as NotebookWindowedLayout).beforeWidgetDetached.disconnect(
+      this.onBeforeCellDetached,
+      this
+    );
     this._activeCell = null;
     super.dispose();
   }
@@ -2019,8 +2030,24 @@ export class Notebook extends StaticNotebook {
       activeCell.addClass(SELECTED_CLASS);
       // Set tab index to 0 on the active cell so that if the user tabs away from
       // the notebook then tabs back, they will return to the cell where they
-      // left off.
-      activeCell.node.tabIndex = 0;
+      // left off. If the active cell has been detached (for windowing), then set the
+      // tabIndex=0 to the computed tabbable cell.
+      // The cell with tab index = 0 is focused if a cell was already focused before
+      // the update.
+      if (activeCell.isAttached && activeCell.node.checkVisibility()) {
+        activeCell.node.tabIndex = 0;
+        this._tabbableCell = undefined;
+        if (this._keepFocusOnACell) {
+          activeCell.node.focus({ preventScroll: true });
+        }
+      } else {
+        if (this._tabbableCell) {
+          this._tabbableCell.node.tabIndex = 0;
+          if (this._keepFocusOnACell) {
+            this._tabbableCell.node.focus({ preventScroll: true });
+          }
+        }
+      }
       if (count > 1) {
         activeCell.addClass(OTHER_SELECTED_CLASS);
       }
@@ -2071,6 +2098,50 @@ export class Notebook extends StaticNotebook {
     // Try to set the active cell index to 0.
     // It will be set to `-1` if there is no new model or the model is empty.
     this.activeCellIndex = 0;
+  }
+
+  /**
+   * Triggered when the windowed notebook is about to detach a cell from the DOM.
+   * If the detached cell is the one having the tabIndex=0, it compute the best cell
+   * to have the tabindex on next update.
+   * If the detached cell had the ficus, it ensure the focus will be kept in the
+   * notebook's node.
+   */
+  protected onBeforeCellDetached(_: NotebookWindowedLayout, cell: Cell): void {
+    if (cell.node.tabIndex === 0 || cell === this._tabbableCell) {
+      const activeCellIndex = this.activeCellIndex;
+      let n = 1;
+      this._tabbableCell = undefined;
+      // Loop around the current active cell to find the closest visible which can
+      // handle the tabIndex=0.
+      while (
+        this.widgets[activeCellIndex + n] ||
+        this.widgets[activeCellIndex - n]
+      ) {
+        const candidateCells = [
+          this.widgets[activeCellIndex + n],
+          this.widgets[activeCellIndex - n]
+        ];
+        for (let i = 0; i < 2; i++) {
+          const candidateCell = candidateCells[i];
+          if (
+            candidateCell !== cell &&
+            candidateCell?.isAttached &&
+            candidateCell?.node.checkVisibility()
+          ) {
+            this._tabbableCell = candidateCell;
+            break;
+          }
+        }
+        if (this._tabbableCell) {
+          break;
+        }
+        n++;
+      }
+    }
+    if (cell.node.contains(document.activeElement) || this._keepFocusOnACell) {
+      this._keepFocusOnACell = true;
+    }
   }
 
   /**
@@ -2689,14 +2760,21 @@ export class Notebook extends StaticNotebook {
       // If the editor itself does not have focus, ensure command mode.
       if (widget.editorWidget && !widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
+        // If the cell is focused because the previous focused has been detached
+        // by windowing, do not change the active cell.
+        if (!(widget === this._tabbableCell)) {
+          this.activeCellIndex = index;
+        }
       }
-      this.activeCellIndex = index;
       // If the editor has focus, ensure edit mode.
       const node = widget.editorWidget?.node;
       if (node?.contains(target)) {
+        this._keepFocusOnACell = false;
+        this.activeCellIndex = index;
         this.mode = 'edit';
+        // Focusing on the editor switch the active cell.
+        this.activeCellIndex = index;
       }
-      this.activeCellIndex = index;
     } else {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
@@ -2704,11 +2782,19 @@ export class Notebook extends StaticNotebook {
       // Prevents the parent element to get the focus.
       event.preventDefault();
 
-      // Focuses on a cell (if possible), or on the footer element.
-      if (this._activeCell && this._activeCell.node.checkVisibility()) {
-        this._activeCell.node.focus({
-          preventScroll: true
-        });
+      // Focusing on the notebook node outside of a cell should focus on a children
+      // of the notebook. It will try to focus on the following, respectively:
+      //   - the active cell (if not detached or hidden by windowing)
+      //   - the tabbable cell (if exists)
+      //   - the footer element (button to add cell)
+      if (
+        this._activeCell &&
+        this._activeCell.isAttached &&
+        this._activeCell.node.checkVisibility()
+      ) {
+        this._activeCell.node.focus({ preventScroll: true });
+      } else if (this._tabbableCell) {
+        this._tabbableCell.node.focus({ preventScroll: true });
       } else {
         // If the active cell is not visible (because of full windowing), set the focus
         // on the footer (always visible) to set focus on Notebook widget.
@@ -2739,6 +2825,9 @@ export class Notebook extends StaticNotebook {
       if (widget.editorWidget?.node.contains(relatedTarget)) {
         return;
       }
+    } else {
+      // If no cell gained focus, do not keep focus on a cell.
+      this._keepFocusOnACell = false;
     }
 
     // Otherwise enter command mode if not already.
@@ -2822,6 +2911,13 @@ export class Notebook extends StaticNotebook {
     );
   }
   private _selectedCells: Cell[] = [];
+
+  // Attributes to handle active cell detached in virtual notebook.
+  // The 'tabbableCell' is the cell that can be reach by tab (tabindex='0'). This
+  // attribute is null if the active cell is attached. The 'keepFocusOnCell' force
+  // focusing on the tabbable cell when updating the widget.
+  private _tabbableCell: Cell | undefined = undefined;
+  private _keepFocusOnACell: boolean = false;
 }
 
 /**

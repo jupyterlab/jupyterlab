@@ -138,7 +138,7 @@
   background: transparent;
 }
 
-.jp-Notebook.jp-mod-commandMode .jp-Cell:focus-visible {
+.jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-active:focus-visible {
   outline: none;
   border: none;
   border-radius: 2px;

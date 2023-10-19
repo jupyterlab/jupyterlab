@@ -600,7 +600,7 @@
     },
     {
       "command": "viewmenu:line-numbering",
-      "keys": [""],
+      "keys": ["Shift L"],
       "selector": ".jp-Notebook.jp-mod-commandMode"
     },
     {

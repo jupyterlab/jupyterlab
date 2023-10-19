@@ -10,6 +10,7 @@ import {
   WindowedListModel
 } from '@jupyterlab/ui-components';
 import { Message, MessageLoop } from '@lumino/messaging';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 
@@ -107,6 +108,13 @@ export class NotebookWindowedLayout extends WindowedLayout {
     if (this._footer && this.parent?.isAttached) {
       Widget.attach(this._footer, this.parent!.node);
     }
+  }
+
+  /**
+   * Signal emitted when a widget is detached from the DOM.
+   */
+  get beforeWidgetDetached(): ISignal<this, Widget> {
+    return this._beforeWidgetDetached;
   }
 
   /**
@@ -228,6 +236,9 @@ export class NotebookWindowedLayout extends WindowedLayout {
   protected detachWidget(index: number, widget: Widget): void {
     (widget as Cell).inViewport = false;
 
+    // Signaling the future detached widget.
+    this._beforeWidgetDetached.emit(widget);
+
     // TODO we could improve this further by discarding also the code cell without outputs
     if (
       widget instanceof CodeCell &&
@@ -255,11 +266,11 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
       // Ensure to clean up drop target class if the widget move out of the viewport
       widget.node.classList.remove(DROP_TARGET_CLASS);
-    }
 
-    if (this.parent!.isAttached) {
-      // Detach sub widget of CodeCell except the OutputAreaWrapper
-      MessageLoop.sendMessage(widget, Widget.Msg.AfterDetach);
+      if (this.parent!.isAttached) {
+        // Detach sub widget of CodeCell except the OutputAreaWrapper
+        MessageLoop.sendMessage(widget, Widget.Msg.AfterDetach);
+      }
     }
   }
 
@@ -381,4 +392,5 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
   private _willBeRemoved: Widget | null = null;
   private _topHiddenCodeCells: number = -1;
+  private _beforeWidgetDetached = new Signal<this, Widget>(this);
 }
