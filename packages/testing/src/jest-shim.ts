@@ -25,6 +25,22 @@ const fetchMod = ((window as any).fetch = require('node-fetch'));
 
 globalThis.Image = (window as any).Image;
 
+// Prevents the CodeMirror error "getClientRects is not a function".
+// See https://github.com/jsdom/jsdom/issues/3002#issue-652790925
+(window as any).document.createRange = () => {
+	const range = new Range();
+	range.getBoundingClientRect = jest.fn();
+	range.getClientRects = () => {
+		return {
+			length: 0,
+			item: () => null,
+			[Symbol.iterator]: jest.fn(),
+		};
+	};
+
+	return range;
+};
+
 window.focus = () => {
   /* JSDom throws "Not Implemented" */
 };
