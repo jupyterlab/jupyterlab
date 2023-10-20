@@ -47,6 +47,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    repo
    components
    patterns
+   Accessibility <accessibility>
    internationalization
    css
    performance
@@ -352,11 +353,53 @@ With Homebrew:
 Using automation to set up a local development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While there is a lot to learn by following the steps above, they can be automated to save time. This section shows how
-to do that using Vagrant as an example.
-
-The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
+While there is a lot to learn by following the steps above, they can be automated to save time. The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
 re-build the environment, better standardisation ("baseline", reproducible environments).
+This section shows how to do that using Docker and Vagrant.
+
+**Setup using Docker**
+""""""""""""""""""""""""
+
+To start a JupyterLab development container in a UNIX system with docker installed:
+
+1. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab>`__.
+
+2. Start the container:
+
+.. code:: bash
+
+   git clone https://github.com/<your-github-username>/jupyterlab.git
+   cd jupyterlab
+   bash docker/start.sh
+
+The above command will build the docker image if it does not exist, then start the container with JupyterLab running in watch mode. The port 8888 is exposed and the current JupyterLab repo is mounted into the container. Then you can start developing JupyterLab with your favorite IDE, JupyterLab will be rebuilt on the fly.
+
+Other available commands:
+
+.. code:: bash
+
+   bash docker/start.sh dev 4567 # Start JupyterLab dev container at port 4567
+   bash docker/start.sh stop  # Stop the running container
+   bash docker/start.sh clean  # Remove the docker image
+   bash docker/start.sh build  # Rebuild the docker image
+
+   # Log into the container's shell with the JupyterLab environment activated.
+   # It's useful to run the tests or install dependencies.
+   bash docker/start.sh shell
+
+To add TypeScript dependencies to the project, you need to log into the container's shell, install the dependencies to update the package.json and yarn.lock files, and then rebuild the docker image.
+
+.. code:: bash
+
+   bash docker/start.sh shell
+   # In the container shell
+   jlpm add ...
+   exit
+   # Back to host shell
+   bash docker/start.sh build
+
+**Setup using Vagrant**
+""""""""""""""""""""""""""""
 
 A practical example can be found `there <https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant>`_ and
 includes a ``Vagrantfile``, the bootstrap files and additional documentation.

@@ -2067,7 +2067,7 @@ namespace Private {
       if (data.widgetStates) {
         this._stackedPanel.widgets.forEach((w: SidePanel) => {
           if (w.id && w.content instanceof SplitPanel) {
-            const state = data.widgetStates[w.id];
+            const state = data.widgetStates[w.id] ?? {};
             w.content.widgets.forEach((wi, widx) => {
               const expansion = (state.expansionStates ?? [])[widx];
               if (
