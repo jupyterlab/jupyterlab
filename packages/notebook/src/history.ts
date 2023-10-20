@@ -212,7 +212,7 @@ export class NotebookHistory implements INotebookHistory {
   }
 
   /**
-   * Get the next item in the console history.
+   * Update the editor of the cell with provided text content.
    *
    * @param activeCell - The currently selected Cell in the notebook.
    * @param update - the result from back or forward
