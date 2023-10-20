@@ -813,7 +813,7 @@
       "default": "defer"
     },
     "accessKernelHistory": {
-      "title": "Enable kernel history access.",
+      "title": "Kernel history access",
       "description": "Enable kernel history access from notebook cells. Enabling this allows you to scroll through kernel history from a given notebook cell.",
       "type": "boolean",
       "default": false
