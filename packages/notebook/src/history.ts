@@ -5,7 +5,11 @@ import { Cell } from '@jupyterlab/cells';
 import { ISessionContext } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { KernelMessage } from '@jupyterlab/services';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
@@ -14,16 +18,6 @@ import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
  * The definition of a console history manager object.
  */
 export interface INotebookHistory extends IDisposable {
-  /**
-   * The session context used to query history.
-   */
-  readonly sessionContext: ISessionContext;
-
-  /**
-   * Translator to be used for warnings.
-   */
-  readonly translator: ITranslator;
-
   /**
    * The current editor used by the history widget.
    */
@@ -46,7 +40,7 @@ export interface INotebookHistory extends IDisposable {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  back(activeCell: Cell): Promise<string>;
+  back(activeCell: Cell): Promise<string | undefined>;
 
   /**
    * Get the next item in the console history.
@@ -55,7 +49,7 @@ export interface INotebookHistory extends IDisposable {
    *
    * @returns A Promise for console command text or `undefined` if unavailable.
    */
-  forward(activeCell: Cell): Promise<string>;
+  forward(activeCell: Cell): Promise<string | undefined>;
 
   /**
    * Reset the history navigation state, i.e., start a new history session.
@@ -66,9 +60,9 @@ export interface INotebookHistory extends IDisposable {
    * Get the next item in the console history.
    *
    * @param activeCell - The currently selected Cell in the notebook.
-   * @param update - the result from back or forward
+   * @param content - the result from back or forward
    */
-  updateEditor(activeCell: Cell, update: string): void;
+  updateEditor(activeCell: Cell, content: string | undefined): void;
 }
 
 /**
@@ -79,33 +73,33 @@ export class NotebookHistory implements INotebookHistory {
    * Construct a new console history object.
    */
   constructor(options: NotebookHistory.IOptions) {
-    this.sessionContext = options.sessionContext;
-    this.translator = options.translator || nullTranslator;
+    this._sessionContext = options.sessionContext;
+    this._trans = (options.translator || nullTranslator).load('jupyterlab');
     void this._handleKernel().then(() => {
-      this.sessionContext.kernelChanged.connect(this._handleKernel, this);
+      this._sessionContext.kernelChanged.connect(this._handleKernel, this);
     });
-    this.toRequest = this.requestBatchSize;
+    this._toRequest = this._requestBatchSize;
   }
 
   /**
    * The client session used to query history.
    */
-  readonly sessionContext: ISessionContext;
+  private _sessionContext: ISessionContext;
 
   /**
    * Translator to be used for warnings
    */
-  readonly translator: ITranslator;
+  private _trans: TranslationBundle;
 
   /**
    * The number of history items to request.
    */
-  private toRequest: number;
+  private _toRequest: number;
 
   /**
    * The number of history items to increase a batch size by per subsequent request.
    */
-  private requestBatchSize: number = 10;
+  private _requestBatchSize: number = 10;
 
   /**
    * The current editor used by the history manager.
@@ -185,7 +179,7 @@ export class NotebookHistory implements INotebookHistory {
    *
    * @returns A Promise resolving to the historical cell content text.
    */
-  async back(activeCell: Cell): Promise<string> {
+  async back(activeCell: Cell): Promise<string | undefined> {
     await this.checkSession(activeCell);
     --this._cursor;
     if (this._cursor < 0) {
@@ -203,7 +197,7 @@ export class NotebookHistory implements INotebookHistory {
    *
    * @returns A Promise resolving to the historical cell content text.
    */
-  async forward(activeCell: Cell): Promise<string> {
+  async forward(activeCell: Cell): Promise<string | undefined> {
     await this.checkSession(activeCell);
     ++this._cursor;
     this._cursor = Math.min(this._filtered.length - 1, this._cursor);
@@ -215,24 +209,24 @@ export class NotebookHistory implements INotebookHistory {
    * Update the editor of the cell with provided text content.
    *
    * @param activeCell - The currently selected Cell in the notebook.
-   * @param update - the result from back or forward
+   * @param content - the result from back or forward
    */
-  updateEditor(activeCell: Cell, update: string): void {
+  updateEditor(activeCell: Cell, content: string | undefined): void {
     if (activeCell) {
       const model = activeCell.editor?.model;
       const source = model?.sharedModel.getSource();
-      if (this.isDisposed || !update) {
+      if (this.isDisposed || !content) {
         return;
       }
-      if (source === update) {
+      if (source === content) {
         return;
       }
       this._setByHistory = true;
-      model?.sharedModel.setSource(update);
+      model?.sharedModel.setSource(content);
       let columnPos = 0;
-      columnPos = update.indexOf('\n');
+      columnPos = content.indexOf('\n');
       if (columnPos < 0) {
-        columnPos = update.length;
+        columnPos = content.length;
       }
       activeCell.editor?.setCursorPosition({ line: 0, column: columnPos });
     }
@@ -244,7 +238,7 @@ export class NotebookHistory implements INotebookHistory {
   reset(): void {
     this._hasSession = false;
     this._placeholder = '';
-    this.toRequest = this.requestBatchSize;
+    this._toRequest = this._requestBatchSize;
   }
 
   /**
@@ -252,7 +246,7 @@ export class NotebookHistory implements INotebookHistory {
    * accounting for potentially new history items above it.
    */
   private async fetchBatch() {
-    this.toRequest += this.requestBatchSize;
+    this._toRequest += this._requestBatchSize;
     let oldFilteredReversed = this._filtered.slice().reverse();
     let oldHistory = this._history.slice();
     await this._retrieveHistory().then(() => {
@@ -329,7 +323,7 @@ export class NotebookHistory implements INotebookHistory {
    * Handle the current kernel changing.
    */
   private async _handleKernel(): Promise<void> {
-    this._kernel = this.sessionContext.session?.kernel;
+    this._kernel = this._sessionContext.session?.kernel;
     if (!this._kernel) {
       this._history.length = 0;
       return;
@@ -345,16 +339,12 @@ export class NotebookHistory implements INotebookHistory {
    */
   private async _retrieveHistory(cell?: Cell): Promise<void> {
     return await this._kernel
-      ?.requestHistory(request(this.toRequest))
+      ?.requestHistory(request(this._toRequest))
       .then(v => {
         this.onHistory(v, cell);
       })
       .catch(() => {
-        console.warn(
-          this.translator
-            .load('jupyterlab')
-            .__('History was unable to be retrieved')
-        );
+        console.warn(this._trans.__('History was unable to be retrieved'));
       });
   }
 
