@@ -85,9 +85,9 @@ describe('@jupyterlab/notebook', () => {
         widget.select(activeCell);
 
         for (let i = 0; i < 12; i++) {
-          let update = await widget.history?.back(activeCell);
+          let update = await widget.kernelHistory?.back(activeCell);
           if (update) {
-            widget.history?.updateEditor(activeCell, update);
+            widget.kernelHistory?.updateEditor(activeCell, update);
           }
         }
 

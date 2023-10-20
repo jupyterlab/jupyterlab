@@ -180,7 +180,9 @@ export namespace NBTestUtils {
    */
   export function createNotebook(sessionContext?: ISessionContext): Notebook {
     let history = sessionContext
-      ? { history: new NotebookHistory({ sessionContext: sessionContext }) }
+      ? {
+          kernelHistory: new NotebookHistory({ sessionContext: sessionContext })
+        }
       : {};
     return new Notebook({
       rendermime: defaultRenderMime(),
