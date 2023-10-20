@@ -39,7 +39,7 @@
     },
     {
       "command": "application:toggle-right-area",
-      "keys": [""],
+      "keys": ["Accel Shift B"],
       "selector": "body"
     },
     {
