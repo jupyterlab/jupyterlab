@@ -1,15 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import { expect, test } from '@jupyterlab/galata';
 
-const sidebarIds: galata.SidebarTabId[] = [
-  'filebrowser',
-  'jp-property-inspector',
-  'jp-running-sessions',
-  'table-of-contents',
-  'extensionmanager.main-view'
-];
+// const sidebarIds: galata.SidebarTabId[] = [
+//   'filebrowser',
+//   'jp-property-inspector',
+//   'jp-running-sessions',
+//   'table-of-contents',
+//   'extensionmanager.main-view'
+// ];
 
 test.use({ viewport: { width: 320, height: 256 } });
 
