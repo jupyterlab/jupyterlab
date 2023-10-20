@@ -201,7 +201,7 @@ export class NotebookHistory implements INotebookHistory {
    *
    * @param activeCell - The currently selected Cell in the notebook.
    *
-   * @returns A Promise for console command text or `undefined` if unavailable.
+   * @returns A Promise resolving to the historical cell content text.
    */
   async forward(activeCell: Cell): Promise<string> {
     await this.checkSession(activeCell);
