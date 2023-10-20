@@ -204,6 +204,39 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       return widgets.slice(index + 1);
     };
 
+    // Gets and returns the dataId of currently active tab in the specified sidebar (left or right)
+    // or an empty string
+    const activeSidePanelWidget = (side: string): string => {
+      // default active element is luancher (luancher-0)
+      let activeTab;
+      if (side != 'left' && side != 'right') {
+        throw Error(`Unsupported sidebar: ${side}`);
+      }
+      if (side === 'left') {
+        activeTab = document.querySelector('.lm-TabBar-tab.lm-mod-current');
+      } else {
+        const query = document.querySelectorAll(
+          '.lm-TabBar-tab.lm-mod-current'
+        );
+        activeTab = query[query.length - 1];
+      }
+      const activeTabDataId = activeTab?.getAttribute('data-id');
+      if (activeTabDataId) {
+        return activeTabDataId?.toString();
+      } else {
+        return '';
+      }
+    };
+
+    // Sets tab focus on the element
+    function setTabFocus(focusElement: Element | null) {
+      if (focusElement) {
+        if ((focusElement as HTMLElement).focus) {
+          (focusElement as HTMLElement).focus();
+        }
+      }
+    }
+
     commands.addCommand(CommandIDs.close, {
       label: () => trans.__('Close Tab'),
       isEnabled: () => {
@@ -344,15 +377,21 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             return;
           }
           const widgetId = widgets[index].id;
-          // activate widget to show the associated content
-          labShell.activateById(widgetId);
           const focusElement = document.querySelector(
             "[data-id='" + widgetId + "']"
           );
-          if (focusElement) {
-            if ((focusElement as HTMLElement).focus) {
-              (focusElement as HTMLElement).focus();
+          if (activeSidePanelWidget(args.side) === widgetId) {
+            if (args.side == 'left') {
+              labShell.collapseLeft();
+              setTabFocus(focusElement);
             }
+            if (args.side == 'right') {
+              labShell.collapseRight();
+              setTabFocus(focusElement);
+            }
+          } else {
+            labShell.activateById(widgetId);
+            setTabFocus(focusElement);
           }
         }
       });
