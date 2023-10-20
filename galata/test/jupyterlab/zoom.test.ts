@@ -24,7 +24,7 @@ test.describe('Low Vision / Zoom Support', () => {
     expect(
       await page.screenshot({
         fullPage: true,
-        clip: { x: 0, y: 0, width: 320, height: 128 }
+        clip: { x: 0, y: 0, width: 320, height: 130 }
       })
     ).toMatchSnapshot('visibility-of-menu-bar-at-400-zoom.png');
   });
