@@ -15,7 +15,7 @@ import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
  */
 export interface INotebookHistory extends IDisposable {
   /**
-   * The session context used by the foreign handler.
+   * The session context used to query history.
    */
   readonly sessionContext: ISessionContext;
 
