@@ -843,7 +843,7 @@ export namespace NotebookActions {
    * This will skip any collapsed cells.
    * The existing selection will be cleared.
    */
-  export async function selectAbove(notebook: Notebook): Promise<void> {
+  export function selectAbove(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -895,7 +895,7 @@ export namespace NotebookActions {
    * This will skip any collapsed cells.
    * The existing selection will be cleared.
    */
-  export async function selectBelow(notebook: Notebook): Promise<void> {
+  export function selectBelow(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }

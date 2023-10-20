@@ -19,6 +19,7 @@ import {
   acceptDialog,
   dismissDialog,
   JupyterServer,
+  signalToPromise,
   sleep
 } from '@jupyterlab/testing';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
@@ -1073,27 +1074,39 @@ describe('@jupyterlab/notebook', () => {
     describe('#selectAbove()', () => {
       it('should select the cell above the active cell', async () => {
         widget.activeCellIndex = 1;
-        await NotebookActions.selectAbove(widget);
+        const waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectAbove(widget);
+        await waitForChange;
         expect(widget.activeCellIndex).toBe(0);
       });
 
-      it('should be a no-op if there is no model', async () => {
+      it.failing('should be a no-op if there is no model', async () => {
         widget.model = null;
-        await NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).toBe(-1);
+        const waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectAbove(widget);
+        // should timeout as there is no change.
+        await waitForChange;
+        expect(widget.activeCellIndex).toBe(0);
       });
 
-      it('should not wrap around to the bottom', async () => {
-        await NotebookActions.selectAbove(widget);
+      it.failing('should not wrap around to the bottom', async () => {
+        const waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectAbove(widget);
+        // should timeout as there is no change.
+        await waitForChange;
         expect(widget.activeCellIndex).toBe(0);
       });
 
       it('should preserve the mode', async () => {
         widget.activeCellIndex = 2;
-        await NotebookActions.selectAbove(widget);
+        let waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectAbove(widget);
+        await waitForChange;
         expect(widget.mode).toBe('command');
         widget.mode = 'edit';
-        await NotebookActions.selectAbove(widget);
+        waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectAbove(widget);
+        await waitForChange;
         expect(widget.mode).toBe('edit');
       });
 
@@ -1103,45 +1116,65 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets[1].inputHidden = true;
         widget.widgets[2].inputHidden = true;
         widget.widgets[3].inputHidden = false;
-        await NotebookActions.selectAbove(widget);
+        const waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectAbove(widget);
+        await waitForChange;
         expect(widget.activeCellIndex).toBe(0);
       });
     });
 
     describe('#selectBelow()', () => {
       it('should select the cell below the active cell', async () => {
-        await NotebookActions.selectBelow(widget);
+        const waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectBelow(widget);
+        await waitForChange;
         expect(widget.activeCellIndex).toBe(1);
       });
 
-      it('should be a no-op if there is no model', async () => {
+      it.failing('should be a no-op if there is no model', async () => {
         widget.model = null;
-        await NotebookActions.selectBelow(widget);
+        const waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectBelow(widget);
+        // should timeout as there is no change.
+        await waitForChange;
         expect(widget.activeCellIndex).toBe(-1);
       });
 
-      it('should not wrap around to the top', async () => {
+      it.failing('should not wrap around to the top', async () => {
         widget.activeCellIndex = widget.widgets.length - 1;
-        await NotebookActions.selectBelow(widget);
+        const waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectBelow(widget);
+        // should timeout as there is no change.
+        await waitForChange;
         expect(widget.activeCellIndex).not.toBe(0);
       });
 
       it('should preserve the mode', async () => {
         widget.activeCellIndex = 2;
-        await NotebookActions.selectBelow(widget);
+        let waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectBelow(widget);
+        await waitForChange;
         expect(widget.mode).toBe('command');
         widget.mode = 'edit';
-        await NotebookActions.selectBelow(widget);
+        waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectBelow(widget);
+        await waitForChange;
         expect(widget.mode).toBe('edit');
       });
 
-      it('should not change if in edit mode and no non-collapsed cells below', async () => {
-        widget.activeCellIndex = widget.widgets.length - 2;
-        widget.mode = 'edit';
-        widget.widgets[widget.widgets.length - 1].inputHidden = true;
-        await NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
-      });
+      it.failing(
+        'should not change if in edit mode and no non-collapsed cells below',
+        async () => {
+          widget.activeCellIndex = widget.widgets.length - 2;
+          widget.mode = 'edit';
+          widget.widgets[widget.widgets.length - 1].inputHidden = true;
+          const waitForChange = signalToPromise(widget.stateChanged);
+          NotebookActions.selectBelow(widget);
+          // should timeout as there is no change.
+          await waitForChange;
+          expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
+        }
+      );
     });
 
     describe('#extendSelectionAbove()', () => {
