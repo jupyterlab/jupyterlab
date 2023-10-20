@@ -146,7 +146,7 @@ export class NotebookHistory implements INotebookHistory {
   }
 
   /**
-   * Get whether the console history manager is disposed.
+   * Get whether the notebook history manager is disposed.
    */
   get isDisposed(): boolean {
     return this._isDisposed;
