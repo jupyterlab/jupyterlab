@@ -913,16 +913,11 @@ export namespace Cell {
  */
 export class CodeCellLayout extends PanelLayout {
   /**
-   * A message handler invoked on a `'before-attach'` message.
+   * A function called to partially attach a code cell, in windowing notebook.
+   * Attach sub widget of CodeCell except the OutputAreaWrapper.
    *
-   * #### Notes
-   * The default implementation of this method forwards the message
-   * to all widgets. It assumes all widget nodes are attached to the
-   * parent widget node.
-   *
-   * This may be reimplemented by subclasses as needed.
    */
-  protected onBeforeAttach(msg: Message): void {
+  windowingAttach(): void {
     let beforeOutputArea = true;
     const outputAreaWrapper = this.parent!.node.firstElementChild;
     for (const widget of this) {
@@ -930,7 +925,7 @@ export class CodeCellLayout extends PanelLayout {
         if (widget.node === outputAreaWrapper) {
           beforeOutputArea = false;
         } else {
-          MessageLoop.sendMessage(widget, msg);
+          MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
 
           if (beforeOutputArea) {
             this.parent!.node.insertBefore(widget.node, outputAreaWrapper);
@@ -953,16 +948,11 @@ export class CodeCellLayout extends PanelLayout {
   }
 
   /**
-   * A message handler invoked on an `'after-detach'` message.
+   * A function called to partially detach a code cell, in windowing notebook.
+   * Detach sub widget of CodeCell except the OutputAreaWrapper.
    *
-   * #### Notes
-   * The default implementation of this method forwards the message
-   * to all widgets. It assumes all widget nodes are attached to the
-   * parent widget node.
-   *
-   * This may be reimplemented by subclasses as needed.
    */
-  protected onAfterDetach(msg: Message): void {
+  windowingDetach(): void {
     for (const widget of this) {
       // TODO we could improve this further by removing outputs based
       // on their mime type (for example plain/text or markdown could safely be detached)
@@ -976,7 +966,7 @@ export class CodeCellLayout extends PanelLayout {
 
         this.parent!.node.removeChild(widget.node);
 
-        MessageLoop.sendMessage(widget, msg);
+        MessageLoop.sendMessage(widget, Widget.Msg.AfterDetach);
       }
     }
   }
