@@ -153,7 +153,7 @@ export class NotebookHistory implements INotebookHistory {
   }
 
   /**
-   * Dispose of the resources held by the console history manager.
+   * Dispose of the resources held by the notebook history manager.
    */
   dispose(): void {
     this._isDisposed = true;
