@@ -88,7 +88,7 @@ export class NotebookHistory implements INotebookHistory {
   }
 
   /**
-   * The client session used by the foreign handler.
+   * The client session used to query history.
    */
   readonly sessionContext: ISessionContext;
 
