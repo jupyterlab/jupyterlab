@@ -110,6 +110,17 @@ export class NotebookWindowedLayout extends WindowedLayout {
   }
 
   /**
+   * Notebook's active cell
+   */
+  get activeCell(): Widget | null {
+    return this._activeCell;
+  }
+  set activeCell(widget: Widget | null) {
+    this._activeCell = widget;
+  }
+  private _activeCell: Widget | null;
+
+  /**
    * Dispose the layout
    * */
   dispose(): void {
@@ -177,6 +188,12 @@ export class NotebookWindowedLayout extends WindowedLayout {
       widget instanceof CodeCell &&
       widget.node.parentElement
     ) {
+      if (widget.node.style.opacity === '0') {
+        // Restore visibility for active, or previously active cell
+        widget.node.style.opacity = '1';
+        widget.node.style.height = '';
+      }
+
       // We don't remove code cells to preserve outputs internal state
       widget.node.style.display = '';
 
@@ -235,6 +252,16 @@ export class NotebookWindowedLayout extends WindowedLayout {
       !widget.node.classList.contains(DROP_SOURCE_CLASS) &&
       widget !== this._willBeRemoved
     ) {
+      // Note: `index` is relative to the displayed cells, not all cells,
+      // hence we compare with the widget itself.
+      if (widget === this.activeCell) {
+        // Do not change display of the active cell to allow user to continue providing input
+        // into the code mirror editor when out of view. We still hide the cell so to prevent
+        // minor visual glitches when scrolling.
+        widget.node.style.opacity = '0';
+        widget.node.style.height = '0';
+        return;
+      }
       // We don't remove code cells to preserve outputs internal state
       // Transform does not work because the widget height is kept (at lease in FF)
       widget.node.style.display = 'none';
