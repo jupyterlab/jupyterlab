@@ -188,10 +188,9 @@ export class NotebookWindowedLayout extends WindowedLayout {
       widget instanceof CodeCell &&
       widget.node.parentElement
     ) {
-      if (widget.node.style.opacity === '0') {
+      if (this._isSoftHidden(widget)) {
         // Restore visibility for active, or previously active cell
-        widget.node.style.opacity = '1';
-        widget.node.style.height = '';
+        this._toggleSoftVisibility(widget, true);
       }
 
       // We don't remove code cells to preserve outputs internal state
@@ -258,8 +257,9 @@ export class NotebookWindowedLayout extends WindowedLayout {
         // Do not change display of the active cell to allow user to continue providing input
         // into the code mirror editor when out of view. We still hide the cell so to prevent
         // minor visual glitches when scrolling.
-        widget.node.style.opacity = '0';
-        widget.node.style.height = '0';
+        this._toggleSoftVisibility(widget, false);
+        // Return before sending "AfterDetach" message to CodeCell
+        // to prevent removing contents of the active cell.
         return;
       }
       // We don't remove code cells to preserve outputs internal state
@@ -375,6 +375,35 @@ export class NotebookWindowedLayout extends WindowedLayout {
     this._willBeRemoved = msg.child;
     super.onChildRemoved(msg);
     this._willBeRemoved = null;
+  }
+
+  /**
+   * Toggle "soft" visibility of the widget.
+   *
+   * #### Notes
+   * To ensure that user events reach the CodeMirror editor, this method
+   * does not toggle `display` nor `visibility` which have side effects,
+   * but instead hides it in the compositor and ensures that the bounding
+   * box is has an area equal to zero.
+   * To ensure we do not trigger style recalculation, we set the styles
+   * directly on the node instead of using a class.
+   */
+  private _toggleSoftVisibility(widget: Widget, show: boolean): void {
+    if (show) {
+      widget.node.style.opacity = '';
+      widget.node.style.height = '';
+      widget.node.style.padding = '';
+    } else {
+      widget.node.style.opacity = '0';
+      // Both padding and height need to be set to zero
+      // to ensure bounding box collapses to invisible.
+      widget.node.style.height = '0';
+      widget.node.style.padding = '0';
+    }
+  }
+
+  private _isSoftHidden(widget: Widget): boolean {
+    return widget.node.style.opacity === '0';
   }
 
   private _findNearestChildBinarySearch(
