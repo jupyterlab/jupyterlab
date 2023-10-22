@@ -268,7 +268,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * By default, the list will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
    *
    *   auto (default) - Scroll as little as possible to ensure the item is visible. (If the item is already visible, it won't scroll at all.)
-   *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away, scroll so that it becomes visible (including the margin). If it is more than one viewport away, scroll so that it is centered within the list.
+   *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away or exceeds viewport in height, scroll so that it becomes visible (including the margin). If it is more than one viewport away and fits the viewport, scroll so that it is centered within the list.
    *   center - Center align the item within the list.
    *   end - Align the item to the end of the list
    *   start - Align the item to the beginning of the list
@@ -300,15 +300,36 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       0,
       itemMetadata.offset - size + itemMetadata.size
     );
+    const itemTop = itemMetadata.offset;
+    const itemBottom = itemMetadata.offset + itemMetadata.size;
+    const marginSize = size * boundedMargin;
+    const significantlyCrossingBottomEdge =
+      this._scrollOffset + size - marginSize > itemTop &&
+      this._scrollOffset + size - marginSize < itemBottom;
+    const significantlyCrossingTopEdge =
+      this._scrollOffset + marginSize > itemTop &&
+      this._scrollOffset + marginSize < itemBottom;
 
     if (align === 'smart') {
-      if (
+      const edgeLessThanOneViewportAway =
         this._scrollOffset >= bottomOffset - size &&
-        this._scrollOffset <= topOffset + size
+        this._scrollOffset <= topOffset + size;
+      if (
+        significantlyCrossingBottomEdge ||
+        significantlyCrossingTopEdge ||
+        edgeLessThanOneViewportAway
       ) {
+        // Possibly less than one viewport away, scroll so that it becomes visible (including the margin)
         align = 'auto';
       } else {
-        align = 'center';
+        // More than one viewport away, scroll so that it is centered within the list,
+        // unless the widget is larger than the viewport, in which case only scroll to
+        // align with the top or bottom edge (automatically)
+        if (itemMetadata.size > size) {
+          align = 'auto';
+        } else {
+          align = 'center';
+        }
       }
     }
 
@@ -325,10 +346,19 @@ export abstract class WindowedListModel implements WindowedList.IModel {
           this._scrollOffset >= bottomOffset &&
           this._scrollOffset <= itemMetadata.offset
         ) {
+          // No need to change the position, return the current offset.
           return this._scrollOffset;
         } else if (this._scrollOffset < bottomOffset) {
+          // If bottom of the cell is not visible, show the bottom.
+          // but only if it would NOT result in hiding the top of
+          // the widget if it was already visible.
+          if (significantlyCrossingBottomEdge && itemMetadata.size > size) {
+            // Aligning to bottom would hide the top, do nothing.
+            return this._scrollOffset;
+          }
           return bottomOffset + boundedMargin * size;
         } else {
+          // Align to the top edge.
           return Math.max(0, topOffset - boundedMargin * size);
         }
     }
