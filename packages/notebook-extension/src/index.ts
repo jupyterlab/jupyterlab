@@ -1088,8 +1088,7 @@ export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
       fieldRenderer: () => {
         return new FilterButtonWidget(
           commands,
-          CommandIDs.filterCellsWithTags,
-          'Filter with tags'
+          CommandIDs.filterCellsWithTags
         ).render();
       }
     };
