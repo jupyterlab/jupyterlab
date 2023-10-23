@@ -32,6 +32,14 @@
     ]
   },
   {
+    "id": "application:activate-sidebar-widget",
+    "label": "Open Sidebar Element",
+    "caption": "By default opens first element of left sidebar",
+    "shortcuts": [
+      "Alt 1"
+    ]
+  },
+  {
     "id": "application:close",
     "label": "Close Tab",
     "caption": "",
@@ -101,7 +109,9 @@
     "id": "application:toggle-right-area",
     "label": "Show Right Sidebar",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Ctrl Shift B"
+    ]
   },
   {
     "id": "application:toggle-side-tabbar",
@@ -2063,9 +2073,7 @@
     "id": "running:show-panel",
     "label": "Sessions and Tabs",
     "caption": "",
-    "shortcuts": [
-      "Ctrl Shift B"
-    ]
+    "shortcuts": []
   },
   {
     "id": "settingeditor:open",
