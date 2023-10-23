@@ -23,14 +23,14 @@ test.describe('Low Vision / Zoom Support', () => {
 
   test('Light Themed Launch Screen at low vision', async ({ page }) => {
     expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
-      'launch-screen-at-low-vision.png'
+      'light-launch-screen-at-low-vision.png'
     );
   });
 
   test('Dark Themed Launch Screen at low vision ', async ({ page }) => {
     await page.theme.setDarkTheme();
     expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
-      'launch-screen-at-low-vision.png'
+      'dark-launch-screen-at-low-vision.png'
     );
   });
 
@@ -42,6 +42,7 @@ test.describe('Low Vision / Zoom Support', () => {
       })
     ).toMatchSnapshot('visibility-of-menu-bar-at-low-vision.png');
   });
+  h;
 
   test('Light themed left tabBar at low vision', async ({ page }) => {
     await page.theme.setLightTheme();
@@ -68,7 +69,7 @@ test.describe('Low Vision / Zoom Support', () => {
     page
   }) => {
     await page.sidebar.openTab('filebrowser');
-    expect(await page.screenshot()).toMatchSnapshot(
+    expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
       'opened-filebrowser-on-left-tabbar-at-low-vision.png'
     );
   });
