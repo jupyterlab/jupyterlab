@@ -58,6 +58,9 @@ describe('@jupyterlab/notebook', () => {
         let update = await widget.kernelHistory?.back(activeCell);
         widget.kernelHistory?.updateEditor(activeCell, update);
         expect(activeCell.model.sharedModel.getSource()).toBe('');
+        update = await widget.kernelHistory?.forward(activeCell);
+        widget.kernelHistory?.updateEditor(activeCell, update);
+        expect(activeCell.model.sharedModel.getSource()).toBe('');
       });
       it('should iterate back through history', async () => {
         let emitted = 0;
