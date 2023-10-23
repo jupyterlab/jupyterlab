@@ -322,14 +322,8 @@ namespace ListView {
   }
 }
 
-function ErrorMessage(props: ErrorMessage.IProperties) {
+function ErrorMessage(props: React.PropsWithChildren) {
   return <div className="jp-extensionmanager-error">{props.children}</div>;
-}
-
-namespace ErrorMessage {
-  export interface IProperties {
-    children: React.ReactNode;
-  }
 }
 
 class Header extends ReactWidget {
