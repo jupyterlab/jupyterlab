@@ -15,7 +15,7 @@ test.use({ viewport: { width: 320, height: 256 } });
 
 test.describe('Low Vision / Zoom Support', () => {
   test('Launch Screen at 400% zoom', async ({ page }) => {
-    expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
+    expect(await page.screenshot()).toMatchSnapshot(
       'launch-screen-at-400-zoom.png'
     );
   });
