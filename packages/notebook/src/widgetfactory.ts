@@ -79,7 +79,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     source?: NotebookPanel
   ): NotebookPanel {
     const translator = (context as any).translator;
-    const history = new NotebookHistory({
+    const kernelHistory = new NotebookHistory({
       sessionContext: context.sessionContext,
       translator: translator
     });
@@ -94,7 +94,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
         ? source.content.notebookConfig
         : this._notebookConfig,
       translator,
-      history
+      kernelHistory
     };
     const content = this.contentFactory.createNotebook(nbOptions);
 
