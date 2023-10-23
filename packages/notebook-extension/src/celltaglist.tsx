@@ -34,13 +34,11 @@ export class FilterButtonWidget extends ReactWidget {
   constructor(
     commands: CommandRegistry,
     commandID: string,
-    sectionLabel: string,
     buttonLabel: string
   ) {
     super();
     this._commands = commands;
     this._commandID = commandID;
-    this._sectionLabel = sectionLabel;
     this._buttonLabel = buttonLabel;
   }
   onClick = () => this._commands.execute(this._commandID);
