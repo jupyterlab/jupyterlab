@@ -23,7 +23,7 @@ test.describe('Low Vision / Zoom Support', () => {
   test('Should show visibility of menubar at low vision', async ({ page }) => {
     expect(
       await page.screenshot({
-        fullPage: true,
+        // fullPage: true,
         clip: { x: 0, y: 0, width: 320, height: 130 }
       })
     ).toMatchSnapshot('visibility-of-menu-bar-at-400-zoom.png');
