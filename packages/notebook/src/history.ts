@@ -187,6 +187,7 @@ export class NotebookHistory implements INotebookHistory {
     }
     this._cursor = Math.max(0, this._cursor);
     const content = this._filtered[this._cursor];
+    // This shouldn't ever be undefined as `setFilter` will always be run first
     return content;
   }
 
@@ -202,6 +203,7 @@ export class NotebookHistory implements INotebookHistory {
     ++this._cursor;
     this._cursor = Math.min(this._filtered.length - 1, this._cursor);
     const content = this._filtered[this._cursor];
+    // This shouldn't ever be undefined as `setFilter` will always be run first
     return content;
   }
 
