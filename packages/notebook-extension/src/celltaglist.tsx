@@ -8,48 +8,23 @@ import React from 'react';
 //import PropTypes from 'prop-types';
 import { ReactWidget, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { CommandRegistry } from '@lumino/commands';
-
-interface IPropsFilterButton {
-  onClick: () => void;
-  sectionLabel: string;
-  buttonLabel: string;
-}
-
-export function FilterButtonComponent(props: IPropsFilterButton) {
-  return (
-    <div>
-      <p> {props.sectionLabel}</p>
-      <button type="button" onClick={props.onClick}>
-        {props.buttonLabel}
-      </button>
-    </div>
-  );
-}
+import { Button } from '@jupyterlab/ui-components';
 
 export class FilterButtonWidget extends ReactWidget {
   private _commands: CommandRegistry;
   private _commandID: string;
-  private _buttonLabel: string;
-  private _sectionLabel: string;
-  constructor(
-    commands: CommandRegistry,
-    commandID: string,
-    buttonLabel: string
-  ) {
+
+  constructor(commands: CommandRegistry, commandID: string) {
     super();
     this._commands = commands;
     this._commandID = commandID;
-    this._buttonLabel = buttonLabel;
   }
   onClick = () => this._commands.execute(this._commandID);
   render() {
     return (
       <>
-        <FilterButtonComponent
-          onClick={this.onClick}
-          sectionLabel={this._sectionLabel}
-          buttonLabel={this._buttonLabel}
-        />
+        <p> Filter cells with tags</p>
+        <Button onClick={this.onClick} />
       </>
     );
   }
