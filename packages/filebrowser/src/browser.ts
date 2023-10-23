@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { showErrorMessage } from '@jupyterlab/apputils';
+import { PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -252,6 +253,10 @@ export class FileBrowser extends SidePanel {
   private async _createNew(
     options: Contents.ICreateOptions
   ): Promise<Contents.IModel> {
+    // normalize the path if create a file from a custom drive
+    if (options.path) {
+      options.path = this._toGlobalPath(this.model.driveName, options.path);
+    }
     try {
       const model = await this._manager.newUntitled(options);
       await this.listing.selectItemByName(model.name, true);
@@ -400,6 +405,22 @@ export class FileBrowser extends SidePanel {
         this.model.path
       );
       void showErrorMessage(title, args);
+    }
+  }
+
+  /**
+   * Given a drive name and a local path
+   *
+   * @param driveName: the name of the drive
+   * @param localPath: the local path on the drive.
+   *
+   * @returns the fully qualified path.
+   */
+  private _toGlobalPath(driveName: string, localPath: string): string {
+    if (driveName === '') {
+      return localPath;
+    } else {
+      return `${driveName}:${PathExt.removeSlash(localPath)}`;
     }
   }
 
