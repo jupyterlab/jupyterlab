@@ -21,7 +21,14 @@ test.describe('Low Vision / Zoom Support', () => {
     });
   });
 
-  test('Launch Screen at 400% zoom', async ({ page }) => {
+  test('Light Themed Launch Screen at low vision', async ({ page }) => {
+    expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
+      'launch-screen-at-low-vision.png'
+    );
+  });
+
+  test('Dark Themed Launch Screen at low vision ', async ({ page }) => {
+    await page.theme.setDarkTheme();
     expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
       'launch-screen-at-low-vision.png'
     );
@@ -36,13 +43,49 @@ test.describe('Low Vision / Zoom Support', () => {
     ).toMatchSnapshot('visibility-of-menu-bar-at-low-vision.png');
   });
 
-  test('Should show visibility of left light tabBar at low vision', async ({
-    page
-  }) => {
+  test('Light themed left tabBar at low vision', async ({ page }) => {
     await page.theme.setLightTheme();
     const tabbar = await page.sidebar.getTabBar();
     expect(await tabbar.screenshot()).toMatchSnapshot(
       'left-light-tabbar-of-status-bar-at-low-vision.png'
+    );
+  });
+
+  test('Dark Themed left tabBar at low vision', async ({ page }) => {
+    await page.theme.setDarkTheme();
+    const tabbar = await page.sidebar.getTabBar();
+    expect(await tabbar.screenshot()).toMatchSnapshot(
+      'left-dark-tabbar-of-status-bar-at-low-vision.png'
+    );
+  });
+
+  test('Open File Browser on left at low vision', async ({ page }) => {
+    await page.sidebar.openTab('filebrowser');
+    expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
+  });
+
+  test('Capture File Browser opened on left at low vision', async ({
+    page
+  }) => {
+    await page.sidebar.openTab('filebrowser');
+    expect(await page.screenshot()).toMatchSnapshot(
+      'opened-filebrowser-on-left-tabbar-at-low-vision.png'
+    );
+  });
+
+  test('Light Themed right tabBar at low vision', async ({ page }) => {
+    await page.theme.setLightTheme();
+    const tabbar = await page.sidebar.getTabBar('right');
+    expect(await tabbar.screenshot()).toMatchSnapshot(
+      'right-light-tabbar-at-low-vision.png'
+    );
+  });
+
+  test('Dark Themed right tabBar at low vision', async ({ page }) => {
+    await page.theme.setDarkTheme();
+    const tabbar = await page.sidebar.getTabBar('right');
+    expect(await tabbar.screenshot()).toMatchSnapshot(
+      'right-dark-tabbar-at-low-vision.png'
     );
   });
 });
