@@ -162,7 +162,7 @@ export class Popup extends Widget {
       offset: {
         horizontal: aligned
       },
-      privilege: 'below',
+      privilege: 'forceAbove',
       style
     });
   }
