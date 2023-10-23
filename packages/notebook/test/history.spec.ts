@@ -52,6 +52,13 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#history', () => {
+      it('shouldnt break if there is no history', async () => {
+        let activeCell = widget.widgets[0];
+        widget.select(activeCell);
+        let update = await widget.kernelHistory?.back(activeCell);
+        widget.kernelHistory?.updateEditor(activeCell, update);
+        expect(activeCell.model.sharedModel.getSource()).toBe('');
+      });
       it('should iterate back through history', async () => {
         let emitted = 0;
         let failed = 0;
@@ -62,7 +69,6 @@ describe('@jupyterlab/notebook', () => {
             failed += 1;
           }
         });
-
         for (let i = 0; i < 15; i++) {
           let source = `print("this is input ${i}")`;
           if (widget.widgets[i]) {
