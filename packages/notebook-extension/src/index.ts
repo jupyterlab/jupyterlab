@@ -1123,7 +1123,6 @@ export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
         return new FilterButtonWidget(
           commands,
           CommandIDs.filterCellsWithTags,
-          '',
           'Filter with tags'
         ).render();
       }
