@@ -42,7 +42,6 @@ test.describe('Low Vision / Zoom Support', () => {
       })
     ).toMatchSnapshot('visibility-of-menu-bar-at-low-vision.png');
   });
-  h;
 
   test('Light themed left tabBar at low vision', async ({ page }) => {
     await page.theme.setLightTheme();
