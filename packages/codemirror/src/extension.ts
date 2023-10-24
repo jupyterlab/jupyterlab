@@ -21,6 +21,7 @@ import {
   drawSelection,
   EditorView,
   highlightActiveLine,
+  highlightSpecialChars,
   highlightTrailingWhitespace,
   highlightWhitespace,
   KeyBinding,
@@ -644,6 +645,15 @@ export namespace EditorExtensionRegistry {
         }
       }),
       Object.freeze({
+        name: 'highlightSpecialCharacters',
+        default: true,
+        factory: () => createConditionalExtension(highlightSpecialChars()),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Highlight special characters')
+        }
+      }),
+      Object.freeze({
         name: 'highlightTrailingWhitespace',
         default: false,
         factory: () =>
@@ -718,9 +728,9 @@ export namespace EditorExtensionRegistry {
         default: true,
         factory: () =>
           createConditionalExtension([
-          bracketMatching(), 
-          // closeBracketsKeymap must have higher precedence over defaultKeymap
-            Prec.high(keymap.of(closeBracketsKeymap)),
+            bracketMatching(),
+            // closeBracketsKeymap must have higher precedence over defaultKeymap
+            Prec.high(keymap.of(closeBracketsKeymap))
           ]),
         schema: {
           type: 'boolean',
