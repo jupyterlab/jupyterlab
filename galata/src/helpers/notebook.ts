@@ -823,7 +823,7 @@ export class NotebookHelper {
       return false;
     }
 
-    const cellEditor = await cell.$('.jp-Cell-inputArea');
+    const cellEditor = await cell.$('.jp-Cell-inputArea .jp-InputArea-editor');
     if (cellEditor) {
       let isMarkdown = false;
       const cellType = await this.getCellType(cellIndex);
