@@ -33,8 +33,8 @@
   },
   {
     "id": "application:activate-sidebar-widget",
-    "label": "Open Sidebar Element",
-    "caption": "By default opens first element of left sidebar",
+    "label": "Toggle Sidebar Element",
+    "caption": "By default opens first element of the sidebar",
     "shortcuts": [
       "Alt 1"
     ]
@@ -96,7 +96,7 @@
     "label": "Simple Interface",
     "caption": "",
     "shortcuts": [
-      "Ctrl Shift D"
+      "Ctrl J"
     ]
   },
   {
