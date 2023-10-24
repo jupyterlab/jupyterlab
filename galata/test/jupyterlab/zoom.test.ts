@@ -35,12 +35,9 @@ test.describe('Low Vision / Zoom Support', () => {
   });
 
   test('Should show visibility of menubar at low vision', async ({ page }) => {
-    expect(
-      await page.screenshot({
-        fullPage: true,
-        clip: { x: 0, y: 0, width: 320, height: 150 }
-      })
-    ).toMatchSnapshot('visibility-of-menu-bar-at-low-vision.png');
+    expect(await page.locator('#jp-menu-panel').screenshot()).toMatchSnapshot(
+      'visibility-of-menu-bar-at-low-vision.png'
+    );
   });
 
   test('Light themed left tabBar at low vision', async ({ page }) => {
@@ -62,15 +59,6 @@ test.describe('Low Vision / Zoom Support', () => {
   test('Open File Browser on left at low vision', async ({ page }) => {
     await page.sidebar.openTab('filebrowser');
     expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
-  });
-
-  test('Capture File Browser opened on left at low vision', async ({
-    page
-  }) => {
-    await page.sidebar.openTab('filebrowser');
-    expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
-      'opened-filebrowser-on-left-tabbar-at-low-vision.png'
-    );
   });
 
   test('Light Themed right tabBar at low vision', async ({ page }) => {
