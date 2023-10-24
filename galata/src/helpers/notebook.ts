@@ -823,8 +823,8 @@ export class NotebookHelper {
       return false;
     }
 
-    const cellEditor = await cell.$('.jp-Cell-inputArea .jp-InputArea-editor');
-    if (cellEditor) {
+    const cellInput = await cell.$('.jp-Cell-inputArea');
+    if (cellInput) {
       let isMarkdown = false;
       const cellType = await this.getCellType(cellIndex);
       if (cellType === 'markdown') {
@@ -835,7 +835,12 @@ export class NotebookHelper {
       }
 
       if (isMarkdown) {
-        await cellEditor.dblclick();
+        await cellInput.dblclick();
+      }
+
+      const cellEditor = await cellInput.$('.jp-InputArea-editor');
+      if (!cellEditor) {
+        return false;
       }
 
       await cellEditor.click();
