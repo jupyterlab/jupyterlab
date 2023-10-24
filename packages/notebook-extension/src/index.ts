@@ -1076,10 +1076,9 @@ export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     formRegistry: IFormRendererRegistry,
-    translator_: ITranslator | undefined
+    translator: ITranslator
   ): void => {
-    const translator = translator_ ?? nullTranslator;
-    const trans = translator?.load('jupyterlab');
+    const trans = translator.load('jupyterlab');
     const { shell, commands } = app;
     const isEnabled = (): boolean => Private.isEnabled(shell, tracker);
     const notebookModelMap = new WeakMap<Notebook, CellTagListModel>();
@@ -1088,7 +1087,8 @@ export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
       fieldRenderer: () => {
         return new FilterButtonWidget(
           commands,
-          CommandIDs.filterCellsWithTags
+          CommandIDs.filterCellsWithTags,
+          translator
         ).render();
       }
     };
@@ -1098,8 +1098,8 @@ export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
     );
 
     app.commands.addCommand(CommandIDs.filterCellsWithTags, {
-      label: trans.__('Filter Cells'),
-      caption: trans.__('Filter cells'),
+      label: trans.__('Filter Cells With Tags'),
+      caption: trans.__('Filter cells with tags'),
 
       execute: args => {
         const current = getCurrent(tracker, shell, args);
