@@ -23,8 +23,8 @@ export class FilterButtonWidget extends ReactWidget {
   render() {
     return (
       <>
-        <p> Filter cells with tags</p>
-        <Button onClick={this.onClick} />
+        <p>{this._trans.__('Filter cells with tags')}</p>
+        <Button onClick={this.onClick}>{this._commands.label(this._commandID)}</Button>
       </>
     );
   }
