@@ -9,22 +9,30 @@ import React from 'react';
 import { ReactWidget, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { CommandRegistry } from '@lumino/commands';
 import { Button } from '@jupyterlab/ui-components';
+import { ITranslator } from '@jupyterlab/translation';
+import { IRenderMime } from '@jupyterlab/rendermime';
 
 export class FilterButtonWidget extends ReactWidget {
   private _commands: CommandRegistry;
   private _commandID: string;
+  private _trans: IRenderMime.TranslationBundle;
 
-  constructor(commands: CommandRegistry, commandID: string) {
+  constructor(
+    commands: CommandRegistry,
+    commandID: string,
+    translator: ITranslator
+  ) {
     super();
     this._commands = commands;
     this._commandID = commandID;
+    this._trans = translator.load('jupyterlab');
   }
   onClick = () => this._commands.execute(this._commandID);
   render() {
     return (
       <>
-        <p>{this._trans.__('Filter cells with tags')}</p>
-        <Button onClick={this.onClick}>{this._commands.label(this._commandID)}</Button>
+        <p>{this._trans.__(this._commands.label(this._commandID))}</p>
+        <Button onClick={this.onClick}>{'Open the filtering tool'}</Button>
       </>
     );
   }
@@ -130,7 +138,6 @@ export class CellTagListView extends VDomRenderer<CellTagListModel> {
   render() {
     return (
       <>
-        <h3> Filter cells with tags</h3>
         <CellTagListComponent model={this.model} />
       </>
     );
