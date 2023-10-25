@@ -285,7 +285,7 @@ html_theme_options = {
         "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
     },
     # rely on browser-native accessibility features instead of custom JS
-    "navigation_with_keys": False
+    "navigation_with_keys": False,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
