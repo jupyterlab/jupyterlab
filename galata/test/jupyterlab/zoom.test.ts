@@ -34,9 +34,21 @@ test.describe('Low Vision / Zoom Support', () => {
     );
   });
 
-  test('Should show visibility of menubar at low vision', async ({ page }) => {
+  test('Should show visibility of light themed menubar at low vision', async ({
+    page
+  }) => {
+    await page.theme.setLightTheme();
     expect(await page.locator('#jp-top-panel').screenshot()).toMatchSnapshot(
-      'visibility-of-menu-bar-at-low-vision.png'
+      'visibility-of-light-menu-bar-at-low-vision.png'
+    );
+  });
+
+  test('Should show visibility of dark themed menubar at low vision', async ({
+    page
+  }) => {
+    await page.theme.setDarkTheme();
+    expect(await page.locator('#jp-top-panel').screenshot()).toMatchSnapshot(
+      'visibility-of-dark-menu-bar-at-low-vision.png'
     );
   });
 
@@ -75,5 +87,19 @@ test.describe('Low Vision / Zoom Support', () => {
     expect(await tabbar.screenshot()).toMatchSnapshot(
       'right-dark-tabbar-at-low-vision.png'
     );
+  });
+
+  test('Light Themed statusBar at low vision', async ({ page }) => {
+    await page.theme.setLightTheme();
+    expect(
+      await page.locator('#jp-main-statusbar').screenshot()
+    ).toMatchSnapshot('light-statusbar-at-low-vision.png');
+  });
+
+  test('Dark Themed statusBar at low vision', async ({ page }) => {
+    await page.theme.setDarkTheme();
+    expect(
+      await page.locator('#jp-main-statusbar').screenshot()
+    ).toMatchSnapshot('dark-statusbar-at-low-vision.png');
   });
 });
