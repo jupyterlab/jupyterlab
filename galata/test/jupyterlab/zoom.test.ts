@@ -95,7 +95,7 @@ test.describe('Low Vision / Zoom Support', () => {
       await page.locator('#jp-main-statusbar').screenshot()
     ).toMatchSnapshot('light-statusbar-at-low-vision.png');
   });
-
+  // comment to file
   test('Dark Themed statusBar at low vision', async ({ page }) => {
     await page.theme.setDarkTheme();
     expect(
