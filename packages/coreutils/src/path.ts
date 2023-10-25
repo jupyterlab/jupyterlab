@@ -21,7 +21,7 @@ export namespace PathExt {
   }
 
   /**
-   * Join all arguments together and normalize the resulting path and reserve the leading slash.
+   * Join all arguments together and normalize the resulting path and preserve the leading slash.
    *
    * @param paths - The string paths to join.
    */
