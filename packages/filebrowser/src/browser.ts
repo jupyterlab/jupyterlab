@@ -253,9 +253,9 @@ export class FileBrowser extends SidePanel {
   private async _createNew(
     options: Contents.ICreateOptions
   ): Promise<Contents.IModel> {
-    // normalize the path if create a file from a custom drive
+    // normalize the path if the file is created from a custom drive
     if (options.path) {
-      options.path = this._toGlobalPath(this.model.driveName, options.path);
+      options.path = this._toDrivePath(this.model.driveName, options.path);
     }
     try {
       const model = await this._manager.newUntitled(options);
@@ -409,14 +409,15 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
-   * Given a drive name and a local path
+   * Given a drive name and a local path, return the full
+   * drive path which includes the drive name and the local path.
    *
    * @param driveName: the name of the drive
    * @param localPath: the local path on the drive.
    *
-   * @returns the fully qualified path.
+   * @returns the full drive path
    */
-  private _toGlobalPath(driveName: string, localPath: string): string {
+  private _toDrivePath(driveName: string, localPath: string): string {
     if (driveName === '') {
       return localPath;
     } else {
