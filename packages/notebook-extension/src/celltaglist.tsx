@@ -31,8 +31,8 @@ export class FilterButtonWidget extends ReactWidget {
   render() {
     return (
       <>
-        <p>{this._trans.__(this._commands.label(this._commandID))}</p>
-        <Button onClick={this.onClick}>{'Open the filtering tool'}</Button>
+        <p>{this._commands.label(this._commandID)}</p>
+        <Button onClick={this.onClick}>{this._trans.__('Open the filtering tool')}</Button>
       </>
     );
   }
