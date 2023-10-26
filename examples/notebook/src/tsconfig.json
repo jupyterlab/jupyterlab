@@ -1,8 +1,7 @@
 {
   "extends": "../../../tsconfigbase",
   "compilerOptions": {
-    "outDir": "../build",
-    "skipLibCheck": true
+    "outDir": "../build"
   },
   "include": ["*"]
 }

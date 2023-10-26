@@ -4,7 +4,6 @@
     "lib": ["DOM", "DOM.Iterable", "ES2021.WeakRef"],
     "outDir": "lib",
     "rootDir": "src",
-    "skipLibCheck": true,
     "types": ["node"]
   },
   "include": ["src/**/*"],

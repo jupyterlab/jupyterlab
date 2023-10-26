@@ -2052,27 +2052,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jupyter/react-components@npm:^0.13.2":
-  version: 0.13.2
-  resolution: "@jupyter/react-components@npm:0.13.2"
+"@jupyter/react-components@npm:^0.13.3":
+  version: 0.13.3
+  resolution: "@jupyter/react-components@npm:0.13.3"
   dependencies:
-    "@jupyter/web-components": ^0.13.2
+    "@jupyter/web-components": ^0.13.3
     "@microsoft/fast-react-wrapper": ^0.3.18
     react: ">=17.0.0 <19.0.0"
-  checksum: e96cb59ad6909a107b5874e3538acec0e29d7466521a5133dd40645f07dbe44ef8f31afdaaf53d1cf56c7c69e890baee8f18f37741ba37c28247f4bf37783706
+  checksum: d8912ff6a68833d18bfe44489d71c9e6b4203a29c3c4f65379e630b2b1c1bd887360609d0ee2d03db2e84ee41570de1757cc09a1144288cd0e27a5e9bc0c6e82
   languageName: node
   linkType: hard
 
-"@jupyter/web-components@npm:^0.13.2":
-  version: 0.13.2
-  resolution: "@jupyter/web-components@npm:0.13.2"
+"@jupyter/web-components@npm:^0.13.3":
+  version: 0.13.3
+  resolution: "@jupyter/web-components@npm:0.13.3"
   dependencies:
     "@microsoft/fast-colors": ^5.3.1
     "@microsoft/fast-components": ^2.30.6
     "@microsoft/fast-element": ^1.12.0
     "@microsoft/fast-foundation": ^2.49.0
     "@microsoft/fast-web-utilities": ^6.0.0
-  checksum: 720ab85cdd30942919902bb3d6e09c9a81f71acd67d01b7f8a7bee36cd0f1f70f1919f57963e015f11edcedf8ec61b3d528df1e793beed0e82c55ab2821976ca
+  checksum: 23a698f4a0cecc0536f8af54c57175fd276d731a8dd978fe52ada02a72679189096f4fff337279a38a75cfdd92c590f7295d3fd12b6e1c5e3241a4691137d214
   languageName: node
   linkType: hard
 
@@ -3031,7 +3031,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-cell@workspace:examples/cell"
   dependencies:
-    "@jupyter/web-components": ^0.13.2
+    "@jupyter/web-components": ^0.13.3
     "@jupyter/ydoc": ^1.1.1
     "@jupyterlab/application": ^4.1.0-alpha.3
     "@jupyterlab/apputils": ^4.2.0-alpha.3
@@ -3061,7 +3061,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-console@workspace:examples/console"
   dependencies:
-    "@jupyter/web-components": ^0.13.2
+    "@jupyter/web-components": ^0.13.3
     "@jupyter/ydoc": ^1.1.1
     "@jupyterlab/application": ^4.1.0-alpha.3
     "@jupyterlab/codemirror": ^4.1.0-alpha.3
@@ -3179,7 +3179,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
-    "@jupyter/web-components": ^0.13.2
+    "@jupyter/web-components": ^0.13.3
     "@jupyterlab/application": ^4.1.0-alpha.3
     "@jupyterlab/apputils": ^4.2.0-alpha.3
     "@jupyterlab/codemirror": ^4.1.0-alpha.3
@@ -3210,7 +3210,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-notebook@workspace:examples/notebook"
   dependencies:
-    "@jupyter/web-components": ^0.13.2
+    "@jupyter/web-components": ^0.13.3
     "@jupyter/ydoc": ^1.1.1
     "@jupyterlab/application": ^4.1.0-alpha.3
     "@jupyterlab/apputils": ^4.2.0-alpha.3
@@ -3299,7 +3299,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-terminal@workspace:examples/terminal"
   dependencies:
-    "@jupyter/web-components": ^0.13.2
+    "@jupyter/web-components": ^0.13.3
     "@jupyterlab/application": ^4.1.0-alpha.3
     "@jupyterlab/coreutils": ^6.1.0-alpha.3
     "@jupyterlab/services": ^7.1.0-alpha.3
@@ -4286,7 +4286,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/notebook@workspace:packages/notebook"
   dependencies:
-    "@jupyter/react-components": ^0.13.2
+    "@jupyter/react-components": ^0.13.3
     "@jupyter/ydoc": ^1.1.1
     "@jupyterlab/apputils": ^4.2.0-alpha.3
     "@jupyterlab/cells": ^4.1.0-alpha.3
@@ -5004,8 +5004,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/ui-components@workspace:packages/ui-components"
   dependencies:
-    "@jupyter/react-components": ^0.13.2
-    "@jupyter/web-components": ^0.13.2
+    "@jupyter/react-components": ^0.13.3
+    "@jupyter/web-components": ^0.13.3
     "@jupyterlab/coreutils": ^6.1.0-alpha.3
     "@jupyterlab/observables": ^5.1.0-alpha.3
     "@jupyterlab/rendermime-interfaces": ^3.9.0-alpha.2
@@ -5450,14 +5450,14 @@ __metadata:
   linkType: hard
 
 "@microsoft/fast-foundation@npm:^2.46.2, @microsoft/fast-foundation@npm:^2.49.0, @microsoft/fast-foundation@npm:^2.49.1":
-  version: 2.49.1
-  resolution: "@microsoft/fast-foundation@npm:2.49.1"
+  version: 2.49.2
+  resolution: "@microsoft/fast-foundation@npm:2.49.2"
   dependencies:
     "@microsoft/fast-element": ^1.12.0
     "@microsoft/fast-web-utilities": ^5.4.1
     tabbable: ^5.2.0
     tslib: ^1.13.0
-  checksum: 9550f3b92cae893fa70532acc8921366432cc52b24d07053d3da2353d1b2e684b39a591491f7149d6e79ac45f87f5851ece34089994995f712b521a041fcf260
+  checksum: b582bd2012fa366d417c26c2e7c80ecc860664e796cfe52ed9ecee1089d73da5bdf1730aad3a30fbd5fa4ea80782259cf45e8500c358bb246b893ec103d00d9e
   languageName: node
   linkType: hard
 
