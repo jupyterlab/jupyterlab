@@ -2051,6 +2051,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@jupyter/react-components@npm:^0.13.2, @jupyter/react-components@npm:~0.13.2":
+  version: 0.13.2
+  resolution: "@jupyter/react-components@npm:0.13.2"
+  dependencies:
+    "@jupyter/web-components": ^0.13.2
+    "@microsoft/fast-react-wrapper": ^0.3.18
+    react: ">=17.0.0 <19.0.0"
+  checksum: e96cb59ad6909a107b5874e3538acec0e29d7466521a5133dd40645f07dbe44ef8f31afdaaf53d1cf56c7c69e890baee8f18f37741ba37c28247f4bf37783706
+  languageName: node
+  linkType: hard
+
+"@jupyter/web-components@npm:^0.13.2, @jupyter/web-components@npm:~0.13.2":
+  version: 0.13.2
+  resolution: "@jupyter/web-components@npm:0.13.2"
+  dependencies:
+    "@microsoft/fast-colors": ^5.3.1
+    "@microsoft/fast-components": ^2.30.6
+    "@microsoft/fast-element": ^1.12.0
+    "@microsoft/fast-foundation": ^2.49.0
+    "@microsoft/fast-web-utilities": ^6.0.0
+  checksum: 720ab85cdd30942919902bb3d6e09c9a81f71acd67d01b7f8a7bee36cd0f1f70f1919f57963e015f11edcedf8ec61b3d528df1e793beed0e82c55ab2821976ca
+  languageName: node
+  linkType: hard
+
 "@jupyter/ydoc@npm:^1.1.1":
   version: 1.1.1
   resolution: "@jupyter/ydoc@npm:1.1.1"
@@ -3326,6 +3350,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/filebrowser-extension@workspace:packages/filebrowser-extension"
   dependencies:
+    "@jupyter/react-components": ~0.13.2
+    "@jupyter/web-components": ~0.13.2
     "@jupyterlab/application": ^4.1.0-alpha.2
     "@jupyterlab/apputils": ^4.2.0-alpha.2
     "@jupyterlab/coreutils": ^6.1.0-alpha.2
@@ -3341,6 +3367,7 @@ __metadata:
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.1.3
     "@lumino/widgets": ^2.3.1-alpha.0
+    react: ^18.2.0
     rimraf: ~3.0.0
     typedoc: ~0.24.7
     typescript: ~5.0.4
@@ -4458,6 +4485,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/repo-top@workspace:."
   dependencies:
+    "@jupyter/react-components": ^0.13.2
+    "@jupyter/web-components": ^0.13.2
     "@typescript-eslint/eslint-plugin": ~5.55.0
     "@typescript-eslint/parser": ~5.55.0
     eslint: ~8.36.0
@@ -5378,6 +5407,75 @@ __metadata:
   bin:
     node-pre-gyp: bin/node-pre-gyp
   checksum: 1a98db05d955b74dad3814679593df293b9194853698f3f5f1ed00ecd93128cdd4b14fb8767fe44ac6981ef05c23effcfdc88710e7c1de99ccb6f647890597c8
+  languageName: node
+  linkType: hard
+
+"@microsoft/fast-colors@npm:^5.3.0, @microsoft/fast-colors@npm:^5.3.1":
+  version: 5.3.1
+  resolution: "@microsoft/fast-colors@npm:5.3.1"
+  checksum: ff87f402faadb4b5aeee3d27762566c11807f927cd4012b8bbc7f073ca68de0e2197f95330ff5dfd7038f4b4f0e2f51b11feb64c5d570f5c598d37850a5daf60
+  languageName: node
+  linkType: hard
+
+"@microsoft/fast-components@npm:^2.30.6":
+  version: 2.30.6
+  resolution: "@microsoft/fast-components@npm:2.30.6"
+  dependencies:
+    "@microsoft/fast-colors": ^5.3.0
+    "@microsoft/fast-element": ^1.10.1
+    "@microsoft/fast-foundation": ^2.46.2
+    "@microsoft/fast-web-utilities": ^5.4.1
+    tslib: ^1.13.0
+  checksum: 1fbf3b7c265bcbf6abcae4d2f72430f7f871104a3d8344f16667a4cc7b123698cdf2bab8b760cbed92ef761c4db350a67f570665c76b132d6996990ac93cbd4f
+  languageName: node
+  linkType: hard
+
+"@microsoft/fast-element@npm:^1.10.1, @microsoft/fast-element@npm:^1.12.0":
+  version: 1.12.0
+  resolution: "@microsoft/fast-element@npm:1.12.0"
+  checksum: bbff4e9c83106d1d74f3eeedc87bf84832429e78fee59c6a4ae8164ee4f42667503f586896bea72341b4d2c76c244a3cb0d4fd0d5d3732755f00357714dd609e
+  languageName: node
+  linkType: hard
+
+"@microsoft/fast-foundation@npm:^2.46.2, @microsoft/fast-foundation@npm:^2.49.0, @microsoft/fast-foundation@npm:^2.49.2":
+  version: 2.49.2
+  resolution: "@microsoft/fast-foundation@npm:2.49.2"
+  dependencies:
+    "@microsoft/fast-element": ^1.12.0
+    "@microsoft/fast-web-utilities": ^5.4.1
+    tabbable: ^5.2.0
+    tslib: ^1.13.0
+  checksum: b582bd2012fa366d417c26c2e7c80ecc860664e796cfe52ed9ecee1089d73da5bdf1730aad3a30fbd5fa4ea80782259cf45e8500c358bb246b893ec103d00d9e
+  languageName: node
+  linkType: hard
+
+"@microsoft/fast-react-wrapper@npm:^0.3.18":
+  version: 0.3.20
+  resolution: "@microsoft/fast-react-wrapper@npm:0.3.20"
+  dependencies:
+    "@microsoft/fast-element": ^1.12.0
+    "@microsoft/fast-foundation": ^2.49.2
+  peerDependencies:
+    react: ">=16.9.0"
+  checksum: 3ced25465f1f53c18d6cf62fa75118f66d4b6c75a622bda2e7ecdfcfda3fb8347b147573665de486951b86d70312dbbf63c3faeb5cf002fa263561d3feb4d1a2
+  languageName: node
+  linkType: hard
+
+"@microsoft/fast-web-utilities@npm:^5.4.1":
+  version: 5.4.1
+  resolution: "@microsoft/fast-web-utilities@npm:5.4.1"
+  dependencies:
+    exenv-es6: ^1.1.1
+  checksum: 303e87847f962944f474e3716c3eb305668243916ca9e0719e26bb9a32346144bc958d915c103776b3e552cea0f0f6233f839fad66adfdf96a8436b947288ca7
+  languageName: node
+  linkType: hard
+
+"@microsoft/fast-web-utilities@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "@microsoft/fast-web-utilities@npm:6.0.0"
+  dependencies:
+    exenv-es6: ^1.1.1
+  checksum: b4b906dbbf626212446d5952c160b1f7e7ce72dd33087c7ed634cb2745c31767bab7d17fba0e9fc32e42984fc5bc0a9929b4f05cbbcbe52869abe3666b5bfa39
   languageName: node
   linkType: hard
 
@@ -11422,6 +11520,13 @@ __metadata:
     signal-exit: ^3.0.7
     strip-final-newline: ^3.0.0
   checksum: 21fa46fc69314ace4068cf820142bdde5b643a5d89831c2c9349479c1555bff137a291b8e749e7efca36535e4e0a8c772c11008ca2e84d2cbd6ca141a3c8f937
+  languageName: node
+  linkType: hard
+
+"exenv-es6@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "exenv-es6@npm:1.1.1"
+  checksum: 7f2aa12025e6f06c48dc286f380cf3183bb19c6017b36d91695034a3e5124a7235c4f8ff24ca2eb88ae801322f0f99605cedfcfd996a5fcbba7669320e2a448e
   languageName: node
   linkType: hard
 
@@ -19365,6 +19470,13 @@ __metadata:
     systeminformation: lib/cli.js
   checksum: 302b8b430a5b0a7009be95c086b1bc43db3ecfd6ecab6cf654ae3312240f616823505f15a080a70f2335a9e5aab45d789aaba018843c9a9f8f18117aa32dce8a
   conditions: (os=darwin | os=linux | os=win32 | os=freebsd | os=openbsd | os=netbsd | os=sunos | os=android)
+  languageName: node
+  linkType: hard
+
+"tabbable@npm:^5.2.0":
+  version: 5.3.3
+  resolution: "tabbable@npm:5.3.3"
+  checksum: 1aa56e1bb617cc10616c407f4e756f0607f3e2d30f9803664d70b85db037ca27e75918ed1c71443f3dc902e21dc9f991ce4b52d63a538c9b69b3218d3babcd70
   languageName: node
   linkType: hard
 

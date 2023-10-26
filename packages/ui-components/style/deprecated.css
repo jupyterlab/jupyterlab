@@ -42,6 +42,7 @@
   --jp-icon-cut: url('icons/toolbar/cut.svg');
   --jp-icon-delete: url('icons/toolbar/delete.svg');
   --jp-icon-download: url('icons/toolbar/download.svg');
+  --jp-icon-drive: url('icons/toolbar/drive.svg');
   --jp-icon-duplicate: url('icons/toolbar/duplicate.svg');
   --jp-icon-edit: url('icons/toolbar/edit.svg');
   --jp-icon-ellipses: url('icons/toolbar/ellipses.svg');
@@ -237,6 +238,10 @@
 
 .jp-DownloadIcon {
   background-image: var(--jp-icon-download);
+}
+
+.jp-DriveIcon {
+  background-image: var(--jp-icon-drive);
 }
 
 .jp-DuplicateIcon {

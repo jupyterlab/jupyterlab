@@ -10,6 +10,11 @@
       },
       { "name": "uploader", "rank": 20 },
       { "name": "refresh", "command": "filebrowser:refresh", "rank": 30 },
+      {
+        "name": "drive",
+        "command": "filebrowser:open-drives-dialog",
+        "rank": 35
+      },
       { "name": "fileNameSearcher", "rank": 40 }
     ]
   },

@@ -38,6 +38,7 @@ import copyrightSvgstr from '../../style/icons/licenses/copyright.svg';
 import cutSvgstr from '../../style/icons/toolbar/cut.svg';
 import deleteSvgstr from '../../style/icons/toolbar/delete.svg';
 import downloadSvgstr from '../../style/icons/toolbar/download.svg';
+import driveSvgstr from '../../style/icons/toolbar/drive.svg';
 import duplicateSvgstr from '../../style/icons/toolbar/duplicate.svg';
 import editSvgstr from '../../style/icons/toolbar/edit.svg';
 import ellipsesSvgstr from '../../style/icons/toolbar/ellipses.svg';
@@ -143,6 +144,7 @@ export const copyrightIcon = new LabIcon({ name: 'ui-components:copyright', svgs
 export const cutIcon = new LabIcon({ name: 'ui-components:cut', svgstr: cutSvgstr });
 export const deleteIcon = new LabIcon({ name: 'ui-components:delete', svgstr: deleteSvgstr });
 export const downloadIcon = new LabIcon({ name: 'ui-components:download', svgstr: downloadSvgstr });
+export const driveIcon = new LabIcon({ name: 'ui-components:drive', svgstr: driveSvgstr });
 export const duplicateIcon = new LabIcon({ name: 'ui-components:duplicate', svgstr: duplicateSvgstr });
 export const editIcon = new LabIcon({ name: 'ui-components:edit', svgstr: editSvgstr });
 export const ellipsesIcon = new LabIcon({ name: 'ui-components:ellipses', svgstr: ellipsesSvgstr });

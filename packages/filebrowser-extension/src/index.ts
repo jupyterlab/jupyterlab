@@ -47,6 +47,7 @@ import {
   copyIcon,
   cutIcon,
   downloadIcon,
+  driveIcon,
   editIcon,
   fileIcon,
   FilenameSearcher,
@@ -62,9 +63,13 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
+
 import { find, map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
+import { /*Dialog,*/ showDialog } from '@jupyterlab/apputils';
+import { DriveListModel, DriveListView } from './drivelistmanager';
+import { addJupyterLabThemeChangeListener } from '@jupyter/web-components';
 
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
@@ -145,6 +150,8 @@ namespace CommandIDs {
   export const toggleHiddenFiles = 'filebrowser:toggle-hidden-files';
 
   export const toggleFileCheckboxes = 'filebrowser:toggle-file-checkboxes';
+
+  export const openDrivesDialog = 'filebrowser:open-drives-dialog';
 }
 
 /**
@@ -899,6 +906,70 @@ const openUrlPlugin: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const openDriveDialogPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/filebrowser-extension:open-drive-dialog',
+  description: 'Open a dialog to select drives to be added in the filebrowser.',
+  requires: [IFileBrowserFactory, ITranslator],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    factory: IFileBrowserFactory,
+    translator: ITranslator
+  ): void => {
+    addJupyterLabThemeChangeListener();
+    const { commands } = app;
+    const trans = translator.load('jupyterlab');
+    const { tracker } = factory;
+
+    commands.addCommand(CommandIDs.openDrivesDialog, {
+      execute: args => {
+        const widget = tracker.currentWidget;
+        const driveList = [
+          'BananaDrive',
+          'RaspberryDrive',
+          'PineAppleDrive',
+          'PomeloDrive',
+          'OrangeDrive',
+          'TomatoDrive',
+          'AvocadoDrive'
+        ];
+
+        const model = new DriveListModel(driveList);
+
+        if (widget) {
+          /*const selectButton = Dialog.okButton({
+            label: trans.__('Select Drives'),
+            actions: ['select']
+          });
+          const clearButton = Dialog.okButton({
+            label: trans.__('Clear Filter(s)'),
+            actions: ['clear']
+          });*/
+          showDialog({
+            body: new DriveListView(model)
+            //body: new DrivePalette(driveList)
+            //buttons: [Dialog.cancelButton(), selectButton, clearButton]
+            //buttons:[Dialog.cancelButton()]
+          });
+          /*.then(result => {
+              if (result.button.actions.includes('select')) {
+                console.log('You have clicked on select button');
+              }
+              if (result.button.actions.includes('clear')) {
+                console.log('You have clicked on cancel button');
+              }
+            })
+            .catch(error => window.alert('No button has been pressed!'));*/
+        }
+      },
+
+      icon: driveIcon.bindprops({ stylesheet: 'menuItem' }),
+      caption: trans.__('Add drives to filebrowser.'),
+      label: trans.__('Add Drives To Filebrowser')
+    });
+  }
+};
+
 /**
  * Add the main file browser commands to the application's command registry.
  */
@@ -1344,6 +1415,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   browserWidget,
   openWithPlugin,
   openBrowserTabPlugin,
+  openDriveDialogPlugin,
   openUrlPlugin
 ];
 export default plugins;
