@@ -151,11 +151,11 @@ export class CellToolbarTracker implements IDisposable {
   private _addToolbar(model: ICellModel): void {
     const cell = this._getCell(model);
 
-    if (cell) {
+    if (cell && !cell.isDisposed) {
       const toolbarWidget = new Toolbar();
       toolbarWidget.addClass(CELL_MENU_CLASS);
 
-      const promises: Promise<void>[] = [];
+      const promises: Promise<void>[] = [cell.ready];
       for (const { name, widget } of this._toolbar) {
         toolbarWidget.addItem(name, widget);
         if (
@@ -170,6 +170,10 @@ export class CellToolbarTracker implements IDisposable {
       // Wait for all the buttons to be rendered before attaching the toolbar.
       Promise.all(promises)
         .then(() => {
+          if (cell.isDisposed) {
+            return;
+          }
+
           toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
           (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
 
@@ -201,7 +205,7 @@ export class CellToolbarTracker implements IDisposable {
 
   private _removeToolbar(model: ICellModel): void {
     const cell = this._getCell(model);
-    if (cell) {
+    if (cell && !cell.isDisposed) {
       this._findToolbarWidgets(cell).forEach(widget => {
         widget.dispose();
       });
