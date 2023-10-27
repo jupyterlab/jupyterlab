@@ -184,17 +184,20 @@ export class NotebookWindowedLayout extends WindowedLayout {
     if (this.parent!.isAttached && !this._isSoftHidden(widget)) {
       MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
     }
-    if (!wasPlaceholder && widget.node.parentElement) {
-      if (this._isSoftHidden(widget)) {
-        // Restore visibility for active, or previously active cell
-        this._toggleSoftVisibility(widget, true);
-      } else if (widget instanceof CodeCell) {
-        // We don't remove code cells to preserve outputs internal state
-        widget.node.style.display = '';
+    if (this._isSoftHidden(widget)) {
+      // Restore visibility for active, or previously active cell
+      this._toggleSoftVisibility(widget, true);
+    }
+    if (
+      !wasPlaceholder &&
+      widget instanceof CodeCell &&
+      widget.node.parentElement
+    ) {
+      // We don't remove code cells to preserve outputs internal state
+      widget.node.style.display = '';
 
-        // Reset cache
-        this._topHiddenCodeCells = -1;
-      }
+      // Reset cache
+      this._topHiddenCodeCells = -1;
     } else {
       // Look up the next sibling reference node.
       const siblingIndex = this._findNearestChildBinarySearch(
@@ -241,30 +244,30 @@ export class NotebookWindowedLayout extends WindowedLayout {
   protected detachWidget(index: number, widget: Widget): void {
     (widget as Cell).inViewport = false;
 
+    // Note: `index` is relative to the displayed cells, not all cells,
+    // hence we compare with the widget itself.
+    if (widget === this.activeCell) {
+      // Do not change display of the active cell to allow user to continue providing input
+      // into the code mirror editor when out of view. We still hide the cell so to prevent
+      // minor visual glitches when scrolling.
+      this._toggleSoftVisibility(widget, false);
+      // Return before sending "AfterDetach" message to CodeCell
+      // to prevent removing contents of the active cell.
+      return;
+    }
     // TODO we could improve this further by discarding also the code cell without outputs
     if (
       // We detach the code cell currently dragged otherwise it won't be attached at the correct position
+      widget instanceof CodeCell &&
       !widget.node.classList.contains(DROP_SOURCE_CLASS) &&
       widget !== this._willBeRemoved
     ) {
-      // Note: `index` is relative to the displayed cells, not all cells,
-      // hence we compare with the widget itself.
-      if (widget === this.activeCell) {
-        // Do not change display of the active cell to allow user to continue providing input
-        // into the code mirror editor when out of view. We still hide the cell so to prevent
-        // minor visual glitches when scrolling.
-        this._toggleSoftVisibility(widget, false);
-        // Return before sending "AfterDetach" message to CodeCell
-        // to prevent removing contents of the active cell.
-        return;
-      } else if (widget instanceof CodeCell) {
-        // We don't remove code cells to preserve outputs internal state
-        // Transform does not work because the widget height is kept (at least in FF)
-        widget.node.style.display = 'none';
+      // We don't remove code cells to preserve outputs internal state
+      // Transform does not work because the widget height is kept (at least in FF)
+      widget.node.style.display = 'none';
 
-        // Reset cache
-        this._topHiddenCodeCells = -1;
-      }
+      // Reset cache
+      this._topHiddenCodeCells = -1;
     } else {
       // Send a `'before-detach'` message if the parent is attached.
       // This should not be called every time a cell leaves the viewport
