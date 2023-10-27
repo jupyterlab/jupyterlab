@@ -183,21 +183,17 @@ export class NotebookWindowedLayout extends WindowedLayout {
       MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
     }
 
-    if (
-      !wasPlaceholder &&
-      widget instanceof CodeCell &&
-      widget.node.parentElement
-    ) {
+    if (!wasPlaceholder && widget.node.parentElement) {
       if (this._isSoftHidden(widget)) {
         // Restore visibility for active, or previously active cell
         this._toggleSoftVisibility(widget, true);
+      } else if (widget instanceof CodeCell) {
+        // We don't remove code cells to preserve outputs internal state
+        widget.node.style.display = '';
+
+        // Reset cache
+        this._topHiddenCodeCells = -1;
       }
-
-      // We don't remove code cells to preserve outputs internal state
-      widget.node.style.display = '';
-
-      // Reset cache
-      this._topHiddenCodeCells = -1;
     } else {
       // Look up the next sibling reference node.
       const siblingIndex = this._findNearestChildBinarySearch(
@@ -246,7 +242,6 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
     // TODO we could improve this further by discarding also the code cell without outputs
     if (
-      widget instanceof CodeCell &&
       // We detach the code cell currently dragged otherwise it won't be attached at the correct position
       !widget.node.classList.contains(DROP_SOURCE_CLASS) &&
       widget !== this._willBeRemoved
@@ -261,13 +256,14 @@ export class NotebookWindowedLayout extends WindowedLayout {
         // Return before sending "AfterDetach" message to CodeCell
         // to prevent removing contents of the active cell.
         return;
-      }
-      // We don't remove code cells to preserve outputs internal state
-      // Transform does not work because the widget height is kept (at lease in FF)
-      widget.node.style.display = 'none';
+      } else if (widget instanceof CodeCell) {
+        // We don't remove code cells to preserve outputs internal state
+        // Transform does not work because the widget height is kept (at least in FF)
+        widget.node.style.display = 'none';
 
-      // Reset cache
-      this._topHiddenCodeCells = -1;
+        // Reset cache
+        this._topHiddenCodeCells = -1;
+      }
     } else {
       // Send a `'before-detach'` message if the parent is attached.
       // This should not be called every time a cell leaves the viewport
