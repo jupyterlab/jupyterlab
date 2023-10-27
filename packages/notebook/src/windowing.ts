@@ -179,10 +179,11 @@ export class NotebookWindowedLayout extends WindowedLayout {
     // Status may change in onBeforeAttach
     const wasPlaceholder = (widget as Cell).isPlaceholder();
     // Initialized sub-widgets or attached them for CodeCell
-    if (this.parent!.isAttached) {
+    // Because this reattaches all sub-widget to the DOM which leads
+    // to a loss of focus, we do not call it for soft-hidden cells.
+    if (this.parent!.isAttached && !this._isSoftHidden(widget)) {
       MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
     }
-
     if (!wasPlaceholder && widget.node.parentElement) {
       if (this._isSoftHidden(widget)) {
         // Restore visibility for active, or previously active cell
