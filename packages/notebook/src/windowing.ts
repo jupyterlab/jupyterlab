@@ -181,10 +181,11 @@ export class NotebookWindowedLayout extends WindowedLayout {
     // Initialized sub-widgets or attached them for CodeCell
     // Because this reattaches all sub-widget to the DOM which leads
     // to a loss of focus, we do not call it for soft-hidden cells.
-    if (this.parent!.isAttached && !this._isSoftHidden(widget)) {
+    const isSoftHidden = this._isSoftHidden(widget);
+    if (this.parent!.isAttached && !isSoftHidden) {
       MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
     }
-    if (this._isSoftHidden(widget)) {
+    if (isSoftHidden) {
       // Restore visibility for active, or previously active cell
       this._toggleSoftVisibility(widget, true);
     }
@@ -198,7 +199,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
       // Reset cache
       this._topHiddenCodeCells = -1;
-    } else {
+    } else if (!isSoftHidden) {
       // Look up the next sibling reference node.
       const siblingIndex = this._findNearestChildBinarySearch(
         this.parent!.viewportNode.childElementCount - 1,
