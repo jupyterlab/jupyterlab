@@ -47,7 +47,7 @@ import {
 import { saveIcon } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -841,7 +841,10 @@ function addCommands(
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
     caption,
     icon: args => (args.toolbar ? saveIcon : undefined),
-    isEnabled: args => (args.isKeybinding ? true : isWritable()),
+    isEnabled: args =>
+      (args._luminoEvent as ReadonlyPartialJSONObject).type === 'keybinding'
+        ? true
+        : isWritable(),
     execute: async args => {
       // Checks that shell.currentWidget is valid:
       const widget = shell.currentWidget;
@@ -857,12 +860,12 @@ function addCommands(
           if (saveInProgress.has(context)) {
             return;
           }
-
-          if (context.model.readOnly) {
-            if (args.isKeybinding) {
+          if (!context.contentsModel?.writable) {
+            let type = (args._luminoEvent as ReadonlyPartialJSONObject).type;
+            if (type === 'keybinding') {
               return Notification.warning(
                 trans.__(
-                  `%1 is permissioned as readonly. Use "save as..." instead.`,
+                  `%1 is permissioned as read-only. Use "save as..." instead.`,
                   context.path
                 ),
                 { autoClose: 5000 }
