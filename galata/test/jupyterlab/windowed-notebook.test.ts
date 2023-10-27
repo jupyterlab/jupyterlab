@@ -131,34 +131,37 @@ test('should not detach active code cell input when scrolling down', async ({
   expect(await firstCell.waitForSelector('.jp-InputArea')).toBeDefined();
 });
 
-test('should scroll back to the active cell on typing', async ({
-  page,
-  tmpPath
-}) => {
-  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+for (const cellType of ['code', 'markdown']) {
+  test(`should scroll back to the active ${cellType} cell on typing`, async ({
+    page,
+    tmpPath
+  }) => {
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
-  await page.notebook.enterCellEditingMode(0);
-  const h = await page.notebook.getNotebookInPanel();
-  const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';
-  const firstCell = await h!.waitForSelector(firstCellSelector);
+    await page.notebook.setCellType(0, cellType);
+    await page.notebook.enterCellEditingMode(0);
+    const h = await page.notebook.getNotebookInPanel();
+    const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';
+    const firstCell = await h!.waitForSelector(firstCellSelector);
 
-  const bbox = await h!.boundingBox();
-  await page.mouse.move(bbox!.x, bbox!.y);
-  await Promise.all([
-    firstCell.waitForElementState('hidden'),
-    page.mouse.wheel(0, 1200)
-  ]);
+    const bbox = await h!.boundingBox();
+    await page.mouse.move(bbox!.x, bbox!.y);
+    await Promise.all([
+      firstCell.waitForElementState('hidden'),
+      page.mouse.wheel(0, 1200)
+    ]);
 
-  // Type in the cell
-  await page.keyboard.type('new text', { delay: 100 });
+    // Type in the cell
+    await page.keyboard.type('TEST', { delay: 150 });
 
-  // Expect the cell to become visible again
-  await firstCell.waitForElementState('visible');
+    // Expect the cell to become visible again
+    await firstCell.waitForElementState('visible');
 
-  // Expect the text to populate the cell editor
-  const firstCellInput = await page.notebook.getCellInput(0);
-  expect(await firstCellInput.textContent()).toContain('new text');
-});
+    // Expect the text to populate the cell editor
+    const firstCellInput = await page.notebook.getCellInput(0);
+    expect(await firstCellInput.textContent()).toContain('TEST');
+  });
+}
 
 test('should scroll back to the cell below the active cell on arrow down key', async ({
   page,
