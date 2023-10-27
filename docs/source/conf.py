@@ -275,6 +275,7 @@ html_theme_options = {
     "use_edit_page_button": True,
     "navbar_align": "left",
     "navbar_start": ["navbar-logo", "version-switcher"],
+    "navigation_with_keys": False,
     "footer_start": ["copyright.html"],
     "switcher": {
         # Trick to get the documentation version switcher to always points to the latest version without being corrected by the integrity check;
