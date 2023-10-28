@@ -3,143 +3,259 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { NotebookPanel } from '@jupyterlab/notebook';
-import React from 'react';
-//import PropTypes from 'prop-types';
-import { ReactWidget, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import { CommandRegistry } from '@lumino/commands';
-import { Button } from '@jupyterlab/ui-components';
+import { Dialog, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { CodeCell } from '@jupyterlab/cells';
+import { INotebookModel, Notebook } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
-import { IRenderMime } from '@jupyterlab/rendermime';
+import { JSONExt } from '@lumino/coreutils';
+import React from 'react';
 
-export class FilterButtonWidget extends ReactWidget {
-  private _commands: CommandRegistry;
-  private _commandID: string;
-  private _trans: IRenderMime.TranslationBundle;
-
-  constructor(
-    commands: CommandRegistry,
-    commandID: string,
-    translator: ITranslator
-  ) {
-    super();
-    this._commands = commands;
-    this._commandID = commandID;
-    this._trans = translator.load('jupyterlab');
-  }
-  onClick = () => this._commands.execute(this._commandID);
-  render() {
-    return (
-      <>
-        <p>{this._commands.label(this._commandID)}</p>
-        <Button onClick={this.onClick}>{this._trans.__('Open the filtering tool')}</Button>
-      </>
-    );
-  }
+/**
+ * CellFiltersComponent properties
+ */
+interface ICellFiltersComponentProps {
+  /**
+   * Filters
+   */
+  filters: Set<string>;
+  /**
+   * Set new filters
+   *
+   * @param f New filters
+   */
+  setFilters: (f: Set<string>) => void;
+  /**
+   * Cell tags used in the notebook
+   */
+  tags: Set<string>;
+  /**
+   * Cell types used in the notebook
+   */
+  types: Set<string>;
+  /**
+   * Application translator
+   */
+  translator: ITranslator;
 }
 
-/* Get the current widget and activate unless the args specify otherwise */
-export function getNotebookTagList(notebookPanel: NotebookPanel) {
-  const tagList: Array<string> = [];
-  notebookPanel?.content.widgets.forEach(cell => {
-    const tags: any = cell.model.getMetadata('tags');
-    for (let i = 0; i < tags.length; i++) {
-      if (!tagList.includes(tags[i])) {
-        tagList.push(tags[i]);
-      }
-    }
-  });
-  return tagList;
-}
+/**
+ * Display checkboxes to select cell filters.
+ */
+function CellFiltersComponent(props: ICellFiltersComponentProps): JSX.Element {
+  const { filters, setFilters, tags, translator, types } = props;
 
-export function getCellsTypeList(notebookPanel: NotebookPanel) {
-  const typeList: Array<string> = [];
-  notebookPanel?.content.widgets.forEach(cell => {
-    const type = cell.model.type;
-    if (!typeList.includes(type)) {
-      typeList.push(type);
-    }
-  });
-  return typeList;
-}
+  const trans = translator.load('jupyterlab');
 
-interface IProps {
-  model: CellTagListModel;
-}
-
-export function CellTagListComponent(props: IProps) {
-  let { model } = props;
-  model.setNotebookTagList(model.notebookPanel);
-  const updatedCheckedDict = { ...model.tagCheckedDict };
-
-  const handleCheck = (event: any) => {
-    if (event.target.checked) {
-      updatedCheckedDict[event.target.value] =
-        !updatedCheckedDict[event.target.value];
+  const handleCheck = (item: string) => {
+    const newFilters = new Set<string>(filters);
+    if (filters.has(item)) {
+      newFilters.delete(item);
     } else {
-      updatedCheckedDict[event.target.value] =
-        !updatedCheckedDict[event.target.value];
+      newFilters.add(item);
     }
+
+    setFilters(newFilters);
   };
 
-  model.updateTagCheckedDict(updatedCheckedDict);
-  let isChecked = (item: any) =>
-    updatedCheckedDict[item] === true ? 'checked-item' : 'not-checked-item';
-
   return (
-    <div className="tag-list-component">
-      {model.tagList.map((item, index) => {
-        return (
-          <ul key={index}>
-            <div className="tag-list-item">
-              <input
-                type="checkbox"
-                value={item}
-                onChange={handleCheck}
-                defaultChecked={model.tagCheckedDict[item]}
-              />
-              <span className={isChecked(item)}>{item}</span>
-            </div>
+    <>
+      {types.size ? (
+        <fieldset>
+          {trans.__('Cell types')}
+          <ul className="jp-cell-types-list">
+            {[...types].map(item => {
+              return (
+                <li key={item} className="jp-cell-types-item">
+                  <label>
+                    <input
+                      type="checkbox"
+                      onChange={() => {
+                        handleCheck(item);
+                      }}
+                      checked={filters.has(item)}
+                    />
+                    {item}
+                  </label>
+                </li>
+              );
+            })}
           </ul>
-        );
-      })}
-    </div>
+        </fieldset>
+      ) : null}
+      {tags.size ? (
+        <fieldset>
+          {trans.__('Cell tags')}
+
+          <ul className="jp-cell-tags">
+            {[...tags].map(item => {
+              return (
+                <li key={item} className="jp-cell-tags-item">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={filters.has(item)}
+                      onChange={() => {
+                        handleCheck(item);
+                      }}
+                    />
+                    {item}
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        </fieldset>
+      ) : null}
+    </>
   );
 }
 
-export class CellTagListModel extends VDomModel {
-  public notebookPanel: NotebookPanel;
-  public tagList: Array<string>;
-  public tagCheckedDict: { [key: string]: boolean };
-  public updatedTagCheckedDict: { [key: string]: boolean };
+/**
+ * Cell filters model
+ */
+export class CellFiltersModel extends VDomModel {
+  private _notebook: Notebook;
+  private _filters = new Set<string>();
 
-  constructor(notebookPanel: NotebookPanel) {
+  constructor({ notebook }: { notebook: Notebook }) {
     super();
-    this.notebookPanel = notebookPanel;
-    this.tagList = getNotebookTagList(this.notebookPanel);
-    this.tagList = this.tagList.concat(getCellsTypeList(this.notebookPanel));
+    this._notebook = notebook;
   }
 
-  updateTagCheckedDict(dict: { [key: string]: boolean }) {
-    this.updatedTagCheckedDict = dict;
+  /**
+   * Cell types used by the notebook
+   */
+  get cellTypes(): Set<string> {
+    const types = new Set<string>();
+    if (!this._model) {
+      return types;
+    }
+    for (let cellIdx = 0; cellIdx < this._model.cells.length; cellIdx++) {
+      const cellModel = this._model.cells.get(cellIdx);
+      types.add(cellModel.type);
+    }
+    return types;
   }
 
-  setNotebookTagList(notebookPanel: NotebookPanel) {
-    this.tagList = getNotebookTagList(notebookPanel);
-    this.tagList = this.tagList.concat(getCellsTypeList(notebookPanel));
+  /**
+   * Latest cell filters applied
+   */
+  get filters(): Set<string> {
+    return this._filters;
+  }
+  set filters(v: Set<string>) {
+    if (!JSONExt.deepEqual([...this._filters], [...v])) {
+      this._filters = v;
+      this._applyFilters();
+    }
+  }
+
+  /**
+   * Cell tags defined in the notebook
+   */
+  get tags(): Set<string> {
+    const tags = new Set<string>();
+    if (!this._model) {
+      return tags;
+    }
+    for (let cellIdx = 0; cellIdx < this._model.cells.length; cellIdx++) {
+      const cellModel = this._model.cells.get(cellIdx);
+      ((cellModel.getMetadata('tags') ?? []) as string[]).forEach(tag => {
+        tags.add(tag);
+      });
+    }
+    return tags;
+  }
+
+  private get _model(): INotebookModel | null {
+    return this._notebook.model;
+  }
+
+  /**
+   * Check is the cells of the input notebook have to be filtered
+   * Update the hidden cells state
+   */
+  private _applyFilters() {
+    this._notebook.widgets.forEach(cell => {
+      const cellTagList = new Set<string>(
+        (cell.model.getMetadata('tags') ?? []).concat(cell.model.type)
+      );
+      const isTagFiltered = this._isContentShared(
+        cellTagList,
+        this._filters
+      ); /* IsTagFiltered is true when the list of tags of a cell includes at least one the checked tags */
+
+      if (isTagFiltered === false && cell.inputHidden === false) {
+        cell.inputHidden = true;
+        if (cell instanceof CodeCell) {
+          cell.outputHidden = true;
+        }
+      }
+      if (isTagFiltered === true && cell.inputHidden === true) {
+        cell.inputHidden = false;
+        if (cell instanceof CodeCell) {
+          cell.outputHidden = false;
+        }
+      }
+    });
+  }
+
+  /**
+   * Check if `subset` is included into another one
+   * return true if that's the case
+   */
+  private _isContentShared(subSet: Set<string>, mainSet: Set<string>): boolean {
+    const isIncluded: boolean[] = [];
+    mainSet.forEach(item => {
+      isIncluded.push(subSet.has(item));
+    });
+    return isIncluded.every(item => item);
   }
 }
 
-export class CellTagListView extends VDomRenderer<CellTagListModel> {
-  constructor(model: CellTagListModel) {
+/**
+ * Cell filters view
+ */
+export class CellFiltersView
+  extends VDomRenderer<CellFiltersModel>
+  implements Dialog.IBodyWidget<Set<string>>
+{
+  constructor({
+    model,
+    translator
+  }: {
+    model: CellFiltersModel;
+    translator: ITranslator;
+  }) {
     super(model);
-    this.model = model;
+    this._filters = model.filters;
+    this._translator = translator;
   }
+
+  /**
+   * Returns the filters defined in the view.
+   *
+   * @returns Filters
+   */
+  getValue(): Set<string> {
+    return this._filters;
+  }
+
   render() {
     return (
-      <>
-        <CellTagListComponent model={this.model} />
-      </>
+      <CellFiltersComponent
+        filters={this._filters}
+        setFilters={(f: Set<string>) => {
+          this._filters = f;
+          this.update();
+        }}
+        tags={this.model.tags}
+        types={this.model.cellTypes}
+        translator={this._translator}
+      />
     );
   }
+
+  private _filters = new Set<string>();
+  private _translator: ITranslator;
 }

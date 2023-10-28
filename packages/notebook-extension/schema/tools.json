@@ -14,7 +14,7 @@
             "type": "null"
           },
           "_TAG-FILTERING-TOOL": {
-            "title": "Filter cells with tags",
+            "title": "Filter cells",
             "type": "null"
           },
           "/editable": {
@@ -110,7 +110,7 @@
           "customRenderer": "@jupyterlab/notebook-extension:active-cell-tool.renderer"
         },
         "_TAG-FILTERING-TOOL": {
-          "customRenderer": "@jupyterlab/notebook-extension:filter-cells-with-tags.renderer"
+          "customRenderer": "@jupyterlab/notebook-extension:filter-cells.renderer"
         },
         "/raw_mimetype": {
           "cellTypes": ["raw"]

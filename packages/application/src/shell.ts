@@ -2069,7 +2069,7 @@ namespace Private {
           if (w.id && w.content instanceof SplitPanel) {
             const state = data.widgetStates[w.id] ?? {};
             w.content.widgets.forEach((wi, widx) => {
-              const expansion = (state?.expansionStates ?? [])[widx];
+              const expansion = (state.expansionStates ?? [])[widx];
               if (
                 typeof expansion === 'boolean' &&
                 w.content instanceof AccordionPanel
@@ -2077,7 +2077,7 @@ namespace Private {
                 expansion ? w.content.expand(widx) : w.content.collapse(widx);
               }
             });
-            if (state?.sizes) {
+            if (state.sizes) {
               w.content.setRelativeSizes(state.sizes);
             }
           }
