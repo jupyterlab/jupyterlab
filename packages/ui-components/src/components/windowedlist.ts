@@ -90,6 +90,14 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   abstract widgetRenderer: (index: number) => Widget;
 
   /**
+   * The threshold used to decide if an item should be scrolled to in the
+   * `smart` scrolling mode. The value represents the number of pixels if
+   * greater than one, otherwise corresponds to a fraction of item height.
+   * By default the item is scrolled to if not full visible in the viewport.
+   */
+  readonly itemScrollThreshold: number = 1;
+
+  /**
    * List widget height
    */
   get height(): number {
@@ -276,18 +284,26 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @param index Item index
    * @param align Where to align the item in the viewport
    * @param margin In 'smart' mode the viewport proportion to add
+   * @param visibilityThreshold The overlap threshold at which an item is considered significantly visible (ratio if <=1, in pixels if >1)
    * @returns The needed scroll offset
    */
   getOffsetForIndexAndAlignment(
     index: number,
     align: WindowedList.ScrollToAlign = 'auto',
-    margin: number = 0.25
+    margin: number = 0.25,
+    visibilityThreshold: number | null = null
   ): number {
+    if (visibilityThreshold === null) {
+      visibilityThreshold = this.itemScrollThreshold;
+    }
     const boundedMargin =
       align === 'smart' ? Math.min(Math.max(0.0, margin), 1.0) : 0.0;
     const size = this._height;
     const itemMetadata = this._getItemMetadata(index);
 
+    if (visibilityThreshold <= 1) {
+      visibilityThreshold = itemMetadata.size * visibilityThreshold;
+    }
     // Get estimated total size after ItemMetadata is computed,
     // To ensure it reflects actual measurements instead of just estimates.
     const estimatedTotalSize = this.getEstimatedTotalSize();
@@ -302,13 +318,12 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     );
     const itemTop = itemMetadata.offset;
     const itemBottom = itemMetadata.offset + itemMetadata.size;
-    const marginSize = size * boundedMargin;
     const significantlyCrossingBottomEdge =
-      this._scrollOffset + size - marginSize > itemTop &&
-      this._scrollOffset + size - marginSize < itemBottom;
+      this._scrollOffset + size - visibilityThreshold > itemTop &&
+      this._scrollOffset + size - visibilityThreshold < itemBottom;
     const significantlyCrossingTopEdge =
-      this._scrollOffset + marginSize > itemTop &&
-      this._scrollOffset + marginSize < itemBottom;
+      this._scrollOffset + visibilityThreshold > itemTop &&
+      this._scrollOffset + visibilityThreshold < itemBottom;
 
     if (align === 'smart') {
       const edgeLessThanOneViewportAway =
@@ -1330,12 +1345,14 @@ export namespace WindowedList {
      * @param index Item index
      * @param align Where to align the item in the viewport
      * @param margin In 'smart' mode the viewport proportion to add
+     * @param visibilityThreshold The overlap threshold at which an item is considered significantly visible (ratio if <=1, in pixels if >1)
      * @returns The needed scroll offset
      */
     getOffsetForIndexAndAlignment(
       index: number,
       align?: ScrollToAlign,
-      margin?: number
+      margin?: number,
+      visibilityThreshold?: number
     ): number;
     /**
      * Compute the items range to display.

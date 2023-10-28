@@ -68,6 +68,14 @@ export class NotebookViewModel extends WindowedListModel {
   widgetRenderer = (index: number): Widget => {
     return this.cells[index];
   };
+
+  /**
+   * Threshold used to decide if the cell should be scrolled to in the `smart` mode.
+   * Defaults to scrolling when less than a full line of the cell is visible.
+   */
+  readonly itemScrollThreshold =
+    NotebookViewModel.DEFAULT_CELL_MARGIN / 2 +
+    NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT;
 }
 
 /**
