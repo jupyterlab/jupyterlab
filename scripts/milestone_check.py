@@ -1,4 +1,4 @@
-# Copyright (c) 2018 Jupyter Development Team.
+# Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
 # Generate a GitHub token at https://github.com/settings/tokens
@@ -55,6 +55,7 @@ out = subprocess.run(
     shell=True,  # noqa S602
     encoding="utf8",
     stdout=subprocess.PIPE,
+    check=True,
 )
 commits = {i[0]: (i[1], i[2]) for i in (x.split(",", 2) for x in out.stdout.splitlines())}
 

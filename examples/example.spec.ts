@@ -5,7 +5,7 @@
 
 import { ConsoleMessage, expect, test } from '@playwright/test';
 
-const URL = process.env['BASE_URL'];
+const URL = `${process.env['BASE_URL']}`;
 
 test.setTimeout(120000);
 
@@ -39,11 +39,23 @@ test('should load the example', async ({ page }) => {
   // Wait for the local file to redirect on notebook >= 6.0. Refs:
   // https://jupyter-notebook.readthedocs.io/en/stable/changelog.html?highlight=redirect
   // https://stackoverflow.com/q/46948489/425458
-  await page.waitForNavigation();
+  await page.waitForURL('http://**');
 
-  await expect(page.locator('#jupyter-config-data')).toHaveCount(1);
+  await expect.soft(page.locator('#jupyter-config-data')).toHaveCount(1);
 
   await waitForTestEnd;
 
-  expect(errorLogs).toEqual(0); // Missing lsp handlers
+  if (process.env['TEST_SNAPSHOT'] === '1') {
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
+    expect
+      .soft(
+        await page.screenshot({
+          mask: [page.locator('.jp-DirListing-itemModified')]
+        })
+      )
+      .toMatchSnapshot('example.png');
+  }
+
+  expect(errorLogs).toEqual(0);
 });

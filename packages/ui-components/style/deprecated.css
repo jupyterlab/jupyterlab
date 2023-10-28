@@ -74,7 +74,9 @@
   --jp-icon-line-form: url('icons/statusbar/line-form.svg');
   --jp-icon-link: url('icons/toolbar/link.svg');
   --jp-icon-list: url('icons/statusbar/list.svg');
+  --jp-icon-lock: url('icons/lock.svg');
   --jp-icon-markdown: url('icons/filetype/markdown.svg');
+  --jp-icon-mermaid: url('icons/filetype/mermaid.svg');
   --jp-icon-move-down: url('icons/toolbar/move-down.svg');
   --jp-icon-move-up: url('icons/toolbar/move-up.svg');
   --jp-icon-new-folder: url('icons/toolbar/new-folder.svg');
@@ -365,8 +367,16 @@
   background-image: var(--jp-icon-list);
 }
 
+.jp-LockIcon {
+  background-image: var(--jp-icon-lock);
+}
+
 .jp-MarkdownIcon {
   background-image: var(--jp-icon-markdown);
+}
+
+.jp-MermaidIcon {
+  background-image: var(--jp-icon-mermaid);
 }
 
 .jp-MoveDownIcon {

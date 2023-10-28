@@ -198,3 +198,31 @@ test.describe('change font-size', () => {
     expect(computedStyle.fontSize).toEqual(`${fontSize - 1}px`);
   });
 });
+
+test('Check codemirror settings can all be set at the same time.', async ({
+  page
+}) => {
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'CodeMirror'
+    });
+  });
+
+  await expect(page.locator('.jp-SettingsForm')).toHaveCount(1);
+
+  const textList: Array[string] = [
+    'Code Folding',
+    'Highlight the active line',
+    'Highlight trailing white space',
+    'Highlight white space'
+  ];
+  let locators = [];
+  for (const selectText of textList) {
+    let locator = page.getByLabel(selectText);
+    await locator.click();
+    locators.push(locator);
+  }
+  for (const locator of locators) {
+    await expect(locator).toBeChecked();
+  }
+});
