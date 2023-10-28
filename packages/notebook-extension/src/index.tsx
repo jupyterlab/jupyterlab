@@ -94,13 +94,14 @@ import {
 } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
-import { IStatusBar /*showPopup*/ } from '@jupyterlab/statusbar';
+import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITableOfContentsRegistry } from '@jupyterlab/toc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   addAboveIcon,
   addBelowIcon,
   buildIcon,
+  CommandToolbarButtonComponent,
   copyIcon,
   cutIcon,
   duplicateIcon,
@@ -129,17 +130,14 @@ import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
 import { cellExecutor } from './cellexecutor';
+import React from 'react';
+import { CellFiltersModel, CellFiltersView } from './celltaglist';
 import { logNotebookOutput } from './nboutput';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
-import {
-  CellTagListModel,
-  CellTagListView,
-  FilterButtonWidget
-} from './celltaglist';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -331,7 +329,9 @@ namespace CommandIDs {
   export const accessPreviousHistory = 'notebook:access-previous-history-entry';
 
   export const accessNextHistory = 'notebook:access-next-history-entry';
+
   export const filterCells = 'notebook:filter-cells-with-tags';
+  
   export const filterCellsWithTags = 'notebook:filter-cells-with-tags';
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
@@ -1102,138 +1102,83 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
 };
 
 export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extension:filter-cells-with-tags',
-  description: 'Filter and collapse cells using tags.',
+  id: '@jupyterlab/notebook-extension:filter-cells',
+  description: 'Filter cells.',
   autoStart: true,
-  optional: [INotebookTracker, IFormRendererRegistry, ITranslator],
+  requires: [INotebookTracker, IFormRendererRegistry],
+  optional: [ICommandPalette, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     formRegistry: IFormRendererRegistry,
-    translator: ITranslator
+    palette: ICommandPalette | null,
+    translator_: ITranslator | null
   ): void => {
+    const translator = translator_ ?? nullTranslator;
     const trans = translator.load('jupyterlab');
     const { shell, commands } = app;
-    const isEnabled = (): boolean => Private.isEnabled(shell, tracker);
-    const notebookModelMap = new WeakMap<Notebook, CellTagListModel>();
+    const isEnabled = () => Private.isEnabled(shell, tracker);
+    const notebookModelMap = new WeakMap<Notebook, CellFiltersModel>();
 
     const filterButton: IFormRenderer = {
-      fieldRenderer: () => {
-        return new FilterButtonWidget(
-          commands,
-          CommandIDs.filterCellsWithTags,
-          translator
-        ).render();
-      }
+      fieldRenderer: () => (
+        <CommandToolbarButtonComponent
+          commands={commands}
+          id={CommandIDs.filterCells}
+          caption={trans.__('Open the filtering tool')}
+        ></CommandToolbarButtonComponent>
+      )
     };
     formRegistry.addRenderer(
-      '@jupyterlab/notebook-extension:filter-cells-with-tags.renderer',
+      '@jupyterlab/notebook-extension:filter-cells.renderer',
       filterButton
     );
 
-    app.commands.addCommand(CommandIDs.filterCellsWithTags, {
-      label: trans.__('Filter Cells With Tags'),
-      caption: trans.__('Filter cells with tags'),
-
-      execute: args => {
+    app.commands.addCommand(CommandIDs.filterCells, {
+      label: trans.__('Filter Cells'),
+      caption: trans.__('Filter cells'),
+      execute: async args => {
         const current = getCurrent(tracker, shell, args);
-
-        /* Check if one array is included into another one and return true if that's the case*/
-        function isContentShared(array1: Array<string>, array2: Array<string>) {
-          const isIncluded: boolean[] = [];
-          array2.forEach(item => {
-            isIncluded.push(array1.includes(item));
-          });
-          return isIncluded.every(item => item);
-        }
-
-        /* Check is the cells of the input notebook have to be filtered
-        Update the hidden cells state respectively and update model.checkedDict  */
-        function updateFilteredCells(model: CellTagListModel | undefined) {
-          if (model) {
-            const tagCheckedList: Array<string> = [];
-            for (const key in model.updatedTagCheckedDict) {
-              const value = model.updatedTagCheckedDict[key];
-              if (value === true) {
-                tagCheckedList.push(key);
-              }
-            }
-            model.notebookPanel?.content.widgets.forEach(cell => {
-              const cellTagList = cell.model
-                .getMetadata('tags')
-                .concat(cell.model.type);
-              const isTagFiltered = isContentShared(
-                cellTagList,
-                tagCheckedList
-              ); /* IsTagFiltered is true when the list of tags of a cell includes at least one the checked tags */
-
-              if (isTagFiltered === false && cell.inputHidden === false) {
-                cell.inputHidden = true;
-              }
-              if (isTagFiltered === true && cell.inputHidden === true) {
-                cell.inputHidden = false;
-              }
-            });
-            model.tagCheckedDict = model.updatedTagCheckedDict;
-          }
-        }
-        /* Uncollapse all cells, set all tags to false in checklist and update model.checkedDict */
-        function clearFilters(model: CellTagListModel | undefined) {
-          if (model) {
-            model.notebookPanel?.content.widgets.forEach(cell => {
-              cell.inputHidden = false;
-            });
-            for (const key in model.updatedTagCheckedDict) {
-              model.updatedTagCheckedDict[key] = false;
-            }
-            model.tagCheckedDict = model.updatedTagCheckedDict;
-          }
-        }
 
         if (current) {
           let model = notebookModelMap.get(current.content);
-
           if (!model) {
-            current.content.widgets.forEach(cell => {
-              cell.inputHidden = false;
-            });
-            model = new CellTagListModel(current);
-            model.tagCheckedDict = {};
-            model.updatedTagCheckedDict = {};
-            model.tagList.forEach(item => {
-              if (model) {
-                model.tagCheckedDict[item] = false;
-              }
-            });
+            model = new CellFiltersModel({ notebook: current.content });
+            notebookModelMap.set(current.content, model);
           }
-          notebookModelMap.set(current.content, model);
 
           const selectButton = Dialog.okButton({
-            label: trans.__('Select Cell(s) With Current Tag(s)'),
+            label: trans.__('Filter Cell(s)'),
             actions: ['select']
           });
-          const clearButton = Dialog.okButton({
+          const clearButton = Dialog.warnButton({
             label: trans.__('Clear Filter(s)'),
             actions: ['clear']
           });
-          const view = new CellTagListView(model);
-          showDialog({
+          const view = new CellFiltersView({ model, translator });
+          const result = await showDialog({
+            title: trans.__('Select cell filters:'),
             body: view,
             buttons: [Dialog.cancelButton(), selectButton, clearButton]
-          })
-            .then(result => {
-              if (result.button.actions.includes('select')) {
-                updateFilteredCells(model);
-              }
-              if (result.button.actions.includes('clear')) {
-                clearFilters(model);
-              }
-            })
-            .catch(error => window.alert('No button has been pressed!'));
+          });
+
+          if (result.button.actions.includes('select')) {
+            model.filters = result.value ?? new Set<string>();
+          }
+          if (result.button.actions.includes('clear')) {
+            model.filters = new Set<string>();
+          }
         }
       },
       isEnabled: args => (args.toolbar ? true : isEnabled())
     });
+
+    if (palette) {
+      palette.addItem({
+        category: 'Notebook Operations',
+        command: CommandIDs.filterCells
+      });
+    }
   }
 };
 
