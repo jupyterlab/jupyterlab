@@ -69,11 +69,8 @@ test.describe('Notebook scroll on execution', () => {
   });
 
   test('should scroll when advancing if top is only marginally visible', async ({
-    page,
-    tmpPath
+    page
   }) => {
-    await page.notebook.openByPath(`${tmpPath}/${longOutputsNb}`);
-
     const notebook = await page.notebook.getNotebookInPanel();
     const thirdCell = await page.notebook.getCell(2);
 
@@ -84,7 +81,7 @@ test.describe('Notebook scroll on execution', () => {
       thirdCellBBox.y -
       notebookBbox.y -
       notebookBbox.height +
-      thirdCellBBox.height * 0.025;
+      thirdCellBBox.height * 0.01;
     await Promise.all([page.mouse.wheel(0, scrollOffset)]);
     // Select second cell
     await page.notebook.selectCells(1);
@@ -92,9 +89,9 @@ test.describe('Notebook scroll on execution', () => {
     const thirdCellLocator = page.locator(
       '.jp-Cell[data-windowed-list-index="2"]'
     );
-    // The third cell should be positioned at the bottom, revealing between 1 to 5% of its content.
-    await expect(thirdCellLocator).toBeInViewport({ ratio: 0.01 });
-    await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.05 });
+    // The third cell should be positioned at the bottom, revealing between 0 to 2% of its content.
+    await expect(thirdCellLocator).toBeInViewport({ ratio: 0.0 });
+    await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.02 });
 
     // Run second cell
     await page.notebook.runCell(1);
@@ -103,11 +100,8 @@ test.describe('Notebook scroll on execution', () => {
   });
 
   test('should not scroll when advancing if top is non-marginally visible', async ({
-    page,
-    tmpPath
+    page
   }) => {
-    await page.notebook.openByPath(`${tmpPath}/${longOutputsNb}`);
-
     const notebook = await page.notebook.getNotebookInPanel();
     const thirdCell = await page.notebook.getCell(2);
 
