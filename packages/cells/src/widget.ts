@@ -212,6 +212,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     this._inViewport = null;
     this.placeholder = options.placeholder ?? true;
 
+    this._setTagsAttribute();
     model.metadataChanged.connect(this.onMetadataChanged, this);
   }
 
@@ -711,8 +712,20 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
           this.loadEditableState();
         }
         break;
+      case 'tags':
+        this._setTagsAttribute();
+        break;
       default:
         break;
+    }
+  }
+
+  private _setTagsAttribute() {
+    const tags: string[] = this.model.getMetadata('tags') ?? [];
+    if (tags.length) {
+      this.node.dataset['tags'] = tags.sort().join(',');
+    } else {
+      delete this.node.dataset['tags'];
     }
   }
 
