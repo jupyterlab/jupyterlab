@@ -606,7 +606,7 @@ export namespace NotebookActions {
       notebook.activeCellIndex++;
     }
 
-    Private.handleState(notebook, state, true);
+    Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -663,7 +663,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    Private.handleState(notebook, state, true);
+    Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -2161,7 +2161,7 @@ namespace Private {
     }
 
     if (scrollIfNeeded && activeCell) {
-      notebook.scrollToItem(activeCellIndex, 'smart', 0.05).catch(reason => {
+      notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
         // no-op
       });
     }
@@ -2178,15 +2178,11 @@ namespace Private {
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
-    if (scroll && state.activeCellId) {
-      const index = notebook.widgets.findIndex(
-        w => w.model.id === state.activeCellId
-      );
-      if (notebook.widgets[index]?.inputArea) {
-        notebook.scrollToItem(index).catch(reason => {
-          // no-op
-        });
-      }
+    const { activeCell, activeCellIndex } = notebook;
+    if (scroll && activeCell) {
+      notebook.scrollToItem(activeCellIndex, 'smart', 0).catch(reason => {
+        // no-op
+      });
     }
   }
 

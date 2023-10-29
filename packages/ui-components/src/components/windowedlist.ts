@@ -90,12 +90,30 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   abstract widgetRenderer: (index: number) => Widget;
 
   /**
-   * The threshold used to decide if an item should be scrolled to in the
-   * `smart` scrolling mode. The value represents the number of pixels if
-   * greater than one, otherwise corresponds to a fraction of item height.
+   * The overlap threshold used to decide whether to scroll down to an item
+   * below the viewport (smart mode). If the item overlap with the viewport
+   * is greater or equal this threshold the item is considered sufficiently
+   * visible and will not be scrolled to. The value is the number of pixels
+   * in overlap if greater than one, or otherwise a fraction of item height.
    * By default the item is scrolled to if not full visible in the viewport.
    */
-  readonly itemScrollThreshold: number = 1;
+  readonly scrollDownThreshold: number = 1;
+
+  /**
+   * The underlap threshold used to decide whether to scroll up to an item
+   * above the viewport (smart mode). If the item part outside the viewport
+   * (underlap) is greater than this threshold then the item is considered
+   * not sufficiently visible and will be scrolled to.
+   * The value is the number of pixels in underlap if greater than one, or
+   * otherwise a fraction of the item height.
+   * By default the item is scrolled to if not full visible in the viewport.
+   */
+  readonly scrollUpThreshold: number = 0;
+
+  /**
+   * Top padding of the the outer window node.
+   */
+  paddingTop: number = 0;
 
   /**
    * List widget height
@@ -273,37 +291,41 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   /**
    * Get the scroll offset to display an item in the viewport.
    *
-   * By default, the list will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
+   * By default, the list will scroll as little as possible to ensure the item is fully visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
    *
-   *   auto (default) - Scroll as little as possible to ensure the item is visible. (If the item is already visible, it won't scroll at all.)
-   *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away or exceeds viewport in height, scroll so that it becomes visible (including the margin). If it is more than one viewport away and fits the viewport, scroll so that it is centered within the list.
+   *   auto (default) - Automatically align with the top or bottom minimising the amount scrolled; if item is smaller than the viewport and fully visible, do not scroll at all.
+   *   smart - If the item is significantly visible, don't scroll at all (regardless of whether it fits in the viewport). If it is less than one viewport away or exceeds viewport in height, scroll so that it becomes visible. If it is more than one viewport away and fits the viewport, scroll so that it is centered within the viewport.
    *   center - Center align the item within the list.
    *   end - Align the item to the end of the list
    *   start - Align the item to the beginning of the list
    *
+   * An item is considered significantly visible if:
+   *  - it overlaps with the viewport by the amount specified by `scrollDownThreshold` when below the viewport
+   *  - it exceeds the viewport by the amount less than specified by `scrollUpThreshold` when above the viewport.
+   *
    * @param index Item index
    * @param align Where to align the item in the viewport
-   * @param margin In 'smart' mode the viewport proportion to add
-   * @param visibilityThreshold The overlap threshold at which an item is considered significantly visible (ratio if <=1, in pixels if >1)
+   * @param margin The proportion of viewport to add when aligning with the top/bottom of the list.
    * @returns The needed scroll offset
    */
   getOffsetForIndexAndAlignment(
     index: number,
     align: WindowedList.ScrollToAlign = 'auto',
-    margin: number = 0.25,
-    visibilityThreshold: number | null = null
+    margin: number = 0
   ): number {
-    if (visibilityThreshold === null) {
-      visibilityThreshold = this.itemScrollThreshold;
-    }
-    const boundedMargin =
-      align === 'smart' ? Math.min(Math.max(0.0, margin), 1.0) : 0.0;
+    const boundedMargin = Math.min(Math.max(0.0, margin), 1.0);
     const size = this._height;
     const itemMetadata = this._getItemMetadata(index);
 
-    if (visibilityThreshold <= 1) {
-      visibilityThreshold = itemMetadata.size * visibilityThreshold;
-    }
+    const scrollDownThreshold =
+      this.scrollDownThreshold <= 1
+        ? itemMetadata.size * this.scrollDownThreshold
+        : this.scrollDownThreshold;
+    const scrollUpThreshold =
+      this.scrollUpThreshold <= 1
+        ? itemMetadata.size * this.scrollUpThreshold
+        : this.scrollUpThreshold;
+
     // Get estimated total size after ItemMetadata is computed,
     // To ensure it reflects actual measurements instead of just estimates.
     const estimatedTotalSize = this.getEstimatedTotalSize();
@@ -316,24 +338,28 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       0,
       itemMetadata.offset - size + itemMetadata.size
     );
+    const currentOffset = this._scrollOffset;
+
     const itemTop = itemMetadata.offset;
     const itemBottom = itemMetadata.offset + itemMetadata.size;
-    const significantlyCrossingBottomEdge =
-      this._scrollOffset + size - visibilityThreshold > itemTop &&
-      this._scrollOffset + size - visibilityThreshold < itemBottom;
-    const significantlyCrossingTopEdge =
-      this._scrollOffset + visibilityThreshold > itemTop &&
-      this._scrollOffset + visibilityThreshold < itemBottom;
-
+    const bottomEdge = currentOffset - this.paddingTop + size;
+    const topEdge = currentOffset - this.paddingTop;
+    const crossingBottomEdge = bottomEdge > itemTop && bottomEdge < itemBottom;
+    const crossingTopEdge = topEdge > itemTop && topEdge < itemBottom;
     if (align === 'smart') {
       const edgeLessThanOneViewportAway =
-        this._scrollOffset >= bottomOffset - size &&
-        this._scrollOffset <= topOffset + size;
+        currentOffset >= bottomOffset - size &&
+        currentOffset <= topOffset + size;
+
+      const visiblePartBottom = bottomEdge - itemTop;
+      const hiddenPartTop = topEdge - itemTop;
+
       if (
-        significantlyCrossingBottomEdge ||
-        significantlyCrossingTopEdge ||
-        edgeLessThanOneViewportAway
+        (crossingBottomEdge && visiblePartBottom > scrollDownThreshold) ||
+        (crossingTopEdge && hiddenPartTop < scrollUpThreshold)
       ) {
+        return this._scrollOffset;
+      } else if (edgeLessThanOneViewportAway) {
         // Possibly less than one viewport away, scroll so that it becomes visible (including the margin)
         align = 'auto';
       } else {
@@ -348,34 +374,26 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       }
     }
 
+    if (align === 'auto') {
+      if (bottomEdge > itemBottom && topEdge < itemTop) {
+        // No need to change the position, return the current offset.
+        return this._scrollOffset;
+      } else if (crossingBottomEdge || bottomEdge <= itemBottom) {
+        align = 'end';
+      } else {
+        align = 'start';
+      }
+    }
+
     switch (align) {
       case 'start':
-        return topOffset;
+        // Align to the top edge.
+        return Math.max(0, topOffset - boundedMargin * size) + this.paddingTop;
       case 'end':
-        return bottomOffset;
+        // Align to the bottom edge.
+        return bottomOffset + boundedMargin * size + this.paddingTop;
       case 'center':
         return Math.round(bottomOffset + (topOffset - bottomOffset) / 2);
-      case 'auto':
-      default:
-        if (
-          this._scrollOffset >= bottomOffset &&
-          this._scrollOffset <= itemMetadata.offset
-        ) {
-          // No need to change the position, return the current offset.
-          return this._scrollOffset;
-        } else if (this._scrollOffset < bottomOffset) {
-          // If bottom of the cell is not visible, show the bottom.
-          // but only if it would NOT result in hiding the top of
-          // the widget if it was already visible.
-          if (significantlyCrossingBottomEdge && itemMetadata.size > size) {
-            // Aligning to bottom would hide the top, do nothing.
-            return this._scrollOffset;
-          }
-          return bottomOffset + boundedMargin * size;
-        } else {
-          // Align to the top edge.
-          return Math.max(0, topOffset - boundedMargin * size);
-        }
     }
   }
 
@@ -877,6 +895,8 @@ export class WindowedList<
       this._applyNoWindowingStyles();
     }
     this.viewModel.height = this.node.getBoundingClientRect().height;
+    const style = window.getComputedStyle(this.node);
+    this.viewModel.paddingTop = parseFloat(style.paddingTop);
   }
 
   /**
@@ -1345,14 +1365,12 @@ export namespace WindowedList {
      * @param index Item index
      * @param align Where to align the item in the viewport
      * @param margin In 'smart' mode the viewport proportion to add
-     * @param visibilityThreshold The overlap threshold at which an item is considered significantly visible (ratio if <=1, in pixels if >1)
      * @returns The needed scroll offset
      */
     getOffsetForIndexAndAlignment(
       index: number,
       align?: ScrollToAlign,
-      margin?: number,
-      visibilityThreshold?: number
+      margin?: number
     ): number;
     /**
      * Compute the items range to display.
@@ -1377,6 +1395,11 @@ export namespace WindowedList {
      * List widget height
      */
     height: number;
+
+    /**
+     * Top padding of the the outer window node.
+     */
+    paddingTop?: number;
 
     /**
      * Items list to be rendered
