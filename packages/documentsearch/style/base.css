@@ -32,7 +32,6 @@
 .jp-DocumentSearch-overlay button {
   background-color: var(--jp-toolbar-background);
   outline: 0;
-  margin-top: 1.5px;
 }
 
 .jp-DocumentSearch-overlay button:hover {
@@ -277,7 +276,7 @@
   min-width: 1em;
   grid-area: 1/2;
   font: inherit;
-  padding: 0.25em;
+  padding: 2px 3px;
   margin: 0;
   resize: none;
   background: none;
