@@ -9,6 +9,9 @@ import {
   SessionContextDialogs,
   showDialog
 } from '@jupyterlab/apputils';
+
+import { isPlaceholderVisible } from '@jupyterlab/notebook/src/default-toolbar';
+
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
@@ -36,6 +39,15 @@ import * as React from 'react';
 import { NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
+
+
+// This variable will hold the state of the placeholder's visibility.
+let isPlaceholderVisible = true;
+
+// This function will toggle the visibility state.
+function toggleGlobalPlaceholderVisibility() {
+  isPlaceholderVisible = !isPlaceholderVisible;
+}
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.
@@ -273,6 +285,7 @@ export namespace ToolbarItems {
       { name: 'cut', widget: createCutButton(panel, translator) },
       { name: 'copy', widget: createCopyButton(panel, translator) },
       { name: 'paste', widget: createPasteButton(panel, translator) },
+      { name: 'togglePlaceholder', widget: createTogglePlaceholderButton(panel) }, //for the placeholder toggle button
       {
         name: 'run',
         widget: createRunButton(panel, sessionDialogs, translator)
@@ -308,6 +321,23 @@ export namespace ToolbarItems {
       }
     ];
   }
+
+ export function createTogglePlaceholderButton(panel: NotebookPanel): ReactWidget {
+  return new ToolbarButton({
+    icon: addIcon, // Used this icon for now, will change it after collaborating with maintainers
+    onClick: () => {
+      // Toggle the global placeholder visibility state.
+      toggleGlobalPlaceholderVisibility();
+    },
+    tooltip: 'Toggle Placeholder'
+  });
+}
+
+
+
+
+
+  
 }
 
 /**
