@@ -355,7 +355,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       const hiddenPartTop = topEdge - itemTop;
 
       if (
-        (crossingBottomEdge && visiblePartBottom > scrollDownThreshold) ||
+        (crossingBottomEdge && visiblePartBottom >= scrollDownThreshold) ||
         (crossingTopEdge && hiddenPartTop < scrollUpThreshold)
       ) {
         return this._scrollOffset;
