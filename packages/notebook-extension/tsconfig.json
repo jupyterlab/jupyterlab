@@ -16,6 +16,9 @@
       "path": "../cells"
     },
     {
+      "path": "../celltags-extension"
+    },
+    {
       "path": "../codeeditor"
     },
     {

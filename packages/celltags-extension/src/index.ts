@@ -19,6 +19,8 @@ import {
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
 
+export { CellTag, ICellTagProps } from './celltag';
+
 /**
  * Registering cell tag field.
  */
