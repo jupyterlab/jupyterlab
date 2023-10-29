@@ -43,6 +43,59 @@ const CELL_TAGS_ADD_CLASS = 'jp-CellTags-Add';
  */
 const CELL_TAGS_EMPTY_CLASS = 'jp-CellTags-Empty';
 
+/**
+ * Cell tag component properties
+ */
+export interface ICellTagProps {
+  /**
+   * Whether the current tag is applied or not.
+   */
+  checked: boolean;
+  /**
+   * Callback on click
+   */
+  onChange: (event?: any) => void;
+  /**
+   * Cell tag
+   */
+  tag: string;
+}
+
+/**
+ * CellTag component
+ */
+export function CellTag(props: ICellTagProps): JSX.Element {
+  return (
+    <div
+      className={`${CELL_TAGS_ELEMENT_CLASS} ${
+        props.checked
+          ? CELL_TAGS_ELEMENT_APPLIED_CLASS
+          : CELL_TAGS_ELEMENT_UNAPPLIED_CLASS
+      }`}
+    >
+      <label className={CELL_TAGS_HOLDER_CLASS}>
+        {props.tag}
+        <input
+          type="checkbox"
+          checked={props.checked}
+          onChange={props.onChange}
+        ></input>
+        {props.checked && (
+          <LabIcon.resolveReact
+            icon={checkIcon}
+            tag="span"
+            elementPosition="center"
+            height="18px"
+            width="18px"
+            marginLeft="5px"
+            marginRight="-3px"
+          />
+        )}
+      </label>
+    </div>
+  );
+}
+
 export class CellTagField {
   constructor(tracker: INotebookTracker, translator?: ITranslator) {
     this._tracker = tracker;
@@ -170,31 +223,15 @@ export class CellTagField {
           Cell Tags
         </div>
         {allTags &&
-          allTags.map((tag: string, i: number) => (
-            <div
-              key={i}
-              className={`${CELL_TAGS_ELEMENT_CLASS} ${
-                props.formData.includes(tag)
-                  ? CELL_TAGS_ELEMENT_APPLIED_CLASS
-                  : CELL_TAGS_ELEMENT_UNAPPLIED_CLASS
-              }`}
-              onClick={() => this._onTagClick(props, tag)}
-            >
-              <div className={CELL_TAGS_HOLDER_CLASS}>
-                <span>{tag}</span>
-                {props.formData.includes(tag) && (
-                  <LabIcon.resolveReact
-                    icon={checkIcon}
-                    tag="span"
-                    elementPosition="center"
-                    height="18px"
-                    width="18px"
-                    marginLeft="5px"
-                    marginRight="-3px"
-                  />
-                )}
-              </div>
-            </div>
+          allTags.map((tag: string) => (
+            <CellTag
+              key={tag}
+              checked={props.formData.includes(tag)}
+              onChange={() => {
+                this._onTagClick(props, tag);
+              }}
+              tag={tag}
+            ></CellTag>
           ))}
         <div
           className={`${CELL_TAGS_ELEMENT_CLASS} ${CELL_TAGS_ELEMENT_UNAPPLIED_CLASS}`}
