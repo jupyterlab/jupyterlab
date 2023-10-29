@@ -5,6 +5,7 @@
 
 import { Dialog, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { CodeCell } from '@jupyterlab/cells';
+import { CellTag } from '@jupyterlab/celltags-extension';
 import { INotebookModel, Notebook } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONExt } from '@lumino/coreutils';
@@ -61,11 +62,11 @@ function CellFiltersComponent(props: ICellFiltersComponentProps): JSX.Element {
     <>
       {types.size ? (
         <fieldset>
-          {trans.__('Cell types')}
-          <ul className="jp-cell-types-list">
+          <legend>{trans.__('Cell types')}</legend>
+          <ul className="jp-cell-filters-types">
             {[...types].map(item => {
               return (
-                <li key={item} className="jp-cell-types-item">
+                <li key={item}>
                   <label>
                     <input
                       type="checkbox"
@@ -84,22 +85,20 @@ function CellFiltersComponent(props: ICellFiltersComponentProps): JSX.Element {
       ) : null}
       {tags.size ? (
         <fieldset>
-          {trans.__('Cell tags')}
+          <legend>{trans.__('Cell tags')}</legend>
 
-          <ul className="jp-cell-tags">
+          <ul className="jp-cell-filters-tags">
             {[...tags].map(item => {
               return (
-                <li key={item} className="jp-cell-tags-item">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={filters.has(item)}
-                      onChange={() => {
-                        handleCheck(item);
-                      }}
-                    />
-                    {item}
-                  </label>
+                <li key={item}>
+                  <CellTag
+                    key={item}
+                    checked={filters.has(item)}
+                    onChange={() => {
+                      handleCheck(item);
+                    }}
+                    tag={item}
+                  ></CellTag>
                 </li>
               );
             })}

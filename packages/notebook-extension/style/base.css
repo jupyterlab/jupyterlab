@@ -1,0 +1,11 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-cell-filters-types,
+.jp-cell-filters-tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
