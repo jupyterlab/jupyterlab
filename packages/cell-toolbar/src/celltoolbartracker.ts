@@ -192,7 +192,8 @@ export class CellToolbarTracker implements IDisposable {
       // Wait for all the buttons to be rendered before attaching the toolbar.
       Promise.all(promises)
         .then(() => {
-          if (cell.isDisposed) {
+          if (cell.isDisposed || this._panel?.content.activeCell !== cell) {
+            toolbarWidget.dispose();
             return;
           }
 
