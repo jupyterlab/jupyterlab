@@ -177,6 +177,16 @@ const EXTENSION_API_PATH = 'lab/api/extensions';
 export type Action = 'install' | 'uninstall' | 'enable' | 'disable';
 
 /**
+ * Additional options for an action.
+ */
+export interface IActionOptions {
+  /**
+   * If true, install the latest version of the entry.
+   */
+  useLatestVersion?: boolean;
+}
+
+/**
  * Model for an extension list.
  */
 export class ListModel extends VDomModel {
@@ -343,14 +353,20 @@ export class ListModel extends VDomModel {
    * Install an extension.
    *
    * @param entry An entry indicating which extension to install.
+   * @param useLatestVersion Whether to use the latest version to install.
    */
-  async install(entry: IEntry): Promise<void> {
-    await this.performAction('install', entry).then(data => {
-      if (data.status !== 'ok') {
-        reportInstallError(entry.name, data.message, this.translator);
+  async install(
+    entry: IEntry,
+    useLatestVersion: boolean = false
+  ): Promise<void> {
+    await this.performAction('install', entry, { useLatestVersion }).then(
+      data => {
+        if (data.status !== 'ok') {
+          reportInstallError(entry.name, data.message, this.translator);
+        }
+        return this.update(true);
       }
-      return this.update(true);
-    });
+    );
   }
 
   /**
@@ -480,19 +496,27 @@ export class ListModel extends VDomModel {
    *
    * @param action A valid action to perform.
    * @param entry The extension to perform the action on.
+   * @param actionOptions Additional options for the action.
    */
   protected performAction(
     action: string,
-    entry: IEntry
+    entry: IEntry,
+    actionOptions: IActionOptions = {}
   ): Promise<IActionReply> {
+    const bodyJson: Record<string, string> = {
+      cmd: action,
+      extension_name: entry.name
+    };
+
+    if (action === 'install' && actionOptions.useLatestVersion) {
+      bodyJson['extension_version'] = entry.latest_version;
+    }
+
     const actionRequest = Private.requestAPI<IActionReply>(
       {},
       {
         method: 'POST',
-        body: JSON.stringify({
-          cmd: action,
-          extension_name: entry.name
-        })
+        body: JSON.stringify(bodyJson)
       }
     );
 

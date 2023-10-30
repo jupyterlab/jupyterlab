@@ -18,7 +18,7 @@ import { Message } from '@lumino/messaging';
 import { AccordionLayout, AccordionPanel } from '@lumino/widgets';
 import * as React from 'react';
 import ReactPaginate from 'react-paginate';
-import { Action, IEntry, ListModel } from './model';
+import { Action, IActionOptions, IEntry, ListModel } from './model';
 
 const BADGE_SIZE = 32;
 const BADGE_QUERY_SIZE = Math.floor(devicePixelRatio * BADGE_SIZE);
@@ -129,7 +129,11 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                     <>
                       {ListModel.entryHasUpdate(entry) && (
                         <Button
-                          onClick={() => props.performAction!('install', entry)}
+                          onClick={() =>
+                            props.performAction!('install', entry, {
+                              useLatestVersion: true
+                            })
+                          }
                           title={trans.__(
                             'Update "%1" to "%2"',
                             entry.name,
@@ -216,7 +220,11 @@ namespace ListEntry {
      *
      * Not provided if actions are not allowed.
      */
-    performAction?: (action: Action, entry: IEntry) => void;
+    performAction?: (
+      action: Action,
+      entry: IEntry,
+      actionOptions?: IActionOptions
+    ) => void;
 
     /**
      * The language translator.
@@ -318,7 +326,11 @@ namespace ListView {
      *
      * Not provided if actions are not allowed.
      */
-    performAction?: (action: Action, entry: IEntry) => void;
+    performAction?: (
+      action: Action,
+      entry: IEntry,
+      actionOptions: IActionOptions
+    ) => void;
   }
 }
 
@@ -498,11 +510,16 @@ class InstalledList extends ReactWidget {
    *
    * @param action The action to perform.
    * @param entry The entry to perform the action on.
+   * @param actionOptions Additional options for the action.
    */
-  onAction(action: Action, entry: IEntry): Promise<void> {
+  onAction(
+    action: Action,
+    entry: IEntry,
+    actionOptions: IActionOptions = {}
+  ): Promise<void> {
     switch (action) {
       case 'install':
-        return this.model.install(entry);
+        return this.model.install(entry, actionOptions.useLatestVersion);
       case 'uninstall':
         return this.model.uninstall(entry);
       case 'enable':
@@ -538,11 +555,16 @@ class SearchResult extends ReactWidget {
    *
    * @param action The action to perform.
    * @param entry The entry to perform the action on.
+   * @param actionOptions Additional options for the action.
    */
-  onAction(action: Action, entry: IEntry): Promise<void> {
+  onAction(
+    action: Action,
+    entry: IEntry,
+    actionOptions: IActionOptions = {}
+  ): Promise<void> {
     switch (action) {
       case 'install':
-        return this.model.install(entry);
+        return this.model.install(entry, actionOptions.useLatestVersion);
       case 'uninstall':
         return this.model.uninstall(entry);
       case 'enable':
