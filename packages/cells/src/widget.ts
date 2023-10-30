@@ -1622,6 +1622,15 @@ export namespace CodeCell {
       // execution, clear the prompt.
       if (future && !cell.isDisposed && cell.outputArea.future === future) {
         cell.setPrompt('');
+        if (recordTiming && future.isDisposed) {
+          // Record the time when the cell execution was aborted
+          const timingInfo: any = Object.assign(
+            {},
+            model.getMetadata('execution')
+          );
+          timingInfo['execution_failed'] = new Date().toISOString();
+          model.setMetadata('execution', timingInfo);
+        }
       }
       throw e;
     }
