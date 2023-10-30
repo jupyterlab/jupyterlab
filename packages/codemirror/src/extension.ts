@@ -21,7 +21,6 @@ import {
   drawSelection,
   EditorView,
   highlightActiveLine,
-  highlightSpecialChars,
   highlightTrailingWhitespace,
   highlightWhitespace,
   KeyBinding,
@@ -642,15 +641,6 @@ export namespace EditorExtensionRegistry {
         schema: {
           type: 'boolean',
           title: trans.__('Highlight the active line')
-        }
-      }),
-      Object.freeze({
-        name: 'highlightSpecialCharacters',
-        default: true,
-        factory: () => createConditionalExtension(highlightSpecialChars()),
-        schema: {
-          type: 'boolean',
-          title: trans.__('Highlight special characters')
         }
       }),
       Object.freeze({
