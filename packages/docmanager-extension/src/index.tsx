@@ -841,10 +841,16 @@ function addCommands(
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
     caption,
     icon: args => (args.toolbar ? saveIcon : undefined),
-    isEnabled: args =>
-      (args._luminoEvent as ReadonlyPartialJSONObject).type === 'keybinding'
-        ? true
-        : isWritable(),
+    isEnabled: args => {
+      if (args._luminoEvent) {
+        return (args._luminoEvent as ReadonlyPartialJSONObject).type ===
+          'keybinding'
+          ? true
+          : isWritable();
+      } else {
+        return isWritable();
+      }
+    },
     execute: async args => {
       // Checks that shell.currentWidget is valid:
       const widget = shell.currentWidget;
@@ -861,7 +867,10 @@ function addCommands(
             return;
           }
           if (!context.contentsModel?.writable) {
-            let type = (args._luminoEvent as ReadonlyPartialJSONObject).type;
+            let type;
+            if (args._luminoEvent) {
+              type = (args._luminoEvent as ReadonlyPartialJSONObject).type;
+            }
             if (type === 'keybinding') {
               return Notification.warning(
                 trans.__(
