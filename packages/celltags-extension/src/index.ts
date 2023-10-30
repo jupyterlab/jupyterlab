@@ -5,21 +5,19 @@
  * @module celltags-extension
  */
 
-import type { FieldProps } from '@rjsf/utils';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { INotebookTracker } from '@jupyterlab/notebook';
+import { CellTagField, INotebookTracker } from '@jupyterlab/notebook';
 
-import { CellTagField } from './celltag';
 import {
   IFormRenderer,
   IFormRendererRegistry
 } from '@jupyterlab/ui-components';
 
-export { CellTag, ICellTagProps } from './celltag';
+import type { FieldProps } from '@rjsf/utils';
 
 /**
  * Registering cell tag field.

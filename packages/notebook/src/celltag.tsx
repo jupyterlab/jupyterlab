@@ -3,16 +3,16 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import React from 'react';
-import { FieldProps } from '@rjsf/utils';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { addIcon, checkIcon, LabIcon } from '@jupyterlab/ui-components';
-import { reduce } from '@lumino/algorithm';
 import {
   ITranslator,
   nullTranslator,
   TranslationBundle
 } from '@jupyterlab/translation';
+import { addIcon, checkIcon, LabIcon } from '@jupyterlab/ui-components';
+import { reduce } from '@lumino/algorithm';
+import { FieldProps } from '@rjsf/utils';
+import React from 'react';
+import { INotebookTracker } from './tokens';
 
 /**
  * The class name added to the cell-tags field.
@@ -96,6 +96,11 @@ export function CellTag(props: ICellTagProps): JSX.Element {
   );
 }
 
+/**
+ * Cell tags editor
+ *
+ * To be used with react-json-schema-form
+ */
 export class CellTagField {
   constructor(tracker: INotebookTracker, translator?: ITranslator) {
     this._tracker = tracker;
