@@ -52,7 +52,7 @@ test.describe('Notebook tags', () => {
     await page
       .getByRole('listitem')
       .filter({ hasText: 'orange' })
-      .getByRole('checkbox')
+      .getByText('orange')
       .click();
     await page.pause();
     await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
@@ -84,7 +84,7 @@ test.describe('Notebook tags', () => {
     await page
       .getByRole('listitem')
       .filter({ hasText: 'markdown' })
-      .getByRole('checkbox')
+      .getByText('markdown')
       .click();
     await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
 
@@ -115,12 +115,12 @@ test.describe('Notebook tags', () => {
     await page
       .getByRole('listitem')
       .filter({ hasText: 'code' })
-      .getByRole('checkbox')
+      .getByText('code')
       .click();
     await page
       .getByRole('listitem')
       .filter({ hasText: 'orange' })
-      .getByRole('checkbox')
+      .getByText('orange')
       .click();
     await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
 
@@ -151,12 +151,12 @@ test.describe('Notebook tags', () => {
     await page
       .getByRole('listitem')
       .filter({ hasText: 'code' })
-      .getByRole('checkbox')
+      .getByText('code')
       .click();
     await page
       .getByRole('listitem')
       .filter({ hasText: 'banana' })
-      .getByRole('checkbox')
+      .getByText('banana')
       .click();
     await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
 
