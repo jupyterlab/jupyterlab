@@ -129,12 +129,9 @@ import {
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
-<<<<<<< HEAD:packages/notebook-extension/src/index.ts
 import { cellExecutor } from './cellexecutor';
-=======
 import React from 'react';
-import { CellFiltersModel, CellFiltersView } from './celltaglist';
->>>>>>> 340b72c2bd (Improve code):packages/notebook-extension/src/index.tsx
+import { CellFiltersModel, CellFiltersView } from './cellfilters';
 import { logNotebookOutput } from './nboutput';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
@@ -332,15 +329,12 @@ namespace CommandIDs {
   export const accessPreviousHistory = 'notebook:access-previous-history-entry';
 
   export const accessNextHistory = 'notebook:access-next-history-entry';
-<<<<<<< HEAD:packages/notebook-extension/src/index.ts
-  export const filterCells = 'notebook:filter-cells-with-tags';
+
   export const filterCellsWithTags = 'notebook:filter-cells-with-tags';
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
-=======
 
   export const filterCells = 'notebook:filter-cells';
->>>>>>> 340b72c2bd (Improve code):packages/notebook-extension/src/index.tsx
 }
 
 /**
@@ -3629,7 +3623,6 @@ function addCommands(
       }
     }
   });
-<<<<<<< HEAD:packages/notebook-extension/src/index.ts
   app.commands.addCommand(CommandIDs.filterCells, {
     label: trans.__('Filter Cells'),
     caption: trans.__('Filter cells with tags'),
@@ -3684,8 +3677,6 @@ function addCommands(
   };
   tracker.currentChanged.connect(notify);
   shell.currentChanged?.connect(notify);
-=======
->>>>>>> 340b72c2bd (Improve code):packages/notebook-extension/src/index.tsx
 }
 
 /**
