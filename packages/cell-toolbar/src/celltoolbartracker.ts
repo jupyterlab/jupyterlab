@@ -170,7 +170,7 @@ export class CellToolbarTracker implements IDisposable {
 
     if (cell && !cell.isDisposed) {
       const toolbarWidget = (this._toolbar = new Toolbar());
-      // deprecated on those classes are useless
+      // Note: CELL_MENU_CLASS is deprecated.
       toolbarWidget.addClass(CELL_MENU_CLASS);
       toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
       const promises: Promise<void>[] = [cell.ready];
