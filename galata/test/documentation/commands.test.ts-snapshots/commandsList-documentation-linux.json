@@ -1740,7 +1740,7 @@
     ]
   },
   {
-    "id": "notebook:filter-cells-with-tags",
+    "id": "notebook:filter-cells",
     "label": "Filter Cells",
     "caption": "Filter cells",
     "shortcuts": []
