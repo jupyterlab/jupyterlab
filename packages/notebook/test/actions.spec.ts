@@ -1072,6 +1072,13 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#selectAbove()', () => {
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject('expected timeout');
+        }, 5000);
+      });
+      timeoutPromise.catch(() => null);
+
       it('should select the cell above the active cell', async () => {
         widget.activeCellIndex = 1;
         const waitForChange = signalToPromise(widget.stateChanged);
@@ -1080,20 +1087,34 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(0);
       });
 
-      it.failing('should be a no-op if there is no model', async () => {
+      it('should be a no-op if there is no model', async () => {
         widget.model = null;
         const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectAbove(widget);
         // should timeout as there is no change.
-        await waitForChange;
-        expect(widget.activeCellIndex).toBe(0);
+        let err: string = '';
+        try {
+          await Promise.race([waitForChange, timeoutPromise]);
+        } catch (e) {
+          err = e;
+        } finally {
+          expect(err).toMatch('expected timeout');
+        }
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
-      it.failing('should not wrap around to the bottom', async () => {
+      it('should not wrap around to the bottom', async () => {
         const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectAbove(widget);
         // should timeout as there is no change.
-        await waitForChange;
+        let err: string = '';
+        try {
+          await Promise.race([waitForChange, timeoutPromise]);
+        } catch (e) {
+          err = e;
+        } finally {
+          expect(err).toMatch('expected timeout');
+        }
         expect(widget.activeCellIndex).toBe(0);
       });
 
@@ -1124,6 +1145,13 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#selectBelow()', () => {
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject('expected timeout');
+        }, 5000);
+      });
+      timeoutPromise.catch(() => null);
+
       it('should select the cell below the active cell', async () => {
         const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectBelow(widget);
@@ -1131,21 +1159,35 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCellIndex).toBe(1);
       });
 
-      it.failing('should be a no-op if there is no model', async () => {
+      it('should be a no-op if there is no model', async () => {
         widget.model = null;
         const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectBelow(widget);
         // should timeout as there is no change.
-        await waitForChange;
+        let err: string = '';
+        try {
+          await Promise.race([waitForChange, timeoutPromise]);
+        } catch (e) {
+          err = e;
+        } finally {
+          expect(err).toMatch('expected timeout');
+        }
         expect(widget.activeCellIndex).toBe(-1);
       });
 
-      it.failing('should not wrap around to the top', async () => {
+      it('should not wrap around to the top', async () => {
         widget.activeCellIndex = widget.widgets.length - 1;
         const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectBelow(widget);
         // should timeout as there is no change.
-        await waitForChange;
+        let err: string = '';
+        try {
+          await Promise.race([waitForChange, timeoutPromise]);
+        } catch (e) {
+          err = e;
+        } finally {
+          expect(err).toMatch('expected timeout');
+        }
         expect(widget.activeCellIndex).not.toBe(0);
       });
 
@@ -1162,19 +1204,23 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('edit');
       });
 
-      it.failing(
-        'should not change if in edit mode and no non-collapsed cells below',
-        async () => {
-          widget.activeCellIndex = widget.widgets.length - 2;
-          widget.mode = 'edit';
-          widget.widgets[widget.widgets.length - 1].inputHidden = true;
-          const waitForChange = signalToPromise(widget.stateChanged);
-          NotebookActions.selectBelow(widget);
-          // should timeout as there is no change.
-          await waitForChange;
-          expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
+      it('should not change if in edit mode and no non-collapsed cells below', async () => {
+        widget.activeCellIndex = widget.widgets.length - 2;
+        widget.mode = 'edit';
+        widget.widgets[widget.widgets.length - 1].inputHidden = true;
+        const waitForChange = signalToPromise(widget.stateChanged);
+        NotebookActions.selectBelow(widget);
+        // should timeout as there is no change.
+        let err: string = '';
+        try {
+          await Promise.race([waitForChange, timeoutPromise]);
+        } catch (e) {
+          err = e;
+        } finally {
+          expect(err).toMatch('expected timeout');
         }
-      );
+        expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
+      });
     });
 
     describe('#extendSelectionAbove()', () => {
