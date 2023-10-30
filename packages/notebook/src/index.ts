@@ -7,6 +7,7 @@
 
 export * from './actions';
 export * from './cellexecutor';
+export * from './celltag';
 export * from './celllist';
 export * from './default-toolbar';
 export * from './executionindicator';

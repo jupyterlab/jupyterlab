@@ -5,8 +5,7 @@
 
 import { Dialog, VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { CodeCell } from '@jupyterlab/cells';
-import { CellTag } from '@jupyterlab/celltags-extension';
-import { INotebookModel, Notebook } from '@jupyterlab/notebook';
+import { CellTag, INotebookModel, Notebook } from '@jupyterlab/notebook';
 import { ITranslator } from '@jupyterlab/translation';
 import { JSONExt } from '@lumino/coreutils';
 import React from 'react';
@@ -255,6 +254,6 @@ export class CellFiltersView
     );
   }
 
-  private _filters = new Set<string>();
+  private _filters: Set<string>;
   private _translator: ITranslator;
 }

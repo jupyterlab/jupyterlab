@@ -131,7 +131,7 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
 import { cellExecutor } from './cellexecutor';
 import React from 'react';
-import { CellFiltersModel, CellFiltersView } from './celltaglist';
+import { CellFiltersModel, CellFiltersView } from './cellfilters';
 import { logNotebookOutput } from './nboutput';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
