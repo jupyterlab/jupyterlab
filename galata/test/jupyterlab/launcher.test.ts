@@ -12,9 +12,9 @@ test.use({
 test.describe('Dynamic Text Spacing', () => {
   test('should Use Dynamic Text Spacing', async ({ page }) => {
     await page.goto();
-    await page.waitForSelector('.jp-Launcher-content');
+    await page.waitForSelector('.jp-LauncherCard-label');
 
-    let element = page.locator('div.jp-Launcher-content');
+    let element = page.locator('div.jp-LauncherCard-label');
     for (let i = 0; i < (await element.count()); i++) {
       let height = await element
         .nth(i)
@@ -38,7 +38,9 @@ test.describe('Dynamic Text Spacing', () => {
       expect(height).toEqual(expectedValue + 'px');
     }
 
-    const imageName = 'launcher-card-content-height.png';
-    expect(await page.screenshot()).toMatchSnapshot(imageName.toLowerCase());
+    const imageName = 'launcher-card-label-height.png';
+    expect(
+      await page.locator('.jp-Launcher-content').screenshot()
+    ).toMatchSnapshot(imageName.toLowerCase());
   });
 });
