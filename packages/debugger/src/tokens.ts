@@ -468,6 +468,10 @@ export namespace IDebugger {
      * Whether the variable is expanded.
      */
     expanded?: boolean;
+    /**
+     * Children variables
+     */
+    children?: IVariable[];
   }
 
   /**
@@ -1034,13 +1038,21 @@ export namespace IDebugger {
     }
 
     /**
-     * Structure storing the expansion states of variables.
+     * Debugger variable context
      */
-    export interface IVariableExpansionStates {
-      [variableName: string]: {
-        collapseState: boolean;
-        children?: IVariableExpansionStates;
-      };
+    export interface IVariableContext {
+      /**
+       * Variable
+       */
+      variable: IDebugger.IVariable;
+      /**
+       * Variable scope
+       */
+      scope: string;
+      /**
+       * Variable parents
+       */
+      parents?: string[];
     }
 
     /**
@@ -1060,7 +1072,7 @@ export namespace IDebugger {
       /**
        * Signal emitted when the current variable has been expanded.
        */
-      readonly variableExpanded: ISignal<this, IDebugger.IVariable>;
+      readonly variableExpanded: ISignal<this, IVariableContext>;
 
       /**
        * Selected variable in the variables explorer.
@@ -1071,25 +1083,17 @@ export namespace IDebugger {
        * Expand a variable.
        *
        * @param variable The variable to expand.
+       *
+       * @deprecated This is not used.
        */
       expandVariable(variable: IDebugger.IVariable): void;
 
       /**
-       * Variables tree expansion states.
+       * Toogle variable expansion.
+       *
+       * @param context The variable context
        */
-      variableExpansionStates: IVariableExpansionStates;
-
-      /**
-       * Get the expanison states tree.
-       */
-      getVariableExpansionStates(): IDebugger.Model.IVariableExpansionStates;
-
-      /**
-       * Set the expansion states tree.
-       */
-      setVariableExpasionStates(
-        states: IDebugger.Model.IVariableExpansionStates
-      ): void;
+      toggleVariableExpansion(context: IVariableContext): void;
     }
   }
 }

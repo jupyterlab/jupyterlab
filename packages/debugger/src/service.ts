@@ -350,12 +350,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         srcFrameId: frames[0].id
       })
       .then(async () => {
-        const scopes = await this._getScopes(frames[0]);
-        const variables = await Promise.all(
-          scopes.map(scope => this._getVariables(scope))
-        );
-        const variableScopes = this._convertScopes(scopes, variables);
-        this._model.variables.scopes = variableScopes;
+        await this._onCurrentFrameChanged(this.model.callstack, frames[0]);
       })
       .catch(reason => {
         console.error(reason);
@@ -857,26 +852,6 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Get the variables for a given scope.
-   *
-   * @param scope The scope to get variables for.
-   */
-  private async _getVariables(
-    scope: DebugProtocol.Scope
-  ): Promise<DebugProtocol.Variable[]> {
-    if (!this.session) {
-      throw new Error('No active debugger session');
-    }
-    if (!scope) {
-      return [];
-    }
-    const reply = await this.session.sendRequest('variables', {
-      variablesReference: scope.variablesReference
-    });
-    return reply.body.variables;
-  }
-
-  /**
    * Process the list of breakpoints from the server and return as a map.
    *
    * @param breakpoints - The list of breakpoints from the kernel.
@@ -923,7 +898,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
     const scopes = await this._getScopes(frame);
     const variables = await Promise.all(
-      scopes.map(scope => this._getVariables(scope))
+      scopes.map(scope => this.inspectVariable(scope.variablesReference))
     );
     const variableScopes = this._convertScopes(scopes, variables);
     this._model.variables.scopes = variableScopes;
@@ -933,33 +908,49 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Handle a variable expanded event and request variables from the kernel.
    *
    * @param _ The variables model.
-   * @param variable The expanded variable.
+   * @param context The expanded variable.
    */
   private async _onVariableExpanded(
-    _: VariablesModel,
-    variable: DebugProtocol.Variable
-  ): Promise<DebugProtocol.Variable[]> {
-    if (!this.session) {
-      throw new Error('No active debugger session');
+    model: VariablesModel,
+    context: IDebugger.Model.IVariableContext
+  ): Promise<void> {
+    const newScopes = model.scopes.slice();
+
+    let scope = newScopes.find(scope => scope.name === context.scope);
+    if (!scope) {
+      scope = { name: context.scope, variables: [] };
+      newScopes.push(scope);
     }
-    const reply = await this.session.sendRequest('variables', {
-      variablesReference: variable.variablesReference
-    });
-    let newVariable = { ...variable, expanded: true };
 
-    reply.body.variables.forEach((variable: DebugProtocol.Variable) => {
-      newVariable = { [variable.name]: variable, ...newVariable };
-    });
-    const newScopes = this._model.variables.scopes.map(scope => {
-      const findIndex = scope.variables.findIndex(
-        ele => ele.variablesReference === variable.variablesReference
+    const parents = context.parents ?? [];
+    let container = scope.variables;
+    for (let deep = 0; deep < parents.length; deep++) {
+      const parent = container.find(item => item.name === parents[deep]);
+      if (!parent) {
+        return;
+      }
+      if (typeof parent.children === 'undefined') {
+        parent.children = [];
+      }
+      container = parent.children;
+    }
+    const expandingItem = container.find(
+      item => item.name === context.variable.name
+    );
+    if (!expandingItem) {
+      return;
+    }
+    expandingItem.expanded = true;
+    if (typeof expandingItem.children === 'undefined') {
+      // Request children
+      const variables = await this.inspectVariable(
+        context.variable.variablesReference
       );
-      scope.variables[findIndex] = newVariable;
-      return { ...scope };
-    });
 
-    this._model.variables.scopes = [...newScopes];
-    return reply.body.variables;
+      expandingItem.children = variables;
+    }
+    // Set new variables state
+    model.scopes = [...newScopes];
   }
 
   /**

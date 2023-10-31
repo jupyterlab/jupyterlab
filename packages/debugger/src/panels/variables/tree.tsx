@@ -11,11 +11,7 @@ import {
   searchIcon
 } from '@jupyterlab/ui-components';
 
-import { ArrayExt } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
-
-import { DebugProtocol } from '@vscode/debugprotocol';
 
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -24,8 +20,6 @@ import { convertType } from '.';
 import { Debugger } from '../../debugger';
 
 import { IDebugger } from '../../tokens';
-
-import { VariablesModel } from './model';
 
 const BUTTONS_CLASS = 'jp-DebuggerVariables-buttons';
 
@@ -44,11 +38,11 @@ export class VariablesBodyTree extends ReactWidget {
     this._service = options.service;
     this._translator = options.translator;
     this._hoverChanged = new Signal(this);
-    this._variableExpanded = new Signal<this, IDebugger.IVariable>(this);
-    this._variableExpansionStates = options.model.variableExpansionStates = {};
 
     const model = (this.model = options.model);
-    model.changed.connect(this._updateScopes, this);
+    model.changed.connect(() => {
+      this.update();
+    }, this);
 
     this.addClass('jp-DebuggerVariables-body');
   }
@@ -58,7 +52,16 @@ export class VariablesBodyTree extends ReactWidget {
    */
   render(): JSX.Element {
     const scope =
-      this._scopes.find(scope => scope.name === this._scope) ?? this._scopes[0];
+      this.model.scopes.find(scope => scope.name === this._scope) ??
+      this.model.scopes[0];
+
+    const handleClick = (variable: IDebugger.IVariable, parents?: string[]) => {
+      this.model.toggleVariableExpansion({
+        variable,
+        scope: scope.name,
+        parents
+      });
+    };
 
     const handleSelectVariable = (variable: IDebugger.IVariable) => {
       this.model.selectedVariable = variable;
@@ -75,30 +78,22 @@ export class VariablesBodyTree extends ReactWidget {
 
     return scope ? (
       <>
-        <VariablesBranch
-          key={scope.name}
-          commands={this._commands}
-          service={this._service}
-          data={scope.variables}
+        <VariablesList
           filter={this._filter}
-          translator={this._translator}
+          variables={scope.variables}
+          handleClick={handleClick}
           handleSelectVariable={handleSelectVariable}
           onHoverChanged={(data: IHoverData) => {
             this._hoverChanged.emit(data);
           }}
           collapserIcon={collapserIcon}
-          onVariableExpanded={(variable: IDebugger.IVariable) => {
-            this._variableExpanded.emit(variable);
-            this.variableExpansionStates();
-          }}
-          variableExpansionStates={this.variableExpansionStates()}
-          updateVariableExpansionStates={this.updateVariableExpansionStates}
         />
         <TreeButtons
           commands={this._commands}
           service={this._service}
           hoverChanged={this._hoverChanged}
           handleSelectVariable={handleSelectVariable}
+          translator={this._translator}
         />
       </>
     ) : (
@@ -116,101 +111,20 @@ export class VariablesBodyTree extends ReactWidget {
 
   /**
    * Set the current scope
+   *
+   * @deprecated This is a no-op; the source of truth is the model.
    */
   set scope(scope: string) {
-    this._scope = scope;
-    this.update();
-  }
-
-  /**
-   * Update the scopes and the tree of variables.
-   *
-   * @param model The variables model.
-   */
-  private _updateScopes(model: VariablesModel): void {
-    if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
-      return;
-    }
-    this._scopes = model.scopes;
-    this.update();
-  }
-
-  /**
-   * Get children
-   */
-  private _getChildren(variable: IDebugger.IVariable): IDebugger.IVariable[] {
-    // add logic to extract children from a variable
-    return [];
-  }
-
-  /**
-   * Get the expanison states tree.
-   */
-  variableExpansionStates(): IDebugger.Model.IVariableExpansionStates {
-    let expansionStates: IDebugger.Model.IVariableExpansionStates = {};
-
-    const scope =
-      this._scopes.find(scope => scope.name === this._scope) ?? this._scopes[0];
-
-    if (scope.variables) {
-      expansionStates = this.buildTree(scope.variables);
-    }
-
-    console.log(expansionStates);
-    return this._variableExpansionStates;
-  }
-
-  /**
-   * Set the expansion states tree.
-   */
-  setVariableExpasionStates(states: IDebugger.Model.IVariableExpansionStates) {
-    this._variableExpansionStates = states;
-  }
-
-  /**
-   * Update variable expansion states tree, once a variable's expansion state is changed.
-   */
-  updateVariableExpansionStates(
-    variable: IDebugger.IVariable,
-    expanded: boolean
-  ): IDebugger.Model.IVariableExpansionStates {
-    const newVariableState = {
-      collapseState: expanded,
-      children: this._variableExpansionStates[variable.name].children
-    };
-
-    this._variableExpansionStates[variable.name] = newVariableState;
-
-    return this._variableExpansionStates;
-  }
-
-  /**
-   * Build tree structure of the variables,
-   */
-  buildTree(
-    variables: IDebugger.IVariable[]
-  ): IDebugger.Model.IVariableExpansionStates {
-    variables.forEach(variable => {
-      const childrenVariables = this._getChildren(variable);
-      this._variableExpansionStates[variable.name] = {
-        collapseState: false,
-        children: this.buildTree(childrenVariables) || []
-      };
-    });
-
-    return this._variableExpansionStates;
+    // no-op
   }
 
   protected model: IDebugger.Model.IVariables;
   private _commands: CommandRegistry;
   private _scope = '';
-  private _scopes: IDebugger.IScope[] = [];
   private _filter = new Set<string>();
   private _service: IDebugger;
   private _translator: ITranslator | undefined;
   private _hoverChanged: Signal<VariablesBodyTree, IHoverData>;
-  private _variableExpanded = new Signal<this, IDebugger.IVariable>(this);
-  private _variableExpansionStates: IDebugger.Model.IVariableExpansionStates;
 }
 
 interface IHoverData {
@@ -356,18 +270,14 @@ const TreeButtons = (props: ITreeButtonsProps): JSX.Element => {
   );
 };
 
-interface IVariablesBranchProps {
-  /**
-   * The commands registry.
-   */
-  commands: CommandRegistry;
-  data: IDebugger.IVariable[];
-  service: IDebugger;
+interface IVariablesListProps {
+  variables: IDebugger.IVariable[];
+
   filter?: Set<string>;
   /**
-   * The application language translator
+   * Callback on click
    */
-  translator?: ITranslator;
+  handleClick: (variable: IDebugger.IVariable, parents?: string[]) => void;
   /**
    * Callback on variable selection
    */
@@ -380,21 +290,6 @@ interface IVariablesBranchProps {
    * Collapser icon component
    */
   collapserIcon: JSX.Element;
-  /**
-   * Variables tree expansion states;
-   */
-  variableExpansionStates: IDebugger.Model.IVariableExpansionStates;
-  /**
-   * Callback on variable expansion.
-   */
-  onVariableExpanded: (variable: IDebugger.IVariable) => void;
-  /**
-   * Update variables expansion tree when a variable's collapse status is changed.
-   */
-  updateVariableExpansionStates: (
-    variable: IDebugger.IVariable,
-    expanded: boolean
-  ) => IDebugger.Model.IVariableExpansionStates;
 }
 
 /**
@@ -405,48 +300,41 @@ interface IVariablesBranchProps {
  * @param props.service The debugger service.
  * @param props.filter Optional variable filter list.
  */
-const VariablesBranch = (props: IVariablesBranchProps): JSX.Element => {
+const VariablesList = (props: IVariablesListProps): JSX.Element => {
   const {
-    commands,
-    data,
-    service,
+    variables,
     filter,
-    translator,
+    handleClick,
     handleSelectVariable,
     onHoverChanged,
-    collapserIcon,
-    onVariableExpanded,
-    variableExpansionStates,
-    updateVariableExpansionStates
+    collapserIcon
   } = props;
-  const [variables, setVariables] = useState(data);
-
-  useEffect(() => {
-    setVariables(data);
-  }, [data]);
 
   return (
     <ul className="jp-DebuggerVariables-branch">
       {variables
-        .filter(
-          variable => !(filter || new Set()).has(variable.evaluateName || '')
+        .filter(variable =>
+          filter ? !filter.has(variable.evaluateName ?? '') : true
         )
         .map(variable => {
           const key = `${variable.name}-${variable.evaluateName}-${variable.type}-${variable.value}-${variable.variablesReference}`;
           return (
             <VariableComponent
               key={key}
-              commands={commands}
-              data={variable}
-              service={service}
+              variable={variable}
               filter={filter}
-              translator={translator}
+              onClick={(variable_, parents) => {
+                if (!parents) {
+                  parents = [];
+                }
+                if (variable_ !== variable) {
+                  parents.unshift(variable.name);
+                }
+                handleClick(variable_, parents);
+              }}
               onSelect={handleSelectVariable}
               onHoverChanged={onHoverChanged}
               collapserIcon={collapserIcon}
-              onVariableExpanded={onVariableExpanded}
-              variableExpansionStates={variableExpansionStates}
-              updateVariableExpansionStates={updateVariableExpansionStates}
             />
           );
         })}
@@ -459,25 +347,17 @@ const VariablesBranch = (props: IVariablesBranchProps): JSX.Element => {
  */
 interface IVariableComponentProps {
   /**
-   * The commands registry.
-   */
-  commands: CommandRegistry;
-  /**
    * Variable description
    */
-  data: IDebugger.IVariable;
+  variable: IDebugger.IVariable;
   /**
    * Filter applied on the variable list
    */
   filter?: Set<string>;
   /**
-   * The Debugger service
+   * Callback on click
    */
-  service: IDebugger;
-  /**
-   * The application language translator
-   */
-  translator?: ITranslator;
+  onClick: (variable: IDebugger.IVariable, parents?: string[]) => void;
   /**
    * Callback on selection
    */
@@ -490,21 +370,6 @@ interface IVariableComponentProps {
    * Collapser icon component
    */
   collapserIcon: JSX.Element;
-  /**
-   * Callback on variable expansion.
-   */
-  onVariableExpanded: (variable: IDebugger.IVariable) => void;
-  /**
-   * Variables tree expansion states;
-   */
-  variableExpansionStates: IDebugger.Model.IVariableExpansionStates;
-  /**
-   * Update variables expansion tree when a variable's collapse status is changed.
-   */
-  updateVariableExpansionStates: (
-    variable: IDebugger.IVariable,
-    expanded: boolean
-  ) => IDebugger.Model.IVariableExpansionStates;
 }
 
 function _prepareDetail(variable: IDebugger.IVariable) {
@@ -526,50 +391,23 @@ function _prepareDetail(variable: IDebugger.IVariable) {
  * @param props.filter Optional variable filter list.
  */
 const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
-  const {
-    commands,
-    data,
-    service,
-    filter,
-    translator,
-    onSelect,
-    onHoverChanged,
-    collapserIcon,
-    onVariableExpanded,
-    variableExpansionStates,
-    updateVariableExpansionStates
-  } = props;
-  const [variable] = useState(data);
-  const [expanded, setExpanded] = useState<boolean>();
-  const [variables, setVariables] = useState<DebugProtocol.Variable[]>();
+  const { variable, filter, onClick, onSelect, onHoverChanged, collapserIcon } =
+    props;
 
   const onSelection = onSelect ?? (() => void 0);
 
   const expandable =
     variable.variablesReference !== 0 || variable.type === 'function';
 
-  let currentVariableExpansionStates = variableExpansionStates;
-
-  const onVariableClicked = async (e: React.MouseEvent): Promise<void> => {
-    if (!expandable) {
-      return;
-    }
-    e.stopPropagation();
-    const variables = await service.inspectVariable(
-      variable.variablesReference
-    );
-    setExpanded(!expanded);
-    setVariables(variables);
-    onVariableExpanded(variable);
-    currentVariableExpansionStates = updateVariableExpansionStates(
-      variable,
-      !expanded
-    );
-  };
-
   return (
     <li
-      onClick={(e): Promise<void> => onVariableClicked(e)}
+      onClick={e => {
+        if (!expandable) {
+          return;
+        }
+        e.stopPropagation();
+        onClick(variable);
+      }}
       onMouseDown={e => {
         e.stopPropagation();
         onSelection(variable);
@@ -593,7 +431,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       <span
         className={
           'jp-DebuggerVariables-collapser' +
-          (expanded ? ' jp-mod-expanded' : '')
+          (variable.expanded ? ' jp-mod-expanded' : '')
         }
       >
         {
@@ -605,22 +443,16 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       <span className="jp-DebuggerVariables-detail">
         {_prepareDetail(variable)}
       </span>
-      {expanded && variables && (
-        <VariablesBranch
-          key={variable.name}
-          commands={commands}
-          data={variables}
-          service={service}
+      {variable.expanded && variable.children?.length ? (
+        <VariablesList
+          variables={variable.children}
           filter={filter}
-          translator={translator}
+          handleClick={onClick}
           handleSelectVariable={onSelect}
           onHoverChanged={onHoverChanged}
           collapserIcon={collapserIcon}
-          onVariableExpanded={onVariableExpanded}
-          variableExpansionStates={currentVariableExpansionStates}
-          updateVariableExpansionStates={updateVariableExpansionStates}
         />
-      )}
+      ) : null}
     </li>
   );
 };
@@ -628,7 +460,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
 /**
  * A namespace for VariablesBodyTree `statics`.
  */
-namespace VariablesBodyTree {
+export namespace VariablesBodyTree {
   /**
    * Instantiation options for `VariablesBodyTree`.
    */
@@ -649,9 +481,5 @@ namespace VariablesBodyTree {
      * The application language translator
      */
     translator?: ITranslator;
-    /**
-     * Variables tree expansion states;
-     */
-    variableExpansionStates: IDebugger.Model.IVariableExpansionStates;
   }
 }

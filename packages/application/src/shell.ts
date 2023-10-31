@@ -295,11 +295,6 @@ export namespace ILabShell {
         readonly expansionStates: Array<boolean> | null;
       };
     };
-
-    /**
-     * The expansion states of the variables from the debugger sidebar.
-     */
-    readonly debuggerVariables: boolean[] | null;
   }
 }
 
@@ -2039,14 +2034,6 @@ namespace Private {
           expansionStates: boolean[] | null;
         };
       } = {};
-      const debuggerVariables = [true, true, true];
-      this._stackedPanel.widgets.forEach((w: SidePanel) => {
-        // @ts-expect-error sometimes widget is a DebuggerSidebar with Variables
-        if (w.id && w.content instanceof SplitPanel && w?.variables) {
-          // console.log(w?.variables._tree) // get expansion states of variables
-          // variableStates = w?.variables._tree.variableExpansionStates();
-        }
-      });
       this._stackedPanel.widgets.forEach((w: SidePanel) => {
         if (w.id && w.content instanceof SplitPanel) {
           widgetStates[w.id] = {
@@ -2060,8 +2047,7 @@ namespace Private {
         currentWidget,
         visible: !this._isHiddenByUser,
         widgets,
-        widgetStates,
-        debuggerVariables
+        widgetStates
       };
     }
 
@@ -2094,15 +2080,6 @@ namespace Private {
             if (state.sizes) {
               w.content.setRelativeSizes(state.sizes);
             }
-          }
-        });
-      }
-      if (data.debuggerVariables) {
-        this._stackedPanel.widgets.forEach((w: SidePanel) => {
-          // @ts-expect-error sometimes widget is a DebuggerSidebar with Variables
-          if (w.id && w.content instanceof SplitPanel && w?.variables) {
-            // set expansion states of variables
-            // w?.variables._tree.setVariableExpansionStates(data.debuggerVariables);
           }
         });
       }

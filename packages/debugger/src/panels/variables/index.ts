@@ -30,15 +30,13 @@ export class Variables extends PanelWithToolbar {
     const { model, service, commands, themeManager } = options;
     const translator = options.translator || nullTranslator;
     const trans = translator.load('jupyterlab');
-    const variableExpansionStates = {};
     this.title.label = trans.__('Variables');
     this.toolbar.addClass('jp-DebuggerVariables-toolbar');
     this._tree = new VariablesBodyTree({
       model,
       service,
       commands,
-      translator,
-      variableExpansionStates
+      translator
     });
     this._table = new VariablesBodyGrid({
       model,
@@ -65,7 +63,7 @@ export class Variables extends PanelWithToolbar {
         this.node.setAttribute('data-jp-table', 'true');
         markViewButtonSelection('table');
       } else {
-        this._tree.show(); // add layout restoration here ?
+        this._tree.show();
         this._table.hide();
         this.node.removeAttribute('data-jp-table');
         markViewButtonSelection('tree');
@@ -199,11 +197,3 @@ export namespace Variables {
     translator?: ITranslator;
   }
 }
-
-/*
-To do:
-add signal to expand and collapse selected variable
-listen to signal - in shell.ts
-getVariableStates
-setVariableStates
-*/

@@ -469,9 +469,6 @@ export class LayoutRestorer implements ILayoutRestorer {
         };
       };
     }
-    if (area.debuggerVariables) {
-      dehydrated.debuggerVariables = area.debuggerVariables as boolean[];
-    }
     return dehydrated;
   }
 
@@ -496,8 +493,7 @@ export class LayoutRestorer implements ILayoutRestorer {
             sizes: null,
             expansionStates: null
           }
-        },
-        debuggerVariables: null
+        }
       };
     }
     const internal = this._widgets;
@@ -524,8 +520,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       currentWidget: currentWidget!,
       widgets: widgets as Widget[] | null,
       visible: area.visible ?? true,
-      widgetStates: widgetStates,
-      debuggerVariables: area.debuggerVariables as boolean[]
+      widgetStates: widgetStates
     };
   }
 

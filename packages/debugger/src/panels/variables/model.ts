@@ -34,7 +34,7 @@ export class VariablesModel implements IDebugger.Model.IVariables {
   /**
    * Signal emitted when the current variable has been expanded.
    */
-  get variableExpanded(): ISignal<this, IDebugger.IVariable> {
+  get variableExpanded(): ISignal<this, IDebugger.Model.IVariableContext> {
     return this._variableExpanded;
   }
 
@@ -49,30 +49,58 @@ export class VariablesModel implements IDebugger.Model.IVariables {
    * Expand a variable.
    *
    * @param variable The variable to expand.
+   * @deprecated This is a no-op
    */
   expandVariable(variable: IDebugger.IVariable): void {
-    this._variableExpanded.emit(variable);
+    // no-op
   }
 
   /**
-   * Get the expanison states tree.
+   * Toggle variable expansion state.
+   *
+   * @param context The variable context.
    */
-  getVariableExpansionStates(): IDebugger.Model.IVariableExpansionStates {
-    return this.variableExpansionStates;
-  }
+  toggleVariableExpansion(context: IDebugger.Model.IVariableContext): void {
+    let scope = this.scopes.find(scope => scope.name === context.scope);
+    if (!scope) {
+      scope = { name: context.scope, variables: [] };
+      this.scopes.push(scope);
+    }
 
-  /**
-   * Set the expansion states tree.
-   */
-  setVariableExpasionStates(
-    expansionStates: IDebugger.Model.IVariableExpansionStates
-  ) {
-    this.variableExpansionStates = expansionStates;
+    const parents = context.parents ?? [];
+    let container = scope.variables;
+    for (let deep = 0; deep < parents.length; deep++) {
+      const parent = container.find(item => item.name === parents[deep]);
+      if (!parent) {
+        return;
+      }
+      if (typeof parent.children === 'undefined') {
+        parent.children = [];
+      }
+      container = parent.children;
+    }
+    const expandingItem = container.find(
+      item => item.name === context.variable.name
+    );
+    if (!expandingItem) {
+      return;
+    }
+
+    if (expandingItem.expanded === true) {
+      expandingItem.expanded = false;
+      this._changed.emit();
+    } else {
+      // Variable expanded will set new scopes through `DebuggerService._onVariableExpanded`.
+      // That will triggered the `_changed` signal; so no need to call it here.
+      this._variableExpanded.emit(context);
+    }
   }
 
   private _selectedVariable: IDebugger.IVariableSelection | null = null;
   private _state: IDebugger.IScope[] = [];
-  private _variableExpanded = new Signal<this, IDebugger.IVariable>(this);
+  private _variableExpanded = new Signal<
+    this,
+    IDebugger.Model.IVariableContext
+  >(this);
   private _changed = new Signal<this, void>(this);
-  variableExpansionStates: IDebugger.Model.IVariableExpansionStates;
 }
