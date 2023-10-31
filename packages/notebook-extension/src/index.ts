@@ -315,6 +315,10 @@ namespace CommandIDs {
   export const selectCompleter = 'completer:select-notebook';
 
   export const tocRunCells = 'toc:run-cells';
+
+  export const accessPreviousHistory = 'notebook:access-previous-history-entry';
+
+  export const accessNextHistory = 'notebook:access-next-history-entry';
 }
 
 /**
@@ -1842,7 +1846,9 @@ function activateNotebookHandler(
       windowingMode: settings.get('windowingMode').composite as
         | 'defer'
         | 'full'
-        | 'none'
+        | 'none',
+      accessKernelHistory: settings.get('accessKernelHistory')
+        .composite as boolean
     };
     setSideBySideOutputRatio(factory.notebookConfig.sideBySideOutputRatio);
     const sideBySideMarginStyle = `.jp-mod-sideBySide.jp-Notebook .jp-Notebook-cell {
@@ -3404,6 +3410,24 @@ function addCommands(
       );
     }
   });
+  commands.addCommand(CommandIDs.accessPreviousHistory, {
+    label: trans.__('Access Previous Kernel History Entry'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        return await NotebookActions.accessPreviousHistory(current.content);
+      }
+    }
+  });
+  commands.addCommand(CommandIDs.accessNextHistory, {
+    label: trans.__('Access Next Kernel History Entry'),
+    execute: async args => {
+      const current = getCurrent(tracker, shell, args);
+      if (current) {
+        return await NotebookActions.accessNextHistory(current.content);
+      }
+    }
+  });
 }
 
 /**
@@ -3439,7 +3463,9 @@ function populatePalette(
     CommandIDs.trust,
     CommandIDs.toggleCollapseCmd,
     CommandIDs.collapseAllCmd,
-    CommandIDs.expandAllCmd
+    CommandIDs.expandAllCmd,
+    CommandIDs.accessPreviousHistory,
+    CommandIDs.accessNextHistory
   ].forEach(command => {
     palette.addItem({ command, category });
   });

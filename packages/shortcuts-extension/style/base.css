@@ -353,16 +353,17 @@
 
 .jp-Shortcuts-AdvancedOptionsLink {
   color: var(--jp-content-link-color);
-  text-decoration: none;
   margin-right: 15px;
 }
 
 .jp-Shortcuts-AdvancedOptionsLink:hover {
   color: var(--jp-brand-color0);
+  text-decoration: underline;
 }
 
 .jp-Shortcuts-AdvancedOptionsLink:active {
   color: var(--jp-brand-color0);
+  text-decoration: underline;
 }
 
 .jp-Shortcuts-HeaderRowContainer {
