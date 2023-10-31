@@ -48,7 +48,7 @@
       "selector": "body"
     },
     {
-      "command": "application:display-sidebars-shortcut-numbers",
+      "command": "application:activate-sidebar-overlays",
       "keys": ["Alt"],
       "selector": "body",
       "args": {
@@ -56,7 +56,7 @@
       }
     },
     {
-      "command": "application:display-sidebars-shortcut-numbers",
+      "command": "application:activate-sidebar-overlays",
       "keys": ["Alt Shift"],
       "selector": "body",
       "args": {
