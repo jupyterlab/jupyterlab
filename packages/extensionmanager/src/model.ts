@@ -356,20 +356,18 @@ export class ListModel extends VDomModel {
    * Install an extension.
    *
    * @param entry An entry indicating which extension to install.
-   * @param useLatestVersion Whether to use the latest version to install.
+   * @param options Additional options for the action.
    */
   async install(
     entry: IEntry,
-    options: { useVersion?: string }
+    options: { useVersion?: string } = {}
   ): Promise<void> {
-    await this.performAction('install', entry, options).then(
-      data => {
-        if (data.status !== 'ok') {
-          reportInstallError(entry.name, data.message, this.translator);
-        }
-        return this.update(true);
+    await this.performAction('install', entry, options).then(data => {
+      if (data.status !== 'ok') {
+        reportInstallError(entry.name, data.message, this.translator);
       }
-    );
+      return this.update(true);
+    });
   }
 
   /**
