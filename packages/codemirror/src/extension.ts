@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { closeBrackets } from '@codemirror/autocomplete';
+import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { defaultKeymap, indentLess } from '@codemirror/commands';
 import {
   bracketMatching,
@@ -13,6 +13,7 @@ import {
   Compartment,
   EditorState,
   Extension,
+  Prec,
   StateEffect
 } from '@codemirror/state';
 import {
@@ -715,7 +716,12 @@ export namespace EditorExtensionRegistry {
       Object.freeze({
         name: 'matchBrackets',
         default: true,
-        factory: () => createConditionalExtension(bracketMatching()),
+        factory: () =>
+          createConditionalExtension([
+            bracketMatching(),
+            // closeBracketsKeymap must have higher precedence over defaultKeymap
+            Prec.high(keymap.of(closeBracketsKeymap))
+          ]),
         schema: {
           type: 'boolean',
           title: trans.__('Match Brackets')
