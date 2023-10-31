@@ -131,7 +131,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                         <Button
                           onClick={() =>
                             props.performAction!('install', entry, {
-                              useLatestVersion: true
+                              useVersion: entry.latest_version
                             })
                           }
                           title={trans.__(
@@ -329,7 +329,7 @@ namespace ListView {
     performAction?: (
       action: Action,
       entry: IEntry,
-      actionOptions: IActionOptions
+      actionOptions?: IActionOptions
     ) => void;
   }
 }
@@ -519,7 +519,7 @@ class InstalledList extends ReactWidget {
   ): Promise<void> {
     switch (action) {
       case 'install':
-        return this.model.install(entry, actionOptions.useLatestVersion);
+        return this.model.install(entry, actionOptions);
       case 'uninstall':
         return this.model.uninstall(entry);
       case 'enable':
@@ -564,7 +564,7 @@ class SearchResult extends ReactWidget {
   ): Promise<void> {
     switch (action) {
       case 'install':
-        return this.model.install(entry, actionOptions.useLatestVersion);
+        return this.model.install(entry, actionOptions);
       case 'uninstall':
         return this.model.uninstall(entry);
       case 'enable':

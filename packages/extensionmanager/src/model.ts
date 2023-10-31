@@ -181,9 +181,12 @@ export type Action = 'install' | 'uninstall' | 'enable' | 'disable';
  */
 export interface IActionOptions {
   /**
-   * If true, install the latest version of the entry.
+   * Install the version of the entry.
+   *
+   * #### Note
+   * This is ignored by all actions except install.
    */
-  useLatestVersion?: boolean;
+  useVersion?: string;
 }
 
 /**
@@ -357,9 +360,9 @@ export class ListModel extends VDomModel {
    */
   async install(
     entry: IEntry,
-    useLatestVersion: boolean = false
+    options: { useVersion?: string }
   ): Promise<void> {
-    await this.performAction('install', entry, { useLatestVersion }).then(
+    await this.performAction('install', entry, options).then(
       data => {
         if (data.status !== 'ok') {
           reportInstallError(entry.name, data.message, this.translator);
@@ -508,8 +511,8 @@ export class ListModel extends VDomModel {
       extension_name: entry.name
     };
 
-    if (action === 'install' && actionOptions.useLatestVersion) {
-      bodyJson['extension_version'] = entry.latest_version;
+    if (actionOptions.useVersion) {
+      bodyJson['extension_version'] = actionOptions.useVersion;
     }
 
     const actionRequest = Private.requestAPI<IActionReply>(
