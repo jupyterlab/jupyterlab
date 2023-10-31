@@ -120,11 +120,7 @@
   "@jupyterlab/lsp-extension:feature": "Provides the language server feature manager.",
   "@jupyterlab/lsp-extension:settings": "Provides the language server settings.",
   "@jupyterlab/lsp:ILSPCodeExtractorsManager": "Provides the code extractor manager.",
-<<<<<<< HEAD
   "@jupyterlab/lsp-extension:tracker": "Provides the tracker of `WidgetLSPAdapter`.",
-=======
-  "@jupyterlab/lsp-extension:tracker": "Provides the `WidgetLSPAdapter`s tracker.",
->>>>>>> b8b0b84774 (Update Playwright Snapshots)
   "@jupyterlab/mainmenu-extension:plugin": "Adds and provides the application main menu.",
   "@jupyterlab/markdownviewer-extension:plugin": "Adds markdown file viewer and provides its tracker.",
   "@jupyterlab/markedparser-extension:plugin": "Provides the Markdown parser.",
