@@ -176,6 +176,10 @@ export class CellToolbarTracker implements IDisposable {
       const promises: Promise<void>[] = [cell.ready];
       if (this._toolbarFactory) {
         setToolbar(cell, this._toolbarFactory, toolbarWidget);
+        // FIXME toolbarWidget.update() - strangely this does not work
+        (toolbarWidget.layout as PanelLayout).widgets.forEach(w => {
+          w.update();
+        });
       } else {
         for (const { name, widget } of this._toolbarItems!) {
           toolbarWidget.addItem(name, widget);
