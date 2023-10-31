@@ -2271,7 +2271,7 @@ namespace Private {
     private _createSkipLink(skipLinkText: string, area: ILabShell.Area): void {
       const skipLink = document.createElement('a');
       skipLink.href = '#';
-      skipLink.tabIndex = 1;
+      skipLink.tabIndex = 0;
       skipLink.text = skipLinkText;
       skipLink.className = 'skip-link';
       skipLink.dataset['targetarea'] = area;
