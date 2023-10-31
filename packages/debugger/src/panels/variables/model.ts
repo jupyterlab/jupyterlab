@@ -86,14 +86,12 @@ export class VariablesModel implements IDebugger.Model.IVariables {
       return;
     }
 
+    expandingItem.expanded = !expandingItem.expanded;
     if (expandingItem.expanded === true) {
-      expandingItem.expanded = false;
-      this._changed.emit();
-    } else {
       // Variable expanded will set new scopes through `DebuggerService._onVariableExpanded`.
-      // That will triggered the `_changed` signal; so no need to call it here.
       this._variableExpanded.emit(context);
     }
+    this._changed.emit();
   }
 
   private _selectedVariable: IDebugger.IVariableSelection | null = null;

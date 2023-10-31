@@ -358,16 +358,25 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Requests all the defined variables and display them in the
-   * table view.
+   * Requests all the defined variables in none-stopped threads.
+   *
+   * This is used to display the kernel variables in between code execution.
    */
   async displayDefinedVariables(): Promise<void> {
+    this._model.variables.variableExpanded.disconnect(
+      this._onVariableExpanded,
+      this
+    );
+
     if (!this.session) {
       throw new Error('No active debugger session');
     }
-    const inspectReply = await this.session.sendRequest('inspectVariables', {});
-    const variables = inspectReply.body.variables;
+    const reply = await this.session.sendRequest('inspectVariables', {});
+    if (!reply.success) {
+      throw new Error(reply.message);
+    }
 
+    const variables = reply.body.variables;
     const variableScopes = [
       {
         name: this._trans.__('Globals'),
@@ -375,6 +384,10 @@ export class DebuggerService implements IDebugger, IDisposable {
       }
     ];
     this._model.variables.scopes = variableScopes;
+    this._model.variables.variableExpanded.connect(
+      this._onVariableExpanded,
+      this
+    );
   }
 
   async displayModules(): Promise<void> {
@@ -907,13 +920,18 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Handle a variable expanded event and request variables from the kernel.
    *
-   * @param _ The variables model.
+   * @param model The variables model.
    * @param context The expanded variable.
    */
   private async _onVariableExpanded(
     model: VariablesModel,
     context: IDebugger.Model.IVariableContext
   ): Promise<void> {
+    if (context.variable.children) {
+      // Bail early as we know the variable children
+      return;
+    }
+
     const newScopes = model.scopes.slice();
 
     let scope = newScopes.find(scope => scope.name === context.scope);
@@ -940,7 +958,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (!expandingItem) {
       return;
     }
-    expandingItem.expanded = true;
+
     if (typeof expandingItem.children === 'undefined') {
       // Request children
       const variables = await this.inspectVariable(
