@@ -225,7 +225,7 @@ const browser: JupyterFrontEndPlugin<void> = {
             showHiddenFiles: false,
             showFileCheckboxes: false,
             sortNotebooksFirst: false,
-            enableFullPath: false
+            showFullPath: false
           };
           const fileBrowserModelConfig = {
             filterDirectories: true
