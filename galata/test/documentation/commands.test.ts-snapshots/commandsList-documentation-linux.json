@@ -1375,6 +1375,22 @@
     "shortcuts": []
   },
   {
+    "id": "notebook:access-next-history-entry",
+    "label": "Access Next Kernel History Entry",
+    "caption": "",
+    "shortcuts": [
+      "Alt ArrowDown"
+    ]
+  },
+  {
+    "id": "notebook:access-previous-history-entry",
+    "label": "Access Previous Kernel History Entry",
+    "caption": "",
+    "shortcuts": [
+      "Alt ArrowUp"
+    ]
+  },
+  {
     "id": "notebook:change-cell-to-code",
     "label": "Change to Code Cell Type",
     "caption": "",
@@ -1982,6 +1998,18 @@
     "shortcuts": [
       "Z"
     ]
+  },
+  {
+    "id": "pluginmanager:open",
+    "label": "Advanced Plugin Manager",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "pluginmanager:refresh",
+    "label": "Refresh Plugin List",
+    "caption": "Refresh plugins list",
+    "shortcuts": []
   },
   {
     "id": "property-inspector:show-panel",

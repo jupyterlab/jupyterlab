@@ -3,6 +3,7 @@
 
 import { SessionContext } from '@jupyterlab/apputils';
 import { Cell, ICellModel } from '@jupyterlab/cells';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import {
   Document,
   IAdapterOptions,
@@ -67,7 +68,9 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     } else {
       mimeType = languageMetadata.mimetype;
     }
-    return Array.isArray(mimeType) ? mimeType[0] ?? 'text/plain' : mimeType;
+    return Array.isArray(mimeType)
+      ? mimeType[0] ?? IEditorMimeTypeService.defaultMimeType
+      : mimeType;
   }
 
   /**
