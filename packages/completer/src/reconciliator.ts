@@ -127,6 +127,7 @@ export class ProviderReconciliator implements IProviderReconciliator {
       // Stream an update.
       item.insertText = updated.insertText;
       item.lastStreamed = addition;
+      item.isError = reply.response.isError;
       streamed.emit(CompletionHandler.StraemEvent.update);
     }
 

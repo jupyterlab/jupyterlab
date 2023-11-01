@@ -14,6 +14,7 @@ const TRANSIENT_LETTER_SPACER_CLASS = 'jp-GhostText-letterSpacer';
 const GHOST_TEXT_CLASS = 'jp-GhostText';
 const STREAMED_TOKEN_CLASS = 'jp-GhostText-streamedToken';
 const STREAMING_INDICATOR_CLASS = 'jp-GhostText-streamingIndicator';
+const ERROR_INDICATOR_CLASS = 'jp-GhostText-errorIndicator';
 
 /**
  * Ghost text content and placement.
@@ -39,6 +40,10 @@ export interface IGhostText {
    * Whether streaming is in progress.
    */
   streaming?: boolean;
+  /**
+   * An error occurred in the request.
+   */
+  isError?: boolean;
   /**
    * Callback to execute when pointer enters the boundary of the ghost text.
    */
@@ -139,7 +144,43 @@ class GhostTextWidget extends WidgetType {
     return wrap;
   }
 
+  private _removeErrorAnimation(dom: HTMLElement) {
+    const elementsToRemove = dom.querySelectorAll(`.${ERROR_INDICATOR_CLASS}`);
+
+    elementsToRemove.forEach(element => {
+      element.remove();
+    });
+  }
+
+  /**
+   * Mount the error animation dom and delete all displayed ghost text dom.
+   */
+  private _mountErrorAnimation(dom: HTMLElement) {
+    const streamingIndicator = document.createElement('span');
+    streamingIndicator.className = ERROR_INDICATOR_CLASS;
+
+    // Delete stream and previous error animation
+    const elementsToRemove = dom.querySelectorAll(
+      `.${STREAMING_INDICATOR_CLASS}, .${ERROR_INDICATOR_CLASS}`
+    );
+
+    elementsToRemove.forEach(element => {
+      element.remove();
+    });
+
+    dom.appendChild(streamingIndicator);
+  }
+
   private _updateDOM(dom: HTMLElement) {
+    if (this.options.isError) {
+      this._mountErrorAnimation(dom);
+
+      setTimeout(() => {
+        this._removeErrorAnimation(dom);
+      }, 2000);
+      return;
+    }
+
     const content = this.content;
     let addition = this.options.addedPart;
     if (addition && !this.isSpacer) {

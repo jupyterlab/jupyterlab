@@ -411,7 +411,8 @@ export class InlineCompleter extends Widget {
       addedPart: item.lastStreamed,
       streaming: item.streaming,
       onPointerOver: this._onPointerOverGhost.bind(this),
-      onPointerLeave: this._onPointerLeaveGhost.bind(this)
+      onPointerLeave: this._onPointerLeaveGhost.bind(this),
+      isError: item.isError
     });
   }
 
