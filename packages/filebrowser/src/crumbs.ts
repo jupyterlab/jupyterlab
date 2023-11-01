@@ -116,6 +116,17 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
+   * Whether to show the full path in the breadcrumbs
+   */
+  get fullPath(): boolean {
+    return this._fullPath;
+  }
+
+  set fullPath(value: boolean) {
+    this._fullPath = value;
+  }
+
+  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
@@ -320,14 +331,6 @@ export class BreadCrumbs extends Widget {
   private _crumbs: ReadonlyArray<HTMLElement>;
   private _crumbSeps: ReadonlyArray<HTMLElement>;
   private _fullPath: boolean;
-
-  get fullPath(): boolean {
-    return this._fullPath;
-  }
-
-  set fullPath(value: boolean) {
-    this._fullPath = value;
-  }
 }
 
 /**
