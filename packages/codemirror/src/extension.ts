@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { closeBrackets } from '@codemirror/autocomplete';
+import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
 import { defaultKeymap, indentLess } from '@codemirror/commands';
 import {
   bracketMatching,
@@ -13,6 +13,7 @@ import {
   Compartment,
   EditorState,
   Extension,
+  Prec,
   StateEffect
 } from '@codemirror/state';
 import {
@@ -20,13 +21,15 @@ import {
   drawSelection,
   EditorView,
   highlightActiveLine,
+  highlightSpecialChars,
   highlightTrailingWhitespace,
   highlightWhitespace,
   KeyBinding,
   keymap,
   lineNumbers,
   rectangularSelection,
-  scrollPastEnd
+  scrollPastEnd,
+  tooltips
 } from '@codemirror/view';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
@@ -642,6 +645,15 @@ export namespace EditorExtensionRegistry {
         }
       }),
       Object.freeze({
+        name: 'highlightSpecialCharacters',
+        default: true,
+        factory: () => createConditionalExtension(highlightSpecialChars()),
+        schema: {
+          type: 'boolean',
+          title: trans.__('Highlight special characters')
+        }
+      }),
+      Object.freeze({
         name: 'highlightTrailingWhitespace',
         default: false,
         factory: () =>
@@ -714,7 +726,12 @@ export namespace EditorExtensionRegistry {
       Object.freeze({
         name: 'matchBrackets',
         default: true,
-        factory: () => createConditionalExtension(bracketMatching()),
+        factory: () =>
+          createConditionalExtension([
+            bracketMatching(),
+            // closeBracketsKeymap must have higher precedence over defaultKeymap
+            Prec.high(keymap.of(closeBracketsKeymap))
+          ]),
         schema: {
           type: 'boolean',
           title: trans.__('Match Brackets')
@@ -789,6 +806,19 @@ export namespace EditorExtensionRegistry {
           type: 'number',
           title: trans.__('Tab size')
         }
+      }),
+      Object.freeze({
+        name: 'tooltips',
+        factory: () =>
+          // we need `absolute` due to use of `contain: layout` in lumino;
+          // we attach to body to ensure cursor collaboration tooltip is
+          // visible in first line of the editor.
+          createImmutableExtension(
+            tooltips({
+              position: 'absolute',
+              parent: document.body
+            })
+          )
       }),
       Object.freeze({
         name: 'allowMultipleSelections',

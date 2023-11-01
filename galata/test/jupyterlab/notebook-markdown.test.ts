@@ -75,4 +75,18 @@ test.describe('Notebook Markdown', () => {
       imageName
     );
   });
+
+  test('Render a MermaidJS flowchart', async ({ page, tmpPath }) => {
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    const imageName = 'render-mermaid-flowchart.png';
+    const cell = await page.notebook.getCell(3);
+    expect(await cell.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Render a MermaidJS error', async ({ page, tmpPath }) => {
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    const imageName = 'render-mermaid-error.png';
+    const cell = await page.notebook.getCell(4);
+    expect(await cell.screenshot()).toMatchSnapshot(imageName);
+  });
 });

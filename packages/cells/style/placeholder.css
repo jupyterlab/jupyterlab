@@ -8,18 +8,18 @@
 |----------------------------------------------------------------------------*/
 
 .jp-Placeholder {
-  display: table;
-  table-layout: fixed;
+  display: flex;
+  flex-direction: row;
   width: 100%;
 }
 
 .jp-Placeholder-prompt {
-  display: table-cell;
+  flex: 0 0 var(--jp-cell-prompt-width);
   box-sizing: border-box;
 }
 
 .jp-Placeholder-content {
-  display: table-cell;
+  flex: 1 1 auto;
   padding: 4px 6px;
   border: 1px solid transparent;
   border-radius: 0;
@@ -60,4 +60,22 @@
 .jp-InputPlaceholder > .jp-Placeholder-content {
   border-color: var(--jp-cell-editor-border-color);
   background: var(--jp-cell-editor-background);
+}
+
+/*-----------------------------------------------------------------------------
+| Print
+|----------------------------------------------------------------------------*/
+@media print {
+  .jp-Placeholder {
+    display: table;
+    table-layout: fixed;
+  }
+
+  .jp-Placeholder-content {
+    display: table-cell;
+  }
+
+  .jp-Placeholder-prompt {
+    display: table-cell;
+  }
 }

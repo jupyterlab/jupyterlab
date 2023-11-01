@@ -825,6 +825,10 @@ export namespace CommandToolbarButtonComponent {
      * Overrides command label
      */
     label?: string;
+    /**
+     * Overrides command caption
+     */
+    caption?: string;
   }
 }
 
@@ -1089,7 +1093,7 @@ namespace Private {
       dataset: { 'data-command': options.id },
       icon,
       iconClass,
-      tooltip,
+      tooltip: options.caption ?? tooltip,
       onClick,
       enabled,
       label: options.label ?? label

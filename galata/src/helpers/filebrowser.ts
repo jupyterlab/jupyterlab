@@ -10,7 +10,10 @@ import * as Utils from '../utils';
  * File Browser Helpers
  */
 export class FileBrowserHelper {
-  constructor(readonly page: Page, readonly contents: ContentsHelper) {}
+  constructor(
+    readonly page: Page,
+    readonly contents: ContentsHelper
+  ) {}
 
   /**
    * Create the selector for a file in the file browser
@@ -95,10 +98,11 @@ export class FileBrowserHelper {
    * Note: This will double click on the file;
    * an editor needs to be available for the given file type.
    *
-   * @param filePath Notebook path
+   * @param filePath File path
+   * @param factory Document factory to use
    * @returns Action success status
    */
-  async open(filePath: string): Promise<boolean> {
+  async open(filePath: string, factory?: string): Promise<boolean> {
     await this.revealFileInBrowser(filePath);
     const name = path.basename(filePath);
 
@@ -106,10 +110,28 @@ export class FileBrowserHelper {
       `xpath=${this.xpBuildFileSelector(name)}`
     );
     if (fileItem) {
-      await fileItem.click({ clickCount: 2 });
-      await this.page.waitForSelector(Utils.xpBuildActivityTabSelector(name), {
-        state: 'visible'
-      });
+      if (factory) {
+        await fileItem.click({ button: 'right' });
+        await this.page
+          .getByRole('listitem')
+          .filter({ hasText: 'Open With' })
+          .click();
+        await this.page
+          .getByRole('menuitem', { name: factory, exact: true })
+          .click();
+      } else {
+        await fileItem.dblclick();
+      }
+      // Use `last` as if a file is already open, it will simply be activated
+      // if not it will be opened with optionally another factory (but we don't have a way
+      // to know that from the DOM).
+      await this.page
+        .getByRole('main')
+        .getByRole('tab', { name })
+        .last()
+        .waitFor({
+          state: 'visible'
+        });
     } else {
       return false;
     }

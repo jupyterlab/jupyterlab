@@ -461,6 +461,14 @@ export class LayoutRestorer implements ILayoutRestorer {
         .map(widget => Private.nameProperty.get(widget))
         .filter(name => !!name);
     }
+    if (area.widgetStates) {
+      dehydrated.widgetStates = area.widgetStates as {
+        [id: string]: {
+          sizes: number[] | null;
+          expansionStates: boolean[] | null;
+        };
+      };
+    }
     return dehydrated;
   }
 
@@ -479,7 +487,13 @@ export class LayoutRestorer implements ILayoutRestorer {
         collapsed: true,
         currentWidget: null,
         visible: true,
-        widgets: null
+        widgets: null,
+        widgetStates: {
+          ['null']: {
+            sizes: null,
+            expansionStates: null
+          }
+        }
       };
     }
     const internal = this._widgets;
@@ -495,11 +509,18 @@ export class LayoutRestorer implements ILayoutRestorer {
             internal.has(`${name}`) ? internal.get(`${name}`) : null
           )
           .filter(widget => !!widget);
+    const widgetStates = area.widgetStates as {
+      [id: string]: {
+        sizes: number[] | null;
+        expansionStates: boolean[] | null;
+      };
+    };
     return {
       collapsed,
       currentWidget: currentWidget!,
       widgets: widgets as Widget[] | null,
-      visible: area.visible ?? true
+      visible: area.visible ?? true,
+      widgetStates: widgetStates
     };
   }
 

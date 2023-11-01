@@ -48,6 +48,7 @@ dependencies = [
     "traitlets",
     "tornado>=6.2.0",
     "tomli;python_version<\"3.11\"",
+    "httpx>=0.25.0",
 ]
 dynamic = [
     "version",
@@ -74,7 +75,7 @@ Pypi = "https://pypi.org/project/jupyterlab"
 
 [project.optional-dependencies]
 docs = [
-    "sphinx>=1.8",
+    "sphinx>=1.8,<7.3.0",
     "sphinx-copybutton",
     "pydata-sphinx-theme>=0.13.0",
     "pytest",
@@ -84,14 +85,14 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
-    "altair==5.0.1",
-    "ipython==8.14.0",
-    "ipywidgets==8.0.6",
+    "altair==5.1.1",
+    "ipython==8.16.1",
+    "ipywidgets==8.1.0",
     "jupyterlab-geojson==3.4.0",
-    "jupyterlab-language-pack-zh-CN==4.0.post0",
-    "matplotlib==3.7.1",
+    "jupyterlab-language-pack-zh-CN==4.0.post3",
+    "matplotlib==3.7.2",
     "nbconvert>=7.0.0",
-    "pandas==2.0.3",
+    "pandas==2.1.1",
     "scipy==1.11.1",
     "vega_datasets==0.9.0",
 ]
@@ -116,8 +117,8 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.276",
-    "black[jupyter]==23.3.0"
+    "ruff==0.0.292",
+    "black[jupyter]==23.7.0"
 ]
 
 [tool.check-wheel-contents]
@@ -164,7 +165,7 @@ exclude = [
     "/buildutils",
     "/dist",
     "/docs/build",
-    "/docs/api",
+    "/docs/source/api",
     "/design",
     "/dev_mode",
     "/examples",
@@ -220,7 +221,6 @@ ignore = "tests examples"
 [tool.jupyter-releaser.options]
 version-cmd = "jlpm bumpversion --force --skip-commit"
 npm-install-options = "--legacy-peer-deps"
-npm-cmd = "npm publish --tag latest"
 release-message = "[ci skip] Publish {version}"
 tag-message = "[ci skip] Release {tag_name}"
 
@@ -311,7 +311,9 @@ ignore = [
 # N806 Variable `tM` in function should be lowercase
 # N816 Variable `comparatorTrimReplace` in global scope should not be mixedCase
 # PLC1901 test can be simplified as an empty string is falsey
-"jupyterlab/semver.py" = ["C901", "EM101", "EM102", "N806", "N816", "PLC1901"]
+# PLR1714 Consider merging multiple comparisons
+# PLR5501 Use `elif` instead of `else` then `if`, to reduce indentation
+"jupyterlab/semver.py" = ["C901", "EM101", "EM102", "N806", "N816", "PLC1901", "PLR1714", "PLR5501"]
 # T201 `print` found
 "jupyterlab/upgrade_extension.py" = ["T201"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`

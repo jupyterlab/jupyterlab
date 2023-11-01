@@ -7,6 +7,7 @@ import {
   classes,
   DockPanelSvg,
   LabIcon,
+  SidePanel,
   TabBarSvg,
   tabIcon,
   TabPanelSvg
@@ -17,6 +18,7 @@ import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import {
+  AccordionPanel,
   BoxLayout,
   BoxPanel,
   DockLayout,
@@ -276,6 +278,23 @@ export namespace ILabShell {
      * The collection of widgets held by the sidebar.
      */
     readonly widgets: Array<Widget> | null;
+
+    /**
+     * The collection of widgets states held by the sidebar.
+     */
+    readonly widgetStates: {
+      [id: string]: {
+        /**
+         * Vertical sizes of the widgets.
+         */
+        readonly sizes: Array<number> | null;
+
+        /**
+         * Expansion states of the widgets.
+         */
+        readonly expansionStates: Array<boolean> | null;
+      };
+    };
   }
 }
 
@@ -1910,6 +1929,20 @@ namespace Private {
     }
 
     /**
+     * Handles a movement to the handles of a widget
+     */
+    private _onHandleMoved(): void {
+      return this._refreshVisibility();
+    }
+
+    /**
+     * Handles changes to the expansion status of a widget
+     */
+    private _onExpansionToggle(sender: AccordionPanel, index: number): void {
+      return this._refreshVisibility();
+    }
+
+    /**
      * Expand the sidebar.
      *
      * #### Notes
@@ -1967,7 +2000,6 @@ namespace Private {
       // Store the parent id in the title dataset
       // in order to dispatch click events to the right widget.
       title.dataset = { id: widget.id };
-
       if (title.icon instanceof LabIcon) {
         // bind an appropriate style to the icon
         title.icon = title.icon.bindprops({
@@ -1982,7 +2014,10 @@ namespace Private {
           stylesheet: 'sideBar'
         });
       }
-
+      // @ts-expect-error sometimes widget is an Accordion Panel
+      widget.content?.expansionToggled?.connect(this._onExpansionToggle, this);
+      // @ts-expect-error sometimes widget is a SidePanel
+      widget.content?.handleMoved?.connect(this._onHandleMoved, this);
       this._refreshVisibility();
     }
 
@@ -1993,11 +2028,26 @@ namespace Private {
       const collapsed = this._sideBar.currentTitle === null;
       const widgets = Array.from(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
+      const widgetStates: {
+        [id: string]: {
+          sizes: number[] | null;
+          expansionStates: boolean[] | null;
+        };
+      } = {};
+      this._stackedPanel.widgets.forEach((w: SidePanel) => {
+        if (w.id && w.content instanceof SplitPanel) {
+          widgetStates[w.id] = {
+            sizes: w.content.relativeSizes() as number[],
+            expansionStates: w.content.widgets.map(wi => wi.isVisible)
+          };
+        }
+      });
       return {
         collapsed,
         currentWidget,
         visible: !this._isHiddenByUser,
-        widgets
+        widgets,
+        widgetStates
       };
     }
 
@@ -2013,6 +2063,25 @@ namespace Private {
       }
       if (!data.visible) {
         this.hide();
+      }
+      if (data.widgetStates) {
+        this._stackedPanel.widgets.forEach((w: SidePanel) => {
+          if (w.id && w.content instanceof SplitPanel) {
+            const state = data.widgetStates[w.id] ?? {};
+            w.content.widgets.forEach((wi, widx) => {
+              const expansion = (state.expansionStates ?? [])[widx];
+              if (
+                typeof expansion === 'boolean' &&
+                w.content instanceof AccordionPanel
+              ) {
+                expansion ? w.content.expand(widx) : w.content.collapse(widx);
+              }
+            });
+            if (state.sizes) {
+              w.content.setRelativeSizes(state.sizes);
+            }
+          }
+        });
       }
     }
 

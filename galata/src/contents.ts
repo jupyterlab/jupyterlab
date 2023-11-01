@@ -24,7 +24,10 @@ export class ContentsHelper {
    * @param request Playwright API request context
    * @param page Playwright page model object
    */
-  constructor(request?: APIRequestContext, readonly page?: Page) {
+  constructor(
+    request?: APIRequestContext,
+    readonly page?: Page
+  ) {
     if (request) {
       this.request = request;
     } else if (page) {
