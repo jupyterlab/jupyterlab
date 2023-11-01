@@ -48,6 +48,7 @@ dependencies = [
     "traitlets",
     "tornado>=6.2.0",
     "tomli;python_version<\"3.11\"",
+    "httpx>=0.25.0",
 ]
 dynamic = [
     "version",
@@ -116,7 +117,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.0.291",
+    "ruff==0.0.292",
     "black[jupyter]==23.7.0"
 ]
 
