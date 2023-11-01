@@ -320,6 +320,14 @@ export class BreadCrumbs extends Widget {
   private _crumbs: ReadonlyArray<HTMLElement>;
   private _crumbSeps: ReadonlyArray<HTMLElement>;
   private _fullPath: boolean;
+
+  get fullPath(): boolean {
+    return this._fullPath;
+  }
+
+  set fullPath(value: boolean) {
+    this._fullPath = value;
+  }
 }
 
 /**
