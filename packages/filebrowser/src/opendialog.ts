@@ -198,8 +198,8 @@ class OpenDialog
 
         this._ready.resolve();
       })
-      .catch(() => {
-        console.error('Error while creating file browser in open dialog');
+      .catch(reason => {
+        console.error('Error while creating file browser in open dialog', reason);
         this._ready.reject(void 0);
       });
   }
