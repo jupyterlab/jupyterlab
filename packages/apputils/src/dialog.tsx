@@ -875,7 +875,7 @@ export namespace Dialog {
                   iconClass="jp-Icon"
                   className="jp-ToolbarButtonComponent-icon"
                   tag="span"
-                  title={trans.__('Close popup')}
+                  title={trans.__('Close dialog')}
                 />
               </Button>
             )}
