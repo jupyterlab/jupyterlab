@@ -151,6 +151,10 @@ and select “New Console for Notebook”:
      <iframe src="https://www.youtube-nocookie.com/embed/eq1l7DBngQQ?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
+.. _kernel_history:
+
+You can iterate through the kernel history in a document cell using ``Alt Up-Arrow`` and ``Alt Down-Arrow``. To use this feature, enable kernel history access in the notebook settings.
+
 .. _cell-toolbar:
 
 Cell Toolbar

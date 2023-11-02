@@ -48,6 +48,7 @@ dependencies = [
     "traitlets",
     "tornado>=6.2.0",
     "tomli;python_version<\"3.11\"",
+    "httpx>=0.25.0",
 ]
 dynamic = [
     "version",
@@ -84,15 +85,15 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
-    "altair==5.1.1",
+    "altair==5.1.2",
     "ipython==8.16.1",
-    "ipywidgets==8.1.0",
+    "ipywidgets==8.1.1",
     "jupyterlab-geojson==3.4.0",
     "jupyterlab-language-pack-zh-CN==4.0.post3",
     "matplotlib==3.7.2",
     "nbconvert>=7.0.0",
-    "pandas==2.1.1",
-    "scipy==1.11.1",
+    "pandas==2.1.2",
+    "scipy==1.11.3",
     "vega_datasets==0.9.0",
 ]
 test = [
@@ -117,7 +118,7 @@ dev = [
     "hatch",
     "bump2version",
     "ruff==0.0.292",
-    "black[jupyter]==23.7.0"
+    "black[jupyter]==23.10.1"
 ]
 
 [tool.check-wheel-contents]
