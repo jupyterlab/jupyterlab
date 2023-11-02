@@ -406,7 +406,7 @@ const resources: JupyterFrontEndPlugin<void> = {
             execute: () => {
               // Create the header of the about dialog
               const headerLogo = (
-                <img src={kernelIconUrl} alt={trans.__('Project Jupyter')} />
+                <img src={kernelIconUrl} alt={trans.__('Kernel Icon')} />
               );
               const title = (
                 <span className="jp-About-header">
