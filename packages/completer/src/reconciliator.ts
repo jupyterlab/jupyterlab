@@ -7,9 +7,17 @@ import {
   CompletionTriggerKind,
   ICompletionContext,
   ICompletionProvider,
+  IInlineCompleterSettings,
+  IInlineCompletionList,
+  IInlineCompletionProvider,
+  InlineCompletionTriggerKind,
   IProviderReconciliator
 } from './tokens';
 import { Completer } from './widget';
+import { Signal } from '@lumino/signaling';
+
+// Shorthand for readability.
+type InlineResult = IInlineCompletionList<CompletionHandler.IInlineItem> | null;
 
 /**
  * The reconciliator which is used to fetch and merge responses from multiple completion providers.
@@ -20,6 +28,8 @@ export class ProviderReconciliator implements IProviderReconciliator {
    */
   constructor(options: ProviderReconciliator.IOptions) {
     this._providers = options.providers;
+    this._inlineProviders = options.inlineProviders ?? [];
+    this._inlineProvidersSettings = options.inlineProvidersSettings ?? {};
     this._context = options.context;
     this._timeout = options.timeout;
   }
@@ -35,6 +45,96 @@ export class ProviderReconciliator implements IProviderReconciliator {
     );
     const applicableProviders = await Promise.all(isApplicablePromises);
     return this._providers.filter((_, idx) => applicableProviders[idx]);
+  }
+
+  fetchInline(
+    request: CompletionHandler.IRequest,
+    trigger: InlineCompletionTriggerKind
+  ): Promise<InlineResult>[] {
+    let promises: Promise<
+      IInlineCompletionList<CompletionHandler.IInlineItem>
+    >[] = [];
+    const current = ++this._inlineFetching;
+    for (const provider of this._inlineProviders) {
+      const settings = this._inlineProvidersSettings[provider.identifier];
+
+      let delay = 0;
+      if (trigger === InlineCompletionTriggerKind.Automatic) {
+        delay = settings.debouncerDelay;
+      }
+
+      const fetch = (): Promise<InlineResult> => {
+        const promise = provider
+          .fetch(request, { ...this._context, triggerKind: trigger })
+          .then(completionList => {
+            return {
+              ...completionList,
+              items: completionList.items.map(item => {
+                const newItem = item as CompletionHandler.IInlineItem;
+                newItem.stream = new Signal(newItem);
+                newItem.provider = provider;
+                void this._stream(newItem, provider);
+                return newItem;
+              })
+            };
+          });
+        const timeoutPromise = new Promise<null>(resolve => {
+          return setTimeout(() => resolve(null), delay + settings.timeout);
+        });
+        return Promise.race([promise, timeoutPromise]);
+      };
+      const promise =
+        delay === 0
+          ? fetch()
+          : new Promise<InlineResult>((resolve, reject) => {
+              return setTimeout(() => {
+                if (current != this._inlineFetching) {
+                  // User pressed another key or explicitly requested completions since.
+                  return reject(null);
+                } else {
+                  return resolve(fetch());
+                }
+              }, delay);
+            });
+
+      // Wrap promise and return error in case of failure.
+      promises.push(promise.catch(p => p));
+    }
+    return promises;
+  }
+
+  private async _stream(
+    item: CompletionHandler.IInlineItem,
+    provider: IInlineCompletionProvider
+  ) {
+    if (!item.isIncomplete || !provider.stream || !item.token) {
+      return;
+    }
+    const streamed = item.stream as Signal<
+      CompletionHandler.IInlineItem,
+      CompletionHandler.StraemEvent
+    >;
+    const token = item.token;
+    item.token = undefined;
+
+    // Notify that streaming started.
+    item.streaming = true;
+    streamed.emit(CompletionHandler.StraemEvent.opened);
+
+    for await (const reply of provider.stream(token)) {
+      const updated = reply.response;
+      const addition = updated.insertText.substring(item.insertText.length);
+      // Stream an update.
+      item.insertText = updated.insertText;
+      item.lastStreamed = addition;
+      streamed.emit(CompletionHandler.StraemEvent.update);
+    }
+
+    // Notify that streaming is no longer in progress.
+    item.isIncomplete = false;
+    item.lastStreamed = undefined;
+    item.streaming = false;
+    streamed.emit(CompletionHandler.StraemEvent.closed);
   }
 
   /**
@@ -65,10 +165,9 @@ export class ProviderReconciliator implements IProviderReconciliator {
         return { ...reply, items };
       });
 
-      const timeoutPromise =
-        new Promise<CompletionHandler.ICompletionItemsReply | null>(resolve => {
-          return setTimeout(() => resolve(null), this._timeout);
-        });
+      const timeoutPromise = new Promise<null>(resolve => {
+        return setTimeout(() => resolve(null), this._timeout);
+      });
       promise = Promise.race([promise, timeoutPromise]);
       // Wrap promise and return error in case of failure.
       promises.push(promise.catch(p => p));
@@ -226,6 +325,16 @@ export class ProviderReconciliator implements IProviderReconciliator {
   private _providers: Array<ICompletionProvider>;
 
   /**
+   * List of inline providers.
+   */
+  private _inlineProviders: Array<IInlineCompletionProvider>;
+
+  /**
+   * Inline providers settings.
+   */
+  private _inlineProvidersSettings: IInlineCompleterSettings['providers'];
+
+  /**
    * Current completer context.
    */
   private _context: ICompletionContext;
@@ -239,6 +348,11 @@ export class ProviderReconciliator implements IProviderReconciliator {
    * Counter to reject current provider response if a new fetch request is created.
    */
   private _fetching = 0;
+
+  /**
+   * Counter to reject current inline provider response if a new `inlineFetch` request is created.
+   */
+  private _inlineFetching = 0;
 }
 
 export namespace ProviderReconciliator {
@@ -254,6 +368,12 @@ export namespace ProviderReconciliator {
      * List of completion providers, assumed to contain at least one provider.
      */
     providers: ICompletionProvider[];
+    /**
+     * List of inline completion providers, may be empty.
+     */
+    inlineProviders?: IInlineCompletionProvider[];
+
+    inlineProvidersSettings?: IInlineCompleterSettings['providers'];
     /**
      * How long should we wait for each of the providers to resolve `fetch` promise
      */
