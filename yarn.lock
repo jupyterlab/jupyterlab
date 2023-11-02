@@ -5199,36 +5199,33 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@lumino/algorithm@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@lumino/algorithm@npm:2.0.1"
-  checksum: cbf7fcf6ee6b785ea502cdfddc53d61f9d353dcb9659343511d5cd4b4030be2ff2ca4c08daec42f84417ab0318a3d9972a17319fa5231693e109ab112dcf8000
+"@lumino/algorithm@portal:/home/ec2-user/repos/lumino/packages/algorithm::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/algorithm@portal:/home/ec2-user/repos/lumino/packages/algorithm::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/application@npm:^2.3.0-alpha.0":
-  version: 2.3.0-alpha.0
-  resolution: "@lumino/application@npm:2.3.0-alpha.0"
+"@lumino/application@portal:/home/ec2-user/repos/lumino/packages/application::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/application@portal:/home/ec2-user/repos/lumino/packages/application::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/commands": ^2.1.3
     "@lumino/coreutils": ^2.1.2
     "@lumino/widgets": ^2.3.1-alpha.0
-  checksum: 8fabe7ce632cd9cc25f55fdb717ffcb071e7f95aeef33305b9e5ac24b1a4d0f1d4ec1b7c08211da51a202911444304356b59146a8561b101ab583f85c80e7ef3
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/collections@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@lumino/collections@npm:2.0.1"
+"@lumino/collections@portal:/home/ec2-user/repos/lumino/packages/collections::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/collections@portal:/home/ec2-user/repos/lumino/packages/collections::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/algorithm": ^2.0.1
-  checksum: 8a29b7973a388a33c5beda0819dcd2dc2aad51a8406dcfd4581b055a9f77a39dc5800f7a8b4ae3c0bb97ae7b56a7a869e2560ffb7a920a28e93b477ba05907d6
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/commands@npm:^2.1.3":
-  version: 2.1.3
-  resolution: "@lumino/commands@npm:2.1.3"
+"@lumino/commands@portal:/home/ec2-user/repos/lumino/packages/commands::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/commands@portal:/home/ec2-user/repos/lumino/packages/commands::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
@@ -5237,20 +5234,18 @@ __metadata:
     "@lumino/keyboard": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/virtualdom": ^2.0.1
-  checksum: e4e3ee279f2a5e8d68e4ce142c880333f5542f90c684972402356936ecb5cf5e07163800b59e7cb8c911cbdb4e5089edcc5dd2990bc8db10c87517268de1fc5d
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/coreutils@npm:^1.11.0 || ^2.0.0, @lumino/coreutils@npm:^1.11.0 || ^2.1.2, @lumino/coreutils@npm:^2.1.1, @lumino/coreutils@npm:^2.1.2":
-  version: 2.1.2
-  resolution: "@lumino/coreutils@npm:2.1.2"
-  checksum: 7865317ac0676b448d108eb57ab5d8b2a17c101995c0f7a7106662d9fe6c859570104525f83ee3cda12ae2e326803372206d6f4c1f415a5b59e4158a7b81066f
+"@lumino/coreutils@portal:/home/ec2-user/repos/lumino/packages/coreutils::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/coreutils@portal:/home/ec2-user/repos/lumino/packages/coreutils::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/datagrid@npm:^2.3.0-alpha.0":
-  version: 2.3.0-alpha.0
-  resolution: "@lumino/datagrid@npm:2.3.0-alpha.0"
+"@lumino/datagrid@portal:/home/ec2-user/repos/lumino/packages/datagrid::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/datagrid@portal:/home/ec2-user/repos/lumino/packages/datagrid::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
@@ -5261,93 +5256,83 @@ __metadata:
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1-alpha.0
-  checksum: f1fc2519438e89f359ace5eacc093bc5ba3144f9a8cc56da7a22f09c0932f67118b2120ee26a44ea495371c576c6e9471373b766074b52a12b59220550b506c7
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/disposable@npm:^1.10.0 || ^2.0.0, @lumino/disposable@npm:^2.1.2":
-  version: 2.1.2
-  resolution: "@lumino/disposable@npm:2.1.2"
+"@lumino/disposable@portal:/home/ec2-user/repos/lumino/packages/disposable::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/disposable@portal:/home/ec2-user/repos/lumino/packages/disposable::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/signaling": ^2.1.2
-  checksum: ac2fb2bf18d0b2939fda454f3db248a0ff6e8a77b401e586d1caa9293b3318f808b93a117c9c3ac27cd17aab545aea83b49108d099b9b2f5503ae2a012fbc6e2
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/domutils@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@lumino/domutils@npm:2.0.1"
-  checksum: 61fa0ab226869dfbb763fc426790cf5a43b7d6f4cea1364c6dd56d61c44bff05eea188d33ff847449608ef58ed343161bee15c19b96f35410e4ee35815dc611a
+"@lumino/domutils@portal:/home/ec2-user/repos/lumino/packages/domutils::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/domutils@portal:/home/ec2-user/repos/lumino/packages/domutils::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/dragdrop@npm:^2.1.3":
-  version: 2.1.3
-  resolution: "@lumino/dragdrop@npm:2.1.3"
+"@lumino/dragdrop@portal:/home/ec2-user/repos/lumino/packages/dragdrop::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/dragdrop@portal:/home/ec2-user/repos/lumino/packages/dragdrop::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
-  checksum: d5f7eb4cc9f9a084cb9af10f02d6741b25d683350878ecbc324e24ba9d4b5246451a410e2ca5fff227aab1c191d1e73a2faf431f93e13111d67a4e426e126258
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/keyboard@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@lumino/keyboard@npm:2.0.1"
-  checksum: cf33f13427a418efd7cc91061233321e860d5404f3d86397781028309bef86c8ad2d88276ffe335c1db0fe619bd9d1e60641c81f881696957a58703ee4652c3e
+"@lumino/keyboard@portal:/home/ec2-user/repos/lumino/packages/keyboard::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/keyboard@portal:/home/ec2-user/repos/lumino/packages/keyboard::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/messaging@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@lumino/messaging@npm:2.0.1"
+"@lumino/messaging@portal:/home/ec2-user/repos/lumino/packages/messaging::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/messaging@portal:/home/ec2-user/repos/lumino/packages/messaging::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/algorithm": ^2.0.1
     "@lumino/collections": ^2.0.1
-  checksum: 964c4651c374b17452b4252b7d71500b32d2ecd87c192fc5bcf5d3bd1070661d78d07edcac8eca7d1d6fd50aa25992505485e1296d6dd995691b8e349b652045
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/polling@npm:^2.1.2":
-  version: 2.1.2
-  resolution: "@lumino/polling@npm:2.1.2"
+"@lumino/polling@portal:/home/ec2-user/repos/lumino/packages/polling::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/polling@portal:/home/ec2-user/repos/lumino/packages/polling::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/signaling": ^2.1.2
-  checksum: fa9b401e6dbeb8f31d7e3ba485e8ef1e0c92b3f2da086239c0ed49931026f5d3528709193c93e031e35ac624fb4bbbfcdcbaa0e25eb797f36e2952e5cd91e9e3
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/properties@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@lumino/properties@npm:2.0.1"
-  checksum: c50173a935148cc4148fdaea119df1d323ee004ae16ab666800388d27e9730345629662d85f25591683329b39f0cdae60ee8c94e8943b4d0ef7d7370a38128d6
+"@lumino/properties@portal:/home/ec2-user/repos/lumino/packages/properties::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/properties@portal:/home/ec2-user/repos/lumino/packages/properties::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/signaling@npm:^1.10.0 || ^2.0.0, @lumino/signaling@npm:^2.1.2":
-  version: 2.1.2
-  resolution: "@lumino/signaling@npm:2.1.2"
+"@lumino/signaling@portal:/home/ec2-user/repos/lumino/packages/signaling::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/signaling@portal:/home/ec2-user/repos/lumino/packages/signaling::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
-  checksum: ad7d7153db57980da899c43e412e6130316ef30b231a70250e7af49058db16cadb018c1417a2ea8083d83c48623cfe6b705fa82bf10216b1a8949aed9f4aca4e
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/virtualdom@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@lumino/virtualdom@npm:2.0.1"
+"@lumino/virtualdom@portal:/home/ec2-user/repos/lumino/packages/virtualdom::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/virtualdom@portal:/home/ec2-user/repos/lumino/packages/virtualdom::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/algorithm": ^2.0.1
-  checksum: cf59b6f15b430e13e9e657b7a0619b9056cd9ea7b2a87f407391d071c501b77403c302b6a66dca510382045e75b2e3fe551630bb391f1c6b33678057d4bec164
   languageName: node
-  linkType: hard
+  linkType: soft
 
-"@lumino/widgets@npm:^1.37.2 || ^2.3.1-alpha.0, @lumino/widgets@npm:^2.3.1-alpha.0":
-  version: 2.3.1-alpha.0
-  resolution: "@lumino/widgets@npm:2.3.1-alpha.0"
+"@lumino/widgets@portal:/home/ec2-user/repos/lumino/packages/widgets::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@lumino/widgets@portal:/home/ec2-user/repos/lumino/packages/widgets::locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.1.3
@@ -5360,9 +5345,8 @@ __metadata:
     "@lumino/properties": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/virtualdom": ^2.0.1
-  checksum: 52fe9f772d626d348a4e67533ff882f14e608c6cb78db351ef7235a78b34be53e3436698b1c18ed8ed8162cce2b000208b08821b4d517cf533b5226b9d74de5e
   languageName: node
-  linkType: hard
+  linkType: soft
 
 "@mapbox/node-pre-gyp@npm:^1.0.0":
   version: 1.0.10

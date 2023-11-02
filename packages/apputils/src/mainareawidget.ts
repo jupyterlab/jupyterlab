@@ -48,6 +48,7 @@ export class MainAreaWidget<T extends Widget = Widget>
     const toolbar = (this._toolbar = options.toolbar || new ReactiveToolbar());
     toolbar.node.setAttribute('role', 'toolbar');
     toolbar.node.setAttribute('aria-label', trans.__('notebook actions'));
+    toolbar.node.setAttribute('aria-hidden', 'true');
     const contentHeader = (this._contentHeader =
       options.contentHeader ||
       new BoxPanel({
