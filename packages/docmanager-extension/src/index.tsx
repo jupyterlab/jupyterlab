@@ -647,6 +647,16 @@ function addCommands(
     return !!context?.contentsModel?.writable;
   };
 
+  const readonlyNotification = (contextPath: string) => {
+    return Notification.warning(
+      trans.__(
+        `%1 is permissioned as read-only. Use "save as..." instead.`,
+        contextPath
+      ),
+      { autoClose: 5000 }
+    );
+  };
+
   // If inside a rich application like JupyterLab, add additional functionality.
   if (labShell) {
     addLabCommands(app, docManager, labShell, widgetOpener, translator);
@@ -872,13 +882,7 @@ function addCommands(
               type = (args._luminoEvent as ReadonlyPartialJSONObject).type;
             }
             if (type === 'keybinding') {
-              return Notification.warning(
-                trans.__(
-                  `%1 is permissioned as read-only. Use "save as..." instead.`,
-                  context.path
-                ),
-                { autoClose: 5000 }
-              );
+              readonlyNotification(context.path);
             }
             return showDialog({
               title: trans.__('Cannot Save'),
@@ -979,13 +983,7 @@ function addCommands(
             paths.add(context.path);
             promises.push(context.save());
           } else {
-            Notification.warning(
-              trans.__(
-                `%1 is permissioned as readonly. Use "save as..." instead.`,
-                context.path
-              ),
-              { autoClose: 5000 }
-            );
+            readonlyNotification(context.path);
           }
         }
       }
