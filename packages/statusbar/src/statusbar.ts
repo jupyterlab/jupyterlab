@@ -42,8 +42,19 @@ export class StatusBar extends Widget implements IStatusBar {
    * @param statusItem - The item to add to the status bar.
    */
   registerStatusItem(id: string, statusItem: IStatusBar.IItem): IDisposable {
+    console.log(this._statusItems);
+    console.log(statusItem.item.title);
     if (id in this._statusItems) {
       throw new Error(`Status item ${id} already registered.`);
+    }
+
+    if (
+      id === '@jupyterlab/application-extension:mode-switch' ||
+      id === '@jupyterlab/apputils-extension:kernel-status' ||
+      id === '@jupyterlab/codemirror-extension:line-col-status' ||
+      id === '@jupyterlab/notebook-extension:mode-status'
+    ) {
+      statusItem.priorityZoom = 1;
     }
 
     // Populate defaults for the optional properties of the status item.
@@ -51,7 +62,7 @@ export class StatusBar extends Widget implements IStatusBar {
       ...Private.statusItemDefaults,
       ...statusItem
     } as Private.IFullItem;
-    const { align, item, rank } = fullStatusItem;
+    const { align, item, rank, priorityZoom } = fullStatusItem;
 
     // Connect the activeStateChanged signal to refreshing the status item,
     // if the signal was provided.
@@ -62,7 +73,7 @@ export class StatusBar extends Widget implements IStatusBar {
       fullStatusItem.activeStateChanged.connect(onActiveStateChanged);
     }
 
-    const rankItem = { id, rank };
+    const rankItem = { id, rank, priorityZoom };
 
     fullStatusItem.item.addClass('jp-StatusBar-Item');
     this._statusItems[id] = fullStatusItem;
@@ -112,6 +123,13 @@ export class StatusBar extends Widget implements IStatusBar {
     super.dispose();
   }
 
+  private WindowZoomedLevel = () => {
+    // Get the current browser zoom level.
+    const browserZoomLevel = Math.round(window.devicePixelRatio * 100);
+    // Check if the zoom level is greater than or equal to 400%.
+    return browserZoomLevel >= 400;
+  };
+
   /**
    * Handle an 'update-request' message to the status bar.
    */
@@ -129,7 +147,10 @@ export class StatusBar extends Widget implements IStatusBar {
 
   private _refreshItem(id: string) {
     const statusItem = this._statusItems[id];
-    if (statusItem.isActive()) {
+    if (
+      statusItem.isActive() &&
+      !(this.WindowZoomedLevel() && statusItem.priorityZoom === 0)
+    ) {
       statusItem.item.show();
       statusItem.item.update();
     } else {
@@ -163,6 +184,7 @@ namespace Private {
   export const statusItemDefaults: Omit<IStatusBar.IItem, 'item'> = {
     align: 'left',
     rank: 0,
+    priorityZoom: 0,
     isActive: () => true,
     activeStateChanged: undefined
   };
@@ -173,9 +195,10 @@ namespace Private {
   export interface IRankItem {
     id: string;
     rank: number;
+    priorityZoom?: number;
   }
 
-  export type DefaultKeys = 'align' | 'rank' | 'isActive';
+  export type DefaultKeys = 'align' | 'rank' | 'isActive' | 'priorityZoom';
 
   /**
    * Type of statusbar item with defaults filled in.

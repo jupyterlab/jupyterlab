@@ -1183,11 +1183,7 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
     statusBar.registerStatusItem(modeSwitchPlugin.id, {
       item: modeSwitch,
       align: 'left',
-      rank: -1,
-      isActive: () => {
-        let zoom = ((window.outerWidth - 10) / window.innerWidth) * 100;
-        return zoom < 400;
-      }
+      rank: -1
     });
   },
   autoStart: true

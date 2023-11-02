@@ -104,13 +104,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
       item,
       align: 'left',
       rank: 1,
-      isActive: () => {
-        let zoom = ((window.outerWidth - 10) / window.innerWidth) * 100;
-        if (item.model!.sessionContext !== null && zoom < 400) {
-          return true;
-        }
-        return false;
-      }
+      isActive: () => item.model!.sessionContext !== null
     });
 
     return { addSessionProvider };

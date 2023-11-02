@@ -56,6 +56,11 @@ export namespace IStatusBar {
     rank?: number;
 
     /**
+     *  Displaying Items based on zoom priority -- higher zoom priority gets prioritised when zoom levels increase
+     */
+    priorityZoom?: number;
+
+    /**
      * Whether the item is shown or hidden.
      */
     isActive?: () => boolean;
