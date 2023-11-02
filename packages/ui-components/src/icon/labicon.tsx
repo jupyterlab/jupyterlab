@@ -549,6 +549,10 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       if (uuid) {
         svgElement.dataset.iconId = uuid;
       }
+
+      if (title) {
+        Private.setTitleSvg(svgElement, title);
+      }
     }
 
     return svgElement;
@@ -820,6 +824,18 @@ namespace Private {
       (typeof icon === 'string' ||
         ((icon as LabIcon.IIcon).name && (icon as LabIcon.IIcon).svgstr))
     );
+  }
+
+  export function setTitleSvg(svgNode: HTMLElement, title: string): void {
+    // add a title node to the top level svg node
+    const titleNodes = svgNode.getElementsByTagName('title');
+    if (titleNodes.length) {
+      titleNodes[0].textContent = title;
+    } else {
+      const titleNode = document.createElement('title');
+      titleNode.textContent = title;
+      svgNode.appendChild(titleNode);
+    }
   }
 
   /**
