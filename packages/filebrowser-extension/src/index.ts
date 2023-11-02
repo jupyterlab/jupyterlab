@@ -1214,7 +1214,7 @@ function addCommands(
       }
 
       if (PageConfig.getOption('copyAbsolutePath') === 'true') {
-        const absolutePath = PathExt.join(
+        const absolutePath = PathExt.joinWithLeadingSlash(
           PageConfig.getOption('serverRoot') ?? '',
           item.value.path
         );

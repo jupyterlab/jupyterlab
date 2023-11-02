@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 24 24">
+<g fill="#616161" class="jp-icon2 jp-icon-selectable">
+  <path d="M6 8h16v14.3H6z" style="fill:#eee;stroke:#444;stroke-linejoin:round"/>
+  <path d="M3 3v2h10V3H3Z" transform="matrix(.8 0 0 1 .5 0)"/>
+</g>
+<g class="jp-icon3 jp-icon-selectable">
+  <path fill="#616161" d="M18 14.1H8v2h11v-2ZM8 12.1H20V10.1H8v2Zm0 8H20v-2H8v3Z"/>
+</g>
+</svg>
