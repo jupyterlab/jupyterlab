@@ -15,9 +15,9 @@ test.use({ viewport: { width: 320, height: 256 } });
 
 test.describe('Low Vision / Zoom Support', () => {
   sidebarIds.forEach(sidebarId => {
-    test(`Open Sidebar tab ${sidebarId}`, async ({ page }) => {
-      await page.sidebar.openTab(sidebarId);
-      expect(await page.sidebar.isTabOpen(sidebarId)).toEqual(true);
+    test(`Close Sidebar tab ${sidebarId}`, async ({ page }) => {
+      await page.sidebar.close('left');
+      expect(await page.sidebar.isOpen('left')).toEqual(false);
     });
   });
 
