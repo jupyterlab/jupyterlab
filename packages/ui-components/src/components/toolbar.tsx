@@ -730,7 +730,9 @@ export function ToolbarButtonComponent(
           tag={null}
         />
       )}
-      {props.label ?? ''}
+      {props.label && (
+        <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
+      )}
     </Button>
   );
 }

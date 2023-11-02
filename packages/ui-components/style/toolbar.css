@@ -63,6 +63,14 @@
   user-select: none;
 }
 
+button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
+  font-size: var(--jp-ui-font-size1);
+  line-height: 100%;
+  padding-left: 2px;
+  color: var(--jp-ui-font-color1);
+  font-family: var(--jp-ui-font-family);
+}
+
 .jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
   flex-grow: 1;
   flex-shrink: 1;

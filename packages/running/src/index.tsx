@@ -382,8 +382,8 @@ class Section extends PanelWithToolbar {
     const enabled = runningItems.length > 0;
     this._button = new ToolbarButton({
       label: shutdownAllLabel,
-      className: `${SHUTDOWN_ALL_BUTTON_CLASS} jp-mod-styled ${
-        !enabled && 'jp-mod-disabled'
+      className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
+        !enabled ? ' jp-mod-disabled' : ''
       }`,
       enabled,
       onClick: onShutdown
