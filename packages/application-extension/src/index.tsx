@@ -203,7 +203,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
     commands.addCommand(CommandIDs.close, {
       label: () => trans.__('Close Tab'),
-      // commandDialog: () => trans.__('Close Tab'),
       isEnabled: () => {
         const widget = contextMenuWidget();
         return !!widget && widget.title.closable;
@@ -302,8 +301,10 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         execute: () => {
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
-            let doc = document.getElementById('showleftsidebar');
-            doc!.innerHTML = 'Test Screen Reader';
+            let doc = document.getElementById('command-palette-aria-live');
+            let p = document.createElement('p');
+            p.innerHTML = 'Test screen reader';
+            doc!.append(p);
           } else {
             labShell.collapseLeft();
             if (labShell.currentWidget) {
