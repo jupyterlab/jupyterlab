@@ -110,6 +110,17 @@ export class NotebookWindowedLayout extends WindowedLayout {
   }
 
   /**
+   * Notebook's active cell
+   */
+  get activeCell(): Widget | null {
+    return this._activeCell;
+  }
+  set activeCell(widget: Widget | null) {
+    this._activeCell = widget;
+  }
+  private _activeCell: Widget | null;
+
+  /**
    * Dispose the layout
    * */
   dispose(): void {
@@ -168,10 +179,16 @@ export class NotebookWindowedLayout extends WindowedLayout {
     // Status may change in onBeforeAttach
     const wasPlaceholder = (widget as Cell).isPlaceholder();
     // Initialized sub-widgets or attached them for CodeCell
-    if (this.parent!.isAttached) {
+    // Because this reattaches all sub-widget to the DOM which leads
+    // to a loss of focus, we do not call it for soft-hidden cells.
+    const isSoftHidden = this._isSoftHidden(widget);
+    if (this.parent!.isAttached && !isSoftHidden) {
       MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
     }
-
+    if (isSoftHidden) {
+      // Restore visibility for active, or previously active cell
+      this._toggleSoftVisibility(widget, true);
+    }
     if (
       !wasPlaceholder &&
       widget instanceof CodeCell &&
@@ -182,7 +199,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
       // Reset cache
       this._topHiddenCodeCells = -1;
-    } else {
+    } else if (!isSoftHidden) {
       // Look up the next sibling reference node.
       const siblingIndex = this._findNearestChildBinarySearch(
         this.parent!.viewportNode.childElementCount - 1,
@@ -228,15 +245,26 @@ export class NotebookWindowedLayout extends WindowedLayout {
   protected detachWidget(index: number, widget: Widget): void {
     (widget as Cell).inViewport = false;
 
+    // Note: `index` is relative to the displayed cells, not all cells,
+    // hence we compare with the widget itself.
+    if (widget === this.activeCell) {
+      // Do not change display of the active cell to allow user to continue providing input
+      // into the code mirror editor when out of view. We still hide the cell so to prevent
+      // minor visual glitches when scrolling.
+      this._toggleSoftVisibility(widget, false);
+      // Return before sending "AfterDetach" message to CodeCell
+      // to prevent removing contents of the active cell.
+      return;
+    }
     // TODO we could improve this further by discarding also the code cell without outputs
     if (
-      widget instanceof CodeCell &&
       // We detach the code cell currently dragged otherwise it won't be attached at the correct position
+      widget instanceof CodeCell &&
       !widget.node.classList.contains(DROP_SOURCE_CLASS) &&
       widget !== this._willBeRemoved
     ) {
       // We don't remove code cells to preserve outputs internal state
-      // Transform does not work because the widget height is kept (at lease in FF)
+      // Transform does not work because the widget height is kept (at least in FF)
       widget.node.style.display = 'none';
 
       // Reset cache
@@ -348,6 +376,35 @@ export class NotebookWindowedLayout extends WindowedLayout {
     this._willBeRemoved = msg.child;
     super.onChildRemoved(msg);
     this._willBeRemoved = null;
+  }
+
+  /**
+   * Toggle "soft" visibility of the widget.
+   *
+   * #### Notes
+   * To ensure that user events reach the CodeMirror editor, this method
+   * does not toggle `display` nor `visibility` which have side effects,
+   * but instead hides it in the compositor and ensures that the bounding
+   * box is has an area equal to zero.
+   * To ensure we do not trigger style recalculation, we set the styles
+   * directly on the node instead of using a class.
+   */
+  private _toggleSoftVisibility(widget: Widget, show: boolean): void {
+    if (show) {
+      widget.node.style.opacity = '';
+      widget.node.style.height = '';
+      widget.node.style.padding = '';
+    } else {
+      widget.node.style.opacity = '0';
+      // Both padding and height need to be set to zero
+      // to ensure bounding box collapses to invisible.
+      widget.node.style.height = '0';
+      widget.node.style.padding = '0';
+    }
+  }
+
+  private _isSoftHidden(widget: Widget): boolean {
+    return widget.node.style.opacity === '0';
   }
 
   private _findNearestChildBinarySearch(

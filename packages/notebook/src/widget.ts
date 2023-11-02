@@ -1410,6 +1410,7 @@ export class Notebook extends StaticNotebook {
 
     this._activeCellIndex = newValue;
     const cell = this.widgets[newValue] ?? null;
+    (this.layout as NotebookWindowedLayout).activeCell = cell;
     const cellChanged = cell !== this._activeCell;
     if (cellChanged) {
       // Post an update request.
@@ -2104,7 +2105,7 @@ export class Notebook extends StaticNotebook {
     const activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
       // Test for !== true to cover hasFocus is false and editor is not yet rendered.
-      if (activeCell.editor?.hasFocus() !== true) {
+      if (activeCell.editor?.hasFocus() !== true || !activeCell.inViewport) {
         if (activeCell.inViewport) {
           activeCell.editor?.focus();
         } else {
