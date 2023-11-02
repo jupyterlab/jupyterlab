@@ -1216,7 +1216,15 @@ function addCommands(
         return;
       }
 
-      Clipboard.copyToSystem(item.value.path);
+      if (PageConfig.getOption('copyAbsolutePath') === 'true') {
+        const absolutePath = PathExt.join(
+          PageConfig.getOption('serverRoot') ?? '',
+          item.value.path
+        );
+        Clipboard.copyToSystem(absolutePath);
+      } else {
+        Clipboard.copyToSystem(item.value.path);
+      }
     },
     isVisible: () =>
       // So long as this command only handles one file at time, don't show it

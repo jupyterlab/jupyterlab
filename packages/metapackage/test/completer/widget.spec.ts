@@ -2,17 +2,18 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 import {
   Completer,
   CompleterModel,
   CompletionHandler
 } from '@jupyterlab/completer';
-import { YFile } from '@jupyter/ydoc';
-import { framePromise, sleep } from '@jupyterlab/testing';
+import {
+  createEditorWidget,
+  getBoundingClientRectMock
+} from '@jupyterlab/completer/lib/testutils';
+import { framePromise, simulate, sleep } from '@jupyterlab/testing';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
-import { simulate } from 'simulate-event';
 
 const TEST_ITEM_CLASS = 'jp-TestItem';
 
@@ -23,44 +24,6 @@ const ITEM_CLASS = 'jp-Completer-item';
 const DOC_PANEL_CLASS = 'jp-Completer-docpanel';
 
 const ACTIVE_CLASS = 'jp-mod-active';
-
-function createEditorWidget(): CodeEditorWrapper {
-  const model = new CodeEditor.Model({ sharedModel: new YFile() });
-  const factory = (options: CodeEditor.IOptions) => {
-    const m = options.model.sharedModel as any;
-    options.extensions = [
-      ...(options.extensions ?? []),
-      ybinding({ ytext: m.ysource })
-    ];
-    return new CodeMirrorEditor(options);
-  };
-  return new CodeEditorWrapper({ factory, model });
-}
-
-/**
- * jsdom mock for getBoundingClientRect returns zeros for all fields,
- * see https://github.com/jsdom/jsdom/issues/653. We can do better,
- * and need to do better to get meaningful tests for rendering.
- */
-function betterGetBoundingClientRectMock() {
-  const style = window.getComputedStyle(this);
-  const top = parseFloat(style.top) || 0;
-  const left = parseFloat(style.left) || 0;
-  const dimensions = {
-    width: parseFloat(style.width) || parseFloat(style.minWidth) || 0,
-    height: parseFloat(style.height) || parseFloat(style.minHeight) || 0,
-    top,
-    left,
-    x: left,
-    y: top,
-    bottom: 0,
-    right: 0
-  };
-  return {
-    ...dimensions,
-    toJSON: () => dimensions
-  };
-}
 
 class CustomRenderer extends Completer.Renderer {
   createCompletionItemNode(
@@ -435,12 +398,12 @@ describe('completer/widget', () => {
     });
 
     describe('#handleEvent()', () => {
-      it('should handle document keydown, mousedown, and scroll events', () => {
+      it('should handle document keydown, pointerdown, and scroll events', () => {
         const anchor = createEditorWidget();
         const widget = new LogWidget({ editor: anchor.editor });
         Widget.attach(anchor, document.body);
         Widget.attach(widget, document.body);
-        ['keydown', 'mousedown', 'scroll'].forEach(type => {
+        ['keydown', 'pointerdown', 'scroll'].forEach(type => {
           simulate(document.body, type);
           expect(widget.events).toEqual(expect.arrayContaining([type]));
         });
@@ -864,8 +827,8 @@ describe('completer/widget', () => {
         anchor.dispose();
       });
 
-      describe('mousedown', () => {
-        it('should trigger a selected signal on mouse down', () => {
+      describe('pointerdown', () => {
+        it('should trigger a selected signal on pointer down', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
           let options: Completer.IOptions = {
@@ -894,13 +857,13 @@ describe('completer/widget', () => {
 
           simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
           expect(model.query).toBe('ba');
-          simulate(item, 'mousedown');
+          simulate(item, 'pointerdown');
           expect(value).toBe('baz');
           widget.dispose();
           anchor.dispose();
         });
 
-        it('should ignore nonstandard mouse clicks (e.g., right click)', () => {
+        it('should ignore nonstandard pointer clicks (e.g., right click)', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
           let options: Completer.IOptions = {
@@ -920,13 +883,13 @@ describe('completer/widget', () => {
           Widget.attach(widget, document.body);
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           expect(value).toBe('');
-          simulate(widget.node, 'mousedown', { button: 1 });
+          simulate(widget.node, 'pointerdown', { button: 1 });
           expect(value).toBe('');
           widget.dispose();
           anchor.dispose();
         });
 
-        it('should ignore a mouse down that misses an item', () => {
+        it('should ignore a pointer down that misses an item', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
           let options: Completer.IOptions = {
@@ -946,13 +909,13 @@ describe('completer/widget', () => {
           Widget.attach(widget, document.body);
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           expect(value).toBe('');
-          simulate(widget.node, 'mousedown');
+          simulate(widget.node, 'pointerdown');
           expect(value).toBe('');
           widget.dispose();
           anchor.dispose();
         });
 
-        it('should hide widget if mouse down misses it', () => {
+        it('should hide widget if pointer down misses it', () => {
           let anchor = createEditorWidget();
           let model = new CompleterModel();
           let options: Completer.IOptions = {
@@ -971,7 +934,7 @@ describe('completer/widget', () => {
           Widget.attach(widget, document.body);
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           expect(widget.isHidden).toBe(false);
-          simulate(anchor.node, 'mousedown');
+          simulate(anchor.node, 'pointerdown');
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           expect(widget.isHidden).toBe(true);
           widget.dispose();
@@ -1084,7 +1047,7 @@ describe('completer/widget', () => {
 
       it('should pre-compute and cache dimensions when items are many', () => {
         window.HTMLElement.prototype.getBoundingClientRect =
-          betterGetBoundingClientRectMock;
+          getBoundingClientRectMock;
         let anchor = createEditorWidget();
         let model = new CompleterModel();
 
@@ -1111,9 +1074,9 @@ describe('completer/widget', () => {
         anchor.dispose();
       });
 
-      it('should not fix nor cache dimensions when items are few', () => {
+      it('should compute height based on number of items', () => {
         window.HTMLElement.prototype.getBoundingClientRect =
-          betterGetBoundingClientRectMock;
+          getBoundingClientRectMock;
         let anchor = createEditorWidget();
         let model = new CompleterModel();
 
@@ -1131,14 +1094,108 @@ describe('completer/widget', () => {
         Widget.attach(widget, document.body);
         expect(widget.sizeCache).toBe(undefined);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(widget.sizeCache).toEqual(undefined);
+        expect(widget.sizeCache).toEqual({
+          width: 150,
+          height: 3 * 20
+        });
         widget.dispose();
+        expect(widget.sizeCache).toBe(undefined);
         anchor.dispose();
+      });
+
+      it('should account for documentation panel width if shown', async () => {
+        window.HTMLElement.prototype.getBoundingClientRect =
+          getBoundingClientRectMock;
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+
+        Widget.attach(anchor, document.body);
+        model.setCompletionItems(
+          Array.from({ length: 3 }, (_, i) => {
+            return { label: `candidate ${i}`, documentation: 'text' };
+          })
+        );
+
+        let widget = new LogWidget({
+          editor: anchor.editor,
+          model
+        });
+        widget.showDocsPanel = true;
+        Widget.attach(widget, document.body);
+        expect(widget.sizeCache).toBe(undefined);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(widget.sizeCache).toEqual({
+          width: 550, // 150 (items) + 400 (documentation panel)
+          height: 300
+        });
+        widget.showDocsPanel = false;
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(widget.sizeCache).toEqual({
+          width: 150,
+          height: 60 // 3* 20
+        });
+        widget.dispose();
+        expect(widget.sizeCache).toBe(undefined);
+        anchor.dispose();
+      });
+
+      it('should show/hide the documentation panel depending on documentation presence', async () => {
+        window.HTMLElement.prototype.getBoundingClientRect =
+          getBoundingClientRectMock;
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+        Widget.attach(anchor, document.body);
+
+        let widget = new LogWidget({
+          editor: anchor.editor,
+          model
+        });
+        widget.showDocsPanel = true;
+        Widget.attach(widget, document.body);
+
+        const expectedSizeNoDocs = {
+          width: 150, // (no documentation panel width here)
+          height: 20
+        };
+        const expectedSizeDocs = {
+          width: 550, // 150 (items) + 400 (documentation panel)
+          height: 300 // (min documentation panel height)
+        };
+
+        // no documentation
+        model.setCompletionItems([{ label: 'test' }]);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(widget.sizeCache).toEqual(expectedSizeNoDocs);
+        let panel = widget.node.querySelector(
+          `.${DOC_PANEL_CLASS}`
+        ) as HTMLElement;
+        expect(panel.style.display).toBe('none');
+
+        // documentation
+        model.setCompletionItems([
+          { label: 'test', documentation: 'test doc' }
+        ]);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(widget.sizeCache).toEqual(expectedSizeDocs);
+        panel = widget.node.querySelector(`.${DOC_PANEL_CLASS}`) as HTMLElement;
+        expect(panel.style.display).toBe('');
+
+        // no documentation again
+        model.setCompletionItems([{ label: 'test' }]);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(widget.sizeCache).toEqual(expectedSizeNoDocs);
+        panel = widget.node.querySelector(`.${DOC_PANEL_CLASS}`) as HTMLElement;
+        expect(panel.style.display).toBe('none');
       });
 
       it('should render completions lazily in chunks', async () => {
         window.HTMLElement.prototype.getBoundingClientRect =
-          betterGetBoundingClientRectMock;
+          getBoundingClientRectMock;
         let anchor = createEditorWidget();
         let model = new CompleterModel();
 
@@ -1158,7 +1215,7 @@ describe('completer/widget', () => {
 
         // First "page":
         //  - 300px/20px = 15 items at each "page",
-        //  - we add one item in case if height heuristic is inacurate.
+        //  - we add one item in case if height heuristic is inaccurate.
         let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
         expect(items).toHaveLength(15 + 1);
 
@@ -1187,7 +1244,7 @@ describe('completer/widget', () => {
 
       beforeEach(() => {
         window.HTMLElement.prototype.getBoundingClientRect =
-          betterGetBoundingClientRectMock;
+          getBoundingClientRectMock;
         wrapper = createEditorWidget();
         model = new CompleterModel();
         const editor = wrapper.editor;
@@ -1277,6 +1334,53 @@ describe('completer/widget', () => {
         };
         model.handleTextChange(current);
         expect(widget.sizeCache).toEqual(undefined);
+      });
+
+      it('should update the documentation panel of selected item', async () => {
+        let args = '';
+        const spy = jest
+          .spyOn(widget as any, '_updateDocPanel')
+          .mockImplementation(async (item: any) => {
+            if (item) {
+              args = (await item).label;
+            }
+          });
+        widget.showDocsPanel = true;
+        const current: Completer.ITextState = {
+          ...position,
+          text: 'c13'
+        };
+        model.handleTextChange(current);
+
+        await new Promise(process.nextTick);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(args).toEqual('candx 13');
+
+        // Cycle to the second item
+        widget['_cycle']('down');
+        await new Promise(process.nextTick);
+        expect(spy).toHaveBeenCalledTimes(2);
+        expect(args).toEqual('candidate 13');
+        spy.mockRestore();
+      });
+    });
+  });
+  describe('Completer.Renderer', () => {
+    describe('#itemWidthHeuristic()', () => {
+      let renderer: Completer.Renderer;
+      beforeEach(() => {
+        renderer = new Completer.Renderer();
+      });
+      it('returns a sum of characters in label and type info', () => {
+        let width = renderer.itemWidthHeuristic({
+          label: 'test',
+          type: 'variable'
+        });
+        expect(width).toBe(12);
+      });
+      it('disregards <mark> markup', () => {
+        let width = renderer.itemWidthHeuristic({ label: '<mark>test</mark>' });
+        expect(width).toBe(4);
       });
     });
   });

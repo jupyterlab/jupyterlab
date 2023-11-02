@@ -945,8 +945,8 @@ export class WindowedList<
     }
     for (const widget of this.layout.widgets) {
       this._resizeObserver.observe(widget.node);
-      widget.disposed.connect(() =>
-        this._resizeObserver?.unobserve(widget.node)
+      widget.disposed.connect(
+        () => this._resizeObserver?.unobserve(widget.node)
       );
     }
     this.node.addEventListener('scroll', this, passiveIfSupported);
@@ -995,8 +995,8 @@ export class WindowedList<
         const item = toAdd[index];
         if (this._resizeObserver && !this.layout.widgets.includes(item)) {
           this._resizeObserver.observe(item.node);
-          item.disposed.connect(() =>
-            this._resizeObserver?.unobserve(item.node)
+          item.disposed.connect(
+            () => this._resizeObserver?.unobserve(item.node)
           );
         }
 

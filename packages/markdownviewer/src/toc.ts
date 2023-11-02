@@ -140,6 +140,13 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
           ) {
             el.scrollIntoView({ block: 'center' });
           }
+        } else {
+          console.warn(
+            'Heading element not found for heading',
+            heading,
+            'in widget',
+            widget
+          );
         }
       }
     };

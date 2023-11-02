@@ -322,14 +322,8 @@ namespace ListView {
   }
 }
 
-function ErrorMessage(props: ErrorMessage.IProperties) {
+function ErrorMessage(props: React.PropsWithChildren) {
   return <div className="jp-extensionmanager-error">{props.children}</div>;
-}
-
-namespace ErrorMessage {
-  export interface IProperties {
-    children: React.ReactNode;
-  }
 }
 
 class Header extends ReactWidget {
@@ -387,7 +381,10 @@ class Header extends ReactWidget {
 }
 
 class Warning extends ReactWidget {
-  constructor(protected model: ListModel, protected trans: TranslationBundle) {
+  constructor(
+    protected model: ListModel,
+    protected trans: TranslationBundle
+  ) {
     super();
     this.addClass('jp-extensionmanager-disclaimer');
     model.stateChanged.connect(this.update, this);
@@ -452,7 +449,10 @@ activate this feature?`)}
 }
 
 class InstalledList extends ReactWidget {
-  constructor(protected model: ListModel, protected trans: TranslationBundle) {
+  constructor(
+    protected model: ListModel,
+    protected trans: TranslationBundle
+  ) {
     super();
     model.stateChanged.connect(this.update, this);
   }
@@ -516,7 +516,10 @@ class InstalledList extends ReactWidget {
 }
 
 class SearchResult extends ReactWidget {
-  constructor(protected model: ListModel, protected trans: TranslationBundle) {
+  constructor(
+    protected model: ListModel,
+    protected trans: TranslationBundle
+  ) {
     super();
     model.stateChanged.connect(this.update, this);
   }

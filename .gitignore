@@ -14,7 +14,7 @@ docs/_build
 docs/source/user/commands_list.md
 docs/source/extension/plugins_list.rst
 docs/source/extension/tokens_list.rst
-docs/api
+docs/source/api
 **/docs/source/_build
 
 examples/app/build
@@ -74,6 +74,7 @@ __pycache__
 pip-wheel-metadata
 Pipfile
 Pipfile.lock
+venv/
 
 # xeus-python debug logs
 xpython_debug_logs
