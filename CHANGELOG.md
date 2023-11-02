@@ -101,6 +101,45 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.8
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.7...86078b863e794fe26154576118dae972f071ea2f))
+
+### Enhancements made
+
+- Expand search box horizontally when text grows long [#15266](https://github.com/jupyterlab/jupyterlab/pull/15266) ([@sinistersnare](https://github.com/sinistersnare))
+
+### Bugs fixed
+
+- Add min width to constrain resizing in side-by-side view [#14529](https://github.com/jupyterlab/jupyterlab/pull/14529) ([@dharmaquark](https://github.com/dharmaquark))
+- Fix collapsed cells styling [#15322](https://github.com/jupyterlab/jupyterlab/pull/15322) ([@fcollonval](https://github.com/fcollonval))
+- Fix autobrackets and other default CM extension [#15297](https://github.com/jupyterlab/jupyterlab/pull/15297) ([@fcollonval](https://github.com/fcollonval))
+- Fix rulers position with gutter width [#15296](https://github.com/jupyterlab/jupyterlab/pull/15296) ([@fcollonval](https://github.com/fcollonval))
+- Declare Webpack loaders with `require.resolve()` [#15299](https://github.com/jupyterlab/jupyterlab/pull/15299) ([@tibdex](https://github.com/tibdex))
+
+### Maintenance and upkeep improvements
+
+- Backport ruff/black/pre-commit updates to align versions [#15345](https://github.com/jupyterlab/jupyterlab/pull/15345) ([@krassowski](https://github.com/krassowski))
+- Turn off navigation with keys [#15310](https://github.com/jupyterlab/jupyterlab/pull/15310) ([@fcollonval](https://github.com/fcollonval))
+- Update benchmark reporter snapshots [#15279](https://github.com/jupyterlab/jupyterlab/pull/15279) ([@krassowski](https://github.com/krassowski))
+- Update canvas to a version with prebuilds for nodeJS 20 [#15270](https://github.com/jupyterlab/jupyterlab/pull/15270) ([@fcollonval](https://github.com/fcollonval))
+- Commit JS and Python packages in one commit on release [#15042](https://github.com/jupyterlab/jupyterlab/pull/15042) ([@jtpio](https://github.com/jtpio))
+
+### Documentation improvements
+
+- Expand search box horizontally when text grows long [#15266](https://github.com/jupyterlab/jupyterlab/pull/15266) ([@sinistersnare](https://github.com/sinistersnare))
+- Turn off navigation with keys [#15310](https://github.com/jupyterlab/jupyterlab/pull/15310) ([@fcollonval](https://github.com/fcollonval))
+- Fixed home page link to sibling project. [#15256](https://github.com/jupyterlab/jupyterlab/pull/15256) ([@ericsnekbytes](https://github.com/ericsnekbytes))
+- Commit JS and Python packages in one commit on release [#15042](https://github.com/jupyterlab/jupyterlab/pull/15042) ([@jtpio](https://github.com/jtpio))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-10-11&to=2023-11-02&type=c))
+
+[@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2023-10-11..2023-11-02&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2023-10-11..2023-11-02&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-10-11..2023-11-02&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-10-11..2023-11-02&type=Issues) | [@j264415](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aj264415+updated%3A2023-10-11..2023-11-02&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-10-11..2023-11-02&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-10-11..2023-11-02&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-10-11..2023-11-02&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-10-11..2023-11-02&type=Issues) | [@tonyfast](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atonyfast+updated%3A2023-10-11..2023-11-02&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-10-11..2023-11-02&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.7
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.6...277bd0b0dbf28688149ed2bc62830b7d67e6ad21))
@@ -147,8 +186,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-09-14&to=2023-10-11&type=c))
 
 [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2023-09-14..2023-10-11&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-09-14..2023-10-11&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-09-14..2023-10-11&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2023-09-14..2023-10-11&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-09-14..2023-10-11&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-09-14..2023-10-11&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-09-14..2023-10-11&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-09-14..2023-10-11&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-09-14..2023-10-11&type=Issues) | [@parmentelat](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aparmentelat+updated%3A2023-09-14..2023-10-11&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-09-14..2023-10-11&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.6
 
