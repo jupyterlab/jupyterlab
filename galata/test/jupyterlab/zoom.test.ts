@@ -1,12 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import { expect, test } from '@jupyterlab/galata';
 
 test.use({ viewport: { width: 320, height: 256 } });
 
 test.describe('Low Vision / Zoom Support', () => {
-
   test('Light Themed Launch Screen at low vision', async ({ page }) => {
     expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
       'light-launch-screen-at-low-vision.png'
