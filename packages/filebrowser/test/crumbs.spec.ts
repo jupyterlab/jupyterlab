@@ -192,6 +192,22 @@ describe('filebrowser/model', () => {
       });
     });
 
+    describe('#fullPath', () => {
+      it('should show/hide full path', async () => {
+        Widget.attach(crumbs, document.body);
+        MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+        expect(crumbs.node.textContent).toMatch(
+          /\/\/Untitled Folder.*?\/Untitled Folder.*?\//
+        );
+        crumbs.fullPath = true;
+        MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
+        await framePromise();
+        expect(crumbs.node.textContent).toMatch(
+          /\/Untitled Folder.*?\/Untitled Folder.*?\/Untitled Folder.*?\//
+        );
+      });
+    });
+
     describe('#onUpdateRequest()', () => {
       it('should be called when the model updates', async () => {
         const model = new FileBrowserModel({ manager });
