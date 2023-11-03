@@ -175,7 +175,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
                 iconClass={classes(iconClass, 'jp-Icon-cover')}
                 stylesheet="launcherSection"
                 aria-hidden="true"
-              />{' '}
+              />
               <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
             <div className="jp-Launcher-cardContainer">
