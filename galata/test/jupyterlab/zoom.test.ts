@@ -43,6 +43,6 @@ test.describe('Low Vision / Zoom Support', () => {
     await page.theme.setLightTheme();
     expect(
       await page.locator('#jp-main-statusbar').screenshot()
-    ).toMatchSnapshot('light-statusbar-at-low-vision.png');
+    ).toMatchSnapshot('statusbar-at-low-vision.png');
   });
 });
