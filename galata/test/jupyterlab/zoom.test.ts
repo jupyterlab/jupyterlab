@@ -3,14 +3,6 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 
-const sidebarIds: galata.SidebarTabId[] = [
-  'filebrowser',
-  'jp-property-inspector',
-  'jp-running-sessions',
-  'table-of-contents',
-  'extensionmanager.main-view'
-];
-
 test.use({ viewport: { width: 320, height: 256 } });
 
 test.describe('Low Vision / Zoom Support', () => {
