@@ -181,8 +181,12 @@ test.describe('Top menu keyboard navigation', () => {
   test.use({ autoGoto: false });
   test('navigate to open file with keyboard', async ({ page }) => {
     await page.goto();
-    for (let i = 0; i < 3; i++) {
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
+    while (true) {
       await page.keyboard.press('Shift+Tab');
+      if (fileMenu.evaluate(el => el === document.activeElement)) {
+        break;
+      }
     }
     await page.keyboard.press('Enter');
 
