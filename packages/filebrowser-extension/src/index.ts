@@ -135,6 +135,8 @@ namespace CommandIDs {
 
   export const toggleLastModified = 'filebrowser:toggle-last-modified';
 
+  export const toggleShowFullPath = 'filebrowser:toggle-show-full-path';
+
   export const toggleFileSize = 'filebrowser:toggle-file-size';
 
   export const toggleSortNotebooksFirst =
@@ -222,7 +224,8 @@ const browser: JupyterFrontEndPlugin<void> = {
             showFileSizeColumn: false,
             showHiddenFiles: false,
             showFileCheckboxes: false,
-            sortNotebooksFirst: false
+            sortNotebooksFirst: false,
+            showFullPath: false
           };
           const fileBrowserModelConfig = {
             filterDirectories: true
@@ -1214,7 +1217,7 @@ function addCommands(
       }
 
       if (PageConfig.getOption('copyAbsolutePath') === 'true') {
-        const absolutePath = PathExt.join(
+        const absolutePath = PathExt.joinWithLeadingSlash(
           PageConfig.getOption('serverRoot') ?? '',
           item.value.path
         );
@@ -1250,6 +1253,22 @@ function addCommands(
     execute: () => {
       const value = !browser.showLastModifiedColumn;
       const key = 'showLastModifiedColumn';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleShowFullPath, {
+    label: trans.__('Show Full Path'),
+    isToggled: () => browser.showFullPath,
+    execute: () => {
+      const value = !browser.showFullPath;
+      const key = 'showFullPath';
       if (settingRegistry) {
         return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)

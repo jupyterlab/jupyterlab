@@ -437,6 +437,16 @@
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
+      "command": "notebook:access-previous-history-entry",
+      "keys": ["Alt ArrowUp"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:access-next-history-entry",
+      "keys": ["Alt ArrowDown"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
       "command": "notebook:enter-edit-mode",
       "keys": ["Enter"],
       "selector": ".jp-Notebook:focus"
@@ -801,6 +811,12 @@
       "description": "'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells - 'full': Best performance with side effects - Attach to the DOM only cells in viewport - 'none': Worst performance without side effects - Attach all cells to the viewport",
       "enum": ["defer", "full", "none"],
       "default": "defer"
+    },
+    "accessKernelHistory": {
+      "title": "Kernel history access",
+      "description": "Enable kernel history access from notebook cells. Enabling this allows you to scroll through kernel history from a given notebook cell.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

@@ -318,8 +318,8 @@
 
 .jp-mod-sideBySide.jp-Notebook .jp-CodeCell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) min-content minmax(
-      0,
+  grid-template-columns: minmax(70px, 1fr) min-content minmax(
+      70px,
       var(--jp-side-by-side-output-size)
     );
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -330,8 +330,8 @@
 }
 
 .jp-mod-sideBySide.jp-Notebook .jp-CodeCell.jp-mod-resizedCell {
-  grid-template-columns: minmax(0, 1fr) min-content minmax(
-      0,
+  grid-template-columns: minmax(70px, 1fr) min-content minmax(
+      70px,
       var(--jp-side-by-side-resized-cell)
     );
 }
