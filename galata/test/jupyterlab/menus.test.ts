@@ -179,7 +179,7 @@ function reduceItem(
 
 test.describe('Top menu keyboard navigation @a11y', () => {
   test.use({ autoGoto: false });
-  test('navigate to open file with keyboard', async ({ page }) => {
+  test('open file menu with keyboard', async ({ page }) => {
     await page.goto();
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
     // eslint-disable-next-line no-constant-condition
