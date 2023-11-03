@@ -177,7 +177,7 @@ function reduceItem(
   return null;
 }
 
-test.describe('Top menu keyboard navigation', () => {
+test.describe('Top menu keyboard navigation @a11y', () => {
   test.use({ autoGoto: false });
   test('navigate to open file with keyboard', async ({ page }) => {
     await page.goto();
