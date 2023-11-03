@@ -182,6 +182,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   test('navigate to open file with keyboard', async ({ page }) => {
     await page.goto();
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
       if (fileMenu.evaluate(el => el === document.activeElement)) {
