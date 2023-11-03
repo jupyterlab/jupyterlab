@@ -6,15 +6,17 @@ import { expect, test } from '@jupyterlab/galata';
 test.use({ viewport: { width: 320, height: 256 } });
 
 test.describe('Low Vision / Zoom Support', () => {
-  test('Light Themed Launch Screen at low vision', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await page.sidebar.close('left');
+  });
+
+  test('Light Themed Launch Screen at low vision', async ({ page }) => {
     expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
       'light-launch-screen-at-low-vision.png'
     );
   });
 
   test('Dark Themed Launch Screen at low vision ', async ({ page }) => {
-    await page.sidebar.close('left');
     await page.theme.setDarkTheme();
     expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
       'dark-launch-screen-at-low-vision.png'
