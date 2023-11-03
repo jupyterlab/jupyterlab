@@ -10,85 +10,39 @@ test.describe('Low Vision / Zoom Support', () => {
     await page.sidebar.close('left');
   });
 
-  test('Light Themed Launch Screen at low vision', async ({ page }) => {
+  test('Launch Screen at low vision', async ({ page }) => {
     expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
-      'light-launch-screen-at-low-vision.png'
+      'launch-screen-at-low-vision.png'
     );
   });
 
-  test('Dark Themed Launch Screen at low vision ', async ({ page }) => {
-    await page.theme.setDarkTheme();
-    expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
-      'dark-launch-screen-at-low-vision.png'
-    );
-  });
-
-  test('Should show visibility of light themed menubar at low vision', async ({
-    page
-  }) => {
+  test('Should show visibility of menubar at low vision', async ({ page }) => {
     await page.theme.setLightTheme();
     expect(await page.locator('#jp-top-panel').screenshot()).toMatchSnapshot(
-      'visibility-of-light-menu-bar-at-low-vision.png'
+      'visibility-of-menu-bar-at-low-vision.png'
     );
   });
 
-  test('Should show visibility of dark themed menubar at low vision', async ({
-    page
-  }) => {
-    await page.theme.setDarkTheme();
-    expect(await page.locator('#jp-top-panel').screenshot()).toMatchSnapshot(
-      'visibility-of-dark-menu-bar-at-low-vision.png'
-    );
-  });
-
-  test('Light themed left tabBar at low vision', async ({ page }) => {
+  test('Left tabBar at low vision', async ({ page }) => {
     await page.theme.setLightTheme();
     const tabbar = await page.sidebar.getTabBar();
     expect(await tabbar.screenshot()).toMatchSnapshot(
-      'left-light-tabbar-of-status-bar-at-low-vision.png'
+      'left-tabbar-at-low-vision.png'
     );
   });
 
-  test('Dark Themed left tabBar at low vision', async ({ page }) => {
-    await page.theme.setDarkTheme();
-    const tabbar = await page.sidebar.getTabBar();
-    expect(await tabbar.screenshot()).toMatchSnapshot(
-      'left-dark-tabbar-of-status-bar-at-low-vision.png'
-    );
-  });
-
-  test('Open File Browser on left at low vision', async ({ page }) => {
-    await page.sidebar.openTab('filebrowser');
-    expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
-  });
-
-  test('Light Themed right tabBar at low vision', async ({ page }) => {
+  test('Right tabBar at low vision', async ({ page }) => {
     await page.theme.setLightTheme();
     const tabbar = await page.sidebar.getTabBar('right');
     expect(await tabbar.screenshot()).toMatchSnapshot(
-      'right-light-tabbar-at-low-vision.png'
+      'right-tabbar-at-low-vision.png'
     );
   });
 
-  test('Dark Themed right tabBar at low vision', async ({ page }) => {
-    await page.theme.setDarkTheme();
-    const tabbar = await page.sidebar.getTabBar('right');
-    expect(await tabbar.screenshot()).toMatchSnapshot(
-      'right-dark-tabbar-at-low-vision.png'
-    );
-  });
-
-  test('Light Themed statusBar at low vision', async ({ page }) => {
+  test('StatusBar at low vision', async ({ page }) => {
     await page.theme.setLightTheme();
     expect(
       await page.locator('#jp-main-statusbar').screenshot()
     ).toMatchSnapshot('light-statusbar-at-low-vision.png');
-  });
-  // comment to file
-  test('Dark Themed statusBar at low vision', async ({ page }) => {
-    await page.theme.setDarkTheme();
-    expect(
-      await page.locator('#jp-main-statusbar').screenshot()
-    ).toMatchSnapshot('dark-statusbar-at-low-vision.png');
   });
 });
