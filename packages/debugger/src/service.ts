@@ -927,11 +927,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     model: VariablesModel,
     context: IDebugger.Model.IVariableContext
   ): Promise<void> {
-    if (context.variable.children) {
-      // Bail early as we know the variable children
-      return;
-    }
-
     const newScopes = model.scopes.slice();
 
     let scope = newScopes.find(scope => scope.name === context.scope);
@@ -953,16 +948,17 @@ export class DebuggerService implements IDebugger, IDisposable {
       container = parent.children;
     }
     const expandingItem = container.find(
-      item => item.name === context.variable.name
+      item => item.name === context.variable
     );
-    if (!expandingItem) {
+    if (!expandingItem || expandingItem.children) {
+      // Bail early if we don't find the item to expand or if we know the variable children
       return;
     }
 
     if (typeof expandingItem.children === 'undefined') {
       // Request children
       const variables = await this.inspectVariable(
-        context.variable.variablesReference
+        expandingItem.variablesReference
       );
 
       expandingItem.children = variables;

@@ -150,6 +150,7 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       msg: KernelMessage.IIOPubMessage
     ): void => {
       if (
+        msg.header.msg_type == 'execute_result' &&
         (msg.parent_header as KernelMessage.IHeader).msg_type ==
           'execute_request' &&
         this._service.isStarted &&

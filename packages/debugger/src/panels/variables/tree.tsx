@@ -57,7 +57,7 @@ export class VariablesBodyTree extends ReactWidget {
 
     const handleClick = (variable: IDebugger.IVariable, parents?: string[]) => {
       this.model.toggleVariableExpansion({
-        variable,
+        variable: variable.name,
         scope: scope.name,
         parents
       });

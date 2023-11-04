@@ -1042,9 +1042,9 @@ export namespace IDebugger {
      */
     export interface IVariableContext {
       /**
-       * Variable
+       * Variable name
        */
-      variable: IDebugger.IVariable;
+      variable: string;
       /**
        * Variable scope
        */
