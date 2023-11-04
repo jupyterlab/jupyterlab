@@ -2083,6 +2083,44 @@ export namespace NotebookActions {
       }
     });
   }
+
+  /**
+   * Access last notebook history.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export async function accessPreviousHistory(
+    notebook: Notebook
+  ): Promise<void> {
+    if (!notebook.notebookConfig.accessKernelHistory) {
+      return;
+    }
+    const activeCell = notebook.activeCell;
+    if (activeCell) {
+      if (notebook.kernelHistory) {
+        const previousHistory = await notebook.kernelHistory.back(activeCell);
+        notebook.kernelHistory.updateEditor(activeCell, previousHistory);
+      }
+    }
+  }
+
+  /**
+   * Access next notebook history.
+   *
+   * @param notebook - The target notebook widget.
+   */
+  export async function accessNextHistory(notebook: Notebook): Promise<void> {
+    if (!notebook.notebookConfig.accessKernelHistory) {
+      return;
+    }
+    const activeCell = notebook.activeCell;
+    if (activeCell) {
+      if (notebook.kernelHistory) {
+        const nextHistory = await notebook.kernelHistory.forward(activeCell);
+        notebook.kernelHistory.updateEditor(activeCell, nextHistory);
+      }
+    }
+  }
 }
 
 /**

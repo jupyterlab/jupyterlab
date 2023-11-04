@@ -55,12 +55,15 @@ test('should not update height when hiding', async ({ page, tmpPath }) => {
   expect(parseInt(innerHeight, 10)).toEqual(initialHeight);
 });
 
-test('should hide first code cell when scrolling down', async ({
+test('should hide first inactive code cell when scrolling down', async ({
   page,
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
+  // Activate >second< cell
+  await page.notebook.selectCells(1);
+  // Test if the >first< (now inactive) cell gets detached
   const h = await page.notebook.getNotebookInPanel();
   const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';
   const firstCell = await h!.waitForSelector(firstCellSelector);
@@ -76,12 +79,15 @@ test('should hide first code cell when scrolling down', async ({
   expect(await firstCell.textContent()).toEqual('[16]:local link\n');
 });
 
-test('should reattached a code code cell when scrolling back into the viewport', async ({
+test('should reattached inactive code cell when scrolling back into the viewport', async ({
   page,
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
+  // Activate >second< cell
+  await page.notebook.selectCells(1);
+  // Test if the >first< (now inactive) cell gets re-attached
   const h = await page.notebook.getNotebookInPanel();
   const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';
   const firstCell = await h!.waitForSelector(firstCellSelector);
@@ -101,6 +107,91 @@ test('should reattached a code code cell when scrolling back into the viewport',
 
   // Check that the input area is back
   expect(await firstCell.waitForSelector('.jp-InputArea')).toBeDefined();
+});
+
+test('should not detach active code cell input when scrolling down', async ({
+  page,
+  tmpPath
+}) => {
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  await page.notebook.selectCells(0);
+  const h = await page.notebook.getNotebookInPanel();
+  const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';
+  const firstCell = await h!.waitForSelector(firstCellSelector);
+
+  const bbox = await h!.boundingBox();
+  await page.mouse.move(bbox!.x, bbox!.y);
+  await Promise.all([
+    firstCell.waitForElementState('hidden'),
+    page.mouse.wheel(0, 1200)
+  ]);
+
+  // Check the input is still defined
+  expect(await firstCell.waitForSelector('.jp-InputArea')).toBeDefined();
+});
+
+for (const cellType of ['code', 'markdown']) {
+  test(`should scroll back to the active ${cellType} cell on typing`, async ({
+    page,
+    tmpPath
+  }) => {
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+    await page.notebook.setCellType(0, cellType);
+    await page.notebook.enterCellEditingMode(0);
+    const h = await page.notebook.getNotebookInPanel();
+    const firstCellSelector = '.jp-Cell[data-windowed-list-index="0"]';
+    const firstCell = await h!.waitForSelector(firstCellSelector);
+
+    const bbox = await h!.boundingBox();
+    await page.mouse.move(bbox!.x, bbox!.y);
+    await Promise.all([
+      firstCell.waitForElementState('hidden'),
+      page.mouse.wheel(0, 1200)
+    ]);
+
+    // Type in the cell
+    await page.keyboard.type('TEST', { delay: 150 });
+
+    // Expect the cell to become visible again
+    await firstCell.waitForElementState('visible');
+
+    // Expect the text to populate the cell editor
+    const firstCellInput = await page.notebook.getCellInput(0);
+    expect(await firstCellInput.textContent()).toContain('TEST');
+  });
+}
+
+test('should scroll back to the cell below the active cell on arrow down key', async ({
+  page,
+  tmpPath
+}) => {
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  // Activate the first cell.
+  await page.notebook.selectCells(0);
+  const h = await page.notebook.getNotebookInPanel();
+  const firstCell = await h!.waitForSelector(
+    '.jp-Cell[data-windowed-list-index="0"]'
+  );
+  const secondCell = await h!.waitForSelector(
+    '.jp-Cell[data-windowed-list-index="1"]'
+  );
+
+  const bbox = await h!.boundingBox();
+  await page.mouse.move(bbox!.x, bbox!.y);
+  await Promise.all([
+    firstCell.waitForElementState('hidden'),
+    secondCell.waitForElementState('hidden'),
+    page.mouse.wheel(0, 1200)
+  ]);
+
+  // Select cell below the active cell
+  await page.keyboard.press('ArrowDown');
+
+  // Expect the second cell to become visible again.
+  await secondCell.waitForElementState('visible');
 });
 
 test('should detach a markdown code cell when scrolling out of the viewport', async ({
