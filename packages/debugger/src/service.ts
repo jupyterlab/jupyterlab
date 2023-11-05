@@ -726,7 +726,6 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Clear the signals set on the model.
    */
   private _clearSignals(): void {
-    console.log('_clearSignals');
     this._model.callstack.currentFrameChanged.disconnect(
       this._onCurrentFrameChanged,
       this
@@ -956,7 +955,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     );
     if (!expandingItem || expandingItem.children) {
       // Bail early if we don't find the item to expand or if we know the variable children
-      console.log('Bail for ', context, expandingItem);
       return;
     }
 
