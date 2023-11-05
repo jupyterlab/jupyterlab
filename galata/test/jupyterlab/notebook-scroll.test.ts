@@ -65,7 +65,9 @@ test.describe('Notebook scroll over long outputs', () => {
     await page.notebook.activate(outputAndHeading);
   });
 
-  test('should scroll over long output smoothly', async ({ page }) => {
+  test('should scroll smoothly without snapping to headings', async ({
+    page
+  }) => {
     const renderedMarkdownLocator = page.locator(
       '.jp-Cell .jp-RenderedMarkdown:has-text("Before")'
     );
