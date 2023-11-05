@@ -9,6 +9,7 @@ import { DocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditor } from '@jupyterlab/fileeditor';
 import { NotebookPanel } from '@jupyterlab/notebook';
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
+import { IStatusMsg } from '@jupyterlab/services/src/kernel/messages';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { bugDotIcon, bugIcon, ToolbarButton } from '@jupyterlab/ui-components';
 import { Debugger } from './debugger';
@@ -145,18 +146,30 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
     connection.statusChanged.connect(statusChanged);
     this._statusChangedHandlers[widget.id] = statusChanged;
 
+    let isExecutingInput = false;
     const iopubMessage = (
       _: Session.ISessionConnection,
       msg: KernelMessage.IIOPubMessage
     ): void => {
       if (
-        msg.header.msg_type == 'execute_result' &&
-        (msg.parent_header as KernelMessage.IHeader).msg_type ==
-          'execute_request' &&
         this._service.isStarted &&
-        !this._service.hasStoppedThreads()
+        !this._service.hasStoppedThreads() &&
+        msg.parent_header.msg_type == 'execute_request'
       ) {
-        void this._service.displayDefinedVariables();
+        if (msg.header.msg_type == 'execute_input') {
+          isExecutingInput = true;
+        } else {
+          if (
+            isExecutingInput &&
+            msg.header.msg_type == 'status' &&
+            (msg as IStatusMsg).content.execution_state == 'idle'
+          ) {
+            isExecutingInput = false;
+            this._service.displayDefinedVariables().catch(error => {
+              console.error(`Failed to list kernel variables:\n${error}`);
+            });
+          }
+        }
       }
     };
     const iopubMessageHandler = this._iopubMessageHandlers[widget.id];

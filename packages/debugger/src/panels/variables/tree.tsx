@@ -13,6 +13,8 @@ import {
 
 import { CommandRegistry } from '@lumino/commands';
 
+import { JSONExt } from '@lumino/coreutils';
+
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { convertType } from '.';
@@ -102,20 +104,29 @@ export class VariablesBodyTree extends ReactWidget {
   }
 
   /**
-   * Set the variable filter list.
+   * The variable filter list.
    */
+  get filter(): Set<string> {
+    return new Set<string>([...this._filter]);
+  }
   set filter(filter: Set<string>) {
-    this._filter = filter;
-    this.update();
+    if (!JSONExt.deepEqual([...this._filter], [...filter])) {
+      this._filter = filter;
+      this.update();
+    }
   }
 
   /**
-   * Set the current scope
-   *
-   * @deprecated This is a no-op; the source of truth is the model.
+   * The current scope to display
    */
+  get scope(): string {
+    return this._scope;
+  }
   set scope(scope: string) {
-    // no-op
+    if (this._scope != scope) {
+      this._scope = scope;
+      this.update();
+    }
   }
 
   protected model: IDebugger.Model.IVariables;

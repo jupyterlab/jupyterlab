@@ -383,11 +383,14 @@ export class DebuggerService implements IDebugger, IDisposable {
         variables: variables
       }
     ];
-    this._model.variables.scopes = variableScopes;
+
+    // We need to connect this signal before setting the scopes
+    // as it will be used to restore the variable expansion states.
     this._model.variables.variableExpanded.connect(
       this._onVariableExpanded,
       this
     );
+    this._model.variables.scopes = variableScopes;
   }
 
   async displayModules(): Promise<void> {
@@ -723,6 +726,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Clear the signals set on the model.
    */
   private _clearSignals(): void {
+    console.log('_clearSignals');
     this._model.callstack.currentFrameChanged.disconnect(
       this._onCurrentFrameChanged,
       this
@@ -952,6 +956,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     );
     if (!expandingItem || expandingItem.children) {
       // Bail early if we don't find the item to expand or if we know the variable children
+      console.log('Bail for ', context, expandingItem);
       return;
     }
 

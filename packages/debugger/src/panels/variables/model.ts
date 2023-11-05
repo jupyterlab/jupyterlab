@@ -42,26 +42,23 @@ export class VariablesModel implements IDebugger.Model.IVariables {
   }
 
   /**
-   * Get all the scopes.
+   * The scopes.
    */
   get scopes(): IDebugger.IScope[] {
-    return this._state;
+    return this._state.slice();
   }
-
-  /**
-   * Set the scopes.
-   */
   set scopes(scopes: IDebugger.IScope[]) {
-    const oldStateLength = this._state.length;
+    const oldExpansion = this.expandedVariables;
     this._state = scopes.slice();
 
     if (this._variablesToExpand.length == 0 && scopes.length) {
-      if (oldStateLength === 0 && this._latestExpansionState.length > 0) {
+      // Backup latest non-empty expansion state
+      if (oldExpansion.length) {
+        this._latestExpansionState = oldExpansion;
+      }
+      if (this._latestExpansionState.length > 0) {
         this._variablesToExpand = [...this._latestExpansionState];
         this._latestExpansionState.length = 0;
-      } else {
-        // Backup latest expansion state in case of clean
-        this._latestExpansionState = this.expandedVariables;
       }
     }
 
@@ -82,8 +79,10 @@ export class VariablesModel implements IDebugger.Model.IVariables {
             const variable = container.find(v => v.name == context!.variable);
             if (variable) {
               variable.expanded = true;
-              this._variableExpanded.emit(context);
-              return;
+              if (!variable.children?.length) {
+                this._variableExpanded.emit(context);
+                return;
+              }
             }
           }
         }
