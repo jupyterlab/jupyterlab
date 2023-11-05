@@ -65,6 +65,10 @@ test.describe('Notebook scroll over long outputs', () => {
     await page.notebook.activate(outputAndHeading);
   });
 
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
   test('should scroll smoothly without snapping to headings', async ({
     page
   }) => {
