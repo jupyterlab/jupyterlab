@@ -880,8 +880,12 @@ export class WindowedList<
    * A message handler invoked on an `'resize-request'` message.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
+    const previousHeight = this.viewModel.height;
     this.viewModel.height =
       msg.height >= 0 ? msg.height : this.node.getBoundingClientRect().height;
+    if (this.viewModel.height !== previousHeight) {
+      this.update();
+    }
     super.onResize(msg);
   }
 
