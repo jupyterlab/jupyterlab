@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { expect, galata, test } from '@jupyterlab/galata';
+import { ElementHandle } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'windowed_notebook.ipynb';
@@ -27,32 +28,65 @@ test.beforeEach(async ({ page, tmpPath }) => {
   );
 });
 
+async function getWindowHeight(panel: ElementHandle<Element>) {
+  return parseInt(
+    (await panel?.$$eval(
+      '.jp-WindowedPanel-inner',
+      nodes => nodes[0].style.height
+    )) ?? '0',
+    10
+  );
+}
+
+test('should update window height on resize', async ({ page, tmpPath }) => {
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  // Wait to ensure the rendering logic is stable.
+  await page.waitForTimeout(200);
+
+  // Measure height when only the notebook is open
+  const panel = await page.notebook.getNotebookInPanel();
+  const fullHeight = await getWindowHeight(panel);
+
+  // Add a new launcher below the notebook
+  await page.evaluate(async () => {
+    const widget = await window.jupyterapp.commands.execute('launcher:create');
+    window.jupyterapp.shell.add(widget, 'main', { mode: 'split-bottom' });
+  });
+  // Measure height after splitting the dock area
+  const heightAfterSplit = await getWindowHeight(panel);
+
+  expect(heightAfterSplit).toBeLessThan(fullHeight);
+
+  // Resize the dock panel, increasing the notebook height/decreasing the launcher height.
+  const resizeHandle = page.locator(
+    '.lm-DockPanel-handle[data-orientation="vertical"]'
+  );
+  resizeHandle.dragTo(page.locator('#jp-main-statusbar'));
+
+  // Measure height after resizing
+  const heightAfterResize = await getWindowHeight(panel);
+
+  expect(heightAfterResize).toBeGreaterThan(heightAfterSplit);
+});
+
 test('should not update height when hiding', async ({ page, tmpPath }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
   // Wait to ensure the rendering logic is stable.
   await page.waitForTimeout(200);
 
-  const h = await page.notebook.getNotebookInPanel();
-  const initialHeight = parseInt(
-    (await h?.$$eval(
-      '.jp-WindowedPanel-inner',
-      nodes => nodes[0].style.height
-    )) ?? '0',
-    10
-  );
+  const panel = await page.notebook.getNotebookInPanel();
+  const initialHeight = await getWindowHeight(panel);
 
   expect(initialHeight).toBeGreaterThan(0);
 
+  // Add a new launcher covering the notebook.
   await page.menu.clickMenuItem('File>New Launcher');
 
-  const innerHeight =
-    (await h?.$$eval(
-      '.jp-WindowedPanel-inner',
-      nodes => nodes[0].style.height
-    )) ?? '-1';
+  const innerHeight = await getWindowHeight(panel);
 
-  expect(parseInt(innerHeight, 10)).toEqual(initialHeight);
+  expect(innerHeight).toEqual(initialHeight);
 });
 
 test('should hide first inactive code cell when scrolling down', async ({
