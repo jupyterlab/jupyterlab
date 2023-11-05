@@ -28,25 +28,38 @@ test.beforeEach(async ({ page, tmpPath }) => {
   );
 });
 
+async function getInnerHeight(panel: ElementHandle<Element>) {
+  return parseInt(
+    await panel.$eval(
+      '.jp-WindowedPanel-inner',
+      node => (node as HTMLElement).style.height
+    ),
+    10
+  );
+}
 async function getWindowHeight(panel: ElementHandle<Element>) {
   return parseInt(
-    (await panel?.$$eval(
-      '.jp-WindowedPanel-inner',
-      nodes => nodes[0].style.height
-    )) ?? '0',
+    await panel.$eval(
+      '.jp-WindowedPanel-window',
+      node => (node as HTMLElement).style.minHeight
+    ),
     10
   );
 }
 
 test('should update window height on resize', async ({ page, tmpPath }) => {
-  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  // Note: this needs many small cells so that they get added during resize changing height.
+  const notebookName = '20_empty_cells.ipynb';
+  await page.contents.uploadFile(
+    path.resolve(__dirname, `notebooks/${notebookName}`),
+    `${tmpPath}/${notebookName}`
+  );
+  await page.notebook.openByPath(`${tmpPath}/${notebookName}`);
 
-  // Wait to ensure the rendering logic is stable.
-  await page.waitForTimeout(200);
+  const notebook = await page.notebook.getNotebookInPanel();
 
-  // Measure height when only the notebook is open
-  const panel = await page.notebook.getNotebookInPanel();
-  const fullHeight = await getWindowHeight(panel);
+  // Measure height when the notebook is open but launcher closed
+  const fullHeight = await getWindowHeight(notebook);
 
   // Add a new launcher below the notebook
   await page.evaluate(async () => {
@@ -54,18 +67,18 @@ test('should update window height on resize', async ({ page, tmpPath }) => {
     window.jupyterapp.shell.add(widget, 'main', { mode: 'split-bottom' });
   });
   // Measure height after splitting the dock area
-  const heightAfterSplit = await getWindowHeight(panel);
+  const heightAfterSplit = await getWindowHeight(notebook);
 
   expect(heightAfterSplit).toBeLessThan(fullHeight);
 
   // Resize the dock panel, increasing the notebook height/decreasing the launcher height.
   const resizeHandle = page.locator(
-    '.lm-DockPanel-handle[data-orientation="vertical"]'
+    '.lm-DockPanel-handle[data-orientation="vertical"]:visible'
   );
-  resizeHandle.dragTo(page.locator('#jp-main-statusbar'));
+  await resizeHandle.dragTo(page.locator('#jp-main-statusbar'));
 
   // Measure height after resizing
-  const heightAfterResize = await getWindowHeight(panel);
+  const heightAfterResize = await getWindowHeight(notebook);
 
   expect(heightAfterResize).toBeGreaterThan(heightAfterSplit);
 });
@@ -76,15 +89,15 @@ test('should not update height when hiding', async ({ page, tmpPath }) => {
   // Wait to ensure the rendering logic is stable.
   await page.waitForTimeout(200);
 
-  const panel = await page.notebook.getNotebookInPanel();
-  const initialHeight = await getWindowHeight(panel);
+  const notebook = await page.notebook.getNotebookInPanel();
+  const initialHeight = await getInnerHeight(notebook);
 
   expect(initialHeight).toBeGreaterThan(0);
 
   // Add a new launcher covering the notebook.
   await page.menu.clickMenuItem('File>New Launcher');
 
-  const innerHeight = await getWindowHeight(panel);
+  const innerHeight = await getInnerHeight(notebook);
 
   expect(innerHeight).toEqual(initialHeight);
 });
