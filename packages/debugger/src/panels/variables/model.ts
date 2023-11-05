@@ -58,7 +58,6 @@ export class VariablesModel implements IDebugger.Model.IVariables {
       }
       if (this._latestExpansionState.length > 0) {
         this._variablesToExpand = [...this._latestExpansionState];
-        this._latestExpansionState.length = 0;
       }
     }
 
