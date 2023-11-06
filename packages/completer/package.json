@@ -30,6 +30,7 @@
     "lib/default/*.js.map",
     "lib/default/*.js",
     "style/*.css",
+    "style/**/*.svg",
     "style/index.js",
     "src/**/*.{ts,tsx}"
   ],
@@ -45,13 +46,18 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
+    "@codemirror/state": "^6.2.0",
+    "@codemirror/view": "^6.9.6",
     "@jupyter/ydoc": "^1.1.1",
     "@jupyterlab/apputils": "^4.2.0-alpha.2",
     "@jupyterlab/codeeditor": "^4.1.0-alpha.2",
+    "@jupyterlab/codemirror": "^4.1.0-alpha.2",
     "@jupyterlab/coreutils": "^6.1.0-alpha.2",
     "@jupyterlab/rendermime": "^4.1.0-alpha.2",
     "@jupyterlab/services": "^7.1.0-alpha.2",
+    "@jupyterlab/settingregistry": "^4.1.0-alpha.2",
     "@jupyterlab/statedb": "^4.1.0-alpha.2",
+    "@jupyterlab/translation": "^4.1.0-alpha.2",
     "@jupyterlab/ui-components": "^4.1.0-alpha.2",
     "@lumino/algorithm": "^2.0.1",
     "@lumino/coreutils": "^2.1.2",

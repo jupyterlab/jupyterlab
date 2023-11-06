@@ -1,7 +1,8 @@
 {
   "title": "Code Completion",
   "description": "Code Completion settings.",
-  "jupyter.lab.setting-icon-label": "Code Completion settings",
+  "jupyter.lab.setting-icon": "completer:widget",
+  "jupyter.lab.setting-icon-label": "Code Completer",
   "jupyter.lab.transform": true,
   "properties": {
     "availableProviders": {

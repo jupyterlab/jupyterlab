@@ -1066,7 +1066,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this._output.outputLengthChanged.connect(this._outputLengthHandler, this);
     outputWrapper.addWidget(this._output);
     const layout = this.layout as PanelLayout;
-    layout.insertWidget(layout.widgets.length - 1, new ResizeHandle(this.node));
+    const resizeHandle = new ResizeHandle(this.node);
+    resizeHandle.sizeChanged.connect(this._sizeChangedHandler, this);
+    layout.insertWidget(layout.widgets.length - 1, resizeHandle);
     layout.insertWidget(layout.widgets.length - 1, outputWrapper);
 
     if (this.model.isDirty) {
@@ -1505,6 +1507,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this.node.setAttribute('aria-label', ariaLabel);
   }
 
+  /**
+   * Handle changes in input/output proportions in side-by-side mode.
+   */
+  private _sizeChangedHandler(sender: ResizeHandle) {
+    this._displayChanged.emit();
+  }
+
   private _headingsCache: Cell.IHeading[] | null = null;
   private _rendermime: IRenderMimeRegistry;
   private _outputHidden = false;
@@ -1632,6 +1641,15 @@ export namespace CodeCell {
       // execution, clear the prompt.
       if (future && !cell.isDisposed && cell.outputArea.future === future) {
         cell.setPrompt('');
+        if (recordTiming && future.isDisposed) {
+          // Record the time when the cell execution was aborted
+          const timingInfo: any = Object.assign(
+            {},
+            model.getMetadata('execution')
+          );
+          timingInfo['execution_failed'] = new Date().toISOString();
+          model.setMetadata('execution', timingInfo);
+        }
       }
       throw e;
     }
