@@ -65,6 +65,10 @@ test.describe('Notebook scroll on execution', () => {
     await page.notebook.activate(longOutputsNb);
   });
 
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
   test('should scroll when advancing if top is only marginally visible', async ({
     page
   }) => {
