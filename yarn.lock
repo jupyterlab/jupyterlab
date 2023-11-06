@@ -5819,8 +5819,8 @@ __metadata:
   linkType: hard
 
 "@rjsf/core@npm:^5.13.2":
-  version: 5.13.4
-  resolution: "@rjsf/core@npm:5.13.4"
+  version: 5.13.2
+  resolution: "@rjsf/core@npm:5.13.2"
   dependencies:
     lodash: ^4.17.21
     lodash-es: ^4.17.21
@@ -5830,13 +5830,13 @@ __metadata:
   peerDependencies:
     "@rjsf/utils": ^5.12.x
     react: ^16.14.0 || >=17
-  checksum: a263eca0064a62815a1e6a0492072c70834415a35dd67dd24a17f5ca77866c5878b57a1867b216a9a11e56f115b18822b4e20423dec984e22d0d7a8eed52eb22
+  checksum: e977c33bc74075fe2035a22d242bd1a8433468834e3e45fe9b8edaf9e14e14793c43936917805f105960b3d71385fc6616ce502b5273fd6ee1c4539aa3c4e69c
   languageName: node
   linkType: hard
 
 "@rjsf/utils@npm:^5.13.2":
-  version: 5.13.4
-  resolution: "@rjsf/utils@npm:5.13.4"
+  version: 5.13.2
+  resolution: "@rjsf/utils@npm:5.13.2"
   dependencies:
     json-schema-merge-allof: ^0.8.1
     jsonpointer: ^5.0.1
@@ -5845,13 +5845,13 @@ __metadata:
     react-is: ^18.2.0
   peerDependencies:
     react: ^16.14.0 || >=17
-  checksum: 9c55dd102a850cded70edc9de1a68b1d0b181d04abe59cbfd9b1cd42500dae6a271ff4e991925843447f881a579790ba28bc578a1373133fd164cad40b8f826e
+  checksum: 06834669205fa0429355f04fc551986ca6899c7b656feb2f2f0477c02e6da625bf198bd292b06e703e2c029436d899a2c802fe28d1bfe5017b2a2d016a361180
   languageName: node
   linkType: hard
 
 "@rjsf/validator-ajv8@npm:^5.13.2":
-  version: 5.13.4
-  resolution: "@rjsf/validator-ajv8@npm:5.13.4"
+  version: 5.13.2
+  resolution: "@rjsf/validator-ajv8@npm:5.13.2"
   dependencies:
     ajv: ^8.12.0
     ajv-formats: ^2.1.1
@@ -5859,7 +5859,7 @@ __metadata:
     lodash-es: ^4.17.21
   peerDependencies:
     "@rjsf/utils": ^5.12.x
-  checksum: 5d28ae60378f6a934c8e72dfa7318f5dc7757740b8998d5a12b150ce890c992297c59ff2278e71cb93cd85d10c944baa6d12e46cee4c6df61c42b2202e33a21a
+  checksum: 1c88d806ac3c6c8753f798ebc0c23afc3ac9066bf872baa82f0623029b0683ec51a962282dfa48a130234f6e875a856ff7dbd4e268d86a639d3a4f8612e31a10
   languageName: node
   linkType: hard
 
@@ -15027,11 +15027,11 @@ __metadata:
   linkType: hard
 
 "marked@npm:^9.1.2":
-  version: 9.1.5
-  resolution: "marked@npm:9.1.5"
+  version: 9.1.2
+  resolution: "marked@npm:9.1.2"
   bin:
     marked: bin/marked.js
-  checksum: 55b27281f67c362d7ad08e9639a30fc80d1eea24d88a2071bbf8a6e0821d9203b0acf03ce3e7c47f361613cabc22293be3aaca7fa05dce159a30a936cfcb0f9c
+  checksum: 8dd1b9e268f149d770397b5299e73dc6b5ae915f867acfaa166603eb5b137cfadaa40406048f424371729036abdf3b0bb629223520571534ec32e27746a798d2
   languageName: node
   linkType: hard
 
