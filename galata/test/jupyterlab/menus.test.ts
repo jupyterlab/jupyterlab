@@ -185,114 +185,141 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (fileMenu.evaluate(el => el === document.activeElement)) {
+      if (await fileMenu.evaluate(el => el === document.activeElement)) {
         break;
       }
     }
     await page.keyboard.press('Enter');
 
     expect(await page.menu.isOpen('File')).toBeTruthy();
+
+    test('Open edit menu with keyboard', async ({ page }) => {
+      await page.goto();
+      const editMenu = page.getByRole('menuitem', { name: 'Edit' });
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Shift+Tab');
+        if (await editMenu.evaluate(el => el === document.activeElement)) {
+          break;
+        }
+      }
+      await page.keyboard.press('Enter');
+
+      expect(await page.menu.isOpen('Edit')).toBeTruthy();
+    });
+
+    test('Open view menu with keyboard', async ({ page }) => {
+      await page.goto();
+      const viewMenu = page.getByRole('menuitem', { name: 'View' });
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Shift+Tab');
+        if (await viewMenu.evaluate(el => el === document.activeElement)) {
+          break;
+        }
+      }
+      await page.keyboard.press('Enter');
+
+      expect(await page.menu.isOpen('View')).toBeTruthy();
+    });
+
+    test('Open run menu with keyboard', async ({ page }) => {
+      await page.goto();
+      const runMenu = page.getByRole('menuitem', { name: 'Run' });
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Shift+Tab');
+        if (await runMenu.evaluate(el => el === document.activeElement)) {
+          break;
+        }
+      }
+      await page.keyboard.press('Enter');
+
+      expect(await page.menu.isOpen('Run')).toBeTruthy();
+    });
+
+    test('Open kernel menu with keyboard', async ({ page }) => {
+      await page.goto();
+      const kernelMenu = page.getByRole('menuitem', { name: 'Kernel' });
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Shift+Tab');
+        if (await kernelMenu.evaluate(el => el === document.activeElement)) {
+          break;
+        }
+      }
+      await page.keyboard.press('Enter');
+
+      expect(await page.menu.isOpen('Kernel')).toBeTruthy();
+    });
+
+    test('Open tabs menu with keyboard', async ({ page }) => {
+      await page.goto();
+      const tabsMenu = page.getByRole('menuitem', { name: 'Tabs' });
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Shift+Tab');
+        if (await tabsMenu.evaluate(el => el === document.activeElement)) {
+          break;
+        }
+      }
+      await page.keyboard.press('Enter');
+
+      expect(await page.menu.isOpen('Tabs')).toBeTruthy();
+    });
+
+    test('Open settings menu with keyboard', async ({ page }) => {
+      await page.goto();
+      const settingsMenu = page.getByRole('menuitem', { name: 'Settings' });
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Shift+Tab');
+        if (await settingsMenu.evaluate(el => el === document.activeElement)) {
+          break;
+        }
+      }
+      await page.keyboard.press('Enter');
+
+      expect(await page.menu.isOpen('Settings')).toBeTruthy();
+    });
+
+    test('Open help menu with keyboard', async ({ page }) => {
+      await page.goto();
+      const helpMenu = page.getByRole('menuitem', { name: 'Help' });
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Shift+Tab');
+        if (await helpMenu.evaluate(el => el === document.activeElement)) {
+          break;
+        }
+      }
+      await page.keyboard.press('Enter');
+
+      expect(await page.menu.isOpen('Help')).toBeTruthy();
+    });
+
+    test('Open new launcher with keyboard', async ({ page }) => {
+      await page.goto();
+      const launcherTab = page.getByRole('tab', { name: 'Launcher' });
+      const newLauncherBtn = page.getByRole('button', { name: 'New Launcher' });
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Shift+Tab');
+        if (await launcherTab.evaluate(el => el === document.activeElement)) {
+          break;
+        }
+        await page.keyboard.press('ArrowRight');
+        if (
+          await newLauncherBtn.evaluate(el => el === document.activeElement)
+        ) {
+          break;
+        }
+      }
+      await page.keyboard.press('Enter');
+
+      await expect(page.locator('#tab-key-2-1')).toBeFocused();
+    });
   });
-
-  // test("navigate to open edit with keyboard", async ({ page }) => {
-  //   await page.goto();
-  //   for (let i = 0; i < 3; i++) {
-  //     await page.keyboard.press("Shift+Tab");
-  //   }
-  //   await page.keyboard.press("ArrowRight");
-  //   await page.keyboard.press("Enter");
-
-  //   await expect(page.locator("#jp-mainmenu-edit")).toBeFocused();
-  // });
-
-  // test("navigate to open view with keyboard", async ({ page }) => {
-  //   await page.goto();
-  //   for (let i = 0; i < 3; i++) {
-  //     await page.keyboard.press("Shift+Tab");
-  //   }
-  //   for (let i = 0; i < 2; i++) {
-  //     await page.keyboard.press("ArrowRight");
-  //   }
-  //   await page.keyboard.press("Enter");
-
-  //   await expect(page.locator("#jp-mainmenu-view")).toBeFocused();
-  // });
-
-  // test("navigate to open run with keyboard", async ({ page }) => {
-  //   await page.goto();
-  //   for (let i = 0; i < 3; i++) {
-  //     await page.keyboard.press("Shift+Tab");
-  //   }
-  //   for (let i = 0; i < 3; i++) {
-  //     await page.keyboard.press("ArrowRight");
-  //   }
-  //   await page.keyboard.press("Enter");
-
-  //   await expect(page.locator("#jp-mainmenu-run")).toBeFocused();
-  // });
-
-  // test("navigate to open kernel with keyboard", async ({ page }) => {
-  //   await page.goto();
-  //   for (let i = 0; i < 3; i++) {
-  //     await page.keyboard.press("Shift+Tab");
-  //   }
-  //   for (let i = 0; i < 4; i++) {
-  //     await page.keyboard.press("ArrowRight");
-  //   }
-  //   await page.keyboard.press("Enter");
-
-  //   await expect(page.locator("#jp-mainmenu-kernel")).toBeFocused();
-  // });
-
-  // test("navigate to open tabs with keyboard", async ({ page }) => {
-  //   await page.goto();
-  //   for (let i = 0; i < 3; i++) {
-  //     await page.keyboard.press("Shift+Tab");
-  //   }
-  //   for (let i = 0; i < 5; i++) {
-  //     await page.keyboard.press("ArrowRight");
-  //   }
-  //   await page.keyboard.press("Enter");
-
-  //   await expect(page.locator("#jp-mainmenu-tabs")).toBeFocused();
-  // });
-
-  // test("navigate to open settings with keyboard", async ({ page }) => {
-  //   await page.goto();
-  //   for (let i = 0; i < 3; i++) {
-  //     await page.keyboard.press("Shift+Tab");
-  //   }
-  //   for (let i = 0; i < 6; i++) {
-  //     await page.keyboard.press("ArrowRight");
-  //   }
-  //   await page.keyboard.press("Enter");
-
-  //   await expect(page.locator("#jp-mainmenu-settings")).toBeFocused();
-  // });
-
-  // test("navigate to open help with keyboard", async ({ page }) => {
-  //   await page.goto();
-  //   for (let i = 0; i < 3; i++) {
-  //     await page.keyboard.press("Shift+Tab");
-  //   }
-  //   for (let i = 0; i < 7; i++) {
-  //     await page.keyboard.press("ArrowRight");
-  //   }
-  //   await page.keyboard.press("Enter");
-
-  //   await expect(page.locator("#jp-mainmenu-help")).toBeFocused();
-  // });
-
-  // test("navigate to open launcher with keyboard", async ({ page }) => {
-  //   await page.goto();
-  //   await page.keyboard.press("Shift+Tab");
-  //   await page.keyboard.press("Shift+Tab");
-  //   await page.keyboard.press("Shift+Tab");
-  //   await page.keyboard.press("Enter");
-  //   await page.keyboard.press("ArrowDown");
-  //   await page.keyboard.press("Enter");
-  //   await expect(page.locator("#tab-key-2-1")).toBeFocused();
-  // });
 
   // test("navigate to close launcher with keyboard", async ({ page }) => {
   //   await page.goto();
