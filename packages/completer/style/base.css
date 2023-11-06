@@ -206,3 +206,130 @@
     transform: translateX(400%);
   }
 }
+
+.jp-GhostText {
+  color: var(--jp-ui-font-color3);
+  white-space: pre-wrap;
+}
+
+.jp-GhostText-lineSpacer,
+.jp-GhostText-letterSpacer {
+  opacity: 0;
+  display: inline-block;
+  vertical-align: top;
+  max-width: 0;
+}
+
+.jp-GhostText-lineSpacer {
+  animation: jp-GhostText-hide 300ms 700ms ease-out forwards;
+}
+
+@keyframes jp-GhostText-hide {
+  0% {
+    font-size: unset;
+  }
+
+  100% {
+    font-size: 0;
+  }
+}
+
+.jp-GhostText[data-animation='uncover'] {
+  position: relative;
+}
+
+.jp-GhostText-streamedToken {
+  white-space: pre;
+}
+
+.jp-GhostText[data-animation='uncover'] > .jp-GhostText-streamedToken {
+  animation: jp-GhostText-typing 2s forwards;
+  display: inline-flex;
+  overflow: hidden;
+}
+
+@keyframes jp-GhostText-typing {
+  from {
+    max-width: 0;
+  }
+
+  to {
+    max-width: 100%;
+  }
+}
+
+.jp-GhostText-streamingIndicator::after {
+  animation: jp-GhostText-streaming 2s infinite;
+  animation-delay: 400ms;
+  content: ' ';
+  background: var(--jp-layout-color4);
+  opacity: 0.2;
+}
+
+@keyframes jp-GhostText-streaming {
+  0% {
+    opacity: 0.2;
+  }
+
+  20% {
+    opacity: 0.4;
+  }
+
+  40% {
+    opacity: 0.2;
+  }
+}
+
+.jp-InlineCompleter {
+  box-shadow: var(--jp-elevation-z2);
+  background: var(--jp-layout-color1);
+  color: var(--jp-content-font-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.jp-InlineCompleter-progressBar {
+  height: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: var(--jp-accent-color2);
+}
+
+.jp-InlineCompleter[data-display='onHover'] {
+  opacity: 0;
+  transition:
+    visibility 0s linear 0.1s,
+    opacity 0.1s linear;
+  visibility: hidden;
+}
+
+.jp-InlineCompleter[data-display='onHover']:hover,
+.jp-InlineCompleter-hover[data-display='onHover'] {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.jp-InlineCompleter[data-display='never'] {
+  display: none;
+}
+
+.jp-InlineCompleter > .jp-Toolbar {
+  box-shadow: none;
+  border-bottom: none;
+  background: none;
+}
+
+.jp-InlineCompleter[data-show-shortcuts='false']
+  .jp-ToolbarButtonComponent-label {
+  display: none;
+}
+
+[data-command='inline-completer:next'] > .jp-ToolbarButtonComponent-icon,
+[data-command='inline-completer:previous'] > .jp-ToolbarButtonComponent-icon {
+  scale: 1.5;
+}
