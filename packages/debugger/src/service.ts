@@ -928,46 +928,15 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   private async _onVariableExpanded(
     model: VariablesModel,
-    context: IDebugger.Model.IVariableContext
+    variable: IDebugger.IVariable
   ): Promise<void> {
-    const newScopes = model.scopes.slice();
+    // Use the mutable variable state to update the children
+    const variables = await this.inspectVariable(variable.variablesReference);
 
-    let scope = newScopes.find(scope => scope.name === context.scope);
-    if (!scope) {
-      scope = { name: context.scope, variables: [] };
-      newScopes.push(scope);
-    }
+    variable.children = variables;
 
-    const parents = context.parents ?? [];
-    let container = scope.variables;
-    for (let deep = 0; deep < parents.length; deep++) {
-      const parent = container.find(item => item.name === parents[deep]);
-      if (!parent) {
-        return;
-      }
-      if (typeof parent.children === 'undefined') {
-        parent.children = [];
-      }
-      container = parent.children;
-    }
-    const expandingItem = container.find(
-      item => item.name === context.variable
-    );
-    if (!expandingItem || expandingItem.children) {
-      // Bail early if we don't find the item to expand or if we know the variable children
-      return;
-    }
-
-    if (typeof expandingItem.children === 'undefined') {
-      // Request children
-      const variables = await this.inspectVariable(
-        expandingItem.variablesReference
-      );
-
-      expandingItem.children = variables;
-    }
-    // Set new variables state
-    model.scopes = [...newScopes];
+    // Set a copy to trigger refresh
+    model.scopes = model.scopes.slice();
   }
 
   /**

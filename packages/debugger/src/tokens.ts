@@ -1072,7 +1072,7 @@ export namespace IDebugger {
       /**
        * Signal emitted when the current variable has been expanded.
        */
-      readonly variableExpanded: ISignal<this, IVariableContext>;
+      readonly variableExpanded: ISignal<this, IDebugger.IVariable>;
 
       /**
        * Selected variable in the variables explorer.
@@ -1080,20 +1080,11 @@ export namespace IDebugger {
       selectedVariable: IVariableSelection | null;
 
       /**
-       * Expand a variable.
+       * Toogle a variable expansion.
        *
-       * @param variable The variable to expand.
-       *
-       * @deprecated This is not used.
+       * @param variable The variable to expand or collapse.
        */
       expandVariable(variable: IDebugger.IVariable): void;
-
-      /**
-       * Toogle variable expansion.
-       *
-       * @param context The variable context
-       */
-      toggleVariableExpansion(context: IVariableContext): void;
     }
   }
 }

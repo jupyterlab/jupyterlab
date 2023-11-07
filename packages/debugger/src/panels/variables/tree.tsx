@@ -57,12 +57,8 @@ export class VariablesBodyTree extends ReactWidget {
       this.model.scopes.find(scope => scope.name === this._scope) ??
       this.model.scopes[0];
 
-    const handleClick = (variable: IDebugger.IVariable, parents?: string[]) => {
-      this.model.toggleVariableExpansion({
-        variable: variable.name,
-        scope: scope.name,
-        parents
-      });
+    const handleClick = (variable: IDebugger.IVariable) => {
+      this.model.expandVariable(variable);
     };
 
     const handleSelectVariable = (variable: IDebugger.IVariable) => {
@@ -288,7 +284,7 @@ interface IVariablesListProps {
   /**
    * Callback on click
    */
-  handleClick: (variable: IDebugger.IVariable, parents?: string[]) => void;
+  handleClick: (variable: IDebugger.IVariable) => void;
   /**
    * Callback on variable selection
    */
@@ -334,15 +330,7 @@ const VariablesList = (props: IVariablesListProps): JSX.Element => {
               key={key}
               variable={variable}
               filter={filter}
-              onClick={(variable_, parents) => {
-                if (!parents) {
-                  parents = [];
-                }
-                if (variable_ !== variable) {
-                  parents.unshift(variable.name);
-                }
-                handleClick(variable_, parents);
-              }}
+              onClick={handleClick}
               onSelect={handleSelectVariable}
               onHoverChanged={onHoverChanged}
               collapserIcon={collapserIcon}
@@ -368,7 +356,7 @@ interface IVariableComponentProps {
   /**
    * Callback on click
    */
-  onClick: (variable: IDebugger.IVariable, parents?: string[]) => void;
+  onClick: (variable: IDebugger.IVariable) => void;
   /**
    * Callback on selection
    */

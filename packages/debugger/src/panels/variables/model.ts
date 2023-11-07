@@ -84,7 +84,7 @@ export class VariablesModel implements IDebugger.Model.IVariables {
         if (variable) {
           variable.expanded = true;
           if (!variable.children?.length) {
-            this._variableExpanded.emit(context);
+            this._variableExpanded.emit(variable);
             return;
           }
         }
@@ -104,7 +104,7 @@ export class VariablesModel implements IDebugger.Model.IVariables {
   /**
    * Signal emitted when the current variable has been expanded.
    */
-  get variableExpanded(): ISignal<this, IDebugger.Model.IVariableContext> {
+  get variableExpanded(): ISignal<this, IDebugger.IVariable> {
     return this._variableExpanded;
   }
 
@@ -116,6 +116,20 @@ export class VariablesModel implements IDebugger.Model.IVariables {
   }
   set selectedVariable(selection: IDebugger.IVariableSelection | null) {
     this._selectedVariable = selection;
+  }
+
+  /**
+   * Toogle a variable expansion.
+   *
+   * @param variable The variable to expand or collapse.
+   */
+  expandVariable(variable: IDebugger.IVariable): void {
+    variable.expanded = !variable.expanded;
+    if (variable.expanded === true) {
+      // Variable expanded will set new scopes through `DebuggerService._onVariableExpanded`.
+      this._variableExpanded.emit(variable);
+    }
+    this._changed.emit();
   }
 
   protected contextToVariable(
@@ -133,44 +147,11 @@ export class VariablesModel implements IDebugger.Model.IVariables {
     }
   }
 
-  /**
-   * Expand a variable.
-   *
-   * @param variable The variable to expand.
-   * @deprecated This is a no-op
-   */
-  expandVariable(variable: IDebugger.IVariable): void {
-    // no-op
-  }
-
-  /**
-   * Toggle variable expansion state.
-   *
-   * @param context The variable context.
-   * @returns Whether the action was successful or not.
-   */
-  toggleVariableExpansion(context: IDebugger.Model.IVariableContext): void {
-    const expandingItem = this.contextToVariable(context);
-    if (!expandingItem) {
-      return;
-    }
-
-    expandingItem.expanded = !expandingItem.expanded;
-    if (expandingItem.expanded === true) {
-      // Variable expanded will set new scopes through `DebuggerService._onVariableExpanded`.
-      this._variableExpanded.emit(context);
-    }
-    this._changed.emit();
-  }
-
   private _selectedVariable: IDebugger.IVariableSelection | null = null;
   private _state: IDebugger.IScope[] = [];
   private _latestExpansionState: IDebugger.Model.IVariableContext[] = [];
   private _settingExpansion = false;
   private _variablesToExpand: IDebugger.Model.IVariableContext[] = [];
-  private _variableExpanded = new Signal<
-    this,
-    IDebugger.Model.IVariableContext
-  >(this);
+  private _variableExpanded = new Signal<this, IDebugger.IVariable>(this);
   private _changed = new Signal<this, void>(this);
 }
