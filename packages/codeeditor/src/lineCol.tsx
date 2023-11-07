@@ -61,6 +61,10 @@ namespace LineFormComponent {
      * Whether the form has focus.
      */
     hasFocus: boolean;
+    /**
+     * A generated ID for the input field
+     */
+    textInputId: string;
   }
 }
 
@@ -80,7 +84,8 @@ class LineFormComponent extends React.Component<
     this._trans = this.translator.load('jupyterlab');
     this.state = {
       value: '',
-      hasFocus: false
+      hasFocus: false,
+      textInputId: DOMUtils.createDomID() + '-line-number-input'
     };
   }
 
@@ -95,7 +100,6 @@ class LineFormComponent extends React.Component<
    * Render the LineFormComponent.
    */
   render() {
-    const textInputId = DOMUtils.createDomID() + '-line-number-input';
     return (
       <div className="jp-lineFormSearch">
         <form name="lineColumnForm" onSubmit={this._handleSubmit} noValidate>
@@ -108,7 +112,7 @@ class LineFormComponent extends React.Component<
           >
             <input
               type="text"
-              id={textInputId}
+              id={this.state.textInputId}
               className="jp-lineFormInput"
               onChange={this._handleChange}
               onFocus={this._handleFocus}
@@ -130,7 +134,10 @@ class LineFormComponent extends React.Component<
               />
             </div>
           </div>
-          <label className="jp-lineFormCaption" htmlFor={textInputId}>
+          <label
+            className="jp-lineFormCaption"
+            htmlFor={this.state.textInputId}
+          >
             {this._trans.__(
               'Go to line number between 1 and %1',
               this.props.maxLine

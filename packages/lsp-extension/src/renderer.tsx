@@ -6,7 +6,7 @@ import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { closeIcon } from '@jupyterlab/ui-components';
 import { UUID } from '@lumino/coreutils';
 import { Debouncer } from '@lumino/polling';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { DOMUtils } from '@jupyterlab/apputils';
 
 import type { FieldProps } from '@rjsf/utils';
@@ -204,7 +204,9 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
     any,
     [hash: string, property: ISettingProperty]
   >(setProperty);
-  const textInputId = DOMUtils.createDomID() + '-line-number-input';
+  const textInputId = useRef<string>(
+    DOMUtils.createDomID() + '-line-number-input'
+  );
   return (
     <div className="array-item">
       <div className="form-group ">
@@ -215,14 +217,14 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
                 <div className="jp-modifiedIndicator jp-errorIndicator"></div>
                 <div className="jp-FormGroup-content">
                   <label
-                    htmlFor={textInputId}
+                    htmlFor={textInputId.current}
                     className="jp-FormGroup-fieldLabel jp-FormGroup-contentItem"
                   >
                     {props.trans.__('Server name:')}
                   </label>
                   <div className="jp-inputFieldWrapper jp-FormGroup-contentItem">
                     <input
-                      id={textInputId}
+                      id={textInputId.current}
                       className="form-control"
                       type="text"
                       required={true}
