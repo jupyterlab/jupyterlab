@@ -16,6 +16,7 @@ import { Debugger } from './debugger';
 import { ConsoleHandler } from './handlers/console';
 import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
+import { VariablesModel } from './panels/variables/model';
 import { IDebugger } from './tokens';
 
 const TOOLBAR_DEBUGGER_ITEM = 'debugger-icon';
@@ -75,6 +76,34 @@ function updateIconButtonState(
     if (onClick) {
       widget.onClick = onClick;
     }
+  }
+}
+
+/**
+ * Map session path with variable expansion state.
+ */
+const TREE_VIEW_STATE = new Map<string, IDebugger.Model.IVariableContext[]>();
+
+async function restoreTreeViewState(service: IDebugger): Promise<void> {
+  if (service.model.variables instanceof VariablesModel) {
+    const sessionPath = service.session?.connection?.path;
+    if (sessionPath) {
+      const treeState = TREE_VIEW_STATE.get(sessionPath);
+      if (treeState) {
+        (service.model.variables as VariablesModel).expandedVariables =
+          treeState;
+      }
+    }
+  }
+}
+
+function saveTreeViewState(service: IDebugger): void {
+  const sessionPath = service.session?.connection?.path;
+  if (sessionPath) {
+    TREE_VIEW_STATE.set(
+      sessionPath,
+      (service.model.variables as VariablesModel).expandedVariables ?? []
+    );
   }
 }
 
@@ -351,6 +380,9 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       }
     };
 
+    // Back up current state before doing anything else
+    saveTreeViewState(this._service);
+
     addToolbarButton(false);
 
     // listen to the disposed signals
@@ -383,11 +415,16 @@ export class DebuggerHandler implements DebuggerHandler.IHandler {
       this._service.session.connection = connection;
     }
     await this._service.restoreState(false);
-    if (this._service.isStarted && !this._service.hasStoppedThreads()) {
-      await this._service.displayDefinedVariables();
-      if (this._service.session?.capabilities?.supportsModulesRequest) {
-        await this._service.displayModules();
+    if (this._service.isStarted) {
+      if (!this._service.hasStoppedThreads()) {
+        await this._service.displayDefinedVariables();
+        if (this._service.session?.capabilities?.supportsModulesRequest) {
+          await this._service.displayModules();
+        }
       }
+
+      // Restore tree view state if it exists
+      await restoreTreeViewState(this._service);
     }
 
     updateIconButtonState(

@@ -10,6 +10,10 @@ import { IDebugger } from '../../tokens';
  */
 export class VariablesModel implements IDebugger.Model.IVariables {
   get expandedVariables(): IDebugger.Model.IVariableContext[] {
+    if (this._settingExpansion) {
+      this._settingExpansion = false;
+      return this._latestExpansionState;
+    }
     const expanded: IDebugger.Model.IVariableContext[] = [];
     for (const scope of this._state) {
       expanded.push(...listExpandedChildren(scope.name, scope.variables));
@@ -40,6 +44,11 @@ export class VariablesModel implements IDebugger.Model.IVariables {
       );
     }
   }
+  set expandedVariables(value: IDebugger.Model.IVariableContext[]) {
+    this._latestExpansionState = value;
+    this._settingExpansion = true;
+    this.scopes = this.scopes.slice();
+  }
 
   /**
    * The scopes.
@@ -68,21 +77,12 @@ export class VariablesModel implements IDebugger.Model.IVariables {
       ) {
         // check the variable exist before requesting its expansion
         // we cannot check a priori as the variable tree is not yet expanded
-        const scope = scopes.find(s => s.name == context!.scope);
-        if (scope) {
-          let container = scope.variables;
-          for (const p of context!.parents ?? []) {
-            container = container.find(v => v.name == p)?.children ?? [];
-          }
-          if (container.length) {
-            const variable = container.find(v => v.name == context!.variable);
-            if (variable) {
-              variable.expanded = true;
-              if (!variable.children?.length) {
-                this._variableExpanded.emit(context);
-                return;
-              }
-            }
+        const variable = this.contextToVariable(context);
+        if (variable) {
+          variable.expanded = true;
+          if (!variable.children?.length) {
+            this._variableExpanded.emit(context);
+            return;
           }
         }
       }
@@ -112,6 +112,21 @@ export class VariablesModel implements IDebugger.Model.IVariables {
     this._selectedVariable = selection;
   }
 
+  protected contextToVariable(
+    context: IDebugger.Model.IVariableContext
+  ): IDebugger.IVariable | undefined {
+    const scope = this._state.find(s => s.name == context.scope);
+    if (scope) {
+      let container = scope.variables;
+      for (const p of context.parents ?? []) {
+        container = container.find(v => v.name == p)?.children ?? [];
+      }
+      if (container.length) {
+        return container.find(v => v.name == context.variable);
+      }
+    }
+  }
+
   /**
    * Expand a variable.
    *
@@ -126,29 +141,10 @@ export class VariablesModel implements IDebugger.Model.IVariables {
    * Toggle variable expansion state.
    *
    * @param context The variable context.
+   * @returns Whether the action was successful or not.
    */
   toggleVariableExpansion(context: IDebugger.Model.IVariableContext): void {
-    let scope = this._state.find(scope => scope.name === context.scope);
-    if (!scope) {
-      scope = { name: context.scope, variables: [] };
-      this._state.push(scope);
-    }
-
-    const parents = context.parents ?? [];
-    let container = scope.variables;
-    for (let deep = 0; deep < parents.length; deep++) {
-      const parent = container.find(item => item.name === parents[deep]);
-      if (!parent) {
-        return;
-      }
-      if (typeof parent.children === 'undefined') {
-        parent.children = [];
-      }
-      container = parent.children;
-    }
-    const expandingItem = container.find(
-      item => item.name === context.variable
-    );
+    const expandingItem = this.contextToVariable(context);
     if (!expandingItem) {
       return;
     }
@@ -164,6 +160,7 @@ export class VariablesModel implements IDebugger.Model.IVariables {
   private _selectedVariable: IDebugger.IVariableSelection | null = null;
   private _state: IDebugger.IScope[] = [];
   private _latestExpansionState: IDebugger.Model.IVariableContext[] = [];
+  private _settingExpansion = false;
   private _variablesToExpand: IDebugger.Model.IVariableContext[] = [];
   private _variableExpanded = new Signal<
     this,
