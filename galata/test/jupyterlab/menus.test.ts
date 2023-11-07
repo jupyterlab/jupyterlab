@@ -299,14 +299,14 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     const helpClass = ((await helpMenu.getAttribute('class')) ?? '').split(' ');
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      await page.keyboard.press('Shift+Tab');
+      page.keyboard.press('Shift+Tab');
       if (fileClass.includes('lm-mod-active')) {
         break;
       }
     }
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      await page.keyboard.press('ArrowRight');
+      page.keyboard.press('ArrowRight');
       if (helpClass.includes('lm-mod-active')) {
         break;
       }
