@@ -286,10 +286,11 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   test('Open help menu with keyboard', async ({ page }) => {
     await page.goto();
     const helpMenu = page.getByRole('menuitem', { name: 'Help' });
+    const classes = ((await helpMenu.getAttribute('class')) ?? '').split(' ');
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (await helpMenu.evaluate(el => el === document.activeElement)) {
+      if (classes.includes('lm-mod-active')) {
         break;
       }
     }
