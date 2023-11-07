@@ -1,7 +1,8 @@
 {
   "title": "Code Completion",
   "description": "Code Completion settings.",
-  "jupyter.lab.setting-icon-label": "Code Completion settings",
+  "jupyter.lab.setting-icon": "completer:widget",
+  "jupyter.lab.setting-icon-label": "Code Completer",
   "jupyter.lab.transform": true,
   "properties": {
     "availableProviders": {
@@ -15,8 +16,8 @@
       },
       "additionalProperties": false,
       "default": {
-        "CompletionProvider:context": 100,
-        "CompletionProvider:kernel": 200
+        "CompletionProvider:context": 500,
+        "CompletionProvider:kernel": 550
       }
     },
     "providerTimeout": {

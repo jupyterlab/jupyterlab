@@ -70,6 +70,11 @@
           "description": "If defined, it will override the command label",
           "type": "string"
         },
+        "caption": {
+          "title": "Item caption",
+          "description": "If defined, it will override the command caption",
+          "type": "string"
+        },
         "type": {
           "title": "Item type",
           "type": "string",

@@ -222,6 +222,12 @@ pkg:property-inspector:
   - packages/property-inspector/**/*
   - packages/property-inspector/*
 
+pkg:pluginmanager:
+  - packages/pluginmanager/**/*
+  - packages/pluginmanager/*
+  - packages/pluginmanager-extension/**/*
+  - packages/pluginmanager-extension/*
+
 pkg:rendermime:
   - packages/rendermime/**/*
   - packages/rendermime/*

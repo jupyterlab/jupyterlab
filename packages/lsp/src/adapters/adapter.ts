@@ -25,6 +25,7 @@ import {
   ISocketConnectionOptions
 } from '../tokens';
 import { VirtualDocument } from '../virtual/document';
+import { EditorAdapter } from './editorAdapter';
 
 type IButton = Dialog.IButton;
 const createButton = Dialog.createButton;
@@ -74,13 +75,17 @@ export interface IAdapterOptions {
  * as this would make the logic of inspections caching impossible to maintain, thus the WidgetAdapter
  * has to handle that, keeping multiple connections and multiple virtual documents.
  */
-export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
-  implements IDisposable
+export abstract class WidgetLSPAdapter<
+  T extends IDocumentWidget = IDocumentWidget
+> implements IDisposable
 {
   // note: it could be using namespace/IOptions pattern,
   // but I do not know how to make it work with the generic type T
   // (other than using 'any' in the IOptions interface)
-  constructor(public widget: T, protected options: IAdapterOptions) {
+  constructor(
+    public widget: T,
+    protected options: IAdapterOptions
+  ) {
     this._connectionManager = options.connectionManager;
     this._isConnected = false;
     this._trans = (options.translator || nullTranslator).load('jupyterlab');
@@ -88,6 +93,18 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     this.widget.context.saveState.connect(this.onSaveState, this);
     this.connectionManager.closed.connect(this.onConnectionClosed, this);
     this.widget.disposed.connect(this.dispose, this);
+
+    this._editorToAdapter = new WeakMap();
+    this.editorAdded.connect(this._onEditorAdded, this);
+    this.editorRemoved.connect(this._onEditorRemoved, this);
+    this._connectionManager.languageServerManager.sessionsChanged.connect(
+      this._onLspSessionOrFeatureChanged,
+      this
+    );
+    this.options.featureManager.featureRegistered.connect(
+      this._onLspSessionOrFeatureChanged,
+      this
+    );
   }
 
   /**
@@ -260,6 +277,16 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     if (this._isDisposed) {
       return;
     }
+    this.editorAdded.disconnect(this._onEditorAdded, this);
+    this.editorRemoved.disconnect(this._onEditorRemoved, this);
+    this._connectionManager.languageServerManager.sessionsChanged.disconnect(
+      this._onLspSessionOrFeatureChanged,
+      this
+    );
+    this.options.featureManager.featureRegistered.disconnect(
+      this._onLspSessionOrFeatureChanged,
+      this
+    );
     this._isDisposed = true;
     this.disconnect();
     this._virtualDocument = null;
@@ -336,8 +363,8 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
 
   /**
    * Get the index of editor from the cursor position in the virtual
-   * document. Since there is only one editor, this method always return
-   * 0
+   * document.
+   * @deprecated This is error-prone and will be removed in JupyterLab 5.0, use `getEditorIndex()` with `virtualDocument.getEditorAtVirtualLine(position)` instead.
    *
    * @param position - the position of cursor in the virtual document.
    * @return - index of the virtual editor
@@ -520,10 +547,9 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
    * Create the virtual document using current path and language.
    */
   protected initVirtual(): void {
-    const { model } = this.widget.context;
     this._virtualDocument?.dispose();
     this._virtualDocument = this.createVirtualDocument();
-    model.contentChanged.connect(this._onContentChanged, this);
+    this._onLspSessionOrFeatureChanged();
   }
 
   /**
@@ -589,6 +615,30 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
   private _isConnected: boolean;
   private _updateFinished: Promise<void>;
   private _virtualDocument: VirtualDocument | null = null;
+  private _editorToAdapter: WeakMap<Document.IEditor, EditorAdapter>;
+
+  private _onEditorAdded(
+    sender: WidgetLSPAdapter<T>,
+    change: IEditorChangedData
+  ): void {
+    const { editor } = change;
+    const editorAdapter = new EditorAdapter({
+      editor: editor,
+      widgetAdapter: this,
+      extensions: this.options.featureManager.extensionFactories()
+    });
+    this._editorToAdapter.set(editor, editorAdapter);
+  }
+
+  private _onEditorRemoved(
+    sender: WidgetLSPAdapter<T>,
+    change: IEditorChangedData
+  ): void {
+    const { editor } = change;
+    const adapter = this._editorToAdapter.get(editor);
+    adapter?.dispose();
+    this._editorToAdapter.delete(editor);
+  }
 
   /**
    * Callback called when a foreign document is closed,
@@ -682,5 +732,39 @@ export abstract class WidgetLSPAdapter<T extends IDocumentWidget>
     }
     this._updateFinished = promise.catch(console.warn);
     await this.updateFinished;
+  }
+
+  /**
+   * Check if the virtual document should be updated on content
+   * changed signal. Returns `true` if two following conditions are
+   * are satisfied:
+   *  - The LSP feature is enabled.
+   *  - The LSP features list is not empty.
+   */
+  private _shouldUpdateVirtualDocument(): boolean {
+    const { languageServerManager } = this.connectionManager;
+    return (
+      languageServerManager.isEnabled &&
+      this.options.featureManager.features.length > 0
+    );
+  }
+
+  /**
+   * Connect the virtual document update handler with the content
+   * updated signal.This method is invoked at startup and when
+   * the LSP server status changed or when a LSP feature is registered.
+   */
+  private _onLspSessionOrFeatureChanged(): void {
+    if (!this._virtualDocument) {
+      return;
+    }
+
+    const { model } = this.widget.context;
+
+    if (this._shouldUpdateVirtualDocument()) {
+      model.contentChanged.connect(this._onContentChanged, this);
+    } else {
+      model.contentChanged.disconnect(this._onContentChanged, this);
+    }
   }
 }

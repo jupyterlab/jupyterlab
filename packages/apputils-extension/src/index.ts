@@ -612,10 +612,11 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.runAllEnabled, {
       label: trans.__('Run All Enabled Commands Passed as Args'),
       execute: async args => {
-        const commands: string[] = args.commands as string[];
+        const commands: string[] = (args.commands as string[]) ?? [];
         const commandArgs: any = args.args;
         const argList = Array.isArray(args);
-        const errorIfNotEnabled: boolean = args.errorIfNotEnabled as boolean;
+        const errorIfNotEnabled: boolean =
+          (args.errorIfNotEnabled as boolean) ?? false;
         for (let i = 0; i < commands.length; i++) {
           const cmd = commands[i];
           const arg = argList ? commandArgs[i] : commandArgs;
@@ -627,6 +628,15 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
             }
           }
         }
+      },
+      isEnabled: args => {
+        const commands: string[] = (args.commands as string[]) ?? [];
+        const commandArgs: any = args.args;
+        const argList = Array.isArray(args);
+
+        return commands.some((cmd, idx) =>
+          app.commands.isEnabled(cmd, argList ? commandArgs[idx] : commandArgs)
+        );
       }
     });
 
@@ -636,14 +646,11 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
         'Show relevant keyboard shortcuts for the current active widget'
       ),
       execute: args => {
-        const included = app.shell.currentWidget?.node.contains(
-          document.activeElement
-        );
+        const currentWidget = app.shell.currentWidget;
+        const included = currentWidget?.node.contains(document.activeElement);
 
-        if (!included) {
-          const currentNode =
-            (app.shell.currentWidget as MainAreaWidget)?.content.node ??
-            app.shell.currentWidget?.node;
+        if (!included && currentWidget instanceof MainAreaWidget) {
+          const currentNode = currentWidget.content.node ?? currentWidget?.node;
           currentNode?.focus();
         }
         const options = { commands, trans };

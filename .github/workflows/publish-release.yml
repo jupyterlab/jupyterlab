@@ -11,7 +11,6 @@ on:
       steps_to_skip:
         description: "Comma separated list of steps to skip"
         required: false
-        default: "ensure-sha"
 
 jobs:
   publish_release:

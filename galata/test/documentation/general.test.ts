@@ -16,8 +16,7 @@ test.use({
 });
 
 test.describe('General', () => {
-  // FIXME restore when ipywidgets support lumino 2
-  test.skip('Welcome', async ({ page }) => {
+  test('Welcome', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
     await page.addStyleTag({

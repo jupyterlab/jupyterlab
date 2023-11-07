@@ -118,8 +118,26 @@
     ]
   },
   {
+    "id": "apputils:adaptive-theme",
+    "label": "Synchronize with System Settings",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:change-dark-theme",
+    "label": "Switch to the provided dark `theme`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "apputils:change-font",
     "label": "waiting for fonts",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:change-light-theme",
+    "label": "Switch to the provided light `theme`.",
     "caption": "",
     "shortcuts": []
   },
@@ -549,7 +567,7 @@
   {
     "id": "docmanager:save",
     "label": "Save ",
-    "caption": "Save and create checkpoint",
+    "caption": "document is permissioned readonly; \"save\" is disabled, use \"save as...\" instead",
     "shortcuts": [
       "Ctrl S"
     ]
@@ -617,6 +635,14 @@
     "label": "Find and Replace…",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "documentsearch:toggleSearchInSelection",
+    "label": "Search in Selection",
+    "caption": "",
+    "shortcuts": [
+      "Alt L"
+    ]
   },
   {
     "id": "editmenu:clear-all",
@@ -1343,6 +1369,28 @@
     "shortcuts": []
   },
   {
+    "id": "mermaid:copy-source",
+    "label": "Mermaid Copy Diagram Source",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:access-next-history-entry",
+    "label": "Access Next Kernel History Entry",
+    "caption": "",
+    "shortcuts": [
+      "Alt ArrowDown"
+    ]
+  },
+  {
+    "id": "notebook:access-previous-history-entry",
+    "label": "Access Previous Kernel History Entry",
+    "caption": "",
+    "shortcuts": [
+      "Alt ArrowUp"
+    ]
+  },
+  {
     "id": "notebook:change-cell-to-code",
     "label": "Change to Code Cell Type",
     "caption": "",
@@ -1952,6 +2000,18 @@
     ]
   },
   {
+    "id": "pluginmanager:open",
+    "label": "Advanced Plugin Manager",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "pluginmanager:refresh",
+    "label": "Refresh Plugin List",
+    "caption": "Refresh plugins list",
+    "shortcuts": []
+  },
+  {
     "id": "property-inspector:show-panel",
     "label": "Property Inspector",
     "caption": "",
@@ -2223,7 +2283,9 @@
     "id": "viewmenu:line-numbering",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Shift L"
+    ]
   },
   {
     "id": "viewmenu:match-brackets",

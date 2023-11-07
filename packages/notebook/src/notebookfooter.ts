@@ -11,6 +11,11 @@ import { NotebookActions } from './actions';
 const NOTEBOOK_FOOTER_CLASS = 'jp-Notebook-footer';
 
 /**
+ * The data attribute added to a widget that can be traversed with up/down arrow and j/k shortcuts.
+ */
+const TRAVERSABLE = 'jpTraversable';
+
+/**
  * A footer widget added after the last cell of the notebook.
  */
 export class NotebookFooter extends Widget {
@@ -19,6 +24,7 @@ export class NotebookFooter extends Widget {
    */
   constructor(protected notebook: Notebook) {
     super({ node: document.createElement('button') });
+    this.node.dataset[TRAVERSABLE] = 'true';
     const trans = notebook.translator.load('jupyterlab');
     this.addClass(NOTEBOOK_FOOTER_CLASS);
     this.node.innerText = trans.__('Click to add a cell.');
@@ -51,11 +57,11 @@ export class NotebookFooter extends Widget {
   }
 
   /**
-   * On arrow up key pressed (keydown keyboard event), blur the footer and switch to command mode.
+   * On arrow up key pressed (keydown keyboard event).
+   * @deprecated To be removed in v5, this is a no-op
    */
   protected onArrowUp(): void {
-    this.node.blur();
-    this.notebook.mode = 'command';
+    // The specific behavior has been removed in https://github.com/jupyterlab/jupyterlab/pull/14796
   }
 
   /*

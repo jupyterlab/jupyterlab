@@ -32,6 +32,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { NotebookActions } from './actions';
 import { CellList } from './celllist';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
+import { INotebookHistory } from './history';
 import { INotebookModel } from './model';
 import { NotebookViewModel, NotebookWindowedLayout } from './windowing';
 import { NotebookFooter } from './notebookfooter';
@@ -50,6 +51,11 @@ const CODE_RUNNER = 'jpCodeRunner';
  * The data attribute added to a widget that can undo.
  */
 const UNDOER = 'jpUndoer';
+
+/**
+ * The data attribute added to a widget that can be traversed with up/down arrow and j/k shortcuts.
+ */
+const TRAVERSABLE = 'jpTraversable';
 
 /**
  * The class name added to notebook widgets.
@@ -210,7 +216,7 @@ export class StaticNotebook extends WindowedList {
 
     this._editorConfig = StaticNotebook.defaultEditorConfig;
     this._notebookConfig = StaticNotebook.defaultNotebookConfig;
-    this._mimetype = 'text/plain';
+    this._mimetype = IEditorMimeTypeService.defaultMimeType;
     this._notebookModel = null;
     this._modelChanged = new Signal<this, void>(this);
     this._modelContentChanged = new Signal<this, void>(this);
@@ -218,6 +224,7 @@ export class StaticNotebook extends WindowedList {
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[UNDOER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
+    this.node.dataset[TRAVERSABLE] = 'true';
     this.rendermime = options.rendermime;
     this.translator = options.translator || nullTranslator;
     this.contentFactory = options.contentFactory;
@@ -228,6 +235,7 @@ export class StaticNotebook extends WindowedList {
     this._updateNotebookConfig();
     this._mimetypeService = options.mimeTypeService;
     this.renderingLayout = options.notebookConfig?.renderingLayout;
+    this.kernelHistory = options.kernelHistory;
   }
 
   get cellCollapsed(): ISignal<this, Cell> {
@@ -540,7 +548,7 @@ export class StaticNotebook extends WindowedList {
       }
     }
     if (!newValue) {
-      this._mimetype = 'text/plain';
+      this._mimetype = IEditorMimeTypeService.defaultMimeType;
       return;
     }
     this._updateMimetype();
@@ -887,8 +895,19 @@ export class StaticNotebook extends WindowedList {
       cellIdx++;
     }
 
+    // If the notebook is not fully rendered
     if (cellIdx < this.cellsArray.length) {
-      this._scheduleCellRenderOnIdle();
+      // If we are defering the cell rendering and the rendered cells do
+      // not fill the viewport yet
+      if (
+        this.notebookConfig.windowingMode === 'defer' &&
+        this.viewportNode.clientHeight < this.node.clientHeight
+      ) {
+        // Spend more time rendering cells to fill the viewport
+        await this._runOnIdleTime();
+      } else {
+        this._scheduleCellRenderOnIdle();
+      }
     } else {
       if (this._idleCallBack) {
         window.cancelIdleCallback(this._idleCallBack);
@@ -972,6 +991,7 @@ export class StaticNotebook extends WindowedList {
   private _idleCallBack: number | null;
   private _mimetype: string;
   private _mimetypeService: IEditorMimeTypeService;
+  readonly kernelHistory: INotebookHistory | undefined;
   private _modelChanged: Signal<this, void>;
   private _modelContentChanged: Signal<this, void>;
   private _notebookConfig: StaticNotebook.INotebookConfig;
@@ -1022,6 +1042,11 @@ export namespace StaticNotebook {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * The kernel history retrieval object
+     */
+    kernelHistory?: INotebookHistory;
   }
 
   /**
@@ -1172,6 +1197,7 @@ export namespace StaticNotebook {
      * - 'none': Attach all cells to the viewport
      */
     windowingMode: 'defer' | 'full' | 'none';
+    accessKernelHistory?: boolean;
   }
 
   /**
@@ -1191,7 +1217,8 @@ export namespace StaticNotebook {
     sideBySideRightMarginOverride: '10px',
     sideBySideOutputRatio: 1,
     overscanCount: 1,
-    windowingMode: 'full'
+    windowingMode: 'full',
+    accessKernelHistory: false
   };
 
   /**
@@ -1383,6 +1410,7 @@ export class Notebook extends StaticNotebook {
 
     this._activeCellIndex = newValue;
     const cell = this.widgets[newValue] ?? null;
+    (this.layout as NotebookWindowedLayout).activeCell = cell;
     const cellChanged = cell !== this._activeCell;
     if (cellChanged) {
       // Post an update request.
@@ -2077,7 +2105,7 @@ export class Notebook extends StaticNotebook {
     const activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
       // Test for !== true to cover hasFocus is false and editor is not yet rendered.
-      if (activeCell.editor?.hasFocus() !== true) {
+      if (activeCell.editor?.hasFocus() !== true || !activeCell.inViewport) {
         if (activeCell.inViewport) {
           activeCell.editor?.focus();
         } else {
@@ -2763,6 +2791,9 @@ export class Notebook extends StaticNotebook {
     this._selectedCells = this.widgets.filter(cell =>
       this.isSelectedOrActive(cell)
     );
+    if (this.kernelHistory) {
+      this.kernelHistory.reset();
+    }
   }
   private _selectedCells: Cell[] = [];
 }

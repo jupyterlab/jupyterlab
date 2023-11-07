@@ -6,8 +6,34 @@
 Extension Migration Guide
 ================================================
 
+JupyterLab 4.0 to 4.1
+---------------------
+
+Plugin manager and extension locks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Prior to JupyterLab 4.1 there was no mechanisms:
+- for users to disable/enable individual plugins (rather than entire extensions)
+- for administrators to fully block users from enabling/disabling certain extensions
+
+This version of JupyterLab enables both with the addition of :ref:`Plugin Manager <plugin_manager>`.
+
+If your installation had any plugins disabled these will be automatically :ref:`locked <locking_plugins>`
+on the first startup to ensure that there is no change to user-exposed functionality. The plugin manager
+itself can be disabled and locked using ``jupyter labextension`` commands, but we recommend to instead
+lock individual plugins as required.
+
+If your extension previously included a custom enable/disable setting, you may be able to replace it
+with instructions pointing users to the Plugin Manager. However, please consider whether your extension
+may be used in distributions which do not include Plugin Manager or have it disabled.
+
 JupyterLab 3.x to 4.x
 ---------------------
+
+Because of significant type changes from JupyterLab 3.x to 4.x, we recommend **publishing a new major version**
+of your extension to work with each major version of JupyterLab. For examples of extensions that use different
+major versions for Lab 3 and Lab 4, see `jupyterlab-vim <https://github.com/jupyterlab-contrib/jupyterlab-vim>`_
+and `jupyter-ai <https://github.com/jupyterlab/jupyter-ai>`_.
 
 Upgrading extension using the upgrade script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -78,7 +104,7 @@ package configuration.
 .. note::
 
    You can find more information on upgrading Yarn from version 1 to version 3 in
-   [Yarn documentation](https://yarnpkg.com/getting-started/migration).
+   [Yarn documentation](https://v3.yarnpkg.com/getting-started/migration).
 
 If you are hit by multiple versions of the same packages (like ``@lumino/widgets``),
 TypeScript may complain that the types are not matching. One possible solution

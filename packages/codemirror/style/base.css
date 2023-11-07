@@ -28,7 +28,7 @@
 }
 
 /* When zoomed out 67% and 33% on a screen of 1440 width x 900 height */
-@media screen and (min-width: 2138px) and (max-width: 4319px) {
+@media screen and (width >= 2138px) and (width <= 4319px) {
   .jp-CodeMirrorEditor[data-type='inline'] .cm-cursor {
     border-left: var(--jp-code-cursor-width1) solid
       var(--jp-editor-cursor-color);
@@ -36,7 +36,7 @@
 }
 
 /* When zoomed out less than 33% */
-@media screen and (min-width: 4320px) {
+@media screen and (width >= 4320px) {
   .jp-CodeMirrorEditor[data-type='inline'] .cm-cursor {
     border-left: var(--jp-code-cursor-width2) solid
       var(--jp-editor-cursor-color);

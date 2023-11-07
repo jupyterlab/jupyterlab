@@ -42,16 +42,13 @@ test.describe('Notebook Scroll', () => {
     test(`Scroll to ${link}`, async ({ page }) => {
       const firstCell = await page.notebook.getCell(0);
       await firstCell.scrollIntoViewIfNeeded();
-      expect(await firstCell.boundingBox()).toBeTruthy();
 
       await page.click(`a:has-text("${link}")`);
 
       await firstCell.waitForElementState('hidden');
-      expect(await firstCell.boundingBox()).toBeFalsy();
 
       const lastCell = await page.notebook.getCell(cellIdx);
       await lastCell.waitForElementState('visible');
-      expect(await lastCell.boundingBox()).toBeTruthy();
     });
   }
 });
