@@ -9,6 +9,9 @@ import { IDebugger } from '../../tokens';
  * A model for a variable explorer.
  */
 export class VariablesModel implements IDebugger.Model.IVariables {
+  /**
+   * Variable expansion states
+   */
   get expandedVariables(): IDebugger.Model.IVariableContext[] {
     if (this._settingExpansion) {
       this._settingExpansion = false;
@@ -105,6 +108,9 @@ export class VariablesModel implements IDebugger.Model.IVariables {
     return this._variableExpanded;
   }
 
+  /**
+   * Selected variable in the variables explorer.
+   */
   get selectedVariable(): IDebugger.IVariableSelection | null {
     return this._selectedVariable;
   }

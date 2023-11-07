@@ -378,6 +378,39 @@ test.describe('Tree view', () => {
     await argv1.waitFor();
     await expect(argv1).toHaveCount(1);
   });
+
+  test('should preserve tree view state when switching files', async ({
+    page,
+    tmpPath
+  }) => {
+    const name = 'code_notebook.ipynb';
+    await openNotebook(page, tmpPath, name);
+    await page.debugger.switchOn(name);
+    await page.waitForCondition(() => page.debugger.isOpen());
+
+    await page.notebook.runCell(0);
+    await page.notebook.runCell(1);
+
+    // Expand a variable
+    await page.getByRole('listitem').filter({ hasText: 'sysmodule' }).click();
+    await page
+      .getByRole('listitem')
+      .filter({ hasText: /^argvlist$/ })
+      .click();
+
+    const argv1 = page.getByRole('listitem').filter({ hasText: /^1-f$/ });
+    await expect.soft(argv1).toHaveCount(1);
+
+    // Create a new notebook
+    await page.notebook.createNew();
+    // Debugger should be empty
+    await expect.soft(argv1).toHaveCount(0);
+
+    // Switch back to the notebook
+    await page.activity.activateTab(name);
+
+    await expect(argv1).toHaveCount(1);
+  });
 });
 
 async function createNotebook(page: IJupyterLabPageFixture) {
