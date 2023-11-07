@@ -299,14 +299,16 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.toggleLeftArea, {
         label: trans.__('Show Left Sidebar'),
         execute: () => {
+          let doc = document.getElementById('command-palette-aria-live');
+          let p = document.createElement('p');
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
-            let doc = document.getElementById('command-palette-aria-live');
-            let p = document.createElement('p');
-            p.innerHTML = 'Test screen reader';
+            p.innerHTML = trans.__('Show Left Sidebar');
             doc!.append(p);
           } else {
             labShell.collapseLeft();
+            p.innerHTML = trans.__('Closing Left Sidebar');
+            doc!.append(p);
             if (labShell.currentWidget) {
               labShell.activateById(labShell.currentWidget.id);
             }
