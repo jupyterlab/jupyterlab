@@ -195,10 +195,18 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open edit menu with keyboard', async ({ page }) => {
     await page.goto();
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const editMenu = page.getByRole('menuitem', { name: 'Edit' });
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
+      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+        break;
+      }
+    }
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
       if (await editMenu.evaluate(el => el === document.activeElement)) {
         break;
       }
@@ -285,12 +293,21 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open help menu with keyboard', async ({ page }) => {
     await page.goto();
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
+    const fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
     const helpMenu = page.getByRole('menuitem', { name: 'Help' });
-    const classes = ((await helpMenu.getAttribute('class')) ?? '').split(' ');
+    const helpClass = ((await helpMenu.getAttribute('class')) ?? '').split(' ');
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (classes.includes('lm-mod-active')) {
+      if (fileClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      if (helpClass.includes('lm-mod-active')) {
         break;
       }
     }
@@ -314,7 +331,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
     expect(await page.menu.isOpen('File')).toBeTruthy();
 
-    await expect(page.locator('#tab-key-2-1')).toBeFocused();
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('ArrowDown');
