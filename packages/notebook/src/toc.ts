@@ -9,7 +9,7 @@ import {
   TableOfContentsModel,
   TableOfContentsUtils
 } from '@jupyterlab/toc';
-import { NotebookActions } from './actions';
+import { KernelError, NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
 import { INotebookTracker } from './tokens';
 import { Notebook } from './widget';
@@ -22,6 +22,10 @@ export enum RunningStatus {
    * Cell is idle
    */
   Idle = -1,
+  /**
+   * Cell execution is unsuccessful
+   */
+  Error = -0.5,
   /**
    * Cell execution is scheduled
    */
@@ -80,6 +84,7 @@ export class NotebookToCModel extends TableOfContentsModel<
   ) {
     super(widget, configuration);
     this._runningCells = new Array<Cell>();
+    this._errorCells = new Array<Cell>();
     this._cellToHeadingIndex = new WeakMap<Cell, number>();
 
     void widget.context.ready.then(() => {
@@ -97,6 +102,7 @@ export class NotebookToCModel extends TableOfContentsModel<
     );
     NotebookActions.executionScheduled.connect(this.onExecutionScheduled, this);
     NotebookActions.executed.connect(this.onExecuted, this);
+    NotebookActions.outputCleared.connect(this.onOutputCleared, this);
     this.headingsChanged.connect(this.onHeadingsChanged, this);
   }
 
@@ -180,8 +186,10 @@ export class NotebookToCModel extends TableOfContentsModel<
       this
     );
     NotebookActions.executed.disconnect(this.onExecuted, this);
+    NotebookActions.outputCleared.disconnect(this.onOutputCleared, this);
 
     this._runningCells.length = 0;
+    this._errorCells.length = 0;
 
     super.dispose();
   }
@@ -344,7 +352,12 @@ export class NotebookToCModel extends TableOfContentsModel<
 
   protected onExecuted(
     _: unknown,
-    args: { notebook: Notebook; cell: Cell }
+    args: {
+      notebook: Notebook;
+      cell: Cell;
+      success: boolean;
+      error: KernelError | null;
+    }
   ): void {
     this._runningCells.forEach((cell, index) => {
       if (cell === args.cell) {
@@ -353,7 +366,16 @@ export class NotebookToCModel extends TableOfContentsModel<
         const headingIndex = this._cellToHeadingIndex.get(cell);
         if (headingIndex !== undefined) {
           const heading = this.headings[headingIndex];
-          heading.isRunning = RunningStatus.Idle;
+          // when the execution is not successful but errorName is undefined,
+          // the execution is interrupted by previous cells
+          if (args.success || args.error?.errorName === undefined) {
+            heading.isRunning = RunningStatus.Idle;
+            return;
+          }
+          heading.isRunning = RunningStatus.Error;
+          if (!this._errorCells.includes(cell)) {
+            this._errorCells.push(cell);
+          }
         }
       }
     });
@@ -369,7 +391,31 @@ export class NotebookToCModel extends TableOfContentsModel<
     if (!this._runningCells.includes(args.cell)) {
       this._runningCells.push(args.cell);
     }
+    this._errorCells.forEach((cell, index) => {
+      if (cell === args.cell) {
+        this._errorCells.splice(index, 1);
+      }
+    });
 
+    this.updateRunningStatus(this.headings);
+    this.stateChanged.emit();
+  }
+
+  protected onOutputCleared(
+    _: unknown,
+    args: { notebook: Notebook; cell: Cell }
+  ): void {
+    this._errorCells.forEach((cell, index) => {
+      if (cell === args.cell) {
+        this._errorCells.splice(index, 1);
+
+        const headingIndex = this._cellToHeadingIndex.get(cell);
+        if (headingIndex !== undefined) {
+          const heading = this.headings[headingIndex];
+          heading.isRunning = RunningStatus.Idle;
+        }
+      }
+    });
     this.updateRunningStatus(this.headings);
     this.stateChanged.emit();
   }
@@ -384,10 +430,24 @@ export class NotebookToCModel extends TableOfContentsModel<
       const headingIndex = this._cellToHeadingIndex.get(cell);
       if (headingIndex !== undefined) {
         const heading = this.headings[headingIndex];
-        heading.isRunning = Math.max(
-          index > 0 ? RunningStatus.Scheduled : RunningStatus.Running,
-          heading.isRunning
-        );
+        // Running is prioritized over Scheduled, so if a heading is
+        // running don't change status
+        if (heading.isRunning !== RunningStatus.Running) {
+          heading.isRunning =
+            index > 0 ? RunningStatus.Scheduled : RunningStatus.Running;
+        }
+      }
+    });
+
+    this._errorCells.forEach((cell, index) => {
+      const headingIndex = this._cellToHeadingIndex.get(cell);
+      if (headingIndex !== undefined) {
+        const heading = this.headings[headingIndex];
+        // Running and Scheduled are prioritized over Error, so only if
+        // a heading is idle will it be set to Error
+        if (heading.isRunning === RunningStatus.Idle) {
+          heading.isRunning = RunningStatus.Error;
+        }
       }
     });
 
@@ -463,6 +523,7 @@ export class NotebookToCModel extends TableOfContentsModel<
   };
 
   private _runningCells: Cell[];
+  private _errorCells: Cell[];
   private _cellToHeadingIndex: WeakMap<Cell, number>;
 }
 
