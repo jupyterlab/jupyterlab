@@ -2,10 +2,20 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
-import { sleep } from '@jupyterlab/coreutils';
 import mergeWith from 'lodash.mergewith';
 
-export { sleep } from '@jupyterlab/coreutils';
+/**
+ * Helper to wait for timeout.
+ *
+ * @param  timeout - time out in ms
+ */
+export async function sleep(timeout: number): Promise<void> {
+  return new Promise<void>(resolve => {
+    setTimeout(() => {
+      resolve();
+    }, timeout);
+  });
+}
 
 /**
  * Wait for an event by pooling the `isReady` function.
