@@ -49,8 +49,6 @@ import {
 import { Session } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { IStateDB } from '@jupyterlab/statedb';
-import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 function notifyCommands(app: JupyterFrontEnd): void {
   Object.values(Debugger.CommandIDs).forEach(command => {
@@ -556,7 +554,7 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
   id: '@jupyterlab/debugger-extension:sidebar',
   description: 'Provides the debugger sidebar.',
   provides: IDebuggerSidebar,
-  requires: [IDebugger, IEditorServices, ITranslator, IStateDB],
+  requires: [IDebugger, IEditorServices, ITranslator],
   optional: [IThemeManager, ISettingRegistry],
   autoStart: true,
   activate: async (
@@ -564,7 +562,6 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
     service: IDebugger,
     editorServices: IEditorServices,
     translator: ITranslator,
-    state: IStateDB,
     themeManager: IThemeManager | null,
     settingRegistry: ISettingRegistry | null
   ): Promise<IDebugger.ISidebar> => {
@@ -595,17 +592,6 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
       translator
     });
 
-    let docId = sidebar.variables.id;
-
-    const fullState: {
-      [docId: string]: IDebugger.Model.IVariableExpansionStates;
-    } = {};
-
-    service.model.variables.variableExpanded.connect(() => {
-      fullState[docId] = service.model.variables.variableExpansionStates;
-      state.save(docId, fullState);
-    });
-
     if (settingRegistry) {
       const setting = await settingRegistry.load(main.id);
       const updateSettings = (): void => {
@@ -619,25 +605,12 @@ const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
         const kernelSourcesFilter = setting.get('defaultKernelSourcesFilter')
           .composite as string;
         sidebar.kernelSources.filter = kernelSourcesFilter;
-
-        // get the new id when the session changes
-        docId = sidebar.variables.id;
       };
       updateSettings();
       setting.changed.connect(updateSettings);
       service.sessionChanged.connect(updateSettings);
     }
 
-    app.restored
-      .then(() => state.fetch(docId))
-      .then(value => {
-        if (value) {
-          let currentState = (value as ReadonlyPartialJSONObject)[
-            'fullState'
-          ] as IDebugger.Model.IVariableExpansionStates;
-          service.model.variables.setVariableExpasionStates(currentState);
-        }
-      });
     return sidebar;
   }
 };
