@@ -793,7 +793,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * Activate specified Area widget.
+   * Activate widget in specified area.
    *
    * ### Notes
    * The alpha version of this method only supports activating the "main" area.
