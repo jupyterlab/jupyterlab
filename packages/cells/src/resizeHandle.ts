@@ -6,6 +6,7 @@
 import { Message } from '@lumino/messaging';
 import { Throttler } from '@lumino/polling';
 import { Widget } from '@lumino/widgets';
+import { Signal } from '@lumino/signaling';
 
 const RESIZE_HANDLE_CLASS = 'jp-CellResizeHandle';
 
@@ -104,10 +105,16 @@ export class ResizeHandle extends Widget {
         '--jp-side-by-side-output-size',
         `${normalized}fr`
       );
+      this.sizeChanged.emit(normalized);
     }
   }
 
   private _isActive = false;
   private _isDragging = false;
   private _resizer: Throttler<void, void, [MouseEvent]>;
+
+  /**
+   * A public signal used to indicate the size of the cell and output has changed.
+   */
+  readonly sizeChanged = new Signal<this, number>(this);
 }

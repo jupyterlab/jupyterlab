@@ -127,6 +127,17 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to show the full path in the breadcrumbs
+   */
+  get showFullPath(): boolean {
+    return this.crumbs.fullPath;
+  }
+
+  set showFullPath(value: boolean) {
+    this.crumbs.fullPath = value;
+  }
+
+  /**
    * Whether to show the file size column
    */
   get showFileSizeColumn(): boolean {
