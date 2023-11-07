@@ -4,12 +4,17 @@ import { expect, IJupyterLabPageFixture, test } from '@jupyterlab/galata';
 import { PromiseDelegate } from '@lumino/coreutils';
 import * as path from 'path';
 
-async function openNotebook(page: IJupyterLabPageFixture, tmpPath, fileName) {
+async function openNotebook(
+  page: IJupyterLabPageFixture,
+  tmpPath: string,
+  fileName: string
+) {
   await page.contents.uploadFile(
     path.resolve(__dirname, `./notebooks/${fileName}`),
     `${tmpPath}/${fileName}`
   );
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
 }
 
 test.describe('Debugger Tests', () => {
@@ -106,7 +111,7 @@ test.describe('Debugger Tests', () => {
     await page.activity.closePanel(`${globalVar} - ${notebookName}`);
 
     await page.locator('button[title="Continue (F9)"]').click();
-    await expect(variablesPanel).not.toContain('ul');
+    expect(variablesPanel).not.toContain('ul');
     await page.debugger.waitForVariables();
 
     await page.debugger.renderVariable(localVar);
@@ -307,6 +312,71 @@ test.describe('Debugger Variables', () => {
     await expect(
       page.locator('li.lm-Menu-item[data-command="debugger:copy-to-clipboard"]')
     ).toHaveCount(0);
+  });
+});
+
+test.describe('Tree view', () => {
+  test.afterEach(async ({ page }) => {
+    await page.debugger.switchOff();
+    await page.waitForTimeout(500);
+    await page.notebook.close();
+  });
+
+  test('should preserve tree view state when executing', async ({
+    page,
+    tmpPath
+  }) => {
+    const name = 'code_notebook.ipynb';
+    await openNotebook(page, tmpPath, name);
+    await page.debugger.switchOn(name);
+    await page.waitForCondition(() => page.debugger.isOpen());
+
+    await page.notebook.waitForCellGutter(2);
+    await page.notebook.clickCellGutter(2, 2);
+
+    await page.debugger.waitForBreakPoints();
+
+    await page.notebook.runCell(0);
+    await page.notebook.runCell(1);
+
+    // Expand a variable
+    await page.getByRole('listitem').filter({ hasText: 'sysmodule' }).click();
+    await page
+      .getByRole('listitem')
+      .filter({ hasText: /^argvlist$/ })
+      .click();
+
+    const scopeSelect = page.getByRole('combobox', { name: 'Scope' });
+    const argv1 = page.getByRole('listitem').filter({ hasText: /^1-f$/ });
+
+    // Run without waiting as we will hit a breakpoint
+    void page.notebook.run();
+    await page.waitForCondition(
+      async () => (await scopeSelect.inputValue()) === 'Locals'
+    );
+
+    // Check the tree is still expanded on breakpoint
+    await scopeSelect.selectOption('Globals');
+    await argv1.scrollIntoViewIfNeeded();
+    await expect.soft(argv1).toHaveCount(1);
+
+    await page.getByRole('button', { name: 'Continue (F9)' }).click();
+    await page.waitForCondition(
+      async () => (await scopeSelect.inputValue()) === 'Globals'
+    );
+
+    // Check the tree is still expanded on continue
+    await argv1.waitFor();
+    await expect(argv1).toHaveCount(1);
+
+    await page.getByRole('button', { name: 'Continue (F9)' }).click();
+    await page.waitForCondition(
+      async () => (await scopeSelect.inputValue()) === 'Globals'
+    );
+
+    // Check the tree is still expanded on continue that terminates the cell execution
+    await argv1.waitFor();
+    await expect(argv1).toHaveCount(1);
   });
 });
 

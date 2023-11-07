@@ -54,9 +54,7 @@ export class FileBrowserHelper {
       await this.openDirectory(dirPath);
     }
 
-    await Utils.waitForCondition(async () => {
-      return await this.isFileListedInBrowser(fileName);
-    });
+    await Utils.waitForCondition(() => this.isFileListedInBrowser(fileName));
   }
 
   /**
@@ -66,10 +64,11 @@ export class FileBrowserHelper {
    * @returns File status
    */
   async isFileListedInBrowser(fileName: string): Promise<boolean> {
-    const item = await this.page.$(
-      `xpath=${this.xpBuildFileSelector(fileName)}`
-    );
-    return item !== null;
+    const item = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByRole('listitem', { name: new RegExp(`^Name: ${fileName}`) });
+
+    return (await item.count()) > 0;
   }
 
   /**
@@ -78,18 +77,11 @@ export class FileBrowserHelper {
    * @returns Directory full path
    */
   async getCurrentDirectory(): Promise<string> {
-    return await this.page.evaluate(() => {
-      let directory = '';
-      const spans = document.querySelectorAll(
-        '.jp-FileBrowser .jp-FileBrowser-crumbs span'
-      );
-      const numSpans = spans.length;
-      if (numSpans > 1) {
-        directory = spans[numSpans - 2].getAttribute('title') ?? '';
-      }
-
-      return directory;
-    });
+    const breadcrumbs = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .locator('.jp-FileBrowser-crumbs > span');
+    const count = await breadcrumbs.count();
+    return (await breadcrumbs.nth(count - 2).getAttribute('title')) ?? '';
   }
 
   /**
@@ -106,10 +98,10 @@ export class FileBrowserHelper {
     await this.revealFileInBrowser(filePath);
     const name = path.basename(filePath);
 
-    const fileItem = await this.page.$(
-      `xpath=${this.xpBuildFileSelector(name)}`
-    );
-    if (fileItem) {
+    const fileItem = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByRole('listitem', { name: new RegExp(`^Name: ${name}`) });
+    if (await fileItem.count()) {
       if (factory) {
         await fileItem.click({ button: 'right' });
         await this.page
@@ -127,7 +119,7 @@ export class FileBrowserHelper {
       // to know that from the DOM).
       await this.page
         .getByRole('main')
-        .getByRole('tab', { name })
+        .getByRole('tab', { name: new RegExp(`^${name}`) })
         .last()
         .waitFor({
           state: 'visible'
@@ -145,26 +137,22 @@ export class FileBrowserHelper {
    * @returns Action success status
    */
   async openHomeDirectory(): Promise<boolean> {
-    const homeButton = await this.page.$(
-      '.jp-FileBrowser .jp-FileBrowser-crumbs span'
-    );
-    if (!homeButton) {
+    const breadcrumbs = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .locator('.jp-FileBrowser-crumbs > span');
+    const homeButton = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .locator('.jp-BreadCrumbs-home');
+
+    if (!((await homeButton.count()) == 1)) {
       return false;
     }
     await homeButton.click();
 
-    await this.page.waitForFunction(() => {
-      const spans = document.querySelectorAll(
-        '.jp-FileBrowser .jp-FileBrowser-crumbs span'
-      );
-      return (
-        // The home is the root if no preferred dir is defined.
-        spans.length === 2 && spans[0].classList.contains('jp-BreadCrumbs-home')
-      );
-    });
+    await homeButton.waitFor();
 
-    // wait for DOM rerender
-    await this.page.waitForTimeout(200);
+    // When in home directory, we have only two spans
+    Utils.waitForCondition(async () => (await breadcrumbs.count()) == 2);
 
     return true;
   }
@@ -209,41 +197,30 @@ export class FileBrowserHelper {
    * Trigger a file browser refresh
    */
   async refresh(): Promise<void> {
-    const page = this.page;
-    const item = await page.$(
-      `xpath=//div[@id='filebrowser']//button[${Utils.xpContainsClass(
-        'jp-ToolbarButtonComponent'
-      )} and .//*[@data-icon='ui-components:refresh']]`
-    );
+    const button = this.page.getByRole('button', {
+      name: 'Refresh the file browser.'
+    });
 
-    if (item) {
-      // wait for network response or timeout
-      await Promise.race([
-        page.waitForTimeout(2000),
-        this.contents.waitForAPIResponse(async () => {
-          await item.click();
-        })
-      ]);
-      // wait for DOM rerender
-      await page.waitForTimeout(200);
-    } else {
-      throw new Error('Could not find refresh toolbar item');
-    }
+    this.contents.waitForAPIResponse(async () => {
+      await button.click();
+    });
   }
 
   protected async _openDirectory(dirName: string): Promise<boolean> {
-    const item = await this.page.$(
-      `xpath=${this.xpBuildDirectorySelector(dirName)}`
-    );
-    if (item === null) {
+    const item = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByRole('listitem', { name: new RegExp(`^Name: ${dirName}`) });
+    if (!((await item.count()) > 0)) {
       return false;
     }
 
     await this.contents.waitForAPIResponse(async () => {
-      await item.click({ clickCount: 2 });
+      await item.dblclick();
     });
-    // wait for DOM rerender
-    await this.page.waitForTimeout(200);
+    await this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByText(`/${dirName}/`)
+      .waitFor();
 
     return true;
   }
