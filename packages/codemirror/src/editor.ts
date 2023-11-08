@@ -403,7 +403,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const offset = this.getOffsetAt(position);
     this.editor.dispatch({
       selection: { anchor: offset },
-      scrollIntoView: true
+      scrollIntoView: options?.scroll === false ? false : true
     });
     // If the editor does not have focus, this cursor change
     // will get screened out in _onCursorsChanged(). Make an
