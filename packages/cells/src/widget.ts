@@ -2253,10 +2253,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         .getSource()
         .match(/^#+/g) || [''])[0].length;
       if (numHashAtStart > 0) {
-        this.inputArea!.editor.setCursorPosition({
-          column: numHashAtStart + 1,
-          line: 0
-        });
+        this.inputArea!.editor.setCursorPosition(
+          {
+            column: numHashAtStart + 1,
+            line: 0
+          },
+          { scroll: false }
+        );
       }
     }
   }
