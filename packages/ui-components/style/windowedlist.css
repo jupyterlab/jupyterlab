@@ -13,7 +13,6 @@
 .jp-WindowedPanel.jp-mod-virtual-scrollbar > .jp-WindowedPanel-outer {
   margin-left: 25px;
 }
-}
 
 .jp-WindowedPanel-inner {
   position: relative;
@@ -30,7 +29,7 @@
   display: none;
 }
 
-.jp-WindowedPanel.jp-mod-virtual-scrollbar .jp-WindowedPanel-scrollbar {
+.jp-WindowedPanel.jp-mod-virtual-scrollbar > .jp-WindowedPanel-scrollbar {
   background-color: inherit;
   border-left: 1px solid var(--jp-layout-color3);
   display: block;
