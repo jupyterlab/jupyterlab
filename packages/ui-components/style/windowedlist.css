@@ -10,6 +10,11 @@
   transform: none;
 }
 
+.jp-WindowedPanel.jp-mod-virtual-scrollbar > .jp-WindowedPanel-outer {
+  margin-left: 25px;
+}
+}
+
 .jp-WindowedPanel-inner {
   position: relative;
 }
