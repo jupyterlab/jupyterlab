@@ -930,13 +930,15 @@ export class DebuggerService implements IDebugger, IDisposable {
     model: VariablesModel,
     variable: IDebugger.IVariable
   ): Promise<void> {
-    // Use the mutable variable state to update the children
-    const variables = await this.inspectVariable(variable.variablesReference);
+    if (typeof variable.children == 'undefined') {
+      // Use the mutable variable state to update the children
+      const variables = await this.inspectVariable(variable.variablesReference);
 
-    variable.children = variables;
+      variable.children = variables;
 
-    // Set a copy to trigger refresh
-    model.scopes = model.scopes.slice();
+      // Set a copy to trigger refresh
+      model.scopes = model.scopes.slice();
+    }
   }
 
   /**
