@@ -6,5 +6,20 @@
 /*
 Placeholder for custom user CSS
 mainly to be overridden in profile/static/custom/custom.css
-This will always be an empty file
+
+The CSS here will only be applied when the corresponding
+data attribute is added to the body and is intended to be
+used to test that custom CSS is applied in the documentation
+tests for documentation screenshots.
 */
+body[data-testing-custom-css] #top-panel-wrapper,
+#jp-top-bar {
+  background-color: #aecad4 !important;
+}
+
+body[data-testing-custom-css] h1 {
+  font-size: 22px;
+  margin-bottom: 40px;
+  color: #10929e;
+  text-decoration: underline;
+}

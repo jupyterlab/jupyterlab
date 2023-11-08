@@ -10,10 +10,10 @@ this directory by running ``jupyter --paths``. There you can create a
 folder named ``custom`` and create a ``custom.css`` file within the
 folder.
 
-Custom CSS is loaded by default. In the jupyter configuration directory, the
-``~/.jupyter/custom/custom.css`` file will be loaded unless the the application is
-initialized with the ``custom_css`` flag with the argument set to ``False`` as in
-``--LabApp.custom_css=False``.
+Custom CSS is not loaded by default. In the jupyter configuration directory, the
+``~/.jupyter/custom/custom.css`` file will not be loaded unless the the application is
+initialized with the ``custom_css`` flag with the argument set to ``True`` as in
+``--LabApp.custom_css=True``.
 
 Jupyter Styling
 ---------------
