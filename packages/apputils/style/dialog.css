@@ -76,7 +76,7 @@ button.jp-Dialog-button.jp-mod-styled.jp-mod-warn:focus {
 }
 
 button.jp-Dialog-button.jp-mod-styled.jp-mod-reject:focus {
-  outline: 1px solid var(--jp-reject-color-normal, var(--md-grey-600));
+  outline: 1px solid var(--jp-reject-color-normal, var(--md-grey-600, #757575));
 }
 
 button.jp-Dialog-close-button {

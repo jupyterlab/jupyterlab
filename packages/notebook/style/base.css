@@ -21,8 +21,8 @@
   --jp-side-by-side-resized-cell: var(--jp-side-by-side-output-size);
   --jp-private-notebook-dragImage-width: 304px;
   --jp-private-notebook-dragImage-height: 36px;
-  --jp-private-notebook-selected-color: var(--md-blue-400);
-  --jp-private-notebook-active-color: var(--md-green-400);
+  --jp-private-notebook-selected-color: var(--md-blue-400, #42a5f5);
+  --jp-private-notebook-active-color: var(--md-green-400, #66bb6a);
 }
 
 /*-----------------------------------------------------------------------------

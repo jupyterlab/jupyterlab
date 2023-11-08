@@ -9,13 +9,13 @@
 }
 
 body[data-jp-theme-light='false'] .jp-DebuggerEditor-highlight {
-  background-color: var(--md-brown-800);
-  outline-color: var(--md-brown-600);
+  background-color: var(--md-brown-800, #4e342e);
+  outline-color: var(--md-brown-600, #6d4c41);
 }
 
 body[data-jp-theme-light='true'] .jp-DebuggerEditor-highlight {
-  background-color: var(--md-brown-100);
-  outline-color: var(--md-brown-300);
+  background-color: var(--md-brown-100, #d7ccc8);
+  outline-color: var(--md-brown-300, #a1887f);
 }
 
 .jp-DebuggerEditor-marker {
