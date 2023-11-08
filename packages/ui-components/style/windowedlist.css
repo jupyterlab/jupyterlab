@@ -55,7 +55,7 @@ ol.jp-WindowedPanel-scrollbar-content > li {
   text-align: right;
 }
 
-ol.jp-WindowedPanel-scrollbar-content li:hover {
+ol.jp-WindowedPanel-scrollbar-content > li:hover {
   cursor: pointer;
   background-color: var(--jp-layout-color2);
 }
