@@ -60,13 +60,11 @@ export namespace TabBarSvg {
       );
 
       return hpass(
-        'div',
+        'button',
         {
           className,
           title,
-          'aria-label': 'Close Launcher',
-          'aria-hidden': 'false',
-          role: 'button'
+          type: 'button'
         },
         closeIcon
       ) as unknown as VirtualElement;
