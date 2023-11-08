@@ -775,7 +775,7 @@ export class WindowedList<
       node.classList.add('jp-mod-virtual-scrollbar');
     }
 
-    this._viewModel.stateChanged.connect(this.onStateChanged, this);
+    this.viewModel.stateChanged.connect(this.onStateChanged, this);
   }
 
   /**
@@ -930,7 +930,7 @@ export class WindowedList<
     this._resetScrollToItem();
     this.scrollTo(
       this.viewModel.getOffsetForIndexAndAlignment(
-        Math.max(0, Math.min(index, this._viewModel.widgetCount - 1)),
+        Math.max(0, Math.min(index, this.viewModel.widgetCount - 1)),
         align,
         margin
       )
@@ -944,7 +944,7 @@ export class WindowedList<
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    if (this._viewModel.windowingActive) {
+    if (this.viewModel.windowingActive) {
       this._addListeners();
     } else {
       this._applyNoWindowingStyles();
@@ -958,7 +958,7 @@ export class WindowedList<
    * A message handler invoked on an `'before-detach'` message.
    */
   protected onBeforeDetach(msg: Message): void {
-    if (this._viewModel.windowingActive) {
+    if (this.viewModel.windowingActive) {
       this._removeListeners();
     }
     const scrollbar = this.node.querySelector('.jp-WindowedPanel-scrollbar')!;
@@ -1076,6 +1076,9 @@ export class WindowedList<
     }
   }
 
+  /**
+   * Add listeners for viewport and contents (but not the virtual scrollbar).
+   */
   private _addListeners() {
     if (!this._resizeObserver) {
       this._resizeObserver = new ResizeObserver(
@@ -1093,11 +1096,17 @@ export class WindowedList<
     this._viewport.style.position = 'absolute';
   }
 
+  /**
+   * Turn off windowing related styles in the viewport.
+   */
   private _applyNoWindowingStyles() {
     this._viewport.style.position = 'relative';
     this._viewport.style.top = '0px';
   }
 
+  /**
+   * Remove listeners for viewport and contents (but not the virtual scrollbar).
+   */
   private _removeListeners() {
     const outer = this.node.querySelector('.jp-WindowedPanel-outer');
     outer!.removeEventListener('scroll', this);
@@ -1106,6 +1115,9 @@ export class WindowedList<
     this._applyNoWindowingStyles();
   }
 
+  /**
+   * Update viewport and DOM state.
+   */
   private _update(): void {
     if (this.isDisposed || !this.layout) {
       return;
@@ -1193,6 +1205,9 @@ export class WindowedList<
     }
   }
 
+  /**
+   * Handle viewport content (e.g. widgets) resize.
+   */
   private _onWidgetResize(entries: ResizeObserverEntry[]): void {
     this._resetScrollToItem();
 
@@ -1229,6 +1244,9 @@ export class WindowedList<
     }
   }
 
+  /**
+   * Clear any outstanding timeout and enqueue scrolling to a new item.
+   */
   private _resetScrollToItem(): void {
     if (this._resetScrollToItemTimeout) {
       clearTimeout(this._resetScrollToItemTimeout);
@@ -1245,6 +1263,9 @@ export class WindowedList<
     }
   }
 
+  /**
+   * Render virtual scrollbar.
+   */
   private _renderScrollbar(): void {
     const { node, renderer, viewModel } = this;
     const content = node.querySelector('.jp-WindowedPanel-scrollbar-content')!;
@@ -1263,6 +1284,9 @@ export class WindowedList<
     }
   }
 
+  /**
+   * Handle `pointerdown` events on the virtual scrollbar.
+   */
   private _evtPointerDown(event: PointerEvent): void {
     let target = event.target as HTMLElement;
     while (target && target.parentElement) {
@@ -1274,7 +1298,6 @@ export class WindowedList<
     }
   }
 
-  protected _viewModel: T;
   private _innerElement: HTMLElement;
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
@@ -1285,6 +1308,7 @@ export class WindowedList<
   private _scrollToItem: [number, WindowedList.ScrollToAlign] | null;
   private _scrollUpdateWasRequested: boolean;
   private _updater: Throttler;
+  private _viewModel: T;
   private _viewport: HTMLElement;
 }
 
