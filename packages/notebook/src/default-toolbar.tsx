@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Option, Select } from '@jupyter/react-components';
 import {
   Toolbar as AppToolbar,
   Dialog,
@@ -23,6 +22,7 @@ import {
   copyIcon,
   cutIcon,
   fastForwardIcon,
+  HTMLSelect,
   pasteIcon,
   ReactWidget,
   runIcon,
@@ -366,23 +366,19 @@ export class CellTypeSwitcher extends ReactWidget {
       }
     }
     return (
-      <Select
+      <HTMLSelect
         className={TOOLBAR_CELLTYPE_DROPDOWN_CLASS}
-        onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-          this.handleChange(event)
-        }
+        onChange={this.handleChange}
         onKeyDown={this.handleKeyDown}
         value={value}
         aria-label={this._trans.__('Cell type')}
         title={this._trans.__('Select the cell type')}
-        autowidth
-        minimal
       >
-        <Option value="-">-</Option>
-        <Option value="code">{this._trans.__('Code')}</Option>
-        <Option value="markdown">{this._trans.__('Markdown')}</Option>
-        <Option value="raw">{this._trans.__('Raw')}</Option>
-      </Select>
+        <option value="-">-</option>
+        <option value="code">{this._trans.__('Code')}</option>
+        <option value="markdown">{this._trans.__('Markdown')}</option>
+        <option value="raw">{this._trans.__('Raw')}</option>
+      </HTMLSelect>
     );
   }
 
