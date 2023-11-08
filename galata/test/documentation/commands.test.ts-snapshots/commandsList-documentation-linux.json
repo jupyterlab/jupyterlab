@@ -35,9 +35,7 @@
     "id": "application:activate-sidebar-widget",
     "label": "Toggle Sidebar Element",
     "caption": "By default opens first element of the sidebar",
-    "shortcuts": [
-      "Alt 1"
-    ]
+    "shortcuts": []
   },
   {
     "id": "application:close",
@@ -96,7 +94,7 @@
     "label": "Simple Interface",
     "caption": "",
     "shortcuts": [
-      "Ctrl J"
+      "Ctrl Shift D"
     ]
   },
   {
@@ -110,7 +108,7 @@
     "label": "Show Right Sidebar",
     "caption": "",
     "shortcuts": [
-      "Ctrl Shift B"
+      "Ctrl J"
     ]
   },
   {
@@ -2073,7 +2071,9 @@
     "id": "running:show-panel",
     "label": "Sessions and Tabs",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Ctrl Shift B"
+    ]
   },
   {
     "id": "settingeditor:open",
