@@ -152,7 +152,7 @@ export class FileBrowserHelper {
     await homeButton.waitFor();
 
     // When in home directory, we have only two spans
-    Utils.waitForCondition(async () => (await breadcrumbs.count()) == 2);
+    await Utils.waitForCondition(async () => (await breadcrumbs.count()) == 2);
 
     return true;
   }
@@ -201,7 +201,7 @@ export class FileBrowserHelper {
       name: 'Refresh the file browser.'
     });
 
-    this.contents.waitForAPIResponse(async () => {
+    await this.contents.waitForAPIResponse(async () => {
       await button.click();
     });
   }
