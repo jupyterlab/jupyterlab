@@ -52,7 +52,7 @@ def touch(file, mtime=None):
     dirname = os.path.dirname(file)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-    open(file, "a").close()  # noqa
+    open(file, "a").close()
     # set explicit mtime
     if mtime:
         atime = os.stat(file).st_atime
