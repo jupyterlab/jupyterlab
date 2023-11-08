@@ -52,3 +52,60 @@ test.describe('Notebook Scroll', () => {
     });
   }
 });
+
+test.describe('Notebook scroll over long outputs', () => {
+  const outputAndHeading = 'long_output_and_headings.ipynb';
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${outputAndHeading}`),
+      `${tmpPath}/${outputAndHeading}`
+    );
+
+    await page.notebook.openByPath(`${tmpPath}/${outputAndHeading}`);
+    await page.notebook.activate(outputAndHeading);
+  });
+
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
+  test('should scroll smoothly without snapping to headings', async ({
+    page
+  }) => {
+    const renderedMarkdownLocator = page.locator(
+      '.jp-Cell .jp-RenderedMarkdown:has-text("Before")'
+    );
+    // Wait until Markdown cells are rendered
+    await renderedMarkdownLocator.waitFor({ timeout: 100 });
+    // Un-render the "before" markdown cell
+    await renderedMarkdownLocator.dblclick();
+    // Make the first cell active
+    await page.notebook.selectCells(0);
+    // Check that that the markdown cell is un-rendered
+    await renderedMarkdownLocator.waitFor({ state: 'hidden', timeout: 100 });
+
+    // Scroll to the last cell
+    const lastCell = await page.notebook.getCell(10);
+    await lastCell.scrollIntoViewIfNeeded();
+
+    // Get the outer window
+    const outer = page.locator('.jp-WindowedPanel-outer');
+
+    let previousOffset = await outer.evaluate(node => node.scrollTop);
+    expect(previousOffset).toBeGreaterThan(1000);
+
+    // Scroll piece by piece checking that there is no jump
+    while (previousOffset > 75) {
+      await page.mouse.wheel(0, -100);
+      // Explicit wait because mouse wheel does not wait for scrolling.
+      await page.waitForTimeout(150);
+      const offset = await outer.evaluate(node => node.scrollTop);
+      const diff = previousOffset - offset;
+      // The scroll should be by about 100px, but because wheel event
+      // does not wait we allow for some wiggle room (+/-25px).
+      expect(diff).toBeLessThanOrEqual(125);
+      expect(diff).toBeGreaterThan(75);
+      previousOffset = offset;
+    }
+  });
+});
