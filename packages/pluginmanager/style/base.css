@@ -33,3 +33,7 @@
 .jp-pluginmanager-Header > .jp-FilterBox {
   width: 100%;
 }
+
+.jp-mod-scrollable {
+  overflow-y: auto;
+}
