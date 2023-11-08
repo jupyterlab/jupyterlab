@@ -218,10 +218,18 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open view menu with keyboard', async ({ page }) => {
     await page.goto();
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const viewMenu = page.getByRole('menuitem', { name: 'View' });
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
+      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+        break;
+      }
+    }
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
       if (await viewMenu.evaluate(el => el === document.activeElement)) {
         break;
       }
@@ -233,10 +241,18 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open run menu with keyboard', async ({ page }) => {
     await page.goto();
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const runMenu = page.getByRole('menuitem', { name: 'Run' });
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
+      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+        break;
+      }
+    }
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
       if (await runMenu.evaluate(el => el === document.activeElement)) {
         break;
       }
@@ -248,10 +264,18 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open kernel menu with keyboard', async ({ page }) => {
     await page.goto();
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const kernelMenu = page.getByRole('menuitem', { name: 'Kernel' });
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
+      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+        break;
+      }
+    }
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
       if (await kernelMenu.evaluate(el => el === document.activeElement)) {
         break;
       }
@@ -263,10 +287,18 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open tabs menu with keyboard', async ({ page }) => {
     await page.goto();
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const tabsMenu = page.getByRole('menuitem', { name: 'Tabs' });
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
+      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+        break;
+      }
+    }
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
       if (await tabsMenu.evaluate(el => el === document.activeElement)) {
         break;
       }
@@ -278,14 +310,20 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open settings menu with keyboard', async ({ page }) => {
     await page.goto();
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const settingsMenu = page.getByRole('menuitem', { name: 'Settings' });
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
+      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+        break;
+      }
+      await page.keyboard.press('ArrowRight');
       if (await settingsMenu.evaluate(el => el === document.activeElement)) {
         break;
       }
     }
+
     await page.keyboard.press('Enter');
 
     expect(await page.menu.isOpen('Settings')).toBeTruthy();
@@ -294,19 +332,19 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   test('Open help menu with keyboard', async ({ page }) => {
     await page.goto();
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
-    const fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+    let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
     const helpMenu = page.getByRole('menuitem', { name: 'Help' });
-    const helpClass = ((await helpMenu.getAttribute('class')) ?? '').split(' ');
+    let helpClass = ((await helpMenu.getAttribute('class')) ?? '').split(' ');
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Shift+Tab');
       if (fileClass.includes('lm-mod-active')) {
         break;
       }
     }
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      page.keyboard.press('ArrowRight');
+      await page.keyboard.press('ArrowRight');
       if (helpClass.includes('lm-mod-active')) {
         break;
       }
