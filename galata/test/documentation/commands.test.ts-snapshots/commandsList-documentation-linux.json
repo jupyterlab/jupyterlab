@@ -35,7 +35,9 @@
     "id": "application:activate-sidebar-widget",
     "label": "Toggle Sidebar Element",
     "caption": "By default opens first element of the sidebar",
-    "shortcuts": []
+    "shortcuts": [
+      "Alt 1"
+    ]
   },
   {
     "id": "application:close",
