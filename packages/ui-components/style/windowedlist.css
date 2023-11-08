@@ -49,7 +49,7 @@ ol.jp-WindowedPanel-scrollbar-content {
   padding: 0;
 }
 
-ol.jp-WindowedPanel-scrollbar-content li {
+ol.jp-WindowedPanel-scrollbar-content > li {
   border-bottom: 1px solid var(--jp-layout-color3);
   padding: 2px;
   text-align: right;
