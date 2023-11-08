@@ -110,6 +110,13 @@ export class NotebookActions {
   }
 
   /**
+   * A signal that emits when a cell's output is cleared.
+   */
+  static get outputCleared(): ISignal<any, { notebook: Notebook; cell: Cell }> {
+    return Private.outputCleared;
+  }
+
+  /**
    * A private constructor for the `NotebookActions` class.
    *
    * #### Notes
@@ -1427,6 +1434,7 @@ export namespace NotebookActions {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
         }, false);
+        Private.outputCleared.emit({ notebook, cell: child });
       }
     }
     Private.handleState(notebook, state, true);
@@ -1455,6 +1463,7 @@ export namespace NotebookActions {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
         }, false);
+        Private.outputCleared.emit({ notebook, cell: child });
       }
     }
     Private.handleState(notebook, state, true);
@@ -2154,6 +2163,14 @@ namespace Private {
   export const selectionExecuted = new Signal<
     any,
     { notebook: Notebook; lastCell: Cell }
+  >({});
+
+  /**
+   * A signal that emits when one notebook's cells are all executed.
+   */
+  export const outputCleared = new Signal<
+    any,
+    { notebook: Notebook; cell: Cell }
   >({});
 
   /**

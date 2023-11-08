@@ -16,6 +16,7 @@ import { ArrayExt } from '@lumino/algorithm';
 import { PromiseDelegate } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
+import { Throttler } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
@@ -751,6 +752,7 @@ export class WindowedList<
     this._scrollToItem = null;
     this._scrollRepaint = null;
     this._scrollUpdateWasRequested = false;
+    this._updater = new Throttler(() => this.update(), 50);
     this._resizeObserver = null;
 
     this._viewModel.stateChanged.connect(this.onStateChanged, this);
@@ -788,6 +790,14 @@ export class WindowedList<
    */
   protected get viewModel(): T {
     return this._viewModel;
+  }
+
+  /**
+   * Dispose the windowed list.
+   */
+  dispose(): void {
+    this._updater.dispose();
+    super.dispose();
   }
 
   /**
@@ -945,8 +955,12 @@ export class WindowedList<
    * A message handler invoked on an `'resize-request'` message.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
+    const previousHeight = this.viewModel.height;
     this.viewModel.height =
       msg.height >= 0 ? msg.height : this.node.getBoundingClientRect().height;
+    if (this.viewModel.height !== previousHeight) {
+      void this._updater.invoke();
+    }
     super.onResize(msg);
   }
 
@@ -1179,6 +1193,7 @@ export class WindowedList<
   private _scrollRepaint: number | null;
   private _scrollToItem: [number, WindowedList.ScrollToAlign] | null;
   private _scrollUpdateWasRequested: boolean;
+  private _updater: Throttler;
 }
 
 /**

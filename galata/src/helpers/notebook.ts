@@ -787,7 +787,10 @@ export class NotebookHelper {
   }
 
   /**
-   * Whether the cell is in editing mode or not
+   * Whether the cell is in editing mode or not.
+   *
+   * This method is not suitable for checking if a cell is unrendered
+   * as it will return false when the cell is not active (not focused).
    *
    * @param cellIndex Cell index
    * @returns Editing mode
