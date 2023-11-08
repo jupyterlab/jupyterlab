@@ -511,7 +511,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         CommandIDs.closeAll,
         CommandIDs.closeOtherTabs,
         CommandIDs.closeRightTabs,
-        CommandIDs.activateSidebarWidget,
         CommandIDs.toggleHeader,
         CommandIDs.toggleLeftArea,
         CommandIDs.toggleRightArea,
