@@ -497,7 +497,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
     flags["custom-css"] = (
         {"LabApp": {"custom_css": False}},
-        "Load custom CSS in template html files. Default is True",
+        "Load custom CSS in template html files. Default is False",
     )
 
     subcommands = {
