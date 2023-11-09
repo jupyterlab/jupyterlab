@@ -8,6 +8,20 @@ import fs from 'fs';
 import path from 'path';
 
 /**
+ * Filter directory content
+ *
+ * @param array Array of content models
+ * @returns Filtered array
+ */
+export function filterContent(array: any[]): any[] {
+  return array.filter(
+    item =>
+      item['type'] !== 'directory' ||
+      !(item['name'] as string).startsWith('test-')
+  );
+}
+
+/**
  * Generate a SVG arrow to inject in a HTML document.
  *
  * @param position Absolute position

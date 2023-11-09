@@ -3,7 +3,12 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
-import { generateArrow, positionMouse, positionMouseOver } from './utils';
+import {
+  filterContent,
+  generateArrow,
+  positionMouse,
+  positionMouseOver
+} from './utils';
 
 test.use({
   autoGoto: false,
@@ -13,7 +18,7 @@ test.use({
 
 test.describe('General', () => {
   test('Welcome', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -76,7 +81,7 @@ test.describe('General', () => {
   });
 
   test('Left Sidebar', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
