@@ -913,11 +913,16 @@ export namespace Cell {
  */
 export class CodeCellLayout extends PanelLayout {
   /**
-   * A function called to partially attach a code cell, in windowing notebook.
-   * Attach sub widget of CodeCell except the OutputAreaWrapper.
+   * A message handler invoked on a `'before-attach'` message.
    *
+   * #### Notes
+   * The default implementation of this method forwards the message
+   * to all widgets. It assumes all widget nodes are attached to the
+   * parent widget node.
+   *
+   * This may be reimplemented by subclasses as needed.
    */
-  windowingAttach(): void {
+  protected onBeforeAttach(msg: Message): void {
     let beforeOutputArea = true;
     const outputAreaWrapper = this.parent!.node.firstElementChild;
     for (const widget of this) {
@@ -925,7 +930,7 @@ export class CodeCellLayout extends PanelLayout {
         if (widget.node === outputAreaWrapper) {
           beforeOutputArea = false;
         } else {
-          MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
+          MessageLoop.sendMessage(widget, msg);
 
           if (beforeOutputArea) {
             this.parent!.node.insertBefore(widget.node, outputAreaWrapper);
@@ -948,11 +953,16 @@ export class CodeCellLayout extends PanelLayout {
   }
 
   /**
-   * A function called to partially detach a code cell, in windowing notebook.
-   * Detach sub widget of CodeCell except the OutputAreaWrapper.
+   * A message handler invoked on an `'after-detach'` message.
    *
+   * #### Notes
+   * The default implementation of this method forwards the message
+   * to all widgets. It assumes all widget nodes are attached to the
+   * parent widget node.
+   *
+   * This may be reimplemented by subclasses as needed.
    */
-  windowingDetach(): void {
+  protected onAfterDetach(msg: Message): void {
     for (const widget of this) {
       // TODO we could improve this further by removing outputs based
       // on their mime type (for example plain/text or markdown could safely be detached)
@@ -966,7 +976,7 @@ export class CodeCellLayout extends PanelLayout {
 
         this.parent!.node.removeChild(widget.node);
 
-        MessageLoop.sendMessage(widget, Widget.Msg.AfterDetach);
+        MessageLoop.sendMessage(widget, msg);
       }
     }
   }
@@ -1056,7 +1066,9 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this._output.outputLengthChanged.connect(this._outputLengthHandler, this);
     outputWrapper.addWidget(this._output);
     const layout = this.layout as PanelLayout;
-    layout.insertWidget(layout.widgets.length - 1, new ResizeHandle(this.node));
+    const resizeHandle = new ResizeHandle(this.node);
+    resizeHandle.sizeChanged.connect(this._sizeChangedHandler, this);
+    layout.insertWidget(layout.widgets.length - 1, resizeHandle);
     layout.insertWidget(layout.widgets.length - 1, outputWrapper);
 
     if (this.model.isDirty) {
@@ -1493,6 +1505,13 @@ export class CodeCell extends Cell<ICodeCellModel> {
       ? trans.__('Code Cell Content')
       : trans.__('Code Cell Content with Output');
     this.node.setAttribute('aria-label', ariaLabel);
+  }
+
+  /**
+   * Handle changes in input/output proportions in side-by-side mode.
+   */
+  private _sizeChangedHandler(sender: ResizeHandle) {
+    this._displayChanged.emit();
   }
 
   private _headingsCache: Cell.IHeading[] | null = null;
@@ -2234,10 +2253,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         .getSource()
         .match(/^#+/g) || [''])[0].length;
       if (numHashAtStart > 0) {
-        this.inputArea!.editor.setCursorPosition({
-          column: numHashAtStart + 1,
-          line: 0
-        });
+        this.inputArea!.editor.setCursorPosition(
+          {
+            column: numHashAtStart + 1,
+            line: 0
+          },
+          { scroll: false }
+        );
       }
     }
   }
