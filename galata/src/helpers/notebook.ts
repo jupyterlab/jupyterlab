@@ -16,7 +16,7 @@ import { MenuHelper } from './menu';
 /**
  * Maximal number of retries to get a cell
  */
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 5;
 
 /**
  * Notebook helpers
@@ -610,6 +610,79 @@ export class NotebookHelper {
   }
 
   /**
+   * Get a cell locator
+   *
+   * @param cellIndex Cell index
+   * @param name Notebook name
+   * @returns Handle to the cell
+   */
+  async getCellLocator(
+    cellIndex: number,
+    name?: string
+  ): Promise<Locator | null> {
+    const notebook = await this.activity.getPanelLocator(name);
+    if (!notebook) {
+      return null;
+    }
+
+    const cells = notebook.locator('.jp-Cell');
+    let firstIndex = parseInt(
+      (await cells.first().getAttribute('data-windowed-list-index')) ?? '',
+      10
+    );
+    let lastIndex = parseInt(
+      (await cells.last().getAttribute('data-windowed-list-index')) ?? '',
+      10
+    );
+
+    if (cellIndex < firstIndex) {
+      // Scroll up
+      const viewport = await notebook
+        .locator('.jp-WindowedPanel-window')
+        .first()
+        .boundingBox();
+      await this.page.mouse.move(viewport!.x, viewport!.y);
+      do {
+        await this.page.mouse.wheel(0, -100);
+        await this.page.waitForTimeout(50);
+        firstIndex = parseInt(
+          (await cells.first().getAttribute('data-windowed-list-index')) ?? '',
+          10
+        );
+      } while (cellIndex < firstIndex);
+      lastIndex = parseInt(
+        (await cells.last().getAttribute('data-windowed-list-index')) ?? '',
+        10
+      );
+    } else if (cellIndex > lastIndex) {
+      // Scroll down
+      const viewport = await notebook
+        .locator('.jp-WindowedPanel-window')
+        .first()
+        .boundingBox();
+      await this.page.mouse.move(viewport!.x, viewport!.y);
+      do {
+        await this.page.mouse.wheel(0, 100);
+        await this.page.waitForTimeout(50);
+        lastIndex = parseInt(
+          (await cells.last().getAttribute('data-windowed-list-index')) ?? '',
+          10
+        );
+      } while (lastIndex < cellIndex);
+      firstIndex = parseInt(
+        (await cells.first().getAttribute('data-windowed-list-index')) ?? '',
+        10
+      );
+    }
+
+    if (firstIndex <= cellIndex && cellIndex <= lastIndex) {
+      return cells.locator('[data-windowed-list-index="${cellIndex}"]');
+    } else {
+      return null;
+    }
+  }
+
+  /**
    * Get the handle to the input of a cell
    *
    * @param cellIndex Cell index
@@ -859,6 +932,24 @@ export class NotebookHelper {
     return false;
   }
 
+  private async _setCellMode(
+    cell: Locator,
+    mode: 'Edit' | 'Command'
+  ): Promise<void> {
+    if ((await this.page.getByText(`Mode: ${mode}`).count()) > 1) {
+      return;
+    }
+
+    // Double click works for all cell types
+    if (mode == 'Edit') {
+      cell.getByRole('textbox').dblclick();
+    } else {
+      cell.getByRole('textbox').press('Escape');
+    }
+
+    await this.page.getByText(`Mode: ${mode}`).waitFor();
+  }
+
   /**
    * Enter the editing mode on a given cell
    *
@@ -866,37 +957,14 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async enterCellEditingMode(cellIndex: number): Promise<boolean> {
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return false;
     }
 
-    const cellInput = await cell.$('.jp-Cell-inputArea');
-    if (cellInput) {
-      let isMarkdown = false;
-      const cellType = await this.getCellType(cellIndex);
-      if (cellType === 'markdown') {
-        const renderedMarkdown = await cell.$('.jp-MarkdownOutput');
-        if (renderedMarkdown) {
-          isMarkdown = true;
-        }
-      }
+    await this._setCellMode(cell, 'Edit');
 
-      if (isMarkdown) {
-        await cellInput.dblclick();
-      }
-
-      const cellEditor = await cellInput.$('.jp-InputArea-editor');
-      if (!cellEditor) {
-        return false;
-      }
-
-      await cellEditor.click();
-
-      return true;
-    }
-
-    return false;
+    return true;
   }
 
   /**
@@ -906,12 +974,14 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async leaveCellEditingMode(cellIndex: number): Promise<boolean> {
-    if (await this.isCellInEditingMode(cellIndex)) {
-      await this.page.keyboard.press('Escape');
-      return true;
+    const cell = await this.getCellLocator(cellIndex);
+    if (!cell) {
+      return false;
     }
 
-    return false;
+    await this._setCellMode(cell, 'Command');
+
+    return true;
   }
 
   /**
@@ -1114,7 +1184,10 @@ export class NotebookHelper {
       return false;
     }
 
-    await this.setCellType(cellIndex, cellType);
+    const r = await this.setCellType(cellIndex, cellType);
+    if (!r) {
+      return false;
+    }
 
     if (
       !(await this.isCellSelected(cellIndex)) &&
@@ -1123,14 +1196,15 @@ export class NotebookHelper {
       return false;
     }
 
-    await this.enterCellEditingMode(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
 
-    const keyboard = this.page.keyboard;
-    await keyboard.press('Control+A');
-    // give CodeMirror time to style properly
-    await keyboard.type(source, { delay: cellType === 'code' ? 100 : 0 });
+    if (!cell) {
+      return false;
+    }
 
-    await this.leaveCellEditingMode(cellIndex);
+    await this._setCellMode(cell, 'Edit');
+    await cell.getByRole('textbox').fill(source);
+    await this._setCellMode(cell, 'Command');
 
     // give CodeMirror time to style properly
     if (cellType === 'code') {
@@ -1188,7 +1262,7 @@ export class NotebookHelper {
       cell = await this.getCell(cellIndex);
     } while (cell === null && counter++ < MAX_RETRIES);
 
-    return true;
+    return counter < MAX_RETRIES;
   }
 
   /**
