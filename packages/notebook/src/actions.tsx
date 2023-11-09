@@ -110,6 +110,13 @@ export class NotebookActions {
   }
 
   /**
+   * A signal that emits when a cell's output is cleared.
+   */
+  static get outputCleared(): ISignal<any, { notebook: Notebook; cell: Cell }> {
+    return Private.outputCleared;
+  }
+
+  /**
    * A private constructor for the `NotebookActions` class.
    *
    * #### Notes
@@ -606,7 +613,7 @@ export namespace NotebookActions {
       notebook.activeCellIndex++;
     }
 
-    Private.handleState(notebook, state, true);
+    Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -663,7 +670,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    Private.handleState(notebook, state, true);
+    Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -1427,6 +1434,7 @@ export namespace NotebookActions {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
         }, false);
+        Private.outputCleared.emit({ notebook, cell: child });
       }
     }
     Private.handleState(notebook, state, true);
@@ -1455,6 +1463,7 @@ export namespace NotebookActions {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
         }, false);
+        Private.outputCleared.emit({ notebook, cell: child });
       }
     }
     Private.handleState(notebook, state, true);
@@ -2157,6 +2166,14 @@ namespace Private {
   >({});
 
   /**
+   * A signal that emits when one notebook's cells are all executed.
+   */
+  export const outputCleared = new Signal<
+    any,
+    { notebook: Notebook; cell: Cell }
+  >({});
+
+  /**
    * The interface for a widget state.
    */
   export interface IState {
@@ -2199,7 +2216,7 @@ namespace Private {
     }
 
     if (scrollIfNeeded && activeCell) {
-      notebook.scrollToItem(activeCellIndex, 'smart', 0.05).catch(reason => {
+      notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
         // no-op
       });
     }
@@ -2216,15 +2233,11 @@ namespace Private {
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
-    if (scroll && state.activeCellId) {
-      const index = notebook.widgets.findIndex(
-        w => w.model.id === state.activeCellId
-      );
-      if (notebook.widgets[index]?.inputArea) {
-        notebook.scrollToItem(index).catch(reason => {
-          // no-op
-        });
-      }
+    const { activeCell, activeCellIndex } = notebook;
+    if (scroll && activeCell) {
+      notebook.scrollToItem(activeCellIndex, 'smart', 0).catch(reason => {
+        // no-op
+      });
     }
   }
 

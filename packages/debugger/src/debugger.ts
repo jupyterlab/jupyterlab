@@ -125,6 +125,8 @@ export namespace Debugger {
     export const copyToClipboard = 'debugger:copy-to-clipboard';
 
     export const copyToGlobals = 'debugger:copy-to-globals';
+
+    export const openSource = 'debugger:open-source';
   }
 
   /**
