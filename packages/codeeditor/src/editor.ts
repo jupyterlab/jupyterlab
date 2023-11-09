@@ -257,15 +257,11 @@ export namespace CodeEditor {
      * Set the primary position of the cursor.
      *
      * @param position - The new primary position.
-     * @param options - Adjustment options allowing to disable scrolling.
      *
      * #### Notes
      * This will remove any secondary cursors.
      */
-    setCursorPosition(
-      position: IPosition,
-      options?: { scroll?: boolean }
-    ): void;
+    setCursorPosition(position: IPosition): void;
 
     /**
      * Returns the primary selection, never `null`.

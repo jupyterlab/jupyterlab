@@ -70,7 +70,6 @@ export class BreadCrumbs extends Widget {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
     this._model = options.model;
-    this._fullPath = options.fullPath || false;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
     this._crumbSeps = Private.createCrumbSeparators();
@@ -116,17 +115,6 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
-   * Whether to show the full path in the breadcrumbs
-   */
-  get fullPath(): boolean {
-    return this._fullPath;
-  }
-
-  set fullPath(value: boolean) {
-    this._fullPath = value;
-  }
-
-  /**
    * A message handler invoked on an `'after-attach'` message.
    */
   protected onAfterAttach(msg: Message): void {
@@ -164,8 +152,7 @@ export class BreadCrumbs extends Widget {
       this._crumbs,
       this._crumbSeps,
       localPath,
-      this._hasPreferred,
-      this._fullPath
+      this._hasPreferred
     );
   }
 
@@ -197,20 +184,12 @@ export class BreadCrumbs extends Widget {
         node.classList.contains(BREADCRUMB_ITEM_CLASS) ||
         node.classList.contains(BREADCRUMB_ROOT_CLASS)
       ) {
-        let index = ArrayExt.findFirstIndex(
+        const index = ArrayExt.findFirstIndex(
           this._crumbs,
           value => value === node
         );
-        let destination = BREAD_CRUMB_PATHS[index];
-        if (
-          this._fullPath &&
-          index < 0 &&
-          !node.classList.contains(BREADCRUMB_ROOT_CLASS)
-        ) {
-          destination = node.title;
-        }
         this._model
-          .cd(destination)
+          .cd(BREAD_CRUMB_PATHS[index])
           .catch(error =>
             showErrorMessage(this._trans.__('Open Error'), error)
           );
@@ -330,7 +309,6 @@ export class BreadCrumbs extends Widget {
   private _hasPreferred: boolean;
   private _crumbs: ReadonlyArray<HTMLElement>;
   private _crumbSeps: ReadonlyArray<HTMLElement>;
-  private _fullPath: boolean;
 }
 
 /**
@@ -350,11 +328,6 @@ export namespace BreadCrumbs {
      * The application language translator.
      */
     translator?: ITranslator;
-
-    /**
-     * Show the full file browser path in breadcrumbs
-     */
-    fullPath?: boolean;
   }
 }
 
@@ -380,8 +353,7 @@ namespace Private {
     breadcrumbs: ReadonlyArray<HTMLElement>,
     separators: ReadonlyArray<HTMLElement>,
     path: string,
-    hasPreferred: boolean,
-    fullPath: boolean
+    hasPreferred: boolean
   ): void {
     const node = breadcrumbs[0].parentNode as HTMLElement;
 
@@ -399,7 +371,7 @@ namespace Private {
     }
 
     const parts = path.split('/');
-    if (!fullPath && parts.length > 2) {
+    if (parts.length > 2) {
       node.appendChild(breadcrumbs[Crumb.Ellipsis]);
       const grandParent = parts.slice(0, parts.length - 2).join('/');
       breadcrumbs[Crumb.Ellipsis].title = grandParent;
@@ -407,31 +379,17 @@ namespace Private {
     }
 
     if (path) {
-      if (!fullPath) {
-        if (parts.length >= 2) {
-          breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
-          node.appendChild(breadcrumbs[Crumb.Parent]);
-          const parent = parts.slice(0, parts.length - 1).join('/');
-          breadcrumbs[Crumb.Parent].title = parent;
-          node.appendChild(separators[2]);
-        }
-        breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
-        node.appendChild(breadcrumbs[Crumb.Current]);
-        breadcrumbs[Crumb.Current].title = path;
-        node.appendChild(separators[3]);
-      } else {
-        for (let i = 0; i < parts.length; i++) {
-          const elem = document.createElement('span');
-          elem.className = BREADCRUMB_ITEM_CLASS;
-          elem.textContent = parts[i];
-          const elemPath = `/${parts.slice(0, i + 1).join('/')}`;
-          elem.title = elemPath;
-          node.appendChild(elem);
-          const separator = document.createElement('span');
-          separator.textContent = '/';
-          node.appendChild(separator);
-        }
+      if (parts.length >= 2) {
+        breadcrumbs[Crumb.Parent].textContent = parts[parts.length - 2];
+        node.appendChild(breadcrumbs[Crumb.Parent]);
+        const parent = parts.slice(0, parts.length - 1).join('/');
+        breadcrumbs[Crumb.Parent].title = parent;
+        node.appendChild(separators[2]);
       }
+      breadcrumbs[Crumb.Current].textContent = parts[parts.length - 1];
+      node.appendChild(breadcrumbs[Crumb.Current]);
+      breadcrumbs[Crumb.Current].title = path;
+      node.appendChild(separators[3]);
     }
   }
 

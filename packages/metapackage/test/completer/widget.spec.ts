@@ -2,15 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 import {
   Completer,
   CompleterModel,
   CompletionHandler
 } from '@jupyterlab/completer';
-import {
-  createEditorWidget,
-  getBoundingClientRectMock
-} from '@jupyterlab/completer/lib/testutils';
+import { YFile } from '@jupyter/ydoc';
 import { framePromise, simulate, sleep } from '@jupyterlab/testing';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Panel, Widget } from '@lumino/widgets';
@@ -24,6 +22,44 @@ const ITEM_CLASS = 'jp-Completer-item';
 const DOC_PANEL_CLASS = 'jp-Completer-docpanel';
 
 const ACTIVE_CLASS = 'jp-mod-active';
+
+function createEditorWidget(): CodeEditorWrapper {
+  const model = new CodeEditor.Model({ sharedModel: new YFile() });
+  const factory = (options: CodeEditor.IOptions) => {
+    const m = options.model.sharedModel as any;
+    options.extensions = [
+      ...(options.extensions ?? []),
+      ybinding({ ytext: m.ysource })
+    ];
+    return new CodeMirrorEditor(options);
+  };
+  return new CodeEditorWrapper({ factory, model });
+}
+
+/**
+ * jsdom mock for getBoundingClientRect returns zeros for all fields,
+ * see https://github.com/jsdom/jsdom/issues/653. We can do better,
+ * and need to do better to get meaningful tests for rendering.
+ */
+function betterGetBoundingClientRectMock() {
+  const style = window.getComputedStyle(this);
+  const top = parseFloat(style.top) || 0;
+  const left = parseFloat(style.left) || 0;
+  const dimensions = {
+    width: parseFloat(style.width) || parseFloat(style.minWidth) || 0,
+    height: parseFloat(style.height) || parseFloat(style.minHeight) || 0,
+    top,
+    left,
+    x: left,
+    y: top,
+    bottom: 0,
+    right: 0
+  };
+  return {
+    ...dimensions,
+    toJSON: () => dimensions
+  };
+}
 
 class CustomRenderer extends Completer.Renderer {
   createCompletionItemNode(
@@ -1047,7 +1083,7 @@ describe('completer/widget', () => {
 
       it('should pre-compute and cache dimensions when items are many', () => {
         window.HTMLElement.prototype.getBoundingClientRect =
-          getBoundingClientRectMock;
+          betterGetBoundingClientRectMock;
         let anchor = createEditorWidget();
         let model = new CompleterModel();
 
@@ -1076,7 +1112,7 @@ describe('completer/widget', () => {
 
       it('should compute height based on number of items', () => {
         window.HTMLElement.prototype.getBoundingClientRect =
-          getBoundingClientRectMock;
+          betterGetBoundingClientRectMock;
         let anchor = createEditorWidget();
         let model = new CompleterModel();
 
@@ -1105,7 +1141,7 @@ describe('completer/widget', () => {
 
       it('should account for documentation panel width if shown', async () => {
         window.HTMLElement.prototype.getBoundingClientRect =
-          getBoundingClientRectMock;
+          betterGetBoundingClientRectMock;
         let anchor = createEditorWidget();
         let model = new CompleterModel();
 
@@ -1143,7 +1179,7 @@ describe('completer/widget', () => {
 
       it('should show/hide the documentation panel depending on documentation presence', async () => {
         window.HTMLElement.prototype.getBoundingClientRect =
-          getBoundingClientRectMock;
+          betterGetBoundingClientRectMock;
         let anchor = createEditorWidget();
         let model = new CompleterModel();
         Widget.attach(anchor, document.body);
@@ -1195,7 +1231,7 @@ describe('completer/widget', () => {
 
       it('should render completions lazily in chunks', async () => {
         window.HTMLElement.prototype.getBoundingClientRect =
-          getBoundingClientRectMock;
+          betterGetBoundingClientRectMock;
         let anchor = createEditorWidget();
         let model = new CompleterModel();
 
@@ -1244,7 +1280,7 @@ describe('completer/widget', () => {
 
       beforeEach(() => {
         window.HTMLElement.prototype.getBoundingClientRect =
-          getBoundingClientRectMock;
+          betterGetBoundingClientRectMock;
         wrapper = createEditorWidget();
         model = new CompleterModel();
         const editor = wrapper.editor;

@@ -8,21 +8,15 @@ import { CONTEXT_PROVIDER_ID } from './default/contextprovider';
 import { KERNEL_PROVIDER_ID } from './default/kernelprovider';
 import { CompletionHandler } from './handler';
 import { CompleterModel } from './model';
-import { InlineCompleter } from './inline';
 import {
   ICompletionContext,
   ICompletionProvider,
-  ICompletionProviderManager,
-  IInlineCompleterActions,
-  IInlineCompleterFactory,
-  IInlineCompleterSettings,
-  IInlineCompletionProvider,
-  IInlineCompletionProviderInfo
+  ICompletionProviderManager
 } from './tokens';
 import { Completer } from './widget';
 
 /**
- * A manager for completion providers.
+ * A manager for completer provider.
  */
 export class CompletionProviderManager implements ICompletionProviderManager {
   /**
@@ -30,13 +24,11 @@ export class CompletionProviderManager implements ICompletionProviderManager {
    */
   constructor() {
     this._providers = new Map();
-    this._inlineProviders = new Map();
     this._panelHandlers = new Map();
     this._mostRecentContext = new Map();
     this._activeProvidersChanged = new Signal<ICompletionProviderManager, void>(
       this
     );
-    this._inlineCompleterFactory = null;
   }
 
   /**
@@ -82,24 +74,10 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     const identifier = provider.identifier;
     if (this._providers.has(identifier)) {
       console.warn(
-        `Completion provider with identifier ${identifier} is already registered`
+        `Completion service with identifier ${identifier} is already registered`
       );
     } else {
       this._providers.set(identifier, provider);
-      this._panelHandlers.forEach((handler, id) => {
-        void this.updateCompleter(this._mostRecentContext.get(id)!);
-      });
-    }
-  }
-
-  registerInlineProvider(provider: IInlineCompletionProvider): void {
-    const identifier = provider.identifier;
-    if (this._inlineProviders.has(identifier)) {
-      console.warn(
-        `Completion provider with identifier ${identifier} is already registered`
-      );
-    } else {
-      this._inlineProviders.set(identifier, provider);
       this._panelHandlers.forEach((handler, id) => {
         void this.updateCompleter(this._mostRecentContext.get(id)!);
       });
@@ -163,7 +141,6 @@ export class CompletionProviderManager implements ICompletionProviderManager {
 
     const options = {
       model,
-      editor,
       renderer,
       sanitizer,
       showDoc: this._showDoc
@@ -221,69 +198,6 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * Set inline completer factory.
-   */
-  setInlineCompleterFactory(factory: IInlineCompleterFactory) {
-    this._inlineCompleterFactory = factory;
-    this._panelHandlers.forEach((handler, id) => {
-      void this.updateCompleter(this._mostRecentContext.get(id)!);
-    });
-    if (this.inline) {
-      return;
-    }
-    this.inline = {
-      invoke: (id: string) => {
-        const handler = this._panelHandlers.get(id);
-        if (handler && handler.inlineCompleter) {
-          handler.invokeInline();
-        }
-      },
-      cycle: (id: string, direction: 'next' | 'previous') => {
-        const handler = this._panelHandlers.get(id);
-        if (handler && handler.inlineCompleter) {
-          handler.inlineCompleter.cycle(direction);
-        }
-      },
-      accept: (id: string) => {
-        const handler = this._panelHandlers.get(id);
-        if (handler && handler.inlineCompleter) {
-          handler.inlineCompleter.accept();
-        }
-      },
-      configure: (settings: IInlineCompleterSettings) => {
-        this._inlineCompleterSettings = settings;
-        this._panelHandlers.forEach((handler, handlerId) => {
-          for (const [
-            providerId,
-            provider
-          ] of this._inlineProviders.entries()) {
-            if (provider.configure) {
-              provider.configure(settings.providers[providerId]);
-            }
-          }
-          if (handler.inlineCompleter) {
-            handler.inlineCompleter.configure(settings);
-          }
-          // trigger update to regenerate reconciliator
-          void this.updateCompleter(this._mostRecentContext.get(handlerId)!);
-        });
-      }
-    };
-  }
-
-  /**
-   * Inline completer actions.
-   */
-  inline?: IInlineCompleterActions;
-
-  /**
-   * Inline providers information.
-   */
-  get inlineProviders(): IInlineCompletionProviderInfo[] {
-    return [...this._inlineProviders.values()];
-  }
-
-  /**
    * Helper function to generate a `ProviderReconciliator` with provided context.
    * The `isApplicable` method of provider is used to filter out the providers
    * which can not be used with provided context.
@@ -293,19 +207,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private async generateReconciliator(
     completerContext: ICompletionContext
   ): Promise<ProviderReconciliator> {
-    const enabledProviders: string[] = [];
-    for (const [id, providerSettings] of Object.entries(
-      this._inlineCompleterSettings.providers
-    )) {
-      if ((providerSettings as any).enabled === true) {
-        enabledProviders.push(id);
-      }
-    }
-    const inlineProviders = [...this._inlineProviders.values()].filter(
-      provider => enabledProviders.includes(provider.identifier)
-    );
-
     const providers: Array<ICompletionProvider> = [];
+    //TODO Update list with rank
     for (const id of this._activeProviders) {
       const provider = this._providers.get(id);
       if (provider) {
@@ -315,8 +218,6 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     return new ProviderReconciliator({
       context: completerContext,
       providers,
-      inlineProviders,
-      inlineProvidersSettings: this._inlineCompleterSettings.providers,
       timeout: this._timeout
     });
   }
@@ -330,8 +231,6 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private disposeHandler(id: string, handler: CompletionHandler) {
     handler.completer.model?.dispose();
     handler.completer.dispose();
-    handler.inlineCompleter?.model?.dispose();
-    handler.inlineCompleter?.dispose();
     handler.dispose();
     this._panelHandlers.delete(id);
   }
@@ -344,23 +243,11 @@ export class CompletionProviderManager implements ICompletionProviderManager {
     options: Completer.IOptions
   ): Promise<CompletionHandler> {
     const completer = new Completer(options);
-    const inlineCompleter = this._inlineCompleterFactory
-      ? this._inlineCompleterFactory.factory({
-          ...options,
-          model: new InlineCompleter.Model()
-        })
-      : undefined;
     completer.hide();
     Widget.attach(completer, document.body);
-    if (inlineCompleter) {
-      Widget.attach(inlineCompleter, document.body);
-      inlineCompleter.hide();
-      inlineCompleter.configure(this._inlineCompleterSettings);
-    }
     const reconciliator = await this.generateReconciliator(completerContext);
     const handler = new CompletionHandler({
       completer,
-      inlineCompleter,
       reconciliator: reconciliator
     });
     handler.editor = completerContext.editor;
@@ -369,14 +256,9 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   }
 
   /**
-   * The completion provider map, the keys are id of provider
+   * The completer provider map, the keys are id of provider
    */
   private readonly _providers: Map<string, ICompletionProvider>;
-
-  /**
-   * The inline completion provider map, the keys are id of provider
-   */
-  private readonly _inlineProviders: Map<string, IInlineCompletionProvider>;
 
   /**
    * The completer handler map, the keys are id of widget and
@@ -396,7 +278,7 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private _activeProviders = new Set([KERNEL_PROVIDER_ID, CONTEXT_PROVIDER_ID]);
 
   /**
-   * Timeout value for the completion provider.
+   * Timeout value for the completer provider.
    */
   private _timeout: number;
 
@@ -411,6 +293,4 @@ export class CompletionProviderManager implements ICompletionProviderManager {
   private _autoCompletion: boolean;
 
   private _activeProvidersChanged: Signal<ICompletionProviderManager, void>;
-  private _inlineCompleterFactory: IInlineCompleterFactory | null;
-  private _inlineCompleterSettings = InlineCompleter.defaultSettings;
 }

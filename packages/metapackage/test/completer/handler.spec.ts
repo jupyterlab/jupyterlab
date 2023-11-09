@@ -2,7 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 import {
   Completer,
   CompleterModel,
@@ -12,10 +13,22 @@ import {
   ICompletionProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
-import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import { ISharedText, SourceChange, YFile } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
+
+function createEditorWidget(): CodeEditorWrapper {
+  const model = new CodeEditor.Model({ sharedModel: new YFile() });
+  const factory = (options: CodeEditor.IOptions) => {
+    const m = options.model.sharedModel as any;
+    options.extensions = [
+      ...(options.extensions ?? []),
+      ybinding({ ytext: m.ysource })
+    ];
+    return new CodeMirrorEditor(options);
+  };
+  return new CodeEditorWrapper({ factory, model });
+}
 
 class TestCompleterModel extends CompleterModel {
   methods: string[] = [];

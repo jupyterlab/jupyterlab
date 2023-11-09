@@ -2520,7 +2520,7 @@ def _semver_key(version, prerelease_first=False):
 
 def _fetch_package_metadata(registry, name, logger):
     """Fetch the metadata for a package from the npm registry"""
-    req = Request(  # noqa S310
+    req = Request(
         urljoin(registry, quote(name, safe="@")),
         headers={
             "Accept": ("application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*")

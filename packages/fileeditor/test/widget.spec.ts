@@ -12,11 +12,7 @@ import {
   DocumentWidget,
   TextModelFactory
 } from '@jupyterlab/docregistry';
-import {
-  FileEditor,
-  FileEditorFactory,
-  FileEditorWidget
-} from '@jupyterlab/fileeditor';
+import { FileEditor, FileEditorFactory } from '@jupyterlab/fileeditor';
 import { ServiceManager } from '@jupyterlab/services';
 import { framePromise } from '@jupyterlab/testing';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
@@ -178,55 +174,6 @@ describe('fileeditorcodewrapper', () => {
       it('should resolve after initialization', async () => {
         await context.initialize(true);
         return expect(widget.ready).resolves.toBe(undefined);
-      });
-    });
-  });
-
-  describe('FileEditorWidget', () => {
-    let documentWidget: FileEditorWidget;
-
-    beforeEach(() => {
-      const path = UUID.uuid4() + '.py';
-      context = new Context({ manager, factory: modelFactory, path });
-      context.model.sharedModel.setSource('a\nb\nc');
-      const content = new FileEditor({
-        factory: options => factoryService.newDocumentEditor(options),
-        mimeTypeService,
-        context
-      });
-      documentWidget = new FileEditorWidget({ content, context });
-    });
-
-    afterEach(() => {
-      documentWidget.dispose();
-    });
-
-    describe('#setFragment', () => {
-      it('should set fragment for a single line', async () => {
-        await context.initialize(true);
-        await context.ready;
-        const widget = documentWidget.content;
-
-        await documentWidget.setFragment('#line=2');
-        let cursor = widget.editor.getCursorPosition();
-        expect(cursor.line).toBe(2);
-
-        await documentWidget.setFragment('#line=0');
-        cursor = widget.editor.getCursorPosition();
-        expect(cursor.line).toBe(0);
-      });
-      it('should set fragment for a range', async () => {
-        await context.initialize(true);
-        await context.ready;
-        const widget = documentWidget.content;
-
-        await documentWidget.setFragment('#line=,3');
-        let cursor = widget.editor.getCursorPosition();
-        expect(cursor.line).toBe(0);
-
-        await documentWidget.setFragment('#line=2,3');
-        cursor = widget.editor.getCursorPosition();
-        expect(cursor.line).toBe(2);
       });
     });
   });

@@ -3,13 +3,14 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Cell, CodeCell } from '@jupyterlab/cells';
+import { Cell, CodeCell, CodeCellLayout } from '@jupyterlab/cells';
 import {
   WindowedLayout,
   WindowedList,
   WindowedListModel
 } from '@jupyterlab/ui-components';
 import { Message, MessageLoop } from '@lumino/messaging';
+import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 
@@ -68,20 +69,6 @@ export class NotebookViewModel extends WindowedListModel {
   widgetRenderer = (index: number): Widget => {
     return this.cells[index];
   };
-
-  /**
-   * Threshold used to decide if the cell should be scrolled to in the `smart` mode.
-   * Defaults to scrolling when less than a full line of the cell is visible.
-   */
-  readonly scrollDownThreshold =
-    NotebookViewModel.DEFAULT_CELL_MARGIN / 2 +
-    NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT;
-
-  /**
-   * Threshold used to decide if the cell should be scrolled to in the `smart` mode.
-   * Defaults to scrolling when the cell margin or more is invisible.
-   */
-  readonly scrollUpThreshold = NotebookViewModel.DEFAULT_CELL_MARGIN / 2;
 }
 
 /**
@@ -124,15 +111,11 @@ export class NotebookWindowedLayout extends WindowedLayout {
   }
 
   /**
-   * Notebook's active cell
+   * Signal emitted when a widget is detached from the DOM.
    */
-  get activeCell(): Widget | null {
-    return this._activeCell;
+  get beforeWidgetDetached(): ISignal<this, Widget> {
+    return this._beforeWidgetDetached;
   }
-  set activeCell(widget: Widget | null) {
-    this._activeCell = widget;
-  }
-  private _activeCell: Widget | null;
 
   /**
    * Dispose the layout
@@ -192,27 +175,27 @@ export class NotebookWindowedLayout extends WindowedLayout {
   protected attachWidget(index: number, widget: Widget): void {
     // Status may change in onBeforeAttach
     const wasPlaceholder = (widget as Cell).isPlaceholder();
-    // Initialized sub-widgets or attached them for CodeCell
-    // Because this reattaches all sub-widget to the DOM which leads
-    // to a loss of focus, we do not call it for soft-hidden cells.
-    const isSoftHidden = this._isSoftHidden(widget);
-    if (this.parent!.isAttached && !isSoftHidden) {
-      MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
-    }
-    if (isSoftHidden) {
-      // Restore visibility for active, or previously active cell
-      this._toggleSoftVisibility(widget, true);
-    }
+
     if (
       !wasPlaceholder &&
       widget instanceof CodeCell &&
       widget.node.parentElement
     ) {
+      // We don't remove code cells to preserve outputs internal state.
+      (widget.layout as CodeCellLayout).windowingAttach();
+
+      // Show the widget.
       widget.node.style.display = '';
+      widget.show();
 
       // Reset cache
       this._topHiddenCodeCells = -1;
-    } else if (!isSoftHidden) {
+    } else {
+      // Initialized sub-widgets
+      if (this.parent!.isAttached) {
+        MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
+      }
+
       // Look up the next sibling reference node.
       const siblingIndex = this._findNearestChildBinarySearch(
         this.parent!.viewportNode.childElementCount - 1,
@@ -258,30 +241,26 @@ export class NotebookWindowedLayout extends WindowedLayout {
   protected detachWidget(index: number, widget: Widget): void {
     (widget as Cell).inViewport = false;
 
-    // Note: `index` is relative to the displayed cells, not all cells,
-    // hence we compare with the widget itself.
-    if (widget === this.activeCell) {
-      // Do not change display of the active cell to allow user to continue providing input
-      // into the code mirror editor when out of view. We still hide the cell so to prevent
-      // minor visual glitches when scrolling.
-      this._toggleSoftVisibility(widget, false);
-      // Return before sending "AfterDetach" message to CodeCell
-      // to prevent removing contents of the active cell.
-      return;
-    }
+    // Signaling the future detached widget.
+    this._beforeWidgetDetached.emit(widget);
+
     // TODO we could improve this further by discarding also the code cell without outputs
     if (
-      // We detach the code cell currently dragged otherwise it won't be attached at the correct position
       widget instanceof CodeCell &&
+      // We detach the code cell currently dragged otherwise it won't be attached at the correct position
       !widget.node.classList.contains(DROP_SOURCE_CLASS) &&
       widget !== this._willBeRemoved
     ) {
-      // We don't remove code cells to preserve outputs internal state
-      // Transform does not work because the widget height is kept (at least in FF)
+      // Hide the widget. We use the transform for consistency but force display
+      // to 'none' because the widget height is kept (at lease in FF).
+      widget.hide();
       widget.node.style.display = 'none';
 
       // Reset cache
       this._topHiddenCodeCells = -1;
+
+      // We don't remove code cells to preserve outputs internal state.
+      (widget.layout as CodeCellLayout).windowingDetach();
     } else {
       // Send a `'before-detach'` message if the parent is attached.
       // This should not be called every time a cell leaves the viewport
@@ -298,7 +277,6 @@ export class NotebookWindowedLayout extends WindowedLayout {
       widget.node.classList.remove(DROP_TARGET_CLASS);
 
       if (this.parent!.isAttached) {
-        // Detach sub widget of CodeCell except the OutputAreaWrapper
         MessageLoop.sendMessage(widget, Widget.Msg.AfterDetach);
       }
     }
@@ -391,35 +369,6 @@ export class NotebookWindowedLayout extends WindowedLayout {
     this._willBeRemoved = null;
   }
 
-  /**
-   * Toggle "soft" visibility of the widget.
-   *
-   * #### Notes
-   * To ensure that user events reach the CodeMirror editor, this method
-   * does not toggle `display` nor `visibility` which have side effects,
-   * but instead hides it in the compositor and ensures that the bounding
-   * box is has an area equal to zero.
-   * To ensure we do not trigger style recalculation, we set the styles
-   * directly on the node instead of using a class.
-   */
-  private _toggleSoftVisibility(widget: Widget, show: boolean): void {
-    if (show) {
-      widget.node.style.opacity = '';
-      widget.node.style.height = '';
-      widget.node.style.padding = '';
-    } else {
-      widget.node.style.opacity = '0';
-      // Both padding and height need to be set to zero
-      // to ensure bounding box collapses to invisible.
-      widget.node.style.height = '0';
-      widget.node.style.padding = '0';
-    }
-  }
-
-  private _isSoftHidden(widget: Widget): boolean {
-    return widget.node.style.opacity === '0';
-  }
-
   private _findNearestChildBinarySearch(
     high: number,
     low: number,
@@ -451,4 +400,5 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
   private _willBeRemoved: Widget | null = null;
   private _topHiddenCodeCells: number = -1;
+  private _beforeWidgetDetached = new Signal<this, Widget>(this);
 }
