@@ -935,7 +935,11 @@ export function CommandToolbarButtonComponent(
         args.type === 'many-changed'
       }
     >
-      {() => <ToolbarButtonComponent {...Private.propsFromCommand(props)} />}
+      {() =>
+        props.commands.listCommands().includes(props.id) ? (
+          <ToolbarButtonComponent {...Private.propsFromCommand(props)} />
+        ) : null
+      }
     </UseSignal>
   );
 }
