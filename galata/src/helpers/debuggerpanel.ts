@@ -8,8 +8,6 @@ import { SidebarHelper } from './sidebar';
 import { NotebookHelper } from './notebook';
 import { waitForCondition } from '../utils';
 
-const DEBUGGER_ITEM = 'debugger-icon';
-
 /**
  * Debugger Helper
  */
@@ -22,46 +20,51 @@ export class DebuggerHelper {
 
   /**
    * Returns true if debugger toolbar item is enabled, false otherwise
+   *
+   * @param name Notebook name
    */
-  async isOn(): Promise<boolean> {
-    if (!(await this.notebook.isAnyActive())) {
-      return false;
-    }
-    const item = await this.notebook.getToolbarItem(DEBUGGER_ITEM);
-    if (item) {
-      const button = await item.$('button');
-      if (button) {
-        return (await button.getAttribute('aria-pressed')) === 'true';
-      }
+  async isOn(name?: string): Promise<boolean> {
+    const toolbar = await this.notebook.getToolbarLocator(name);
+    if (toolbar) {
+      return (
+        (await toolbar
+          .locator('.jp-DebuggerBugButton')
+          .getAttribute('aria-pressed')) === 'true'
+      );
     }
     return false;
   }
 
   /**
    * Enables the debugger toolbar item
+   *
+   * @param name Notebook name
    */
-  async switchOn(): Promise<void> {
-    await waitForCondition(async () => {
-      const item = await this.notebook.getToolbarItem(DEBUGGER_ITEM);
-      if (item) {
-        const button = await item.$('button');
-        if (button) {
-          return (await button.getAttribute('aria-disabled')) !== 'true';
-        }
+  async switchOn(name?: string): Promise<void> {
+    const toolbar = await this.notebook.getToolbarLocator(name);
+    if (toolbar) {
+      await waitForCondition(
+        async () =>
+          (await toolbar.locator('.jp-DebuggerBugButton').isDisabled()) ===
+          false,
+        2000
+      );
+
+      if (!(await this.isOn(name))) {
+        await toolbar.locator('.jp-DebuggerBugButton').click();
       }
-      return false;
-    }, 2000);
-    if (!(await this.isOn())) {
-      await this.notebook.clickToolbarItem(DEBUGGER_ITEM);
     }
   }
 
   /**
    * Disables the debugger toolbar item
+   *
+   * @param name Notebook name
    */
-  async switchOff(): Promise<void> {
-    if (await this.isOn()) {
-      await this.notebook.clickToolbarItem(DEBUGGER_ITEM);
+  async switchOff(name?: string): Promise<void> {
+    const toolbar = await this.notebook.getToolbarLocator(name);
+    if (toolbar && (await this.isOn(name))) {
+      await toolbar.locator('.jp-DebuggerBugButton').click();
     }
   }
 

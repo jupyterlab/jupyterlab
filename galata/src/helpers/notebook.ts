@@ -3,7 +3,7 @@
 
 import type * as nbformat from '@jupyterlab/nbformat';
 import type { NotebookPanel } from '@jupyterlab/notebook';
-import { ElementHandle, Page } from '@playwright/test';
+import { ElementHandle, Locator, Page } from '@playwright/test';
 import * as path from 'path';
 import { ContentsHelper } from '../contents';
 import type { INotebookRunCallback } from '../extension';
@@ -37,8 +37,8 @@ export class NotebookHelper {
    * @returns Notebook opened status
    */
   async isOpen(name: string): Promise<boolean> {
-    const tab = await this.activity.getTab(name);
-    return tab !== null;
+    const tab = this.activity.getTabLocator(name);
+    return (await tab.count()) > 0;
   }
 
   /**
@@ -102,10 +102,10 @@ export class NotebookHelper {
   async getNotebookInPanel(
     name?: string
   ): Promise<ElementHandle<Element> | null> {
-    const nbPanel = await this.activity.getPanel(name);
+    const nbPanel = await this.activity.getPanelLocator(name);
 
-    if (nbPanel) {
-      return await nbPanel.$('.jp-NotebookPanel-notebook');
+    if (nbPanel && (await nbPanel.count())) {
+      return nbPanel.locator('.jp-NotebookPanel-notebook').elementHandle();
     }
 
     return null;
@@ -118,13 +118,28 @@ export class NotebookHelper {
    * @returns Handle to the Notebook toolbar
    */
   async getToolbar(name?: string): Promise<ElementHandle<Element> | null> {
-    const nbPanel = await this.activity.getPanel(name);
+    const nbPanel = await this.activity.getPanelLocator(name);
 
-    if (nbPanel) {
-      return await nbPanel.$('.jp-Toolbar');
+    if (nbPanel && (await nbPanel.count())) {
+      // Take the first as there are also cell toolbar
+      return nbPanel.locator('.jp-Toolbar').first().elementHandle();
     }
 
     return null;
+  }
+
+  /**
+   * Get the notebook toolbar locator
+   *
+   * @param name Notebook name
+   * @returns Locator to the Notebook toolbar
+   */
+  async getToolbarLocator(name?: string): Promise<Locator | null> {
+    return (
+      (await this.activity.getPanelLocator(name))
+        ?.locator('.jp-Toolbar')
+        .first() ?? null
+    );
   }
 
   /**
@@ -918,14 +933,7 @@ export class NotebookHelper {
     }
 
     const cell = await this.getCell(cellIndex);
-    const gutters = await cell!.$$(
-      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
-    );
-    if (gutters.length < lineNumber) {
-      return false;
-    }
-    await gutters[lineNumber].click();
-    return true;
+    return this._clickOnGutter(cell!, lineNumber);
   }
 
   /**
@@ -938,7 +946,7 @@ export class NotebookHelper {
     if (!cell) {
       return false;
     }
-    return (await cell.$('.cm-gutters')) !== null;
+    return (await (await cell.$('.cm-gutters'))?.isVisible()) === true;
   }
 
   /**
@@ -946,13 +954,8 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  async waitForCellGutter(cellIndex: number): Promise<void> {
-    const cell = await this.getCell(cellIndex);
-    if (cell) {
-      await this.page.waitForSelector('.cm-gutters', {
-        state: 'attached'
-      });
-    }
+  waitForCellGutter(cellIndex: number): Promise<void> {
+    return Utils.waitForCondition(() => this.isCellGutterPresent(cellIndex));
   }
 
   /**
@@ -974,14 +977,8 @@ export class NotebookHelper {
       '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement',
       { state: 'attached' }
     );
-    const gutters = await panel!.$$(
-      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
-    );
-    if (gutters.length < lineNumber) {
-      return false;
-    }
-    await gutters[lineNumber].click();
-    return true;
+
+    return this._clickOnGutter(panel!, lineNumber);
   }
 
   /**
@@ -993,7 +990,7 @@ export class NotebookHelper {
     if (!panel) {
       return false;
     }
-    return (await panel.$('.cm-gutters')) !== null;
+    return (await (await panel.$('.cm-gutters'))?.isVisible()) !== null;
   }
 
   /**
@@ -1001,13 +998,22 @@ export class NotebookHelper {
    *
    * @param cellIndex
    */
-  async waitForCodeGutter(): Promise<void> {
-    const panel = await this.activity.getPanel();
-    if (panel) {
-      await this.page.waitForSelector('.cm-gutters', {
-        state: 'attached'
-      });
+  waitForCodeGutter(): Promise<void> {
+    return Utils.waitForCondition(() => this.isCodeGutterPresent());
+  }
+
+  protected async _clickOnGutter(
+    panel: ElementHandle,
+    line: number
+  ): Promise<boolean> {
+    const gutters = await panel.$$(
+      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
+    );
+    if (gutters.length < line) {
+      return false;
     }
+    await gutters[line].click();
+    return true;
   }
 
   /**

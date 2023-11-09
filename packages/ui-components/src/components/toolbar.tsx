@@ -239,6 +239,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     layout.insertWidget(j, widget);
 
     Private.nameProperty.set(widget, name);
+    widget.node.dataset['name'] = name;
     return true;
   }
 
