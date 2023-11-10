@@ -546,6 +546,10 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     super(tracker);
   }
 
+  /**
+   * Whether to scroll the active heading to the top
+   * of the document or not.
+   */
   get scrollToTop(): boolean {
     return this._scrollToTop;
   }
