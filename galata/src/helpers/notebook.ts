@@ -843,7 +843,7 @@ export class NotebookHelper {
         return false;
       }
 
-      await cellEditor.click({ position: { x: 10, y: 10 } });
+      await cellEditor.click();
 
       return true;
     }
