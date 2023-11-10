@@ -2717,11 +2717,17 @@ export class Notebook extends StaticNotebook {
 
       // Focuses on a cell (if possible), or on the footer element.
       if (this._activeCell) {
-        this._activeCell.ready.then(() => {
-          this._activeCell?.node.focus({
-            preventScroll: true
+        this._activeCell.ready
+          .then(() => {
+            this._activeCell?.node.focus({
+              preventScroll: true
+            });
+          })
+          .catch(() => {
+            (this.layout as NotebookWindowedLayout).footer?.node.focus({
+              preventScroll: true
+            });
           });
-        });
       } else {
         // If the active cell is not visible (because of full windowing), set the focus
         // on the footer (always visible) to set focus on Notebook widget.

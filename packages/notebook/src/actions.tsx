@@ -586,7 +586,7 @@ export namespace NotebookActions {
       sessionDialogs,
       translator
     );
-    Private.handleRunState(notebook, state, false);
+    void Private.handleRunState(notebook, state, false);
     return promise;
   }
 
