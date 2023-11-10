@@ -3,14 +3,13 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { Cell, CodeCell, CodeCellLayout } from '@jupyterlab/cells';
+import { Cell, CodeCell } from '@jupyterlab/cells';
 import {
   WindowedLayout,
   WindowedList,
   WindowedListModel
 } from '@jupyterlab/ui-components';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { DROP_SOURCE_CLASS, DROP_TARGET_CLASS } from './constants';
 
@@ -111,13 +110,6 @@ export class NotebookWindowedLayout extends WindowedLayout {
   }
 
   /**
-   * Signal emitted when a widget is detached from the DOM.
-   */
-  get beforeWidgetDetached(): ISignal<this, Widget> {
-    return this._beforeWidgetDetached;
-  }
-
-  /**
    * Dispose the layout
    * */
   dispose(): void {
@@ -175,27 +167,22 @@ export class NotebookWindowedLayout extends WindowedLayout {
   protected attachWidget(index: number, widget: Widget): void {
     // Status may change in onBeforeAttach
     const wasPlaceholder = (widget as Cell).isPlaceholder();
+    // Initialized sub-widgets or attached them for CodeCell
+    if (this.parent!.isAttached) {
+      MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
+    }
 
     if (
       !wasPlaceholder &&
       widget instanceof CodeCell &&
       widget.node.parentElement
     ) {
-      // We don't remove code cells to preserve outputs internal state.
-      (widget.layout as CodeCellLayout).windowingAttach();
-
-      // Show the widget.
+      // We don't remove code cells to preserve outputs internal state
       widget.node.style.display = '';
-      widget.show();
 
       // Reset cache
       this._topHiddenCodeCells = -1;
     } else {
-      // Initialized sub-widgets
-      if (this.parent!.isAttached) {
-        MessageLoop.sendMessage(widget, Widget.Msg.BeforeAttach);
-      }
-
       // Look up the next sibling reference node.
       const siblingIndex = this._findNearestChildBinarySearch(
         this.parent!.viewportNode.childElementCount - 1,
@@ -241,9 +228,6 @@ export class NotebookWindowedLayout extends WindowedLayout {
   protected detachWidget(index: number, widget: Widget): void {
     (widget as Cell).inViewport = false;
 
-    // Signaling the future detached widget.
-    this._beforeWidgetDetached.emit(widget);
-
     // TODO we could improve this further by discarding also the code cell without outputs
     if (
       widget instanceof CodeCell &&
@@ -251,16 +235,12 @@ export class NotebookWindowedLayout extends WindowedLayout {
       !widget.node.classList.contains(DROP_SOURCE_CLASS) &&
       widget !== this._willBeRemoved
     ) {
-      // Hide the widget. We use the transform for consistency but force display
-      // to 'none' because the widget height is kept (at lease in FF).
-      widget.hide();
+      // We don't remove code cells to preserve outputs internal state
+      // Transform does not work because the widget height is kept (at lease in FF)
       widget.node.style.display = 'none';
 
       // Reset cache
       this._topHiddenCodeCells = -1;
-
-      // We don't remove code cells to preserve outputs internal state.
-      (widget.layout as CodeCellLayout).windowingDetach();
     } else {
       // Send a `'before-detach'` message if the parent is attached.
       // This should not be called every time a cell leaves the viewport
@@ -275,10 +255,11 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
       // Ensure to clean up drop target class if the widget move out of the viewport
       widget.node.classList.remove(DROP_TARGET_CLASS);
+    }
 
-      if (this.parent!.isAttached) {
-        MessageLoop.sendMessage(widget, Widget.Msg.AfterDetach);
-      }
+    if (this.parent!.isAttached) {
+      // Detach sub widget of CodeCell except the OutputAreaWrapper
+      MessageLoop.sendMessage(widget, Widget.Msg.AfterDetach);
     }
   }
 
@@ -400,5 +381,4 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
   private _willBeRemoved: Widget | null = null;
   private _topHiddenCodeCells: number = -1;
-  private _beforeWidgetDetached = new Signal<this, Widget>(this);
 }
