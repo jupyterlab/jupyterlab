@@ -332,12 +332,13 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   test('Open help menu with keyboard', async ({ page }) => {
     await page.goto();
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
-    let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+
     const helpMenu = page.getByRole('menuitem', { name: 'Help' });
-    let helpClass = ((await helpMenu.getAttribute('class')) ?? '').split(' ');
+
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
       if (fileClass.includes('lm-mod-active')) {
         break;
       }
@@ -345,6 +346,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('ArrowRight');
+      let helpClass = ((await helpMenu.getAttribute('class')) ?? '').split(' ');
       if (helpClass.includes('lm-mod-active')) {
         break;
       }
