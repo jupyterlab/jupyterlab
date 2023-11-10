@@ -614,6 +614,12 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
         const cell = heading.cellRef;
         const cells = widget.content.widgets;
         const idx = cells.indexOf(cell);
+        // Switch to command mode to avoid entering Markdown cell in edit mode
+        // if the document was in edit mode
+        if (cell.model.type == 'markdown' && widget.content.mode != 'command') {
+          widget.content.mode = 'command';
+        }
+
         widget.content.activeCellIndex = idx;
 
         if (cell.inViewport) {
