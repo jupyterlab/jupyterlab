@@ -1001,6 +1001,36 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#runCells()', () => {
+      beforeEach(() => {
+        // Make sure all cells have valid code.
+        widget.widgets[2].model.sharedModel.setSource('a = 1');
+      });
+
+      it('should change to command mode', async () => {
+        widget.mode = 'edit';
+        const result = await NotebookActions.runCells(
+          widget,
+          [widget.widgets[2]],
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(widget.mode).toBe('command');
+      });
+
+      it('should preserve the existing selection', async () => {
+        const next = widget.widgets[2];
+        widget.select(next);
+        const result = await NotebookActions.runCells(
+          widget,
+          [widget.widgets[1]],
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(widget.isSelected(widget.widgets[2])).toBe(true);
+      });
+    });
+
     describe('#runAll()', () => {
       beforeEach(() => {
         // Make sure all cells have valid code.
@@ -1068,6 +1098,27 @@ describe('@jupyterlab/notebook', () => {
         await sleep(400);
         expect(result).toBe(false);
         expect(cell.rendered).toBe(true);
+      });
+    });
+
+    describe('#runAllBelow()', () => {
+      it('should run all selected cell and all below', async () => {
+        const next = widget.widgets[1] as MarkdownCell;
+        const cell = widget.activeCell as CodeCell;
+        cell.model.outputs.clear();
+        next.rendered = false;
+        const result = await NotebookActions.runAllBelow(
+          widget,
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(cell.model.outputs.length).toBeGreaterThan(0);
+        expect(next.rendered).toBe(true);
+      });
+
+      it('should activate the last cell', async () => {
+        await NotebookActions.runAllBelow(widget, sessionContext);
+        expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
       });
     });
 

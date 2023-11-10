@@ -553,6 +553,44 @@ export namespace NotebookActions {
   }
 
   /**
+   * Run specified cells.
+   *
+   * @param notebook - The target notebook widget.
+   * @param cells - The cells to run.
+   * @param sessionContext - The client session object.
+   * @param sessionDialogs - The session dialogs.
+   * @param translator - The application translator.
+   *
+   * #### Notes
+   * The existing selection will be preserved.
+   * The mode will be changed to command.
+   * An execution error will prevent the remaining code cells from executing.
+   * All markdown cells will be rendered.
+   */
+  export function runCells(
+    notebook: Notebook,
+    cells: readonly Cell[],
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
+  ): Promise<boolean> {
+    if (!notebook.model) {
+      return Promise.resolve(false);
+    }
+
+    const state = Private.getState(notebook);
+    const promise = Private.runCells(
+      notebook,
+      cells,
+      sessionContext,
+      sessionDialogs,
+      translator
+    );
+    Private.handleRunState(notebook, state, false);
+    return promise;
+  }
+
+  /**
    * Run the selected cell(s) and advance to the next cell.
    *
    * @param notebook - The target notebook widget.
@@ -699,17 +737,18 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const lastIndex = notebook.widgets.length;
 
-    notebook.widgets.forEach(child => {
-      notebook.select(child);
-    });
-
-    const promise = Private.runSelected(
+    const promise = Private.runCells(
       notebook,
+      notebook.widgets,
       sessionContext,
       sessionDialogs,
       translator
     );
+
+    notebook.activeCellIndex = lastIndex;
+    notebook.deselectAll();
 
     void Private.handleRunState(notebook, state, true);
     return promise;
@@ -766,20 +805,16 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
 
-    notebook.activeCellIndex--;
-    notebook.deselectAll();
-    for (let i = 0; i < notebook.activeCellIndex; ++i) {
-      notebook.select(notebook.widgets[i]);
-    }
-
-    const promise = Private.runSelected(
+    const promise = Private.runCells(
       notebook,
+      notebook.widgets.slice(0, notebook.activeCellIndex),
       sessionContext,
       sessionDialogs,
       translator
     );
 
-    notebook.activeCellIndex++;
+    notebook.deselectAll();
+
     void Private.handleRunState(notebook, state, true);
     return promise;
   }
@@ -809,18 +844,18 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
+    const lastIndex = notebook.widgets.length;
 
-    notebook.deselectAll();
-    for (let i = notebook.activeCellIndex; i < notebook.widgets.length; ++i) {
-      notebook.select(notebook.widgets[i]);
-    }
-
-    const promise = Private.runSelected(
+    const promise = Private.runCells(
       notebook,
+      notebook.widgets.slice(notebook.activeCellIndex),
       sessionContext,
       sessionDialogs,
       translator
     );
+
+    notebook.activeCellIndex = lastIndex;
+    notebook.deselectAll();
 
     void Private.handleRunState(notebook, state, true);
     return promise;
@@ -2302,6 +2337,69 @@ namespace Private {
    * Run the selected cells.
    *
    * @param notebook Notebook
+   * @param cells Cells to run
+   * @param sessionContext Notebook session context
+   * @param sessionDialogs Session dialogs
+   * @param translator Application translator
+   */
+  export function runCells(
+    notebook: Notebook,
+    cells: readonly Cell[],
+    sessionContext?: ISessionContext,
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
+  ): Promise<boolean> {
+    const lastCell = cells[-1];
+    notebook.mode = 'command';
+
+    return Promise.all(
+      cells.map(cell =>
+        runCell(notebook, cell, sessionContext, sessionDialogs, translator)
+      )
+    )
+      .then(results => {
+        if (notebook.isDisposed) {
+          return false;
+        }
+        selectionExecuted.emit({
+          notebook,
+          lastCell
+        });
+        // Post an update request.
+        notebook.update();
+
+        return results.every(result => result);
+      })
+      .catch(reason => {
+        if (reason.message.startsWith('KernelReplyNotOK')) {
+          cells.map(cell => {
+            // Remove '*' prompt from cells that didn't execute
+            if (
+              cell.model.type === 'code' &&
+              (cell as CodeCell).model.executionCount == null
+            ) {
+              cell.setPrompt('');
+            }
+          });
+        } else {
+          throw reason;
+        }
+
+        selectionExecuted.emit({
+          notebook,
+          lastCell
+        });
+
+        notebook.update();
+
+        return false;
+      });
+  }
+
+  /**
+   * Run the selected cells.
+   *
+   * @param notebook Notebook
    * @param sessionContext Notebook session context
    * @param sessionDialogs Session dialogs
    * @param translator Application translator
@@ -2328,48 +2426,13 @@ namespace Private {
     notebook.activeCellIndex = lastIndex;
     notebook.deselectAll();
 
-    return Promise.all(
-      selected.map(child =>
-        runCell(notebook, child, sessionContext, sessionDialogs, translator)
-      )
-    )
-      .then(results => {
-        if (notebook.isDisposed) {
-          return false;
-        }
-        selectionExecuted.emit({
-          notebook,
-          lastCell: notebook.widgets[lastIndex]
-        });
-        // Post an update request.
-        notebook.update();
-
-        return results.every(result => result);
-      })
-      .catch(reason => {
-        if (reason.message.startsWith('KernelReplyNotOK')) {
-          selected.map(cell => {
-            // Remove '*' prompt from cells that didn't execute
-            if (
-              cell.model.type === 'code' &&
-              (cell as CodeCell).model.executionCount == null
-            ) {
-              cell.setPrompt('');
-            }
-          });
-        } else {
-          throw reason;
-        }
-
-        selectionExecuted.emit({
-          notebook,
-          lastCell: notebook.widgets[lastIndex]
-        });
-
-        notebook.update();
-
-        return false;
-      });
+    return runCells(
+      notebook,
+      selected,
+      sessionContext,
+      sessionDialogs,
+      translator
+    );
   }
 
   /**
