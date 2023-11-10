@@ -2716,7 +2716,7 @@ export class Notebook extends StaticNotebook {
       event.preventDefault();
 
       // Focuses on a cell (if possible), or on the footer element.
-      if (this._activeCell && this._activeCell.node.checkVisibility()) {
+      if (this._activeCell) {
         this._activeCell.node.focus({
           preventScroll: true
         });
