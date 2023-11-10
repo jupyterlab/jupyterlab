@@ -11,11 +11,9 @@ import {
   searchIcon
 } from '@jupyterlab/ui-components';
 
-import { ArrayExt } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
 
-import { DebugProtocol } from '@vscode/debugprotocol';
+import { JSONExt } from '@lumino/coreutils';
 
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -24,8 +22,6 @@ import { convertType } from '.';
 import { Debugger } from '../../debugger';
 
 import { IDebugger } from '../../tokens';
-
-import { VariablesModel } from './model';
 
 const BUTTONS_CLASS = 'jp-DebuggerVariables-buttons';
 
@@ -46,7 +42,9 @@ export class VariablesBodyTree extends ReactWidget {
     this._hoverChanged = new Signal(this);
 
     const model = (this.model = options.model);
-    model.changed.connect(this._updateScopes, this);
+    model.changed.connect(() => {
+      this.update();
+    }, this);
 
     this.addClass('jp-DebuggerVariables-body');
   }
@@ -56,7 +54,12 @@ export class VariablesBodyTree extends ReactWidget {
    */
   render(): JSX.Element {
     const scope =
-      this._scopes.find(scope => scope.name === this._scope) ?? this._scopes[0];
+      this.model.scopes.find(scope => scope.name === this._scope) ??
+      this.model.scopes[0];
+
+    const handleClick = (variable: IDebugger.IVariable) => {
+      this.model.expandVariable(variable);
+    };
 
     const handleSelectVariable = (variable: IDebugger.IVariable) => {
       this.model.selectedVariable = variable;
@@ -73,13 +76,10 @@ export class VariablesBodyTree extends ReactWidget {
 
     return scope ? (
       <>
-        <VariablesBranch
-          key={scope.name}
-          commands={this._commands}
-          service={this._service}
-          data={scope.variables}
+        <VariablesList
           filter={this._filter}
-          translator={this._translator}
+          variables={scope.variables}
+          handleClick={handleClick}
           handleSelectVariable={handleSelectVariable}
           onHoverChanged={(data: IHoverData) => {
             this._hoverChanged.emit(data);
@@ -91,6 +91,7 @@ export class VariablesBodyTree extends ReactWidget {
           service={this._service}
           hoverChanged={this._hoverChanged}
           handleSelectVariable={handleSelectVariable}
+          translator={this._translator}
         />
       </>
     ) : (
@@ -99,38 +100,34 @@ export class VariablesBodyTree extends ReactWidget {
   }
 
   /**
-   * Set the variable filter list.
+   * The variable filter list.
    */
+  get filter(): Set<string> {
+    return new Set<string>([...this._filter]);
+  }
   set filter(filter: Set<string>) {
-    this._filter = filter;
-    this.update();
-  }
-
-  /**
-   * Set the current scope
-   */
-  set scope(scope: string) {
-    this._scope = scope;
-    this.update();
-  }
-
-  /**
-   * Update the scopes and the tree of variables.
-   *
-   * @param model The variables model.
-   */
-  private _updateScopes(model: VariablesModel): void {
-    if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
-      return;
+    if (!JSONExt.deepEqual([...this._filter], [...filter])) {
+      this._filter = filter;
+      this.update();
     }
-    this._scopes = model.scopes;
-    this.update();
+  }
+
+  /**
+   * The current scope to display
+   */
+  get scope(): string {
+    return this._scope;
+  }
+  set scope(scope: string) {
+    if (this._scope != scope) {
+      this._scope = scope;
+      this.update();
+    }
   }
 
   protected model: IDebugger.Model.IVariables;
   private _commands: CommandRegistry;
   private _scope = '';
-  private _scopes: IDebugger.IScope[] = [];
   private _filter = new Set<string>();
   private _service: IDebugger;
   private _translator: ITranslator | undefined;
@@ -280,18 +277,14 @@ const TreeButtons = (props: ITreeButtonsProps): JSX.Element => {
   );
 };
 
-interface IVariablesBranchProps {
-  /**
-   * The commands registry.
-   */
-  commands: CommandRegistry;
-  data: IDebugger.IVariable[];
-  service: IDebugger;
+interface IVariablesListProps {
+  variables: IDebugger.IVariable[];
+
   filter?: Set<string>;
   /**
-   * The application language translator
+   * Callback on click
    */
-  translator?: ITranslator;
+  handleClick: (variable: IDebugger.IVariable) => void;
   /**
    * Callback on variable selection
    */
@@ -314,39 +307,30 @@ interface IVariablesBranchProps {
  * @param props.service The debugger service.
  * @param props.filter Optional variable filter list.
  */
-const VariablesBranch = (props: IVariablesBranchProps): JSX.Element => {
+const VariablesList = (props: IVariablesListProps): JSX.Element => {
   const {
-    commands,
-    data,
-    service,
+    variables,
     filter,
-    translator,
+    handleClick,
     handleSelectVariable,
     onHoverChanged,
     collapserIcon
   } = props;
-  const [variables, setVariables] = useState(data);
-
-  useEffect(() => {
-    setVariables(data);
-  }, [data]);
 
   return (
     <ul className="jp-DebuggerVariables-branch">
       {variables
-        .filter(
-          variable => !(filter || new Set()).has(variable.evaluateName || '')
+        .filter(variable =>
+          filter ? !filter.has(variable.evaluateName ?? '') : true
         )
         .map(variable => {
           const key = `${variable.name}-${variable.evaluateName}-${variable.type}-${variable.value}-${variable.variablesReference}`;
           return (
             <VariableComponent
               key={key}
-              commands={commands}
-              data={variable}
-              service={service}
+              variable={variable}
               filter={filter}
-              translator={translator}
+              onClick={handleClick}
               onSelect={handleSelectVariable}
               onHoverChanged={onHoverChanged}
               collapserIcon={collapserIcon}
@@ -362,25 +346,17 @@ const VariablesBranch = (props: IVariablesBranchProps): JSX.Element => {
  */
 interface IVariableComponentProps {
   /**
-   * The commands registry.
-   */
-  commands: CommandRegistry;
-  /**
    * Variable description
    */
-  data: IDebugger.IVariable;
+  variable: IDebugger.IVariable;
   /**
    * Filter applied on the variable list
    */
   filter?: Set<string>;
   /**
-   * The Debugger service
+   * Callback on click
    */
-  service: IDebugger;
-  /**
-   * The application language translator
-   */
-  translator?: ITranslator;
+  onClick: (variable: IDebugger.IVariable) => void;
   /**
    * Callback on selection
    */
@@ -414,40 +390,23 @@ function _prepareDetail(variable: IDebugger.IVariable) {
  * @param props.filter Optional variable filter list.
  */
 const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
-  const {
-    commands,
-    data,
-    service,
-    filter,
-    translator,
-    onSelect,
-    onHoverChanged,
-    collapserIcon
-  } = props;
-  const [variable] = useState(data);
-  const [expanded, setExpanded] = useState<boolean>();
-  const [variables, setVariables] = useState<DebugProtocol.Variable[]>();
+  const { variable, filter, onClick, onSelect, onHoverChanged, collapserIcon } =
+    props;
 
   const onSelection = onSelect ?? (() => void 0);
 
   const expandable =
     variable.variablesReference !== 0 || variable.type === 'function';
 
-  const onVariableClicked = async (e: React.MouseEvent): Promise<void> => {
-    if (!expandable) {
-      return;
-    }
-    e.stopPropagation();
-    const variables = await service.inspectVariable(
-      variable.variablesReference
-    );
-    setExpanded(!expanded);
-    setVariables(variables);
-  };
-
   return (
     <li
-      onClick={(e): Promise<void> => onVariableClicked(e)}
+      onClick={e => {
+        if (!expandable) {
+          return;
+        }
+        e.stopPropagation();
+        onClick(variable);
+      }}
       onMouseDown={e => {
         e.stopPropagation();
         onSelection(variable);
@@ -471,7 +430,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       <span
         className={
           'jp-DebuggerVariables-collapser' +
-          (expanded ? ' jp-mod-expanded' : '')
+          (variable.expanded ? ' jp-mod-expanded' : '')
         }
       >
         {
@@ -483,19 +442,16 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
       <span className="jp-DebuggerVariables-detail">
         {_prepareDetail(variable)}
       </span>
-      {expanded && variables && (
-        <VariablesBranch
-          key={variable.name}
-          commands={commands}
-          data={variables}
-          service={service}
+      {variable.expanded && variable.children?.length ? (
+        <VariablesList
+          variables={variable.children}
           filter={filter}
-          translator={translator}
+          handleClick={onClick}
           handleSelectVariable={onSelect}
           onHoverChanged={onHoverChanged}
           collapserIcon={collapserIcon}
         />
-      )}
+      ) : null}
     </li>
   );
 };
@@ -503,7 +459,7 @@ const VariableComponent = (props: IVariableComponentProps): JSX.Element => {
 /**
  * A namespace for VariablesBodyTree `statics`.
  */
-namespace VariablesBodyTree {
+export namespace VariablesBodyTree {
   /**
    * Instantiation options for `VariablesBodyTree`.
    */

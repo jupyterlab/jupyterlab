@@ -350,12 +350,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         srcFrameId: frames[0].id
       })
       .then(async () => {
-        const scopes = await this._getScopes(frames[0]);
-        const variables = await Promise.all(
-          scopes.map(scope => this._getVariables(scope))
-        );
-        const variableScopes = this._convertScopes(scopes, variables);
-        this._model.variables.scopes = variableScopes;
+        await this._onCurrentFrameChanged(this.model.callstack, frames[0]);
       })
       .catch(reason => {
         console.error(reason);
@@ -363,22 +358,38 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Requests all the defined variables and display them in the
-   * table view.
+   * Requests all the defined variables in none-stopped threads.
+   *
+   * This is used to display the kernel variables in between code execution.
    */
   async displayDefinedVariables(): Promise<void> {
+    this._model.variables.variableExpanded.disconnect(
+      this._onVariableExpanded,
+      this
+    );
+
     if (!this.session) {
       throw new Error('No active debugger session');
     }
-    const inspectReply = await this.session.sendRequest('inspectVariables', {});
-    const variables = inspectReply.body.variables;
+    const reply = await this.session.sendRequest('inspectVariables', {});
+    if (!reply.success) {
+      throw new Error(reply.message);
+    }
 
+    const variables = reply.body.variables;
     const variableScopes = [
       {
         name: this._trans.__('Globals'),
         variables: variables
       }
     ];
+
+    // We need to connect this signal before setting the scopes
+    // as it will be used to restore the variable expansion states.
+    this._model.variables.variableExpanded.connect(
+      this._onVariableExpanded,
+      this
+    );
     this._model.variables.scopes = variableScopes;
   }
 
@@ -857,26 +868,6 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Get the variables for a given scope.
-   *
-   * @param scope The scope to get variables for.
-   */
-  private async _getVariables(
-    scope: DebugProtocol.Scope
-  ): Promise<DebugProtocol.Variable[]> {
-    if (!this.session) {
-      throw new Error('No active debugger session');
-    }
-    if (!scope) {
-      return [];
-    }
-    const reply = await this.session.sendRequest('variables', {
-      variablesReference: scope.variablesReference
-    });
-    return reply.body.variables;
-  }
-
-  /**
    * Process the list of breakpoints from the server and return as a map.
    *
    * @param breakpoints - The list of breakpoints from the kernel.
@@ -923,7 +914,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
     const scopes = await this._getScopes(frame);
     const variables = await Promise.all(
-      scopes.map(scope => this._getVariables(scope))
+      scopes.map(scope => this.inspectVariable(scope.variablesReference))
     );
     const variableScopes = this._convertScopes(scopes, variables);
     this._model.variables.scopes = variableScopes;
@@ -932,34 +923,22 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Handle a variable expanded event and request variables from the kernel.
    *
-   * @param _ The variables model.
-   * @param variable The expanded variable.
+   * @param model The variables model.
+   * @param context The expanded variable.
    */
   private async _onVariableExpanded(
-    _: VariablesModel,
-    variable: DebugProtocol.Variable
-  ): Promise<DebugProtocol.Variable[]> {
-    if (!this.session) {
-      throw new Error('No active debugger session');
+    model: VariablesModel,
+    variable: IDebugger.IVariable
+  ): Promise<void> {
+    if (typeof variable.children == 'undefined') {
+      // Use the mutable variable state to update the children
+      const variables = await this.inspectVariable(variable.variablesReference);
+
+      variable.children = variables;
+
+      // Set a copy to trigger refresh
+      model.scopes = model.scopes.slice();
     }
-    const reply = await this.session.sendRequest('variables', {
-      variablesReference: variable.variablesReference
-    });
-    let newVariable = { ...variable, expanded: true };
-
-    reply.body.variables.forEach((variable: DebugProtocol.Variable) => {
-      newVariable = { [variable.name]: variable, ...newVariable };
-    });
-    const newScopes = this._model.variables.scopes.map(scope => {
-      const findIndex = scope.variables.findIndex(
-        ele => ele.variablesReference === variable.variablesReference
-      );
-      scope.variables[findIndex] = newVariable;
-      return { ...scope };
-    });
-
-    this._model.variables.scopes = [...newScopes];
-    return reply.body.variables;
   }
 
   /**

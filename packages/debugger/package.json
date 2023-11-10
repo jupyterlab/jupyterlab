@@ -67,7 +67,6 @@
     "@jupyterlab/services": "^7.1.0-alpha.2",
     "@jupyterlab/translation": "^4.1.0-alpha.2",
     "@jupyterlab/ui-components": "^4.1.0-alpha.2",
-    "@lumino/algorithm": "^2.0.1",
     "@lumino/commands": "^2.1.3",
     "@lumino/coreutils": "^2.1.2",
     "@lumino/datagrid": "^2.3.0-alpha.0",

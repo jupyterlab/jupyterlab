@@ -192,7 +192,7 @@ export namespace Variables {
     themeManager?: IThemeManager | null;
 
     /**
-     * The application language translator
+     * The application language translator.
      */
     translator?: ITranslator;
   }

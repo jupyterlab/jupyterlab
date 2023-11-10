@@ -478,6 +478,10 @@ export namespace IDebugger {
      * Whether the variable is expanded.
      */
     expanded?: boolean;
+    /**
+     * Children variables
+     */
+    children?: IVariable[];
   }
 
   /**
@@ -1044,6 +1048,24 @@ export namespace IDebugger {
     }
 
     /**
+     * Debugger variable context
+     */
+    export interface IVariableContext {
+      /**
+       * Variable name
+       */
+      variable: string;
+      /**
+       * Variable scope
+       */
+      scope: string;
+      /**
+       * Variable parents
+       */
+      parents?: string[];
+    }
+
+    /**
      * The variables UI model.
      */
     export interface IVariables {
@@ -1068,9 +1090,9 @@ export namespace IDebugger {
       selectedVariable: IVariableSelection | null;
 
       /**
-       * Expand a variable.
+       * Toogle a variable expansion.
        *
-       * @param variable The variable to expand.
+       * @param variable The variable to expand or collapse.
        */
       expandVariable(variable: IDebugger.IVariable): void;
     }
