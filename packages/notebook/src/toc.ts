@@ -546,6 +546,13 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
     super(tracker);
   }
 
+  get scrollToTop(): boolean {
+    return this._scrollToTop;
+  }
+  set scrollToTop(v: boolean) {
+    this._scrollToTop = v;
+  }
+
   /**
    * Create a new table of contents model for the widget
    *
@@ -582,18 +589,25 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           const el = headingToElement.get(heading);
 
           if (el) {
-            const widgetBox = widget.content.node.getBoundingClientRect();
-            const elementBox = el.getBoundingClientRect();
+            if (this.scrollToTop) {
+              el.scrollIntoView({ block: 'start' });
+            } else {
+              const widgetBox = widget.content.node.getBoundingClientRect();
+              const elementBox = el.getBoundingClientRect();
 
-            if (
-              elementBox.top > widgetBox.bottom ||
-              elementBox.bottom < widgetBox.top
-            ) {
-              el.scrollIntoView({ block: 'center' });
+              if (
+                elementBox.top > widgetBox.bottom ||
+                elementBox.bottom < widgetBox.top
+              ) {
+                el.scrollIntoView({ block: 'center' });
+              }
             }
           } else {
             console.debug('scrolling to heading: using fallback strategy');
-            await widget.content.scrollToItem(widget.content.activeCellIndex);
+            await widget.content.scrollToItem(
+              widget.content.activeCellIndex,
+              this.scrollToTop ? 'start' : undefined
+            );
           }
         };
 
@@ -610,7 +624,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           });
         } else {
           widget.content
-            .scrollToItem(idx)
+            .scrollToItem(idx, this.scrollToTop ? 'start' : undefined)
             .then(() => {
               return onCellInViewport(cell);
             })
@@ -735,6 +749,8 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
     return model;
   }
+
+  private _scrollToTop: boolean = true;
 }
 
 /**
