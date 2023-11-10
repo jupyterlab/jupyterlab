@@ -41,7 +41,6 @@
 
 .jp-Toolbar::part(positioning-region) {
   align-items: center;
-  flex-wrap: nowrap;
 }
 
 .jp-ToolbarLabelComponent {
