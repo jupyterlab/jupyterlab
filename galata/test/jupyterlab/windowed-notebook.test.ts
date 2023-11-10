@@ -237,15 +237,15 @@ test('should remove all cells including hidden outputs artifacts', async ({
   expect(found).toEqual(false);
 });
 
-test('should scroll past end when running and inserting a cell at the viewport bottom', async ({
+test('should scroll as little as possible on markdown rendering', async ({
   page,
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-
   const h = await page.notebook.getNotebookInPanel();
-  const mdCellSelector = '.jp-MarkdownCell[data-windowed-list-index="2"]';
-  const mdCell = await h!.waitForSelector(mdCellSelector);
+  const mdCell = await h.waitForSelector(
+    '.jp-MarkdownCell[data-windowed-list-index="2"]'
+  );
 
   await page
     .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
@@ -253,19 +253,16 @@ test('should scroll past end when running and inserting a cell at the viewport b
 
   await mdCell.click();
 
-  await expect
-    .soft(
-      page
-        .getByRole('main')
-        .locator('.jp-RawCell[data-windowed-list-index="4"]')
-    )
-    .not.toBeInViewport();
+  const thirdCell = page.locator('.jp-CodeCell[data-windowed-list-index="3"]');
+  const fourthCell = page.locator('.jp-RawCell[data-windowed-list-index="4"]');
+
+  await expect.soft(thirdCell).not.toBeInViewport({ ratio: 0.1 });
+  await expect.soft(fourthCell).not.toBeInViewport();
 
   await page.keyboard.press('Shift+Enter');
 
-  await expect(
-    page.getByRole('main').locator('.jp-RawCell[data-windowed-list-index="4"]')
-  ).toBeInViewport();
+  await expect(thirdCell).toBeInViewport();
+  await expect(fourthCell).not.toBeInViewport({ ratio: 0.1 });
 });
 
 test('should rendered injected styles of out-of-viewport cells', async ({
