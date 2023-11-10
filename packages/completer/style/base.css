@@ -329,7 +329,7 @@
   display: none;
 }
 
-.jp-InlineCompleter [data-command='inline-completer:next']::part(control),
-.jp-InlineCompleter [data-command='inline-completer:previous']::part(control) {
+.jp-InlineCompleter [data-command='inline-completer:next'] svg,
+.jp-InlineCompleter [data-command='inline-completer:previous'] svg {
   scale: 1.5;
 }

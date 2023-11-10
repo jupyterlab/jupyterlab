@@ -74,6 +74,11 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   font-family: var(--jp-ui-font-family);
 }
 
+.jp-ToolbarButtonComponent::part(content) {
+  display: flex;
+  align-items: center;
+}
+
 .jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
   flex-grow: 1;
   flex-shrink: 1;
