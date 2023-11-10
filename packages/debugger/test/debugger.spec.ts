@@ -42,6 +42,8 @@ import { IDebugger } from '../src/tokens';
 
 const server = new JupyterServer();
 
+const emptyFn = () => undefined;
+
 beforeAll(async () => {
   await server.start();
 }, 30000);
@@ -56,6 +58,14 @@ describe('Debugger', () => {
   const service = new DebuggerService({ specsManager, config });
   const registry = new CommandRegistry();
   const languages = new EditorLanguageRegistry();
+  const callstackToolbarCommands = {
+    continue: 'continue',
+    terminate: 'terminate',
+    next: 'next',
+    stepIn: 'stepIn',
+    stepOut: 'stepOut',
+    evaluate: 'evaluate'
+  };
   EditorLanguageRegistry.getDefaultLanguages()
     .filter(lang => ['Python'].includes(lang.name))
     .forEach(lang => {
@@ -103,16 +113,16 @@ describe('Debugger', () => {
     session = new Debugger.Session({ connection, config });
     service.session = session;
 
+    // Populate the command registry with fake command to render the button.
+    Object.keys(callstackToolbarCommands).forEach(command => {
+      registry.addCommand(command, { execute: emptyFn });
+    });
+
     sidebar = new Debugger.Sidebar({
       service,
       callstackCommands: {
         registry,
-        continue: '',
-        terminate: '',
-        next: '',
-        stepIn: '',
-        stepOut: '',
-        evaluate: ''
+        ...callstackToolbarCommands
       },
       breakpointsCommands: {
         registry,
