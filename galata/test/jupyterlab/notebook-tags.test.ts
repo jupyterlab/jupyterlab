@@ -18,31 +18,31 @@ test.describe('Notebook tags', () => {
     await page.getByText('Python 3 (ipykernel) | Idle').waitFor();
   });
 
-  test('should set data-tags', async ({ page }) => {
+  test('should set data-jp-tags', async ({ page }) => {
     const codesCells = page.locator('.jp-CodeCell');
 
     await expect.soft(codesCells).toHaveCount(3);
     await expect
       .soft(codesCells.first())
-      .toHaveAttribute('data-tags', 'banana');
-    await expect.soft(codesCells.nth(1)).toHaveAttribute('data-tags', 'orange');
-    expect.soft(await codesCells.last().getAttribute('data-tags')).toBeNull();
+      .toHaveAttribute('data-jp-tags', 'banana');
+    await expect.soft(codesCells.nth(1)).toHaveAttribute('data-jp-tags', ',orange,');
+    expect.soft(await codesCells.last().getAttribute('data-jp-tags')).toBeNull();
 
     const mdCells = page.locator('.jp-MarkdownCell');
 
     await expect.soft(mdCells).toHaveCount(3);
-    await expect.soft(mdCells.first()).toHaveAttribute('data-tags', 'orange');
-    await expect.soft(mdCells.nth(1)).toHaveAttribute('data-tags', 'banana');
-    expect.soft(await mdCells.last().getAttribute('data-tags')).toBeNull();
+    await expect.soft(mdCells.first()).toHaveAttribute('data-jp-tags', ',orange,');
+    await expect.soft(mdCells.nth(1)).toHaveAttribute('data-jp-tags', ',banana,');
+    expect.soft(await mdCells.last().getAttribute('data-jp-tags')).toBeNull();
 
     const rawCells = page.locator('.jp-RawCell');
 
     await expect.soft(rawCells).toHaveCount(3);
-    await expect.soft(rawCells.first()).toHaveAttribute('data-tags', 'cherry');
+    await expect.soft(rawCells.first()).toHaveAttribute('data-jp-tags', ',cherry,');
     await expect
       .soft(rawCells.nth(1))
-      .toHaveAttribute('data-tags', 'banana,orange');
-    expect(await rawCells.last().getAttribute('data-tags')).toBeNull();
+      .toHaveAttribute('data-jp-tags', ',banana,orange,');
+    expect(await rawCells.last().getAttribute('data-jp-tags')).toBeNull();
   });
 
   test('should filter on tag', async ({ page }) => {
@@ -57,7 +57,7 @@ test.describe('Notebook tags', () => {
     await page.pause();
     await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
 
-    const visibleCells = page.locator('.jp-Cell[data-tags*="orange"]');
+    const visibleCells = page.locator('.jp-Cell[data-jp-tags*="\\2Corange\\2C"]');
 
     await expect.soft(visibleCells).toHaveCount(3);
     for (let i = 0; i < 3; i++) {
@@ -72,7 +72,7 @@ test.describe('Notebook tags', () => {
     await expect.soft(filteredCells).toHaveCount(6);
     for (let i = 0; i < 6; i++) {
       expect
-        .soft((await filteredCells.nth(i).getAttribute('data-tags')) ?? '')
+        .soft((await filteredCells.nth(i).getAttribute('data-jp-tags')) ?? '')
         .not.toContain('orange');
     }
   });
@@ -124,7 +124,7 @@ test.describe('Notebook tags', () => {
       .click();
     await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
 
-    const visibleCells = page.locator('.jp-CodeCell[data-tags*="orange"]');
+    const visibleCells = page.locator('.jp-CodeCell[data-jp-tags*="\\2Corange\\2C"]');
 
     await expect.soft(visibleCells).toHaveCount(1);
     await expect
@@ -136,11 +136,11 @@ test.describe('Notebook tags', () => {
       .filter({ has: page.locator('.jp-Placeholder') });
     await expect.soft(filteredCells).toHaveCount(8);
     for (let i = 0; i < 8; i++) {
-      const tags = (await filteredCells.nth(i).getAttribute('data-tags')) ?? '';
+      const tags = (await filteredCells.nth(i).getAttribute('data-jp-tags')) ?? '';
       const isCodeCell = await filteredCells
         .nth(i)
         .evaluate(elt => elt.classList.contains('jp-CodeCell'));
-      expect.soft(isCodeCell && tags.match('orange') !== null).toEqual(false);
+      expect.soft(isCodeCell && tags.match(',orange,') !== null).toEqual(false);
     }
   });
 
