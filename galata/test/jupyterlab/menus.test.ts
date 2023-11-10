@@ -359,7 +359,11 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   test('Open new launcher via top menu bar with keyboard', async ({ page }) => {
     await page.goto();
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
-    const newLauncher = page.getByRole('menuitem', { name: 'New Launcher' });
+    const fileNewLauncher = page.getByRole('menuitem', {
+      name: 'New Launcher'
+    });
+    const secondLauncher = page.locator('#tab-key-2-1');
+
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
@@ -374,12 +378,15 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('ArrowDown');
-      if (await newLauncher.evaluate(el => el === document.activeElement)) {
+      if (await fileNewLauncher.evaluate(el => el === document.activeElement)) {
         break;
       }
     }
     await page.keyboard.press('Enter');
-    await expect(page.locator('#tab-key-2-1')).toBeFocused();
+    let secondLauncherClass = (
+      (await secondLauncher.getAttribute('class')) ?? ''
+    ).split(' ');
+    expect(secondLauncherClass.includes('jp-mod-current')).toBeTruthy;
   });
 });
 
