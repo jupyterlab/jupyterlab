@@ -45,10 +45,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     this.toolbar.addClass(NOTEBOOK_PANEL_TOOLBAR_CLASS);
     this.content.addClass(NOTEBOOK_PANEL_NOTEBOOK_CLASS);
 
-    // Remove the tabindex attribute to avoid the notebook widget to get
-    // the focus on click.
-    // this.content.node.removeAttribute('tabindex');
-
     // Set up things related to the context
     this.content.model = this.context.model;
     this.context.sessionContext.kernelChanged.connect(
