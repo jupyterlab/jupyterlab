@@ -110,6 +110,13 @@ export class NotebookActions {
   }
 
   /**
+   * A signal that emits when a cell's output is cleared.
+   */
+  static get outputCleared(): ISignal<any, { notebook: Notebook; cell: Cell }> {
+    return Private.outputCleared;
+  }
+
+  /**
    * A private constructor for the `NotebookActions` class.
    *
    * #### Notes
@@ -606,7 +613,7 @@ export namespace NotebookActions {
       notebook.activeCellIndex++;
     }
 
-    void Private.handleState(notebook, state, true);
+    void Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -663,7 +670,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    void Private.handleState(notebook, state, true);
+    void Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -1445,6 +1452,7 @@ export namespace NotebookActions {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
         }, false);
+        Private.outputCleared.emit({ notebook, cell: child });
       }
     }
     void Private.handleState(notebook, state, true);
@@ -1473,6 +1481,7 @@ export namespace NotebookActions {
           (cell as ICodeCellModel).clearExecution();
           (child as CodeCell).outputHidden = false;
         }, false);
+        Private.outputCleared.emit({ notebook, cell: child });
       }
     }
     void Private.handleState(notebook, state, true);
@@ -2216,6 +2225,14 @@ namespace Private {
   >({});
 
   /**
+   * A signal that emits when one notebook's cells are all executed.
+   */
+  export const outputCleared = new Signal<
+    any,
+    { notebook: Notebook; cell: Cell }
+  >({});
+
+  /**
    * The interface for a widget state.
    */
   export interface IState {
@@ -2253,11 +2270,9 @@ namespace Private {
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
     if (scrollIfNeeded && activeCell) {
-      await notebook
-        .scrollToItem(activeCellIndex, 'smart', 0.05)
-        .catch(reason => {
-          // no-op
-        });
+      await notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
+        // no-op
+      });
     }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
@@ -2272,15 +2287,11 @@ namespace Private {
     state: IState,
     scroll = false
   ): Promise<void> {
-    if (scroll && state.activeCellId) {
-      const index = notebook.widgets.findIndex(
-        w => w.model.id === state.activeCellId
-      );
-      if (notebook.widgets[index]?.inputArea) {
-        await notebook.scrollToItem(index).catch(reason => {
-          // no-op
-        });
-      }
+    const { activeCell, activeCellIndex } = notebook;
+    if (scroll && activeCell) {
+      await notebook.scrollToItem(activeCellIndex, 'smart', 0).catch(reason => {
+        // no-op
+      });
     }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
