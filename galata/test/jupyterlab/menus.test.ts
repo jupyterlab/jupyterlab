@@ -200,14 +200,13 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
         break;
       }
-    }
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
       await page.keyboard.press('ArrowRight');
-      if (await editMenu.evaluate(el => el === document.activeElement)) {
+      let editClass = ((await editMenu.getAttribute('class')) ?? '').split(' ');
+      if (editClass.includes('lm-mod-active')) {
         break;
       }
     }
@@ -223,14 +222,13 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
         break;
       }
-    }
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
       await page.keyboard.press('ArrowRight');
-      if (await viewMenu.evaluate(el => el === document.activeElement)) {
+      let viewClass = ((await viewMenu.getAttribute('class')) ?? '').split(' ');
+      if (viewClass.includes('lm-mod-active')) {
         break;
       }
     }
@@ -246,14 +244,13 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
         break;
       }
-    }
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
       await page.keyboard.press('ArrowRight');
-      if (await runMenu.evaluate(el => el === document.activeElement)) {
+      let runClass = ((await runMenu.getAttribute('class')) ?? '').split(' ');
+      if (runClass.includes('lm-mod-active')) {
         break;
       }
     }
@@ -269,14 +266,15 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
         break;
       }
-    }
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
       await page.keyboard.press('ArrowRight');
-      if (await kernelMenu.evaluate(el => el === document.activeElement)) {
+      let kernelClass = ((await kernelMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (kernelClass.includes('lm-mod-active')) {
         break;
       }
     }
@@ -292,14 +290,13 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
         break;
       }
-    }
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
       await page.keyboard.press('ArrowRight');
-      if (await tabsMenu.evaluate(el => el === document.activeElement)) {
+      let tabsClass = ((await tabsMenu.getAttribute('class')) ?? '').split(' ');
+      if (tabsClass.includes('lm-mod-active')) {
         break;
       }
     }
@@ -315,11 +312,15 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
         break;
       }
       await page.keyboard.press('ArrowRight');
-      if (await settingsMenu.evaluate(el => el === document.activeElement)) {
+      let settingsClass = (
+        (await settingsMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (settingsClass.includes('lm-mod-active')) {
         break;
       }
     }
@@ -342,15 +343,13 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       if (fileClass.includes('lm-mod-active')) {
         break;
       }
-    }
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
       await page.keyboard.press('ArrowRight');
       let helpClass = ((await helpMenu.getAttribute('class')) ?? '').split(' ');
       if (helpClass.includes('lm-mod-active')) {
         break;
       }
     }
+
     await page.keyboard.press('Enter');
 
     expect(await page.menu.isOpen('Help')).toBeTruthy();
