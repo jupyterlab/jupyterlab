@@ -575,7 +575,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
                 {schema.description}
               </div>
             )}
-            {isModified && defaultValue !== undefined && (
+            {isModified && defaultValue !== undefined && schema.type !== 'object' && (
               <div className="jp-FormGroup-default">
                 {trans.__(
                   'Default: %1',
