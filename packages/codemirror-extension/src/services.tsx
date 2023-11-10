@@ -239,11 +239,7 @@ export const servicesPlugin: JupyterFrontEndPlugin<IEditorServices> = {
   id: '@jupyterlab/codemirror-extension:services',
   description: 'Provides the service to instantiate CodeMirror editors.',
   provides: IEditorServices,
-  requires: [
-    IEditorLanguageRegistry,
-    IEditorExtensionRegistry,
-    IEditorThemeRegistry
-  ],
+  requires: [IEditorLanguageRegistry, IEditorExtensionRegistry],
   optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,

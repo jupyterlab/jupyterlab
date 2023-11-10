@@ -62,15 +62,21 @@ export const svgRendererFactory: IRenderMime.IRendererFactory = {
 };
 
 /**
+ * A mime renderer factory for rendering stderr outputs
+ */
+export const errorRendererFactory: IRenderMime.IRendererFactory = {
+  safe: true,
+  mimeTypes: ['application/vnd.jupyter.stderr'],
+  defaultRank: 110,
+  createRenderer: options => new widgets.RenderedError(options)
+};
+
+/**
  * A mime renderer factory for plain and jupyter console text data.
  */
 export const textRendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
-  mimeTypes: [
-    'text/plain',
-    'application/vnd.jupyter.stdout',
-    'application/vnd.jupyter.stderr'
-  ],
+  mimeTypes: ['text/plain', 'application/vnd.jupyter.stdout'],
   defaultRank: 120,
   createRenderer: options => new widgets.RenderedText(options)
 };
@@ -96,5 +102,6 @@ export const standardRendererFactories: ReadonlyArray<IRenderMime.IRendererFacto
     svgRendererFactory,
     imageRendererFactory,
     javaScriptRendererFactory,
+    errorRendererFactory,
     textRendererFactory
   ];
