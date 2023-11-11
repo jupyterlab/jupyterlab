@@ -624,6 +624,59 @@ export namespace galata {
       });
     }
 
+    export async function makeNotebookReadonly(page: Page): Promise<void> {
+      // Listen for closing connection (may happen when request are still being processed)
+      let isClosed = false;
+      const ctxt = page.context();
+      ctxt.once('close', () => {
+        isClosed = true;
+      });
+      ctxt.browser()?.once('disconnected', () => {
+        isClosed = true;
+      });
+
+      return page.route(Routes.contents, async (route, request) => {
+        switch (request.method()) {
+          case 'GET': {
+            // Proxy the GET request
+            const response = await ctxt.request.fetch(request);
+            console.debug(response);
+            console.error(response);
+            if (!response.ok()) {
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: response.status(),
+                  body: await response.text()
+                });
+              }
+              break;
+            }
+            const data = await response.json();
+            // Modify the last_modified values to be set one day before now.
+            if (data['type'] === 'notebook' && Array.isArray(data['content'])) {
+              const now = Date.now();
+              const aDayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
+              for (const entry of data['content'] as any[]) {
+                // Mutate the list in-place
+                entry['last_modified'] = aDayAgo;
+              }
+            }
+            console.log(data);
+            if (!page.isClosed() && !isClosed) {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify(data),
+                contentType: 'application/json'
+              });
+            }
+            break;
+          }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
     /**
      * Clear all wanted sessions or terminals.
      *
