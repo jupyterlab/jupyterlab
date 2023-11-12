@@ -147,7 +147,7 @@
     "handlebars": "^4.5.3",
     "mini-css-extract-plugin": "^2.7.0",
     "mini-svg-data-uri": "^1.4.4",
-    "rimraf": "~3.0.0",
+    "rimraf": "~5.0.5",
     "style-loader": "~3.3.1",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1",
