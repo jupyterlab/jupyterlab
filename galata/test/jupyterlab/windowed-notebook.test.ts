@@ -339,3 +339,39 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
     await page.getByText('JavaScript injected header').count()
   ).toBeGreaterThan(1);
 });
+
+test('should navigate to a search hit in a out-of-viewport cell', async ({
+  page,
+  tmpPath
+}) => {
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  // Open search box
+  await page.keyboard.press('Control+f');
+
+  await page.getByPlaceholder('Find').fill('IFrame');
+  await page.getByText('1/2').waitFor();
+  await expect
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="11"]'))
+    .toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Next Match' }).click();
+
+  await page.locator('.jp-Cell[data-windowed-list-index="11"]').waitFor();
+  await expect
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="11"]'))
+    .toContainText('IFrame');
+
+  await page.getByPlaceholder('Find').fill('Final');
+  await page.getByText('1/1').waitFor();
+  await expect
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="18"]'))
+    .toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Previous Match' }).click();
+
+  await page.locator('.jp-Cell[data-windowed-list-index="18"]').waitFor();
+  await expect(
+    page.locator('.jp-Cell[data-windowed-list-index="18"]')
+  ).toContainText('Final');
+});
