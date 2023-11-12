@@ -368,9 +368,7 @@ test('should navigate to a search hit in a out-of-viewport cell', async ({
     .soft(page.locator('.jp-Cell[data-windowed-list-index="18"]'))
     .toHaveCount(0);
 
-  await page
-    .getByRole('button', { name: 'Previous Match' })
-    .click();
+  await page.getByRole('button', { name: 'Previous Match' }).click();
 
   await page.locator('.jp-Cell[data-windowed-list-index="18"]').waitFor();
   await expect(
