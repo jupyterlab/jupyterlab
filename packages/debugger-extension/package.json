@@ -64,9 +64,9 @@
     "@jupyterlab/testing": "^4.1.0-alpha.2",
     "@types/jest": "^29.2.0",
     "@types/react-dom": "^18.0.9",
-    "rimraf": "~3.0.0",
+    "rimraf": "~5.0.5",
     "typedoc": "~0.24.7",
-    "typescript": "~5.0.4"
+    "typescript": "~5.1.6"
   },
   "publishConfig": {
     "access": "public"
