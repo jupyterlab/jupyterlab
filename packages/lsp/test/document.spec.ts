@@ -245,7 +245,7 @@ describe('@jupyterlab/lsp', () => {
           document['_chooseForeignDocument'](rawCellExtractor);
         expect(md.uri).toBe('test.ipynb.python-text.txt');
       });
-      it('should use unused virtual document if availble', () => {
+      it('should use unused virtual document if available', () => {
         document.appendCodeBlock({
           value: 'test line in raw 1\ntest line in raw 2',
           ceEditor: {} as Document.IEditor,
