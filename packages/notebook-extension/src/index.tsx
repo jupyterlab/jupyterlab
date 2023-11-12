@@ -1157,7 +1157,7 @@ export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
           });
           const view = new CellFiltersView({ model, translator });
           const result = await showDialog({
-            title: trans.__('Select cell filters:'),
+            title: trans.__('Select cell filters'),
             body: view,
             buttons: [Dialog.cancelButton(), selectButton, clearButton]
           });
