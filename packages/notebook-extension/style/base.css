@@ -9,3 +9,7 @@
   margin: 0;
   padding: 0;
 }
+
+.jp-cell-filters-types {
+  user-select: none;
+}
