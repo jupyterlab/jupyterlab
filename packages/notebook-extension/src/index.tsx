@@ -1162,7 +1162,7 @@ export const cellFiltersPlugin: JupyterFrontEndPlugin<void> = {
           const result = await showDialog({
             title: trans.__('Select cell filters'),
             body: view,
-            buttons: [Dialog.cancelButton(), selectButton, clearButton]
+            buttons: [selectButton, clearButton, Dialog.cancelButton()]
           });
 
           if (result.button.actions.includes('select')) {
