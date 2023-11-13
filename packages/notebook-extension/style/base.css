@@ -13,3 +13,11 @@
 .jp-cell-filters-types {
   user-select: none;
 }
+
+.jp-ToolbarButtonComponent[data-command='notebook:cell-filters'] {
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color1);
+  border-radius: 10px;
+  border: 1px solid var(--jp-border-color1);
+  font-size: var(--jp-ui-font-size1);
+}

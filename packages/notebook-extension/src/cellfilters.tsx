@@ -45,15 +45,17 @@ function CellFiltersComponent(props: ICellFiltersComponentProps): JSX.Element {
   const { filters, setFilters, tags, translator, types } = props;
 
   const trans = translator.load('jupyterlab');
+  let count = 0;
 
   const handleCheck = (item: string) => {
     const newFilters = new Set<string>(filters);
     if (filters.has(item)) {
       newFilters.delete(item);
+      count = 0;
     } else {
       newFilters.add(item);
+      count = count + 1;
     }
-
     setFilters(newFilters);
   };
 

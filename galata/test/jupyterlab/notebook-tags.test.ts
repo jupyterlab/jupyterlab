@@ -25,20 +25,30 @@ test.describe('Notebook tags', () => {
     await expect
       .soft(codesCells.first())
       .toHaveAttribute('data-jp-tags', 'banana');
-    await expect.soft(codesCells.nth(1)).toHaveAttribute('data-jp-tags', ',orange,');
-    expect.soft(await codesCells.last().getAttribute('data-jp-tags')).toBeNull();
+    await expect
+      .soft(codesCells.nth(1))
+      .toHaveAttribute('data-jp-tags', ',orange,');
+    expect
+      .soft(await codesCells.last().getAttribute('data-jp-tags'))
+      .toBeNull();
 
     const mdCells = page.locator('.jp-MarkdownCell');
 
     await expect.soft(mdCells).toHaveCount(3);
-    await expect.soft(mdCells.first()).toHaveAttribute('data-jp-tags', ',orange,');
-    await expect.soft(mdCells.nth(1)).toHaveAttribute('data-jp-tags', ',banana,');
+    await expect
+      .soft(mdCells.first())
+      .toHaveAttribute('data-jp-tags', ',orange,');
+    await expect
+      .soft(mdCells.nth(1))
+      .toHaveAttribute('data-jp-tags', ',banana,');
     expect.soft(await mdCells.last().getAttribute('data-jp-tags')).toBeNull();
 
     const rawCells = page.locator('.jp-RawCell');
 
     await expect.soft(rawCells).toHaveCount(3);
-    await expect.soft(rawCells.first()).toHaveAttribute('data-jp-tags', ',cherry,');
+    await expect
+      .soft(rawCells.first())
+      .toHaveAttribute('data-jp-tags', ',cherry,');
     await expect
       .soft(rawCells.nth(1))
       .toHaveAttribute('data-jp-tags', ',banana,orange,');
@@ -57,7 +67,9 @@ test.describe('Notebook tags', () => {
     await page.pause();
     await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
 
-    const visibleCells = page.locator('.jp-Cell[data-jp-tags*="\\2Corange\\2C"]');
+    const visibleCells = page.locator(
+      '.jp-Cell[data-jp-tags*="\\2Corange\\2C"]'
+    );
 
     await expect.soft(visibleCells).toHaveCount(3);
     for (let i = 0; i < 3; i++) {
@@ -124,7 +136,9 @@ test.describe('Notebook tags', () => {
       .click();
     await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
 
-    const visibleCells = page.locator('.jp-CodeCell[data-jp-tags*="\\2Corange\\2C"]');
+    const visibleCells = page.locator(
+      '.jp-CodeCell[data-jp-tags*="\\2Corange\\2C"]'
+    );
 
     await expect.soft(visibleCells).toHaveCount(1);
     await expect
@@ -136,7 +150,8 @@ test.describe('Notebook tags', () => {
       .filter({ has: page.locator('.jp-Placeholder') });
     await expect.soft(filteredCells).toHaveCount(8);
     for (let i = 0; i < 8; i++) {
-      const tags = (await filteredCells.nth(i).getAttribute('data-jp-tags')) ?? '';
+      const tags =
+        (await filteredCells.nth(i).getAttribute('data-jp-tags')) ?? '';
       const isCodeCell = await filteredCells
         .nth(i)
         .evaluate(elt => elt.classList.contains('jp-CodeCell'));

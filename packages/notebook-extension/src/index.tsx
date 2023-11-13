@@ -101,6 +101,8 @@ import {
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  filterIcon,
+  //filterIcon,
   IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
@@ -323,7 +325,7 @@ namespace CommandIDs {
 
   export const accessNextHistory = 'notebook:access-next-history-entry';
 
-  export const filterCells = 'notebook:filter-cells';
+  export const cellFilters = 'notebook:cell-filters';
 }
 
 /**
@@ -1065,8 +1067,8 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
   }
 };
 
-export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/notebook-extension:filter-cells',
+export const cellFiltersPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:cell-filters',
   description: 'Filter cells.',
   autoStart: true,
   requires: [INotebookTracker, IFormRendererRegistry],
@@ -1088,17 +1090,18 @@ export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
       fieldRenderer: () => (
         <CommandToolbarButtonComponent
           commands={commands}
-          id={CommandIDs.filterCells}
+          id={CommandIDs.cellFilters}
           caption={trans.__('Open the filtering tool')}
+          icon={filterIcon}
         ></CommandToolbarButtonComponent>
       )
     };
     formRegistry.addRenderer(
-      '@jupyterlab/notebook-extension:filter-cells.renderer',
+      '@jupyterlab/notebook-extension:cell-filters.renderer',
       filterButton
     );
 
-    app.commands.addCommand(CommandIDs.filterCells, {
+    app.commands.addCommand(CommandIDs.cellFilters, {
       label: trans.__('Filter Cells'),
       caption: trans.__('Filter cells'),
       execute: async args => {
@@ -1138,9 +1141,10 @@ export const filterCellsPlugin: JupyterFrontEndPlugin<void> = {
     });
 
     if (palette) {
+      const category = trans.__('Notebook Operations');
       palette.addItem({
-        category: 'Notebook Operations',
-        command: CommandIDs.filterCells
+        category,
+        command: CommandIDs.cellFilters
       });
     }
   }
@@ -1171,7 +1175,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   updateRawMimetype,
   customMetadataEditorFields,
   activeCellTool,
-  filterCellsPlugin
+  cellFiltersPlugin
 ];
 export default plugins;
 
