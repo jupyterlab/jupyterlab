@@ -491,22 +491,113 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    expect(commandPalette.isVisible).toBe(true);
+    expect(commandPalette).toBeVisible();
+  });
+
+  test('Open File Browser with keyboard', async ({ page }) => {
+    const fileBrowserMenu = page.getByRole('menuitem', {
+      name: 'File Browser'
+    });
+    const viewMenu = page.getByRole('menuitem', { name: 'View' });
+    const fileBrowserSideMenu = page.getByLabel('File Browser Section');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (viewMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let fileBrowserMenuClass = (
+        (await fileBrowserMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (fileBrowserMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    expect(fileBrowserSideMenu.isVisible).toBe(true);
+  });
+
+  test('Open Property Inspector with keyboard', async ({ page }) => {
+    const propertyInspectorMenu = page.getByRole('menuitem', {
+      name: 'Property Inspector'
+    });
+    const viewMenu = page.getByRole('menuitem', { name: 'View' });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (viewMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let propertyInspectorClass = (
+        (await propertyInspectorMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (propertyInspectorClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // await page.sidebar.openTab('jp-property-inspector')
+
+    expect(await page.sidebar.isTabOpen('jp-property-inspector')).toBeTruthy();
+  });
+
+  test('Open Sessions and Tabs with keyboard', async ({ page }) => {
+    const sessionsAndTabsMenu = page.getByRole('menuitem', {
+      name: 'Sessions and Tabs'
+    });
+    const viewMenu = page.getByRole('menuitem', { name: 'View' });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (viewMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let runningTerminalsClass = (
+        (await sessionsAndTabsMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (runningTerminalsClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // await page.sidebar.openTab('jp-property-inspector')
+
+    expect(await page.sidebar.isTabOpen('jp-running-sessions')).toBeTruthy();
   });
 });
-
-// test("navigate to close all tabs with keyboard", async ({ page }) => {
-//   await page.goto();
-//   for (let i = 0; i < 3; i++) {
-//     await page.keyboard.press("Shift+Tab");
-//   }
-//   await page.keyboard.press("Enter");
-//   for (let i = 0; i < 4; i++) {
-//     await page.keyboard.press("ArrowDown");
-//   }
-//   await page.keyboard.press("Enter");
-//   await expect(page.locator("#tab-key-2-1")).toBeFocused();
-// });
 
 // test("navigate to change to Dark mode with keyboard", async ({ page }) => {
 //   await page.goto();
