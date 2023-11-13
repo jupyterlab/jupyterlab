@@ -184,7 +184,8 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
         break;
       }
     }
@@ -366,7 +367,8 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
-      if (await fileMenu.evaluate(el => el === document.activeElement)) {
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
         break;
       }
     }
@@ -377,7 +379,10 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('ArrowDown');
-      if (await fileNewLauncher.evaluate(el => el === document.activeElement)) {
+      let fileNewLauncherClass = (
+        (await fileNewLauncher.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (fileNewLauncherClass.includes('lm-mod-active')) {
         break;
       }
     }
