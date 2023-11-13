@@ -309,40 +309,27 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     expect(await page.menu.isOpen('Help')).toBeTruthy();
   });
 
-  // test('Open file > New with keyboard', async ({ page }) => {
-  //   await page.goto();
-  //   const fileMenu = page.getByRole('menuitem', { name: 'File' });
-  //   const fileNew = page.getByRole('menuitem', {
-  //     name: 'New'
-  //   });
-  //   const secondLauncher = page.locator('#tab-key-2-1');
+  test('Open file > New with keyboard', async ({ page }) => {
+    const fileNew = page.getByText('New', { exact: true });
 
-  //   // eslint-disable-next-line no-constant-condition
-  //   while (true) {
-  //     await page.keyboard.press('Shift+Tab');
-  //     let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
-  //     if (fileClass.includes('lm-mod-active')) {
-  //       break;
-  //     }
-  //   }
-  //   await page.keyboard.press('Enter');
+    await page.keyboard.press('Enter');
 
-  //   expect(await page.menu.isOpen('File')).toBeTruthy();
+    expect(await page.menu.isOpen('File')).toBeTruthy();
 
-  //   // eslint-disable-next-line no-constant-condition
-  //   while (true) {
-  //     await page.keyboard.press('ArrowDown');
-  //     let fileNewClass = ((await fileNew.getAttribute('class')) ?? '').split(
-  //       ' '
-  //     );
-  //     if (fileNewClass.includes('lm-mod-active')) {
-  //       break;
-  //     }
-  //   }
-  //   await page.keyboard.press('Enter');
-  //   const menuPath = 'File>New';
-  //   expect(await page.menu.isOpen(menuPath)).toBeTruthy();
-  // });
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let fileNewClass = ((await fileNew.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (fileNewClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+    const menuPath = 'File>New';
+    expect(await page.menu.isOpen(menuPath)).toBeTruthy();
+  });
 
   test('Open new launcher via top menu bar with keyboard', async ({ page }) => {
     const fileNewLauncher = page.getByRole('menuitem', {
@@ -430,9 +417,13 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Close all tabs with keyboard', async ({ page }) => {
     await page.goto();
-
+    const closeAllTabs = page.getByRole('menuitem', {
+      name: 'Close All Tabs'
+    });
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const secondLauncher = page.locator('#tab-key-2-1');
     const thirdLauncher = page.locator('#tab-key-2-2');
+
     await page.menu.clickMenuItem('File>New Launcher');
     let secondLauncherClass = (
       (await secondLauncher.getAttribute('class')) ?? ''
@@ -443,6 +434,30 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       (await thirdLauncher.getAttribute('class')) ?? ''
     ).split(' ');
     expect(thirdLauncherClass.includes('jp-mod-current')).toBeTruthy;
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('Shift+Tab');
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let closeAllTabsClass = (
+        (await closeAllTabs.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (closeAllTabsClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    expect(secondLauncherClass.includes('jp-mod-current')).not.toBeTruthy;
+    expect(thirdLauncherClass.includes('jp-mod-current')).not.toBeTruthy;
   });
 });
 
