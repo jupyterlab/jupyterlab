@@ -186,7 +186,7 @@ const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 /**
  * The data attribute set on cells for tags
  */
-const TAGS_DATA_ATTRIBUTE = 'jp-tags';
+const TAGS_DATA_ATTRIBUTE = 'jpTags';
 
 /** ****************************************************************************
  * Cell
