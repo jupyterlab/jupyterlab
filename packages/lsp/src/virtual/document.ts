@@ -461,12 +461,15 @@ export class VirtualDocument implements IDisposable {
    * Clear the virtual document and all related stuffs
    */
   clear(): void {
+    this.unusedStandaloneDocuments.clear();
+
     for (let document of this.foreignDocuments.values()) {
       document.clear();
+      if (document.standalone) {
+        let set = this.unusedStandaloneDocuments.get(document.language);
+        set.push(document);
+      }
     }
-
-    // TODO - deep clear (assure that there is no memory leak)
-    this.unusedStandaloneDocuments.clear();
 
     this.virtualLines.clear();
     this.sourceLines.clear();
@@ -739,7 +742,7 @@ export class VirtualDocument implements IDisposable {
             );
             continue;
           }
-          let foreignDocument = this.chooseForeignDocument(extractor);
+          let foreignDocument = this._chooseForeignDocument(extractor);
           foreignDocumentsMap.set(result.range, {
             virtualLine: foreignDocument.lastVirtualLine,
             virtualDocument: foreignDocument,
@@ -889,6 +892,19 @@ export class VirtualDocument implements IDisposable {
   }
 
   /**
+   * Compute the position in root document from the position of
+   * a virtual document.
+   */
+  transformVirtualToRoot(position: IVirtualPosition): IRootPosition | null {
+    const editor = this.virtualLines.get(position.line)?.editor;
+    const editorPosition = this.transformVirtualToEditor(position);
+    if (!editor || !editorPosition) {
+      return null;
+    }
+    return this.root.transformFromEditorToRoot(editor, editorPosition);
+  }
+
+  /**
    * Get the corresponding editor of the virtual line.
    */
   getEditorAtVirtualLine(pos: IVirtualPosition): Document.IEditor {
@@ -965,7 +981,7 @@ export class VirtualDocument implements IDisposable {
   /**
    * Get the foreign document that can be opened with the input extractor.
    */
-  private chooseForeignDocument(
+  private _chooseForeignDocument(
     extractor: IForeignCodeExtractor
   ): VirtualDocument {
     let foreignDocument: VirtualDocument;
@@ -976,11 +992,18 @@ export class VirtualDocument implements IDisposable {
     } else {
       // if (previous document does not exists) or (extractor produces standalone documents
       // and no old standalone document could be reused): create a new document
-      foreignDocument = this.openForeign(
-        extractor.language,
-        extractor.standalone,
-        extractor.fileExtension
+      let unusedStandalone = this.unusedStandaloneDocuments.get(
+        extractor.language
       );
+      if (extractor.standalone && unusedStandalone.length > 0) {
+        foreignDocument = unusedStandalone.pop()!;
+      } else {
+        foreignDocument = this.openForeign(
+          extractor.language,
+          extractor.standalone,
+          extractor.fileExtension
+        );
+      }
     }
     return foreignDocument;
   }
@@ -997,13 +1020,16 @@ export class VirtualDocument implements IDisposable {
     standalone: boolean,
     fileExtension: string
   ): VirtualDocument {
-    let document = new VirtualDocument({
+    let document = new (this.constructor as new (
+      ...args: ConstructorParameters<typeof VirtualDocument>
+    ) => VirtualDocument)({
       ...this.options,
       parent: this,
       standalone: standalone,
       fileExtension: fileExtension,
       language: language
     });
+
     const context: Document.IForeignContext = {
       foreignDocument: document,
       parentHost: this
