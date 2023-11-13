@@ -186,7 +186,7 @@ const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 /**
  * The data attribute set on cells for tags
  */
-const TAGS_DATA_ATTRIBUTE = 'jp-tags'
+const TAGS_DATA_ATTRIBUTE = 'jp-tags';
 
 /** ****************************************************************************
  * Cell
@@ -728,7 +728,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _setTagsAttribute() {
     const tags: string[] = this.model.getMetadata('tags') ?? [];
     if (tags.length) {
-      this.node.dataset[TAGS_DATA_ATTRIBUTE] = ',' + tags.sort().join(',') + ',';
+      this.node.dataset[TAGS_DATA_ATTRIBUTE] =
+        ',' + tags.sort().join(',') + ',';
     } else {
       delete this.node.dataset[TAGS_DATA_ATTRIBUTE];
     }
