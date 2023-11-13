@@ -312,7 +312,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   test('Open file > New with keyboard', async ({ page }) => {
     await page.keyboard.press('Enter');
 
-    const fileNew = page.getByText('New', { exact: true });
+    const fileNew = page.locator('[data-type="submenu", { hasText: "New" }]');
 
     expect(await page.menu.isOpen('File')).toBeTruthy();
 
@@ -458,6 +458,40 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
     expect(secondLauncherClass.includes('jp-mod-current')).not.toBeTruthy;
     expect(thirdLauncherClass.includes('jp-mod-current')).not.toBeTruthy;
+  });
+
+  test('Open Activate command palette with keyboard', async ({ page }) => {
+    const activateCommandPalette = page.getByRole('menuitem', {
+      name: 'Activate Command Palette'
+    });
+    const viewMenu = page.getByRole('menuitem', { name: 'View' });
+    const commandPalette = page.getByLabel('Activate Command Palette');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (viewMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let activateCommandPaletteClass = (
+        (await activateCommandPalette.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (activateCommandPaletteClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    expect(commandPalette.isVisible).toBe(true);
   });
 });
 
