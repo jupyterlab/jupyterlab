@@ -2693,7 +2693,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle `focus` events for the widget.
    */
-  private _evtFocusIn(event: MouseEvent): void {
+  private _evtFocusIn(event: FocusEvent): void {
     const target = event.target as HTMLElement;
     const index = this._findCell(target);
     if (index !== -1) {
@@ -2715,8 +2715,13 @@ export class Notebook extends StaticNotebook {
       // Prevents the parent element to get the focus.
       event.preventDefault();
 
-      // Focuses on a cell (if possible), or on the footer element.
-      if (this._activeCell) {
+      // Check if the focus was previously in the active cell to avoid focus looping
+      // between the cell and the cell toolbar.
+      const source = event.relatedTarget as HTMLElement;
+
+      // Focuses on the active cell if the focus did not come from it.
+      // Otherwise focus on the footer element (add cell button).
+      if (this._activeCell && !this._activeCell.node.contains(source)) {
         this._activeCell.ready
           .then(() => {
             this._activeCell?.node.focus({
