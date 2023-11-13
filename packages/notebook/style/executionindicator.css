@@ -17,6 +17,7 @@
   position: relative;
   display: inline-block;
   z-index: 9997;
+  padding-top: 1px;
 }
 
 .jp-Notebook-ExecutionIndicator-tooltip {
