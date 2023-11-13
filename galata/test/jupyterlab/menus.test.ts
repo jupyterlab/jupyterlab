@@ -310,9 +310,9 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   });
 
   test('Open file > New with keyboard', async ({ page }) => {
-    const fileNew = page.getByText('New', { exact: true });
-
     await page.keyboard.press('Enter');
+
+    const fileNew = page.getByText('New', { exact: true });
 
     expect(await page.menu.isOpen('File')).toBeTruthy();
 
