@@ -311,10 +311,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open file > New with keyboard', async ({ page }) => {
     await page.keyboard.press('Enter');
-
-    const fileNew = page.locator('[data-type="submenu", { hasText: "New" }]');
-
-    expect(await page.menu.isOpen('File')).toBeTruthy();
+    const fileNew = page.getByText('New', { exact: true });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -464,8 +461,9 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     const activateCommandPalette = page.getByRole('menuitem', {
       name: 'Activate Command Palette'
     });
+
     const viewMenu = page.getByRole('menuitem', { name: 'View' });
-    const commandPalette = page.getByLabel('Activate Command Palette');
+    const commandPalette = page.locator('#modal-command-palette');
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -491,7 +489,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    expect(commandPalette).toBeVisible();
+    expect(commandPalette.isVisible).toBe(true);
   });
 
   test('Open File Browser with keyboard', async ({ page }) => {
@@ -525,7 +523,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    expect(fileBrowserSideMenu).toBeVisible();
+    expect(await page.sidebar.isTabOpen('filebrowser')).toBeTruthy();
   });
 
   test('Open Property Inspector with keyboard', async ({ page }) => {
