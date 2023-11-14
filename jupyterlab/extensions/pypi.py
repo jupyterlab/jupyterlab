@@ -77,7 +77,7 @@ async def _fetch_package_metadata(
         base_url + f"/{name}/{latest_version}/json",
         headers={"Content-Type": "application/json"},
     )
-    if response.status_code < 400:
+    if response.status_code < 400:  # noqa PLR2004
         data = json.loads(response.text).get("info")
 
         # Keep minimal information to limit cache size
@@ -125,10 +125,10 @@ class PyPIExtensionManager(ExtensionManager):
         parent: Optional[config.Configurable] = None,
     ) -> None:
         super().__init__(app_options, ext_options, parent)
+        self._httpx_client = httpx.AsyncClient(proxies=proxies)
         # Set configurable cache size to fetch function
         self._fetch_package_metadata = partial(_fetch_package_metadata, self._httpx_client)
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
-        self._httpx_client = httpx.AsyncClient(proxies=proxies)
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
         self._rpc_client = xmlrpc.client.ServerProxy(
             self.base_url, transport=xmlrpc_transport_override
@@ -162,7 +162,7 @@ class PyPIExtensionManager(ExtensionManager):
                 self.base_url + f"/{pkg}/json", headers={"Content-Type": "application/json"}
             )
 
-            if response.status_code < 400:
+            if response.status_code < 400:  # noqa PLR2004
                 data = json.loads(response.content).get("info", {})
             else:
                 self.log.debug(f"Failed to get package information on PyPI; {response!s}")
@@ -387,7 +387,7 @@ class PyPIExtensionManager(ExtensionManager):
                 download_url: str = pkg_action.get("download_info", {}).get("url")
                 if download_url is not None:
                     response = await self._httpx_client.get(download_url)
-                    if response.status_code < 400:
+                    if response.status_code < 400:  # noqa PLR2004
                         if download_url.endswith(".whl"):
                             with ZipFile(io.BytesIO(response.content)) as wheel:
                                 for name in filter(
