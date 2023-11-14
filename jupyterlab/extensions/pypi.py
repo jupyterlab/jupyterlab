@@ -67,12 +67,17 @@ if http_proxy_url:
     xmlrpc_transport_override.set_proxy(proxy_host, proxy_port)
 
 
-async def _fetch_package_metadata(name: str, latest_version: str, base_url: str) -> dict:
-    async with httpx.AsyncClient(proxies=proxies) as httpx_client:
-        response = await httpx_client.get(
-            base_url + f"/{name}/{latest_version}/json",
-            headers={"Content-Type": "application/json"},
-        )
+async def _fetch_package_metadata(
+    client: httpx.AsyncClient,
+    name: str,
+    latest_version: str,
+    base_url: str,
+) -> dict:
+    response = await client.get(
+        base_url + f"/{name}/{latest_version}/json",
+        headers={"Content-Type": "application/json"},
+    )
+    if response.status_code < 400:
         data = json.loads(response.text).get("info")
 
         # Keep minimal information to limit cache size
@@ -90,6 +95,8 @@ async def _fetch_package_metadata(name: str, latest_version: str, base_url: str)
                 "summary",
             ]
         }
+    else:
+        return {}
 
 
 class PyPIExtensionManager(ExtensionManager):
@@ -119,8 +126,9 @@ class PyPIExtensionManager(ExtensionManager):
     ) -> None:
         super().__init__(app_options, ext_options, parent)
         # Set configurable cache size to fetch function
-        self._fetch_package_metadata = _fetch_package_metadata
+        self._fetch_package_metadata = partial(_fetch_package_metadata, self._httpx_client)
         self._observe_package_metadata_cache_size({"new": self.package_metadata_cache_size})
+        self._httpx_client = httpx.AsyncClient(proxies=proxies)
         # Combine XML RPC API and JSON API to reduce throttling by PyPI.org
         self._rpc_client = xmlrpc.client.ServerProxy(
             self.base_url, transport=xmlrpc_transport_override
@@ -150,15 +158,19 @@ class PyPIExtensionManager(ExtensionManager):
             The latest available version
         """
         try:
-            async with httpx.AsyncClient(proxies=proxies) as httpx_client:
-                response = await httpx_client.get(
-                    self.base_url + f"/{pkg}/json", headers={"Content-Type": "application/json"}
-                )
-                data = json.loads(response.content).get("info")
+            response = await self._httpx_client.get(
+                self.base_url + f"/{pkg}/json", headers={"Content-Type": "application/json"}
+            )
+
+            if response.status_code < 400:
+                data = json.loads(response.content).get("info", {})
+            else:
+                self.log.debug(f"Failed to get package information on PyPI; {response!s}")
+                return None
         except Exception:
             return None
         else:
-            return ExtensionManager.get_semver_version(data.get("version"))
+            return ExtensionManager.get_semver_version(data.get("version", "")) or None
 
     def get_normalized_name(self, extension: ExtensionPackage) -> str:
         """Normalize extension name.
@@ -215,7 +227,9 @@ class PyPIExtensionManager(ExtensionManager):
 
     @observe("package_metadata_cache_size")
     def _observe_package_metadata_cache_size(self, change):
-        self._fetch_package_metadata = alru_cache(maxsize=change["new"])(_fetch_package_metadata)
+        self._fetch_package_metadata = alru_cache(maxsize=change["new"])(
+            partial(_fetch_package_metadata, self._httpx_client)
+        )   
 
     async def list_packages(
         self, query: str, page: int, per_page: int
@@ -372,28 +386,30 @@ class PyPIExtensionManager(ExtensionManager):
             try:
                 download_url: str = pkg_action.get("download_info", {}).get("url")
                 if download_url is not None:
-                    async with httpx.AsyncClient(proxies=proxies) as httpx_client:
-                        response = await httpx_client.get(download_url, proxies=proxies)
-                    if download_url.endswith(".whl"):
-                        with ZipFile(io.BytesIO(response.content)) as wheel:
-                            for name in filter(
-                                lambda f: Path(f).name == "package.json",
-                                wheel.namelist(),
-                            ):
-                                data = json.loads(wheel.read(name))
-                                jlab_metadata = data.get("jupyterlab")
-                                if jlab_metadata is not None:
-                                    break
-                    elif download_url.endswith("tar.gz"):
-                        with TarFile(io.BytesIO(response.content)) as sdist:
-                            for name in filter(
-                                lambda f: Path(f).name == "package.json",
-                                sdist.getnames(),
-                            ):
-                                data = json.load(sdist.extractfile(sdist.getmember(name)))
-                                jlab_metadata = data.get("jupyterlab")
-                                if jlab_metadata is not None:
-                                    break
+                    response = await self._httpx_client.get(download_url)
+                    if response.status_code < 400:
+                        if download_url.endswith(".whl"):
+                            with ZipFile(io.BytesIO(response.content)) as wheel:
+                                for name in filter(
+                                    lambda f: Path(f).name == "package.json",
+                                    wheel.namelist(),
+                                ):
+                                    data = json.loads(wheel.read(name))
+                                    jlab_metadata = data.get("jupyterlab")
+                                    if jlab_metadata is not None:
+                                        break
+                        elif download_url.endswith("tar.gz"):
+                            with TarFile(io.BytesIO(response.content)) as sdist:
+                                for name in filter(
+                                    lambda f: Path(f).name == "package.json",
+                                    sdist.getnames(),
+                                ):
+                                    data = json.load(sdist.extractfile(sdist.getmember(name)))
+                                    jlab_metadata = data.get("jupyterlab")
+                                    if jlab_metadata is not None:
+                                        break
+                    else:
+                        self.log.debug(f"Failed to get '{download_url}'; {response!s}")
             except Exception as e:
                 self.log.debug("Fail to get package.json.", exc_info=e)
 
