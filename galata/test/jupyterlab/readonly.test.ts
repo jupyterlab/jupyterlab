@@ -5,23 +5,21 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 
-test.describe('test kernel history keybindings', () => {
-  test.use({
-    mockSettings: {
-      ...galata.DEFAULT_SETTINGS,
-      '@jupyterlab/notebook-extension:tracker': {
-        accessKernelHistory: true
-      }
-    }
-  });
-  test('Use history keybindings', async ({ page }) => {
+test.describe('test readonly status', () => {
+  test('test readonly status', async ({ page }) => {
     await galata.Mock.makeNotebookReadonly(page);
     await page.notebook.createNew('notebook.ipynb');
 
-    const imageName = 'readonly.png';
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    // have to open and close notebook for notification to show up
+    await page.notebook.close();
+    await page.notebook.open('notebook.ipynb');
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
-    expect(0).toBe(1);
+    await page.keyboard.press('Control+s');
+
+    const imageName = 'readonly.png';
+    await page.waitForSelector('.Toastify__toast');
+    expect(
+      await await page.locator('.Toastify__toast').screenshot()
+    ).toMatchSnapshot(imageName);
   });
 });

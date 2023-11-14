@@ -877,18 +877,13 @@ function addCommands(
             return;
           }
           if (!context.contentsModel?.writable) {
-            let type;
             if (args._luminoEvent) {
-              type = (args._luminoEvent as ReadonlyPartialJSONObject).type;
+              let type = (args._luminoEvent as ReadonlyPartialJSONObject).type;
+              if (type === 'keybinding') {
+                readonlyNotification(context.path);
+                return;
+              }
             }
-            if (type === 'keybinding') {
-              readonlyNotification(context.path);
-            }
-            return showDialog({
-              title: trans.__('Cannot Save'),
-              body: trans.__('Document is read-only'),
-              buttons: [Dialog.okButton()]
-            });
           }
 
           saveInProgress.add(context);
