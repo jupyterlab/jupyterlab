@@ -104,8 +104,8 @@ namespace CommandIDs {
 
   export const toggleSideTabBar: string = 'application:toggle-side-tabbar';
 
-  export const activateSidebarWidget: string =
-    'application:activate-sidebar-widget';
+  export const toggleSidebarWidget: string =
+    'application:toggle-sidebar-widget';
 
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
