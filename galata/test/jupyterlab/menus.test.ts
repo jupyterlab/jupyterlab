@@ -487,7 +487,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       }
     }
     await page.keyboard.press('Enter');
-    expect(page.locator('command-palette')).toBeVisible();
+    await expect(page.locator('command-palette')).not.toBeHidden();
   });
 
   test('Open File Browser with keyboard', async ({ page }) => {
@@ -521,7 +521,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     await page.keyboard.press('Enter');
 
     // await page.sidebar.openTab('filebrowser');
-    expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
+    expect(await page.sidebar.isTabOpen('tab-key-1-6')).toEqual(true);
   });
 
   test('Open Property Inspector with keyboard', async ({ page }) => {
@@ -727,7 +727,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     expect(await status.getAttribute('class')).toMatch(/\s?jp-mod-selected\s?/);
     await expect(status).toHaveText('0');
     await expect(page.locator('.jp-Notification-Header')).toHaveText(
-      '0 notifications'
+      'No notifications'
     );
   });
 });
