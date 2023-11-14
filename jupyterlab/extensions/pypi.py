@@ -229,7 +229,7 @@ class PyPIExtensionManager(ExtensionManager):
     def _observe_package_metadata_cache_size(self, change):
         self._fetch_package_metadata = alru_cache(maxsize=change["new"])(
             partial(_fetch_package_metadata, self._httpx_client)
-        )   
+        )
 
     async def list_packages(
         self, query: str, page: int, per_page: int
