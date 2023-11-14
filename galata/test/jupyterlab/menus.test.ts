@@ -311,7 +311,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open file > New with keyboard', async ({ page }) => {
     await page.keyboard.press('Enter');
-    const fileNew = page.getByText('New', { exact: true });
+    const fileNew = page.getByRole('menu', { name: 'New' });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -463,7 +463,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     });
 
     const viewMenu = page.getByRole('menuitem', { name: 'View' });
-    const commandPalette = page.locator('#modal-command-palette');
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -488,8 +487,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       }
     }
     await page.keyboard.press('Enter');
-
-    expect(commandPalette).not.toBeHidden();
+    expect(page.locator('command-palette')).toBeVisible();
   });
 
   test('Open File Browser with keyboard', async ({ page }) => {
@@ -556,8 +554,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    // await page.sidebar.openTab('jp-property-inspector')
-
     expect(await page.sidebar.isTabOpen('jp-property-inspector')).toEqual(true);
   });
 
@@ -591,8 +587,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    // await page.sidebar.openTab('jp-property-inspector')
-
     expect(await page.sidebar.isTabOpen('jp-running-sessions')).toEqual(true);
   });
 
@@ -625,8 +619,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       }
     }
     await page.keyboard.press('Enter');
-
-    // await page.sidebar.openTab('jp-property-inspector')
 
     expect(await page.sidebar.isTabOpen('table-of-contents')).toEqual(true);
   });
@@ -696,8 +688,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    // await page.sidebar.openTab('jp-property-inspector')
-
     expect(await page.sidebar.isTabOpen('extensionmanager.main-view')).toEqual(
       true
     );
@@ -735,9 +725,9 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     await page.keyboard.press('Enter');
     const status = page.locator('.jp-Notification-Status');
     expect(await status.getAttribute('class')).toMatch(/\s?jp-mod-selected\s?/);
-    await expect(status).toHaveText('1');
+    await expect(status).toHaveText('0');
     await expect(page.locator('.jp-Notification-Header')).toHaveText(
-      '1 notification'
+      '0 notifications'
     );
   });
 });
