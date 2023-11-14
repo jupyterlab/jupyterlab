@@ -375,7 +375,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             return;
           }
           const widgetId = widgets[index].id;
-          const focusElement = document.querySelector(
+          const focusElement: HTMLElement | null = document.querySelector(
             "[data-id='" + widgetId + "']"
           );
           if (activeSidePanelWidget(args.side) === widgetId) {
