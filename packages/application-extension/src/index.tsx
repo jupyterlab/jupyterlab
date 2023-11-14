@@ -229,11 +229,9 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
     };
 
     // Sets tab focus on the element
-    function setTabFocus(focusElement: Element | null) {
+    function setTabFocus(focusElement: HTMLElement | null) {
       if (focusElement) {
-        if ((focusElement as HTMLElement).focus) {
-          (focusElement as HTMLElement).focus();
-        }
+        focusElement.focus();
       }
     }
 
