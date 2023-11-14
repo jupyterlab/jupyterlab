@@ -522,8 +522,8 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    await page.sidebar.openTab('filebrowser');
-    expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
+    // await page.sidebar.openTab('filebrowser');
+    expect(await page.sidebar.isTabOpen('tab-key-1-6')).toEqual(true);
   });
 
   test('Open Property Inspector with keyboard', async ({ page }) => {
