@@ -450,6 +450,12 @@
     ]
   },
   {
+    "id": "debugger:open-source",
+    "label": "Open Source",
+    "caption": "Open Source",
+    "shortcuts": []
+  },
+  {
     "id": "debugger:pause-on-exceptions",
     "label": "Breakpoints on exception",
     "shortcuts": []
@@ -895,6 +901,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-show-full-path",
+    "label": "Show Full Path",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-sort-notebooks-first",
     "label": "Sort Notebooks Above Files",
     "caption": "",
@@ -1216,6 +1228,38 @@
     "caption": "",
     "shortcuts": [
       "-"
+    ]
+  },
+  {
+    "id": "inline-completer:accept",
+    "label": "Accept Inline Completion",
+    "caption": "",
+    "shortcuts": [
+      "Alt End"
+    ]
+  },
+  {
+    "id": "inline-completer:invoke",
+    "label": "Invoke Inline Completer",
+    "caption": "",
+    "shortcuts": [
+      "Alt \\"
+    ]
+  },
+  {
+    "id": "inline-completer:next",
+    "label": "Next Inline Completion",
+    "caption": "",
+    "shortcuts": [
+      "Alt ]"
+    ]
+  },
+  {
+    "id": "inline-completer:previous",
+    "label": "Previous Inline Completion",
+    "caption": "",
+    "shortcuts": [
+      "Alt ["
     ]
   },
   {
