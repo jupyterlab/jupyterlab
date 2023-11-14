@@ -489,7 +489,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    expect(commandPalette.isVisible).toBe(true);
+    expect(commandPalette).not.toBeHidden();
   });
 
   test('Open File Browser with keyboard', async ({ page }) => {
@@ -497,7 +497,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       name: 'File Browser'
     });
     const viewMenu = page.getByRole('menuitem', { name: 'View' });
-    const fileBrowserSideMenu = page.getByLabel('File Browser Section');
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -523,7 +522,8 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    expect(await page.sidebar.isTabOpen('filebrowser')).toBeTruthy();
+    await page.sidebar.openTab('filebrowser');
+    expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
   });
 
   test('Open Property Inspector with keyboard', async ({ page }) => {
@@ -558,7 +558,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
     // await page.sidebar.openTab('jp-property-inspector')
 
-    expect(await page.sidebar.isTabOpen('jp-property-inspector')).toBeTruthy();
+    expect(await page.sidebar.isTabOpen('jp-property-inspector')).toEqual(true);
   });
 
   test('Open Sessions and Tabs with keyboard', async ({ page }) => {
@@ -593,7 +593,152 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
     // await page.sidebar.openTab('jp-property-inspector')
 
-    expect(await page.sidebar.isTabOpen('jp-running-sessions')).toBeTruthy();
+    expect(await page.sidebar.isTabOpen('jp-running-sessions')).toEqual(true);
+  });
+
+  test('Open Table of Contents with keyboard', async ({ page }) => {
+    const tableOfContentsMenu = page.getByRole('menuitem', {
+      name: 'Table of Contents'
+    });
+    const viewMenu = page.getByRole('menuitem', { name: 'View' });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (viewMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let tableOfContentsClass = (
+        (await tableOfContentsMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (tableOfContentsClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // await page.sidebar.openTab('jp-property-inspector')
+
+    expect(await page.sidebar.isTabOpen('table-of-contents')).toEqual(true);
+  });
+
+  test('Open Debugger Panel with keyboard', async ({ page }) => {
+    const debuggerPanelMenu = page.getByRole('menuitem', {
+      name: 'Debugger Panel'
+    });
+    const viewMenu = page.getByRole('menuitem', { name: 'View' });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (viewMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let debuggerPanelClass = (
+        (await debuggerPanelMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (debuggerPanelClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // await page.sidebar.openTab('jp-property-inspector')
+
+    expect(await page.sidebar.isTabOpen('jp-debugger-sidebar')).toEqual(true);
+  });
+
+  test('Open Extension Manager with keyboard', async ({ page }) => {
+    const extensionManagerMenu = page.getByRole('menuitem', {
+      name: 'Extension Manager'
+    });
+    const viewMenu = page.getByRole('menuitem', { name: 'View' });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (viewMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let extensionManagerClass = (
+        (await extensionManagerMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (extensionManagerClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // await page.sidebar.openTab('jp-property-inspector')
+
+    expect(await page.sidebar.isTabOpen('extensionmanager.main-view')).toEqual(
+      true
+    );
+  });
+
+  test('Show Notifications with keyboard', async ({ page }) => {
+    const showNotificationsMenu = page.getByRole('menuitem', {
+      name: 'Show Notifications'
+    });
+    const viewMenu = page.getByRole('menuitem', { name: 'View' });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (viewMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let showNotificationsClass = (
+        (await showNotificationsMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (showNotificationsClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+
+    await page.keyboard.press('Enter');
+    const status = page.locator('.jp-Notification-Status');
+    expect(await status.getAttribute('class')).toMatch(/\s?jp-mod-selected\s?/);
+    await expect(status).toHaveText('1');
+    await expect(page.locator('.jp-Notification-Header')).toHaveText(
+      '1 notification'
+    );
   });
 });
 
