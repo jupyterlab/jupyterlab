@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 import { Sanitizer } from '@jupyterlab/apputils';
-import { PathExt, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { Contents } from '@jupyterlab/services';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -384,6 +384,53 @@ export namespace RenderMimeRegistry {
         return false;
       }
       return URLExt.isLocal(url) || !!this._contents.driveName(decodeURI(url));
+    }
+
+    /**
+     * Resolve a path from Jupyter kernel to a path:
+     * - relative to `root_dir` (preferrably) this is in jupyter-server scope,
+     * - path understood and known by kernel (if such a path exists).
+     * Returns `null` if there is no file matching provided path in neither
+     * kernel nor jupyter-server contents manager.
+     */
+    async resolvePath(
+      path: string
+    ): Promise<IRenderMime.IResolvedLocation | null> {
+      // TODO: a clean implementation would be server-side and depends on:
+      // https://github.com/jupyter-server/jupyter_server/issues/1280
+
+      const rootDir = PageConfig.getOption('rootUri').replace('file://', '');
+      // Workaround: expand `~` path using root dir (if it matches).
+      if (path.startsWith('~/') && rootDir.startsWith('/home/')) {
+        // For now we assume that kernel is in root dir.
+        path = rootDir.split('/').slice(0, 3).join('/') + path.substring(1);
+      }
+      if (path.startsWith(rootDir) || path.startsWith('./')) {
+        try {
+          const relativePath = path.replace(rootDir, '');
+          // If file exists on the server we have guessed right
+          const response = await this._contents.get(relativePath, {
+            content: false
+          });
+          return {
+            path: response.path,
+            scope: 'server'
+          };
+        } catch (error) {
+          // The file seems like should be on the server but is not.
+          console.warn(`Could not resolve location of ${path} on server`);
+          return null;
+        }
+      }
+      // The file is not accessible from jupyter-server but maybe it is
+      // available from DAP `source`; we assume the path is available
+      // from kernel because currently we have no way of checking this
+      // without introducing a cycle (unless we were to set the debugger
+      // service instance on the resolver later).
+      return {
+        path: path,
+        scope: 'kernel'
+      };
     }
 
     /**

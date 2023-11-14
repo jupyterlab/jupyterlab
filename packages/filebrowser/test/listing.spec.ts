@@ -91,6 +91,16 @@ describe('filebrowser/listing', () => {
       });
     });
 
+    describe('#defaultRenderer', () => {
+      it('should enable scrolling when dragging items', () => {
+        const options = createOptionsForConstructor();
+        const dirListing = new DirListing(options);
+        expect(
+          dirListing.node.querySelector('[data-lm-dragscroll]')
+        ).toBeDefined();
+      });
+    });
+
     describe('#rename', () => {
       it('backspace during rename does not trigger goUp method', async () => {
         dirListing.selectNext();
