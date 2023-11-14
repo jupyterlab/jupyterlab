@@ -14,7 +14,8 @@
   user-select: none;
 }
 
-.jp-ToolbarButtonComponent[data-command='notebook:cell-filters'] {
+.jp-NotebookTools-tool
+  .jp-ToolbarButtonComponent[data-command='notebook:cell-filters'] {
   background-color: var(--jp-layout-color2);
   color: var(--jp-ui-font-color1);
   border-radius: 10px;
