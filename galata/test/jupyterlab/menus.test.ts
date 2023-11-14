@@ -525,7 +525,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    expect(fileBrowserSideMenu.isVisible).toBe(true);
+    expect(fileBrowserSideMenu).toBeVisible();
   });
 
   test('Open Property Inspector with keyboard', async ({ page }) => {
