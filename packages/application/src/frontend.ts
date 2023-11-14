@@ -278,6 +278,15 @@ export namespace JupyterFrontEnd {
 
     /**
      * A signal emitted when the focused widget in the application shell changes.
+     *
+     * ### Notes
+     * Shells may not always have a {@link currentWidget} or it may not change.
+     * Therefore implementing this signal is only expected for shell with the ability
+     * to switch between active widgets.
+     *
+     * Although the signal argument type mentionned a focus tracker, the shell
+     * current widget may not be the one focused as its definition is an implementation
+     * detail.
      */
     readonly currentChanged?: ISignal<
       IShell,
