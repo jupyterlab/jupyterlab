@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  COMPLETER_ACTIVE_CLASS,
+  COMPLETER_ENABLED_CLASS
+} from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
 import { ISharedText, SourceChange } from '@jupyter/ydoc';
 import { IDataConnector } from '@jupyterlab/statedb';
@@ -20,16 +24,6 @@ import {
 } from './tokens';
 import { Completer } from './widget';
 import { InlineCompleter } from './inline';
-
-/**
- * A class added to editors that can host a completer.
- */
-const COMPLETER_ENABLED_CLASS: string = 'jp-mod-completer-enabled';
-
-/**
- * A class added to editors that have an active completer.
- */
-const COMPLETER_ACTIVE_CLASS: string = 'jp-mod-completer-active';
 
 /**
  * A completion handler for editors.
