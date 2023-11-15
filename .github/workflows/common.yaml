@@ -1,0 +1,27 @@
+name: Bigdata Commit Checks
+
+on: [pull_request]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    # - name: Install devctl
+    #   run: |
+    #     mkdir -p ${{ env.DEVCTL_INSTALL_DIR }}
+    #     curl -H "Authorization: token ${{ env.GITHUB_TOKEN }}" -o- ${{ env.DEVCTL_INSTALL_URL }} | INSTALL_DIR=${{ env.DEVCTL_INSTALL_DIR }} bash
+    #     echo ${{ env.DEVCTL_INSTALL_DIR }} >> $GITHUB_PATH
+    #   shell: bash
+    #   env:
+    #     DEVCTL_INSTALL_DIR: ${{runner.tool_cache}}/devctl
+    #     DEVCTL_INSTALL_URL: https://raw.githubusercontent.com/spotinst/bigdata-devctl/main/install.sh
+    #     GITHUB_TOKEN: ${{secrets.CI_PAT}}
+
+    # - name: run validation checks
+    #   run: devctl ci
+    #   env:
+    #     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    #     JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+    #     PR_ID: ${{ github.event.pull_request.number }}
