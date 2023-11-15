@@ -499,7 +499,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
 
     if (await page.sidebar.isTabOpen('filebrowser')) {
-      page.sidebar.close('right');
+      page.sidebar.close('left');
     }
 
     // eslint-disable-next-line no-constant-condition
