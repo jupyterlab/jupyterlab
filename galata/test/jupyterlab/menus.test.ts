@@ -493,7 +493,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open File Browser with keyboard', async ({ page }) => {
     const fileBrowserMenu = page.getByRole('menuitem', {
-      name: 'File Browser'
+      name: 'File Browser Ctrl + Shift + F'
     });
     const viewMenu = page.getByRole('menuitem', { name: 'View' });
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
@@ -774,12 +774,22 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     expect(!logConsoleClass.includes('lm-mod-hidden'));
   });
 });
-test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
-  test.beforeEach(async ({ page }) => {
+
+const tabsMenuPaths = [
+  'Activate Next Tab Ctrl+Shift+]',
+  'Activate Previous Tab Ctrl+Shift+[',
+  "Activate Previously used Tab Ctrl+Shift+'"
+];
+
+tabsMenuPaths.forEach(tabsMenuPath => {
+  test(`Navigate to ${tabsMenuPath} with keyboard`, async ({ page }) => {
     await page.goto();
     await page.menu.clickMenuItem('File>New Launcher');
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const tabsMenu = page.getByRole('menuitem', { name: 'Tabs' });
+    const menuitem = page.getByRole('menuitem', {
+      name: `${tabsMenuPath}`
+    });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -788,10 +798,6 @@ test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
       if (fileClass.includes('lm-mod-active')) {
         break;
       }
-    }
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
       await page.keyboard.press('ArrowRight');
       let tabsMenuClass = ((await tabsMenu.getAttribute('class')) ?? '').split(
         ' '
@@ -800,33 +806,26 @@ test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
         break;
       }
     }
-    await page.keyboard.press('Enter');
-  });
-
-  test('Activate Next Tab with keyboard', async ({ page }) => {
-    const activateNextTabMenu = page.getByRole('menuitem', {
-      name: 'Activate Next Tab'
-    });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('ArrowDown');
-      let activateNextTabClass = (
-        (await activateNextTabMenu.getAttribute('class')) ?? ''
-      ).split(' ');
-      if (activateNextTabClass.includes('lm-mod-active')) {
+      let menuitemClass = ((await menuitem.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (menuitemClass.includes('lm-mod-active')) {
         break;
       }
     }
 
     await page.keyboard.press('Enter');
 
-    const logConsole = page.locator('#jp-down-stack');
-    let logConsoleClass = (
-      (await logConsole.getAttribute('class')) ?? ''
-    ).split(' ');
+    const firstTab = page.locator('tab-key-2-0');
+    let firstTabClass = ((await firstTab.getAttribute('class')) ?? '').split(
+      ' '
+    );
 
-    expect(!logConsoleClass.includes('lm-mod-hidden'));
+    expect(firstTabClass.includes('jp-mod-current'));
   });
 });
 
