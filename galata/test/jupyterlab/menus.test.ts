@@ -487,6 +487,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       }
     }
     await page.keyboard.press('Enter');
+
     await expect(page.locator('#command-palette')).not.toBeHidden();
   });
 
@@ -521,7 +522,9 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     await page.keyboard.press('Enter');
 
     // await page.sidebar.openTab('filebrowser');
-    expect(await page.sidebar.isTabOpen('tab-key-1-6')).toEqual(true);
+    // expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
+    const fileBrowserRegion = page.locator('#filebrowser');
+    await expect(fileBrowserRegion).not.toBeHidden();
   });
 
   test('Open Property Inspector with keyboard', async ({ page }) => {
