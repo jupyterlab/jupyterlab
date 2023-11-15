@@ -95,7 +95,7 @@ Using Plugin Metadata to Drive Compatibility
 
 JupyterLab's extension system is designed so that plugins can depend on and
 reuse features from one another. A key part of this approach is :ref:`JupyterLab's
-provider-consumer pattern <plugin_system>`, and it's what enables the compatibility solutions
+provider-consumer pattern <services>`, and it's what enables the compatibility solutions
 discussed here.
 
 Each plugin uses some properties (the "requires" and "optional" properties) to
@@ -115,10 +115,10 @@ So, these capabilities form the backbone of extension compatibility: You can
 use them to make checks in your extensions that will allow them to function in
 both JupyterLab and Jupyter Notebook 7 (and others).
 
-JupyterLab itself is a :ref:`provider <plugin_system>` of many features through its built-in plugins,
+JupyterLab itself is a :ref:`provider <services>` of many features through its built-in plugins,
 which you can read more about in the [Common Extension Points document](https://jupyterlab.readthedocs.io/en/latest/extension/extension_points.html).
 It's a good idea to use these extension points while you're building your extensions (and
-by doing so you're acting as the "consumer" in JupyterLab's :ref:`provider-consumer pattern <plugin_system>`.
+by doing so you're acting as the "consumer" in JupyterLab's :ref:`provider-consumer pattern <services>`.
 
 Testing for Optional Features
 .............................
@@ -126,8 +126,8 @@ Testing for Optional Features
 Making an app-specific feature optional and checking if it's available before
 using it is one technique you can use to make your extensions compatible.
 
-Take a look at a snippet from [this example extension](https://github.com/jupyterlab/extension-examples/tree/main/shout-button-message) in the examples
-repo (you can read the full extension example code there):
+Take a look at a snippet from [this example extension](https://github.com/jupyterlab/extension-examples/tree/main/shout-button-message)
+in the examples repo (you can read the full extension example code there):
 
 ..
    TODO: use a pointer/reference to the code with the docs toolkit
@@ -265,4 +265,4 @@ Further Reading
 ---------------
 
 For an explanation of JupyterLab's plugin system and the provider-consumer pattern,
-read the :ref:`Plugin System document <plugin_system>`.
+read the :ref:`Extension Development document <services>`.
