@@ -4,12 +4,15 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IRenderMime } from '@jupyterlab/rendermime';
 import { Session } from '@jupyterlab/services';
+import { LabIcon } from '@jupyterlab/ui-components';
 import { SourceChange } from '@jupyter/ydoc';
-import { Token } from '@lumino/coreutils';
+import { JSONValue, Token } from '@lumino/coreutils';
+import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { CompletionHandler } from './handler';
 import { Completer } from './widget';
+import { InlineCompleter } from './inline';
 
 /**
  * The type of completion request.
@@ -21,8 +24,7 @@ export enum CompletionTriggerKind {
 }
 
 /**
- * The context which will be passed to the `fetch` function
- * of a provider.
+ * The context which will be passed to the completion provider.
  */
 export interface ICompletionContext {
   /**
@@ -48,7 +50,7 @@ export interface ICompletionContext {
 }
 
 /**
- * The interface to implement a completer provider.
+ * The interface to implement a completion provider.
  */
 export interface ICompletionProvider<
   T extends
@@ -139,6 +141,181 @@ export interface ICompletionProvider<
 }
 
 /**
+ * Describes how an inline completion provider was triggered.
+ * @alpha
+ */
+export enum InlineCompletionTriggerKind {
+  /**
+   * Completion was triggered explicitly by a user gesture.
+   * Return multiple completion items to enable cycling through them.
+   */
+  Invoke = 0,
+  /**
+   * Completion was triggered automatically while editing.
+   * It is sufficient to return a single completion item in this case.
+   */
+  Automatic = 1
+}
+
+/**
+ * The context which will be passed to the inline completion provider.
+ * @alpha
+ */
+export interface IInlineCompletionContext {
+  /**
+   * The widget (notebook, console, code editor) which invoked
+   * the inline completer
+   */
+  widget: Widget;
+
+  /**
+   * Describes how an inline completion provider was triggered.
+   */
+  triggerKind: InlineCompletionTriggerKind;
+
+  /**
+   * The session extracted from widget for convenience.
+   */
+  session?: Session.ISessionConnection | null;
+}
+
+/**
+ * LSP 3.18-compliant inline completion API subset.
+ */
+interface IInlineCompletionItemLSP {
+  /**
+   * The text to replace the range with. Must be set.
+   * Is used both for the preview and the accept operation.
+   */
+  insertText: string;
+
+  /**
+   * A text that is used to decide if this inline completion should be
+   * shown. When `falsy` the insertText is used.
+   *
+   * An inline completion is shown if the text to replace is a prefix of the
+   * filter text.
+   */
+  filterText?: string;
+}
+
+/**
+ * An inline completion item represents a text snippet that is proposed inline
+ * to complete text that is being typed.
+ * @alpha
+ */
+export interface IInlineCompletionItem extends IInlineCompletionItemLSP {
+  token?: string;
+  /**
+   * Whether generation of `insertText` is still ongoing. If your provider supports streaming,
+   * you can set this to true, which will result in the provider's `stream()` method being called
+   * with `token` which has to be set for incomplete completions.
+   */
+  isIncomplete?: boolean;
+}
+
+export interface IInlineCompletionList<
+  T extends IInlineCompletionItem = IInlineCompletionItem
+> {
+  /**
+   * The inline completion items.
+   */
+  items: T[];
+}
+
+/**
+ * The inline completion provider information used in widget rendering.
+ */
+export interface IInlineCompletionProviderInfo {
+  /**
+   * Name of the provider to be displayed in the user interface.
+   */
+  readonly name: string;
+
+  /**
+   * Unique identifier, cannot change on runtime.
+   *
+   * The identifier is also added on data attribute of ghost text widget,
+   * allowing different providers to style the ghost text differently.
+   */
+  readonly identifier: string;
+
+  /**
+   * The icon representing the provider in the user interface.
+   */
+  readonly icon?: LabIcon.ILabIcon;
+
+  /**
+   * Settings schema contributed by provider for user customization.
+   */
+  readonly schema?: ISettingRegistry.IProperty;
+}
+
+/**
+ * The interface extensions should implement to provide inline completions.
+ */
+export interface IInlineCompletionProvider<
+  T extends IInlineCompletionItem = IInlineCompletionItem
+> extends IInlineCompletionProviderInfo {
+  /**
+   * The method called when user requests inline completions.
+   *
+   * The implicit request (on typing) vs explicit invocation are distinguished
+   * by the value of `triggerKind` in the provided `context`.
+   */
+  fetch(
+    request: CompletionHandler.IRequest,
+    context: IInlineCompletionContext
+  ): Promise<IInlineCompletionList<T>>;
+
+  /**
+   * Optional method called when user changes settings.
+   *
+   * This is only called if `schema` for settings is present.
+   */
+  configure?(settings: { [property: string]: JSONValue }): void;
+
+  /**
+   * Optional method to stream remainder of the `insertText`.
+   */
+  stream?(token: string): AsyncGenerator<{ response: T }>;
+}
+
+/**
+ * Inline completer factory
+ */
+export interface IInlineCompleterFactory {
+  factory(options: IInlineCompleterFactory.IOptions): InlineCompleter;
+}
+
+/**
+ * A namespace for inline completer factory statics.
+ */
+export namespace IInlineCompleterFactory {
+  /**
+   * The subset of inline completer widget initialization options provided to the factory.
+   */
+  export interface IOptions {
+    /**
+     * The semantic parent of the completer widget, its referent editor.
+     */
+    editor?: CodeEditor.IEditor | null;
+    /**
+     * The model for the completer widget.
+     */
+    model?: InlineCompleter.IModel;
+  }
+}
+
+/**
+ * Token allowing to override (or disable) inline completer widget factory.
+ */
+export const IInlineCompleterFactory = new Token<IInlineCompleterFactory>(
+  '@jupyterlab/completer:IInlineCompleterFactory',
+  'A factory of inline completer widgets.'
+);
+
+/**
  * The exported token used to register new provider.
  */
 export const ICompletionProviderManager = new Token<ICompletionProviderManager>(
@@ -153,6 +330,16 @@ export interface ICompletionProviderManager {
    * @param {ICompletionProvider} provider - the provider to be registered.
    */
   registerProvider(provider: ICompletionProvider): void;
+
+  /**
+   * Register an inline completer provider with the manager.
+   */
+  registerInlineProvider(provider: IInlineCompletionProvider): void;
+
+  /**
+   * Set inline completer factory.
+   */
+  setInlineCompleterFactory(factory: IInlineCompleterFactory): void;
 
   /**
    * Invoke the completer in the widget with provided id.
@@ -179,6 +366,80 @@ export interface ICompletionProviderManager {
    * Signal emitted when active providers list is changed.
    */
   activeProvidersChanged: ISignal<ICompletionProviderManager, void>;
+
+  /**
+   * Inline completer actions.
+   */
+  inline?: IInlineCompleterActions;
+
+  /**
+   * Inline providers information.
+   */
+  inlineProviders?: IInlineCompletionProviderInfo[];
+}
+
+export interface IInlineCompleterActions {
+  /**
+   * Invoke inline completer.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  invoke(id: string): void;
+
+  /**
+   * Switch to next or previous completion of inline completer.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   * @param direction - the cycling direction
+   */
+  cycle(id: string, direction: 'next' | 'previous'): void;
+
+  /**
+   * Accept active inline completion.
+   * @experimental
+   *
+   * @param id - the id of notebook panel, console panel or code editor.
+   */
+  accept(id: string): void;
+
+  /**
+   * Configure the inline completer.
+   * @experimental
+   *
+   * @param settings - the new settings values.
+   */
+  configure(settings: IInlineCompleterSettings): void;
+}
+
+/**
+ * Inline completer user-configurable settings.
+ */
+export interface IInlineCompleterSettings {
+  /**
+   * Whether to show the inline completer widget.
+   */
+  showWidget: 'always' | 'onHover' | 'never';
+  /**
+   * Whether to show shortcuts in the inline completer widget.
+   */
+  showShortcuts: boolean;
+  /**
+   * Transition effect used when streaming tokens from model.
+   */
+  streamingAnimation: 'none' | 'uncover';
+  /**
+   * Provider settings.
+   */
+  providers: {
+    [providerId: string]: {
+      enabled: boolean;
+      debouncerDelay: number;
+      timeout: number;
+      [property: string]: JSONValue;
+    };
+  };
 }
 
 export interface IProviderReconciliator {
@@ -194,6 +455,17 @@ export interface IProviderReconciliator {
     request: CompletionHandler.IRequest,
     trigger?: CompletionTriggerKind
   ): Promise<CompletionHandler.ICompletionItemsReply | null>;
+
+  /**
+   * Returns a list of promises to enable showing results from
+   * the provider which resolved fastest, even if other providers
+   * are still generating.
+   * The result may be null if the request timed out.
+   */
+  fetchInline(
+    request: CompletionHandler.IRequest,
+    trigger?: InlineCompletionTriggerKind
+  ): Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>[];
 
   /**
    * Check if completer should make request to fetch completion responses

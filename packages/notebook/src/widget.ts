@@ -53,11 +53,6 @@ const CODE_RUNNER = 'jpCodeRunner';
 const UNDOER = 'jpUndoer';
 
 /**
- * The data attribute added to a widget that can be traversed with up/down arrow and j/k shortcuts.
- */
-const TRAVERSABLE = 'jpTraversable';
-
-/**
  * The class name added to notebook widgets.
  */
 const NB_CLASS = 'jp-Notebook';
@@ -224,7 +219,6 @@ export class StaticNotebook extends WindowedList {
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[UNDOER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
-    this.node.dataset[TRAVERSABLE] = 'true';
     this.rendermime = options.rendermime;
     this.translator = options.translator || nullTranslator;
     this.contentFactory = options.contentFactory;
@@ -687,9 +681,15 @@ export class StaticNotebook extends WindowedList {
     cell.syncCollapse = true;
     cell.syncEditable = true;
     cell.syncScrolled = true;
-    cell.outputArea.inputRequested.connect(() => {
+    cell.outputArea.inputRequested.connect((_, stdin) => {
       this._onInputRequested(cell).catch(reason => {
         console.error('Failed to scroll to cell requesting input.', reason);
+      });
+      stdin.disposed.connect(() => {
+        // The input field is removed from the DOM after the user presses Enter.
+        // This causes focus to be lost if we don't explicitly re-focus
+        // somewhere else.
+        cell.node.focus();
       });
     });
     return cell;
@@ -1099,17 +1099,20 @@ export namespace StaticNotebook {
     code: {
       lineNumbers: false,
       lineWrap: false,
-      matchBrackets: true
+      matchBrackets: true,
+      tabFocusable: false
     },
     markdown: {
       lineNumbers: false,
       lineWrap: true,
-      matchBrackets: false
+      matchBrackets: false,
+      tabFocusable: false
     },
     raw: {
       lineNumbers: false,
       lineWrap: true,
-      matchBrackets: false
+      matchBrackets: false,
+      tabFocusable: false
     }
   };
 
@@ -1282,11 +1285,11 @@ export class Notebook extends StaticNotebook {
    */
   constructor(options: Notebook.IOptions) {
     super(options);
-    this.node.tabIndex = 0; // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.selectionChanged.connect(this._updateSelectedCells, this);
+
     this.addFooter();
   }
 
@@ -1374,14 +1377,21 @@ export class Notebook extends StaticNotebook {
       for (const widget of this.widgets) {
         this.deselect(widget);
       }
-      //  Edit mode unrenders an active markdown widget.
+      // Edit mode unrenders an active markdown widget.
       if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
       }
       activeCell!.inputHidden = false;
     } else {
-      // Focus on the notebook document, which blurs the active cell.
-      this.node.focus();
+      void NotebookActions.focusActiveCell(this, {
+        // Do not await the active cell because that creates a bug. If the user
+        // is editing a code cell and presses Accel Shift C to open the command
+        // palette, then the command palette opens before
+        // activeCell.node.focus() is called, which closes the command palette.
+        // To the end user, it looks as if all the keyboard shortcut did was
+        // move focus from the cell editor to the cell as a whole.
+        waitUntilReady: false
+      });
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
     this._ensureFocus();
@@ -1410,6 +1420,7 @@ export class Notebook extends StaticNotebook {
 
     this._activeCellIndex = newValue;
     const cell = this.widgets[newValue] ?? null;
+    (this.layout as NotebookWindowedLayout).activeCell = cell;
     const cellChanged = cell !== this._activeCell;
     if (cellChanged) {
       // Post an update request.
@@ -1854,9 +1865,6 @@ export class Notebook extends StaticNotebook {
           this._evtDocumentMousemove(event as MouseEvent);
         }
         break;
-      case 'keydown':
-        this._ensureFocus(true);
-        break;
       case 'dblclick':
         this._evtDblClick(event as MouseEvent);
         break;
@@ -1998,15 +2006,17 @@ export class Notebook extends StaticNotebook {
       this.addClass(COMMAND_CLASS);
       this.removeClass(EDIT_CLASS);
     }
-    if (activeCell) {
-      activeCell.addClass(ACTIVE_CLASS);
-    }
 
     let count = 0;
     for (const widget of this.widgets) {
-      if (widget !== activeCell) {
-        widget.removeClass(ACTIVE_CLASS);
-      }
+      // Set tabIndex to -1 to allow calling .focus() on cell without allowing
+      // focus via tab key. This allows focus (document.activeElement) to move
+      // up and down the document, cell by cell, when the user presses J/K or
+      // ArrowDown/ArrowUp, but (unlike tabIndex = 0) does not add the notebook
+      // cells (which could be numerous) to the set of nodes that the user would
+      // have to visit when pressing the tab key to move about the UI.
+      widget.node.tabIndex = -1;
+      widget.removeClass(ACTIVE_CLASS);
       widget.removeClass(OTHER_SELECTED_CLASS);
       if (this.isSelectedOrActive(widget)) {
         widget.addClass(SELECTED_CLASS);
@@ -2015,8 +2025,17 @@ export class Notebook extends StaticNotebook {
         widget.removeClass(SELECTED_CLASS);
       }
     }
-    if (count > 1) {
-      activeCell?.addClass(OTHER_SELECTED_CLASS);
+
+    if (activeCell) {
+      activeCell.addClass(ACTIVE_CLASS);
+      activeCell.addClass(SELECTED_CLASS);
+      // Set tab index to 0 on the active cell so that if the user tabs away from
+      // the notebook then tabs back, they will return to the cell where they
+      // left off.
+      activeCell.node.tabIndex = 0;
+      if (count > 1) {
+        activeCell.addClass(OTHER_SELECTED_CLASS);
+      }
     }
   }
 
@@ -2104,7 +2123,7 @@ export class Notebook extends StaticNotebook {
     const activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
       // Test for !== true to cover hasFocus is false and editor is not yet rendered.
-      if (activeCell.editor?.hasFocus() !== true) {
+      if (activeCell.editor?.hasFocus() !== true || !activeCell.inViewport) {
         if (activeCell.inViewport) {
           activeCell.editor?.focus();
         } else {
@@ -2120,8 +2139,14 @@ export class Notebook extends StaticNotebook {
         }
       }
     }
-    if (force && !this.node.contains(document.activeElement)) {
-      this.node.focus();
+    if (
+      force &&
+      activeCell &&
+      !activeCell.node.contains(document.activeElement)
+    ) {
+      void NotebookActions.focusActiveCell(this, {
+        preventScroll: true
+      });
     }
   }
 
@@ -2408,7 +2433,7 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex = index;
       // Focus notebook if active cell changes but does not have focus.
       if (!this.activeCell!.node.contains(document.activeElement)) {
-        this.node.focus();
+        void NotebookActions.focusActiveCell(this);
       }
     }
 
@@ -2589,6 +2614,7 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex = start;
       this.extendContiguousSelectionTo(index - 1);
     }
+    void NotebookActions.focusActiveCell(this);
   }
 
   /**
@@ -2667,7 +2693,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle `focus` events for the widget.
    */
-  private _evtFocusIn(event: MouseEvent): void {
+  private _evtFocusIn(event: FocusEvent): void {
     const target = event.target as HTMLElement;
     const index = this._findCell(target);
     if (index !== -1) {
@@ -2676,7 +2702,6 @@ export class Notebook extends StaticNotebook {
       if (widget.editorWidget && !widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
       }
-      this.activeCellIndex = index;
       // If the editor has focus, ensure edit mode.
       const node = widget.editorWidget?.node;
       if (node?.contains(target)) {
@@ -2686,6 +2711,35 @@ export class Notebook extends StaticNotebook {
     } else {
       // No cell has focus, ensure command mode.
       this.mode = 'command';
+
+      // Prevents the parent element to get the focus.
+      event.preventDefault();
+
+      // Check if the focus was previously in the active cell to avoid focus looping
+      // between the cell and the cell toolbar.
+      const source = event.relatedTarget as HTMLElement;
+
+      // Focuses on the active cell if the focus did not come from it.
+      // Otherwise focus on the footer element (add cell button).
+      if (this._activeCell && !this._activeCell.node.contains(source)) {
+        this._activeCell.ready
+          .then(() => {
+            this._activeCell?.node.focus({
+              preventScroll: true
+            });
+          })
+          .catch(() => {
+            (this.layout as NotebookWindowedLayout).footer?.node.focus({
+              preventScroll: true
+            });
+          });
+      } else {
+        // If the active cell is not visible (because of full windowing), set the focus
+        // on the footer (always visible) to set focus on Notebook widget.
+        (this.layout as NotebookWindowedLayout).footer?.node.focus({
+          preventScroll: true
+        });
+      }
     }
   }
 
@@ -2715,7 +2769,7 @@ export class Notebook extends StaticNotebook {
     if (this.mode !== 'command') {
       this.mode = 'command';
 
-      // Switching to command mode currently focuses the notebook element, so
+      // Switching to command mode currently focuses the active cell, so
       // refocus the relatedTarget so the focus actually switches as intended.
       if (relatedTarget) {
         relatedTarget.focus();
