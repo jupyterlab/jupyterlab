@@ -487,7 +487,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       }
     }
     await page.keyboard.press('Enter');
-    await expect(page.locator('command-palette')).not.toBeHidden();
+    await expect(page.locator('#command-palette')).not.toBeHidden();
   });
 
   test('Open File Browser with keyboard', async ({ page }) => {
