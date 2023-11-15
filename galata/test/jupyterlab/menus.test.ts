@@ -496,30 +496,35 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       name: 'File Browser'
     });
     const viewMenu = page.getByRole('menuitem', { name: 'View' });
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
+
+    if (await page.sidebar.isTabOpen('filebrowser')) {
+      page.sidebar.close('right');
+    }
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
+      await page.keyboard.press('Shift+Tab');
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
+        await page.keyboard.press('Enter');
+      }
       await page.keyboard.press('ArrowRight');
       let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
         ' '
       );
       if (viewMenuClass.includes('lm-mod-active')) {
-        break;
+        await page.keyboard.press('Enter');
       }
-    }
-    await page.keyboard.press('Enter');
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
       await page.keyboard.press('ArrowDown');
       let fileBrowserMenuClass = (
         (await fileBrowserMenu.getAttribute('class')) ?? ''
       ).split(' ');
       if (fileBrowserMenuClass.includes('lm-mod-active')) {
+        await page.keyboard.press('Enter');
         break;
       }
     }
-    await page.keyboard.press('Enter');
 
     // await page.sidebar.openTab('filebrowser');
     expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
