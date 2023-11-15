@@ -493,7 +493,8 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open File Browser with keyboard', async ({ page }) => {
     const fileBrowserMenu = page.getByRole('menuitem', {
-      name: 'File Browser Ctrl + Shift + F'
+      name: 'File Browser'
+      //  Ctrl + Shift + F
     });
     const viewMenu = page.getByRole('menuitem', { name: 'View' });
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
@@ -788,7 +789,7 @@ tabsMenuPaths.forEach(tabsMenuPath => {
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const tabsMenu = page.getByRole('menuitem', { name: 'Tabs' });
     const menuitem = page.getByRole('menuitem', {
-      name: `${tabsMenuPath}`
+      name: tabsMenuPath
     });
 
     // eslint-disable-next-line no-constant-condition
