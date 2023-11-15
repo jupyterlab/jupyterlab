@@ -312,6 +312,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   test('Open file > New with keyboard', async ({ page }) => {
     await page.keyboard.press('Enter');
     const fileNew = page.getByRole('menu', { name: 'New' });
+    // page.menu.getMenuItemInMenu('File', 'New')
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -522,9 +523,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     await page.keyboard.press('Enter');
 
     // await page.sidebar.openTab('filebrowser');
-    // expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
-    const fileBrowserRegion = page.locator('#filebrowser');
-    await expect(fileBrowserRegion).not.toBeHidden();
+    expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
   });
 
   test('Open Property Inspector with keyboard', async ({ page }) => {
@@ -656,8 +655,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    // await page.sidebar.openTab('jp-property-inspector')
-
     expect(await page.sidebar.isTabOpen('jp-debugger-sidebar')).toEqual(true);
   });
 
@@ -732,6 +729,45 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     await expect(page.locator('.jp-Notification-Header')).toHaveText(
       'No notifications'
     );
+  });
+
+  test('Show Log Console with keyboard', async ({ page }) => {
+    const showLogConsoleMenu = page.getByRole('menuitem', {
+      name: 'Show Log Console'
+    });
+    const viewMenu = page.getByRole('menuitem', { name: 'View' });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (viewMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let showLogConsoleClass = (
+        (await showLogConsoleMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (showLogConsoleClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+
+    await page.keyboard.press('Enter');
+
+    const logConsole = page.locator('#jp-down-stack');
+    let logConsoleClass = (
+      (await logConsole.getAttribute('class')) ?? ''
+    ).split(' ');
+
+    expect(!logConsoleClass.includes('lm-mod-hidden'));
   });
 });
 
