@@ -658,7 +658,6 @@ export namespace galata {
               break;
             }
             const data = await response.json();
-            // Modify the last_modified values to be set one day before now.
             if (data['type'] === 'notebook') {
               data['writable'] = false;
             }
