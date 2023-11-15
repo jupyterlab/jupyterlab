@@ -311,8 +311,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open file > New with keyboard', async ({ page }) => {
     await page.keyboard.press('Enter');
-    const fileNew = page.getByRole('menu', { name: 'New' });
-    // page.menu.getMenuItemInMenu('File', 'New')
+    const fileNew = page.locator('[data-type="submenu"]', { hasText: 'New' });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -756,6 +755,61 @@ test.describe('Top menu keyboard navigation @a11y', () => {
         (await showLogConsoleMenu.getAttribute('class')) ?? ''
       ).split(' ');
       if (showLogConsoleClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+
+    await page.keyboard.press('Enter');
+
+    const logConsole = page.locator('#jp-down-stack');
+    let logConsoleClass = (
+      (await logConsole.getAttribute('class')) ?? ''
+    ).split(' ');
+
+    expect(!logConsoleClass.includes('lm-mod-hidden'));
+  });
+});
+test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto();
+    await page.menu.clickMenuItem('File>New Launcher');
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
+    const tabsMenu = page.getByRole('menuitem', { name: 'Tabs' });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('Shift+Tab');
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let tabsMenuClass = ((await tabsMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (tabsMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+  });
+
+  test('Activate Next Tab with keyboard', async ({ page }) => {
+    const activateNextTabMenu = page.getByRole('menuitem', {
+      name: 'Activate Next Tab'
+    });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let activateNextTabClass = (
+        (await activateNextTabMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (activateNextTabClass.includes('lm-mod-active')) {
         break;
       }
     }
