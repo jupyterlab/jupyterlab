@@ -949,7 +949,7 @@ test.describe('Top menu keyboard navigation to Settings @a11y', () => {
 
       await page.keyboard.press('Enter');
 
-      expect(await page.menu.isOpen(settingsPath)).toBeTruthy();
+      expect(await page.menu.isOpen(`Settings>${settingsPath}`)).toBeTruthy();
     });
   });
 });
