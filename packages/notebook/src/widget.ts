@@ -2717,7 +2717,6 @@ export class Notebook extends StaticNotebook {
   private _evtFocusIn(event: FocusEvent): void {
     const target = event.target as HTMLElement;
     const index = this._findCell(target);
-    console.log(`In _evtFocusIn idx ${index}`);
     if (index !== -1) {
       const widget = this.widgets[index];
       // If the editor itself does not have focus, ensure command mode.
