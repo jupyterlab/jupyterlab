@@ -496,7 +496,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       name: 'File Browser'
       //  Ctrl + Shift + F
     });
-    const viewMenu = page.getByRole('menuitem', { name: 'View' });
+    const viewMenu = page.getByRole('menuitem', { name: 'View', exact: true });
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
 
     if (await page.sidebar.isTabOpen('filebrowser')) {
@@ -777,9 +777,9 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 });
 
 const tabsMenuPaths = [
-  'Activate Next Tab Ctrl+Shift+]',
-  'Activate Previous Tab Ctrl+Shift+[',
-  "Activate Previously used Tab Ctrl+Shift+'"
+  'Activate Next Tab',
+  'Activate Previous Tab',
+  'Activate Previously used Tab'
 ];
 
 tabsMenuPaths.forEach(tabsMenuPath => {
@@ -789,7 +789,8 @@ tabsMenuPaths.forEach(tabsMenuPath => {
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const tabsMenu = page.getByRole('menuitem', { name: 'Tabs' });
     const menuitem = page.getByRole('menuitem', {
-      name: tabsMenuPath
+      name: tabsMenuPath,
+      exact: true
     });
 
     // eslint-disable-next-line no-constant-condition
