@@ -503,8 +503,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       .getByRole('menuitem', { name: 'File', exact: true })
       .nth(0);
 
-    console.log(page.sidebar.isTabOpen('filebrowser'));
-    console.log(fileMenu);
+    page.sidebar.close('left');
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -530,10 +529,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       }
     }
 
-    console.log(page.sidebar.isTabOpen('filebrowser'));
-    // await page.sidebar.openTab('filebrowser');
-
-    expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
+    expect(await page.sidebar.isTabOpen('#tab-key-1-6')).toEqual(true);
   });
 
   test('Open Property Inspector with keyboard', async ({ page }) => {
