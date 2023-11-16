@@ -1,0 +1,17 @@
+# these are some repos we want to check out and test against.
+# these aren't submodules, so that they can be easily updated from the web UI
+repos:
+  # a local symbolic name, also where packages will be checked out in `packages`
+  jupyterlab:
+    # the public remote from which to start
+    origin: https://github.com/m158261/jupyterlab
+    # an ordered list of refs to attempt merging: must be fast-forward
+    refs:
+      - ref: pull/15048/head
+        commit: "90bc58f"
+
+  lumino:
+    origin: https://github.com/m158261/lumino
+    refs:
+      - ref: pull/627/head
+        commit: "5b121d0"
