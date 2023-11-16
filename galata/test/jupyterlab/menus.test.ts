@@ -520,6 +520,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       );
       if (viewMenuClass.includes('lm-mod-active')) {
         await page.keyboard.press('Enter');
+        break;
       }
       await page.keyboard.press('ArrowDown');
       let fileBrowserMenuClass = (
