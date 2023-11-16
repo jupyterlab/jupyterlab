@@ -493,7 +493,8 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
   test('Open File Browser with keyboard', async ({ page }) => {
     const fileBrowserMenu = page.getByRole('menuitem', {
-      name: 'File Browser'
+      name: 'File Browser',
+      exact: true
     });
     const viewMenu = page.getByRole('menuitem', { name: 'View', exact: true });
     const fileMenu = page
@@ -827,7 +828,7 @@ test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
 
     await page.keyboard.press('Enter');
 
-    const firstTab = page.locator('tab-key-2-0');
+    const firstTab = page.locator('#tab-key-2-0');
     let firstTabClass = ((await firstTab.getAttribute('class')) ?? '').split(
       ' '
     );
@@ -855,7 +856,7 @@ test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
 
     await page.keyboard.press('Enter');
 
-    const firstTab = page.locator('tab-key-2-0');
+    const firstTab = page.locator('#tab-key-2-0');
     let firstTabClass = ((await firstTab.getAttribute('class')) ?? '').split(
       ' '
     );
@@ -883,12 +884,73 @@ test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
 
     await page.keyboard.press('Enter');
 
-    const firstTab = page.locator('tab-key-2-0');
+    const firstTab = page.locator('#tab-key-2-0');
     let firstTabClass = ((await firstTab.getAttribute('class')) ?? '').split(
       ' '
     );
 
     expect(firstTabClass.includes('jp-mod-current'));
+  });
+});
+
+const settingsPaths = [
+  'Theme',
+  'Console Run Keystroke',
+  'Text Editor Theme',
+  'Text Editor Indentation',
+  'Terminal Theme'
+];
+
+test.describe('Top menu keyboard navigation to Settings @a11y', () => {
+  settingsPaths.forEach(settingsPath => {
+    test(`Open menu item ${settingsPath}`, async ({ page }) => {
+      await page.goto();
+      const fileMenu = page.getByRole('menuitem', { name: 'File' });
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Shift+Tab');
+        let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(
+          ' '
+        );
+        if (fileClass.includes('lm-mod-active')) {
+          break;
+        }
+      }
+      const settingsMenu = page.getByRole('menuitem', { name: 'Settings' });
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('ArrowRight');
+        let settingsClass = (
+          (await settingsMenu.getAttribute('class')) ?? ''
+        ).split(' ');
+        if (settingsClass.includes('lm-mod-active')) {
+          break;
+        }
+      }
+
+      await page.keyboard.press('Enter');
+
+      const settingsSubMenu = page.locator('[data-type="submenu"]', {
+        hasText: settingsPath
+      });
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('ArrowDown');
+        let settingsSubMenuClass = (
+          (await settingsSubMenu.getAttribute('class')) ?? ''
+        ).split(' ');
+        if (settingsSubMenuClass.includes('lm-mod-active')) {
+          break;
+        }
+      }
+
+      await page.keyboard.press('Enter');
+
+      expect(await page.menu.isOpen(settingsPath)).toBeTruthy();
+    });
   });
 });
 
