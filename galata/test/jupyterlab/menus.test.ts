@@ -497,7 +497,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       //  Ctrl + Shift + F
     });
     const viewMenu = page.getByRole('menuitem', { name: 'View', exact: true });
-    const fileMenu = page.getByRole('menuitem', { name: 'File' });
+    const fileMenu = page.getByRole('menuitem', { name: 'File', exact: true });
 
     if (await page.sidebar.isTabOpen('filebrowser')) {
       page.sidebar.close('left');
