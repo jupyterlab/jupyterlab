@@ -14,7 +14,6 @@ jobs:
     if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please update galata snapshots') || contains(github.event.comment.body, 'please update snapshots')) }}
     timeout-minutes: 80
     runs-on: ubuntu-22.04
-
     steps:
       - name: React to the triggering comment
         run: |
@@ -54,7 +53,7 @@ jobs:
 
       - name: Comment back on the PR
         run: |
-          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Galata snapshots updated.'
+          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Galata snapshots updated. @jupyterlab-bot, please restart ci'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -135,6 +134,6 @@ jobs:
 
       - name: Comment back on the PR
         run: |
-          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated.'
+          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated. @jupyterlab-bot, please restart ci'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
