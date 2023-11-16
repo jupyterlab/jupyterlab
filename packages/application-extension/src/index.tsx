@@ -362,7 +362,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         isEnabled: () => !labShell.isEmpty('right')
       });
 
-      commands.addCommand(CommandIDs.activateSidebarWidget, {
+      commands.addCommand(CommandIDs.toggleSidebarWidget, {
         label: trans.__('Toggle Sidebar Element'),
         caption: trans.__('By default opens first element of the sidebar'),
         execute: args => {
