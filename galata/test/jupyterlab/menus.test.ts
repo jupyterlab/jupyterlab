@@ -505,7 +505,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       .getByRole('menuitem', { name: 'File', exact: true })
       .nth(0);
 
-    page.sidebar.close('left');
+    await page.sidebar.close('left');
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -514,23 +514,31 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       if (fileClass.includes('lm-mod-active')) {
         break;
       }
+    }
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
       await page.keyboard.press('ArrowRight');
       let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
         ' '
       );
       if (viewMenuClass.includes('lm-mod-active')) {
-        await page.keyboard.press('Enter');
         break;
       }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
       await page.keyboard.press('ArrowDown');
       let fileBrowserMenuClass = (
         (await fileBrowserMenu.getAttribute('class')) ?? ''
       ).split(' ');
       if (fileBrowserMenuClass.includes('lm-mod-active')) {
-        await page.keyboard.press('Enter');
         break;
       }
     }
+    await page.keyboard.press('Enter');
 
     expect(await page.sidebar.isTabOpen('#tab-key-1-6')).toEqual(true);
   });
