@@ -286,7 +286,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
         break;
       }
     }
-
     await page.keyboard.press('Enter');
 
     expect(await page.menu.isOpen('Settings')).toBeTruthy();
@@ -325,6 +324,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
     const menuPath = 'File>New';
+
     expect(await page.menu.isOpen(menuPath)).toBeTruthy();
   });
 
@@ -352,6 +352,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     let secondLauncherClass = (
       (await secondLauncher.getAttribute('class')) ?? ''
     ).split(' ');
+
     expect(secondLauncherClass.includes('jp-mod-current')).toBeTruthy;
   });
 
@@ -383,6 +384,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     let secondLauncherClass = (
       (await secondLauncher.getAttribute('class')) ?? ''
     ).split(' ');
+
     expect(secondLauncherClass.includes('jp-mod-current')).toBeTruthy;
 
     // eslint-disable-next-line no-constant-condition
@@ -510,7 +512,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       await page.keyboard.press('Shift+Tab');
       let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
       if (fileClass.includes('lm-mod-active')) {
-        await page.keyboard.press('Enter');
+        break;
       }
       await page.keyboard.press('ArrowRight');
       let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
@@ -953,35 +955,3 @@ test.describe('Top menu keyboard navigation to Settings @a11y', () => {
     });
   });
 });
-
-// test("navigate to change to Dark mode with keyboard", async ({ page }) => {
-//   await page.goto();
-//   for (let i = 0; i < 3; i++) {
-//     await page.keyboard.press("Shift+Tab");
-//   }
-//   for (let i = 0; i < 6; i++) {
-//     await page.keyboard.press("ArrowRight");
-//   }
-//   for (let i = 0; i < 3; i++) {
-//     await page.keyboard.press("Enter");
-//   }
-//   const locator = page.locator("body");
-//   await expect(locator).toHaveJSProperty("data-jp-theme-light", false);
-// });
-
-// test("navigate to open command pallette with keyboard", async ({ page }) => {
-//   await page.goto();
-//   for (let i = 0; i < 3; i++) {
-//     await page.keyboard.press("Shift+Tab");
-//   }
-//   for (let i = 0; i < 2; i++) {
-//     await page.keyboard.press("ArrowRight");
-//   }
-//   for (let i = 0; i < 2; i++) {
-//     await page.keyboard.press("Enter");
-//   }
-
-//   await expect(page.locator("#modal-command-palette")).toHaveClass(
-//     "lm-Widget lm-Panel jp-ModalCommandPalette lm-mod-hidden"
-//   );
-// });
