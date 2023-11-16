@@ -494,12 +494,16 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   test('Open File Browser with keyboard', async ({ page }) => {
     const fileBrowserMenu = page.getByRole('menuitem', {
       name: 'File Browser'
-      //  Ctrl + Shift + F
     });
     const viewMenu = page.getByRole('menuitem', { name: 'View', exact: true });
-    const fileMenu = page.getByRole('menuitem', { name: 'File', exact: true });
+    const fileMenu = page
+      .getByRole('menuitem', { name: 'File', exact: true })
+      .nth(0);
 
-    if (await page.sidebar.isTabOpen('filebrowser')) {
+    console.log(page.sidebar.isTabOpen('filebrowser'));
+    console.log(fileMenu);
+
+    if (await page.sidebar.isOpen('left')) {
       page.sidebar.close('left');
     }
 
@@ -527,7 +531,9 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       }
     }
 
+    console.log(page.sidebar.isTabOpen('filebrowser'));
     // await page.sidebar.openTab('filebrowser');
+
     expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
   });
 
@@ -776,46 +782,99 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   });
 });
 
-const tabsMenuPaths = [
-  'Activate Next Tab',
-  'Activate Previous Tab',
-  'Activate Previously used Tab'
-];
-
-tabsMenuPaths.forEach(tabsMenuPath => {
-  test(`Navigate to ${tabsMenuPath} with keyboard`, async ({ page }) => {
+test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
+  test.beforeEach(async ({ page }) => {
     await page.goto();
     await page.menu.clickMenuItem('File>New Launcher');
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
     const tabsMenu = page.getByRole('menuitem', { name: 'Tabs' });
-    const menuitem = page.getByRole('menuitem', {
-      name: tabsMenuPath,
-      exact: true
-    });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
       let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
       if (fileClass.includes('lm-mod-active')) {
-        await page.keyboard.press('ArrowRight');
-        let tabsMenuClass = (
-          (await tabsMenu.getAttribute('class')) ?? ''
-        ).split(' ');
-        if (tabsMenuClass.includes('lm-mod-active')) {
-          break;
-        }
+        break;
+      }
+    }
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let tabsMenuClass = ((await tabsMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (tabsMenuClass.includes('lm-mod-active')) {
+        break;
       }
     }
     await page.keyboard.press('Enter');
+  });
+
+  test('Activate Next Tab with keyboard', async ({ page }) => {
+    const activateNextTabMenu = page.getByRole('menuitem', {
+      name: 'Activate Next Tab'
+    });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('ArrowDown');
-      let menuitemClass = ((await menuitem.getAttribute('class')) ?? '').split(
-        ' '
-      );
-      if (menuitemClass.includes('lm-mod-active')) {
+      let activateNextTabClass = (
+        (await activateNextTabMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (activateNextTabClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+
+    await page.keyboard.press('Enter');
+
+    const firstTab = page.locator('tab-key-2-0');
+    let firstTabClass = ((await firstTab.getAttribute('class')) ?? '').split(
+      ' '
+    );
+
+    expect(firstTabClass.includes('jp-mod-current'));
+  });
+
+  test('Activate Previous Tab with keyboard', async ({ page }) => {
+    const activatePreviousTabMenu = page.getByRole('menuitem', {
+      name: 'Activate Previous Tab'
+    });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let activatePreviousTabClass = (
+        (await activatePreviousTabMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (activatePreviousTabClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+
+    await page.keyboard.press('Enter');
+
+    const firstTab = page.locator('tab-key-2-0');
+    let firstTabClass = ((await firstTab.getAttribute('class')) ?? '').split(
+      ' '
+    );
+
+    expect(firstTabClass.includes('jp-mod-current'));
+  });
+
+  test('Activate Previously used Tab with keyboard', async ({ page }) => {
+    const previousUsedTabMenu = page.getByRole('menuitem', {
+      name: 'Activate Previous Tab'
+    });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let previousUsedTabClass = (
+        (await previousUsedTabMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (previousUsedTabClass.includes('lm-mod-active')) {
         break;
       }
     }
