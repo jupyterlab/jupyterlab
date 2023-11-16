@@ -503,10 +503,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     console.log(page.sidebar.isTabOpen('filebrowser'));
     console.log(fileMenu);
 
-    if (await page.sidebar.isOpen('left')) {
-      page.sidebar.close('left');
-    }
-
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Shift+Tab');
@@ -812,9 +808,11 @@ test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
   });
 
   test('Activate Next Tab with keyboard', async ({ page }) => {
-    const activateNextTabMenu = page.getByRole('menuitem', {
-      name: 'Activate Next Tab'
-    });
+    const activateNextTabMenu = page
+      .getByRole('menuitem', {
+        name: 'Activate Next Tab'
+      })
+      .nth(0);
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -838,9 +836,11 @@ test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
   });
 
   test('Activate Previous Tab with keyboard', async ({ page }) => {
-    const activatePreviousTabMenu = page.getByRole('menuitem', {
-      name: 'Activate Previous Tab'
-    });
+    const activatePreviousTabMenu = page
+      .getByRole('menuitem', {
+        name: 'Activate Previous Tab'
+      })
+      .nth(0);
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -864,9 +864,11 @@ test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
   });
 
   test('Activate Previously used Tab with keyboard', async ({ page }) => {
-    const previousUsedTabMenu = page.getByRole('menuitem', {
-      name: 'Activate Previous Tab'
-    });
+    const previousUsedTabMenu = page
+      .getByRole('menuitem', {
+        name: 'Activate Previously Used Tab'
+      })
+      .nth(0);
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
