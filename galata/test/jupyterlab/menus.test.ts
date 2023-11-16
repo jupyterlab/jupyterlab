@@ -492,10 +492,12 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   });
 
   test('Open File Browser with keyboard', async ({ page }) => {
-    const fileBrowserMenu = page.getByRole('menuitem', {
-      name: 'File Browser',
-      exact: true
-    });
+    const fileBrowserMenu = page
+      .getByRole('menuitem', {
+        name: 'File Browser',
+        exact: true
+      })
+      .nth(0);
     const viewMenu = page.getByRole('menuitem', { name: 'View', exact: true });
     const fileMenu = page
       .getByRole('menuitem', { name: 'File', exact: true })
@@ -932,9 +934,11 @@ test.describe('Top menu keyboard navigation to Settings @a11y', () => {
 
       await page.keyboard.press('Enter');
 
-      const settingsSubMenu = page.locator('[data-type="submenu"]', {
-        hasText: settingsPath
-      });
+      const settingsSubMenu = page
+        .locator('[data-type="submenu"]', {
+          hasText: settingsPath
+        })
+        .nth(0);
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
