@@ -494,12 +494,10 @@ test.describe('Top menu keyboard navigation @a11y', () => {
   });
 
   test('Open File Browser with keyboard', async ({ page }) => {
-    const fileBrowserMenu = page
-      .getByRole('menuitem', {
-        name: 'File Browser',
-        exact: true
-      })
-      .nth(0);
+    const fileBrowserMenu = page.getByRole('menuitem', {
+      name: 'File Browser'
+    });
+
     const viewMenu = page.getByRole('menuitem', { name: 'View', exact: true });
 
     await page.keyboard.press('Control+Shift+F');
