@@ -102,6 +102,28 @@ test.describe('Extension Manager', () => {
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
     ).toMatchSnapshot('extensions_search.png');
   });
+
+  test('Update button', async ({ page }) => {
+    await page.goto();
+    await openExtensionSidebar(page);
+
+    const waitRequest = page.waitForRequest(request => {
+      if (
+        request.method() !== 'POST' ||
+        !galata.Routes.extensions.test(request.url())
+      ) {
+        return false;
+      }
+      const data = request.postDataJSON();
+      return (
+        data.cmd === 'install' &&
+        data.extension_name === '@jupyterlab/geojson-extension' &&
+        data.extension_version === '3.2.1'
+      );
+    });
+    await page.getByRole('button', { name: 'Update to 3.2.1' }).click();
+    await waitRequest;
+  });
 });
 
 test.describe('Filtered Extension Manager', () => {
