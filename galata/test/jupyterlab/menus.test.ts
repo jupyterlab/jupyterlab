@@ -501,20 +501,20 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       })
       .nth(0);
     const viewMenu = page.getByRole('menuitem', { name: 'View', exact: true });
-    const fileMenu = page
-      .getByRole('menuitem', { name: 'File', exact: true })
-      .nth(0);
+    // const fileMenu = page
+    //   .getByRole('menuitem', { name: 'File', exact: true })
+    //   .nth(0);
 
-    // await page.sidebar.close('left');
+    await page.sidebar.close('left');
 
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      await page.keyboard.press('Shift+Tab');
-      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
-      if (fileClass.includes('lm-mod-active')) {
-        break;
-      }
-    }
+    // // eslint-disable-next-line no-constant-condition
+    // while (true) {
+    //   await page.keyboard.press('Shift+Tab');
+    //   let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+    //   if (fileClass.includes('lm-mod-active')) {
+    //     break;
+    //   }
+    // }
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
