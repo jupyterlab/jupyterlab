@@ -5,6 +5,7 @@
   "description": "Text editor settings for all CodeMirror editors.",
   "properties": {
     "defaultConfig": {
+      "default": {},
       "title": "Default editor configuration",
       "description": "Base configuration used by all CodeMirror editors.",
       "type": "object"
