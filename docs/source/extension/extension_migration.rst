@@ -41,7 +41,7 @@ Use of UI toolkit for Toolbar and ToolbarButtonComponent
 The Toolbar and ToolbarButtonComponent (from the package *ui-components*) now relies on the external library
 `jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`.
 
-This library uses of the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
+This library uses the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
 and is based on `FAST <https://www.fast.design/>` library by Microsoft.
 
 See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
