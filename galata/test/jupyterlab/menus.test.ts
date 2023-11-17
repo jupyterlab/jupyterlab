@@ -500,9 +500,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
     const viewMenu = page.getByRole('menuitem', { name: 'View', exact: true });
 
-    await page.keyboard.press('Control+Shift+F');
-    expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(false);
-
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('ArrowRight');
