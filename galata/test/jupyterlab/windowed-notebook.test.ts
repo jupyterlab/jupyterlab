@@ -328,15 +328,15 @@ test('should remove all cells including hidden outputs artifacts', async ({
   expect(found).toEqual(false);
 });
 
-test('should scroll past end when running and inserting a cell at the viewport bottom', async ({
+test('should scroll as little as possible on markdown rendering', async ({
   page,
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-
   const h = await page.notebook.getNotebookInPanel();
-  const mdCellSelector = '.jp-MarkdownCell[data-windowed-list-index="2"]';
-  const mdCell = await h!.waitForSelector(mdCellSelector);
+  const mdCell = await h.waitForSelector(
+    '.jp-MarkdownCell[data-windowed-list-index="2"]'
+  );
 
   await page
     .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
@@ -344,19 +344,16 @@ test('should scroll past end when running and inserting a cell at the viewport b
 
   await mdCell.click();
 
-  await expect
-    .soft(
-      page
-        .getByRole('main')
-        .locator('.jp-RawCell[data-windowed-list-index="4"]')
-    )
-    .not.toBeInViewport();
+  const thirdCell = page.locator('.jp-CodeCell[data-windowed-list-index="3"]');
+  const fourthCell = page.locator('.jp-RawCell[data-windowed-list-index="4"]');
+
+  await expect.soft(thirdCell).not.toBeInViewport({ ratio: 0.1 });
+  await expect.soft(fourthCell).not.toBeInViewport();
 
   await page.keyboard.press('Shift+Enter');
 
-  await expect(
-    page.getByRole('main').locator('.jp-RawCell[data-windowed-list-index="4"]')
-  ).toBeInViewport();
+  await expect(thirdCell).toBeInViewport();
+  await expect(fourthCell).not.toBeInViewport({ ratio: 0.1 });
 });
 
 test('should rendered injected styles of out-of-viewport cells', async ({
@@ -432,4 +429,42 @@ test('should rendered injected JavaScript snippets of out-of-viewport cells', as
   expect(
     await page.getByText('JavaScript injected header').count()
   ).toBeGreaterThan(1);
+});
+
+test('should navigate to a search hit in a out-of-viewport cell', async ({
+  page,
+  tmpPath
+}) => {
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+
+  // Open search box
+  await page.keyboard.press('Control+f');
+
+  await page.getByPlaceholder('Find').fill('IFrame');
+  await page.getByText('1/2').waitFor();
+  await expect
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="11"]'))
+    .toHaveCount(0);
+
+  await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
+
+  await page.locator('.jp-Cell[data-windowed-list-index="11"]').waitFor();
+  await expect
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="11"]'))
+    .toContainText('IFrame');
+
+  await page.getByPlaceholder('Find').fill('Final');
+  await page.getByText('1/1').waitFor();
+  await expect
+    .soft(page.locator('.jp-Cell[data-windowed-list-index="18"]'))
+    .toHaveCount(0);
+
+  await page
+    .getByRole('button', { name: 'Previous Match (Ctrl+Shift+G)' })
+    .click();
+
+  await page.locator('.jp-Cell[data-windowed-list-index="18"]').waitFor();
+  await expect(
+    page.locator('.jp-Cell[data-windowed-list-index="18"]')
+  ).toContainText('Final');
 });
