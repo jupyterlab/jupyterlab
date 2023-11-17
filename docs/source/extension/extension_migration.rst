@@ -47,7 +47,7 @@ and is based on `FAST <https://www.fast.design/>` library by Microsoft.
 See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
 
 If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
-They need to be ignore when transforming the code with Jest. You will need to update the
+They need to be ignored when transforming the code with Jest. You will need to update the
 ``transformIgnorePatterns`` to add:
 
 .. code::
