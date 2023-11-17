@@ -193,6 +193,7 @@ export class CellToolbarTracker implements IDisposable {
           }
         }
       }
+      promises.push(cell.ready);
 
       // Wait for all the buttons to be rendered before attaching the toolbar.
       Promise.all(promises)
@@ -202,7 +203,10 @@ export class CellToolbarTracker implements IDisposable {
             return;
           }
 
-          (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
+          (cell.inputArea!.layout as PanelLayout).insertWidget(
+            0,
+            toolbarWidget
+          );
 
           // For rendered markdown, watch for resize events.
           cell.displayChanged.connect(this._resizeEventCallback, this);
