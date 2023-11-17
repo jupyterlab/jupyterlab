@@ -22,7 +22,7 @@
   min-height: 25px;
   z-index: 6;
   position: absolute;
-  right: 8px;
+  right: 3px;
 
   /* Override .jp-Toolbar */
   background-color: transparent;
