@@ -28,7 +28,7 @@
   /* Override .jp-Toolbar */
   background-color: transparent;
   border-bottom: inherit;
-  box-shadow: inherit;
+  box-shadow: none;
 }
 
 /* Overrides for mobile view hiding cell toolbar */
