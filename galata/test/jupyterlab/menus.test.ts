@@ -505,7 +505,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
       .getByRole('menuitem', { name: 'File', exact: true })
       .nth(0);
 
-    await page.sidebar.close('left');
+    // await page.sidebar.close('left');
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
