@@ -17,6 +17,7 @@ import {
   isRawCellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
+import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
@@ -2334,9 +2335,10 @@ namespace Private {
     const lastCell = cells[-1];
     notebook.mode = 'command';
 
+    let initDialogFlag = { dialogShown: false };
     return Promise.all(
       cells.map(cell =>
-        runCell(notebook, cell, sessionContext, sessionDialogs, translator)
+        runCell(notebook, cell, initDialogFlag, sessionContext, sessionDialogs, translator)
       )
     )
       .then(results => {
@@ -2417,12 +2419,17 @@ namespace Private {
     );
   }
 
+interface IInitDialog {
+  dialogShown: boolean;
+}
+
   /**
    * Run a cell.
    */
   async function runCell(
     notebook: Notebook,
     cell: Cell,
+    initDialogFlag: IInitDialog,
     sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
@@ -2437,6 +2444,27 @@ namespace Private {
         break;
       case 'code':
         if (sessionContext) {
+          if (sessionContext.kernelDisplayStatus === 'initializing' && !initDialogFlag.dialogShown) {
+            initDialogFlag.dialogShown = true;
+            const kernelInitNotificationId = Notification.emit(
+                trans.__(
+                    `Kernel '${sessionContext.kernelDisplayName}' is still initializing, code cells will not be executed.`
+                ),
+                'warning',
+                {
+                  autoClose: false,
+                  actions: [
+                    {
+                      label: trans.__('Ok'),
+                      callback: () => {
+                        Notification.dismiss(kernelInitNotificationId);
+                      }
+                    }
+                  ]
+                }
+            );
+            return Promise.resolve(false);
+          }
           if (sessionContext.isTerminating) {
             await showDialog({
               title: trans.__('Kernel Terminating'),
