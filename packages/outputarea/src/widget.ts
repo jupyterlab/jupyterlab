@@ -1282,7 +1282,8 @@ namespace Private {
     password: boolean
   ): HTMLElement {
     const node = document.createElement('div');
-    const promptNode = document.createElement('pre');
+    const inputContainer = document.createElement('div');
+    const promptNode = document.createElement('label');
     promptNode.className = STDIN_PROMPT_CLASS;
     promptNode.textContent = prompt;
     const input = document.createElement('input');
@@ -1290,8 +1291,9 @@ namespace Private {
     if (password) {
       input.type = 'password';
     }
-    node.appendChild(promptNode);
-    promptNode.appendChild(input);
+    node.appendChild(inputContainer);
+    inputContainer.appendChild(promptNode);
+    inputContainer.appendChild(input);
     return node;
   }
 

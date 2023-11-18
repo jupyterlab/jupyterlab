@@ -213,28 +213,60 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 | The Stdin output
 |----------------------------------------------------------------------------*/
 
+.jp-OutputArea-stdin-item {
+  margin-top: 5px;
+}
+
+.jp-Stdin {
+  margin: 2px;
+  box-sizing: border-box;
+  color: var(--jp-content-font-color1);
+  overflow: visible;
+  width: 300px;
+  flex-direction: row;
+  align-content: center;
+  justify-content: center;
+  align-items: baseline;
+}
+
+.jp-Stdin > div {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  width: 300px;
+  margin: 2px;
+  color: var(--jp-content-font-color1);
+  overflow: visible;
+}
+
 .jp-Stdin-prompt {
-  color: var(--jp-content-font-color0);
-  padding-right: var(--jp-code-padding);
-  vertical-align: baseline;
-  flex: 0 0 auto;
+  font-size: var(--jp-ui-font-size1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 28px;
+  color: var(--jp-content-font-color1);
+  text-align: right;
+  margin-right: 8px;
+  width: 80px;
+  flex-shrink: 0;
 }
 
 .jp-Stdin-input {
-  font-family: var(--jp-code-font-family);
-  font-size: inherit;
-  color: inherit;
-  background-color: inherit;
-  width: 42%;
-  min-width: 200px;
-
-  /* make sure input baseline aligns with prompt */
-  vertical-align: baseline;
-
-  /* padding + margin = 0.5em between prompt and cursor */
-  padding: 0 0.25em;
-  margin: 0 0.25em;
-  flex: 0 0 70%;
+  box-sizing: border-box;
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  background-color: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  flex-grow: 1;
+  min-width: 0;
+  flex-shrink: 1;
+  padding: 4px 8px;
+  height: 28px;
+  line-height: 28px;
+  border-radius: none;
+  outline: none !important;
 }
 
 .jp-Stdin-input::placeholder {
