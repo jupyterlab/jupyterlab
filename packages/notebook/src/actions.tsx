@@ -2335,11 +2335,27 @@ namespace Private {
     const lastCell = cells[-1];
     notebook.mode = 'command';
 
-    let initDialogFlag = { dialogShown: false };
+    let initializingDialogShown = false;
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
     return Promise.all(
-      cells.map(cell =>
-        runCell(notebook, cell, initDialogFlag, sessionContext, sessionDialogs, translator)
-      )
+      cells.map(cell => {
+        if (cell.model.type === "code" && sessionContext &&
+            sessionContext.kernelDisplayStatus === 'idle' && !initializingDialogShown) {
+          initializingDialogShown = true;
+          Notification.emit(
+              trans.__(
+                  `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing, code cells will not be executed.`
+              ),
+              'warning',
+              {
+                autoClose: false
+              }
+          );
+          return Promise.resolve(false);
+        }
+        runCell(notebook, cell, sessionContext, sessionDialogs, translator)
+      })
     )
       .then(results => {
         if (notebook.isDisposed) {
@@ -2419,17 +2435,12 @@ namespace Private {
     );
   }
 
-interface IInitDialog {
-  dialogShown: boolean;
-}
-
   /**
    * Run a cell.
    */
   async function runCell(
     notebook: Notebook,
     cell: Cell,
-    initDialogFlag: IInitDialog,
     sessionContext?: ISessionContext,
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
@@ -2444,27 +2455,6 @@ interface IInitDialog {
         break;
       case 'code':
         if (sessionContext) {
-          if (sessionContext.kernelDisplayStatus === 'initializing' && !initDialogFlag.dialogShown) {
-            initDialogFlag.dialogShown = true;
-            const kernelInitNotificationId = Notification.emit(
-                trans.__(
-                    `Kernel '${sessionContext.kernelDisplayName}' is still initializing, code cells will not be executed.`
-                ),
-                'warning',
-                {
-                  autoClose: false,
-                  actions: [
-                    {
-                      label: trans.__('Ok'),
-                      callback: () => {
-                        Notification.dismiss(kernelInitNotificationId);
-                      }
-                    }
-                  ]
-                }
-            );
-            return Promise.resolve(false);
-          }
           if (sessionContext.isTerminating) {
             await showDialog({
               title: trans.__('Kernel Terminating'),
