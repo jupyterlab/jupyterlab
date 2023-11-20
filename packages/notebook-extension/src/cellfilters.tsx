@@ -59,27 +59,23 @@ function CellFiltersComponent(props: ICellFiltersComponentProps): JSX.Element {
   return (
     <>
       {types.size ? (
-        <fieldset>
+        <fieldset className="jp-cell-filters-types">
           <legend>{trans.__('Cell types')}</legend>
-          <ul className="jp-cell-filters-types">
-            {[...types].map(item => {
-              return (
-                <li key={item}>
-                  <label>
-                    <input
-                      type="radio"
-                      name="cell-type"
-                      onChange={() => {
-                        handleCheck(item);
-                      }}
-                      checked={filters.has(item)}
-                    />
-                    {item}
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
+          {[...types].map(item => {
+            return (
+              <label key={item}>
+                <input
+                  type="radio"
+                  name="cell-type"
+                  onChange={() => {
+                    handleCheck(item);
+                  }}
+                  checked={filters.has(item)}
+                />
+                {item}
+              </label>
+            );
+          })}
         </fieldset>
       ) : null}
       {tags.size ? (
