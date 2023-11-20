@@ -24,7 +24,7 @@ test.describe('Notebook tags', () => {
     await expect.soft(codesCells).toHaveCount(3);
     await expect
       .soft(codesCells.first())
-      .toHaveAttribute('data-jp-tags', 'banana');
+      .toHaveAttribute('data-jp-tags', ',banana,');
     await expect
       .soft(codesCells.nth(1))
       .toHaveAttribute('data-jp-tags', ',orange,');
