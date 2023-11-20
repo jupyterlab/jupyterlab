@@ -7,6 +7,7 @@
 | Imports
 |----------------------------------------------------------------------------*/
 
+@import './celltags.css';
 @import './toolbar.css';
 @import './executionindicator.css';
 @import './toc.css';
