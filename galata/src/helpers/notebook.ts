@@ -676,7 +676,9 @@ export class NotebookHelper {
     }
 
     if (firstIndex <= cellIndex && cellIndex <= lastIndex) {
-      return cells.locator('[data-windowed-list-index="${cellIndex}"]');
+      return notebook.locator(
+        `.jp-Cell[data-windowed-list-index="${cellIndex}"]`
+      );
     } else {
       return null;
     }
@@ -942,9 +944,9 @@ export class NotebookHelper {
 
     // Double click works for all cell types
     if (mode == 'Edit') {
-      cell.getByRole('textbox').dblclick();
+      await cell.getByRole('textbox').dblclick();
     } else {
-      cell.getByRole('textbox').press('Escape');
+      await cell.getByRole('textbox').press('Escape');
     }
 
     await this.page.getByText(`Mode: ${mode}`).waitFor();
