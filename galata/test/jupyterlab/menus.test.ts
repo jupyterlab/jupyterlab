@@ -183,7 +183,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     const fileMenu = page.getByRole('menuitem', { name: 'File' });
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
       let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
       if (fileClass.includes('lm-mod-active')) {
         break;
@@ -389,7 +389,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
       let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
       if (fileClass.includes('lm-mod-active')) {
         break;
@@ -436,7 +436,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
       let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
       if (fileClass.includes('lm-mod-active')) {
         break;
@@ -499,7 +499,6 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     });
 
     const viewMenu = page.getByRole('menuitem', { name: 'View', exact: true });
-    const fileMenu = page.getByRole('menuitem', { name: 'File' });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -529,7 +528,7 @@ test.describe('Top menu keyboard navigation @a11y', () => {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
       let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
         ' '
       );
@@ -808,7 +807,7 @@ test.describe('Top menu keyboard navigation to Tabs @a11y', () => {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Tab');
       let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
       if (fileClass.includes('lm-mod-active')) {
         break;
@@ -929,7 +928,7 @@ test.describe('Top menu keyboard navigation to Settings @a11y', () => {
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        await page.keyboard.press('Shift+Tab');
+        await page.keyboard.press('Tab');
         let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(
           ' '
         );
