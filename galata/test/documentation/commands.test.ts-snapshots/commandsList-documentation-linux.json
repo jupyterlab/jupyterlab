@@ -32,7 +32,7 @@
     ]
   },
   {
-    "id": "application:activate-sidebar-widget",
+    "id": "application:toggle-side-tabbar",
     "label": "Toggle Sidebar Element",
     "caption": "By default opens first element of the sidebar",
     "shortcuts": [
