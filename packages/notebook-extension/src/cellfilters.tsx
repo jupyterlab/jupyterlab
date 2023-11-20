@@ -209,6 +209,8 @@ export class CellFiltersModel extends VDomModel {
 
 /**
  * Cell filters view
+ *
+ * @alpha It may change to avoid using dialog in inspector property panel.
  */
 export class CellFiltersView
   extends VDomRenderer<CellFiltersModel>
