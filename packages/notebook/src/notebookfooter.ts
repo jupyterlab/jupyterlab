@@ -48,6 +48,8 @@ export class NotebookFooter extends Widget {
       this.notebook.activeCellIndex = this.notebook.widgets.length - 1;
     }
     NotebookActions.insertBelow(this.notebook);
+    // Focus on the created cell.
+    void NotebookActions.focusActiveCell(this.notebook);
   }
 
   /**
