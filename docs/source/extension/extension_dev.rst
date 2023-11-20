@@ -32,6 +32,7 @@ See the sections below for more detailed information, or browse the rest of this
    internationalization
    identity
    extension_tutorial
+   extension_dual_compatibility
    extension_migration
 
 Other resources
