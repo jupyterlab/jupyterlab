@@ -198,3 +198,35 @@ test.describe('Sidebars', () => {
     expect(tableOfContentsElementRole).toEqual('region');
   });
 });
+
+test.describe('Sidebar keyboard navigation @a11y', () => {
+  test('Open Running Terminals and Kernels tab', async ({ page }) => {
+    await page.goto();
+
+    const fileBrowserTab = document.getElementById('tab-key-1-6');
+    const TerminalsAndKernelsTab = document.getElementById('tab-key-1-2');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('Tab');
+      let fileBrowserIsFocused = document.activeElement === fileBrowserTab;
+      if (fileBrowserIsFocused) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let TerminalsAndKernelsIsFocused =
+        document.activeElement === TerminalsAndKernelsTab;
+      if (TerminalsAndKernelsIsFocused) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    expect(await page.sidebar.isTabOpen('jp-property-inspector')).toEqual(true);
+  });
+});
