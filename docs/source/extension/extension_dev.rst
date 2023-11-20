@@ -46,7 +46,7 @@ Tutorials
 We provide a set of guides to get started writing extensions for JupyterLab:
 
 - :ref:`extension_tutorial`: A tutorial to learn how to make a simple JupyterLab extension.
-- :ref:`Making Dual-Compatible Extensions Tutorial () <dual_compatible_extensions>` A tutorial for making extensions that work in both JupyterLab and Jupyter Notebook 7
+- :ref:`Making Dual-Compatible Extensions Tutorial <dual_compatible_extensions>` A tutorial for making extensions that work in both JupyterLab and Jupyter Notebook 7
 - The `JupyterLab Extension Examples Repository <https://github.com/jupyterlab/extension-examples>`_: A short tutorial series to learn how to develop extensions for JupyterLab by example.
 - :ref:`developer-extension-points`: A list of the most common JupyterLab extension points.
 - Another common pattern for extending JupyterLab document widgets with application plugins is covered in :ref:`documents`.
