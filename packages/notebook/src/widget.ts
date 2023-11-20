@@ -1866,6 +1866,7 @@ export class Notebook extends StaticNotebook {
         }
         break;
       case 'keydown':
+        // This works because CodeMirror does not stop the event propagation
         this._ensureFocus(true);
         break;
       case 'dblclick':
