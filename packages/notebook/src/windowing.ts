@@ -86,7 +86,12 @@ export class NotebookViewModel extends WindowedListModel {
       }
     } else {
       this.cellsEstimatedHeight.set(cellId, size);
-      this._emitEstimatedHeightChanged.invoke();
+      this._emitEstimatedHeightChanged.invoke().catch(error => {
+        console.error(
+          'Fail to trigger an update following a estimated height update.',
+          error
+        );
+      });
     }
   }
 
