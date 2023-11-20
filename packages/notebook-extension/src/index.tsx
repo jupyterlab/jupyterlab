@@ -107,7 +107,6 @@ import {
   duplicateIcon,
   fastForwardIcon,
   filterIcon,
-  //filterIcon,
   IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
@@ -332,9 +331,7 @@ namespace CommandIDs {
 
   export const accessNextHistory = 'notebook:access-next-history-entry';
 
-  export const filterCells = 'notebook:filter-cells-with-tags';
-  
-  export const filterCellsWithTags = 'notebook:filter-cells-with-tags';
+  export const filterCells = 'notebook:filter-cells';
 
   export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
 }
@@ -1126,7 +1123,7 @@ export const cellFiltersPlugin: JupyterFrontEndPlugin<void> = {
       fieldRenderer: () => (
         <CommandToolbarButtonComponent
           commands={commands}
-          id={CommandIDs.cellFilters}
+          id={CommandIDs.filterCells}
           caption={trans.__('Open the filtering tool')}
           icon={filterIcon}
         ></CommandToolbarButtonComponent>
@@ -1137,7 +1134,7 @@ export const cellFiltersPlugin: JupyterFrontEndPlugin<void> = {
       filterButton
     );
 
-    app.commands.addCommand(CommandIDs.cellFilters, {
+    app.commands.addCommand(CommandIDs.filterCells, {
       label: trans.__('Filter Cells'),
       caption: trans.__('Filter cells'),
       execute: async args => {
@@ -1151,25 +1148,28 @@ export const cellFiltersPlugin: JupyterFrontEndPlugin<void> = {
           }
 
           const selectButton = Dialog.okButton({
-            label: trans.__('Filter Cell(s)'),
+            label: trans._n('Filter Cell', 'Filter Cells', current.content.selectedCells.length ?? 1),
             actions: ['select']
           });
           const clearButton = Dialog.warnButton({
-            label: trans.__('Clear Filter(s)'),
+            label: trans._n('Clear Filter', 'Clear Filters', model.filters.size),
             actions: ['clear']
           });
           const view = new CellFiltersView({ model, translator });
           const result = await showDialog({
             title: trans.__('Select cell filters'),
             body: view,
-            buttons: [selectButton, clearButton, Dialog.cancelButton()]
+            buttons: [Dialog.cancelButton(), selectButton, clearButton],
+            defaultButton: 1
           });
 
-          if (result.button.actions.includes('select')) {
-            model.filters = result.value ?? new Set<string>();
-          }
-          if (result.button.actions.includes('clear')) {
-            model.filters = new Set<string>();
+          if(result.button.accept) {
+            if (result.button.actions.includes('select')) {
+              model.filters = result.value ?? new Set<string>();
+            }
+            if (result.button.actions.includes('clear')) {
+              model.filters = new Set<string>();
+            }
           }
         }
       },
@@ -1180,7 +1180,7 @@ export const cellFiltersPlugin: JupyterFrontEndPlugin<void> = {
       const category = trans.__('Notebook Operations');
       palette.addItem({
         category,
-        command: CommandIDs.cellFilters
+        command: CommandIDs.filterCells
       });
     }
   }
