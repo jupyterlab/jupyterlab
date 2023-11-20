@@ -41,10 +41,6 @@
   outline-color: var(--accent-fill-focus);
 }
 
-.jp-Notebook-toolbarCellTypeDropdown span {
-  top: 5px !important;
-}
-
 .jp-Toolbar > .jp-Toolbar-responsive-opener {
   margin-left: auto;
 }
