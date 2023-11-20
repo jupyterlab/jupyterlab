@@ -499,6 +499,42 @@ test.describe('Top menu keyboard navigation @a11y', () => {
     });
 
     const viewMenu = page.getByRole('menuitem', { name: 'View', exact: true });
+    const fileMenu = page.getByRole('menuitem', { name: 'File' });
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowRight');
+      let viewMenuClass = ((await viewMenu.getAttribute('class')) ?? '').split(
+        ' '
+      );
+      if (viewMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('ArrowDown');
+      let fileBrowserMenuClass = (
+        (await fileBrowserMenu.getAttribute('class')) ?? ''
+      ).split(' ');
+      if (fileBrowserMenuClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
+    await page.keyboard.press('Enter');
+
+    expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(false);
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('Shift+Tab');
+      let fileClass = ((await fileMenu.getAttribute('class')) ?? '').split(' ');
+      if (fileClass.includes('lm-mod-active')) {
+        break;
+      }
+    }
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
