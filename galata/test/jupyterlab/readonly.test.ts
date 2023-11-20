@@ -17,9 +17,9 @@ test.describe('test readonly status', () => {
     await page.keyboard.press('Control+s');
 
     const imageName = 'readonly.png';
-    await page.waitForSelector('.Toastify__toast');
-    expect(
-      await await page.locator('.Toastify__toast').screenshot()
-    ).toMatchSnapshot(imageName);
+    await page.locator('.Toastify__toast').waitFor({ state: 'visible' });
+    expect(await page.locator('.Toastify__toast').screenshot()).toMatchSnapshot(
+      imageName
+    );
   });
 });
