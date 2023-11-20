@@ -890,16 +890,21 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
     const nbTocFactory = new NotebookToCFactory(tracker, mdParser, sanitizer);
     tocRegistry.add(nbTocFactory);
     if (settingRegistry) {
-      Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)]).then(
-        ([_, setting]) => {
+      Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)])
+        .then(([_, setting]) => {
           const onSettingsUpdate = () => {
             nbTocFactory.scrollToTop =
               (setting.composite['scrollHeadingToTop'] as boolean) ?? true;
           };
           onSettingsUpdate();
           setting.changed.connect(onSettingsUpdate);
-        }
-      );
+        })
+        .catch(error => {
+          console.error(
+            'Failed to load notebook table of content settings.',
+            error
+          );
+        });
     }
   }
 };
