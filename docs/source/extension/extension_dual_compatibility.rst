@@ -14,7 +14,8 @@ little or no modification depending on its design.
 This guide will give you an overview of compatibility features, then a
 tutorial and reference code covering some of the topics mentioned here.
 If you don't know how to make extensions, you can read more about the
-basics at :ref:`the extensions page <extension_dev>`.
+basics at :ref:`the Extension Tutorial <extension_tutorial>` or the
+:ref:`the Extensions page <extension_dev>`.
 
 How Compatibility Works
 -----------------------
@@ -95,7 +96,7 @@ Using Plugin Metadata to Drive Compatibility
 
 JupyterLab's extension system is designed so that plugins can depend on and
 reuse features from one another. A key part of this approach is :ref:`JupyterLab's
-provider-consumer pattern <services>`, and it's what enables the compatibility solutions
+provider-consumer pattern <provider-consumer-basic-info>`, and it's what enables the compatibility solutions
 discussed here.
 
 Each plugin uses some properties (the "requires" and "optional" properties) to
@@ -115,10 +116,10 @@ So, these capabilities form the backbone of extension compatibility: You can
 use them to make checks in your extensions that will allow them to function in
 both JupyterLab and Jupyter Notebook 7 (and others).
 
-JupyterLab itself is a :ref:`provider <services>` of many features through its built-in plugins,
+JupyterLab itself is a :ref:`provider <provider-consumer-basic-info>` of many features through its built-in plugins,
 which you can read more about in the [Common Extension Points document](https://jupyterlab.readthedocs.io/en/latest/extension/extension_points.html).
 It's a good idea to use these extension points while you're building your extensions (and
-by doing so you're acting as the "consumer" in JupyterLab's :ref:`provider-consumer pattern <services>`.
+by doing so you're acting as the "consumer" in JupyterLab's :ref:`provider-consumer pattern <provider-consumer-basic-info>`.
 
 Testing for Optional Features
 .............................
@@ -265,4 +266,4 @@ Further Reading
 ---------------
 
 For an explanation of JupyterLab's plugin system and the provider-consumer pattern,
-read the :ref:`Extension Development document <services>`.
+read the :ref:`Extension Development document <provider-consumer-basic-info>`.

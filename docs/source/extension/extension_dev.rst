@@ -133,6 +133,8 @@ A Jupyter front-end application object is given to a plugin's ``activate`` funct
 
 See the JupyterLab API reference documentation for the ``JupyterFrontEnd`` class for more details.
 
+.. _provider-consumer-basic-info:
+
 .. _services:
 
 Plugins Interacting with Each Other
