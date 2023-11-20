@@ -234,7 +234,10 @@ export class CellToolbarTracker implements IDisposable {
       cell.displayChanged.disconnect(this._resizeEventCallback, this);
     }
     model.contentChanged.disconnect(this._changedEventCallback, this);
-    if (this._toolbar?.parent === cell && this._toolbar?.isDisposed === false) {
+    if (
+      this._toolbar?.parent === cell?.inputArea &&
+      this._toolbar?.isDisposed === false
+    ) {
       this._toolbar.dispose();
     }
   }
