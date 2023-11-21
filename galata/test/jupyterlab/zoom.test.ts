@@ -31,7 +31,7 @@ test.describe('Low Vision / Zoom Support', () => {
     );
   });
 
-  test('Right tabBar at low vision', async ({ page }) => {
+  test('Right tab bar, small viewport', async ({ page }) => {
     await page.theme.setLightTheme();
     const tabbar = await page.sidebar.getTabBar('right');
     expect(await tabbar.screenshot()).toMatchSnapshot(
