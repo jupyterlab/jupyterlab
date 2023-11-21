@@ -27,7 +27,7 @@ test.describe('Low Vision / Zoom Support', () => {
     await page.theme.setLightTheme();
     const tabbar = await page.sidebar.getTabBar();
     expect(await tabbar.screenshot()).toMatchSnapshot(
-      'left-tabbar-at-low-vision.png'
+      'left-tab-bar-small-viewport.png'
     );
   });
 
