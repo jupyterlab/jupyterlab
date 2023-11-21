@@ -294,6 +294,7 @@ describe('@jupyterlab/ui-components', () => {
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.disabled).toBe(true);
         expect(buttonNode.classList.contains('lm-mod-toggled')).toBe(true);
+        expect(buttonNode.getAttribute('aria-pressed')).toBe('true');
         expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(true);
         button.dispose();
       });
@@ -310,6 +311,7 @@ describe('@jupyterlab/ui-components', () => {
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.disabled).toBe(true);
         expect(buttonNode.classList.contains('lm-mod-toggled')).toBe(true);
+        expect(buttonNode.getAttribute('aria-pressed')).toBe('true');
         expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(true);
         enabled = true;
         visible = true;
@@ -318,6 +320,7 @@ describe('@jupyterlab/ui-components', () => {
         await button.renderPromise;
         expect(buttonNode.disabled).toBe(false);
         expect(buttonNode.classList.contains('lm-mod-toggled')).toBe(true);
+        expect(buttonNode.getAttribute('aria-pressed')).toBe('true');
         expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(false);
         enabled = false;
         visible = false;
@@ -443,6 +446,8 @@ describe('@jupyterlab/ui-components', () => {
         });
         Widget.attach(widget, document.body);
         await framePromise();
+        await widget.renderPromise;
+
         const button = widget.node.firstChild as HTMLElement;
         expect(button.classList.contains('foo')).toBe(true);
         expect(button.querySelector('.iconFoo')).toBeDefined();
@@ -476,6 +481,7 @@ describe('@jupyterlab/ui-components', () => {
           });
           Widget.attach(button, document.body);
           await framePromise();
+          await button.renderPromise;
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           expect(called).toBe(true);
           button.dispose();

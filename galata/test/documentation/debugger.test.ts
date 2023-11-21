@@ -31,7 +31,7 @@ test.describe('Debugger', () => {
 
     expect(
       await page.screenshot({
-        clip: { x: 1030, y: 62, width: 210, height: 28 }
+        clip: { x: 1030, y: 62, width: 210, height: 32 }
       })
     ).toMatchSnapshot('debugger_kernel.png');
   });
@@ -46,7 +46,7 @@ test.describe('Debugger', () => {
     await setSidebarWidth(page, 251, 'right');
 
     expect(
-      await page.screenshot({ clip: { y: 62, x: 780, width: 210, height: 28 } })
+      await page.screenshot({ clip: { y: 62, x: 780, width: 210, height: 32 } })
     ).toMatchSnapshot('debugger_activate.png');
   });
 
@@ -76,19 +76,22 @@ test.describe('Debugger', () => {
 
     await createNotebook(page);
 
-    const runButton = await page.waitForSelector(
-      '.jp-Toolbar-item >> [data-command="notebook:run-cell-and-select-next"]'
-    );
+    const runButton = await page
+      .locator('.jp-Toolbar-item')
+      .locator('[data-command="notebook:run-cell-and-select-next"]')
+      .getByRole('button')
+      .elementHandle();
 
     // Inject mouse pointer
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [await positionMouseOver(runButton)]
+      [await positionMouseOver(runButton!)]
     );
-    await runButton.focus();
-    await runButton.hover();
+    await runButton!.focus();
+    await runButton!.focus();
+    await runButton!.hover();
 
     expect(
       await page.screenshot({ clip: { y: 62, x: 400, width: 190, height: 60 } })
@@ -118,7 +121,7 @@ test.describe('Debugger', () => {
       })
     ).toMatchSnapshot('debugger_stop_on_breakpoint.png');
 
-    await page.click('button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]');
   });
 
   test('Breakpoints on exception', async ({ page, tmpPath }) => {
@@ -130,10 +133,10 @@ test.describe('Debugger', () => {
     await page.waitForCondition(() => page.debugger.isOpen());
     await setSidebarWidth(page, 251, 'right');
 
-    await expect(page.locator('button.jp-PauseOnExceptions')).not.toHaveClass(
-      /lm-mod-toggled/
-    );
-    await page.locator('button.jp-PauseOnExceptions').click();
+    await expect(
+      page.locator('jp-button.jp-PauseOnExceptions')
+    ).toHaveAttribute('aria-pressed', 'false');
+    await page.locator('jp-button.jp-PauseOnExceptions').click();
     const menu = page.locator('.jp-PauseOnExceptions-menu');
     await expect(menu).toBeVisible();
     await expect(menu.locator('li.lm-Menu-item')).toHaveCount(3);
@@ -143,9 +146,9 @@ test.describe('Debugger', () => {
       .locator('li div.lm-Menu-itemLabel:text("userUnhandled")')
       .click();
 
-    await expect(page.locator('button.jp-PauseOnExceptions')).toHaveClass(
-      /lm-mod-toggled/
-    );
+    await expect(
+      page.locator('jp-button.jp-PauseOnExceptions')
+    ).toHaveAttribute('aria-pressed', 'true');
 
     await page.notebook.enterCellEditingMode(0);
     const keyboard = page.keyboard;
@@ -164,10 +167,10 @@ test.describe('Debugger', () => {
       })
     ).toMatchSnapshot('debugger_stop_on_unhandled_exception.png');
 
-    await page.click('button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]');
     await page.notebook.waitForRun(0);
 
-    await page.locator('button.jp-PauseOnExceptions').click();
+    await page.locator('jp-button.jp-PauseOnExceptions').click();
 
     await expect(menu.locator('li.lm-Menu-item.lm-mod-toggled')).toHaveCount(1);
     await expect(
@@ -185,8 +188,8 @@ test.describe('Debugger', () => {
         clip: { y: 110, x: 300, width: 300, height: 80 }
       })
     ).toMatchSnapshot('debugger_stop_on_raised_exception.png');
-    await page.click('button[title^=Continue]');
-    await page.click('button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]');
   });
 
   test('Debugger sidebar', async ({ page, tmpPath }) => {
@@ -270,7 +273,7 @@ test.describe('Debugger', () => {
       path: 'test/documentation/screenshots/debugger-callstack.png'
     });
 
-    await page.click('button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]');
   });
 
   test('Breakpoints panel', async ({ page, tmpPath }) => {
@@ -300,7 +303,7 @@ test.describe('Debugger', () => {
       path: 'test/documentation/screenshots/debugger-breakpoints.png'
     });
 
-    await page.click('button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]');
   });
 
   test('Source panel', async ({ page, tmpPath }) => {
@@ -319,12 +322,9 @@ test.describe('Debugger', () => {
 
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
-
-    await expect(
-      page.locator(
-        '[aria-label="side panel content"] >> text=Source/tmp/ipykernel_'
-      )
-    ).toBeVisible();
+    await expect(page.locator('.jp-DebuggerSources-header-path')).toContainText(
+      '/tmp/ipykernel_'
+    );
 
     // Don't compare screenshot as the kernel id varies
     // Need to set precisely the path
@@ -333,7 +333,7 @@ test.describe('Debugger', () => {
       path: 'test/documentation/screenshots/debugger-source.png'
     });
 
-    await page.click('button[title^=Continue]');
+    await page.click('jp-button[title^=Continue]');
   });
 });
 

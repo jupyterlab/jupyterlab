@@ -1865,6 +1865,10 @@ export class Notebook extends StaticNotebook {
           this._evtDocumentMousemove(event as MouseEvent);
         }
         break;
+      case 'keydown':
+        // This works because CodeMirror does not stop the event propagation
+        this._ensureFocus(true);
+        break;
       case 'dblclick':
         this._evtDblClick(event as MouseEvent);
         break;
@@ -2120,6 +2124,11 @@ export class Notebook extends StaticNotebook {
    * Ensure that the notebook has proper focus.
    */
   private _ensureFocus(force = false): void {
+    // No-op is the footer has the focus.
+    const footer = (this.layout as NotebookWindowedLayout).footer;
+    if (footer && document.activeElement === footer.node) {
+      return;
+    }
     const activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
       // Test for !== true to cover hasFocus is false and editor is not yet rendered.
@@ -2734,8 +2743,6 @@ export class Notebook extends StaticNotebook {
             });
           });
       } else {
-        // If the active cell is not visible (because of full windowing), set the focus
-        // on the footer (always visible) to set focus on Notebook widget.
         (this.layout as NotebookWindowedLayout).footer?.node.focus({
           preventScroll: true
         });
