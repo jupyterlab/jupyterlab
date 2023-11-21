@@ -62,8 +62,6 @@ export class FileBrowser extends SidePanel {
     model.connectionFailure.connect(this._onConnectionFailure, this);
     this._manager = model.manager;
 
-    // a11y
-    this.toolbar.node.setAttribute('role', 'navigation');
     this.toolbar.node.setAttribute(
       'aria-label',
       this._trans.__('file browser')

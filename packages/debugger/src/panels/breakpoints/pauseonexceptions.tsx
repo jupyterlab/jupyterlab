@@ -52,9 +52,7 @@ export class PauseOnExceptionsWidget extends ToolbarButton {
     const exceptionBreakpointFilters = session?.exceptionBreakpointFilters;
     this._props.className = PAUSE_ON_EXCEPTION_BUTTON_CLASS;
     if (this._props.service.session?.isStarted && exceptionBreakpointFilters) {
-      if (session.isPausingOnException()) {
-        this._props.className += ' lm-mod-toggled';
-      }
+      this._props.pressed = session.isPausingOnException();
       this._props.enabled = true;
     } else {
       this._props.enabled = false;
