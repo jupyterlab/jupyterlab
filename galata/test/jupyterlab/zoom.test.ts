@@ -16,7 +16,7 @@ test.describe('Low Vision / Zoom Support', () => {
     );
   });
 
-  test('Should show visibility of menubar at low vision', async ({ page }) => {
+  test('Menubar, small viewport', async ({ page }) => {
     await page.theme.setLightTheme();
     expect(await page.locator('#jp-top-panel').screenshot()).toMatchSnapshot(
       'visibility-of-menu-bar-at-low-vision.png'
