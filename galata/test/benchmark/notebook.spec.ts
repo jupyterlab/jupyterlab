@@ -126,6 +126,16 @@ test.describe('Benchmark', () => {
       let panel = await page.$('[role="main"] >> .jp-NotebookPanel');
       // Get only the document node to avoid noise from kernel and debugger in the toolbar
       let document = await panel.$('.jp-Notebook');
+
+      // Wait for the cell toolbar to be visible in code cell.
+      if (file === codeNotebook) {
+        await expect(
+          page.locator(
+            '.jp-Notebook .jp-Cell .jp-cell-toolbar:not(.jp-Toolbar-micro)'
+          )
+        ).toBeVisible();
+      }
+
       expect(await document.screenshot()).toMatchSnapshot(
         `${file.replace('.', '-')}.png`
       );
