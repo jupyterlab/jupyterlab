@@ -203,12 +203,12 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
   test('Open Running Terminals and Kernels tab', async ({ page }) => {
     await page.goto();
 
-    const fileBrowserTab = page.getByRole('tab', {
-      name: 'File Browser (Ctrl+Shift+F)'
-    });
-    const TerminalsAndKernelsTab = page.getByRole('tab', {
-      name: 'Running Terminals and Kernels'
-    });
+    // const fileBrowserTab = page.getByRole('tab', {
+    //   name: 'File Browser (Ctrl+Shift+F)'
+    // });
+    // const TerminalsAndKernelsTab = page.getByRole('tab', {
+    //   name: 'Running Terminals and Kernels'
+    // });
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -221,7 +221,6 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         break;
       }
     }
-    await page.keyboard.press('Enter');
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -244,18 +243,20 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
   test('Open table of contents tab', async ({ page }) => {
     await page.goto();
 
-    const fileBrowserTab = document.getElementById('tab-key-1-6');
-    const tableOFContentsTab = document.getElementById('tab-key-1-4');
+    // const fileBrowserTab = document.getElementById('tab-key-1-6');
+    // const tableOFContentsTab = document.getElementById('tab-key-1-4');
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await page.keyboard.press('Tab');
-      let fileBrowserIsFocused = document.activeElement === fileBrowserTab;
-      if (fileBrowserIsFocused) {
+      let fileBrowserIsFocused = await page.evaluate(
+        () => document.activeElement
+      );
+      fileBrowserIsFocused?.getAttribute;
+      if (fileBrowserIsFocused?.getAttribute('data-id') === 'filebrowser') {
         break;
       }
     }
-    await page.keyboard.press('Enter');
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
