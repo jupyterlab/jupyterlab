@@ -5,7 +5,6 @@
 @import './breakpoints.css';
 @import './callstack.css';
 @import './editor.css';
-@import './icons.css';
 @import './kernelSources.css';
 @import './sidebar.css';
 @import './sources.css';
@@ -19,6 +18,11 @@
 
 #jp-debugger .jp-switch-label {
   margin-right: 0;
+}
+
+.jp-DebuggerBugButton[aria-pressed='true'] {
+  /* Undo default toolkit style */
+  box-shadow: none;
 }
 
 .jp-DebuggerBugButton[aria-pressed='true'] path {

@@ -24,6 +24,7 @@
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
   flex-wrap: wrap;
+
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
   row-gap: min(
@@ -33,12 +34,16 @@
 
   border-bottom: none;
   height: auto;
+
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
   margin: min(1vh, 8px) min(1.5vw, 12px) 0; /* Using min() and vw/vh allows the margins to shrink when the screen is small or when the user zooms in, which should allow at least 2 files or folders to be seen within the file browser at 400% zoom */
   box-shadow: none;
   padding: 0;
-  justify-content: flex-start;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar::part(positioning-region) {
+  row-gap: 12px;
 }
 
 .jp-FileBrowser-Panel {
@@ -49,6 +54,7 @@
 
 .jp-BreadCrumbs {
   flex: 0 0 auto;
+
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
   margin: min(1vh, 8px) min(1vw, 12px); /* Using min() and vw/vh allows the margins to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
@@ -81,7 +87,6 @@
 .jp-FileBrowser-toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0;
-  padding-right: 2px;
   align-items: center;
   height: unset;
 }
@@ -217,6 +222,7 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
   padding: min(1vh, 4px) min(1vw, 12px); /* Using min() and vw/vh allows the padding to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */

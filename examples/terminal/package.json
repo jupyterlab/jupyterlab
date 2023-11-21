@@ -7,12 +7,13 @@
     "clean": "rimraf build"
   },
   "dependencies": {
+    "@jupyter/web-components": "^0.13.3",
     "@jupyterlab/application": "^4.1.0-alpha.3",
     "@jupyterlab/coreutils": "^6.1.0-alpha.3",
     "@jupyterlab/services": "^7.1.0-alpha.3",
     "@jupyterlab/terminal": "^4.1.0-alpha.3",
     "@jupyterlab/theme-light-extension": "^4.1.0-alpha.3",
-    "@lumino/widgets": "^2.3.1-alpha.0"
+    "@lumino/widgets": "^2.3.1"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
