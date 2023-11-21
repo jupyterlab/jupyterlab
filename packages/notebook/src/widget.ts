@@ -204,28 +204,7 @@ export class StaticNotebook extends WindowedList {
         windowingActive
       }),
       layout: new NotebookWindowedLayout(),
-      renderer: {
-        createOuter() {
-          return document.createElement('div');
-        },
-
-        createViewport() {
-          const el = document.createElement('div');
-          el.setAttribute('role', 'feed');
-          el.setAttribute('aria-label', 'Cells');
-          return el;
-        },
-
-        createScrollbar(): HTMLOListElement {
-          return document.createElement('ol');
-        },
-
-        createScrollbarItem(index: number, item: ICellModel): HTMLLIElement {
-          const li = document.createElement('li');
-          li.appendChild(document.createTextNode(`${index + 1}`));
-          return li;
-        }
-      },
+      renderer: options.renderer ?? WindowedList.defaultRenderer,
       scrollbar: windowingActive
     });
     this.addClass(NB_CLASS);
@@ -1071,6 +1050,11 @@ export namespace StaticNotebook {
      * The kernel history retrieval object
      */
     kernelHistory?: INotebookHistory;
+
+    /**
+     * The renderer used by the underlying windowed list.
+     */
+    renderer?: WindowedList.IRenderer;
   }
 
   /**
@@ -1308,7 +1292,38 @@ export class Notebook extends StaticNotebook {
    * Construct a notebook widget.
    */
   constructor(options: Notebook.IOptions) {
-    super(options);
+    super({
+      renderer: {
+        createOuter(): HTMLElement {
+          return document.createElement('div');
+        },
+
+        createViewport(): HTMLElement {
+          const el = document.createElement('div');
+          el.setAttribute('role', 'feed');
+          el.setAttribute('aria-label', 'Cells');
+          return el;
+        },
+
+        createScrollbar(): HTMLOListElement {
+          return document.createElement('ol');
+        },
+
+        createScrollbarItem(
+          index: number,
+          model: ICellModel,
+          notebook: Notebook
+        ): HTMLLIElement {
+          const li = document.createElement('li');
+          li.appendChild(document.createTextNode(`${index + 1}`));
+          if (notebook.selectedCells.some(cell => model === cell.model)) {
+            li.className = 'jp-mod-selected';
+          }
+          return li;
+        }
+      },
+      ...options
+    });
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);

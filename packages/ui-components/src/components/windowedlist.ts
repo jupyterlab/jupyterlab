@@ -1279,7 +1279,7 @@ export class WindowedList<
     const list = viewModel.itemsList;
     if (list?.length) {
       for (let index = 0; index < list.length; index += 1) {
-        const item = renderer.createScrollbarItem(index, list.get(index));
+        const item = renderer.createScrollbarItem(index, list.get(index), this);
         item.dataset.index = `${index}`;
         content.appendChild(item);
       }
@@ -1479,7 +1479,7 @@ export namespace WindowedList {
     /**
      * Create an individual item rendered in the scrollbar.
      */
-    createScrollbarItem(index: number, item: T): HTMLLIElement {
+    createScrollbarItem(index: number): HTMLLIElement {
       const li = document.createElement('li');
       li.appendChild(document.createTextNode(`${index}`));
       return li;
@@ -1724,7 +1724,11 @@ export namespace WindowedList {
     /**
      * Create an individual item rendered in the scrollbar.
      */
-    createScrollbarItem(index: number, item: T): HTMLLIElement;
+    createScrollbarItem(
+      index: number,
+      item: T,
+      list: WindowedList
+    ): HTMLLIElement;
 
     /**
      * Create the viewport element into which virtualized children are added.
