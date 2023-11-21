@@ -12,7 +12,7 @@ test.describe('Low Vision / Zoom Support', () => {
 
   test('Full page, small viewport', async ({ page }) => {
     expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
-      'launch-screen-at-low-vision.png'
+      'full-page-small-viewport.png'
     );
   });
 
