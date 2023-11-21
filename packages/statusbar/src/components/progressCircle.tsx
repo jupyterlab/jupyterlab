@@ -65,6 +65,7 @@ export function ProgressCircle(props: ProgressCircle.IProps): JSX.Element {
           fill="none"
         />
         <path
+          className={'jp-Statusbar-ProgressCirclePath'}
           transform="translate(125,125) scale(.9)"
           d={d(props.progress)}
           fill={'var(--jp-inverse-layout-color3)'}

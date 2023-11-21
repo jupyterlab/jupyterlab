@@ -64,6 +64,8 @@ test.describe('Debugger Tests', () => {
     expect(await sourcesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-sources.png'
     );
+
+    await page.click('jp-button[title^=Continue]');
   });
 
   test('Rich variables inspector', async ({ page, tmpPath }) => {
@@ -105,7 +107,7 @@ test.describe('Debugger Tests', () => {
 
     await page.activity.closePanel(`${globalVar} - ${notebookName}`);
 
-    await page.locator('button[title="Continue (F9)"]').click();
+    await page.locator('jp-button[title="Continue (F9)"]').click();
     await expect(variablesPanel).not.toContain('ul');
     await page.debugger.waitForVariables();
 
