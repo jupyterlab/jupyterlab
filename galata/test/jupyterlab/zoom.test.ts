@@ -7,6 +7,8 @@ test.use({ viewport: { width: 320, height: 256 } });
 
 test.describe('Low Vision / Zoom Support', () => {
   test.beforeEach(async ({ page }) => {
+    // Close the left sidebar before these tests because we are unable to support
+    // showing both the sidebar and the main area for small screen / high zoom.
     await page.sidebar.close('left');
   });
 
