@@ -24,6 +24,7 @@
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
   flex-wrap: wrap;
+  /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
   row-gap: min(
     1.5vh,
