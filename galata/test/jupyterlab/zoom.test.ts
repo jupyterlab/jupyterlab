@@ -19,7 +19,7 @@ test.describe('Low Vision / Zoom Support', () => {
   test('Menubar, small viewport', async ({ page }) => {
     await page.theme.setLightTheme();
     expect(await page.locator('#jp-top-panel').screenshot()).toMatchSnapshot(
-      'visibility-of-menu-bar-at-low-vision.png'
+      'menu-bar-small-viewport.png'
     );
   });
 
