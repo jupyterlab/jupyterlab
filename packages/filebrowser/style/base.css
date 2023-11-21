@@ -138,6 +138,7 @@
 }
 
 .jp-DirListing-headerItem {
+  /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
   padding: min(1vh, 4px) min(1vw, 12px) min(0.5vh, 2px); /* Using min() and vw/vh allows the padding to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
   font-weight: 500;
