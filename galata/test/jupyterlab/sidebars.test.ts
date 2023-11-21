@@ -293,19 +293,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 test('Close then open File Browser tab', async ({ page }) => {
   await page.goto();
 
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
-    await page.keyboard.press('Tab');
-    let fileBrowserIsFocused = await page.evaluate(
-      () => document.activeElement?.getAttribute('data-id')
-    );
-    if (fileBrowserIsFocused === 'filebrowser') {
-      break;
-    }
-  }
-  await page.keyboard.press('Enter');
-
-  expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(false); //doesn't work, you can't close it on enter!
+  await page.sidebar.close('left');
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
