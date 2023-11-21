@@ -3,8 +3,10 @@
 
 .. _dual_compatible_extensions:
 
-Making Dual-Compatible Extensions (for JupyterLab 4, Notebook 7 and more!)
-==========================================================================
+Making Extensions Compatible with Multiple Applications Tutorial
+================================================================
+
+*Make your extensions work in JupyterLab 4, Notebook 7 and more!*
 
 Jupyter Notebook 7 is built with components from JupyterLab, and since
 both use the same building blocks, that means your extension can work
