@@ -39,7 +39,7 @@ test.describe('Low Vision / Zoom Support', () => {
     );
   });
 
-  test('StatusBar at low vision', async ({ page }) => {
+  test('Status bar, small viewport', async ({ page }) => {
     await page.theme.setLightTheme();
     expect(
       await page.locator('#jp-main-statusbar').screenshot()
