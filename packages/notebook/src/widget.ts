@@ -204,7 +204,28 @@ export class StaticNotebook extends WindowedList {
         windowingActive
       }),
       layout: new NotebookWindowedLayout(),
-      renderer: StaticNotebook.defaultRenderer,
+      renderer: {
+        createOuter() {
+          return document.createElement('div');
+        },
+
+        createViewport() {
+          const el = document.createElement('div');
+          el.setAttribute('role', 'feed');
+          el.setAttribute('aria-label', 'Cells');
+          return el;
+        },
+
+        createScrollbar(): HTMLOListElement {
+          return document.createElement('ol');
+        },
+
+        createScrollbarItem(index: number, item: ICellModel): HTMLLIElement {
+          const li = document.createElement('li');
+          li.appendChild(document.createTextNode(`${index + 1}`));
+          return li;
+        }
+      },
       scrollbar: windowingActive
     });
     this.addClass(NB_CLASS);
@@ -1094,33 +1115,6 @@ export namespace StaticNotebook {
      */
     readonly raw: Record<string, any>;
   }
-
-  /**
-   * The renderer class for static notebooks.
-   */
-  class Renderer extends WindowedList.Renderer<ICellModel> {
-    createOuter() {
-      return document.createElement('div');
-    }
-
-    createViewport() {
-      const el = document.createElement('div');
-      el.setAttribute('role', 'feed');
-      el.setAttribute('aria-label', 'Cells');
-      return el;
-    }
-
-    createScrollbarItem(index: number, item: ICellModel): HTMLLIElement {
-      const li = document.createElement('li');
-      li.appendChild(document.createTextNode(`${index + 1}`));
-      return li;
-    }
-  }
-
-  /**
-   * Default windowed list renderer for static notebooks.
-   */
-  export const defaultRenderer = new Renderer();
 
   /**
    * Default configuration options for cell editors.

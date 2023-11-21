@@ -951,7 +951,9 @@ export class WindowedList<
     }
     this.viewModel.height = this.node.getBoundingClientRect().height;
     const style = window.getComputedStyle(this.node);
-    this.viewModel.paddingTop = parseFloat(style.paddingTop)
+    this.viewModel.paddingTop = parseFloat(style.paddingTop);
+    const scrollbar = this.node.querySelector('.jp-WindowedPanel-scrollbar')!;
+    scrollbar.addEventListener('pointerdown', this);
   }
 
   /**
