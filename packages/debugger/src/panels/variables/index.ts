@@ -86,15 +86,8 @@ export class Variables extends PanelWithToolbar {
     });
 
     const markViewButtonSelection = (selectedView: string): void => {
-      const viewModeClassName = 'jp-ViewModeSelected';
-
-      if (selectedView === 'tree') {
-        tableViewButton.removeClass(viewModeClassName);
-        treeViewButton.addClass(viewModeClassName);
-      } else {
-        treeViewButton.removeClass(viewModeClassName);
-        tableViewButton.addClass(viewModeClassName);
-      }
+      tableViewButton.pressed = selectedView !== 'tree';
+      treeViewButton.pressed = !tableViewButton.pressed;
     };
 
     markViewButtonSelection(this._table.isHidden ? 'tree' : 'table');

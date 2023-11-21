@@ -870,12 +870,7 @@ export namespace Dialog {
                 title={trans.__('Cancel')}
                 minimal
               >
-                <LabIcon.resolveReact
-                  icon={closeIcon}
-                  iconClass="jp-Icon"
-                  className="jp-ToolbarButtonComponent-icon"
-                  tag="span"
-                />
+                <LabIcon.resolveReact icon={closeIcon} tag="span" />
               </Button>
             )}
           </>
