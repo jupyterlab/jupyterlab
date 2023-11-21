@@ -76,6 +76,26 @@ function CellFiltersComponent(props: ICellFiltersComponentProps): JSX.Element {
               </label>
             );
           })}
+          <label key={'any'}>
+            <input
+              type="radio"
+              name="cell-type"
+              onChange={() => {
+                const newFilters = new Set<string>(filters);
+                for (const item of types) {
+                  if (filters.has(item)) {
+                    newFilters.delete(item);
+                  }
+                }
+                setFilters(newFilters);
+              }}
+              checked={[...filters].reduce(
+                (agg, f) => agg && !types.has(f),
+                true
+              )}
+            />
+            {trans.__('any type')}
+          </label>
         </fieldset>
       ) : null}
       {tags.size ? (
@@ -174,10 +194,9 @@ export class CellFiltersModel extends VDomModel {
       const cellTagList = new Set<string>(
         (cell.model.getMetadata('tags') ?? []).concat(cell.model.type)
       );
-      const isTagFiltered = this._isContentShared(
-        cellTagList,
-        this._filters
-      ); /* IsTagFiltered is true when the list of tags of a cell includes at least one the checked tags */
+      // IsTagFiltered is true when the list of tags of a cell includes
+      // at least one the checked tags
+      const isTagFiltered = this._isSubset(cellTagList, this._filters);
 
       if (isTagFiltered === false && cell.inputHidden === false) {
         cell.inputHidden = true;
@@ -198,10 +217,10 @@ export class CellFiltersModel extends VDomModel {
    * Check if `subset` is included into another one
    * return true if that's the case
    */
-  private _isContentShared(subSet: Set<string>, mainSet: Set<string>): boolean {
+  private _isSubset(mainSet: Set<string>, subset: Set<string>): boolean {
     const isIncluded: boolean[] = [];
-    mainSet.forEach(item => {
-      isIncluded.push(subSet.has(item));
+    subset.forEach(item => {
+      isIncluded.push(mainSet.has(item));
     });
     return isIncluded.every(item => item);
   }
