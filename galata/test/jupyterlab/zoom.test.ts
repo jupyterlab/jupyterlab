@@ -9,6 +9,9 @@ test.describe('Low Vision / Zoom Support', () => {
   test.beforeEach(async ({ page }) => {
     // Close the left sidebar before these tests because we are unable to support
     // showing both the sidebar and the main area for small screen / high zoom.
+    // Close the left sidebar before these tests because we are currently and 
+    // probably never will be able fully fit both the sidebar and the main area
+    // side-by-side together on small screens / high zoom.
     await page.sidebar.close('left');
   });
 
