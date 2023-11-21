@@ -303,13 +303,15 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 test('Open File Browser tab', async ({ page }) => {
   await page.goto();
 
+  const fileBrowserTab = page.getByRole('tab', {
+    name: 'File Browser (Ctrl+Shift+F)'
+  });
+
   // eslint-disable-next-line no-constant-condition
   while (true) {
     await page.keyboard.press('Tab');
-    let fileBrowserIsFocused = await page.evaluate(
-      () => document.activeElement
-    );
-    if (fileBrowserIsFocused?.getAttribute('data-id') === 'filebrowser') {
+    let isFocused = page.locator(':focus');
+    if (fileBrowserTab === isFocused) {
       break;
     }
   }
@@ -320,10 +322,8 @@ test('Open File Browser tab', async ({ page }) => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     await page.keyboard.press('Tab');
-    let fileBrowserIsFocused = await page.evaluate(
-      () => document.activeElement
-    );
-    if (fileBrowserIsFocused?.getAttribute('data-id') === 'filebrowser') {
+    let isFocused = page.locator(':focus');
+    if (fileBrowserTab === isFocused) {
       break;
     }
   }
