@@ -17,14 +17,12 @@ test.describe('Low Vision / Zoom Support', () => {
   });
 
   test('Menubar, small viewport', async ({ page }) => {
-    await page.theme.setLightTheme();
     expect(await page.locator('#jp-top-panel').screenshot()).toMatchSnapshot(
       'menu-bar-small-viewport.png'
     );
   });
 
   test('Left tab bar, small viewport', async ({ page }) => {
-    await page.theme.setLightTheme();
     const tabbar = await page.sidebar.getTabBar();
     expect(await tabbar.screenshot()).toMatchSnapshot(
       'left-tab-bar-small-viewport.png'
@@ -32,7 +30,6 @@ test.describe('Low Vision / Zoom Support', () => {
   });
 
   test('Right tab bar, small viewport', async ({ page }) => {
-    await page.theme.setLightTheme();
     const tabbar = await page.sidebar.getTabBar('right');
     expect(await tabbar.screenshot()).toMatchSnapshot(
       'right-tab-bar-small-viewport.png'
@@ -40,7 +37,6 @@ test.describe('Low Vision / Zoom Support', () => {
   });
 
   test('Status bar, small viewport', async ({ page }) => {
-    await page.theme.setLightTheme();
     expect(
       await page.locator('#jp-main-statusbar').screenshot()
     ).toMatchSnapshot('status-bar-small-viewport.png');
