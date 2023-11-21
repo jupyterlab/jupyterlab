@@ -226,7 +226,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     }
     await page.keyboard.press('Enter');
 
-    expect(await page.sidebar.isTabOpen('jp-property-inspector')).toEqual(true);
+    expect(await page.sidebar.isTabOpen('jp-running-sessions')).toEqual(true);
   });
 
   test('Open table of contents tab', async ({ page }) => {
@@ -305,7 +305,7 @@ test('Close then open File Browser tab', async ({ page }) => {
   }
   await page.keyboard.press('Enter');
 
-  expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(false);
+  expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(false); //doesn't work, you can't close it on enter!
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
