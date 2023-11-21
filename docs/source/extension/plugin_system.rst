@@ -66,7 +66,7 @@ objects (in the order you specify them), then any "optional" objects (again,
 in the order you specify them).
 
 By returning an object from your activate function, you become a "provider"
-in Jupyter's provider-consumer pattern, and other plugins can use ("consume")
+in JupyterLab's provider-consumer pattern, and other plugins can use ("consume")
 this object (the "service object") in their extensions. Read more about this
 in the "Making Your Plugin a Provider" section below.
 
