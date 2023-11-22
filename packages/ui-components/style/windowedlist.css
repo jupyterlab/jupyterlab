@@ -38,6 +38,7 @@
   top: 0;
   bottom: 0;
   right: 25px;
+  min-width: 35px;
   z-index: 1;
 }
 
@@ -51,7 +52,7 @@ ol.jp-WindowedPanel-scrollbar-content {
 ol.jp-WindowedPanel-scrollbar-content > li {
   border-bottom: 1px solid var(--jp-layout-color3);
   padding: 2px;
-  text-align: right;
+  text-align: left;
 }
 
 ol.jp-WindowedPanel-scrollbar-content > li:hover {

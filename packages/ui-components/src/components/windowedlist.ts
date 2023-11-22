@@ -1051,8 +1051,8 @@ export class WindowedList<
     if (this.scrollbar) {
       this.node.style.width = 'calc(100% + 25px)';
       const scrollbar = this.node.querySelector('.jp-WindowedPanel-scrollbar');
-      const scrollbarWidth = scrollbar!.getBoundingClientRect().width;
-      this._innerElement.style.width = `calc(100% - ${scrollbarWidth}px)`;
+      const offset = scrollbar!.getBoundingClientRect().width + 15;
+      this._innerElement.style.width = `calc(100% - ${offset}px)`;
       this._renderScrollbar();
     } else {
       this.node.style.width = '100%';
