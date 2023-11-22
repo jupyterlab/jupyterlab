@@ -220,8 +220,17 @@ const accordionPanelAriaLabels = [
   'Callstack Section',
   'Breakpoints Section',
   'Source Section',
-  'Kernel Sources Section'
+  'Kernel Sources Section',
+  'Warning Section',
+  'Installed Section',
+  'Discover Section'
 ];
+
+// const extensionAccordionAriaLabels = [
+//   'Warning Section',
+//   'Installed Section',
+//   'Discover Section',
+// ]
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
   leftSidebarIds.forEach(leftSidebarId => {
@@ -302,7 +311,10 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       await page.goto();
 
       await page.sidebar.openTab('jp-running-sessions');
-      await page.sidebar.openTab('jp-property-inspector');
+
+      await page.sidebar.openTab('jp-debugger-sidebar');
+
+      await page.sidebar.openTab('extensionmanager.main-view');
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -324,4 +336,33 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       expect(isExpanded).toBeTruthy();
     });
   });
+
+  // extensionAccordionAriaLabels.forEach((accordionPanelAriaLabel) => {
+  // test(`Open Extension manager ${extensionAccordionAriaLabel} via keyboard navigation`, async ({
+  //   page,
+  // }) => {
+  //   await page.goto();
+
+  //   await page.sidebar.openTab('jp-running-sessions');
+  //   await page.sidebar.openTab('jp-property-inspector');
+
+  //   // eslint-disable-next-line no-constant-condition
+  //   while (true) {
+  //     await page.keyboard.press('Tab');
+  //     let IsFocused = await page.evaluate(() =>
+  //       document.activeElement?.getAttribute('aria-label')
+  //     );
+  //     if (IsFocused === extensionAccordionAriaLabel) {
+  //       break;
+  //     }
+  //   }
+
+  //   await page.keyboard.press('Enter');
+
+  //   const isExpanded = await page.evaluate(() =>
+  //     document.activeElement?.getAttribute('aria-expanded')
+  //   );
+
+  //   expect(isExpanded).toBeTruthy();
+  // });
 });
