@@ -205,10 +205,16 @@ const leftSidebarIds: galata.SidebarTabId[] = [
   'table-of-contents',
   'extensionmanager.main-view'
 ];
+const rightSidebarIds: galata.SidebarTabId[] = [
+  'jp-property-inspector',
+  'jp-debugger-sidebar'
+];
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
   leftSidebarIds.forEach(leftSidebarId => {
-    test(`Open Sidebar tab ${leftSidebarId}`, async ({ page }) => {
+    test(`Open Sidebar tab ${leftSidebarId} via keyboard navigation`, async ({
+      page
+    }) => {
       await page.goto();
 
       await page.sidebar.close('left');
@@ -239,125 +245,38 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       expect(await page.sidebar.isTabOpen(leftSidebarId)).toEqual(true);
     });
   });
+  rightSidebarIds.forEach(rightSidebarId => {
+    test(`Open Sidebar tab ${rightSidebarId} via keyboard navigation`, async ({
+      page
+    }) => {
+      await page.goto();
+
+      await page.sidebar.close('right');
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Tab');
+        let propertyInspectorIsFocused = await page.evaluate(
+          () => document.activeElement?.getAttribute('data-id')
+        );
+        if (propertyInspectorIsFocused === 'jp-property-inspector') {
+          break;
+        }
+      }
+
+      // eslint-disable-next-line no-constant-condition
+      while (rightSidebarId !== 'jp-property-inspector') {
+        await page.keyboard.press('ArrowDown');
+        let IsFocused = await page.evaluate(
+          () => document.activeElement?.getAttribute('data-id')
+        );
+        if (IsFocused === rightSidebarId) {
+          break;
+        }
+      }
+      await page.keyboard.press('Enter');
+
+      expect(await page.sidebar.isTabOpen(rightSidebarId)).toEqual(true);
+    });
+  });
 });
-
-// test.describe('Sidebar keyboard navigation @a11y', () => {
-//   test('Open Running Terminals and Kernels tab', async ({ page }) => {
-//     await page.goto();
-
-//     // eslint-disable-next-line no-constant-condition
-//     while (true) {
-//       await page.keyboard.press('Tab');
-//       let fileBrowserIsFocused = await page.evaluate(() =>
-//         document.activeElement?.getAttribute('data-id')
-//       );
-//       if (fileBrowserIsFocused === 'filebrowser') {
-//         break;
-//       }
-//     }
-
-//     // eslint-disable-next-line no-constant-condition
-//     while (true) {
-//       await page.keyboard.press('ArrowDown');
-//       let TerminalsAndKernelsIsFocused = await page.evaluate(() =>
-//         document.activeElement?.getAttribute('data-id')
-//       );
-//       if (TerminalsAndKernelsIsFocused === 'jp-running-sessions') {
-//         break;
-//       }
-//     }
-//     await page.keyboard.press('Enter');
-
-//     expect(await page.sidebar.isTabOpen('jp-running-sessions')).toEqual(true);
-//   });
-
-//   test('Open table of contents tab', async ({ page }) => {
-//     await page.goto();
-
-//     // eslint-disable-next-line no-constant-condition
-//     while (true) {
-//       await page.keyboard.press('Tab');
-//       let fileBrowserIsFocused = await page.evaluate(() =>
-//         document.activeElement?.getAttribute('data-id')
-//       );
-//       if (fileBrowserIsFocused === 'filebrowser') {
-//         break;
-//       }
-//     }
-
-//     // eslint-disable-next-line no-constant-condition
-//     while (true) {
-//       await page.keyboard.press('ArrowDown');
-//       let tableOFContentsIsFocused = await page.evaluate(() =>
-//         document.activeElement?.getAttribute('data-id')
-//       );
-//       if (tableOFContentsIsFocused === 'table-of-contents') {
-//         break;
-//       }
-//     }
-//     await page.keyboard.press('Enter');
-
-//     expect(await page.sidebar.isTabOpen('table-of-contents')).toEqual(true);
-//   });
-
-//   test('Open Extension Manager tab', async ({ page }) => {
-//     await page.goto();
-
-//     // eslint-disable-next-line no-constant-condition
-//     while (true) {
-//       await page.keyboard.press('Tab');
-//       let fileBrowserIsFocused = await page.evaluate(() =>
-//         document.activeElement?.getAttribute('data-id')
-//       );
-//       if (fileBrowserIsFocused === 'filebrowser') {
-//         break;
-//       }
-//     }
-
-//     // eslint-disable-next-line no-constant-condition
-//     while (true) {
-//       await page.keyboard.press('ArrowDown');
-//       let tableOFContentsIsFocused = await page.evaluate(() =>
-//         document.activeElement?.getAttribute('data-id')
-//       );
-//       if (tableOFContentsIsFocused === 'extensionmanager.main-view') {
-//         break;
-//       }
-//     }
-//     await page.keyboard.press('Enter');
-
-//     expect(await page.sidebar.isTabOpen('extensionmanager.main-view')).toEqual(
-//       true
-//     );
-//   });
-// });
-
-// test('Close then open File Browser tab', async ({ page }) => {
-//   await page.goto();
-
-//   await page.sidebar.close('left');
-
-//   // eslint-disable-next-line no-constant-condition
-//   while (true) {
-//     await page.keyboard.press('Tab');
-//     let fileBrowserIsFocused = await page.evaluate(() =>
-//       document.activeElement?.getAttribute('data-id')
-//     );
-//     if (fileBrowserIsFocused === 'filebrowser') {
-//       break;
-//     }
-//   }
-//   await page.keyboard.press('Enter');
-
-//   expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
-// });
-
-// test('Is file browser open/closed tab', async ({ page }) => {
-//   await page.goto();
-
-//   expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);
-
-//   await page.sidebar.close('left');
-
-//   expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(false);
-// });
