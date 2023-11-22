@@ -214,7 +214,12 @@ const accordionPanelAriaLabels = [
   'Open Tabs Section',
   'Kernels Section',
   'Language servers Section',
-  'Terminals Section'
+  'Terminals Section',
+  'Variables Section',
+  'Callstack Section',
+  'Breakpoints Section',
+  'Source Section',
+  'Kernel Sources Section'
 ];
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
@@ -235,10 +240,14 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         if (IsFocused === 'filebrowser') {
           break;
         }
-        await page.keyboard.press('ArrowDown');
-
-        if (IsFocused === leftSidebarId) {
-          break;
+        while (leftSidebarId !== 'filebrowser') {
+          await page.keyboard.press('ArrowDown');
+          let IsFocused = await page.evaluate(
+            () => document.activeElement?.getAttribute('data-id')
+          );
+          if (IsFocused === leftSidebarId) {
+            break;
+          }
         }
       }
 
@@ -251,7 +260,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       //   if (IsFocused === leftSidebarId) {
       //     break;
       //   }
-      // }
+
       await page.keyboard.press('Enter');
 
       expect(await page.sidebar.isTabOpen(leftSidebarId)).toEqual(true);
@@ -300,6 +309,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       await page.goto();
 
       await page.sidebar.openTab('jp-running-sessions');
+      await page.sidebar.openTab('jp-property-inspector');
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
