@@ -279,4 +279,30 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       expect(await page.sidebar.isTabOpen(rightSidebarId)).toEqual(true);
     });
   });
+  test(`Open Terminals and Kernels Accordion Panel sections keyboard navigation`, async ({
+    page
+  }) => {
+    await page.goto();
+
+    await page.sidebar.openTab('jp-running-sessions');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('Tab');
+      let IsFocused = await page.evaluate(
+        () => document.activeElement?.getAttribute('id')
+      );
+      if (IsFocused === 'title-key-2-3') {
+        break;
+      }
+    }
+
+    await page.keyboard.press('Enter');
+
+    const isExpanded = await page.evaluate(
+      () => document.activeElement?.getAttribute('aria-expanded')
+    );
+
+    expect(isExpanded).toBeTruthy();
+  });
 });
