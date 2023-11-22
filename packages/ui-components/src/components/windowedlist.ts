@@ -1079,6 +1079,11 @@ export class WindowedList<
   }
 
   /**
+   * A signal that emits the index when the virtual scrollbar jumps to an item.
+   */
+  protected jumped = new Signal<this, number>(this);
+
+  /**
    * Add listeners for viewport and contents (but not the virtual scrollbar).
    */
   private _addListeners() {
@@ -1294,7 +1299,10 @@ export class WindowedList<
     while (target && target.parentElement) {
       if (target.hasAttribute('data-index')) {
         const index = parseInt(target.getAttribute('data-index')!, 10);
-        return void this.scrollToItem(index);
+        return void (async () => {
+          await this.scrollToItem(index);
+          this.jumped.emit(index);
+        })();
       }
       target = target.parentElement;
     }
