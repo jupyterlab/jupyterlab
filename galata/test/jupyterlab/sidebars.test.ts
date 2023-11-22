@@ -240,26 +240,18 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         if (IsFocused === 'filebrowser') {
           break;
         }
-        while (leftSidebarId !== 'filebrowser') {
-          await page.keyboard.press('ArrowDown');
-          let IsFocused = await page.evaluate(
-            () => document.activeElement?.getAttribute('data-id')
-          );
-          if (IsFocused === leftSidebarId) {
-            break;
-          }
-        }
       }
 
-      // // eslint-disable-next-line no-constant-condition
-      // while (leftSidebarId !== 'filebrowser') {
-      //   await page.keyboard.press('ArrowDown');
-      //   let IsFocused = await page.evaluate(
-      //     () => document.activeElement?.getAttribute('data-id')
-      //   );
-      //   if (IsFocused === leftSidebarId) {
-      //     break;
-      //   }
+      // eslint-disable-next-line no-constant-condition
+      while (leftSidebarId !== 'filebrowser') {
+        await page.keyboard.press('ArrowDown');
+        let IsFocused = await page.evaluate(
+          () => document.activeElement?.getAttribute('data-id')
+        );
+        if (IsFocused === leftSidebarId) {
+          break;
+        }
+      }
 
       await page.keyboard.press('Enter');
 
