@@ -228,23 +228,33 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         if (fileBrowserIsFocused === 'filebrowser') {
           break;
         }
-      }
-
-      // eslint-disable-next-line no-constant-condition
-      while (leftSidebarId !== 'filebrowser') {
-        await page.keyboard.press('ArrowDown');
-        let IsFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
-        if (IsFocused === leftSidebarId) {
-          break;
+        while (leftSidebarId !== 'filebrowser') {
+          await page.keyboard.press('ArrowDown');
+          let IsFocused = await page.evaluate(
+            () => document.activeElement?.getAttribute('data-id')
+          );
+          if (IsFocused === leftSidebarId) {
+            break;
+          }
         }
       }
+
+      // // eslint-disable-next-line no-constant-condition
+      // while (leftSidebarId !== 'filebrowser') {
+      //   await page.keyboard.press('ArrowDown');
+      //   let IsFocused = await page.evaluate(
+      //     () => document.activeElement?.getAttribute('data-id')
+      //   );
+      //   if (IsFocused === leftSidebarId) {
+      //     break;
+      //   }
+      // }
       await page.keyboard.press('Enter');
 
       expect(await page.sidebar.isTabOpen(leftSidebarId)).toEqual(true);
     });
   });
+
   rightSidebarIds.forEach(rightSidebarId => {
     test(`Open Sidebar tab ${rightSidebarId} via keyboard navigation`, async ({
       page
@@ -279,6 +289,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       expect(await page.sidebar.isTabOpen(rightSidebarId)).toEqual(true);
     });
   });
+
   test(`Open Terminals and Kernels Accordion Panel sections keyboard navigation`, async ({
     page
   }) => {
@@ -293,6 +304,31 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         () => document.activeElement?.getAttribute('id')
       );
       if (IsFocused === 'title-key-2-3') {
+        break;
+      }
+    }
+
+    await page.keyboard.press('Enter');
+
+    const isExpanded = await page.evaluate(
+      () => document.activeElement?.getAttribute('aria-expanded')
+    );
+
+    expect(isExpanded).toBeTruthy();
+  });
+
+  test(`Open Terminals and Kernels (Kernels submenu)`, async ({ page }) => {
+    await page.goto();
+
+    await page.sidebar.openTab('jp-running-sessions');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('Tab');
+      let IsFocused = await page.evaluate(
+        () => document.activeElement?.getAttribute('id')
+      );
+      if (IsFocused === 'title-key-2-4') {
         break;
       }
     }
