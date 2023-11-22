@@ -205,6 +205,7 @@ const leftSidebarIds: galata.SidebarTabId[] = [
   'table-of-contents',
   'extensionmanager.main-view'
 ];
+
 const rightSidebarIds: galata.SidebarTabId[] = [
   'jp-property-inspector',
   'jp-debugger-sidebar'
