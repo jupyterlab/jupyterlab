@@ -382,8 +382,8 @@ class Section extends PanelWithToolbar {
     const enabled = runningItems.length > 0;
     this._button = new ToolbarButton({
       label: shutdownAllLabel,
-      className: `${SHUTDOWN_ALL_BUTTON_CLASS} jp-mod-styled ${
-        !enabled && 'jp-mod-disabled'
+      className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
+        !enabled ? ' jp-mod-disabled' : ''
       }`,
       enabled,
       onClick: onShutdown
@@ -412,9 +412,11 @@ class Section extends PanelWithToolbar {
     const button = this._button;
     button.enabled = this._manager.running().length > 0;
     if (button.enabled) {
-      button.node.querySelector('button')?.classList.remove('jp-mod-disabled');
+      button.node
+        .querySelector('jp-button')
+        ?.classList.remove('jp-mod-disabled');
     } else {
-      button.node.querySelector('button')?.classList.add('jp-mod-disabled');
+      button.node.querySelector('jp-button')?.classList.add('jp-mod-disabled');
     }
   }
 
