@@ -3,13 +3,20 @@
 
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
 
-const sidebarIds: galata.SidebarTabId[] = [
+const leftSidebarIds: galata.SidebarTabId[] = [
   'filebrowser',
-  'jp-property-inspector',
   'jp-running-sessions',
   'table-of-contents',
   'extensionmanager.main-view'
 ];
+
+const rightSidebarIds: galata.SidebarTabId[] = [
+  'jp-property-inspector',
+  'jp-debugger-sidebar'
+];
+
+const sidebarIds: galata.SidebarTabId[] =
+  leftSidebarIds.concat(rightSidebarIds);
 
 /**
  * Add provided text as label on first tab in given tabbar.
@@ -199,32 +206,27 @@ test.describe('Sidebars', () => {
   });
 });
 
-const leftSidebarIds: galata.SidebarTabId[] = [
-  'filebrowser',
-  'jp-running-sessions',
-  'table-of-contents',
-  'extensionmanager.main-view'
-];
-
-const rightSidebarIds: galata.SidebarTabId[] = [
-  'jp-property-inspector',
-  'jp-debugger-sidebar'
-];
-
-const accordionPanelAriaLabels: string[] = [
+const runningSessionsElementAriaLabels: string[] = [
   'Open Tabs Section',
   'Kernels Section',
   'Language servers Section',
-  'Terminals Section',
+  'Terminals Section'
+];
+const debuggerElementAriaLabels: string[] = [
   'Variables Section',
   'Callstack Section',
   'Breakpoints Section',
   'Source Section',
-  'Kernel Sources Section',
+  'Kernel Sources Section'
+];
+const propertyElementAriaLabels: string[] = [
   'Warning Section',
   'Installed Section',
   'Discover Section'
 ];
+
+const sessionsAndDebuggerAriaLabels: string[] =
+  runningSessionsElementAriaLabels.concat(debuggerElementAriaLabels);
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
   leftSidebarIds.forEach(leftSidebarId => {
@@ -298,19 +300,14 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     });
   });
 
-  accordionPanelAriaLabels.forEach((accordionPanelAriaLabel, index) => {
-    test(`Open accordion panels ${accordionPanelAriaLabel} via keyboard navigation`, async ({
+  sessionsAndDebuggerAriaLabels.forEach(sessionsAndDebuggerAriaLabel => {
+    test(`Open accordion panels ${sessionsAndDebuggerAriaLabel} via keyboard navigation`, async ({
       page
     }) => {
       await page.goto();
 
-      if (index < 4) {
-        await page.sidebar.openTab(leftSidebarIds[1]);
-      } else if (index < 9) {
-        await page.sidebar.openTab(rightSidebarIds[1]);
-      } else {
-        await page.sidebar.openTab(leftSidebarIds[3]);
-      }
+      await page.sidebar.openTab('jp-running-sessions');
+      await page.sidebar.openTab('jp-property-inspector');
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -318,7 +315,37 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('aria-label')
         );
-        if (IsFocused === accordionPanelAriaLabel) {
+        if (IsFocused === sessionsAndDebuggerAriaLabel) {
+          break;
+        }
+      }
+
+      await page.keyboard.press('Enter');
+
+      const isExpanded = await page.evaluate(
+        () => document.activeElement?.getAttribute('aria-expanded')
+      );
+
+      expect(isExpanded).toBeTruthy();
+    });
+  });
+
+  propertyElementAriaLabels.forEach(propertyElementAriaLabel => {
+    test(`Open accordion panels ${propertyElementAriaLabel} via keyboard navigation`, async ({
+      page
+    }) => {
+      await page.goto();
+
+      await page.sidebar.openTab('jp-running-sessions');
+      await page.sidebar.openTab('jp-property-inspector');
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await page.keyboard.press('Tab');
+        let IsFocused = await page.evaluate(
+          () => document.activeElement?.getAttribute('aria-label')
+        );
+        if (IsFocused === propertyElementAriaLabel) {
           break;
         }
       }
