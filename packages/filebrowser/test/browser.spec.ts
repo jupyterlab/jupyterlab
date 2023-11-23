@@ -75,7 +75,7 @@ describe('filebrowser/browser', () => {
       it('toolbar should have an aria label of file browser and a role of navigation', () => {
         const toolbar = fileBrowser.toolbar.node;
         expect(toolbar.getAttribute('aria-label')).toEqual('file browser');
-        expect(toolbar.getAttribute('role')).toEqual('navigation');
+        expect(toolbar.getAttribute('role')).toEqual('toolbar');
       });
     });
 

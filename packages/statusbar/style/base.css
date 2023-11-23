@@ -76,15 +76,14 @@
   flex-direction: row;
 }
 
-.jp-Statusbar-ProgressCircle svg {
+.jp-Statusbar-ProgressCircle > svg {
   display: block;
   margin: 0 auto;
   width: 16px;
-  height: 24px;
   align-self: normal;
 }
 
-.jp-Statusbar-ProgressCircle path {
+.jp-Statusbar-ProgressCircle .jp-Statusbar-ProgressCirclePath {
   fill: var(--jp-inverse-layout-color3);
 }
 
