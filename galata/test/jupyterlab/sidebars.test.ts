@@ -307,7 +307,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       await page.goto();
 
       await page.sidebar.openTab('jp-running-sessions');
-      await page.sidebar.openTab('jp-property-inspector');
+      await page.sidebar.openTab('jp-debugger-sidebar');
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -336,8 +336,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     }) => {
       await page.goto();
 
-      await page.sidebar.openTab('jp-running-sessions');
-      await page.sidebar.openTab('jp-property-inspector');
+      await page.sidebar.openTab('extensionmanager.main-view');
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
