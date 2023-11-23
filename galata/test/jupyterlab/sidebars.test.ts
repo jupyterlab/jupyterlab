@@ -211,7 +211,7 @@ const rightSidebarIds: galata.SidebarTabId[] = [
   'jp-debugger-sidebar'
 ];
 
-const accordionPanelAriaLabels = [
+const accordionPanelAriaLabels: string[] = [
   'Open Tabs Section',
   'Kernels Section',
   'Language servers Section',
@@ -241,13 +241,13 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
         );
-        if (IsFocused === 'filebrowser') {
+        if (IsFocused === leftSidebarIds[0]) {
           break;
         }
       }
 
       // eslint-disable-next-line no-constant-condition
-      while (leftSidebarId !== 'filebrowser') {
+      while (leftSidebarId !== leftSidebarIds[0]) {
         await page.keyboard.press('ArrowDown');
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
@@ -277,13 +277,13 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         let propertyInspectorIsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
         );
-        if (propertyInspectorIsFocused === 'jp-property-inspector') {
+        if (propertyInspectorIsFocused === rightSidebarIds[0]) {
           break;
         }
       }
 
       // eslint-disable-next-line no-constant-condition
-      while (rightSidebarId !== 'jp-property-inspector') {
+      while (rightSidebarId !== rightSidebarIds[0]) {
         await page.keyboard.press('ArrowDown');
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
@@ -298,29 +298,18 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     });
   });
 
-  accordionPanelAriaLabels.forEach(accordionPanelAriaLabel => {
-    test(`Open Terminals and Kernels ${accordionPanelAriaLabel} via keyboard navigation`, async ({
+  accordionPanelAriaLabels.forEach((accordionPanelAriaLabel, index) => {
+    test(`Open accordion panels ${accordionPanelAriaLabel} via keyboard navigation`, async ({
       page
     }) => {
       await page.goto();
 
-      if (
-        accordionPanelAriaLabel === 'Open Tabs Section' ||
-        accordionPanelAriaLabel === 'Kernels Section' ||
-        accordionPanelAriaLabel === 'Language servers Section' ||
-        accordionPanelAriaLabel === 'Terminals Section'
-      ) {
-        await page.sidebar.openTab('jp-running-sessions');
-      } else if (
-        accordionPanelAriaLabel === 'Variables Section' ||
-        accordionPanelAriaLabel === 'Callstack Section' ||
-        accordionPanelAriaLabel === 'Breakpoints Section' ||
-        accordionPanelAriaLabel === 'Source Section' ||
-        accordionPanelAriaLabel === 'Kernel Sources Section'
-      ) {
-        await page.sidebar.openTab('jp-debugger-sidebar');
+      if (index < 4) {
+        await page.sidebar.openTab(leftSidebarIds[1]);
+      } else if (index < 9) {
+        await page.sidebar.openTab(rightSidebarIds[1]);
       } else {
-        await page.sidebar.openTab('extensionmanager.main-view');
+        await page.sidebar.openTab(leftSidebarIds[3]);
       }
 
       // eslint-disable-next-line no-constant-condition
