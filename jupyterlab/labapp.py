@@ -496,7 +496,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         This flag is now deprecated and will be removed in JupyterLab v5.""",
     )
     flags["custom-css"] = (
-        {"LabApp": {"custom_css": False}},
+        {"LabApp": {"custom_css": True}},
         "Load custom CSS in template html files. Default is False",
     )
 
@@ -588,7 +588,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         False,
         config=True,
         help="""Whether custom CSS is loaded on the page.
-    Defaults to True and custom CSS is loaded.
+    Defaults to False.
     """,
     )
 

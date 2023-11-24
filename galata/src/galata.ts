@@ -395,6 +395,11 @@ export namespace galata {
     export const contents = /.*\/api\/contents(?<path>\/.+)?\?/;
 
     /**
+     * Custom CSS
+     */
+    export const customCSS = /.*\/custom\/custom.css/;
+
+    /**
      * Extensions API
      */
     export const extensions = /.*\/lab\/api\/extensions.*/;
@@ -683,6 +688,30 @@ export namespace galata {
             config[section] = data;
             return route.fulfill({ status: 204 });
           }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Mock custom CSS.
+     *
+     * @param page Page model object
+     * @param customCSS Custom CSS content
+     */
+    export function mockCustomCSS(
+      page: Page,
+      customCSS: string
+    ): Promise<void> {
+      return page.route(Routes.customCSS, async (route, request) => {
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              body: customCSS,
+              contentType: 'text/css'
+            });
           default:
             return route.continue();
         }

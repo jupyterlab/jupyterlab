@@ -132,7 +132,9 @@ def build_api_docs(out_dir: Path):
 
 # Copy frontend files for snippet inclusion
 FILES_LIST = [  # File paths should be relative to jupyterlab root folder
-    "packages/settingregistry/src/plugin-schema.json"
+    "galata/test/documentation/data/custom-jupyter.css",
+    "galata/test/documentation/data/custom-markdown.css",
+    "packages/settingregistry/src/plugin-schema.json",
 ]
 SNIPPETS_FOLDER = "snippets"
 
@@ -402,9 +404,9 @@ def setup(app):
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
     # Skip we are dealing with internationalization
-    outdir = Path(app.outdir)
-    if outdir.name != "gettext":
-        build_api_docs(outdir)
+    Path(app.outdir)
+    # if outdir.name != "gettext":
+    #     build_api_docs(outdir)
 
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)
     tmp_files = copy_automated_screenshots(Path(app.srcdir) / IMAGES_FOLDER)
