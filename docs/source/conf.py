@@ -404,9 +404,9 @@ def setup(app):
     shutil.copy(str(HERE.parent.parent / "CHANGELOG.md"), str(dest))
     app.add_css_file("css/custom.css")  # may also be an URL
     # Skip we are dealing with internationalization
-    Path(app.outdir)
-    # if outdir.name != "gettext":
-    #     build_api_docs(outdir)
+    outdir = Path(app.outdir)
+    if outdir.name != "gettext":
+        build_api_docs(outdir)
 
     copy_code_files(Path(app.srcdir) / SNIPPETS_FOLDER)
     tmp_files = copy_automated_screenshots(Path(app.srcdir) / IMAGES_FOLDER)
