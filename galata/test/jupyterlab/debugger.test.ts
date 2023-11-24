@@ -319,6 +319,9 @@ async function createNotebook(page: IJupyterLabPageFixture) {
 }
 
 async function setBreakpoint(page: IJupyterLabPageFixture) {
+  // Close left side panel to avoid side effect when entering the cell editor.
+  await page.sidebar.close('left');
+
   await page.notebook.setCell(
     0,
     'code',
