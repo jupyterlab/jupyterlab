@@ -31,9 +31,6 @@ def make_lab_app(
 ):
     def _make_lab_app(**kwargs):
         class TestLabApp(LabApp):
-            def __init__(self):
-                self.modify_flags()
-
             base_url = "/lab"
             extension_url = "/lab"
             default_url = Unicode("/", help="The default URL to redirect to from `/`")
@@ -47,13 +44,6 @@ def make_lab_app(
                 schemas_dir=str(schemas_dir),
                 workspaces_dir=str(workspaces_dir),
             )
-
-            def modify_flags(self):
-                flags = super().flags
-                flags["custom-css"] = (
-                    {"LabApp": {"custom_css": True}},
-                    "Load custom CSS in template html files. Is Enabled for testing.",
-                )
 
         app = TestLabApp()
         return app
