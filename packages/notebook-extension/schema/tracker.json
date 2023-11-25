@@ -629,11 +629,6 @@
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
-      "command": "notebook:toggle-all-cell-line-numbers",
-      "keys": ["Shift L"],
-      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(:read-write)"
-    },
-    {
       "command": "notebook:undo-cell-action",
       "keys": ["Z"],
       "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(:read-write)"
