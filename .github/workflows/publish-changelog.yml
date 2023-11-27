@@ -1,0 +1,29 @@
+name: "Publish Changelog"
+on:
+  release:
+    types: [published]
+
+  workflow_dispatch:
+    inputs:
+      token:
+        description: "GitHub access token"
+        required: true
+      branch:
+        description: "The branch to target"
+        required: false
+
+jobs:
+  publish_changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Publish changelog
+        id: publish-changelog
+        uses: jupyter-server/jupyter_releaser/.github/actions/publish-changelog@v2
+        with:
+          token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          branch: ${{ github.event.inputs.branch }}
+
+      - name: "** Next Step **"
+        run: |
+          echo "Merge the changelog update PR: ${{ steps.publish-changelog.outputs.pr_url }}"
