@@ -787,7 +787,10 @@ export class NotebookHelper {
   }
 
   /**
-   * Whether the cell is in editing mode or not
+   * Whether the cell is in editing mode or not.
+   *
+   * This method is not suitable for checking if a cell is unrendered
+   * as it will return false when the cell is not active (not focused).
    *
    * @param cellIndex Cell index
    * @returns Editing mode
@@ -820,8 +823,8 @@ export class NotebookHelper {
       return false;
     }
 
-    const cellEditor = await cell.$('.jp-Cell-inputArea');
-    if (cellEditor) {
+    const cellInput = await cell.$('.jp-Cell-inputArea');
+    if (cellInput) {
       let isMarkdown = false;
       const cellType = await this.getCellType(cellIndex);
       if (cellType === 'markdown') {
@@ -832,7 +835,12 @@ export class NotebookHelper {
       }
 
       if (isMarkdown) {
-        await cellEditor.dblclick();
+        await cellInput.dblclick();
+      }
+
+      const cellEditor = await cellInput.$('.jp-InputArea-editor');
+      if (!cellEditor) {
+        return false;
       }
 
       await cellEditor.click();
@@ -1118,14 +1126,20 @@ export class NotebookHelper {
     }
 
     await this.clickToolbarItem('cellType');
-    const selectInput = await nbPanel.$(
-      'div.jp-Notebook-toolbarCellTypeDropdown select'
-    );
+    const selectInput = await nbPanel.$('.jp-Notebook-toolbarCellTypeDropdown');
     if (!selectInput) {
       return false;
     }
 
-    await selectInput.selectOption(cellType);
+    // Legay select
+    const select = await selectInput.$('select');
+    if (select) {
+      await select.selectOption(cellType);
+    } else {
+      await selectInput.evaluate((el, cellType) => {
+        (el as any).value = cellType;
+      }, cellType);
+    }
 
     // Wait for the new cell to be rendered
     let cell: ElementHandle | null;
