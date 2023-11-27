@@ -3459,6 +3459,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/fileeditor@workspace:packages/fileeditor"
   dependencies:
+    "@jupyter/ydoc": ^1.1.1
     "@jupyterlab/apputils": ^4.2.0-alpha.3
     "@jupyterlab/codeeditor": ^4.1.0-alpha.3
     "@jupyterlab/codemirror": ^4.1.0-alpha.3
