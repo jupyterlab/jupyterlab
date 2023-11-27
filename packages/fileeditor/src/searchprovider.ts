@@ -93,7 +93,7 @@ export class FileEditorSearchProvider
     changes: SourceChange
   ): Promise<void> {
     if (this._searchActive) {
-      super.onSharedModelChanged(emitter, changes);
+      return super.onSharedModelChanged(emitter, changes);
     }
   }
 
