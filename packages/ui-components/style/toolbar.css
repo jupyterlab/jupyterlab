@@ -66,19 +66,6 @@
   user-select: none;
 }
 
-button.jp-ToolbarButtonComponent:disabled {
-  opacity: 0.4;
-}
-
-button.jp-ToolbarButtonComponent.lm-mod-hidden {
-  display: none;
-}
-
-button.jp-ToolbarButtonComponent > span {
-  padding: 0;
-  flex: 0 0 auto;
-}
-
 button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   font-size: var(--jp-ui-font-size1);
   line-height: 100%;
