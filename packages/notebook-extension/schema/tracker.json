@@ -601,7 +601,7 @@
     {
       "command": "viewmenu:line-numbering",
       "keys": ["Shift L"],
-      "selector": ".jp-Notebook.jp-mod-commandMode"
+      "selector": ".jp-Notebook.jp-mod-commandMode :focus:not(:read-write)"
     },
     {
       "command": "viewmenu:match-brackets",
@@ -617,11 +617,6 @@
       "command": "notebook:split-cell-at-cursor",
       "keys": ["Ctrl Shift -"],
       "selector": ".jp-Notebook.jp-mod-editMode"
-    },
-    {
-      "command": "notebook:toggle-all-cell-line-numbers",
-      "keys": ["Shift L"],
-      "selector": ".jp-Notebook:focus"
     },
     {
       "command": "notebook:undo-cell-action",
