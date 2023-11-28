@@ -18,9 +18,9 @@ import {
   MarkdownCell
 } from '@jupyterlab/cells';
 import { Notification } from '@jupyterlab/apputils';
-import { signalToPromise } from '@jupyterlab/coreutils';
+import { PageConfig, signalToPromise, URLExt } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
-import { KernelMessage } from '@jupyterlab/services';
+import { KernelMessage, ServerConnection } from '@jupyterlab/services';
 import { ISharedAttachmentsCell } from '@jupyter/ydoc';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { every, findIndex } from '@lumino/algorithm';
@@ -2528,36 +2528,60 @@ namespace Private {
 
           let ran = false;
           try {
-            const reply = await CodeCell.execute(
-              cell as CodeCell,
-              sessionContext,
-              {
-                deletedCells,
-                recordTiming: notebook.notebookConfig.recordTiming
+            if (PageConfig.getOption('serverSideExecution') === 'true') {
+              const kernelId = sessionContext.session?.kernel?.id;
+              const settings = ServerConnection.makeSettings();
+              const apiURL = URLExt.join(
+                settings.baseUrl,
+                `api/kernels/${kernelId}/execute`
+              );
+              const cellId = cell.model.sharedModel.getId();
+              const documentId = `json:notebook:${notebook.model?.sharedModel.getState(
+                'file_id'
+              )}`;
+              const body = `{"cell_id":"${cellId}","document_id":"${documentId}"}`;
+              const init = {
+                method: 'POST',
+                body
+              };
+              try {
+                await ServerConnection.makeRequest(apiURL, init, settings);
+              } catch (error) {
+                throw new ServerConnection.NetworkError(error);
               }
-            );
-            deletedCells.splice(0, deletedCells.length);
+              ran = true;
+            } else {
+              const reply = await CodeCell.execute(
+                cell as CodeCell,
+                sessionContext,
+                {
+                  deletedCells,
+                  recordTiming: notebook.notebookConfig.recordTiming
+                }
+              );
+              deletedCells.splice(0, deletedCells.length);
 
-            ran = (() => {
-              if (cell.isDisposed) {
-                return false;
-              }
-
-              if (!reply) {
-                return true;
-              }
-              if (reply.content.status === 'ok') {
-                const content = reply.content;
-
-                if (content.payload && content.payload.length) {
-                  handlePayload(content, notebook, cell);
+              ran = (() => {
+                if (cell.isDisposed) {
+                  return false;
                 }
 
-                return true;
-              } else {
-                throw new KernelError(reply.content);
-              }
-            })();
+                if (!reply) {
+                  return true;
+                }
+                if (reply.content.status === 'ok') {
+                  const content = reply.content;
+
+                  if (content.payload && content.payload.length) {
+                    handlePayload(content, notebook, cell);
+                  }
+
+                  return true;
+                } else {
+                  throw new KernelError(reply.content);
+                }
+              })();
+            }
           } catch (reason) {
             if (cell.isDisposed || reason.message.startsWith('Canceled')) {
               ran = false;

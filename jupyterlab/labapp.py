@@ -499,6 +499,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         {"LabApp": {"custom_css": True}},
         "Load custom CSS in template html files. Default is False",
     )
+    flags["server-side-execution"] = (
+        {"LabApp": {"server-side-execution": True}},
+        """Whether to execute notebooks in the server using the REST API, not using the kernel protocol over WebSocket. The frontend only interacts with the notebook through its shared model. This execution mode requires jupyter-collaboration.""",
+    )
 
     subcommands = {
         "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -601,6 +605,12 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             python -m pip install jupyter_collaboration
 
         This flag is now deprecated and will be removed in JupyterLab v5.""",
+    )
+
+    server_side_execution = Bool(
+        False,
+        config=True,
+        help="""Whether to execute notebooks in the server using the REST API, not using the kernel protocol over WebSocket. The frontend only interacts with the notebook through its shared model. This execution mode requires jupyter-collaboration.""",
     )
 
     news_url = Unicode(
