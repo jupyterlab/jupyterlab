@@ -72,7 +72,11 @@ export class FileBrowser extends SidePanel {
     this.mainPanel.addClass(FILE_BROWSER_PANEL_CLASS);
     this.mainPanel.title.label = this._trans.__('File Browser');
 
-    this.crumbs = new BreadCrumbs({ model, translator });
+    this.crumbs = new BreadCrumbs({
+      model,
+      translator,
+      driveName: 'mydrive'
+    });
     this.crumbs.addClass(CRUMBS_CLASS);
 
     this.listing = this.createDirListing({
@@ -457,6 +461,11 @@ export namespace FileBrowser {
      * The application language translator.
      */
     translator?: ITranslator;
+
+    /**
+     * Name of the drive.
+     */
+    driveName?: string;
   }
 
   /**

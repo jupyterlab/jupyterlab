@@ -74,7 +74,7 @@ export class BreadCrumbs extends Widget {
     this._fullPath = options.fullPath || false;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
-    this._crumbSeps = Private.createCrumbSeparators();
+    this._crumbSeps = Private.createCrumbSeparators(options.driveName);
     const hasPreferred = PageConfig.getOption('preferredPath');
     this._hasPreferred = hasPreferred && hasPreferred !== '/' ? true : false;
     if (this._hasPreferred) {
@@ -360,6 +360,12 @@ export namespace BreadCrumbs {
      * Show the full file browser path in breadcrumbs
      */
     fullPath?: boolean;
+
+    /**
+     *Name of the drive .
+     */
+
+    driveName?: string;
   }
 }
 
@@ -464,6 +470,7 @@ namespace Private {
       stylesheet: 'breadCrumb'
     });
     const parent = document.createElement('span');
+    parent.textContent = 'thisIsADrive';
     parent.className = BREADCRUMB_ITEM_CLASS;
     const current = document.createElement('span');
     current.className = BREADCRUMB_ITEM_CLASS;
@@ -471,6 +478,7 @@ namespace Private {
       className: BREADCRUMB_PREFERRED_CLASS,
       tag: 'span',
       title: PageConfig.getOption('preferredPath') || 'Jupyter Preferred Path',
+
       stylesheet: 'breadCrumb'
     });
     return [home, ellipsis, parent, current, preferred];
@@ -479,7 +487,9 @@ namespace Private {
   /**
    * Create the breadcrumb separator nodes.
    */
-  export function createCrumbSeparators(): ReadonlyArray<HTMLElement> {
+  export function createCrumbSeparators(
+    driveName?: string
+  ): ReadonlyArray<HTMLElement> {
     const items: HTMLElement[] = [];
     // The maximum number of directories that will be shown in the crumbs
     const MAX_DIRECTORIES = 2;
@@ -488,7 +498,9 @@ namespace Private {
     // after a possible ellipsis.
     for (let i = 0; i < MAX_DIRECTORIES + 2; i++) {
       const item = document.createElement('span');
-      item.textContent = '/';
+      if (driveName && i === 0) {
+        item.textContent = '/' + driveName + '/';
+      } else item.textContent = '/';
       items.push(item);
     }
     return items;
