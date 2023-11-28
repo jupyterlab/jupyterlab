@@ -12,7 +12,9 @@ test.describe('Kernel', () => {
         page
           .getByRole('tabpanel', { name: 'Launcher' })
           .waitFor({ state: 'detached' }),
-        page.getByTitle('Python 3 (ipykernel)').nth(1).click()
+        page
+          .locator('[data-category="Notebook"][title="Python 3 (ipykernel)"]')
+          .click()
       ]);
 
       await expect.soft(page.locator('.jp-Dialog')).toHaveCount(0);
@@ -112,14 +114,16 @@ test.describe('Kernel', () => {
         page
           .getByRole('tabpanel', { name: 'Launcher' })
           .waitFor({ state: 'detached' }),
-        page.getByTitle('Python 3 (ipykernel)').nth(2).click()
+        page
+          .locator('[data-category="Console"][title="Python 3 (ipykernel)"]')
+          .click()
       ]);
-
       await expect.soft(page.locator('.jp-Dialog')).toHaveCount(0);
 
-      await expect(page.getByTitle('Change kernel for Console 1')).toHaveText(
-        'Python 3 (ipykernel) | Idle'
-      );
+      await page
+        .getByTitle('Change kernel for Console 1')
+        .getByText('Python 3 (ipykernel) | Idle')
+        .waitFor();
     });
 
     test('Should ask for kernel when creating console from menu', async ({
@@ -132,9 +136,10 @@ test.describe('Kernel', () => {
         .getByRole('button', { name: 'Select Kernel', exact: true })
         .click();
 
-      await expect(page.getByTitle('Change kernel for Console 1')).toHaveText(
-        'Python 3 (ipykernel) | Idle'
-      );
+      await page
+        .getByTitle('Change kernel for Console 1')
+        .getByText('Python 3 (ipykernel) | Idle')
+        .waitFor();
     });
   });
 });
