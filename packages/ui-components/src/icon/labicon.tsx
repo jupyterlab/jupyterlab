@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+import { DOMUtils } from './domutils';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
@@ -847,11 +848,20 @@ namespace Private {
   export function setTitleSvg(svgNode: HTMLElement, title: string): void {
     // add a title node to the top level svg node
     const titleNodes = svgNode.getElementsByTagName('title');
+    // make the title the aria label0
+
+    /// TODO set better unique id for title
     if (titleNodes.length) {
-      titleNodes[0].textContent = title;
+      titleNodes[0].id = DOMUtils.createDomID();
+      if (!titleNodes[0].id) {
+        titleNodes[0].id = performance.now().toString();
+      }
+      svgNode.setAttribute('aria-labelledby', titleNodes[0].id);
     } else {
       const titleNode = document.createElement('title');
       titleNode.textContent = title;
+      titleNode.id = performance.now().toString();
+      svgNode.setAttribute('aria-labelledby', titleNode.id);
       svgNode.appendChild(titleNode);
     }
   }
