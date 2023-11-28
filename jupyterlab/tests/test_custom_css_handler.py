@@ -32,4 +32,4 @@ async def test_CustomCssHandler(tmp_path, jp_serverapp, labserverapp, jp_fetch):
     response = await jp_fetch("custom", "custom.css", method="GET")
 
     assert response.code == 200
-    assert response.body.decode() == CUSTOM_CSS
+    assert response.body.decode().replace(os.linesep, "\n") == CUSTOM_CSS
