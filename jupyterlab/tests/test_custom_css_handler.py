@@ -29,7 +29,6 @@ async def test_CustomCssHandler(tmp_path, jp_serverapp, labserverapp, jp_fetch):
     assert str(custom_path) in jp_serverapp.web_app.settings['static_custom_path']
     custom_path.mkdir(parents=True, exist_ok=True)
     (custom_path / "custom.css").write_text(CUSTOM_CSS)
-    # jp_serverapp.web_app.settings['static_custom_path'].append(str(custom_path))
     response = await jp_fetch("custom", "custom.css", method="GET")
 
     assert response.code == 200
