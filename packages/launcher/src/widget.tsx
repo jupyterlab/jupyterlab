@@ -302,7 +302,7 @@ function Card(
             <img
               src={item.kernelIconUrl}
               className="jp-Launcher-kernelIcon"
-              alt={trans.__('Create new notebook using kernel')}
+              alt={title}
             />
           ) : (
             <div className="jp-LauncherCard-noKernelIcon">
