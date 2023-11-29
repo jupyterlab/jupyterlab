@@ -46,21 +46,12 @@ export class StatusBar extends Widget implements IStatusBar {
       throw new Error(`Status item ${id} already registered.`);
     }
 
-    if (
-      id === '@jupyterlab/application-extension:mode-switch' ||
-      id === '@jupyterlab/apputils-extension:kernel-status' ||
-      id === '@jupyterlab/codemirror-extension:line-col-status' ||
-      id === '@jupyterlab/notebook-extension:mode-status'
-    ) {
-      statusItem.priorityZoom = 1;
-    }
-
     // Populate defaults for the optional properties of the status item.
     const fullStatusItem = {
       ...Private.statusItemDefaults,
       ...statusItem
     } as Private.IFullItem;
-    const { align, item, rank, priorityZoom } = fullStatusItem;
+    const { align, item, rank, priority } = fullStatusItem;
 
     // Connect the activeStateChanged signal to refreshing the status item,
     // if the signal was provided.
@@ -71,7 +62,7 @@ export class StatusBar extends Widget implements IStatusBar {
       fullStatusItem.activeStateChanged.connect(onActiveStateChanged);
     }
 
-    const rankItem = { id, rank, priorityZoom };
+    const rankItem = { id, rank, priority };
 
     fullStatusItem.item.addClass('jp-StatusBar-Item');
     this._statusItems[id] = fullStatusItem;
@@ -147,7 +138,7 @@ export class StatusBar extends Widget implements IStatusBar {
     const statusItem = this._statusItems[id];
     if (
       statusItem.isActive() &&
-      !(statusItem.priorityZoom === 0 && this._isWindowZoomed())
+      !(statusItem.priority === 0 && this._isWindowZoomed())
     ) {
       statusItem.item.show();
       statusItem.item.update();
@@ -182,7 +173,7 @@ namespace Private {
   export const statusItemDefaults: Omit<IStatusBar.IItem, 'item'> = {
     align: 'left',
     rank: 0,
-    priorityZoom: 0,
+    priority: 0,
     isActive: () => true,
     activeStateChanged: undefined
   };
@@ -193,10 +184,10 @@ namespace Private {
   export interface IRankItem {
     id: string;
     rank: number;
-    priorityZoom?: number;
+    priority?: number;
   }
 
-  export type DefaultKeys = 'align' | 'rank' | 'isActive' | 'priorityZoom';
+  export type DefaultKeys = 'align' | 'rank' | 'isActive' | 'priority';
 
   /**
    * Type of statusbar item with defaults filled in.

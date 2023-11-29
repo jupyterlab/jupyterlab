@@ -429,6 +429,7 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
     });
 
     statusBar.registerStatusItem('@jupyterlab/notebook-extension:mode-status', {
+      priority: 1,
       item,
       align: 'right',
       rank: 4,
