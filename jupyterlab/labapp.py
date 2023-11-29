@@ -495,6 +495,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         This flag is now deprecated and will be removed in JupyterLab v5.""",
     )
+    flags["custom-css"] = (
+        {"LabApp": {"custom_css": True}},
+        "Load custom CSS in template html files. Default is False",
+    )
 
     subcommands = {
         "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -578,6 +582,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         False,
         config=True,
         help="Whether to expose the global app instance to browser via window.jupyterapp",
+    )
+
+    custom_css = Bool(
+        False,
+        config=True,
+        help="""Whether custom CSS is loaded on the page.
+    Defaults to False.
+    """,
     )
 
     collaborative = Bool(
@@ -710,6 +722,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
+    def _prepare_templates(self):
+        super()._prepare_templates()
+        self.jinja2_env.globals.update(custom_css=self.custom_css)
+
     def initialize_handlers(self):  # noqa
         handlers = []
 
@@ -728,6 +744,18 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         self.log.info("JupyterLab extension loaded from %s" % HERE)
         self.log.info("JupyterLab application directory is %s" % self.app_dir)
+
+        if self.custom_css:
+            handlers.append(
+                (
+                    r"/custom/(.*)(?<!\.js)$",
+                    self.serverapp.web_app.settings["static_handler_class"],
+                    {
+                        'path': self.serverapp.web_app.settings['static_custom_path'],
+                        'no_cache_paths': ['/'],  # don't cache anything in custom
+                    },
+                )
+            )
 
         app_options = AppOptions(
             logger=self.log,
