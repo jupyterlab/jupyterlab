@@ -499,7 +499,7 @@ namespace Private {
     for (let i = 0; i < MAX_DIRECTORIES + 2; i++) {
       const item = document.createElement('span');
       if (driveName && i === 0) {
-        item.textContent = '/' + driveName + '/';
+        item.textContent = '/ ' + driveName + ' /';
       } else item.textContent = '/';
       items.push(item);
     }
