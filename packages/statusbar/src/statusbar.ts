@@ -147,7 +147,7 @@ export class StatusBar extends Widget implements IStatusBar {
     const statusItem = this._statusItems[id];
     if (
       statusItem.isActive() &&
-      !(this.WindowZoomedLevel() && statusItem.priorityZoom === 0)
+      !(statusItem.priorityZoom === 0 && this._isWindowZoomed())
     ) {
       statusItem.item.show();
       statusItem.item.update();
