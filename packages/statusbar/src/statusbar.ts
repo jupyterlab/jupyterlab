@@ -42,8 +42,6 @@ export class StatusBar extends Widget implements IStatusBar {
    * @param statusItem - The item to add to the status bar.
    */
   registerStatusItem(id: string, statusItem: IStatusBar.IItem): IDisposable {
-    console.log(this._statusItems);
-    console.log(statusItem.item.title);
     if (id in this._statusItems) {
       throw new Error(`Status item ${id} already registered.`);
     }
