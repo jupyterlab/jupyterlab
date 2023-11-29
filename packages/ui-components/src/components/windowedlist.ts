@@ -1282,12 +1282,12 @@ export class WindowedList<
     }
 
     const list = viewModel.itemsList;
-    if (list?.length) {
-      for (let index = 0; index < list.length; index += 1) {
-        const item = renderer.createScrollbarItem(index, list.get(index), this);
-        item.dataset.index = `${index}`;
-        content.appendChild(item);
-      }
+    const count = list?.length ?? viewModel.widgetCount;
+    for (let index = 0; index < count; index += 1) {
+      const item = list?.get?.(index);
+      const li = renderer.createScrollbarItem(this, index, item);
+      li.dataset.index = `${index}`;
+      content.appendChild(li);
     }
   }
 
@@ -1487,7 +1487,7 @@ export namespace WindowedList {
     /**
      * Create an individual item rendered in the scrollbar.
      */
-    createScrollbarItem(index: number): HTMLLIElement {
+    createScrollbarItem(_: WindowedList, index: number): HTMLLIElement {
       const li = document.createElement('li');
       li.appendChild(document.createTextNode(`${index}`));
       return li;
@@ -1587,7 +1587,7 @@ export namespace WindowedList {
      * Items list to be rendered
      */
     itemsList: {
-      get(index: number): T;
+      get?: (index: number) => T;
       length: number;
       changed: ISignal<any, IObservableList.IChangedArgs<any>>;
     } | null;
@@ -1733,9 +1733,9 @@ export namespace WindowedList {
      * Create an individual item rendered in the scrollbar.
      */
     createScrollbarItem(
+      list: WindowedList,
       index: number,
-      item: T,
-      list: WindowedList
+      item: T | undefined
     ): HTMLLIElement;
 
     /**

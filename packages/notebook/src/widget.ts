@@ -1310,9 +1310,9 @@ export class Notebook extends StaticNotebook {
         },
 
         createScrollbarItem(
+          notebook: Notebook,
           index: number,
-          model: ICellModel,
-          notebook: Notebook
+          model: ICellModel
         ): HTMLLIElement {
           const li = document.createElement('li');
           li.appendChild(document.createTextNode(`${index + 1}`));
