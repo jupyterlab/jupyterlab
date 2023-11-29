@@ -58,7 +58,7 @@ export namespace IStatusBar {
     /**
      *  Displaying Items based on zoom priority -- higher zoom priority gets prioritised when zoom levels increase
      */
-    priorityZoom?: number;
+    priority?: number;
 
     /**
      * Whether the item is shown or hidden.
