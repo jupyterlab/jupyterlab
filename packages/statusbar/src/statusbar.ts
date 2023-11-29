@@ -121,7 +121,7 @@ export class StatusBar extends Widget implements IStatusBar {
     super.dispose();
   }
 
-  private WindowZoomedLevel = () => {
+  private _isWindowZoomed = () => {
     // Get the current browser zoom level.
     const browserZoomLevel = Math.round(window.devicePixelRatio * 100);
     // Check if the zoom level is greater than or equal to 400%.
