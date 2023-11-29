@@ -734,7 +734,7 @@ export class WindowedList<
    *
    * @param options Constructor options
    */
-  constructor(options: WindowedList.IOptions<U, T>) {
+  constructor(options: WindowedList.IOptions<T, U>) {
     const renderer = options.renderer ?? WindowedList.defaultRenderer;
 
     const node = document.createElement('div');
@@ -1692,13 +1692,13 @@ export namespace WindowedList {
    * Windowed list view constructor options
    */
   export interface IOptions<
-    T = any,
-    U extends WindowedList.IModel<T> = WindowedList.IModel<T>
+    T extends WindowedList.IModel = WindowedList.IModel,
+    U = any
   > {
     /**
      * Windowed list model to display
      */
-    model: U;
+    model: T;
     /**
      * Windowed list layout
      */
@@ -1707,7 +1707,7 @@ export namespace WindowedList {
     /**
      * A renderer for the elements of the windowed list.
      */
-    renderer?: IRenderer<T>;
+    renderer?: IRenderer<U>;
 
     /**
      * Whether the windowed list should display a scrollbar UI.
