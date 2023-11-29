@@ -925,13 +925,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 import jupyter_collaboration  # noqa
             except ImportError:
                 self.log.critical(
-                    """
-To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
-You can install it using pip for example:
+                    """\
+Juptyer Lab cannot start, because `jupyter_collaboration` was configured but cannot be `import`ed.
 
-  python -m pip install jupyter_collaboration
+To fix this, either:
 
-This flag is now deprecated and will be removed in JupyterLab v5.
+1) install the extension `jupyter_collaboration`; for example: `python -m pip install jupyter_collaboration`
+
+2) disable collaboration; for example, remove the `--collaborative` flag from the commandline.  To see more ways to adjust the collaborative behavior, see https://jupyterlab-realtime-collaboration.readthedocs.io/en/latest/configuration.html .
 """
                 )
                 sys.exit(1)

@@ -138,6 +138,14 @@
   background: transparent;
 }
 
+.jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-active:focus-visible {
+  outline: none;
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--jp-brand-color1);
+  z-index: 1;
+}
+
 /* Edit mode */
 
 .jp-Notebook.jp-mod-editMode .jp-Cell.jp-mod-active .jp-InputArea-editor {

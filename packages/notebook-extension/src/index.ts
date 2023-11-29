@@ -2409,18 +2409,24 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.restartAndRunToSelected, {
     label: trans.__('Restart Kernel and Run up to Selected Cell…'),
-    execute: async () => {
-      const restarted: boolean = await commands.execute(CommandIDs.restart, {
-        activate: false
-      });
+    execute: async args => {
+      const current = getCurrent(tracker, shell, { activate: false, ...args });
+      if (!current) {
+        return;
+      }
+      const { context, content } = current;
+
+      const cells = content.widgets.slice(0, content.activeCellIndex + 1);
+      const restarted = await sessionDialogs.restart(current.sessionContext);
+
       if (restarted) {
-        const executed: boolean = await commands.execute(
-          CommandIDs.runAllAbove,
-          { activate: false }
+        return NotebookActions.runCells(
+          content,
+          cells,
+          context.sessionContext,
+          sessionDialogs,
+          translator
         );
-        if (executed) {
-          return commands.execute(CommandIDs.run);
-        }
       }
     },
     isEnabled: isEnabledAndSingleSelected
@@ -2428,12 +2434,25 @@ function addCommands(
   commands.addCommand(CommandIDs.restartRunAll, {
     label: trans.__('Restart Kernel and Run All Cells…'),
     caption: trans.__('Restart the kernel and run all cells'),
-    execute: async () => {
-      const restarted: boolean = await commands.execute(CommandIDs.restart, {
-        activate: false
-      });
+    execute: async args => {
+      const current = getCurrent(tracker, shell, { activate: false, ...args });
+
+      if (!current) {
+        return;
+      }
+      const { context, content } = current;
+
+      const cells = content.widgets;
+      const restarted = await sessionDialogs.restart(current.sessionContext);
+
       if (restarted) {
-        await commands.execute(CommandIDs.runAll);
+        return NotebookActions.runCells(
+          content,
+          cells,
+          context.sessionContext,
+          sessionDialogs,
+          translator
+        );
       }
     },
     isEnabled: args => (args.toolbar ? true : isEnabled()),

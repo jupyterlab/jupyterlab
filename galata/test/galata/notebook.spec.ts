@@ -157,7 +157,7 @@ test.describe('Access cells in windowed notebook', () => {
     await page.filebrowser.open(target);
     await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
 
-    expect(await page.notebook.getCellCount()).toEqual(14);
+    expect(await page.notebook.getCellCount()).toEqual(19);
   });
 
   test('getCell below the viewport', async ({ page, tmpPath }) => {

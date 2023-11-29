@@ -630,6 +630,58 @@ export namespace galata {
     }
 
     /**
+     * Set a notebook's writable attribute to false
+     *
+     * @param page Page model object
+     *
+     * #### Notes
+     * The goal is to have the notebook to appear as read-only
+     */
+    export async function makeNotebookReadonly(page: Page): Promise<void> {
+      // Listen for closing connection (may happen when request are still being processed)
+      let isClosed = false;
+      const ctxt = page.context();
+      ctxt.once('close', () => {
+        isClosed = true;
+      });
+      ctxt.browser()?.once('disconnected', () => {
+        isClosed = true;
+      });
+
+      return page.route(Routes.contents, async (route, request) => {
+        switch (request.method()) {
+          case 'GET': {
+            // Proxy the GET request
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: response.status(),
+                  body: await response.text()
+                });
+              }
+              break;
+            }
+            const data = await response.json();
+            if (data['type'] === 'notebook') {
+              data['writable'] = false;
+            }
+            if (!page.isClosed() && !isClosed) {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify(data),
+                contentType: 'application/json'
+              });
+            }
+            break;
+          }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
      * Clear all wanted sessions or terminals.
      *
      * @param baseURL Application base URL
