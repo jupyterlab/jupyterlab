@@ -45,6 +45,7 @@ test.describe('Use custom CSS layout', () => {
     await page.goto();
 
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    await page.notebook.activate(fileName);
 
     expect(
       await (await page.activity.getPanelLocator())?.screenshot()
