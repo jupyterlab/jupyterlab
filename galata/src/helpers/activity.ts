@@ -51,13 +51,11 @@ export class ActivityHelper {
       return activeTab === name;
     } else {
       const tab = await this.getTab(name);
-      return (
-        (tab &&
-          (await tab.evaluate((tab: Element) =>
-            tab.classList.contains('jp-mod-current')
-          ))) ??
-        false
-      );
+      if (!tab) {
+        return false;
+      }
+      const classes = ((await tab.getAttribute('class')) ?? '').split(' ');
+      return classes.includes('jp-mod-current');
     }
   }
 
