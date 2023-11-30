@@ -28,6 +28,14 @@ export const IDocumentWidgetOpener = new Token<IDocumentWidgetOpener>(
 );
 
 /**
+ * The recent documents database token.
+ */
+export const IRecentsManager = new Token<IRecentsManager>(
+  '@jupyterlab/docmanager:IRecentsManager',
+  `A service providing information about recently opened and closed documents`
+);
+
+/**
  * The interface for a document manager.
  */
 export interface IDocumentManager extends IDisposable {
@@ -279,3 +287,53 @@ export interface IDocumentWidgetOpener {
    */
   readonly opened: ISignal<IDocumentWidgetOpener, IDocumentWidget>;
 }
+
+/**
+ * Recent opened items manager.
+ */
+export interface IRecentsManager {
+  /**
+   * Get the recently opened documents.
+   */
+  readonly recentlyOpened: RecentDocument[];
+
+  /**
+   * Get the recently closed items.
+   */
+  readonly recentlyClosed: RecentDocument[];
+
+  /**
+   * Signal emitted when either of the list changes.
+   */
+  readonly changed: ISignal<IRecentsManager, void>;
+
+  /**
+   * Check if the recent item is valid, remove if it from both lists if it is not.
+   */
+  validate(recent: RecentDocument): Promise<boolean>;
+
+  /**
+   * Add a new path to the recent list.
+   */
+  addRecent(path: string, contentType: string, type: 'opened' | 'closed'): void;
+}
+
+/**
+ * The interface for a recent document.
+ */
+export type RecentDocument = {
+  /**
+   * The server root path.
+   *
+   * Allows to select only the currently accessible documents.
+   */
+  root: string;
+  /**
+   * The path to the document.
+   */
+  path: string;
+  /**
+   * The document content type or `directory` literal for directories.
+   */
+  contentType: string;
+};

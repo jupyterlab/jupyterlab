@@ -41,6 +41,8 @@
     "@jupyterlab/application": "^4.1.0-alpha.4",
     "@jupyterlab/apputils": "^4.2.0-alpha.4",
     "@jupyterlab/coreutils": "^6.1.0-alpha.4",
+    "@jupyterlab/docmanager": "^4.1.0-alpha.4",
+    "@jupyterlab/filebrowser": "^4.1.0-alpha.4",
     "@jupyterlab/mainmenu": "^4.1.0-alpha.4",
     "@jupyterlab/services": "^7.1.0-alpha.4",
     "@jupyterlab/settingregistry": "^4.1.0-alpha.4",
@@ -49,6 +51,7 @@
     "@lumino/algorithm": "^2.0.1",
     "@lumino/coreutils": "^2.1.2",
     "@lumino/disposable": "^2.1.2",
+    "@lumino/messaging": "^2.0.1",
     "@lumino/widgets": "^2.3.1"
   },
   "devDependencies": {

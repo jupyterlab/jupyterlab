@@ -12,6 +12,7 @@ import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+import { IRecentsManager } from './tokens';
 
 /**
  * The class name added to document widgets.
@@ -28,6 +29,7 @@ export class DocumentWidgetManager implements IDisposable {
   constructor(options: DocumentWidgetManager.IOptions) {
     this._registry = options.registry;
     this.translator = options.translator || nullTranslator;
+    this._recentsManager = options.recentsManager || null;
   }
 
   /**
@@ -259,6 +261,14 @@ export class DocumentWidgetManager implements IDisposable {
       case 'activate-request': {
         const context = this.contextForWidget(handler as Widget);
         if (context) {
+          context.ready
+            .then(() => {
+              // contentsModel is null until the the context is ready
+              this._recordAsRecent(context.contentsModel!);
+            })
+            .catch(() => {
+              console.warn('Could not record the recents status for', context);
+            });
           this._activateRequested.emit(context.path);
         }
         break;
@@ -353,6 +363,27 @@ export class DocumentWidgetManager implements IDisposable {
   protected onDelete(widget: Widget): Promise<void> {
     widget.dispose();
     return Promise.resolve(void 0);
+  }
+
+  /**
+   * Record the activated file, and its parent directory, as recent
+   */
+  private _recordAsRecent(model: Omit<Contents.IModel, 'content'>) {
+    const recents = this._recentsManager;
+    if (!recents) {
+      // no-op
+      return;
+    }
+    const path = model.path;
+    const fileType = this._registry.getFileTypeForModel(model);
+    const contentType = fileType.contentType;
+    recents.addRecent(path, contentType, 'opened');
+    // Add the containing directory, too
+    if (contentType !== 'directory') {
+      const parent =
+        path.lastIndexOf('/') > 0 ? path.slice(0, path.lastIndexOf('/')) : '';
+      recents.addRecent(parent, 'directory', 'opened');
+    }
   }
 
   /**
@@ -513,6 +544,7 @@ export class DocumentWidgetManager implements IDisposable {
   private _stateChanged = new Signal<DocumentWidgetManager, IChangedArgs<any>>(
     this
   );
+  private _recentsManager: IRecentsManager | null;
 }
 
 /**
@@ -527,6 +559,11 @@ export namespace DocumentWidgetManager {
      * A document registry instance.
      */
     registry: DocumentRegistry;
+
+    /**
+     * The manager for recent documents.
+     */
+    recentsManager?: IRecentsManager;
 
     /**
      * The application language translator.

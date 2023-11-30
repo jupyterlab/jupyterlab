@@ -121,7 +121,17 @@ export namespace IFileBrowserFactory {
 /**
  * The token that indicates the default file browser commands are loaded.
  */
-export const IFileBrowserCommands = new Token<void>(
+export const IFileBrowserCommands = new Token<IFileBrowserCommands>(
   '@jupyterlab/filebrowser:IFileBrowserCommands',
   'A token to ensure file browser commands are loaded.'
 );
+
+/**
+ * The identifiers of loaded commands exposed for reuse.
+ */
+export interface IFileBrowserCommands {
+  /**
+   * Command for opening a file or a directory by path.
+   */
+  openPath: string;
+}

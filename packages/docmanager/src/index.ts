@@ -12,3 +12,4 @@ export * from './savehandler';
 export * from './savingstatus';
 export * from './tokens';
 export * from './widgetmanager';
+export * from './recents';

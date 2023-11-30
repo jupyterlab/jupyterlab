@@ -44,6 +44,7 @@ import { find } from '@lumino/algorithm';
 import { JSONExt } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Menu, Widget } from '@lumino/widgets';
+import { recentsMenuPlugin } from './recents';
 
 const PLUGIN_ID = '@jupyterlab/mainmenu-extension:plugin';
 
@@ -759,7 +760,7 @@ function createHelpMenu(
   );
 }
 
-export default plugin;
+export default [plugin, recentsMenuPlugin];
 
 /**
  * A namespace for Private data.

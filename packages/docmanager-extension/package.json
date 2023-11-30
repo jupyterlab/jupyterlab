@@ -45,6 +45,7 @@
     "@jupyterlab/docregistry": "^4.1.0-alpha.4",
     "@jupyterlab/services": "^7.1.0-alpha.4",
     "@jupyterlab/settingregistry": "^4.1.0-alpha.4",
+    "@jupyterlab/statedb": "^4.1.0-alpha.4",
     "@jupyterlab/statusbar": "^4.1.0-alpha.4",
     "@jupyterlab/translation": "^4.1.0-alpha.4",
     "@jupyterlab/ui-components": "^4.1.0-alpha.4",
