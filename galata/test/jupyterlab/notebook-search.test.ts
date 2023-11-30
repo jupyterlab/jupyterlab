@@ -42,6 +42,19 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
   });
 
+  test('Should open search box in edit mode', async ({ page }) => {
+    // Enter edit mode
+    await page.notebook.enterCellEditingMode(0);
+
+    await page.keyboard.press('Control+f');
+
+    // Wait for the search box
+    await page.getByPlaceholder('Find').waitFor();
+
+    // Check the CM search panel is not displayed.
+    await expect(page.locator('.cm-search.cm-panel')).toHaveCount(0);
+  });
+
   test('Typing in search box', async ({ page }) => {
     // Check against React being too eager with controling state of input box
     await page.keyboard.press('Control+f');
