@@ -1,0 +1,23 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-cell-filters-tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jp-cell-filters-types {
+  user-select: none;
+}
+
+.jp-NotebookTools-tool
+  .jp-ToolbarButtonComponent[data-command='notebook:cell-filters'] {
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color1);
+  border-radius: 10px;
+  border: 1px solid var(--jp-border-color1);
+  font-size: var(--jp-ui-font-size1);
+}

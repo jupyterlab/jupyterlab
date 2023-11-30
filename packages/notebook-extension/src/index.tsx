@@ -96,10 +96,12 @@ import {
   addAboveIcon,
   addBelowIcon,
   buildIcon,
+  CommandToolbarButtonComponent,
   copyIcon,
   cutIcon,
   duplicateIcon,
   fastForwardIcon,
+  filterIcon,
   IFormRenderer,
   IFormRendererRegistry,
   moveDownIcon,
@@ -122,6 +124,8 @@ import {
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
+import React from 'react';
+import { CellFiltersModel, CellFiltersView } from './cellfilters';
 import { logNotebookOutput } from './nboutput';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
@@ -319,6 +323,8 @@ namespace CommandIDs {
   export const accessPreviousHistory = 'notebook:access-previous-history-entry';
 
   export const accessNextHistory = 'notebook:access-next-history-entry';
+
+  export const filterCells = 'notebook:filter-cells';
 }
 
 /**
@@ -1060,6 +1066,100 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
   }
 };
 
+export const cellFiltersPlugin: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/notebook-extension:cell-filters',
+  description: 'Filter cells.',
+  autoStart: true,
+  requires: [INotebookTracker, IFormRendererRegistry],
+  optional: [ICommandPalette, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    tracker: INotebookTracker,
+    formRegistry: IFormRendererRegistry,
+    palette: ICommandPalette | null,
+    translator_: ITranslator | null
+  ): void => {
+    const translator = translator_ ?? nullTranslator;
+    const trans = translator.load('jupyterlab');
+    const { shell, commands } = app;
+    const isEnabled = () => Private.isEnabled(shell, tracker);
+    const notebookModelMap = new WeakMap<Notebook, CellFiltersModel>();
+
+    const filterButton: IFormRenderer = {
+      fieldRenderer: () => (
+        <CommandToolbarButtonComponent
+          commands={commands}
+          id={CommandIDs.filterCells}
+          caption={trans.__('Open the filtering tool')}
+          icon={filterIcon}
+        ></CommandToolbarButtonComponent>
+      )
+    };
+    formRegistry.addRenderer(
+      '@jupyterlab/notebook-extension:cell-filters.renderer',
+      filterButton
+    );
+
+    app.commands.addCommand(CommandIDs.filterCells, {
+      label: trans.__('Filter Cells'),
+      caption: trans.__('Filter cells'),
+      execute: async args => {
+        const current = getCurrent(tracker, shell, args);
+
+        if (current) {
+          let model = notebookModelMap.get(current.content);
+          if (!model) {
+            model = new CellFiltersModel({ notebook: current.content });
+            notebookModelMap.set(current.content, model);
+          }
+
+          const selectButton = Dialog.okButton({
+            label: trans._n(
+              'Filter Cell',
+              'Filter Cells',
+              current.content.widgets.length ?? 1
+            ),
+            actions: ['select']
+          });
+          const clearButton = Dialog.warnButton({
+            label: trans._n(
+              'Clear Filter',
+              'Clear Filters',
+              model.filters.size
+            ),
+            actions: ['clear']
+          });
+          const view = new CellFiltersView({ model, translator });
+          const result = await showDialog({
+            title: trans.__('Select cell filters'),
+            body: view,
+            buttons: [Dialog.cancelButton(), selectButton, clearButton],
+            defaultButton: 1
+          });
+
+          if (result.button.accept) {
+            if (result.button.actions.includes('select')) {
+              model.filters = result.value ?? new Set<string>();
+            }
+            if (result.button.actions.includes('clear')) {
+              model.filters = new Set<string>();
+            }
+          }
+        }
+      },
+      isEnabled: args => (args.toolbar ? true : isEnabled())
+    });
+
+    if (palette) {
+      const category = trans.__('Notebook Operations');
+      palette.addItem({
+        category,
+        command: CommandIDs.filterCells
+      });
+    }
+  }
+};
+
 /**
  * Export the plugins as default.
  */
@@ -1084,7 +1184,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   languageServerPlugin,
   updateRawMimetype,
   customMetadataEditorFields,
-  activeCellTool
+  activeCellTool,
+  cellFiltersPlugin
 ];
 export default plugins;
 
