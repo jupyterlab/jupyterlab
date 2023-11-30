@@ -291,15 +291,15 @@ namespace Private {
       filterDirectories
     });
 
-    if (defaultPath) {
-      await model.cd(defaultPath);
-    }
-
     const widget = new FileBrowser({
       id,
       model,
       translator
     });
+
+    if (defaultPath) {
+      await widget.model.cd(defaultPath);
+    }
 
     return widget;
   };
