@@ -21,12 +21,11 @@ test.beforeEach(async ({ page, tmpPath }) => {
   await page.notebook.activate(TEST_FILENAME);
 });
 
+const HIGHLIGHTS_LOCATOR = '.cm-searching';
+
 test('Open and close Search dialog, then add new code cell', async ({
   page
 }) => {
-  const imageNameBefore = 'notebook-no-search-highlight-before.png';
-  const imageNameAfter = 'notebook-no-search-highlight-after.png';
-
   // search for our needle
   await page.evaluate(async searchText => {
     await window.jupyterapp.commands.execute('documentsearch:start', {
@@ -36,16 +35,15 @@ test('Open and close Search dialog, then add new code cell', async ({
 
   // wait for the search to complete
   await page.waitForSelector('text=1/21');
+  expect(await page.locator(HIGHLIGHTS_LOCATOR).count()).toBeGreaterThanOrEqual(
+    4
+  );
 
   // cancel search
   await page.keyboard.press('Escape');
 
-  // expect the outlining to have gone
-  const panel = await page.activity.getPanel(TEST_FILENAME);
-  // get only the document node to avoid noise from kernel and debugger in the toolbar
-  const notebook = await panel.$('.jp-Notebook');
-
-  expect(await notebook.screenshot()).toMatchSnapshot(imageNameBefore);
+  // expect the highlights to have gone
+  expect(await page.locator(HIGHLIGHTS_LOCATOR).count()).toEqual(0);
 
   // insert a new code cell
   await page.evaluate(async () =>
@@ -53,8 +51,8 @@ test('Open and close Search dialog, then add new code cell', async ({
   );
 
   // wait an arbitrary amount of extra time
-  // and expect the outlining to be still gone
-  // but because of #14871, text is highlighted again
+  // and expect the highlights to be still gone
+  // regression-testing against #14871
   await new Promise(resolve => setTimeout(resolve, 1000));
-  expect(await notebook.screenshot()).toMatchSnapshot(imageNameAfter);
+  expect(await page.locator(HIGHLIGHTS_LOCATOR).count()).toEqual(0);
 });
