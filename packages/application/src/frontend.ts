@@ -281,10 +281,10 @@ export namespace JupyterFrontEnd {
      *
      * ### Notes
      * Shells may not always have a {@link currentWidget} or it may not change.
-     * Therefore implementing this signal is only expected for shell with the ability
+     * Therefore implementing this signal is only expected for shells with the ability
      * to switch between active widgets.
      *
-     * Although the signal argument type mentioned a focus tracker, the shell
+     * Although the signal argument type references a focus tracker, the shell
      * current widget may not be the one focused as its definition is an implementation
      * detail.
      */
