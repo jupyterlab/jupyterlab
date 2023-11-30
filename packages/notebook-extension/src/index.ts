@@ -3452,7 +3452,9 @@ function addCommands(
   });
   commands.addCommand(CommandIDs.virtualScrollbar, {
     label: trans.__('Virtual Scrollbar'),
-    caption: trans.__('Toggle virtual scrollbar (enabled with windowing mode: full)'),
+    caption: trans.__(
+      'Toggle virtual scrollbar (enabled with windowing mode: full)'
+    ),
     execute: args => {
       const current = getCurrent(tracker, shell, args);
 
