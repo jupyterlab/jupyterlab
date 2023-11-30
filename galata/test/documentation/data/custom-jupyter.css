@@ -1,0 +1,38 @@
+/*
+Copyright (c) Jupyter Development Team.
+Distributed under the terms of the Modified BSD License.
+*/
+
+/* Modify Jupyter Styles */
+
+.lm-BoxPanel-child,
+.jp-FileBrowser-Panel,
+.lm-StackedPanel-child,
+.jp-FileBrowser-toolbar {
+  background-color: #aecad4 !important;
+}
+
+#top-panel-wrapper,
+#jp-top-bar {
+  background-color: #aecad4 !important;
+}
+
+#menu-panel-wrapper,
+#jp-MainMenu,
+#menu-panel {
+  background-color: #aecad4 !important;
+}
+
+.jp-NotebookPanel-toolbar {
+  background-color: #aecad4 !important;
+}
+
+.lm-MenuBar-content {
+  color: #02484d;
+}
+
+.lm-TabBar-content,
+.jp-DirListing-content,
+.lm-MenuBar-content {
+  font-size: small;
+}
