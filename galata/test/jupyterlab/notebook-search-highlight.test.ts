@@ -24,8 +24,8 @@ test.beforeEach(async ({ page, tmpPath }) => {
 test('Open and close Search dialog, then add new code cell', async ({
   page
 }) => {
-  const imageName1 = 'notebook-search-highlight-1.png';
-  const imageName2 = 'notebook-search-highlight-2.png';
+  const imageNameBefore = 'notebook-no-search-highlight-before.png';
+  const imageNameAfter = 'notebook-no-search-highlight-after.png';
 
   // search for our needle
   await page.evaluate(async searchText => {
@@ -36,14 +36,16 @@ test('Open and close Search dialog, then add new code cell', async ({
 
   // wait for the search to complete
   await page.waitForSelector('text=1/21');
-  await page.locator('[placeholder="Find"]');
 
   // cancel search
   await page.keyboard.press('Escape');
 
   // expect the outlining to have gone
-  const tabHandle = await page.activity.getPanel(TEST_FILENAME);
-  expect(await tabHandle.screenshot()).toMatchSnapshot(imageName1);
+  const panel = await page.activity.getPanel(TEST_FILENAME);
+  // get only the document node to avoid noise from kernel and debugger in the toolbar
+  const notebook = await panel.$('.jp-Notebook');
+
+  expect(await notebook.screenshot()).toMatchSnapshot(imageNameBefore);
 
   // insert a new code cell
   await page.evaluate(async () =>
@@ -52,8 +54,8 @@ test('Open and close Search dialog, then add new code cell', async ({
 
   // wait an arbitrary amount of extra time
   // and expect the outlining to be still gone
-  // but because of #14871, text is highlightd again
+  // but because of #14871, text is highlighted again
   setTimeout(async () => {
-    expect(await tabHandle.screenshot()).toMatchSnapshot(imageName2);
+    expect(await notebook.screenshot()).toMatchSnapshot(imageNameAfter);
   }, 1000);
 });
