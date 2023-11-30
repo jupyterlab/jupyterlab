@@ -55,7 +55,6 @@ test('Open and close Search dialog, then add new code cell', async ({
   // wait an arbitrary amount of extra time
   // and expect the outlining to be still gone
   // but because of #14871, text is highlighted again
-  setTimeout(async () => {
-    expect(await notebook.screenshot()).toMatchSnapshot(imageNameAfter);
-  }, 1000);
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  expect(await notebook.screenshot()).toMatchSnapshot(imageNameAfter);
 });
