@@ -249,6 +249,37 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   opacity: 1;
 }
 
+.jp-OutputArea-stdin-hiding:has(~ .jp-OutputArea-stdin-item) {
+  /* hide the old input immediately if a new input was attached */
+  display: none;
+}
+
+.jp-OutputArea-stdin-hiding .jp-Stdin-prompt::after {
+  content: '✓';
+  color: var(--jp-accent-color0);
+  font-weight: bold;
+  animation: jp-reveal-check 0.1s forwards;
+  font-size: 120%;
+}
+
+@keyframes jp-reveal-check {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.jp-OutputArea-stdin-hiding {
+  opacity: 0;
+  transition: opacity 0.1s ease-in;
+  transition-delay: 0.3s;
+}
+
 /*-----------------------------------------------------------------------------
 | Output Area View
 |----------------------------------------------------------------------------*/
