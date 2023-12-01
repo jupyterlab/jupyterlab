@@ -35,6 +35,32 @@ If your extension previously included a custom enable/disable setting, you may b
 with instructions pointing users to the Plugin Manager. However, please consider whether your extension
 may be used in distributions which do not include Plugin Manager or have it disabled.
 
+Use of UI toolkit for Toolbar and ToolbarButtonComponent
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Toolbar and ToolbarButtonComponent (from the package *ui-components*) now relies on the external library
+`jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`.
+
+This library uses the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
+and is based on `FAST <https://www.fast.design/>` library by Microsoft.
+
+See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
+
+If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
+They need to be ignored when transforming the code with Jest. You will need to update the
+``transformIgnorePatterns`` to add:
+
+.. code::
+
+   const esModules = [
+     '@microsoft',
+     '@jupyter/react-components',
+     '@jupyter/web-components',
+     'exenv-es6',
+     ...
+   ].join('|');
+
+
 JupyterLab 3.x to 4.x
 ---------------------
 

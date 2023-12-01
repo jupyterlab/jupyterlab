@@ -313,3 +313,10 @@ Users can add a "Open in Simple Mode" context menu option by adding the followin
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
         "rank": 1.6
     }
+
+.. _custom-css:
+
+Custom CSS
+==========
+
+.. include:: custom_css.rst
