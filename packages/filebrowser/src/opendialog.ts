@@ -196,12 +196,6 @@ class OpenDialog
         // Set Widget content
         this.layout = layout;
 
-        // Dispose of file browser model when dialog closes
-        this.dispose = () => {
-          this._browser.model.dispose();
-          super.dispose();
-        };
-
         this._ready.resolve();
       })
       .catch(reason => {
