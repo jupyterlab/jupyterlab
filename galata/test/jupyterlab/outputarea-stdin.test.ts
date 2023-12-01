@@ -7,6 +7,13 @@ test.use({
   locale: 'en-US'
 });
 
+const loopedInput = `\
+from time import sleep
+input()
+print('before sleep')
+sleep(0.1)
+print('after sleep')`;
+
 test.describe('Stdin for ipdb', () => {
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew();
@@ -81,5 +88,40 @@ test.describe('Stdin for ipdb', () => {
     await expect(page.locator('.jp-Stdin-input')).toHaveValue(
       alphabet + alphabet.toUpperCase() + digits
     );
+  });
+
+  test('Subsequent execution in short succession', async ({ page }) => {
+    await page.notebook.setCell(0, 'code', loopedInput);
+    // Run the selected (only) cell without proceeding and without waiting
+    // for it to complete (as it should stay waiting for input).
+    await page.keyboard.press('Control+Enter');
+
+    // Wait for first input
+    await page.waitForSelector('.jp-Stdin-input');
+
+    // Note: this test does not wait for subsequent inputs on purpose
+
+    await page.getByText('before sleep').waitFor();
+
+    // Press enter five times (should do nothing)
+    for (let j = 0; j < 5; j++) {
+      await page.keyboard.press('Enter');
+    }
+    // Press a key which should go to the input
+    await page.keyboard.press('x');
+
+    await page.getByText('after sleep').waitFor();
+
+    // Press enter five times (should submit and then do nothing)
+    for (let j = 0; j < 5; j++) {
+      await page.keyboard.press('Enter');
+    }
+
+    const cellInput = await page.notebook.getCellInput(0);
+    const editor = await cellInput.$('.cm-content');
+    const contentAfter = await editor.evaluate((e: any) =>
+      e.cmView.view.state.doc.toString()
+    );
+    expect(contentAfter).toBe(loopedInput);
   });
 });
