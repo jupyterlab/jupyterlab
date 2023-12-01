@@ -2024,7 +2024,7 @@
   {
     "id": "notebook:toggle-virtual-scrollbar",
     "label": "Virtual Scrollbar",
-    "caption": "Virtual Scrollbar (enabled with windowing mode: full)",
+    "caption": "Toggle virtual scrollbar (enabled with windowing mode: full)",
     "shortcuts": []
   },
   {
