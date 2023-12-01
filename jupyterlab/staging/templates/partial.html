@@ -17,3 +17,7 @@
   <link rel="icon" type="image/x-icon" href="{{ base_url | escape }}static/favicons/favicon.ico" class="idle favicon">
   <link rel="" type="image/x-icon" href="{{ base_url | escape }}static/favicons/favicon-busy-1.ico" class="busy favicon">
   {% endblock %}
+
+  {% if custom_css %}
+  <link rel="stylesheet" type="text/css" href="{{ base_url | escape }}custom/custom.css">
+  {% endif %}
