@@ -90,30 +90,25 @@ export class RecentsManager implements IRecentsManager, IDisposable {
 
   /**
    * Add a new path to the recent list.
-   *
-   * @param path Path
-   * @param contentType Content type
    */
   addRecent(
-    path: string,
-    contentType: string,
-    type: 'opened' | 'closed'
+    document: Omit<RecentDocument, 'root'>,
+    event: 'opened' | 'closed'
   ): void {
     const recent: RecentDocument = {
       root: this._serverRoot,
-      path,
-      contentType
+      ...document
     };
-    const recents = this._recents[type];
+    const recents = this._recents[event];
     // Check if it's already present; if so remove it
-    const existingIndex = recents.findIndex(r => r.path === path);
+    const existingIndex = recents.findIndex(r => r.path === document.path);
     if (existingIndex >= 0) {
       recents.splice(existingIndex, 1);
     }
     // Add to the front of the list
     recents.unshift(recent);
 
-    this._setRecents(recents, type);
+    this._setRecents(recents, event);
     this._recentsChanged.emit(undefined);
   }
 
@@ -127,15 +122,22 @@ export class RecentsManager implements IRecentsManager, IDisposable {
   }
 
   /**
+   * Remove the document from recents list.
+   */
+  removeRecent(document: RecentDocument, event: 'opened' | 'closed'): void {
+    this._removeRecent(document.path, [event]);
+  }
+
+  /**
    * Remove a path from both lists (opened and closed)
    *
    * @param path Path to remove
    */
-  private _removeRecent(path: string): void {
+  private _removeRecent(path: string, lists = ['opened', 'closed']): void {
     let changed = false;
-    for (const type of ['opened', 'closed']) {
+    for (const type of lists) {
       const recents = this._recents[type];
-      const newRecents = recents.filter(r => path === r.path);
+      const newRecents = recents.filter(r => path !== r.path);
       if (recents.length !== newRecents.length) {
         this._setRecents(newRecents, type as 'opened' | 'closed');
       }
@@ -275,5 +277,4 @@ export namespace RecentsManager {
 
 namespace Private {
   export const stateDBKey = 'docmanager:recents';
-  export const poolKey = 'docmanager:recents';
 }

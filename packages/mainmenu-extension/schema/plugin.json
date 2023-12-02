@@ -306,6 +306,11 @@
       "command": "tabsmenu:activate-previously-used-tab",
       "keys": ["Accel Shift '"],
       "selector": "body"
+    },
+    {
+      "command": "recentmenu:reopen-last",
+      "keys": ["Accel Shift T"],
+      "selector": "body"
     }
   ],
   "jupyter.lab.transform": true,

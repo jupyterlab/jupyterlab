@@ -259,12 +259,13 @@ export class DocumentWidgetManager implements IDisposable {
         void this.onClose(handler as Widget);
         return false;
       case 'activate-request': {
-        const context = this.contextForWidget(handler as Widget);
+        const widget = handler as Widget;
+        const context = this.contextForWidget(widget);
         if (context) {
           context.ready
             .then(() => {
               // contentsModel is null until the the context is ready
-              this._recordAsRecent(context.contentsModel!);
+              this._recordAsRecentlyOpened(widget, context.contentsModel!);
             })
             .catch(() => {
               console.warn('Could not record the recents status for', context);
@@ -336,8 +337,8 @@ export class DocumentWidgetManager implements IDisposable {
       return true;
     }
     if (shouldClose) {
+      const context = Private.contextProperty.get(widget);
       if (!ignoreSave) {
-        const context = Private.contextProperty.get(widget);
         if (!context) {
           return true;
         }
@@ -346,6 +347,16 @@ export class DocumentWidgetManager implements IDisposable {
         } else {
           await context.saveAs();
         }
+      }
+      if (context) {
+        context.ready
+          .then(() => {
+            // contentsModel is null until the the context is ready
+            this._recordAsRecentlyClosed(widget, context.contentsModel!);
+          })
+          .catch(() => {
+            console.warn('Could not record the recents status for', context);
+          });
       }
       if (widget.isDisposed) {
         return true;
@@ -366,9 +377,12 @@ export class DocumentWidgetManager implements IDisposable {
   }
 
   /**
-   * Record the activated file, and its parent directory, as recent
+   * Record the activated file, and its parent directory, as recently opened.
    */
-  private _recordAsRecent(model: Omit<Contents.IModel, 'content'>) {
+  private _recordAsRecentlyOpened(
+    widget: Widget,
+    model: Omit<Contents.IModel, 'content'>
+  ) {
     const recents = this._recentsManager;
     if (!recents) {
       // no-op
@@ -377,13 +391,33 @@ export class DocumentWidgetManager implements IDisposable {
     const path = model.path;
     const fileType = this._registry.getFileTypeForModel(model);
     const contentType = fileType.contentType;
-    recents.addRecent(path, contentType, 'opened');
+    const factory = Private.factoryProperty.get(widget)?.name;
+    recents.addRecent({ path, contentType, factory }, 'opened');
     // Add the containing directory, too
     if (contentType !== 'directory') {
       const parent =
         path.lastIndexOf('/') > 0 ? path.slice(0, path.lastIndexOf('/')) : '';
-      recents.addRecent(parent, 'directory', 'opened');
+      recents.addRecent({ path: parent, contentType: 'directory' }, 'opened');
     }
+  }
+
+  /**
+   * Record the activated file, and its parent directory, as recently opened.
+   */
+  private _recordAsRecentlyClosed(
+    widget: Widget,
+    model: Omit<Contents.IModel, 'content'>
+  ) {
+    const recents = this._recentsManager;
+    if (!recents) {
+      // no-op
+      return;
+    }
+    const path = model.path;
+    const fileType = this._registry.getFileTypeForModel(model);
+    const contentType = fileType.contentType;
+    const factory = Private.factoryProperty.get(widget)?.name;
+    recents.addRecent({ path, contentType, factory }, 'closed');
   }
 
   /**

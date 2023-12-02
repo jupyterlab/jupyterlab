@@ -21,6 +21,8 @@ namespace CommandIDs {
 
 namespace PluginIDs {
   export const recentsManager = '@jupyterlab/docmanager-extension:recents';
+  export const reopenClosed =
+    '@jupyterlab/docmanager-extension:reopen-recently-closed';
   export const mainPlugin = '@jupyterlab/docmanager-extension:plugin';
 }
 
@@ -64,7 +66,7 @@ export const recentsManagerPlugin: JupyterFrontEndPlugin<IRecentsManager> = {
       execute: () => {
         recentsManager.clearRecents();
       },
-      label: trans.__('Clear Recently Opened'),
+      label: trans.__('Clear Recent Documents'),
       caption: trans.__('Clear the list of recently opened items.')
     });
 

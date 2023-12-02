@@ -315,7 +315,15 @@ export interface IRecentsManager {
   /**
    * Add a new path to the recent list.
    */
-  addRecent(path: string, contentType: string, type: 'opened' | 'closed'): void;
+  addRecent(
+    document: Omit<RecentDocument, 'root'>,
+    event: 'opened' | 'closed'
+  ): void;
+
+  /**
+   * Remove the document from recents list.
+   */
+  removeRecent(document: RecentDocument, event: 'opened' | 'closed'): void;
 }
 
 /**
@@ -336,4 +344,8 @@ export type RecentDocument = {
    * The document content type or `directory` literal for directories.
    */
   contentType: string;
+  /**
+   * The factory that was used when the document was most recently opened or closed.
+   */
+  factory?: string;
 };

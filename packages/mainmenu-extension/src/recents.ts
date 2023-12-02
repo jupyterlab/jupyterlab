@@ -10,7 +10,6 @@ import {
 import { PathExt } from '@jupyterlab/coreutils';
 import { showErrorMessage } from '@jupyterlab/apputils';
 import { IRecentsManager, RecentDocument } from '@jupyterlab/docmanager';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { IFileBrowserCommands } from '@jupyterlab/filebrowser';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -28,6 +27,10 @@ namespace CommandIDs {
    * Open a recent document or directory
    */
   export const openRecent = 'recentmenu:open-recent';
+  /**
+   * Reopen recently closed tab
+   */
+  export const reopenLast = 'recentmenu:reopen-last';
   /**
    * Clear recent documents and directories (implemented in docmanager)
    */
@@ -80,7 +83,12 @@ class RecentsMenu extends Menu {
     // that could cause the user to mis-clicks when items move around
     // because another item was hidden.
     this.clearItems();
+    this.addItem({
+      command: CommandIDs.reopenLast
+    });
+    this.addItem({ type: 'separator' });
     let addSeparator = true;
+    let anyDirectory = false;
     this._manager.recentlyOpened
       .sort((a: RecentDocument, b: RecentDocument) => {
         if (a.contentType === b.contentType) {
@@ -91,10 +99,12 @@ class RecentsMenu extends Menu {
       })
       .forEach((recent: RecentDocument) => {
         const isDirectory = recent.contentType === 'directory';
-        if (isDirectory && !this._showDirectories) {
-          return;
-        }
-        if (addSeparator && !isDirectory) {
+        if (isDirectory) {
+          if (!this._showDirectories) {
+            return;
+          }
+          anyDirectory = true;
+        } else if (addSeparator && anyDirectory) {
           addSeparator = false;
           this.addItem({ type: 'separator' });
         }
@@ -120,7 +130,7 @@ export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
   requires: [IRecentsManager, IMainMenu],
-  optional: [ISettingRegistry, IFileBrowserCommands, ITranslator],
+  optional: [IFileBrowserCommands, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     recentsManager: IRecentsManager,
@@ -134,28 +144,39 @@ export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
     // Do not show directories if the file browser is not present
     const showDirectories = fileBrowserCommands !== null;
 
+    const validate = async (recent: RecentDocument): Promise<boolean> => {
+      // If path is not found, validating will remove it
+      const isValid = await recentsManager.validate(recent);
+      if (!isValid) {
+        await showErrorMessage(
+          trans.__('Could Not Open Recent'),
+          trans.__(
+            '%1 is no longer valid and will be removed from the list',
+            recent.path
+          )
+        );
+      }
+      return isValid;
+    };
+
     // Commands
     commands.addCommand(CommandIDs.openRecent, {
       execute: async args => {
         const recent = args.recent as RecentDocument;
         const path = recent.path === '' ? '/' : recent.path;
-        const isValid = await recentsManager.validate(recent);
+        const isValid = await validate(recent);
         if (!isValid) {
-          return showErrorMessage(
-            trans.__('Could Not Open Recent'),
-            trans.__(
-              '%1 is no longer valid and will be removed from the list',
-              recent.path
-            )
-          );
+          return;
         }
-        if (fileBrowserCommands) {
+        if (fileBrowserCommands && recent.contentType === 'directory') {
           // Note: prefer file browser (if available) to allow opening directories
           await commands.execute(fileBrowserCommands.openPath, { path });
         } else {
-          await commands.execute('docmanager:open', { path });
+          await commands.execute('docmanager:open', {
+            path,
+            factory: recent.factory
+          });
         }
-        // If path not found, validating will remove it after an error message
       },
       label: args => {
         const recent = args.recent as RecentDocument;
@@ -164,20 +185,46 @@ export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
       isEnabled: args =>
         recentsManager.recentlyOpened.includes(args.recent as RecentDocument)
     });
+
+    app.commands.addCommand(CommandIDs.reopenLast, {
+      execute: async () => {
+        const recent = recentsManager.recentlyClosed[0];
+        if (!recent) {
+          return;
+        }
+        const isValid = await validate(recent);
+        if (!isValid) {
+          return;
+        }
+        await commands.execute('docmanager:open', {
+          path: recent.path,
+          factory: recent.factory
+        });
+        recentsManager.removeRecent(recent, 'closed');
+      },
+      label: () => {
+        const recent = recentsManager.recentlyClosed[0];
+        return recent
+          ? trans.__('Reopen %1', recent.path)
+          : trans.__('Reopen Closed Document');
+      },
+      isEnabled: () => {
+        return recentsManager.recentlyClosed.length !== 0;
+      },
+      caption: trans.__('Reopen recently closed file or notebook.')
+    });
+
+    // Menu
     const submenu = new RecentsMenu({
       commands,
       manager: recentsManager,
       showDirectories
     });
     submenu.title.label = trans.__('Open Recent');
-    mainMenu.fileMenu.addGroup(
-      [
-        {
-          type: 'submenu' as Menu.ItemType,
-          submenu
-        }
-      ],
-      1
-    );
+    mainMenu.fileMenu.addItem({
+      type: 'submenu' as Menu.ItemType,
+      submenu,
+      rank: 1
+    });
   }
 };
