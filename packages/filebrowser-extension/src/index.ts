@@ -206,7 +206,7 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
       commandPalette
     );
 
-    return Promise.all([app.restored, browser.model.restored]).then(() => {
+    void Promise.all([app.restored, browser.model.restored]).then(() => {
       if (treePathUpdater) {
         browser.model.pathChanged.connect((sender, args) => {
           treePathUpdater(args.newValue);
@@ -250,10 +250,10 @@ const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
           onSettingsChanged(settings);
         });
       }
-      return {
-        openPath: CommandIDs.openPath
-      };
     });
+    return {
+      openPath: CommandIDs.openPath
+    };
   }
 };
 
