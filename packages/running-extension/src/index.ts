@@ -11,10 +11,12 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { Dialog, ICommandPalette } from '@jupyterlab/apputils';
 import {
   IRunningSessionManagers,
   RunningSessionManagers,
-  RunningSessions
+  RunningSessions,
+  SearchableSessions
 } from '@jupyterlab/running';
 import { IRecentsManager } from '@jupyterlab/docmanager';
 import { ITranslator } from '@jupyterlab/translation';
@@ -32,6 +34,7 @@ export namespace CommandIDs {
   export const kernelOpenSession = 'running:kernel-open-session';
   export const kernelShutDown = 'running:kernel-shut-down';
   export const showPanel = 'running:show-panel';
+  export const showModal = 'running:show-modal';
 }
 
 /**
@@ -65,7 +68,8 @@ const searchPlugin: JupyterFrontEndPlugin<void> = {
   activate: activateSearch,
   id: '@jupyterlab/running-extension:search-tabs',
   description: 'Adds a widget to search open and closed tabs.',
-  requires: [IRunningSessionManagers],
+  requires: [IRunningSessionManagers, ITranslator],
+  optional: [ICommandPalette],
   autoStart: true
 };
 
@@ -118,9 +122,32 @@ function activate(
 
 function activateSearch(
   app: JupyterFrontEnd,
-  manager: IRunningSessionManagers
+  manager: IRunningSessionManagers,
+  translator: ITranslator,
+  palette: ICommandPalette | null
 ): void {
-  console.log(app, manager);
+  const trans = translator.load('jupyterlab');
+
+  app.commands.addCommand(CommandIDs.showModal, {
+    execute: () => {
+      const running = new SearchableSessions(manager, translator);
+      const dialog = new Dialog({
+        title: trans.__('Tabs and Running Sessions'),
+        body: running,
+        buttons: [Dialog.okButton({})],
+        hasClose: true
+      });
+      dialog.addClass('jp-SearchableSessions-modal');
+      return dialog.launch();
+    },
+    label: trans.__('Search Tabs and Running Sessions')
+  });
+  if (palette) {
+    palette.addItem({
+      command: CommandIDs.showModal,
+      category: trans.__('Running')
+    });
+  }
 }
 
 function activateRecents(

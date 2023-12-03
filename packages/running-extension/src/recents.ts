@@ -75,6 +75,15 @@ export function addRecentlyClosedSessionManager(
       if (!this._recent.factory) {
         return fileIcon;
       }
+      // Prefer path inference as it is more granular.
+      const fileTypes = docRegistry.getFileTypesForPath(this._recent.path);
+      for (const fileType of fileTypes) {
+        const icon = fileType.icon;
+        if (icon instanceof LabIcon) {
+          return icon;
+        }
+      }
+      // Fallback to factory-base inference.
       const factory = docRegistry.getWidgetFactory(this._recent.factory);
       if (factory) {
         for (const fileTypeName of factory.fileTypes) {

@@ -4526,6 +4526,7 @@ __metadata:
   resolution: "@jupyterlab/running-extension@workspace:packages/running-extension"
   dependencies:
     "@jupyterlab/application": ^4.1.0-alpha.4
+    "@jupyterlab/apputils": ^4.2.0-alpha.4
     "@jupyterlab/coreutils": ^6.1.0-alpha.4
     "@jupyterlab/docmanager": ^4.1.0-alpha.4
     "@jupyterlab/docregistry": ^4.1.0-alpha.4
@@ -4553,6 +4554,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.1.0-alpha.4
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
+    "@lumino/domutils": ^2.0.1
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1

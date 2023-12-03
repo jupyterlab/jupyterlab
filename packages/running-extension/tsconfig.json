@@ -10,7 +10,13 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../coreutils"
+    },
+    {
+      "path": "../docmanager"
     },
     {
       "path": "../docregistry"
@@ -29,9 +35,6 @@
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../docmanager"
     }
   ]
 }
