@@ -4527,6 +4527,7 @@ __metadata:
   dependencies:
     "@jupyterlab/application": ^4.1.0-alpha.4
     "@jupyterlab/coreutils": ^6.1.0-alpha.4
+    "@jupyterlab/docmanager": ^4.1.0-alpha.4
     "@jupyterlab/docregistry": ^4.1.0-alpha.4
     "@jupyterlab/rendermime-interfaces": ^3.9.0-alpha.3
     "@jupyterlab/running": ^4.1.0-alpha.4

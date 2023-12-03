@@ -349,14 +349,11 @@ export class DocumentWidgetManager implements IDisposable {
         }
       }
       if (context) {
-        context.ready
-          .then(() => {
-            // contentsModel is null until the the context is ready
-            this._recordAsRecentlyClosed(widget, context.contentsModel!);
-          })
-          .catch(() => {
-            console.warn('Could not record the recents status for', context);
-          });
+        await context.ready;
+        // Note: `contentsModel` is null until the the context is ready;
+        // we have to handle it after `await` rather than in a `then`
+        // to ensure we record it as recent before the widget gets disposed.
+        this._recordAsRecentlyClosed(widget, context.contentsModel!);
       }
       if (widget.isDisposed) {
         return true;

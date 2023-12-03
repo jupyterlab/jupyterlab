@@ -16,10 +16,12 @@ import {
   RunningSessionManagers,
   RunningSessions
 } from '@jupyterlab/running';
+import { IRecentsManager } from '@jupyterlab/docmanager';
 import { ITranslator } from '@jupyterlab/translation';
 import { runningIcon } from '@jupyterlab/ui-components';
 import { addKernelRunningSessionManager } from './kernels';
 import { addOpenTabsSessionManager } from './opentabs';
+import { addRecentlyClosedSessionManager } from './recents';
 
 /**
  * The command IDs used by the running plugin.
@@ -46,9 +48,31 @@ const plugin: JupyterFrontEndPlugin<IRunningSessionManagers> = {
 };
 
 /**
+ * An optional adding recently closed tabs.
+ */
+const recentsPlugin: JupyterFrontEndPlugin<void> = {
+  activate: activateRecents,
+  id: '@jupyterlab/running-extension:recently-closed',
+  description: 'Adds recently closed documents list.',
+  requires: [IRunningSessionManagers, IRecentsManager, ITranslator],
+  autoStart: true
+};
+
+/**
+ * An optional plugin allowing to among running items.
+ */
+const searchPlugin: JupyterFrontEndPlugin<void> = {
+  activate: activateSearch,
+  id: '@jupyterlab/running-extension:search-tabs',
+  description: 'Adds a widget to search open and closed tabs.',
+  requires: [IRunningSessionManagers],
+  autoStart: true
+};
+
+/**
  * Export the plugin as default.
  */
-export default plugin;
+export default [plugin, recentsPlugin, searchPlugin];
 
 /**
  * Activate the running plugin.
@@ -90,4 +114,26 @@ function activate(
   });
 
   return runningSessionManagers;
+}
+
+function activateSearch(
+  app: JupyterFrontEnd,
+  manager: IRunningSessionManagers
+): void {
+  console.log(app, manager);
+}
+
+function activateRecents(
+  app: JupyterFrontEnd,
+  manager: IRunningSessionManagers,
+  recents: IRecentsManager,
+  translator: ITranslator
+): void {
+  addRecentlyClosedSessionManager(
+    manager,
+    recents,
+    app.commands,
+    app.docRegistry,
+    translator
+  );
 }
