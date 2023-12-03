@@ -10,17 +10,14 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { IRecentsManager, RecentDocument } from './tokens';
 
-type RecentsDatabase = {
-  [key: string]: RecentDocument[];
-  opened: RecentDocument[];
-  closed: RecentDocument[];
-};
-
+/**
+ * Manager for recently opened and closed documents.
+ */
 export class RecentsManager implements IRecentsManager, IDisposable {
   constructor(options: RecentsManager.IOptions) {
-    this._serverRoot = PageConfig.getOption('serverRoot');
     this._stateDB = options.stateDB;
     this._contentsManager = options.contents;
+    this.updateRootDir();
 
     this._loadRecents().catch(r => {
       console.error(`Failed to load recent list from state:\n${r}`);
@@ -96,8 +93,8 @@ export class RecentsManager implements IRecentsManager, IDisposable {
     event: 'opened' | 'closed'
   ): void {
     const recent: RecentDocument = {
-      root: this._serverRoot,
-      ...document
+      ...document,
+      root: this._serverRoot
     };
     const recents = this._recents[event];
     // Check if it's already present; if so remove it
@@ -129,25 +126,6 @@ export class RecentsManager implements IRecentsManager, IDisposable {
   }
 
   /**
-   * Remove a path from both lists (opened and closed)
-   *
-   * @param path Path to remove
-   */
-  private _removeRecent(path: string, lists = ['opened', 'closed']): void {
-    let changed = false;
-    for (const type of lists) {
-      const recents = this._recents[type];
-      const newRecents = recents.filter(r => path !== r.path);
-      if (recents.length !== newRecents.length) {
-        this._setRecents(newRecents, type as 'opened' | 'closed');
-      }
-    }
-    if (changed) {
-      this._recentsChanged.emit(undefined);
-    }
-  }
-
-  /**
    * Check if the recent item is valid, remove if it from both lists if it is not.
    */
   async validate(recent: RecentDocument): Promise<boolean> {
@@ -158,6 +136,36 @@ export class RecentsManager implements IRecentsManager, IDisposable {
     return valid;
   }
 
+  /**
+   * Set server root dir.
+   *
+   * Note: protected to allow unit-testing.
+   */
+  protected updateRootDir() {
+    this._serverRoot = PageConfig.getOption('serverRoot');
+  }
+
+  /**
+   * Remove a path from both lists (opened and closed).
+   */
+  private _removeRecent(path: string, lists = ['opened', 'closed']): void {
+    let changed = false;
+    for (const type of lists) {
+      const recents = this._recents[type];
+      const newRecents = recents.filter(r => path !== r.path);
+      if (recents.length !== newRecents.length) {
+        this._setRecents(newRecents, type as 'opened' | 'closed');
+        changed = true;
+      }
+    }
+    if (changed) {
+      this._recentsChanged.emit(undefined);
+    }
+  }
+
+  /**
+   * Check if the path of a given recent document exists.
+   */
   private async _isValid(recent: RecentDocument): Promise<boolean> {
     try {
       await this._contentsManager.get(recent.path, { content: false });
@@ -195,7 +203,7 @@ export class RecentsManager implements IRecentsManager, IDisposable {
   private async _loadRecents(): Promise<void> {
     const recents = ((await this._stateDB.fetch(
       Private.stateDBKey
-    )) as RecentsDatabase) || {
+    )) as Private.RecentsDatabase) || {
       opened: [],
       closed: []
     };
@@ -254,7 +262,7 @@ export class RecentsManager implements IRecentsManager, IDisposable {
   private _serverRoot: string;
   private _stateDB: IStateDB;
   private _contentsManager: Contents.IManager;
-  private _recents: RecentsDatabase = {
+  private _recents: Private.RecentsDatabase = {
     opened: [],
     closed: []
   };
@@ -262,19 +270,40 @@ export class RecentsManager implements IRecentsManager, IDisposable {
   private _saveRoutine: ReturnType<typeof setTimeout> | undefined;
   // Whether there are local changes sent to be recorded without verification
   private _awaitingSaveCompletion = false;
-
   private _isDisposed = false;
-
   private _maxRecentsLength = 10;
 }
 
+/**
+ * Namespace for RecentsManager statics.
+ */
 export namespace RecentsManager {
+  /**
+   * Initialization options for RecentsManager.
+   */
   export interface IOptions {
+    /**
+     * State database used to store the recent documents.
+     */
     stateDB: IStateDB;
+    /**
+     * Contents manager used for path validation.
+     */
     contents: Contents.IManager;
   }
 }
 
 namespace Private {
+  /**
+   * Key reserved in the state database.
+   */
   export const stateDBKey = 'docmanager:recents';
+  /**
+   * The data structure for the state database value.
+   */
+  export type RecentsDatabase = {
+    [key: string]: RecentDocument[];
+    opened: RecentDocument[];
+    closed: RecentDocument[];
+  };
 }
