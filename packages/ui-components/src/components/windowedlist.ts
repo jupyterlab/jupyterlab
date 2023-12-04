@@ -743,6 +743,9 @@ export class WindowedList<
       document.createElement('div')
     );
     windowContainer.className = 'jp-WindowedPanel-window';
+    if (options.windowContainerCallback) {
+      options.windowContainerCallback(windowContainer);
+    }
     super({ node });
     super.layout = options.layout ?? new WindowedLayout();
     this._viewModel = options.model;
@@ -1534,6 +1537,11 @@ export namespace WindowedList {
      * Windowed list layout
      */
     layout?: WindowedLayout;
+    /**
+     * Callback to allow subclasses to set up/modify the window container
+     * during instantiation.
+     */
+    windowContainerCallback?: (windowContainer: Element) => void;
   }
 
   /**
