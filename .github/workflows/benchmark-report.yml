@@ -26,7 +26,7 @@ jobs:
     if: github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure'
     steps:
       - name: 'Download artifact'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             var artifacts = await github.rest.actions.listWorkflowRunArtifacts({
@@ -48,7 +48,7 @@ jobs:
       - run: unzip benchmark-assets.zip
 
       - name: 'Comment on PR'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

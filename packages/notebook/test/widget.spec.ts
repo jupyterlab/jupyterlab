@@ -1348,7 +1348,7 @@ describe('@jupyter/notebook', () => {
       });
 
       describe('focusout', () => {
-        it('should switch to command mode', () => {
+        it('should switch to command mode', async () => {
           simulate(widget.node, 'focusin');
           widget.mode = 'edit';
           const event = generate('focusout');
@@ -1356,6 +1356,8 @@ describe('@jupyter/notebook', () => {
           widget.node.dispatchEvent(event);
           expect(widget.mode).toBe('command');
           MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+          // Wait for the activeCell to be focused
+          await framePromise();
           expect(widget.mode).toBe('command');
           expect(widget.activeCell!.editor!.hasFocus()).toBe(false);
         });
