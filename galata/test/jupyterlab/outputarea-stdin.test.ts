@@ -14,6 +14,9 @@ print('before sleep')
 sleep(0.1)
 print('after sleep')`;
 
+const ACTIVE_INPUT =
+  '.jp-OutputArea-stdin-item:not(.jp-OutputArea-stdin-hiding) .jp-Stdin-input';
+
 test.describe('Stdin for ipdb', () => {
   test.beforeEach(async ({ page }) => {
     await page.notebook.createNew();
@@ -31,20 +34,20 @@ test.describe('Stdin for ipdb', () => {
     await page.keyboard.press('Control+Enter');
 
     // enter a bunch of nonsense commands into the stdin attached to ipdb
-    await page.waitForSelector('.jp-Stdin-input');
+    await page.waitForSelector(ACTIVE_INPUT);
     await page.keyboard.insertText('foofoo');
     await page.keyboard.press('Enter');
 
-    await page.waitForSelector('.jp-Stdin-input');
+    await page.waitForSelector(ACTIVE_INPUT);
     await page.keyboard.insertText('barbar');
     await page.keyboard.press('Enter');
 
-    await page.waitForSelector('.jp-Stdin-input');
+    await page.waitForSelector(ACTIVE_INPUT);
     await page.keyboard.insertText('bazbaz');
     await page.keyboard.press('Enter');
 
     // search for the first nonsense command
-    await page.waitForSelector('.jp-Stdin-input');
+    await page.waitForSelector(ACTIVE_INPUT);
     await page.keyboard.insertText('foo');
     await page.keyboard.press('Control+ArrowUp');
 
@@ -61,7 +64,7 @@ test.describe('Stdin for ipdb', () => {
 
     // Check that the input remains focused and cursor is at the end.
     await page.keyboard.insertText('x');
-    await expect(page.locator('.jp-Stdin-input')).toHaveValue('foofoox');
+    await expect(page.locator(ACTIVE_INPUT)).toHaveValue('foofoox');
   });
 
   test('Typing in stdin box', async ({ page }) => {
