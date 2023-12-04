@@ -896,34 +896,25 @@ export namespace NotebookActions {
       return;
     }
 
-    // Scroll first to the active widget in case it is not attached,
-    // in windowed notebook.
-    notebook
-      .scrollToItem(notebook.activeCellIndex)
-      .then(() => {
-        if (notebook.activeCellIndex === 0) {
-          return;
-        }
+    if (notebook.activeCellIndex === 0) {
+      return;
+    }
 
-        let possibleNextCellIndex = notebook.activeCellIndex - 1;
+    let possibleNextCellIndex = notebook.activeCellIndex - 1;
 
-        // find first non hidden cell above current cell
-        while (possibleNextCellIndex >= 0) {
-          const possibleNextCell = notebook.widgets[possibleNextCellIndex];
-          if (!possibleNextCell.inputHidden && !possibleNextCell.isHidden) {
-            break;
-          }
-          possibleNextCellIndex -= 1;
-        }
+    // find first non hidden cell above current cell
+    while (possibleNextCellIndex >= 0) {
+      const possibleNextCell = notebook.widgets[possibleNextCellIndex];
+      if (!possibleNextCell.inputHidden && !possibleNextCell.isHidden) {
+        break;
+      }
+      possibleNextCellIndex -= 1;
+    }
 
-        const state = Private.getState(notebook);
-        notebook.activeCellIndex = possibleNextCellIndex;
-        notebook.deselectAll();
-        void Private.handleState(notebook, state, true);
-      })
-      .catch(reason => {
-        // no-op
-      });
+    const state = Private.getState(notebook);
+    notebook.activeCellIndex = possibleNextCellIndex;
+    notebook.deselectAll();
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -951,36 +942,27 @@ export namespace NotebookActions {
       maxCellIndex -= 1;
     }
 
-    // Scroll first to the active widget in case it is not attached,
-    // in windowed notebook.
-    notebook
-      .scrollToItem(notebook.activeCellIndex)
-      .then(() => {
-        if (notebook.activeCellIndex === maxCellIndex) {
-          const footer = (notebook.layout as NotebookWindowedLayout).footer;
-          footer?.node.focus();
-          return;
-        }
+    if (notebook.activeCellIndex === maxCellIndex) {
+      const footer = (notebook.layout as NotebookWindowedLayout).footer;
+      footer?.node.focus();
+      return;
+    }
 
-        let possibleNextCellIndex = notebook.activeCellIndex + 1;
+    let possibleNextCellIndex = notebook.activeCellIndex + 1;
 
-        // find first non hidden cell below current cell
-        while (possibleNextCellIndex < maxCellIndex) {
-          let possibleNextCell = notebook.widgets[possibleNextCellIndex];
-          if (!possibleNextCell.inputHidden && !possibleNextCell.isHidden) {
-            break;
-          }
-          possibleNextCellIndex += 1;
-        }
+    // find first non hidden cell below current cell
+    while (possibleNextCellIndex < maxCellIndex) {
+      let possibleNextCell = notebook.widgets[possibleNextCellIndex];
+      if (!possibleNextCell.inputHidden && !possibleNextCell.isHidden) {
+        break;
+      }
+      possibleNextCellIndex += 1;
+    }
 
-        const state = Private.getState(notebook);
-        notebook.activeCellIndex = possibleNextCellIndex;
-        notebook.deselectAll();
-        void Private.handleState(notebook, state, true);
-      })
-      .catch(reason => {
-        // no-op
-      });
+    const state = Private.getState(notebook);
+    notebook.activeCellIndex = possibleNextCellIndex;
+    notebook.deselectAll();
+    void Private.handleState(notebook, state, true);
   }
 
   /** Insert new heading of same level above active cell.
