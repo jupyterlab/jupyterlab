@@ -249,17 +249,6 @@ export class FileBrowser extends SidePanel {
     return this.listing.paste();
   }
 
-  /**
-   * Dispose of the resources held by the browser.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this.model.dispose();
-    super.dispose();
-  }
-
   private async _createNew(
     options: Contents.ICreateOptions
   ): Promise<Contents.IModel> {

@@ -128,12 +128,5 @@ describe('filebrowser/browser', () => {
         expect(itemNode.contains(document.activeElement)).toBe(true);
       });
     });
-
-    describe('#dispose', () => {
-      it('should dispose model', () => {
-        fileBrowser.dispose();
-        expect(model.isDisposed).toBe(true);
-      });
-    });
   });
 });

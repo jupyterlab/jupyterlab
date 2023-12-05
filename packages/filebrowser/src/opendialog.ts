@@ -193,6 +193,18 @@ class OpenDialog
         const layout = new PanelLayout();
         layout.addWidget(this._browser);
 
+        /**
+         * Dispose browser model when OpenDialog
+         * is disposed.
+         */
+        this.dispose = () => {
+          if (this.isDisposed) {
+            return;
+          }
+          this._browser.model.dispose();
+          super.dispose();
+        };
+
         // Set Widget content
         this.layout = layout;
 
