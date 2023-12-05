@@ -412,6 +412,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     hboxPanel.addWidget(vsplitPanel);
     hboxPanel.addWidget(rightHandler.sideBar);
 
+    let ariaLiveRegion = document.createElement('div');
+    ariaLiveRegion.setAttribute('aria-live', 'polite');
+    ariaLiveRegion.setAttribute('role', 'region');
+    ariaLiveRegion.setAttribute('id', 'aria-live-test');
+    ariaLiveRegion.className = 'lm-TabBar-ariaLive';
+    dockPanel.node.appendChild(ariaLiveRegion);
+
     rootLayout.direction = 'top-to-bottom';
     rootLayout.spacing = 0; // TODO make this configurable?
     // Use relative sizing to set the width of the side panels.
