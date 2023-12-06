@@ -417,7 +417,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     ariaLiveRegion.setAttribute('role', 'region');
     ariaLiveRegion.setAttribute('id', 'aria-live-test');
     ariaLiveRegion.className = 'lm-TabBar-ariaLive';
-    dockPanel.node.appendChild(ariaLiveRegion);
+    hboxPanel.node.appendChild(ariaLiveRegion);
 
     rootLayout.direction = 'top-to-bottom';
     rootLayout.spacing = 0; // TODO make this configurable?
