@@ -208,7 +208,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return !!widget && widget.title.closable;
       },
       execute: () => {
-        let ariaLiveRegion = document.getElementById('aria-live-test');
+        let ariaLiveRegion = document.getElementById('commands-aria-live');
         const widget = contextMenuWidget();
         if (widget) {
           widget.close();
@@ -224,7 +224,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         return some(shell.widgets('main'), (_, i) => i === 1);
       },
       execute: () => {
-        let ariaLiveRegion = document.getElementById('aria-live-test');
+        let ariaLiveRegion = document.getElementById('commands-aria-live');
         const widget = contextMenuWidget();
         if (!widget) {
           return;
@@ -245,7 +245,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         !!contextMenuWidget() &&
         widgetsRightOf(contextMenuWidget()!).length > 0,
       execute: () => {
-        let ariaLiveRegion = document.getElementById('aria-live-test');
+        let ariaLiveRegion = document.getElementById('commands-aria-live');
         const widget = contextMenuWidget();
         if (!widget) {
           return;
@@ -259,7 +259,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.activateNextTab, {
         label: trans.__('Activate Next Tab'),
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           labShell.activateNextTab();
           ariaLiveRegion!.append(trans.__('Activate Next Tab'));
         }
@@ -268,7 +268,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.activatePreviousTab, {
         label: trans.__('Activate Previous Tab'),
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           labShell.activatePreviousTab();
           ariaLiveRegion!.append(trans.__('Activate Previous Tab'));
         }
@@ -277,7 +277,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.activateNextTabBar, {
         label: trans.__('Activate Next Tab Bar'),
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           labShell.activateNextTabBar();
           ariaLiveRegion!.append(trans.__('Activate Next Tab Bar'));
         }
@@ -286,7 +286,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.activatePreviousTabBar, {
         label: trans.__('Activate Previous Tab Bar'),
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           labShell.activatePreviousTabBar();
           ariaLiveRegion!.append(trans.__('Activate Previous Tab Bar'));
         }
@@ -295,7 +295,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.closeAll, {
         label: trans.__('Close All Tabs'),
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           labShell.closeAll();
           ariaLiveRegion!.append(trans.__('Close All Tabs'));
         }
@@ -304,7 +304,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.toggleHeader, {
         label: trans.__('Show Header'),
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           if (labShell.mode === 'single-document') {
             labShell.toggleTopInSimpleModeVisibility();
             ariaLiveRegion!.append(trans.__('Show Header'));
@@ -317,7 +317,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.toggleLeftArea, {
         label: trans.__('Show Left Sidebar'),
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           if (labShell.leftCollapsed) {
             labShell.expandLeft();
             ariaLiveRegion!.append(trans.__('Show Left Sidebar'));
@@ -336,7 +336,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.toggleRightArea, {
         label: trans.__('Show Right Sidebar'),
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           if (labShell.rightCollapsed) {
             labShell.expandRight();
             ariaLiveRegion!.append(trans.__('Opening Right Sidebar'));
@@ -358,7 +358,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             ? trans.__('Show Right Activity Bar')
             : trans.__('Show Left Activity Bar'),
         execute: args => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           if (args.side === 'right') {
             labShell.toggleSideTabBarVisibility('right');
             ariaLiveRegion!.append(trans.__('Show Right Activity Bar'));
@@ -380,7 +380,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.togglePresentationMode, {
         label: () => trans.__('Presentation Mode'),
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           labShell.presentationMode = !labShell.presentationMode;
           ariaLiveRegion!.append(trans.__('Presentation Mode'));
         },
@@ -401,7 +401,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           return mode === 'single-document' || mode === 'multiple-document';
         },
         execute: args => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           const mode = args['mode'] as string;
           if (mode === 'single-document' || mode === 'multiple-document') {
             labShell.mode = mode;
@@ -416,7 +416,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         label: trans.__('Simple Interface'),
         isToggled: () => labShell.mode === 'single-document',
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           const args =
             labShell.mode === 'multiple-document'
               ? { mode: 'single-document' }
@@ -429,7 +429,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.resetLayout, {
         label: trans.__('Reset Default Layout'),
         execute: () => {
-          let ariaLiveRegion = document.getElementById('aria-live-test');
+          let ariaLiveRegion = document.getElementById('commands-aria-live');
           // Turn off presentation mode
           if (labShell.presentationMode) {
             commands

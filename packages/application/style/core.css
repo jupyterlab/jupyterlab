@@ -91,7 +91,7 @@ body {
   align-items: center;
 }
 
-.lm-TabBar-ariaLive {
+.jp-ContentPanel-ariaLive {
   width: 0;
   overflow: hidden;
 }
