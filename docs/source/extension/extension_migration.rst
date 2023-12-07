@@ -46,11 +46,13 @@ and is based on `FAST <https://www.fast.design/>` library by Microsoft.
 
 See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
 
-- Changes the selectors of the ``ToolbarButtonComponent``.
+- Changes the selectors of the ``Toolbar`` and ``ToolbarButtonComponent``.
 
-  - The ``ToolbarButtonComponent`` have now the tag ``jp-button`` instead of ``button``.
+  - The DOM of ``Toolbar`` is now a ``jp-toolbar`` component instead of a ``div``.
 
-    This has be taken into account since the button itself is in the shadow DOM of the ``jp-button`` component,
+  - The DOM of ``ToolbarButtonComponent`` are now ``jp-button`` elements instead of ``button``.
+
+    This must be taken into account since the button itself is in the shadow DOM of the ``jp-button`` component,
     and cannot be accessed as a child of the toolbar component.
 
   - The icon in the ``ToolbarButtonComponent`` is a direct child of the ``jp-button`` component.
