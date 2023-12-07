@@ -185,8 +185,11 @@ function getShortcutObjects(
   settings: ISettingRegistry.ISettings
 ): { [index: string]: ShortcutObject } {
   const shortcuts = settings.composite.shortcuts as ReadonlyJSONArray;
+  const commands = new Set(external.getAllCommands());
+
   let shortcutObjects: { [index: string]: ShortcutObject } = {};
   shortcuts.forEach((shortcut: any) => {
+    commands.delete(shortcut.command);
     let key = shortcut.command + '_' + shortcut.selector;
     if (Object.keys(shortcutObjects).indexOf(key) !== -1) {
       let currentCount = shortcutObjects[key].numberOfShortcuts;
@@ -221,6 +224,20 @@ function getShortcutObjects(
       shortcutObjects[keyTo].source = 'Custom';
     }
   });
+
+  // Append all commands without a shortcut
+  commands.forEach(commandName => {
+    if (commandName.startsWith('__')) {
+      // Bail early for private commands
+      return;
+    }
+    const shortcut = (shortcutObjects[`${commandName}_`] =
+      new ShortcutObject());
+    shortcut.category = commandName.split(':')[0];
+    shortcut.commandName = commandName;
+    shortcut.label = external.getLabel(commandName);
+  });
+
   return shortcutObjects;
 }
 
@@ -412,6 +429,17 @@ export class ShortcutUI extends React.Component<
     }
     if (filterCritera !== '') {
       shortcuts.sort((a: ShortcutObject, b: ShortcutObject) => {
+        // First sort if there is keyboard shortcuts or not
+        const nShortcutA = Math.min(a.numberOfShortcuts, 1);
+        const nShortcutB = Math.min(b.numberOfShortcuts, 1);
+
+        if (nShortcutA < nShortcutB) {
+          return 1;
+        } else if (nShortcutA > nShortcutB) {
+          return -1;
+        }
+
+        // Second sort by user criteria
         const compareA: string = a.get(filterCritera);
         const compareB: string = b.get(filterCritera);
         if (compareA < compareB) {
