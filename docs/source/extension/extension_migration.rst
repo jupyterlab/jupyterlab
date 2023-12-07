@@ -46,19 +46,32 @@ and is based on `FAST <https://www.fast.design/>` library by Microsoft.
 
 See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
 
-If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
-They need to be ignored when transforming the code with Jest. You will need to update the
-``transformIgnorePatterns`` to add:
+- Changes the selectors of the ``ToolbarButtonComponent``.
 
-.. code::
+  - The ``ToolbarButtonComponent`` have now the tag ``jp-button`` instead of ``button``.
 
-   const esModules = [
-     '@microsoft',
-     '@jupyter/react-components',
-     '@jupyter/web-components',
-     'exenv-es6',
-     ...
-   ].join('|');
+    This has be taken into account since the button itself is in the shadow DOM of the ``jp-button`` component,
+    and cannot be accessed as a child of the toolbar component.
+
+  - The icon in the ``ToolbarButtonComponent`` is a direct child of the ``jp-button`` component.
+
+    The icon was previously encapsulated in a span with the class ``.jp-ToolbarButtonComponent-icon``.
+    Accessing that icon to change its properties require now something like ``jp-button > svg``.
+
+- If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
+
+  They need to be ignored when transforming the code with Jest. You will need to update the
+  ``transformIgnorePatterns`` to add:
+
+  .. code::
+
+    const esModules = [
+      '@microsoft',
+      '@jupyter/react-components',
+      '@jupyter/web-components',
+      'exenv-es6',
+      ...
+    ].join('|');
 
 
 JupyterLab 3.x to 4.x
