@@ -92,7 +92,7 @@ docs-screenshots = [
     "jupyterlab-language-pack-zh-CN==4.0.post3",
     "matplotlib==3.8.2",
     "nbconvert>=7.0.0",
-    "pandas==2.1.2",
+    "pandas==2.1.3",
     "scipy==1.11.3",
     "vega_datasets==0.9.0",
 ]
@@ -117,8 +117,8 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.1.4",
-    "black[jupyter]==23.10.1"
+    "ruff==0.1.6",
+    "black[jupyter]==23.11.0"
 ]
 
 [tool.check-wheel-contents]
