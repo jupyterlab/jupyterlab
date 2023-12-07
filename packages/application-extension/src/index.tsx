@@ -339,7 +339,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           let ariaLiveRegion = document.getElementById('commands-aria-live');
           if (labShell.rightCollapsed) {
             labShell.expandRight();
-            ariaLiveRegion!.append(trans.__('Opening Right Sidebar'));
+            ariaLiveRegion!.append(trans.__('Right Sidebar Closed'));
           } else {
             labShell.collapseRight();
             ariaLiveRegion!.append(trans.__('Closing Right Sidebar'));
