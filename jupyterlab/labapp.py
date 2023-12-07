@@ -751,8 +751,8 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                     r"/custom/(.*)(?<!\.js)$",
                     self.serverapp.web_app.settings["static_handler_class"],
                     {
-                        'path': self.serverapp.web_app.settings['static_custom_path'],
-                        'no_cache_paths': ['/'],  # don't cache anything in custom
+                        "path": self.serverapp.web_app.settings["static_custom_path"],
+                        "no_cache_paths": ["/"],  # don't cache anything in custom
                     },
                 )
             )

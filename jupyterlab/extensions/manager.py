@@ -221,10 +221,10 @@ class PluginManager(LoggingConfigurable):
             return set(plugins_or_extensions)
         locked_subset = set()
         extensions_with_locked_plugins = {
-            plugin.split(':')[0] for plugin in self.options.lock_rules
+            plugin.split(":")[0] for plugin in self.options.lock_rules
         }
         for plugin in plugins_or_extensions:
-            if ':' in plugin:
+            if ":" in plugin:
                 # check directly if this is a plugin identifier (has colon)
                 if plugin in self.options.lock_rules:
                     locked_subset.add(plugin)
