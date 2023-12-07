@@ -1994,7 +1994,9 @@ def _yarn_config(logger):
 
     try:
         output_binary = subprocess.check_output(
-            [node, YARN_PATH, "config", "--json"], stderr=subprocess.PIPE, cwd=HERE  # noqa S603
+            [node, YARN_PATH, "config", "--json"],  # noqa S603
+            stderr=subprocess.PIPE,
+            cwd=HERE,
         )
         output = output_binary.decode("utf-8")
         lines = iter(output.splitlines())
@@ -2328,7 +2330,7 @@ def _log_multiple_compat_errors(logger, errors_map):
                 [
                     "\n   The following extensions are outdated:",
                     *outdated,
-                    '\n   Consider checking if an update is available for these packages.\n',
+                    "\n   Consider checking if an update is available for these packages.\n",
                 ]
             )
         )
