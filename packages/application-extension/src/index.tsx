@@ -323,7 +323,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
             ariaLiveRegion!.append(trans.__('Show Left Sidebar'));
           } else {
             labShell.collapseLeft();
-            ariaLiveRegion!.append(trans.__('Closing Left Sidebar'));
+            ariaLiveRegion!.append(trans.__('Left Sidebar Closed'));
             if (labShell.currentWidget) {
               labShell.activateById(labShell.currentWidget.id);
             }
