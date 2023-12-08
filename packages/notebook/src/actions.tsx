@@ -2341,7 +2341,7 @@ namespace Private {
     return Promise.all(
       cells.map(cell => {
         if (cell.model.type === "code" && sessionContext &&
-            sessionContext.kernelDisplayStatus === 'idle' && !initializingDialogShown) {
+            sessionContext.kernelDisplayStatus === 'initializing' && !initializingDialogShown) {
           initializingDialogShown = true;
           Notification.emit(
               trans.__(
