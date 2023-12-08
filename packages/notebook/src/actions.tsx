@@ -2340,21 +2340,32 @@ namespace Private {
     const trans = translator.load('jupyterlab');
     return Promise.all(
       cells.map(cell => {
-        if (cell.model.type === "code" && sessionContext &&
-            sessionContext.kernelDisplayStatus === 'initializing' && !initializingDialogShown) {
+        if (
+          cell.model.type === 'code' &&
+          notebook.notebookConfig.enableKernelInitNotification &&
+          sessionContext &&
+          sessionContext.kernelDisplayStatus === 'initializing' &&
+          !initializingDialogShown
+        ) {
           initializingDialogShown = true;
           Notification.emit(
-              trans.__(
-                  `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing, code cells will not be executed.`
-              ),
-              'warning',
-              {
-                autoClose: false
-              }
+            trans.__(
+              `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing, code cells will not be executed.`
+            ),
+            'warning',
+            {
+              autoClose: false
+            }
           );
           return Promise.resolve(false);
         }
-        return runCell(notebook, cell, sessionContext, sessionDialogs, translator)
+        return runCell(
+          notebook,
+          cell,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
       })
     )
       .then(results => {
