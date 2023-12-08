@@ -153,6 +153,16 @@ export const announcements: JupyterFrontEndPlugin<void> = {
             ]
           }
         );
+        const alertId = Notification.emit(
+          trans.__(
+            'For best user experience when using screenreader, turn off scan mode. Use the command: "Modifier Key + Spacebar." For ORCA use: "Insert+A"'
+          ),
+          'default',
+          {
+            autoClose: false
+          }
+        );
+        return alertId;
       } else {
         await fetchNews();
       }
