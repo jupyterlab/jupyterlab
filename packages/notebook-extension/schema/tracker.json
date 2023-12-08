@@ -672,7 +672,7 @@
   },
   "properties": {
     "enableKernelInitNotification": {
-      "title": "Notify about code execution while kernel is initializing",
+      "title": "Notify about code execution if kernel is initializing",
       "description": "Display notification if code cells are run while kernel is initializing.",
       "type": "boolean",
       "default": false
