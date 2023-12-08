@@ -2354,7 +2354,7 @@ namespace Private {
           );
           return Promise.resolve(false);
         }
-        runCell(notebook, cell, sessionContext, sessionDialogs, translator)
+        return runCell(notebook, cell, sessionContext, sessionDialogs, translator)
       })
     )
       .then(results => {
