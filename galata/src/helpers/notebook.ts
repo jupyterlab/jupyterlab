@@ -1233,7 +1233,7 @@ export class NotebookHelper {
     }
 
     if ((await this.getCellType(cellIndex)) === cellType) {
-      return false;
+      return true;
     }
 
     if (!(await this.selectCells(cellIndex))) {
