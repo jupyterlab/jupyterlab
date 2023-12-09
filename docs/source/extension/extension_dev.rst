@@ -32,7 +32,7 @@ See the sections below for more detailed information, or browse the rest of this
    internationalization
    identity
    extension_tutorial
-   extension_dual_compatibility
+   extension_multiple_ui
    extension_migration
 
 Other resources
@@ -135,7 +135,7 @@ A Jupyter front-end application object is given to a plugin's ``activate`` funct
 
 See the JupyterLab API reference documentation for the ``JupyterFrontEnd`` class for more details.
 
-.. _provider-consumer-basic-info:
+.. _dependency-injection-basic-info:
 
 .. _services:
 
