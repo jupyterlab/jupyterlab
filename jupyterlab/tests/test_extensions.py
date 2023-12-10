@@ -8,7 +8,7 @@ import pytest
 from traitlets.config import Config, Configurable
 
 from jupyterlab.extensions import PyPIExtensionManager, ReadOnlyExtensionManager
-from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage
+from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage, PluginManager
 
 from . import fake_client_factory
 
@@ -340,3 +340,32 @@ async def test_PyPiExtensionManager_custom_server_url():
     manager = PyPIExtensionManager(parent=parent)
 
     assert manager.base_url == BASE_URL
+
+
+LEVELS = ["user", "sys_prefix", "system"]
+
+
+@pytest.mark.parametrize("level", LEVELS)
+async def test_PyPiExtensionManager_custom_level(level):
+    parent = Configurable(config=Config({"PyPIExtensionManager": {"level": level}}))
+    manager = PyPIExtensionManager(parent=parent)
+    assert manager.level == level
+
+
+@pytest.mark.parametrize("level", LEVELS)
+async def test_PyPiExtensionManager_inherits_custom_level(level):
+    parent = Configurable(config=Config({"PluginManager": {"level": level}}))
+    manager = PyPIExtensionManager(parent=parent)
+    assert manager.level == level
+
+
+@pytest.mark.parametrize("level", LEVELS)
+async def test_PluginManager_custom_level(level):
+    parent = Configurable(config=Config({"PluginManager": {"level": level}}))
+    manager = PluginManager(parent=parent)
+    assert manager.level == level
+
+
+async def test_PluginManager_default_level():
+    manager = PluginManager()
+    assert manager.level == "sys_prefix"

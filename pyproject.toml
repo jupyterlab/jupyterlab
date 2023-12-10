@@ -213,7 +213,7 @@ npm = ["node", "yarn.js"]
 
 [tool.pytest.ini_options]
 testpaths = "jupyterlab/tests"
-norecursedirs = "node_modules .git _build"
+norecursedirs = "node_modules .git _build .ipynb_checkpoints"
 addopts = "--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
 ignore = "tests examples"
 
