@@ -39,12 +39,9 @@ fi
 
 if [[ $GROUP == docs ]]; then
     # Build the docs (includes API docs)
+    python -m pip install .[docs]
     pushd docs
-    conda env create -f environment.yml
-    conda init --all
-    source $CONDA/bin/activate jupyterlab_documentation
     make html
-    conda deactivate
     popd
 fi
 
