@@ -50,7 +50,7 @@ See https://github.com/jupyterlab/team-compass/issues/143 for more context on th
 
   - The DOM of ``Toolbar`` is now a ``jp-toolbar`` component instead of a ``div``.
 
-  - The DOM of ``ToolbarButtonComponent`` are now ``jp-button`` elements instead of ``button``.
+  - The DOM of ``ToolbarButtonComponent`` is now ``jp-button`` element instead of a ``button``.
 
     This must be taken into account since the button itself is in the shadow DOM of the ``jp-button`` component,
     and cannot be accessed as a child of the toolbar component.
