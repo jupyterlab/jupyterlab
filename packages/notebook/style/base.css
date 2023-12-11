@@ -474,9 +474,16 @@ div.jp-Cell-Placeholder-content-3 {
 | Virtual scrollbar
 |----------------------------------------------------------------------------*/
 
-.jp-Notebook ol.jp-WindowedPanel-scrollbar-content > li.jp-mod-selected {
+.jp-Notebook
+  .jp-WindowedPanel-scrollbar-content
+  .jp-mod-active.jp-mod-selected {
   background: var(--jp-brand-color1);
   color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content .jp-mod-selected {
+  background: var(--jp-brand-color2);
+  color: var(--jp-ui-inverse-font-color2);
 }
 
 /*-----------------------------------------------------------------------------

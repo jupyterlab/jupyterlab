@@ -1316,8 +1316,11 @@ export class Notebook extends StaticNotebook {
         ): HTMLLIElement {
           const li = document.createElement('li');
           li.appendChild(document.createTextNode(`${index + 1}`));
+          if (notebook.activeCellIndex === index) {
+            li.classList.add('jp-mod-active');
+          }
           if (notebook.selectedCells.some(cell => model === cell.model)) {
-            li.className = 'jp-mod-selected';
+            li.classList.add('jp-mod-selected');
           }
           return li;
         }
