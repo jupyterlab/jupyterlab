@@ -47,7 +47,7 @@ export namespace ServerConnection {
   /**
    * A Jupyter server settings object.
    * Note that all of the settings are optional when passed to
-   * [[makeSettings]].  The default settings are given in [[defaultSettings]].
+   * [[makeSettings]]. The default settings are given in [[defaultSettings]].
    */
   export interface ISettings {
     /**
