@@ -11,6 +11,7 @@ from typing import Dict, FrozenSet, List, Optional, Set, Tuple, Union
 
 import tornado
 from jupyterlab_server.translation_utils import translator
+from traitlets import Enum
 from traitlets.config import Configurable, LoggingConfigurable
 
 from jupyterlab.commands import (
@@ -192,6 +193,12 @@ class PluginManager(LoggingConfigurable):
         options: Plugin manager options
     """
 
+    level = Enum(
+        values=["sys_prefix", "user", "system"],
+        default_value="sys_prefix",
+        help="Level at which to manage plugins: sys_prefix, user, system",
+    ).tag(config=True)
+
     def __init__(
         self,
         app_options: Optional[dict] = None,
@@ -199,6 +206,9 @@ class PluginManager(LoggingConfigurable):
         parent: Optional[Configurable] = None,
     ) -> None:
         super().__init__(parent=parent)
+        self.log.debug(
+            "Plugins in %s will managed on the %s level", self.__class__.__name__, self.level
+        )
         self.app_options = _ensure_options(app_options)
         plugin_options_field = {f.name for f in fields(PluginManagerOptions)}
         plugin_options = {
@@ -255,7 +265,7 @@ class PluginManager(LoggingConfigurable):
             )
         try:
             for plugin in plugins:
-                disable_extension(plugin, app_options=self.app_options)
+                disable_extension(plugin, app_options=self.app_options, level=self.level)
             return ActionResult(status="ok", needs_restart=["frontend"])
         except Exception as err:
             return ActionResult(status="error", message=repr(err))
@@ -281,7 +291,7 @@ class PluginManager(LoggingConfigurable):
             )
         try:
             for plugin in plugins:
-                enable_extension(plugin, app_options=self.app_options)
+                enable_extension(plugin, app_options=self.app_options, level=self.level)
             return ActionResult(status="ok", needs_restart=["frontend"])
         except Exception as err:
             return ActionResult(status="error", message=repr(err))
