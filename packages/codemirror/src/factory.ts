@@ -3,6 +3,7 @@
 
 import { CodeEditor, IEditorFactoryService } from '@jupyterlab/codeeditor';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { EditorView, keymap } from '@codemirror/view';
 import { EditorExtensionRegistry } from './extension';
 import { CodeMirrorEditor } from './editor';
 import { EditorLanguageRegistry } from './language';
@@ -12,8 +13,6 @@ import {
   IEditorFactoryOptions,
   IEditorLanguageRegistry
 } from './token';
-import { EditorView, keymap } from '@codemirror/view';
-import { searchKeymap } from '@codemirror/search';
 
 /**
  * CodeMirror editor factory.
@@ -26,7 +25,9 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
     this.languages = options.languages ?? new EditorLanguageRegistry();
     this.extensions = options.extensions ?? new EditorExtensionRegistry();
     this.translator = options.translator ?? nullTranslator;
-    this.inlineCodeMirrorConfig = {};
+    this.inlineCodeMirrorConfig = {
+      searchWithCM: true
+    };
     this.documentCodeMirrorConfig = {
       lineNumbers: true,
       scrollPastEnd: true
@@ -43,9 +44,7 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
     return this.newEditor({
       ...options,
       config: { ...this.inlineCodeMirrorConfig, ...(options.config || {}) },
-      inline: true,
-      // FIXME the search keymap should be added in the search plugin
-      extensions: [keymap.of(searchKeymap)].concat(options.extensions ?? [])
+      inline: true
     });
   };
 
