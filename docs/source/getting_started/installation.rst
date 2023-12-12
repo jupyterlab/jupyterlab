@@ -189,7 +189,7 @@ You can set the proxy or registry used for npm with the following commands.
 
     # Set default registry for NPM (optional, useful in case if common JavaScript libs cannot be found)
     npm config set registry http://registry.npmjs.org/
-    jlpm config set registry https://registry.yarnpkg.com/
+    jlpm config set npmRegistryServer https://registry.yarnpkg.com/
 
 
 In case you can communicate via HTTP, but installation with ``npm`` fails
