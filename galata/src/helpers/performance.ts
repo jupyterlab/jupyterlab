@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Page } from '@playwright/test';
+import { CDPSession, Page } from '@playwright/test';
 import { UUID } from '@lumino/coreutils';
 
 /**
@@ -38,6 +38,22 @@ export class PerformanceHelper {
       `performance.getEntriesByName('${name}')[0].duration`
     );
     return time;
+  }
+
+  /**
+   * Throttle network
+   */
+  async throttleNetwork(config: {
+    downloadThroughput: number;
+    uploadThroughput: number;
+    latency: number;
+  }): Promise<CDPSession> {
+    const cdpSession = await this.page.context().newCDPSession(this.page);
+    await cdpSession.send('Network.emulateNetworkConditions', {
+      offline: false,
+      ...config
+    });
+    return cdpSession;
   }
 
   /**
