@@ -32,6 +32,7 @@ import { IFilter, IFilters, IReplaceOptionsSupport } from './tokens';
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
+const INPUT_LABEL_CLASS = 'jp-DocumentSearch-input-label';
 const INPUT_WRAPPER_CLASS = 'jp-DocumentSearch-input-wrapper';
 const INPUT_BUTTON_CLASS_OFF = 'jp-DocumentSearch-input-button-off';
 const INPUT_BUTTON_CLASS_ON = 'jp-DocumentSearch-input-button-on';
@@ -77,13 +78,19 @@ export interface ISearchKeyBindings {
 function SearchInput(props: ISearchInputProps): JSX.Element {
   const [rows, setRows] = useState<number>(1);
 
-  const updateRows = useCallback(
+  const updateDimensions = useCallback(
     (event?: React.SyntheticEvent<HTMLTextAreaElement>) => {
       const element = event
         ? (event.target as HTMLTextAreaElement)
         : props.inputRef?.current;
       if (element) {
-        setRows(element.value.split(/\n/).length);
+        const split = element.value.split(/\n/);
+        // use the longest string out of all lines to compute the width.
+        let longest = split.reduce((a, b) => (a.length > b.length ? a : b), '');
+        if (element.parentNode && element.parentNode instanceof HTMLElement) {
+          element.parentNode.dataset.value = longest;
+        }
+        setRows(split.length);
       }
     },
     []
@@ -98,31 +105,33 @@ function SearchInput(props: ISearchInputProps): JSX.Element {
     props.inputRef?.current?.select();
     // After any change to initial value we also want to update rows in case if
     // multi-line text was selected.
-    updateRows();
+    updateDimensions();
   }, [props.initialValue]);
 
   return (
-    <textarea
-      placeholder={props.placeholder}
-      className={INPUT_CLASS}
-      rows={rows}
-      onChange={e => {
-        props.onChange(e);
-        updateRows(e);
-      }}
-      onKeyDown={e => {
-        props.onKeyDown(e);
-        updateRows(e);
-      }}
-      // Setting a key ensures that `defaultValue` will become updated
-      // when the initial value changes.
-      key={props.autoUpdate ? props.initialValue : null}
-      tabIndex={0}
-      ref={props.inputRef}
-      title={props.title}
-      defaultValue={props.initialValue}
-      autoFocus={props.autoFocus}
-    ></textarea>
+    <label className={INPUT_LABEL_CLASS}>
+      <textarea
+        onChange={e => {
+          props.onChange(e);
+          updateDimensions(e);
+        }}
+        onKeyDown={e => {
+          props.onKeyDown(e);
+          updateDimensions(e);
+        }}
+        rows={rows}
+        placeholder={props.placeholder}
+        className={INPUT_CLASS}
+        // Setting a key ensures that `defaultValue` will become updated
+        // when the initial value changes.
+        key={props.autoUpdate ? props.initialValue : null}
+        tabIndex={0}
+        ref={props.inputRef}
+        title={props.title}
+        defaultValue={props.initialValue}
+        autoFocus={props.autoFocus}
+      ></textarea>
+    </label>
   );
 }
 

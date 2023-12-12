@@ -132,7 +132,9 @@ def build_api_docs(out_dir: Path):
 
 # Copy frontend files for snippet inclusion
 FILES_LIST = [  # File paths should be relative to jupyterlab root folder
-    "packages/settingregistry/src/plugin-schema.json"
+    "galata/test/documentation/data/custom-jupyter.css",
+    "galata/test/documentation/data/custom-markdown.css",
+    "packages/settingregistry/src/plugin-schema.json",
 ]
 SNIPPETS_FOLDER = "snippets"
 
@@ -275,6 +277,7 @@ html_theme_options = {
     "use_edit_page_button": True,
     "navbar_align": "left",
     "navbar_start": ["navbar-logo", "version-switcher"],
+    "navigation_with_keys": False,
     "footer_start": ["copyright.html"],
     "switcher": {
         # Trick to get the documentation version switcher to always points to the latest version without being corrected by the integrity check;
@@ -393,7 +396,7 @@ epub_exclude_files = ["search.html"]
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
 def setup(app):

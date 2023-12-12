@@ -348,7 +348,7 @@
     "label": "Insert Line Break",
     "caption": "",
     "shortcuts": [
-      "Enter"
+      "Ctrl Enter"
     ]
   },
   {
@@ -448,6 +448,12 @@
     "shortcuts": [
       "F10"
     ]
+  },
+  {
+    "id": "debugger:open-source",
+    "label": "Open Source",
+    "caption": "Open Source",
+    "shortcuts": []
   },
   {
     "id": "debugger:pause-on-exceptions",
@@ -895,6 +901,12 @@
     "shortcuts": []
   },
   {
+    "id": "filebrowser:toggle-show-full-path",
+    "label": "Show Full Path",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "filebrowser:toggle-sort-notebooks-first",
     "label": "Sort Notebooks Above Files",
     "caption": "",
@@ -1219,6 +1231,38 @@
     ]
   },
   {
+    "id": "inline-completer:accept",
+    "label": "Accept Inline Completion",
+    "caption": "",
+    "shortcuts": [
+      "Alt End"
+    ]
+  },
+  {
+    "id": "inline-completer:invoke",
+    "label": "Invoke Inline Completer",
+    "caption": "",
+    "shortcuts": [
+      "Alt \\"
+    ]
+  },
+  {
+    "id": "inline-completer:next",
+    "label": "Next Inline Completion",
+    "caption": "",
+    "shortcuts": [
+      "Alt ]"
+    ]
+  },
+  {
+    "id": "inline-completer:previous",
+    "label": "Previous Inline Completion",
+    "caption": "",
+    "shortcuts": [
+      "Alt ["
+    ]
+  },
+  {
     "id": "inspector:close",
     "label": "Hide Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
@@ -1373,6 +1417,22 @@
     "label": "Mermaid Copy Diagram Source",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "notebook:access-next-history-entry",
+    "label": "Access Next Kernel History Entry",
+    "caption": "",
+    "shortcuts": [
+      "Alt ArrowDown"
+    ]
+  },
+  {
+    "id": "notebook:access-previous-history-entry",
+    "label": "Access Previous Kernel History Entry",
+    "caption": "",
+    "shortcuts": [
+      "Alt ArrowUp"
+    ]
   },
   {
     "id": "notebook:change-cell-to-code",

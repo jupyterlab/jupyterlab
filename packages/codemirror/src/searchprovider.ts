@@ -813,8 +813,17 @@ export class CodeMirrorSearchHighlighter {
       return null;
     }
 
+    // If the editor has not be instantiated yet (e.g. a cell that has not yet be seen in the viewport),
+    // force the behavior
+    if (!this._cm && !['previous-match', 'start'].includes(from)) {
+      from = 'previous-match';
+    }
+
     let lastPosition = 0;
-    if ((from === 'auto' && this._cm!.hasFocus()) || from === 'selection') {
+    if (
+      (from === 'auto' && (this._cm?.hasFocus() ?? false)) ||
+      from === 'selection'
+    ) {
       const cursor = this._cm!.state.selection.main;
       lastPosition = reverse ? cursor.anchor : cursor.head;
     } else if (from === 'selection-start') {
@@ -829,7 +838,10 @@ export class CodeMirrorSearchHighlighter {
     }
     if (lastPosition === 0 && reverse && this.currentIndex === null) {
       // The default position is (0, 0) but we want to start from the end in that case
-      lastPosition = this._cm!.doc.length;
+      // Fallback to the end of the latest match if the editor is not instantiated
+      lastPosition =
+        this._cm?.doc.length ??
+        endLastMatch(this._matches[this._matches.length - 1]);
     }
 
     const position = lastPosition;
@@ -855,6 +867,10 @@ export class CodeMirrorSearchHighlighter {
     }
 
     return found;
+
+    function endLastMatch(lastMatch?: ISearchMatch): number {
+      return lastMatch ? lastMatch.position + lastMatch.text.length : 0;
+    }
   }
 
   private _cm: CodeMirrorEditor | null;

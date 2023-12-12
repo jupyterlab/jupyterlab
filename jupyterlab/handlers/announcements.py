@@ -238,7 +238,7 @@ class NewsHandler(APIHandler):
                             return default
                         else:
                             error_m = (
-                                f'atom feed entry does not contain a required attribute: {attr}'
+                                f"atom feed entry does not contain a required attribute: {attr}"
                             )
                             raise KeyError(error_m)
 
@@ -246,10 +246,10 @@ class NewsHandler(APIHandler):
                     entry_id = get_xml_text("id")
                     entry_updated = get_xml_text("updated")
                     entry_published = get_xml_text("published", entry_updated)
-                    entry_summary = get_xml_text("summary", default='')
+                    entry_summary = get_xml_text("summary", default="")
                     links = node.findall("atom:link", xml_namespaces)
                     if len(links) > 1:
-                        alternate = list(filter(lambda elem: elem.get('rel') == 'alternate', links))
+                        alternate = list(filter(lambda elem: elem.get("rel") == "alternate", links))
                         link_node = alternate[0] if alternate else links[0]
                     else:
                         link_node = links[0] if len(links) == 1 else None
