@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import path from 'path';
 import {
   generateArrow,
   positionMouse,
@@ -499,8 +500,13 @@ test.describe('General', () => {
     );
   });
 
-  test('Terminals', async ({ page }) => {
+  test('Terminal layout', async ({ page, tmpPath }) => {
     await galata.Mock.freezeContentLastModified(page);
+    const fileName = 'tree_fixture.txt';
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./data/${fileName}`),
+      `${tmpPath}/${fileName}`
+    );
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -526,7 +532,7 @@ test.describe('General', () => {
 
     await page.keyboard.type('cd $JUPYTERLAB_GALATA_ROOT_DIR');
     await page.keyboard.press('Enter');
-    await page.keyboard.type('tree . -L 2');
+    await page.keyboard.type(`clear && cat ${tmpPath}/${fileName}`);
     await page.keyboard.press('Enter');
 
     // Wait for command answer
