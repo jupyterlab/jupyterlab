@@ -1,9 +1,8 @@
 name: Benchmark Tests
 
 on:
-  # schedule:
-  #   - cron: '12 1 * * 0'
-  pull_request_review:
+  schedule:
+    - cron: '12 1 * * 0'
 
 jobs:
   test:
