@@ -2336,8 +2336,6 @@ namespace Private {
     notebook.mode = 'command';
 
     let initializingDialogShown = false;
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
     return Promise.all(
       cells.map(cell => {
         if (
@@ -2348,6 +2346,8 @@ namespace Private {
           !initializingDialogShown
         ) {
           initializingDialogShown = true;
+          translator = translator || nullTranslator;
+          const trans = translator.load('jupyterlab');
           Notification.emit(
             trans.__(
               `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing, code cells will not be executed.`
@@ -2357,6 +2357,13 @@ namespace Private {
               autoClose: false
             }
           );
+          return Promise.resolve(false);
+        }
+        if (
+          cell.model.type === 'code' &&
+          notebook.notebookConfig.enableKernelInitNotification &&
+          initializingDialogShown
+        ) {
           return Promise.resolve(false);
         }
         return runCell(
