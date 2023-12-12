@@ -202,7 +202,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     // Set up translator for aria labels
     this.translator = options.translator ?? nullTranslator;
 
-    this._editorConfig = options.editorConfig ?? {};
+    // For cells disable searching with CodeMirror search panel.
+    this._editorConfig = { searchWithCM: false, ...options.editorConfig };
     this._placeholder = true;
     this._inViewport = false;
     this.placeholder = options.placeholder ?? true;
@@ -2253,10 +2254,13 @@ export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
         .getSource()
         .match(/^#+/g) || [''])[0].length;
       if (numHashAtStart > 0) {
-        this.inputArea!.editor.setCursorPosition({
-          column: numHashAtStart + 1,
-          line: 0
-        });
+        this.inputArea!.editor.setCursorPosition(
+          {
+            column: numHashAtStart + 1,
+            line: 0
+          },
+          { scroll: false }
+        );
       }
     }
   }

@@ -3,6 +3,8 @@
 
 import { act } from 'react-dom/test-utils';
 
+import { Button } from '@jupyter/web-components';
+
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import {
@@ -40,6 +42,8 @@ import { IDebugger } from '../src/tokens';
 
 const server = new JupyterServer();
 
+const emptyFn = () => undefined;
+
 beforeAll(async () => {
   await server.start();
 }, 30000);
@@ -54,6 +58,14 @@ describe('Debugger', () => {
   const service = new DebuggerService({ specsManager, config });
   const registry = new CommandRegistry();
   const languages = new EditorLanguageRegistry();
+  const callstackToolbarCommands = {
+    continue: 'continue',
+    terminate: 'terminate',
+    next: 'next',
+    stepIn: 'stepIn',
+    stepOut: 'stepOut',
+    evaluate: 'evaluate'
+  };
   EditorLanguageRegistry.getDefaultLanguages()
     .filter(lang => ['Python'].includes(lang.name))
     .forEach(lang => {
@@ -101,16 +113,16 @@ describe('Debugger', () => {
     session = new Debugger.Session({ connection, config });
     service.session = session;
 
+    // Populate the command registry with fake command to render the button.
+    Object.keys(callstackToolbarCommands).forEach(command => {
+      registry.addCommand(command, { execute: emptyFn });
+    });
+
     sidebar = new Debugger.Sidebar({
       service,
       callstackCommands: {
         registry,
-        continue: '',
-        terminate: '',
-        next: '',
-        stepIn: '',
-        stepOut: '',
-        evaluate: ''
+        ...callstackToolbarCommands
       },
       breakpointsCommands: {
         registry,
@@ -199,10 +211,10 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('Variables');
       });
       it('should have two buttons', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(2);
-        expect(buttons[0].title).toBe('Tree View');
-        expect(buttons[1].title).toBe('Table View');
+        expect((buttons[0] as Button).title).toBe('Tree View');
+        expect((buttons[1] as Button).title).toBe('Table View');
       });
     });
     describe('Callstack toolbar', () => {
@@ -224,7 +236,7 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('Callstack');
       });
       it('should have six buttons', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(6);
       });
     });
@@ -247,7 +259,7 @@ describe('Debugger', () => {
         expect(title[0].innerHTML).toContain('Breakpoints');
       });
       it('should have two buttons', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(2);
       });
     });
@@ -271,7 +283,7 @@ describe('Debugger', () => {
       });
 
       it('should have one button', () => {
-        const buttons = toolbar.querySelectorAll('button');
+        const buttons = toolbar.querySelectorAll('jp-button');
         expect(buttons.length).toBe(1);
       });
     });
