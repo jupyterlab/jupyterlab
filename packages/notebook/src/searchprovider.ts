@@ -358,6 +358,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       return;
     }
     await this.endQuery();
+    this._searchActive = true;
     let cells = this.widget.content.widgets;
 
     this._query = query;
@@ -426,6 +427,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       })
     );
 
+    this._searchActive = false;
     this._searchProviders.length = 0;
     this._currentProviderIndex = null;
   }
@@ -552,7 +554,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this.widget.content.isSelectedOrActive(cell)
       )
       .then(() => {
-        void cellSearchProvider.startQuery(this._query, this._filters);
+        if (this._searchActive) {
+          void cellSearchProvider.startQuery(this._query, this._filters);
+        }
       });
   }
 
@@ -914,4 +918,5 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   > | null = null;
   private _selectionSearchMode: 'cells' | 'text' = 'cells';
   private _selectionLock: boolean = false;
+  private _searchActive: boolean = false;
 }
