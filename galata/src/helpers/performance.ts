@@ -47,13 +47,19 @@ export class PerformanceHelper {
     downloadThroughput: number;
     uploadThroughput: number;
     latency: number;
-  }): Promise<CDPSession> {
-    const cdpSession = await this.page.context().newCDPSession(this.page);
-    await cdpSession.send('Network.emulateNetworkConditions', {
-      offline: false,
-      ...config
-    });
-    return cdpSession;
+  }): Promise<CDPSession | null> {
+    const context = this.page.context();
+    const browserName = context.browser()!.browserType().name();
+    if (browserName === 'chromium') {
+      const cdpSession = await context.newCDPSession(this.page);
+      await cdpSession.send('Network.emulateNetworkConditions', {
+        offline: false,
+        ...config
+      });
+      return cdpSession;
+    }
+    console.log('Browser does not support throttling network');
+    return null;
   }
 
   /**

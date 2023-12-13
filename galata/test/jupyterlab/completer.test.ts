@@ -86,7 +86,7 @@ test.describe('Completer', () => {
       await page.waitForSelector('.jp-Completer-loading-bar', {
         state: 'detached'
       });
-      await session.detach();
+      await session?.detach();
       const imageName = 'completer-with-doc-panel.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
     });
