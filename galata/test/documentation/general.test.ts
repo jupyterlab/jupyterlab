@@ -92,6 +92,8 @@ test.describe('General', () => {
     await setSidebarWidth(page);
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
+    // Wait for the `data` folder to load to have something to blur
+    await page.waitForSelector('text=1024px');
 
     await page.evaluate(() => {
       (document.activeElement as HTMLElement).blur();
