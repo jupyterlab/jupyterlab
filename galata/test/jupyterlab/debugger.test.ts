@@ -12,23 +12,23 @@ async function openNotebook(page: IJupyterLabPageFixture, tmpPath, fileName) {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 }
 
+test('Move Debugger to right', async ({ page }) => {
+  await page.sidebar.moveTabToRight('jp-debugger-sidebar');
+  expect(await page.sidebar.getTabPosition('jp-debugger-sidebar')).toBe(
+    'right'
+  );
+});
+
+test('Open Debugger on right', async ({ page }) => {
+  await page.sidebar.openTab('jp-debugger-sidebar');
+  expect(await page.sidebar.isTabOpen('jp-debugger-sidebar')).toBeTruthy();
+});
+
 test.describe('Debugger Tests', () => {
   test.afterEach(async ({ page }) => {
     await page.debugger.switchOff();
     await page.waitForTimeout(500);
     await page.notebook.close();
-  });
-
-  test('Move Debugger to right', async ({ page }) => {
-    await page.sidebar.moveTabToRight('jp-debugger-sidebar');
-    expect(await page.sidebar.getTabPosition('jp-debugger-sidebar')).toBe(
-      'right'
-    );
-  });
-
-  test('Open Debugger on right', async ({ page }) => {
-    await page.sidebar.openTab('jp-debugger-sidebar');
-    expect(await page.sidebar.isTabOpen('jp-debugger-sidebar')).toBeTruthy();
   });
 
   test('Start debug session', async ({ page, tmpPath }) => {
@@ -322,7 +322,7 @@ async function setBreakpoint(page: IJupyterLabPageFixture) {
   await page.notebook.setCell(
     0,
     'code',
-    'global_var = 1\ndef add(a, b):\nlocal_var = a + b\nreturn local_var'
+    'global_var = 1\ndef add(a, b):\n    local_var = a + b\n    return local_var'
   );
   await page.notebook.run();
   await page.notebook.addCell('code', 'result = add(1, 2)\nprint(result)');

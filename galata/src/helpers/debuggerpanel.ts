@@ -25,12 +25,9 @@ export class DebuggerHelper {
    */
   async isOn(name?: string): Promise<boolean> {
     const toolbar = await this.notebook.getToolbarLocator(name);
-    if (toolbar) {
-      return (
-        (await toolbar
-          .locator('.jp-DebuggerBugButton')
-          .getAttribute('aria-pressed')) === 'true'
-      );
+    const button = toolbar?.locator('.jp-DebuggerBugButton');
+    if (((await button?.count()) ?? 0) > 0) {
+      return (await button!.getAttribute('aria-pressed')) === 'true';
     }
     return false;
   }
@@ -42,16 +39,15 @@ export class DebuggerHelper {
    */
   async switchOn(name?: string): Promise<void> {
     const toolbar = await this.notebook.getToolbarLocator(name);
-    if (toolbar) {
+    const button = toolbar?.locator('.jp-DebuggerBugButton');
+    if (((await button?.count()) ?? 0) > 0) {
       await waitForCondition(
-        async () =>
-          (await toolbar.locator('.jp-DebuggerBugButton').isDisabled()) ===
-          false,
+        async () => (await button!.isDisabled()) === false,
         2000
       );
 
       if (!(await this.isOn(name))) {
-        await toolbar.locator('.jp-DebuggerBugButton').click();
+        await button!.click();
       }
     }
   }
@@ -63,8 +59,9 @@ export class DebuggerHelper {
    */
   async switchOff(name?: string): Promise<void> {
     const toolbar = await this.notebook.getToolbarLocator(name);
-    if (toolbar && (await this.isOn(name))) {
-      await toolbar.locator('.jp-DebuggerBugButton').click();
+    const button = toolbar?.locator('.jp-DebuggerBugButton');
+    if (((await button?.count()) ?? 0) > 0 && (await this.isOn(name))) {
+      await button!.click();
     }
   }
 
