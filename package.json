@@ -41,7 +41,7 @@
     "build:dev:prod:minimize": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod:minimize",
     "build:dev:prod:minimize:report": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod:minimize:report",
     "build:dev:prod:release": "npm run integrity && npm run build:all && cd dev_mode && npm run build:prod:release",
-    "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
+    "build:examples": "lerna run build --scope \"@jupyterlab/example-*\" --concurrency 1",
     "build:galata": "cd galata && npm run build",
     "build:nbconvert:css": "cd packages/nbconvert-css && npm run build",
     "build:packages": "cd packages/metapackage && npm run build",
