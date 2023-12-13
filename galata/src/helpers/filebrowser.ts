@@ -77,11 +77,18 @@ export class FileBrowserHelper {
    * @returns Directory full path
    */
   async getCurrentDirectory(): Promise<string> {
-    const breadcrumbs = this.page
-      .getByRole('region', { name: 'File Browser Section' })
-      .locator('.jp-FileBrowser-crumbs > span');
-    const count = await breadcrumbs.count();
-    return (await breadcrumbs.nth(count - 2).getAttribute('title')) ?? '';
+    return await this.page.evaluate(() => {
+      let directory = '';
+      const spans = document.querySelectorAll(
+        '.jp-FileBrowser .jp-FileBrowser-crumbs span'
+      );
+      const numSpans = spans.length;
+      if (numSpans > 1) {
+        directory = spans[numSpans - 2].getAttribute('title') ?? '';
+      }
+
+      return directory;
+    });
   }
 
   /**
@@ -137,22 +144,26 @@ export class FileBrowserHelper {
    * @returns Action success status
    */
   async openHomeDirectory(): Promise<boolean> {
-    const breadcrumbs = this.page
-      .getByRole('region', { name: 'File Browser Section' })
-      .locator('.jp-FileBrowser-crumbs > span');
-    const homeButton = this.page
-      .getByRole('region', { name: 'File Browser Section' })
-      .locator('.jp-BreadCrumbs-home');
-
-    if (!((await homeButton.count()) == 1)) {
+    const homeButton = await this.page.$(
+      '.jp-FileBrowser .jp-FileBrowser-crumbs span'
+    );
+    if (!homeButton) {
       return false;
     }
     await homeButton.click();
 
-    await homeButton.waitFor();
+    await this.page.waitForFunction(() => {
+      const spans = document.querySelectorAll(
+        '.jp-FileBrowser .jp-FileBrowser-crumbs span'
+      );
+      return (
+        // The home is the root if no preferred dir is defined.
+        spans.length === 2 && spans[0].classList.contains('jp-BreadCrumbs-home')
+      );
+    });
 
-    // When in home directory, we have only two spans
-    await Utils.waitForCondition(async () => (await breadcrumbs.count()) == 2);
+    // wait for DOM rerender
+    await this.page.waitForTimeout(200);
 
     return true;
   }
