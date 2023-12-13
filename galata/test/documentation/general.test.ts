@@ -607,6 +607,7 @@ test.describe('General', () => {
 
     await setSidebarWidth(page);
 
+    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
     await page.click('text=README.md', {
       button: 'right'
     });
