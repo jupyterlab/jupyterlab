@@ -41,6 +41,9 @@ export namespace galata {
       defaultConfig: {
         cursorBlinkRate: 0
       }
+    },
+    '@jupyterlab/terminal-extension:plugin': {
+      cursorBlink: false
     }
   };
 
