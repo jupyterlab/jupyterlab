@@ -243,6 +243,12 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   opacity: 1;
 }
 
+.jp-OutputArea-stdin-hiding {
+  /* soft-hide the output, preserving focus */
+  opacity: 0;
+  height: 0;
+}
+
 /*-----------------------------------------------------------------------------
 | Output Area View
 |----------------------------------------------------------------------------*/
