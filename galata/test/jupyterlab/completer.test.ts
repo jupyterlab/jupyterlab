@@ -74,9 +74,9 @@ test.describe('Completer', () => {
 
       // Throttle requests to catch loading bar
       const session = await page.performance.throttleNetwork({
-        downloadThroughput: (50 * 1024) / 8,
-        uploadThroughput: (50 * 1024) / 8,
-        latency: 500
+        downloadThroughput: (500 * 1024) / 8,
+        uploadThroughput: (500 * 1024) / 8,
+        latency: 300
       });
 
       await page.keyboard.press('Tab');
