@@ -867,6 +867,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                                 "lock_rules": lock_rules,
                                 "all_locked": self.lock_all_plugins,
                             },
+                            parent=self,
                         )
                     },
                 )
