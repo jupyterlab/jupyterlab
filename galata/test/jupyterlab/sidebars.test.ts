@@ -132,9 +132,8 @@ test.describe('Sidebars', () => {
     const runningSessionsWidget = page.locator('#jp-running-sessions');
     const runningSessionsElementAriaLabel =
       await runningSessionsWidget.getAttribute('aria-label');
-    const runningSessionsElementRole = await runningSessionsWidget.getAttribute(
-      'role'
-    );
+    const runningSessionsElementRole =
+      await runningSessionsWidget.getAttribute('role');
     expect(runningSessionsElementAriaLabel).toEqual('Running Sessions section');
     expect(runningSessionsElementRole).toEqual('region');
   });
@@ -161,9 +160,8 @@ test.describe('Sidebars', () => {
   }) => {
     await page.sidebar.open('left');
     const fileBrowserWidget = page.locator('#filebrowser');
-    const fileBrowserElementAriaLabel = await fileBrowserWidget.getAttribute(
-      'aria-label'
-    );
+    const fileBrowserElementAriaLabel =
+      await fileBrowserWidget.getAttribute('aria-label');
     const fileBrowserElementRole = await fileBrowserWidget.getAttribute('role');
     expect(fileBrowserElementAriaLabel).toEqual('File Browser Section');
     expect(fileBrowserElementRole).toEqual('region');
@@ -174,9 +172,8 @@ test.describe('Sidebars', () => {
   }) => {
     await page.sidebar.open('right');
     const debuggerWidget = page.locator('#jp-debugger-sidebar');
-    const debuggerElementAriaLabel = await debuggerWidget.getAttribute(
-      'aria-label'
-    );
+    const debuggerElementAriaLabel =
+      await debuggerWidget.getAttribute('aria-label');
     const debuggerElementRole = await debuggerWidget.getAttribute('role');
     expect(debuggerElementAriaLabel).toEqual('Debugger section');
     expect(debuggerElementRole).toEqual('region');
@@ -189,9 +186,8 @@ test.describe('Sidebars', () => {
     const tableOfContentsWidget = page.locator('#table-of-contents');
     const tableOfContentsElementAriaLabel =
       await tableOfContentsWidget.getAttribute('aria-label');
-    const tableOfContentsElementRole = await tableOfContentsWidget.getAttribute(
-      'role'
-    );
+    const tableOfContentsElementRole =
+      await tableOfContentsWidget.getAttribute('role');
     expect(tableOfContentsElementAriaLabel).toEqual(
       'Table of Contents section'
     );

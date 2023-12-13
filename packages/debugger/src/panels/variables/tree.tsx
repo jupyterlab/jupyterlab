@@ -396,6 +396,12 @@ interface IVariableComponentProps {
 }
 
 function _prepareDetail(variable: IDebugger.IVariable) {
+  if (
+    variable.type === 'float' &&
+    (variable.value == 'inf' || variable.value == '-inf')
+  ) {
+    return variable.value;
+  }
   const detail = convertType(variable);
   if (variable.type === 'float' && isNaN(detail as number)) {
     // silence React warning:
