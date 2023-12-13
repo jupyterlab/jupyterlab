@@ -158,7 +158,7 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         );
         scanModeOffRegion!.append(
           trans.__(
-            'Jupyter is designed to work with scan mode turned off for screenreader.To get the best user experience when using screenreader, please turn scan mode off via the command INSERT + Spacebar '
+            'To get the best user experience with JupyterLab when using a screenreader, please disable scan/browse mode.'
           )
         );
       } else {
