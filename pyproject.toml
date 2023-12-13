@@ -93,7 +93,7 @@ docs-screenshots = [
     "matplotlib==3.8.2",
     "nbconvert>=7.0.0",
     "pandas==2.1.3",
-    "scipy==1.11.3",
+    "scipy==1.11.4",
     "vega_datasets==0.9.0",
 ]
 test = [
@@ -118,7 +118,6 @@ dev = [
     "hatch",
     "bump2version",
     "ruff==0.1.6",
-    "black[jupyter]==23.11.0"
 ]
 
 [tool.check-wheel-contents]
@@ -214,7 +213,7 @@ npm = ["node", "yarn.js"]
 
 [tool.pytest.ini_options]
 testpaths = "jupyterlab/tests"
-norecursedirs = "node_modules .git _build"
+norecursedirs = "node_modules .git _build .ipynb_checkpoints"
 addopts = "--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
 ignore = "tests examples"
 
@@ -240,21 +239,11 @@ before-build-python = [
 ]
 after-publish-assets = "npm run after:publish:assets"
 
-[tool.black]
-line-length = 100
-target-version = ["py37"]
-skip-string-normalization = true
-extend-exclude = '''
-(
-  .*\/css_js_injection.ipynb  # Exclude integration test notebook
-)
-'''
-
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 line-length = 100
 select = [
-  "A", "B", "C", "DTZ", "E", "EM", "F", "FBT", "I", "ICN", "ISC", "N",
+  "A", "B", "C", "DTZ", "E", "EM", "F", "FBT", "I", "ICN", "N",
   "PLC", "PLE", "PLR", "PLW", "Q", "RUF", "S", "SIM", "T", "TID", "UP",
   "W", "YTT",
 ]
@@ -271,7 +260,7 @@ ignore = [
 "SIM105",
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 # F821 Undefined name `c`
 "binder/jupyter_config.py" = ["F821"]
 # RUF012 Mutable class attributes should be annotated with `typing.ClassVar`
