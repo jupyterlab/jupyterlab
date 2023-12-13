@@ -891,7 +891,7 @@ export class NotebookHelper {
     if (gutters.length < lineNumber) {
       return false;
     }
-    await gutters[lineNumber - 1].click();
+    await gutters[lineNumber].click();
     return true;
   }
 
