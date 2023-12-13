@@ -871,7 +871,7 @@ namespace Private {
         : message;
     return (
       <>
-        <div className="jp-toast-message" role="alert">
+        <div className="jp-toast-message">
           {shortenMessage.split('\n').map((part, index) => (
             <React.Fragment key={`part-${index}`}>
               {index > 0 ? <br /> : null}

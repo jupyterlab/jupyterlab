@@ -153,16 +153,14 @@ export const announcements: JupyterFrontEndPlugin<void> = {
             ]
           }
         );
-        const alertId = Notification.emit(
-          trans.__(
-            'For best user experience when using screenreader, turn off scan mode. Use the command: "Modifier Key + Spacebar." For ORCA use: "Insert+A"'
-          ),
-          'default',
-          {
-            autoClose: false
-          }
+        let scanModeOffRegion = document.getElementById(
+          'screen-reader-aria-live'
         );
-        return alertId;
+        scanModeOffRegion!.append(
+          trans.__(
+            'Jupyter is designed to work with scan mode turned off for screenreader.To get the best user experience when using screenreader, please turn scan mode off via the command INSERT + Spacebar '
+          )
+        );
       } else {
         await fetchNews();
       }
