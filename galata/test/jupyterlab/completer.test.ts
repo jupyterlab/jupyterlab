@@ -71,6 +71,14 @@ test.describe('Completer', () => {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(50);
       await expect(completer).toBeHidden();
+
+      // Throttle requests to catch loading bar
+      const session = await page.performance.throttleNetwork({
+        downloadThroughput: (500 * 1024) / 8,
+        uploadThroughput: (500 * 1024) / 8,
+        latency: 300
+      });
+
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
@@ -78,6 +86,7 @@ test.describe('Completer', () => {
       await page.waitForSelector('.jp-Completer-loading-bar', {
         state: 'detached'
       });
+      await session?.detach();
       const imageName = 'completer-with-doc-panel.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
     });

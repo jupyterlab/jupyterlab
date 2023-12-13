@@ -39,7 +39,6 @@ dependencies:
   - requests-cache
   - virtualenv
   # dev
-  - black-jupyter
   - bump2version
   - hatch
   - pre-commit

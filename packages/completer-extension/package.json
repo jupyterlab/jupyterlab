@@ -45,7 +45,7 @@
     "@jupyterlab/ui-components": "^4.1.0-alpha.4",
     "@lumino/commands": "^2.2.0",
     "@lumino/coreutils": "^2.1.2",
-    "@rjsf/utils": "^5.13.2",
+    "@rjsf/utils": "^5.13.4",
     "react": "^18.2.0"
   },
   "devDependencies": {

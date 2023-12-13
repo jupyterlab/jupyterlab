@@ -11,7 +11,8 @@ Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia
 Curae; Cras augue tortor, tristique vitae varius nec, dictum eu lectus. Pellentesque
 id eleifend eros. In non odio in lorem iaculis sollicitudin. In faucibus ante ut
 arcu fringilla interdum. Maecenas elit nulla, imperdiet nec blandit et, consequat
-ut elit.`;
+ut elit.
+in`;
 
 function getSelectionRange(textarea: HTMLTextAreaElement) {
   return {
@@ -79,13 +80,18 @@ test('Populate search box with selected text', async ({ page }) => {
   const inputWithFirstWord = page.locator(
     '[placeholder="Find"] >> text="Lorem"'
   );
-  await expect(inputWithFirstWord).toBeVisible();
-  await expect(inputWithFirstWord).toBeFocused();
+  await expect.soft(inputWithFirstWord).toBeVisible();
+  await expect.soft(inputWithFirstWord).toBeFocused();
   // Expect the newly set text to be selected
-  expect(await inputWithFirstWord.evaluate(getSelectionRange)).toStrictEqual({
-    start: 0,
-    end: 5
-  });
+  expect
+    .soft(await inputWithFirstWord.evaluate(getSelectionRange))
+    .toStrictEqual({
+      start: 0,
+      end: 5
+    });
+
+  // Check the CM search panel is not displayed.
+  await expect(page.locator('.cm-search.cm-panel')).toHaveCount(0);
 
   // Expect the first match to be highlighted
   await page.waitForSelector('text=1/2');
@@ -93,4 +99,36 @@ test('Populate search box with selected text', async ({ page }) => {
   const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
 
   expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+});
+
+test.describe('File search from selection', () => {
+  test('should expand the selection to the next occurence', async ({
+    page
+  }) => {
+    // This could be improved as the following statement will double click
+    // on the last line that will result in the last word being selected.
+    await page.getByRole('textbox').getByText('in').last().dblclick();
+
+    await page.keyboard.press('Control+d');
+
+    await expect(
+      page.getByRole('main').locator('.cm-selectionBackground')
+    ).toHaveCount(2);
+  });
+
+  test('should expand the selection to all occurence', async ({ page }) => {
+    // This could be improved as the following statement will double click
+    // on the last line that will result in the last word being selected.
+    await page.getByRole('textbox').getByText('in').last().dblclick();
+
+    await page.keyboard.press('Control+Shift+l');
+
+    // Switch back to notebook
+    // FIXME it should not be needed when we get https://github.com/jupyterlab/lumino/pull/662
+    await page.activity.activateTab(DEFAULT_NAME);
+
+    await expect(
+      page.getByRole('main').locator('.cm-selectionBackground')
+    ).toHaveCount(7);
+  });
 });
