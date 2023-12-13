@@ -1023,7 +1023,7 @@ function addCommands(
           }
         };
         docManager.services.contents.fileChanged.connect(onChange);
-        context
+        void context
           .saveAs()
           .finally(() =>
             docManager.services.contents.fileChanged.disconnect(onChange)
