@@ -9,6 +9,14 @@ Extension Migration Guide
 JupyterLab 4.0 to 4.1
 ---------------------
 
+jlpm upgrade
+^^^^^^^^^^^^
+
+.. warning::
+
+    ``jlpm`` has been upgrade from 3.5.0 to 3.6.4. Extension authors will need to update their ``yarn.lock``
+    file by running ``jlpm install`` to avoid CI issues.
+
 Plugin manager and extension locks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -26,6 +34,47 @@ lock individual plugins as required.
 If your extension previously included a custom enable/disable setting, you may be able to replace it
 with instructions pointing users to the Plugin Manager. However, please consider whether your extension
 may be used in distributions which do not include Plugin Manager or have it disabled.
+
+Use of UI toolkit for Toolbar and ToolbarButtonComponent
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Toolbar and ToolbarButtonComponent (from the package *ui-components*) now relies on the external library
+`jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`_.
+
+This library uses the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
+and is based on `FAST <https://www.fast.design/>`_ library by Microsoft.
+
+See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
+
+- Changes the selectors of the ``Toolbar`` and ``ToolbarButtonComponent``.
+
+  - The DOM of ``Toolbar`` is now a ``jp-toolbar`` component instead of a ``div``.
+
+  - The DOM of ``ToolbarButtonComponent`` is now ``jp-button`` element instead of a ``button``.
+
+    This must be taken into account since the button itself is in the shadow DOM of the ``jp-button`` component,
+    and cannot be accessed as a child of the toolbar component.
+
+  - The icon in the ``ToolbarButtonComponent`` is a direct child of the ``jp-button`` component.
+
+    The icon was previously encapsulated in a span with the class ``.jp-ToolbarButtonComponent-icon``.
+    Accessing that icon to change its properties require now something like ``jp-button > svg``.
+
+- If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
+
+  They need to be ignored when transforming the code with Jest. You will need to update the
+  ``transformIgnorePatterns`` to add:
+
+  .. code::
+
+    const esModules = [
+      '@microsoft',
+      '@jupyter/react-components',
+      '@jupyter/web-components',
+      'exenv-es6',
+      ...
+    ].join('|');
+
 
 JupyterLab 3.x to 4.x
 ---------------------

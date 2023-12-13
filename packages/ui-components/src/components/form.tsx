@@ -507,7 +507,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
           }`}
         >
           {!hasCustomField &&
-            (rawErrors ? (
+            (rawErrors?.length ? (
               // Shows a red indicator for fields that have validation errors
               <div className="jp-modifiedIndicator jp-errorIndicator" />
             ) : (

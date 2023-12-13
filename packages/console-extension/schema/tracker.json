@@ -73,11 +73,6 @@
   },
   "jupyter.lab.shortcuts": [
     {
-      "command": "console:linebreak",
-      "keys": ["Enter"],
-      "selector": ".jp-CodeConsole[data-jp-interaction-mode='notebook'] .jp-CodeConsole-promptCell"
-    },
-    {
       "command": "console:run-forced",
       "keys": ["Shift Enter"],
       "selector": ".jp-CodeConsole[data-jp-interaction-mode='notebook'] .jp-CodeConsole-promptCell"

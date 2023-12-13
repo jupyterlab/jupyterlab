@@ -15,6 +15,10 @@ on:
 jobs:
   publish_release:
     runs-on: ubuntu-latest
+    permissions:
+      # This is useful if you want to use PyPI trusted publisher
+      # and NPM provenance
+      id-token: write
     steps:
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
@@ -23,7 +27,6 @@ jobs:
         uses: jupyter-server/jupyter_releaser/.github/actions/populate-release@v2
         with:
           token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-          target: ${{ github.event.inputs.target }}
           branch: ${{ github.event.inputs.branch }}
           release_url: ${{ github.event.inputs.release_url }}
           steps_to_skip: ${{ github.event.inputs.steps_to_skip }}
@@ -31,14 +34,10 @@ jobs:
       - name: Finalize Release
         id: finalize-release
         env:
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-          PYPI_TOKEN_MAP: ${{ secrets.PYPI_TOKEN_MAP }}
-          TWINE_USERNAME: __token__
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        uses: jupyter-server/jupyter-releaser/.github/actions/finalize-release@v2
+        uses: jupyter-server/jupyter_releaser/.github/actions/finalize-release@v2
         with:
           token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-          target: ${{ github.event.inputs.target }}
           release_url: ${{ steps.populate-release.outputs.release_url }}
 
       - name: "** Next Step **"
