@@ -436,9 +436,8 @@ describe('filebrowser/model', () => {
               const file = new File([content], fname, { type: 'text/plain' });
               await model.upload(file);
               // Ensure we get the file back.
-              const contentModel = await model.manager.services.contents.get(
-                fname
-              );
+              const contentModel =
+                await model.manager.services.contents.get(fname);
               expect(contentModel.content.length).toBeGreaterThan(0);
             });
           }
