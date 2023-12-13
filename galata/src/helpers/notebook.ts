@@ -938,18 +938,20 @@ export class NotebookHelper {
     cell: Locator,
     mode: 'Edit' | 'Command'
   ): Promise<void> {
-    if ((await this.page.getByText(`Mode: ${mode}`).count()) > 1) {
+    const modeLocator = this.page.getByText(`Mode: ${mode}`);
+    if ((await modeLocator.count()) > 1) {
       return;
     }
 
-    // Double click works for all cell types
-    if (mode == 'Edit') {
-      await cell.getByRole('textbox').dblclick();
-    } else {
-      await cell.getByRole('textbox').press('Escape');
-    }
-
-    await this.page.getByText(`Mode: ${mode}`).waitFor();
+    do {
+      await this.page.waitForTimeout(20);
+      // Double click works for all cell types
+      if (mode == 'Edit') {
+        await cell.getByRole('textbox').dblclick();
+      } else {
+        await cell.getByRole('textbox').press('Escape');
+      }
+    } while ((await modeLocator.count()) == 0);
   }
 
   /**
