@@ -87,7 +87,7 @@ test.describe('Extension Manager', () => {
     await openExtensionSidebar(page);
 
     await page.fill(
-      '.jp-extensionmanager-view >> [placeholder="Search"]',
+      '.jp-extensionmanager-view >> [placeholder="Search extensions"]',
       'drawio'
     );
 
