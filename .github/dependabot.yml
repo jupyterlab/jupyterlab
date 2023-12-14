@@ -13,3 +13,5 @@ updates:
       # Check for updates to GitHub Actions every month
       # Align with pre-commit configuration .pre-commit-config.yaml
       interval: "monthly"
+    ignore:
+    - dependency-name: "ipython"
