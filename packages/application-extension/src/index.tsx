@@ -364,7 +364,6 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
 
       commands.addCommand(CommandIDs.toggleSidebarWidget, {
         label: trans.__('Toggle Sidebar Element'),
-        caption: trans.__('By default opens first element of the sidebar'),
         execute: args => {
           const index = parseInt(args.index as string, 10);
           if (args.side != 'left' && args.side != 'right') {
