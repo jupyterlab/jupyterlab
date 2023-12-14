@@ -17,3 +17,4 @@ updates:
     # Prevent the UI tests from failing, as the version number of ipython is visible
     # in some of the Galata snapshots
     - dependency-name: "ipython"
+    - update-types: ["version-update:semver-minor", "version-update:semver-patch"]
