@@ -252,7 +252,7 @@
 
 .jp-DirListing-item.jp-mod-selected {
   color: var(--jp-ui-inverse-font-color1);
-  background: var(--jp-brand-color1);
+  background: var(--jp-brand-color0);
 }
 
 .jp-DirListing-item.jp-mod-dropTarget {
