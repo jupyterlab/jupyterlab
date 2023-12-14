@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Page } from '@playwright/test';
+import { CDPSession, Page } from '@playwright/test';
 import { UUID } from '@lumino/coreutils';
 
 /**
@@ -38,6 +38,28 @@ export class PerformanceHelper {
       `performance.getEntriesByName('${name}')[0].duration`
     );
     return time;
+  }
+
+  /**
+   * Throttle network
+   */
+  async throttleNetwork(config: {
+    downloadThroughput: number;
+    uploadThroughput: number;
+    latency: number;
+  }): Promise<CDPSession | null> {
+    const context = this.page.context();
+    const browserName = context.browser()!.browserType().name();
+    if (browserName === 'chromium') {
+      const cdpSession = await context.newCDPSession(this.page);
+      await cdpSession.send('Network.emulateNetworkConditions', {
+        offline: false,
+        ...config
+      });
+      return cdpSession;
+    }
+    console.log('Browser does not support throttling network');
+    return null;
   }
 
   /**
