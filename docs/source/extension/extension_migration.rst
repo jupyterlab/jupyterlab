@@ -9,14 +9,6 @@ Extension Migration Guide
 JupyterLab 4.0 to 4.1
 ---------------------
 
-jlpm upgrade
-^^^^^^^^^^^^
-
-.. warning::
-
-    ``jlpm`` has been upgrade from 3.5.0 to 3.6.4. Extension authors will need to update their ``yarn.lock``
-    file by running ``jlpm install`` to avoid CI issues.
-
 Plugin manager and extension locks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
