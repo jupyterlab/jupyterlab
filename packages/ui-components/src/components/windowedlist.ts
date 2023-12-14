@@ -763,6 +763,7 @@ export class WindowedList<
 
     this._innerElement = innerElement;
     this._isScrolling = null;
+    this._outerElement = outerElement;
     this._resizeObserver = null;
     this._scrollToItem = null;
     this._scrollRepaint = null;
@@ -796,6 +797,13 @@ export class WindowedList<
    */
   get layout(): WindowedLayout {
     return super.layout as WindowedLayout;
+  }
+
+  /**
+   * The outer container of the windowed list.
+   */
+  get outerNode(): HTMLElement {
+    return this._outerElement;
   }
 
   /**
@@ -1313,6 +1321,7 @@ export class WindowedList<
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
   private _needsUpdate = false;
+  private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
   private _resizeObserver: ResizeObserver | null;
   private _scrollRepaint: number | null;
