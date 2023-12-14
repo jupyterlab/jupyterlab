@@ -67,6 +67,9 @@ See https://github.com/jupyterlab/team-compass/issues/143 for more context on th
       ...
     ].join('|');
 
+CSS class name change in the ``WindowedList`` superclass of ``StaticNotebook``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- The class ``.jp-WindowedPanel-window`` has been renamed to ``.jp-WindowedPanel-viewport``.
 
 JupyterLab 3.x to 4.x
 ---------------------

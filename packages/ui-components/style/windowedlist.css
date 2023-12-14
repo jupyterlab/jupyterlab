@@ -7,7 +7,6 @@
   height: 100%;
   position: relative;
   overflow: auto;
-  transform: none;
 }
 
 .jp-WindowedPanel.jp-mod-virtual-scrollbar > .jp-WindowedPanel-outer {
@@ -42,20 +41,20 @@
   z-index: 1;
 }
 
-ol.jp-WindowedPanel-scrollbar-content {
+.jp-WindowedPanel-scrollbar-content {
   background-color: var(--jp-layout-color1);
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
 
-ol.jp-WindowedPanel-scrollbar-content > li {
+.jp-WindowedPanel-scrollbar-content > .jp-WindowedPanel-scrollbar-item {
   border-bottom: 1px solid var(--jp-layout-color3);
   padding: 2px;
   text-align: left;
 }
 
-ol.jp-WindowedPanel-scrollbar-content > li:hover {
+.jp-WindowedPanel-scrollbar-content > .jp-WindowedPanel-scrollbar-item:hover {
   cursor: pointer;
   background-color: var(--jp-layout-color2);
 }

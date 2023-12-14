@@ -1285,9 +1285,10 @@ export class WindowedList<
     const count = list?.length ?? viewModel.widgetCount;
     for (let index = 0; index < count; index += 1) {
       const item = list?.get?.(index);
-      const li = renderer.createScrollbarItem(this, index, item);
-      li.dataset.index = `${index}`;
-      content.appendChild(li);
+      const element = renderer.createScrollbarItem(this, index, item);
+      element.classList.add('jp-WindowedPanel-scrollbar-item');
+      element.dataset.index = `${index}`;
+      content.appendChild(element);
     }
   }
 
@@ -1727,7 +1728,7 @@ export namespace WindowedList {
     /**
      * Create the virtual scrollbar element.
      */
-    createScrollbar(): HTMLOListElement;
+    createScrollbar(): HTMLElement;
 
     /**
      * Create an individual item rendered in the scrollbar.
@@ -1736,7 +1737,7 @@ export namespace WindowedList {
       list: WindowedList,
       index: number,
       item: T | undefined
-    ): HTMLLIElement;
+    ): HTMLElement;
 
     /**
      * Create the viewport element into which virtualized children are added.
