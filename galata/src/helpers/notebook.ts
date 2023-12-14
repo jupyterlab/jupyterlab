@@ -544,7 +544,7 @@ export class NotebookHelper {
       const clientHeight = await notebook.evaluate(node => node.clientHeight);
       // Scroll down
       const viewport = await (
-        await notebook.$$('.jp-WindowedPanel-window')
+        await notebook.$$('.jp-WindowedPanel-viewport')
       )[0].boundingBox();
       let scrollHeight = viewport!.y + viewport!.height;
       let previousScrollHeight = 0;
@@ -567,7 +567,7 @@ export class NotebookHelper {
         );
 
         const viewport = await (
-          await notebook.$$('.jp-WindowedPanel-window')
+          await notebook.$$('.jp-WindowedPanel-viewport')
         )[0].boundingBox();
         scrollHeight = viewport!.y + viewport!.height;
         // Avoid jitter
