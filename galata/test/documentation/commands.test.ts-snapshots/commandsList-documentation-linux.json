@@ -1999,9 +1999,7 @@
     "id": "notebook:toggle-all-cell-line-numbers",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": [
-      "Shift L"
-    ]
+    "shortcuts": []
   },
   {
     "id": "notebook:toggle-autoclosing-brackets",
