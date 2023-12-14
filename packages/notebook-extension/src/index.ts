@@ -3463,12 +3463,24 @@ function addCommands(
       }
     },
     icon: args => (args.toolbar ? tableRowsIcon : undefined),
-    isEnabled: args =>
-      (args.toolbar ? true : isEnabled()) &&
-      (settings?.composite.windowingMode === 'full' ?? false),
-    isVisible: args =>
-      (args.toolbar ? true : isEnabled()) &&
-      (settings?.composite.windowingMode === 'full' ?? false)
+    isEnabled: args => {
+      const enabled =
+        (args.toolbar ? true : isEnabled()) &&
+        (settings?.composite.windowingMode === 'full' ?? false);
+      tracker.forEach(w => {
+        w.content.scrollbar = enabled;
+      });
+      return enabled;
+    },
+    isVisible: args => {
+      const visible =
+        (args.toolbar ? true : isEnabled()) &&
+        (settings?.composite.windowingMode === 'full' ?? false);
+      tracker.forEach(w => {
+        w.content.scrollbar = visible;
+      });
+      return visible;
+    }
   });
 }
 
