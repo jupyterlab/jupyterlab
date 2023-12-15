@@ -547,6 +547,17 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
   }
 
   /**
+   * Whether to scroll the active heading to the top
+   * of the document or not.
+   */
+  get scrollToTop(): boolean {
+    return this._scrollToTop;
+  }
+  set scrollToTop(v: boolean) {
+    this._scrollToTop = v;
+  }
+
+  /**
    * Create a new table of contents model for the widget
    *
    * @param widget - widget
@@ -582,24 +593,37 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           const el = headingToElement.get(heading);
 
           if (el) {
-            const widgetBox = widget.content.node.getBoundingClientRect();
-            const elementBox = el.getBoundingClientRect();
+            if (this.scrollToTop) {
+              el.scrollIntoView({ block: 'start' });
+            } else {
+              const widgetBox = widget.content.node.getBoundingClientRect();
+              const elementBox = el.getBoundingClientRect();
 
-            if (
-              elementBox.top > widgetBox.bottom ||
-              elementBox.bottom < widgetBox.top
-            ) {
-              el.scrollIntoView({ block: 'center' });
+              if (
+                elementBox.top > widgetBox.bottom ||
+                elementBox.bottom < widgetBox.top
+              ) {
+                el.scrollIntoView({ block: 'center' });
+              }
             }
           } else {
             console.debug('scrolling to heading: using fallback strategy');
-            await widget.content.scrollToItem(widget.content.activeCellIndex);
+            await widget.content.scrollToItem(
+              widget.content.activeCellIndex,
+              this.scrollToTop ? 'start' : undefined
+            );
           }
         };
 
         const cell = heading.cellRef;
         const cells = widget.content.widgets;
         const idx = cells.indexOf(cell);
+        // Switch to command mode to avoid entering Markdown cell in edit mode
+        // if the document was in edit mode
+        if (cell.model.type == 'markdown' && widget.content.mode != 'command') {
+          widget.content.mode = 'command';
+        }
+
         widget.content.activeCellIndex = idx;
 
         if (cell.inViewport) {
@@ -610,7 +634,7 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
           });
         } else {
           widget.content
-            .scrollToItem(idx)
+            .scrollToItem(idx, this.scrollToTop ? 'start' : undefined)
             .then(() => {
               return onCellInViewport(cell);
             })
@@ -735,6 +759,8 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
     return model;
   }
+
+  private _scrollToTop: boolean = true;
 }
 
 /**
