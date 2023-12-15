@@ -1817,6 +1817,14 @@ function activateNotebookHandler(
     tracker.forEach(widget => {
       widget.setConfig(options);
     });
+    if (options.notebookConfig.windowingMode !== 'full') {
+      // Disable all virtual scrollbars if any was enabled
+      tracker.forEach(widget => {
+        if (widget.content.scrollbar) {
+          widget.content.scrollbar = false;
+        }
+      });
+    }
   }
 
   /**
@@ -3486,18 +3494,12 @@ function addCommands(
       const enabled =
         (args.toolbar ? true : isEnabled()) &&
         (settings?.composite.windowingMode === 'full' ?? false);
-      tracker.forEach(w => {
-        w.content.scrollbar = enabled;
-      });
       return enabled;
     },
     isVisible: args => {
       const visible =
         (args.toolbar ? true : isEnabled()) &&
         (settings?.composite.windowingMode === 'full' ?? false);
-      tracker.forEach(w => {
-        w.content.scrollbar = visible;
-      });
       return visible;
     }
   });
