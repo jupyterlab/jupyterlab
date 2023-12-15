@@ -7,6 +7,7 @@ import { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
 import { Platform } from '@lumino/domutils';
 import pluginSchema from '../schema/shortcuts.json';
+import expect from 'expect';
 
 describe('@jupyterlab/shortcut-extension', () => {
   const pluginId = 'test-plugin:settings';
