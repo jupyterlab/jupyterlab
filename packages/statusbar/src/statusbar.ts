@@ -113,9 +113,9 @@ export class StatusBar extends Widget implements IStatusBar {
   }
 
   private _isWindowZoomed = () => {
-    // The value for 630px was chosen by trial and error. 
+    // The value for 630px was chosen by trial and error.
     // When the screen width drops below 630px, there is no
-    // longer enough space for all the items in the status bar 
+    // longer enough space for all the items in the status bar
     // (with notebook open), and items become clipped.
     return window.innerWidth <= 630;
   };
