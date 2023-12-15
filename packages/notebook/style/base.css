@@ -50,7 +50,7 @@
   padding: var(--jp-notebook-padding);
 }
 
-.jp-Notebook.jp-mod-scrollPastEnd::after {
+.jp-Notebook.jp-mod-scrollPastEnd > .jp-WindowedPanel-outer::after {
   display: block;
   content: '';
   min-height: var(--jp-notebook-scroll-padding);
