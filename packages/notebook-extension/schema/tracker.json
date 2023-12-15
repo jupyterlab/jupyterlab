@@ -749,6 +749,12 @@
       "type": "number",
       "default": 50
     },
+    "scrollHeadingToTop": {
+      "title": "Scroll heading to top",
+      "description": "Whether to scroll heading to the document top when selecting it in the table of contents.",
+      "type": "boolean",
+      "default": true
+    },
     "showEditorForReadOnlyMarkdown": {
       "title": "Show editor for read-only Markdown cells",
       "description": "Should an editor be shown for read-only markdown",

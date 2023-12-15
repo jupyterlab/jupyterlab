@@ -108,3 +108,36 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   border: none;
   box-shadow: none;
 }
+
+/* @deprecated dead code to be removed in JupyterLab 5
+  Button in toolbar should use the ui-toolkit
+  https://github.com/jupyterlab-contrib/jupyter-ui-toolkit.
+*/
+button.jp-ToolbarButtonComponent {
+  background: var(--jp-layout-color1);
+  border: none;
+  box-sizing: border-box;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 0 6px;
+  margin: 0;
+  height: 24px;
+  border-radius: var(--jp-border-radius);
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-size: var(--jp-ui-font-size0);
+  min-width: unset;
+  min-height: unset;
+}
+
+button.jp-ToolbarButtonComponent:disabled {
+  opacity: 0.4;
+}
+
+button.jp-ToolbarButtonComponent > span {
+  padding: 0;
+  flex: 0 0 auto;
+}
