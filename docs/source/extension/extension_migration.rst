@@ -67,6 +67,12 @@ See https://github.com/jupyterlab/team-compass/issues/143 for more context on th
       ...
     ].join('|');
 
+- Some CSS rules for ``button`` with the class ``.jp-ToolbarButtonComponent`` has been kept for backward compatibility.
+
+  These rules are now **deprecated** and will be removed in Jupyterlab 5.
+  The ``button`` elements in toolbars must be updated to ``jp-button``, from
+  `jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`_.
+
 CSS class name change in the ``WindowedList`` superclass of ``StaticNotebook``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 - The class ``.jp-WindowedPanel-window`` has been renamed to ``.jp-WindowedPanel-viewport``.
