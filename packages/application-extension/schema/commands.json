@@ -39,13 +39,193 @@
     },
     {
       "command": "application:toggle-right-area",
-      "keys": [""],
+      "keys": ["Accel J"],
       "selector": "body"
     },
     {
       "command": "application:toggle-presentation-mode",
       "keys": [""],
       "selector": "body"
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt 1"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": 0
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt 2"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": 1
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt 3"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": 2
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt 4"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": 3
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt 5"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": 4
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt 6"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": 5
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt 7"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": 6
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt 8"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": 7
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt 9"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": 8
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt 0"],
+      "selector": "body",
+      "args": {
+        "side": "left",
+        "index": 9
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt Shift 1"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": 0
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt Shift 2"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": 1
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt Shift 3"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": 2
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt Shift 4"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": 3
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt Shift 5"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": 4
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt Shift 6"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": 5
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt Shift 7"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": 6
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt Shift 8"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": 7
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt Shift 9"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": 8
+      }
+    },
+    {
+      "command": "application:toggle-side-tabbar",
+      "keys": ["Alt Shift 0"],
+      "selector": "body",
+      "args": {
+        "side": "right",
+        "index": 9
+      }
     }
   ],
   "jupyter.lab.menus": {
