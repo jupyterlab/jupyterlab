@@ -825,6 +825,7 @@ export class WindowedList<
     } else {
       this.node.classList.remove('jp-mod-virtual-scrollbar');
     }
+    this._adjustDimensionsForScrollbar();
     this.update();
   }
 
@@ -1055,16 +1056,8 @@ export class WindowedList<
    * The default implementation of this handler is a no-op.
    */
   protected onUpdateRequest(msg: Message): void {
-    // Hide the native scrollbar if necessary and update dimensions.
     if (this.scrollbar) {
-      this.node.style.width = 'calc(100% + 25px)';
-      const scrollbar = this.node.querySelector('.jp-WindowedPanel-scrollbar');
-      const offset = scrollbar!.getBoundingClientRect().width + 15;
-      this._innerElement.style.width = `calc(100% - ${offset}px)`;
       this._renderScrollbar();
-    } else {
-      this.node.style.width = '100%';
-      this._innerElement.style.width = 'auto';
     }
     if (this.viewModel.windowingActive) {
       // Throttle update request
@@ -1091,8 +1084,50 @@ export class WindowedList<
    */
   protected jumped = new Signal<this, number>(this);
 
+  /*
+   * Hide the native scrollbar if necessary and update dimensions
+   */
+  private _adjustDimensionsForScrollbar() {
+    const outer = this.node.querySelector(
+      '.jp-WindowedPanel-outer'
+    ) as HTMLElement;
+    const scrollbar = this.node.querySelector(
+      '.jp-WindowedPanel-scrollbar'
+    ) as HTMLElement;
+    if (this.scrollbar) {
+      // Query DOM
+      let outerScrollbarWidth = outer.offsetWidth - outer.clientWidth;
+      // Update DOM
+
+      // 1) The native scrollbar is hidden by shifting it out of view.
+      if (outerScrollbarWidth == 0) {
+        // If the scrollbar width is zero, one of the following is true:
+        // - (a) the content is not overflowing
+        // - (b) the browser uses overlay scrollbars
+        // In (b) the overlay scrollbars could show up even even if
+        // occluded by a child element; to prevent this resulting in
+        // double scrollbar we shift the content by an arbitrary offset.
+        outerScrollbarWidth = 1000;
+        outer.style.paddingRight = `${outerScrollbarWidth}px`;
+        outer.style.boxSizing = 'border-box';
+      } else {
+        outer.style.paddingRight = '0';
+      }
+      outer.style.width = `calc(100% + ${outerScrollbarWidth}px)`;
+
+      // 2) The inner window is shrank to accommodate the virtual scrollbar
+      this._innerElement.style.marginRight = `${scrollbar.offsetWidth}px`;
+    } else {
+      // Reset all styles that may have been touched.
+      outer.style.width = '100%';
+      this._innerElement.style.marginRight = '0';
+      outer.style.paddingRight = '0';
+      outer.style.boxSizing = '';
+    }
+  }
+
   /**
-   * Add listeners for viewport and contents (but not the virtual scrollbar).
+   * Add listeners for viewport, contents and the virtual scrollbar.
    */
   private _addListeners() {
     if (!this._resizeObserver) {
@@ -1106,9 +1141,20 @@ export class WindowedList<
         () => this._resizeObserver?.unobserve(widget.node)
       );
     }
-    const outer = this.node.querySelector('.jp-WindowedPanel-outer');
+    const outer = this.node.querySelector(
+      '.jp-WindowedPanel-outer'
+    ) as HTMLElement;
     outer!.addEventListener('scroll', this, passiveIfSupported);
     this._viewport.style.position = 'absolute';
+
+    const scrollbar = this.node.querySelector(
+      '.jp-WindowedPanel-scrollbar'
+    ) as HTMLElement;
+    this._scrollbarResizeObserver = new ResizeObserver(
+      this._adjustDimensionsForScrollbar.bind(this)
+    );
+    this._scrollbarResizeObserver.observe(outer);
+    this._scrollbarResizeObserver.observe(scrollbar);
   }
 
   /**
@@ -1127,6 +1173,8 @@ export class WindowedList<
     outer!.removeEventListener('scroll', this);
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
+    this._scrollbarResizeObserver?.disconnect();
+    this._scrollbarResizeObserver = null;
     this._applyNoWindowingStyles();
   }
 
@@ -1324,6 +1372,7 @@ export class WindowedList<
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
   private _resizeObserver: ResizeObserver | null;
+  private _scrollbarResizeObserver: ResizeObserver | null;
   private _scrollRepaint: number | null;
   private _scrollToItem: [number, WindowedList.ScrollToAlign] | null;
   private _scrollUpdateWasRequested: boolean;

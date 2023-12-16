@@ -9,10 +9,6 @@
   overflow: auto;
 }
 
-.jp-WindowedPanel.jp-mod-virtual-scrollbar > .jp-WindowedPanel-outer {
-  margin-left: 25px;
-}
-
 .jp-WindowedPanel-inner {
   position: relative;
 }
@@ -36,7 +32,7 @@
   overflow-y: auto;
   top: 0;
   bottom: 0;
-  right: 25px;
+  right: 0;
   min-width: 35px;
   z-index: 1;
 }
