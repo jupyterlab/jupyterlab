@@ -165,3 +165,26 @@ describe('@jupyterlab/shortcut-extension', () => {
     });
   });
 });
+
+describe('shorcuts list', () => {
+  it('should add punctuation aria-label', () => {
+    const keyboardShortcuts = document.getElementsByClassName(
+      'jp-contextualShortcut-key'
+    );
+    for (let i = 0; i < keyboardShortcuts.length; i++) {
+      const keyboardLabelAria = keyboardShortcuts[i].getAttribute('aria-label');
+      const keyboardLabelText = keyboardShortcuts[i].innerHTML;
+      const punctuation = ",}{.'-";
+      if (punctuation.includes(keyboardLabelText)) {
+        expect(keyboardLabelAria).toEqual([
+          'Comma',
+          'Closing bracket',
+          'Opening bracket',
+          'Full stop',
+          'Single quote',
+          'Hyphen-minus'
+        ]);
+      }
+    }
+  });
+});
