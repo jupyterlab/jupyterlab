@@ -106,6 +106,7 @@
   "resolutions": {
     "@jupyterlab/services/ws": "8.12.0",
     "@types/react": "^18.0.26",
+    "canvas": "automattic/node-canvas#2c4d2a7dc61252913825cf9204730381051f0eba",
     "react": "^18.2.0",
     "yjs": "^13.5.40"
   },
