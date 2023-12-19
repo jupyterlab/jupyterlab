@@ -740,10 +740,10 @@ export class WindowedList<
     const node = document.createElement('div');
     node.className = 'jp-WindowedPanel';
 
-    const scrollbar = node.appendChild(document.createElement('div'));
-    scrollbar.classList.add('jp-WindowedPanel-scrollbar');
+    const scrollbarElement = node.appendChild(document.createElement('div'));
+    scrollbarElement.classList.add('jp-WindowedPanel-scrollbar');
 
-    const list = scrollbar.appendChild(renderer.createScrollbar());
+    const list = scrollbarElement.appendChild(renderer.createScrollbar());
     list.classList.add('jp-WindowedPanel-scrollbar-content');
 
     const outerElement = node.appendChild(renderer.createOuter());
@@ -765,6 +765,7 @@ export class WindowedList<
     this._isScrolling = null;
     this._outerElement = outerElement;
     this._resizeObserver = null;
+    this._scrollbarElement = scrollbarElement;
     this._scrollToItem = null;
     this._scrollRepaint = null;
     this._scrollUpdateWasRequested = false;
@@ -961,8 +962,7 @@ export class WindowedList<
     this.viewModel.height = this.node.getBoundingClientRect().height;
     const style = window.getComputedStyle(this.node);
     this.viewModel.paddingTop = parseFloat(style.paddingTop);
-    const scrollbar = this.node.querySelector('.jp-WindowedPanel-scrollbar')!;
-    scrollbar.addEventListener('pointerdown', this);
+    this._scrollbarElement.addEventListener('pointerdown', this);
   }
 
   /**
@@ -972,8 +972,7 @@ export class WindowedList<
     if (this.viewModel.windowingActive) {
       this._removeListeners();
     }
-    const scrollbar = this.node.querySelector('.jp-WindowedPanel-scrollbar')!;
-    scrollbar.removeEventListener('pointerdown', this);
+    this._scrollbarElement.removeEventListener('pointerdown', this);
     super.onBeforeDetach(msg);
   }
 
@@ -1088,12 +1087,8 @@ export class WindowedList<
    * Hide the native scrollbar if necessary and update dimensions
    */
   private _adjustDimensionsForScrollbar() {
-    const outer = this.node.querySelector(
-      '.jp-WindowedPanel-outer'
-    ) as HTMLElement;
-    const scrollbar = this.node.querySelector(
-      '.jp-WindowedPanel-scrollbar'
-    ) as HTMLElement;
+    const outer = this._outerElement;
+    const scrollbar = this._scrollbarElement;
     if (this.scrollbar) {
       // Query DOM
       let outerScrollbarWidth = outer.offsetWidth - outer.clientWidth;
@@ -1141,20 +1136,14 @@ export class WindowedList<
         () => this._resizeObserver?.unobserve(widget.node)
       );
     }
-    const outer = this.node.querySelector(
-      '.jp-WindowedPanel-outer'
-    ) as HTMLElement;
-    outer!.addEventListener('scroll', this, passiveIfSupported);
+    this._outerElement.addEventListener('scroll', this, passiveIfSupported);
     this._viewport.style.position = 'absolute';
 
-    const scrollbar = this.node.querySelector(
-      '.jp-WindowedPanel-scrollbar'
-    ) as HTMLElement;
     this._scrollbarResizeObserver = new ResizeObserver(
       this._adjustDimensionsForScrollbar.bind(this)
     );
-    this._scrollbarResizeObserver.observe(outer);
-    this._scrollbarResizeObserver.observe(scrollbar);
+    this._scrollbarResizeObserver.observe(this._outerElement);
+    this._scrollbarResizeObserver.observe(this._scrollbarElement);
   }
 
   /**
@@ -1169,8 +1158,7 @@ export class WindowedList<
    * Remove listeners for viewport and contents (but not the virtual scrollbar).
    */
   private _removeListeners() {
-    const outer = this.node.querySelector('.jp-WindowedPanel-outer');
-    outer!.removeEventListener('scroll', this);
+    this._outerElement.removeEventListener('scroll', this);
     this._resizeObserver?.disconnect();
     this._resizeObserver = null;
     this._scrollbarResizeObserver?.disconnect();
@@ -1247,8 +1235,7 @@ export class WindowedList<
 
         // Update scroll
         if (this._scrollUpdateWasRequested) {
-          const outer = this.node.querySelector('.jp-WindowedPanel-outer');
-          outer!.scrollTop = this.viewModel.scrollOffset;
+          this._outerElement.scrollTop = this.viewModel.scrollOffset;
           this._scrollUpdateWasRequested = false;
         }
       }
@@ -1372,6 +1359,7 @@ export class WindowedList<
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
   private _resizeObserver: ResizeObserver | null;
+  private _scrollbarElement: HTMLElement;
   private _scrollbarResizeObserver: ResizeObserver | null;
   private _scrollRepaint: number | null;
   private _scrollToItem: [number, WindowedList.ScrollToAlign] | null;
