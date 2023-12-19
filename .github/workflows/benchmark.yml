@@ -1,14 +1,13 @@
 name: Benchmark Tests
 
 on:
-  # schedule:
-  #   - cron: '12 1 * * 0'
-  pull_request_review:
+  issue_comment:
+    types: [created, edited]
 
 jobs:
   test:
     name: Execute benchmark tests
-    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && (github.event.review.state == 'approved' || contains(github.event.review.body, 'please run benchmark')))
+    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please run benchmarks') }}
 
     runs-on: ubuntu-22.04
 
@@ -190,7 +189,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: benchmark-assets
           path: |
