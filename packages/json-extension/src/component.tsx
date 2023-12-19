@@ -75,7 +75,7 @@ export class Component extends React.Component<IProps, IState> {
         <InputGroup
           className="filter"
           type="text"
-          placeholder={trans.__('Filter…')}
+          placeholder={trans.__('Find…')}
           onChange={this.handleChange}
           value={this.state.value}
           rightIcon="ui-components:search"
