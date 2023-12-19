@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import { ElementHandle } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'scroll.ipynb';
@@ -75,7 +76,10 @@ test.describe('Notebook scroll on execution', () => {
     const notebook = await page.notebook.getNotebookInPanel();
     const thirdCell = await page.notebook.getCell(2);
 
-    const notebookBbox = await notebook.boundingBox();
+    const scroller = (await notebook.$(
+      '.jp-WindowedPanel-outer'
+    )) as ElementHandle<HTMLElement>;
+    const notebookBbox = await scroller.boundingBox();
     const thirdCellBBox = await thirdCell.boundingBox();
     await page.mouse.move(notebookBbox.x, notebookBbox.y);
     const scrollOffset =
@@ -106,7 +110,10 @@ test.describe('Notebook scroll on execution', () => {
     const notebook = await page.notebook.getNotebookInPanel();
     const thirdCell = await page.notebook.getCell(2);
 
-    const notebookBbox = await notebook.boundingBox();
+    const scroller = (await notebook.$(
+      '.jp-WindowedPanel-outer'
+    )) as ElementHandle<HTMLElement>;
+    const notebookBbox = await scroller.boundingBox();
     const thirdCellBBox = await thirdCell.boundingBox();
     await page.mouse.move(notebookBbox.x, notebookBbox.y);
     const scrollOffset =
