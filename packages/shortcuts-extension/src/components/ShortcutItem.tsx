@@ -208,6 +208,26 @@ export class ShortcutItem extends React.Component<
     }, '');
   };
 
+  punctuationToText = (value: string): string => {
+    return value.split(' ').reduce((result, key) => {
+      if (key === ']') {
+        return (result + ' Closing bracket').trim();
+      } else if (key === '[') {
+        return (result + ' Opening bracket').trim();
+      } else if (key === ',') {
+        return (result + ' Comma').trim();
+      } else if (key === '.') {
+        return (result + ' Full stop').trim();
+      } else if (key === " '") {
+        return (result + ' Single quote').trim();
+      } else if (key === ' -') {
+        return (result + ' Hyphen-minus').trim();
+      } else {
+        return (result + ' ' + key).trim();
+      }
+    }, '');
+  };
+
   getErrorRow(): JSX.Element {
     const trans = this.props.external.translator.load('jupyterlab');
 
@@ -343,6 +363,7 @@ export class ShortcutItem extends React.Component<
         shortcut={this.props.shortcut}
         shortcutId={key}
         toSymbols={this.toSymbols}
+        punctuationToText={this.punctuationToText}
         keyBindingsUsed={this.props.keyBindingsUsed}
         sortConflict={this.props.sortConflict}
         clearConflicts={this.props.clearConflicts}
@@ -358,9 +379,13 @@ export class ShortcutItem extends React.Component<
     return this.props.shortcut.keys[key].map(
       (keyBinding: string, index: number) => (
         <div className="jp-Shortcuts-ShortcutKeysContainer" key={index}>
-          <div className="jp-Shortcuts-ShortcutKeys">
+          <button
+            className="jp-Shortcuts-ShortcutKeys"
+            aria-label={this.punctuationToText(keyBinding)}
+            role="text"
+          >
             {this.toSymbols(keyBinding)}
-          </div>
+          </button>
           {index + 1 < this.props.shortcut.keys[key].length ? (
             <div className="jp-Shortcuts-Comma">,</div>
           ) : null}
@@ -434,6 +459,7 @@ export class ShortcutItem extends React.Component<
         newOrReplace={'new'}
         placeholder={''}
         translator={this.props.external.translator}
+        punctuationToText={this.punctuationToText}
       />
     ) : (
       <div />

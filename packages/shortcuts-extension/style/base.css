@@ -211,6 +211,8 @@
   border-radius: var(--jp-border-radius);
   padding: 5px 6px;
   margin: 3px 0;
+  background: none;
+  border: none;
 }
 
 .jp-Shortcuts-Or {
@@ -250,6 +252,10 @@
 }
 
 .jp-Shortcuts-Plus:hover {
+  background-color: var(--jp-brand-color2);
+}
+
+.jp-Shortcuts-Plus:focus {
   background-color: var(--jp-brand-color2);
 }
 
