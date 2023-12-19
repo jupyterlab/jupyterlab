@@ -300,9 +300,9 @@ class WatchLabExtensionApp(BaseExtensionApp):
     )
 
     aliases = {
-        "development": "BuildLabExtensionApp.development",
-        "source-map": "BuildLabExtensionApp.source_map",
-        "core-path": "BuildLabExtensionApp.core_path",
+        "core-path": "WatchLabExtensionApp.core_path",
+        "development": "WatchLabExtensionApp.development",
+        "source-map": "WatchLabExtensionApp.source_map",
     }
 
     def run_task(self):
