@@ -2506,6 +2506,7 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.2.0
     "@jupyter/ydoc": ^1.1.1
+    "@jupyterlab/apputils": ^4.2.0-alpha.4
     "@jupyterlab/coreutils": ^6.1.0-alpha.4
     "@jupyterlab/nbformat": ^4.1.0-alpha.4
     "@jupyterlab/observables": ^5.1.0-alpha.4
@@ -3820,6 +3821,7 @@ __metadata:
   resolution: "@jupyterlab/lsp-extension@workspace:packages/lsp-extension"
   dependencies:
     "@jupyterlab/application": ^4.1.0-alpha.4
+    "@jupyterlab/apputils": ^4.2.0-alpha.4
     "@jupyterlab/lsp": ^4.1.0-alpha.4
     "@jupyterlab/running": ^4.1.0-alpha.4
     "@jupyterlab/settingregistry": ^4.1.0-alpha.4
