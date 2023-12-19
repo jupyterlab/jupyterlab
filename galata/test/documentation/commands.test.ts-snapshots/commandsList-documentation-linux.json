@@ -2031,6 +2031,12 @@
     ]
   },
   {
+    "id": "notebook:toggle-virtual-scrollbar",
+    "label": "Virtual Scrollbar",
+    "caption": "Toggle virtual scrollbar (enabled with windowing mode: full)",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:trust",
     "label": "Trust Notebook",
     "caption": "",
