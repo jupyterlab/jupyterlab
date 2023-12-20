@@ -40,7 +40,7 @@ async function getInnerHeight(panel: ElementHandle<Element>) {
 async function getWindowHeight(panel: ElementHandle<Element>) {
   return parseInt(
     await panel.$eval(
-      '.jp-WindowedPanel-window',
+      '.jp-WindowedPanel-viewport',
       node => (node as HTMLElement).style.minHeight
     ),
     10

@@ -963,7 +963,39 @@ export class CommandToolbarButton extends ReactWidget {
    */
   constructor(private props: CommandToolbarButtonComponent.IProps) {
     super();
+    const { commands, id, args } = props;
     addCommandToolbarButtonClass(this);
+    this.setCommandAttributes(commands, id, args);
+    commands.commandChanged.connect((_, change) => {
+      if (change.id === props.id) {
+        this.setCommandAttributes(commands, id, args);
+      }
+    }, this);
+  }
+  protected setCommandAttributes(
+    commands: CommandRegistry,
+    id: string,
+    args: ReadonlyJSONObject | undefined
+  ): void {
+    if (commands.isToggled(id, args)) {
+      this.addClass('lm-mod-toggled');
+    } else {
+      this.removeClass('lm-mod-toggled');
+    }
+    if (commands.isVisible(id, args)) {
+      this.removeClass('lm-mod-hidden');
+    } else {
+      this.addClass('lm-mod-hidden');
+    }
+    if (commands.isEnabled(id, args)) {
+      if ('disabled' in this.node) {
+        this.node.disabled = false;
+      }
+    } else {
+      if ('disabled' in this.node) {
+        this.node.disabled = true;
+      }
+    }
   }
   render(): JSX.Element {
     return <CommandToolbarButtonComponent {...this.props} />;
