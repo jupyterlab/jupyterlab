@@ -725,7 +725,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // change, and if selection is getting extended, we do not want to clear
       // highlights just to re-apply them shortly after, which has side effects
       // impacting the functionality and performance.
-      this._delayedActiveCellChangeHandler = setTimeout(() => {
+      this._delayedActiveCellChangeHandler = window.setTimeout(() => {
         this.delayedActiveCellChangeHandlerReady =
           this._handleHighlightsAfterActiveCellChange();
       }, 0);
