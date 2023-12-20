@@ -40,6 +40,7 @@ import {
   NotebookModelFactory,
   NotebookPanel,
   NotebookWidgetFactory,
+  StaticNotebook,
   ToolbarItems
 } from '@jupyterlab/notebook';
 import {
@@ -205,7 +206,11 @@ function createApp(manager: ServiceManager.IManager): void {
     rendermime,
     contentFactory,
     mimeTypeService,
-    toolbarFactory
+    toolbarFactory,
+    notebookConfig: {
+      ...StaticNotebook.defaultNotebookConfig,
+      windowingMode: 'none'
+    }
   });
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
