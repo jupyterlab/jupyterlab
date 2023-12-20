@@ -108,7 +108,8 @@ import {
   pasteIcon,
   refreshIcon,
   runIcon,
-  stopIcon
+  stopIcon,
+  tableRowsIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -319,6 +320,8 @@ namespace CommandIDs {
   export const accessPreviousHistory = 'notebook:access-previous-history-entry';
 
   export const accessNextHistory = 'notebook:access-next-history-entry';
+
+  export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
 }
 
 /**
@@ -1629,6 +1632,7 @@ function activateNotebookHandler(
       updateConfig(settings);
       settings.changed.connect(() => {
         updateConfig(settings);
+        commands.notifyCommandChanged(CommandIDs.virtualScrollbar);
       });
 
       const updateSessionSettings = (
@@ -1723,6 +1727,14 @@ function activateNotebookHandler(
             .catch(console.error);
         }
       });
+      addCommands(
+        app,
+        tracker,
+        translator,
+        sessionDialogs,
+        settings,
+        isEnabled
+      );
     })
     .catch((reason: Error) => {
       console.warn(reason.message);
@@ -1732,6 +1744,7 @@ function activateNotebookHandler(
         kernelShutdown: factory.shutdownOnClose,
         autoStartDefault: factory.autoStartDefault
       });
+      addCommands(app, tracker, translator, sessionDialogs, null, isEnabled);
     });
 
   if (formRegistry) {
@@ -1772,8 +1785,6 @@ function activateNotebookHandler(
   });
   registry.addModelFactory(modelFactory);
 
-  addCommands(app, tracker, translator, sessionDialogs, isEnabled);
-
   if (palette) {
     populatePalette(palette, translator);
   }
@@ -1806,6 +1817,14 @@ function activateNotebookHandler(
     tracker.forEach(widget => {
       widget.setConfig(options);
     });
+    if (options.notebookConfig.windowingMode !== 'full') {
+      // Disable all virtual scrollbars if any was enabled
+      tracker.forEach(widget => {
+        if (widget.content.scrollbar) {
+          widget.content.scrollbar = false;
+        }
+      });
+    }
   }
 
   /**
@@ -2119,6 +2138,7 @@ function addCommands(
   tracker: NotebookTracker,
   translator: ITranslator,
   sessionDialogs: ISessionContextDialogs,
+  settings: ISettingRegistry.ISettings | null,
   isEnabled: () => boolean
 ): void {
   const trans = translator.load('jupyterlab');
@@ -3398,7 +3418,6 @@ function addCommands(
       }
     }
   });
-
   commands.addCommand(CommandIDs.tocRunCells, {
     label: trans.__('Select and Run Cell(s) for this Heading'),
     execute: args => {
@@ -3456,6 +3475,32 @@ function addCommands(
       if (current) {
         return await NotebookActions.accessNextHistory(current.content);
       }
+    }
+  });
+  commands.addCommand(CommandIDs.virtualScrollbar, {
+    label: trans.__('Virtual Scrollbar'),
+    caption: trans.__(
+      'Toggle virtual scrollbar (enabled with windowing mode: full)'
+    ),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        current.content.scrollbar = !current.content.scrollbar;
+      }
+    },
+    icon: args => (args.toolbar ? tableRowsIcon : undefined),
+    isEnabled: args => {
+      const enabled =
+        (args.toolbar ? true : isEnabled()) &&
+        (settings?.composite.windowingMode === 'full' ?? false);
+      return enabled;
+    },
+    isVisible: args => {
+      const visible =
+        (args.toolbar ? true : isEnabled()) &&
+        (settings?.composite.windowingMode === 'full' ?? false);
+      return visible;
     }
   });
 }
