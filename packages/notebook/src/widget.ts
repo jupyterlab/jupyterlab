@@ -193,16 +193,19 @@ export class StaticNotebook extends WindowedList {
    */
   constructor(options: StaticNotebook.IOptions) {
     const cells = new Array<Cell>();
+    const windowingActive =
+      (options.notebookConfig?.windowingMode ??
+        StaticNotebook.defaultNotebookConfig.windowingMode) === 'full';
     super({
       model: new NotebookViewModel(cells, {
         overscanCount:
           options.notebookConfig?.overscanCount ??
           StaticNotebook.defaultNotebookConfig.overscanCount,
-        windowingActive:
-          (options.notebookConfig?.windowingMode ??
-            StaticNotebook.defaultNotebookConfig.windowingMode) === 'full'
+        windowingActive
       }),
-      layout: new NotebookWindowedLayout()
+      layout: new NotebookWindowedLayout(),
+      renderer: options.renderer ?? WindowedList.defaultRenderer,
+      scrollbar: false
     });
     this.addClass(NB_CLASS);
     this.cellsArray = cells;
@@ -1047,6 +1050,11 @@ export namespace StaticNotebook {
      * The kernel history retrieval object
      */
     kernelHistory?: INotebookHistory;
+
+    /**
+     * The renderer used by the underlying windowed list.
+     */
+    renderer?: WindowedList.IRenderer;
   }
 
   /**
@@ -1284,10 +1292,45 @@ export class Notebook extends StaticNotebook {
    * Construct a notebook widget.
    */
   constructor(options: Notebook.IOptions) {
-    super(options);
+    super({
+      renderer: {
+        createOuter(): HTMLElement {
+          return document.createElement('div');
+        },
+
+        createViewport(): HTMLElement {
+          const el = document.createElement('div');
+          el.setAttribute('role', 'feed');
+          el.setAttribute('aria-label', 'Cells');
+          return el;
+        },
+
+        createScrollbar(): HTMLOListElement {
+          return document.createElement('ol');
+        },
+
+        createScrollbarItem(
+          notebook: Notebook,
+          index: number,
+          model: ICellModel
+        ): HTMLLIElement {
+          const li = document.createElement('li');
+          li.appendChild(document.createTextNode(`${index + 1}`));
+          if (notebook.activeCellIndex === index) {
+            li.classList.add('jp-mod-active');
+          }
+          if (notebook.selectedCells.some(cell => model === cell.model)) {
+            li.classList.add('jp-mod-selected');
+          }
+          return li;
+        }
+      },
+      ...options
+    });
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
+    this.jumped.connect((_, index: number) => (this.activeCellIndex = index));
     this.selectionChanged.connect(this._updateSelectedCells, this);
 
     this.addFooter();

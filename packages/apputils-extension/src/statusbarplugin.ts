@@ -101,6 +101,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
     }
 
     statusBar.registerStatusItem(kernelStatus.id, {
+      priority: 1,
       item,
       align: 'left',
       rank: 1,
