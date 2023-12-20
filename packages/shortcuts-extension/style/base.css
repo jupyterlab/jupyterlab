@@ -145,6 +145,11 @@
   display: block;
 }
 
+.jp-Shortcuts-Row:focus-within #add-link,
+.jp-Shortcuts-Row:focus-within #or {
+  display: block;
+}
+
 .jp-Shortcuts-ErrorMessage {
   color: var(--jp-error-color1);
   margin-top: 9px;
@@ -255,9 +260,9 @@
   background-color: var(--jp-brand-color2);
 }
 
-.jp-Shortcuts-Plus:focus {
+/* .jp-Shortcuts-Plus:focus {
   background-color: var(--jp-brand-color2);
-}
+} */
 
 .jp-Shortcuts-Plus:active {
   background-color: var(--jp-brand-color2);
