@@ -197,6 +197,11 @@
   background: var(--jp-layout-color3);
 }
 
+.jp-Shortcuts-ShortcutContainer:focus-within .jp-Shortcuts-ShortcutKeys {
+  border-color: var(--jp-border-color3);
+  background: var(--jp-layout-color3);
+}
+
 .jp-Shortcuts-ShortcutKeysContainer {
   font-size: var(--jp-code-font-size);
   font-family: var(--jp-ui-font-family);
@@ -254,15 +259,16 @@
   border-width: var(--jp-border-width);
   margin: 3px 0;
   padding: 5px 6px;
+  border: none;
 }
 
 .jp-Shortcuts-Plus:hover {
   background-color: var(--jp-brand-color2);
 }
 
-/* .jp-Shortcuts-Plus:focus {
+.jp-Shortcuts-Plus:focus-within {
   background-color: var(--jp-brand-color2);
-} */
+}
 
 .jp-Shortcuts-Plus:active {
   background-color: var(--jp-brand-color2);

@@ -431,7 +431,7 @@ export class ShortcutItem extends React.Component<
   getAddLink(): JSX.Element {
     const trans = this.props.external.translator.load('jupyterlab');
     return (
-      <a
+      <button
         className={!this.state.displayNewInput ? 'jp-Shortcuts-Plus' : ''}
         onClick={() => {
           this.toggleInputNew(), this.props.clearConflicts();
@@ -439,7 +439,7 @@ export class ShortcutItem extends React.Component<
         id="add-link"
       >
         {trans.__('Add')}
-      </a>
+      </button>
     );
   }
 
