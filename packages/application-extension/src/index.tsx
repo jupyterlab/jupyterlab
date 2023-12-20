@@ -1246,6 +1246,7 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
     modeSwitch.label = trans.__('Simple');
 
     statusBar.registerStatusItem(modeSwitchPlugin.id, {
+      priority: 1,
       item: modeSwitch,
       align: 'left',
       rank: -1
