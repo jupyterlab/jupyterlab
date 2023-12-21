@@ -273,12 +273,12 @@ export class ShortcutItem extends React.Component<
   getResetShortCutLink(): JSX.Element {
     const trans = this.props.external.translator.load('jupyterlab');
     return (
-      <a
+      <button
         className="jp-Shortcuts-Reset"
         onClick={() => this.props.resetShortcut(this.props.shortcut)}
       >
         {trans.__('Reset')}
-      </a>
+      </button>
     );
   }
 

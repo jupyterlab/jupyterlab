@@ -425,6 +425,7 @@ export class ShortcutInput extends React.Component<
             : 'jp-mod-hidden'
         }
         onBlur={event => this.handleBlur(event)}
+        aria-label="keyboard shortcut Input Box"
       >
         <div
           tabIndex={0}

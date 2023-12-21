@@ -140,6 +140,11 @@
   background: var(--jp-layout-color2);
 }
 
+.jp-Shortcuts-Row:focus-within .jp-Shortcuts-ShortcutKeys {
+  border-color: var(--jp-border-color1);
+  background: var(--jp-layout-color2);
+}
+
 .jp-Shortcuts-Row:hover #add-link,
 .jp-Shortcuts-Row:hover #or {
   display: block;
@@ -277,9 +282,15 @@
 .jp-Shortcuts-Reset {
   color: var(--jp-brand-color2);
   padding-left: 10px;
+  background: none;
+  border: none;
 }
 
 .jp-Shortcuts-Reset:hover {
+  color: var(--jp-brand-color1);
+}
+
+.jp-Shortcuts-Reset:focus {
   color: var(--jp-brand-color1);
 }
 
