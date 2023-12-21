@@ -525,8 +525,11 @@ export class ReactiveToolbar extends Toolbar<Widget> {
             // Insert the widget in the right position in the toolbar.
             const widget = widgetsToAdd.shift()!;
             const name = Private.nameProperty.get(widget);
-            const index = this._widgetPositions.get(name) ?? 0;
-            this.insertItem(index, name, widget);
+            if (this._widgetPositions.has(name)) {
+              this.insertItem(this._widgetPositions.get(name)!, name, widget);
+            } else {
+              this.addItem(name, widget);
+            }
           }
         }
 
