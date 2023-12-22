@@ -282,6 +282,9 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     return this.insertRelative(at, 0, name, widget);
   }
 
+  /**
+   * Insert an item relatively to an other item.
+   */
   protected insertRelative(
     at: string,
     offset: number,
