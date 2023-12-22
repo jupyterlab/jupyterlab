@@ -419,7 +419,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   }
 
   /**
-   * insert an item relatively to an other item.
+   * Insert an item relatively to an other item.
    */
   protected insertRelative(
     at: string,
