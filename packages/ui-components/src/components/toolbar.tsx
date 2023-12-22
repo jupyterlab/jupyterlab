@@ -259,7 +259,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * The item can be removed from the toolbar by setting its parent to `null`.
    */
   insertAfter(at: string, name: string, widget: T): boolean {
-    return this._insertRelative(at, 1, name, widget);
+    return this.insertRelative(at, 1, name, widget);
   }
 
   /**
@@ -279,10 +279,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * The item can be removed from the toolbar by setting its parent to `null`.
    */
   insertBefore(at: string, name: string, widget: T): boolean {
-    return this._insertRelative(at, 0, name, widget);
+    return this.insertRelative(at, 0, name, widget);
   }
 
-  private _insertRelative(
+  protected insertRelative(
     at: string,
     offset: number,
     name: string,
@@ -416,6 +416,25 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   }
 
   /**
+   * insert an item relatively to an other item.
+   */
+  protected insertRelative(
+    at: string,
+    offset: number,
+    name: string,
+    widget: Widget
+  ): boolean {
+    const targetPosition = this._widgetPositions.get(at);
+    const position = (targetPosition ?? 0) + offset;
+    this._widgetPositions.forEach((value, key) => {
+      if (key !== TOOLBAR_OPENER_NAME && value >= position) {
+        this._widgetPositions.set(key, value + 1);
+      }
+    });
+    return this.insertItem(position, name, widget);
+  }
+
+  /**
    * Insert an item into the toolbar at the specified index.
    *
    * @param index - The index at which to insert the item.
@@ -444,8 +463,11 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     }
 
     // Save the widgets position when a new widget is inserted.
-    if (this._widgetPositions.get(name) === undefined) {
-      this._saveWidgetPosition();
+    if (
+      name !== TOOLBAR_OPENER_NAME &&
+      this._widgetPositions.get(name) === undefined
+    ) {
+      this._widgetPositions.set(name, index);
     }
     return status;
   }
@@ -474,7 +496,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     }
   }
 
-  private _onResize() {
+  private async _onResize() {
     if (!(this.parent && this.parent.isAttached)) {
       return;
     }
@@ -532,7 +554,6 @@ export class ReactiveToolbar extends Toolbar<Widget> {
             }
           }
         }
-
         if (opener.widgetCount() > 0) {
           opener.updatePopup();
           opener.show();
@@ -566,8 +587,10 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       if (this._zoomChanged) {
         widgetWidth = await this._saveWidgetWidth(widget);
       } else {
+        // The widget widths can be 0px if it has been added to the toolbar but
+        // not rendered, this is why we must use '||' instead of '??'.
         widgetWidth =
-          this._getWidgetWidth(widget) ?? (await this._saveWidgetWidth(widget));
+          this._getWidgetWidth(widget) || (await this._saveWidgetWidth(widget));
       }
       width += widgetWidth;
       if (
@@ -606,13 +629,6 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   private _getWidgetWidth(widget: Widget): number {
     const widgetName = Private.nameProperty.get(widget);
     return this._widgetWidths![widgetName];
-  }
-
-  private _saveWidgetPosition(): void {
-    this._widgetPositions.clear();
-    (this.layout as ToolbarLayout).widgets.forEach((widget, index) => {
-      this._widgetPositions.set(Private.nameProperty.get(widget), index);
-    });
   }
 
   protected readonly popupOpener: ToolbarPopupOpener = new ToolbarPopupOpener();
