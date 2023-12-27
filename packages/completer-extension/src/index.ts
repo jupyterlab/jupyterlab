@@ -359,7 +359,7 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
               binding.keys[0] === 'Tab' &&
               target.closest(binding.selector)
             ) {
-              app.commands.execute(binding.command);
+              app.commands.execute(binding.command).catch(console.error);
               event.preventDefault();
               event.stopPropagation();
               event.stopImmediatePropagation();
