@@ -572,7 +572,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
           opener.hide();
         }
         if (twiceCall) {
-          this._onResize();
+          void this._onResize();
         }
       })
       .catch(msg => {
