@@ -168,6 +168,8 @@ test.describe('Inline Completer', () => {
     });
 
     test('Accepts suggestion on Tab', async ({ page }) => {
+      await page.keyboard.press('u');
+
       await page.evaluate(async () => {
         await window.jupyterapp.commands.execute('inline-completer:invoke');
       });
