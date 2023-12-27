@@ -97,11 +97,11 @@ All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
-All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `black <https://github.com/psf/black>`__.
+All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `ruff <https://docs.astral.sh/ruff>`__.
 When code is modified and committed, all staged files will be
 automatically formatted using pre-commit git hooks (with help from
 `pre-commit <https://github.com/pre-commit/pre-commit>`__). The benefit of
-using a code formatters like ``prettier`` and ``black`` is that it removes the topic of
+using a code formatters like ``prettier`` and ``ruff`` is that it removes the topic of
 code style from the conversation when reviewing pull requests, thereby
 speeding up the review process.
 
@@ -121,7 +121,7 @@ You can invoke the pre-commit hook by hand at any time with::
 
 which should run any autoformatting on your code
 and tell you about any errors it couldn't fix automatically.
-You may also install `black integration <https://github.com/psf/black#editor-integration>`__
+You may also install `ruff integration <https://docs.astral.sh/ruff/integrations>`__
 into your text editor to format code automatically.
 
 If you have already committed files before setting up the pre-commit
