@@ -374,8 +374,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     super();
     this.insertItem(0, TOOLBAR_OPENER_NAME, this.popupOpener);
     this.popupOpener.hide();
-    this._resizer = new Throttler(async () => {
-      await this._onResize();
+    this._resizer = new Throttler(async (twiceCall = false) => {
+      await this._onResize(twiceCall);
     }, 300);
   }
 
@@ -476,6 +476,15 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   }
 
   /**
+   * A message handler invoked on an `'after-show'` message.
+   *
+   * Invokes resizing to ensure correct display of items.
+   */
+  onAfterShow(msg: Message): void {
+    void this._resizer.invoke(true);
+  }
+
+  /**
    * A message handler invoked on a `'before-hide'` message.
    *
    * It will hide the pop-up panel
@@ -499,7 +508,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     }
   }
 
-  private async _onResize() {
+  private async _onResize(twiceCall = false) {
     if (!(this.parent && this.parent.isAttached)) {
       return;
     }
@@ -526,26 +535,25 @@ export class ReactiveToolbar extends Toolbar<Widget> {
         if (opener.widgetCount() > 0) {
           const widgetsToAdd = [];
           let index = 0;
-          let widget = opener.widgetAt(index);
           const widgetCount = opener.widgetCount();
 
-          width += this._getWidgetWidth(widget);
-
-          if (widgetCount === 1 && width - openerWidth <= toolbarWidth) {
-            width -= openerWidth;
-          }
-
-          while (width < toolbarWidth && index < widgetCount) {
-            widgetsToAdd.push(widget);
-            index++;
-            widget = opener.widgetAt(index);
+          while (index < widgetCount) {
+            let widget = opener.widgetAt(index);
             if (widget) {
               width += this._getWidgetWidth(widget);
+              if (widgetCount - widgetsToAdd.length === 1) {
+                width -= openerWidth;
+              }
             } else {
               break;
             }
+            if (width < toolbarWidth) {
+              widgetsToAdd.push(widget);
+            } else {
+              break;
+            }
+            index++;
           }
-
           while (widgetsToAdd.length > 0) {
             // Insert the widget in the right position in the toolbar.
             const widget = widgetsToAdd.shift()!;
@@ -562,6 +570,9 @@ export class ReactiveToolbar extends Toolbar<Widget> {
           opener.show();
         } else {
           opener.hide();
+        }
+        if (twiceCall) {
+          this._onResize();
         }
       })
       .catch(msg => {
