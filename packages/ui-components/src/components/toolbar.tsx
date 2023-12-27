@@ -374,8 +374,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     super();
     this.insertItem(0, TOOLBAR_OPENER_NAME, this.popupOpener);
     this.popupOpener.hide();
-    this._resizer = new Throttler(async (twiceCall = false) => {
-      await this._onResize(twiceCall);
+    this._resizer = new Throttler(async (callTwice = false) => {
+      await this._onResize(callTwice);
     }, 300);
   }
 
@@ -508,7 +508,19 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     }
   }
 
-  private async _onResize(twiceCall = false) {
+  /**
+   * Move the toolbar items between the reactive toolbar and the popup toolbar,
+   * depending on the width of the toolbar and the width of each item.
+   *
+   * @param callTwice - whether to call the function twice.
+   *
+   * **NOTES**
+   * The `callTwice` parameter is useful when the toolbar is displayed the first time,
+   * because the size of the items is unknown before their first rendering. The first
+   * call will usually add all the items in the main toolbar, and the second call will
+   * reorganize the items between the main toolbar and the popup toolbar.
+   */
+  private async _onResize(callTwice = false) {
     if (!(this.parent && this.parent.isAttached)) {
       return;
     }
@@ -571,7 +583,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
         } else {
           opener.hide();
         }
-        if (twiceCall) {
+        if (callTwice) {
           void this._onResize();
         }
       })
