@@ -200,9 +200,11 @@ export abstract class TableOfContentsModel<
     if (this._activeHeading !== heading) {
       this._activeHeading = heading;
       this.stateChanged.emit();
-      if (emitSignal) {
-        this._activeHeadingChanged.emit(heading);
-      }
+    }
+
+    if (emitSignal) {
+      // Always emit the signal to trigger a scroll even if the value did not change
+      this._activeHeadingChanged.emit(this._activeHeading);
     }
   }
 

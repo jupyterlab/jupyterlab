@@ -739,6 +739,12 @@
       "type": "number",
       "default": 50
     },
+    "scrollHeadingToTop": {
+      "title": "Scroll heading to top",
+      "description": "Whether to scroll heading to the document top when selecting it in the table of contents. Starting with JupyterLab 4.1 this setting will be enabled by default.",
+      "type": "boolean",
+      "default": false
+    },
     "showEditorForReadOnlyMarkdown": {
       "title": "Show editor for read-only Markdown cells",
       "description": "Should an editor be shown for read-only markdown",
