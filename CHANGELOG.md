@@ -101,6 +101,38 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.0.10
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.9...b9bc3002b1ab89b9a1c4d2a3007c43275d11e0df))
+
+### Bugs fixed
+
+- Backport PR #15386: Improve scrolling to heading [#15565](https://github.com/jupyterlab/jupyterlab/pull/15565) ([@krassowski](https://github.com/krassowski))
+- Workaround focus leaving input box on consecutive submissions [#15479](https://github.com/jupyterlab/jupyterlab/pull/15479) ([@krassowski](https://github.com/krassowski))
+- Fix search coming back in notebook and editor [#15443](https://github.com/jupyterlab/jupyterlab/pull/15443) ([@krassowski](https://github.com/krassowski))
+- Fix `jupyter labextension watch --help` [#15542](https://github.com/jupyterlab/jupyterlab/pull/15542) ([@akx](https://github.com/akx))
+- Fix `FormComponent` showing error indicators in all fields when using a `customValidate` function [#15464](https://github.com/jupyterlab/jupyterlab/pull/15464) ([@mmichilot](https://github.com/mmichilot))
+- Fix Shift + L not working in stdin [#15440](https://github.com/jupyterlab/jupyterlab/pull/15440) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Backport PR #15499: Adopt ruff format [#15564](https://github.com/jupyterlab/jupyterlab/pull/15564) ([@krassowski](https://github.com/krassowski))
+- Pin `actions/labeler` to v4 to fix failing CI action [#15496](https://github.com/jupyterlab/jupyterlab/pull/15496) ([@krassowski](https://github.com/krassowski))
+- Fix URLs in debugger-extension [#15462](https://github.com/jupyterlab/jupyterlab/pull/15462) ([@fcollonval](https://github.com/fcollonval))
+- More robust galata/UI tests [#15355](https://github.com/jupyterlab/jupyterlab/pull/15355) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Backport PR #15499: Adopt ruff format [#15564](https://github.com/jupyterlab/jupyterlab/pull/15564) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-11-18&to=2023-12-29&type=c))
+
+[@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2023-11-18..2023-12-29&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2023-11-18..2023-12-29&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2023-11-18..2023-12-29&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2023-11-18..2023-12-29&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-11-18..2023-12-29&type=Issues) | [@g547315](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ag547315+updated%3A2023-11-18..2023-12-29&type=Issues) | [@gabalafou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agabalafou+updated%3A2023-11-18..2023-12-29&type=Issues) | [@GabrielaVives](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AGabrielaVives+updated%3A2023-11-18..2023-12-29&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-11-18..2023-12-29&type=Issues) | [@j264415](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aj264415+updated%3A2023-11-18..2023-12-29&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-11-18..2023-12-29&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-11-18..2023-12-29&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-11-18..2023-12-29&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-11-18..2023-12-29&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-11-18..2023-12-29&type=Issues) | [@parmentelat](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aparmentelat+updated%3A2023-11-18..2023-12-29&type=Issues) | [@tonyfast](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atonyfast+updated%3A2023-11-18..2023-12-29&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-11-18..2023-12-29&type=Issues) | [@Wh1isper](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AWh1isper+updated%3A2023-11-18..2023-12-29&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.0.9
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.8...685fad189917242f1736d2c88a890f346874472d))
@@ -131,8 +163,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2023-11-02&to=2023-11-18&type=c))
 
 [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2023-11-02..2023-11-18&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2023-11-02..2023-11-18&type=Issues) | [@dharmaquark](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adharmaquark+updated%3A2023-11-02..2023-11-18&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-11-02..2023-11-18&type=Issues) | [@gabalafou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agabalafou+updated%3A2023-11-02..2023-11-18&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-11-02..2023-11-18&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-11-02..2023-11-18&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-11-02..2023-11-18&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-11-02..2023-11-18&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-11-02..2023-11-18&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2023-11-02..2023-11-18&type=Issues) | [@skyetim](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Askyetim+updated%3A2023-11-02..2023-11-18&type=Issues) | [@tonyfast](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atonyfast+updated%3A2023-11-02..2023-11-18&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-11-02..2023-11-18&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.8
 

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/running",
-  "version": "4.0.9",
+  "version": "4.0.10",
   "description": "JupyterLab - Running Sessions Panel",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,9 +37,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.1.9",
-    "@jupyterlab/translation": "^4.0.9",
-    "@jupyterlab/ui-components": "^4.0.9",
+    "@jupyterlab/apputils": "^4.1.10",
+    "@jupyterlab/translation": "^4.0.10",
+    "@jupyterlab/ui-components": "^4.0.10",
     "@lumino/coreutils": "^2.1.2",
     "@lumino/disposable": "^2.1.2",
     "@lumino/messaging": "^2.0.1",
