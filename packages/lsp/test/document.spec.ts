@@ -53,6 +53,7 @@ describe('@jupyterlab/lsp', () => {
     let extractorManager: ILSPCodeExtractorsManager;
     let markdownCellExtractor: TextForeignCodeExtractor;
     let rawCellExtractor: TextForeignCodeExtractor;
+    let standaloneCellExtractor: TextForeignCodeExtractor;
     beforeAll(() => {
       extractorManager = new CodeExtractorsManager();
 
@@ -70,6 +71,13 @@ describe('@jupyterlab/lsp', () => {
         cellType: ['raw']
       });
       extractorManager.register(rawCellExtractor, null);
+      standaloneCellExtractor = new TextForeignCodeExtractor({
+        language: 'standalone-text',
+        isStandalone: true,
+        file_extension: 'txt',
+        cellType: ['standalone-raw']
+      });
+      extractorManager.register(standaloneCellExtractor, null);
     });
     beforeEach(() => {
       document = new VirtualDocument({
@@ -137,7 +145,6 @@ describe('@jupyterlab/lsp', () => {
         document.dispose();
         expect(document.foreignDocuments.size).toEqual(0);
         expect(document['sourceLines'].size).toEqual(0);
-        expect(document['unusedDocuments'].size).toEqual(0);
         expect(document['unusedStandaloneDocuments'].size).toEqual(0);
         expect(document['virtualLines'].size).toEqual(0);
       });
@@ -226,17 +233,68 @@ describe('@jupyterlab/lsp', () => {
         expect(foreignDocumentsMap.size).toEqual(1);
       });
     });
-    describe('#chooseForeignDocument', () => {
+    describe('#_chooseForeignDocument', () => {
       it('should select the foreign document for markdown cell', () => {
-        const md: VirtualDocument = document['chooseForeignDocument'](
+        const md: VirtualDocument = document['_chooseForeignDocument'](
           markdownCellExtractor
         );
         expect(md.uri).toBe('test.ipynb.python-markdown.md');
       });
       it('should select the foreign document for raw cell', () => {
         const md: VirtualDocument =
-          document['chooseForeignDocument'](rawCellExtractor);
+          document['_chooseForeignDocument'](rawCellExtractor);
         expect(md.uri).toBe('test.ipynb.python-text.txt');
+      });
+      it('should use unused virtual document if available', () => {
+        document.appendCodeBlock({
+          value: 'test line in raw 1\ntest line in raw 2',
+          ceEditor: {} as Document.IEditor,
+          type: 'standalone-raw'
+        });
+        document.clear();
+        expect(
+          document['unusedStandaloneDocuments'].get(
+            standaloneCellExtractor.language
+          ).length
+        ).toEqual(1);
+
+        const openForeignSpy = jest.spyOn(document as any, 'openForeign');
+        document['_chooseForeignDocument'](standaloneCellExtractor);
+
+        expect(
+          document['unusedStandaloneDocuments'].get(
+            standaloneCellExtractor.language
+          ).length
+        ).toEqual(0);
+        expect(openForeignSpy).toHaveBeenCalledTimes(0);
+      });
+    });
+    describe('#closeExpiredDocuments', () => {
+      it('should close expired foreign documents', async () => {
+        // We start with a notebook having a code cell, a raw cell and a markdown cell
+        // this means we have two foreign documents which can expire: one for markdown
+        // cell and one for raw cell.
+        expect(new Set(document.foreignDocuments.keys())).toEqual(
+          new Set(['text', 'markdown'])
+        );
+        const newNotebookState = [
+          {
+            value: 'test line in markdown 1\ntest line in markdown 2',
+            ceEditor: {} as Document.IEditor,
+            type: 'markdown'
+          }
+        ];
+        // If user just removed the last raw cell we do expire the virtual document
+        // associated immediately (because if they are just cutting and pasting
+        // cells we may be able to recycle connections). However if user keeps modifying
+        // the notebook, we ultimately discard the virtual document as expired.
+        for (let i = 0; i < 10; i++) {
+          await document.updateManager.updateDocuments(newNotebookState);
+          document.closeExpiredDocuments();
+        }
+        expect(new Set(document.foreignDocuments.keys())).toEqual(
+          new Set(['markdown'])
+        );
       });
     });
     describe('#openForeign', () => {
@@ -255,14 +313,14 @@ describe('@jupyterlab/lsp', () => {
       it('should emit the `foreignDocumentClosed` signal', () => {
         const cb = jest.fn();
         document.foreignDocumentClosed.connect(cb);
-        const md: VirtualDocument = document['chooseForeignDocument'](
+        const md: VirtualDocument = document['_chooseForeignDocument'](
           markdownCellExtractor
         );
         document.closeForeign(md);
         expect(cb).toHaveBeenCalled();
       });
       it('should close correctly foreign documents', () => {
-        const md: VirtualDocument = document['chooseForeignDocument'](
+        const md: VirtualDocument = document['_chooseForeignDocument'](
           markdownCellExtractor
         );
         md.closeAllForeignDocuments = jest.fn();
@@ -285,7 +343,7 @@ describe('@jupyterlab/lsp', () => {
         );
       });
       it('should get the markdown content of the document', () => {
-        const md = document['chooseForeignDocument'](markdownCellExtractor);
+        const md = document['_chooseForeignDocument'](markdownCellExtractor);
 
         expect(md.value).toContain(
           'test line in markdown 1\ntest line in markdown 2'
@@ -310,6 +368,44 @@ describe('@jupyterlab/lsp', () => {
           line: 0
         });
         expect(position).toEqual({ ch: 2, line: 0 });
+      });
+    });
+    describe('#transformVirtualToRoot', () => {
+      it('should return the position in root', async () => {
+        await document.updateManager.updateDocuments([
+          {
+            value: 'new line',
+            ceEditor: {} as Document.IEditor,
+            type: 'code'
+          }
+        ]);
+        const position = document.transformVirtualToRoot({
+          isVirtual: true,
+          ch: 2,
+          line: 0
+        });
+        expect(position).toEqual({ ch: 2, line: 0 });
+      });
+    });
+    describe('#clear', () => {
+      it('should clear everything', () => {
+        document.clear();
+        expect(document['unusedStandaloneDocuments'].size).toEqual(0);
+        expect(document['virtualLines'].size).toEqual(0);
+        expect(document['virtualLines'].size).toEqual(0);
+        expect(document['sourceLines'].size).toEqual(0);
+        expect(document['lastVirtualLine']).toEqual(0);
+        expect(document['lastSourceLine']).toEqual(0);
+        expect(document['lineBlocks']).toEqual([]);
+      });
+      it('should keep unused document', () => {
+        document.appendCodeBlock({
+          value: 'test line in raw 1\ntest line in raw 2',
+          ceEditor: {} as Document.IEditor,
+          type: 'standalone-raw'
+        });
+        document.clear();
+        expect(document['unusedStandaloneDocuments'].size).toEqual(1);
       });
     });
   });

@@ -146,14 +146,11 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
               () => registry.settingsSchema,
               []
             ) as any;
-            const editorConfiguration =
-              (props.formContext.settings as ISettingRegistry.ISettings).id ===
-              SETTINGS_ID
-                ? registry.baseConfiguration
-                : registry.defaultConfiguration;
             const defaultFormData: Record<string, any> = {};
             // Only provide customizable options
-            for (const [key, value] of Object.entries(editorConfiguration)) {
+            for (const [key, value] of Object.entries(
+              registry.defaultConfiguration
+            )) {
               if (typeof properties[key] !== 'undefined') {
                 defaultFormData[key] = value;
               }
@@ -242,11 +239,7 @@ export const servicesPlugin: JupyterFrontEndPlugin<IEditorServices> = {
   id: '@jupyterlab/codemirror-extension:services',
   description: 'Provides the service to instantiate CodeMirror editors.',
   provides: IEditorServices,
-  requires: [
-    IEditorLanguageRegistry,
-    IEditorExtensionRegistry,
-    IEditorThemeRegistry
-  ],
+  requires: [IEditorLanguageRegistry, IEditorExtensionRegistry],
   optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,

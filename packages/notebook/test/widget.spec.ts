@@ -1348,7 +1348,7 @@ describe('@jupyter/notebook', () => {
       });
 
       describe('focusout', () => {
-        it('should switch to command mode', () => {
+        it('should switch to command mode', async () => {
           simulate(widget.node, 'focusin');
           widget.mode = 'edit';
           const event = generate('focusout');
@@ -1356,6 +1356,8 @@ describe('@jupyter/notebook', () => {
           widget.node.dispatchEvent(event);
           expect(widget.mode).toBe('command');
           MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+          // Wait for the activeCell to be focused
+          await framePromise();
           expect(widget.mode).toBe('command');
           expect(widget.activeCell!.editor!.hasFocus()).toBe(false);
         });
@@ -1429,13 +1431,15 @@ describe('@jupyter/notebook', () => {
     describe('#onActivateRequest()', () => {
       it('should focus the node after an update', async () => {
         const widget = createActiveWidget();
+        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
+        await framePromise();
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onActivateRequest'])
         );
         await framePromise();
-        expect(document.activeElement).toBe(widget.node);
+        expect(document.activeElement).toBe(widget.activeCell!.node);
         widget.dispose();
       });
     });

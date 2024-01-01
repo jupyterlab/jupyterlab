@@ -13,3 +13,8 @@ updates:
       # Check for updates to GitHub Actions every month
       # Align with pre-commit configuration .pre-commit-config.yaml
       interval: "monthly"
+    ignore:
+    # Prevent the UI tests from failing, as the version number of ipython is visible
+    # in some of the Galata snapshots
+    - dependency-name: "ipython"
+    - update-types: ["version-update:semver-minor", "version-update:semver-patch"]

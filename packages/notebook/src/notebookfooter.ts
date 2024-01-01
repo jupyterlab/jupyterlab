@@ -48,14 +48,16 @@ export class NotebookFooter extends Widget {
       this.notebook.activeCellIndex = this.notebook.widgets.length - 1;
     }
     NotebookActions.insertBelow(this.notebook);
+    // Focus on the created cell.
+    void NotebookActions.focusActiveCell(this.notebook);
   }
 
   /**
-   * On arrow up key pressed (keydown keyboard event), blur the footer and switch to command mode.
+   * On arrow up key pressed (keydown keyboard event).
+   * @deprecated To be removed in v5, this is a no-op
    */
   protected onArrowUp(): void {
-    this.node.blur();
-    this.notebook.mode = 'command';
+    // The specific behavior has been removed in https://github.com/jupyterlab/jupyterlab/pull/14796
   }
 
   /*

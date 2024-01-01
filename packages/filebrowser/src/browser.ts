@@ -62,8 +62,6 @@ export class FileBrowser extends SidePanel {
     model.connectionFailure.connect(this._onConnectionFailure, this);
     this._manager = model.manager;
 
-    // a11y
-    this.toolbar.node.setAttribute('role', 'navigation');
     this.toolbar.node.setAttribute(
       'aria-label',
       this._trans.__('file browser')
@@ -124,6 +122,17 @@ export class FileBrowser extends SidePanel {
     } else {
       console.warn('Listing does not support toggling column visibility');
     }
+  }
+
+  /**
+   * Whether to show the full path in the breadcrumbs
+   */
+  get showFullPath(): boolean {
+    return this.crumbs.fullPath;
+  }
+
+  set showFullPath(value: boolean) {
+    this.crumbs.fullPath = value;
   }
 
   /**

@@ -330,7 +330,7 @@ notifications using:
 
 .. code:: typescript
 
-  Notification.dimiss(id?: string): void;
+  Notification.dismiss(id?: string): void;
 
 .. note::
 

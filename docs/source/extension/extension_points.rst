@@ -383,7 +383,7 @@ Jupyter Front-End Shell
 -----------------------
 
 The Jupyter front-end
-`shell <../api/interfaces/application.jupyterfrontend.ishell.html>`__
+`shell <../api/interfaces/application.JupyterFrontEnd.IShell.html>`__
 is used to add and interact with content in the application. The ``IShell``
 interface provides an ``add()`` method for adding widgets to the application.
 In JupyterLab, the application shell consists of:
@@ -888,6 +888,103 @@ If you are adding your own activities to JupyterLab, you might consider providin
 a ``WidgetTracker`` token of your own, so that other extensions can make use of it.
 
 
+Completion Providers
+--------------------
+
+Both code completer and inline completer can be extended by registering
+an (inline) completion provider on the completion manager provided by
+the ``ICompletionProviderManager`` token.
+
+
+Code Completer
+^^^^^^^^^^^^^^
+
+A minimal code completion provider needs to implement the `fetch` and `isApplicable`
+methods, and define a unique `identifier` property, but the ``ICompletionProvider``
+interface allows for much more extensive customization of the completer.
+
+.. code:: typescript
+
+    import { ICompletionProviderManager, ICompletionProvider } from '@jupyterlab/completer';
+
+    class MyProvider implements ICompletionProvider {
+      readonly identifier = 'my-provider';
+
+      async isApplicable(context) {
+        return true;
+      }
+
+      async fetch(request, context) {
+        return {
+          start: request.offset,
+          end: request.offset,
+          items: [
+            { label: 'option 1' },
+            { label: 'option 2' }
+          ]
+        };
+      }
+    }
+
+    const plugin: JupyterFrontEndPlugin<void> = {
+      id: 'my-completer-extension:provider',
+      autoStart: true,
+      requires: [ICompletionProviderManager],
+      activate: (app: JupyterFrontEnd, manager: ICompletionProviderManager): void => {
+        const provider = new MyProvider();
+        manager.registerProvider(provider);
+      }
+    };
+
+
+A more detailed example is provided in the `extension-examples <https://github.com/jupyterlab/extension-examples/tree/main/completer>`__ repository.
+
+For an example of an extensively customised completion provider, see the
+`jupyterlab-lsp <https://github.com/jupyter-lsp/jupyterlab-lsp>`__ extension.
+
+Inline Completer
+^^^^^^^^^^^^^^^^
+
+.. versionadded::4.1
+    Experimental Inline Completion API was added in JupyterLab 4.1.
+    We welcome feedback on making it better for extension authors.
+
+A minimal inline completion provider extension would only implement the
+required method `fetch` and define `identifier` and `name` properties,
+but a number of additional fields can be used for enhanced functionality,
+such as streaming, see the ``IInlineCompletionProvider`` documentation.
+
+.. code:: typescript
+
+    import { ICompletionProviderManager, IInlineCompletionProvider } from '@jupyterlab/completer';
+
+    class MyInlineProvider implements IInlineCompletionProvider {
+      readonly identifier = 'my-provider';
+      readonly name = 'My provider';
+
+      async fetch(request, context) {
+        return {
+          items: [
+            { insertText: 'suggestion 1' },
+            { insertText: 'suggestion 2' }
+          ]
+        };
+      }
+    }
+
+    const plugin: JupyterFrontEndPlugin<void> = {
+      id: 'my-completer-extension:inline-provider',
+      autoStart: true,
+      requires: [ICompletionProviderManager],
+      activate: (app: JupyterFrontEnd, manager: ICompletionProviderManager): void => {
+        const provider = new MyInlineProvider();
+        manager.registerInlineProvider(provider);
+      }
+    };
+
+For an example of an inline completion provider with streaming support, see
+`jupyterlab-transformers-completer <https://github.com/krassowski/jupyterlab-transformers-completer>`__.
+
 State Database
 --------------
 
@@ -951,10 +1048,70 @@ Here is an example for making requests to the language server.
       const virtualDocument = adapter.virtualDocument;
 
       // Get the LSP connection of the virtual document.
-      const connection = manager.connections.get(document.uri);
+      const connection = manager.connections.get(virtualDocument.uri);
       ...
       // Send completion request to the language server
       const response = await connection.clientRequests['textDocument/completion'].request(params);
       ...
+    }
+  };
+
+Occasionally, LSP extensions include a CodeMirror extension to modify the code editor. In those cases, you can follow this example:
+
+.. code:: typescript
+
+  const renamePlugin: JupyterFrontEndPlugin<void> = {
+    id,
+    autoStart: true,
+    requires: [ILSPDocumentConnectionManager, ILSPFeatureManager, IWidgetLSPAdapterTracker],
+    activate: (app: JupyterFrontEnd, connectionManager: ILSPDocumentConnectionManager, featureManager: ILSPFeatureManager, tracker: IWidgetLSPAdapterTracker) => {
+      const FEATURE_ID = "rename_symbol";
+      const extensionFactory: EditorAdapter.ILSPEditorExtensionFactory = {
+        name: FEATURE_ID,
+        factory: (options) =>  {
+          const { editor, widgetAdapter } = options;
+
+          // Get the editor
+          const ceEditor: CodeEditor.IEditor | null = editor.getEditor();
+          if (!ceEditor) {
+            return null;
+          }
+
+          // Get the associated virtual document of the opened document
+          if (!widgetAdapter.virtualDocument) {
+            return null;
+          }
+
+          // Get the LSP connection of the virtual document.
+          const connection = connectionManager.connections.get(widgetAdapter.virtualDocument.uri);
+          if (!connection || !connection.provides('renameProvider')) {
+            return null;
+          }
+
+          // Create a CodeMirror extension that listens for double click, gets the
+          // selected code and makes a LSP request to rename it and prints the results.
+          const ext = EditorView.domEventHandlers({ dblclick: (e, view) => {
+            const range = ceEditor.getSelection();
+              const res = connection.clientRequests['textDocument/rename'].request({
+                newName: "test",
+                position: { line: range.start.line, character: range.start.column },
+                textDocument: { uri: widgetAdapter.virtualDocument!.uri }
+              });
+
+              res.then(value => {
+                console.debug(value);
+              }).catch(e => console.error);
+          }});
+
+          // Wrap the CodeMirror extension in the extension registry object.
+          return EditorExtensionRegistry.createImmutableExtension(ext);
+        }
+      }
+
+      // Register the extension with the LSP feature
+      featureManager.register({
+        id: FEATURE_ID,
+        extensionFactory
+      });
     }
   };

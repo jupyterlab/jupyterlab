@@ -31,6 +31,9 @@ RECOMMENDED_TO_OVERRIDE = [
     ".github/workflows/binder-on-pr.yml",
     ".github/workflows/build.yml",
     ".github/workflows/check-release.yml",
+    ".github/workflows/enforce-label.yml",
+    ".github/workflows/prep-release.yml",
+    ".github/workflows/publish-release.yml",
     ".github/workflows/update-integration-tests.yml",
     "binder/postBuild",
     ".eslintignore",
@@ -95,7 +98,8 @@ def update_extension(  # noqa
         if setup_file.exists():
             python_name = (
                 subprocess.check_output(
-                    [sys.executable, "setup.py", "--name"], cwd=target  # noqa S603
+                    [sys.executable, "setup.py", "--name"],  # noqa: S603
+                    cwd=target,
                 )
                 .decode("utf8")
                 .strip()
@@ -103,7 +107,9 @@ def update_extension(  # noqa
         else:
             python_name = data["name"]
             if "@" in python_name:
-                python_name = python_name[1:].replace("/", "_").replace("-", "_")
+                python_name = python_name[1:]
+            # Clean up the name to be valid package module name
+        python_name = python_name.replace("/", "_").replace("-", "_")
 
     output_dir = target / "_temp_extension"
     if output_dir.exists():
@@ -111,7 +117,7 @@ def update_extension(  # noqa
 
     # Build up the template answers and run the template engine
     author = data.get("author", "<author_name>")
-    author_email = "<author_email>"
+    author_email = ""
     if isinstance(author, dict):
         author_name = author.get("name", "<author_name>")
         author_email = author.get("email", author_email)
@@ -144,7 +150,7 @@ def update_extension(  # noqa
     }
 
     template = "https://github.com/jupyterlab/extension-template"
-    if tuple(copier.__version__.split('.')) < ('8', '0', '0'):
+    if tuple(copier.__version__.split(".")) < ("8", "0", "0"):
         copier.run_auto(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True)
     else:
         copier.run_copy(
@@ -171,11 +177,31 @@ def update_extension(  # noqa
             data["scripts"][key] = value
         if "install-ext" in data["scripts"]:
             del data["scripts"]["install-ext"]
+        if "prepare" in data["scripts"]:
+            del data["scripts"]["prepare"]
     else:
         warnings.append("package.json scripts must be updated manually")
 
     # Set the output directory
     data["jupyterlab"]["outputDir"] = temp_data["jupyterlab"]["outputDir"]
+
+    # Set linters
+    ## Map package.json key to previous config file
+    linters = {
+        "eslintConfig": ".eslintrc.js",
+        "eslintIgnore": ".eslintignore",
+        "prettier": ".prettierrc",
+        "stylelint": ".stylelintrc",
+    }
+
+    for key, file in linters.items():
+        if key in temp_data:
+            data[key] = temp_data[key]
+
+            linter_file = target / file
+            if linter_file.exists():
+                linter_file.unlink()
+                warnings.append(f"DELETED {file}")
 
     # Look for resolutions in JupyterLab metadata and upgrade those as well
     root_jlab_package = files("jupyterlab").joinpath("staging/package.json")
@@ -212,7 +238,7 @@ def update_extension(  # noqa
     # At the end, list the files that were: added, overridden, skipped
     for p in output_dir.rglob("*"):
         relpath = p.relative_to(output_dir)
-        if relpath.name == "package.json":
+        if str(relpath) == "package.json":
             continue
         if p.is_dir():
             continue
@@ -256,7 +282,7 @@ def update_extension(  # noqa
                 pyproject = tomllib.loads(pyproject_file.read_text())
 
                 # Backport requirements
-                requirements_raw = config.get('options', 'install_requires', fallback=None)
+                requirements_raw = config.get("options", "install_requires", fallback=None)
                 if requirements_raw is not None:
                     requirements = list(
                         filter(
@@ -272,8 +298,8 @@ def update_extension(  # noqa
                 )
 
                 # Backport extras
-                if config.has_section('options.extras_require'):
-                    for extra, deps_raw in config.items('options.extras_require'):
+                if config.has_section("options.extras_require"):
+                    for extra, deps_raw in config.items("options.extras_require"):
                         deps = list(filter(lambda r: r, deps_raw.splitlines()))
                         if extra in pyproject["project"].get("optional-dependencies", {}):
                             if pyproject["project"].get("optional-dependencies") is None:
@@ -314,7 +340,7 @@ if __name__ == "__main__":
 
     if answer_file.exists():
         msg = "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
-        if tuple(copier.__version__.split('.')) >= ('8', '0', '0'):
+        if tuple(copier.__version__.split(".")) >= ("8", "0", "0"):
             msg += " --UNSAFE"
         print(msg)
     else:

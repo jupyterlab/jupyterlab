@@ -104,7 +104,7 @@ export namespace ITerminal {
     closeOnExit: boolean;
 
     /**
-     * Whether to blink the cursor.  Can only be set at startup.
+     * Whether to blink the cursor. Can only be set at startup.
      */
     cursorBlink: boolean;
 

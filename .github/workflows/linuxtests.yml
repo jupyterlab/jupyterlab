@@ -13,10 +13,12 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, linkcheck, lint]
+        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
         # This will be used by the base setup action
         python-version: ["3.8", "3.11"]
         include:
+          - group: examples
+            upload-output: true
           - group: release_test
             upload-output: true
         exclude:
@@ -34,8 +36,6 @@ jobs:
             python-version: "3.8"
           - group: usage2
             python-version: "3.8"
-          - group: linkcheck
-            python-version: "3.8"
           - group: nonode
             python-version: "3.8"
           - group: lint
@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -72,17 +72,19 @@ jobs:
 
       - name: Upload ${{ matrix.group }} results
         if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.group }} ${{ github.run_number }}
-          path: ./build/${{ matrix.group }}_output
+          path: |
+            ./build/${{ matrix.group }}_output
+            ./examples/*/test-results
 
   test_minimum_versions:
     name: Test Minimum Versions
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
         with:
@@ -100,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Install dependencies
@@ -110,7 +112,7 @@ jobs:
         run: |
           pip install build
           python -m build --sdist
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: "sdist"
           path: dist/*.tar.gz
@@ -124,7 +126,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
       - name: Download sdist
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
       - name: Install From SDist
         run: |
           set -ex
@@ -141,11 +143,15 @@ jobs:
 
   check_links:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - run: |
+          node ./jupyterlab/staging/yarn.js install
+          node ./jupyterlab/staging/yarn.js run build:packages
+          node ./jupyterlab/staging/yarn.js run docs
       - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
         with:
-          ignore_glob: "packages/ui-components/docs/source/ui_components.rst images"
-          ignore_links: "../api/*.* .*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.*"
+          ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
+          ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.*"

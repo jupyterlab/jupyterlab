@@ -416,6 +416,24 @@ export class RenderedText extends RenderedCommon {
   }
 }
 
+export class RenderedError extends RenderedCommon {
+  constructor(options: IRenderMime.IRendererOptions) {
+    super(options);
+    this.addClass('jp-RenderedText');
+  }
+
+  render(model: IRenderMime.IMimeModel): Promise<void> {
+    return renderers.renderError({
+      host: this.node,
+      sanitizer: this.sanitizer,
+      source: String(model.data[this.mimeType]),
+      linkHandler: this.linkHandler,
+      resolver: this.resolver,
+      translator: this.translator
+    });
+  }
+}
+
 /**
  * A widget for displaying JavaScript output.
  */

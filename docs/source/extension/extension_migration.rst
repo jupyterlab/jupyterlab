@@ -6,8 +6,86 @@
 Extension Migration Guide
 ================================================
 
+JupyterLab 4.0 to 4.1
+---------------------
+
+Plugin manager and extension locks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Prior to JupyterLab 4.1 there was no mechanisms:
+- for users to disable/enable individual plugins (rather than entire extensions)
+- for administrators to fully block users from enabling/disabling certain extensions
+
+This version of JupyterLab enables both with the addition of :ref:`Plugin Manager <plugin_manager>`.
+
+If your installation had any plugins disabled these will be automatically :ref:`locked <locking_plugins>`
+on the first startup to ensure that there is no change to user-exposed functionality. The plugin manager
+itself can be disabled and locked using ``jupyter labextension`` commands, but we recommend to instead
+lock individual plugins as required.
+
+If your extension previously included a custom enable/disable setting, you may be able to replace it
+with instructions pointing users to the Plugin Manager. However, please consider whether your extension
+may be used in distributions which do not include Plugin Manager or have it disabled.
+
+Use of UI toolkit for Toolbar and ToolbarButtonComponent
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Toolbar and ToolbarButtonComponent (from the package *ui-components*) now relies on the external library
+`jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`_.
+
+This library uses the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
+and is based on `FAST <https://www.fast.design/>`_ library by Microsoft.
+
+See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
+
+- Changes the selectors of the ``Toolbar`` and ``ToolbarButtonComponent``.
+
+  - The DOM of ``Toolbar`` is now a ``jp-toolbar`` component instead of a ``div``.
+
+  - The DOM of ``ToolbarButtonComponent`` is now ``jp-button`` element instead of a ``button``.
+
+    This must be taken into account since the button itself is in the shadow DOM of the ``jp-button`` component,
+    and cannot be accessed as a child of the toolbar component.
+
+  - The icon in the ``ToolbarButtonComponent`` is a direct child of the ``jp-button`` component.
+
+    The icon was previously encapsulated in a span with the class ``.jp-ToolbarButtonComponent-icon``.
+    Accessing that icon to change its properties require now something like ``jp-button > svg``.
+
+- If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
+
+  They need to be ignored when transforming the code with Jest. You will need to update the
+  ``transformIgnorePatterns`` to add:
+
+  .. code::
+
+    const esModules = [
+      '@microsoft',
+      '@jupyter/react-components',
+      '@jupyter/web-components',
+      'exenv-es6',
+      ...
+    ].join('|');
+
+- Some CSS rules for ``button`` with the class ``.jp-ToolbarButtonComponent`` has been kept for backward compatibility.
+
+  These rules are now **deprecated** and will be removed in Jupyterlab 5.
+  The ``button`` elements in toolbars must be updated to ``jp-button``, from
+  `jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`_.
+
+CSS class name change in the ``WindowedList`` superclass of ``StaticNotebook``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- The class ``.jp-WindowedPanel-window`` has been renamed to ``.jp-WindowedPanel-viewport``.
+- The notebook scroll container is now ``.jp-WindowedPanel-outer`` rather than ``.jp-Notebook``
+- Galata notebook helpers `getCell` and `getCellCount` were updated accordingly
+
 JupyterLab 3.x to 4.x
 ---------------------
+
+Because of significant type changes from JupyterLab 3.x to 4.x, we recommend **publishing a new major version**
+of your extension to work with each major version of JupyterLab. For examples of extensions that use different
+major versions for Lab 3 and Lab 4, see `jupyterlab-vim <https://github.com/jupyterlab-contrib/jupyterlab-vim>`_
+and `jupyter-ai <https://github.com/jupyterlab/jupyter-ai>`_.
 
 Upgrading extension using the upgrade script
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -78,7 +156,7 @@ package configuration.
 .. note::
 
    You can find more information on upgrading Yarn from version 1 to version 3 in
-   [Yarn documentation](https://yarnpkg.com/getting-started/migration).
+   [Yarn documentation](https://v3.yarnpkg.com/getting-started/migration).
 
 If you are hit by multiple versions of the same packages (like ``@lumino/widgets``),
 TypeScript may complain that the types are not matching. One possible solution

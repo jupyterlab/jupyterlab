@@ -42,13 +42,15 @@
 }
 
 .jp-Notebook {
-  padding: var(--jp-notebook-padding);
   outline: none;
-  overflow: auto;
   background: var(--jp-layout-color0);
 }
 
-.jp-Notebook.jp-mod-scrollPastEnd::after {
+.jp-Notebook .jp-WindowedPanel-viewport {
+  padding: var(--jp-notebook-padding);
+}
+
+.jp-Notebook.jp-mod-scrollPastEnd > .jp-WindowedPanel-outer::after {
   display: block;
   content: '';
   min-height: var(--jp-notebook-scroll-padding);
@@ -64,6 +66,7 @@
 
 .jp-Notebook .jp-Cell .jp-InputPrompt {
   cursor: move;
+  float: left;
 }
 
 /*-----------------------------------------------------------------------------
@@ -135,6 +138,14 @@
 .jp-Notebook.jp-mod-commandMode
   .jp-Cell.jp-mod-active.jp-mod-selected:not(.jp-mod-multiSelected) {
   background: transparent;
+}
+
+.jp-Notebook.jp-mod-commandMode .jp-Cell.jp-mod-active:focus-visible {
+  outline: none;
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--jp-brand-color1);
+  z-index: 1;
 }
 
 /* Edit mode */
@@ -317,8 +328,8 @@
 
 .jp-mod-sideBySide.jp-Notebook .jp-CodeCell {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) min-content minmax(
-      0,
+  grid-template-columns: minmax(70px, 1fr) min-content minmax(
+      70px,
       var(--jp-side-by-side-output-size)
     );
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -329,8 +340,8 @@
 }
 
 .jp-mod-sideBySide.jp-Notebook .jp-CodeCell.jp-mod-resizedCell {
-  grid-template-columns: minmax(0, 1fr) min-content minmax(
-      0,
+  grid-template-columns: minmax(70px, 1fr) min-content minmax(
+      70px,
       var(--jp-side-by-side-resized-cell)
     );
 }
@@ -457,4 +468,29 @@ div.jp-Cell-Placeholder-content-2 {
 
 div.jp-Cell-Placeholder-content-3 {
   top: 140px;
+}
+
+/*-----------------------------------------------------------------------------
+| Virtual scrollbar
+|----------------------------------------------------------------------------*/
+
+.jp-Notebook
+  .jp-WindowedPanel-scrollbar-content
+  .jp-mod-active.jp-mod-selected {
+  background: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content .jp-mod-selected {
+  background: var(--jp-brand-color2);
+  color: var(--jp-ui-inverse-font-color2);
+}
+
+/*-----------------------------------------------------------------------------
+| Printing
+|----------------------------------------------------------------------------*/
+@media print {
+  .jp-Notebook .jp-Cell .jp-InputPrompt {
+    float: none;
+  }
 }

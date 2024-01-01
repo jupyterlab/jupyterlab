@@ -7,10 +7,8 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
   'example/'
 );
 
-import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/console/style/index.css';
-import '@jupyterlab/theme-light-extension/style/theme.css';
-import '../index.css';
+// Import style through JS file to deduplicate them.
+import './style';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -23,6 +21,7 @@ import {
   CodeMirrorMimeTypeService,
   EditorExtensionRegistry,
   EditorLanguageRegistry,
+  EditorThemeRegistry,
   ybinding
 } from '@jupyterlab/codemirror';
 
@@ -93,12 +92,17 @@ function startApp(
   const rendermime = new RenderMimeRegistry({ initialFactories });
 
   const editorExtensions = () => {
+    const themes = new EditorThemeRegistry();
+    EditorThemeRegistry.getDefaultThemes().forEach(theme => {
+      themes.addTheme(theme);
+    });
     const registry = new EditorExtensionRegistry();
-    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions(
-      {}
-    )) {
-      registry.addExtension(extensionFactory);
-    }
+
+    EditorExtensionRegistry.getDefaultExtensions({ themes }).forEach(
+      extensionFactory => {
+        registry.addExtension(extensionFactory);
+      }
+    );
     registry.addExtension({
       name: 'shared-model-binding',
       factory: options => {

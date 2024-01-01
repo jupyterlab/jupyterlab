@@ -60,13 +60,25 @@ describe('apputils', () => {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           rightArea: {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           relativeSizes: null,
           topArea: { simpleVisibility: true }
@@ -94,13 +106,25 @@ describe('apputils', () => {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           rightArea: {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           relativeSizes: null,
           topArea: { simpleVisibility: true }
@@ -142,13 +166,25 @@ describe('apputils', () => {
             currentWidget,
             collapsed: true,
             widgets: [currentWidget],
-            visible: true
+            visible: true,
+            widgetStates: {
+              [currentWidget.id]: {
+                sizes: null,
+                expansionStates: [true]
+              }
+            }
           },
           rightArea: {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           relativeSizes: null,
           topArea: { simpleVisibility: true }
@@ -208,13 +244,25 @@ describe('apputils', () => {
             currentWidget: null,
             collapsed: true,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           rightArea: {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           relativeSizes: null,
           topArea: { simpleVisibility: true }
@@ -242,13 +290,25 @@ describe('apputils', () => {
             currentWidget,
             collapsed: true,
             widgets: [currentWidget],
-            visible: true
+            visible: true,
+            widgetStates: {
+              [currentWidget.id]: {
+                sizes: null,
+                expansionStates: [true]
+              }
+            }
           },
           rightArea: {
             collapsed: true,
             currentWidget: null,
             widgets: null,
-            visible: false
+            visible: false,
+            widgetStates: {
+              ['null']: {
+                sizes: null,
+                expansionStates: null
+              }
+            }
           },
           relativeSizes: null,
           topArea: { simpleVisibility: true }

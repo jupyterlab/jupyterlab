@@ -71,7 +71,7 @@ test.describe('Notebook Search and Replace', () => {
     await page.waitForSelector('text=1/21');
 
     // Click next button
-    await page.click('button[title="Next Match"]', {
+    await page.click('button[title^="Next Match"]', {
       clickCount: 4
     });
 
@@ -126,7 +126,7 @@ test.describe('Notebook Search and Replace', () => {
     // TODO: Next Match press count should be one less
     // (the -/4 state should not be necessary).
     await page.waitForSelector('text=-/4');
-    await page.click('button[title="Next Match"]', {
+    await page.click('button[title^="Next Match"]', {
       clickCount: 3
     });
 
