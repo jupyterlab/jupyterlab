@@ -910,7 +910,7 @@ export namespace CommandToolbarButtonComponent {
     /**
      * Overrides command label
      */
-    label?: string;
+    label?: string | CommandRegistry.CommandFunc<string>;
     /**
      * Overrides command caption
      */
@@ -1209,9 +1209,13 @@ namespace Private {
     if (!commands.isVisible(id, args)) {
       className += ' lm-mod-hidden';
     }
+    const labelOverride =
+      typeof options.label === 'function'
+        ? options.label(args ?? {})
+        : options.label;
 
     let tooltip =
-      commands.caption(id, args) || options.label || label || iconLabel;
+      commands.caption(id, args) || labelOverride || label || iconLabel;
     // Shows hot keys in tooltips
     const binding = commands.keyBindings.find(b => b.command === id);
     if (binding) {
@@ -1231,7 +1235,7 @@ namespace Private {
       tooltip: options.caption ?? tooltip,
       onClick,
       enabled,
-      label: options.label ?? label,
+      label: labelOverride ?? label,
       pressed
     };
   }
