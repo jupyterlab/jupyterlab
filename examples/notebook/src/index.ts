@@ -7,13 +7,8 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
   'example/'
 );
 
-import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/codemirror/style/index.css';
-import '@jupyterlab/completer/style/index.css';
-import '@jupyterlab/documentsearch/style/index.css';
-import '@jupyterlab/notebook/style/index.css';
-import '@jupyterlab/theme-light-extension/style/theme.css';
-import '../index.css';
+// Import style through JS file to deduplicate them.
+import './style';
 
 import { IYText } from '@jupyter/ydoc';
 import {
@@ -45,6 +40,7 @@ import {
   NotebookModelFactory,
   NotebookPanel,
   NotebookWidgetFactory,
+  StaticNotebook,
   ToolbarItems
 } from '@jupyterlab/notebook';
 import {
@@ -210,7 +206,11 @@ function createApp(manager: ServiceManager.IManager): void {
     rendermime,
     contentFactory,
     mimeTypeService,
-    toolbarFactory
+    toolbarFactory,
+    notebookConfig: {
+      ...StaticNotebook.defaultNotebookConfig,
+      windowingMode: 'none'
+    }
   });
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);

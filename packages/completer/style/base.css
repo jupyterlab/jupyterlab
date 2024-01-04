@@ -329,7 +329,7 @@
   display: none;
 }
 
-[data-command='inline-completer:next'] > .jp-ToolbarButtonComponent-icon,
-[data-command='inline-completer:previous'] > .jp-ToolbarButtonComponent-icon {
+.jp-InlineCompleter [data-command='inline-completer:next'] > svg,
+.jp-InlineCompleter [data-command='inline-completer:previous'] > svg {
   scale: 1.5;
 }

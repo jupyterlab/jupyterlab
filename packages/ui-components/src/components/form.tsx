@@ -507,7 +507,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
           }`}
         >
           {!hasCustomField &&
-            (rawErrors ? (
+            (rawErrors?.length ? (
               // Shows a red indicator for fields that have validation errors
               <div className="jp-modifiedIndicator jp-errorIndicator" />
             ) : (
@@ -575,14 +575,18 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
                 {schema.description}
               </div>
             )}
-            {isModified && defaultValue !== undefined && (
-              <div className="jp-FormGroup-default">
-                {trans.__(
-                  'Default: %1',
-                  defaultValue !== null ? defaultValue.toLocaleString() : 'null'
-                )}
-              </div>
-            )}
+            {isModified &&
+              defaultValue !== undefined &&
+              schema.type !== 'object' && (
+                <div className="jp-FormGroup-default">
+                  {trans.__(
+                    'Default: %1',
+                    defaultValue !== null
+                      ? defaultValue.toLocaleString()
+                      : 'null'
+                  )}
+                </div>
+              )}
             <div className="validationErrors">{errors}</div>
           </div>
         </div>
