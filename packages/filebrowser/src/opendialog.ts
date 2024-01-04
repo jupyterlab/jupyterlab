@@ -236,7 +236,8 @@ class OpenDialog
           created: 'unknown',
           last_modified: 'unknown',
           mimetype: 'text/plain',
-          format: 'text'
+          format: 'text',
+          hash: null
         }
       ];
     } else {

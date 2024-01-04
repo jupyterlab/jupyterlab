@@ -393,6 +393,9 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       if (options?.content != false) {
         return Promise.resolve(model);
       }
+      if (options?.hash === true) {
+        return Promise.resolve({ ...model, content: '', hash: '123' });
+      }
       return Promise.resolve({ ...model, content: '' });
     }),
     driveName: jest.fn(path => {
@@ -453,7 +456,8 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
           format: 'text',
           mimetype: 'plain/text',
           ...options,
-          last_modified: timeStamp
+          last_modified: timeStamp,
+          hash: null
         });
       }
       fileChangedSignal.emit({
@@ -636,7 +640,8 @@ namespace Private {
       created: timeStamp,
       type: options.type || 'file',
       format: 'text',
-      mimetype: 'plain/text'
+      mimetype: 'plain/text',
+      hash: options.type === 'directory' ? null : '123'
     };
   }
 

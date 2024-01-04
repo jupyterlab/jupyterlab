@@ -476,11 +476,12 @@ export class Context<
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
-      format: model.format
+      format: model.format,
+      hash: model.hash
     };
-    const mod = this._contentsModel?.last_modified ?? null;
+    const hash = this._contentsModel?.hash ?? null;
     this._contentsModel = newModel;
-    if (!mod || newModel.last_modified !== mod) {
+    if (!hash || newModel.hash !== hash) {
       this._fileChanged.emit(newModel);
     }
   }
@@ -622,6 +623,7 @@ export class Context<
     const opts: Contents.IFetchOptions = {
       type: this._factory.contentType,
       content: this._factory.fileFormat !== null,
+      hash: true,
       ...(this._factory.fileFormat !== null
         ? { format: this._factory.fileFormat }
         : {})
@@ -681,26 +683,21 @@ export class Context<
   ): Promise<Contents.IModel> {
     const path = this._path;
     // Make sure the file has not changed on disk.
-    const promise = this._manager.contents.get(path, { content: false });
+    const promise = this._manager.contents.get(path, {
+      content: false,
+      hash: true
+    });
     return promise.then(
       model => {
         if (this.isDisposed) {
           return Promise.reject(new Error('Disposed'));
         }
-        // We want to check last_modified (disk) > last_modified (client)
-        // (our last save)
-        // In some cases the filesystem reports an inconsistent time, so we allow buffer when comparing.
-        const lastModifiedCheckMargin = this._lastModifiedCheckMargin;
-        const modified = this.contentsModel?.last_modified;
-        const tClient = modified ? new Date(modified) : new Date();
-        const tDisk = new Date(model.last_modified);
-        if (
-          modified &&
-          tDisk.getTime() - tClient.getTime() > lastModifiedCheckMargin
-        ) {
-          return this._timeConflict(tClient, model, options);
+        // Use hash to check file contents.
+        const localHash = this.contentsModel?.hash ?? null;
+        if (localHash && localHash !== model.hash) {
+          return this._hashConflict(model, options);
         }
-        return this._manager.contents.save(path, options);
+        return this._contentSave(path, options);
       },
       err => {
         if (err.response && err.response.status === 404) {
@@ -709,6 +706,20 @@ export class Context<
         throw err;
       }
     );
+  }
+
+  /**
+   * Handle file's contents save
+   */
+  private async _contentSave(
+    path: string,
+    options: Partial<Contents.IModel>
+  ): Promise<Contents.IModel> {
+    await this._manager.contents.save(path, options);
+    return await this._manager.contents.get(path, {
+      content: false,
+      hash: true
+    });
   }
 
   /**
@@ -748,20 +759,13 @@ export class Context<
   }
 
   /**
-   * Handle a time conflict.
+   * Handle hash conflict.
    */
-  private _timeConflict(
-    tClient: Date,
+  private _hashConflict(
     model: Contents.IModel,
     options: Partial<Contents.IModel>
-  ): Promise<Contents.IModel> {
-    const tDisk = new Date(model.last_modified);
-    console.warn(
-      `Last saving performed ${tClient} ` +
-        `while the current file seems to have been saved ` +
-        `${tDisk}`
-    );
-    if (this._timeConflictModalIsOpen) {
+  ) {
+    if (this._hashConflictModalIsOpen) {
       const error = new Error('Modal is already displayed');
       error.name = 'ModalDuplicateError';
       return Promise.reject(error);
@@ -780,18 +784,18 @@ or load the version on disk (revert)?`,
       label: this._trans.__('Overwrite'),
       actions: ['overwrite']
     });
-    this._timeConflictModalIsOpen = true;
+    this._hashConflictModalIsOpen = true;
     return showDialog({
       title: this._trans.__('File Changed'),
       body,
       buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
     }).then(result => {
-      this._timeConflictModalIsOpen = false;
+      this._hashConflictModalIsOpen = false;
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
       if (result.button.actions.includes('overwrite')) {
-        return this._manager.contents.save(this._path, options);
+        return this._contentSave(this._path, options);
       }
       if (result.button.actions.includes('revert')) {
         return this.revert().then(() => {
@@ -841,7 +845,7 @@ or load the version on disk (revert)?`,
     try {
       await this._manager.ready;
       const options = this._createSaveOptions();
-      await this._manager.contents.save(newPath, options);
+      await this._contentSave(newPath, options);
       await this._maybeCheckpoint(true);
 
       // Emit completion.
@@ -917,7 +921,7 @@ or load the version on disk (revert)?`,
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
   private _lastModifiedCheckMargin = 500;
-  private _timeConflictModalIsOpen = false;
+  private _hashConflictModalIsOpen = false;
 }
 
 /**

@@ -91,6 +91,12 @@ export namespace Contents {
     readonly content: any;
 
     /**
+     * The file contents hash.
+     *
+     */
+    readonly hash: string | null;
+
+    /**
      * The chunk of the file upload.
      */
     readonly chunk?: number;
@@ -153,6 +159,13 @@ export namespace Contents {
      * The default is `true`.
      */
     content?: boolean;
+
+    /**
+     * Whether to include the file content's hash.
+     *
+     * The default is `true`.
+     */
+    hash?: boolean;
   }
 
   /**
@@ -1122,7 +1135,8 @@ export class Drive implements Contents.IDrive {
         delete options['format'];
       }
       const content = options.content ? '1' : '0';
-      const params: PartialJSONObject = { ...options, content };
+      const hash = options.hash ? '1' : '0';
+      const params: PartialJSONObject = { ...options, content, hash };
       url += URLExt.objectToQueryString(params);
     }
 

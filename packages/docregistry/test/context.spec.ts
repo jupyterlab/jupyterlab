@@ -320,11 +320,13 @@ describe('docregistry/context', () => {
         const opts: Contents.IFetchOptions = {
           format: factory.fileFormat,
           type: factory.contentType,
-          content: true
+          content: true,
+          hash: true
         };
         const model = await manager.contents.get(context.path, opts);
 
         expect(model.content).toBe('foo');
+        expect(model.hash).toBeTruthy();
       });
 
       it('should should preserve LF line endings upon save', async () => {

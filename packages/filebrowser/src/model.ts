@@ -69,7 +69,8 @@ export class FileBrowserModel implements IDisposable {
       created: 'unknown',
       last_modified: 'unknown',
       mimetype: 'text/plain',
-      format: 'text'
+      format: 'text',
+      hash: null
     };
     this._state = options.state || null;
     const refreshInterval = options.refreshInterval || DEFAULT_REFRESH_INTERVAL;
@@ -583,7 +584,8 @@ export class FileBrowserModel implements IDisposable {
       last_modified: contents.last_modified,
       size: contents.size,
       mimetype: contents.mimetype,
-      format: contents.format
+      format: contents.format,
+      hash: contents.hash
     };
     this._items = contents.content;
     this._paths.clear();
