@@ -217,12 +217,12 @@ export class FileBrowserHelper {
       );
 
     // wait for network response or timeout
-    await this.contents.waitForAPIResponse(
-      async () => {
+    await Promise.race([
+      page.waitForTimeout(2000),
+      this.contents.waitForAPIResponse(async () => {
         await item.click();
-      },
-      { timeout: 2000 }
-    );
+      })
+    ]);
     // wait for DOM rerender
     await page.waitForTimeout(200);
   }
