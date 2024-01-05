@@ -272,6 +272,9 @@
       "path": "./packages/theme-dark-extension"
     },
     {
+      "path": "./packages/theme-high-contrast-extension"
+    },
+    {
       "path": "./packages/theme-light-extension"
     },
     {

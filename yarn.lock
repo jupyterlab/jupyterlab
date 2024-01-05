@@ -2170,6 +2170,7 @@ __metadata:
     "@jupyterlab/statusbar-extension": ~4.1.0-beta.0
     "@jupyterlab/terminal-extension": ~4.1.0-beta.0
     "@jupyterlab/theme-dark-extension": ~4.1.0-beta.0
+    "@jupyterlab/theme-high-contrast-extension": ~4.1.0-beta.0
     "@jupyterlab/theme-light-extension": ~4.1.0-beta.0
     "@jupyterlab/toc-extension": ~6.1.0-beta.0
     "@jupyterlab/tooltip-extension": ~4.1.0-beta.0
@@ -4146,6 +4147,7 @@ __metadata:
     "@jupyterlab/terminal-extension": ^4.1.0-beta.0
     "@jupyterlab/testing": ^4.1.0-beta.0
     "@jupyterlab/theme-dark-extension": ^4.1.0-beta.0
+    "@jupyterlab/theme-high-contrast-extension": ^4.1.0-beta.0
     "@jupyterlab/theme-light-extension": ^4.1.0-beta.0
     "@jupyterlab/toc": ^6.1.0-beta.0
     "@jupyterlab/toc-extension": ^6.1.0-beta.0
@@ -4861,6 +4863,19 @@ __metadata:
 "@jupyterlab/theme-dark-extension@^4.1.0-beta.0, @jupyterlab/theme-dark-extension@workspace:packages/theme-dark-extension, @jupyterlab/theme-dark-extension@~4.1.0-beta.0":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/theme-dark-extension@workspace:packages/theme-dark-extension"
+  dependencies:
+    "@jupyterlab/application": ^4.1.0-beta.0
+    "@jupyterlab/apputils": ^4.2.0-beta.0
+    "@jupyterlab/translation": ^4.1.0-beta.0
+    rimraf: ~5.0.5
+    typedoc: ~0.24.7
+    typescript: ~5.1.6
+  languageName: unknown
+  linkType: soft
+
+"@jupyterlab/theme-high-contrast-extension@^4.1.0-beta.0, @jupyterlab/theme-high-contrast-extension@workspace:packages/theme-high-contrast-extension, @jupyterlab/theme-high-contrast-extension@~4.1.0-beta.0":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/theme-high-contrast-extension@workspace:packages/theme-high-contrast-extension"
   dependencies:
     "@jupyterlab/application": ^4.1.0-beta.0
     "@jupyterlab/apputils": ^4.2.0-beta.0

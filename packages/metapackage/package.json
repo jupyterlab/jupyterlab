@@ -121,6 +121,7 @@
     "@jupyterlab/terminal": "^4.1.0-beta.0",
     "@jupyterlab/terminal-extension": "^4.1.0-beta.0",
     "@jupyterlab/theme-dark-extension": "^4.1.0-beta.0",
+    "@jupyterlab/theme-high-contrast-extension": "^4.1.0-beta.0",
     "@jupyterlab/theme-light-extension": "^4.1.0-beta.0",
     "@jupyterlab/toc": "^6.1.0-beta.0",
     "@jupyterlab/toc-extension": "^6.1.0-beta.0",
