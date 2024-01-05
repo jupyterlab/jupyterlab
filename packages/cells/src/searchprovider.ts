@@ -326,7 +326,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const cell = this.cell as MarkdownCell;
     if (cell.rendered && this.matchesCount > 0) {
       // Unrender the cell
-      this._unrenderedByHighligh = true;
+      this._unrenderedByHighlight = true;
       const waitForRendered = signalToPromise(cell.renderedChanged);
       cell.rendered = false;
       await waitForRendered;
@@ -347,7 +347,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
     const cell = this.cell as MarkdownCell;
     if (cell.rendered && this.matchesCount > 0) {
       // Unrender the cell if there are matches within the cell
-      this._unrenderedByHighligh = true;
+      this._unrenderedByHighlight = true;
       const waitForRendered = signalToPromise(cell.renderedChanged);
       cell.rendered = false;
       await waitForRendered;
@@ -397,10 +397,10 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
    * @param rendered New rendered value
    */
   protected onRenderedChanged(cell: MarkdownCell, rendered: boolean): void {
-    if (!this._unrenderedByHighligh) {
+    if (!this._unrenderedByHighlight) {
       this.currentIndex = null;
     }
-    this._unrenderedByHighligh = false;
+    this._unrenderedByHighlight = false;
     if (this.isActive) {
       if (rendered) {
         void this.renderedProvider.startQuery(this.query);
@@ -413,7 +413,7 @@ class MarkdownCellSearchProvider extends CellSearchProvider {
   }
 
   protected renderedProvider: GenericSearchProvider;
-  private _unrenderedByHighligh = false;
+  private _unrenderedByHighlight = false;
 }
 
 /**

@@ -2054,7 +2054,9 @@ def _yarn_config(logger):
 
     try:
         output_binary = subprocess.check_output(
-            [node, YARN_PATH, "config", "--json"], stderr=subprocess.PIPE, cwd=HERE  # noqa S603
+            [node, YARN_PATH, "config", "--json"],  # noqa S603
+            stderr=subprocess.PIPE,
+            cwd=HERE,
         )
         output = output_binary.decode("utf-8")
         lines = iter(output.splitlines())
@@ -2363,7 +2365,7 @@ def _is_locked(name, locked=None) -> LockStatus:
             continue
         if name == lock:
             return LockStatus(entire_extension_locked=True)
-        extension_part = lock.partition(':')[0]
+        extension_part = lock.partition(":")[0]
         if name == extension_part:
             locked_plugins.add(lock)
 
@@ -2415,7 +2417,7 @@ def _log_multiple_compat_errors(logger, errors_map):
                 [
                     "\n   The following extensions are outdated:",
                     *outdated,
-                    '\n   Consider checking if an update is available for these packages.\n',
+                    "\n   Consider checking if an update is available for these packages.\n",
                 ]
             )
         )

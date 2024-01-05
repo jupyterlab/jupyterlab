@@ -36,18 +36,40 @@ test.describe('Table of Contents scrolling to heading', () => {
   test('Notebook scrolls to heading', async ({ page }) => {
     await page.notebook.selectCells(0);
 
+    await page.keyboard.press('Enter');
+    await page.getByText('Mode: Edit').waitFor();
+
     await page.sidebar.getContentPanel(
       await page.sidebar.getTabPosition('table-of-contents')
     );
 
     await page
-      .locator('.jp-TableOfContents-tree >> text="the last one"')
-      .click({
-        button: 'left'
-      });
+      .locator('.jp-TableOfContents-tree')
+      .getByText('the last one')
+      .click();
+    // Should switch to command mode
+    await expect.soft(page.getByText('Mode: Command')).toBeVisible();
 
     const nbPanel = await page.notebook.getNotebookInPanel();
-    expect(await nbPanel.screenshot()).toMatchSnapshot(
+    expect
+      .soft(await nbPanel!.screenshot())
+      .toMatchSnapshot('scrolled-to-bottom-heading.png');
+
+    // Scroll up
+    const bbox = await nbPanel!.boundingBox();
+    await page.mouse.move(
+      bbox!.x + 0.5 * bbox!.width,
+      bbox!.y + 0.5 * bbox!.height
+    );
+    await page.mouse.wheel(0, -1200);
+    await page.waitForTimeout(100);
+
+    await page
+      .locator('.jp-TableOfContents-tree')
+      .getByText('the last one')
+      .click();
+
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'scrolled-to-bottom-heading.png'
     );
   });

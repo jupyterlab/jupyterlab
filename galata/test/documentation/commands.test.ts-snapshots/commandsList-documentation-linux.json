@@ -32,6 +32,13 @@
     ]
   },
   {
+    "id": "application:toggle-side-tabbar",
+    "label": "Toggle Sidebar Element",
+    "shortcuts": [
+      "Alt 1"
+    ]
+  },
+  {
     "id": "application:close",
     "label": "Close Tab",
     "caption": "",
@@ -101,7 +108,9 @@
     "id": "application:toggle-right-area",
     "label": "Show Right Sidebar",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Ctrl J"
+    ]
   },
   {
     "id": "application:toggle-side-tabbar",
@@ -1999,9 +2008,7 @@
     "id": "notebook:toggle-all-cell-line-numbers",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": [
-      "Shift L"
-    ]
+    "shortcuts": []
   },
   {
     "id": "notebook:toggle-autoclosing-brackets",
@@ -2022,6 +2029,12 @@
     "shortcuts": [
       "Shift R"
     ]
+  },
+  {
+    "id": "notebook:toggle-virtual-scrollbar",
+    "label": "Virtual Scrollbar",
+    "caption": "Toggle virtual scrollbar (enabled with windowing mode: full)",
+    "shortcuts": []
   },
   {
     "id": "notebook:trust",

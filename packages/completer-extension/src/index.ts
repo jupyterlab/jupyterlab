@@ -106,13 +106,35 @@ const inlineCompleterFactory: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
             : '';
           return keys ? `${keys}` : '';
         };
+
+        const labelCache = {
+          [CommandIDs.previousInline]: describeShortcut(
+            CommandIDs.previousInline
+          ),
+          [CommandIDs.nextInline]: describeShortcut(CommandIDs.nextInline),
+          [CommandIDs.acceptInline]: describeShortcut(CommandIDs.acceptInline)
+        };
+
+        app.commands.keyBindingChanged.connect(
+          (
+            _emitter: CommandRegistry,
+            change: CommandRegistry.IKeyBindingChangedArgs
+          ) => {
+            const command = change.binding.command;
+            if (labelCache.hasOwnProperty(command)) {
+              labelCache[command as keyof typeof labelCache] =
+                describeShortcut(command);
+            }
+          }
+        );
+
         inlineCompleter.toolbar.addItem(
           'previous-inline-completion',
           new CommandToolbarButton({
             commands: app.commands,
             icon: caretLeftIcon,
             id: CommandIDs.previousInline,
-            label: describeShortcut(CommandIDs.previousInline),
+            label: () => labelCache[CommandIDs.previousInline],
             caption: trans.__('Previous')
           })
         );
@@ -122,7 +144,7 @@ const inlineCompleterFactory: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
             commands: app.commands,
             icon: caretRightIcon,
             id: CommandIDs.nextInline,
-            label: describeShortcut(CommandIDs.nextInline),
+            label: () => labelCache[CommandIDs.nextInline],
             caption: trans.__('Next')
           })
         );
@@ -132,7 +154,7 @@ const inlineCompleterFactory: JupyterFrontEndPlugin<IInlineCompleterFactory> = {
             commands: app.commands,
             icon: checkIcon,
             id: CommandIDs.acceptInline,
-            label: describeShortcut(CommandIDs.acceptInline),
+            label: () => labelCache[CommandIDs.acceptInline],
             caption: trans.__('Accept')
           })
         );
@@ -289,6 +311,68 @@ const inlineCompleter: JupyterFrontEndPlugin<void> = {
           .catch(console.error);
       })
       .catch(console.error);
+
+    const findKeybinding = (
+      commandID: string
+    ): CommandRegistry.IKeyBinding | undefined => {
+      return app.commands.keyBindings.find(
+        binding => binding.command === commandID
+      );
+    };
+
+    const keyBindings = {
+      [CommandIDs.acceptInline]: findKeybinding(CommandIDs.acceptInline),
+      [CommandIDs.invokeInline]: findKeybinding(CommandIDs.invokeInline)
+    };
+
+    app.commands.keyBindingChanged.connect(
+      (
+        _emitter: CommandRegistry,
+        change: CommandRegistry.IKeyBindingChangedArgs
+      ) => {
+        const command = change.binding.command;
+        if (keyBindings.hasOwnProperty(command)) {
+          keyBindings[command as keyof typeof keyBindings] =
+            findKeybinding(command);
+        }
+      }
+    );
+
+    const evtKeydown = (event: KeyboardEvent) => {
+      // Handle bindings to `Tab` key specially
+      if (!(event.target instanceof Element)) {
+        return;
+      }
+      const target = event.target as Element;
+      switch (event.keyCode) {
+        case 9: {
+          // Tab key
+          const potentialTabBindings = [
+            // Note: `accept` should come ahead of `invoke` due to specificity
+            keyBindings[CommandIDs.acceptInline],
+            keyBindings[CommandIDs.invokeInline]
+          ];
+          for (const binding of potentialTabBindings) {
+            if (
+              binding &&
+              binding.keys.length === 1 &&
+              binding.keys[0] === 'Tab' &&
+              target.closest(binding.selector)
+            ) {
+              app.commands.execute(binding.command).catch(console.error);
+              event.preventDefault();
+              event.stopPropagation();
+              event.stopImmediatePropagation();
+              return;
+            }
+          }
+          break;
+        }
+        default:
+          return;
+      }
+    };
+    document.addEventListener('keydown', evtKeydown, true);
   }
 };
 
