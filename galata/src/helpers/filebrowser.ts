@@ -216,7 +216,9 @@ export class FileBrowserHelper {
         '.jp-ToolbarButtonComponent[data-command="filebrowser:refresh"]'
       );
 
-    // wait for network response or timeout
+    // Use Promise.race to manage the network response timeout
+    // This is useful for lab-based applications not using the Jupyter Server Contents API.
+    // such as JupyterLite, to avoid having the waitForAPIResponse call fail.
     await Promise.race([
       page.waitForTimeout(2000),
       this.contents.waitForAPIResponse(async () => {
