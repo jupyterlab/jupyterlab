@@ -73,7 +73,7 @@ export class LabStatus implements ILabStatus {
    */
   setBusy(): IDisposable {
     const oldBusy = this.isBusy;
-    const ariaLiveRegion = document.getElementById('notify-user-aria-live');
+    const ariaLiveRegion = document.getElementById('commands-aria-live');
     let timeout: any;
     this._busyCount++;
     if (this.isBusy !== oldBusy) {

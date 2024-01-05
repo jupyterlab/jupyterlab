@@ -415,7 +415,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const ariaLiveRegion = document.createElement('div');
     ariaLiveRegion.setAttribute('aria-live', 'polite');
     ariaLiveRegion.setAttribute('role', 'region');
-    ariaLiveRegion.setAttribute('id', 'notify-user-aria-live');
+    ariaLiveRegion.setAttribute('id', 'commands-aria-live');
     ariaLiveRegion.className = 'jp-ContentPanel-ariaLive';
     hboxPanel.node.appendChild(ariaLiveRegion);
 
