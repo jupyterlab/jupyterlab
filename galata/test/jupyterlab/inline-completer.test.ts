@@ -7,6 +7,7 @@ const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-InlineCompleter';
 const GHOST_SELECTOR = '.jp-GhostText';
 const PLUGIN_ID = '@jupyterlab/completer-extension:inline-completer';
+const SHORTCUTS_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 
 const SHARED_SETTINGS = {
   providers: {
@@ -114,6 +115,73 @@ test.describe('Inline Completer', () => {
       // Widget shows up
       const completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
+    });
+  });
+
+  test.describe('Invoke on Tab', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        [PLUGIN_ID]: {
+          showWidget: 'always',
+          ...SHARED_SETTINGS
+        },
+        [SHORTCUTS_ID]: {
+          shortcuts: [
+            {
+              command: 'inline-completer:invoke',
+              keys: ['Tab'],
+              selector: '.jp-mod-completer-enabled'
+            }
+          ]
+        }
+      }
+    });
+
+    test('Shows up on Tab', async ({ page }) => {
+      await page.keyboard.press('Tab');
+
+      // Widget shows up
+      const completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+    });
+  });
+
+  test.describe('Accept on Tab', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        [PLUGIN_ID]: {
+          showWidget: 'always',
+          ...SHARED_SETTINGS
+        },
+        [SHORTCUTS_ID]: {
+          shortcuts: [
+            {
+              command: 'inline-completer:accept',
+              keys: ['Tab'],
+              selector: '.jp-mod-inline-completer-active'
+            }
+          ]
+        }
+      }
+    });
+
+    test('Accepts suggestion on Tab', async ({ page }) => {
+      await page.keyboard.press('u');
+
+      await page.evaluate(async () => {
+        await window.jupyterapp.commands.execute('inline-completer:invoke');
+      });
+
+      const completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+
+      await page.keyboard.press('Tab');
+
+      const cellEditor = await page.notebook.getCellInput(2);
+      const text = await cellEditor.textContent();
+      expect(text).toMatch(/estion.*/);
     });
   });
 
