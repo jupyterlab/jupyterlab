@@ -876,7 +876,10 @@ function addCommands(
           if (saveInProgress.has(context)) {
             return;
           }
-          if (!context.contentsModel?.writable) {
+          if (
+            !context.contentsModel?.writable &&
+            !context.model.collaborative
+          ) {
             let type = (args._luminoEvent as ReadonlyPartialJSONObject)?.type;
             if (args._luminoEvent && type === 'keybinding') {
               readonlyNotification(context.path);

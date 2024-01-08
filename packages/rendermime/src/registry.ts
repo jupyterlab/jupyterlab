@@ -373,17 +373,22 @@ export namespace RenderMimeRegistry {
      * Whether the URL should be handled by the resolver
      * or not.
      *
+     * @param allowRoot - Whether the paths starting at Unix-style filesystem root (`/`) are permitted.
+     *
      * #### Notes
      * This is similar to the `isLocal` check in `URLExt`,
      * but it also checks whether the path points to any
      * of the `IDrive`s that may be registered with the contents
      * manager.
      */
-    isLocal(url: string): boolean {
+    isLocal(url: string, allowRoot: boolean = false): boolean {
       if (this.isMalformed(url)) {
         return false;
       }
-      return URLExt.isLocal(url) || !!this._contents.driveName(decodeURI(url));
+      return (
+        URLExt.isLocal(url, allowRoot) ||
+        !!this._contents.driveName(decodeURI(url))
+      );
     }
 
     /**
