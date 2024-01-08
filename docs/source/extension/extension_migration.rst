@@ -81,7 +81,7 @@ CSS class name change in the ``WindowedList`` superclass of ``StaticNotebook``
 
 Visibility of StatusBar elements at high magnifications
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-- Statusbar items are by default now hidden at high magnification/low resolution to prevent overlap for those using the application at high magnifications.
+- Statusbar items are now hidden by default at high magnification/low resolution to prevent overlap for those using the application at high magnifications.
 - An additional ``priority`` property has been added to the function ``statusBar.registerStatusItem`` to allow them to remain visible, intended usage is for small statusbar items that either add functionality that would be particularly useful at high zoom or is inaccessible otherwise.
 
 JupyterLab 3.x to 4.x
