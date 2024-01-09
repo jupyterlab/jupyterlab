@@ -52,6 +52,11 @@
   position: relative;
 }
 
+.jp-SideBar .lm-TabBar-tab:focus-visible {
+  outline: 4px solid var(--jp-accept-color-active, var(--jp-brand-color1));
+  outline-offset: -1px;
+}
+
 .jp-SideBar .lm-TabBar-tab.lm-mod-current::after {
   /* Internal border override pseudo-element */
   position: absolute;

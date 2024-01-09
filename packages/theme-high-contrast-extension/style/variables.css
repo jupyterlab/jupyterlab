@@ -91,7 +91,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-border-width: 1px;
   --jp-border-color0: white;
   --jp-border-color1: white;
-  --jp-border-color2: white;
+  --jp-border-color2: var(--md-grey-300);
   --jp-border-color3: white;
   --jp-inverse-border-color: var(--md-grey-600);
   --jp-border-radius: 2px;
@@ -217,7 +217,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-inverse-layout-color3: white;
   --jp-inverse-layout-color4: var(--md-grey-600);
 
-  /* Brand/accent */
+  /* Brand/accent - some colours have been updated to meet WCAG AAA for contrast with text */
 
   --jp-brand-color0: var(--md-blue-700);
   --jp-brand-color1: #319bf2;
