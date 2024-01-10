@@ -86,9 +86,10 @@ breaking changes. Consider documenting your maintenance plans to users in these 
 You may also wish to consider pinning the major version of JupyterLab when developing
 extensions (in your package metadata).
 
-We maintain the **two most recently released major versions of JupyterLab**,
-JupyterLab v3 and JupyterLab v4. JupyterLab v1 and v2 are no longer maintained.
-All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+We maintain a major version of JupyterLab for **one year after its successor's first release**.
+JupyterLab v4 was released on May 15, 2023, so JupyterLab v3 will be maintained
+until May 15, 2024. JupyterLab v1 and v2 are no longer maintained.
+All JupyterLab v2 and v3 users are strongly advised to upgrade as soon as possible.
 
 Languages, Tools and Processes
 ------------------------------
