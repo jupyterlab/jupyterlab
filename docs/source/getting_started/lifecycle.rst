@@ -12,7 +12,6 @@ After the end of maintenance date, no additional releases may be made, not
 even to fix security issues.
 
 .. list-table:: Major version lifecycles
-   :header-rows: 1
 
   * - Version
     - Release Date
