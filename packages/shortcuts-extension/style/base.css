@@ -224,6 +224,7 @@
   border-width: var(--jp-border-width);
   border-color: var(--jp-layout-color0);
   border-radius: var(--jp-border-radius);
+  color: var(--jp-ui-font-color0);
   padding: 5px 6px;
   margin: 3px 0;
   background: none;
