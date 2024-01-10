@@ -161,7 +161,7 @@ export class ShortcutInput extends React.Component<
   ): Array<any> => {
     let key = EN_US.keyForKeydownEvent(event.nativeEvent);
 
-    const modKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Ctrl', 'Accel', 'Esc'];
+    const modKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Ctrl', 'Accel'];
 
     if (event.key === 'Backspace') {
       userInput = '';

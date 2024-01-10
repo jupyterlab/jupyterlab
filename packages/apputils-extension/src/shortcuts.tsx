@@ -50,12 +50,12 @@ export function displayShortcuts(options: IOptions) {
 
   function keyAriaLabel(ch: string) {
     const keyToText: { [key: string]: string } = {
-      ']': 'Closing bracket',
-      '[': 'Opening bracket',
-      ',': 'Comma',
-      '.': 'Full stop',
-      "'": 'Single quote',
-      '-': 'Hyphen-minus'
+      ']': trans.__('Closing bracket'),
+      '[': trans.__('Opening bracket'),
+      ',': trans.__('Comma'),
+      '.': trans.__('Full stop'),
+      "'": trans.__('Single quote'),
+      '-': trans.__('Hyphen-minus')
     };
     if (Object.keys(keyToText).includes(ch)) {
       return keyToText[ch];
