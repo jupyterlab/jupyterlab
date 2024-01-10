@@ -82,3 +82,4 @@ Jupyter Notebook in the ecosystem, visit the
    faq
    changelog
    accessibility
+   lifecycle
