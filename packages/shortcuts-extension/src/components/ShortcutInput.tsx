@@ -161,7 +161,7 @@ export class ShortcutInput extends React.Component<
   ): Array<any> => {
     let key = EN_US.keyForKeydownEvent(event.nativeEvent);
 
-    const modKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Ctrl', 'Accel'];
+    const modKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Ctrl', 'Accel', 'Esc'];
 
     if (event.key === 'Backspace') {
       userInput = '';
@@ -174,6 +174,10 @@ export class ShortcutInput extends React.Component<
         keys: keys,
         currentChain: currentChain
       });
+    } else if (event.key === 'Escape') {
+      const focusedElement = document.activeElement;
+      const parentRow = focusedElement?.closest('.jp-Shortcuts-Row');
+      (parentRow as HTMLDivElement).focus();
     } else if (event.key !== 'CapsLock') {
       const lastKey = userInput
         .substr(userInput.lastIndexOf(' ') + 1, userInput.length)

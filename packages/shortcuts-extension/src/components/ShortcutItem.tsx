@@ -294,8 +294,8 @@ export class ShortcutItem extends React.Component<
 
   getSourceCell(): JSX.Element {
     return (
-      <div className="jp-Shortcuts-Cell" role="tab">
-        <div className="jp-Shortcuts-SourceCell" role="tab">
+      <div className="jp-Shortcuts-Cell">
+        <div className="jp-Shortcuts-SourceCell">
           {this.props.shortcut.source}
         </div>
         {this.props.shortcut.source === 'Custom' && this.getResetShortCutLink()}
@@ -447,7 +447,6 @@ export class ShortcutItem extends React.Component<
         onClick={() => {
           this.toggleInputNew(), this.props.clearConflicts();
         }}
-        role="tab"
         id="add-link"
         onKeyDown={this.handleKeyDown}
       >
@@ -481,11 +480,8 @@ export class ShortcutItem extends React.Component<
 
   getShortCutsCell(nonEmptyKeys: string[]): JSX.Element {
     return (
-      <div className="jp-Shortcuts-Cell" role="tabList">
-        <div
-          className={this.getClassNameForShortCuts(nonEmptyKeys)}
-          role="tablist"
-        >
+      <div className="jp-Shortcuts-Cell">
+        <div className={this.getClassNameForShortCuts(nonEmptyKeys)}>
           {nonEmptyKeys.map((key, index) =>
             this.getDivForKey(index, key, nonEmptyKeys)
           )}
@@ -594,7 +590,6 @@ export class ShortcutItem extends React.Component<
     } else {
       return (
         <div
-          role="tablist"
           className="jp-Shortcuts-Row"
           tabIndex={0}
           onKeyDown={this.handleEvent}
