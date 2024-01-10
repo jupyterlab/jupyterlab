@@ -2350,7 +2350,7 @@ namespace Private {
           const trans = translator.load('jupyterlab');
           Notification.emit(
             trans.__(
-              `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing, code cells will not be executed.`
+              `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing. You can run code cells when the kernel has initialized.`
             ),
             'warning',
             {
