@@ -522,16 +522,16 @@ export class ShortcutItem extends React.Component<
       }
       // Find the next element to focus on.
       let nextFocused: Element | null | undefined;
-      if (event.key === 'ArrowDown') {
+      if (event.key === 'ArrowRight') {
         nextFocused = focusable[focusedIndex + 1] ?? focusable[0];
-      } else if (event.key === 'ArrowUp') {
+      } else if (event.key === 'ArrowLeft') {
         nextFocused =
           focusable[focusedIndex - 1] ?? focusable[focusable.length - 1];
       } else if (event.key === 'Home') {
         nextFocused = focusable[0];
       } else if (event.key === 'End') {
         nextFocused = focusable[focusable.length - 1];
-      } else if (event.key === 'Escape' || event.key === 'ArrowLeft') {
+      } else if (event.key === 'Escape') {
         const parentRow = focusedElement?.closest('.jp-Shortcuts-Row');
         (parentRow as HTMLDivElement).focus();
       }
@@ -549,11 +549,6 @@ export class ShortcutItem extends React.Component<
       event.preventDefault();
       event.stopPropagation();
       return;
-    }
-
-    const { key } = event;
-    if (key === 'Enter' || key === ' ') {
-      console.log('hi');
     }
     // Handle the arrow keys to navigate through rows.
     if (event.key === 'ArrowRight') {
