@@ -26,6 +26,7 @@ export interface IShortcutItemProps {
   clearConflicts: Function;
   contextMenu: Function;
   external: IShortcutUIexternal;
+  tabIndex: number;
 }
 
 /** State for ShortcutItem component */
@@ -40,7 +41,7 @@ enum ShortCutLocation {
   Left,
   Right
 }
-
+let currentNode = 0;
 /** Describe commands that are used by shortcuts */
 function getCommands(trans: TranslationBundle): {
   [key: string]: { commandId: string; label: string; caption: string };
@@ -253,12 +254,12 @@ export class ShortcutItem extends React.Component<
   getResetShortCutLink(): JSX.Element {
     const trans = this.props.external.translator.load('jupyterlab');
     return (
-      <a
+      <button
         className="jp-Shortcuts-Reset"
         onClick={() => this.props.resetShortcut(this.props.shortcut)}
       >
         {trans.__('Reset')}
-      </a>
+      </button>
     );
   }
 
@@ -358,9 +359,9 @@ export class ShortcutItem extends React.Component<
     return this.props.shortcut.keys[key].map(
       (keyBinding: string, index: number) => (
         <div className="jp-Shortcuts-ShortcutKeysContainer" key={index}>
-          <div className="jp-Shortcuts-ShortcutKeys">
+          <button className="jp-Shortcuts-ShortcutKeys">
             {this.toSymbols(keyBinding)}
-          </div>
+          </button>
           {index + 1 < this.props.shortcut.keys[key].length ? (
             <div className="jp-Shortcuts-Comma">,</div>
           ) : null}
@@ -406,7 +407,7 @@ export class ShortcutItem extends React.Component<
   getAddLink(): JSX.Element {
     const trans = this.props.external.translator.load('jupyterlab');
     return (
-      <a
+      <button
         className={!this.state.displayNewInput ? 'jp-Shortcuts-Plus' : ''}
         onClick={() => {
           this.toggleInputNew(), this.props.clearConflicts();
@@ -414,7 +415,7 @@ export class ShortcutItem extends React.Component<
         id="add-link"
       >
         {trans.__('Add')}
-      </a>
+      </button>
     );
   }
 
@@ -442,7 +443,7 @@ export class ShortcutItem extends React.Component<
 
   getShortCutsCell(nonEmptyKeys: string[]): JSX.Element {
     return (
-      <div className="jp-Shortcuts-Cell">
+      <div className="jp-Shortcuts-Cell" role="tab">
         <div className={this.getClassNameForShortCuts(nonEmptyKeys)}>
           {nonEmptyKeys.map((key, index) =>
             this.getDivForKey(index, key, nonEmptyKeys)
@@ -460,6 +461,74 @@ export class ShortcutItem extends React.Component<
     );
   }
 
+  //navHandler = (event: React.KeyboardEvent): void => {}
+
+  handleKeyDown = (event: React.KeyboardEvent): void => {
+    const shortcutList = document.getElementById('Shortcuts-ShortcutList');
+    const focusable: Element[] = [];
+
+    if (shortcutList) {
+      // Get focusable children within the shortcut list
+      Array.from(shortcutList.children).forEach(child => {
+        focusable.push(child);
+      });
+
+      // If focusable contains only one element, nothing to do.
+      if (focusable.length <= 1) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    let activeNode = focusable[currentNode] as HTMLElement;
+    let nextNode = focusable[currentNode + 1] as HTMLElement;
+    let previousNode = focusable[currentNode - 1] as HTMLElement;
+
+    if (event.key === 'ArrowDown') {
+      let nxtNode = nextNode;
+      if (nxtNode) {
+        nxtNode.setAttribute('tabindex', '0');
+        activeNode.setAttribute('tabindex', '-1');
+        nxtNode.focus();
+        currentNode += 1;
+      }
+
+      if (currentNode >= focusable.length - 1) {
+        let node = focusable[0] as HTMLElement;
+        let activeNode = focusable[currentNode] as HTMLElement;
+
+        node.setAttribute('tabindex', '0');
+        activeNode.setAttribute('tabindex', '-1');
+        node.focus();
+        currentNode = 0;
+      }
+    }
+
+    if (event.key === 'ArrowUp') {
+      let prvNode = previousNode;
+      let activeNode = focusable[currentNode] as HTMLElement;
+      if (prvNode && currentNode >= 0) {
+        prvNode.setAttribute('tabindex', '0');
+        activeNode.setAttribute('tabindex', '-1');
+        prvNode.focus();
+        currentNode -= 1;
+      }
+
+      if (currentNode <= 0) {
+        console.log('node o');
+        let lastNode = focusable[focusable.length - 1] as HTMLElement;
+        let activeNode = focusable[currentNode] as HTMLElement;
+
+        lastNode.setAttribute('tabindex', '0');
+        activeNode.setAttribute('tabindex', '-1');
+        lastNode.focus();
+        currentNode = focusable.length - 1;
+        //return
+      }
+    }
+  };
+
   render(): JSX.Element {
     const nonEmptyKeys = Object.keys(this.props.shortcut.keys).filter(
       (key: string) => this.props.shortcut.keys[key][0] !== ''
@@ -469,7 +538,11 @@ export class ShortcutItem extends React.Component<
     } else {
       return (
         <div
+          title={this.props.shortcut.commandName}
+          role="tab"
           className="jp-Shortcuts-Row"
+          tabIndex={this.props.tabIndex}
+          onKeyDown={this.handleKeyDown}
           onContextMenu={e => {
             e.persist();
             this.handleRightClick(e);
