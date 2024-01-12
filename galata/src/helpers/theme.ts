@@ -20,7 +20,7 @@ export class ThemeHelper {
    * Set JupyterLab theme to Dark
    */
   async setHighContrastTheme(): Promise<void> {
-    await this.setTheme('JupyterLab High Contrast');
+    await this.setTheme('JupyterLab Dark High Contrast');
   }
 
   /**

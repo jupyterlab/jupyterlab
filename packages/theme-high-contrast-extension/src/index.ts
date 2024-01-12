@@ -27,8 +27,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const trans = translator.load('jupyterlab');
     const style = '@jupyterlab/theme-high-contrast-extension/index.css';
     manager.register({
-      name: 'JupyterLab High Contrast',
-      displayName: trans.__('JupyterLab High Contrast'),
+      name: 'JupyterLab Dark High Contrast',
+      displayName: trans.__('JupyterLab Dark High Contrast'),
       isLight: false,
       themeScrollbars: true,
       load: () => manager.loadCSS(style),
