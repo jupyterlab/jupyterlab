@@ -7,6 +7,7 @@ import { IDataConnector } from '@jupyterlab/statedb';
 import { CommandRegistry } from '@lumino/commands';
 import { Platform } from '@lumino/domutils';
 import pluginSchema from '../schema/shortcuts.json';
+import expect from 'expect';
 
 describe('@jupyterlab/shortcut-extension', () => {
   const pluginId = 'test-plugin:settings';
@@ -162,5 +163,28 @@ describe('@jupyterlab/shortcut-extension', () => {
 
       expect(shortcuts).toHaveLength(1);
     });
+  });
+});
+
+describe('shorcuts list', () => {
+  it('should add punctuation aria-label', () => {
+    const keyboardShortcuts = document.getElementsByClassName(
+      'jp-contextualShortcut-key'
+    );
+    for (let i = 0; i < keyboardShortcuts.length; i++) {
+      const keyboardLabelAria = keyboardShortcuts[i].getAttribute('aria-label');
+      const keyboardLabelText = keyboardShortcuts[i].innerHTML;
+      const punctuation = ",}{.'-";
+      if (punctuation.includes(keyboardLabelText)) {
+        expect(keyboardLabelAria).toEqual([
+          'Comma',
+          'Closing bracket',
+          'Opening bracket',
+          'Full stop',
+          'Single quote',
+          'Hyphen-minus'
+        ]);
+      }
+    }
   });
 });

@@ -48,6 +48,20 @@ export function displayShortcuts(options: IOptions) {
   const { commands, trans, activeElement } = options;
   const elt = activeElement ?? document.activeElement;
 
+  function keyAriaLabel(ch: string) {
+    const keyToText: { [key: string]: string } = {
+      ']': trans.__('Closing bracket'),
+      '[': trans.__('Opening bracket'),
+      ',': trans.__('Comma'),
+      '.': trans.__('Full stop'),
+      "'": trans.__('Single quote'),
+      '-': trans.__('Hyphen-minus')
+    };
+    if (Object.keys(keyToText).includes(ch)) {
+      return keyToText[ch];
+    }
+  }
+
   /**
    * Find the distance from the target node to the first matching node.
    *
@@ -66,7 +80,11 @@ export function displayShortcuts(options: IOptions) {
       const container: JSX.Element[] = [];
       key.split(' ').forEach((ch, chIndex) => {
         container.push(
-          <span className={SHORTCUT_KEY_CLASS} key={`ch-${chIndex}`}>
+          <span
+            className={SHORTCUT_KEY_CLASS}
+            key={`ch-${chIndex}`}
+            aria-label={keyAriaLabel(ch)}
+          >
             <kbd>{ch}</kbd>
           </span>,
           <React.Fragment key={`fragment-${chIndex}`}> + </React.Fragment>
