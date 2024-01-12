@@ -27,6 +27,16 @@ export interface IShortcutListProps {
 
 /** React component for list of shortcuts */
 export class ShortcutList extends React.Component<IShortcutListProps> {
+  handleTabIndex(shortcut: ShortcutObject): number {
+    let title = shortcut.commandName;
+    let firstElement = this.props.shortcuts[0].commandName;
+
+    if (firstElement === title) {
+      return 0;
+    }
+    return -1;
+  }
+
   render(): JSX.Element {
     return (
       <div
@@ -36,10 +46,17 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
         }}
         id="shortcutListContainer"
       >
-        <div className="jp-Shortcuts-ShortcutList">
+        <div
+          className="jp-Shortcuts-ShortcutList"
+          id="Shortcuts-ShortcutList"
+          role="tablist"
+          tabIndex={0}
+          //onKeyDown={this.handleKeyDown}
+        >
           {this.props.shortcuts.map((shortcut: ShortcutObject) => {
             return (
               <ShortcutItem
+                tabIndex={this.handleTabIndex(shortcut)}
                 key={shortcut.commandName + '_' + shortcut.selector}
                 resetShortcut={this.props.resetShortcut}
                 shortcut={shortcut}
