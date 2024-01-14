@@ -1224,7 +1224,7 @@ export namespace SettingRegistry {
     });
 
     // Return all the shortcuts that should be registered
-    return (
+    return Private.upgradeShortcuts(
       user
         .concat(defaults)
         .filter(shortcut => !shortcut.disabled)
@@ -1494,5 +1494,59 @@ namespace Private {
     } else {
       return schema.default;
     }
+  }
+
+  /**
+   * Upgrade shortcuts to ensure no breaking changes between minor versions.
+   */
+  export function upgradeShortcuts(
+    shortcuts: ISettingRegistry.IShortcut[]
+  ): ISettingRegistry.IShortcut[] {
+    const selectorDeprecationWarnings = new Set();
+    const changes = [
+      {
+        old: '.jp-Notebook:focus.jp-mod-commandMode',
+        new: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '.jp-Notebook:focus',
+        new: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-traversable]:focus',
+        new: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-kernel-user]:focus',
+        new: '[data-jp-kernel-user] :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1'
+      }
+    ];
+    const upgraded = shortcuts.map(shortcut => {
+      const oldSelector = shortcut.selector;
+      let newSelector = oldSelector;
+      for (const change of changes) {
+        if (oldSelector.includes(change.old)) {
+          newSelector = oldSelector.replace(change.old, change.new);
+          console.log(newSelector);
+          selectorDeprecationWarnings.add(
+            `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated}`
+          );
+        }
+      }
+      shortcut.selector = newSelector;
+      return shortcut;
+    });
+    if (selectorDeprecationWarnings.size > 0) {
+      console.warn(
+        'Deprecated shortcut selectors: ' +
+          [...selectorDeprecationWarnings].concat('\n') +
+          '\n\nThe selectors will be substituted transparently this time, but need to be updated at source before next major release.'
+      );
+    }
+    return upgraded;
   }
 }
