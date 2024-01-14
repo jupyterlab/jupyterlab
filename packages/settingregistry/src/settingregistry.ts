@@ -1464,7 +1464,10 @@ namespace Private {
       return result;
     } else if (schema.type === 'array') {
       // Make a copy of the default value to populate.
-      const result = JSONExt.deepCopy(schema.default as PartialJSONArray);
+      const result =
+        typeof schema.default !== 'undefined'
+          ? JSONExt.deepCopy(schema.default as PartialJSONArray)
+          : [];
 
       // Items defines the properties of each item in the array
       let props = (schema.items as PartialJSONObject) || {};
