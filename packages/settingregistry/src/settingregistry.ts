@@ -1437,14 +1437,25 @@ namespace Private {
 
   /**
    * Create a fully extrapolated default value for a root key in a schema.
+   *
+   * @todo This function would ideally reuse `getDefaultFormState` from rjsf
+   * with appropriate`defaultFormStateBehavior` setting, as currently
+   * these two implementations duplicate each other.
+   *
+   * Note: absence of a property may mean something else than the default.
    */
   export function reifyDefault(
     schema: ISettingRegistry.IProperty,
     root?: string,
-    definitions?: PartialJSONObject
+    definitions?: PartialJSONObject,
+    required?: boolean
   ): PartialJSONValue | undefined {
     definitions = definitions ?? (schema.definitions as PartialJSONObject);
     // If the property is at the root level, traverse its schema.
+    required = root
+      ? schema.required instanceof Array &&
+        schema.required?.includes(root as any)
+      : required;
     schema = (root ? schema.properties?.[root] : schema) || {};
 
     if (schema.type === 'object') {
@@ -1457,17 +1468,23 @@ namespace Private {
         result[property] = reifyDefault(
           props[property],
           undefined,
-          definitions
+          definitions,
+          schema.required instanceof Array &&
+            schema.required?.includes(property as any)
         );
       }
 
       return result;
     } else if (schema.type === 'array') {
+      const defaultUndefined = typeof schema.default !== 'undefined';
+      const shouldPopulateDefaultArray = defaultUndefined || required;
+      if (!shouldPopulateDefaultArray) {
+        return undefined;
+      }
       // Make a copy of the default value to populate.
-      const result =
-        typeof schema.default !== 'undefined'
-          ? JSONExt.deepCopy(schema.default as PartialJSONArray)
-          : [];
+      const result = defaultUndefined
+        ? JSONExt.deepCopy(schema.default as PartialJSONArray)
+        : [];
 
       // Items defines the properties of each item in the array
       let props = (schema.items as PartialJSONObject) || {};
@@ -1481,16 +1498,23 @@ namespace Private {
       }
       // Iterate through the items in the array and fill in defaults
       for (const item in result) {
-        // Use the values that are hard-coded in the default array over the defaults for each field.
-        const reified =
-          (reifyDefault(props, undefined, definitions) as PartialJSONObject) ??
-          {};
-        for (const prop in reified) {
-          if ((result[item] as PartialJSONObject)?.[prop]) {
-            reified[prop] = (result[item] as PartialJSONObject)[prop];
+        if (props.type === 'object') {
+          // Use the values that are hard-coded in the default array over the defaults for each field.
+          const reified =
+            (reifyDefault(
+              props,
+              undefined,
+              definitions
+            ) as PartialJSONObject) ??
+            result[item] ??
+            {};
+          for (const prop in reified) {
+            if ((result[item] as PartialJSONObject)?.[prop]) {
+              reified[prop] = (result[item] as PartialJSONObject)[prop];
+            }
           }
+          result[item] = reified;
         }
-        result[item] = reified;
       }
 
       return result;
@@ -1534,7 +1558,6 @@ namespace Private {
       for (const change of changes) {
         if (oldSelector.includes(change.old)) {
           newSelector = oldSelector.replace(change.old, change.new);
-          console.log(newSelector);
           selectorDeprecationWarnings.add(
             `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated}`
           );
