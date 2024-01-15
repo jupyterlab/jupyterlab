@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import { filterContent } from './utils';
 
 test.use({
   autoGoto: false,
@@ -14,7 +15,7 @@ test.describe.configure({ mode: 'serial' });
 
 test.describe('Overview', () => {
   test('Overview', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await openOverview(page);
 
     expect(await page.screenshot()).toMatchSnapshot('interface_jupyterlab.png');
@@ -36,7 +37,7 @@ test.describe('Overview', () => {
   });
 
   test('Tabs menu', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await openOverview(page);
 
     await page.click('text="Tabs"');
