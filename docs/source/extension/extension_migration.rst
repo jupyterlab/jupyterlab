@@ -79,6 +79,31 @@ CSS class name change in the ``WindowedList`` superclass of ``StaticNotebook``
 - The notebook scroll container is now ``.jp-WindowedPanel-outer`` rather than ``.jp-Notebook``
 - Galata notebook helpers `getCell` and `getCellCount` were updated accordingly
 
+Change of notebook focus handling impacting command-mode shortcut selectors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Previously focus in the notebook would revert back to the notebook HTML node
+when switching to command mode, which was preventing :kbd:`Tab` navigation
+between cells, especially impacting users with accessibility needs.
+In JupyterLab 4.1+ the focus stays on the active cell when switching to command
+mode; this requires all shortcut selectors to be adjusted as follows:
+
+- ``.jp-Notebook:focus.jp-mod-commandMode`` should be replaced with ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)``
+- ``.jp-Notebook:focus`` should be replaced with ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)``
+- ``[data-jp-traversable]:focus`` should be replaced with ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)``
+- ``[data-jp-kernel-user]:focus`` should be replaced with ``[data-jp-kernel-user] :focus:not(:read-write)``
+
+Please note that ``:not(:read-write)`` fragment is disables shortcuts
+when text fields  (such as cell editor) are focused to avoid intercepting
+characters typed by user into the text fields, however if your shortcut
+does not correspond to any key/typographic character (e.g. most shortcuts
+with :kbd:`Ctrl` modifier) you may prefer to drop this fragment
+if you want the shortcut to be active in text fields.
+
+To prevent breaking the user experience these changes are made transparently
+in the background, but will emit a warning and extension developers should
+make the change at the source before the next major JupyterLab release.
+
 JupyterLab 3.x to 4.x
 ---------------------
 
