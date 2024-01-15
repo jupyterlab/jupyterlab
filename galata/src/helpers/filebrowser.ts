@@ -232,10 +232,8 @@ export class FileBrowserHelper {
     const item = this.page
       .getByRole('region', { name: 'File Browser Section' })
       .getByRole('listitem', { name: new RegExp(`^Name: ${dirName}`) });
-    if (!((await item.count()) > 0)) {
-      return false;
-    }
 
+    await Utils.waitForCondition(async () => (await item.count()) > 0);
     await this.contents.waitForAPIResponse(async () => {
       await item.dblclick();
     });
