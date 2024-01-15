@@ -65,9 +65,6 @@ test('Search with a text and replacement', async ({ page }) => {
 test('Populate search box with selected text', async ({ page }) => {
   const imageName = 'text-editor-search-from-selection.png';
 
-  // Enter first cell
-  await page.notebook.enterCellEditingMode(0);
-
   // Go to first line
   await page.keyboard.press('PageUp');
   // Select first line

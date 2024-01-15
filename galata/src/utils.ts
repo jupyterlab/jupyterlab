@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { ElementHandle, Page } from '@playwright/test';
+import { ElementHandle, Locator, Page } from '@playwright/test';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
@@ -90,6 +90,21 @@ export async function getElementClassList(
     if (typeof classNameList === 'string') {
       return classNameList.split(' ');
     }
+  }
+
+  return [];
+}
+
+/**
+ * Get the classes of an locator
+ *
+ * @param locator Element locator
+ * @returns Classes list
+ */
+export async function getLocatorClassList(locator: Locator): Promise<string[]> {
+  const className = await locator.getAttribute('class');
+  if (className) {
+    return className.split(/\s/);
   }
 
   return [];

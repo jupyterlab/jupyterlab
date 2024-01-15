@@ -939,21 +939,44 @@ export class NotebookHelper {
   private async _setCellMode(
     cell: Locator,
     mode: 'Edit' | 'Command'
-  ): Promise<void> {
-    const modeLocator = this.page.getByText(`Mode: ${mode}`);
-    if ((await modeLocator.count()) > 1) {
-      return;
+  ): Promise<boolean> {
+    const isCellActive = (await cell.getAttribute('class'))
+      ?.split(/\s/)
+      .includes('jp-mod-active');
+    const modeLocator = this.page.getByText(`Mode: ${mode}`, { exact: true });
+    if ((await modeLocator.count()) == 1 && isCellActive) {
+      return false;
+    }
+    const cellInput = cell.locator('.jp-Cell-inputArea');
+    if (!(await cellInput.count())) {
+      return false;
     }
 
-    do {
-      await this.page.waitForTimeout(20);
-      // Double click works for all cell types
-      if (mode == 'Edit') {
-        await cell.locator('.jp-Cell-inputArea').dblclick();
-      } else {
-        await cell.locator('.jp-Cell-inputArea').press('Escape');
+    let isMarkdown = false;
+    const cellType = await this.getCellLocatorType(cell);
+    if (cellType === 'markdown') {
+      const renderedMarkdown = cell.locator('.jp-MarkdownOutput');
+      if (await renderedMarkdown.count()) {
+        isMarkdown = true;
       }
-    } while ((await modeLocator.count()) == 0);
+    }
+
+    if (mode == 'Edit') {
+      if (isMarkdown) {
+        await cellInput.dblclick();
+      }
+      await cell.locator('.jp-Cell-inputArea').dblclick();
+      const cellEditor = cellInput.locator('.jp-InputArea-editor');
+      if (!cellEditor.count()) {
+        return false;
+      }
+
+      await cellEditor.click();
+    } else {
+      await cell.locator('.jp-Cell-inputArea').press('Escape');
+    }
+
+    return true;
   }
 
   /**
@@ -968,9 +991,7 @@ export class NotebookHelper {
       return false;
     }
 
-    await this._setCellMode(cell, 'Edit');
-
-    return true;
+    return this._setCellMode(cell, 'Edit');
   }
 
   /**
@@ -1303,13 +1324,33 @@ export class NotebookHelper {
       return null;
     }
 
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
 
     if (!cell) {
       return null;
     }
 
-    const classList = await Utils.getElementClassList(cell);
+    const classList = await Utils.getLocatorClassList(cell);
+
+    if (classList.indexOf('jp-CodeCell') !== -1) {
+      return 'code';
+    } else if (classList.indexOf('jp-MarkdownCell') !== -1) {
+      return 'markdown';
+    } else if (classList.indexOf('jp-RawCell') !== -1) {
+      return 'raw';
+    }
+
+    return null;
+  }
+
+  /**
+   * Get the cell type of a cell from its locator
+   *
+   * @param cell Cell locator
+   * @returns Cell type
+   */
+  async getCellLocatorType(cell: Locator): Promise<nbformat.CellType | null> {
+    const classList = await Utils.getLocatorClassList(cell);
 
     if (classList.indexOf('jp-CodeCell') !== -1) {
       return 'code';
