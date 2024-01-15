@@ -46,7 +46,7 @@ input.jp-mod-styled:focus {
   box-shadow: inset 0 0 4px var(--md-blue-300);
 }
 
-input[type='checkbox'].jp-mod-styled:focus {
+input[type='checkbox'].jp-mod-styled:focus-visible {
   outline: var(--jp-border-width) solid var(--jp-input-active-border-color);
   outline-offset: 1px;
 }
