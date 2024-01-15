@@ -33,6 +33,15 @@ re-open or focus the document linked to a given kernel or terminal:
      <iframe src="https://www.youtube-nocookie.com/embed/gDM5lwU6Dmo?rel=0&amp;showinfo=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
 
+The recently closed and currently open documents can be searched in the
+modal view, which can be opened using a keyboard shortcut,
+or by clicking the [↗] icon in the running sidebar.
+
+.. image:: ../images/running-modal.png
+   :align: center
+   :class: jp-screenshot
+   :alt: The modal running dialog
+
 .. _shutdown-kernel:
 
 Kernels or terminals can be shut down from the Running panel:

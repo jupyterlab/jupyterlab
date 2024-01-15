@@ -566,15 +566,29 @@ test.describe('General', () => {
 
     await page.click('[title="Running Terminals and Kernels"]');
 
-    await expect(
-      page.locator(
-        '.jp-RunningSessions-item.jp-mod-kernel >> text="Python 3 (ipykernel)"'
+    await expect
+      .soft(
+        page.locator(
+          '.jp-RunningSessions-item.jp-mod-kernel >> text="Python 3 (ipykernel)"'
+        )
       )
-    ).toHaveCount(2);
+      .toHaveCount(2);
+
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 27, x: 0, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('running_layout.png');
+
+    await page.click('jp-button[data-command="running:show-modal"]');
 
     expect(
-      await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
-    ).toMatchSnapshot('running_layout.png');
+      await page
+        .locator('.jp-SearchableSessions-modal .jp-Dialog-content')
+        .screenshot()
+    ).toMatchSnapshot('running_modal.png');
   });
 
   test('Command Palette', async ({ page }) => {
