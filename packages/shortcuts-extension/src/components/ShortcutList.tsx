@@ -48,7 +48,6 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
       >
         <div
           className="jp-Shortcuts-ShortcutList"
-          id="Shortcuts-ShortcutList"
           role="tablist"
           tabIndex={0}
           //onKeyDown={this.handleKeyDown}
