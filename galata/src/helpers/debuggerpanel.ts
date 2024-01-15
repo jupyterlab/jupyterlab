@@ -39,16 +39,18 @@ export class DebuggerHelper {
    */
   async switchOn(name?: string): Promise<void> {
     const toolbar = await this.notebook.getToolbarLocator(name);
-    const button = toolbar?.locator('.jp-DebuggerBugButton');
-    if (((await button?.count()) ?? 0) > 0) {
-      await waitForCondition(
-        async () => (await button!.isDisabled()) === false,
-        2000
-      );
+    if (!toolbar) {
+      return;
+    }
+    const button = toolbar.locator('.jp-DebuggerBugButton');
+    await waitForCondition(async () => (await button.count()) === 1);
+    await waitForCondition(
+      async () => (await button!.isDisabled()) === false,
+      2000
+    );
 
-      if (!(await this.isOn(name))) {
-        await button!.click();
-      }
+    if (!(await this.isOn(name))) {
+      await button!.click();
     }
   }
 
@@ -59,8 +61,12 @@ export class DebuggerHelper {
    */
   async switchOff(name?: string): Promise<void> {
     const toolbar = await this.notebook.getToolbarLocator(name);
-    const button = toolbar?.locator('.jp-DebuggerBugButton');
-    if (((await button?.count()) ?? 0) > 0 && (await this.isOn(name))) {
+    if (!toolbar) {
+      return;
+    }
+    const button = toolbar.locator('.jp-DebuggerBugButton');
+    await waitForCondition(async () => (await button.count()) === 1);
+    if (await this.isOn(name)) {
       await button!.click();
     }
   }

@@ -105,7 +105,9 @@ export class NotebookHelper {
     const nbPanel = await this.activity.getPanelLocator(name);
 
     if (nbPanel && (await nbPanel.count())) {
-      return nbPanel.locator('.jp-NotebookPanel-notebook').elementHandle();
+      if (await nbPanel.locator('.jp-NotebookPanel-notebook').count()) {
+        return nbPanel.locator('.jp-NotebookPanel-notebook').elementHandle();
+      }
     }
 
     return null;
@@ -947,9 +949,9 @@ export class NotebookHelper {
       await this.page.waitForTimeout(20);
       // Double click works for all cell types
       if (mode == 'Edit') {
-        await cell.getByRole('textbox').dblclick();
+        await cell.locator('.jp-Cell-inputArea').dblclick();
       } else {
-        await cell.getByRole('textbox').press('Escape');
+        await cell.locator('.jp-Cell-inputArea').press('Escape');
       }
     } while ((await modeLocator.count()) == 0);
   }
@@ -1006,7 +1008,7 @@ export class NotebookHelper {
       return false;
     }
 
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     return this._clickOnGutter(cell!, lineNumber);
   }
 
@@ -1046,10 +1048,17 @@ export class NotebookHelper {
       return false;
     }
 
-    const panel = await this.activity.getPanel();
-    await panel!.waitForSelector(
-      '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement',
-      { state: 'attached' }
+    const panel = await this.activity.getPanelLocator();
+    if (!panel) {
+      return false;
+    }
+    await Utils.waitForCondition(
+      async () =>
+        (await panel
+          .locator(
+            '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
+          )
+          .count()) > 0
     );
 
     return this._clickOnGutter(panel!, lineNumber);
@@ -1077,16 +1086,29 @@ export class NotebookHelper {
   }
 
   protected async _clickOnGutter(
-    panel: ElementHandle,
+    panel: Locator,
     line: number
   ): Promise<boolean> {
-    const gutters = await panel.$$(
+    const gutters = panel.locator(
       '.cm-gutters > .cm-gutter.cm-breakpoint-gutter > .cm-gutterElement'
     );
-    if (gutters.length < line) {
+    if ((await gutters.count()) < line) {
       return false;
     }
-    await gutters[line].click();
+
+    // Sometime the breakpoint is not activated when clicking on the gutter, it can be
+    // useful to try it several times.
+    const gutter = gutters.nth(line);
+    for (let i = 0; i < 3; i++) {
+      await gutter.click({ position: { x: 5, y: 5 } });
+      await Utils.waitForCondition(
+        async () => ((await gutter.textContent())?.length ?? 0) > 0,
+        500
+      );
+      if ((await gutter.textContent())?.length) {
+        break;
+      }
+    }
     return true;
   }
 

@@ -68,10 +68,10 @@ export class ActivityHelper {
   async getTab(name?: string): Promise<ElementHandle<Element> | null> {
     const locator = this.getTabLocator(name);
     const start = Date.now();
-    while((await locator.count()) == 0 && (Date.now() - start) < 500) {
+    while ((await locator.count()) == 0 && Date.now() - start < 500) {
       await this.page.waitForTimeout(50);
     }
-    if((await locator.count()) > 0) {
+    if ((await locator.count()) > 0) {
       return locator.elementHandle();
     }
     return null;
@@ -111,10 +111,10 @@ export class ActivityHelper {
     }
 
     const start = Date.now();
-    while((await locator.count()) == 0 && (Date.now() - start) < 500) {
+    while ((await locator.count()) == 0 && Date.now() - start < 500) {
       await this.page.waitForTimeout(50);
     }
-    if((await locator.count()) > 0) {
+    if ((await locator.count()) > 0) {
       return locator.elementHandle();
     }
     return null;

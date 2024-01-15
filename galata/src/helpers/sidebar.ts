@@ -34,10 +34,10 @@ export class SidebarHelper {
    * @returns Tab opened status
    */
   async isTabOpen(id: galata.SidebarTabId): Promise<boolean> {
-    const tabButton = await this.page.$(
+    const tabButton = this.page.locator(
       `${this.buildTabSelector(id)}.lm-mod-current`
     );
-    return tabButton !== null;
+    return (await tabButton.count()) > 0;
   }
 
   /**
