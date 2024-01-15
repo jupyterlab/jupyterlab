@@ -14,13 +14,18 @@ import {
 import { Dialog, ICommandPalette } from '@jupyterlab/apputils';
 import {
   IRunningSessionManagers,
+  IRunningSessionSidebar,
   RunningSessionManagers,
   RunningSessions,
   SearchableSessions
 } from '@jupyterlab/running';
 import { IRecentsManager } from '@jupyterlab/docmanager';
 import { ITranslator } from '@jupyterlab/translation';
-import { runningIcon } from '@jupyterlab/ui-components';
+import {
+  CommandToolbarButton,
+  launcherIcon,
+  runningIcon
+} from '@jupyterlab/ui-components';
 import { addKernelRunningSessionManager } from './kernels';
 import { addOpenTabsSessionManager } from './opentabs';
 import { addRecentlyClosedSessionManager } from './recents';
@@ -41,126 +46,155 @@ export namespace CommandIDs {
  * The default running sessions extension.
  */
 const plugin: JupyterFrontEndPlugin<IRunningSessionManagers> = {
-  activate,
   id: '@jupyterlab/running-extension:plugin',
   description: 'Provides the running session managers.',
   provides: IRunningSessionManagers,
   requires: [ITranslator],
-  optional: [ILayoutRestorer, ILabShell],
-  autoStart: true
+  optional: [ILabShell],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    labShell: ILabShell | null
+  ): IRunningSessionManagers => {
+    const runningSessionManagers = new RunningSessionManagers();
+
+    if (labShell) {
+      addOpenTabsSessionManager(runningSessionManagers, translator, labShell);
+    }
+    void addKernelRunningSessionManager(
+      runningSessionManagers,
+      translator,
+      app
+    );
+
+    return runningSessionManagers;
+  }
+};
+
+/**
+ * The plugin enabling the running sidebar.
+ */
+const sidebarPlugin: JupyterFrontEndPlugin<IRunningSessionSidebar> = {
+  id: '@jupyterlab/running-extension:sidebar',
+  description: 'Provides the running session sidebar.',
+  provides: IRunningSessionSidebar,
+  requires: [IRunningSessionManagers, ITranslator],
+  optional: [ILayoutRestorer],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    manager: IRunningSessionManagers,
+    translator: ITranslator,
+    restorer: ILayoutRestorer | null
+  ): IRunningSessionSidebar => {
+    const trans = translator.load('jupyterlab');
+    const running = new RunningSessions(manager, translator);
+    running.id = 'jp-running-sessions';
+    running.title.caption = trans.__('Running Terminals and Kernels');
+    running.title.icon = runningIcon;
+    running.node.setAttribute('role', 'region');
+    running.node.setAttribute(
+      'aria-label',
+      trans.__('Running Sessions section')
+    );
+
+    // Let the application restorer track the running panel for restoration of
+    // application state (e.g. setting the running panel as the current side bar
+    // widget).
+    if (restorer) {
+      restorer.add(running, 'running-sessions');
+    }
+    // Rank has been chosen somewhat arbitrarily to give priority to the running
+    // sessions widget in the sidebar.
+    app.shell.add(running, 'left', { rank: 200, type: 'Sessions and Tabs' });
+
+    app.commands.addCommand(CommandIDs.showPanel, {
+      label: trans.__('Sessions and Tabs'),
+      execute: () => {
+        app.shell.activateById(running.id);
+      }
+    });
+
+    return running;
+  }
 };
 
 /**
  * An optional adding recently closed tabs.
  */
 const recentsPlugin: JupyterFrontEndPlugin<void> = {
-  activate: activateRecents,
   id: '@jupyterlab/running-extension:recently-closed',
   description: 'Adds recently closed documents list.',
   requires: [IRunningSessionManagers, IRecentsManager, ITranslator],
-  autoStart: true
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    manager: IRunningSessionManagers,
+    recents: IRecentsManager,
+    translator: ITranslator
+  ): void => {
+    addRecentlyClosedSessionManager(
+      manager,
+      recents,
+      app.commands,
+      app.docRegistry,
+      translator
+    );
+  }
 };
 
 /**
  * An optional plugin allowing to among running items.
  */
 const searchPlugin: JupyterFrontEndPlugin<void> = {
-  activate: activateSearch,
   id: '@jupyterlab/running-extension:search-tabs',
   description: 'Adds a widget to search open and closed tabs.',
   requires: [IRunningSessionManagers, ITranslator],
-  optional: [ICommandPalette],
-  autoStart: true
+  optional: [ICommandPalette, IRunningSessionSidebar],
+  autoStart: true,
+  activate: (
+    app: JupyterFrontEnd,
+    manager: IRunningSessionManagers,
+    translator: ITranslator,
+    palette: ICommandPalette | null,
+    sidebar: IRunningSessionSidebar | null
+  ): void => {
+    const trans = translator.load('jupyterlab');
+
+    app.commands.addCommand(CommandIDs.showModal, {
+      execute: () => {
+        const running = new SearchableSessions(manager, translator);
+        const dialog = new Dialog({
+          title: trans.__('Tabs and Running Sessions'),
+          body: running,
+          buttons: [Dialog.okButton({})],
+          hasClose: true
+        });
+        dialog.addClass('jp-SearchableSessions-modal');
+        return dialog.launch();
+      },
+      label: trans.__('Search Tabs and Running Sessions')
+    });
+    if (palette) {
+      palette.addItem({
+        command: CommandIDs.showModal,
+        category: trans.__('Running')
+      });
+    }
+    if (sidebar) {
+      const button = new CommandToolbarButton({
+        commands: app.commands,
+        id: CommandIDs.showModal,
+        icon: launcherIcon,
+        label: ''
+      });
+      sidebar.toolbar.addItem('open-as-modal', button);
+    }
+  }
 };
 
 /**
- * Export the plugin as default.
+ * Export the plugins.
  */
-export default [plugin, recentsPlugin, searchPlugin];
-
-/**
- * Activate the running plugin.
- */
-function activate(
-  app: JupyterFrontEnd,
-  translator: ITranslator,
-  restorer: ILayoutRestorer | null,
-  labShell: ILabShell | null
-): IRunningSessionManagers {
-  const trans = translator.load('jupyterlab');
-  const runningSessionManagers = new RunningSessionManagers();
-  const running = new RunningSessions(runningSessionManagers, translator);
-  running.id = 'jp-running-sessions';
-  running.title.caption = trans.__('Running Terminals and Kernels');
-  running.title.icon = runningIcon;
-  running.node.setAttribute('role', 'region');
-  running.node.setAttribute('aria-label', trans.__('Running Sessions section'));
-
-  // Let the application restorer track the running panel for restoration of
-  // application state (e.g. setting the running panel as the current side bar
-  // widget).
-  if (restorer) {
-    restorer.add(running, 'running-sessions');
-  }
-  if (labShell) {
-    addOpenTabsSessionManager(runningSessionManagers, translator, labShell);
-  }
-  void addKernelRunningSessionManager(runningSessionManagers, translator, app);
-  // Rank has been chosen somewhat arbitrarily to give priority to the running
-  // sessions widget in the sidebar.
-  app.shell.add(running, 'left', { rank: 200, type: 'Sessions and Tabs' });
-
-  app.commands.addCommand(CommandIDs.showPanel, {
-    label: trans.__('Sessions and Tabs'),
-    execute: () => {
-      app.shell.activateById(running.id);
-    }
-  });
-
-  return runningSessionManagers;
-}
-
-function activateSearch(
-  app: JupyterFrontEnd,
-  manager: IRunningSessionManagers,
-  translator: ITranslator,
-  palette: ICommandPalette | null
-): void {
-  const trans = translator.load('jupyterlab');
-
-  app.commands.addCommand(CommandIDs.showModal, {
-    execute: () => {
-      const running = new SearchableSessions(manager, translator);
-      const dialog = new Dialog({
-        title: trans.__('Tabs and Running Sessions'),
-        body: running,
-        buttons: [Dialog.okButton({})],
-        hasClose: true
-      });
-      dialog.addClass('jp-SearchableSessions-modal');
-      return dialog.launch();
-    },
-    label: trans.__('Search Tabs and Running Sessions')
-  });
-  if (palette) {
-    palette.addItem({
-      command: CommandIDs.showModal,
-      category: trans.__('Running')
-    });
-  }
-}
-
-function activateRecents(
-  app: JupyterFrontEnd,
-  manager: IRunningSessionManagers,
-  recents: IRecentsManager,
-  translator: ITranslator
-): void {
-  addRecentlyClosedSessionManager(
-    manager,
-    recents,
-    app.commands,
-    app.docRegistry,
-    translator
-  );
-}
+export default [plugin, sidebarPlugin, recentsPlugin, searchPlugin];

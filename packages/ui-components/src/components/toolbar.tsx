@@ -198,9 +198,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    *
    * @param widget - The widget to add to the toolbar.
    *
-   * @param index - The optional name of the item to insert after.
-   *
-   * @returns Whether the item was added to toolbar.  Returns false if
+   * @returns Whether the item was added to toolbar. Returns false if
    *   an item of the same name is already in the toolbar.
    *
    * #### Notes

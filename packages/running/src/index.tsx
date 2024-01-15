@@ -22,6 +22,7 @@ import {
   ReactWidget,
   refreshIcon,
   SidePanel,
+  Toolbar,
   ToolbarButton,
   ToolbarButtonComponent,
   UseSignal
@@ -85,11 +86,19 @@ const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
 const SHUTDOWN_ALL_BUTTON_CLASS = 'jp-RunningSessions-shutdownAll';
 
 /**
- * The running sessions token.
+ * The running sessions managers token.
  */
 export const IRunningSessionManagers = new Token<IRunningSessionManagers>(
   '@jupyterlab/running:IRunningSessionManagers',
   'A service to add running session managers.'
+);
+
+/**
+ * The running sessions token.
+ */
+export const IRunningSessionSidebar = new Token<IRunningSessionSidebar>(
+  '@jupyterlab/running:IRunningSessionsSidebar',
+  'A token allowing to modify the running sessions sidebar.'
 );
 
 /**
@@ -550,9 +559,22 @@ namespace Section {
 }
 
 /**
+ * The interface exposing the running sessions sidebar widget properties.
+ */
+export interface IRunningSessionSidebar {
+  /**
+   * The toolbar of the running sidebar.
+   */
+  readonly toolbar: Toolbar;
+}
+
+/**
  * A class that exposes the running terminal and kernel sessions.
  */
-export class RunningSessions extends SidePanel {
+export class RunningSessions
+  extends SidePanel
+  implements IRunningSessionSidebar
+{
   /**
    * Construct a new running widget.
    */
