@@ -59,7 +59,7 @@
     },
     {
       "command": "running:show-modal",
-      "keys": ["Accel Shift A"],
+      "keys": ["Accel Alt A"],
       "selector": "body"
     }
   ],
