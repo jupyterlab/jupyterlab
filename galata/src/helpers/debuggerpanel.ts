@@ -52,6 +52,7 @@ export class DebuggerHelper {
     if (!(await this.isOn(name))) {
       await button!.click();
     }
+    await waitForCondition(async () => await this.isOn(name));
   }
 
   /**
@@ -69,6 +70,7 @@ export class DebuggerHelper {
     if (await this.isOn(name)) {
       await button!.click();
     }
+    await waitForCondition(async () => !(await this.isOn(name)));
   }
 
   /**

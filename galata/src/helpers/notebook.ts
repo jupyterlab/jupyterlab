@@ -1250,7 +1250,7 @@ export class NotebookHelper {
     }
 
     await this._setCellMode(cell, 'Edit');
-    await cell.getByRole('textbox').fill(source);
+    await cell.getByRole('textbox').type(source);
     await this._setCellMode(cell, 'Command');
 
     // give CodeMirror time to style properly
@@ -1272,8 +1272,8 @@ export class NotebookHelper {
     cellIndex: number,
     cellType: nbformat.CellType
   ): Promise<boolean> {
-    const nbPanel = await this.activity.getPanel();
-    if (!nbPanel) {
+    const nbPanel = await this.activity.getPanelLocator();
+    if (!(nbPanel && (await nbPanel.count()))) {
       return false;
     }
 
@@ -1286,14 +1286,14 @@ export class NotebookHelper {
     }
 
     await this.clickToolbarItem('cellType');
-    const selectInput = await nbPanel.$('.jp-Notebook-toolbarCellTypeDropdown');
-    if (!selectInput) {
+    const selectInput = nbPanel.locator('.jp-Notebook-toolbarCellTypeDropdown');
+    if (!(await selectInput.count())) {
       return false;
     }
 
     // Legay select
-    const select = await selectInput.$('select');
-    if (select) {
+    const select = selectInput.locator('select');
+    if (await select.count()) {
       await select.selectOption(cellType);
     } else {
       await selectInput.evaluate((el, cellType) => {
@@ -1302,12 +1302,12 @@ export class NotebookHelper {
     }
 
     // Wait for the new cell to be rendered
-    let cell: ElementHandle | null;
+    let cell: Locator | null;
     let counter = 1;
     do {
       await this.page.waitForTimeout(50);
-      cell = await this.getCell(cellIndex);
-    } while (cell === null && counter++ < MAX_RETRIES);
+      cell = await this.getCellLocator(cellIndex);
+    } while (!cell?.isVisible() && counter++ < MAX_RETRIES);
 
     return counter < MAX_RETRIES;
   }
