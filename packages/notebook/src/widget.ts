@@ -1139,6 +1139,11 @@ export namespace StaticNotebook {
     disableDocumentWideUndoRedo: boolean;
 
     /**
+     * Whether to display notification if code cell is run while kernel is still initializing.
+     */
+    enableKernelInitNotification: boolean;
+
+    /**
      * Defines the maximum number of outputs per cell.
      */
     maxNumberOutputs: number;
@@ -1215,6 +1220,7 @@ export namespace StaticNotebook {
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
+    enableKernelInitNotification: false,
     showHiddenCellsButton: true,
     scrollPastEnd: true,
     defaultCell: 'code',
@@ -2775,13 +2781,16 @@ export class Notebook extends StaticNotebook {
       if (widget.editorWidget && !widget.editorWidget.node.contains(target)) {
         this.setMode('command', { focus: false });
       }
+
+      // Cell index needs to be updated before changing mode,
+      // otherwise the previous cell may get un-rendered.
+      this.activeCellIndex = index;
+
       // If the editor has focus, ensure edit mode.
       const node = widget.editorWidget?.node;
       if (node?.contains(target)) {
         this.setMode('edit', { focus: false });
       }
-      // This will set the focus
-      this.activeCellIndex = index;
     } else {
       // No cell has focus, ensure command mode.
       this.setMode('command', { focus: false });
