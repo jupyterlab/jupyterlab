@@ -295,6 +295,10 @@ test.describe('Notebook Search', () => {
     await (await cell.$('.jp-InputPrompt')).click();
 
     await page.waitForSelector('text=Search in 1 Selected Cell');
+    // Wait for the counter to be properly updated
+    await page.waitForSelector(
+      '.jp-DocumentSearch-index-counter:has-text("1/10")'
+    );
 
     // Select cell above
     await page.keyboard.press('Shift+ArrowUp');
