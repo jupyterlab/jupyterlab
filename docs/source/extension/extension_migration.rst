@@ -9,14 +9,6 @@ Extension Migration Guide
 JupyterLab 4.0 to 4.1
 ---------------------
 
-jlpm upgrade
-^^^^^^^^^^^^
-
-.. warning::
-
-    ``jlpm`` has been upgrade from 3.5.0 to 3.6.4. Extension authors will need to update their ``yarn.lock``
-    file by running ``jlpm install`` to avoid CI issues.
-
 Plugin manager and extension locks
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -39,27 +31,53 @@ Use of UI toolkit for Toolbar and ToolbarButtonComponent
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Toolbar and ToolbarButtonComponent (from the package *ui-components*) now relies on the external library
-`jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`.
+`jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`_.
 
 This library uses the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
-and is based on `FAST <https://www.fast.design/>` library by Microsoft.
+and is based on `FAST <https://www.fast.design/>`_ library by Microsoft.
 
 See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
 
-If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
-They need to be ignored when transforming the code with Jest. You will need to update the
-``transformIgnorePatterns`` to add:
+- Changes the selectors of the ``Toolbar`` and ``ToolbarButtonComponent``.
 
-.. code::
+  - The DOM of ``Toolbar`` is now a ``jp-toolbar`` component instead of a ``div``.
 
-   const esModules = [
-     '@microsoft',
-     '@jupyter/react-components',
-     '@jupyter/web-components',
-     'exenv-es6',
-     ...
-   ].join('|');
+  - The DOM of ``ToolbarButtonComponent`` is now ``jp-button`` element instead of a ``button``.
 
+    This must be taken into account since the button itself is in the shadow DOM of the ``jp-button`` component,
+    and cannot be accessed as a child of the toolbar component.
+
+  - The icon in the ``ToolbarButtonComponent`` is a direct child of the ``jp-button`` component.
+
+    The icon was previously encapsulated in a span with the class ``.jp-ToolbarButtonComponent-icon``.
+    Accessing that icon to change its properties require now something like ``jp-button > svg``.
+
+- If you are using jest to test your extension, some new ES6 packages dependencies are added to JupyterLab.
+
+  They need to be ignored when transforming the code with Jest. You will need to update the
+  ``transformIgnorePatterns`` to add:
+
+  .. code::
+
+    const esModules = [
+      '@microsoft',
+      '@jupyter/react-components',
+      '@jupyter/web-components',
+      'exenv-es6',
+      ...
+    ].join('|');
+
+- Some CSS rules for ``button`` with the class ``.jp-ToolbarButtonComponent`` has been kept for backward compatibility.
+
+  These rules are now **deprecated** and will be removed in Jupyterlab 5.
+  The ``button`` elements in toolbars must be updated to ``jp-button``, from
+  `jupyter-ui-toolkit <https://github.com/jupyterlab-contrib/jupyter-ui-toolkit>`_.
+
+CSS class name change in the ``WindowedList`` superclass of ``StaticNotebook``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- The class ``.jp-WindowedPanel-window`` has been renamed to ``.jp-WindowedPanel-viewport``.
+- The notebook scroll container is now ``.jp-WindowedPanel-outer`` rather than ``.jp-Notebook``
+- Galata notebook helpers `getCell` and `getCellCount` were updated accordingly
 
 JupyterLab 3.x to 4.x
 ---------------------

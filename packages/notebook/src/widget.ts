@@ -193,16 +193,19 @@ export class StaticNotebook extends WindowedList {
    */
   constructor(options: StaticNotebook.IOptions) {
     const cells = new Array<Cell>();
+    const windowingActive =
+      (options.notebookConfig?.windowingMode ??
+        StaticNotebook.defaultNotebookConfig.windowingMode) === 'full';
     super({
       model: new NotebookViewModel(cells, {
         overscanCount:
           options.notebookConfig?.overscanCount ??
           StaticNotebook.defaultNotebookConfig.overscanCount,
-        windowingActive:
-          (options.notebookConfig?.windowingMode ??
-            StaticNotebook.defaultNotebookConfig.windowingMode) === 'full'
+        windowingActive
       }),
-      layout: new NotebookWindowedLayout()
+      layout: new NotebookWindowedLayout(),
+      renderer: options.renderer ?? WindowedList.defaultRenderer,
+      scrollbar: false
     });
     this.addClass(NB_CLASS);
     this.cellsArray = cells;
@@ -1047,6 +1050,11 @@ export namespace StaticNotebook {
      * The kernel history retrieval object
      */
     kernelHistory?: INotebookHistory;
+
+    /**
+     * The renderer used by the underlying windowed list.
+     */
+    renderer?: WindowedList.IRenderer;
   }
 
   /**
@@ -1131,6 +1139,11 @@ export namespace StaticNotebook {
     disableDocumentWideUndoRedo: boolean;
 
     /**
+     * Whether to display notification if code cell is run while kernel is still initializing.
+     */
+    enableKernelInitNotification: boolean;
+
+    /**
      * Defines the maximum number of outputs per cell.
      */
     maxNumberOutputs: number;
@@ -1207,6 +1220,7 @@ export namespace StaticNotebook {
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
+    enableKernelInitNotification: false,
     showHiddenCellsButton: true,
     scrollPastEnd: true,
     defaultCell: 'code',
@@ -1284,10 +1298,45 @@ export class Notebook extends StaticNotebook {
    * Construct a notebook widget.
    */
   constructor(options: Notebook.IOptions) {
-    super(options);
+    super({
+      renderer: {
+        createOuter(): HTMLElement {
+          return document.createElement('div');
+        },
+
+        createViewport(): HTMLElement {
+          const el = document.createElement('div');
+          el.setAttribute('role', 'feed');
+          el.setAttribute('aria-label', 'Cells');
+          return el;
+        },
+
+        createScrollbar(): HTMLOListElement {
+          return document.createElement('ol');
+        },
+
+        createScrollbarItem(
+          notebook: Notebook,
+          index: number,
+          model: ICellModel
+        ): HTMLLIElement {
+          const li = document.createElement('li');
+          li.appendChild(document.createTextNode(`${index + 1}`));
+          if (notebook.activeCellIndex === index) {
+            li.classList.add('jp-mod-active');
+          }
+          if (notebook.selectedCells.some(cell => model === cell.model)) {
+            li.classList.add('jp-mod-selected');
+          }
+          return li;
+        }
+      },
+      ...options
+    });
     // Allow the node to scroll while dragging items.
     this.node.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
+    this.jumped.connect((_, index: number) => (this.activeCellIndex = index));
     this.selectionChanged.connect(this._updateSelectedCells, this);
 
     this.addFooter();
@@ -1359,12 +1408,29 @@ export class Notebook extends StaticNotebook {
     return this._mode;
   }
   set mode(newValue: NotebookMode) {
+    this.setMode(newValue);
+  }
+
+  /**
+   * Set the notebook mode.
+   *
+   * @param newValue Notebook mode
+   * @param options Control mode side-effect
+   * @param options.focus Whether to ensure focus (default) or not when setting the mode.
+   */
+  protected setMode(
+    newValue: NotebookMode,
+    options: { focus?: boolean } = {}
+  ): void {
+    const setFocus = options.focus ?? true;
     const activeCell = this.activeCell;
     if (!activeCell) {
       newValue = 'command';
     }
     if (newValue === this._mode) {
-      this._ensureFocus();
+      if (setFocus) {
+        this._ensureFocus();
+      }
       return;
     }
     // Post an update request.
@@ -1383,18 +1449,22 @@ export class Notebook extends StaticNotebook {
       }
       activeCell!.inputHidden = false;
     } else {
-      void NotebookActions.focusActiveCell(this, {
-        // Do not await the active cell because that creates a bug. If the user
-        // is editing a code cell and presses Accel Shift C to open the command
-        // palette, then the command palette opens before
-        // activeCell.node.focus() is called, which closes the command palette.
-        // To the end user, it looks as if all the keyboard shortcut did was
-        // move focus from the cell editor to the cell as a whole.
-        waitUntilReady: false
-      });
+      if (setFocus) {
+        void NotebookActions.focusActiveCell(this, {
+          // Do not await the active cell because that creates a bug. If the user
+          // is editing a code cell and presses Accel Shift C to open the command
+          // palette, then the command palette opens before
+          // activeCell.node.focus() is called, which closes the command palette.
+          // To the end user, it looks as if all the keyboard shortcut did was
+          // move focus from the cell editor to the cell as a whole.
+          waitUntilReady: false
+        });
+      }
     }
     this._stateChanged.emit({ name: 'mode', oldValue, newValue });
-    this._ensureFocus();
+    if (setFocus) {
+      this._ensureFocus();
+    }
   }
 
   /**
@@ -2709,17 +2779,21 @@ export class Notebook extends StaticNotebook {
       const widget = this.widgets[index];
       // If the editor itself does not have focus, ensure command mode.
       if (widget.editorWidget && !widget.editorWidget.node.contains(target)) {
-        this.mode = 'command';
+        this.setMode('command', { focus: false });
       }
+
+      // Cell index needs to be updated before changing mode,
+      // otherwise the previous cell may get un-rendered.
+      this.activeCellIndex = index;
+
       // If the editor has focus, ensure edit mode.
       const node = widget.editorWidget?.node;
       if (node?.contains(target)) {
-        this.mode = 'edit';
+        this.setMode('edit', { focus: false });
       }
-      this.activeCellIndex = index;
     } else {
       // No cell has focus, ensure command mode.
-      this.mode = 'command';
+      this.setMode('command', { focus: false });
 
       // Prevents the parent element to get the focus.
       event.preventDefault();
@@ -2774,13 +2848,7 @@ export class Notebook extends StaticNotebook {
 
     // Otherwise enter command mode if not already.
     if (this.mode !== 'command') {
-      this.mode = 'command';
-
-      // Switching to command mode currently focuses the active cell, so
-      // refocus the relatedTarget so the focus actually switches as intended.
-      if (relatedTarget) {
-        relatedTarget.focus();
-      }
+      this.setMode('command', { focus: false });
     }
   }
 

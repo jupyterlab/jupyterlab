@@ -259,7 +259,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * The item can be removed from the toolbar by setting its parent to `null`.
    */
   insertAfter(at: string, name: string, widget: T): boolean {
-    return this._insertRelative(at, 1, name, widget);
+    return this.insertRelative(at, 1, name, widget);
   }
 
   /**
@@ -279,10 +279,13 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * The item can be removed from the toolbar by setting its parent to `null`.
    */
   insertBefore(at: string, name: string, widget: T): boolean {
-    return this._insertRelative(at, 0, name, widget);
+    return this.insertRelative(at, 0, name, widget);
   }
 
-  private _insertRelative(
+  /**
+   * Insert an item relatively to an other item.
+   */
+  protected insertRelative(
     at: string,
     offset: number,
     name: string,
@@ -371,8 +374,8 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     super();
     this.insertItem(0, TOOLBAR_OPENER_NAME, this.popupOpener);
     this.popupOpener.hide();
-    this._resizer = new Throttler(async () => {
-      await this._onResize();
+    this._resizer = new Throttler(async (callTwice = false) => {
+      await this._onResize(callTwice);
     }, 300);
   }
 
@@ -416,6 +419,25 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   }
 
   /**
+   * Insert an item relatively to an other item.
+   */
+  protected insertRelative(
+    at: string,
+    offset: number,
+    name: string,
+    widget: Widget
+  ): boolean {
+    const targetPosition = this._widgetPositions.get(at);
+    const position = (targetPosition ?? 0) + offset;
+    this._widgetPositions.forEach((value, key) => {
+      if (key !== TOOLBAR_OPENER_NAME && value >= position) {
+        this._widgetPositions.set(key, value + 1);
+      }
+    });
+    return this.insertItem(position, name, widget);
+  }
+
+  /**
    * Insert an item into the toolbar at the specified index.
    *
    * @param index - The index at which to insert the item.
@@ -444,10 +466,22 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     }
 
     // Save the widgets position when a new widget is inserted.
-    if (this._widgetPositions.get(name) === undefined) {
-      this._saveWidgetPosition();
+    if (
+      name !== TOOLBAR_OPENER_NAME &&
+      this._widgetPositions.get(name) === undefined
+    ) {
+      this._widgetPositions.set(name, index);
     }
     return status;
+  }
+
+  /**
+   * A message handler invoked on an `'after-show'` message.
+   *
+   * Invokes resizing to ensure correct display of items.
+   */
+  onAfterShow(msg: Message): void {
+    void this._resizer.invoke(true);
   }
 
   /**
@@ -474,7 +508,19 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     }
   }
 
-  private _onResize() {
+  /**
+   * Move the toolbar items between the reactive toolbar and the popup toolbar,
+   * depending on the width of the toolbar and the width of each item.
+   *
+   * @param callTwice - whether to call the function twice.
+   *
+   * **NOTES**
+   * The `callTwice` parameter is useful when the toolbar is displayed the first time,
+   * because the size of the items is unknown before their first rendering. The first
+   * call will usually add all the items in the main toolbar, and the second call will
+   * reorganize the items between the main toolbar and the popup toolbar.
+   */
+  private async _onResize(callTwice = false) {
     if (!(this.parent && this.parent.isAttached)) {
       return;
     }
@@ -501,40 +547,44 @@ export class ReactiveToolbar extends Toolbar<Widget> {
         if (opener.widgetCount() > 0) {
           const widgetsToAdd = [];
           let index = 0;
-          let widget = opener.widgetAt(index);
           const widgetCount = opener.widgetCount();
 
-          width += this._getWidgetWidth(widget);
-
-          if (widgetCount === 1 && width - openerWidth <= toolbarWidth) {
-            width -= openerWidth;
-          }
-
-          while (width < toolbarWidth && index < widgetCount) {
-            widgetsToAdd.push(widget);
-            index++;
-            widget = opener.widgetAt(index);
+          while (index < widgetCount) {
+            let widget = opener.widgetAt(index);
             if (widget) {
               width += this._getWidgetWidth(widget);
+              if (widgetCount - widgetsToAdd.length === 1) {
+                width -= openerWidth;
+              }
             } else {
               break;
             }
+            if (width < toolbarWidth) {
+              widgetsToAdd.push(widget);
+            } else {
+              break;
+            }
+            index++;
           }
-
           while (widgetsToAdd.length > 0) {
             // Insert the widget in the right position in the toolbar.
             const widget = widgetsToAdd.shift()!;
             const name = Private.nameProperty.get(widget);
-            const index = this._widgetPositions.get(name) ?? 0;
-            this.insertItem(index, name, widget);
+            if (this._widgetPositions.has(name)) {
+              this.insertItem(this._widgetPositions.get(name)!, name, widget);
+            } else {
+              this.addItem(name, widget);
+            }
           }
         }
-
         if (opener.widgetCount() > 0) {
           opener.updatePopup();
           opener.show();
         } else {
           opener.hide();
+        }
+        if (callTwice) {
+          void this._onResize();
         }
       })
       .catch(msg => {
@@ -563,8 +613,10 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       if (this._zoomChanged) {
         widgetWidth = await this._saveWidgetWidth(widget);
       } else {
+        // The widget widths can be 0px if it has been added to the toolbar but
+        // not rendered, this is why we must use '||' instead of '??'.
         widgetWidth =
-          this._getWidgetWidth(widget) ?? (await this._saveWidgetWidth(widget));
+          this._getWidgetWidth(widget) || (await this._saveWidgetWidth(widget));
       }
       width += widgetWidth;
       if (
@@ -603,13 +655,6 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   private _getWidgetWidth(widget: Widget): number {
     const widgetName = Private.nameProperty.get(widget);
     return this._widgetWidths![widgetName];
-  }
-
-  private _saveWidgetPosition(): void {
-    this._widgetPositions.clear();
-    (this.layout as ToolbarLayout).widgets.forEach((widget, index) => {
-      this._widgetPositions.set(Private.nameProperty.get(widget), index);
-    });
   }
 
   protected readonly popupOpener: ToolbarPopupOpener = new ToolbarPopupOpener();
@@ -910,7 +955,7 @@ export namespace CommandToolbarButtonComponent {
     /**
      * Overrides command label
      */
-    label?: string;
+    label?: string | CommandRegistry.CommandFunc<string>;
     /**
      * Overrides command caption
      */
@@ -963,7 +1008,39 @@ export class CommandToolbarButton extends ReactWidget {
    */
   constructor(private props: CommandToolbarButtonComponent.IProps) {
     super();
+    const { commands, id, args } = props;
     addCommandToolbarButtonClass(this);
+    this.setCommandAttributes(commands, id, args);
+    commands.commandChanged.connect((_, change) => {
+      if (change.id === props.id) {
+        this.setCommandAttributes(commands, id, args);
+      }
+    }, this);
+  }
+  protected setCommandAttributes(
+    commands: CommandRegistry,
+    id: string,
+    args: ReadonlyJSONObject | undefined
+  ): void {
+    if (commands.isToggled(id, args)) {
+      this.addClass('lm-mod-toggled');
+    } else {
+      this.removeClass('lm-mod-toggled');
+    }
+    if (commands.isVisible(id, args)) {
+      this.removeClass('lm-mod-hidden');
+    } else {
+      this.addClass('lm-mod-hidden');
+    }
+    if (commands.isEnabled(id, args)) {
+      if ('disabled' in this.node) {
+        this.node.disabled = false;
+      }
+    } else {
+      if ('disabled' in this.node) {
+        this.node.disabled = true;
+      }
+    }
   }
   render(): JSX.Element {
     return <CommandToolbarButtonComponent {...this.props} />;
@@ -1177,9 +1254,13 @@ namespace Private {
     if (!commands.isVisible(id, args)) {
       className += ' lm-mod-hidden';
     }
+    const labelOverride =
+      typeof options.label === 'function'
+        ? options.label(args ?? {})
+        : options.label;
 
     let tooltip =
-      commands.caption(id, args) || options.label || label || iconLabel;
+      commands.caption(id, args) || labelOverride || label || iconLabel;
     // Shows hot keys in tooltips
     const binding = commands.keyBindings.find(b => b.command === id);
     if (binding) {
@@ -1199,7 +1280,7 @@ namespace Private {
       tooltip: options.caption ?? tooltip,
       onClick,
       enabled,
-      label: options.label ?? label,
+      label: labelOverride ?? label,
       pressed
     };
   }

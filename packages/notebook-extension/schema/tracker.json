@@ -671,6 +671,12 @@
     }
   },
   "properties": {
+    "enableKernelInitNotification": {
+      "title": "Notify about code execution if kernel is initializing",
+      "description": "Display notification if code cells are run while kernel is initializing.",
+      "type": "boolean",
+      "default": false
+    },
     "codeCellConfig": {
       "title": "Code Cell Configuration",
       "description": "The configuration for all code cells; it will override the CodeMirror default configuration.",
@@ -748,6 +754,12 @@
       "description": "Defines the maximum number of output cells to be rendered in the output area for cells with many outputs. The output area will have a head and the remaining outputs will be trimmed and not displayed unless the user clicks on the information message. Set to 0 to have the complete display.",
       "type": "number",
       "default": 50
+    },
+    "scrollHeadingToTop": {
+      "title": "Scroll heading to top",
+      "description": "Whether to scroll heading to the document top when selecting it in the table of contents.",
+      "type": "boolean",
+      "default": true
     },
     "showEditorForReadOnlyMarkdown": {
       "title": "Show editor for read-only Markdown cells",
