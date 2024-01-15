@@ -83,7 +83,7 @@ package configuration.
 .. note::
 
    You can find more information on upgrading Yarn from version 1 to version 3 in
-   [Yarn documentation](https://v3.yarnpkg.com/getting-started/migration).
+   `Yarn documentation <https://v3.yarnpkg.com/getting-started/migration>`_.
 
 If you are hit by multiple versions of the same packages (like ``@lumino/widgets``),
 TypeScript may complain that the types are not matching. One possible solution
