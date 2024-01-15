@@ -504,8 +504,9 @@ export class ShortcutItem extends React.Component<
 
   //navHandler = (event: React.KeyboardEvent): void => {}
 
-  // Handle key down for row navigation
-
+  /**
+   * Handle key down for row navigation
+   */
   handleRowKeyDown = (event: React.KeyboardEvent): void => {
     const shortcutList = document.getElementById('Shortcuts-ShortcutList');
     const focusable: Element[] = [];
