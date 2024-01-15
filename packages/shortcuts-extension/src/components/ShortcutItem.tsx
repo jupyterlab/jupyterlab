@@ -287,6 +287,7 @@ export class ShortcutItem extends React.Component<
         className="jp-Shortcuts-Reset"
         onClick={() => this.props.resetShortcut(this.props.shortcut)}
         onKeyDown={this.handleKeyDown}
+        tabIndex={-1}
       >
         {trans.__('Reset')}
       </button>
@@ -395,6 +396,7 @@ export class ShortcutItem extends React.Component<
             aria-label={this.punctuationToText(keyBinding)}
             role="text"
             onKeyDown={this.handleKeyDown}
+            tabIndex={-1}
           >
             {this.toSymbols(keyBinding)}
           </button>
@@ -450,6 +452,7 @@ export class ShortcutItem extends React.Component<
         }}
         id="add-link"
         onKeyDown={this.handleKeyDown}
+        tabIndex={-1}
       >
         {trans.__('Add')}
       </button>
@@ -501,7 +504,9 @@ export class ShortcutItem extends React.Component<
 
   //navHandler = (event: React.KeyboardEvent): void => {}
 
-  handleKeyDown = (event: React.KeyboardEvent): void => {
+  // Handle key down for row navigation
+
+  handleRowKeyDown = (event: React.KeyboardEvent): void => {
     const shortcutList = document.getElementById('Shortcuts-ShortcutList');
     const focusable: Element[] = [];
 
@@ -554,7 +559,6 @@ export class ShortcutItem extends React.Component<
       }
 
       if (currentNode <= 0) {
-        console.log('node o');
         let lastNode = focusable[focusable.length - 1] as HTMLElement;
         let activeNode = focusable[currentNode] as HTMLElement;
 
@@ -562,22 +566,21 @@ export class ShortcutItem extends React.Component<
         activeNode.setAttribute('tabindex', '-1');
         lastNode.focus();
         currentNode = focusable.length - 1;
-        //return
       }
     }
   };
+
+  // handle key down function to navigate within each row
 
   handleKeyDown(event: React.KeyboardEvent): void {
     // Handle the arrow keys to navigate through rows.
     if (ARROW_KEYS.includes(event.key)) {
       const focusedElement = document.activeElement;
-      console.log(`Focused element: ${focusedElement}`);
 
       const parentRow = focusedElement?.closest('.jp-Shortcuts-Row');
       const elements = parentRow!.querySelectorAll('button');
 
       const focusable: Element[] = [...elements];
-      console.log(focusable);
 
       // Get the current focused element.
       let focusedIndex = focusable.indexOf(document.activeElement as Element);
@@ -614,7 +617,22 @@ export class ShortcutItem extends React.Component<
   }
 
   handleEvent(event: React.KeyboardEvent): void {
-    if (event.key === 'Tab' || event.eventPhase === Event.CAPTURING_PHASE) {
+    let tabOrder = document.getElementById('tab-key-1-1') as HTMLLIElement;
+    let reverseTabOrder = document.getElementsByClassName(
+      'jp-InputGroup jp-Shortcuts-Search'
+    )[0] as HTMLElement;
+
+    if (event.shiftKey && event.key === 'Tab') {
+      reverseTabOrder.setAttribute('tabindex', '0');
+      reverseTabOrder.focus();
+      return;
+    } else if (event.key === 'Tab') {
+      tabOrder.setAttribute('tabindex', '0');
+      tabOrder.focus();
+      return;
+    }
+
+    if (event.eventPhase === Event.CAPTURING_PHASE) {
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -622,12 +640,10 @@ export class ShortcutItem extends React.Component<
     // Handle the arrow keys to navigate through rows.
     if (event.key === 'ArrowRight') {
       const focusedElement = document.activeElement;
-      console.log(`Focused element: ${focusedElement}`);
 
       // Create a list of all focusable elements in the focused shortcuts row.
       if (focusedElement?.className === 'jp-Shortcuts-Row') {
         const elements = Array.from(focusedElement.querySelectorAll('button'));
-        console.log(`Elements: ${elements}`);
 
         const focusable: Element[] = [...elements];
 
@@ -645,7 +661,6 @@ export class ShortcutItem extends React.Component<
     }
   }
 
-
   render(): JSX.Element {
     const nonEmptyKeys = Object.keys(this.props.shortcut.keys).filter(
       (key: string) => this.props.shortcut.keys[key][0] !== ''
@@ -659,8 +674,10 @@ export class ShortcutItem extends React.Component<
           role="tab"
           className="jp-Shortcuts-Row"
           tabIndex={this.props.tabIndex}
-          onKeyDown={this.handleKeyDown, this.handleEvent}
-
+          onKeyDown={event => {
+            this.handleRowKeyDown(event);
+            this.handleEvent(event);
+          }}
           onContextMenu={e => {
             e.persist();
             this.handleRightClick(e);
