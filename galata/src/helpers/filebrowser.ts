@@ -209,9 +209,11 @@ export class FileBrowserHelper {
    */
   async refresh(): Promise<void> {
     const page = this.page;
-    const button = page.getByRole('button', {
-      name: 'Refresh the file browser.'
-    });
+    const button = page
+      .locator('#filebrowser')
+      .locator(
+        '.jp-ToolbarButtonComponent[data-command="filebrowser:refresh"]'
+      );
 
     // Use Promise.race to manage the network response timeout
     // This is useful for lab-based applications not using the Jupyter Server Contents API.
