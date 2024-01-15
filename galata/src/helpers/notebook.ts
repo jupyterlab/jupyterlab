@@ -1250,7 +1250,10 @@ export class NotebookHelper {
     }
 
     await this._setCellMode(cell, 'Edit');
-    await cell.getByRole('textbox').type(source);
+    await cell.getByRole('textbox').press('Control+A');
+    await cell
+      .getByRole('textbox')
+      .type(source, { delay: cellType === 'code' ? 100 : 0 });
     await this._setCellMode(cell, 'Command');
 
     // give CodeMirror time to style properly
