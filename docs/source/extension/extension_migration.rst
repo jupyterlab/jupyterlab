@@ -79,6 +79,11 @@ CSS class name change in the ``WindowedList`` superclass of ``StaticNotebook``
 - The notebook scroll container is now ``.jp-WindowedPanel-outer`` rather than ``.jp-Notebook``
 - Galata notebook helpers `getCell` and `getCellCount` were updated accordingly
 
+Visibility of ``StatusBar`` elements at high magnifications
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- Statusbar items are now hidden by default at high magnification/low resolution to prevent overlap for those using the application at high magnifications.
+- An additional ``priority`` property has been added to the options of ``IStatusBar.registerStatusItem`` method to allow the status bar item to remain visible; the intended usage is for small statusbar items that either add functionality that would be particularly useful at high zoom or is inaccessible otherwise.
+
 JupyterLab 3.x to 4.x
 ---------------------
 
