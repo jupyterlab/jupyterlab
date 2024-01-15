@@ -60,12 +60,10 @@ export function addRecentlyClosedSessionManager(
       if (!isValid) {
         return;
       }
-      commands
-        .execute('docmanager:open', {
-          path: recent.path,
-          factory: recent.factory
-        })
-        .finally();
+      await commands.execute('docmanager:open', {
+        path: recent.path,
+        factory: recent.factory
+      });
       recentsManager.removeRecent(recent, 'closed');
     }
     shutdown() {
