@@ -166,7 +166,7 @@ describe('@jupyterlab/shortcut-extension', () => {
   });
 });
 
-describe('shorcuts list', () => {
+describe('shorcuts list @A11y', () => {
   it('should add punctuation aria-label', () => {
     const keyboardShortcuts = document.getElementsByClassName(
       'jp-contextualShortcut-key'
