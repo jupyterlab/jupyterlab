@@ -124,7 +124,7 @@ It's a good idea to use these extension points while you're building your extens
 by doing so you are acting as the *consumer* in JupyterLab's :ref:`Provider-Consumer pattern <dependency-injection-basic-info>`.
 
 Testing for Optional Features
-"""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Making an app-specific feature optional and checking if it is available before
 using it, is one technique you can use to make your extensions compatible.
@@ -192,7 +192,7 @@ JupyterLab and Jupyter Notebook 7:
     }
 
 Using Required Features to Switch Behaviors
-"""""""""""""""""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Another pattern you can follow is to export a list of plugins from your
 extension, then use different "requires" features to select different
