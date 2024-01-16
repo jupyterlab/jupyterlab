@@ -1476,13 +1476,13 @@ namespace Private {
 
       return result;
     } else if (schema.type === 'array') {
-      const defaultUndefined = typeof schema.default !== 'undefined';
-      const shouldPopulateDefaultArray = defaultUndefined || required;
+      const defaultDefined = typeof schema.default !== 'undefined';
+      const shouldPopulateDefaultArray = defaultDefined || required;
       if (!shouldPopulateDefaultArray) {
         return undefined;
       }
       // Make a copy of the default value to populate.
-      const result = defaultUndefined
+      const result = defaultDefined
         ? JSONExt.deepCopy(schema.default as PartialJSONArray)
         : [];
 
