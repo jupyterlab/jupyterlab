@@ -160,9 +160,9 @@ loads). If ``IStatusBar`` is not available, the second argument to the ``activat
 function will be ``null``, as is the case when the extension is loaded in Jupyter
 Notebook 7.
 
-When it comes time to use the status bar, this extension creates the common main widget.
-Then if the ``IStatusBar`` is available, it
-sets up a status bar item, which allows the extension to run successfully in both
+The extension always creates a common main widget, but when it comes time to use the
+status bar, the extension first checks if the ``IStatusBar`` is available, and only then
+proceeds to create a status bar item. This allows the extension to run successfully in both
 JupyterLab and Jupyter Notebook 7:
 
 .. code:: TypeScript
