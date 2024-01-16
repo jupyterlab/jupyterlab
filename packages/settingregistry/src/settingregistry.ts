@@ -1524,6 +1524,11 @@ namespace Private {
   }
 
   /**
+   * Selectors which were previously warned about.
+   */
+  const selectorsAlreadyWarnedAbout = new Set<string>();
+
+  /**
    * Upgrade shortcuts to ensure no breaking changes between minor versions.
    */
   export function upgradeShortcuts(
@@ -1556,11 +1561,15 @@ namespace Private {
       const oldSelector = shortcut.selector;
       let newSelector = oldSelector;
       for (const change of changes) {
-        if (oldSelector.includes(change.old)) {
+        if (
+          oldSelector.includes(change.old) &&
+          !selectorsAlreadyWarnedAbout.has(oldSelector)
+        ) {
           newSelector = oldSelector.replace(change.old, change.new);
           selectorDeprecationWarnings.add(
-            `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated}`
+            `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated} (present in "${oldSelector}")`
           );
+          selectorsAlreadyWarnedAbout.add(oldSelector);
         }
       }
       shortcut.selector = newSelector;
@@ -1569,7 +1578,7 @@ namespace Private {
     if (selectorDeprecationWarnings.size > 0) {
       console.warn(
         'Deprecated shortcut selectors: ' +
-          [...selectorDeprecationWarnings].concat('\n') +
+          [...selectorDeprecationWarnings].join('\n') +
           '\n\nThe selectors will be substituted transparently this time, but need to be updated at source before next major release.'
       );
     }
