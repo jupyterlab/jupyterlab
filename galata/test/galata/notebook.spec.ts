@@ -25,6 +25,9 @@ test.describe('Notebook Tests', () => {
     await page.notebook.setCell(0, 'markdown', '## This is a markdown cell');
     expect(await page.notebook.getCellCount()).toBe(1);
     expect(await page.notebook.getCellType(0)).toBe('markdown');
+    expect(await page.notebook.getCellTextInput(0)).toBe(
+      '## This is a markdown cell'
+    );
 
     // Wait for kernel to be idle
     await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
@@ -40,6 +43,7 @@ test.describe('Notebook Tests', () => {
     await page.notebook.addCell('raw', 'This is a raw cell');
     expect(await page.notebook.getCellCount()).toBe(2);
     expect(await page.notebook.getCellType(1)).toBe('raw');
+    expect(await page.notebook.getCellTextInput(1)).toBe('This is a raw cell');
 
     // Wait for kernel to be idle and the debug switch to appear
     await Promise.all([
@@ -58,6 +62,7 @@ test.describe('Notebook Tests', () => {
     await page.notebook.addCell('code', '2 + 2');
     expect(await page.notebook.getCellCount()).toBe(2);
     expect(await page.notebook.getCellType(1)).toBe('code');
+    expect(await page.notebook.getCellTextInput(1)).toBe('2 + 2');
 
     // Wait for kernel to be idle
     await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
@@ -65,6 +70,13 @@ test.describe('Notebook Tests', () => {
     expect(await page.getByRole('main').screenshot()).toMatchSnapshot(
       'code-cell.png'
     );
+  });
+
+  test('Should copy cell input content with new lines', async ({ page }) => {
+    await page.notebook.createNew();
+
+    await page.notebook.setCell(0, 'code', 'a\nb\nc');
+    expect(await page.notebook.getCellTextInput(0)).toBe('a\nb\nc');
   });
 
   test('Run Cells', async ({ page }) => {
