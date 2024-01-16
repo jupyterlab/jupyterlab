@@ -23,7 +23,7 @@ Users with the custom CSS file using the selectors from legacy Notebook versions
 will need to update them and note that tutorials may refer to the selectors for the old Notebook versions.
 ```
 
-### Markdown Diagram support
+### Diagrams in Markdown
 
 Matching GitHub-Flavoured Markdown, a support for diagrams represented with [Mermaid](https://github.com/mermaid-js/mermaid) was added.
 To create a mermaid diagram use the `mermaid` language specifier for a code block in a markdown cell or document, for example:
@@ -134,14 +134,14 @@ JupyterLab 4.1 adds two notifications to guide users in potentially confusing si
 - Search in selection can now be toggled using <kbd>Alt</kbd> + <kbd>L</kbd> and automatic search in selection can be configured in settings
 - Tooltips with shortcuts were added to the buttons in the search box to improve discoverability of the shortcuts
 
-### Kiscellaneous
+### Miscellaneous
 - The current theme (dark/light) can now be synced with the browser/system preference (Settings menu → Theme → Synchronise with System Settings)
 - A blue "read-only" status indicator is now  displayed in the toolbar of documents which cannot be saved because their model is read-only.
 - Native support for viewing jsonl/ndjson files was added
 - Collapsing of breadcrumbs in the File Browser can be disabled in File Browser settings
 - Extension manager can now use a HTTP proxy for fetching extensions
 
-#### Moved plugins
+### Moved plugins
 
 Some internal JupyterLab plugins have been re-organized to allow for better flexibility for deployments and downstream applications like Notebook 7. This might affect users that disable specific plugins with the `jupyter labextension disable` command or the `disabledExtensions` config option.
 
