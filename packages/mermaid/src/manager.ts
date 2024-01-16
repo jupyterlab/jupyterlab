@@ -286,6 +286,7 @@ namespace Private {
       theme,
       fontFamily,
       maxTextSize: 100000,
+      maxEdges: 100000,
       startOnLoad: false
     });
     return true;
