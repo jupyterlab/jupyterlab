@@ -45,7 +45,8 @@
 }
 
 .jp-SideBar .lm-TabBar-tab {
-  padding: 16px 0;
+  /* stylelint-disable-next-line csstree/validator */
+  padding: min(5vh, 16px) 0; /* Using min() and vh allows the top and bottom padding to shrink when the screen is small or when the user increases browser zoom level, making room to show more content in the sidebar */
   border: none;
   overflow: visible;
   flex-direction: column;
