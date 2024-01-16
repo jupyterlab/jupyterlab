@@ -51,6 +51,7 @@ jobs:
           test_folder: galata
           artifact_name: updated-galata-snapshots
           report_name: update-galata-report
+          npm_client: jlpm
 
       - name: Comment back on the PR
         run: |
@@ -132,6 +133,7 @@ jobs:
           update_script: test:doc:update
           artifact_name: updated-documentation-snapshots
           report_name: update-documentation-report
+          npm_client: jlpm
 
       - name: Comment back on the PR
         run: |
