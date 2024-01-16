@@ -109,7 +109,6 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
           lastNode.setAttribute('tabindex', '0');
           activeNode.setAttribute('tabindex', '-1');
           lastNode.focus();
-          currentNode = focusable.length - 1;
         }
       }
     }
