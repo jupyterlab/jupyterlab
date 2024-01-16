@@ -8,6 +8,8 @@ import { ShortcutObject, TakenByObject } from './ShortcutInput';
 import { ShortcutItem } from './ShortcutItem';
 import { IShortcutUIexternal } from './TopNav';
 
+const ARROW_KEYS = ['ArrowUp', 'ArrowDown'];
+
 const TOPNAV_HEIGHT: number = 115;
 
 /** Props for ShortcutList component */
@@ -23,6 +25,7 @@ export interface IShortcutListProps {
   height: number;
   contextMenu: Function;
   external: IShortcutUIexternal;
+  id?: string;
 }
 
 /** React component for list of shortcuts */
@@ -37,6 +40,81 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
     return -1;
   }
 
+  /**
+   * Handle key down for row navigation
+   */
+  handleRowKeyDown = (event: React.KeyboardEvent): void => {
+    if (ARROW_KEYS.includes(event.key)) {
+      let shortcutList;
+
+      if (this.props.id) {
+        shortcutList = document.getElementById(this.props.id) as HTMLElement;
+      }
+
+      const focusable: Element[] = [];
+
+      if (shortcutList) {
+        // Get focusable children within the shortcut list
+        Array.from(shortcutList.children).forEach(child => {
+          focusable.push(child);
+        });
+
+        // If focusable contains only one element, nothing to do.
+        if (focusable.length <= 1) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      let activeElement = document.activeElement as HTMLElement;
+      let currentNode = focusable.indexOf(activeElement);
+      let activeNode = focusable[currentNode] as HTMLElement;
+      let nextNode = focusable[currentNode + 1] as HTMLElement;
+      let previousNode = focusable[currentNode - 1] as HTMLElement;
+
+      if (event.key === 'ArrowDown') {
+        let nxtNode = nextNode;
+        if (nxtNode) {
+          nxtNode.setAttribute('tabindex', '0');
+          activeNode.setAttribute('tabindex', '-1');
+          nxtNode.focus();
+          currentNode += 1;
+        }
+
+        if (currentNode >= focusable.length - 1) {
+          let node = focusable[0] as HTMLElement;
+          let activeNode = focusable[currentNode] as HTMLElement;
+
+          node.setAttribute('tabindex', '0');
+          activeNode.setAttribute('tabindex', '-1');
+          node.focus();
+          currentNode = 0;
+        }
+      }
+
+      if (event.key === 'ArrowUp') {
+        let prvNode = previousNode;
+        let activeNode = focusable[currentNode] as HTMLElement;
+        if (prvNode && currentNode >= 0) {
+          prvNode.setAttribute('tabindex', '0');
+          activeNode.setAttribute('tabindex', '-1');
+          prvNode.focus();
+          currentNode -= 1;
+        }
+
+        if (currentNode <= 0) {
+          let lastNode = focusable[focusable.length - 1] as HTMLElement;
+          let activeNode = focusable[currentNode] as HTMLElement;
+
+          lastNode.setAttribute('tabindex', '0');
+          activeNode.setAttribute('tabindex', '-1');
+          lastNode.focus();
+          currentNode = focusable.length - 1;
+        }
+      }
+    }
+  };
+
   render(): JSX.Element {
     return (
       <div
@@ -50,7 +128,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
           className="jp-Shortcuts-ShortcutList"
           role="tablist"
           tabIndex={0}
-          //onKeyDown={this.handleKeyDown}
+          id={this.props.id}
         >
           {this.props.shortcuts.map((shortcut: ShortcutObject) => {
             return (
@@ -67,6 +145,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
                 clearConflicts={this.props.clearConflicts}
                 contextMenu={this.props.contextMenu}
                 external={this.props.external}
+                handleRowKeyDown={this.handleRowKeyDown}
               />
             );
           })}

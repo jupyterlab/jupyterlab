@@ -37,6 +37,7 @@ export interface IShortcutItemProps {
   contextMenu: Function;
   external: IShortcutUIexternal;
   tabIndex: number;
+  handleRowKeyDown: Function;
 }
 
 /** State for ShortcutItem component */
@@ -51,7 +52,7 @@ enum ShortCutLocation {
   Left,
   Right
 }
-let currentNode = 0;
+
 /** Describe commands that are used by shortcuts */
 function getCommands(trans: TranslationBundle): {
   [key: string]: { commandId: string; label: string; caption: string };
@@ -219,19 +220,20 @@ export class ShortcutItem extends React.Component<
   };
 
   punctuationToText = (value: string): string => {
+    const trans = this.props.external.translator.load('jupyterlab');
     return value.split(' ').reduce((result, key) => {
       if (key === ']') {
-        return (result + ' Closing bracket').trim();
+        return (result + trans.__(' Closing bracket')).trim();
       } else if (key === '[') {
-        return (result + ' Opening bracket').trim();
+        return (result + trans.__(' Opening bracket')).trim();
       } else if (key === ',') {
-        return (result + ' Comma').trim();
+        return (result + trans.__(' Comma')).trim();
       } else if (key === '.') {
-        return (result + ' Full stop').trim();
+        return (result + trans.__(' Full stop')).trim();
       } else if (key === " '") {
-        return (result + ' Single quote').trim();
+        return (result + trans.__(' Single quote')).trim();
       } else if (key === ' -') {
-        return (result + ' Hyphen-minus').trim();
+        return (result + trans.__(' Hyphen-minus')).trim();
       } else {
         return (result + ' ' + key).trim();
       }
@@ -502,75 +504,6 @@ export class ShortcutItem extends React.Component<
     );
   }
 
-  //navHandler = (event: React.KeyboardEvent): void => {}
-
-  /**
-   * Handle key down for row navigation
-   */
-  handleRowKeyDown = (event: React.KeyboardEvent): void => {
-    const shortcutList = document.getElementById('Shortcuts-ShortcutList');
-    const focusable: Element[] = [];
-
-    if (shortcutList) {
-      // Get focusable children within the shortcut list
-      Array.from(shortcutList.children).forEach(child => {
-        focusable.push(child);
-      });
-
-      // If focusable contains only one element, nothing to do.
-      if (focusable.length <= 1) {
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    let activeNode = focusable[currentNode] as HTMLElement;
-    let nextNode = focusable[currentNode + 1] as HTMLElement;
-    let previousNode = focusable[currentNode - 1] as HTMLElement;
-
-    if (event.key === 'ArrowDown') {
-      let nxtNode = nextNode;
-      if (nxtNode) {
-        nxtNode.setAttribute('tabindex', '0');
-        activeNode.setAttribute('tabindex', '-1');
-        nxtNode.focus();
-        currentNode += 1;
-      }
-
-      if (currentNode >= focusable.length - 1) {
-        let node = focusable[0] as HTMLElement;
-        let activeNode = focusable[currentNode] as HTMLElement;
-
-        node.setAttribute('tabindex', '0');
-        activeNode.setAttribute('tabindex', '-1');
-        node.focus();
-        currentNode = 0;
-      }
-    }
-
-    if (event.key === 'ArrowUp') {
-      let prvNode = previousNode;
-      let activeNode = focusable[currentNode] as HTMLElement;
-      if (prvNode && currentNode >= 0) {
-        prvNode.setAttribute('tabindex', '0');
-        activeNode.setAttribute('tabindex', '-1');
-        prvNode.focus();
-        currentNode -= 1;
-      }
-
-      if (currentNode <= 0) {
-        let lastNode = focusable[focusable.length - 1] as HTMLElement;
-        let activeNode = focusable[currentNode] as HTMLElement;
-
-        lastNode.setAttribute('tabindex', '0');
-        activeNode.setAttribute('tabindex', '-1');
-        lastNode.focus();
-        currentNode = focusable.length - 1;
-      }
-    }
-  };
-
   // handle key down function to navigate within each row
 
   handleKeyDown(event: React.KeyboardEvent): void {
@@ -605,6 +538,7 @@ export class ShortcutItem extends React.Component<
       } else if (event.key === 'End') {
         nextFocused = focusable[focusable.length - 1];
       } else if (event.key === 'Escape') {
+        focusedElement?.setAttribute('tabindex', '-1');
         const parentRow = focusedElement?.closest('.jp-Shortcuts-Row');
         (parentRow as HTMLDivElement).focus();
       }
@@ -618,18 +552,22 @@ export class ShortcutItem extends React.Component<
   }
 
   handleEvent(event: React.KeyboardEvent): void {
-    let tabOrder = document.getElementById('tab-key-1-1') as HTMLLIElement;
-    let reverseTabOrder = document.getElementsByClassName(
+    let nextElement = document.getElementsByClassName(
+      'jp-property-inspector'
+    )[0] as HTMLLIElement;
+    let previousElement = document.getElementsByClassName(
       'jp-InputGroup jp-Shortcuts-Search'
     )[0] as HTMLElement;
 
     if (event.shiftKey && event.key === 'Tab') {
-      reverseTabOrder.setAttribute('tabindex', '0');
-      reverseTabOrder.focus();
+      event.preventDefault();
+      event.stopPropagation();
+      previousElement.setAttribute('tabindex', '0');
+      previousElement.focus();
       return;
     } else if (event.key === 'Tab') {
-      tabOrder.setAttribute('tabindex', '0');
-      tabOrder.focus();
+      nextElement.setAttribute('tabindex', '0');
+      nextElement.focus();
       return;
     }
 
@@ -675,8 +613,9 @@ export class ShortcutItem extends React.Component<
           role="tab"
           className="jp-Shortcuts-Row"
           tabIndex={this.props.tabIndex}
+          ref={this.props.shortcut.id}
           onKeyDown={event => {
-            this.handleRowKeyDown(event);
+            this.props.handleRowKeyDown(event);
             this.handleEvent(event);
           }}
           onContextMenu={e => {

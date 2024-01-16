@@ -15,6 +15,7 @@ import { IShortcutUIexternal, TopNav } from './TopNav';
 
 import * as React from 'react';
 import { ErrorObject, ShortcutObject, TakenByObject } from './ShortcutInput';
+import { DOMUtils } from '@jupyterlab/apputils';
 
 const enum MatchType {
   Label,
@@ -505,6 +506,7 @@ export class ShortcutUI extends React.Component<
           height={this.props.height}
           contextMenu={this.contextMenu}
           external={this.props.external}
+          id={DOMUtils.createDomID() + '-shortcut-list'}
         />
       </div>
     );
