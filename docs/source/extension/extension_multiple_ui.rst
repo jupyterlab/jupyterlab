@@ -23,8 +23,8 @@ How Compatibility Works
 -----------------------
 
 At a high level, extensions for JupyterLab and Jupyter Notebook both
-typically start from a template project. You can download and start modifying
-a template project (read more at `the extension tutorial <https://jupyterlab.readthedocs.io/en/latest/extension/extension_tutorial.html>`_).
+typically start from a template project, which you can download and set up
+using instructions from `the extension tutorial <https://jupyterlab.readthedocs.io/en/latest/extension/extension_tutorial.html>`_).
 Once your template is ready, you can start adding components and features to build your extension.
 
 An extension for JupyterLab (and for Notebook 7) is made up of a `series <https://jupyterlab.readthedocs.io/en/latest/extension/extension_dev.html>`_
@@ -98,10 +98,10 @@ Using Plugin Metadata to Drive Compatibility
 
 JupyterLab's extension system is designed so that plugins can depend on and
 reuse features from one another. A key part of this approach is :ref:`JupyterLab's
-dependency-injection pattern <dependency-injection-basic-info>`, and it is what
-enables the compatibility solutions discussed here.
+Provider-Consumer pattern <dependency-injection-basic-info>` (a type of `dependency-injection <https://en.wikipedia.org/wiki/Dependency_injection>`_
+pattern), and it is what enables the compatibility solutions discussed here.
 
-Each plugin uses some properties (the *requires* and *optional* properties) to
+Each plugin uses some properties (the ``requires`` and ``optional`` properties) to
 request features it wants which are provided by other plugins that have been
 loaded into JupyterLab. When your plugin requests features, the system sends
 them to your plugin's activate function if they are available.
@@ -109,9 +109,9 @@ them to your plugin's activate function if they are available.
 You can build compatible extensions by taking advantage of these plugin
 properties, and how the plugin system uses them:
 
-- When you designate a feature in the *requires* list of your
+- When you designate a feature in the ``requires`` list of your
   plugin, JupyterLab will only load your plugin if that feature is available.
-- By designating a feature in the *optional* list, JupyterLab will pass you
+- By designating a feature in the ``optional`` list, JupyterLab will pass you
   an object for it (if it's available) or ``null`` if it's not.
 
 So, these capabilities form the backbone of extension compatibility. You can
@@ -121,7 +121,7 @@ both JupyterLab and Jupyter Notebook 7 (and others).
 JupyterLab itself is a :ref:`provider <dependency-injection-basic-info>` of many features through its built-in plugins,
 which you can read more about in the `Common Extension Points document <https://jupyterlab.readthedocs.io/en/latest/extension/extension_points.html>`_.
 It's a good idea to use these extension points while you're building your extensions (and
-by doing so you are acting as the *consumer* in JupyterLab's :ref:`dependency-injection pattern <dependency-injection-basic-info>`.
+by doing so you are acting as the *consumer* in JupyterLab's :ref:`Provider-Consumer pattern <dependency-injection-basic-info>`.
 
 Testing for Optional Features
 """""""""""""""""""""""""""""
@@ -273,5 +273,5 @@ should prefer the "Testing for Optional Features" approach and target the
 Further Reading
 ---------------
 
-For an explanation of JupyterLab's plugin system and the dependency-injection pattern,
-read the :ref:`Extension Development document <dependency-injection-basic-info>`.
+For an explanation of JupyterLab's plugin system and JupyterLab's Provider-Consumer pattern (a type of `dependency-injection <https://en.wikipedia.org/wiki/Dependency_injection>`_
+pattern), read the :ref:`Extension Development document <dependency-injection-basic-info>`.

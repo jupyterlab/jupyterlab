@@ -142,9 +142,11 @@ See the JupyterLab API reference documentation for the ``JupyterFrontEnd`` class
 Plugins Interacting with Each Other
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+*(The Provider-Consumer pattern is explained here)*
+
 One of the foundational features of the JupyterLab plugin system is that application plugins can interact with other plugins by providing a service to the system and requiring services provided by other plugins. A service can be any JavaScript value, and typically is a JavaScript object with methods and data attributes. For example, the core plugin that supplies the JupyterLab main menu provides a :ref:`mainmenu` service object to the system with a method to add a new top-level menu and attributes to interact with existing top-level application menus.
 
-In the following discussion, the plugin that is providing a service to the system is the *provider* plugin, and the plugin that is requiring and using the service is the *consumer* plugin.
+In the following discussion, the plugin that is providing a service to the system is the *provider* plugin, and the plugin that is requiring and using the service is the *consumer* plugin. Note that these kinds of *provider* and *consumer* plugins are fundamental parts of JupyterLab's Provider-Consumer pattern (which is a type of `dependency-injection <https://en.wikipedia.org/wiki/Dependency_injection>`_ pattern).
 
 .. _tokens:
 
