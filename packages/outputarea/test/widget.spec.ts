@@ -450,13 +450,13 @@ describe('outputarea/widget', () => {
         });
         await ipySessionContext.initialize();
         const code = [
-          "import time",
-          "for i in range(3):",
-          "    print(f\"Hello Jupyter! {i}\")",
-          "    time.sleep(1)"
+          'import time',
+          'for i in range(3):',
+          '    print(f"Hello Jupyter! {i}")',
+          '    time.sleep(1)'
         ].join('\n');
         await SimplifiedOutputArea.execute(code, widget0, ipySessionContext);
-        expect(model0.toJSON()[0].text).toBe(widget0.node.textContent)
+        expect(model0.toJSON()[0].text).toBe(widget0.node.textContent);
       });
     });
 
