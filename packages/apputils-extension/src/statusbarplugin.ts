@@ -42,15 +42,32 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
-    const changeKernel = async () => {
-      if (!item.model.sessionContext) {
-        return;
+    const changeKernel = async (
+      event?: React.KeyboardEvent<HTMLImageElement>
+    ) => {
+      if (
+        event &&
+        (event.key === 'Enter' || event.key === 'Spacebar' || event.key === ' ')
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!item.model.sessionContext) {
+          return;
+        }
+        await sessionDialogs.selectKernel(item.model.sessionContext);
+      } else if (!event!.key) {
+        if (!item.model.sessionContext) {
+          return;
+        }
+        await sessionDialogs.selectKernel(item.model.sessionContext);
       }
-      await sessionDialogs.selectKernel(item.model.sessionContext);
     };
 
     // Create the status item.
-    const item = new KernelStatus({ onClick: changeKernel }, translator);
+    const item = new KernelStatus(
+      { onClick: changeKernel, onKeyDown: changeKernel },
+      translator
+    );
 
     const providers = new Set<(w: Widget | null) => ISessionContext | null>();
 
@@ -128,6 +145,17 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
   ) => {
     const item = new RunningSessions({
       onClick: () => app.shell.activateById('jp-running-sessions'),
+      onKeyDown: (event: React.KeyboardEvent<HTMLImageElement>) => {
+        if (
+          event.key === 'Enter' ||
+          event.key === 'Spacebar' ||
+          event.key === ' '
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          app.shell.activateById('jp-running-sessions');
+        }
+      },
       serviceManager: app.serviceManager,
       translator
     });

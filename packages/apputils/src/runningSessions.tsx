@@ -37,25 +37,12 @@ const HALF_SPACING = 4;
 function RunningSessionsComponent(
   props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> {
-  const keydownHandler = (event: React.KeyboardEvent<HTMLImageElement>) => {
-    if (
-      event.key === 'Enter' ||
-      event.key === 'Spacebar' ||
-      event.key === ' '
-    ) {
-      event.preventDefault();
-      event.stopPropagation();
-      props.handleClick();
-    } else {
-      return;
-    }
-  };
   return (
     <GroupItem
       tabIndex={0}
       spacing={HALF_SPACING}
       onClick={props.handleClick}
-      onKeyDown={keydownHandler}
+      onKeyDown={props.handleKeyDown}
     >
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
@@ -77,6 +64,7 @@ namespace RunningSessionsComponent {
    * The props for rendering the RunningSessionsComponent.
    */
   export interface IProps {
+    handleKeyDown: (event: React.KeyboardEvent<HTMLImageElement>) => void;
     /**
      * A click handler for the component. By default this is used
      * to activate the running sessions side panel.
@@ -106,6 +94,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
     super(new RunningSessions.Model());
     this._serviceManager = opts.serviceManager;
     this._handleClick = opts.onClick;
+    this._handleKeyDown = opts.onKeyDown;
     this.translator = opts.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 
@@ -140,6 +129,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
         sessions={this.model.sessions}
         terminals={this.model.terminals}
         handleClick={this._handleClick}
+        handleKeyDown={this._handleKeyDown}
       />
     );
   }
@@ -183,6 +173,9 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _handleClick: () => void;
+  private _handleKeyDown: (
+    event: React.KeyboardEvent<HTMLImageElement>
+  ) => void;
   private _serviceManager: ServiceManager.IManager;
 }
 
@@ -242,6 +235,12 @@ export namespace RunningSessions {
      * to activate the running sessions side panel.
      */
     onClick: () => void;
+
+    /**
+     * A click handler for the item. By default this is used
+     * to activate the running sessions side panel.
+     */
+    onKeyDown: (event: React.KeyboardEvent<HTMLImageElement>) => void;
 
     /**
      * The application language translator.

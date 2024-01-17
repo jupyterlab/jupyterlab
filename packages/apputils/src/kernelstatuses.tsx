@@ -49,19 +49,6 @@ export function translateKernelStatuses(
 function KernelStatusComponent(
   props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> {
-  const keydownHandler = (event: React.KeyboardEvent<HTMLImageElement>) => {
-    if (
-      event.key === 'Enter' ||
-      event.key === 'Spacebar' ||
-      event.key === ' '
-    ) {
-      event.preventDefault();
-      event.stopPropagation();
-      props.handleClick();
-    } else {
-      return;
-    }
-  };
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
   let statusText = '';
@@ -71,7 +58,7 @@ function KernelStatusComponent(
   return (
     <TextItem
       onClick={props.handleClick}
-      onKeyDown={keydownHandler}
+      onKeyDown={props.handleKeyDown}
       source={`${props.kernelName}${statusText}`}
       title={trans.__('Change kernel for %1', props.activityName)}
       tabIndex={0}
@@ -92,6 +79,12 @@ namespace KernelStatusComponent {
      * we have it bring up the kernel change dialog.
      */
     handleClick: () => void;
+
+    /**
+     * A key down handler for the kernel status component. By default
+     * we have it bring up the kernel change dialog.
+     */
+    handleKeyDown: (event: React.KeyboardEvent<HTMLImageElement>) => void;
 
     /**
      * The name the kernel.
@@ -126,6 +119,7 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
     super(new KernelStatus.Model(translator));
     this.translator = translator || nullTranslator;
     this._handleClick = opts.onClick;
+    this._handleKeyDown = opts.onKeyDown;
     this.addClass('jp-mod-highlighted');
   }
 
@@ -142,6 +136,7 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
           kernelName={this.model.kernelName}
           activityName={this.model.activityName}
           handleClick={this._handleClick}
+          handleKeyDown={this._handleKeyDown}
           translator={this.translator}
         />
       );
@@ -150,6 +145,9 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
 
   translator: ITranslator;
   private _handleClick: () => void;
+  private _handleKeyDown: (
+    event: React.KeyboardEvent<HTMLImageElement>
+  ) => void;
 }
 
 /**
@@ -286,6 +284,12 @@ export namespace KernelStatus {
      * we launch a kernel selection dialog.
      */
     onClick: () => void;
+
+    /**
+     * A key press handler for the item. By default
+     * we launch a kernel selection dialog.
+     */
+    onKeyDown: (event: React.KeyboardEvent<HTMLImageElement>) => void;
   }
 }
 
