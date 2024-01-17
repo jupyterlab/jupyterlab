@@ -349,11 +349,20 @@ export class DocumentWidgetManager implements IDisposable {
         }
       }
       if (context) {
-        await context.ready;
-        // Note: `contentsModel` is null until the the context is ready;
-        // we have to handle it after `await` rather than in a `then`
-        // to ensure we record it as recent before the widget gets disposed.
-        this._recordAsRecentlyClosed(widget, context.contentsModel!);
+        const result = await Promise.race([
+          context.ready,
+          new Promise(resolve => setTimeout(resolve, 3000, 'timeout'))
+        ]);
+        if (result === 'timeout') {
+          console.warn(
+            'Could not record the widget as recently closed because the context did not become ready in 3 seconds'
+          );
+        } else {
+          // Note: `contentsModel` is null until the the context is ready;
+          // we have to handle it after `await` rather than in a `then`
+          // to ensure we record it as recent before the widget gets disposed.
+          this._recordAsRecentlyClosed(widget, context.contentsModel!);
+        }
       }
       if (widget.isDisposed) {
         return true;

@@ -732,9 +732,11 @@ export class SearchableSessions extends Panel {
    * widget (a limitation of `focusNodeSelector` option implementation).
    */
   private _forceFocusInput(): void {
-    this._filterWidget.renderPromise?.then(() => {
-      this._filterWidget.node.querySelector('input')?.focus();
-    });
+    this._filterWidget.renderPromise
+      ?.then(() => {
+        this._filterWidget.node.querySelector('input')?.focus();
+      })
+      .catch(console.warn);
   }
 
   /**
