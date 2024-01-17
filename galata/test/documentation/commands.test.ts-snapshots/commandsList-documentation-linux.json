@@ -2085,7 +2085,7 @@
   },
   {
     "id": "recentmenu:open-recent",
-    "label": "",
+    "label": "Open a Recent Document (given by `recent` argument)",
     "caption": "",
     "shortcuts": []
   },

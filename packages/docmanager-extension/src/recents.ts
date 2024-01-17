@@ -28,6 +28,7 @@ namespace PluginIDs {
 
 export const recentsManagerPlugin: JupyterFrontEndPlugin<IRecentsManager> = {
   id: PluginIDs.recentsManager,
+  description: 'Provides a manager of recently opened and closed documents.',
   autoStart: true,
   requires: [IStateDB],
   optional: [ISettingRegistry, ITranslator],

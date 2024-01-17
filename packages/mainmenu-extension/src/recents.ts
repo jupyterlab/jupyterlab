@@ -128,6 +128,8 @@ class RecentsMenu extends Menu {
  */
 export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
+  description:
+    'Adds sub-menu for opening recent documents to the File section of the main menu.',
   autoStart: true,
   requires: [IRecentsManager, IMainMenu],
   optional: [IFileBrowserCommands, ITranslator],
@@ -179,8 +181,14 @@ export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
         }
       },
       label: args => {
-        const recent = args.recent as RecentDocument;
-        return PathExt.joinWithLeadingSlash(recent.root, recent.path);
+        const recent = args.recent as RecentDocument | undefined;
+        if (recent) {
+          return PathExt.joinWithLeadingSlash(recent.root, recent.path);
+        } else {
+          return trans.__(
+            'Open a Recent Document (given by `recent` argument)'
+          );
+        }
       },
       isEnabled: args =>
         recentsManager.recentlyOpened.includes(args.recent as RecentDocument)
