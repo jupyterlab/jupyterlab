@@ -19,7 +19,7 @@ import {
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/ui-components';
-import React from 'react';
+import React, { KeyboardEvent } from 'react';
 import { GroupItem, TextItem } from '@jupyterlab/statusbar';
 
 /**
@@ -64,7 +64,7 @@ namespace RunningSessionsComponent {
    * The props for rendering the RunningSessionsComponent.
    */
   export interface IProps {
-    handleKeyDown: (event: React.KeyboardEvent<HTMLImageElement>) => void;
+    handleKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
     /**
      * A click handler for the component. By default this is used
      * to activate the running sessions side panel.
@@ -173,9 +173,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _handleClick: () => void;
-  private _handleKeyDown: (
-    event: React.KeyboardEvent<HTMLImageElement>
-  ) => void;
+  private _handleKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
   private _serviceManager: ServiceManager.IManager;
 }
 
@@ -237,10 +235,10 @@ export namespace RunningSessions {
     onClick: () => void;
 
     /**
-     * A click handler for the item. By default this is used
+     * A key down handler for the item. By default this is used
      * to activate the running sessions side panel.
      */
-    onKeyDown: (event: React.KeyboardEvent<HTMLImageElement>) => void;
+    onKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
 
     /**
      * The application language translator.

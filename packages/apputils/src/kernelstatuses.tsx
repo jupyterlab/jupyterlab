@@ -10,7 +10,7 @@ import {
 } from '@jupyterlab/translation';
 import { VDomModel, VDomRenderer } from '@jupyterlab/ui-components';
 import { JSONArray, JSONExt } from '@lumino/coreutils';
-import React from 'react';
+import React, { KeyboardEvent } from 'react';
 import { ISessionContext } from './sessioncontext';
 
 /**
@@ -84,7 +84,7 @@ namespace KernelStatusComponent {
      * A key down handler for the kernel status component. By default
      * we have it bring up the kernel change dialog.
      */
-    handleKeyDown: (event: React.KeyboardEvent<HTMLImageElement>) => void;
+    handleKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
 
     /**
      * The name the kernel.
@@ -145,9 +145,7 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
 
   translator: ITranslator;
   private _handleClick: () => void;
-  private _handleKeyDown: (
-    event: React.KeyboardEvent<HTMLImageElement>
-  ) => void;
+  private _handleKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
 }
 
 /**
@@ -289,7 +287,7 @@ export namespace KernelStatus {
      * A key press handler for the item. By default
      * we launch a kernel selection dialog.
      */
-    onKeyDown: (event: React.KeyboardEvent<HTMLImageElement>) => void;
+    onKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
   }
 }
 

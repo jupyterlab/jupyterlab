@@ -19,6 +19,7 @@ import {
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Title, Widget } from '@lumino/widgets';
+import { KeyboardEvent } from 'react';
 
 /**
  * A plugin that provides a kernel status item to the status bar.
@@ -42,9 +43,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
-    const changeKernel = async (
-      event?: React.KeyboardEvent<HTMLImageElement>
-    ) => {
+    const changeKernel = async (event?: KeyboardEvent<HTMLImageElement>) => {
       if (
         event &&
         (event.key === 'Enter' || event.key === 'Spacebar' || event.key === ' ')
@@ -145,7 +144,7 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
   ) => {
     const item = new RunningSessions({
       onClick: () => app.shell.activateById('jp-running-sessions'),
-      onKeyDown: (event: React.KeyboardEvent<HTMLImageElement>) => {
+      onKeyDown: (event: KeyboardEvent<HTMLImageElement>) => {
         if (
           event.key === 'Enter' ||
           event.key === 'Spacebar' ||
