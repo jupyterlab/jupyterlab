@@ -6,7 +6,8 @@ import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
   IOutputAreaModel,
   OutputArea,
-  OutputAreaModel
+  OutputAreaModel,
+  SimplifiedOutputArea
 } from '@jupyterlab/outputarea';
 import { KernelManager } from '@jupyterlab/services';
 import { JupyterServer } from '@jupyterlab/testing';
@@ -435,6 +436,27 @@ describe('outputarea/widget', () => {
         expect(reply2!.content.status).toBe('ok');
         widget1.dispose();
         await ipySessionContext.shutdown();
+      });
+
+      it('should continuously render delayed outputs', async () => {
+        const model0 = new OutputAreaModel({ trusted: true });
+        const widget0 = new SimplifiedOutputArea({
+          model: model0,
+          rendermime: rendermime
+        });
+        let ipySessionContext: SessionContext;
+        ipySessionContext = await createSessionContext({
+          kernelPreference: { name: 'python3' }
+        });
+        await ipySessionContext.initialize();
+        const code = [
+          'import time',
+          'for i in range(3):',
+          '    print(f"Hello Jupyter! {i}")',
+          '    time.sleep(1)'
+        ].join('\n');
+        await SimplifiedOutputArea.execute(code, widget0, ipySessionContext);
+        expect(model0.toJSON()[0].text).toBe(widget0.node.textContent);
       });
     });
 
