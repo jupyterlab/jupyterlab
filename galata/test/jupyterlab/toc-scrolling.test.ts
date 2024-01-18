@@ -39,9 +39,10 @@ test.describe('Table of Contents scrolling to heading', () => {
     await page.keyboard.press('Enter');
     await page.getByText('Mode: Edit').waitFor();
 
-    await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    const contentPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
+    await contentPanel.waitFor();
 
     await page
       .locator('.jp-TableOfContents-tree')

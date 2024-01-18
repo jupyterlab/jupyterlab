@@ -33,11 +33,11 @@ test.describe('ToC Running indicator', () => {
   });
 
   test('should display running indicators', async ({ page }) => {
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    const tocPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
     const executed = page.notebook.run();
-    await tocPanel.waitForSelector('[data-running="1"]');
+    await tocPanel.locator('[data-running="1"]').waitFor();
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicators.png'
     );
@@ -46,11 +46,11 @@ test.describe('ToC Running indicator', () => {
   });
 
   test('should display error indicators', async ({ page }) => {
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    const tocPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
     const executed = page.notebook.run();
-    await tocPanel.waitForSelector('[data-running="-0.5"]');
+    await tocPanel.locator('[data-running="-0.5"]').waitFor();
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicator-error.png'
     );
@@ -61,8 +61,8 @@ test.describe('ToC Running indicator', () => {
   test('should display running indicator on first visible top level', async ({
     page
   }) => {
-    const tocPanel = await page.sidebar.getContentPanel(
-      await page.sidebar.getTabPosition('table-of-contents')
+    const tocPanel = page.sidebar.getContentPanelLocator(
+      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
     );
     await page.notebook.run();
 
@@ -73,7 +73,7 @@ test.describe('ToC Running indicator', () => {
 
     const executed = page.notebook.runCell(5);
 
-    await tocPanel.waitForSelector('[data-running="1"]');
+    await tocPanel.locator('[data-running="1"]').waitFor();
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicator-top-level.png'
     );

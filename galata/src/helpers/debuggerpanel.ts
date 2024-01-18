@@ -158,10 +158,7 @@ export class DebuggerHelper {
   private async _getPanel(
     selector: string
   ): Promise<ElementHandle<Element> | null> {
-    const panel = await this.sidebar.getContentPanel('right');
-    if (panel) {
-      return panel.$(selector);
-    }
-    return null;
+    const panel = this.sidebar.getContentPanelLocator('right');
+    return panel.locator(selector).elementHandle();
   }
 }
