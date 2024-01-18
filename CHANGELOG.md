@@ -129,6 +129,20 @@ JupyterLab 4.1 adds two notifications to guide users in potentially confusing si
 - when user attempts to save a read-only document a transient notification suggesting using "save as" is displayed
 - when user attempts to execute a cell before a low-starting kernel has initialized a notification is shown to indicate that the cell cannot be yet executed (this is opt-in and needs to be enabled in settings)
 
+### Full Notebook Windowing Mode Improvements
+
+Notebooks in the `full` windowing mode only render the visible cells, significantly improving the performance of the application.
+Numerous improvements for the full windowing mode behaviour (such as scrolling, search, rendering, and navigation) are included in this release (see the list of issues in [#15258](https://github.com/jupyterlab/jupyterlab/issues/15258) for details).
+
+```{note}
+The windowing mode is still experimental and known issues remain to be solved
+([#15415](https://github.com/jupyterlab/jupyterlab/issues/15415), [#15465](https://github.com/jupyterlab/jupyterlab/issues/15465),  [#15594](https://github.com/jupyterlab/jupyterlab/issues/15594)).
+In addition, a sporadic regression in cell ordering ([#15610](https://github.com/jupyterlab/jupyterlab/issues/15610)) was observed in 4.1 beta,
+and remains to be fixed, pending reports from users willing to test the windowing mode in JupyterLab 4.1 to help create reproducible steps that would enable fixing this issue.
+
+Users who already enabled this mode in previous versions are advised to evaluate the benefits of fixes included in 4.1 against regressions linked above before deciding to upgrade.
+```
+
 ### Search improvements
 - The search box will now grow automatically to accommodate longer text
 - Search in selection can now be toggled using <kbd>Alt</kbd> + <kbd>L</kbd> and automatic search in selection can be configured in settings
