@@ -53,7 +53,7 @@ test.describe('Table of Contents', () => {
     const numberingButton = tocPanel.locator(
       'jp-button[data-command="toc:display-numbering"]'
     );
-    expect(numberingButton).toHaveCount(1);
+    await expect(numberingButton).toHaveCount(1);
 
     const imageName = 'toggle-numbered-list.png';
     await numberingButton.click();
@@ -79,11 +79,11 @@ test.describe('Table of Contents', () => {
         })
     ]);
 
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
 
-    await (
-      await menu.$('text=Select and Run Cell(s) for this Heading')
-    ).click();
+    await menu
+      ?.locator('text=Select and Run Cell(s) for this Heading')
+      ?.click();
 
     await page
       .locator('.jp-TableOfContents-tree >> text="2. HTML title"')

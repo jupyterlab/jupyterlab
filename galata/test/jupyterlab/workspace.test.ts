@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { Page } from '@playwright/test';
+import { Locator, Page } from '@playwright/test';
 import * as path from 'path';
 
 const nbFile = 'simple_notebook.ipynb';
@@ -153,7 +153,9 @@ test.describe('Workspace', () => {
     // Wait for the kernel to be ready so it does not unfocus the menu
     await page.waitForSelector('text= | Idle');
 
-    await expect(page.menu.getMenuItem(`Tabs>${mdFile}`)).toBeDefined();
+    const menuItem = await page.menu.getMenuItemLocator(`Tabs>${mdFile}`);
+    expect(menuItem).toBeDefined();
+    expect(menuItem).toBeNull();
   });
 
   test('should clone the default workspace', async ({ page, tmpPath }) => {

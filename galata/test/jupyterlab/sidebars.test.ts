@@ -46,11 +46,14 @@ test.describe('Sidebars', () => {
   test('File Browser has no unused rules', async ({ page }) => {
     await page.sidebar.openTab('filebrowser');
     const clickMenuItem = async (command): Promise<void> => {
-      const contextmenu = await page.menu.openContextMenu(
+      const contextmenu = await page.menu.openContextMenuLocator(
         '.jp-DirListing-headerItem'
       );
-      const item = await page.menu.getMenuItemInMenu(contextmenu, command);
-      await item.click();
+      const item = await page.menu.getMenuItemLocatorInMenu(
+        contextmenu,
+        command
+      );
+      await item?.click();
     };
     await clickMenuItem('Show File Checkboxes');
     await clickMenuItem('Show File Size Column');

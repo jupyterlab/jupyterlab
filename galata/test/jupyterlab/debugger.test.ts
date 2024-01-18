@@ -127,8 +127,8 @@ test.describe('Debugger Tests', () => {
       button: 'right'
     });
 
-    const menu = await page.menu.getOpenMenu();
-    await (await menu.$('[data-command="fileeditor:create-console"]')).click();
+    const menu = await page.menu.getOpenMenuLocator();
+    await menu?.locator('[data-command="fileeditor:create-console"]')?.click();
 
     await page.waitForSelector('.jp-Dialog-body');
     const select = await page.$('.jp-Dialog-body >> select');

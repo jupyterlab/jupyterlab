@@ -59,7 +59,7 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     const imageName = 'folder.png';
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -74,7 +74,7 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     const imageName = 'file.png';
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -95,7 +95,7 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     const imageName = 'running-notebook.png';
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -116,7 +116,7 @@ test.describe('Application Context Menu', () => {
 
     const imageName = `file-openwith.png`;
     // Get the last menu -> will be submenu
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
 
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
@@ -129,7 +129,7 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     const imageName = `tab-launcher.png`;
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -150,7 +150,7 @@ test.describe('Application Context Menu', () => {
       expect(await page.menu.isAnyOpen()).toBe(true);
 
       const imageName = `tab-notebook.png`;
-      const menu = await page.menu.getOpenMenu();
+      const menu = await page.menu.getOpenMenuLocator();
       expect(await menu.screenshot()).toMatchSnapshot(imageName);
     });
 
@@ -161,7 +161,7 @@ test.describe('Application Context Menu', () => {
       expect(await page.menu.isAnyOpen()).toBe(true);
 
       const imageName = `notebook-md.png`;
-      const menu = await page.menu.getOpenMenu();
+      const menu = await page.menu.getOpenMenuLocator();
       expect(await menu.screenshot()).toMatchSnapshot(imageName);
     });
 
@@ -172,7 +172,7 @@ test.describe('Application Context Menu', () => {
       expect(await page.menu.isAnyOpen()).toBe(true);
 
       const imageName = `notebook-code.png`;
-      const menu = await page.menu.getOpenMenu();
+      const menu = await page.menu.getOpenMenuLocator();
       expect(await menu.screenshot()).toMatchSnapshot(imageName);
     });
   });
@@ -189,7 +189,7 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     const imageName = `fileeditor.png`;
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
 

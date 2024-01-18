@@ -60,11 +60,11 @@ test.describe('Notebook Create', () => {
         await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
       ).toBeTruthy();
 
-      await page.menu.open(menuPath);
+      await page.menu.openLocator(menuPath);
       expect(await page.menu.isOpen(menuPath)).toBeTruthy();
 
       const imageName = `opened-menu-${menuPath.replace(/>/g, '-')}.png`;
-      const menu = await page.menu.getOpenMenu();
+      const menu = await page.menu.getOpenMenuLocator();
       expect(await menu.screenshot()).toMatchSnapshot(imageName.toLowerCase());
     });
   });
