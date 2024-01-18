@@ -64,6 +64,10 @@ namespace RunningSessionsComponent {
    * The props for rendering the RunningSessionsComponent.
    */
   export interface IProps {
+    /**
+     * A key down handler for the component. By default this is used
+     * to activate the running sessions side panel.
+     */
     handleKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
     /**
      * A click handler for the component. By default this is used
