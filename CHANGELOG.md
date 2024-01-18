@@ -86,7 +86,7 @@ To clear the execution history consult the documentation of the kernel you are u
 ### Opening files from tracebacks
 
 Paths to code files detected in the tracebacks returned by kernels on execution error are now turned into links.
-These links will open the corresponding file for editing, if it is in the Jupyter root directory, 
+These links will open the corresponding file for editing, if it is in the Jupyter root directory,
 or they will open a read-only preview if the file is outside of the root directory and the active kernel supports the debugger.
 
 <img alt="A link to the file with definition of imported module is shown in the traceback" src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog-4.1/docs/source/getting_started/changelog_assets/4.1-traceback-links.png" class="jp-screenshot">
