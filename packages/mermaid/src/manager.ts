@@ -81,7 +81,9 @@ export class MermaidManager implements IMermaidManager {
     const el = document.createElement('div');
     document.body.appendChild(el);
     try {
-      const { svg } = await _mermaid.render(id, text, el);
+      let { svg } = await _mermaid.render(id, text, el);
+      svg = svg.replace(/<br\s*>/gi, '<br/>');
+
       const parser = new DOMParser();
       const doc = parser.parseFromString(svg, 'image/svg+xml');
 
