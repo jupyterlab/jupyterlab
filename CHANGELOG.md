@@ -97,7 +97,7 @@ or open a read-only preview (if the file is outside of the root directory and th
 When a cell fails during execution an error indicator will be displayed by the corresponding heading,
 increasing awareness of the notebook state and enabling users to quickly navigate to the cell which requires attention.
 
-<img alt="Error indicator in the shape of a triangle with exclamation sign (using ⚠ UTF character) shown next to one of the heading in the table of contents panel" src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog-4.1/docs/source/getting_started/changelog_assets/4.1-toc-error-indicator.png" class="jp-screenshot">
+<img alt="Error indicator in the shape of a triangle with exclamation sign (using ⚠ UTF character) shown next to one of the headings in the table of contents panel" src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog-4.1/docs/source/getting_started/changelog_assets/4.1-toc-error-indicator.png" class="jp-screenshot">
 
 ### Plugin Manager
 
@@ -127,7 +127,7 @@ Virtual scrollbar is considered experimental, please share feedback!
 JupyterLab 3.6 added a notification center which so far was only used for announcements and version update notifications (both opt-in).
 JupyterLab 4.1 adds two notifications to guide users in potentially confusing situations:
 - when a user attempts to save a read-only document a transient notification suggesting using "save as" is displayed
-- when a user attempts to execute a cell before a low-starting kernel has initialized a notification is shown to indicate that the cell cannot be yet executed (this is opt-in and needs to be enabled in settings)
+- when a user attempts to execute a cell before a slow-starting kernel has initialized a notification is shown to indicate that the cell cannot be yet executed (this is opt-in and needs to be enabled in settings)
 
 ### Full Notebook Windowing Mode Improvements
 
