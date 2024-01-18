@@ -100,7 +100,7 @@ async function openOverview(page) {
   const mdHandle = await page.$('div[role="main"] >> text=jupyterlab.md');
   await mdHandle.click();
   const mdBBox = await mdHandle.boundingBox();
-  const panelHandle = await page.activity.getPanel();
+  const panelHandle = await page.activity.getPanelLocator();
   const panelBBox = await panelHandle.boundingBox();
 
   await page.mouse.move(

@@ -50,11 +50,11 @@ export class ActivityHelper {
         .inputValue();
       return activeTab === name;
     } else {
-      const tab = await this.getTab(name);
-      if (!tab) {
+      const tab = this.getTabLocator(name);
+      if (!(await tab.count())) {
         return false;
       }
-      const classes = ((await tab.getAttribute('class')) ?? '').split(' ');
+      const classes = await Utils.getLocatorClassList(tab);
       return classes.includes('jp-mod-current');
     }
   }
@@ -163,16 +163,12 @@ export class ActivityHelper {
    * @returns Whether the action is successful
    */
   async activateTab(name: string): Promise<boolean> {
-    const tab = await this.getTab(name);
-    if (tab) {
+    const tab = this.getTabLocator(name);
+    if ((await tab.count()) === 1) {
       await tab.click();
-      await this.page.waitForFunction(
-        ({ tab }) => {
-          return tab.ariaSelected === 'true';
-        },
-        { tab }
+      await Utils.waitForCondition(
+        async () => (await tab.getAttribute('aria-selected')) === 'true'
       );
-
       return true;
     }
 

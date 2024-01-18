@@ -98,10 +98,10 @@ test.describe('Debugger Tests', () => {
     );
 
     await page.debugger.renderVariable(globalVar);
-    let richVariableTab = await page.activity.getPanel(
+    let richVariableTab = await page.activity.getPanelLocator(
       `${globalVar} - ${notebookName}`
     );
-    expect(await richVariableTab.screenshot()).toMatchSnapshot(
+    expect(await richVariableTab?.screenshot()).toMatchSnapshot(
       'image-debug-session-global-rich-variable.png'
     );
 
@@ -112,10 +112,10 @@ test.describe('Debugger Tests', () => {
     await page.debugger.waitForVariables();
 
     await page.debugger.renderVariable(localVar);
-    richVariableTab = await page.activity.getPanel(
+    richVariableTab = await page.activity.getPanelLocator(
       `${localVar} - ${notebookName}`
     );
-    expect(await richVariableTab.screenshot()).toMatchSnapshot(
+    expect(await richVariableTab?.screenshot()).toMatchSnapshot(
       'image-debug-session-local-rich-variable.png'
     );
   });

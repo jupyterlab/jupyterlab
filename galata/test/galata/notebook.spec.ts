@@ -121,7 +121,7 @@ test.describe('Notebook Tests', () => {
     expect(cellOutput4).toBeTruthy();
     expect(parseFloat(cellOutput4![0])).toBeGreaterThan(1.5);
 
-    const panel = await page.activity.getPanel();
+    const panel = await page.activity.getPanelLocator();
 
     expect(await panel!.screenshot()).toMatchSnapshot('example-run.png');
   });

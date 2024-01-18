@@ -159,8 +159,8 @@ test('Toolbar items act on owner widget', async ({ page }) => {
   // Given two side-by-side notebooks and the second being active
   const file1 = 'notebook1.ipynb';
   await page.notebook.createNew(file1);
-  const panel1 = await page.activity.getPanel(file1);
-  const tab1 = await page.activity.getTab(file1);
+  const panel1 = await page.activity.getPanelLocator(file1);
+  const tab1 = page.activity.getTabLocator(file1);
 
   // FIXME Calling a second time `page.notebook.createNew` is not robust
   await page.menu.clickMenuItem('File>New>Notebook');
@@ -171,7 +171,7 @@ test('Toolbar items act on owner widget', async ({ page }) => {
     // no-op
   }
 
-  const tab2 = await page.activity.getTab();
+  const tab2 = page.activity.getTabLocator();
 
   const tab2BBox = await tab2.boundingBox();
   await page.mouse.move(
@@ -186,9 +186,10 @@ test('Toolbar items act on owner widget', async ({ page }) => {
   expect(classlist.split(' ')).not.toContain('jp-mod-current');
 
   // When clicking on toolbar item of the first file
-  await (
-    await panel1.$('jp-button[data-command="notebook:insert-cell-below"]')
-  ).click();
+  await panel1
+    ?.locator('jp-button[data-command="notebook:insert-cell-below"]')
+    .first()
+    .click();
 
   // Then the first file is activated and the action is performed
   const classlistEnd = await tab1.getAttribute('class');

@@ -93,9 +93,9 @@ test('Populate search box with selected text', async ({ page }) => {
   // Expect the first match to be highlighted
   await page.waitForSelector('text=1/2');
 
-  const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
+  const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
 
-  expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+  expect(await tabHandle?.screenshot()).toMatchSnapshot(imageName);
 });
 
 test.describe('File search from selection', () => {

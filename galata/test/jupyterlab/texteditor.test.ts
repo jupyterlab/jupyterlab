@@ -12,8 +12,8 @@ test.describe('Text Editor Tests', () => {
 
     await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
 
-    const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
-    expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+    const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
+    expect(await tabHandle?.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Changing a text editor settings', async ({ page }) => {
@@ -37,9 +37,9 @@ test.describe('Text Editor Tests', () => {
 
     await page.activity.activateTab(DEFAULT_NAME);
 
-    const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
+    const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
 
-    expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+    expect(await tabHandle?.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Selection in highlighted line', async ({ page }) => {
@@ -100,7 +100,7 @@ ut elit.`
 
     await page.keyboard.type('#2:8#');
 
-    const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
-    expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+    const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
+    expect(await tabHandle?.screenshot()).toMatchSnapshot(imageName);
   });
 });

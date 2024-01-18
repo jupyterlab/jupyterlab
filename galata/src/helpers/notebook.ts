@@ -423,9 +423,9 @@ export class NotebookHelper {
     }
 
     const page = this.page;
-    const tab = await this.activity.getTab();
+    const tab = this.activity.getTabLocator();
 
-    if (!tab) {
+    if (!(await tab.count())) {
       return false;
     }
 
@@ -435,8 +435,8 @@ export class NotebookHelper {
       }
     }
 
-    const closeIcon = await tab.$('.lm-TabBar-tabCloseIcon');
-    if (!closeIcon) {
+    const closeIcon = tab.locator('.lm-TabBar-tabCloseIcon');
+    if (!(await closeIcon.count())) {
       return false;
     }
 
@@ -1090,11 +1090,11 @@ export class NotebookHelper {
    *
    */
   async isCodeGutterPresent(): Promise<boolean> {
-    const panel = await this.activity.getPanel();
-    if (!panel) {
+    const panel = await this.activity.getPanelLocator();
+    if (!(panel && (await panel.count()))) {
       return false;
     }
-    return (await (await panel.$('.cm-gutters'))?.isVisible()) !== null;
+    return (await panel.locator('.cm-gutters')?.isVisible()) !== null;
   }
 
   /**
@@ -1409,19 +1409,17 @@ export class NotebookHelper {
     await page.waitForSelector('.jp-Dialog');
     await page.click('.jp-Dialog .jp-mod-accept');
 
-    const activeTab = await this.activity.getTab();
-    if (!activeTab) {
+    const activeTab = this.activity.getTabLocator();
+    if (!(await activeTab.count())) {
       return null;
     }
 
-    const label = await activeTab.$('div.lm-TabBar-tabLabel');
-    if (!label) {
+    const label = activeTab.locator('div.lm-TabBar-tabLabel');
+    if (!(await label.count())) {
       return null;
     }
 
-    const assignedName = (await (
-      await label.getProperty('textContent')
-    ).jsonValue()) as string;
+    const assignedName = await label.textContent();
 
     if (!name) {
       return assignedName;
@@ -1432,9 +1430,9 @@ export class NotebookHelper {
       `${currentDir}/${assignedName}`,
       `${currentDir}/${name}`
     );
-    const renamedTab = await this.activity.getTab(name);
+    const renamedTab = this.activity.getTabLocator(name);
 
-    return renamedTab ? name : null;
+    return (await renamedTab.count()) ? name : null;
   }
 
   private _runCallbacksExposed = 0;
