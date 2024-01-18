@@ -74,7 +74,7 @@ Numerous improvements to keyboard navigation with focus on accessibility and usa
 
 The code from previously executed cells can be used to populate empty cells,
 allowing to iterate on code from previous cells or even sessions
-(depending on how specific kernel stores history).
+(depending on how a specific kernel stores history).
 
 To cycle between history items press <kbd>Alt</kbd> + <kbd>Arrow Up</kbd> and  <kbd>Alt</kbd> + <kbd>Arrow Down</kbd>.
 
