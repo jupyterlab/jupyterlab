@@ -70,6 +70,8 @@ Numerous improvements to keyboard navigation with focus on accessibility and usa
 - the focus can now be moved beyond the active notebook
 - the toolbars can now be navigated using arrow keys
 
+For more details, see [this post on Jupyter Blog](https://blog.jupyter.org/recent-keyboard-navigation-improvements-in-jupyter-4df32f97628d).
+
 ### Execution history in notebook
 
 The code from previously executed cells can be used to populate empty cells,
