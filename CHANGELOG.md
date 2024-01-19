@@ -18,7 +18,7 @@ The location of the `custom.css` file is documented in the section on [customizi
 ```{note}
 `custom.css` is also available in Jupyter Notebook;
 while similar selectors can be used for components shared between JupyterLab 4.1 and Jupyter Notebook 7.0,
-a different set of selectors was used in Notebook 6 and older versions.
+there was a different set of selectors in Notebook 6 and older versions.
 Users with the custom CSS file using the selectors from legacy Notebook versions
 will need to update them and note that tutorials may refer to the selectors for the old Notebook versions.
 ```
