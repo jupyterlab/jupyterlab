@@ -2,9 +2,33 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { TableOfContentsUtils } from '@jupyterlab/toc';
+import { Sanitizer } from '@jupyterlab/apputils';
+import { createMarkdownParser } from '@jupyterlab/markedparser-extension';
+import { IMarkdownParser } from '@jupyterlab/rendermime';
+import {
+  EditorLanguageRegistry,
+  IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 
 describe('TableOfContentsUtils', () => {
   describe('Markdown', () => {
+    describe('#getHeadingId', () => {
+      const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
+      const parser: IMarkdownParser = createMarkdownParser(languages);
+      const sanitizer = new Sanitizer();
+      it.each<[string, string]>([
+        ['# Title', 'Title'],
+        [`# test'"></title><img>test {#'"><img>}`, `test'\">test-{#'\">}`]
+      ])('should derive ID from markdown', async (markdown, expectedId) => {
+        const headingId = await TableOfContentsUtils.Markdown.getHeadingId(
+          parser,
+          markdown,
+          1,
+          sanitizer
+        );
+        expect(headingId).toEqual(expectedId);
+      });
+    });
     describe('#getHeadings', () => {
       it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
         [
