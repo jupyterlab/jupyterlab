@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/builder",
-  "version": "3.6.6",
+  "version": "3.6.7",
   "description": "JupyterLab - Extension Builder",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
