@@ -55,6 +55,15 @@ describe('workspace', () => {
         expect((await manager.fetch(id)).metadata.id).toBe(id);
         await manager.remove(id);
       });
+
+      it('should reject on invalid id', async () => {
+        const id = '../';
+
+        const callback = async () => {
+          await manager.fetch(id);
+        };
+        await expect(callback).rejects.toThrow();
+      });
     });
 
     describe('#list()', () => {
@@ -86,6 +95,15 @@ describe('workspace', () => {
         await manager.save(id, { data: {}, metadata: { id } });
         expect((await manager.fetch(id)).metadata.id).toBe(id);
         await manager.remove(id);
+      });
+
+      it('should reject on invalid id', async () => {
+        const id = '../';
+
+        const callback = async () => {
+          await manager.save(id, { data: {}, metadata: { id } });
+        };
+        await expect(callback).rejects.toThrow();
       });
     });
   });

@@ -157,5 +157,9 @@ describe('session', () => {
     it('should handle a 404 status', () => {
       return SessionAPI.shutdownSession(UUID.uuid4());
     });
+
+    it('should reject invalid on invalid id', async () => {
+      await expect(SessionAPI.shutdownSession('../')).rejects.toThrow();
+    });
   });
 });

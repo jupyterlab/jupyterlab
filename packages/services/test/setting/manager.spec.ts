@@ -53,6 +53,15 @@ describe('setting', () => {
 
         expect((await manager.fetch(id)).id).toBe(id);
       });
+
+      it('should reject on invalid id', async () => {
+        const id = '../';
+
+        const callback = async () => {
+          await manager.fetch(id);
+        };
+        await expect(callback).rejects.toThrow();
+      });
     });
 
     describe('#save()', () => {
@@ -63,6 +72,17 @@ describe('setting', () => {
 
         await manager.save(id, raw);
         expect(JSON.parse((await manager.fetch(id)).raw).theme).toBe(theme);
+      });
+
+      it('should reject on invalid id', async () => {
+        const id = '../';
+        const theme = 'Foo Theme';
+        const raw = `{"theme": "${theme}"}`;
+
+        const callback = async () => {
+          await manager.save(id, raw);
+        };
+        await expect(callback).rejects.toThrow();
       });
     });
   });

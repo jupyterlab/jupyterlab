@@ -178,6 +178,11 @@ namespace Private {
    * Get the url for a workspace.
    */
   export function url(base: string, id: string): string {
-    return URLExt.join(base, SERVICE_WORKSPACES_URL, id);
+    const workspacesBase = URLExt.join(base, SERVICE_WORKSPACES_URL);
+    const result = URLExt.join(workspacesBase, id);
+    if (!result.startsWith(workspacesBase)) {
+      throw new Error('Can only be used for workspaces requests');
+    }
+    return result;
   }
 }
