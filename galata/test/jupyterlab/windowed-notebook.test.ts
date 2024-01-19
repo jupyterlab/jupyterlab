@@ -203,7 +203,7 @@ for (const cellType of ['code', 'markdown']) {
     await firstCell.waitFor({ state: 'visible' });
 
     // Expect the text to populate the cell editor
-    const firstCellInput = await page.notebook.getCellInput(0);
+    const firstCellInput = await page.notebook.getCellInputLocator(0);
     expect(await firstCellInput!.textContent()).toContain('TEST');
   });
 }

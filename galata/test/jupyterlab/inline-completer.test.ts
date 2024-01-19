@@ -179,8 +179,8 @@ test.describe('Inline Completer', () => {
 
       await page.keyboard.press('Tab');
 
-      const cellEditor = await page.notebook.getCellInput(2);
-      const text = await cellEditor.textContent();
+      const cellEditor = await page.notebook.getCellInputLocator(2);
+      const text = await cellEditor!.textContent();
       expect(text).toMatch(/estion.*/);
     });
   });
@@ -207,9 +207,9 @@ test.describe('Inline Completer', () => {
       await page.keyboard.type('gg');
       await expect(ghostText).toHaveText(/estion.*/);
 
-      const cellEditor = await page.notebook.getCellInput(2);
+      const cellEditor = await page.notebook.getCellInputLocator(2);
       const imageName = 'editor-with-ghost-text.png';
-      expect(await cellEditor.screenshot()).toMatchSnapshot(imageName);
+      expect(await cellEditor!.screenshot()).toMatchSnapshot(imageName);
 
       // Ghost text should hide
       await page.keyboard.press('Escape');

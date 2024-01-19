@@ -259,12 +259,7 @@ export class MenuHelper {
    * @returns Handle to the opened menu
    */
   async getOpenMenu(): Promise<ElementHandle<Element> | null> {
-    const openMenus = await this.page.$$('.lm-Widget.lm-Menu .lm-Menu-content');
-    if (openMenus.length > 0) {
-      return openMenus[openMenus.length - 1];
-    }
-
-    return null;
+    return (await this.getOpenMenuLocator())?.elementHandle() ?? null;
   }
 
   /**

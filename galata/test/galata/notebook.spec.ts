@@ -7,7 +7,6 @@
 import * as path from 'path';
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { Locator } from '@playwright/test';
 
 test.describe('Notebook Tests', () => {
   test('Create New Notebook', async ({ page, tmpPath }) => {

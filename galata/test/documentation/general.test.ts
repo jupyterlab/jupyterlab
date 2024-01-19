@@ -201,7 +201,7 @@ test.describe('General', () => {
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).toHaveClass(/lm-mod-hidden/);
-    await (await page.notebook.getCellInput(1))?.click();
+    await (await page.notebook.getCellInputLocator(1))?.click();
     await page.keyboard.type(' content');
     await expect(
       page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')

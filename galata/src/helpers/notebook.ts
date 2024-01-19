@@ -634,21 +634,34 @@ export class NotebookHelper {
   async getCellInput(
     cellIndex: number
   ): Promise<ElementHandle<Element> | null> {
-    const cell = await this.getCell(cellIndex);
+    return (await this.getCellInputLocator(cellIndex))?.elementHandle() ?? null;
+  }
+
+  /**
+   * Get the locator to the input of a cell
+   *
+   * @param cellIndex Cell index
+   * @returns Locator to the cell input
+   */
+  async getCellInputLocator(cellIndex: number): Promise<Locator | null> {
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
-    const cellEditor = await cell.$('.jp-InputArea-editor');
-    if (!cellEditor) {
+    const cellEditor = cell.locator('.jp-InputArea-editor');
+    if (!(await cellEditor.count())) {
       return null;
     }
 
-    const isRenderedMarkdown = await cellEditor.evaluate(editor =>
-      editor.classList.contains('lm-mod-hidden')
-    );
+    const isRenderedMarkdown = (
+      await Utils.getLocatorClassList(cellEditor)
+    ).includes('lm-mod-hidden');
+    // const isRenderedMarkdown = await cellEditor.evaluate(editor =>
+    //   editor.classList.contains('lm-mod-hidden')
+    // );
     if (isRenderedMarkdown) {
-      return await cell.$('.jp-MarkdownOutput');
+      return cell.locator('.jp-MarkdownOutput');
     }
 
     return cellEditor;
@@ -691,12 +704,27 @@ export class NotebookHelper {
   async getCellInputExpander(
     cellIndex: number
   ): Promise<ElementHandle<Element> | null> {
-    const cell = await this.getCell(cellIndex);
+    return (
+      (await this.getCellInputExpanderLocator(cellIndex))?.elementHandle() ??
+      null
+    );
+  }
+
+  /**
+   * Get the locator to the input expander of a cell
+   *
+   * @param cellIndex Cell index
+   * @returns Locator to the cell input expander
+   */
+  async getCellInputExpanderLocator(
+    cellIndex: number
+  ): Promise<Locator | null> {
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
-    return await cell.$('.jp-InputCollapser');
+    return cell.locator('.jp-InputCollapser');
   }
 
   /**
@@ -706,12 +734,12 @@ export class NotebookHelper {
    * @returns Cell input expanded status
    */
   async isCellInputExpanded(cellIndex: number): Promise<boolean | null> {
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
-    return (await cell.$('.jp-InputPlaceholder')) === null;
+    return (await cell.locator('.jp-InputPlaceholder').count()) > 0;
   }
 
   /**
@@ -727,7 +755,7 @@ export class NotebookHelper {
       return false;
     }
 
-    const inputExpander = await this.getCellInputExpander(cellIndex);
+    const inputExpander = await this.getCellInputExpanderLocator(cellIndex);
     if (!inputExpander) {
       return false;
     }
@@ -746,14 +774,29 @@ export class NotebookHelper {
   async getCellOutputExpander(
     cellIndex: number
   ): Promise<ElementHandle<Element> | null> {
-    const cell = await this.getCell(cellIndex);
+    return (
+      (await this.getCellInputExpanderLocator(cellIndex))?.elementHandle() ??
+      null
+    );
+  }
+
+  /**
+   * Get the locator to a cell output expander
+   *
+   * @param cellIndex Cell index
+   * @returns Handle to the cell output expander
+   */
+  async getCellOutputExpanderLocator(
+    cellIndex: number
+  ): Promise<Locator | null> {
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
     const cellType = await this.getCellType(cellIndex);
 
-    return cellType === 'code' ? await cell.$('.jp-OutputCollapser') : null;
+    return cellType === 'code' ? cell.locator('.jp-OutputCollapser') : null;
   }
 
   /**
@@ -763,12 +806,12 @@ export class NotebookHelper {
    * @returns Cell output expanded status
    */
   async isCellOutputExpanded(cellIndex: number): Promise<boolean | null> {
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
-    return (await cell.$('.jp-OutputPlaceholder')) === null;
+    return (await cell.locator('.jp-OutputPlaceholder').count()) > 0;
   }
 
   /**
@@ -784,7 +827,7 @@ export class NotebookHelper {
       return false;
     }
 
-    const outputExpander = await this.getCellOutputExpander(cellIndex);
+    const outputExpander = await this.getCellOutputExpanderLocator(cellIndex);
     if (!outputExpander) {
       return false;
     }
@@ -803,18 +846,30 @@ export class NotebookHelper {
   async getCellOutput(
     cellIndex: number
   ): Promise<ElementHandle<Element> | null> {
-    const cell = await this.getCell(cellIndex);
+    return (
+      (await this.getCellOutputLocator(cellIndex))?.elementHandle() ?? null
+    );
+  }
+
+  /**
+   * Get the locator on a given output cell
+   *
+   * @param cellIndex Cell index
+   * @returns Locator cell handle
+   */
+  async getCellOutputLocator(cellIndex: number): Promise<Locator | null> {
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return null;
     }
 
-    const codeCellOutput = await cell.$('.jp-Cell-outputArea');
-    if (codeCellOutput) {
+    const codeCellOutput = cell.locator('.jp-Cell-outputArea');
+    if (await codeCellOutput.count()) {
       return codeCellOutput;
     }
 
-    const mdCellOutput = await cell.$('.jp-MarkdownOutput');
-    if (mdCellOutput) {
+    const mdCellOutput = cell.locator('.jp-MarkdownOutput');
+    if (await mdCellOutput.count()) {
       return mdCellOutput;
     }
 
@@ -828,20 +883,17 @@ export class NotebookHelper {
    * @returns List of text outputs
    */
   async getCellTextOutput(cellIndex: number): Promise<string[] | null> {
-    const cellOutput = await this.getCellOutput(cellIndex);
+    const cellOutput = await this.getCellOutputLocator(cellIndex);
     if (!cellOutput) {
       return null;
     }
 
-    const textOutputs = await cellOutput.$$('.jp-OutputArea-output');
-    if (textOutputs.length > 0) {
+    const textOutputs = cellOutput.locator('.jp-OutputArea-output');
+    const textOutputsNum = await textOutputs.count();
+    if (textOutputsNum > 0) {
       const outputs: string[] = [];
-      for (const textOutput of textOutputs) {
-        outputs.push(
-          (await (
-            await textOutput.getProperty('textContent')
-          ).jsonValue()) as string
-        );
+      for (let i = 0; i < textOutputsNum; i++) {
+        outputs.push((await textOutputs.nth(i).textContent()) ?? '');
       }
 
       return outputs;
@@ -860,15 +912,15 @@ export class NotebookHelper {
    * @returns Editing mode
    */
   async isCellInEditingMode(cellIndex: number): Promise<boolean> {
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return false;
     }
 
-    const cellEditor = await cell.$('.jp-InputArea-editor');
-    if (cellEditor) {
-      return await cellEditor.evaluate(editor =>
-        editor.classList.contains('jp-mod-focused')
+    const cellEditor = cell.locator('.jp-InputArea-editor');
+    if (await cellEditor.count()) {
+      return (await Utils.getLocatorClassList(cellEditor)).includes(
+        'jp-mod-focused'
       );
     }
 
@@ -978,11 +1030,11 @@ export class NotebookHelper {
    * @param cellIndex
    */
   async isCellGutterPresent(cellIndex: number): Promise<boolean> {
-    const cell = await this.getCell(cellIndex);
+    const cell = await this.getCellLocator(cellIndex);
     if (!cell) {
       return false;
     }
-    return (await (await cell.$('.cm-gutters'))?.isVisible()) === true;
+    return await cell.locator('.cm-gutters')?.isVisible();
   }
 
   /**
@@ -1080,7 +1132,7 @@ export class NotebookHelper {
    * @returns Action success status
    */
   async selectCells(startIndex: number, endIndex?: number): Promise<boolean> {
-    const startCell = await this.getCell(startIndex);
+    const startCell = await this.getCellLocator(startIndex);
     if (!startCell) {
       return false;
     }
@@ -1090,7 +1142,7 @@ export class NotebookHelper {
     await startCell.click({ position: clickPosition });
 
     if (endIndex !== undefined) {
-      const endCell = await this.getCell(endIndex);
+      const endCell = await this.getCellLocator(endIndex);
       if (!endCell) {
         return false;
       }
