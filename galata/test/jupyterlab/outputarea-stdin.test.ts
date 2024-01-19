@@ -65,8 +65,8 @@ test.describe('Stdin for ipdb', () => {
     await filePath.evaluate(node => (node.textContent = '/tmp/masked.py'));
 
     const imageName = 'stdin-history-search.png';
-    const cell = await page.notebook.getCell(1);
-    expect(await cell.screenshot()).toMatchSnapshot(imageName);
+    const cell = await page.notebook.getCellLocator(1);
+    expect(await cell!.screenshot()).toMatchSnapshot(imageName);
 
     // Check that the input remains focused and cursor is at the end.
     await page.keyboard.insertText('x');

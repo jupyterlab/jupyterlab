@@ -7,6 +7,7 @@
 import * as path from 'path';
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import { Locator } from '@playwright/test';
 
 test.describe('Notebook Tests', () => {
   test('Create New Notebook', async ({ page, tmpPath }) => {
@@ -182,7 +183,7 @@ test.describe('Access cells in windowed notebook', () => {
     await page.filebrowser.open(target);
     await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
 
-    expect(await page.notebook.getCell(12)).toBeTruthy();
+    expect(await page.notebook.getCellLocator(12)).toBeTruthy();
   });
 
   test('getCell above the viewport', async ({ page, tmpPath }) => {
@@ -196,8 +197,8 @@ test.describe('Access cells in windowed notebook', () => {
     await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
     await page.waitForTimeout(50);
 
-    await page.notebook.getCell(12);
+    await page.notebook.getCellLocator(12);
 
-    expect(await page.notebook.getCell(0)).toBeTruthy();
+    expect(await page.notebook.getCellLocator(0)).toBeTruthy();
   });
 });

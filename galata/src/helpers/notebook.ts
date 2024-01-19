@@ -102,15 +102,9 @@ export class NotebookHelper {
   async getNotebookInPanel(
     name?: string
   ): Promise<ElementHandle<Element> | null> {
-    const nbPanel = await this.activity.getPanelLocator(name);
-
-    if (nbPanel && (await nbPanel.count())) {
-      if (await nbPanel.locator('.jp-NotebookPanel-notebook').count()) {
-        return nbPanel.locator('.jp-NotebookPanel-notebook').elementHandle();
-      }
-    }
-
-    return null;
+    return (
+      (await this.getNotebookInPanelLocator(name))?.elementHandle() ?? null
+    );
   }
 
   /**
@@ -138,14 +132,7 @@ export class NotebookHelper {
    * @returns Handle to the Notebook toolbar
    */
   async getToolbar(name?: string): Promise<ElementHandle<Element> | null> {
-    const nbPanel = await this.activity.getPanelLocator(name);
-
-    if (nbPanel && (await nbPanel.count())) {
-      // Take the first as there are also cell toolbar
-      return nbPanel.locator('.jp-Toolbar').first().elementHandle();
-    }
-
-    return null;
+    return (await this.getToolbarLocator(name))?.elementHandle() ?? null;
   }
 
   /**
@@ -173,16 +160,34 @@ export class NotebookHelper {
     itemIndex: number,
     notebookName?: string
   ): Promise<ElementHandle<Element> | null> {
+    return (
+      (
+        await this.getToolbarItemLocatorByIndex(itemIndex, notebookName)
+      )?.elementHandle() ?? null
+    );
+  }
+
+  /**
+   * Get the locator to a notebook toolbar item from its index
+   *
+   * @param itemIndex Toolbar item index
+   * @param notebookName Notebook name
+   * @returns locator to the notebook toolbar item
+   */
+  async getToolbarItemLocatorByIndex(
+    itemIndex: number,
+    notebookName?: string
+  ): Promise<Locator | null> {
     if (itemIndex === -1) {
       return null;
     }
 
-    const toolbar = await this.getToolbar(notebookName);
+    const toolbar = await this.getToolbarLocator(notebookName);
 
     if (toolbar) {
-      const toolbarItems = await toolbar.$$('.jp-Toolbar-item');
-      if (itemIndex < toolbarItems.length) {
-        return toolbarItems[itemIndex];
+      const toolbarItems = toolbar.locator('.jp-Toolbar-item');
+      if (itemIndex < (await toolbarItems.count())) {
+        return toolbarItems.nth(itemIndex);
       }
     }
 
@@ -200,14 +205,32 @@ export class NotebookHelper {
     itemId: galata.NotebookToolbarItemId,
     notebookName?: string
   ): Promise<ElementHandle<Element> | null> {
-    const toolbar = await this.getToolbar(notebookName);
+    return (
+      (
+        await this.getToolbarItemLocator(itemId, notebookName)
+      )?.elementHandle() ?? null
+    );
+  }
+
+  /**
+   * Get the locator to a notebook toolbar item from its id
+   *
+   * @param itemId Toolbar item id
+   * @param notebookName Notebook name
+   * @returns Locator to the notebook toolbar item
+   */
+  async getToolbarItemLocator(
+    itemId: galata.NotebookToolbarItemId,
+    notebookName?: string
+  ): Promise<Locator | null> {
+    const toolbar = await this.getToolbarLocator(notebookName);
 
     if (toolbar) {
       const itemIndex = await this.page.evaluate(async (itemId: string) => {
         return window.galata.getNotebookToolbarItemIndex(itemId);
       }, itemId);
 
-      return this.getToolbarItemByIndex(itemIndex);
+      return this.getToolbarItemLocatorByIndex(itemIndex);
     }
 
     return null;
@@ -224,7 +247,7 @@ export class NotebookHelper {
     itemId: galata.NotebookToolbarItemId,
     notebookName?: string
   ): Promise<boolean> {
-    const toolbarItem = await this.getToolbarItem(itemId, notebookName);
+    const toolbarItem = await this.getToolbarItemLocator(itemId, notebookName);
 
     if (toolbarItem) {
       await toolbarItem.click();
@@ -528,101 +551,7 @@ export class NotebookHelper {
    * @returns Handle to the cell
    */
   async getCell(cellIndex: number): Promise<ElementHandle<Element> | null> {
-    const notebook = await this.getNotebookInPanel();
-    if (!notebook) {
-      return null;
-    }
-    const scroller = (await notebook.$(
-      '.jp-WindowedPanel-outer'
-    )) as ElementHandle<HTMLElement>;
-    const viewport = (await notebook.$(
-      '.jp-WindowedPanel-viewport'
-    )) as ElementHandle<HTMLElement>;
-
-    const allCells = await notebook.$$('div.jp-Cell');
-    const filters = await Promise.all(allCells.map(c => c.isVisible()));
-    const cells = allCells.filter((c, i) => filters[i]);
-
-    const firstCell = cells[0];
-    const lastCell = cells[cells.length - 1];
-
-    let firstIndex = parseInt(
-      (await firstCell.getAttribute('data-windowed-list-index')) ?? '0',
-      10
-    );
-    let lastIndex = parseInt(
-      (await lastCell.getAttribute('data-windowed-list-index')) ?? '0',
-      10
-    );
-
-    if (cellIndex < firstIndex) {
-      // Scroll up
-      let scrollTop =
-        (await firstCell.boundingBox())?.y ??
-        (await scroller.evaluate(node => node.scrollTop - node.clientHeight));
-
-      do {
-        await scroller.evaluate((node, scrollTarget) => {
-          node.scrollTo({ top: scrollTarget });
-        }, scrollTop);
-        await this.page.waitForTimeout(50);
-
-        const cells = await notebook.$$('div.jp-Cell');
-        const isVisible = await Promise.all(cells.map(c => c.isVisible()));
-        const firstCell = isVisible.findIndex(visibility => visibility);
-
-        firstIndex = parseInt(
-          (await cells[firstCell].getAttribute('data-windowed-list-index')) ??
-            '0',
-          10
-        );
-        scrollTop =
-          (await cells[firstCell].boundingBox())?.y ??
-          (await scroller.evaluate(node => node.scrollTop - node.clientHeight));
-      } while (scrollTop > 0 && firstIndex > cellIndex);
-    } else if (cellIndex > lastIndex) {
-      const clientHeight = await scroller.evaluate(node => node.clientHeight);
-      // Scroll down
-      const viewportBox = await viewport.boundingBox();
-      let scrollHeight = viewportBox!.y + viewportBox!.height;
-      let previousScrollHeight = 0;
-
-      do {
-        previousScrollHeight = scrollHeight;
-        await scroller.evaluate((node, scrollTarget) => {
-          node.scrollTo({ top: scrollTarget });
-        }, scrollHeight);
-        await this.page.waitForTimeout(50);
-
-        const cells = await notebook.$$('div.jp-Cell');
-        const isVisible = await Promise.all(cells.map(c => c.isVisible()));
-        const lastCell = isVisible.lastIndexOf(true);
-
-        lastIndex = parseInt(
-          (await cells[lastCell].getAttribute('data-windowed-list-index')) ??
-            '0',
-          10
-        );
-
-        const viewportBox = await viewport.boundingBox();
-        scrollHeight = viewportBox!.y + viewportBox!.height;
-        // Avoid jitter
-        scrollHeight = Math.max(
-          previousScrollHeight + clientHeight,
-          scrollHeight
-        );
-      } while (scrollHeight > previousScrollHeight && lastIndex < cellIndex);
-    }
-
-    if (firstIndex <= cellIndex && cellIndex <= lastIndex) {
-      return (
-        await notebook.$$(
-          `div.jp-Cell[data-windowed-list-index="${cellIndex}"]`
-        )
-      )[0];
-    } else {
-      return null;
-    }
+    return (await this.getCellLocator(cellIndex))?.elementHandle() ?? null;
   }
 
   /**
@@ -632,16 +561,13 @@ export class NotebookHelper {
    * @param name Notebook name
    * @returns Handle to the cell
    */
-  async getCellLocator(
-    cellIndex: number,
-    name?: string
-  ): Promise<Locator | null> {
-    const notebook = await this.activity.getPanelLocator(name);
+  async getCellLocator(cellIndex: number): Promise<Locator | null> {
+    const notebook = await this.getNotebookInPanelLocator();
     if (!notebook) {
       return null;
     }
 
-    const cells = notebook.locator('.jp-Cell');
+    const cells = notebook.locator('.jp-Cell:visible');
     let firstIndex = parseInt(
       (await cells.first().getAttribute('data-windowed-list-index')) ?? '',
       10
@@ -650,11 +576,10 @@ export class NotebookHelper {
       (await cells.last().getAttribute('data-windowed-list-index')) ?? '',
       10
     );
-
     if (cellIndex < firstIndex) {
       // Scroll up
       const viewport = await notebook
-        .locator('.jp-WindowedPanel-window')
+        .locator('.jp-WindowedPanel-outer')
         .first()
         .boundingBox();
       await this.page.mouse.move(viewport!.x, viewport!.y);
@@ -673,7 +598,7 @@ export class NotebookHelper {
     } else if (cellIndex > lastIndex) {
       // Scroll down
       const viewport = await notebook
-        .locator('.jp-WindowedPanel-window')
+        .locator('.jp-WindowedPanel-outer')
         .first()
         .boundingBox();
       await this.page.mouse.move(viewport!.x, viewport!.y);

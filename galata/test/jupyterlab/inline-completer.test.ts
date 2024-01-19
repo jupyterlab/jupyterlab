@@ -61,8 +61,8 @@ test.describe('Inline Completer', () => {
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
 
       // Should hide on moving cursor away
-      const toolbar = await page.notebook.getToolbar();
-      await toolbar.hover();
+      const toolbar = await page.notebook.getToolbarLocator();
+      await toolbar!.hover();
       await completer.waitFor({ state: 'hidden' });
     });
   });

@@ -52,13 +52,13 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.click('button[title="Show Replace"]');
     await page.fill('[placeholder="Replace"]', 'script/$1');
-    const cell = await page.notebook.getCell(2);
+    const cell = await page.notebook.getCellLocator(2);
     await expect(page.locator('body')).not.toContainText('script/plain');
 
     await page.click('button:has-text("Replace")');
     await page.waitForSelector('text=1/2');
 
-    await cell.waitForSelector('text=script/plain');
+    await cell!.locator('text=script/plain').waitFor();
     await expect(page.locator('body')).toContainText('script/plain');
   });
 
@@ -83,11 +83,11 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.waitForSelector('text=5/20');
 
-    const cell = await page.notebook.getCell(1);
+    const cell = await page.notebook.getCellLocator(1);
 
-    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
-      'replace-in-markdown-rendered-cell.png'
-    );
+    expect(
+      await cell!.locator('.jp-Editor').first().screenshot()
+    ).toMatchSnapshot('replace-in-markdown-rendered-cell.png');
   });
 
   test('Replace all', async ({ page }) => {

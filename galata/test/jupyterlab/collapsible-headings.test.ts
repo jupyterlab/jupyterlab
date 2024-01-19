@@ -27,16 +27,16 @@ test.describe('Collapsible Headings; showHCB', () => {
   });
 
   test('Show Collapser Unselected; showHCB', async ({ page }) => {
-    expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
-      'showHCB_heading_unselected.png'
-    );
+    expect(
+      await (await page.notebook.getCellLocator(0))!.screenshot()
+    ).toMatchSnapshot('showHCB_heading_unselected.png');
   });
 
   test('Show Collapser Selected; showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
-      'showHCB_heading_selected.png'
-    );
+    expect(
+      await (await page.notebook.getCellLocator(0))!.screenshot()
+    ).toMatchSnapshot('showHCB_heading_selected.png');
   });
 
   test('Collapse Heading; showHCB', async ({ page }) => {
@@ -76,16 +76,16 @@ test.describe('Collapsible Headings; no_showHCB', () => {
   });
 
   test('Show Collapser Unselected; no_showHCB', async ({ page }) => {
-    expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
-      'no_showHCB_heading_unselected.png'
-    );
+    expect(
+      await (await page.notebook.getCellLocator(0))!.screenshot()
+    ).toMatchSnapshot('no_showHCB_heading_unselected.png');
   });
 
   test('Show Collapser Selected; no_showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
-      'no_showHCB_heading_selected.png'
-    );
+    expect(
+      await (await page.notebook.getCellLocator(0))!.screenshot()
+    ).toMatchSnapshot('no_showHCB_heading_selected.png');
   });
 
   test('Collapse Heading; no_showHCB', async ({ page }) => {

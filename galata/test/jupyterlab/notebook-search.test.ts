@@ -245,8 +245,8 @@ test.describe('Notebook Search', () => {
 
     await page.waitForSelector('text=1/29');
 
-    const cell = await page.notebook.getCell(5);
-    await cell.scrollIntoViewIfNeeded();
+    const cell = await page.notebook.getCellLocator(5);
+    await cell!.scrollIntoViewIfNeeded();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
@@ -280,8 +280,8 @@ test.describe('Notebook Search', () => {
     await page.click('text=Search in 1 Selected Cell');
 
     // Bring focus to first cell without switching away from command mode
-    let cell = await page.notebook.getCell(0);
-    await (await cell.$('.jp-InputPrompt')).click();
+    let cell = await page.notebook.getCellLocator(0);
+    await cell!.locator('.jp-InputPrompt').click();
 
     // Select two cells below
     await page.keyboard.press('Shift+ArrowDown');
@@ -291,8 +291,8 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=Search in 3 Selected Cells');
 
     // Reset selection, switch to third cell, preserving command mode
-    cell = await page.notebook.getCell(2);
-    await (await cell.$('.jp-InputPrompt')).click();
+    cell = await page.notebook.getCellLocator(2);
+    await cell!.locator('.jp-InputPrompt').click();
 
     await page.waitForSelector('text=Search in 1 Selected Cell');
     // Wait for the counter to be properly updated
@@ -329,8 +329,8 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/4');
 
     // Bring focus to first cell without switching to edit mode
-    let cell = await page.notebook.getCell(0);
-    await (await cell.$('.jp-Editor')).click();
+    let cell = await page.notebook.getCellLocator(0);
+    await cell!.locator('.jp-Editor').click();
 
     // Switch back to command mode
     await page.keyboard.press('Escape');
@@ -353,9 +353,8 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/3');
 
     // Activate third cell
-    const cell = await page.notebook.getCell(2);
-    const editor = await cell.$('.jp-Editor');
-    await editor.click();
+    const cell = await page.notebook.getCellLocator(2);
+    await cell!.locator('.jp-Editor').click();
 
     // Select 7 lines
     await page.keyboard.press('Control+Home');
@@ -381,14 +380,13 @@ test.describe('Notebook Search', () => {
     await page.fill('[placeholder="Find"]', 'with');
     await page.waitForSelector('text=1/21');
 
-    const cell = await page.notebook.getCell(0);
-    const editor = await cell.$('.jp-Editor');
-    await editor.click();
+    const cell = await page.notebook.getCellLocator(0);
+    await cell!.locator('.jp-Editor').click();
 
     // Select text (to see if the highlights will still be visible)
     await page.keyboard.press('Control+A');
 
-    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
+    expect(await cell!.locator('.jp-Editor').screenshot()).toMatchSnapshot(
       'highlight-visible-under-selection.png'
     );
   });
@@ -404,9 +402,9 @@ test.describe('Notebook Search', () => {
     // Click next button
     await page.click('button[title^="Next Match"]');
 
-    const cell = await page.notebook.getCell(0);
+    const cell = await page.notebook.getCellLocator(0);
 
-    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
+    expect(await cell!.locator('.jp-Editor').screenshot()).toMatchSnapshot(
       'highlight-next-in-editor.png'
     );
   });
@@ -424,9 +422,9 @@ test.describe('Notebook Search', () => {
       clickCount: 4
     });
 
-    const cell = await page.notebook.getCell(1);
+    const cell = await page.notebook.getCellLocator(1);
 
-    expect(await cell.screenshot()).toMatchSnapshot('highlight-next-cell.png');
+    expect(await cell!.screenshot()).toMatchSnapshot('highlight-next-cell.png');
   });
 
   test('Highlight previous hit', async ({ page }) => {
@@ -448,17 +446,17 @@ test.describe('Notebook Search', () => {
     // Should move up by two
     await page.waitForSelector('text=19/21');
 
-    const hit = await page.notebook.getCell(2);
-    expect(await hit.screenshot()).toMatchSnapshot(
+    const hit = await page.notebook.getCellLocator(2);
+    expect(await hit!.screenshot()).toMatchSnapshot(
       'highlight-previous-element.png'
     );
   });
 
   test('Search from cursor', async ({ page }) => {
-    const cell = await page.notebook.getCell(5);
-    await cell.click();
+    const cell = await page.notebook.getCellLocator(5);
+    await cell!.click();
     await page.keyboard.press('Escape');
-    await cell.scrollIntoViewIfNeeded();
+    await cell!.scrollIntoViewIfNeeded();
 
     // Open search box
     await page.keyboard.press('Control+f');
@@ -483,11 +481,11 @@ test.describe('Notebook Search', () => {
       clickCount: 4
     });
 
-    const cell = await page.notebook.getCell(1);
+    const cell = await page.notebook.getCellLocator(1);
 
-    await cell.dblclick();
+    await cell!.dblclick();
 
-    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
+    expect(await cell!.locator('.jp-Editor').screenshot()).toMatchSnapshot(
       'highlight-markdown-switch-state.png'
     );
   });
@@ -505,8 +503,8 @@ test.describe('Notebook Search', () => {
 
     await page.notebook.setCell(5, 'code', 'with');
 
-    const cell = await page.notebook.getCell(5);
-    expect(await cell.screenshot()).toMatchSnapshot('search-typing.png');
+    const cell = await page.notebook.getCellLocator(5);
+    expect(await cell!.screenshot()).toMatchSnapshot('search-typing.png');
   });
 
   test('Search new outputs', async ({ page }) => {
@@ -521,12 +519,12 @@ test.describe('Notebook Search', () => {
 
     await page.waitForSelector('text=1/29');
 
-    const cell = await page.notebook.getCell(5);
+    const cell = await page.notebook.getCellLocator(5);
 
-    await cell.click();
+    await cell!.click();
 
     await page.notebook.runCell(5);
-    expect(await cell.screenshot()).toMatchSnapshot('search-new-outputs.png');
+    expect(await cell!.screenshot()).toMatchSnapshot('search-new-outputs.png');
   });
 
   test('Search on new cell', async ({ page }) => {
@@ -537,8 +535,8 @@ test.describe('Notebook Search', () => {
 
     await page.waitForSelector('text=1/21');
 
-    const cell = await page.notebook.getCell(5);
-    await cell.click();
+    const cell = await page.notebook.getCellLocator(5);
+    await cell!.click();
     await page.notebook.clickToolbarItem('insert');
     await page.notebook.setCell(6, 'code', 'with');
 
@@ -557,10 +555,10 @@ test.describe('Notebook Search', () => {
 
     await page.waitForSelector('text=1/21');
 
-    const cell = await page.notebook.getCell(5);
-    await cell.click();
+    const cell = await page.notebook.getCellLocator(5);
+    await cell!.click();
     await page.keyboard.press('Escape');
-    await cell.scrollIntoViewIfNeeded();
+    await cell!.scrollIntoViewIfNeeded();
 
     await page.keyboard.press('d');
     await page.keyboard.press('d');
@@ -619,8 +617,8 @@ test.describe('Auto search in multiple selection', async () => {
 
   test('Toggles search in cell selection', async ({ page }) => {
     // Bring focus to first cell without switching away from command mode
-    let cell = await page.notebook.getCell(0);
-    await (await cell.$('.jp-InputPrompt')).click();
+    let cell = await page.notebook.getCellLocator(0);
+    await cell!.locator('.jp-InputPrompt').click();
     // Open search box and show filters
     await page.keyboard.press('Control+f');
     await page.click('button[title="Show Search Filters"]');
@@ -641,8 +639,8 @@ test.describe('Auto search in multiple selection', async () => {
 
   test('Toggles search in line selection', async ({ page }) => {
     // Activate third cell
-    const cell = await page.notebook.getCell(2);
-    const editor = await cell.$('.jp-Editor');
+    const cell = await page.notebook.getCellLocator(2);
+    const editor = cell!.locator('.jp-Editor');
     await editor.click();
 
     // Select 1st line
@@ -682,8 +680,8 @@ test.describe('Auto search in any selection', async () => {
 
   test('Toggles search in cell selection', async ({ page }) => {
     // Bring focus to first cell without switching away from command mode
-    let cell = await page.notebook.getCell(0);
-    await (await cell.$('.jp-InputPrompt')).click();
+    let cell = await page.notebook.getCellLocator(0);
+    await cell!.locator('.jp-InputPrompt').click();
     // Open search box and show filters
     await page.keyboard.press('Control+f');
     await page.click('button[title="Show Search Filters"]');
@@ -697,8 +695,8 @@ test.describe('Auto search in any selection', async () => {
 
   test('Toggles search in line selection', async ({ page }) => {
     // Activate third cell
-    const cell = await page.notebook.getCell(2);
-    const editor = await cell.$('.jp-Editor');
+    const cell = await page.notebook.getCellLocator(2);
+    const editor = cell!.locator('.jp-Editor');
     await editor.click();
 
     // Open search box and show filters
