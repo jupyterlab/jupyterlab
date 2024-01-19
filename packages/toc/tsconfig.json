@@ -22,13 +22,13 @@
       "path": "../rendermime"
     },
     {
+      "path": "../rendermime-interfaces"
+    },
+    {
       "path": "../translation"
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../rendermime-interfaces"
     }
   ]
 }
