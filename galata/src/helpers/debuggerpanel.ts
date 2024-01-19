@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ElementHandle, Page } from '@playwright/test';
+import { ElementHandle, Locator, Page } from '@playwright/test';
 import { SidebarHelper } from './sidebar';
 import { NotebookHelper } from './notebook';
 import { waitForCondition } from '../utils';
@@ -84,6 +84,13 @@ export class DebuggerHelper {
    * Returns handle to the variables panel content
    */
   async getVariablesPanel(): Promise<ElementHandle<Element> | null> {
+    return (await this.getVariablesPanelLocator()).elementHandle();
+  }
+
+  /**
+   * Returns locator to the variables panel content
+   */
+  async getVariablesPanelLocator(): Promise<Locator> {
     return this._getPanel('.jp-DebuggerVariables');
   }
 
@@ -111,6 +118,13 @@ export class DebuggerHelper {
    * Returns handle to callstack panel content
    */
   async getCallStackPanel(): Promise<ElementHandle<Element> | null> {
+    return (await this.getCallStackPanelLocator()).elementHandle();
+  }
+
+  /**
+   * Returns locator to callstack panel content
+   */
+  async getCallStackPanelLocator(): Promise<Locator> {
     return this._getPanel('.jp-DebuggerCallstack');
   }
 
@@ -127,6 +141,13 @@ export class DebuggerHelper {
    * Returns handle to breakpoints panel content
    */
   async getBreakPointsPanel(): Promise<ElementHandle<Element> | null> {
+    return (await this.getBreakPointsPanelLocator()).elementHandle();
+  }
+
+  /**
+   * Returns locator to breakpoints panel content
+   */
+  async getBreakPointsPanelLocator(): Promise<Locator> {
     return this._getPanel('.jp-DebuggerBreakpoints');
   }
 
@@ -143,6 +164,13 @@ export class DebuggerHelper {
    * Returns handle to sources panel content
    */
   async getSourcePanel(): Promise<ElementHandle<Element> | null> {
+    return (await this.getSourcePanelLocator()).elementHandle();
+  }
+
+  /**
+   * Returns locator to sources panel content
+   */
+  async getSourcePanelLocator(): Promise<Locator> {
     return this._getPanel('.jp-DebuggerSources');
   }
 
@@ -155,10 +183,8 @@ export class DebuggerHelper {
     });
   }
 
-  private async _getPanel(
-    selector: string
-  ): Promise<ElementHandle<Element> | null> {
+  private async _getPanel(selector: string): Promise<Locator> {
     const panel = this.sidebar.getContentPanelLocator('right');
-    return panel.locator(selector).elementHandle();
+    return panel.locator(selector);
   }
 }

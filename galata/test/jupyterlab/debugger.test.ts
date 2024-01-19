@@ -41,10 +41,10 @@ test.describe('Debugger Tests', () => {
     await page.notebook.clickCellGutter(0, 2);
 
     await page.debugger.waitForBreakPoints();
-    const breakpointsPanel = await page.debugger.getBreakPointsPanel();
+    const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
     expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
 
-    const callStackPanel = await page.debugger.getCallStackPanel();
+    const callStackPanel = await page.debugger.getCallStackPanelLocator();
     expect(await callStackPanel.innerText()).toBe('');
 
     // don't add await, run will be blocked by the breakpoint
@@ -54,13 +54,13 @@ test.describe('Debugger Tests', () => {
     expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
 
     await page.debugger.waitForVariables();
-    const variablesPanel = await page.debugger.getVariablesPanel();
+    const variablesPanel = await page.debugger.getVariablesPanelLocator();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-variables.png'
     );
 
     await page.debugger.waitForSources();
-    const sourcesPanel = await page.debugger.getSourcePanel();
+    const sourcesPanel = await page.debugger.getSourcePanelLocator();
     expect(await sourcesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-sources.png'
     );
@@ -92,7 +92,7 @@ test.describe('Debugger Tests', () => {
     await page.debugger.waitForCallStack();
 
     await page.debugger.waitForVariables();
-    const variablesPanel = await page.debugger.getVariablesPanel();
+    const variablesPanel = await page.debugger.getVariablesPanelLocator();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
       'image-debug-session-global-variables.png'
     );
@@ -144,10 +144,10 @@ test.describe('Debugger Tests', () => {
     await page.notebook.clickCodeGutter(2);
 
     await page.debugger.waitForBreakPoints();
-    const breakpointsPanel = await page.debugger.getBreakPointsPanel();
+    const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
     expect(await breakpointsPanel.innerText()).toMatch(/ipykernel/);
 
-    const callStackPanel = await page.debugger.getCallStackPanel();
+    const callStackPanel = await page.debugger.getCallStackPanelLocator();
     expect(await callStackPanel.innerText()).toBe('');
 
     // don't add await, run will be blocked by the breakpoint
@@ -157,13 +157,13 @@ test.describe('Debugger Tests', () => {
     expect(await callStackPanel.innerText()).toMatch(/ipykernel/);
 
     await page.debugger.waitForVariables();
-    const variablesPanel = await page.debugger.getVariablesPanel();
+    const variablesPanel = await page.debugger.getVariablesPanelLocator();
     expect(await variablesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-script-variables.png'
     );
 
     await page.debugger.waitForSources();
-    const sourcesPanel = await page.debugger.getSourcePanel();
+    const sourcesPanel = await page.debugger.getSourcePanelLocator();
     expect(await sourcesPanel.screenshot()).toMatchSnapshot(
       'start-debug-session-script-sources.png'
     );

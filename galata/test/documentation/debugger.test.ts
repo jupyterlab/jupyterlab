@@ -293,7 +293,7 @@ test.describe('Debugger', () => {
     // Wait to be stopped on the breakpoint
     await page.debugger.waitForCallStack();
 
-    const breakpointsPanel = await page.debugger.getBreakPointsPanel();
+    const breakpointsPanel = await page.debugger.getBreakPointsPanelLocator();
     expect(await breakpointsPanel.innerText()).toMatch(/ipykernel.*\/\d+.py/);
 
     // Don't compare screenshot as the kernel id varies
