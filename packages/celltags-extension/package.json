@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/celltags-extension",
-  "version": "4.0.10",
+  "version": "4.0.11",
   "description": "An extension for manipulating tags in cell metadata",
   "keywords": [
     "jupyter",
@@ -40,10 +40,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.10",
-    "@jupyterlab/notebook": "^4.0.10",
-    "@jupyterlab/translation": "^4.0.10",
-    "@jupyterlab/ui-components": "^4.0.10",
+    "@jupyterlab/application": "^4.0.11",
+    "@jupyterlab/notebook": "^4.0.11",
+    "@jupyterlab/translation": "^4.0.11",
+    "@jupyterlab/ui-components": "^4.0.11",
     "@lumino/algorithm": "^2.0.1",
     "@rjsf/utils": "^5.1.0",
     "react": "^18.2.0"

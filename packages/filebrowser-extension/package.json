@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/filebrowser-extension",
-  "version": "4.0.10",
+  "version": "4.0.11",
   "description": "JupyterLab - Filebrowser Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,18 +38,18 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.10",
-    "@jupyterlab/apputils": "^4.1.10",
-    "@jupyterlab/coreutils": "^6.0.10",
-    "@jupyterlab/docmanager": "^4.0.10",
-    "@jupyterlab/docregistry": "^4.0.10",
-    "@jupyterlab/filebrowser": "^4.0.10",
-    "@jupyterlab/services": "^7.0.10",
-    "@jupyterlab/settingregistry": "^4.0.10",
-    "@jupyterlab/statedb": "^4.0.10",
-    "@jupyterlab/statusbar": "^4.0.10",
-    "@jupyterlab/translation": "^4.0.10",
-    "@jupyterlab/ui-components": "^4.0.10",
+    "@jupyterlab/application": "^4.0.11",
+    "@jupyterlab/apputils": "^4.1.11",
+    "@jupyterlab/coreutils": "^6.0.11",
+    "@jupyterlab/docmanager": "^4.0.11",
+    "@jupyterlab/docregistry": "^4.0.11",
+    "@jupyterlab/filebrowser": "^4.0.11",
+    "@jupyterlab/services": "^7.0.11",
+    "@jupyterlab/settingregistry": "^4.0.11",
+    "@jupyterlab/statedb": "^4.0.11",
+    "@jupyterlab/statusbar": "^4.0.11",
+    "@jupyterlab/translation": "^4.0.11",
+    "@jupyterlab/ui-components": "^4.0.11",
     "@lumino/algorithm": "^2.0.1",
     "@lumino/commands": "^2.1.3",
     "@lumino/widgets": "^2.3.0"

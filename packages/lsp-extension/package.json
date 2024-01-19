@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/lsp-extension",
-  "version": "4.0.10",
+  "version": "4.0.11",
   "description": "",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,12 +36,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.10",
-    "@jupyterlab/lsp": "^4.0.10",
-    "@jupyterlab/running": "^4.0.10",
-    "@jupyterlab/settingregistry": "^4.0.10",
-    "@jupyterlab/translation": "^4.0.10",
-    "@jupyterlab/ui-components": "^4.0.10",
+    "@jupyterlab/application": "^4.0.11",
+    "@jupyterlab/lsp": "^4.0.11",
+    "@jupyterlab/running": "^4.0.11",
+    "@jupyterlab/settingregistry": "^4.0.11",
+    "@jupyterlab/translation": "^4.0.11",
+    "@jupyterlab/ui-components": "^4.0.11",
     "@lumino/coreutils": "^2.1.2",
     "@lumino/polling": "^2.1.2",
     "@lumino/signaling": "^2.1.2",
