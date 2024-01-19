@@ -46,6 +46,7 @@
     "@jupyterlab/docregistry": "^4.1.0-beta.1",
     "@jupyterlab/observables": "^5.1.0-beta.1",
     "@jupyterlab/rendermime": "^4.1.0-beta.1",
+    "@jupyterlab/rendermime-interfaces": "^3.9.0-beta.1",
     "@jupyterlab/translation": "^4.1.0-beta.1",
     "@jupyterlab/ui-components": "^4.1.0-beta.1",
     "@lumino/coreutils": "^2.1.2",

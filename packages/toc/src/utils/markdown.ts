@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Sanitizer } from '@jupyterlab/apputils';
 import { IMarkdownParser, renderMarkdown } from '@jupyterlab/rendermime';
+import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { TableOfContents } from '../tokens';
 
 /**
@@ -24,27 +26,35 @@ export interface IMarkdownHeading extends TableOfContents.IHeading {
  *
  * @param raw Raw markdown heading
  * @param level Heading level
+ * @param sanitizer HTML sanitizer
  */
 export async function getHeadingId(
-  parser: IMarkdownParser,
+  markdownParser: IMarkdownParser,
   raw: string,
-  level: number
+  level: number,
+  sanitizer?: IRenderMime.ISanitizer
 ): Promise<string | null> {
   try {
-    const innerHTML = await parser.render(raw);
+    const host = document.createElement('div');
 
-    if (!innerHTML) {
-      return null;
-    }
+    await renderMarkdown({
+      markdownParser,
+      host,
+      source: raw,
+      trusted: false,
+      sanitizer: sanitizer ?? new Sanitizer(),
+      shouldTypeset: false,
+      resolver: null,
+      linkHandler: null,
+      latexTypesetter: null
+    });
 
-    const container = document.createElement('div');
-    container.innerHTML = innerHTML;
-    const header = container.querySelector(`h${level}`);
+    const header = host.querySelector(`h${level}`);
     if (!header) {
       return null;
     }
 
-    return renderMarkdown.createHeaderId(header);
+    return header.id;
   } catch (reason) {
     console.error('Failed to parse a heading.', reason);
   }
