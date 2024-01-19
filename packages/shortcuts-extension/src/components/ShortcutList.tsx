@@ -58,7 +58,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
         Array.from(shortcutList.children).forEach(child => {
           focusable.push(child);
         });
-
+        console.log(`Array length: ${focusable.length}`);
         // If focusable contains only one element, nothing to do.
         if (focusable.length <= 1) {
           return;
@@ -79,9 +79,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
           activeNode.setAttribute('tabindex', '-1');
           nxtNode.focus();
           currentNode += 1;
-        }
-
-        if (currentNode >= focusable.length - 1) {
+        } else if (currentNode >= focusable.length - 1) {
           let node = focusable[0] as HTMLElement;
           let activeNode = focusable[currentNode] as HTMLElement;
 
