@@ -37,9 +37,9 @@ test.describe('Notebook Search', () => {
 
     await page.waitForSelector('text=1/21');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
+    expect(await nbPanel!.screenshot()).toMatchSnapshot('search.png');
   });
 
   test('Should open search box in edit mode', async ({ page }) => {
@@ -248,9 +248,9 @@ test.describe('Notebook Search', () => {
     const cell = await page.notebook.getCell(5);
     await cell.scrollIntoViewIfNeeded();
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'search-within-outputs.png'
     );
   });
@@ -267,8 +267,8 @@ test.describe('Notebook Search', () => {
 
     await page.waitForSelector('text=1/4');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
-    expect(await nbPanel.screenshot()).toMatchSnapshot(
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'search-in-selected-cells.png'
     );
   });
@@ -312,8 +312,8 @@ test.describe('Notebook Search', () => {
     // it as a reference, especially when it was set as closest to the cursor.
     await page.waitForSelector('text=6/15');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
-    expect(await nbPanel.screenshot()).toMatchSnapshot(
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'search-in-two-selected-cells.png'
     );
   });
@@ -369,9 +369,9 @@ test.describe('Notebook Search', () => {
 
     await page.waitForSelector('text=1/2');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'search-in-selected-text.png'
     );
   });
@@ -542,9 +542,9 @@ test.describe('Notebook Search', () => {
     await page.notebook.clickToolbarItem('insert');
     await page.notebook.setCell(6, 'code', 'with');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'search-on-new-cell.png'
     );
   });
@@ -567,9 +567,9 @@ test.describe('Notebook Search', () => {
 
     await page.waitForSelector('text=1/19');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'search-on-deleted-cell.png'
     );
   });

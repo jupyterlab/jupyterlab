@@ -38,9 +38,9 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.waitForSelector('text=1/20');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot('replace-in-cell.png');
+    expect(await nbPanel!.screenshot()).toMatchSnapshot('replace-in-cell.png');
   });
 
   test('Substitute groups of regular expressions', async ({ page }) => {
@@ -106,9 +106,9 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.waitForSelector('text=-/-');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot('replace-all.png');
+    expect(await nbPanel!.screenshot()).toMatchSnapshot('replace-all.png');
   });
 
   test('Replace step-by-step across cell boundaries', async ({ page }) => {

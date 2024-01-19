@@ -17,8 +17,8 @@ test.describe('Notebook Layout on Mobile', () => {
     await page.notebook.setCell(0, 'code', 'print("hello")');
     await page.notebook.addCell('code', '2 * 3');
     await page.notebook.runCellByCell();
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
     const imageName = 'mobile-layout.png';
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });

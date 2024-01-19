@@ -57,7 +57,7 @@ export class NotebookHelper {
    * @returns Notebook active status
    */
   async isAnyActive(): Promise<boolean> {
-    return (await this.getNotebookInPanel()) !== null;
+    return (await this.getNotebookInPanelLocator()) !== null;
   }
 
   /**
@@ -107,6 +107,24 @@ export class NotebookHelper {
     if (nbPanel && (await nbPanel.count())) {
       if (await nbPanel.locator('.jp-NotebookPanel-notebook').count()) {
         return nbPanel.locator('.jp-NotebookPanel-notebook').elementHandle();
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Get the locator to a notebook panel
+   *
+   * @param name Notebook name
+   * @returns Locator to the Notebook panel
+   */
+  async getNotebookInPanelLocator(name?: string): Promise<Locator | null> {
+    const nbPanel = await this.activity.getPanelLocator(name);
+
+    if (nbPanel && (await nbPanel.count())) {
+      if (await nbPanel.locator('.jp-NotebookPanel-notebook').count()) {
+        return nbPanel.locator('.jp-NotebookPanel-notebook').first();
       }
     }
 
@@ -466,14 +484,11 @@ export class NotebookHelper {
    * @returns Number of cells
    */
   getCellCount = async (): Promise<number> => {
-    const notebook = await this.getNotebookInPanel();
+    const notebook = await this.getNotebookInPanelLocator();
     if (!notebook) {
       return -1;
     }
-    const scroller = (await notebook.$(
-      '.jp-WindowedPanel-outer'
-    )) as ElementHandle<HTMLElement>;
-
+    const scroller = notebook.locator('.jp-WindowedPanel-outer');
     const scrollTop = await scroller.evaluate(node => node.scrollTop);
 
     // Scroll to bottom
@@ -491,11 +506,10 @@ export class NotebookHelper {
         node => node.scrollHeight - node.clientHeight
       );
     } while (scrollHeight > previousScrollHeight);
-
-    const lastCell = await notebook.$$('div.jp-Cell >> nth=-1');
+    const lastCell = notebook.locator('div.jp-Cell').last();
     const count =
       parseInt(
-        (await lastCell[0].getAttribute('data-windowed-list-index')) ?? '0',
+        (await lastCell.getAttribute('data-windowed-list-index')) ?? '0',
         10
       ) + 1;
 
@@ -1322,11 +1336,6 @@ export class NotebookHelper {
    * @returns Cell type
    */
   async getCellType(cellIndex: number): Promise<nbformat.CellType | null> {
-    const notebook = await this.getNotebookInPanel();
-    if (!notebook) {
-      return null;
-    }
-
     const cell = await this.getCellLocator(cellIndex);
 
     if (!cell) {

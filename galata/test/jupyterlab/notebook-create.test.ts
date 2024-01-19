@@ -65,7 +65,7 @@ test.describe('Notebook Create', () => {
 
       const imageName = `opened-menu-${menuPath.replace(/>/g, '-')}.png`;
       const menu = await page.menu.getOpenMenuLocator();
-      expect(await menu.screenshot()).toMatchSnapshot(imageName.toLowerCase());
+      expect(await menu!.screenshot()).toMatchSnapshot(imageName.toLowerCase());
     });
   });
 
@@ -78,18 +78,18 @@ test.describe('Notebook Create', () => {
     expect((await page.notebook.getCellTextOutput(2))[0]).toBe('8');
     await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(1);
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Toggle Dark theme', async ({ page }) => {
     await populateNotebook(page);
     await page.notebook.run();
     await page.theme.setDarkTheme();
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
     const imageName = 'dark-theme.png';
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });

@@ -53,9 +53,9 @@ test.describe('Notebook Run Mermaid', () => {
     await page.notebook.run();
     await page.waitForSelector('.jp-RenderedMermaid');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
     expect(await nbDiskContent(page, nbPath)).toContain(SVG_MIME_TYPE);
   });
 
@@ -75,9 +75,9 @@ test.describe('Notebook Run Mermaid', () => {
     await page.notebook.run();
     await page.waitForSelector('.jp-RenderedMermaid');
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
     expect(await nbDiskContent(page, nbPath)).toContain(SVG_MIME_TYPE);
   });
 });

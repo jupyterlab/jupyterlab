@@ -51,7 +51,7 @@ test.describe('Table of Contents scrolling to heading', () => {
     // Should switch to command mode
     await expect.soft(page.getByText('Mode: Command')).toBeVisible();
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
     expect
       .soft(await nbPanel!.screenshot())
       .toMatchSnapshot('scrolled-to-bottom-heading.png');
