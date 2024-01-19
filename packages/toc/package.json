@@ -46,6 +46,7 @@
     "@jupyterlab/docregistry": "^4.0.10",
     "@jupyterlab/observables": "^5.0.10",
     "@jupyterlab/rendermime": "^4.0.10",
+    "@jupyterlab/rendermime-interfaces": "^3.8.10",
     "@jupyterlab/translation": "^4.0.10",
     "@jupyterlab/ui-components": "^4.0.10",
     "@lumino/coreutils": "^2.1.2",
