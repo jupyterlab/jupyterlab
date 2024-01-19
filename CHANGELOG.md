@@ -43,7 +43,7 @@ C -->|Two| E[Result 2]
 
 which renders as:
 
-<img alt="Rendered Mermaid diagram going from left to right with modern look; the diagram contains blueish square node with text Hard pointing to round square node with text Round; over the arrow connecting the two nodes there is a word Text; the second node further connects to a rhombus-shaped node with text Decision which then connects to two further nodes, Result 1 and Result 2." src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog-4.1/docs/source/getting_started/changelog_assets/4.1-merimad-diagram.png" class="jp-screenshot">
+<img alt="Rendered Mermaid diagram going from left to right with modern look; the diagram contains blueish square node with text Hard pointing to round square node with text Round; over the arrow connecting the two nodes there is a word Text; the second node further connects to a rhombus-shaped node with text Decision which then connects to two further nodes, Result 1 and Result 2." src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.1-merimad-diagram.png" class="jp-screenshot">
 
 
 ### Inline completer
@@ -53,7 +53,7 @@ allowing generative AI models to provide multi-line completions.
 The suggestions are provided by plugins implementing the ``IInlineCompletionProvider`` API;
 by default a single provider which uses kernel history is available.
 
-<img alt="In a code cell with `def fac` content a ghost text containing a suggestion representing further code of factorial function is shown; over the code cell there is a floating widget allowing to accept the suggestion and iterate between alternative suggestions" src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog-4.1/docs/source/getting_started/changelog_assets/4.1-inline-completer.png" class="jp-screenshot">
+<img alt="In a code cell with `def fac` content a ghost text containing a suggestion representing further code of factorial function is shown; over the code cell there is a floating widget allowing to accept the suggestion and iterate between alternative suggestions" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.1-inline-completer.png" class="jp-screenshot">
 
 The suggestions can be invoked as-you-type or manually using a configurable shortcut (by default <kbd>Alt</kbd> + <kbd>\\</kbd>).
 The default keyboard shortcuts are displayed in the small widget shown when hovering over the ghost suggestion:
@@ -93,7 +93,7 @@ Paths to code files detected in the tracebacks returned by kernels on execution 
 These links will open the corresponding file for editing, if it is in the Jupyter root directory,
 or they will open a read-only preview if the file is outside of the root directory and the active kernel supports the debugger.
 
-<img alt="A link to the file with definition of imported module is shown in the traceback" src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog-4.1/docs/source/getting_started/changelog_assets/4.1-traceback-links.png" class="jp-screenshot">
+<img alt="A link to the file with definition of imported module is shown in the traceback" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.1-traceback-links.png" class="jp-screenshot">
 
 
 ### Error indicator in the table of contents
@@ -101,7 +101,7 @@ or they will open a read-only preview if the file is outside of the root directo
 When a cell fails during execution, an error indicator will be displayed by the corresponding heading,
 increasing awareness of the notebook state and enabling users to quickly navigate to the cell which requires attention.
 
-<img alt="Error indicator in the shape of a triangle with exclamation sign (using ⚠ UTF character) shown next to one of the headings in the table of contents panel" src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog-4.1/docs/source/getting_started/changelog_assets/4.1-toc-error-indicator.png" class="jp-screenshot">
+<img alt="Error indicator in the shape of a triangle with exclamation sign (using ⚠ UTF character) shown next to one of the headings in the table of contents panel" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.1-toc-error-indicator.png" class="jp-screenshot">
 
 ### Plugin Manager
 
@@ -120,7 +120,7 @@ Administrators may want to [lock specific plugins](https://jupyterlab.readthedoc
 The windowed notebook received an optional scrollbar delineating the active cell and selected cells.
 Users can jump to a specific cell.
 
-<img alt="Virtual scrollbar shown on the right side of notebook" src="https://raw.githubusercontent.com/krassowski/jupyterlab/changelog-4.1/docs/source/getting_started/changelog_assets/4.1-virtual-scrollbar.png" class="jp-screenshot">
+<img alt="Virtual scrollbar shown on the right side of notebook" src="https://raw.githubusercontent.com/jupyterlab/jupyterlab/main/docs/source/getting_started/changelog_assets/4.1-virtual-scrollbar.png" class="jp-screenshot">
 
 To enable the virtual scrollbar, go to Settings → Notebook → Windowing mode, choose "full", and click on the hamburger icon (≡) which appears in the notebook's toolbar.
 
