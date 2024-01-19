@@ -210,7 +210,11 @@ namespace Private {
         await this._state.save(LAST_SAVE_ID, path);
 
         // Navigate to new workspace.
-        const url = URLExt.join(this._application, 'workspaces', id);
+        const workspacesBase = URLExt.join(this._application, 'workspaces');
+        const url = URLExt.join(workspacesBase, id);
+        if (!workspacesBase.startsWith(url)) {
+          throw new Error('Can only be used for workspaces');
+        }
         if (this._router) {
           this._router.navigate(url, { hard: true });
         } else {
