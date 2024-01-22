@@ -265,7 +265,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       }
 
       // eslint-disable-next-line no-constant-condition
-      while (IsFocused === leftSidebarId) {
+      while (leftSidebarId !== leftSidebarIds[0]) {
         await page.keyboard.press('ArrowDown');
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
@@ -327,7 +327,10 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
           () => document.activeElement?.getAttribute('aria-label')
         );
         while (IsFocused !== (await sectionName)) {
+          let focused = IsFocused;
+
           await page.keyboard.press('Tab');
+          return focused;
         }
 
         await page.keyboard.press('Enter');
