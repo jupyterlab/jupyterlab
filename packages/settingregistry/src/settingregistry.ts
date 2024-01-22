@@ -1224,7 +1224,7 @@ export namespace SettingRegistry {
     });
 
     // Return all the shortcuts that should be registered
-    return (
+    return Private.upgradeShortcuts(
       user
         .concat(defaults)
         .filter(shortcut => !shortcut.disabled)
@@ -1437,14 +1437,25 @@ namespace Private {
 
   /**
    * Create a fully extrapolated default value for a root key in a schema.
+   *
+   * @todo This function would ideally reuse `getDefaultFormState` from rjsf
+   * with appropriate`defaultFormStateBehavior` setting, as currently
+   * these two implementations duplicate each other.
+   *
+   * Note: absence of a property may mean something else than the default.
    */
   export function reifyDefault(
     schema: ISettingRegistry.IProperty,
     root?: string,
-    definitions?: PartialJSONObject
+    definitions?: PartialJSONObject,
+    required?: boolean
   ): PartialJSONValue | undefined {
     definitions = definitions ?? (schema.definitions as PartialJSONObject);
     // If the property is at the root level, traverse its schema.
+    required = root
+      ? schema.required instanceof Array &&
+        schema.required?.includes(root as any)
+      : required;
     schema = (root ? schema.properties?.[root] : schema) || {};
 
     if (schema.type === 'object') {
@@ -1457,14 +1468,23 @@ namespace Private {
         result[property] = reifyDefault(
           props[property],
           undefined,
-          definitions
+          definitions,
+          schema.required instanceof Array &&
+            schema.required?.includes(property as any)
         );
       }
 
       return result;
     } else if (schema.type === 'array') {
+      const defaultDefined = typeof schema.default !== 'undefined';
+      const shouldPopulateDefaultArray = defaultDefined || required;
+      if (!shouldPopulateDefaultArray) {
+        return undefined;
+      }
       // Make a copy of the default value to populate.
-      const result = JSONExt.deepCopy(schema.default as PartialJSONArray);
+      const result = defaultDefined
+        ? JSONExt.deepCopy(schema.default as PartialJSONArray)
+        : [];
 
       // Items defines the properties of each item in the array
       let props = (schema.items as PartialJSONObject) || {};
@@ -1478,21 +1498,90 @@ namespace Private {
       }
       // Iterate through the items in the array and fill in defaults
       for (const item in result) {
-        // Use the values that are hard-coded in the default array over the defaults for each field.
-        const reified =
-          (reifyDefault(props, undefined, definitions) as PartialJSONObject) ??
-          {};
-        for (const prop in reified) {
-          if ((result[item] as PartialJSONObject)?.[prop]) {
-            reified[prop] = (result[item] as PartialJSONObject)[prop];
+        if (props.type === 'object') {
+          // Use the values that are hard-coded in the default array over the defaults for each field.
+          const reified =
+            (reifyDefault(
+              props,
+              undefined,
+              definitions
+            ) as PartialJSONObject) ??
+            result[item] ??
+            {};
+          for (const prop in reified) {
+            if ((result[item] as PartialJSONObject)?.[prop]) {
+              reified[prop] = (result[item] as PartialJSONObject)[prop];
+            }
           }
+          result[item] = reified;
         }
-        result[item] = reified;
       }
 
       return result;
     } else {
       return schema.default;
     }
+  }
+
+  /**
+   * Selectors which were previously warned about.
+   */
+  const selectorsAlreadyWarnedAbout = new Set<string>();
+
+  /**
+   * Upgrade shortcuts to ensure no breaking changes between minor versions.
+   */
+  export function upgradeShortcuts(
+    shortcuts: ISettingRegistry.IShortcut[]
+  ): ISettingRegistry.IShortcut[] {
+    const selectorDeprecationWarnings = new Set();
+    const changes = [
+      {
+        old: '.jp-Notebook:focus.jp-mod-commandMode',
+        new: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '.jp-Notebook:focus',
+        new: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-traversable]:focus',
+        new: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-kernel-user]:focus',
+        new: '[data-jp-kernel-user] :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1'
+      }
+    ];
+    const upgraded = shortcuts.map(shortcut => {
+      const oldSelector = shortcut.selector;
+      let newSelector = oldSelector;
+      for (const change of changes) {
+        if (
+          oldSelector.includes(change.old) &&
+          !selectorsAlreadyWarnedAbout.has(oldSelector)
+        ) {
+          newSelector = oldSelector.replace(change.old, change.new);
+          selectorDeprecationWarnings.add(
+            `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated} (present in "${oldSelector}")`
+          );
+          selectorsAlreadyWarnedAbout.add(oldSelector);
+        }
+      }
+      shortcut.selector = newSelector;
+      return shortcut;
+    });
+    if (selectorDeprecationWarnings.size > 0) {
+      console.warn(
+        'Deprecated shortcut selectors: ' +
+          [...selectorDeprecationWarnings].join('\n') +
+          '\n\nThe selectors will be substituted transparently this time, but need to be updated at source before next major release.'
+      );
+    }
+    return upgraded;
   }
 }

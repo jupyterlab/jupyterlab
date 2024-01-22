@@ -210,7 +210,7 @@ test('Check codemirror settings can all be set at the same time.', async ({
 
   await expect(page.locator('.jp-SettingsForm')).toHaveCount(1);
 
-  const textList: Array[string] = [
+  const textList: Array<string> = [
     'Code Folding',
     'Highlight the active line',
     'Highlight trailing white space',
@@ -226,6 +226,7 @@ test('Check codemirror settings can all be set at the same time.', async ({
     await expect(locator).toBeChecked();
   }
 });
+
 test.describe('shorcuts list @A11y', () => {
   test.beforeEach(async ({ page }) => {
     await page.evaluate(async () => {
@@ -366,4 +367,31 @@ test.describe('shorcuts list @A11y', () => {
       expect(shortcutRows.nth(i)).toBeFocused();
     }
   });
+  
+
+test('Opening Keyboard Shortcuts settings does not mangle user shortcuts', async ({
+  page
+}) => {
+  // Testing against https://github.com/jupyterlab/jupyterlab/issues/12056
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open', {
+      query: 'Keyboard Shortcuts'
+    });
+  });
+
+  await expect(page.locator('.jp-SettingsForm')).toHaveCount(1);
+
+  await page.evaluate(async () => {
+    await window.jupyterapp.commands.execute('settingeditor:open-json');
+  });
+
+  await expect(page.locator('#json-setting-editor')).toHaveCount(1);
+  await page.click(
+    '#json-setting-editor .jp-PluginList-entry[data-id="@jupyterlab/shortcuts-extension:shortcuts"]'
+  );
+  const userPanelLines = await page
+    .locator('.jp-SettingsRawEditor-user .cm-line')
+    .count();
+  expect(userPanelLines).toBeLessThan(10);
+
 });
