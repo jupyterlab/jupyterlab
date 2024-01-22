@@ -65,9 +65,9 @@ test.describe('General', () => {
     await page.click('text=Create New View for Cell Output');
 
     // Emulate drag and drop
-    const viewerHandle = page
-      .locator('div[role="main"]')
-      .getByText('lorenz.py', { exact: true });
+    const viewerHandle = page.locator(
+      '.lm-TabBar-tabLabel:text-is("lorenz.py")'
+    );
     await viewerHandle.click();
     const viewerBBox = await viewerHandle.boundingBox();
 
