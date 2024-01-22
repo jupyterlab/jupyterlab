@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
+import { notTrustedIcon } from '@jupyterlab/ui-components';
 
 const leftSidebarIds: galata.SidebarTabId[] = [
   'filebrowser',
@@ -332,14 +333,27 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
           await page.keyboard.press('Tab');
           return focused;
         }
+        let initialState = await page.evaluate(() => {
+          return sectionName.isOpen();
+        });
 
         await page.keyboard.press('Enter');
+
+        let stateAfter = await page.evaluate(() => {
+          return sectionName.isOpen();
+        });
+
+        expect(initialState).not.toEqual(stateAfter);
 
         const isExpanded = await page.evaluate(
           () => document.activeElement?.getAttribute('aria-expanded')
         );
 
-        expect(isExpanded).toBeTruthy();
+        expect(isExpanded).toBe(false);
+
+        await page.keyboard.press('Enter');
+
+        expect(initialState).toEqual(stateAfter);
       });
     });
   });
