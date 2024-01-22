@@ -134,6 +134,7 @@ export class DebuggerHelper {
   async waitForCallStack(): Promise<void> {
     await this.page
       .locator('.jp-DebuggerCallstack-body >> .jp-DebuggerCallstackFrame')
+      .first()
       .waitFor();
   }
 
@@ -157,6 +158,7 @@ export class DebuggerHelper {
   async waitForBreakPoints(): Promise<void> {
     await this.page
       .locator('.jp-DebuggerBreakpoints >> .jp-DebuggerBreakpoint')
+      .first()
       .waitFor();
   }
 
@@ -180,6 +182,7 @@ export class DebuggerHelper {
   async waitForSources(): Promise<void> {
     await this.page
       .locator('.jp-DebuggerSources-body >> .jp-Editor')
+      .first()
       .waitFor({ state: 'visible' });
   }
 

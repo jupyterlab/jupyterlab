@@ -241,19 +241,15 @@ export async function waitForLocatorTransition(
 ): Promise<void> {
   const el = typeof element === 'string' ? page.locator(element) : element;
 
-  if (el) {
-    return el.evaluate(elem => {
-      return new Promise(resolve => {
-        const onEndHandler = () => {
-          elem.removeEventListener('transitionend', onEndHandler);
-          resolve();
-        };
-        elem.addEventListener('transitionend', onEndHandler);
-      });
-    }, el);
-  }
-
-  return Promise.reject();
+  return el.evaluate(elem => {
+    return new Promise(resolve => {
+      const onEndHandler = () => {
+        elem.removeEventListener('transitionend', onEndHandler);
+        resolve();
+      };
+      elem.addEventListener('transitionend', onEndHandler);
+    });
+  });
 }
 
 // Selector builders
