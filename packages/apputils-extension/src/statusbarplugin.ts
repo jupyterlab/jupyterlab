@@ -60,7 +60,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
       ) {
         event.preventDefault();
         event.stopPropagation();
-        changeKernel();
+        return changeKernel();
       }
     };
 
