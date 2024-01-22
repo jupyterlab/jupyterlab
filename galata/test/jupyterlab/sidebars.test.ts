@@ -202,50 +202,47 @@ test.describe('Sidebars', () => {
   });
 });
 
-const runningSessionsElementAriaLabels: string[] = [
-  'Open Tabs Section',
-  'Kernels Section',
-  'Language servers Section',
-  'Terminals Section'
-];
-const debuggerElementAriaLabels: string[] = [
-  'Variables Section',
-  'Callstack Section',
-  'Breakpoints Section',
-  'Source Section',
-  'Kernel Sources Section'
-];
-const propertyElementAriaLabels: string[] = [
-  'Warning Section',
-  'Installed Section',
-  'Discover Section'
-];
-
-const sessionsAndDebuggerAriaLabels: string[] =
-  runningSessionsElementAriaLabels.concat(debuggerElementAriaLabels);
+const elementAriaLabels = {
+  'jp-running-sessions': [
+    'Open Tabs Section',
+    'Kernels Section',
+    'Language servers Section',
+    'Terminals Section'
+  ],
+  'jp-debugger-sidebar': [
+    'Variables Section',
+    'Callstack Section',
+    'Breakpoints Section',
+    'Source Section',
+    'Kernel Sources Section'
+  ],
+  'extensionmanager.main-view': [
+    'Warning Section',
+    'Installed Section',
+    'Discover Section'
+  ]
+};
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
   leftSidebarIds.forEach(leftSidebarId => {
     test(`Open Sidebar tab ${leftSidebarId} via keyboard navigation`, async ({
       page
     }) => {
-      await page.goto();
-
       await page.sidebar.close('left');
 
+      let IsFocused = await page.evaluate(
+        () => document.activeElement?.getAttribute('data-id')
+      );
       // eslint-disable-next-line no-constant-condition
       while (true) {
         await page.keyboard.press('Tab');
-        let IsFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
         if (IsFocused === leftSidebarIds[0]) {
           break;
         }
       }
 
       // eslint-disable-next-line no-constant-condition
-      while (leftSidebarId !== leftSidebarIds[0]) {
+      while (IsFocused === leftSidebarId) {
         await page.keyboard.press('ArrowDown');
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
@@ -265,8 +262,6 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     test(`Open Sidebar tab ${rightSidebarId} via keyboard navigation`, async ({
       page
     }) => {
-      await page.goto();
-
       await page.sidebar.close('right');
 
       // eslint-disable-next-line no-constant-condition
@@ -296,62 +291,30 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     });
   });
 
-  sessionsAndDebuggerAriaLabels.forEach(sessionsAndDebuggerAriaLabel => {
-    test(`Open accordion panels ${sessionsAndDebuggerAriaLabel} via keyboard navigation`, async ({
+  Object.keys(elementAriaLabels).forEach(tabName => {
+    test(`Open accordion panels ${tabName} via keyboard navigation`, async ({
       page
     }) => {
-      await page.goto();
+      await page.sidebar.openTab(tabName);
 
-      await page.sidebar.openTab('jp-running-sessions');
-      await page.sidebar.openTab('jp-debugger-sidebar');
+      const keyValueArray = elementAriaLabels[tabName];
 
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        await page.keyboard.press('Tab');
+      keyValueArray.forEach(async sectionName => {
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('aria-label')
         );
-        if (IsFocused === sessionsAndDebuggerAriaLabel) {
-          break;
+        while (IsFocused !== sectionName) {
+          await page.keyboard.press('Tab');
         }
-      }
 
-      await page.keyboard.press('Enter');
+        await page.keyboard.press('Enter');
 
-      const isExpanded = await page.evaluate(
-        () => document.activeElement?.getAttribute('aria-expanded')
-      );
-
-      expect(isExpanded).toBeTruthy();
-    });
-  });
-
-  propertyElementAriaLabels.forEach(propertyElementAriaLabel => {
-    test(`Open accordion panels ${propertyElementAriaLabel} via keyboard navigation`, async ({
-      page
-    }) => {
-      await page.goto();
-
-      await page.sidebar.openTab('extensionmanager.main-view');
-
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        await page.keyboard.press('Tab');
-        let IsFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('aria-label')
+        const isExpanded = await page.evaluate(
+          () => document.activeElement?.getAttribute('aria-expanded')
         );
-        if (IsFocused === propertyElementAriaLabel) {
-          break;
-        }
-      }
 
-      await page.keyboard.press('Enter');
-
-      const isExpanded = await page.evaluate(
-        () => document.activeElement?.getAttribute('aria-expanded')
-      );
-
-      expect(isExpanded).toBeTruthy();
+        expect(isExpanded).toBeTruthy();
+      });
     });
   });
 });
