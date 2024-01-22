@@ -51,11 +51,12 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
     };
 
     const changeKernelOnKeyDown = async (
-      event?: KeyboardEvent<HTMLImageElement>
+      event: KeyboardEvent<HTMLImageElement>
     ) => {
       if (
-        event &&
-        (event.key === 'Enter' || event.key === 'Spacebar' || event.key === ' ')
+        event.key === 'Enter' ||
+        event.key === 'Spacebar' ||
+        event.key === ' '
       ) {
         event.preventDefault();
         event.stopPropagation();
