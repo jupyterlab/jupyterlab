@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
-import { notTrustedIcon } from '@jupyterlab/ui-components';
 
 const leftSidebarIds: galata.SidebarTabId[] = [
   'filebrowser',
@@ -254,11 +253,11 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     }) => {
       await page.sidebar.close('left');
 
-      let IsFocused = await page.evaluate(
-        () => document.activeElement?.getAttribute('data-id')
-      );
       // eslint-disable-next-line no-constant-condition
       while (true) {
+        let IsFocused = await page.evaluate(
+          () => document.activeElement?.getAttribute('data-id')
+        );
         await page.keyboard.press('Tab');
         if (IsFocused === leftSidebarIds[0]) {
           break;
