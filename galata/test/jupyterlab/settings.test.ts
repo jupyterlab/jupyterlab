@@ -367,7 +367,7 @@ test.describe('shorcuts list @A11y', () => {
       expect(shortcutRows.nth(i)).toBeFocused();
     }
   });
-  
+
 
 test('Opening Keyboard Shortcuts settings does not mangle user shortcuts', async ({
   page
