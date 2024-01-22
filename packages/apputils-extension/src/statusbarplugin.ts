@@ -43,28 +43,29 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
       sessionDialogs_ ?? new SessionContextDialogs({ translator });
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
-    const changeKernel = async (event?: KeyboardEvent<HTMLImageElement>) => {
+    const changeKernel = async () => {
+      if (!item.model.sessionContext) {
+        return;
+      }
+      await sessionDialogs.selectKernel(item.model.sessionContext);
+    };
+
+    const changeKernelOnKeyDown = async (
+      event?: KeyboardEvent<HTMLImageElement>
+    ) => {
       if (
         event &&
         (event.key === 'Enter' || event.key === 'Spacebar' || event.key === ' ')
       ) {
         event.preventDefault();
         event.stopPropagation();
-        if (!item.model.sessionContext) {
-          return;
-        }
-        await sessionDialogs.selectKernel(item.model.sessionContext);
-      } else if (!event!.key) {
-        if (!item.model.sessionContext) {
-          return;
-        }
-        await sessionDialogs.selectKernel(item.model.sessionContext);
+        changeKernel();
       }
     };
 
     // Create the status item.
     const item = new KernelStatus(
-      { onClick: changeKernel, onKeyDown: changeKernel },
+      { onClick: changeKernel, onKeyDown: changeKernelOnKeyDown },
       translator
     );
 
