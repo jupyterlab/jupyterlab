@@ -223,6 +223,29 @@ const elementAriaLabels = {
   ]
 };
 
+// const runningSessionsElementAriaLabels: string[] = [
+//   'Open Tabs Section',
+//   'Kernels Section',
+//   'Language servers Section',
+//   'Terminals Section'
+// ];
+// const debuggerElementAriaLabels: string[] = [
+//   'Variables Section',
+//   'Callstack Section',
+//   'Breakpoints Section',
+//   'Source Section',
+//   'Kernel Sources Section'
+// ];
+// const propertyElementAriaLabels: string[] = [
+//   'Warning Section',
+//   'Installed Section',
+//   'Discover Section'
+// ];
+
+// const sessionsAndDebuggerAriaLabels: string[] = runningSessionsElementAriaLabels.concat(
+//   debuggerElementAriaLabels
+// );
+
 test.describe('Sidebar keyboard navigation @a11y', () => {
   leftSidebarIds.forEach(leftSidebarId => {
     test(`Open Sidebar tab ${leftSidebarId} via keyboard navigation`, async ({
@@ -303,7 +326,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('aria-label')
         );
-        while (IsFocused !== sectionName) {
+        while (IsFocused !== (await sectionName)) {
           await page.keyboard.press('Tab');
         }
 
