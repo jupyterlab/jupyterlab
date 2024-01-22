@@ -12,10 +12,10 @@ test.use({
 test.describe('Dynamic Text Spacing', () => {
   test('should Use Dynamic Text Spacing', async ({ page }) => {
     await page.goto();
-    await page.locator('.jp-LauncherCard-label').waitFor();
 
     let element = page.locator('div.jp-LauncherCard-label');
     for (let i = 0; i < (await element.count()); i++) {
+      await element.nth(i).waitFor();
       let height = await element
         .nth(i)
         .evaluate(el =>

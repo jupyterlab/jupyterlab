@@ -135,7 +135,7 @@ test.describe('Notebook Toolbar', () => {
     await page.notebook.selectCells(2);
 
     await page.notebook.clickToolbarItem('run');
-    await page.locator('text=8').waitFor();
+    await page.getByText('8', { exact: true }).waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 

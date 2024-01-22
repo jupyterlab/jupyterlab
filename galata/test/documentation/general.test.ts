@@ -65,7 +65,9 @@ test.describe('General', () => {
     await page.click('text=Create New View for Cell Output');
 
     // Emulate drag and drop
-    const viewerHandle = page.locator('div[role="main"] >> text=lorenz.py');
+    const viewerHandle = page
+      .locator('div[role="main"]')
+      .getByText('lorenz.py', { exact: true });
     await viewerHandle.click();
     const viewerBBox = await viewerHandle.boundingBox();
 
@@ -261,9 +263,9 @@ test.describe('General', () => {
 
     await page.click('text=File');
     await page.mouse.move(70, 40);
-    const fileMenuNewItem = page.locator(
-      '.lm-Menu ul[role="menu"] >> text=New'
-    );
+    const fileMenuNewItem = page
+      .locator('.lm-Menu ul[role="menu"]')
+      .getByText('New', { exact: true });
     await fileMenuNewItem.waitFor();
     await fileMenuNewItem.click();
 
