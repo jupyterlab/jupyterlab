@@ -34,11 +34,7 @@ export class MenuHelper {
    * @returns Handle to the menu or null
    */
   getMenuBarItem(label: string): Promise<ElementHandle<Element> | null> {
-    return this.page.$(
-      `xpath=//li[./div[text()="${label}" and ${Utils.xpContainsClass(
-        'lm-MenuBar-itemLabel'
-      )}]]`
-    );
+    return this.getMenuBarItemLocator(label).elementHandle();
   }
 
   /**
@@ -180,7 +176,7 @@ export class MenuHelper {
    * @returns Opened menus status
    */
   async isAnyOpen(): Promise<boolean> {
-    return (await this.page.$('.lm-Menu')) !== null;
+    return (await this.page.locator('.lm-Menu').count()) > 0;
   }
 
   /**

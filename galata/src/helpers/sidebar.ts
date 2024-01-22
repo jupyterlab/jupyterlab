@@ -122,11 +122,11 @@ export class SidebarHelper {
 
     await tab.click({ button: 'right' });
 
-    const switchMenuItem = await this.page.waitForSelector(
-      '.lm-Menu-content .lm-Menu-item[data-command="sidebar:switch"]',
-      { state: 'visible' }
+    const switchMenuItem = this.page.locator(
+      '.lm-Menu-content .lm-Menu-item[data-command="sidebar:switch"]'
     );
-    if (switchMenuItem) {
+    await switchMenuItem.waitFor({ state: 'visible' });
+    if (await switchMenuItem.count()) {
       await switchMenuItem.click();
     }
   }
@@ -179,7 +179,7 @@ export class SidebarHelper {
   async getTab(
     id: galata.SidebarTabId
   ): Promise<ElementHandle<Element> | null> {
-    return await this.page.$(this.buildTabSelector(id));
+    return await this.getTabLocator(id).elementHandle();
   }
 
   /**
@@ -220,9 +220,7 @@ export class SidebarHelper {
   async getContentPanel(
     side: galata.SidebarPosition = 'left'
   ): Promise<ElementHandle<Element> | null> {
-    return await this.page.$(
-      `#jp-${side}-stack .lm-StackedPanel-child:not(.lm-mod-hidden)`
-    );
+    return await this.getContentPanelLocator(side).elementHandle();
   }
 
   /**
@@ -246,7 +244,7 @@ export class SidebarHelper {
   async getTabBar(
     side: galata.SidebarPosition = 'left'
   ): Promise<ElementHandle<Element> | null> {
-    return await this.page.$(`.jp-SideBar.jp-mod-${side}`);
+    return await this.getTabBarLocator(side).elementHandle();
   }
 
   /**

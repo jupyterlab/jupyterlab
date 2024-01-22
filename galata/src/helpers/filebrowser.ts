@@ -144,10 +144,10 @@ export class FileBrowserHelper {
    * @returns Action success status
    */
   async openHomeDirectory(): Promise<boolean> {
-    const homeButton = await this.page.$(
-      '.jp-FileBrowser .jp-FileBrowser-crumbs span'
-    );
-    if (!homeButton) {
+    const homeButton = this.page
+      .locator('.jp-FileBrowser .jp-FileBrowser-crumbs span')
+      .first();
+    if (!(await homeButton.count())) {
       return false;
     }
     await homeButton.click();

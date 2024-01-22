@@ -484,19 +484,16 @@ export class NotebookHelper {
     await closeIcon.click();
 
     // close save prompt
-    const dialogSelector = '.jp-Dialog .jp-Dialog-content';
-    const dialog = await page.$(dialogSelector);
-    if (dialog) {
-      const dlgBtnSelector = revertChanges
-        ? 'button.jp-mod-accept.jp-mod-warn' // discard
-        : 'button.jp-mod-accept:not(.jp-mod-warn)'; // save
-      const dlgBtn = await dialog.$(dlgBtnSelector);
+    const dialog = page.locator('.jp-Dialog .jp-Dialog-content');
+    const dlgBtnSelector = revertChanges
+      ? 'button.jp-mod-accept.jp-mod-warn' // discard
+      : 'button.jp-mod-accept:not(.jp-mod-warn)'; // save
+    const dlgBtn = dialog.locator(dlgBtnSelector);
 
-      if (dlgBtn) {
-        await dlgBtn.click();
-      }
+    if (await dlgBtn.count()) {
+      await dlgBtn.click();
     }
-    await page.waitForSelector(dialogSelector, { state: 'hidden' });
+    await dialog.waitFor({ state: 'hidden' });
 
     return true;
   }
@@ -1392,7 +1389,7 @@ export class NotebookHelper {
     await this.menu.clickMenuItem('File>New>Notebook');
 
     const page = this.page;
-    await page.waitForSelector('.jp-Dialog');
+    await page.locator('.jp-Dialog').waitFor();
     await page.click('.jp-Dialog .jp-mod-accept');
 
     const activeTab = this.activity.getTabLocator();

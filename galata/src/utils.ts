@@ -229,6 +229,33 @@ export async function waitForTransition(
   return Promise.reject();
 }
 
+/**
+ * Wait for a element to emit 'transitionend' event.
+ *
+ * @param page Playwright page model object
+ * @param element Element or selector to watch
+ */
+export async function waitForLocatorTransition(
+  page: Page,
+  element: Locator | string
+): Promise<void> {
+  const el = typeof element === 'string' ? page.locator(element) : element;
+
+  if (el) {
+    return el.evaluate(elem => {
+      return new Promise(resolve => {
+        const onEndHandler = () => {
+          elem.removeEventListener('transitionend', onEndHandler);
+          resolve();
+        };
+        elem.addEventListener('transitionend', onEndHandler);
+      });
+    }, el);
+  }
+
+  return Promise.reject();
+}
+
 // Selector builders
 
 /**

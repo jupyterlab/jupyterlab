@@ -230,6 +230,13 @@ export interface IJupyterLabPage {
   waitForTransition(element: ElementHandle<Element> | string): Promise<void>;
 
   /**
+   * Wait for an element to emit 'transitionend' event.
+   *
+   * @param element Locator to the element or selector to watch
+   */
+  waitForLocatorTransition(element: Locator | string): Promise<void>;
+
+  /**
    * Factory for active activity tab xpath
    *
    * @returns The selector
@@ -599,7 +606,7 @@ export class JupyterLabPage implements IJupyterLabPage {
    * @returns Whether this operation succeeds or not
    */
   async setSimpleMode(simple: boolean): Promise<boolean> {
-    const toggle = await this.page.$(
+    const toggle = this.page.locator(
       '#jp-single-document-mode button.jp-switch'
     );
     if (toggle) {
@@ -607,7 +614,7 @@ export class JupyterLabPage implements IJupyterLabPage {
 
       if ((checked && !simple) || (!checked && simple)) {
         await Promise.all([
-          Utils.waitForTransition(this.page, toggle),
+          Utils.waitForLocatorTransition(this.page, toggle),
           toggle.click()
         ]);
       }
@@ -643,6 +650,15 @@ export class JupyterLabPage implements IJupyterLabPage {
     element: ElementHandle<Element> | string
   ): Promise<void> {
     return Utils.waitForTransition(this.page, element);
+  }
+
+  /**
+   * Wait for an element to emit 'transitionend' event.
+   *
+   * @param element Locator to the element or selector to watch
+   */
+  async waitForLocatorTransition(element: Locator | string): Promise<void> {
+    return Utils.waitForLocatorTransition(this.page, element);
   }
 
   /**

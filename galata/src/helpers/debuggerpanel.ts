@@ -98,7 +98,7 @@ export class DebuggerHelper {
    * Waits for variables to be populated in the variables panel
    */
   async waitForVariables(): Promise<void> {
-    await this.page.waitForSelector('.jp-DebuggerVariables-body ul');
+    await this.page.locator('.jp-DebuggerVariables-body ul').waitFor();
   }
 
   /**
@@ -111,7 +111,7 @@ export class DebuggerHelper {
     await this.page
       .locator('.lm-Menu-itemLabel:text("Render Variable")')
       .click();
-    await this.page.waitForSelector('.jp-VariableRendererPanel-renderer');
+    await this.page.locator('.jp-VariableRendererPanel-renderer').waitFor();
   }
 
   /**
@@ -132,9 +132,9 @@ export class DebuggerHelper {
    * Waits for the callstack body to populate in the callstack panel
    */
   async waitForCallStack(): Promise<void> {
-    await this.page.waitForSelector(
-      '.jp-DebuggerCallstack-body >> .jp-DebuggerCallstackFrame'
-    );
+    await this.page
+      .locator('.jp-DebuggerCallstack-body >> .jp-DebuggerCallstackFrame')
+      .waitFor();
   }
 
   /**
@@ -155,9 +155,9 @@ export class DebuggerHelper {
    * Waits for the breakpoints to appear in the breakpoints panel
    */
   async waitForBreakPoints(): Promise<void> {
-    await this.page.waitForSelector(
-      '.jp-DebuggerBreakpoints >> .jp-DebuggerBreakpoint'
-    );
+    await this.page
+      .locator('.jp-DebuggerBreakpoints >> .jp-DebuggerBreakpoint')
+      .waitFor();
   }
 
   /**
@@ -178,9 +178,9 @@ export class DebuggerHelper {
    * Waits for sources to be populated in the sources panel
    */
   async waitForSources(): Promise<void> {
-    await this.page.waitForSelector('.jp-DebuggerSources-body >> .jp-Editor', {
-      state: 'visible'
-    });
+    await this.page
+      .locator('.jp-DebuggerSources-body >> .jp-Editor')
+      .waitFor({ state: 'visible' });
   }
 
   private async _getPanel(selector: string): Promise<Locator> {
