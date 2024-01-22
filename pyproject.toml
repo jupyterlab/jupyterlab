@@ -35,20 +35,20 @@ classifiers = [
 ]
 dependencies = [
     "async_lru>=1.0.0",
+    "httpx>=0.25.0",
     "importlib-metadata>=4.8.3;python_version<\"3.10\"",
     "importlib-resources>=1.4;python_version<\"3.9\"",
     "ipykernel",
     "jinja2>=3.0.3",
     "jupyter_core",
-    "jupyter-lsp>=2.0.0",
     "jupyter_server>=2.4.0,<3",
+    "jupyter-lsp>=2.0.0",
     "jupyterlab_server>=2.19.0,<3",
     "notebook_shim>=0.2",
     "packaging",
-    "traitlets",
-    "tornado>=6.2.0",
     "tomli;python_version<\"3.11\"",
-    "httpx>=0.25.0",
+    "tornado>=6.2.0",
+    "traitlets",
 ]
 dynamic = [
     "version",
@@ -117,7 +117,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.1.6",
+    "ruff==0.1.11",
 ]
 
 [tool.check-wheel-contents]

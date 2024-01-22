@@ -101,7 +101,11 @@ export async function shutdownTerminal(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
   Private.errorIfNotAvailable();
-  const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL, name);
+  const workspacesBase = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
+  const url = URLExt.join(workspacesBase, name);
+  if (!url.startsWith(workspacesBase)) {
+    throw new Error('Can only be used for terminal requests');
+  }
   const init = { method: 'DELETE' };
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status === 404) {

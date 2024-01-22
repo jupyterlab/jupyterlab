@@ -17,6 +17,7 @@ import {
   isRawCellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
+import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
@@ -2334,10 +2335,45 @@ namespace Private {
     const lastCell = cells[-1];
     notebook.mode = 'command';
 
+    let initializingDialogShown = false;
     return Promise.all(
-      cells.map(cell =>
-        runCell(notebook, cell, sessionContext, sessionDialogs, translator)
-      )
+      cells.map(cell => {
+        if (
+          cell.model.type === 'code' &&
+          notebook.notebookConfig.enableKernelInitNotification &&
+          sessionContext &&
+          sessionContext.kernelDisplayStatus === 'initializing' &&
+          !initializingDialogShown
+        ) {
+          initializingDialogShown = true;
+          translator = translator || nullTranslator;
+          const trans = translator.load('jupyterlab');
+          Notification.emit(
+            trans.__(
+              `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing. You can run code cells when the kernel has initialized.`
+            ),
+            'warning',
+            {
+              autoClose: false
+            }
+          );
+          return Promise.resolve(false);
+        }
+        if (
+          cell.model.type === 'code' &&
+          notebook.notebookConfig.enableKernelInitNotification &&
+          initializingDialogShown
+        ) {
+          return Promise.resolve(false);
+        }
+        return runCell(
+          notebook,
+          cell,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
+      })
     )
       .then(results => {
         if (notebook.isDisposed) {
