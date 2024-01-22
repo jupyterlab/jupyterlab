@@ -135,7 +135,7 @@ test.describe('Notebook Toolbar', () => {
     await page.notebook.selectCells(2);
 
     await page.notebook.clickToolbarItem('run');
-    await page.waitForSelector('text=8');
+    await page.locator('text=8').waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
@@ -165,7 +165,7 @@ test('Toolbar items act on owner widget', async ({ page }) => {
   // FIXME Calling a second time `page.notebook.createNew` is not robust
   await page.menu.clickMenuItem('File>New>Notebook');
   try {
-    await page.waitForSelector('.jp-Dialog', { timeout: 5000 });
+    await page.locator('.jp-Dialog').waitFor({ timeout: 5000 });
     await page.click('.jp-Dialog .jp-mod-accept');
   } catch (reason) {
     // no-op

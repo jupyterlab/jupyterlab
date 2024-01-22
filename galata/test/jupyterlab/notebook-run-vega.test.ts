@@ -51,7 +51,7 @@ test.describe('Notebook Run Vega', () => {
     const imageName = 'run-cells-vega.png';
 
     await page.notebook.run();
-    await page.waitForSelector('.vega-embed');
+    await page.locator('.vega-embed').waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
@@ -73,7 +73,7 @@ test.describe('Notebook Run Vega', () => {
     const imageName = 'run-cells-dark-vega.png';
 
     await page.notebook.run();
-    await page.waitForSelector('.vega-embed');
+    await page.locator('.vega-embed').waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 

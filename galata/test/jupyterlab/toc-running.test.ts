@@ -13,9 +13,11 @@ test.describe('ToC Running indicator', () => {
 
     await page.sidebar.openTab('table-of-contents');
     // Wait until the last heading has loaded into the ToC
-    await page.waitForSelector(
-      '.jp-TableOfContents-content[data-document-type="notebook"] >> text=Title 1.3'
-    );
+    await page
+      .locator(
+        '.jp-TableOfContents-content[data-document-type="notebook"] >> text=Title 1.3'
+      )
+      .waitFor();
   });
 
   test.beforeAll(async ({ request, tmpPath }) => {

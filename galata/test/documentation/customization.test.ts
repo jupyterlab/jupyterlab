@@ -27,7 +27,7 @@ test.describe('Default', () => {
 
     await page.menu.clickMenuItem('File>New>Terminal');
 
-    await page.waitForSelector('.jp-Terminal');
+    await page.locator('.jp-Terminal').waitFor();
 
     expect(await page.screenshot()).toMatchSnapshot(
       'default-terminal-position-single.png'
@@ -49,7 +49,7 @@ test.describe('Default', () => {
     );
     await page.dblclick('text=Lorenz.ipynb');
 
-    await page.waitForSelector('div[role="main"] >> text=Lorenz.ipynb');
+    await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
 
     // Wait for kernel to settle on idle
     await page
@@ -79,7 +79,7 @@ test.describe('Default', () => {
 
     await page.click('text=Tabs');
 
-    await page.waitForSelector('#jp-mainmenu-tabs');
+    await page.locator('#jp-mainmenu-tabs').waitFor();
 
     expect(
       await page.screenshot({ clip: { x: 0, y: 0, width: 800, height: 200 } })
@@ -203,7 +203,7 @@ test.describe('Customized', () => {
 
     await page.menu.clickMenuItem('File>New>Terminal');
 
-    await page.waitForSelector('.jp-Terminal');
+    await page.locator('.jp-Terminal').waitFor();
 
     await page.sidebar.setWidth(271, 'right');
 
@@ -227,9 +227,9 @@ test.describe('Customized', () => {
     );
     await page.dblclick('text=Lorenz.ipynb');
 
-    await page.waitForSelector('div[role="main"] >> text=Lorenz.ipynb');
+    await page.locator('div[role="main"] >> text=Lorenz.ipynb').waitFor();
 
-    await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
+    await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
 
     expect(
       await page
@@ -251,7 +251,7 @@ test.describe('Customized', () => {
 
     await page.click('text=Tabs');
 
-    await page.waitForSelector('#jp-mainmenu-tabs');
+    await page.locator('#jp-mainmenu-tabs').waitFor();
 
     expect(
       await page.screenshot({ clip: { x: 0, y: 0, width: 800, height: 200 } })

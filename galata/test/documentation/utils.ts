@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ElementHandle, Page } from '@playwright/test';
+import { ElementHandle, Locator, Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 
@@ -101,6 +101,28 @@ export async function positionMouseOver(
   const offsetTop = position.offsetTop ?? 0;
   const offsetLeft = position.offsetLeft ?? 0;
   const bBox = await element.boundingBox();
+  return positionMouse({
+    x: bBox.x + bBox.width * left + offsetLeft,
+    y: bBox.y + bBox.height * top + offsetTop
+  });
+}
+
+/**
+ * Generate a SVG mouse pointer to inject in a HTML document over a DOM element locator.
+ *
+ * @param locator A playwright locator for the target DOM element
+ * @param position A position within the target element (default: bottom right quarter).
+ * @returns The svg to inject in the page
+ */
+export async function positionMouseOverLocator(
+  locator: Locator,
+  position: IPositionInElement = {}
+): Promise<string> {
+  const top = position.top ?? 0.75;
+  const left = position.left ?? 0.75;
+  const offsetTop = position.offsetTop ?? 0;
+  const offsetLeft = position.offsetLeft ?? 0;
+  const bBox = await locator.boundingBox();
   return positionMouse({
     x: bBox.x + bBox.width * left + offsetLeft,
     y: bBox.y + bBox.height * top + offsetTop

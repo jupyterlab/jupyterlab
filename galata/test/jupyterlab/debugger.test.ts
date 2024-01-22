@@ -130,10 +130,10 @@ test.describe('Debugger Tests', () => {
     const menu = await page.menu.getOpenMenuLocator();
     await menu?.locator('[data-command="fileeditor:create-console"]')?.click();
 
-    await page.waitForSelector('.jp-Dialog-body');
-    const select = await page.$('.jp-Dialog-body >> select');
-    const option = await select.$('option:has-text("ipykernel")');
-    await select.selectOption(option);
+    await page.locator('.jp-Dialog-body').waitFor();
+    const select = page.locator('.jp-Dialog-body >> select');
+    const option = select.locator('option:has-text("ipykernel")');
+    await select.selectOption(await option.textContent());
     await page.click('div.jp-Dialog-content >> button:has-text("Select")');
 
     // activate the script tab
@@ -315,7 +315,7 @@ test.describe('Debugger Variables', () => {
 async function createNotebook(page: IJupyterLabPageFixture) {
   await page.notebook.createNew();
 
-  await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
+  await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
 }
 
 async function setBreakpoint(page: IJupyterLabPageFixture) {

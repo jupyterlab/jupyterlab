@@ -48,6 +48,8 @@ test.describe('Table of Contents scrolling to heading', () => {
       .locator('.jp-TableOfContents-tree')
       .getByText('the last one')
       .click();
+    await page.waitForTimeout(100);
+
     // Should switch to command mode
     await expect.soft(page.getByText('Mode: Command')).toBeVisible();
 
@@ -69,6 +71,7 @@ test.describe('Table of Contents scrolling to heading', () => {
       .locator('.jp-TableOfContents-tree')
       .getByText('the last one')
       .click();
+    await page.waitForTimeout(100);
 
     expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'scrolled-to-bottom-heading.png'

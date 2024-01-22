@@ -35,7 +35,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/21');
+    await page.locator('text=1/21').waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
@@ -91,7 +91,7 @@ test.describe('Notebook Search', () => {
       'one notebook withr\n\n\nThis is a multi'
     );
 
-    await page.waitForSelector('text=1/1');
+    await page.locator('text=1/1').waitFor();
 
     // Show replace buttons to check for visual regressions
     await page.click('button[title="Show Replace"]');
@@ -125,7 +125,7 @@ test.describe('Notebook Search', () => {
     });
 
     // Expect the first match to be highlighted
-    await page.waitForSelector('text=1/2');
+    await page.locator('text=1/2').waitFor();
 
     // Enter first cell again
     await page.notebook.enterCellEditingMode(0);
@@ -162,7 +162,7 @@ test.describe('Notebook Search', () => {
     // Search for "test"
     await page.keyboard.press('Control+f');
     await page.fill('[placeholder="Find"]', 'test');
-    await page.waitForSelector('text=1/2');
+    await page.locator('text=1/2').waitFor();
 
     // Close search box
     await page.keyboard.press('Escape');
@@ -174,7 +174,7 @@ test.describe('Notebook Search', () => {
     // Expect the text to be set in the input field
     await expect(inputWithTestLocator).toBeVisible();
     // Expect the search to be active again
-    await page.waitForSelector('text=1/2');
+    await page.locator('text=1/2').waitFor();
   });
 
   test('Clear search when box is empty', async ({ page }) => {
@@ -243,7 +243,7 @@ test.describe('Notebook Search', () => {
       await page.click('.jp-Dialog .jp-mod-accept');
     }
 
-    await page.waitForSelector('text=1/29');
+    await page.locator('text=1/29').waitFor();
 
     const cell = await page.notebook.getCellLocator(5);
     await cell!.scrollIntoViewIfNeeded();
@@ -265,7 +265,7 @@ test.describe('Notebook Search', () => {
 
     await page.click('text=Search in 1 Selected Cell');
 
-    await page.waitForSelector('text=1/4');
+    await page.locator('text=1/4').waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(
@@ -288,29 +288,29 @@ test.describe('Notebook Search', () => {
     await page.keyboard.press('Shift+ArrowDown');
 
     // Expect the filter text to be updated
-    await page.waitForSelector('text=Search in 3 Selected Cells');
+    await page.locator('text=Search in 3 Selected Cells').waitFor();
 
     // Reset selection, switch to third cell, preserving command mode
     cell = await page.notebook.getCellLocator(2);
     await cell!.locator('.jp-InputPrompt').click();
 
-    await page.waitForSelector('text=Search in 1 Selected Cell');
+    await page.locator('text=Search in 1 Selected Cell').waitFor();
     // Wait for the counter to be properly updated
-    await page.waitForSelector(
-      '.jp-DocumentSearch-index-counter:has-text("1/10")'
-    );
+    await page
+      .locator('.jp-DocumentSearch-index-counter:has-text("1/10")')
+      .waitFor();
 
     // Select cell above
     await page.keyboard.press('Shift+ArrowUp');
 
     // Expect updated text
-    await page.waitForSelector('text=Search in 2 Selected Cells');
+    await page.locator('text=Search in 2 Selected Cells').waitFor();
 
     // Expect 15 matches; this is 6/15, not 1/15 because current match is set
     // in second cell and when selection is extended, it does not move; keeping
     // the current match when extending the selection is desired as user may use
     // it as a reference, especially when it was set as closest to the cursor.
-    await page.waitForSelector('text=6/15');
+    await page.locator('text=6/15').waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
     expect(await nbPanel!.screenshot()).toMatchSnapshot(
@@ -326,7 +326,7 @@ test.describe('Notebook Search', () => {
     await page.fill('[placeholder="Find"]', 'with');
     await page.click('button[title="Show Search Filters"]');
     await page.click('text=Search in 1 Selected Cell');
-    await page.waitForSelector('text=1/4');
+    await page.locator('text=1/4').waitFor();
 
     // Bring focus to first cell without switching to edit mode
     let cell = await page.notebook.getCellLocator(0);
@@ -340,17 +340,17 @@ test.describe('Notebook Search', () => {
     await page.keyboard.press('Shift+ArrowDown');
 
     // Expect the filter text to be updated
-    await page.waitForSelector('text=Search in 3 Selected Cells');
+    await page.locator('text=Search in 3 Selected Cells').waitFor();
 
     // Expect 19 matches
-    await page.waitForSelector('text=1/19');
+    await page.locator('text=1/19').waitFor();
   });
 
   test('Search in selected text', async ({ page }) => {
     await page.keyboard.press('Control+f');
 
     await page.fill('[placeholder="Find"]', 'text/');
-    await page.waitForSelector('text=1/3');
+    await page.locator('text=1/3').waitFor();
 
     // Activate third cell
     const cell = await page.notebook.getCellLocator(2);
@@ -366,7 +366,7 @@ test.describe('Notebook Search', () => {
     await page.click('button[title="Show Search Filters"]');
     await page.click('text=Search in 7 Selected Lines');
 
-    await page.waitForSelector('text=1/2');
+    await page.locator('text=1/2').waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
@@ -378,7 +378,7 @@ test.describe('Notebook Search', () => {
   test('Highlights are visible when text is selected', async ({ page }) => {
     await page.keyboard.press('Control+f');
     await page.fill('[placeholder="Find"]', 'with');
-    await page.waitForSelector('text=1/21');
+    await page.locator('text=1/21').waitFor();
 
     const cell = await page.notebook.getCellLocator(0);
     await cell!.locator('.jp-Editor').click();
@@ -397,7 +397,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/21');
+    await page.locator('text=1/21').waitFor();
 
     // Click next button
     await page.click('button[title^="Next Match"]');
@@ -415,7 +415,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/21');
+    await page.locator('text=1/21').waitFor();
 
     // Click next button
     await page.click('button[title^="Next Match"]', {
@@ -433,18 +433,18 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/21');
+    await page.locator('text=1/21').waitFor();
 
     // Click previous button
     await page.click('button[title^="Previous Match"]');
     // Should cycle back
-    await page.waitForSelector('text=21/21');
+    await page.locator('text=21/21').waitFor();
 
     // Click previous button twice
     await page.click('button[title^="Previous Match"]');
     await page.click('button[title^="Previous Match"]');
     // Should move up by two
-    await page.waitForSelector('text=19/21');
+    await page.locator('text=19/21').waitFor();
 
     const hit = await page.notebook.getCellLocator(2);
     expect(await hit!.screenshot()).toMatchSnapshot(
@@ -461,11 +461,11 @@ test.describe('Notebook Search', () => {
     // Open search box
     await page.keyboard.press('Control+f');
     await page.fill('[placeholder="Find"]', 'with');
-    await page.waitForSelector('text=20/21');
+    await page.locator('text=20/21').waitFor();
 
     // Click previous button
     await page.click('button[title^="Previous Match"]');
-    await page.waitForSelector('text=19/21');
+    await page.locator('text=19/21').waitFor();
   });
 
   test('Highlight on markdown rendered state change', async ({ page }) => {
@@ -474,7 +474,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/21');
+    await page.locator('text=1/21').waitFor();
 
     // Click next button
     await page.click('button[title^="Next Match"]', {
@@ -499,7 +499,7 @@ test.describe('Notebook Search', () => {
     // Wait until search has settled before entering a cell for edition
     // as this can lead to selection of active result near that cell
     // (rather than at the beginning of the notebook)
-    await page.waitForSelector('text=1/21');
+    await page.locator('text=1/21').waitFor();
 
     await page.notebook.setCell(5, 'code', 'with');
 
@@ -517,7 +517,7 @@ test.describe('Notebook Search', () => {
 
     await page.click('text=Search Cell Outputs');
 
-    await page.waitForSelector('text=1/29');
+    await page.locator('text=1/29').waitFor();
 
     const cell = await page.notebook.getCellLocator(5);
 
@@ -533,7 +533,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/21');
+    await page.locator('text=1/21').waitFor();
 
     const cell = await page.notebook.getCellLocator(5);
     await cell!.click();
@@ -553,7 +553,7 @@ test.describe('Notebook Search', () => {
 
     await page.fill('[placeholder="Find"]', 'with');
 
-    await page.waitForSelector('text=1/21');
+    await page.locator('text=1/21').waitFor();
 
     const cell = await page.notebook.getCellLocator(5);
     await cell!.click();
@@ -563,7 +563,7 @@ test.describe('Notebook Search', () => {
     await page.keyboard.press('d');
     await page.keyboard.press('d');
 
-    await page.waitForSelector('text=1/19');
+    await page.locator('text=1/19').waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 

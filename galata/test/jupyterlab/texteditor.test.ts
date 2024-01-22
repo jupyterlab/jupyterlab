@@ -10,7 +10,7 @@ test.describe('Text Editor Tests', () => {
     const imageName = 'text-editor.png';
     await page.menu.clickMenuItem('File>New>Text File');
 
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
     expect(await tabHandle?.screenshot()).toMatchSnapshot(imageName);
@@ -55,7 +55,7 @@ test.describe('Text Editor Tests', () => {
 
     await page.menu.clickMenuItem('File>New>Text File');
 
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     await page.type(
       '.cm-content',
@@ -78,7 +78,7 @@ test.describe('Text Editor Tests', () => {
     const imageName = 'go-to-line-editor.png';
     await page.menu.clickMenuItem('File>New>Text File');
 
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     await page.type(
       '.cm-content',

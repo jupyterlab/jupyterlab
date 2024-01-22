@@ -84,9 +84,9 @@ test.describe('Application Context Menu', () => {
   }) => {
     await page.notebook.openByPath(`${tmpPath}/${testNotebook}`);
     // Wait for kernel to be idle
-    expect(
-      await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
-    ).toBeTruthy();
+    await expect(
+      page.locator(`#jp-main-statusbar >> text=Idle`).first()
+    ).toHaveCount(1);
 
     await page.click(`.jp-DirListing-item span:has-text("${testNotebook}")`, {
       button: 'right'
@@ -110,9 +110,9 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     await page.hover('text=Open With');
-    await page.waitForSelector(
-      '.lm-Menu li[role="menuitem"]:has-text("Editor")'
-    );
+    await page
+      .locator('.lm-Menu li[role="menuitem"]:has-text("Editor")')
+      .waitFor();
 
     const imageName = `file-openwith.png`;
     // Get the last menu -> will be submenu

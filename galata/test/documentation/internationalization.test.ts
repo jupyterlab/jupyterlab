@@ -53,13 +53,11 @@ test.describe('Internationalization', () => {
 
     await Promise.all([
       page.waitForNavigation(),
-      page.waitForSelector('#jupyterlab-splash'),
+      page.locator('#jupyterlab-splash').waitFor(),
       page.click('button:has-text("Change and reload")')
     ]);
 
-    await page.waitForSelector('#jupyterlab-splash', {
-      state: 'detached'
-    });
+    await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
 
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -68,7 +66,7 @@ test.describe('Internationalization', () => {
     });
 
     // Wait for the launcher to be loaded
-    await page.waitForSelector('text=README.md');
+    await page.locator('text=README.md').waitFor();
 
     await page.sidebar.setWidth();
 

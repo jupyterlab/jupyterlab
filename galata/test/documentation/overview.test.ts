@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, test } from '@jupyterlab/galata';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
 import { filterContent } from './utils';
 
 test.use({
@@ -48,7 +53,7 @@ test.describe('Overview', () => {
   });
 });
 
-async function openOverview(page) {
+async function openOverview(page: IJupyterLabPageFixture) {
   await page.goto();
   await page.addStyleTag({
     content: `.jp-LabShell.jp-mod-devMode {
@@ -84,7 +89,7 @@ async function openOverview(page) {
   );
 
   // Move notebook panel
-  const notebookHandle = await page.$('div[role="main"] >> text=Data.ipynb');
+  const notebookHandle = page.locator('div[role="main"] >> text=Data.ipynb');
   await notebookHandle.click();
   const notebookBBox = await notebookHandle.boundingBox();
 
@@ -97,7 +102,7 @@ async function openOverview(page) {
   await page.mouse.up();
 
   // Move md panel
-  const mdHandle = await page.$('div[role="main"] >> text=jupyterlab.md');
+  const mdHandle = page.locator('div[role="main"] >> text=jupyterlab.md');
   await mdHandle.click();
   const mdBBox = await mdHandle.boundingBox();
   const panelHandle = await page.activity.getPanelLocator();

@@ -56,9 +56,9 @@ test.describe('Notebook Create', () => {
   menuPaths.forEach(menuPath => {
     test(`Open menu item ${menuPath}`, async ({ page, sessions }) => {
       // Wait for kernel to be idle as some menu depend of kernel information
-      expect(
-        await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
-      ).toBeTruthy();
+      await expect(
+        page.locator(`#jp-main-statusbar >> text=Idle`).first()
+      ).toHaveCount(1);
 
       await page.menu.openLocator(menuPath);
       expect(await page.menu.isOpen(menuPath)).toBeTruthy();

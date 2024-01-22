@@ -51,7 +51,7 @@ test.describe('Notebook Run Mermaid', () => {
     const imageName = 'run-cells-mermaid.png';
 
     await page.notebook.run();
-    await page.waitForSelector('.jp-RenderedMermaid');
+    await page.locator('.jp-RenderedMermaid').waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
@@ -73,7 +73,7 @@ test.describe('Notebook Run Mermaid', () => {
     const imageName = 'run-cells-dark-mermaid.png';
 
     await page.notebook.run();
-    await page.waitForSelector('.jp-RenderedMermaid');
+    await page.locator('.jp-RenderedMermaid').waitFor();
 
     const nbPanel = await page.notebook.getNotebookInPanelLocator();
 

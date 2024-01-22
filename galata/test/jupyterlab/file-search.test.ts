@@ -91,7 +91,7 @@ test('Populate search box with selected text', async ({ page }) => {
   await expect(page.locator('.cm-search.cm-panel')).toHaveCount(0);
 
   // Expect the first match to be highlighted
-  await page.waitForSelector('text=1/2');
+  await page.locator('text=1/2').waitFor();
 
   const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
 

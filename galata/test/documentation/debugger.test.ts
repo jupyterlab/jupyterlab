@@ -7,7 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { positionMouseOver } from './utils';
+import { positionMouseOverLocator } from './utils';
 
 test.use({
   autoGoto: false,
@@ -79,15 +79,14 @@ test.describe('Debugger', () => {
     const runButton = await page
       .locator('.jp-Toolbar-item')
       .locator('[data-command="notebook:run-cell-and-select-next"]')
-      .getByRole('button')
-      .elementHandle();
+      .getByRole('button');
 
     // Inject mouse pointer
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [await positionMouseOver(runButton!)]
+      [await positionMouseOverLocator(runButton!)]
     );
     await runButton!.focus();
     await runButton!.focus();
@@ -197,9 +196,8 @@ test.describe('Debugger', () => {
 
     await createNotebook(page);
 
-    const sidebar = await page.waitForSelector(
-      '[data-id="jp-debugger-sidebar"]'
-    );
+    const sidebar = page.locator('[data-id="jp-debugger-sidebar"]');
+    await sidebar.waitFor();
     await sidebar.click();
     await page.sidebar.setWidth(251, 'right');
 
@@ -208,7 +206,7 @@ test.describe('Debugger', () => {
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [await positionMouseOver(sidebar, { left: 0.25 })]
+      [await positionMouseOverLocator(sidebar, { left: 0.25 })]
     );
 
     expect(
@@ -342,7 +340,7 @@ async function createNotebook(page: IJupyterLabPageFixture) {
 
   await page.sidebar.setWidth();
 
-  await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
+  await page.locator('text=Python 3 (ipykernel) | Idle').waitFor();
 }
 
 async function setBreakpoint(page: IJupyterLabPageFixture) {
