@@ -18,7 +18,7 @@ async function nbDiskContent(
   nbPath: string
 ): Promise<string> {
   await page.notebook.save();
-  // Use the `files` API to assess if the local path is saved.
+  // Use the `files` API as figure out the local path is though.
   const response = await page.request.fetch(`/files/${nbPath}`);
   if (!response.ok()) {
     return '';
@@ -55,7 +55,7 @@ test.describe('Notebook Run Mermaid', () => {
 
     const nbPanel = await page.notebook.getNotebookInPanel();
 
-    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
     expect(await nbDiskContent(page, nbPath)).toContain(SVG_MIME_TYPE);
   });
 
@@ -77,7 +77,7 @@ test.describe('Notebook Run Mermaid', () => {
 
     const nbPanel = await page.notebook.getNotebookInPanel();
 
-    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
     expect(await nbDiskContent(page, nbPath)).toContain(SVG_MIME_TYPE);
   });
 });
