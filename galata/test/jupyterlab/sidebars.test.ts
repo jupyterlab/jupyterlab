@@ -3,30 +3,19 @@
 
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
 
-// const leftSidebarIds: galata.SidebarTabId[] = [
-//   'filebrowser',
-//   'jp-running-sessions',
-//   'table-of-contents',
-//   'extensionmanager.main-view'
-// ];
-
-// const rightSidebarIds: galata.SidebarTabId[] = [
-//   'jp-property-inspector',
-//   'jp-debugger-sidebar'
-// ];
-
 const sidebarElementIds = {
-  leftSidebarIds: [
+  leftSideBar: [
     'filebrowser',
     'jp-running-sessions',
     'table-of-contents',
     'extensionmanager.main-view'
   ],
-  rightSidebarIds: ['jp-property-inspector', 'jp-debugger-sidebar']
+  rightSideBar: ['jp-property-inspector', 'jp-debugger-sidebar']
 };
 
-const sidebarIds: galata.SidebarTabId[] =
-  sidebarElementIds.leftSidebarIds.concat(sidebarElementIds.rightSidebarIds);
+const sidebarIds: galata.SidebarTabId[] = sidebarElementIds.leftSideBar.concat(
+  sidebarElementIds.rightSideBar
+);
 
 /**
  * Add provided text as label on first tab in given tabbar.
@@ -234,71 +223,33 @@ const elementAriaLabels = {
 };
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
-  leftSidebarIds.forEach(leftSidebarId => {
-    test(`Open Sidebar tab ${leftSidebarId} via keyboard navigation`, async ({
-      page
-    }) => {
+  Object.keys(sidebarElementIds).forEach(tabSide => {
+    test(`Open ${tabSide} via keyboard navigation`, async ({ page }) => {
+      await page.sidebar.close('right');
       await page.sidebar.close('left');
 
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        await page.keyboard.press('Tab');
-        let IsFocused = await page.evaluate(
+      const keyValueArray = sidebarElementIds[tabSide];
+
+      keyValueArray.forEach(async sideBarTabName => {
+        let isSideBarFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
         );
 
-        if (IsFocused === leftSidebarIds[0]) {
-          break;
+        while (isSideBarFocused !== sideBarTabName[0]) {
+          let sideBarFocused = isSideBarFocused;
+          await page.keyboard.press('Tab');
+          return sideBarFocused;
         }
-      }
 
-      // eslint-disable-next-line no-constant-condition
-      while (leftSidebarId !== leftSidebarIds[0]) {
-        await page.keyboard.press('ArrowDown');
-        let IsFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
-        if (IsFocused === leftSidebarId) {
-          break;
+        while (isSideBarFocused !== sideBarTabName) {
+          let sideBarFocused = isSideBarFocused;
+          await page.keyboard.press('ArrowDown');
+          return sideBarFocused;
         }
-      }
+        await page.keyboard.press('Enter');
 
-      await page.keyboard.press('Enter');
-
-      expect(await page.sidebar.isTabOpen(leftSidebarId)).toEqual(true);
-    });
-  });
-
-  rightSidebarIds.forEach(rightSidebarId => {
-    test(`Open Sidebar tab ${rightSidebarId} via keyboard navigation`, async ({
-      page
-    }) => {
-      await page.sidebar.close('right');
-
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        await page.keyboard.press('Tab');
-        let propertyInspectorIsFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
-        if (propertyInspectorIsFocused === rightSidebarIds[0]) {
-          break;
-        }
-      }
-
-      // eslint-disable-next-line no-constant-condition
-      while (rightSidebarId !== rightSidebarIds[0]) {
-        await page.keyboard.press('ArrowDown');
-        let IsFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
-        if (IsFocused === rightSidebarId) {
-          break;
-        }
-      }
-      await page.keyboard.press('Enter');
-
-      expect(await page.sidebar.isTabOpen(rightSidebarId)).toEqual(true);
+        expect(await page.sidebar.isTabOpen(sideBarTabName)).toEqual(true);
+      });
     });
   });
 
