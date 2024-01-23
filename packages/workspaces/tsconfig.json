@@ -22,31 +22,13 @@
       "path": "../filebrowser"
     },
     {
-      "path": "../mainmenu"
-    },
-    {
-      "path": "../rendermime-interfaces"
-    },
-    {
       "path": "../services"
-    },
-    {
-      "path": "../settingregistry"
     },
     {
       "path": "../statedb"
     },
     {
-      "path": "../statusbar"
-    },
-    {
       "path": "../translation"
-    },
-    {
-      "path": "../ui-components"
-    },
-    {
-      "path": "../workspaces"
     }
   ]
 }
