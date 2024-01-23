@@ -85,10 +85,15 @@ describe('docregistry/context', () => {
     describe('#fileChanged', () => {
       it('should be emitted when the file is saved', async () => {
         const path = context.path;
+        const hash = context.contentsModel?.hash ?? null;
         let called = false;
         context.fileChanged.connect((sender, args) => {
           expect(sender).toBe(context);
           expect(args.path).toBe(path);
+          if (hash) {
+            expect(args.hash).not.toBeNull();
+            expect(args.hash).not.toBe(hash);
+          }
           called = true;
         });
         await context.initialize(true);
