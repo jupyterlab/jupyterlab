@@ -79,7 +79,7 @@ docs = [
     "sphinx-copybutton",
     "pydata-sphinx-theme>=0.13.0",
     "pytest",
-    "pytest-tornasync",
+    "pytest-jupyter",
     "pytest-check-links",
     "jsx-lexer",
     "myst-parser",
