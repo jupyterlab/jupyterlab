@@ -255,10 +255,11 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
+        await page.keyboard.press('Tab');
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
         );
-        await page.keyboard.press('Tab');
+
         if (IsFocused === leftSidebarIds[0]) {
           break;
         }
