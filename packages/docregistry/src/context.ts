@@ -808,7 +808,7 @@ export class Context<
     model: Contents.IModel,
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
-    if (this._ConflictModalIsOpen) {
+    if (this._conflictModalIsOpen) {
       const error = new Error('Modal is already displayed');
       error.name = 'ModalDuplicateError';
       return Promise.reject(error);
@@ -827,13 +827,13 @@ or load the version on disk (revert)?`,
       label: this._trans.__('Overwrite'),
       actions: ['overwrite']
     });
-    this._ConflictModalIsOpen = true;
+    this._conflictModalIsOpen = true;
     return showDialog({
       title: this._trans.__('File Changed'),
       body,
       buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
     }).then(result => {
-      this._ConflictModalIsOpen = false;
+      this._conflictModalIsOpen = false;
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
@@ -964,7 +964,7 @@ or load the version on disk (revert)?`,
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
   private _lastModifiedCheckMargin = 500;
-  private _ConflictModalIsOpen = false;
+  private _conflictModalIsOpen = false;
 }
 
 /**
