@@ -287,6 +287,7 @@ namespace Private {
     _mermaid.mermaidAPI.initialize({
       theme,
       fontFamily,
+      securityLevel: 'strict',
       maxTextSize: 100000,
       maxEdges: 100000,
       startOnLoad: false
