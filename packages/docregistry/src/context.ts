@@ -486,8 +486,8 @@ export class Context<
     if (
       !mod ||
       newModel.last_modified !== mod ||
-      !hash ||
-      newModel.hash !== hash
+      // Compare hash if available
+      (hash && newModel.hash !== hash)
     ) {
       this._fileChanged.emit(newModel);
     }
