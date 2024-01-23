@@ -31,8 +31,8 @@ An extension for JupyterLab (and for Notebook 7) is made up of a `series <https:
 of bundled `plugins <https://lumino.readthedocs.io/en/latest/api/interfaces/application.IPlugin.html#requires>`_,
 and those plugins typically use components from the interface toolkit `Lumino <https://lumino.readthedocs.io/en/latest/api/index.html>`_
 as well as the `JupyterLab API <https://jupyterlab.readthedocs.io/en/latest/api/index.html>`_
-(among others) to help build your extension's look and behavior (both are
-written in Typescript).
+(among others) to help build your extension's look and behavior. Both
+Lumino and JupyterLab API are written in Typescript.
 
 This is how basic compatibility features work: both apps use the same building
 blocks and methods. For instance, both JupyterLab and Notebook 7 accept Lumino widgets
