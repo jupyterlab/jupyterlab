@@ -12,7 +12,7 @@ folder.
 
 Custom CSS is not loaded by default. In the jupyter configuration directory, the
 ``~/.jupyter/custom/custom.css`` file will not be loaded unless the the application is
-initialized with the ``--custom-css`` flag.
+initialized with the ``--custom-css`` flag  (`LabApp.custom_css` config).
 
 Jupyter Styling
 ---------------

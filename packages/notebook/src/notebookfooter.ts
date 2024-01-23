@@ -21,6 +21,7 @@ export class NotebookFooter extends Widget {
     super({ node: document.createElement('button') });
     const trans = notebook.translator.load('jupyterlab');
     this.addClass(NOTEBOOK_FOOTER_CLASS);
+    this.node.setAttribute('tabindex', '-1');
     this.node.innerText = trans.__('Click to add a cell.');
   }
 
