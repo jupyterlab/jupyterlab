@@ -3,20 +3,30 @@
 
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
 
-const leftSidebarIds: galata.SidebarTabId[] = [
-  'filebrowser',
-  'jp-running-sessions',
-  'table-of-contents',
-  'extensionmanager.main-view'
-];
+// const leftSidebarIds: galata.SidebarTabId[] = [
+//   'filebrowser',
+//   'jp-running-sessions',
+//   'table-of-contents',
+//   'extensionmanager.main-view'
+// ];
 
-const rightSidebarIds: galata.SidebarTabId[] = [
-  'jp-property-inspector',
-  'jp-debugger-sidebar'
-];
+// const rightSidebarIds: galata.SidebarTabId[] = [
+//   'jp-property-inspector',
+//   'jp-debugger-sidebar'
+// ];
+
+const sidebarElementIds = {
+  leftSidebarIds: [
+    'filebrowser',
+    'jp-running-sessions',
+    'table-of-contents',
+    'extensionmanager.main-view'
+  ],
+  rightSidebarIds: ['jp-property-inspector', 'jp-debugger-sidebar']
+};
 
 const sidebarIds: galata.SidebarTabId[] =
-  leftSidebarIds.concat(rightSidebarIds);
+  sidebarElementIds.leftSidebarIds.concat(sidebarElementIds.rightSidebarIds);
 
 /**
  * Add provided text as label on first tab in given tabbar.
@@ -222,29 +232,6 @@ const elementAriaLabels = {
     'Discover Section'
   ]
 };
-
-// const runningSessionsElementAriaLabels: string[] = [
-//   'Open Tabs Section',
-//   'Kernels Section',
-//   'Language servers Section',
-//   'Terminals Section'
-// ];
-// const debuggerElementAriaLabels: string[] = [
-//   'Variables Section',
-//   'Callstack Section',
-//   'Breakpoints Section',
-//   'Source Section',
-//   'Kernel Sources Section'
-// ];
-// const propertyElementAriaLabels: string[] = [
-//   'Warning Section',
-//   'Installed Section',
-//   'Discover Section'
-// ];
-
-// const sessionsAndDebuggerAriaLabels: string[] = runningSessionsElementAriaLabels.concat(
-//   debuggerElementAriaLabels
-// );
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
   leftSidebarIds.forEach(leftSidebarId => {
