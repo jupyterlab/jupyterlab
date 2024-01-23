@@ -6,7 +6,6 @@ import * as path from 'path';
 
 const fileName = 'mermaid_diagrams.ipynb';
 
-const CSS_CLASS_MMD = '.jp-RenderedMermaid';
 const EXPECTED_MERMAID_COUNT = 16;
 
 test.describe('Notebook Mermaid Diagrams', () => {
@@ -16,12 +15,11 @@ test.describe('Notebook Mermaid Diagrams', () => {
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
     );
-
     await page.filebrowser.openDirectory(tmpPath);
   });
 
   for (const theme of ['default', 'dark']) {
-    const dark = theme == 'dark';
+    const dark = theme === 'dark';
 
     test(`Mermaid Markdown diagrams in ${theme} theme`, async ({
       page,
@@ -36,12 +34,9 @@ test.describe('Notebook Mermaid Diagrams', () => {
       await page.notebook.openByPath(nbPath);
       await page.notebook.activate(fileName);
 
-      await page.waitForSelector(CSS_CLASS_MMD);
-      const outputs = await page.$$(CSS_CLASS_MMD);
-      expect(outputs.length).toBe(EXPECTED_MERMAID_COUNT);
-
-      for (let i = 0; i < outputs.length; i++) {
-        const output = outputs[i];
+      for (let i = 0; i < EXPECTED_MERMAID_COUNT; i++) {
+        const selector = `.jp-Cell:nth-child(${i + 1}) .jp-RenderedMermaid`;
+        const output = await page.waitForSelector(selector);
         const iZero = `${i}`.padStart(2, '0');
         const imageName = `run-cells-mermaid-${theme}-${iZero}.png`;
         expect(await output.screenshot()).toMatchSnapshot(imageName);
