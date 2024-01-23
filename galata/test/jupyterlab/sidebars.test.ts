@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
+import { ActivityHelper } from '/home/ec2-user/repos/jupyterlab/galata/src/helpers/activity.ts';
 
 const sidebarElementIds = {
   leftSideBar: [
@@ -225,8 +226,7 @@ const elementAriaLabels = {
 test.describe('Sidebar keyboard navigation @a11y', () => {
   Object.keys(sidebarElementIds).forEach(tabSide => {
     test(`Open ${tabSide} via keyboard navigation`, async ({ page }) => {
-      await page.sidebar.close('right');
-      await page.sidebar.close('left');
+      await page.activity.closeAll();
 
       const keyValueArray = sidebarElementIds[tabSide];
 
