@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
-import { ActivityHelper } from '/home/ec2-user/repos/jupyterlab/galata/src/helpers/activity.ts';
 
 const sidebarElementIds = {
   leftSideBar: [
@@ -231,21 +230,8 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       const keyValueArray = sidebarElementIds[tabSide];
 
       keyValueArray.forEach(async sideBarTabName => {
-        let isSideBarFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
-
-        while (isSideBarFocused !== sideBarTabName[0]) {
-          let sideBarFocused = isSideBarFocused;
-          await page.keyboard.press('Tab');
-          return sideBarFocused;
-        }
-
-        while (isSideBarFocused !== sideBarTabName) {
-          let sideBarFocused = isSideBarFocused;
-          await page.keyboard.press('ArrowDown');
-          return sideBarFocused;
-        }
+        await page.activity.tabToSidebar(sideBarTabName[0], 'Tab');
+        await page.activity.tabToSidebar(sideBarTabName, 'ArrowDown');
         await page.keyboard.press('Enter');
 
         expect(await page.sidebar.isTabOpen(sideBarTabName)).toEqual(true);

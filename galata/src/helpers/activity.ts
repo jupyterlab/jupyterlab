@@ -60,6 +60,27 @@ export class ActivityHelper {
   }
 
   /**
+   * Keyboard navigation to sideBar using Tab key
+   *
+   * @param dataId sideBar widget id
+   * @returns Active sideBar widget id
+   */
+  async tabToSidebar(
+    dataId: string,
+    key: string
+  ): Promise<string | null | undefined> {
+    let focusedElementId = await this.page.evaluate(
+      () => document.activeElement?.getAttribute('data-id')
+    );
+
+    while (focusedElementId !== dataId) {
+      let sideBarFocused = focusedElementId;
+      await this.page.keyboard.press(key);
+      return sideBarFocused;
+    }
+  }
+
+  /**
    * Get a handle on a tab
    *
    * @param name Activity name
