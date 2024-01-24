@@ -63,9 +63,10 @@ export class ActivityHelper {
    * Keyboard navigation to sideBar using Tab key
    *
    * @param dataId sideBar widget id
+   * @param key navigation key to press
    * @returns Active sideBar widget id
    */
-  async tabToSidebar(
+  async keyToSidebar(
     dataId: string,
     key: string
   ): Promise<string | null | undefined> {
@@ -78,6 +79,7 @@ export class ActivityHelper {
       await this.page.keyboard.press(key);
       return sideBarFocused;
     }
+    return;
   }
 
   /**
