@@ -62,6 +62,12 @@ The default keyboard shortcuts are displayed in the small widget shown when hove
 
 To enable the inline suggestions based on the kernel history, go to Settings → Inline Completer → History provider → check the "enabled" checkbox.
 
+In addition to the built-in history suggestions,
+the [`jupyter-ai`](https://github.com/jupyterlab/jupyter-ai) extension will provide
+suggestions from supported models.
+The `jupyter-ai` integration with inline completer can be tested starting with the
+[v2.10.0beta1](https://github.com/jupyterlab/jupyter-ai/releases/tag/v2.10.0beta1) pre-release.
+
 The Inline Completer API is still considered experimental and may be subject to changes, please share feedback!
 
 ### Keyboard navigation improvements
