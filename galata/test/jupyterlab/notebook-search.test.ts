@@ -42,6 +42,19 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
   });
 
+  test('Should open search box in edit mode', async ({ page }) => {
+    // Enter edit mode
+    await page.notebook.enterCellEditingMode(0);
+
+    await page.keyboard.press('Control+f');
+
+    // Wait for the search box
+    await page.getByPlaceholder('Find').waitFor();
+
+    // Check the CM search panel is not displayed.
+    await expect(page.locator('.cm-search.cm-panel')).toHaveCount(0);
+  });
+
   test('Typing in search box', async ({ page }) => {
     // Check against React being too eager with controling state of input box
     await page.keyboard.press('Control+f');
@@ -679,5 +692,37 @@ test.describe('Auto search in any selection', async () => {
     await page.keyboard.press('Control+f');
     // Expect search in selection to be enabled as 1 line is selected.
     await expect(page.getByLabel('Search in 1 Selected Line')).toBeChecked();
+  });
+});
+
+test.describe('Search from selection', () => {
+  test('should expand the selection to the next occurence', async ({
+    page
+  }) => {
+    // This could be improved as the following statement will double click
+    // on the last line within the first cell that will result in the last word being selected.
+    await page.getByRole('textbox').getByText('with').nth(1).dblclick();
+
+    await page.keyboard.press('Control+d');
+
+    await expect(
+      page.getByRole('main').locator('.cm-selectionBackground')
+    ).toHaveCount(2);
+  });
+
+  test('should expand the selection to all occurence', async ({ page }) => {
+    // This could be improved as the following statement will double click
+    // on the last line within the first cell that will result in the last word being selected.
+    await page.getByRole('textbox').getByText('with').nth(1).dblclick();
+
+    await page.keyboard.press('Control+Shift+l');
+
+    // Switch back to notebook
+    // FIXME it should not be needed when we get https://github.com/jupyterlab/lumino/pull/662
+    await page.activity.activateTab(fileName);
+
+    await expect(
+      page.getByRole('main').locator('.cm-selectionBackground')
+    ).toHaveCount(4);
   });
 });

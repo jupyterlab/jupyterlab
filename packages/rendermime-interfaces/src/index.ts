@@ -488,12 +488,14 @@ export namespace IRenderMime {
      * Whether the URL should be handled by the resolver
      * or not.
      *
+     * @param allowRoot - Whether the paths starting at Unix-style filesystem root (`/`) are permitted.
+     *
      * #### Notes
      * This is similar to the `isLocal` check in `URLExt`,
      * but can also perform additional checks on whether the
      * resolver should handle a given URL.
      */
-    isLocal?: (url: string) => boolean;
+    isLocal?: (url: string, allowRoot?: boolean) => boolean;
 
     /**
      * Resolve a path from Jupyter kernel to a path:
@@ -523,10 +525,10 @@ export namespace IRenderMime {
    */
   export interface IMarkdownParser {
     /**
-     * Render a markdown source.
+     * Render a markdown source into unsanitized HTML.
      *
      * @param source - The string to render.
-     * @returns - A promise of the string.
+     * @returns - A promise of the string containing HTML which may require sanitization.
      */
     render(source: string): Promise<string>;
   }

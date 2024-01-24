@@ -17,9 +17,11 @@ test.describe('test readonly status', () => {
     await page.keyboard.press('Control+s');
 
     const imageName = 'readonly.png';
-    await page.locator('.Toastify__toast').waitFor({ state: 'visible' });
-    expect(await page.locator('.Toastify__toast').screenshot()).toMatchSnapshot(
-      imageName
-    );
+    const toast = page.locator('.Toastify__toast');
+    await toast.waitFor({ state: 'attached' });
+    // For some reason even `{animations: "disabled"}` is flaky.
+    // Instead we just wait a short while.
+    await page.waitForTimeout(2000);
+    expect(await toast.screenshot()).toMatchSnapshot(imageName);
   });
 });

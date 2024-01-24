@@ -29,7 +29,6 @@ export class WidgetLSPAdapterTracker<
       let newValue = args.newValue;
 
       if (!newValue || !(newValue instanceof DocumentWidget)) {
-        console.log('No current widget');
         return;
       }
 
