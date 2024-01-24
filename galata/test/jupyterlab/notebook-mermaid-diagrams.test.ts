@@ -35,11 +35,13 @@ test.describe('Notebook Mermaid Diagrams', () => {
       await page.notebook.activate(fileName);
 
       for (let i = 0; i < EXPECTED_MERMAID_COUNT; i++) {
-        const selector = `.jp-Cell:nth-child(${i + 1}) .jp-RenderedMermaid`;
-        const output = await page.waitForSelector(selector);
+        const output = await page.waitForSelector(
+          `.jp-Cell:nth-child(${i + 1}) .jp-RenderedMermaid`
+        );
         const iZero = `${i}`.padStart(2, '0');
-        const imageName = `run-cells-mermaid-${theme}-${iZero}.png`;
-        expect(await output.screenshot()).toMatchSnapshot(imageName);
+        expect(await output.screenshot()).toMatchSnapshot(
+          `mermaid-diagram-${theme}-${iZero}.png`
+        );
       }
     });
   }
