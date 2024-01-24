@@ -68,7 +68,7 @@ export class ActivityHelper {
    */
   async keyToSidebar(
     dataId: string,
-    key: string
+    key: KeyboardEvent['key']
   ): Promise<string | null | undefined> {
     let focusedElementId = await this.page.evaluate(
       () => document.activeElement?.getAttribute('data-id')
@@ -79,7 +79,6 @@ export class ActivityHelper {
       await this.page.keyboard.press(key);
       return sideBarFocused;
     }
-    return;
   }
 
   /**
