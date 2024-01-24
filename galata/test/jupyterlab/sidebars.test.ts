@@ -225,10 +225,12 @@ const elementAriaLabels = {
 test.describe('Sidebar keyboard navigation @a11y', () => {
   Object.keys(sidebarElementIds).forEach(tabSide => {
     test(`Open ${tabSide} via keyboard navigation`, async ({ page }) => {
+      await page.sidebar.close('left');
+      await page.sidebar.close('right');
+
       const keyValueArray = sidebarElementIds[tabSide];
 
       keyValueArray.forEach(async sideBarTabName => {
-        await page.activity.closeAll();
         await page.activity.tabToSidebar(await sideBarTabName[0], 'Tab');
         await page.activity.tabToSidebar(await sideBarTabName, 'ArrowDown');
         await page.keyboard.press('Enter');
