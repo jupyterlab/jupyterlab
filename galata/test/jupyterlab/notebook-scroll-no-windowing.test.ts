@@ -13,12 +13,12 @@ test.use({
     ...galata.DEFAULT_SETTINGS,
     '@jupyterlab/notebook-extension:tracker': {
       ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
-      windowingMode: 'full'
+      windowingMode: 'none'
     }
   }
 });
 
-test.describe('Windowed notebook scroll on navigation', () => {
+test.describe('Notebook scroll on navigation (no windowing)', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
@@ -55,7 +55,7 @@ test.describe('Windowed notebook scroll on navigation', () => {
   }
 });
 
-test.describe('Windowed notebook scroll on execution', () => {
+test.describe('Notebook scroll on execution (no windowing)', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${longOutputsNb}`),
@@ -139,7 +139,7 @@ test.describe('Windowed notebook scroll on execution', () => {
   });
 });
 
-test.describe('Windowed notebook scroll over long outputs', () => {
+test.describe('Notebook scroll over long outputs (no windowing)', () => {
   const outputAndHeading = 'long_output_and_headings.ipynb';
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
