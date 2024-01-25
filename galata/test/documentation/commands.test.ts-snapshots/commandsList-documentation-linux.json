@@ -619,6 +619,14 @@
     "shortcuts": []
   },
   {
+    "id": "documentsearch:toggleSearchInSelection",
+    "label": "Search in Selection",
+    "caption": "",
+    "shortcuts": [
+      "Alt L"
+    ]
+  },
+  {
     "id": "editmenu:clear-all",
     "label": "Clear All",
     "caption": "",
@@ -1907,7 +1915,9 @@
     "id": "notebook:toggle-all-cell-line-numbers",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Shift L"
+    ]
   },
   {
     "id": "notebook:toggle-autoclosing-brackets",
