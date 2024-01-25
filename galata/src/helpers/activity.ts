@@ -66,20 +66,14 @@ export class ActivityHelper {
    * @param key navigation key to press
    * @returns Active sideBar widget id
    */
-  async keyToSidebar(
-    dataId: string,
-    key: string
-  ): Promise<string | null | undefined> {
+  async keyToSidebar(dataId: string, key: string): Promise<void> {
     let focusedElementId = await this.page.evaluate(
       () => document.activeElement?.getAttribute('data-id')
     );
 
     while (focusedElementId !== dataId) {
-      let sideBarFocused = focusedElementId;
       await this.page.keyboard.press(key);
-      return sideBarFocused;
     }
-    return;
   }
 
   /**
