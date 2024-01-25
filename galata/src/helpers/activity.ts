@@ -75,9 +75,11 @@ export class ActivityHelper {
     );
 
     while (focusedElementId !== dataId) {
-      let sideBarFocused = focusedElementId;
       await this.page.keyboard.press(key);
-      return sideBarFocused;
+      let focusedElementId = await this.page.evaluate(
+        () => document.activeElement?.getAttribute('data-id')
+      );
+      return focusedElementId;
     }
     return;
   }
