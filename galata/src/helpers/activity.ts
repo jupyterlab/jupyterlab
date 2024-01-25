@@ -70,15 +70,13 @@ export class ActivityHelper {
     dataId: string,
     key: string
   ): Promise<string | null | undefined> {
-    let focusedElementId = await this.page.evaluate(
-      () => document.activeElement?.getAttribute('data-id')
-    );
+    let focusedElement = await this.page.evaluate(() => document.activeElement);
+
+    let focusedElementId = focusedElement?.getAttribute('data-id');
 
     while (focusedElementId !== dataId) {
       await this.page.keyboard.press(key);
-      let focusedElementId = await this.page.evaluate(
-        () => document.activeElement?.getAttribute('data-id')
-      );
+      let focusedElementId = focusedElement?.getAttribute('data-id');
       return focusedElementId;
     }
     return;
