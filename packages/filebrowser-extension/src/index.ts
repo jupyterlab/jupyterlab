@@ -62,7 +62,7 @@ import {
   stopIcon,
   textEditorIcon
 } from '@jupyterlab/ui-components';
-import { find, map } from '@lumino/algorithm';
+import { map } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import { ContextMenu } from '@lumino/widgets';
 
@@ -312,22 +312,101 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   id: '@jupyterlab/filebrowser-extension:default-file-browser',
   description: 'Provides the default file browser',
   provides: IDefaultFileBrowser,
-  requires: [IFileBrowserFactory],
+  requires: [
+    IFileBrowserFactory,
+    ISettingRegistry,
+    IToolbarWidgetRegistry,
+    ITranslator
+  ],
   optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
   activate: async (
     app: JupyterFrontEnd,
     fileBrowserFactory: IFileBrowserFactory,
+    settingRegistry: ISettingRegistry,
+    toolbarRegistry: IToolbarWidgetRegistry,
+    translator: ITranslator,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
     labShell: ILabShell | null
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
+    const trans = translator.load('jupyterlab');
 
     // Manually restore and load the default file browser.
     const defaultBrowser = fileBrowserFactory.createFileBrowser('filebrowser', {
       auto: false,
       restore: false
     });
+
+    // Set attributes when adding the browser to the UI
+    defaultBrowser.node.setAttribute('role', 'region');
+    defaultBrowser.node.setAttribute(
+      'aria-label',
+      trans.__('File Browser Section')
+    );
+    defaultBrowser.node.setAttribute('title', trans.__('Default Filebrowser'));
+    defaultBrowser.title.icon = folderIcon;
+
+    // Show the current file browser shortcut in its title.
+    const updateBrowserTitle = () => {
+      const binding = app.commands.keyBindings.find(
+        b => b.command === CommandIDs.toggleBrowser
+      );
+      if (binding) {
+        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
+        defaultBrowser.title.caption = trans.__(
+          'Default File Browser (%1)',
+          ks
+        );
+      } else {
+        defaultBrowser.title.caption = trans.__('Default File Browser');
+      }
+    };
+    updateBrowserTitle();
+    app.commands.keyBindingChanged.connect(() => {
+      updateBrowserTitle();
+    });
+    // Toolbar
+    toolbarRegistry.addFactory(
+      FILE_BROWSER_FACTORY,
+      'uploader',
+      (browser: FileBrowser) =>
+        new Uploader({ model: browser.model, translator })
+    );
+
+    toolbarRegistry.addFactory(
+      FILE_BROWSER_FACTORY,
+      'fileNameSearcher',
+      (browser: FileBrowser) => {
+        const searcher = FilenameSearcher({
+          updateFilter: (
+            filterFn: (item: string) => Partial<IScore> | null,
+            query?: string
+          ) => {
+            browser.model.setFilter(value => {
+              return filterFn(value.name.toLowerCase());
+            });
+          },
+          useFuzzyFilter: true,
+          placeholder: trans.__('Filter files by name'),
+          forceRefresh: true
+        });
+        searcher.addClass(FILTERBOX_CLASS);
+        return searcher;
+      }
+    );
+
+    setToolbar(
+      defaultBrowser,
+      createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        FILE_BROWSER_FACTORY,
+        browserWidget.id,
+        translator
+      )
+    );
+
     void Private.restoreBrowser(
       defaultBrowser,
       commands,
@@ -410,7 +489,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     IDefaultFileBrowser,
     IFileBrowserFactory,
     ISettingRegistry,
-    IToolbarWidgetRegistry,
     ITranslator,
     ILabShell,
     IFileBrowserCommands
@@ -423,7 +501,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     browser: IDefaultFileBrowser,
     factory: IFileBrowserFactory,
     settingRegistry: ISettingRegistry,
-    toolbarRegistry: IToolbarWidgetRegistry,
     translator: ITranslator,
     labShell: ILabShell,
     // Wait until file browser commands are ready before activating file browser widget
@@ -433,70 +510,6 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     const { tracker } = factory;
     const trans = translator.load('jupyterlab');
-
-    // Set attributes when adding the browser to the UI
-    browser.node.setAttribute('role', 'region');
-    browser.node.setAttribute('aria-label', trans.__('File Browser Section'));
-    browser.title.icon = folderIcon;
-
-    // Show the current file browser shortcut in its title.
-    const updateBrowserTitle = () => {
-      const binding = find(
-        app.commands.keyBindings,
-        b => b.command === CommandIDs.toggleBrowser
-      );
-      if (binding) {
-        const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
-        browser.title.caption = trans.__('File Browser (%1)', ks);
-      } else {
-        browser.title.caption = trans.__('File Browser');
-      }
-    };
-    updateBrowserTitle();
-    app.commands.keyBindingChanged.connect(() => {
-      updateBrowserTitle();
-    });
-
-    // Toolbar
-    toolbarRegistry.addFactory(
-      FILE_BROWSER_FACTORY,
-      'uploader',
-      (browser: FileBrowser) =>
-        new Uploader({ model: browser.model, translator })
-    );
-
-    toolbarRegistry.addFactory(
-      FILE_BROWSER_FACTORY,
-      'fileNameSearcher',
-      (browser: FileBrowser) => {
-        const searcher = FilenameSearcher({
-          updateFilter: (
-            filterFn: (item: string) => Partial<IScore> | null,
-            query?: string
-          ) => {
-            browser.model.setFilter(value => {
-              return filterFn(value.name.toLowerCase());
-            });
-          },
-          useFuzzyFilter: true,
-          placeholder: trans.__('Filter files by name'),
-          forceRefresh: true
-        });
-        searcher.addClass(FILTERBOX_CLASS);
-        return searcher;
-      }
-    );
-
-    setToolbar(
-      browser,
-      createToolbarFactory(
-        toolbarRegistry,
-        settingRegistry,
-        FILE_BROWSER_FACTORY,
-        browserWidget.id,
-        translator
-      )
-    );
 
     labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
 
@@ -772,7 +785,7 @@ const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
           )
         );
       },
-      icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
+      icon: folderIcon.bindprops({ stylesheet: 'menuItem' }),
       label: args =>
         args['mode'] === 'single-document'
           ? trans.__('Open in Simple Mode')
@@ -1117,7 +1130,7 @@ function addCommands(
         // ...or leave the icon blank
         return ft?.icon?.bindprops({ stylesheet: 'menuItem' });
       } else {
-        return folderIcon.bindprops({ stylesheet: 'menuItem' });
+        return addIcon.bindprops({ stylesheet: 'menuItem' });
       }
     },
     label: args =>
