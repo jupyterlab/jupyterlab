@@ -67,11 +67,11 @@ export class ActivityHelper {
    * @returns Active sideBar widget id
    */
   async keyToSidebar(dataId: string, key: string): Promise<void> {
-    let focusedElementId = await this.page.evaluate(
-      () => document.activeElement?.getAttribute('data-id')
-    );
-
-    while (focusedElementId !== dataId) {
+    while (
+      (await this.page.evaluate(
+        () => document.activeElement?.getAttribute('data-id')
+      )) !== dataId
+    ) {
       await this.page.keyboard.press(key);
     }
   }
