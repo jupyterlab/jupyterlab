@@ -1,7 +1,6 @@
 {
   "@jupyterlab/javascript-extension:factory": "Adds renderer for JavaScript content.",
   "@jupyterlab/json-extension:factory": "Adds renderer for JSON content.",
-  "@jupyterlab/json-lines-extension:factory": "Adds renderer for JSONLines content.",
   "@jupyterlab/pdf-extension:factory": "Adds renderer for PDF content.",
   "@jupyterlab/vega5-extension:factory": "Provides a renderer for Vega 5 and Vega-Lite 3 to 5 content.",
   "@jupyterlab/application:mimedocument": "Provides a mime document widget tracker.",
@@ -98,8 +97,7 @@
   "@jupyterlab/fileeditor-extension:tab-space-status": "Adds a file editor indentation status widget.",
   "@jupyterlab/help-extension:about": "Adds a \"About\" dialog feature.",
   "@jupyterlab/help-extension:jupyter-forum": "Adds command to open the Jupyter Forum website.",
-  "@jupyterlab/help-extension:open": "Add command to open websites as panel or browser tab.",
-  "@jupyterlab/help-extension:resources": "Adds menu entries to Jupyter reference documentation websites.",
+  "@jupyterlab/help-extension:resources": "Adds commands to Jupyter reference documentation websites.",
   "@jupyterlab/help-extension:licenses": "Adds licenses used report tools.",
   "@jupyterlab/htmlviewer-extension:plugin": "Adds HTML file viewer and provides its tracker.",
   "@jupyterlab/hub-extension:plugin": "Registers commands related to the hub server",
