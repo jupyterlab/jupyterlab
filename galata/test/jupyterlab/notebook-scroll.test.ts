@@ -137,6 +137,38 @@ test.describe('Windowed notebook scroll on execution', () => {
     // After running the second cell, the third cell should not be scrolled
     await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.2 });
   });
+
+  test('should not scroll when running in-place', async ({ page }) => {
+    const notebook = await page.notebook.getNotebookInPanel();
+    const thirdCell = await page.notebook.getCell(2);
+
+    const scroller = (await notebook.$(
+      '.jp-WindowedPanel-outer'
+    )) as ElementHandle<HTMLElement>;
+    const notebookBbox = await scroller.boundingBox();
+    const thirdCellBBox = await thirdCell.boundingBox();
+    await page.mouse.move(notebookBbox.x, notebookBbox.y);
+    const scrollOffset =
+      thirdCellBBox.y -
+      notebookBbox.y -
+      notebookBbox.height +
+      thirdCellBBox.height * 0.15;
+    await Promise.all([page.mouse.wheel(0, scrollOffset)]);
+    // Select third cell
+    await page.notebook.enterCellEditingMode(2);
+
+    const thirdCellLocator = page.locator(
+      '.jp-Cell[data-windowed-list-index="2"]'
+    );
+    // The third cell should be positioned at the bottom, revealing between 10 to 20% of its content.
+    await expect(thirdCellLocator).toBeInViewport({ ratio: 0.1 });
+    await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.2 });
+
+    // Run third cell in-place
+    await page.notebook.runCell(2, true);
+    // After running the third cell it should not be scrolled
+    await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.2 });
+  });
 });
 
 test.describe('Windowed notebook scroll over long outputs', () => {
