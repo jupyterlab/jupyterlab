@@ -42,15 +42,18 @@ test.describe('Notebook scroll on navigation (no windowing)', () => {
   };
   for (const [link, cellIdx] of Object.entries(cellLinks)) {
     test(`Scroll to ${link}`, async ({ page }) => {
-      const firstCell = await page.notebook.getCell(0);
-      await firstCell.scrollIntoViewIfNeeded();
+      const firstCellLocator = page.locator(
+        '.jp-Cell[data-windowed-list-index="0"]'
+      );
+      const lastCellLocator = page.locator(
+        `.jp-Cell[data-windowed-list-index="${cellIdx}"]`
+      );
+      await firstCellLocator.scrollIntoViewIfNeeded();
 
       await page.click(`a:has-text("${link}")`);
 
-      await firstCell.waitForElementState('hidden');
-
-      const lastCell = await page.notebook.getCell(cellIdx);
-      await lastCell.waitForElementState('visible');
+      await expect(firstCellLocator).not.toBeInViewport();
+      await expect(lastCellLocator).toBeInViewport();
     });
   }
 });
