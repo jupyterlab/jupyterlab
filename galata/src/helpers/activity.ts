@@ -74,6 +74,7 @@ export class ActivityHelper {
     ) {
       await this.page.keyboard.press(key);
     }
+    return;
   }
 
   /**
