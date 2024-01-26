@@ -549,7 +549,10 @@ export namespace NotebookActions {
       translator
     );
 
-    void Private.handleRunState(notebook, state, false);
+    // While we do not want to scroll if cell is visible,
+    // we still need to invoke the scrolling logic
+    // in case if cell is outside of viewport.
+    void Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -587,7 +590,11 @@ export namespace NotebookActions {
       sessionDialogs,
       translator
     );
-    void Private.handleRunState(notebook, state, false);
+
+    // While we do not want to scroll if cell is visible,
+    // we still need to invoke the scrolling logic
+    // in case if cell is outside of viewport.
+    void Private.handleRunState(notebook, state, true);
     return promise;
   }
 
@@ -652,7 +659,10 @@ export namespace NotebookActions {
       notebook.activeCellIndex++;
     }
 
-    void Private.handleRunState(notebook, state, true);
+    // If a cell is outside of viewport and scrolling is needed,
+    // prefer to align the cell to the top viewport edge,
+    // rather than to the bottom (so that editor is visible)
+    void Private.handleRunState(notebook, state, true, 'start');
     return promise;
   }
 
@@ -709,7 +719,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state, true, 'start');
     return promise;
   }
 
@@ -2303,13 +2313,17 @@ namespace Private {
   export async function handleRunState(
     notebook: Notebook,
     state: IState,
-    scroll = false
+    scroll = false,
+    alignPreference?: 'start' | 'end'
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
+
     if (scroll && activeCell) {
-      await notebook.scrollToItem(activeCellIndex, 'smart', 0).catch(reason => {
-        // no-op
-      });
+      await notebook
+        .scrollToItem(activeCellIndex, 'smart', 0, alignPreference)
+        .catch(reason => {
+          // no-op
+        });
     }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
@@ -2333,7 +2347,7 @@ namespace Private {
     translator?: ITranslator
   ): Promise<boolean> {
     const lastCell = cells[-1];
-    notebook.mode = 'command';
+    notebook.setMode('command', { focus: true, preventScrollOnFocus: true });
 
     let initializingDialogShown = false;
     return Promise.all(
@@ -2428,7 +2442,8 @@ namespace Private {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    notebook.mode = 'command';
+    // Note: focusing a node can invoke scrolling by the browser
+    notebook.setMode('command', { focus: true, preventScrollOnFocus: true });
 
     let lastIndex = notebook.activeCellIndex;
     const selected = notebook.widgets.filter((child, index) => {
