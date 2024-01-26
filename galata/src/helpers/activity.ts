@@ -70,13 +70,13 @@ export class ActivityHelper {
     dataId: string,
     key: string
   ): Promise<string | null | undefined> {
-    let activeElementId;
+    let activeElementId = await this.page.evaluate(
+      () => document.activeElement?.getAttribute('data-id')
+    );
     while (activeElementId !== dataId) {
+      let elementId = activeElementId;
       await this.page.keyboard.press(key);
-      let activeElementId = await this.page.evaluate(
-        () => document.activeElement?.getAttribute('data-id')
-      );
-      return activeElementId;
+      return elementId;
     }
   }
 
