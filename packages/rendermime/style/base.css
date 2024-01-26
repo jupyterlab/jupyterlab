@@ -31,19 +31,19 @@
   padding: 0;
 }
 
-.jp-RenderedText pre a:link {
+.jp-RenderedText pre a[href]:link {
   text-decoration: none;
   color: var(--jp-content-link-color);
 }
 
-.jp-RenderedText pre a:hover {
+.jp-RenderedText pre a[href]:hover {
   text-decoration: underline;
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-hover-color, var(--jp-content-link-color));
 }
 
-.jp-RenderedText pre a:visited {
+.jp-RenderedText pre a[href]:visited {
   text-decoration: none;
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-visited-color, var(--jp-content-link-color));
 }
 
 /* console foregrounds and backgrounds */
@@ -262,12 +262,12 @@
 
 .jp-RenderedHTMLCommon a:hover {
   text-decoration: underline;
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-hover-color, var(--jp-content-link-color));
 }
 
 .jp-RenderedHTMLCommon a:visited {
   text-decoration: none;
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-visited-color, var(--jp-content-link-color));
 }
 
 /* Headings */
@@ -329,6 +329,8 @@
 
 /* Lists */
 
+/* stylelint-disable selector-max-type, selector-max-compound-selectors */
+
 .jp-RenderedHTMLCommon ul:not(.list-inline),
 .jp-RenderedHTMLCommon ol:not(.list-inline) {
   padding-left: 2em;
@@ -377,6 +379,8 @@
 .jp-RenderedHTMLCommon ol ol {
   margin-bottom: 0;
 }
+
+/* stylelint-enable selector-max-type, selector-max-compound-selectors */
 
 .jp-RenderedHTMLCommon hr {
   color: var(--jp-border-color2);

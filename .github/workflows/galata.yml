@@ -5,7 +5,7 @@ on:
     types: [created]
   push:
     branches:
-      - master
+      - main
   pull_request:
 
 env:
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
@@ -65,7 +65,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-galata-test-assets
           path: |
@@ -74,7 +74,7 @@ jobs:
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-galata-report
           path: |
@@ -99,12 +99,12 @@ jobs:
         python-version: ['3.10.6']
     steps:
       - name: Checkout JupyterLab
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: core
 
       - name: Checkout demo project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
@@ -150,7 +150,7 @@ jobs:
         run: |
           set -ex
           cd galata
-          (jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode > /tmp/jupyterlab_server.log 2>&1) &
+          (jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode --custom-css > /tmp/jupyterlab_server.log 2>&1) &
         working-directory: core
 
       - name: Install browser
@@ -176,7 +176,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-documentation-test-assets
           path: |
@@ -184,7 +184,7 @@ jobs:
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-documentation-report
           path: |

@@ -34,9 +34,12 @@ class DelayedContentsManager extends ContentsManagerMock {
       const delay = this._delay;
       this._delay -= 500;
       void super.get(path, options).then(contents => {
-        setTimeout(() => {
-          resolve(contents);
-        }, Math.max(delay, 0));
+        setTimeout(
+          () => {
+            resolve(contents);
+          },
+          Math.max(delay, 0)
+        );
       });
     });
   }
@@ -433,9 +436,8 @@ describe('filebrowser/model', () => {
               const file = new File([content], fname, { type: 'text/plain' });
               await model.upload(file);
               // Ensure we get the file back.
-              const contentModel = await model.manager.services.contents.get(
-                fname
-              );
+              const contentModel =
+                await model.manager.services.contents.get(fname);
               expect(contentModel.content.length).toBeGreaterThan(0);
             });
           }

@@ -16,6 +16,9 @@
       "path": "../../packages/cells"
     },
     {
+      "path": "../../packages/debugger"
+    },
+    {
       "path": "../../packages/docmanager"
     },
     {

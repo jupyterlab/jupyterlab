@@ -11,7 +11,10 @@ import { Widget } from '@lumino/widgets';
  * The search provider registry token.
  */
 export const ISearchProviderRegistry = new Token<ISearchProviderRegistry>(
-  '@jupyterlab/documentsearch:ISearchProviderRegistry'
+  '@jupyterlab/documentsearch:ISearchProviderRegistry',
+  `A service for a registry of search
+  providers for the application. Plugins can register their UI elements with this registry
+  to provide find/replace support.`
 );
 
 /**
@@ -73,6 +76,11 @@ export interface IReplaceOptionsSupport {
    */
   preserveCase?: boolean;
 }
+
+/**
+ * How many items are selected?
+ */
+export type SelectionState = 'multiple' | 'single' | 'none';
 
 /**
  * React search component state
@@ -371,4 +379,14 @@ export interface ISearchProvider extends IBaseSearchProvider {
    * Signal emitted when filter definition changed.
    */
   filtersChanged?: ISignal<ISearchProvider, void>;
+
+  /**
+   * Is there one or more objects selected?
+   *
+   * The selection can be made of one or more lines, notebook cells, or other
+   * objects (e.g. spreadsheet cells). The provider can decide whether it counts
+   * multiple characters (as opposed to lines) as multiple selection or not,
+   * which will influence the heuristic auto-enabling "search in selection" mode.
+   */
+  getSelectionState?(): SelectionState;
 }

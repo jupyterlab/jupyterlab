@@ -32,6 +32,7 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
   id: '@jupyterlab/rendermime-extension:plugin',
+  description: 'Provides the render mime registry.',
   optional: [
     IDocumentManager,
     ILatexTypesetter,
@@ -48,6 +49,8 @@ const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
  * Export the plugin as default.
  */
 export default plugin;
+
+const DEBUGGER_OPEN_SOURCE = 'debugger:open-source';
 
 /**
  * Activate the rendermine plugin.
@@ -67,8 +70,20 @@ function activate(
       execute: args => {
         const path = args['path'] as string | undefined | null;
         const id = args['id'] as string | undefined | null;
+        const scope = (args['scope'] as string | undefined | null) || 'server';
         if (!path) {
           return;
+        }
+        if (scope === 'kernel') {
+          // Note: using a command instead of requiring
+          // `IDebuggerSourceViewer` to avoid a dependency cycle.
+          if (!app.commands.hasCommand(DEBUGGER_OPEN_SOURCE)) {
+            console.warn(
+              'Cannot open kernel file: debugger sources provider not available'
+            );
+            return;
+          }
+          return app.commands.execute(DEBUGGER_OPEN_SOURCE, { path });
         }
         // First check if the path exists on the server.
         return docManager.services.contents
@@ -102,6 +117,18 @@ function activate(
             app.commandLinker.connectNode(node, CommandIDs.handleLink, {
               path,
               id
+            });
+          },
+          handlePath: (
+            node: HTMLElement,
+            path: string,
+            scope: 'kernel' | 'server',
+            id?: string
+          ) => {
+            app.commandLinker.connectNode(node, CommandIDs.handleLink, {
+              path,
+              id,
+              scope
             });
           }
         },

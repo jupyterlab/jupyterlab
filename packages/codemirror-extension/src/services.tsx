@@ -3,6 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
+import { StreamLanguage } from '@codemirror/language';
 import { IYText } from '@jupyter/ydoc';
 import {
   JupyterFrontEnd,
@@ -18,6 +19,7 @@ import {
   IEditorExtensionRegistry,
   IEditorLanguageRegistry,
   IEditorThemeRegistry,
+  parseMathIPython,
   ybinding
 } from '@jupyterlab/codemirror';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -41,6 +43,7 @@ const SETTINGS_ID = '@jupyterlab/codemirror-extension:plugin';
  */
 export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
   id: '@jupyterlab/codemirror-extension:languages',
+  description: 'Provides the CodeMirror languages registry.',
   provides: IEditorLanguageRegistry,
   optional: [ITranslator],
   activate: (app: JupyterFrontEnd, translator: ITranslator | null) => {
@@ -59,10 +62,16 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
       name: 'ipythongfm',
       mime: 'text/x-ipythongfm',
       load: async () => {
-        // TODO: add support for LaTeX
-        const m = await import('@codemirror/lang-markdown');
+        const [m, tex] = await Promise.all([
+          import('@codemirror/lang-markdown'),
+          import('@codemirror/legacy-modes/mode/stex')
+        ]);
         return m.markdown({
-          codeLanguages: (info: string) => languages.findBest(info) as any
+          base: m.markdownLanguage,
+          codeLanguages: (info: string) => languages.findBest(info) as any,
+          extensions: [
+            parseMathIPython(StreamLanguage.define(tex.stexMath).parser)
+          ]
         });
       }
     });
@@ -75,6 +84,7 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
  */
 export const themePlugin: JupyterFrontEndPlugin<IEditorThemeRegistry> = {
   id: '@jupyterlab/codemirror-extension:themes',
+  description: 'Provides the CodeMirror theme registry',
   provides: IEditorThemeRegistry,
   optional: [ITranslator],
   activate: (app: JupyterFrontEnd, translator: ITranslator | null) => {
@@ -93,6 +103,7 @@ export const themePlugin: JupyterFrontEndPlugin<IEditorThemeRegistry> = {
 export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
   {
     id: '@jupyterlab/codemirror-extension:extensions',
+    description: 'Provides the CodeMirror extension factory registry.',
     provides: IEditorExtensionRegistry,
     requires: [IEditorThemeRegistry],
     optional: [ITranslator, ISettingRegistry, IFormRendererRegistry],
@@ -135,14 +146,11 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
               () => registry.settingsSchema,
               []
             ) as any;
-            const editorConfiguration =
-              (props.formContext.settings as ISettingRegistry.ISettings).id ===
-              SETTINGS_ID
-                ? registry.baseConfiguration
-                : registry.defaultConfiguration;
             const defaultFormData: Record<string, any> = {};
             // Only provide customizable options
-            for (const [key, value] of Object.entries(editorConfiguration)) {
+            for (const [key, value] of Object.entries(
+              registry.defaultConfiguration
+            )) {
               if (typeof properties[key] !== 'undefined') {
                 defaultFormData[key] = value;
               }
@@ -200,15 +208,17 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
   };
 
 /**
- * CodeMirror real-time collaboration binding provider.
+ * CodeMirror shared model binding provider.
  */
 export const bindingPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:binding',
+  description:
+    'Register the CodeMirror extension factory binding the editor and the shared model.',
   autoStart: true,
   requires: [IEditorExtensionRegistry],
   activate: (app: JupyterFrontEnd, extensions: IEditorExtensionRegistry) => {
     extensions.addExtension({
-      name: 'yjs-binding',
+      name: 'shared-model-binding',
       factory: options => {
         const sharedModel = options.model.sharedModel as IYText;
         return EditorExtensionRegistry.createImmutableExtension(
@@ -227,12 +237,9 @@ export const bindingPlugin: JupyterFrontEndPlugin<void> = {
  */
 export const servicesPlugin: JupyterFrontEndPlugin<IEditorServices> = {
   id: '@jupyterlab/codemirror-extension:services',
+  description: 'Provides the service to instantiate CodeMirror editors.',
   provides: IEditorServices,
-  requires: [
-    IEditorLanguageRegistry,
-    IEditorExtensionRegistry,
-    IEditorThemeRegistry
-  ],
+  requires: [IEditorLanguageRegistry, IEditorExtensionRegistry],
   optional: [ITranslator],
   activate: (
     app: JupyterFrontEnd,

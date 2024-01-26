@@ -103,9 +103,9 @@ describe('completer/reconciliator', () => {
           ...defaultOptions,
           providers: [fooProvider1, fooProvider2]
         });
-        void reconciliator.fetch({ offset: 0, text: '' });
-        expect(fooProvider1.fetch).toBeCalled();
-        expect(fooProvider2.fetch).toBeCalled();
+        await reconciliator.fetch({ offset: 0, text: '' });
+        expect(fooProvider1.fetch).toHaveBeenCalled();
+        expect(fooProvider2.fetch).toHaveBeenCalled();
       });
       it('should de-duplicate completions from multiple providers', async () => {
         const provider1 = new FooCompletionProvider();
@@ -213,11 +213,31 @@ describe('completer/reconciliator', () => {
         fooProvider2.shouldShowContinuousHint = jest.fn();
         const reconciliator = new ProviderReconciliator({
           ...defaultOptions,
-          providers: [fooProvider1, fooProvider1]
+          providers: [fooProvider1, fooProvider2]
         });
-        reconciliator.shouldShowContinuousHint(true, null as any);
-        expect(fooProvider1.shouldShowContinuousHint).toBeCalledTimes(1);
-        expect(fooProvider2.shouldShowContinuousHint).toBeCalledTimes(0);
+        await reconciliator.shouldShowContinuousHint(true, null as any);
+        expect(fooProvider1.shouldShowContinuousHint).toHaveBeenCalledTimes(1);
+        expect(fooProvider2.shouldShowContinuousHint).toHaveBeenCalledTimes(0);
+      });
+    });
+    describe('#applicableProviders()', () => {
+      it('should call `isApplicable` of all providers', async () => {
+        const fooProvider1 = new FooCompletionProvider();
+        const spy1 = jest.spyOn(fooProvider1, 'isApplicable');
+        const fooProvider2 = new FooCompletionProvider();
+        const spy2 = jest.spyOn(fooProvider2, 'isApplicable');
+        const reconciliator = new ProviderReconciliator({
+          ...defaultOptions,
+          providers: [fooProvider1, fooProvider2]
+        });
+        const applicableProvides = await reconciliator['applicableProviders']();
+        expect(spy1).toHaveBeenCalledTimes(1);
+        expect(spy2).toHaveBeenCalledTimes(1);
+        expect(applicableProvides).toEqual(
+          expect.arrayContaining([fooProvider1, fooProvider2])
+        );
+        spy1.mockRestore();
+        spy2.mockRestore();
       });
     });
   });

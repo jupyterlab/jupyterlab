@@ -52,7 +52,7 @@ def touch(file, mtime=None):
     dirname = os.path.dirname(file)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-    open(file, "a").close()  # noqa
+    open(file, "a").close()
     # set explicit mtime
     if mtime:
         atime = os.stat(file).st_atime
@@ -293,7 +293,7 @@ class TestExtension(AppHandlerTest):
         # The archive file names are printed to stdout when run `npm pack`
         packages = [
             subprocess.run(
-                ["npm", "pack", name],
+                ["npm", "pack", name],  # noqa S603 S607
                 stdout=subprocess.PIPE,
                 text=True,
                 check=True,

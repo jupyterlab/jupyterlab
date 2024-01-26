@@ -6,13 +6,25 @@
 set -ex
 set -o pipefail
 
+# use a single global cache dir
+export YARN_ENABLE_GLOBAL_CACHE=1
+
+# display verbose output for pkg builds run during `jlpm install`
+export YARN_ENABLE_INLINE_BUILDS=1
+
+
 if [[ $GROUP != nonode ]]; then
     python -c "from jupyterlab.commands import build_check; build_check()"
 fi
 
 
 if [[ $GROUP == python ]]; then
-    jupyter lab build --debug
+    export JUPYTERLAB_DIR="${HOME}/share/jupyter/lab/"
+    mkdir -p $JUPYTERLAB_DIR
+
+    # the env var ensures that `yarn.lock` in app dir does not change on a simple `jupyter lab build` call
+    YARN_ENABLE_IMMUTABLE_INSTALLS=1 jupyter lab build --debug --minimize=False
+
     # Run the python tests
     python -m pytest
 fi
@@ -35,7 +47,7 @@ fi
 
 if [[ $GROUP == docs ]]; then
     # Build the docs (includes API docs)
-    pip install .[docs]
+    python -m pip install .[docs]
     pushd docs
     make html
     popd
@@ -45,10 +57,16 @@ fi
 if [[ $GROUP == integrity ]]; then
     # Run the integrity script first
     jlpm run integrity --force
-
-    # Check yarn.lock file
-    jlpm check --integrity
-
+    # Validate the project
+    jlpm install --immutable  --immutable-cache
+    jlpm dlx yarn-berry-deduplicate --strategy fewerHighest
+    # Here we should not be stringent as yarn may clean
+    # output of `yarn-berry-deduplicate`
+    jlpm install
+    if [[ "$(git status --porcelain | wc -l | sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")" != "0" ]]; then
+        git diff
+        exit 1
+    fi
     # Run a browser check in dev mode
     jlpm run build
     python -m jupyterlab.browser_check --dev-mode
@@ -63,7 +81,7 @@ if [[ $GROUP == lint ]]; then
     jlpm run stylelint:check || (echo 'Please run `jlpm run stylelint` locally and push changes' && exit 1)
 
     # Python checks
-    black --check --diff --color .
+    ruff format .
     ruff .
     pipx run 'validate-pyproject[all]' pyproject.toml
 fi
@@ -79,12 +97,8 @@ if [[ $GROUP == integrity2 ]]; then
     # Make sure we can build for release
     jlpm run build:dev:prod:release
 
-    jlpm config set prefix ~/.yarn
-
     # Make sure we have CSS that can be converted with postcss
-    jlpm global add postcss postcss-cli
-
-    ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
+    jlpm dlx -p postcss -p postcss-cli postcss packages/**/style/*.css --dir /tmp --config scripts/postcss.config.js
 
     # run twine check on the python build assets.
     # this must be done before altering any versions below.
@@ -145,6 +159,7 @@ if [[ $GROUP == release_test ]]; then
     node buildutils/lib/local-repository.js stop
 fi
 
+
 if [[ $GROUP == examples ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
@@ -195,11 +210,11 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension build extension
 
     # Test develop script with hyphens and underscores in the module name
-    pip install -e test-hyphens
+    python -m pip install -e test-hyphens
     jupyter labextension develop test-hyphens --overwrite --debug
-    pip install -e test_no_hyphens
+    python -m pip install -e test_no_hyphens
     jupyter labextension develop test_no_hyphens --overwrite --debug
-    pip install -e test-hyphens-underscore
+    python -m pip install -e test-hyphens-underscore
     jupyter labextension develop test-hyphens-underscore --overwrite --debug
 
     python -m jupyterlab.browser_check
@@ -244,7 +259,7 @@ if [[ $GROUP == usage ]]; then
     jlpm run get:dependency react-native
 
     # Use the extension upgrade script
-    pip install cookiecutter
+    python -m pip install copier jinja2-time "pydantic<2"
     python -m jupyterlab.upgrade_extension --no-input jupyterlab/tests/mock_packages/extension
 fi
 
@@ -278,20 +293,21 @@ if [[ $GROUP == usage2 ]]; then
     python -m jupyterlab.browser_check --watch
 
     # Make sure we can non-dev install.
-    virtualenv -p $(which python3) test_install
-    ./test_install/bin/pip install -q ".[dev,test]"  # this populates <sys_prefix>/share/jupyter/lab
+    TEST_INSTALL_PATH="${HOME}/test_install"
+    virtualenv -p $(which python3) $TEST_INSTALL_PATH
+    $TEST_INSTALL_PATH/bin/pip install -q ".[dev,test]"  # this populates <sys_prefix>/share/jupyter/lab
 
-    ./test_install/bin/jupyter server extension list 1>serverextensions 2>&1
+    $TEST_INSTALL_PATH/bin/jupyter server extension list 1>serverextensions 2>&1
     cat serverextensions
     cat serverextensions | grep -i "jupyterlab.*enabled"
     cat serverextensions | grep -i "jupyterlab.*OK"
 
-    ./test_install/bin/python -m jupyterlab.browser_check
+    $TEST_INSTALL_PATH/bin/python -m jupyterlab.browser_check
     # Make sure we can run the build
-    ./test_install/bin/jupyter lab build
+    $TEST_INSTALL_PATH/bin/jupyter lab build
 
     # Make sure we can start and kill the lab server
-    ./test_install/bin/jupyter lab --no-browser &
+    $TEST_INSTALL_PATH/bin/jupyter lab --no-browser &
     TASK_PID=$!
     # Make sure the task is running
     ps -p $TASK_PID || exit 1
@@ -300,9 +316,9 @@ if [[ $GROUP == usage2 ]]; then
     wait $TASK_PID
 
     # Check the labhubapp
-    ./test_install/bin/pip install jupyterhub
+    $TEST_INSTALL_PATH/bin/pip install jupyterhub
     export JUPYTERHUB_API_TOKEN="mock_token"
-    ./test_install/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
+    $TEST_INSTALL_PATH/bin/jupyter-labhub --HubOAuth.oauth_client_id="mock_id" &
     TASK_PID=$!
     unset JUPYTERHUB_API_TOKEN
     # Make sure the task is running
@@ -358,7 +374,7 @@ if [[ $GROUP == interop ]]; then
     popd
     pushd provider
     jupyter labextension build .
-    pip install .
+    python -m pip install .
     popd
     pushd consumer
     jupyter labextension install .
@@ -382,7 +398,7 @@ if [[ $GROUP == interop ]]; then
     popd
     pushd consumer
     jupyter labextension build .
-    pip install .
+    python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
@@ -406,7 +422,7 @@ if [[ $GROUP == interop ]]; then
     # if installed after
     jupyter labextension install .
     jupyter labextension build .
-    pip install .
+    python -m pip install .
     popd
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"

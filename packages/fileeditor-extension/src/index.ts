@@ -51,7 +51,9 @@ import { ILauncher } from '@jupyterlab/launcher';
 import {
   ILSPCodeExtractorsManager,
   ILSPDocumentConnectionManager,
-  ILSPFeatureManager
+  ILSPFeatureManager,
+  IWidgetLSPAdapterTracker,
+  WidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IObservableList } from '@jupyterlab/observables';
@@ -77,6 +79,7 @@ export { Commands } from './commands';
 const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
+  description: 'Provides the file editor widget tracker.',
   requires: [
     IEditorServices,
     IEditorExtensionRegistry,
@@ -107,6 +110,7 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
  */
 export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
+  description: 'Adds a file editor indentation status widget.',
   autoStart: true,
   requires: [
     IEditorTracker,
@@ -139,7 +143,8 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
     for (const size of ['1', '2', '4', '8']) {
       const args: JSONObject = {
         size,
-        name: trans.__('Spaces: %1', size)
+        // Use a context to differentiate with string set as plural in 3.x
+        name: trans._p('v4', 'Spaces: %1', size)
       };
       menu.addItem({ command, args });
     }
@@ -185,6 +190,7 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
  */
 const lineColStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:cursor-position',
+  description: 'Adds a file editor cursor position status widget.',
   activate: (
     app: JupyterFrontEnd,
     tracker: IEditorTracker,
@@ -204,6 +210,7 @@ const lineColStatus: JupyterFrontEndPlugin<void> = {
 
 const completerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:completer',
+  description: 'Adds the completer capability to the file editor.',
   requires: [IEditorTracker],
   optional: [ICompletionProviderManager, ITranslator, ISanitizer],
   activate: activateFileEditorCompleterService,
@@ -215,6 +222,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
  */
 const searchProvider: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:search',
+  description: 'Adds search capability to the file editor.',
   requires: [ISearchProviderRegistry],
   autoStart: true,
   activate: (app: JupyterFrontEnd, registry: ISearchProviderRegistry) => {
@@ -224,13 +232,14 @@ const searchProvider: JupyterFrontEndPlugin<void> = {
 
 const languageServerPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:language-server',
+  description: 'Adds Language Server capability to the file editor.',
   requires: [
     IEditorTracker,
     ILSPDocumentConnectionManager,
     ILSPFeatureManager,
-    ILSPCodeExtractorsManager
+    ILSPCodeExtractorsManager,
+    IWidgetLSPAdapterTracker
   ],
-
   activate: activateFileEditorLanguageServer,
   autoStart: true
 };
@@ -399,7 +408,7 @@ function activate(
             })
             .forEach(spec => {
               // Avoid mode name with a curse word.
-              if (spec.name.indexOf('brainf') === 0) {
+              if (spec.name.toLowerCase().indexOf('brainf') === 0) {
                 return;
               }
               languageMenu.addItem({
@@ -659,7 +668,8 @@ function activateFileEditorLanguageServer(
   editors: IEditorTracker,
   connectionManager: ILSPDocumentConnectionManager,
   featureManager: ILSPFeatureManager,
-  extractorManager: ILSPCodeExtractorsManager
+  extractorManager: ILSPCodeExtractorsManager,
+  adapterTracker: IWidgetLSPAdapterTracker
 ): void {
   editors.widgetAdded.connect(async (_, editor) => {
     const adapter = new FileEditorAdapter(editor, {
@@ -668,6 +678,6 @@ function activateFileEditorLanguageServer(
       foreignCodeExtractorsManager: extractorManager,
       docRegistry: app.docRegistry
     });
-    connectionManager.registerAdapter(editor.context.path, adapter);
+    (adapterTracker as WidgetLSPAdapterTracker).add(adapter);
   });
 }

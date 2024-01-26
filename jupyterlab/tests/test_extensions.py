@@ -8,7 +8,7 @@ import pytest
 from traitlets.config import Config, Configurable
 
 from jupyterlab.extensions import PyPIExtensionManager, ReadOnlyExtensionManager
-from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage
+from jupyterlab.extensions.manager import ExtensionManager, ExtensionPackage, PluginManager
 
 from . import fake_client_factory
 
@@ -166,7 +166,7 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
     extension2 = ExtensionPackage(
         name="jupyterlab-github",
         description="JupyterLab viewer for GitHub repositories",
-        homepage_url="https://github.com/jupyterlab/jupyterlab-github/blob/master/README.md",
+        homepage_url="https://github.com/jupyterlab/jupyterlab-github/blob/main/README.md",
         pkg_type="prebuilt",
         latest_version="3.0.1",
         author="Ian Rose",
@@ -239,7 +239,6 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
                     "nbformat",
                     "packaging",
                     "pexpect",
-                    "black ; extra == 'dev'",
                     "coverage ; extra == 'dev'",
                     "jupyter-packaging (~=0.7.9) ; extra == 'dev'",
                     "jupyterlab (~=3.0) ; extra == 'dev'",
@@ -248,7 +247,6 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
                     "pytest-asyncio ; extra == 'dev'",
                     "pytest-cov ; extra == 'dev'",
                     "pytest-tornasync ; extra == 'dev'",
-                    "black ; extra == 'tests'",
                     "coverage ; extra == 'tests'",
                     "jupyter-packaging (~=0.7.9) ; extra == 'tests'",
                     "jupyterlab (~=3.0) ; extra == 'tests'",
@@ -285,7 +283,7 @@ async def test_PyPiExtensionManager_list_extensions_query(mocked_rpcclient):
                 "download_url": "",
                 "project_url": "",
                 "project_urls": {
-                    "Homepage": "https://github.com/jupyterlab/jupyterlab-github/blob/master/README.md",
+                    "Homepage": "https://github.com/jupyterlab/jupyterlab-github/blob/main/README.md",
                     "Bug Tracker": "https://github.com/jupyterlab/jupyterlab-github/issues",
                     "Source Code": "https://github.com/jupyterlab/jupyterlab-github",
                 },
@@ -342,3 +340,32 @@ async def test_PyPiExtensionManager_custom_server_url():
     manager = PyPIExtensionManager(parent=parent)
 
     assert manager.base_url == BASE_URL
+
+
+LEVELS = ["user", "sys_prefix", "system"]
+
+
+@pytest.mark.parametrize("level", LEVELS)
+async def test_PyPiExtensionManager_custom_level(level):
+    parent = Configurable(config=Config({"PyPIExtensionManager": {"level": level}}))
+    manager = PyPIExtensionManager(parent=parent)
+    assert manager.level == level
+
+
+@pytest.mark.parametrize("level", LEVELS)
+async def test_PyPiExtensionManager_inherits_custom_level(level):
+    parent = Configurable(config=Config({"PluginManager": {"level": level}}))
+    manager = PyPIExtensionManager(parent=parent)
+    assert manager.level == level
+
+
+@pytest.mark.parametrize("level", LEVELS)
+async def test_PluginManager_custom_level(level):
+    parent = Configurable(config=Config({"PluginManager": {"level": level}}))
+    manager = PluginManager(parent=parent)
+    assert manager.level == level
+
+
+async def test_PluginManager_default_level():
+    manager = PluginManager()
+    assert manager.level == "sys_prefix"

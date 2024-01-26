@@ -22,9 +22,9 @@ The most complicated plugin included in the **JupyterLab application**
 is the **Notebook plugin**.
 
 The
-`NotebookWidgetFactory <../api/classes/notebook.notebookwidgetfactory-1.html>`__
+`NotebookWidgetFactory <../api/classes/notebook.NotebookWidgetFactory-1.html>`__
 constructs a new
-`NotebookPanel <../api/classes/notebook.notebookpanel-1.html>`__
+`NotebookPanel <../api/classes/notebook.NotebookPanel-1.html>`__
 from a model and populates the toolbar with default widgets.
 
 Structure of the Notebook plugin
@@ -37,11 +37,11 @@ Model
 ^^^^^
 
 The
-`NotebookModel <../api/classes/notebook.notebookmodel-1.html>`__
+`NotebookModel <../api/classes/notebook.NotebookModel-1.html>`__
 contains an observable list of cells.
 
 A `cell
-model <../api/classes/cells.cellmodel-1.html>`__
+model <../api/classes/cells.CellModel-1.html>`__
 can be:
 
 -  a code cell
@@ -67,10 +67,12 @@ Metadata
 """"""""
 
 The notebook model and the cell model (i.e. notebook cells) support
-getting and setting metadata through an
-`IObservableJSON <../api/modules/observables.iobservablejson.html>`__
-object. You can use this to get and set notebook/cell metadata,
-as well as subscribe to changes to it.
+getting and setting metadata through method ``getMetadata``, ``setMetadata``
+and ``deleteMetadata`` (see `NotebookModel <../api/classes/notebook.NotebookModel-1.html>`__
+and `cell model <../api/classes/cells.CellModel-1.html>`__).
+You can listen for changes in the metadata through the ``sharedModel.metadataChanged`` attribute
+(see `cell shared model <https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedBaseCell.html#metadataChanged>`__
+and `notebook shared model <https://jupyter-ydoc.readthedocs.io/en/latest/api/interfaces/ISharedNotebook-1.html#metadataChanged>`__).
 
 Notebook widget
 ^^^^^^^^^^^^^^^
@@ -80,13 +82,13 @@ a new NotebookPanel from the model. The NotebookPanel widget is added to
 the DockPanel. The **NotebookPanel** contains:
 
 -  a
-   `Toolbar <../api/classes/apputils.toolbar-1.html>`__
+   `Toolbar <../api/classes/ui_components.Toolbar-1.html>`__
 -  a `Notebook
-   widget <../api/classes/notebook.notebook-2.html>`__.
+   widget <../api/classes/notebook.Notebook-1.html>`__.
 
 The NotebookPanel also adds completion logic.
 
-The **NotebookToolbar** maintains a list of widgets to add to the
+The **Notebook toolbar** maintains a list of widgets to add to the
 toolbar. The **Notebook widget** contains the rendering of the notebook
 and handles most of the interaction logic with the notebook itself (such
 as keeping track of interactions such as selected and active cells and
@@ -99,7 +101,7 @@ Higher level actions using NotebookActions
 """"""""""""""""""""""""""""""""""""""""""
 
 Higher-level actions are contained in the
-`NotebookActions <../api/classes/notebook.notebookactions-1.html>`__
+`NotebookActions <../api/classes/notebook.NotebookActions-1.html>`__
 namespace, which has functions, when given a notebook widget, to run a
 cell and select the next cell, merge or split cells at the cursor,
 delete selected cells, etc.
@@ -108,25 +110,25 @@ Widget hierarchy
 """"""""""""""""
 
 A Notebook widget contains a list of `cell
-widgets <../api/classes/cells.cell-1.html>`__,
+widgets <../api/classes/cells.Cell-1.html>`__,
 corresponding to the cell models in its cell list.
 
 -  Each cell widget contains an
-   `InputArea <../api/classes/cells.inputarea-1.html>`__,
+   `InputArea <../api/classes/cells.InputArea-1.html>`__,
 
    -  which contains a
-      `CodeEditorWrapper <../api/classes/codeeditor.codeeditorwrapper-1.html>`__,
+      `CodeEditorWrapper <../api/classes/codeeditor.CodeEditorWrapper-1.html>`__,
 
       -  which contains a JavaScript CodeMirror instance.
 
 A
-`CodeCell <../api/classes/cells.codecell-1.html>`__
+`CodeCell <../api/classes/cells.CodeCell-1.html>`__
 also contains an
-`OutputArea <../api/classes/outputarea.outputarea-2.html>`__.
+`OutputArea <../api/classes/outputarea.OutputArea-1.html>`__.
 An OutputArea is responsible for rendering the outputs in the
-`OutputAreaModel <../api/classes/outputarea.outputareamodel-1.html>`__
+`OutputAreaModel <../api/classes/outputarea.OutputAreaModel-1.html>`__
 list. An OutputArea uses a notebook-specific
-`RenderMimeRegistry <../api/classes/rendermime.rendermimeregistry-1.html>`__
+`RenderMimeRegistry <../api/classes/rendermime.RenderMimeRegistry-1.html>`__
 object to render ``display_data`` output messages.
 
 The Notebook widget is represented in the DOM with a ``<div>`` element
@@ -205,20 +207,21 @@ You may add a ``rank`` attribute to modify the item position (the default value 
 Adding a widget to the notebook header
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Start from the cookie cutter extension template.
+Start from the extension template.
 
-::
+.. code-block:: shell
 
-    pip install cookiecutter
-    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
-    cd my_cookie_cutter_name
+    pip install "copier~=8.0" jinja2-time
+    mkdir myextension
+    cd myextension
+    copier copy --UNSAFE https://github.com/jupyterlab/extension-template .
 
 Install the dependencies. Note that extensions are built against the
 released npm packages, not the development versions.
 
-::
+.. code-block:: shell
 
-    jlpm add -D @jupyterlab/notebook @jupyterlab/application @jupyterlab/ui-components @jupyterlab/docregistry @lumino/disposable @lumino/widgets --legacy-peer-deps
+    jlpm add -D @jupyterlab/notebook @jupyterlab/application @jupyterlab/ui-components @jupyterlab/docregistry @lumino/disposable @lumino/widgets
 
 Copy the following to ``src/index.ts``:
 
@@ -243,6 +246,7 @@ Copy the following to ``src/index.ts``:
     const plugin: JupyterFrontEndPlugin<void> = {
       activate,
       id: 'my-extension-name:widgetPlugin',
+      description: 'Add a widget to the notebook header.',
       autoStart: true
     };
 
@@ -298,7 +302,7 @@ Copy the following to ``src/index.ts``:
 
 And the following to ``style/base.css``:
 
-.. code:: css
+.. code-block:: css
 
     .jp-myextension-myheader {
         min-height: 20px;
@@ -308,10 +312,9 @@ And the following to ``style/base.css``:
 
 Run the following commands:
 
-::
+.. code-block:: shell
 
     pip install -e .
-    pip install jupyter-packaging
     jupyter labextension develop . --overwrite
     jupyter lab
 
@@ -327,9 +330,9 @@ intrinsic relation between *lumino widgets* and *Jupyter interactive widgets*.
 
 The *ipywidgets* extension registers a factory for a notebook *widget*
 extension using the `Document
-Registry <../api/classes/docregistry.documentregistry-1.html>`__.
+Registry <../api/classes/docregistry.DocumentRegistry-1.html>`__.
 The ``createNew()`` function is called with a NotebookPanel and
-`DocumentContext <../api/interfaces/docregistry.documentregistry.icontext.html>`__.
+`DocumentContext <../api/interfaces/docregistry.DocumentRegistry.IContext.html>`__.
 The plugin then creates a ipywidget manager (which uses the context to
 interact the kernel and kernel's comm manager). The plugin then
 registers an ipywidget renderer with the notebook instance's rendermime

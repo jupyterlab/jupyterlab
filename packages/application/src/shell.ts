@@ -7,6 +7,7 @@ import {
   classes,
   DockPanelSvg,
   LabIcon,
+  SidePanel,
   TabBarSvg,
   tabIcon,
   TabPanelSvg
@@ -17,6 +18,7 @@ import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import {
+  AccordionPanel,
   BoxLayout,
   BoxPanel,
   DockLayout,
@@ -64,7 +66,8 @@ const ACTIVITY_CLASS = 'jp-Activity';
  * The JupyterLab application shell token.
  */
 export const ILabShell = new Token<ILabShell>(
-  '@jupyterlab/application:ILabShell'
+  '@jupyterlab/application:ILabShell',
+  'A service for interacting with the JupyterLab shell. The top-level ``application`` object also has a reference to the shell, but it has a restricted interface in order to be agnostic to different shell implementations on the application. Use this to get more detailed information about currently active widgets and layout state.'
 );
 
 /**
@@ -275,6 +278,23 @@ export namespace ILabShell {
      * The collection of widgets held by the sidebar.
      */
     readonly widgets: Array<Widget> | null;
+
+    /**
+     * The collection of widgets states held by the sidebar.
+     */
+    readonly widgetStates: {
+      [id: string]: {
+        /**
+         * Vertical sizes of the widgets.
+         */
+        readonly sizes: Array<number> | null;
+
+        /**
+         * Expansion states of the widgets.
+         */
+        readonly expansionStates: Array<boolean> | null;
+      };
+    };
   }
 }
 
@@ -466,16 +486,23 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       // Stop watching the title of the previously current widget
       if (oldValue) {
         oldValue.title.changed.disconnect(this._updateTitlePanelTitle, this);
+
+        if (oldValue instanceof DocumentWidget) {
+          oldValue.context.pathChanged.disconnect(
+            this._updateCurrentPath,
+            this
+          );
+        }
       }
 
       // Start watching the title of the new current widget
       if (newValue) {
         newValue.title.changed.connect(this._updateTitlePanelTitle, this);
         this._updateTitlePanelTitle();
-      }
 
-      if (newValue && newValue instanceof DocumentWidget) {
-        newValue.context.pathChanged.connect(this._updateCurrentPath, this);
+        if (newValue instanceof DocumentWidget) {
+          newValue.context.pathChanged.connect(this._updateCurrentPath, this);
+        }
       }
       this._updateCurrentPath();
     });
@@ -517,6 +544,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   get currentChanged(): ISignal<this, ILabShell.IChangedArgs> {
     return this._currentChanged;
+  }
+
+  /**
+   * Current document path.
+   */
+  // FIXME deprecation `undefined` is to ensure backward compatibility in 4.x
+  get currentPath(): string | null | undefined {
+    return this._currentPath;
   }
 
   /**
@@ -694,7 +729,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       TabBarSvg.translator = value;
 
       const trans = value.load('jupyterlab');
-      this._menuHandler.panel.node.setAttribute('aria-label', trans.__('main'));
+      this._menuHandler.panel.node.setAttribute(
+        'aria-label',
+        trans.__('main menu')
+      );
       this._leftHandler.sideBar.node.setAttribute(
         'aria-label',
         trans.__('main sidebar')
@@ -754,6 +792,40 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
+  /**
+   * Activate widget in specified area.
+   *
+   * ### Notes
+   * The alpha version of this method only supports activating the "main" area.
+   *
+   * @alpha
+   * @param area Name of area to activate
+   */
+  activateArea(area: ILabShell.Area = 'main'): void {
+    switch (area) {
+      case 'main':
+        {
+          const current = this._currentTabBar();
+          if (!current) {
+            return;
+          }
+          if (current.currentTitle) {
+            current.currentTitle.owner.activate();
+          }
+        }
+        return;
+      case 'left':
+      case 'right':
+      case 'header':
+      case 'top':
+      case 'menu':
+      case 'bottom':
+        console.debug(`Area: ${area} activation not yet implemented`);
+        break;
+      default:
+        throw new Error(`Invalid area: ${area}`);
+    }
+  }
   /**
    * Activate the next Tab in the active TabBar.
    */
@@ -1894,6 +1966,20 @@ namespace Private {
     }
 
     /**
+     * Handles a movement to the handles of a widget
+     */
+    private _onHandleMoved(): void {
+      return this._refreshVisibility();
+    }
+
+    /**
+     * Handles changes to the expansion status of a widget
+     */
+    private _onExpansionToggle(sender: AccordionPanel, index: number): void {
+      return this._refreshVisibility();
+    }
+
+    /**
      * Expand the sidebar.
      *
      * #### Notes
@@ -1951,7 +2037,6 @@ namespace Private {
       // Store the parent id in the title dataset
       // in order to dispatch click events to the right widget.
       title.dataset = { id: widget.id };
-
       if (title.icon instanceof LabIcon) {
         // bind an appropriate style to the icon
         title.icon = title.icon.bindprops({
@@ -1966,7 +2051,10 @@ namespace Private {
           stylesheet: 'sideBar'
         });
       }
-
+      // @ts-expect-error sometimes widget is an Accordion Panel
+      widget.content?.expansionToggled?.connect(this._onExpansionToggle, this);
+      // @ts-expect-error sometimes widget is a SidePanel
+      widget.content?.handleMoved?.connect(this._onHandleMoved, this);
       this._refreshVisibility();
     }
 
@@ -1977,11 +2065,26 @@ namespace Private {
       const collapsed = this._sideBar.currentTitle === null;
       const widgets = Array.from(this._stackedPanel.widgets);
       const currentWidget = widgets[this._sideBar.currentIndex];
+      const widgetStates: {
+        [id: string]: {
+          sizes: number[] | null;
+          expansionStates: boolean[] | null;
+        };
+      } = {};
+      this._stackedPanel.widgets.forEach((w: SidePanel) => {
+        if (w.id && w.content instanceof SplitPanel) {
+          widgetStates[w.id] = {
+            sizes: w.content.relativeSizes() as number[],
+            expansionStates: w.content.widgets.map(wi => wi.isVisible)
+          };
+        }
+      });
       return {
         collapsed,
         currentWidget,
         visible: !this._isHiddenByUser,
-        widgets
+        widgets,
+        widgetStates
       };
     }
 
@@ -1997,6 +2100,25 @@ namespace Private {
       }
       if (!data.visible) {
         this.hide();
+      }
+      if (data.widgetStates) {
+        this._stackedPanel.widgets.forEach((w: SidePanel) => {
+          if (w.id && w.content instanceof SplitPanel) {
+            const state = data.widgetStates[w.id] ?? {};
+            w.content.widgets.forEach((wi, widx) => {
+              const expansion = (state.expansionStates ?? [])[widx];
+              if (
+                typeof expansion === 'boolean' &&
+                w.content instanceof AccordionPanel
+              ) {
+                expansion ? w.content.expand(widx) : w.content.collapse(widx);
+              }
+            });
+            if (state.sizes) {
+              w.content.setRelativeSizes(state.sizes);
+            }
+          }
+        });
       }
     }
 
@@ -2119,13 +2241,17 @@ namespace Private {
       this.addClass('jp-skiplink');
       this.id = 'jp-skiplink';
       this._shell = shell;
-      this._createSkipLink('Skip to left side bar');
+      this._createSkipLink('Skip to main panel', 'main');
     }
 
     handleEvent(event: Event): void {
       switch (event.type) {
         case 'click':
-          this._focusLeftSideBar();
+          if (event.target instanceof HTMLElement) {
+            this._shell.activateArea(
+              event.target?.dataset?.targetarea as ILabShell.Area
+            );
+          }
           break;
       }
     }
@@ -2146,18 +2272,15 @@ namespace Private {
       this.node.removeEventListener('click', this);
       super.onBeforeDetach(msg);
     }
-
-    private _focusLeftSideBar() {
-      this._shell.expandLeft();
-    }
     private _shell: ILabShell;
 
-    private _createSkipLink(skipLinkText: string): void {
+    private _createSkipLink(skipLinkText: string, area: ILabShell.Area): void {
       const skipLink = document.createElement('a');
       skipLink.href = '#';
-      skipLink.tabIndex = 1;
+      skipLink.tabIndex = 0;
       skipLink.text = skipLinkText;
       skipLink.className = 'skip-link';
+      skipLink.dataset['targetarea'] = area;
       this.node.appendChild(skipLink);
     }
   }

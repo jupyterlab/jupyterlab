@@ -58,7 +58,7 @@ commander
 
     // Handle dry runs.
     if (opts.dryRun) {
-      utils.run(`bumpversion --dry-run --verbose ${spec}`);
+      utils.run(`bumpversion --allow-dirty --dry-run --verbose ${spec}`);
       return;
     }
 
@@ -80,18 +80,13 @@ commander
       lernaVersion += ' --preid=alpha';
     }
 
-    let cmd = `lerna version -m \"[ci skip] New version\" --force-publish=* --no-push ${lernaVersion}`;
+    let cmd = `lerna version --no-git-tag-version --force-publish=* --no-push ${lernaVersion}`;
     if (opts.force) {
       cmd += ' --yes';
     }
-    const oldVersion = utils.run(
-      'git rev-parse HEAD',
-      {
-        stdio: 'pipe',
-        encoding: 'utf8'
-      },
-      true
-    );
+
+    const oldVersion = utils.getJSVersion('metapackage');
+
     // For a major release, we bump 10 minor versions so that we do
     // not conflict with versions during minor releases of the top
     // level package.
@@ -103,21 +98,14 @@ commander
       utils.run(cmd);
     }
 
-    const newVersion = utils.run(
-      'git rev-parse HEAD',
-      {
-        stdio: 'pipe',
-        encoding: 'utf8'
-      },
-      true
-    );
-    if (oldVersion === newVersion) {
+    const newVersion = utils.getJSVersion('metapackage');
+    if (spec !== 'major' && oldVersion === newVersion) {
       // lerna didn't version anything, so we assume the user aborted
       throw new Error('Lerna aborted');
     }
 
     // Bump the version.
-    utils.run(`bumpversion ${spec}`);
+    utils.run(`bumpversion --allow-dirty ${spec}`);
 
     // Run the post-bump script.
     utils.postbump(commit);

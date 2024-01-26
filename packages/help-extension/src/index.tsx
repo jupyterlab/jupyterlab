@@ -76,6 +76,7 @@ const HELP_CLASS = 'jp-Help';
  */
 const about: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:about',
+  description: 'Adds a "About" dialog feature.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ICommandPalette],
@@ -168,6 +169,7 @@ const about: JupyterFrontEndPlugin<void> = {
  */
 const jupyterForum: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:jupyter-forum',
+  description: 'Adds command to open the Jupyter Forum website.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ICommandPalette],
@@ -194,49 +196,25 @@ const jupyterForum: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin to add a list of resources to the help menu.
+ * A plugin to open resources in IFrames or new browser tabs.
  */
-const resources: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/help-extension:resources',
+const open: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:open',
+  description: 'Add command to open websites as panel or browser tab.',
   autoStart: true,
-  requires: [IMainMenu, ITranslator],
-  optional: [ILabShell, ICommandPalette, ILayoutRestorer],
+  requires: [ITranslator],
+  optional: [ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
-    mainMenu: IMainMenu,
     translator: ITranslator,
-    labShell: ILabShell | null,
-    palette: ICommandPalette | null,
     restorer: ILayoutRestorer | null
   ): void => {
+    const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
-    let counter = 0;
-    const category = trans.__('Help');
     const namespace = 'help-doc';
-    const { commands, shell, serviceManager } = app;
-    const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
-    const resources = [
-      {
-        text: trans.__('JupyterLab Reference'),
-        url: 'https://jupyterlab.readthedocs.io/en/latest/'
-      },
-      {
-        text: trans.__('JupyterLab FAQ'),
-        url: 'https://jupyterlab.readthedocs.io/en/latest/getting_started/faq.html'
-      },
-      {
-        text: trans.__('Jupyter Reference'),
-        url: 'https://jupyter.org/documentation'
-      },
-      {
-        text: trans.__('Markdown Reference'),
-        url: 'https://commonmark.org/help/'
-      }
-    ];
 
-    resources.sort((a: any, b: any) => {
-      return a.text.localeCompare(b.text);
-    });
+    const tracker = new WidgetTracker<MainAreaWidget<IFrame>>({ namespace });
+    let counter = 0;
 
     /**
      * Create a new HelpWidget widget.
@@ -295,6 +273,50 @@ const resources: JupyterFrontEndPlugin<void> = {
         name: widget => widget.content.url
       });
     }
+  }
+};
+
+/**
+ * A plugin to add a list of resources to the help menu.
+ */
+const resources: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/help-extension:resources',
+  description: 'Adds menu entries to Jupyter reference documentation websites.',
+  autoStart: true,
+  requires: [IMainMenu, ITranslator],
+  optional: [ILabShell, ICommandPalette],
+  activate: (
+    app: JupyterFrontEnd,
+    mainMenu: IMainMenu,
+    translator: ITranslator,
+    labShell: ILabShell | null,
+    palette: ICommandPalette | null
+  ): void => {
+    const trans = translator.load('jupyterlab');
+    const category = trans.__('Help');
+    const { commands, serviceManager } = app;
+    const resources = [
+      {
+        text: trans.__('JupyterLab Reference'),
+        url: 'https://jupyterlab.readthedocs.io/en/latest/'
+      },
+      {
+        text: trans.__('JupyterLab FAQ'),
+        url: 'https://jupyterlab.readthedocs.io/en/latest/getting_started/faq.html'
+      },
+      {
+        text: trans.__('Jupyter Reference'),
+        url: 'https://jupyter.org/documentation'
+      },
+      {
+        text: trans.__('Markdown Reference'),
+        url: 'https://commonmark.org/help/'
+      }
+    ];
+
+    resources.sort((a: any, b: any) => {
+      return a.text.localeCompare(b.text);
+    });
 
     // Populate the Help menu.
     const helpMenu = mainMenu.helpMenu;
@@ -383,7 +405,9 @@ const resources: JupyterFrontEndPlugin<void> = {
             isEnabled,
             execute: () => {
               // Create the header of the about dialog
-              const headerLogo = <img src={kernelIconUrl} />;
+              const headerLogo = (
+                <img src={kernelIconUrl} alt={trans.__('Kernel Icon')} />
+              );
               const title = (
                 <span className="jp-About-header">
                   {headerLogo}
@@ -453,6 +477,7 @@ const resources: JupyterFrontEndPlugin<void> = {
  */
 const licenses: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/help-extension:licenses',
+  description: 'Adds licenses used report tools.',
   autoStart: true,
   requires: [ITranslator],
   optional: [IMainMenu, ICommandPalette, ILayoutRestorer],
@@ -625,6 +650,7 @@ const licenses: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   about,
   jupyterForum,
+  open,
   resources,
   licenses
 ];

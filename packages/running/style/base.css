@@ -28,7 +28,7 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-.jp-RunningSessions > .jp-SidePanel-toolbar {
+.jp-RunningSessions > .jp-SidePanel-toolbar::part(positioning-region) {
   justify-content: flex-end;
 }
 
@@ -61,10 +61,15 @@
 
 .jp-RunningSessions-item:hover {
   background-color: var(--jp-layout-color2);
+  cursor: pointer;
 }
 
 .jp-RunningSessions-item.jp-mod-running-child {
   padding-left: 40px;
+}
+
+.jp-RunningSessions-item.jp-mod-kernel:not(.jp-mod-running-child) {
+  user-select: none;
 }
 
 .jp-RunningSessions-item img {
@@ -108,8 +113,7 @@
   background: var(--jp-layout-color3);
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled
-  > .jp-ToolbarButtonComponent-label {
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent {
   color: var(--jp-warn-color1);
   background-color: transparent;
   border-radius: 2px;
@@ -118,24 +122,20 @@
   text-overflow: ellipsis;
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled:hover
-  > .jp-ToolbarButtonComponent-label {
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent:hover {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled:focus
-  > .jp-ToolbarButtonComponent-label {
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent:focus {
   border: none;
   box-shadow: none;
   background-color: var(--jp-layout-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled.jp-mod-disabled
-  > .jp-ToolbarButtonComponent-label {
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent.jp-mod-disabled {
   color: var(--jp-ui-font-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-mod-styled.jp-mod-disabled:hover
-  > .jp-ToolbarButtonComponent-label {
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent.jp-mod-disabled:hover {
   background: none;
 }

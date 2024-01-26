@@ -55,5 +55,6 @@ export interface IPropertyInspectorProvider {
  * The property inspector provider token.
  */
 export const IPropertyInspectorProvider = new Token<IPropertyInspectorProvider>(
-  '@jupyterlab/property-inspector:IPropertyInspectorProvider'
+  '@jupyterlab/property-inspector:IPropertyInspectorProvider',
+  'A service to registry new widget in the property inspector side panel.'
 );

@@ -23,14 +23,15 @@
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
-  flex-wrap: wrap;
-  row-gap: 12px;
   border-bottom: none;
   height: auto;
   margin: 8px 12px 0;
   box-shadow: none;
   padding: 0;
-  justify-content: flex-start;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar::part(positioning-region) {
+  row-gap: 12px;
 }
 
 .jp-FileBrowser-Panel {
@@ -71,7 +72,6 @@
 .jp-FileBrowser-toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0;
-  padding-right: 2px;
   align-items: center;
   height: unset;
 }
@@ -113,11 +113,6 @@
   display: flex;
   flex-direction: column;
   outline: 0;
-}
-
-.jp-DirListing:focus-visible {
-  outline: 1px solid var(--jp-brand-color1);
-  outline-offset: -2px;
 }
 
 .jp-DirListing-header {
@@ -279,6 +274,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
   user-select: none;
+}
+
+.jp-DirListing-itemText:focus {
+  outline-width: 2px;
+  outline-color: var(--jp-inverse-layout-color1);
+  outline-style: solid;
+  outline-offset: 1px;
+}
+
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText:focus {
+  outline-color: var(--jp-layout-color1);
 }
 
 .jp-DirListing-itemModified {

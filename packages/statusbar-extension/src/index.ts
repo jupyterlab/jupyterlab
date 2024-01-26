@@ -15,13 +15,14 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStatusBar, StatusBar } from '@jupyterlab/statusbar';
 import { ITranslator } from '@jupyterlab/translation';
 
-export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
+const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 
 /**
  * Initialization data for the statusbar extension.
  */
 const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
+  description: 'Provides the application status bar.',
   requires: [ITranslator],
   provides: IStatusBar,
   autoStart: true,

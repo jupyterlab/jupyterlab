@@ -13,14 +13,15 @@
 }
 
 .jp-OutputArea-child {
-  display: table;
-  table-layout: fixed;
+  display: flex;
+  flex-direction: row;
   width: 100%;
   overflow: hidden;
 }
 
 .jp-OutputPrompt {
   width: var(--jp-cell-prompt-width);
+  flex: 0 0 var(--jp-cell-prompt-width);
   color: var(--jp-cell-outprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
@@ -43,13 +44,7 @@
   user-select: none;
 }
 
-.jp-OutputArea-prompt {
-  display: table-cell;
-  vertical-align: top;
-}
-
 .jp-OutputArea-output {
-  display: table-cell;
   width: 100%;
   height: auto;
   overflow: auto;
@@ -57,6 +52,10 @@
   -moz-user-select: text;
   -webkit-user-select: text;
   -ms-user-select: text;
+}
+
+.jp-OutputArea .jp-RenderedText {
+  padding-left: 1ch;
 }
 
 /**
@@ -69,11 +68,27 @@
   width: var(--jp-cell-prompt-width);
   height: 100%;
   opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-OutputArea-promptOverlay .jp-icon-output {
+  display: none;
+}
+
+.jp-OutputArea-promptOverlay:hover .jp-icon-output {
+  display: initial;
 }
 
 .jp-OutputArea-promptOverlay:hover {
   background: var(--jp-layout-color2);
   box-shadow: inset 0 0 1px var(--jp-inverse-layout-color0);
+}
+
+.jp-OutputArea-child .jp-OutputArea-output {
+  flex-grow: 1;
+  flex-shrink: 1;
 }
 
 /**
@@ -183,6 +198,7 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 .jp-OutputArea-output.jp-OutputArea-executeResult {
   margin-left: 0;
   width: 100%;
+  flex: 1 1 auto;
 }
 
 /* Text output with the Out[] prompt needs a top padding to match the
@@ -233,6 +249,12 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
   opacity: 1;
 }
 
+.jp-OutputArea-stdin-hiding {
+  /* soft-hide the output, preserving focus */
+  opacity: 0;
+  height: 0;
+}
+
 /*-----------------------------------------------------------------------------
 | Output Area View
 |----------------------------------------------------------------------------*/
@@ -252,22 +274,36 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated::before {
 
 @media print {
   .jp-OutputArea-child {
+    display: table;
+    table-layout: fixed;
     break-inside: avoid-page;
+  }
+
+  .jp-OutputArea-prompt {
+    display: table-cell;
+    vertical-align: top;
+  }
+
+  .jp-OutputArea-output {
+    display: table-cell;
   }
 }
 
 /*-----------------------------------------------------------------------------
 | Mobile
 |----------------------------------------------------------------------------*/
-@media only screen and (max-width: 760px) {
+@media only screen and (width <= 760px) {
+  .jp-OutputArea-child {
+    flex-direction: column;
+  }
+
   .jp-OutputPrompt {
-    display: table-row;
+    flex: 0 0 auto;
     text-align: left;
   }
 
-  .jp-OutputArea-child .jp-OutputArea-output {
-    display: table-row;
-    margin-left: var(--jp-notebook-padding);
+  .jp-OutputArea-promptOverlay {
+    display: none;
   }
 }
 

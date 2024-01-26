@@ -24,6 +24,7 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import json
+import os
 import shutil
 import time
 from collections import ChainMap
@@ -108,7 +109,7 @@ def build_api_docs(out_dir: Path):
     """build js api docs"""
     docs = HERE.parent
     root = docs.parent
-    docs_api = docs / "api"
+    docs_api = docs / "source" / "api"
     api_index = docs_api / "index.html"
     # is this an okay way to specify jlpm
     # without installing jupyterlab first?
@@ -119,9 +120,9 @@ def build_api_docs(out_dir: Path):
         # `make clean` to force a rebuild
         pass
     else:
-        check_call(jlpm, cwd=str(root))
-        check_call([*jlpm, "build:packages"], cwd=str(root))
-        check_call([*jlpm, "docs"], cwd=str(root))
+        check_call(jlpm, cwd=str(root))  # noqa S603
+        check_call([*jlpm, "build:packages"], cwd=str(root))  # noqa S603
+        check_call([*jlpm, "docs"], cwd=str(root))  # noqa S603
 
     dest_dir = out_dir / "api"
     if dest_dir.exists():
@@ -131,7 +132,9 @@ def build_api_docs(out_dir: Path):
 
 # Copy frontend files for snippet inclusion
 FILES_LIST = [  # File paths should be relative to jupyterlab root folder
-    "packages/settingregistry/src/plugin-schema.json"
+    "galata/test/documentation/data/custom-jupyter.css",
+    "galata/test/documentation/data/custom-markdown.css",
+    "packages/settingregistry/src/plugin-schema.json",
 ]
 SNIPPETS_FOLDER = "snippets"
 
@@ -186,10 +189,14 @@ def copy_automated_screenshots(temp_folder: Path) -> List[Path]:
 
 COMMANDS_LIST_PATH = "commands.test.ts-snapshots/commandsList-documentation-linux.json"
 COMMANDS_LIST_DOC = "user/commands_list.md"
+PLUGINS_LIST_PATH = "plugins.test.ts-snapshots/plugins-documentation-linux.json"
+PLUGINS_LIST_DOC = "extension/plugins_list.rst"
+TOKENS_LIST_PATH = "plugins.test.ts-snapshots/tokens-documentation-linux.json"
+TOKENS_LIST_DOC = "extension/tokens_list.rst"
 
 
 def document_commands_list(temp_folder: Path) -> None:
-    """Generate the command list documentation page for application extraction."""
+    """Generate the command list documentation page from application extraction."""
     list_path = HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / COMMANDS_LIST_PATH
 
     commands_list = json.loads(list_path.read_text())
@@ -212,6 +219,18 @@ def document_commands_list(temp_folder: Path) -> None:
         template += "| `{id}` | {label} | {shortcuts} |\n".format(**command)
 
     (temp_folder / COMMANDS_LIST_DOC).write_text(template)
+
+
+def document_plugins_tokens_list(list_path: Path, output_path: Path) -> None:
+    """Generate the plugins list documentation page from application extraction."""
+    items = json.loads(list_path.read_text())
+
+    template = ""
+
+    for _name, _description in items.items():
+        template += f"- ``{_name}``: {_description}\n"
+
+    output_path.write_text(template)
 
 
 # -- Options for HTML output ----------------------------------------------
@@ -250,10 +269,24 @@ html_theme_options = {
             "icon": "fab fa-gitter",
         },
     ],
+    "logo": {
+        "image_light": "_static/logo-rectangle.svg",
+        "image_dark": "_static/logo-rectangle-dark.svg",
+        "alt_text": "JupyterLab",
+    },
     "use_edit_page_button": True,
     "navbar_align": "left",
-    "navbar_end": ["navbar-icon-links.html", "search-field.html"],
+    "navbar_start": ["navbar-logo", "version-switcher"],
+    "navigation_with_keys": False,
     "footer_start": ["copyright.html"],
+    "switcher": {
+        # Trick to get the documentation version switcher to always points to the latest version without being corrected by the integrity check;
+        # otherwise older versions won't list newer versions
+        "json_url": "/".join(
+            ("https://jupyterlab.readthedocs.io/en", "latest", "_static/switcher.json")
+        ),
+        "version_match": os.environ.get("READTHEDOCS_VERSION", "latest"),
+    },
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -275,8 +308,8 @@ html_sidebars = {
 html_context = {
     "github_user": "jupyterlab",  # Username
     "github_repo": "jupyterlab",  # Repo name
-    "github_version": "master",  # Version
-    "conf_py_path": "/docs/source/",  # Path in the checkout to the docs root
+    "github_version": "main",  # Version
+    "doc_path": "docs/source/",  # Path in the checkout to the docs root
 }
 
 # -- Options for HTMLHelp output ------------------------------------------
@@ -363,7 +396,7 @@ epub_exclude_files = ["search.html"]
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"https://docs.python.org/": None}
+intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 
 def setup(app):
@@ -388,6 +421,15 @@ def setup(app):
         for f in tmp_files:
             f.unlink()
 
-    document_commands_list(Path(app.srcdir))
+    src_dir = Path(app.srcdir)
+    document_commands_list(src_dir)
+    document_plugins_tokens_list(
+        HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / PLUGINS_LIST_PATH,
+        src_dir / PLUGINS_LIST_DOC,
+    )
+    document_plugins_tokens_list(
+        HERE.parent.parent / AUTOMATED_SCREENSHOTS_FOLDER / TOKENS_LIST_PATH,
+        src_dir / TOKENS_LIST_DOC,
+    )
 
     app.connect("build-finished", partial(clean_code_files, tmp_files))

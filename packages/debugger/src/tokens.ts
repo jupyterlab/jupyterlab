@@ -119,6 +119,14 @@ export interface IDebugger {
   ): Promise<DebugProtocol.Variable[]>;
 
   /**
+   * Request to set a variable in the global scope.
+   *
+   * @param name The name of the variable.
+   * @param value The value of the variable.
+   */
+  copyToGlobals(name: string): Promise<void>;
+
+  /**
    * Request rich representation of a variable.
    *
    * @param variableName The variable name to request
@@ -322,6 +330,16 @@ export namespace IDebugger {
   export interface IHandler extends DebuggerHandler.IHandler {}
 
   /**
+   * Interface for interacting with source viewer.
+   */
+  export interface ISourceViewer {
+    /**
+     * Open read-only editor for given source and optionally set a breakpoint.
+     */
+    open(source: IDebugger.Source, breakpoint?: IDebugger.IBreakpoint): void;
+  }
+
+  /**
    * An interface for a scope.
    */
   export interface IScope {
@@ -521,6 +539,7 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsArguments;
       configurationDone: DebugProtocol.ConfigurationDoneArguments;
       continue: DebugProtocol.ContinueArguments;
+      copyToGlobals: ICopyToGlobalsArguments;
       debugInfo: Record<string, never>;
       disconnect: DebugProtocol.DisconnectArguments;
       dumpCell: IDumpCellArguments;
@@ -565,6 +584,7 @@ export namespace IDebugger {
       completions: DebugProtocol.CompletionsResponse;
       configurationDone: DebugProtocol.ConfigurationDoneResponse;
       continue: DebugProtocol.ContinueResponse;
+      copyToGlobals: DebugProtocol.SetExpressionResponse;
       debugInfo: IDebugInfoResponse;
       disconnect: DebugProtocol.DisconnectResponse;
       dumpCell: IDumpCellResponse;
@@ -602,6 +622,17 @@ export namespace IDebugger {
     };
 
     /**
+     * Arguments for CopyToGlobals request.
+     * This is an addition to the Debug Adaptor protocol to support
+     * copying variable from Locals() to Globals() during breakpoint.
+     */
+    export interface ICopyToGlobalsArguments {
+      srcVariableName: string;
+      dstVariableName: string;
+      srcFrameId: number;
+    }
+
+    /**
      * List of breakpoints in a source file.
      */
     export interface IDebugInfoBreakpoints {
@@ -617,6 +648,10 @@ export namespace IDebugger {
     export interface IDebugInfoResponse extends DebugProtocol.Response {
       body: {
         breakpoints: IDebugInfoBreakpoints[];
+        /**
+         * Whether the kernel supports the 'copyToGlobals' request.
+         */
+        copyToGlobals?: boolean;
         hashMethod: string;
         hashSeed: number;
         isStarted: boolean;
@@ -888,6 +923,11 @@ export namespace IDebugger {
       hasRichVariableRendering: boolean;
 
       /**
+       * Whether the kernel supports the copyToGlobals request.
+       */
+      supportCopyToGlobals: boolean;
+
+      /**
        * The variables UI model.
        */
       readonly variables: IVariables;
@@ -1040,32 +1080,47 @@ export namespace IDebugger {
 /**
  * The visual debugger token.
  */
-export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger:IDebugger');
+export const IDebugger = new Token<IDebugger>(
+  '@jupyterlab/debugger:IDebugger',
+  'A debugger user interface.'
+);
 
 /**
  * The debugger configuration token.
  */
 export const IDebuggerConfig = new Token<IDebugger.IConfig>(
-  '@jupyterlab/debugger:IDebuggerConfig'
+  '@jupyterlab/debugger:IDebuggerConfig',
+  'A service to handle the debugger configuration.'
 );
 
 /**
  * The debugger sources utility token.
  */
 export const IDebuggerSources = new Token<IDebugger.ISources>(
-  '@jupyterlab/debugger:IDebuggerSources'
+  '@jupyterlab/debugger:IDebuggerSources',
+  'A service to display sources in debug mode.'
 );
 
 /**
- * The debugger configuration token.
+ * The debugger sidebar token.
  */
 export const IDebuggerSidebar = new Token<IDebugger.ISidebar>(
-  '@jupyterlab/debugger:IDebuggerSidebar'
+  '@jupyterlab/debugger:IDebuggerSidebar',
+  'A service for the debugger sidebar.'
 );
 
 /**
  * The debugger handler token.
  */
 export const IDebuggerHandler = new Token<IDebugger.IHandler>(
-  '@jupyterlab/debugger:IDebuggerHandler'
+  '@jupyterlab/debugger:IDebuggerHandler',
+  'A service for handling notebook debugger.'
+);
+
+/**
+ * The source viwer token.
+ */
+export const IDebuggerSourceViewer = new Token<IDebugger.ISourceViewer>(
+  '@jupyterlab/debugger:IDebuggerSourceViewer',
+  'A debugger source viewer.'
 );

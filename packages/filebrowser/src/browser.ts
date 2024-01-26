@@ -62,14 +62,10 @@ export class FileBrowser extends SidePanel {
     model.connectionFailure.connect(this._onConnectionFailure, this);
     this._manager = model.manager;
 
-    // a11y
-    this.toolbar.node.setAttribute('role', 'navigation');
     this.toolbar.node.setAttribute(
       'aria-label',
       this._trans.__('file browser')
     );
-
-    this._directoryPending = false;
 
     // File browser widgets container
     this.mainPanel = new Panel();
@@ -129,6 +125,17 @@ export class FileBrowser extends SidePanel {
   }
 
   /**
+   * Whether to show the full path in the breadcrumbs
+   */
+  get showFullPath(): boolean {
+    return this.crumbs.fullPath;
+  }
+
+  set showFullPath(value: boolean) {
+    this.crumbs.fullPath = value;
+  }
+
+  /**
    * Whether to show the file size column
    */
   get showFileSizeColumn(): boolean {
@@ -169,6 +176,22 @@ export class FileBrowser extends SidePanel {
       this._showFileCheckboxes = value;
     } else {
       console.warn('Listing does not support toggling column visibility');
+    }
+  }
+
+  /**
+   * Whether to sort notebooks above other files
+   */
+  get sortNotebooksFirst(): boolean {
+    return this._sortNotebooksFirst;
+  }
+
+  set sortNotebooksFirst(value: boolean) {
+    if (this.listing.setNotebooksFirstSorting) {
+      this.listing.setNotebooksFirstSorting(value);
+      this._sortNotebooksFirst = value;
+    } else {
+      console.warn('Listing does not support sorting notebooks first');
     }
   }
 
@@ -226,63 +249,57 @@ export class FileBrowser extends SidePanel {
     return this.listing.paste();
   }
 
+  private async _createNew(
+    options: Contents.ICreateOptions
+  ): Promise<Contents.IModel> {
+    try {
+      const model = await this._manager.newUntitled(options);
+      await this.listing.selectItemByName(model.name, true);
+      await this.rename();
+      return model;
+    } catch (err) {
+      void showErrorMessage(this._trans.__('Error'), err);
+      throw err;
+    }
+  }
+
   /**
    * Create a new directory
    */
-  createNewDirectory(): void {
-    if (this._directoryPending === true) {
-      return;
+  async createNewDirectory(): Promise<Contents.IModel> {
+    if (this._directoryPending) {
+      return this._directoryPending;
     }
-    this._directoryPending = true;
-    // TODO: We should provide a hook into when the
-    // directory is done being created. This probably
-    // means storing a pendingDirectory promise and
-    // returning that if there is already a directory
-    // request.
-    void this._manager
-      .newUntitled({
-        path: this.model.path,
-        type: 'directory'
-      })
-      .then(async model => {
-        await this.listing.selectItemByName(model.name);
-        await this.rename();
-        this._directoryPending = false;
-      })
-      .catch(err => {
-        void showErrorMessage(this._trans.__('Error'), err);
-        this._directoryPending = false;
-      });
+    this._directoryPending = this._createNew({
+      path: this.model.path,
+      type: 'directory'
+    });
+    try {
+      return await this._directoryPending;
+    } finally {
+      this._directoryPending = null;
+    }
   }
 
   /**
    * Create a new file
    */
-  createNewFile(options: FileBrowser.IFileOptions): void {
-    if (this._filePending === true) {
-      return;
+  async createNewFile(
+    options: FileBrowser.IFileOptions
+  ): Promise<Contents.IModel> {
+    if (this._filePending) {
+      return this._filePending;
     }
-    this._filePending = true;
-    // TODO: We should provide a hook into when the
-    // file is done being created. This probably
-    // means storing a pendingFile promise and
-    // returning that if there is already a file
-    // request.
-    void this._manager
-      .newUntitled({
-        path: this.model.path,
-        type: 'file',
-        ext: options.ext
-      })
-      .then(async model => {
-        await this.listing.selectItemByName(model.name);
-        await this.rename();
-        this._filePending = false;
-      })
-      .catch(err => {
-        void showErrorMessage(this._trans.__('Error'), err);
-        this._filePending = false;
-      });
+    this._filePending = this._createNew({
+      path: this.model.path,
+      type: 'file',
+      ext: options.ext
+    });
+    try {
+      return await this._filePending;
+    } finally {
+      this._filePending = null;
+    }
   }
 
   /**
@@ -308,6 +325,15 @@ export class FileBrowser extends SidePanel {
    */
   download(): Promise<void> {
     return this.listing.download();
+  }
+
+  /**
+   * cd ..
+   *
+   * Go up one level in the directory tree.
+   */
+  async goUp() {
+    return this.listing.goUp();
   }
 
   /**
@@ -382,13 +408,14 @@ export class FileBrowser extends SidePanel {
   protected mainPanel: Panel;
 
   private _manager: IDocumentManager;
-  private _directoryPending: boolean;
-  private _filePending: boolean;
+  private _directoryPending: Promise<Contents.IModel> | null = null;
+  private _filePending: Promise<Contents.IModel> | null = null;
   private _navigateToCurrentDirectory: boolean;
   private _showLastModifiedColumn: boolean = true;
   private _showFileSizeColumn: boolean = false;
   private _showHiddenFiles: boolean = false;
   private _showFileCheckboxes: boolean = false;
+  private _sortNotebooksFirst: boolean = false;
 }
 
 /**

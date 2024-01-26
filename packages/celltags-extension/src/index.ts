@@ -24,6 +24,7 @@ import {
  */
 const customCellTag: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/celltags-extension:plugin',
+  description: 'Adds the cell tags editor.',
   autoStart: true,
   requires: [INotebookTracker],
   optional: [IFormRendererRegistry],
@@ -39,7 +40,10 @@ const customCellTag: JupyterFrontEndPlugin<void> = {
           return new CellTagField(tracker).render(props);
         }
       };
-      formRegistry.addRenderer('celltags-extension:plugin.renderer', component);
+      formRegistry.addRenderer(
+        '@jupyterlab/celltags-extension:plugin.renderer',
+        component
+      );
     }
   }
 };

@@ -36,6 +36,7 @@ const ICON_NAME = 'jp-JupyterIcon';
  */
 export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:workspaces',
+  description: 'Add workspace file type and commands.',
   autoStart: true,
   requires: [
     IDefaultFileBrowser,
@@ -209,7 +210,11 @@ namespace Private {
         await this._state.save(LAST_SAVE_ID, path);
 
         // Navigate to new workspace.
-        const url = URLExt.join(this._application, 'workspaces', id);
+        const workspacesBase = URLExt.join(this._application, 'workspaces');
+        const url = URLExt.join(workspacesBase, id);
+        if (!workspacesBase.startsWith(url)) {
+          throw new Error('Can only be used for workspaces');
+        }
         if (this._router) {
           this._router.navigate(url, { hard: true });
         } else {
@@ -262,7 +267,10 @@ namespace Private {
   ): Promise<string | null> {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
-    const saveBtn = Dialog.okButton({ label: trans.__('Save') });
+    const saveBtn = Dialog.okButton({
+      label: trans.__('Save'),
+      ariaLabel: trans.__('Save Current Workspace')
+    });
     const result = await showDialog({
       title: trans.__('Save Current Workspace As…'),
       body: new SaveWidget(defaultPath),

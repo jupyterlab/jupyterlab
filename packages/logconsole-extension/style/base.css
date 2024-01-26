@@ -26,10 +26,9 @@
   background-color: var(--jp-brand-color1);
 }
 
-/* Need to be very specific to override the typestyle styles on status bar components */
+/* Override semi-transparent white with opaque white for higher contrast */
 .jp-LogConsoleStatusItem.jp-mod-selected,
-.jp-LogConsoleStatusItem.jp-mod-selected div,
-.jp-LogConsoleStatusItem.jp-mod-selected div span {
+.jp-LogConsoleStatusItem.jp-mod-selected .jp-StatusBar-TextItem {
   color: white;
 }
 

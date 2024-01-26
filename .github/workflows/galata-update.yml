@@ -16,8 +16,14 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - name: React to the triggering comment
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions --raw-field 'content=+1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -25,7 +31,7 @@ jobs:
         run: git config --global hub.protocol https
 
       - name: Checkout the branch from the PR that triggered the job
-        run: hub pr checkout ${{ github.event.issue.number }}
+        run: gh pr checkout ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -43,10 +49,13 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           server_url: http-get://localhost:8888/lab
           test_folder: galata
+          artifact_name: updated-galata-snapshots
+          report_name: update-galata-report
+          npm_client: jlpm
 
       - name: Comment back on the PR
         run: |
-          hub api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Galata snapshots updated.'
+          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Galata snapshots updated.'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -65,14 +74,20 @@ jobs:
         python-version: ['3.10.6']
 
     steps:
+      - name: React to the triggering comment
+        run: |
+          gh api repos/${{ github.repository }}/issues/comments/${{ github.event.comment.id }}/reactions --raw-field 'content=+1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Checkout JupyterLab
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: core
 
       - name: Checkout demo project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
@@ -83,12 +98,9 @@ jobs:
           echo "JUPYTERLAB_GALATA_ROOT_DIR=$PWD" >> $GITHUB_ENV
         working-directory: demo
 
-      - name: Configure git to use https
-        run: git config --global hub.protocol https
-
       - name: Checkout the branch from the PR that triggered the job
         working-directory: core
-        run: hub pr checkout ${{ github.event.issue.number }}
+        run: gh pr checkout ${{ github.event.issue.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -119,9 +131,12 @@ jobs:
           test_folder: core/galata
           start_server_script: start:doc
           update_script: test:doc:update
+          artifact_name: updated-documentation-snapshots
+          report_name: update-documentation-report
+          npm_client: jlpm
 
       - name: Comment back on the PR
         run: |
-          hub api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated.'
+          gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments --raw-field 'body=Documentation snapshots updated.'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

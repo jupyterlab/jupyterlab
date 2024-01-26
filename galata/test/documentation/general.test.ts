@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import path from 'path';
 import {
   generateArrow,
   positionMouse,
@@ -16,8 +17,7 @@ test.use({
 });
 
 test.describe('General', () => {
-  // FIXME restore when ipywidgets support lumino 2
-  test.skip('Welcome', async ({ page }) => {
+  test('Welcome', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
     await page.addStyleTag({
@@ -80,13 +80,6 @@ test.describe('General', () => {
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
-  test('Overview', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
-    await openOverview(page);
-
-    expect(await page.screenshot()).toMatchSnapshot('interface_jupyterlab.png');
-  });
-
   test('Left Sidebar', async ({ page }) => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
@@ -99,6 +92,8 @@ test.describe('General', () => {
     await setSidebarWidth(page);
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
+    // Wait for the `data` folder to load to have something to blur
+    await page.waitForSelector('text=1024px');
 
     await page.evaluate(() => {
       (document.activeElement as HTMLElement).blur();
@@ -132,6 +127,9 @@ test.describe('General', () => {
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).not.toBeEmpty();
+    await expect(
+      page.locator('.jp-ActiveCellTool .jp-InputPrompt')
+    ).not.toHaveClass(/lm-mod-hidden/);
 
     expect(
       await page.screenshot({
@@ -224,32 +222,6 @@ test.describe('General', () => {
     await expect(page.locator('.jp-ActiveCellTool .jp-InputPrompt')).toHaveText(
       '[1]:'
     );
-  });
-
-  test('Open tabs', async ({ page }) => {
-    await openOverview(page);
-
-    await page.click('[title="Running Terminals and Kernels"]');
-
-    await page
-      .locator(
-        '.jp-RunningSessions-item.jp-mod-kernel >> text="Python 3 (ipykernel)"'
-      )
-      .waitFor();
-    expect(
-      await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
-    ).toMatchSnapshot('interface_tabs.png');
-  });
-
-  test('Tabs menu', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
-    await openOverview(page);
-
-    await page.click('text="Tabs"');
-
-    expect(
-      await page.screenshot({ clip: { y: 0, x: 210, width: 700, height: 350 } })
-    ).toMatchSnapshot('interface_tabs_menu.png');
   });
 
   test('File menu', async ({ page }) => {
@@ -437,7 +409,7 @@ test.describe('General', () => {
       '[aria-label="File Browser Section"] >> text=notebooks'
     );
     await page.dblclick('text=Data.ipynb');
-
+    await page.menu.clickMenuItem('Edit>Clear Outputs of All Cells');
     await page.notebook.setCell(
       1,
       'code',
@@ -457,8 +429,39 @@ test.describe('General', () => {
 
     // Relax threshold as displayed map may change a bit (in particular text positioning)
     expect(await page.screenshot()).toMatchSnapshot('notebook_ui.png', {
-      threshold: 0.3
+      maxDiffPixelRatio: 0.02
     });
+  });
+
+  test('Trust indicator', async ({ page }) => {
+    await page.goto();
+    // Open Data.ipynb which is not trusted by default
+    await page.dblclick(
+      '[aria-label="File Browser Section"] >> text=notebooks'
+    );
+    await page.dblclick('text=Data.ipynb');
+
+    const trustIndictor = page.locator('.jp-StatusItem-trust');
+
+    expect(await trustIndictor.screenshot()).toMatchSnapshot(
+      'notebook_not_trusted.png'
+    );
+
+    // Open trust dialog
+    // Note: we do not `await` here as it only resolves once dialog is closed
+    const trustPromise = page.evaluate(() => {
+      return window.jupyterapp.commands.execute('notebook:trust');
+    });
+    const dialogSelector = '.jp-Dialog-content';
+    await page.waitForSelector(dialogSelector);
+    // Accept option to trust the notebook
+    await page.click('.jp-Dialog-button.jp-mod-accept');
+    // Wait until dialog is gone
+    await trustPromise;
+
+    expect(await trustIndictor.screenshot()).toMatchSnapshot(
+      'notebook_trusted.png'
+    );
   });
 
   test('Heading anchor', async ({ page }, testInfo) => {
@@ -499,8 +502,13 @@ test.describe('General', () => {
     );
   });
 
-  test('Terminals', async ({ page }) => {
+  test('Terminal layout', async ({ page, tmpPath }) => {
     await galata.Mock.freezeContentLastModified(page);
+    const fileName = 'tree_fixture.txt';
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./data/${fileName}`),
+      `${tmpPath}/${fileName}`
+    );
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -526,7 +534,7 @@ test.describe('General', () => {
 
     await page.keyboard.type('cd $JUPYTERLAB_GALATA_ROOT_DIR');
     await page.keyboard.press('Enter');
-    await page.keyboard.type('tree . -L 2');
+    await page.keyboard.type(`clear && cat ${tmpPath}/${fileName}`);
     await page.keyboard.press('Enter');
 
     // Wait for command answer
@@ -579,6 +587,18 @@ test.describe('General', () => {
     ).toMatchSnapshot('command_palette.png');
   });
 
+  test('Keyboard Shortcuts Help', async ({ page, tmpPath }) => {
+    await page.goto(`tree/${tmpPath}`);
+
+    await page.notebook.createNew();
+
+    await page.keyboard.press('Control+Shift+H');
+
+    expect(await page.locator('.jp-Notebook').screenshot()).toMatchSnapshot(
+      'shortcuts_help.png'
+    );
+  });
+
   test('Open With', async ({ page }) => {
     await page.goto();
     await page.addStyleTag({
@@ -589,6 +609,7 @@ test.describe('General', () => {
 
     await setSidebarWidth(page);
 
+    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
     await page.click('text=README.md', {
       button: 'right'
     });
@@ -665,67 +686,3 @@ test.describe('General', () => {
     });
   });
 });
-
-async function openOverview(page) {
-  await page.goto();
-  await page.addStyleTag({
-    content: `.jp-LabShell.jp-mod-devMode {
-      border-top: none;
-    }`
-  });
-
-  await setSidebarWidth(page);
-
-  // Open Data.ipynb
-  await page.dblclick('[aria-label="File Browser Section"] >> text=notebooks');
-  await page.dblclick('text=Data.ipynb');
-
-  // Back home
-  await page.click('.jp-BreadCrumbs-home svg');
-
-  // Open jupyterlab.md
-  await page.dblclick('[aria-label="File Browser Section"] >> text=narrative');
-  await page.click('text=jupyterlab.md', {
-    button: 'right'
-  });
-  await page.click('text=Open With');
-  await page.click('text=Markdown Preview');
-
-  // Back home
-  await page.click('.jp-BreadCrumbs-home svg');
-
-  // Open bar.vl.json
-  await page.dblclick('[aria-label="File Browser Section"] >> text=data');
-  await page.dblclick('text=bar.vl.json');
-  await page.dblclick(
-    'text=1024px-Hubble_Interacting_Galaxy_AM_0500-620_(2008-04-24).jpg'
-  );
-
-  // Move notebook panel
-  const notebookHandle = await page.$('div[role="main"] >> text=Data.ipynb');
-  await notebookHandle.click();
-  const notebookBBox = await notebookHandle.boundingBox();
-
-  await page.mouse.move(
-    notebookBBox.x + 0.5 * notebookBBox.width,
-    notebookBBox.y + 0.5 * notebookBBox.height
-  );
-  await page.mouse.down();
-  await page.mouse.move(notebookBBox.x + 0.5 * notebookBBox.width, 350);
-  await page.mouse.up();
-
-  // Move md panel
-  const mdHandle = await page.$('div[role="main"] >> text=jupyterlab.md');
-  await mdHandle.click();
-  const mdBBox = await mdHandle.boundingBox();
-  const panelHandle = await page.activity.getPanel();
-  const panelBBox = await panelHandle.boundingBox();
-
-  await page.mouse.move(
-    mdBBox.x + 0.5 * mdBBox.width,
-    mdBBox.y + 0.5 * mdBBox.height
-  );
-  await page.mouse.down();
-  await page.mouse.move(panelBBox.x + 0.5 * panelBBox.width, 200);
-  await page.mouse.up();
-}
