@@ -72,7 +72,7 @@ export class ActivityHelper {
         () => document.activeElement?.getAttribute('data-id')
       )) !== dataId
     ) {
-      await this.page.keyboard.press(key);
+      this.page.keyboard.press(key);
     }
   }
 
