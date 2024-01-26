@@ -453,7 +453,9 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
           format: 'text',
           mimetype: 'plain/text',
           ...options,
-          last_modified: timeStamp
+          last_modified: timeStamp,
+          hash: '123456',
+          hash_algorithm: 'static'
         });
       }
       fileChangedSignal.emit({

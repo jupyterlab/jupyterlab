@@ -485,7 +485,8 @@ export class Context<
     this._contentsModel = newModel;
     if (
       !mod ||
-      newModel.last_modified !== mod ||
+      // Compare last_modified if no hash
+      (!hash && newModel.last_modified !== mod) ||
       // Compare hash if available
       (hash && newModel.hash !== hash)
     ) {

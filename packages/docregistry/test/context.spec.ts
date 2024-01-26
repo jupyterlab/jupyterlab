@@ -100,6 +100,18 @@ describe('docregistry/context', () => {
         expect(called).toBe(true);
       });
 
+      it('should not emitted when the file hash is not changed', async () => {
+        let called = false;
+
+        await context.initialize(true);
+        context.fileChanged.connect(() => {
+          called = true;
+        });
+
+        await context.save();
+        expect(called).toBe(false);
+      });
+
       it('should not contain the file content attribute', async () => {
         let called = false;
         context.fileChanged.connect((sender, args) => {
