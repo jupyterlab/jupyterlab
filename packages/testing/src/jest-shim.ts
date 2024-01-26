@@ -57,6 +57,16 @@ window.focus = () => {
   /* JSDom throws "Not Implemented" */
 };
 
+/**
+ * Shim scrollTo because jsdom still does not implement a shim for it, see:
+ * https://github.com/jsdom/jsdom/issues/2751
+ */
+window.Element.prototype.scrollTo = (
+  _optionsOrX?: ScrollToOptions | number
+) => {
+  // no-op
+};
+
 (window as any).document.elementFromPoint = (left: number, top: number) =>
   document.body;
 
