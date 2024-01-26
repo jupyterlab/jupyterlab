@@ -229,8 +229,8 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       const keyValueArray = sidebarElementIds[tabSide];
 
       keyValueArray.forEach(async sideBarTabName => {
-        await page.activity.keyToSidebar(keyValueArray[0], 'Tab');
-        await page.activity.keyToSidebar(sideBarTabName, 'ArrowDown');
+        await page.activity.keyToSidebar(await keyValueArray[0], 'Tab');
+        await page.activity.keyToSidebar(await sideBarTabName, 'ArrowDown');
 
         await page.keyboard.press('Enter');
 
