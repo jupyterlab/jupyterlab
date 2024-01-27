@@ -360,6 +360,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       0,
       itemMetadata.offset - size + itemMetadata.size
     );
+    // Current offset (+/- padding) is the top edge of the viewport.
     const currentOffset = precomputed
       ? precomputed.currentOffset
       : this._scrollOffset;
@@ -372,6 +373,8 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     const crossingBottomEdge = bottomEdge > itemTop && bottomEdge < itemBottom;
     const crossingTopEdge = topEdge > itemTop && topEdge < itemBottom;
 
+    const isFullyWithinViewport = bottomEdge > itemBottom && topEdge < itemTop;
+
     if (align === 'smart') {
       const edgeLessThanOneViewportAway =
         currentOffset >= bottomOffset - size &&
@@ -381,6 +384,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       const hiddenPartTop = topEdge - itemTop;
 
       if (
+        isFullyWithinViewport ||
         (crossingBottomEdge && visiblePartBottom >= scrollDownThreshold) ||
         (crossingTopEdge && hiddenPartTop < scrollUpThreshold)
       ) {
@@ -401,7 +405,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     }
 
     if (align === 'auto') {
-      if (bottomEdge > itemBottom && topEdge < itemTop) {
+      if (isFullyWithinViewport) {
         // No need to change the position, return the current offset.
         return currentOffset;
       } else if (alignPreference !== undefined) {
