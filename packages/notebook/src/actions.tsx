@@ -662,7 +662,7 @@ export namespace NotebookActions {
     // If a cell is outside of viewport and scrolling is needed,
     // prefer to align the cell to the top viewport edge,
     // rather than to the bottom (so that editor is visible)
-    void Private.handleRunState(notebook, state, true, 'start');
+    void Private.handleRunState(notebook, state, true, 'center');
     return promise;
   }
 
@@ -719,7 +719,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    void Private.handleRunState(notebook, state, true, 'start');
+    void Private.handleRunState(notebook, state, true, 'center');
     return promise;
   }
 
@@ -2314,7 +2314,7 @@ namespace Private {
     notebook: Notebook,
     state: IState,
     scroll = false,
-    alignPreference?: 'start' | 'end'
+    alignPreference?: 'start' | 'end' | 'center' | 'top-center'
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
 
