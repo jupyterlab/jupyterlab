@@ -3,10 +3,15 @@ name: Docker Tests
 on:
   schedule:
     - cron: '0 0 * * *'
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   docker:
     name: Docker Dev Container
+    if: ${{ github.event_name == 'schedule' }} || contains( github.event.pull_request.title, '[docker]')
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
