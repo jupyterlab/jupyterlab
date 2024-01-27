@@ -484,7 +484,8 @@ export class Context<
     const hash = this._contentsModel?.hash ?? null;
     this._contentsModel = newModel;
     if (
-      !mod ||
+      // If neither modification date nor hash available, assume the file has changed
+      (!mod && !hash) ||
       // Compare last_modified if no hash
       (!hash && newModel.last_modified !== mod) ||
       // Compare hash if available
@@ -703,7 +704,9 @@ export class Context<
         // Since jupyter server may provide hash in model, we compare hash first
         const hashAvailable =
           this.contentsModel?.hash !== undefined &&
-          this.contentsModel?.hash !== null;
+          this.contentsModel?.hash !== null &&
+          model.hash !== undefined &&
+          model.hash !== null;
         const hClient = this.contentsModel?.hash;
         const hDisk = model.hash;
         if (hashAvailable && hClient !== hDisk) {
