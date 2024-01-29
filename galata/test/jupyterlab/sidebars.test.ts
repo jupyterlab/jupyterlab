@@ -231,17 +231,9 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       const keyValueArray = sidebarElementIds[tabSide];
 
       keyValueArray.forEach(async sideBarTabName => {
-        let isSideBarFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
-        while (isSideBarFocused !== keyValueArray[0]) {
-          await page.keyboard.press('Tab');
-          return isSideBarFocused;
-        }
-        while (isSideBarFocused !== sideBarTabName) {
-          await page.keyboard.press('ArrowDown');
-          return isSideBarFocused;
-        }
+        await page.activity.keyToSidebar(keyValueArray[0], 'Tab');
+        await page.activity.keyToSidebar(sideBarTabName, 'ArrowDown');
+
         await page.keyboard.press('Enter');
 
         expect(await page.sidebar.isTabOpen(sideBarTabName)).toEqual(true);
