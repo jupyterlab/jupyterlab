@@ -354,7 +354,7 @@ Notes:
 -  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
    returned exit status 127 while in binding.gyp`` while running the
    ``pip install`` command above, you may be missing packages required
-   by ``canvas``. Please see the `"Installing Node.js and jlpm" section`_
+   by ``canvas``. Please see the `Installing Node.js and jlpm section`_
    of this guide for instructions on how to install these packages.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
