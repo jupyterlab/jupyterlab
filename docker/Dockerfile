@@ -35,11 +35,11 @@ USER $MAMBA_USER
 
 WORKDIR /home/$MAMBA_USER/jupyterlab_cache
 
-COPY --chown=$MAMBA_USER:$MAMBA_USER ../binder/environment.yml ./binder/environment.yml
+COPY --chown=$MAMBA_USER:$MAMBA_USER binder/environment.yml ./binder/environment.yml
 
 RUN  micromamba install -n base -c conda-forge git rsync -y && micromamba install -y -n base -f ./binder/environment.yml && micromamba clean --all --yes
 
-COPY --chown=$MAMBA_USER:$MAMBA_USER .. .
+COPY --chown=$MAMBA_USER:$MAMBA_USER . .
 
 RUN micromamba run jlpm install
 
