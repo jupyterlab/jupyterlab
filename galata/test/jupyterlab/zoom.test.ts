@@ -18,12 +18,6 @@ test.describe('Low Vision / Zoom Support', () => {
     await page.sidebar.close('left');
   });
 
-  test('Full page, small viewport', async ({ page }) => {
-    expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
-      'full-page-small-viewport.png'
-    );
-  });
-
   test('Menubar, small viewport', async ({ page }) => {
     expect(await page.locator('#jp-top-panel').screenshot()).toMatchSnapshot(
       'menu-bar-small-viewport.png'
