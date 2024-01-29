@@ -966,6 +966,9 @@ export class WindowedList<
       }
 
       this._isScrolling = new PromiseDelegate<void>();
+      // Catch the internal reject, as otherwise this will
+      // result in an unhandled promise rejection in test.
+      this._isScrolling.promise.catch(console.debug);
     }
 
     this._scrollToItem = [index, align, margin, alignPreference];
