@@ -67,6 +67,21 @@ window.Element.prototype.scrollTo = (
   // no-op
 };
 
+// https://github.com/jsdom/jsdom/issues/3368
+class ResizeObserverMock {
+  observe() {
+    // no-op
+  }
+  unobserve() {
+    // no-op
+  }
+  disconnect() {
+    // no-op
+  }
+}
+
+window.ResizeObserver = ResizeObserverMock;
+
 (window as any).document.elementFromPoint = (left: number, top: number) =>
   document.body;
 
