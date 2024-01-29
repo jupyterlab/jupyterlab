@@ -486,10 +486,10 @@ export namespace IRenderMime {
    */
   export interface IMarkdownParser {
     /**
-     * Render a markdown source.
+     * Render a markdown source into unsanitized HTML.
      *
      * @param source - The string to render.
-     * @returns - A promise of the string.
+     * @returns - A promise of the string containing HTML which may require sanitization.
      */
     render(source: string): Promise<string>;
   }

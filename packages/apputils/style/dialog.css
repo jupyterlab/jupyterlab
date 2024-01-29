@@ -122,11 +122,6 @@ button.jp-Dialog-close-button {
   padding-right: 5px;
 }
 
-.jp-Dialog-checkbox > input:focus-visible {
-  outline: 1px solid var(--jp-input-active-border-color);
-  outline-offset: 1px;
-}
-
 .jp-Dialog-spacer {
   flex: 1 1 auto;
 }

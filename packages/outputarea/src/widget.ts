@@ -509,7 +509,9 @@ export class OutputArea extends Widget {
     }
     const panel = this.layout.widgets[index] as Panel;
     const renderer = (
-      panel.widgets ? panel.widgets[1] : panel
+      panel.widgets
+        ? panel.widgets.filter(it => 'renderModel' in it).pop()
+        : panel
     ) as IRenderMime.IRenderer;
     // Check whether it is safe to reuse renderer:
     // - Preferred mime type has not changed

@@ -2191,14 +2191,15 @@ export class Notebook extends StaticNotebook {
               id = await TableOfContentsUtils.Markdown.getHeadingId(
                 this.rendermime.markdownParser!,
                 mdHeading.raw,
-                mdHeading.level
+                mdHeading.level,
+                this.rendermime.sanitizer
               );
             }
             break;
         }
         if (id === queryId) {
           const element = this.node.querySelector(
-            `h${heading.level}[id="${id}"]`
+            `h${heading.level}[id="${CSS.escape(id)}"]`
           ) as HTMLElement;
 
           return {

@@ -42,7 +42,12 @@ export async function listRunning(
  * Get a session url.
  */
 export function getSessionUrl(baseUrl: string, id: string): string {
-  return URLExt.join(baseUrl, SESSION_SERVICE_URL, id);
+  const servicesBase = URLExt.join(baseUrl, SESSION_SERVICE_URL);
+  const result = URLExt.join(servicesBase, id);
+  if (!result.startsWith(servicesBase)) {
+    throw new Error('Can only be used for services requests');
+  }
+  return result;
 }
 
 /**
