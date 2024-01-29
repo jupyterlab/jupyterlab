@@ -1417,14 +1417,12 @@ export class Notebook extends StaticNotebook {
    * @param newValue Notebook mode
    * @param options Control mode side-effect
    * @param options.focus Whether to ensure focus (default) or not when setting the mode.
-   * @param options.preventScrollOnFocus If focusing  to ensure focus (default) or not when setting the mode.
    */
-  setMode(
+  protected setMode(
     newValue: NotebookMode,
-    options: { focus?: boolean; preventScrollOnFocus?: boolean } = {}
+    options: { focus?: boolean } = {}
   ): void {
     const setFocus = options.focus ?? true;
-    const preventScrollOnFocus = options.preventScrollOnFocus ?? false;
     const activeCell = this.activeCell;
     if (!activeCell) {
       newValue = 'command';
@@ -1460,7 +1458,7 @@ export class Notebook extends StaticNotebook {
           // To the end user, it looks as if all the keyboard shortcut did was
           // move focus from the cell editor to the cell as a whole.
           waitUntilReady: false,
-          preventScroll: preventScrollOnFocus
+          preventScroll: true
         });
       }
     }

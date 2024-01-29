@@ -2347,7 +2347,7 @@ namespace Private {
     translator?: ITranslator
   ): Promise<boolean> {
     const lastCell = cells[-1];
-    notebook.setMode('command', { focus: true, preventScrollOnFocus: true });
+    notebook.mode = 'command';
 
     let initializingDialogShown = false;
     return Promise.all(
@@ -2442,8 +2442,7 @@ namespace Private {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    // Note: focusing a node can invoke scrolling by the browser
-    notebook.setMode('command', { focus: true, preventScrollOnFocus: true });
+    notebook.mode = 'command';
 
     let lastIndex = notebook.activeCellIndex;
     const selected = notebook.widgets.filter((child, index) => {
