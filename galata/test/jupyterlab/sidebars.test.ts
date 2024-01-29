@@ -225,34 +225,26 @@ const elementAriaLabels = {
 test.describe('Sidebar keyboard navigation @a11y', () => {
   Object.keys(sidebarElementIds).forEach(tabSide => {
     test(`Open ${tabSide} via keyboard navigation`, async ({ page }) => {
-      await page.sidebar.close('left');
       await page.sidebar.close('right');
+      await page.sidebar.close('left');
+
       const keyValueArray = sidebarElementIds[tabSide];
 
       keyValueArray.forEach(async sideBarTabName => {
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
+        let isSideBarFocused = await page.evaluate(
+          () => document.activeElement?.getAttribute('data-id')
+        );
+        while (isSideBarFocused !== keyValueArray[0]) {
+          let sideBarFocused = isSideBarFocused;
           await page.keyboard.press('Tab');
-          let IsFocused = await page.evaluate(
-            () => document.activeElement?.getAttribute('data-id')
-          );
-          if (IsFocused === keyValueArray[0]) {
-            break;
-          }
+          return sideBarFocused;
         }
-        // eslint-disable-next-line no-constant-condition
-        while (sideBarTabName !== keyValueArray[0]) {
+        while (isSideBarFocused !== sideBarTabName) {
+          let sideBarFocused = isSideBarFocused;
           await page.keyboard.press('ArrowDown');
-          let IsFocused = await page.evaluate(
-            () => document.activeElement?.getAttribute('data-id')
-          );
-          if (IsFocused === sideBarTabName) {
-            break;
-          }
+          return sideBarFocused;
         }
-
         await page.keyboard.press('Enter');
-
         expect(await page.sidebar.isTabOpen(sideBarTabName)).toEqual(true);
       });
     });
