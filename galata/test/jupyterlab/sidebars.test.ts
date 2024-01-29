@@ -242,7 +242,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
           }
         }
         // eslint-disable-next-line no-constant-condition
-        while (sideBarTabName !== sideBarTabName[0]) {
+        while (sideBarTabName !== keyValueArray[0]) {
           await page.keyboard.press('ArrowDown');
           let IsFocused = await page.evaluate(
             () => document.activeElement?.getAttribute('data-id')
