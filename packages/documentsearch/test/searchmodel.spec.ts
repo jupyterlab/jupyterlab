@@ -10,19 +10,28 @@ import { signalToPromise } from '@jupyterlab/testing';
 
 class LogSearchProvider extends GenericSearchProvider {
   private _queryReceived: PromiseDelegate<RegExp | null>;
+  private _queryEnded: PromiseDelegate<void>;
   private _initialQuery: string = 'unset';
 
   constructor(widget: Widget) {
     super(widget);
     this._queryReceived = new PromiseDelegate();
+    this._queryEnded = new PromiseDelegate();
   }
   get queryReceived(): Promise<RegExp | null> {
     return this._queryReceived.promise;
+  }
+  get queryEnded(): Promise<void> {
+    return this._queryEnded.promise;
   }
 
   async startQuery(query: RegExp | null, filters = {}): Promise<void> {
     this._queryReceived.resolve(query);
     this._queryReceived = new PromiseDelegate();
+  }
+
+  async endQuery(): Promise<void> {
+    this._queryEnded.resolve();
   }
 
   set initialQuery(query: string) {
@@ -59,6 +68,16 @@ describe('documentsearch/searchmodel', () => {
         query.lastIndex = 0;
         expect(query.test('test')).toEqual(false);
         query.lastIndex = 0;
+      });
+      it('should end search when query is empty', async () => {
+        // Start a search
+        model.searchExpression = 'query';
+        expect(model.searchExpression).toEqual('query');
+        await provider.queryReceived;
+        // Empty the query
+        model.searchExpression = '';
+        await provider.queryEnded;
+        expect(model.searchExpression).toEqual('');
       });
     });
 
