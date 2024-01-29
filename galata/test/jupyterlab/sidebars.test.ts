@@ -235,8 +235,6 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
           let IsFocused = await page.evaluate(
             () => document.activeElement?.getAttribute('data-id')
           );
-          await page.keyboard.press('Tab');
-
           if (IsFocused === keyValueArray[0]) {
             break;
           }
