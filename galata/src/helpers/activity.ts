@@ -73,13 +73,14 @@ export class ActivityHelper {
     let activeElementId = await this.page.evaluate(
       () => document.activeElement?.getAttribute('data-id')
     );
-    let ElementIdMatch;
 
     while (activeElementId !== dataId) {
       await this.page.keyboard.press(key);
-      ElementIdMatch = activeElementId;
+      activeElementId = await this.page.evaluate(
+        () => document.activeElement?.getAttribute('data-id')
+      );
     }
-    return ElementIdMatch;
+    return activeElementId;
   }
 
   /**
