@@ -4,13 +4,13 @@
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
 
 const sidebarElementIds = {
-  'left-sidebar': [
+  leftSideBar: [
     'filebrowser',
     'jp-running-sessions',
     'table-of-contents',
     'extensionmanager.main-view'
   ],
-  'right-sidebar': ['jp-property-inspector', 'jp-debugger-sidebar']
+  rightSideBar: ['jp-property-inspector', 'jp-debugger-sidebar']
 };
 
 const sidebarIds: galata.SidebarTabId[] = sidebarElementIds.leftSideBar.concat(
@@ -229,8 +229,28 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       const keyValueArray = sidebarElementIds[tabSide];
 
       keyValueArray.forEach(async sideBarTabName => {
-        await page.activity.keyToSidebar(keyValueArray[0], 'Tab');
-        await page.activity.keyToSidebar(sideBarTabName, 'ArrowDown');
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          await page.keyboard.press('Tab');
+          let IsFocused = await page.evaluate(
+            () => document.activeElement?.getAttribute('data-id')
+          );
+          await page.keyboard.press('Tab');
+
+          if (IsFocused === keyValueArray[0]) {
+            break;
+          }
+        }
+        // eslint-disable-next-line no-constant-condition
+        while (sideBarTabName !== sideBarTabName[0]) {
+          await page.keyboard.press('ArrowDown');
+          let IsFocused = await page.evaluate(
+            () => document.activeElement?.getAttribute('data-id')
+          );
+          if (IsFocused === sideBarTabName) {
+            break;
+          }
+        }
 
         await page.keyboard.press('Enter');
 
