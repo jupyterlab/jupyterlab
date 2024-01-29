@@ -69,10 +69,13 @@ window.Element.prototype.scrollTo = (
 
 // https://github.com/jsdom/jsdom/issues/3368
 class ResizeObserverMock {
-  observe() {
+  constructor(_callback: any) {
     // no-op
   }
-  unobserve() {
+  observe(_target: any, _options?: any) {
+    // no-op
+  }
+  unobserve(_target: any) {
     // no-op
   }
   disconnect() {
