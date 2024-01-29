@@ -2,7 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 [build-system]
-requires = ["hatchling>=1.5.0"]
+requires = ["hatchling>=1.21.1"]
 build-backend = "hatchling.build"
 
 [project]
