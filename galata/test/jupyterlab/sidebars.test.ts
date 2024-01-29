@@ -4,13 +4,13 @@
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
 
 const sidebarElementIds = {
-  leftSideBar: [
+  'left-sidebar': [
     'filebrowser',
     'jp-running-sessions',
     'table-of-contents',
     'extensionmanager.main-view'
   ],
-  rightSideBar: ['jp-property-inspector', 'jp-debugger-sidebar']
+  'right-sidebar': ['jp-property-inspector', 'jp-debugger-sidebar']
 };
 
 const sidebarIds: galata.SidebarTabId[] = sidebarElementIds.leftSideBar.concat(
@@ -229,8 +229,8 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       const keyValueArray = sidebarElementIds[tabSide];
 
       keyValueArray.forEach(async sideBarTabName => {
-        await page.activity.keyToSidebar(await keyValueArray[0], 'Tab');
-        await page.activity.keyToSidebar(await sideBarTabName, 'ArrowDown');
+        await page.activity.keyToSidebar(keyValueArray[0], 'Tab');
+        await page.activity.keyToSidebar(sideBarTabName, 'ArrowDown');
 
         await page.keyboard.press('Enter');
 

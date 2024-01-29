@@ -67,17 +67,13 @@ export class ActivityHelper {
    * @returns Active sideBar widget id
    */
   async keyToSidebar(dataId: string, key: string): Promise<void> {
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
+    let activeElementId = await this.page.evaluate(
+      () => document.activeElement?.getAttribute('data-id')
+    );
+    while (activeElementId !== dataId) {
       await this.page.keyboard.press(key);
-      let IsFocused = await this.page.evaluate(
-        () => document.activeElement?.getAttribute('data-id')
-      );
-
-      if (IsFocused === dataId) {
-        break;
-      }
     }
+    return;
   }
 
   /**
