@@ -56,6 +56,7 @@ test.describe('General', () => {
     await page.click('div[role="main"] >> text=Lorenz.ipynb');
 
     await page.notebook.run();
+    await page.notebook.selectCells(0);
 
     const cell = await page.$(
       '[aria-label="Code Cell Content with Output"] >> text=interactive'
