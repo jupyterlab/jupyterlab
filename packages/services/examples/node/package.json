@@ -1,13 +1,13 @@
 {
   "name": "node-example",
-  "version": "4.0.11",
+  "version": "4.0.12",
   "private": true,
   "scripts": {
     "clean": "rimraf node_modules",
     "update": "rimraf node_modules/@jupyterlab/services && npm install"
   },
   "dependencies": {
-    "@jupyterlab/services": "^7.0.11",
+    "@jupyterlab/services": "^7.0.12",
     "ws": "^8.11.0"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-simple-list",
-  "version": "4.0.11",
+  "version": "4.0.12",
   "private": true,
   "style": "style/index.css",
   "scripts": {
@@ -9,11 +9,11 @@
     "watch": "webpack --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.11",
-    "@jupyterlab/coreutils": "^6.0.11",
-    "@jupyterlab/observables": "^5.0.11",
-    "@jupyterlab/theme-light-extension": "^4.0.11",
-    "@jupyterlab/ui-components": "^4.0.11",
+    "@jupyterlab/application": "^4.0.12",
+    "@jupyterlab/coreutils": "^6.0.12",
+    "@jupyterlab/observables": "^5.0.12",
+    "@jupyterlab/theme-light-extension": "^4.0.12",
+    "@jupyterlab/ui-components": "^4.0.12",
     "@lumino/messaging": "^2.0.1",
     "@lumino/widgets": "^2.3.0"
   },

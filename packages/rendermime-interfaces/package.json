@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime-interfaces",
-  "version": "3.8.11",
+  "version": "3.8.12",
   "description": "JupyterLab - Interfaces for Mime Renderers",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
