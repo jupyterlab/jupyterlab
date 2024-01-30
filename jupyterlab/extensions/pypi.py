@@ -9,6 +9,7 @@ import json
 import math
 import re
 import sys
+import tempfile
 import xmlrpc.client
 from datetime import datetime, timedelta, timezone
 from functools import partial
@@ -23,6 +24,7 @@ import tornado
 from async_lru import alru_cache
 from traitlets import CFloat, CInt, Unicode, config, observe
 
+from jupyterlab._version import __version__
 from jupyterlab.extensions.manager import (
     ActionResult,
     ExtensionManager,
@@ -276,102 +278,184 @@ class PyPIExtensionManager(ExtensionManager):
             The action result
         """
         current_loop = tornado.ioloop.IOLoop.current()
+        with tempfile.NamedTemporaryFile(mode="w+", delete=True) as fconstraint:
+            fconstraint.write(f"jupyterlab=={__version__}")
+            fconstraint.flush()
 
-        cmdline = [
-            sys.executable,
-            "-m",
-            "pip",
-            "install",
-            "--no-input",
-            "--quiet",
-            "--progress-bar",
-            "off",
-        ]
-        if version is not None:
-            cmdline.append(f"{name}=={version}")
-        else:
-            cmdline.append(name)
+            cmdline = [
+                sys.executable,
+                "-m",
+                "pip",
+                "install",
+                "--no-input",
+                "--quiet",
+                "--progress-bar",
+                "off",
+                "--constraint",
+                fconstraint.name,
+            ]
+            if version is not None:
+                cmdline.append(f"{name}=={version}")
+            else:
+                cmdline.append(name)
 
-        pkg_action = {}
-        try:
-            tmp_cmd = cmdline.copy()
-            tmp_cmd.insert(-1, "--dry-run")
-            tmp_cmd.insert(-1, "--report")
-            tmp_cmd.insert(-1, "-")
-            result = await current_loop.run_in_executor(
-                None, partial(run, tmp_cmd, capture_output=True, check=True)
-            )
+            pkg_action = {}
+            try:
+                tmp_cmd = cmdline.copy()
+                tmp_cmd.insert(-1, "--dry-run")
+                tmp_cmd.insert(-1, "--report")
+                tmp_cmd.insert(-1, "-")
+                result = await current_loop.run_in_executor(
+                    None, partial(run, tmp_cmd, capture_output=True, check=True)
+                )
 
-            action_info = json.loads(result.stdout.decode("utf-8"))
-            pkg_action = next(
-                iter(
-                    filter(
-                        lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
-                        action_info.get("install", []),
+                action_info = json.loads(result.stdout.decode("utf-8"))
+                pkg_action = next(
+                    iter(
+                        filter(
+                            lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
+                            action_info.get("install", []),
+                        )
                     )
                 )
+            except CalledProcessError as e:
+                self.log.debug(f"Fail to get installation report: {e.stderr}", exc_info=e)
+            except Exception as err:
+                self.log.debug("Fail to get installation report.", exc_info=err)
+            else:
+                self.log.debug(f"Actions to be executed by pip {json.dumps(action_info)}.")
+
+            self.log.debug(f"Executing '{' '.join(cmdline)}'")
+
+            result = await current_loop.run_in_executor(
+                None, partial(run, cmdline, capture_output=True)
             )
-        except CalledProcessError as e:
-            self.log.debug(f"Fail to get installation report: {e.stderr}", exc_info=e)
-        except Exception as err:
-            self.log.debug("Fail to get installation report.", exc_info=err)
-        else:
-            self.log.debug(f"Actions to be executed by pip {json.dumps(action_info)}.")
 
-        self.log.debug(f"Executing '{' '.join(cmdline)}'")
+            self.log.debug(f"return code: {result.returncode}")
+            self.log.debug(f"stdout: {result.stdout.decode('utf-8')}")
+            error = result.stderr.decode("utf-8")
+            if result.returncode == 0:
+                self.log.debug(f"stderr: {error}")
+                # Figure out if the package has server or kernel parts
+                jlab_metadata = None
+                try:
+                    download_url: str = pkg_action.get("download_info", {}).get("url")
+                    if download_url is not None:
+                        response = await self._http_client.fetch(download_url)
+                        if download_url.endswith(".whl"):
+                            with ZipFile(io.BytesIO(response.body)) as wheel:
+                                for name in filter(
+                                    lambda f: Path(f).name == "package.json",
+                                    wheel.namelist(),
+                                ):
+                                    data = json.loads(wheel.read(name))
+                                    jlab_metadata = data.get("jupyterlab")
+                                    if jlab_metadata is not None:
+                                        break
+                        elif download_url.endswith("tar.gz"):
+                            with TarFile(io.BytesIO(response.body)) as sdist:
+                                for name in filter(
+                                    lambda f: Path(f).name == "package.json",
+                                    sdist.getnames(),
+                                ):
+                                    data = json.load(sdist.extractfile(sdist.getmember(name)))
+                                    jlab_metadata = data.get("jupyterlab")
+                                    if jlab_metadata is not None:
+                                        break
+                except Exception as e:
+                    self.log.debug("Fail to get package.json.", exc_info=e)
 
-        result = await current_loop.run_in_executor(
-            None, partial(run, cmdline, capture_output=True)
-        )
+                follow_ups = [
+                    "frontend",
+                ]
+                if version is not None:
+                    cmdline.append(f"{name}=={version}")
+                else:
+                    cmdline.append(name)
 
-        self.log.debug(f"return code: {result.returncode}")
-        self.log.debug(f"stdout: {result.stdout.decode('utf-8')}")
-        error = result.stderr.decode("utf-8")
-        if result.returncode == 0:
-            self.log.debug(f"stderr: {error}")
-            # Figure out if the package has server or kernel parts
-            jlab_metadata = None
-            try:
-                download_url: str = pkg_action.get("download_info", {}).get("url")
-                if download_url is not None:
-                    response = await self._http_client.fetch(download_url)
-                    if download_url.endswith(".whl"):
-                        with ZipFile(io.BytesIO(response.body)) as wheel:
-                            for name in filter(
-                                lambda f: Path(f).name == "package.json",
-                                wheel.namelist(),
-                            ):
-                                data = json.loads(wheel.read(name))
-                                jlab_metadata = data.get("jupyterlab")
-                                if jlab_metadata is not None:
-                                    break
-                    elif download_url.endswith("tar.gz"):
-                        with TarFile(io.BytesIO(response.body)) as sdist:
-                            for name in filter(
-                                lambda f: Path(f).name == "package.json",
-                                sdist.getnames(),
-                            ):
-                                data = json.load(sdist.extractfile(sdist.getmember(name)))
-                                jlab_metadata = data.get("jupyterlab")
-                                if jlab_metadata is not None:
-                                    break
-            except Exception as e:
-                self.log.debug("Fail to get package.json.", exc_info=e)
+                pkg_action = {}
+                try:
+                    tmp_cmd = cmdline.copy()
+                    tmp_cmd.insert(-1, "--dry-run")
+                    tmp_cmd.insert(-1, "--report")
+                    tmp_cmd.insert(-1, "-")
+                    result = await current_loop.run_in_executor(
+                        None, partial(run, tmp_cmd, capture_output=True, check=True)
+                    )
 
-            follow_ups = [
-                "frontend",
-            ]
-            if jlab_metadata is not None:
-                discovery = jlab_metadata.get("discovery", {})
-                if "kernel" in discovery:
-                    follow_ups.append("kernel")
-                if "server" in discovery:
-                    follow_ups.append("server")
+                    action_info = json.loads(result.stdout.decode("utf-8"))
+                    pkg_action = next(
+                        filter(
+                            lambda p: p.get("metadata", {}).get("name") == name.replace("_", "-"),
+                            action_info.get("install", []),
+                        )
+                    )
+                except CalledProcessError as e:
+                    self.log.debug(f"Fail to get installation report: {e.stderr}", exc_info=e)
+                except Exception as err:
+                    self.log.debug("Fail to get installation report.", exc_info=err)
+                else:
+                    self.log.debug(f"Actions to be executed by pip {json.dumps(action_info)}.")
 
-            return ActionResult(status="ok", needs_restart=follow_ups)
-        else:
-            self.log.error(f"Failed to installed {name}: code {result.returncode}\n{error}")
-            return ActionResult(status="error", message=error)
+                self.log.debug(f"Executing '{' '.join(cmdline)}'")
+
+                result = await current_loop.run_in_executor(
+                    None, partial(run, cmdline, capture_output=True)
+                )
+
+                self.log.debug(f"return code: {result.returncode}")
+                self.log.debug(f"stdout: {result.stdout.decode('utf-8')}")
+                error = result.stderr.decode("utf-8")
+                if result.returncode == 0:
+                    self.log.debug(f"stderr: {error}")
+                    # Figure out if the package has server or kernel parts
+                    jlab_metadata = None
+                    try:
+                        download_url: str = pkg_action.get("download_info", {}).get("url")
+                        if download_url is not None:
+                            response = await self._httpx_client.get(download_url)
+                            if response.status_code < 400:  # noqa PLR2004
+                                if download_url.endswith(".whl"):
+                                    with ZipFile(io.BytesIO(response.content)) as wheel:
+                                        for name in filter(
+                                            lambda f: Path(f).name == "package.json",
+                                            wheel.namelist(),
+                                        ):
+                                            data = json.loads(wheel.read(name))
+                                            jlab_metadata = data.get("jupyterlab")
+                                            if jlab_metadata is not None:
+                                                break
+                                elif download_url.endswith("tar.gz"):
+                                    with TarFile(io.BytesIO(response.content)) as sdist:
+                                        for name in filter(
+                                            lambda f: Path(f).name == "package.json",
+                                            sdist.getnames(),
+                                        ):
+                                            data = json.load(
+                                                sdist.extractfile(sdist.getmember(name))
+                                            )
+                                            jlab_metadata = data.get("jupyterlab")
+                                            if jlab_metadata is not None:
+                                                break
+                            else:
+                                self.log.debug(f"Failed to get '{download_url}'; {response!s}")
+                    except Exception as e:
+                        self.log.debug("Fail to get package.json.", exc_info=e)
+
+                    follow_ups = [
+                        "frontend",
+                    ]
+                    if jlab_metadata is not None:
+                        discovery = jlab_metadata.get("discovery", {})
+                        if "kernel" in discovery:
+                            follow_ups.append("kernel")
+                        if "server" in discovery:
+                            follow_ups.append("server")
+
+                    return ActionResult(status="ok", needs_restart=follow_ups)
+                else:
+                    self.log.error(f"Failed to installed {name}: code {result.returncode}\n{error}")
+                    return ActionResult(status="error", message=error)
 
     async def uninstall(self, extension: str) -> ActionResult:
         """Uninstall the required extension.
