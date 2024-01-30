@@ -95,6 +95,96 @@ describe('docregistry/context', () => {
         expect(called).toBe(true);
       });
 
+      it('should be emitted when the file hash changes', async () => {
+        let called = false;
+        context = new Context({
+          manager,
+          factory,
+          // The path below is a magic string instructing the `get()`
+          // method of the contents manager mock to return a random hash.
+          path: 'random-hash.txt'
+        });
+
+        await context.initialize(true);
+
+        context.fileChanged.connect((_sender, _args) => {
+          called = true;
+        });
+
+        const promise = context.save();
+
+        // Expect the correct dialog
+        await waitForDialog();
+        const dialog = document.body.getElementsByClassName(
+          'jp-Dialog'
+        )[0] as HTMLElement;
+        expect(dialog.innerHTML).toMatch(
+          'has changed on disk since the last time it was opened or saved'
+        );
+
+        // Accept dialog (overwrite)
+        await acceptDialog();
+        await promise;
+
+        // Expect the signal to have been emitted
+        expect(called).toBe(true);
+      });
+
+      it('should be emitted when the file timestamp changes and there is no hash', async () => {
+        let called = false;
+        context = new Context({
+          manager,
+          factory,
+          // The path below is a magic string instructing the `get()`
+          // method of the contents manager mock to return a newer timestamp and no hash.
+          path: 'newer-timestamp-no-hash.txt'
+        });
+
+        await context.initialize(true);
+
+        context.fileChanged.connect((_sender, _args) => {
+          called = true;
+        });
+
+        const promise = context.save();
+
+        // Expect the correct dialog
+        await waitForDialog();
+        const dialog = document.body.getElementsByClassName(
+          'jp-Dialog'
+        )[0] as HTMLElement;
+        expect(dialog.innerHTML).toMatch(
+          'has changed on disk since the last time it was opened or saved'
+        );
+
+        // Accept dialog (overwrite)
+        await acceptDialog();
+        await promise;
+
+        // Expect the signal to have been emitted
+        expect(called).toBe(true);
+      });
+
+      it('should not be emitted when the file hash is not changed', async () => {
+        let called = false;
+        context = new Context({
+          manager,
+          factory,
+          // The path below is a magic string instructing the `save()`
+          // method of the contents manager mock to not update time nor hash.
+          path: 'frozen-time-and-hash.txt'
+        });
+
+        await context.initialize(true);
+
+        context.fileChanged.connect(() => {
+          called = true;
+        });
+
+        await context.save();
+        expect(called).toBe(false);
+      });
+
       it('should not contain the file content attribute', async () => {
         let called = false;
         context.fileChanged.connect((sender, args) => {

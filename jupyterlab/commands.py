@@ -639,7 +639,18 @@ class _AppHandler:
         # Do this last since it relies on other attributes
         self.info = self._get_app_info()
         # Migrate from 4.0 which did not have "locked" status
-        self._maybe_mirror_disabled_in_locked()
+        try:
+            self._maybe_mirror_disabled_in_locked(level="sys_prefix")
+        except PermissionError:
+            try:
+                self.logger.info(
+                    "`sys_prefix` level settings are read-only, using `user` level for migration to `lockedExtensions`"
+                )
+                self._maybe_mirror_disabled_in_locked(level="user")
+            except PermissionError:
+                self.logger.warning(
+                    "Both `sys_prefix` and `user` level settings are read-only, cannot auto-migrate `disabledExtensions` to `lockedExtensions`"
+                )
 
     def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.
@@ -1130,7 +1141,7 @@ class _AppHandler:
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
         )
         if "lockedExtensions" in page_config:
-            # short-circut if migration already happened
+            # short-circuit if migration already happened
             return False
 
         # copy disabled onto lockedExtensions, ensuring the mapping format
