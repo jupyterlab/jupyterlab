@@ -64,6 +64,13 @@ export class VariablesBodyTree extends ReactWidget {
     const collapserIcon = (
       <caretDownEmptyIcon.react stylesheet="menuItem" tag="span" />
     );
+
+    if (scope?.name !== 'Globals') {
+      this.addClass('jp-debuggerVariables-local');
+    } else {
+      this.removeClass('jp-debuggerVariables-local');
+    }
+
     return scope ? (
       <>
         <VariablesBranch
@@ -389,6 +396,12 @@ interface IVariableComponentProps {
 }
 
 function _prepareDetail(variable: IDebugger.IVariable) {
+  if (
+    variable.type === 'float' &&
+    (variable.value == 'inf' || variable.value == '-inf')
+  ) {
+    return variable.value;
+  }
   const detail = convertType(variable);
   if (variable.type === 'float' && isNaN(detail as number)) {
     // silence React warning:

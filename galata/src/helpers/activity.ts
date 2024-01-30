@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ElementHandle, Page } from '@playwright/test';
+import { ElementHandle, Locator, Page } from '@playwright/test';
 import * as Utils from '../utils';
 
 /**
@@ -12,19 +12,28 @@ export class ActivityHelper {
 
   /**
    * JupyterLab launcher selector
+   *
+   * @deprecated You should use locator selector {@link launcher}
    */
   get launcherSelector(): string {
     return Utils.xpBuildActivityTabSelector('Launcher');
   }
 
   /**
+   * JupyterLab launcher tab
+   */
+  get launcher(): Locator {
+    return this.page.getByRole('main').getByRole('tab', { name: 'Launcher' });
+  }
+
+  /**
    * Close all widgets in the main area
    */
   async closeAll(): Promise<void> {
-    await this.page.evaluate(async (launcherSelector: string) => {
+    await this.page.evaluate(async () => {
       await window.jupyterapp.commands.execute('application:close-all');
-      await window.galata.waitForXPath(launcherSelector);
-    }, this.launcherSelector);
+    });
+    await this.launcher.waitFor();
   }
 
   /**
@@ -34,14 +43,20 @@ export class ActivityHelper {
    * @returns Active status
    */
   async isTabActive(name: string): Promise<boolean> {
-    const tab = await this.getTab(name);
-    return (
-      (tab &&
-        (await tab.evaluate((tab: Element) =>
-          tab.classList.contains('lm-mod-current')
-        ))) ??
-      false
-    );
+    if (await Utils.isInSimpleMode(this.page)) {
+      const activeTab = await this.page
+        .locator('#jp-title-panel-title')
+        .getByRole('textbox')
+        .inputValue();
+      return activeTab === name;
+    } else {
+      const tab = await this.getTab(name);
+      if (!tab) {
+        return false;
+      }
+      const classes = ((await tab.getAttribute('class')) ?? '').split(' ');
+      return classes.includes('jp-mod-current');
+    }
   }
 
   /**
@@ -50,12 +65,25 @@ export class ActivityHelper {
    * @param name Activity name
    * @returns Handle on the tab or null if the tab is not found
    */
-  getTab(name?: string): Promise<ElementHandle<Element> | null> {
-    const page = this.page;
-    const tabSelector = name
-      ? Utils.xpBuildActivityTabSelector(name)
-      : Utils.xpBuildActiveActivityTabSelector();
-    return page.$(`xpath=${tabSelector}`);
+  async getTab(name?: string): Promise<ElementHandle<Element> | null> {
+    let handle: ElementHandle<Element> | null = null;
+    try {
+      handle = await this.getTabLocator(name).elementHandle({ timeout: 500 });
+    } catch {
+      handle = null;
+    }
+    return handle;
+  }
+
+  /**
+   * Get a tab locator
+   * @param name Activity name
+   * @returns Tab locator
+   */
+  getTabLocator(name?: string): Locator {
+    return name
+      ? this.page.getByRole('main').getByRole('tab', { name })
+      : this.page.getByRole('main').locator('.jp-mod-current[role="tab"]');
   }
 
   /**
@@ -66,15 +94,51 @@ export class ActivityHelper {
    */
   async getPanel(name?: string): Promise<ElementHandle<Element> | null> {
     const page = this.page;
-    const tab = await this.getTab(name);
-    if (tab) {
-      const id = await tab.evaluate((tab: Element) =>
+    let locator: Locator;
+    if (name) {
+      locator = page.getByRole('main').getByRole('tabpanel', { name });
+    } else {
+      const activeTab = await this.getTab();
+      const id = await activeTab?.evaluate((tab: Element) =>
         tab.getAttribute('data-id')
       );
-      return await page.$(`xpath=${Utils.xpBuildActivityPanelSelector(id!)}`);
+      if (!id) {
+        return null;
+      }
+      locator = page.getByRole('main').locator(`[role="tabpanel"][id="${id}"]`);
     }
 
-    return null;
+    let handle: ElementHandle<Element> | null = null;
+    try {
+      handle = await locator.elementHandle({ timeout: 500 });
+    } catch {
+      handle = null;
+    }
+
+    return handle;
+  }
+
+  /**
+   * Get a panel locator
+   *
+   * @param name Activity name
+   * @returns Panel locator or null
+   */
+  async getPanelLocator(name?: string): Promise<Locator | null> {
+    let locator: Locator;
+    if (name) {
+      locator = this.page.getByRole('main').getByRole('tabpanel', { name });
+    } else {
+      const id = await this.getTabLocator().getAttribute('data-id');
+      if (!id) {
+        return null;
+      }
+      locator = this.page
+        .getByRole('main')
+        .locator(`[role="tabpanel"][id="${id}"]`);
+    }
+
+    return locator;
   }
 
   /**
@@ -84,10 +148,10 @@ export class ActivityHelper {
    */
   async closePanel(name: string): Promise<void> {
     await this.activateTab(name);
-    await this.page.evaluate(async (launcherSelector: string) => {
+    await this.page.evaluate(async () => {
       await window.jupyterapp.commands.execute('application:close');
-      await window.galata.waitForXPath(launcherSelector);
-    }, this.launcherSelector);
+    });
+    await this.launcher.waitFor();
   }
 
   /**
@@ -102,7 +166,7 @@ export class ActivityHelper {
       await tab.click();
       await this.page.waitForFunction(
         ({ tab }) => {
-          return tab.classList.contains('jp-mod-current');
+          return tab.ariaSelected === 'true';
         },
         { tab }
       );

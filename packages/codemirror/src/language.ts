@@ -501,7 +501,7 @@ export namespace EditorLanguageRegistry {
       {
         name: 'SQL',
         displayName: trans.__('SQL'),
-        mime: 'text/x-sql',
+        mime: ['application/sql', 'text/x-sql'],
         extensions: ['sql'],
         load() {
           return sql('StandardSQL');
@@ -679,7 +679,7 @@ export namespace EditorLanguageRegistry {
       },
       {
         name: 'CoffeeScript',
-        displayName: trans.__('CoffeScript'),
+        displayName: trans.__('CoffeeScript'),
         alias: ['coffee', 'coffee-script'],
         mime: [
           'application/vnd.coffeescript',

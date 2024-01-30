@@ -23,6 +23,12 @@ import scrollbarStyleText from '../style/scrollbar.raw.css';
 namespace CommandIDs {
   export const changeTheme = 'apputils:change-theme';
 
+  export const changePreferredLightTheme = 'apputils:change-light-theme';
+
+  export const changePreferredDarkTheme = 'apputils:change-dark-theme';
+
+  export const toggleAdaptiveTheme = 'apputils:adaptive-theme';
+
   export const themeScrollbars = 'apputils:theme-scrollbars';
 
   export const changeFont = 'apputils:change-font';
@@ -44,6 +50,7 @@ function createStyleSheet(text: string): HTMLStyleElement {
  */
 export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
+  description: 'Provides the theme manager.',
   requires: [ISettingRegistry, JupyterFrontEnd.IPaths, ITranslator],
   optional: [ISplashScreen],
   activate: (
@@ -122,7 +129,65 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
         if (theme === manager.theme) {
           return;
         }
+        // Disable adaptive theme if users decide to change the theme when adaptive theme is on
+        if (manager.isToggledAdaptiveTheme()) {
+          return manager.toggleAdaptiveTheme();
+        }
         return manager.setTheme(theme);
+      }
+    });
+
+    commands.addCommand(CommandIDs.changePreferredLightTheme, {
+      label: args => {
+        if (args.theme === undefined) {
+          return trans.__('Switch to the provided light `theme`.');
+        }
+        const theme = args['theme'] as string;
+        const displayName = manager.getDisplayName(theme);
+        return args['isPalette']
+          ? trans.__('Set Preferred Light Theme: %1', displayName)
+          : displayName;
+      },
+      isToggled: args => args['theme'] === manager.preferredLightTheme,
+      execute: args => {
+        const theme = args['theme'] as string;
+        if (theme === manager.preferredLightTheme) {
+          return;
+        }
+        return manager.setPreferredLightTheme(theme);
+      }
+    });
+
+    commands.addCommand(CommandIDs.changePreferredDarkTheme, {
+      label: args => {
+        if (args.theme === undefined) {
+          return trans.__('Switch to the provided dark `theme`.');
+        }
+        const theme = args['theme'] as string;
+        const displayName = manager.getDisplayName(theme);
+        return args['isPalette']
+          ? trans.__('Set Preferred Dark Theme: %1', displayName)
+          : displayName;
+      },
+      isToggled: args => args['theme'] === manager.preferredDarkTheme,
+      execute: args => {
+        const theme = args['theme'] as string;
+        if (theme === manager.preferredDarkTheme) {
+          return;
+        }
+        return manager.setPreferredDarkTheme(theme);
+      }
+    });
+
+    commands.addCommand(CommandIDs.toggleAdaptiveTheme, {
+      // Avoid lengthy option text in menu
+      label: args =>
+        args['isPalette']
+          ? trans.__('Synchronize Styling Theme with System Settings')
+          : trans.__('Synchronize with System Settings'),
+      isToggled: () => manager.isToggledAdaptiveTheme(),
+      execute: () => {
+        manager.toggleAdaptiveTheme().catch(console.warn);
       }
     });
 
@@ -189,6 +254,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
  */
 export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:themes-palette-menu',
+  description: 'Adds theme commands to the menu and the command palette.',
   requires: [IThemeManager, ITranslator],
   optional: [ICommandPalette, IMainMenu],
   activate: (
@@ -233,6 +299,31 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         // choose a theme
         manager.themes.forEach(theme => {
           palette.addItem({ command, args: { isPalette, theme }, category });
+        });
+
+        // choose preferred light theme
+        manager.themes.forEach(theme => {
+          palette.addItem({
+            command: CommandIDs.changePreferredLightTheme,
+            args: { isPalette, theme },
+            category
+          });
+        });
+
+        // choose preferred dark theme
+        manager.themes.forEach(theme => {
+          palette.addItem({
+            command: CommandIDs.changePreferredDarkTheme,
+            args: { isPalette, theme },
+            category
+          });
+        });
+
+        // toggle adaptive theme
+        palette.addItem({
+          command: CommandIDs.toggleAdaptiveTheme,
+          args: { isPalette },
+          category
         });
 
         // toggle scrollbar theming

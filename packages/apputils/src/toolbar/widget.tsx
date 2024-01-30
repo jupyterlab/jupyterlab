@@ -175,6 +175,8 @@ namespace Private {
 
   /**
    * A toolbar item that displays kernel status.
+   *
+   * @deprecated This code is not use any longer and will be removed in JupyterLab 5
    */
   export class KernelStatus extends Widget {
     /**

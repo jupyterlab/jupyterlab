@@ -124,4 +124,73 @@ test.describe('Sidebars', () => {
       'left'
     );
   });
+
+  test('Check Running Session button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.open('left');
+    const runningSessionsWidget = page.locator('#jp-running-sessions');
+    const runningSessionsElementAriaLabel =
+      await runningSessionsWidget.getAttribute('aria-label');
+    const runningSessionsElementRole =
+      await runningSessionsWidget.getAttribute('role');
+    expect(runningSessionsElementAriaLabel).toEqual('Running Sessions section');
+    expect(runningSessionsElementRole).toEqual('region');
+  });
+
+  test('Check Extension Manager button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.open('left');
+    const extensionManagerWidget = page.locator(
+      '#extensionmanager\\.main-view'
+    );
+    const extensionManagerElementAriaLabel =
+      await extensionManagerWidget.getAttribute('aria-label');
+    const extensionManagerElementRole =
+      await extensionManagerWidget.getAttribute('role');
+    expect(extensionManagerElementAriaLabel).toEqual(
+      'Extension Manager section'
+    );
+    expect(extensionManagerElementRole).toEqual('region');
+  });
+
+  test('Check File Browser button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.open('left');
+    const fileBrowserWidget = page.locator('#filebrowser');
+    const fileBrowserElementAriaLabel =
+      await fileBrowserWidget.getAttribute('aria-label');
+    const fileBrowserElementRole = await fileBrowserWidget.getAttribute('role');
+    expect(fileBrowserElementAriaLabel).toEqual('File Browser Section');
+    expect(fileBrowserElementRole).toEqual('region');
+  });
+
+  test('Check Debugger button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.open('right');
+    const debuggerWidget = page.locator('#jp-debugger-sidebar');
+    const debuggerElementAriaLabel =
+      await debuggerWidget.getAttribute('aria-label');
+    const debuggerElementRole = await debuggerWidget.getAttribute('role');
+    expect(debuggerElementAriaLabel).toEqual('Debugger section');
+    expect(debuggerElementRole).toEqual('region');
+  });
+
+  test('Check Table of Contents button on sidebar has correct aria label and role', async ({
+    page
+  }) => {
+    await page.sidebar.open('left');
+    const tableOfContentsWidget = page.locator('#table-of-contents');
+    const tableOfContentsElementAriaLabel =
+      await tableOfContentsWidget.getAttribute('aria-label');
+    const tableOfContentsElementRole =
+      await tableOfContentsWidget.getAttribute('role');
+    expect(tableOfContentsElementAriaLabel).toEqual(
+      'Table of Contents section'
+    );
+    expect(tableOfContentsElementRole).toEqual('region');
+  });
 });

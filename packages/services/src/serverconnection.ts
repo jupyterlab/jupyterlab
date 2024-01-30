@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { KernelMessage } from './kernel';
+import { deserialize, serialize } from './kernel/serialize';
 
 let WEBSOCKET: typeof WebSocket;
 
@@ -11,6 +13,20 @@ if (typeof window === 'undefined') {
   WEBSOCKET = require('ws');
 } else {
   WEBSOCKET = WebSocket;
+}
+
+interface ISerializer {
+  /**
+   * Serialize a kernel message for transport.
+   */
+  serialize(
+    msg: KernelMessage.IMessage,
+    protocol?: string
+  ): string | ArrayBuffer;
+  /**
+   * Deserialize and return the unpacked message.
+   */
+  deserialize(data: ArrayBuffer, protocol?: string): KernelMessage.IMessage;
 }
 
 /**
@@ -31,7 +47,7 @@ export namespace ServerConnection {
   /**
    * A Jupyter server settings object.
    * Note that all of the settings are optional when passed to
-   * [[makeSettings]].  The default settings are given in [[defaultSettings]].
+   * [[makeSettings]]. The default settings are given in [[defaultSettings]].
    */
   export interface ISettings {
     /**
@@ -87,6 +103,11 @@ export namespace ServerConnection {
      * The `WebSocket` object constructor.
      */
     readonly WebSocket: typeof WebSocket;
+
+    /**
+     * Serializer used to serialize/deserialize kernel messages.
+     */
+    readonly serializer: ISerializer;
   }
 
   /**
@@ -143,13 +164,15 @@ export namespace ServerConnection {
     static async create(response: Response): Promise<ResponseError> {
       try {
         const data = await response.json();
-        if (data['traceback']) {
-          console.error(data['traceback']);
+        const { message, traceback } = data;
+        if (traceback) {
+          console.error(traceback);
         }
-        if (data['message']) {
-          return new ResponseError(response, data['message']);
-        }
-        return new ResponseError(response);
+        return new ResponseError(
+          response,
+          message ?? ResponseError._defaultMessage(response),
+          traceback ?? ''
+        );
       } catch (e) {
         console.debug(e);
         return new ResponseError(response);
@@ -161,7 +184,7 @@ export namespace ServerConnection {
      */
     constructor(
       response: Response,
-      message = `Invalid response: ${response.status} ${response.statusText}`,
+      message = ResponseError._defaultMessage(response),
       traceback = ''
     ) {
       super(message);
@@ -178,6 +201,10 @@ export namespace ServerConnection {
      * The traceback associated with the error.
      */
     traceback: string;
+
+    private static _defaultMessage(response: Response): string {
+      return `Invalid response: ${response.status} ${response.statusText}`;
+    }
   }
 
   /**
@@ -232,6 +259,7 @@ namespace Private {
         (typeof process !== 'undefined' &&
           process?.env?.JEST_WORKER_ID !== undefined) ||
         URLExt.getHostName(pageBaseUrl) !== URLExt.getHostName(wsUrl),
+      serializer: { serialize, deserialize },
       ...options,
       baseUrl,
       wsUrl

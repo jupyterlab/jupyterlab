@@ -1,0 +1,4 @@
+{
+  "out": "../../docs/api/mermaid",
+  "theme": "../../typedoc-theme"
+}

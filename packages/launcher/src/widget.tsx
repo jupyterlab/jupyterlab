@@ -174,6 +174,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
                 icon={icon}
                 iconClass={classes(iconClass, 'jp-Icon-cover')}
                 stylesheet="launcherSection"
+                aria-hidden="true"
               />
               <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
@@ -298,7 +299,11 @@ function Card(
       <div className="jp-LauncherCard-icon">
         {kernel ? (
           item.kernelIconUrl ? (
-            <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
+            <img
+              src={item.kernelIconUrl}
+              className="jp-Launcher-kernelIcon"
+              alt={title}
+            />
           ) : (
             <div className="jp-LauncherCard-noKernelIcon">
               {label[0].toUpperCase()}

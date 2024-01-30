@@ -104,6 +104,9 @@ namespace CommandIDs {
 
   export const toggleSideTabBar: string = 'application:toggle-side-tabbar';
 
+  export const toggleSidebarWidget: string =
+    'application:toggle-sidebar-widget';
+
   export const togglePresentationMode: string =
     'application:toggle-presentation-mode';
 
@@ -117,6 +120,7 @@ namespace CommandIDs {
  */
 const mainCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:commands',
+  description: 'Adds commands related to the shell.',
   autoStart: true,
   requires: [ITranslator],
   optional: [ILabShell, ICommandPalette],
@@ -199,6 +203,37 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       }
       return widgets.slice(index + 1);
     };
+
+    // Gets and returns the dataId of currently active tab in the specified sidebar (left or right)
+    // or an empty string
+    const activeSidePanelWidget = (side: string): string => {
+      // default active element is luancher (luancher-0)
+      let activeTab;
+      if (side != 'left' && side != 'right') {
+        throw Error(`Unsupported sidebar: ${side}`);
+      }
+      if (side === 'left') {
+        activeTab = document.querySelector('.lm-TabBar-tab.lm-mod-current');
+      } else {
+        const query = document.querySelectorAll(
+          '.lm-TabBar-tab.lm-mod-current'
+        );
+        activeTab = query[query.length - 1];
+      }
+      const activeTabDataId = activeTab?.getAttribute('data-id');
+      if (activeTabDataId) {
+        return activeTabDataId?.toString();
+      } else {
+        return '';
+      }
+    };
+
+    // Sets tab focus on the element
+    function setTabFocus(focusElement: HTMLElement | null) {
+      if (focusElement) {
+        focusElement.focus();
+      }
+    }
 
     commands.addCommand(CommandIDs.close, {
       label: () => trans.__('Close Tab'),
@@ -325,6 +360,37 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
         },
         isToggled: () => !labShell.rightCollapsed,
         isEnabled: () => !labShell.isEmpty('right')
+      });
+
+      commands.addCommand(CommandIDs.toggleSidebarWidget, {
+        label: trans.__('Toggle Sidebar Element'),
+        execute: args => {
+          const index = parseInt(args.index as string, 10);
+          if (args.side != 'left' && args.side != 'right') {
+            throw Error(`Unsupported sidebar: ${args.side}`);
+          }
+          const widgets = Array.from(labShell.widgets(args.side));
+          if (index >= widgets.length) {
+            return;
+          }
+          const widgetId = widgets[index].id;
+          const focusElement: HTMLElement | null = document.querySelector(
+            "[data-id='" + widgetId + "']"
+          );
+          if (activeSidePanelWidget(args.side) === widgetId) {
+            if (args.side == 'left') {
+              labShell.collapseLeft();
+              setTabFocus(focusElement);
+            }
+            if (args.side == 'right') {
+              labShell.collapseRight();
+              setTabFocus(focusElement);
+            }
+          } else {
+            labShell.activateById(widgetId);
+            setTabFocus(focusElement);
+          }
+        }
       });
 
       commands.addCommand(CommandIDs.toggleSideTabBar, {
@@ -466,6 +532,8 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
  */
 const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
   id: '@jupyterlab/application-extension:main',
+  description:
+    'Initializes the application and provides the URL tree path handler.',
   requires: [
     IRouter,
     IWindowResolver,
@@ -650,6 +718,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
  */
 const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:context-menu',
+  description: 'Populates the context menu.',
   autoStart: true,
   requires: [ISettingRegistry, ITranslator],
   activate: (
@@ -691,6 +760,8 @@ const contextMenuPlugin: JupyterFrontEndPlugin<void> = {
  */
 const dirty: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:dirty',
+  description:
+    'Adds safeguard dialog when closing the browser tab with unsaved modifications.',
   autoStart: true,
   requires: [ITranslator],
   activate: (app: JupyterFrontEnd, translator: ITranslator): void => {
@@ -720,6 +791,7 @@ const dirty: JupyterFrontEndPlugin<void> = {
  */
 const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
+  description: 'Provides the shell layout restorer.',
   requires: [IStateDB, ILabShell, ISettingRegistry],
   optional: [ITranslator],
   activate: (
@@ -806,6 +878,7 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
  */
 const router: JupyterFrontEndPlugin<IRouter> = {
   id: '@jupyterlab/application-extension:router',
+  description: 'Provides the URL router',
   requires: [JupyterFrontEnd.IPaths],
   activate: (app: JupyterFrontEnd, paths: JupyterFrontEnd.IPaths) => {
     const { commands } = app;
@@ -833,6 +906,7 @@ const router: JupyterFrontEndPlugin<IRouter> = {
  */
 const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
   id: '@jupyterlab/application-extension:tree-resolver',
+  description: 'Provides the tree route resolver',
   autoStart: true,
   requires: [IRouter],
   provides: JupyterFrontEnd.ITreeResolver,
@@ -897,6 +971,7 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
  */
 const notfound: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:notfound',
+  description: 'Defines the behavior for not found URL (aka route).',
   requires: [JupyterFrontEnd.IPaths, IRouter, ITranslator],
   activate: (
     _: JupyterFrontEnd,
@@ -931,6 +1006,7 @@ const notfound: JupyterFrontEndPlugin<void> = {
  */
 const busy: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:faviconbusy',
+  description: 'Handles the favicon depending on the application status.',
   requires: [ILabStatus],
   activate: async (_: JupyterFrontEnd, status: ILabStatus) => {
     status.busySignal.connect((_, isBusy) => {
@@ -965,6 +1041,8 @@ const busy: JupyterFrontEndPlugin<void> = {
  */
 const shell: JupyterFrontEndPlugin<ILabShell> = {
   id: '@jupyterlab/application-extension:shell',
+  description:
+    'Provides the JupyterLab shell. It has an extended API compared to `app.shell`.',
   optional: [ISettingRegistry],
   activate: (
     app: JupyterFrontEnd,
@@ -992,6 +1070,7 @@ const shell: JupyterFrontEndPlugin<ILabShell> = {
  */
 const status: JupyterFrontEndPlugin<ILabStatus> = {
   id: '@jupyterlab/application-extension:status',
+  description: 'Provides the application status.',
   activate: (app: JupyterFrontEnd) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${status.id} must be activated in JupyterLab.`);
@@ -1012,6 +1091,7 @@ const status: JupyterFrontEndPlugin<ILabStatus> = {
  */
 const info: JupyterFrontEndPlugin<JupyterLab.IInfo> = {
   id: '@jupyterlab/application-extension:info',
+  description: 'Provides the application information.',
   activate: (app: JupyterFrontEnd) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${info.id} must be activated in JupyterLab.`);
@@ -1026,7 +1106,8 @@ const info: JupyterFrontEndPlugin<JupyterLab.IInfo> = {
  * The default JupyterLab paths dictionary provider.
  */
 const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
-  id: '@jupyterlab/apputils-extension:paths',
+  id: '@jupyterlab/application-extension:paths',
+  description: 'Provides the application paths.',
   activate: (app: JupyterFrontEnd): JupyterFrontEnd.IPaths => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${paths.id} must be activated in JupyterLab.`);
@@ -1042,6 +1123,7 @@ const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
  */
 const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   id: '@jupyterlab/application-extension:property-inspector',
+  description: 'Provides the property inspector.',
   autoStart: true,
   requires: [ILabShell, ITranslator],
   optional: [ILayoutRestorer],
@@ -1053,11 +1135,10 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
     restorer: ILayoutRestorer | null
   ) => {
     const trans = translator.load('jupyterlab');
-    const widget = new SideBarPropertyInspectorProvider(
-      labshell,
-      undefined,
+    const widget = new SideBarPropertyInspectorProvider({
+      shell: labshell,
       translator
-    );
+    });
     widget.title.icon = buildIcon;
     widget.title.caption = trans.__('Property Inspector');
     widget.id = 'jp-property-inspector';
@@ -1077,8 +1158,9 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   }
 };
 
-const JupyterLogo: JupyterFrontEndPlugin<void> = {
+const jupyterLogo: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:logo',
+  description: 'Sets the application logo.',
   autoStart: true,
   requires: [ILabShell],
   activate: (app: JupyterFrontEnd, shell: ILabShell) => {
@@ -1100,6 +1182,7 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
  */
 const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:mode-switch',
+  description: 'Adds the interface mode switch',
   requires: [ILabShell, ITranslator],
   optional: [IStatusBar, ISettingRegistry],
   activate: (
@@ -1163,6 +1246,7 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
     modeSwitch.label = trans.__('Simple');
 
     statusBar.registerStatusItem(modeSwitchPlugin.id, {
+      priority: 1,
       item: modeSwitch,
       align: 'left',
       rank: -1
@@ -1190,7 +1274,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   modeSwitchPlugin,
   paths,
   propertyInspector,
-  JupyterLogo,
+  jupyterLogo,
   topbar
 ];
 

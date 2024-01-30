@@ -5,6 +5,8 @@
  * @module mathjax-extension
  */
 
+import { PromiseDelegate } from '@lumino/coreutils';
+
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -36,61 +38,10 @@ namespace CommandArgs {
  */
 export class MathJaxTypesetter implements ILatexTypesetter {
   protected async _ensureInitialized() {
-    if (this._initialized) {
-      return;
+    if (!this._initialized) {
+      this._mathDocument = await Private.ensureMathDocument();
+      this._initialized = true;
     }
-
-    await import('mathjax-full/js/input/tex/require/RequireConfiguration');
-    const { mathjax } = await import('mathjax-full/js/mathjax');
-    const { CHTML } = await import('mathjax-full/js/output/chtml');
-    const { TeX } = await import('mathjax-full/js/input/tex');
-    const { TeXFont } = await import('mathjax-full/js/output/chtml/fonts/tex');
-    const { AllPackages } = await import(
-      'mathjax-full/js/input/tex/AllPackages'
-    );
-    const { SafeHandler } = await import('mathjax-full/js/ui/safe/SafeHandler');
-    const { HTMLHandler } = await import(
-      'mathjax-full/js/handlers/html/HTMLHandler'
-    );
-    const { browserAdaptor } = await import(
-      'mathjax-full/js/adaptors/browserAdaptor'
-    );
-    const { AssistiveMmlHandler } = await import(
-      'mathjax-full/js/a11y/assistive-mml'
-    );
-
-    mathjax.handlers.register(
-      AssistiveMmlHandler(SafeHandler(new HTMLHandler(browserAdaptor())))
-    );
-
-    class EmptyFont extends TeXFont {
-      defaultFonts = {};
-    }
-
-    const chtml = new CHTML({
-      // Override dynamically generated fonts in favor of our font css
-      font: new EmptyFont()
-    });
-
-    const tex = new TeX({
-      packages: AllPackages.concat('require'),
-      inlineMath: [
-        ['$', '$'],
-        ['\\(', '\\)']
-      ],
-      displayMath: [
-        ['$$', '$$'],
-        ['\\[', '\\]']
-      ],
-      processEscapes: true,
-      processEnvironments: true
-    });
-
-    this._mathDocument = mathjax.document(window.document, {
-      InputJax: tex,
-      OutputJax: chtml
-    });
-    this._initialized = true;
   }
 
   /**
@@ -126,6 +77,7 @@ export class MathJaxTypesetter implements ILatexTypesetter {
  */
 const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
   id: '@jupyterlab/mathjax-extension:plugin',
+  description: 'Provides the LaTeX mathematical expression interpreter.',
   provides: ILatexTypesetter,
   activate: (app: JupyterFrontEnd) => {
     const typesetter = new MathJaxTypesetter();
@@ -156,3 +108,78 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
 };
 
 export default mathJaxPlugin;
+
+/**
+ * A namespace for module-private functionality.
+ */
+namespace Private {
+  let _loading: PromiseDelegate<MathDocument<any, any, any>> | null = null;
+
+  export async function ensureMathDocument(): Promise<
+    MathDocument<any, any, any>
+  > {
+    if (!_loading) {
+      _loading = new PromiseDelegate();
+
+      void import('mathjax-full/js/input/tex/require/RequireConfiguration');
+
+      const [
+        { mathjax },
+        { CHTML },
+        { TeX },
+        { TeXFont },
+        { AllPackages },
+        { SafeHandler },
+        { HTMLHandler },
+        { browserAdaptor },
+        { AssistiveMmlHandler }
+      ] = await Promise.all([
+        import('mathjax-full/js/mathjax'),
+        import('mathjax-full/js/output/chtml'),
+        import('mathjax-full/js/input/tex'),
+        import('mathjax-full/js/output/chtml/fonts/tex'),
+        import('mathjax-full/js/input/tex/AllPackages'),
+        import('mathjax-full/js/ui/safe/SafeHandler'),
+        import('mathjax-full/js/handlers/html/HTMLHandler'),
+        import('mathjax-full/js/adaptors/browserAdaptor'),
+        import('mathjax-full/js/a11y/assistive-mml')
+      ]);
+
+      mathjax.handlers.register(
+        AssistiveMmlHandler(SafeHandler(new HTMLHandler(browserAdaptor())))
+      );
+
+      class EmptyFont extends TeXFont {
+        protected static defaultFonts = {} as any;
+      }
+
+      const chtml = new CHTML({
+        // Override dynamically generated fonts in favor of our font css
+        font: new EmptyFont()
+      });
+
+      const tex = new TeX({
+        packages: AllPackages.concat('require'),
+        inlineMath: [
+          ['$', '$'],
+          ['\\(', '\\)']
+        ],
+        displayMath: [
+          ['$$', '$$'],
+          ['\\[', '\\]']
+        ],
+        processEscapes: true,
+        processEnvironments: true
+      });
+
+      const mathDocument = mathjax.document(window.document, {
+        InputJax: tex,
+        OutputJax: chtml
+      });
+
+      _loading.resolve(mathDocument);
+    }
+
+    return _loading.promise;
+  }
+}

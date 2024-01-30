@@ -19,12 +19,14 @@ import {
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { Title, Widget } from '@lumino/widgets';
+import { KeyboardEvent } from 'react';
 
 /**
  * A plugin that provides a kernel status item to the status bar.
  */
 export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
   id: '@jupyterlab/apputils-extension:kernel-status',
+  description: 'Provides the kernel status indicator model.',
   autoStart: true,
   requires: [IStatusBar],
   provides: IKernelStatusModel,
@@ -48,8 +50,25 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
       await sessionDialogs.selectKernel(item.model.sessionContext);
     };
 
+    const changeKernelOnKeyDown = async (
+      event: KeyboardEvent<HTMLImageElement>
+    ) => {
+      if (
+        event.key === 'Enter' ||
+        event.key === 'Spacebar' ||
+        event.key === ' '
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        return changeKernel();
+      }
+    };
+
     // Create the status item.
-    const item = new KernelStatus({ onClick: changeKernel }, translator);
+    const item = new KernelStatus(
+      { onClick: changeKernel, onKeyDown: changeKernelOnKeyDown },
+      translator
+    );
 
     const providers = new Set<(w: Widget | null) => ISessionContext | null>();
 
@@ -100,6 +119,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
     }
 
     statusBar.registerStatusItem(kernelStatus.id, {
+      priority: 1,
       item,
       align: 'left',
       rank: 1,
@@ -116,6 +136,7 @@ export const kernelStatus: JupyterFrontEndPlugin<IKernelStatusModel> = {
  */
 export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:running-sessions-status',
+  description: 'Add the running sessions and terminals status bar item.',
   autoStart: true,
   requires: [IStatusBar, ITranslator],
   activate: (
@@ -125,6 +146,17 @@ export const runningSessionsStatus: JupyterFrontEndPlugin<void> = {
   ) => {
     const item = new RunningSessions({
       onClick: () => app.shell.activateById('jp-running-sessions'),
+      onKeyDown: (event: KeyboardEvent<HTMLImageElement>) => {
+        if (
+          event.key === 'Enter' ||
+          event.key === 'Spacebar' ||
+          event.key === ' '
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          app.shell.activateById('jp-running-sessions');
+        }
+      },
       serviceManager: app.serviceManager,
       translator
     });

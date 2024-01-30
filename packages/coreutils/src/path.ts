@@ -21,6 +21,16 @@ export namespace PathExt {
   }
 
   /**
+   * Join all arguments together and normalize the resulting path and preserve the leading slash.
+   *
+   * @param paths - The string paths to join.
+   */
+  export function joinWithLeadingSlash(...paths: string[]): string {
+    const path = posix.join(...paths);
+    return path === '.' ? '' : path;
+  }
+
+  /**
    * Return the last portion of a path. Similar to the Unix basename command.
    * Often used to extract the file name from a fully qualified path.
    *
@@ -82,18 +92,18 @@ export namespace PathExt {
    * @param parts - The paths to join.
    *
    * #### Notes
-   * The right-most parameter is considered {to}.  Other parameters are considered an array of {from}.
+   * The right-most parameter is considered \{to\}.  Other parameters are considered an array of \{from\}.
    *
-   * Starting from leftmost {from} parameter, resolves {to} to an absolute path.
+   * Starting from leftmost \{from\} parameter, resolves \{to\} to an absolute path.
    *
-   * If {to} isn't already absolute, {from} arguments are prepended in right to left order, until an absolute path is found. If after using all {from} paths still no absolute path is found, the current working directory is used as well. The resulting path is normalized, and trailing slashes are removed unless the path gets resolved to the root directory.
+   * If \{to\} isn't already absolute, \{from\} arguments are prepended in right to left order, until an absolute path is found. If after using all \{from\} paths still no absolute path is found, the current working directory is used as well. The resulting path is normalized, and trailing slashes are removed unless the path gets resolved to the root directory.
    */
   export function resolve(...parts: string[]): string {
     return removeSlash(posix.resolve(...parts));
   }
 
   /**
-   * Solve the relative path from {from} to {to}.
+   * Solve the relative path from \{from\} to \{to\}.
    *
    * @param from - The source path.
    *

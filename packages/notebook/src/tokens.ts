@@ -14,14 +14,17 @@ import { NotebookWidgetFactory } from './widgetfactory';
  * The notebook widget factory token.
  */
 export const INotebookWidgetFactory = new Token<NotebookWidgetFactory.IFactory>(
-  '@jupyterlab/notebook:INotebookWidgetFactory'
+  '@jupyterlab/notebook:INotebookWidgetFactory',
+  'A service to create the notebook viewer.'
 );
 
 /**
  * The notebook tools token.
  */
 export const INotebookTools = new Token<INotebookTools>(
-  '@jupyterlab/notebook:INotebookTools'
+  '@jupyterlab/notebook:INotebookTools',
+  `A service for the "Notebook Tools" panel in the
+  right sidebar. Use this to add your own functionality to the panel.`
 );
 
 /**
@@ -96,7 +99,10 @@ export namespace INotebookTools {
  * The notebook tracker token.
  */
 export const INotebookTracker = new Token<INotebookTracker>(
-  '@jupyterlab/notebook:INotebookTracker'
+  '@jupyterlab/notebook:INotebookTracker',
+  `A widget tracker for notebooks.
+  Use this if you want to be able to iterate over and interact with notebooks
+  created by the application.`
 );
 
 /**

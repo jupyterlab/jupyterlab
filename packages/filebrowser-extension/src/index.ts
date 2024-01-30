@@ -135,7 +135,12 @@ namespace CommandIDs {
 
   export const toggleLastModified = 'filebrowser:toggle-last-modified';
 
+  export const toggleShowFullPath = 'filebrowser:toggle-show-full-path';
+
   export const toggleFileSize = 'filebrowser:toggle-file-size';
+
+  export const toggleSortNotebooksFirst =
+    'filebrowser:toggle-sort-notebooks-first';
 
   export const search = 'filebrowser:search';
 
@@ -154,6 +159,7 @@ const namespace = 'filebrowser';
  */
 const browser: JupyterFrontEndPlugin<void> = {
   id: FILE_BROWSER_PLUGIN_ID,
+  description: 'Set up the default file browser (commands, settings,...).',
   requires: [IDefaultFileBrowser, IFileBrowserFactory, ITranslator],
   optional: [
     ILayoutRestorer,
@@ -217,7 +223,9 @@ const browser: JupyterFrontEndPlugin<void> = {
             showLastModifiedColumn: true,
             showFileSizeColumn: false,
             showHiddenFiles: false,
-            showFileCheckboxes: false
+            showFileCheckboxes: false,
+            sortNotebooksFirst: false,
+            showFullPath: false
           };
           const fileBrowserModelConfig = {
             filterDirectories: true
@@ -251,6 +259,7 @@ const browser: JupyterFrontEndPlugin<void> = {
  */
 const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   id: '@jupyterlab/filebrowser-extension:factory',
+  description: 'Provides the file browser factory.',
   provides: IFileBrowserFactory,
   requires: [IDocumentManager, ITranslator],
   optional: [IStateDB, JupyterLab.IInfo],
@@ -301,6 +310,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
  */
 const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   id: '@jupyterlab/filebrowser-extension:default-file-browser',
+  description: 'Provides the default file browser',
   provides: IDefaultFileBrowser,
   requires: [IFileBrowserFactory],
   optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
@@ -339,6 +349,8 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
  */
 const downloadPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:download',
+  description:
+    'Adds the download file commands. Disabling this plugin will NOT disable downloading files from the server, if the user enters the appropriate download URLs.',
   requires: [IFileBrowserFactory, ITranslator],
   autoStart: true,
   activate: (
@@ -375,6 +387,11 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
             Clipboard.copyToSystem(url);
           });
       },
+      isVisible: () =>
+        // So long as this command only handles one file at time, don't show it
+        // if multiple files are selected.
+        !!tracker.currentWidget &&
+        Array.from(tracker.currentWidget.selectedItems()).length === 1,
       icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
       label: trans.__('Copy Download Link'),
       mnemonic: 0
@@ -387,6 +404,7 @@ const downloadPlugin: JupyterFrontEndPlugin<void> = {
  */
 const browserWidget: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:widget',
+  description: 'Adds the file browser to the application shell.',
   requires: [
     IDocumentManager,
     IDefaultFileBrowser,
@@ -600,6 +618,8 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
  */
 const shareFile: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:share-file',
+  description:
+    'Adds the "Copy Shareable Link" command; useful for JupyterHub deployment for example.',
   requires: [IFileBrowserFactory, ITranslator],
   autoStart: true,
   activate: (
@@ -644,6 +664,8 @@ const shareFile: JupyterFrontEndPlugin<void> = {
  */
 const openWithPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:open-with',
+  description:
+    'Adds the open-with feature allowing an user to pick the non-preferred document viewer.',
   requires: [IFileBrowserFactory],
   autoStart: true,
   activate: (app: JupyterFrontEnd, factory: IFileBrowserFactory): void => {
@@ -704,6 +726,7 @@ const openWithPlugin: JupyterFrontEndPlugin<void> = {
  */
 const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:open-browser-tab',
+  description: 'Adds the open-in-new-browser-tab features.',
   requires: [IFileBrowserFactory, ITranslator],
   autoStart: true,
   activate: (
@@ -764,6 +787,7 @@ const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
  */
 export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:file-upload-status',
+  description: 'Adds a file upload status widget.',
   autoStart: true,
   requires: [IFileBrowserFactory, ITranslator],
   optional: [IStatusBar],
@@ -801,6 +825,7 @@ export const fileUploadStatus: JupyterFrontEndPlugin<void> = {
  */
 const openUrlPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/filebrowser-extension:open-url',
+  description: 'Adds the feature "Open files from remote URLs".',
   autoStart: true,
   requires: [IDefaultFileBrowser, ITranslator],
   optional: [ICommandPalette],
@@ -986,19 +1011,8 @@ function addCommands(
         return;
       }
       const { model } = browserForPath;
-
       await model.restored;
-      if (model.path === model.rootPath) {
-        return;
-      }
-      try {
-        await model.cd('..');
-      } catch (reason) {
-        console.warn(
-          `${CommandIDs.goUp} failed to go to parent directory of ${model.path}`,
-          reason
-        );
-      }
+      void browserForPath.goUp();
     }
   });
 
@@ -1181,6 +1195,11 @@ function addCommands(
         return widget.rename();
       }
     },
+    isVisible: () =>
+      // So long as this command only handles one file at time, don't show it
+      // if multiple files are selected.
+      !!tracker.currentWidget &&
+      Array.from(tracker.currentWidget.selectedItems()).length === 1,
     icon: editIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Rename'),
     mnemonic: 0
@@ -1197,11 +1216,21 @@ function addCommands(
         return;
       }
 
-      Clipboard.copyToSystem(item.value.path);
+      if (PageConfig.getOption('copyAbsolutePath') === 'true') {
+        const absolutePath = PathExt.joinWithLeadingSlash(
+          PageConfig.getOption('serverRoot') ?? '',
+          item.value.path
+        );
+        Clipboard.copyToSystem(absolutePath);
+      } else {
+        Clipboard.copyToSystem(item.value.path);
+      }
     },
     isVisible: () =>
+      // So long as this command only handles one file at time, don't show it
+      // if multiple files are selected.
       !!tracker.currentWidget &&
-      !tracker.currentWidget.selectedItems().next().done,
+      Array.from(tracker.currentWidget.selectedItems()).length === 1,
     icon: fileIcon.bindprops({ stylesheet: 'menuItem' }),
     label: trans.__('Copy Path')
   });
@@ -1224,6 +1253,38 @@ function addCommands(
     execute: () => {
       const value = !browser.showLastModifiedColumn;
       const key = 'showLastModifiedColumn';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleShowFullPath, {
+    label: trans.__('Show Full Path'),
+    isToggled: () => browser.showFullPath,
+    execute: () => {
+      const value = !browser.showFullPath;
+      const key = 'showFullPath';
+      if (settingRegistry) {
+        return settingRegistry
+          .set(FILE_BROWSER_PLUGIN_ID, key, value)
+          .catch((reason: Error) => {
+            console.error(`Failed to set ${key} setting`);
+          });
+      }
+    }
+  });
+
+  commands.addCommand(CommandIDs.toggleSortNotebooksFirst, {
+    label: trans.__('Sort Notebooks Above Files'),
+    isToggled: () => browser.sortNotebooksFirst,
+    execute: () => {
+      const value = !browser.sortNotebooksFirst;
+      const key = 'sortNotebooksFirst';
       if (settingRegistry) {
         return settingRegistry
           .set(FILE_BROWSER_PLUGIN_ID, key, value)

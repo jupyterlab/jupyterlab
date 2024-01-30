@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-types */
-// Copyright (c) Jupyter Development Team.
-// Copyright (c) Bloomberg Finance LP.
-// Distributed under the terms of the Modified BSD License.
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ * Copyright (c) Bloomberg Finance LP.
+ */
 
 import type { IRouter, JupyterFrontEnd } from '@jupyterlab/application';
 import type {
@@ -641,16 +643,13 @@ export class GalataInpage implements IGalataInpage {
         await callback.onAfterCellRun(i);
       }
 
-      await notebook
-        .scrollToItem(
-          i,
-          ((cell.model as CodeCellModel).outputs?.length ?? 0) > 0
-            ? 'end'
-            : 'start'
-        )
-        .catch(reason => {
-          // no-op
-        });
+      if (callback?.onBeforeScroll) {
+        await callback.onBeforeScroll();
+      }
+
+      await notebook.scrollToItem(i).catch(reason => {
+        // no-op
+      });
 
       if (callback?.onAfterScroll) {
         await callback.onAfterScroll();

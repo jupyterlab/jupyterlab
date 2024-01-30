@@ -16,6 +16,7 @@ import { SettingConnector } from './settingconnector';
  */
 export const settingsPlugin: JupyterFrontEndPlugin<ISettingRegistry> = {
   id: '@jupyterlab/apputils-extension:settings',
+  description: 'Provides the setting registry.',
   activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
     const { isDisabled } = PageConfig.Extension;
     const connector = new SettingConnector(app.serviceManager.settings);

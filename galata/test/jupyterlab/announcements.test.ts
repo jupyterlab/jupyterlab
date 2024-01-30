@@ -65,6 +65,7 @@ test.describe('Update available', () => {
     await galata.Mock.mockSettings(page, settings, {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/apputils-extension:notification': {
+        checkForUpdates: true,
         fetchNews: 'true'
       }
     });
@@ -73,8 +74,8 @@ test.describe('Update available', () => {
 
     const notifications = await page.notifications;
 
-    const updates = notifications.filter(n =>
-      n.options?.data?.tags?.includes('update')
+    const updates = notifications.filter(
+      n => n.options?.data?.tags?.includes('update')
     );
     expect(updates).toHaveLength(1);
     expect(updates[0].message).toEqual(message);
@@ -115,6 +116,7 @@ test.describe('Update available', () => {
     await galata.Mock.mockSettings(page, settings, {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/apputils-extension:notification': {
+        checkForUpdates: true,
         fetchNews: 'true'
       }
     });
@@ -185,8 +187,8 @@ test.describe('Fetch news', () => {
 
     const notifications = await page.notifications;
 
-    const news = notifications.filter(n =>
-      n.options?.data?.tags?.includes('news')
+    const news = notifications.filter(
+      n => n.options?.data?.tags?.includes('news')
     );
     expect(news).toHaveLength(2);
     expect(news.filter(n => n.options.data.id === id)[0].message).toEqual(
@@ -212,8 +214,8 @@ test.describe('Fetch news', () => {
 
     const notifications = await page.notifications;
 
-    const news = notifications.filter(n =>
-      n.options?.data?.tags?.includes('news')
+    const news = notifications.filter(
+      n => n.options?.data?.tags?.includes('news')
     );
     expect(news).toHaveLength(0);
   });
@@ -239,8 +241,8 @@ test.describe('Fetch news', () => {
 
     const notifications = await page.notifications;
 
-    const news = notifications.filter(n =>
-      n.options?.data?.tags?.includes('news')
+    const news = notifications.filter(
+      n => n.options?.data?.tags?.includes('news')
     );
     expect(news).toHaveLength(1);
     expect(news[0].id).not.toEqual(id);

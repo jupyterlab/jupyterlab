@@ -44,10 +44,11 @@
 
 .jp-extensionmanager-disclaimer a {
   color: var(--jp-content-link-color);
+  text-decoration: none;
 }
 
 .jp-extensionmanager-disclaimer a:hover {
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-hover-color, var(--jp-content-link-color));
   text-decoration: underline;
 }
 
@@ -188,12 +189,12 @@
 }
 
 .jp-extensionmanager-entry-name a:visited {
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-visited-color, var(--jp-content-link-color));
   text-decoration: none;
 }
 
 .jp-extensionmanager-entry-name a:hover {
-  color: var(--jp-content-link-color);
+  color: var(--jp-content-link-hover-color, var(--jp-content-link-color));
   text-decoration: underline;
 }
 
@@ -239,7 +240,7 @@
 }
 
 @keyframes loading {
-  from {
+  0% {
     left: -200px;
     width: 30%;
   }
@@ -260,7 +261,7 @@
     left: 120%;
   }
 
-  to {
+  100% {
     left: 100%;
   }
 }

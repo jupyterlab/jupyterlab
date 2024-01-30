@@ -18,7 +18,6 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { SyntaxNodeRef } from '@lezer/common';
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-import './codemirror-ipythongfm';
 import { ExtensionsHandler } from './extension';
 import { EditorLanguageRegistry } from './language';
 import {
@@ -396,15 +395,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    *
    * #### Notes
    * This will remove any secondary cursors.
+   *
+   * @deprecated options bias and origin are not used
    */
   setCursorPosition(
     position: CodeEditor.IPosition,
-    options?: { bias?: number; origin?: string; scroll?: boolean }
+    options: { bias?: number; origin?: string; scroll?: boolean } = {}
   ): void {
     const offset = this.getOffsetAt(position);
     this.editor.dispatch({
       selection: { anchor: offset },
-      scrollIntoView: true
+      scrollIntoView: options.scroll === false ? false : true
     });
     // If the editor does not have focus, this cursor change
     // will get screened out in _onCursorsChanged(). Make an
@@ -492,16 +493,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     const tree = ensureSyntaxTree(this.state, this.doc.length);
     if (tree) {
       tree.iterate({
-        enter: (node: SyntaxNodeRef) => {
-          // If it has a child, it is not a leaf, but we still want to enter
-          if (node.node.firstChild !== null) {
-            return true;
+        enter: (ref: SyntaxNodeRef) => {
+          if (ref.node.firstChild === null) {
+            tokens.push({
+              value: this.state.sliceDoc(ref.from, ref.to),
+              offset: ref.from,
+              type: ref.name
+            });
           }
-          tokens.push({
-            value: this.state.sliceDoc(node.from, node.to),
-            offset: node.from,
-            type: node.name
-          });
           return true;
         }
       });
@@ -517,32 +516,29 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     let token: CodeEditor.IToken | null = null;
     if (tree) {
       tree.iterate({
-        enter: (node: SyntaxNodeRef) => {
-          // If it has a child, it is not a leaf, but we still want to enter
-          if (node.node.firstChild !== null) {
+        enter: (ref: SyntaxNodeRef) => {
+          // If a token has already been discovered, stop iterating.
+          if (token) {
+            return false;
+          }
+          // If it is not a leaf, keep iterating.
+          if (ref.node.firstChild) {
             return true;
           }
-          if (offset >= node.from && offset <= node.to) {
+          // If the relevant leaf token has been found, stop iterating.
+          if (offset >= ref.from && offset <= ref.to) {
             token = {
-              value: this.state.sliceDoc(node.from, node.to),
-              offset: node.from,
-              type: node.name
+              value: this.state.sliceDoc(ref.from, ref.to),
+              offset: ref.from,
+              type: ref.name
             };
-            // We have just found the relevant leaf token, no need to iterate further
             return false;
           }
           return true;
         }
       });
     }
-    if (token !== null) {
-      return token;
-    } else {
-      return {
-        value: '',
-        offset: offset
-      };
-    }
+    return token || { offset, value: '' };
   }
 
   /**

@@ -10,7 +10,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { WidgetTracker } from '@jupyterlab/apputils';
+import { ISanitizer, WidgetTracker } from '@jupyterlab/apputils';
 import { PathExt } from '@jupyterlab/coreutils';
 import {
   IMarkdownViewerTracker,
@@ -20,6 +20,7 @@ import {
   MarkdownViewerTableOfContentsFactory
 } from '@jupyterlab/markdownviewer';
 import {
+  IRenderMime,
   IRenderMimeRegistry,
   markdownRendererFactory
 } from '@jupyterlab/rendermime';
@@ -46,9 +47,15 @@ const FACTORY = 'Markdown Preview';
 const plugin: JupyterFrontEndPlugin<IMarkdownViewerTracker> = {
   activate,
   id: '@jupyterlab/markdownviewer-extension:plugin',
+  description: 'Adds markdown file viewer and provides its tracker.',
   provides: IMarkdownViewerTracker,
   requires: [IRenderMimeRegistry, ITranslator],
-  optional: [ILayoutRestorer, ISettingRegistry, ITableOfContentsRegistry],
+  optional: [
+    ILayoutRestorer,
+    ISettingRegistry,
+    ITableOfContentsRegistry,
+    ISanitizer
+  ],
   autoStart: true
 };
 
@@ -61,7 +68,8 @@ function activate(
   translator: ITranslator,
   restorer: ILayoutRestorer | null,
   settingRegistry: ISettingRegistry | null,
-  tocRegistry: ITableOfContentsRegistry | null
+  tocRegistry: ITableOfContentsRegistry | null,
+  sanitizer: IRenderMime.ISanitizer | null
 ): IMarkdownViewerTracker {
   const trans = translator.load('jupyterlab');
   const { commands, docRegistry } = app;
@@ -181,7 +189,8 @@ function activate(
     tocRegistry.add(
       new MarkdownViewerTableOfContentsFactory(
         tracker,
-        rendermime.markdownParser
+        rendermime.markdownParser,
+        sanitizer ?? rendermime.sanitizer
       )
     );
   }

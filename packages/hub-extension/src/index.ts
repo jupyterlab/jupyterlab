@@ -57,9 +57,16 @@ function activateHubExtension(
   });
 
   // If hubServerName is set, use JupyterHub 1.0 URL.
-  const restartUrl = hubServerName
-    ? hubHost + URLExt.join(hubPrefix, 'spawn', hubUser, hubServerName)
-    : hubHost + URLExt.join(hubPrefix, 'spawn');
+  const spawnBase = URLExt.join(hubPrefix, 'spawn');
+  let restartUrl: string;
+  if (hubServerName) {
+    const suffix = URLExt.join(spawnBase, hubUser, hubServerName);
+    if (!suffix.startsWith(spawnBase)) {
+      throw new Error('Can only be used for spawn requests');
+    }
+    restartUrl = hubHost + suffix;
+  }
+  restartUrl = hubHost + spawnBase;
 
   const { commands } = app;
 
@@ -101,6 +108,7 @@ function activateHubExtension(
 const hubExtension: JupyterFrontEndPlugin<void> = {
   activate: activateHubExtension,
   id: '@jupyterlab/hub-extension:plugin',
+  description: 'Registers commands related to the hub server',
   requires: [JupyterFrontEnd.IPaths, ITranslator],
   optional: [ICommandPalette],
   autoStart: true
@@ -112,6 +120,7 @@ const hubExtension: JupyterFrontEndPlugin<void> = {
 const hubExtensionMenu: JupyterFrontEndPlugin<void> = {
   activate: () => void 0,
   id: '@jupyterlab/hub-extension:menu',
+  description: 'Adds hub related commands to the menu.',
   autoStart: true
 };
 
@@ -124,7 +133,9 @@ const hubExtensionMenu: JupyterFrontEndPlugin<void> = {
  * Otherwise, it shows an error dialog.
  */
 const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
-  id: '@jupyterlab/apputils-extension:connectionlost',
+  id: '@jupyterlab/hub-extension:connectionlost',
+  description:
+    'Provides a service to be notified when the connection to the hub server is lost.',
   requires: [JupyterFrontEnd.IPaths, ITranslator],
   optional: [JupyterLab.IInfo],
   activate: (

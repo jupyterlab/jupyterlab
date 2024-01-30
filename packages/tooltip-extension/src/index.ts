@@ -40,6 +40,7 @@ namespace CommandIDs {
  */
 const manager: JupyterFrontEndPlugin<ITooltipManager> = {
   id: '@jupyterlab/tooltip-extension:manager',
+  description: 'Provides the tooltip manager.',
   autoStart: true,
   optional: [ITranslator],
   provides: ITooltipManager,
@@ -88,7 +89,9 @@ const manager: JupyterFrontEndPlugin<ITooltipManager> = {
  * The console tooltip plugin.
  */
 const consoles: JupyterFrontEndPlugin<void> = {
+  // FIXME This should be in @jupyterlab/console-extension
   id: '@jupyterlab/tooltip-extension:consoles',
+  description: 'Adds the tooltip capability to consoles.',
   autoStart: true,
   optional: [ITranslator],
   requires: [ITooltipManager, IConsoleTracker],
@@ -128,7 +131,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
  * The notebook tooltip plugin.
  */
 const notebooks: JupyterFrontEndPlugin<void> = {
+  // FIXME This should be in @jupyterlab/notebook-extension
   id: '@jupyterlab/tooltip-extension:notebooks',
+  description: 'Adds the tooltip capability to notebooks.',
   autoStart: true,
   optional: [ITranslator],
   requires: [ITooltipManager, INotebookTracker],
@@ -168,7 +173,9 @@ const notebooks: JupyterFrontEndPlugin<void> = {
  * The file editor tooltip plugin.
  */
 const files: JupyterFrontEndPlugin<void> = {
+  // FIXME This should be in @jupyterlab/fileeditor-extension
   id: '@jupyterlab/tooltip-extension:files',
+  description: 'Adds the tooltip capability to file editors.',
   autoStart: true,
   optional: [ITranslator],
   requires: [ITooltipManager, IEditorTracker, IRenderMimeRegistry],

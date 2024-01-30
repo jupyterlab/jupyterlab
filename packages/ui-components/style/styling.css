@@ -1,6 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2017, Jupyter Development Team.
-|
+| Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
@@ -45,6 +44,11 @@ input[type='checkbox'].jp-mod-styled {
 input.jp-mod-styled:focus {
   border: var(--jp-border-width) solid var(--md-blue-500);
   box-shadow: inset 0 0 4px var(--md-blue-300);
+}
+
+input[type='checkbox'].jp-mod-styled:focus-visible {
+  outline: var(--jp-border-width) solid var(--jp-input-active-border-color);
+  outline-offset: 1px;
 }
 
 .jp-select-wrapper {

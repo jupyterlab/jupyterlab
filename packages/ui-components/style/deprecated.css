@@ -35,6 +35,7 @@
   --jp-icon-code-check: url('icons/lsp/code-check.svg');
   --jp-icon-code: url('icons/toolbar/code.svg');
   --jp-icon-collapse-all: url('icons/toolbar/collapse-all.svg');
+  --jp-icon-collapse: url('icons/output/collapse.svg');
   --jp-icon-console: url('icons/filetype/console.svg');
   --jp-icon-copy: url('icons/toolbar/copy.svg');
   --jp-icon-copyright: url('icons/licenses/copyright.svg');
@@ -46,6 +47,7 @@
   --jp-icon-ellipses: url('icons/toolbar/ellipses.svg');
   --jp-icon-error: url('icons/error.svg');
   --jp-icon-expand-all: url('icons/toolbar/expand-all.svg');
+  --jp-icon-expand: url('icons/output/expand.svg');
   --jp-icon-extension: url('icons/sidebar/extension.svg');
   --jp-icon-fast-forward: url('icons/toolbar/fast-forward.svg');
   --jp-icon-file-upload: url('icons/toolbar/file-upload.svg');
@@ -55,6 +57,7 @@
   --jp-icon-filter: url('icons/search/filter.svg');
   --jp-icon-folder-favorite: url('icons/filetype/folder-favorite.svg');
   --jp-icon-folder: url('icons/filetype/folder.svg');
+  --jp-icon-history: url('icons/history.svg');
   --jp-icon-home: url('icons/filetype/home.svg');
   --jp-icon-html5: url('icons/filetype/html5.svg');
   --jp-icon-image: url('icons/filetype/image.svg');
@@ -72,7 +75,9 @@
   --jp-icon-line-form: url('icons/statusbar/line-form.svg');
   --jp-icon-link: url('icons/toolbar/link.svg');
   --jp-icon-list: url('icons/statusbar/list.svg');
+  --jp-icon-lock: url('icons/lock.svg');
   --jp-icon-markdown: url('icons/filetype/markdown.svg');
+  --jp-icon-mermaid: url('icons/filetype/mermaid.svg');
   --jp-icon-move-down: url('icons/toolbar/move-down.svg');
   --jp-icon-move-up: url('icons/toolbar/move-up.svg');
   --jp-icon-new-folder: url('icons/toolbar/new-folder.svg');
@@ -207,6 +212,10 @@
   background-image: var(--jp-icon-collapse-all);
 }
 
+.jp-CollapseIcon {
+  background-image: var(--jp-icon-collapse);
+}
+
 .jp-ConsoleIcon {
   background-image: var(--jp-icon-console);
 }
@@ -251,6 +260,10 @@
   background-image: var(--jp-icon-expand-all);
 }
 
+.jp-ExpandIcon {
+  background-image: var(--jp-icon-expand);
+}
+
 .jp-ExtensionIcon {
   background-image: var(--jp-icon-extension);
 }
@@ -285,6 +298,10 @@
 
 .jp-FolderIcon {
   background-image: var(--jp-icon-folder);
+}
+
+.jp-HistoryIcon {
+  background-image: var(--jp-icon-history);
 }
 
 .jp-HomeIcon {
@@ -355,8 +372,16 @@
   background-image: var(--jp-icon-list);
 }
 
+.jp-LockIcon {
+  background-image: var(--jp-icon-lock);
+}
+
 .jp-MarkdownIcon {
   background-image: var(--jp-icon-markdown);
+}
+
+.jp-MermaidIcon {
+  background-image: var(--jp-icon-mermaid);
 }
 
 .jp-MoveDownIcon {

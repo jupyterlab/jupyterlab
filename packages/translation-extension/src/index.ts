@@ -28,6 +28,7 @@ const PLUGIN_ID = '@jupyterlab/translation-extension:plugin';
 
 const translator: JupyterFrontEndPlugin<ITranslator> = {
   id: '@jupyterlab/translation:translator',
+  description: 'Provides the application translation object.',
   autoStart: true,
   requires: [JupyterFrontEnd.IPaths, ISettingRegistry],
   optional: [ILabShell],
@@ -69,6 +70,7 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
  */
 const langMenu: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
+  description: 'Adds translation commands and settings.',
   requires: [ISettingRegistry, ITranslator],
   optional: [IMainMenu, ICommandPalette],
   autoStart: true,
@@ -97,7 +99,16 @@ const langMenu: JupyterFrontEndPlugin<void> = {
       .then(setting => {
         // Read the settings
         loadSetting(setting);
-        document.documentElement.lang = (currentLocale ?? '').replace('_', '-');
+
+        // Ensure currentLocale is not 'default' which is not a valid language code
+        if (currentLocale !== 'default') {
+          document.documentElement.lang = (currentLocale ?? '').replace(
+            '_',
+            '-'
+          );
+        } else {
+          document.documentElement.lang = 'en-US';
+        }
 
         // Listen for your plugin setting changes using Signal
         setting.changed.connect(loadSetting);

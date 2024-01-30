@@ -2,10 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter } from './adapters/adapter';
+import { WidgetLSPAdapter } from './adapters';
 import { LSPConnection } from './connection';
 import { ClientCapabilities } from './lsp';
 import { AskServersToSendTraceNotifications } from './plugin';
@@ -16,6 +15,7 @@ import {
   ILSPConnection,
   ILSPDocumentConnectionManager,
   ISocketConnectionOptions,
+  IWidgetLSPAdapterTracker,
   TLanguageServerConfigurations,
   TLanguageServerId,
   TServerKeys
@@ -40,6 +40,11 @@ export class DocumentConnectionManager
     this._ignoredLanguages = new Set();
     this.languageServerManager = options.languageServerManager;
     Private.setLanguageServerManager(options.languageServerManager);
+
+    options.adapterTracker.adapterAdded.connect((_, adapter) => {
+      const path = adapter.widget.context.path;
+      this.registerAdapter(path, adapter);
+    });
   }
 
   /**
@@ -49,9 +54,10 @@ export class DocumentConnectionManager
   readonly connections: Map<VirtualDocument.uri, LSPConnection>;
 
   /**
+   * @deprecated
    * Map between the path of the document and its adapter
    */
-  readonly adapters: Map<string, WidgetLSPAdapter<IDocumentWidget>>;
+  readonly adapters: Map<string, WidgetLSPAdapter>;
 
   /**
    * Map between the URI of the virtual document and the document itself.
@@ -199,16 +205,21 @@ export class DocumentConnectionManager
   }
 
   /**
+   * @deprecated
+   *
    * Register a widget adapter with this manager
    *
    * @param  path - path to the inner document of the adapter
    * @param  adapter - the adapter to be registered
    */
-  registerAdapter(
-    path: string,
-    adapter: WidgetLSPAdapter<IDocumentWidget>
-  ): void {
+  registerAdapter(path: string, adapter: WidgetLSPAdapter): void {
     this.adapters.set(path, adapter);
+
+    adapter.widget.context.pathChanged.connect((context, newPath) => {
+      this.adapters.delete(path);
+      this.adapters.set(newPath, adapter);
+    });
+
     adapter.disposed.connect(() => {
       if (adapter.virtualDocument) {
         this.documents.delete(adapter.virtualDocument.uri);
@@ -404,7 +415,7 @@ export class DocumentConnectionManager
   }
 
   /**
-   * Disconnect the signals of requested virtual document uri.
+   * Disconnect the signals of requested virtual document URI.
    */
   unregisterDocument(uri: string, emit: boolean = true): void {
     const connection = this.connections.get(uri);
@@ -423,7 +434,7 @@ export class DocumentConnectionManager
   }
 
   /**
-   * Enable or disable the logging feature of the language servers
+   * Enable or disable the logging of language server communication.
    */
   updateLogging(
     logAllCommunication: boolean,
@@ -535,6 +546,11 @@ export namespace DocumentConnectionManager {
      * The language server manager instance.
      */
     languageServerManager: ILanguageServerManager;
+
+    /**
+     * The WidgetLSPAdapter's tracker.
+     */
+    adapterTracker: IWidgetLSPAdapterTracker;
   }
 
   /**
@@ -547,25 +563,37 @@ export namespace DocumentConnectionManager {
     virtualDocument: VirtualDocument,
     language: string
   ): IURIs | undefined {
-    const wsBase = PageConfig.getBaseUrl().replace(/^http/, 'ws');
+    const serverManager = Private.getLanguageServerManager();
+    const wsBase = serverManager.settings.wsUrl;
     const rootUri = PageConfig.getOption('rootUri');
     const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
 
-    const baseUri = virtualDocument.hasLspSupportedFile
-      ? rootUri
-      : virtualDocumentsUri;
-
     // for now take the best match only
-    const matchingServers =
-      Private.getLanguageServerManager().getMatchingServers({
-        language
-      });
+    const serverOptions: ILanguageServerManager.IGetServerIdOptions = {
+      language
+    };
+    const matchingServers = serverManager.getMatchingServers(serverOptions);
     const languageServerId =
       matchingServers.length === 0 ? null : matchingServers[0];
 
     if (languageServerId === null) {
       return;
     }
+
+    const specs = serverManager.getMatchingSpecs(serverOptions);
+    const spec = specs.get(languageServerId);
+    if (!spec) {
+      console.warn(
+        `Specification not available for server ${languageServerId}`
+      );
+    }
+    const requiresOnDiskFiles = spec?.requires_documents_on_disk ?? true;
+    const supportsInMemoryFiles = !requiresOnDiskFiles;
+
+    const baseUri =
+      virtualDocument.hasLspSupportedFile || supportsInMemoryFiles
+        ? rootUri
+        : virtualDocumentsUri;
 
     // workaround url-parse bug(s) (see https://github.com/jupyter-lsp/jupyterlab-lsp/issues/595)
     let documentUri = URLExt.join(baseUri, virtualDocument.uri);
@@ -653,7 +681,8 @@ namespace Private {
   ): Promise<LSPConnection> {
     let connection = _connections.get(languageServerId);
     if (!connection) {
-      const socket = new WebSocket(uris.socket);
+      const { settings } = Private.getLanguageServerManager();
+      const socket = new settings.WebSocket(uris.socket);
       const connection = new LSPConnection({
         languageId: language,
         serverUri: uris.server,

@@ -4,15 +4,53 @@
  */
 
 .jp-WindowedPanel-outer {
+  height: 100%;
   position: relative;
-  overflow-y: auto;
+  overflow: auto;
 }
 
 .jp-WindowedPanel-inner {
   position: relative;
 }
 
-.jp-WindowedPanel-window {
+.jp-WindowedPanel-viewport {
   position: absolute;
+  left: 0;
+  right: 0;
   overflow: visible;
+}
+
+.jp-WindowedPanel-scrollbar {
+  display: none;
+}
+
+.jp-WindowedPanel.jp-mod-virtual-scrollbar > .jp-WindowedPanel-scrollbar {
+  background-color: inherit;
+  border-left: 1px solid var(--jp-layout-color3);
+  display: block;
+  position: fixed;
+  overflow-y: auto;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  min-width: 35px;
+  z-index: 1;
+}
+
+.jp-WindowedPanel-scrollbar-content {
+  background-color: var(--jp-layout-color1);
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jp-WindowedPanel-scrollbar-content > .jp-WindowedPanel-scrollbar-item {
+  border-bottom: 1px solid var(--jp-layout-color3);
+  padding: 2px;
+  text-align: left;
+}
+
+.jp-WindowedPanel-scrollbar-content > .jp-WindowedPanel-scrollbar-item:hover {
+  cursor: pointer;
+  background-color: var(--jp-layout-color2);
 }
