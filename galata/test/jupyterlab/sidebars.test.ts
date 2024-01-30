@@ -226,11 +226,10 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
   Object.keys(sidebarElementIds).forEach(tabSide => {
     test(`Open ${tabSide} via keyboard navigation`, async ({ page }) => {
       test.slow();
-      await page.goto();
       await page.sidebar.close('right');
       await page.sidebar.close('left');
 
-      const keyValueArray: string[] = sidebarElementIds[tabSide];
+      const keyValueArray = sidebarElementIds[tabSide];
 
       keyValueArray.forEach(async sideBarTabName => {
         await page.activity.keyToSidebar(keyValueArray[0], 'Tab');
