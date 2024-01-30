@@ -659,9 +659,12 @@ export namespace NotebookActions {
       notebook.activeCellIndex++;
     }
 
-    // If a cell is outside of viewport and scrolling is needed,
-    // prefer to align the cell to the top viewport edge,
-    // rather than to the bottom (so that editor is visible)
+    // If a cell is outside of viewport and scrolling is needed, the `smart`
+    // logic in `handleRunState` will choose appropriate alignment, except
+    // for the case of a small cell less than one viewport away for which it
+    // would use the `auto` heuristic, for which we set the preferred alignment
+    // to `center` as in most cases there will be space below and above a cell
+    // that is smaller than (or approximately equal to) the viewport size.
     void Private.handleRunState(notebook, state, true, 'center');
     return promise;
   }
