@@ -344,9 +344,12 @@ export class SearchDocumentModel
       if (query) {
         this._searchActive = true;
         await this.searchProvider.startQuery(query, this._filters);
-        // Emit state change as the index needs to be updated
-        this.stateChanged.emit();
+      } else {
+        this._searchActive = false;
+        await this.searchProvider.endQuery();
       }
+      // Emit state change as the index needs to be updated
+      this.stateChanged.emit();
     } catch (reason) {
       this._parsingError = reason.toString();
       this.stateChanged.emit();
