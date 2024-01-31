@@ -552,7 +552,7 @@ export namespace NotebookActions {
     // While we do not want to scroll if cell is visible,
     // we still need to invoke the scrolling logic
     // in case if cell is outside of viewport.
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -594,7 +594,7 @@ export namespace NotebookActions {
     // While we do not want to scroll if cell is visible,
     // we still need to invoke the scrolling logic
     // in case if cell is outside of viewport.
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -665,7 +665,7 @@ export namespace NotebookActions {
     // would use the `auto` heuristic, for which we set the preferred alignment
     // to `center` as in most cases there will be space below and above a cell
     // that is smaller than (or approximately equal to) the viewport size.
-    void Private.handleRunState(notebook, state, true, 'center');
+    void Private.handleRunState(notebook, state, 'center');
     return promise;
   }
 
@@ -722,7 +722,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    void Private.handleRunState(notebook, state, true, 'center');
+    void Private.handleRunState(notebook, state, 'center');
     return promise;
   }
 
@@ -764,7 +764,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = lastIndex;
     notebook.deselectAll();
 
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -787,7 +787,7 @@ export namespace NotebookActions {
     }
     const promise = Private.runSelected(notebook);
     notebook.activeCellIndex = previousIndex;
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -829,7 +829,7 @@ export namespace NotebookActions {
 
     notebook.deselectAll();
 
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -871,7 +871,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = lastIndex;
     notebook.deselectAll();
 
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -2316,12 +2316,11 @@ namespace Private {
   export async function handleRunState(
     notebook: Notebook,
     state: IState,
-    scroll = false,
     alignPreference?: 'start' | 'end' | 'center' | 'top-center'
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
 
-    if (scroll && activeCell) {
+    if (activeCell) {
       await notebook
         .scrollToItem(activeCellIndex, 'smart', 0, alignPreference)
         .catch(reason => {
