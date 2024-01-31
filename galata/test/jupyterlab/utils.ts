@@ -43,9 +43,9 @@ export async function positionCellPartiallyBelowViewport(
     OUTER_SELECTOR
   )) as ElementHandle<HTMLElement>;
   const notebookBbox = await scroller.boundingBox();
-  const cellBBox = await cell.boundingBox();
+  const cellBbox = await cell.boundingBox();
   await page.mouse.move(notebookBbox.x, notebookBbox.y);
   const scrollOffset =
-    cellBBox.y - notebookBbox.y - notebookBbox.height + cellBBox.height * ratio;
+    cellBbox.y - notebookBbox.y - notebookBbox.height + cellBbox.height * ratio;
   await page.mouse.wheel(0, scrollOffset);
 }
