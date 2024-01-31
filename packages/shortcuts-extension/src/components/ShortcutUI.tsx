@@ -7,7 +7,11 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ArrayExt, StringExt } from '@lumino/algorithm';
 
+import { CommandRegistry } from '@lumino/commands';
+
 import { ReadonlyJSONArray } from '@lumino/coreutils';
+
+import { Menu } from '@lumino/widgets';
 
 import { ShortcutList } from './ShortcutList';
 
@@ -39,7 +43,16 @@ export interface IShortcutUIState {
   showSelectors: boolean;
   currentSort: string;
   keyBindingsUsed: { [index: string]: TakenByObject };
-  contextMenu: any;
+  contextMenu: Menu;
+}
+
+/** Search result data **/
+interface ISearchResult {
+  matchType: MatchType;
+  categoryIndices: number[] | null;
+  labelIndices: number[] | null;
+  score: number;
+  item: ShortcutObject;
 }
 
 /** Normalize the query text for a fuzzy search. */
@@ -48,7 +61,10 @@ function normalizeQuery(text: string): string {
 }
 
 /** Perform a fuzzy search on a single command item. */
-function fuzzySearch(item: any, query: string): any | null {
+function fuzzySearch(
+  item: ShortcutObject,
+  query: string
+): ISearchResult | null {
   // Create the source text to be searched.
   const category = item.category.toLowerCase();
   const label = item['label'].toLowerCase();
@@ -140,12 +156,12 @@ function fuzzySearch(item: any, query: string): any | null {
 }
 
 /** Perform a fuzzy match on an array of command items. */
-function matchItems(items: any, query: string): any {
+function matchItems(items: ShortcutRegistry, query: string): ISearchResult[] {
   // Normalize the query text to lower case with no whitespace.
   query = normalizeQuery(query);
 
   // Create the array to hold the scores.
-  let scores: any[] = [];
+  let scores: ISearchResult[] = [];
   // Iterate over the items and match against the query.
   let itemList = Object.keys(items);
   for (let i = 0, n = itemList.length; i < n; ++i) {
@@ -179,14 +195,17 @@ function matchItems(items: any, query: string): any {
   return scores;
 }
 
+type ShortcutRegistry = { [index: string]: ShortcutObject };
+
 /** Transform SettingRegistry's shortcut list to list of ShortcutObjects */
-function getShortcutObjects(
+export function getShortcutObjects(
   external: IShortcutUIexternal,
   settings: ISettingRegistry.ISettings
-): { [index: string]: ShortcutObject } {
-  const shortcuts = settings.composite.shortcuts as ReadonlyJSONArray;
-  let shortcutObjects: { [index: string]: ShortcutObject } = {};
-  shortcuts.forEach((shortcut: any) => {
+): ShortcutRegistry {
+  const shortcuts = settings.composite
+    .shortcuts as unknown as CommandRegistry.IKeyBindingOptions[];
+  let shortcutObjects: ShortcutRegistry = {};
+  shortcuts.forEach((shortcut: CommandRegistry.IKeyBindingOptions) => {
     let key = shortcut.command + '_' + shortcut.selector;
     if (Object.keys(shortcutObjects).indexOf(key) !== -1) {
       let currentCount = shortcutObjects[key].numberOfShortcuts;
@@ -196,11 +215,14 @@ function getShortcutObjects(
       let shortcutObject = new ShortcutObject();
       shortcutObject.commandName = shortcut.command;
       let label = external.getLabel(shortcut.command);
+      const commandParts = shortcut.command.split(':');
       if (!label) {
-        label = shortcut.command.split(':')[1];
+        // TODO needs translation
+        label =
+          commandParts.length > 1 ? commandParts[1] : '(Command label missing)';
       }
       shortcutObject.label = label;
-      shortcutObject.category = shortcut.command.split(':')[0];
+      shortcutObject.category = commandParts[0];
       shortcutObject.keys[0] = shortcut.keys;
       shortcutObject.selector = shortcut.selector;
       // TODO needs translation
@@ -211,8 +233,9 @@ function getShortcutObjects(
     }
   });
   // find all the shortcuts that have custom settings
-  const userShortcuts: any = settings.user.shortcuts;
-  userShortcuts.forEach((userSetting: any) => {
+  const userShortcuts = settings.user
+    .shortcuts as unknown as CommandRegistry.IKeyBindingOptions[];
+  userShortcuts.forEach((userSetting: CommandRegistry.IKeyBindingOptions) => {
     const command: string = userSetting.command;
     const selector: string = userSetting.selector;
     const keyTo = command + '_' + selector;
@@ -232,7 +255,7 @@ function getKeyBindingsUsed(shortcutObjects: {
   let keyBindingsUsed: { [index: string]: TakenByObject } = {};
 
   Object.keys(shortcutObjects).forEach((shortcut: string) => {
-    Object.keys(shortcutObjects[shortcut].keys).forEach((key: any) => {
+    Object.keys(shortcutObjects[shortcut].keys).forEach((key: string) => {
       const takenBy = new TakenByObject(shortcutObjects[shortcut]);
       takenBy.takenByKey = key;
 
@@ -277,7 +300,7 @@ export class ShortcutUI extends React.Component<
     this.setState(
       {
         shortcutList: shortcutObjects,
-        filteredShortcutList: this.searchFilterShortcuts(shortcutObjects),
+        filteredShortcutList: this._searchFilterShortcuts(shortcutObjects),
         shortcutsFetched: true
       },
       () => {
@@ -297,7 +320,7 @@ export class ShortcutUI extends React.Component<
       () =>
         this.setState(
           {
-            filteredShortcutList: this.searchFilterShortcuts(
+            filteredShortcutList: this._searchFilterShortcuts(
               this.state.shortcutList
             )
           },
@@ -309,11 +332,13 @@ export class ShortcutUI extends React.Component<
   };
 
   /** Filter shortcut list using current search query */
-  private searchFilterShortcuts(shortcutObjects: any): ShortcutObject[] {
+  private _searchFilterShortcuts(
+    shortcutObjects: ShortcutRegistry
+  ): ShortcutObject[] {
     const filteredShortcuts = matchItems(
       shortcutObjects,
       this.state.searchQuery
-    ).map((item: any) => {
+    ).map((item: ISearchResult) => {
       return item.item;
     });
     return filteredShortcuts;
