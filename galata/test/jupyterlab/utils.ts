@@ -33,7 +33,7 @@ export async function notebookViewportRatio(
 /**
  * Scroll so that the given cell is below the viewport, revealing only a given `ratio` of the cell.
  */
-export async function scrollToAboveCell(
+export async function positionCellPartiallyBelowViewport(
   page: IJupyterLabPageFixture,
   notebook: ElementHandle,
   cell: ElementHandle,

@@ -4,7 +4,10 @@
 import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
-import { notebookViewportRatio, scrollToAboveCell } from './utils';
+import {
+  notebookViewportRatio,
+  positionCellPartiallyBelowViewport
+} from './utils';
 
 const fileName = 'scroll.ipynb';
 const longOutputsNb = 'long_outputs.ipynb';
@@ -80,7 +83,7 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     const notebook = await page.notebook.getNotebookInPanel();
     const thirdCell = await page.notebook.getCell(2);
 
-    await scrollToAboveCell(page, notebook, thirdCell, 0.01);
+    await positionCellPartiallyBelowViewport(page, notebook, thirdCell, 0.01);
     // Select second cell
     await page.notebook.selectCells(1);
 
@@ -111,7 +114,7 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     const notebook = await page.notebook.getNotebookInPanel();
     const thirdCell = await page.notebook.getCell(2);
 
-    await scrollToAboveCell(page, notebook, thirdCell, 0.15);
+    await positionCellPartiallyBelowViewport(page, notebook, thirdCell, 0.15);
     // Select second cell
     await page.notebook.selectCells(1);
 
@@ -141,7 +144,7 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     const notebook = await page.notebook.getNotebookInPanel();
     const thirdCell = await page.notebook.getCell(2);
 
-    await scrollToAboveCell(page, notebook, thirdCell, 0.15);
+    await positionCellPartiallyBelowViewport(page, notebook, thirdCell, 0.15);
     // Select third cell
     await page.notebook.enterCellEditingMode(2);
 
