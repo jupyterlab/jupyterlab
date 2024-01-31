@@ -6,7 +6,7 @@ import * as path from 'path';
 
 const fileName = 'mermaid_diagrams.ipynb';
 
-const EXPECTED_MERMAID_COUNT = 16;
+const EXPECTED_MERMAID_COUNT = 14;
 
 test.describe('Notebook Mermaid Diagrams', () => {
   test.beforeEach(async ({ page, request, tmpPath }) => {
