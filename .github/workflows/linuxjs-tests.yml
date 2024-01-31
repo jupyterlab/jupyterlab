@@ -50,6 +50,7 @@ jobs:
             js-services,
             js-settingeditor,
             js-settingregistry,
+            js-shortcuts-extension,
             js-statedb,
             js-statusbar,
             js-testing,
