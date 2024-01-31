@@ -70,13 +70,14 @@ export class ActivityHelper {
     dataId: string,
     key: string
   ): Promise<string | null | undefined> {
-    const activeElementId = await this.page.evaluate(async () => {
-      return document.activeElement?.getAttribute('data-id');
-    });
-    while (activeElementId !== dataId) {
-      let elementId = activeElementId;
+    let activeElementId = await this.page.evaluate(
+      () => document.activeElement?.getAttribute('data-id')
+    );
+    if (activeElementId !== dataId) {
       await this.page.keyboard.press(key);
-      return elementId;
+      return await this.keyToSidebar(dataId, key); // Recursive call until condition is met
+    } else {
+      return activeElementId; // Return once the desired sidebar tab is focused
     }
   }
 
