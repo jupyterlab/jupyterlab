@@ -124,7 +124,6 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     // The third cell should be positioned at the bottom, revealing between 10 to 20% of its content.
     await expect(thirdCellLocator).toBeInViewport({ ratio: 0.1 });
     await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.2 });
-    await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.2 });
     // This cell should initially take up between 30% and 50% of the notebook viewport
     let spaceTaken = await notebookViewportRatio(notebook, thirdCell);
     expect(spaceTaken).toBeGreaterThan(0.3);
