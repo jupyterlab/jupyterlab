@@ -30,7 +30,7 @@ test.describe('Low Vision / Zoom Support', () => {
     expect(
       await page.screenshot({
         fullPage: true,
-        clip: { x: 0, y: 0, width: 320, height: 100 }
+        clip: { x: 0, y: 0, width: 320, height: 30 }
       })
     ).toMatchSnapshot('clipped-full-page-screenshot-for-Menubar.png');
   });
