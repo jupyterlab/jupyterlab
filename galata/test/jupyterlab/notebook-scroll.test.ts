@@ -14,7 +14,7 @@ test.use({
     ...galata.DEFAULT_SETTINGS,
     '@jupyterlab/notebook-extension:tracker': {
       ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
-      windowingMode: 'none'
+      windowingMode: 'full'
     }
   }
 });
