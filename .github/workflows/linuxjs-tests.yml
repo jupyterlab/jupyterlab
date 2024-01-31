@@ -40,6 +40,7 @@ jobs:
             js-logconsole,
             js-lsp,
             js-mainmenu,
+            js-mermaid,
             js-metadataform,
             js-metapackage,
             js-nbformat,
