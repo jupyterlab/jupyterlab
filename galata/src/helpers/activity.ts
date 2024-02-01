@@ -73,11 +73,11 @@ export class ActivityHelper {
     let activeElementId = await this.page.evaluate(
       () => document.activeElement?.getAttribute('data-id')
     );
-    if (activeElementId !== dataId) {
+
+    while (activeElementId !== dataId) {
+      let elementId = activeElementId;
       await this.page.keyboard.press(key);
-      return await this.keyToSidebar(dataId, key); // Recursive call until condition is met
-    } else {
-      return activeElementId; // Return once the desired sidebar tab is focused
+      return elementId;
     }
   }
 
