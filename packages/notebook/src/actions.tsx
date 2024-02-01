@@ -549,9 +549,6 @@ export namespace NotebookActions {
       translator
     );
 
-    // While we do not want to scroll if cell is visible,
-    // we still need to invoke the scrolling logic
-    // in case if cell is outside of viewport.
     void Private.handleRunState(notebook, state);
     return promise;
   }
@@ -591,9 +588,6 @@ export namespace NotebookActions {
       translator
     );
 
-    // While we do not want to scroll if cell is visible,
-    // we still need to invoke the scrolling logic
-    // in case if cell is outside of viewport.
     void Private.handleRunState(notebook, state);
     return promise;
   }

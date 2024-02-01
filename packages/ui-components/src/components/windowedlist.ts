@@ -1376,9 +1376,18 @@ export class WindowedList<
   /**
    * Scroll to the item which was most recently requested.
    *
-   * This is meant to be used when immediately after scrolling to the item
-   * a resize happened (e.g. output of a previous cell got populated after
-   * Shift+Enter). This is ensured by scrolling to `this._scrollToItem`
+   * This method ensures that the app scrolls to the item even if a resize event
+   * occurs shortly after the scroll. Consider the following sequence of events:
+   *
+   * 1. User is at the nth cell, presses Shift+Enter (run current cell and
+   *    advance to next)
+   * 2. App scrolls to the next (n+1) cell
+   * 3. The nth cell finishes running and renders the output, pushing the
+   *    (n+1) cell down out of view
+   * 4. This triggers the resize observer, which calls this method and scrolls
+   *    the (n+1) cell back into view
+   * 
+   * On implementation level, this is ensured by scrolling to `this._scrollToItem`
    * which is cleared after a short timeout once the scrolling settles
    * (see `this._resetScrollToItem()`).
    */
