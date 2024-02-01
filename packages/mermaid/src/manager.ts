@@ -38,6 +38,13 @@ export class MermaidManager implements IMermaidManager {
   }
 
   /**
+   * Post-process to ensure mermaid diagrams contain only valid SVG and XHTML.
+   */
+  static cleanMermaidSvg(svg: string): string {
+    return svg.replace(Private.RE_VOID_ELEMENT, Private.replaceVoidElement);
+  }
+
+  /**
    * Handle (re)-initializing mermaid based on external values.
    */
   initialize() {
@@ -82,7 +89,7 @@ export class MermaidManager implements IMermaidManager {
     document.body.appendChild(el);
     try {
       let { svg } = await _mermaid.render(id, text, el);
-      svg = svg.replace(Private.RE_VOID_ELEMENT, Private.replaceVoidElement);
+      svg = MermaidManager.cleanMermaidSvg(svg);
 
       const parser = new DOMParser();
       const doc = parser.parseFromString(svg, 'image/svg+xml');
@@ -343,6 +350,10 @@ namespace Private {
    * Ensure a void element is closed with a slash, preserving any attributes.
    */
   export function replaceVoidElement(match: string, tag: string, rest: string) {
-    return `<${tag} ${rest.trim()} ${rest.trim().endsWith('/') ? '' : '/'}>`;
+    rest = rest.trim();
+    if (!rest.endsWith('/')) {
+      rest = `${rest} /`;
+    }
+    return `<${tag} ${rest}>`;
   }
 }
