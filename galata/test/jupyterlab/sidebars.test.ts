@@ -236,14 +236,16 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
           () => document.activeElement?.getAttribute('data-id')
         );
         while (isSideBarFocused !== keyValueArray[0]) {
-          let sideBarFocused = isSideBarFocused;
           await page.keyboard.press('Tab');
-          return sideBarFocused;
+          isSideBarFocused = await page.evaluate(
+            () => document.activeElement?.getAttribute('data-id')
+          );
         }
         while (isSideBarFocused !== sideBarTabName) {
-          let sideBarFocused = isSideBarFocused;
           await page.keyboard.press('ArrowDown');
-          return sideBarFocused;
+          isSideBarFocused = await page.evaluate(
+            () => document.activeElement?.getAttribute('data-id')
+          );
         }
 
         await page.keyboard.press('Enter');
