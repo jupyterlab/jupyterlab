@@ -87,6 +87,11 @@ const ITEM_ICON_CLASS = 'jp-DirListing-itemIcon';
 const ITEM_MODIFIED_CLASS = 'jp-DirListing-itemModified';
 
 /**
+ * The class name added to the listing item file size cell.
+ */
+const ITEM_FILE_SIZE_CLASS = 'jp-DirListing-itemFileSize';
+
+/**
  * The class name added to the label element that wraps each item's checkbox and
  * the header's check-all checkbox.
  */
@@ -108,6 +113,11 @@ const NAME_ID_CLASS = 'jp-id-name';
 const MODIFIED_ID_CLASS = 'jp-id-modified';
 
 /**
+ * The class name added to the file size column header cell.
+ */
+const FILE_SIZE_ID_CLASS = 'jp-id-filesize';
+
+/**
  * The class name added to the narrow column header cell.
  */
 const NARROW_ID_CLASS = 'jp-id-narrow';
@@ -116,6 +126,11 @@ const NARROW_ID_CLASS = 'jp-id-narrow';
  * The class name added to the modified column header cell and modified item cell when hidden.
  */
 const MODIFIED_COLUMN_HIDDEN = 'jp-LastModified-hidden';
+
+/**
+ * The class name added to the size column header cell and size item cell when hidden.
+ */
+const FILE_SIZE_COLUMN_HIDDEN = 'jp-FileSize-hidden';
 
 /**
  * The mime type for a contents drag object.
@@ -213,6 +228,8 @@ export class DirListing extends Widget {
     this._renderer = options.renderer || DirListing.defaultRenderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
+    // hide the file size column by default
+    this._hiddenColumns.add('file_size');
     this._renderer.populateHeaderNode(
       headerNode,
       this.translator,
@@ -306,7 +323,11 @@ export class DirListing extends Widget {
    * Sort the items using a sort condition.
    */
   sort(state: DirListing.ISortState): void {
-    this._sortedItems = Private.sort(this.model.items(), state);
+    this._sortedItems = Private.sort(
+      this.model.items(),
+      state,
+      this._sortNotebooksFirst
+    );
     this._sortState = state;
     this.update();
   }
@@ -420,6 +441,16 @@ export class DirListing extends Widget {
     if (!this.isDisposed && result.button.accept) {
       await this._delete(items.map(item => item.path));
     }
+
+    // Re-focus
+    let focusIndex = this._focusIndex;
+    const lastIndexAfterDelete = this._sortedItems.length - items.length - 1;
+    if (focusIndex > lastIndexAfterDelete) {
+      // If the focus index after deleting items is out of bounds, set it to the
+      // last item.
+      focusIndex = Math.max(0, lastIndexAfterDelete);
+    }
+    this._focusItem(focusIndex);
   }
 
   /**
@@ -611,7 +642,7 @@ export class DirListing extends Widget {
    * Select an item by name.
    *
    * @param name - The name of the item to select.
-   * @param focus - Whether to move focus the selected item.
+   * @param focus - Whether to move focus to the selected item.
    *
    * @returns A promise that resolves when the name is selected.
    */
@@ -782,15 +813,24 @@ export class DirListing extends Widget {
       content.appendChild(node);
     }
 
-    // Remove extra classes from the nodes.
-    nodes.forEach(node => {
+    nodes.forEach((node, i) => {
+      // Remove extra classes from the nodes.
       node.classList.remove(SELECTED_CLASS);
       node.classList.remove(RUNNING_CLASS);
       node.classList.remove(CUT_CLASS);
+
+      // Uncheck each file checkbox
       const checkbox = renderer.getCheckboxNode(node);
       if (checkbox) {
-        // Uncheck each file checkbox
         checkbox.checked = false;
+      }
+
+      // Handle `tabIndex`
+      const nameNode = renderer.getNameNode(node);
+      if (nameNode) {
+        // Must check if the name node is there because it gets replaced by the
+        // edit node when editing the name of the file or directory.
+        nameNode.tabIndex = i === this._focusIndex ? 0 : -1;
       }
     });
 
@@ -818,7 +858,7 @@ export class DirListing extends Widget {
       );
     }
 
-    // Add extra classes to item nodes based on widget state.
+    // Update item nodes based on widget state.
     items.forEach((item, i) => {
       const node = nodes[i];
       const ft = this._manager.registry.getFileTypeForModel(item);
@@ -901,6 +941,18 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Update the setting to sort notebooks above files.
+   * This sorts the items again if the internal value is modified.
+   */
+  setNotebooksFirstSorting(isEnabled: boolean) {
+    let previousValue = this._sortNotebooksFirst;
+    this._sortNotebooksFirst = isEnabled;
+    if (this._sortNotebooksFirst !== previousValue) {
+      this.sort(this._sortState);
+    }
+  }
+
+  /**
    * Would this click (or other event type) hit the checkbox by default?
    */
   protected isWithinCheckboxHitArea(event: Event): boolean {
@@ -949,6 +1001,12 @@ export class DirListing extends Widget {
         }
       }
       return;
+    } else {
+      // Focus the selected file on click to ensure a couple of things:
+      // 1. If a user clicks on the item node, its name node will receive focus.
+      // 2. If a user clicks on blank space in the directory listing, the
+      //    previously focussed item will be focussed.
+      this._focusItem(this._focusIndex);
     }
   }
 
@@ -1024,11 +1082,11 @@ export class DirListing extends Widget {
       }
       this._softSelection = '';
     }
-    // Re-focus the selected file. This is needed because nodes corresponding
-    // to files selected in mousedown handler will not retain the focus
-    // as mousedown event is always followed by a blur/focus event.
+    // Re-focus. This is needed because nodes corresponding to files selected in
+    // mousedown handler will not retain the focus as mousedown event is always
+    // followed by a blur/focus event.
     if (event.button === 0) {
-      this._focusSelectedFile();
+      this._focusItem(this._focusIndex);
     }
 
     // Remove the drag listeners if necessary.
@@ -1086,9 +1144,115 @@ export class DirListing extends Widget {
   }
 
   /**
+   * Calculate the next focus index, given the current focus index and a
+   * direction, keeping within the bounds of the directory listing.
+   *
+   * @param index Current focus index
+   * @param direction -1 (up) or 1 (down)
+   * @returns The next focus index, which could be the same as the current focus
+   * index if at the boundary.
+   */
+  private _getNextFocusIndex(index: number, direction: number): number {
+    const nextIndex = index + direction;
+    if (nextIndex === -1 || nextIndex === this._items.length) {
+      // keep focus index within bounds
+      return index;
+    } else {
+      return nextIndex;
+    }
+  }
+
+  /**
+   * Handle the up or down arrow key.
+   *
+   * @param event The keyboard event
+   * @param direction -1 (up) or 1 (down)
+   */
+  private _handleArrowY(event: KeyboardEvent, direction: number) {
+    // We only handle the `ctrl` and `shift` modifiers. If other modifiers are
+    // present, then do nothing.
+    if (event.altKey || event.metaKey) {
+      return;
+    }
+
+    // If folder is empty, there's nothing to do with the up/down key.
+    if (!this._items.length) {
+      return;
+    }
+
+    // Don't handle the arrow key press if it's not on directory item. This
+    // avoids a confusing user experience that can result from when the user
+    // moves the selection and focus index apart (via ctrl + up/down). The last
+    // selected item remains highlighted but the last focussed item loses its
+    // focus ring if it's not actively focussed.  This forces the user to
+    // visibly reveal the last focussed item before moving the focus.
+    if (!(event.target as HTMLElement).classList.contains(ITEM_TEXT_CLASS)) {
+      return;
+    }
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    const focusIndex = this._focusIndex;
+    let nextFocusIndex = this._getNextFocusIndex(focusIndex, direction);
+
+    // The following if-block allows the first press of the down arrow to select
+    // the first (rather than the second) file/directory in the list. This is
+    // the situation when the page first loads or when a user changes directory.
+    if (
+      direction > 0 &&
+      focusIndex === 0 &&
+      !event.ctrlKey &&
+      Object.keys(this.selection).length === 0
+    ) {
+      nextFocusIndex = 0;
+    }
+
+    // Shift key indicates multi-selection. Either the user is trying to grow
+    // the selection, or shrink it.
+    if (event.shiftKey) {
+      this._handleMultiSelect(nextFocusIndex);
+    } else if (!event.ctrlKey) {
+      // If neither the shift nor ctrl keys were used with the up/down arrow,
+      // then we treat it as a normal, unmodified key press and select the
+      // next item.
+      this._selectItem(
+        nextFocusIndex,
+        event.shiftKey,
+        false /* focus = false because we call focus method directly following this */
+      );
+    }
+
+    this._focusItem(nextFocusIndex);
+    this.update();
+  }
+
+  /**
+   * cd ..
+   *
+   * Go up one level in the directory tree.
+   */
+  async goUp() {
+    const model = this.model;
+    if (model.path === model.rootPath) {
+      return;
+    }
+    try {
+      await model.cd('..');
+    } catch (reason) {
+      console.warn(`Failed to go to parent directory of ${model.path}`, reason);
+    }
+  }
+
+  /**
    * Handle the `'keydown'` event for the widget.
    */
   protected evtKeydown(event: KeyboardEvent): void {
+    // Do not handle any keydown events here if in the middle of a file rename.
+    if (this._inRename) {
+      return;
+    }
+
     switch (event.keyCode) {
       case 13: {
         // Enter
@@ -1098,37 +1262,78 @@ export class DirListing extends Widget {
         }
         event.preventDefault();
         event.stopPropagation();
+        for (const item of this.selectedItems()) {
+          this.handleOpen(item);
+        }
+        return;
+      }
+      case 38:
+        // Up arrow
+        this._handleArrowY(event, -1);
+        return;
+      case 40:
+        // Down arrow
+        this._handleArrowY(event, 1);
+        return;
+      case 32: {
+        // Space
+        if (event.ctrlKey) {
+          // Follow the Windows and Ubuntu convention: you must press `ctrl` +
+          // `space` in order to toggle whether an item is selected.
 
-        const selected = Object.keys(this.selection);
-        const path = selected[0];
-        const items = this._sortedItems;
-        const i = ArrayExt.findFirstIndex(items, value => value.path === path);
-        if (i === -1) {
+          // However, do not handle if any other modifiers were pressed.
+          if (event.metaKey || event.shiftKey || event.altKey) {
+            return;
+          }
+
+          // Make sure the ctrl+space key stroke was on a valid, focussed target.
+          const node = this._items[this._focusIndex];
+          if (
+            !(
+              // Event must have occurred within a node whose item can be toggled.
+              (
+                node.contains(event.target as HTMLElement) &&
+                // That node must also contain the currently focussed element.
+                node.contains(document.activeElement)
+              )
+            )
+          ) {
+            return;
+          }
+
+          event.stopPropagation();
+          // Prevent default, otherwise the container will scroll.
+          event.preventDefault();
+
+          // Toggle item selected
+          const { path } = this._sortedItems[this._focusIndex];
+          if (this.selection[path]) {
+            delete this.selection[path];
+          } else {
+            this.selection[path] = true;
+          }
+
+          this.update();
+          // Key was handled, so return.
           return;
         }
-
-        const item = this._sortedItems[i];
-        this.handleOpen(item);
         break;
       }
-      case 38: // Up arrow
-        this.selectPrevious(event.shiftKey);
-        event.stopPropagation();
-        event.preventDefault();
-        break;
-      case 40: // Down arrow
-        this.selectNext(event.shiftKey);
-        event.stopPropagation();
-        event.preventDefault();
-        break;
-      default:
-        break;
     }
 
     // Detects printable characters typed by the user.
     // Not all browsers support .key, but it discharges us from reconstructing
     // characters from key codes.
-    if (!this._inRename && event.key !== undefined && event.key.length === 1) {
+    if (
+      event.key !== undefined &&
+      event.key.length === 1 &&
+      // Don't gobble up the space key on the check-all checkbox (which the
+      // browser treats as a click event).
+      !(
+        (event.key === ' ' || event.keyCode === 32) &&
+        (event.target as HTMLInputElement).type === 'checkbox'
+      )
+    ) {
       if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
         return;
       }
@@ -1469,11 +1674,11 @@ export class DirListing extends Widget {
       } else {
         this.selection[path] = true;
       }
-
+      this._focusItem(index);
       // Handle multiple select.
     } else if (event.shiftKey) {
-      this._handleMultiSelect(selected, index);
-
+      this._handleMultiSelect(index);
+      this._focusItem(index);
       // Handle a 'soft' selection
     } else if (path in this.selection && selected.length > 1) {
       this._softSelection = path;
@@ -1481,75 +1686,125 @@ export class DirListing extends Widget {
       // Default to selecting the only the item.
     } else {
       // Select only the given item.
-      return this._selectItem(index, false);
+      return this._selectItem(index, false, true);
     }
     this.update();
   }
 
   /**
-   * (Re-)focus on the selected file.
+   * (Re-)focus an item in the directory listing.
    *
-   * If index is not given, it will be inferred from the current selection;
-   * providing index saves on the iteration time.
+   * @param index The index of the item node to focus
    */
-  private _focusSelectedFile(index?: number): void {
-    if (typeof index === 'undefined') {
-      const selected = Object.keys(this.selection);
-      if (selected.length > 1) {
-        // Multiselect - do not focus on any single file
-        return;
-      }
-      index = ArrayExt.findFirstIndex(
-        this._sortedItems,
-        value => value.path === selected[0]
-      );
-    }
-    if (index === -1) {
+  private _focusItem(index: number): void {
+    const items = this._items;
+    if (items.length === 0) {
+      // Focus the top node if the folder is empty and therefore there are no
+      // items inside the folder to focus.
+      this._focusIndex = 0;
+      this.node.focus();
       return;
     }
-    // Focus on text to make shortcuts works
-    const node = this._items[index];
-    const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
-    if (text) {
-      text.focus();
+    this._focusIndex = index;
+    const node = items[index];
+    const nameNode = this.renderer.getNameNode(node);
+    if (nameNode) {
+      // Make the filename text node focusable so that it receives keyboard
+      // events; text node was specifically chosen to receive shortcuts because
+      // it gets substituted with input element during file name edits which
+      // conveniently deactivates irrelevant shortcuts.
+      nameNode.tabIndex = 0;
+      nameNode.focus();
     }
+  }
+
+  /**
+   * Are all of the items between two provided indices selected?
+   *
+   * The items at the indices are not considered.
+   *
+   * @param j Index of one item.
+   * @param k Index of another item. Note: may be less or greater than first
+   *          index.
+   * @returns True if and only if all items between the j and k are selected.
+   *          Returns undefined if j and k are the same.
+   */
+  private _allSelectedBetween(j: number, k: number): boolean | void {
+    if (j === k) {
+      return;
+    }
+    const [start, end] = j < k ? [j + 1, k] : [k + 1, j];
+    return this._sortedItems
+      .slice(start, end)
+      .reduce((result, item) => result && this.selection[item.path], true);
   }
 
   /**
    * Handle a multiple select on a file item node.
    */
-  private _handleMultiSelect(selected: string[], index: number): void {
-    // Find the "nearest selected".
+  private _handleMultiSelect(index: number): void {
     const items = this._sortedItems;
-    let nearestIndex = -1;
-    for (let i = 0; i < this._items.length; i++) {
-      if (i === index) {
-        continue;
-      }
-      const path = items[i].path;
-      if (selected.indexOf(path) !== -1) {
-        if (nearestIndex === -1) {
-          nearestIndex = i;
-        } else {
-          if (Math.abs(index - i) < Math.abs(nearestIndex - i)) {
-            nearestIndex = i;
-          }
+    const fromIndex = this._focusIndex;
+    const target = items[index];
+    let shouldAdd = true;
+
+    if (index === fromIndex) {
+      // This follows the convention in Ubuntu and Windows, which is to allow
+      // the focussed item to gain but not lose selected status on shift-click.
+      // (MacOS is irrelevant here because MacOS Finder has no notion of a
+      // focused-but-not-selected state.)
+      this.selection[target.path] = true;
+      return;
+    }
+
+    // If the target and all items in-between are selected, then we assume that
+    // the user is trying to shrink rather than grow the group of selected
+    // items.
+    if (this.selection[target.path]) {
+      // However, there is a special case when the distance between the from-
+      // and to- index is just one (for example, when the user is pressing the
+      // shift key plus arrow-up/down). If and only if the situation looks like
+      // the following when going down (or reverse when going up) ...
+      //
+      // - [ante-anchor / previous item] unselected (or boundary)
+      // - [anchor / currently focussed item / item at from-index] selected
+      // - [target / next item / item at to-index] selected
+      //
+      // ... then we shrink the selection / unselect the currently focussed
+      // item.
+      if (Math.abs(index - fromIndex) === 1) {
+        const anchor = items[fromIndex];
+        const anteAnchor = items[fromIndex + (index < fromIndex ? 1 : -1)];
+        if (
+          // Currently focussed item is selected
+          this.selection[anchor.path] &&
+          // Item on other side of focussed item (away from target) is either a
+          // boundary or unselected
+          (!anteAnchor || !this.selection[anteAnchor.path])
+        ) {
+          delete this.selection[anchor.path];
         }
+      } else if (this._allSelectedBetween(fromIndex, index)) {
+        shouldAdd = false;
       }
     }
 
-    // Default to the first element (and fill down).
-    if (nearestIndex === -1) {
-      nearestIndex = 0;
-    }
-
-    // Select the rows between the current and the nearest selected.
-    for (let i = 0; i < this._items.length; i++) {
-      if (
-        (nearestIndex >= i && index <= i) ||
-        (nearestIndex <= i && index >= i)
-      ) {
+    // Select (or unselect) the rows between chosen index (target) and the last
+    // focussed.
+    const step = fromIndex < index ? 1 : -1;
+    for (let i = fromIndex; i !== index + step; i += step) {
+      if (shouldAdd) {
+        if (i === fromIndex) {
+          // Do not change the selection state of the starting (fromIndex) item.
+          continue;
+        }
         this.selection[items[i].path] = true;
+      } else {
+        if (i === index) {
+          // Do not unselect the target item.
+          continue;
+        }
+        delete this.selection[items[i].path];
       }
     }
   }
@@ -1583,74 +1838,112 @@ export class DirListing extends Widget {
   /**
    * Allow the user to rename item on a given row.
    */
-  private _doRename(): Promise<string> {
+  private async _doRename(): Promise<string> {
     this._inRename = true;
+
+    const selectedPaths = Object.keys(this.selection);
+
+    // Bail out if nothing has been selected.
+    if (selectedPaths.length === 0) {
+      this._inRename = false;
+      return Promise.resolve('');
+    }
+
+    // Figure out which selected path to use for the rename.
     const items = this._sortedItems;
-    const path = Object.keys(this.selection)[0];
+    let { path } = items[this._focusIndex];
+    if (!this.selection[path]) {
+      // If the currently focused item is not selected, then choose the last
+      // selected item.
+      path = selectedPaths.slice(-1)[0];
+    }
+
+    // Get the corresponding model, nodes, and file name.
     const index = ArrayExt.findFirstIndex(items, value => value.path === path);
     const row = this._items[index];
     const item = items[index];
     const nameNode = this.renderer.getNameNode(row);
     const original = item.name;
+
+    // Seed the text input with current file name, and select and focus it.
     this._editNode.value = original;
-    this._selectItem(index, false);
+    this._selectItem(index, false, true);
 
-    return Private.doRename(nameNode, this._editNode, original).then(
-      newName => {
-        this.node.focus();
-        if (!newName || newName === original) {
-          this._inRename = false;
-          return original;
-        }
-        if (!isValidFileName(newName)) {
-          void showErrorMessage(
-            this._trans.__('Rename Error'),
-            Error(
-              this._trans._p(
-                'showErrorMessage',
-                '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
-                newName
-              )
-            )
-          );
-          this._inRename = false;
-          return original;
-        }
-
-        if (this.isDisposed) {
-          this._inRename = false;
-          throw new Error('File browser is disposed.');
-        }
-
-        const manager = this._manager;
-        const oldPath = PathExt.join(this._model.path, original);
-        const newPath = PathExt.join(this._model.path, newName);
-        const promise = renameFile(manager, oldPath, newPath);
-        return promise
-          .catch(error => {
-            if (error !== 'File not renamed') {
-              void showErrorMessage(
-                this._trans._p('showErrorMessage', 'Rename Error'),
-                error
-              );
-            }
-            this._inRename = false;
-            return original;
-          })
-          .then(() => {
-            if (this.isDisposed) {
-              this._inRename = false;
-              throw new Error('File browser is disposed.');
-            }
-            if (this._inRename) {
-              // No need to catch because `newName` will always exit.
-              void this.selectItemByName(newName);
-            }
-            this._inRename = false;
-            return newName;
-          });
-      }
+    // Wait for user input
+    const newName = await Private.userInputForRename(
+      nameNode,
+      this._editNode,
+      original
     );
+
+    // Check if the widget was disposed during the `await`.
+    if (this.isDisposed) {
+      this._inRename = false;
+      throw new Error('File browser is disposed.');
+    }
+
+    let finalFilename = newName;
+
+    if (!newName || newName === original) {
+      finalFilename = original;
+    } else if (!isValidFileName(newName)) {
+      void showErrorMessage(
+        this._trans.__('Rename Error'),
+        Error(
+          this._trans._p(
+            'showErrorMessage',
+            '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+            newName
+          )
+        )
+      );
+      finalFilename = original;
+    } else {
+      // Attempt rename at the file system level.
+
+      const manager = this._manager;
+      const oldPath = PathExt.join(this._model.path, original);
+      const newPath = PathExt.join(this._model.path, newName);
+      try {
+        await renameFile(manager, oldPath, newPath);
+      } catch (error) {
+        if (error !== 'File not renamed') {
+          void showErrorMessage(
+            this._trans._p('showErrorMessage', 'Rename Error'),
+            error
+          );
+        }
+        finalFilename = original;
+      }
+
+      // Check if the widget was disposed during the `await`.
+      if (this.isDisposed) {
+        this._inRename = false;
+        throw new Error('File browser is disposed.');
+      }
+    }
+
+    // If nothing else has been selected, then select the renamed file. In
+    // other words, don't select the renamed file if the user has clicked
+    // away to some other file.
+    if (
+      !this.isDisposed &&
+      Object.keys(this.selection).length === 1 &&
+      // We haven't updated the instance yet to reflect the rename, so unless
+      // the user or something else has updated the selection, the original file
+      // path and not the new file path will be in `this.selection`.
+      this.selection[item.path]
+    ) {
+      try {
+        await this.selectItemByName(finalFilename, true);
+      } catch {
+        // do nothing
+        console.warn('After rename, failed to select file', finalFilename);
+      }
+    }
+
+    this._inRename = false;
+    return finalFilename;
   }
 
   /**
@@ -1669,8 +1962,8 @@ export class DirListing extends Widget {
     const path = items[index].path;
     this.selection[path] = true;
 
-    if (!keepExisting && focus) {
-      this._focusSelectedFile(index);
+    if (focus) {
+      this._focusItem(index);
     }
     this.update();
   }
@@ -1704,6 +1997,11 @@ export class DirListing extends Widget {
     this.clearSelectedItems();
     // Update the sorted items.
     this.sort(this.sortState);
+    // Reset focus. But wait until the DOM has been updated (hence
+    // `requestAnimationFrame`).
+    requestAnimationFrame(() => {
+      this._focusItem(0);
+    });
   }
 
   /**
@@ -1772,6 +2070,9 @@ export class DirListing extends Widget {
   private _inRename = false;
   private _isDirty = false;
   private _hiddenColumns = new Set<DirListing.ToggleableColumn>();
+  private _sortNotebooksFirst = false;
+  // _focusIndex should never be set outside the range [0, this._items.length - 1]
+  private _focusIndex = 0;
 }
 
 /**
@@ -1812,13 +2113,13 @@ export namespace DirListing {
     /**
      * The sort key.
      */
-    key: 'name' | 'last_modified';
+    key: 'name' | 'last_modified' | 'file_size';
   }
 
   /**
    * Toggleable columns.
    */
-  export type ToggleableColumn = 'last_modified' | 'is_selected';
+  export type ToggleableColumn = 'last_modified' | 'is_selected' | 'file_size';
 
   /**
    * A file contents model thunk.
@@ -1950,11 +2251,14 @@ export namespace DirListing {
       const node = document.createElement('div');
       const header = document.createElement('div');
       const content = document.createElement('ul');
+      // Allow the node to scroll while dragging items.
+      content.setAttribute('data-lm-dragscroll', 'true');
       content.className = CONTENT_CLASS;
       header.className = HEADER_CLASS;
       node.appendChild(header);
       node.appendChild(content);
-      node.tabIndex = 0;
+      // Set to -1 to allow calling this.node.focus().
+      node.tabIndex = -1;
       return node;
     }
 
@@ -1973,12 +2277,14 @@ export namespace DirListing {
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
       const modified = this.createHeaderItemNode(trans.__('Last Modified'));
+      const fileSize = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
+      fileSize.classList.add(FILE_SIZE_ID_CLASS);
       narrow.classList.add(NARROW_ID_CLASS);
       narrow.textContent = '...';
-      if (!hiddenColumns?.has?.('is_selected')) {
+      if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode({
           alwaysVisible: true
         });
@@ -1987,11 +2293,18 @@ export namespace DirListing {
       node.appendChild(name);
       node.appendChild(narrow);
       node.appendChild(modified);
+      node.appendChild(fileSize);
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
       }
 
       // set the initial caret icon
@@ -2014,15 +2327,21 @@ export namespace DirListing {
     handleHeaderClick(node: HTMLElement, event: MouseEvent): ISortState | null {
       const name = DOMUtils.findElement(node, NAME_ID_CLASS);
       const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
+      const fileSize = DOMUtils.findElement(node, FILE_SIZE_ID_CLASS);
       const state: ISortState = { direction: 'ascending', key: 'name' };
       const target = event.target as HTMLElement;
-      if (name.contains(target)) {
-        const modifiedIcon = DOMUtils.findElement(
-          modified,
-          HEADER_ITEM_ICON_CLASS
-        );
-        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
 
+      const modifiedIcon = DOMUtils.findElement(
+        modified,
+        HEADER_ITEM_ICON_CLASS
+      );
+      const fileSizeIcon = DOMUtils.findElement(
+        fileSize,
+        HEADER_ITEM_ICON_CLASS
+      );
+      const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
+      if (name.contains(target)) {
         if (name.classList.contains(SELECTED_CLASS)) {
           if (!name.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
@@ -2039,16 +2358,13 @@ export namespace DirListing {
         name.classList.add(SELECTED_CLASS);
         modified.classList.remove(SELECTED_CLASS);
         modified.classList.remove(DESCENDING_CLASS);
+        fileSize.classList.remove(SELECTED_CLASS);
+        fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(modifiedIcon, 'left');
+        Private.updateCaret(fileSizeIcon, 'left');
         return state;
       }
       if (modified.contains(target)) {
-        const modifiedIcon = DOMUtils.findElement(
-          modified,
-          HEADER_ITEM_ICON_CLASS
-        );
-        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
-
         state.key = 'last_modified';
         if (modified.classList.contains(SELECTED_CLASS)) {
           if (!modified.classList.contains(DESCENDING_CLASS)) {
@@ -2066,7 +2382,34 @@ export namespace DirListing {
         modified.classList.add(SELECTED_CLASS);
         name.classList.remove(SELECTED_CLASS);
         name.classList.remove(DESCENDING_CLASS);
+        fileSize.classList.remove(SELECTED_CLASS);
+        fileSize.classList.remove(DESCENDING_CLASS);
         Private.updateCaret(nameIcon, 'right');
+        Private.updateCaret(fileSizeIcon, 'left');
+        return state;
+      }
+      if (fileSize.contains(target)) {
+        state.key = 'file_size';
+        if (fileSize.classList.contains(SELECTED_CLASS)) {
+          if (!fileSize.classList.contains(DESCENDING_CLASS)) {
+            state.direction = 'descending';
+            fileSize.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(fileSizeIcon, 'left', 'down');
+          } else {
+            fileSize.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(fileSizeIcon, 'left', 'up');
+          }
+        } else {
+          fileSize.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(fileSizeIcon, 'left', 'up');
+        }
+        fileSize.classList.add(SELECTED_CLASS);
+        name.classList.remove(SELECTED_CLASS);
+        name.classList.remove(DESCENDING_CLASS);
+        modified.classList.remove(SELECTED_CLASS);
+        modified.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(nameIcon, 'right');
+        Private.updateCaret(modifiedIcon, 'left');
         return state;
       }
       return state;
@@ -2084,28 +2427,32 @@ export namespace DirListing {
       const icon = document.createElement('span');
       const text = document.createElement('span');
       const modified = document.createElement('span');
+      const fileSize = document.createElement('span');
       icon.className = ITEM_ICON_CLASS;
       text.className = ITEM_TEXT_CLASS;
       modified.className = ITEM_MODIFIED_CLASS;
-      if (!hiddenColumns?.has?.('is_selected')) {
+      fileSize.className = ITEM_FILE_SIZE_CLASS;
+      if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode();
         node.appendChild(checkboxWrapper);
       }
       node.appendChild(icon);
       node.appendChild(text);
       node.appendChild(modified);
+      node.appendChild(fileSize);
 
-      // Make the text note focusable so that it receives keyboard events;
-      // text node was specifically chosen to receive shortcuts because
-      // text element gets substituted with input area during file name edits
-      // which conveniently deactivate irrelevant shortcuts.
-      text.tabIndex = 0;
-
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
       }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
+      }
+
       return node;
     }
 
@@ -2129,11 +2476,7 @@ export namespace DirListing {
       // Wrap the checkbox in a label element in order to increase its hit area.
       const labelWrapper = document.createElement('label');
       labelWrapper.classList.add(CHECKBOX_WRAPPER_CLASS);
-      // The individual file checkboxes are visible on hover, but the header
-      // check-all checkbox is always visible.
-      if (options?.alwaysVisible) {
-        labelWrapper.classList.add('jp-mod-visible');
-      }
+
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       // Prevent the user from clicking (via mouse, keyboard, or touch) the
@@ -2142,6 +2485,16 @@ export namespace DirListing {
       checkbox.addEventListener('click', event => {
         event.preventDefault();
       });
+
+      // The individual file checkboxes are visible on hover, but the header
+      // check-all checkbox is always visible.
+      if (options?.alwaysVisible) {
+        labelWrapper.classList.add('jp-mod-visible');
+      } else {
+        // Disable tabbing to all other checkboxes.
+        checkbox.tabIndex = -1;
+      }
+
       labelWrapper.appendChild(checkbox);
       return labelWrapper;
     }
@@ -2177,12 +2530,13 @@ export namespace DirListing {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+      const fileSize = DOMUtils.findElement(node, ITEM_FILE_SIZE_CLASS);
       const checkboxWrapper = DOMUtils.findElement(
         node,
         CHECKBOX_WRAPPER_CLASS
       );
 
-      const showFileCheckboxes = !hiddenColumns?.has?.('is_selected');
+      const showFileCheckboxes = !hiddenColumns?.has('is_selected');
       if (checkboxWrapper && !showFileCheckboxes) {
         node.removeChild(checkboxWrapper);
       } else if (showFileCheckboxes && !checkboxWrapper) {
@@ -2190,10 +2544,16 @@ export namespace DirListing {
         node.insertBefore(checkboxWrapper, iconContainer);
       }
 
-      if (hiddenColumns?.has?.('last_modified')) {
+      if (hiddenColumns?.has('last_modified')) {
         modified.classList.add(MODIFIED_COLUMN_HIDDEN);
       } else {
         modified.classList.remove(MODIFIED_COLUMN_HIDDEN);
+      }
+
+      if (hiddenColumns?.has('file_size')) {
+        fileSize.classList.add(FILE_SIZE_COLUMN_HIDDEN);
+      } else {
+        fileSize.classList.remove(FILE_SIZE_COLUMN_HIDDEN);
       }
 
       // render the file item's icon
@@ -2209,10 +2569,14 @@ export namespace DirListing {
 
       // add file size to pop up if its available
       if (model.size !== null && model.size !== undefined) {
+        const fileSizeText = Private.formatFileSize(model.size, 1, 1024);
+        fileSize.textContent = fileSizeText;
         hoverText += trans.__(
           '\nSize: %1',
           Private.formatFileSize(model.size, 1, 1024)
         );
+      } else {
+        fileSize.textContent = '';
       }
       if (model.path) {
         const dirname = PathExt.dirname(model.path);
@@ -2376,7 +2740,7 @@ namespace Private {
    *
    * @returns Boolean indicating whether the name changed.
    */
-  export function doRename(
+  export function userInputForRename(
     text: HTMLElement,
     edit: HTMLInputElement,
     original: string
@@ -2391,7 +2755,7 @@ namespace Private {
       edit.setSelectionRange(0, index);
     }
 
-    return new Promise<string>((resolve, reject) => {
+    return new Promise<string>(resolve => {
       edit.onblur = () => {
         parent.replaceChild(text, edit);
         resolve(edit.value);
@@ -2408,20 +2772,10 @@ namespace Private {
             event.preventDefault();
             edit.value = original;
             edit.blur();
-            break;
-          case 38: // Up arrow
-            event.stopPropagation();
-            event.preventDefault();
-            if (edit.selectionStart !== edit.selectionEnd) {
-              edit.selectionStart = edit.selectionEnd = 0;
-            }
-            break;
-          case 40: // Down arrow
-            event.stopPropagation();
-            event.preventDefault();
-            if (edit.selectionStart !== edit.selectionEnd) {
-              edit.selectionStart = edit.selectionEnd = edit.value.length;
-            }
+            // Put focus back on the text node. That way the user can, for
+            // example, press the keyboard shortcut to go back into edit mode,
+            // and it will work.
+            text.focus();
             break;
           default:
             break;
@@ -2435,30 +2789,80 @@ namespace Private {
    */
   export function sort(
     items: Iterable<Contents.IModel>,
-    state: DirListing.ISortState
+    state: DirListing.ISortState,
+    sortNotebooksFirst: boolean = false
   ): Contents.IModel[] {
     const copy = Array.from(items);
     const reverse = state.direction === 'descending' ? 1 : -1;
 
+    /**
+     * Compares two items and returns whether they should have a fixed priority.
+     * The fixed priority enables to always sort the directories above the other files. And to sort the notebook above other files if the `sortNotebooksFirst` is true.
+     */
+    function isPriorityOverridden(a: Contents.IModel, b: Contents.IModel) {
+      if (sortNotebooksFirst) {
+        return a.type !== b.type;
+      }
+      return (a.type === 'directory') !== (b.type === 'directory');
+    }
+
+    /**
+     * Returns the priority of a file.
+     */
+    function getPriority(item: Contents.IModel): number {
+      if (item.type === 'directory') {
+        return 2;
+      }
+      if (item.type === 'notebook' && sortNotebooksFirst) {
+        return 1;
+      }
+      return 0;
+    }
+
+    function compare(
+      compare: (a: Contents.IModel, b: Contents.IModel) => number
+    ) {
+      return (a: Contents.IModel, b: Contents.IModel) => {
+        // Group directory first, then notebooks, then files
+        if (isPriorityOverridden(a, b)) {
+          return getPriority(b) - getPriority(a);
+        }
+
+        const compared = compare(a, b);
+
+        if (compared !== 0) {
+          return compared * reverse;
+        }
+
+        // Default sorting is alphabetical ascending
+        return a.name.localeCompare(b.name);
+      };
+    }
+
     if (state.key === 'last_modified') {
-      // Sort by last modified (grouping directories first)
-      copy.sort((a, b) => {
-        const t1 = a.type === 'directory' ? 0 : 1;
-        const t2 = b.type === 'directory' ? 0 : 1;
-
-        const valA = new Date(a.last_modified).getTime();
-        const valB = new Date(b.last_modified).getTime();
-
-        return t1 - t2 || (valA - valB) * reverse;
-      });
+      // Sort by last modified
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return (
+            new Date(a.last_modified).getTime() -
+            new Date(b.last_modified).getTime()
+          );
+        })
+      );
+    } else if (state.key === 'file_size') {
+      // Sort by size
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return (a.size ?? 0) - (b.size ?? 0);
+        })
+      );
     } else {
-      // Sort by name (grouping directories first)
-      copy.sort((a, b) => {
-        const t1 = a.type === 'directory' ? 0 : 1;
-        const t2 = b.type === 'directory' ? 0 : 1;
-
-        return t1 - t2 || b.name.localeCompare(a.name) * reverse;
-      });
+      // Sort by name
+      copy.sort(
+        compare((a: Contents.IModel, b: Contents.IModel) => {
+          return b.name.localeCompare(a.name);
+        })
+      );
     }
     return copy;
   }
@@ -2488,10 +2892,10 @@ namespace Private {
   ): string {
     // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
     if (bytes === 0) {
-      return '0 Bytes';
+      return '0 B';
     }
     const dm = decimalPoint || 2;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     if (i >= 0 && i < sizes.length) {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];

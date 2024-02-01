@@ -14,6 +14,12 @@ export const KERNEL_PROVIDER_ID = 'CompletionProvider:kernel';
  * A kernel connector for completion handlers.
  */
 export class KernelCompleterProvider implements ICompletionProvider {
+  readonly identifier = KERNEL_PROVIDER_ID;
+
+  readonly rank: number = 550;
+
+  readonly renderer = null;
+
   /**
    * The kernel completion provider is applicable only if the kernel is available.
    * @param context - additional information about context of completion request
@@ -52,10 +58,11 @@ export class KernelCompleterProvider implements ICompletionProvider {
     }
 
     const items = new Array<CompletionHandler.ICompletionItem>();
-    const metadata = response.metadata
-      ._jupyter_types_experimental as Array<JSONObject>;
+    const metadata = response.metadata._jupyter_types_experimental as
+      | Array<JSONObject>
+      | undefined;
     response.matches.forEach((label, index) => {
-      if (metadata[index]) {
+      if (metadata && metadata[index]) {
         items.push({
           label,
           type: metadata[index].type as string,
@@ -133,7 +140,4 @@ export class KernelCompleterProvider implements ICompletionProvider {
         (delta.insert === '.' || (!visible && delta.insert.trim().length > 0))
     );
   }
-
-  readonly identifier = KERNEL_PROVIDER_ID;
-  readonly renderer = null;
 }

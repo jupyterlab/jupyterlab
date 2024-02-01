@@ -1,4 +1,6 @@
 ci:
+  # Same schedule interval as dependabot see .github/dependabot.yml
+  autoupdate_schedule: monthly
   # skip any check that needs internet access
   skip: [prettier, eslint, stylelint]
 
@@ -7,7 +9,7 @@ default_language_version:
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: forbid-new-submodules
       - id: end-of-file-fixer
@@ -22,23 +24,20 @@ repos:
       - id: debug-statements
       - id: check-builtin-literals
       - id: trailing-whitespace
-        exclude: .bumpversion.cfg
+        exclude: (.bumpversion.cfg|yarn.js)
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.21.0
+    rev: 0.27.3
     hooks:
       - id: check-github-workflows
 
-  - repo: https://github.com/psf/black
-    rev: 23.1.0
-    hooks:
-      - id: black
-
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.246
+  # Check ruff version is aligned with the one in pyproject.toml
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.11
     hooks:
       - id: ruff
         args: ["--fix"]
+      - id: ruff-format
 
   - repo: local
     hooks:
@@ -47,6 +46,7 @@ repos:
         entry: 'npm run prettier:files'
         language: node
         types_or: [json, ts, tsx, javascript, jsx, css]
+        exclude: \.ipynb$
       - id: eslint
         name: eslint
         entry: 'npm run eslint:files'

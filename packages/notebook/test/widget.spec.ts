@@ -533,7 +533,9 @@ describe('@jupyter/notebook', () => {
 
       describe('#createCodeCell({})', () => {
         it('should create a `CodeCell`', () => {
-          const contentFactory = new StaticNotebook.ContentFactory();
+          const contentFactory = new StaticNotebook.ContentFactory({
+            editorFactory: utils.editorFactory
+          });
           const model = new CodeCellModel();
           const codeOptions = { model, rendermime, contentFactory };
           const widget = contentFactory.createCodeCell(codeOptions);
@@ -543,7 +545,9 @@ describe('@jupyter/notebook', () => {
 
       describe('#createMarkdownCell({})', () => {
         it('should create a `MarkdownCell`', () => {
-          const contentFactory = new StaticNotebook.ContentFactory();
+          const contentFactory = new StaticNotebook.ContentFactory({
+            editorFactory: utils.editorFactory
+          });
           const model = new MarkdownCellModel();
           const mdOptions = { model, rendermime, contentFactory };
           const widget = contentFactory.createMarkdownCell(mdOptions);
@@ -553,7 +557,9 @@ describe('@jupyter/notebook', () => {
 
       describe('#createRawCell()', () => {
         it('should create a `RawCell`', () => {
-          const contentFactory = new StaticNotebook.ContentFactory();
+          const contentFactory = new StaticNotebook.ContentFactory({
+            editorFactory: utils.editorFactory
+          });
           const model = new RawCellModel();
           const rawOptions = { model, contentFactory };
           const widget = contentFactory.createRawCell(rawOptions);
@@ -1066,7 +1072,7 @@ describe('@jupyter/notebook', () => {
         widget.select(widget.widgets[3]);
         widget.activeCellIndex = 3;
 
-        expect(() => widget.getContiguousSelection()).toThrowError(
+        expect(() => widget.getContiguousSelection()).toThrow(
           /Selection not contiguous/
         );
       });
@@ -1081,13 +1087,13 @@ describe('@jupyter/notebook', () => {
 
         // Check if active cell is outside selection.
         widget.activeCellIndex = 0;
-        expect(() => widget.getContiguousSelection()).toThrowError(
+        expect(() => widget.getContiguousSelection()).toThrow(
           /Active cell not at endpoint of selection/
         );
 
         // Check if active cell is inside selection.
         widget.activeCellIndex = 2;
-        expect(() => widget.getContiguousSelection()).toThrowError(
+        expect(() => widget.getContiguousSelection()).toThrow(
           /Active cell not at endpoint of selection/
         );
       });
@@ -1339,10 +1345,28 @@ describe('@jupyter/notebook', () => {
           expect(widget.events).toEqual(expect.arrayContaining(['focusin']));
           expect(widget.mode).toBe('command');
         });
+
+        it('should not unrender previously active markdown cell', async () => {
+          widget.model!.sharedModel.insertCell(0, {
+            cell_type: 'markdown',
+            source: '# Hello'
+          });
+          const mdCell = widget.widgets[0] as MarkdownCell;
+          if (!mdCell.inViewport) {
+            await signalToPromise(mdCell.inViewportChanged);
+          }
+          widget.activeCellIndex = 0;
+          expect(mdCell.rendered).toBe(true);
+          const cellToActivate = widget.widgets[1];
+          expect(widget.mode).toBe('command');
+          simulate(cellToActivate.editorWidget!.node, 'focusin');
+          expect(widget.mode).toBe('edit');
+          expect(mdCell.rendered).toBe(true);
+        });
       });
 
       describe('focusout', () => {
-        it('should switch to command mode', () => {
+        it('should switch to command mode', async () => {
           simulate(widget.node, 'focusin');
           widget.mode = 'edit';
           const event = generate('focusout');
@@ -1350,6 +1374,8 @@ describe('@jupyter/notebook', () => {
           widget.node.dispatchEvent(event);
           expect(widget.mode).toBe('command');
           MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+          // Wait for the activeCell to be focused
+          await framePromise();
           expect(widget.mode).toBe('command');
           expect(widget.activeCell!.editor!.hasFocus()).toBe(false);
         });
@@ -1408,18 +1434,14 @@ describe('@jupyter/notebook', () => {
         const child = widget.widgets[0];
         await framePromise();
         Widget.detach(widget);
-        expect(widget.methods).toEqual(
-          expect.arrayContaining(['onBeforeDetach'])
-        );
+        expect(widget.methods).toContain('onBeforeDetach');
         widget.events = [];
         simulate(widget.node, 'mousedown');
-        expect(widget.events).toEqual(
-          expect.not.arrayContaining(['mousedown'])
-        );
+        expect(widget.events).not.toContain('mousedown');
         simulate(widget.node, 'dblclick');
-        expect(widget.events).toEqual(expect.not.arrayContaining(['dblclick']));
+        expect(widget.events).not.toContain('dblclick');
         simulate(child.node, 'focusin');
-        expect(widget.events).toEqual(expect.not.arrayContaining(['focusin']));
+        expect(widget.events).not.toContain('focusin');
         widget.dispose();
       });
     });
@@ -1427,13 +1449,15 @@ describe('@jupyter/notebook', () => {
     describe('#onActivateRequest()', () => {
       it('should focus the node after an update', async () => {
         const widget = createActiveWidget();
+        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
+        await framePromise();
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onActivateRequest'])
         );
         await framePromise();
-        expect(document.activeElement).toBe(widget.node);
+        expect(document.activeElement).toBe(widget.activeCell!.node);
         widget.dispose();
       });
     });

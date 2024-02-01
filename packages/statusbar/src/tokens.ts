@@ -8,7 +8,8 @@ import { Widget } from '@lumino/widgets';
 
 // tslint:disable-next-line:variable-name
 export const IStatusBar = new Token<IStatusBar>(
-  '@jupyterlab/statusbar:IStatusBar'
+  '@jupyterlab/statusbar:IStatusBar',
+  'A service for the status bar on the application. Use this if you want to add new status bar items.'
 );
 
 /**
@@ -53,6 +54,11 @@ export namespace IStatusBar {
      *  Ordering of Items -- higher rank items are closer to the middle.
      */
     rank?: number;
+
+    /**
+     *  Displaying Items based on zoom priority -- higher zoom priority gets prioritised when zoom levels increase
+     */
+    priority?: number;
 
     /**
      * Whether the item is shown or hidden.

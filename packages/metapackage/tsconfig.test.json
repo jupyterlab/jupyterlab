@@ -27,9 +27,6 @@
       "path": "../cells"
     },
     {
-      "path": "../celltags"
-    },
-    {
       "path": "../celltags-extension"
     },
     {
@@ -165,10 +162,13 @@
       "path": "../markedparser-extension"
     },
     {
-      "path": "../mathjax2"
+      "path": "../mathjax-extension"
     },
     {
-      "path": "../mathjax2-extension"
+      "path": "../mermaid"
+    },
+    {
+      "path": "../mermaid-extension"
     },
     {
       "path": "../metadataform"
@@ -193,6 +193,12 @@
     },
     {
       "path": "../pdf-extension"
+    },
+    {
+      "path": "../pluginmanager"
+    },
+    {
+      "path": "../pluginmanager-extension"
     },
     {
       "path": "../property-inspector"

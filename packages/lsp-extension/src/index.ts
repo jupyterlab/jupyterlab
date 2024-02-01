@@ -7,7 +7,8 @@
 
 import {
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  LabShell
 } from '@jupyterlab/application';
 import {
   CodeExtractorsManager,
@@ -17,11 +18,13 @@ import {
   ILSPConnection,
   ILSPDocumentConnectionManager,
   ILSPFeatureManager,
+  IWidgetLSPAdapterTracker,
   LanguageServerManager,
   LanguageServersExperimental,
   TextForeignCodeExtractor,
   TLanguageServerConfigurations,
-  TLanguageServerId
+  TLanguageServerId,
+  WidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -38,25 +41,38 @@ import { Signal } from '@lumino/signaling';
 import { renderServerSetting } from './renderer';
 
 import type { FieldProps } from '@rjsf/utils';
+
 const plugin: JupyterFrontEndPlugin<ILSPDocumentConnectionManager> = {
   activate,
   id: '@jupyterlab/lsp-extension:plugin',
-  requires: [ISettingRegistry, ITranslator],
-  optional: [IRunningSessionManagers, IFormRendererRegistry],
+  description: 'Provides the language server connection manager.',
+  requires: [ITranslator, IWidgetLSPAdapterTracker],
+  optional: [IRunningSessionManagers],
   provides: ILSPDocumentConnectionManager,
   autoStart: true
 };
 
 const featurePlugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
   id: '@jupyterlab/lsp-extension:feature',
+  description: 'Provides the language server feature manager.',
   activate: () => new FeatureManager(),
   provides: ILSPFeatureManager,
+  autoStart: true
+};
+
+const settingsPlugin: JupyterFrontEndPlugin<void> = {
+  activate: activateSettings,
+  id: '@jupyterlab/lsp-extension:settings',
+  description: 'Provides the language server settings.',
+  requires: [ILSPDocumentConnectionManager, ISettingRegistry, ITranslator],
+  optional: [IFormRendererRegistry],
   autoStart: true
 };
 
 const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManager> =
   {
     id: ILSPCodeExtractorsManager.name,
+    description: 'Provides the code extractor manager.',
     activate: app => {
       const extractorManager = new CodeExtractorsManager();
 
@@ -85,16 +101,42 @@ const codeExtractorManagerPlugin: JupyterFrontEndPlugin<ILSPCodeExtractorsManage
  */
 function activate(
   app: JupyterFrontEnd,
+  translator: ITranslator,
+  tracker: IWidgetLSPAdapterTracker,
+  runningSessionManagers: IRunningSessionManagers | null
+): ILSPDocumentConnectionManager {
+  const languageServerManager = new LanguageServerManager({
+    settings: app.serviceManager.serverSettings
+  });
+  const connectionManager = new DocumentConnectionManager({
+    languageServerManager,
+    adapterTracker: tracker
+  });
+
+  // Add a sessions manager if the running extension is available
+  if (runningSessionManagers) {
+    addRunningSessionManager(
+      runningSessionManagers,
+      connectionManager,
+      translator
+    );
+  }
+
+  return connectionManager;
+}
+
+/**
+ * Activate the lsp settings plugin.
+ */
+function activateSettings(
+  app: JupyterFrontEnd,
+  connectionManager: ILSPDocumentConnectionManager,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
-  runningSessionManagers: IRunningSessionManagers | null,
   settingRendererRegistry: IFormRendererRegistry | null
-): ILSPDocumentConnectionManager {
+): void {
   const LANGUAGE_SERVERS = 'languageServers';
-  const languageServerManager = new LanguageServerManager({});
-  const connectionManager = new DocumentConnectionManager({
-    languageServerManager
-  });
+  const languageServerManager = connectionManager.languageServerManager;
 
   const updateOptions = (settings: ISettingRegistry.ISettings) => {
     const options = settings.composite as Required<LanguageServersExperimental>;
@@ -158,7 +200,7 @@ function activate(
     }
   });
   languageServerManager.sessionsChanged.connect(async () => {
-    await settingRegistry.reload(plugin.id);
+    await settingRegistry.load(plugin.id, true);
   });
 
   settingRegistry
@@ -174,15 +216,6 @@ function activate(
       console.error(reason.message);
     });
 
-  // Add a sessions manager if the running extension is available
-  if (runningSessionManagers) {
-    addRunningSessionManager(
-      runningSessionManagers,
-      connectionManager,
-      translator
-    );
-  }
-
   if (settingRendererRegistry) {
     const renderer: IFormRenderer = {
       fieldRenderer: (props: FieldProps) => {
@@ -194,8 +227,6 @@ function activate(
       renderer
     );
   }
-
-  return connectionManager;
 }
 
 export class RunningLanguageServer implements IRunningSessions.IRunningItem {
@@ -276,7 +307,24 @@ function addRunningSessionManager(
     )
   });
 }
+
+const adapterTrackerPlugin: JupyterFrontEndPlugin<IWidgetLSPAdapterTracker> = {
+  id: '@jupyterlab/lsp-extension:tracker',
+  description: 'Provides the tracker of `WidgetLSPAdapter`.',
+  autoStart: true,
+  provides: IWidgetLSPAdapterTracker,
+  activate: (app: JupyterFrontEnd<LabShell>): IWidgetLSPAdapterTracker => {
+    return new WidgetLSPAdapterTracker({ shell: app.shell });
+  }
+};
+
 /**
  * Export the plugin as default.
  */
-export default [plugin, featurePlugin, codeExtractorManagerPlugin];
+export default [
+  plugin,
+  featurePlugin,
+  settingsPlugin,
+  codeExtractorManagerPlugin,
+  adapterTrackerPlugin
+];

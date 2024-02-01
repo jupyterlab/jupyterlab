@@ -21,7 +21,7 @@ from jupyter_server.utils import pathname2url, urljoin
 from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
 from tornado.websocket import WebSocketClosedError
-from traitlets import Bool
+from traitlets import Bool, Unicode
 
 from .labapp import LabApp, get_app_dir
 from .tests.test_app import TestEnv
@@ -57,7 +57,7 @@ class LogErrorHandler(logging.Handler):
         return super().filter(record)
 
     def emit(self, record):
-        print(record.msg, file=sys.stderr)  # noqa
+        print(record.msg, file=sys.stderr)
         self.errored = True
 
 
@@ -144,8 +144,9 @@ async def run_browser(url):
     if not osp.exists(osp.join(target, "node_modules")):
         if not osp.exists(target):
             os.makedirs(osp.join(target))
-        await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(["jlpm", "add", "playwright@^1.9.2"], cwd=target)
+        await run_async_process(["npm", "init", "-y"], cwd=target)
+        await run_async_process(["npm", "install", "playwright@^1.9.2"], cwd=target)
+    await run_async_process(["npx", "playwright", "install"], cwd=target)
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
@@ -155,10 +156,11 @@ def run_browser_sync(url):
     target = osp.join(get_app_dir(), "browser_test")
     if not osp.exists(osp.join(target, "node_modules")):
         os.makedirs(target)
-        subprocess.call(["jlpm", "init", "-y"], cwd=target)
-        subprocess.call(["jlpm", "add", "playwright@^1.9.2"], cwd=target)
+        subprocess.call(["npm", "init", "-y"], cwd=target)  # noqa S603 S607
+        subprocess.call(["npm", "install", "playwright@^1.9.2"], cwd=target)  # noqa S603 S607
+    subprocess.call(["npx", "playwright", "install"], cwd=target)  # noqa S603 S607
     shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
-    return subprocess.check_call(["node", "browser-test.js", url], cwd=target)
+    return subprocess.check_call(["node", "browser-test.js", url], cwd=target)  # noqa S603 S607
 
 
 class BrowserApp(LabApp):
@@ -170,7 +172,7 @@ class BrowserApp(LabApp):
     open_browser = False
 
     serverapp_config = {"base_url": "/foo/"}
-    default_url = "/lab?reset"
+    default_url = Unicode("/lab?reset", config=True, help="The default URL to redirect to from `/`")
     ip = "127.0.0.1"
     flags = test_flags
     aliases = test_aliases
@@ -206,4 +208,4 @@ if __name__ == "__main__":
             BrowserApp.test_browser = False
             sys.argv.remove(option)
 
-        BrowserApp.launch_instance()
+    BrowserApp.launch_instance()

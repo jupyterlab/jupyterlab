@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ISessionContext } from '@jupyterlab/apputils';
 import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
 import { INotebookContent } from '@jupyterlab/nbformat';
 import {
@@ -11,9 +12,11 @@ import {
 } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/notebook/lib/testutils';
 import * as defaultContent45 from './default-45.json';
+import * as emptyContent from './empty.json';
 
 export { DEFAULT_CONTENT } from '@jupyterlab/notebook/lib/testutils';
 export const DEFAULT_CONTENT_45: INotebookContent = defaultContent45;
+export const EMPTY_CONTENT: INotebookContent = emptyContent;
 
 /**
  * Local versions of the NBTestUtils that import from `src` instead of `lib`.
@@ -36,8 +39,8 @@ export function createNotebookPanelFactory(): NotebookPanel.IContentFactory {
 /**
  * Create a notebook widget.
  */
-export function createNotebook(): Notebook {
-  return NBTestUtils.createNotebook();
+export function createNotebook(sessionContext?: ISessionContext): Notebook {
+  return NBTestUtils.createNotebook(sessionContext);
 }
 
 /**

@@ -77,14 +77,14 @@ Log Console         down      down
 The above example will result in the following changes:
 
 .. figure:: ../images/default-terminal-position-single.png
-    :alt: Default terminal position in simple mode
+    :alt: (Before Change) Default terminal position in "multiple" (default) mode
 
-    Default terminal position in simple mode
+    (Before Change) Default terminal position in "multiple" (default) mode
 
 .. figure:: ../images/customized-terminal-position-single.png
-    :alt: Customized terminal position in simple mode
+    :alt: (After Change) Customized terminal position in "multiple" (default) mode
 
-    Customized terminal position in simple mode
+    (After Change) Customized terminal position in "multiple" (default) mode
 
 .. _toolbars-customization:
 
@@ -313,3 +313,10 @@ Users can add a "Open in Simple Mode" context menu option by adding the followin
         "selector": ".jp-DirListing-item[data-isdir=\"false\"]",
         "rank": 1.6
     }
+
+.. _custom-css:
+
+Custom CSS
+==========
+
+.. include:: custom_css.rst

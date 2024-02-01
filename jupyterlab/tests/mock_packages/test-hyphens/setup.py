@@ -6,8 +6,8 @@ from os import path
 from setuptools import setup
 
 version = "3.0.2"
-name = "test-hyphens"
-module_name = "test-hyphens"
+name = "test_hyphens"
+module_name = "test_hyphens"
 lab_ext_name = "test-hyphens"
 
 HERE = path.abspath(path.dirname(__file__))

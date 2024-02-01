@@ -9,7 +9,8 @@
         "rank": 10
       },
       { "name": "uploader", "rank": 20 },
-      { "name": "refresh", "command": "filebrowser:refresh", "rank": 30 }
+      { "name": "refresh", "command": "filebrowser:refresh", "rank": 30 },
+      { "name": "fileNameSearcher", "rank": 40 }
     ]
   },
   "jupyter.lab.menus": {
@@ -92,6 +93,11 @@
         "label": {
           "title": "Item label",
           "description": "If defined, it will override the command label",
+          "type": "string"
+        },
+        "caption": {
+          "title": "Item caption",
+          "description": "If defined, it will override the command caption",
           "type": "string"
         },
         "type": {

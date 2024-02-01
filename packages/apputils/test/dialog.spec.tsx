@@ -356,6 +356,7 @@ describe('@jupyterlab/apputils', () => {
       };
 
       const data: Dialog.IButton = {
+        ariaLabel: 'ariafoo',
         label: 'foo',
         iconClass: 'bar',
         iconLabel: 'foo',

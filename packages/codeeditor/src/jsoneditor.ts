@@ -74,14 +74,17 @@ export class JSONEditor extends Widget {
     this.node.appendChild(this.headerNode);
     this.node.appendChild(this.editorHostNode);
 
-    const model = new CodeEditor.Model();
-
-    model.mimeType = 'application/json';
+    const model = new CodeEditor.Model({ mimeType: 'application/json' });
     model.sharedModel.changed.connect(this._onModelChanged, this);
 
     this.model = model;
-    this.editor = options.editorFactory({ host: this.editorHostNode, model });
-    this.editor.setOption('readOnly', true);
+    this.editor = options.editorFactory({
+      host: this.editorHostNode,
+      model,
+      config: {
+        readOnly: true
+      }
+    });
   }
 
   /**

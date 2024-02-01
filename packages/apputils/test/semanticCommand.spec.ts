@@ -63,7 +63,7 @@ describe('@jupyterlab/apputils', () => {
 
         expect(() => {
           semanticCmd.add({ id: commandId });
-        }).toThrowError(/Command\s.+\sis already defined\./);
+        }).toThrow(/Command\s.+\sis already defined\./);
       });
     });
 

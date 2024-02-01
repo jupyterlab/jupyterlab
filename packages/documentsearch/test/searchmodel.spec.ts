@@ -10,19 +10,28 @@ import { signalToPromise } from '@jupyterlab/testing';
 
 class LogSearchProvider extends GenericSearchProvider {
   private _queryReceived: PromiseDelegate<RegExp | null>;
+  private _queryEnded: PromiseDelegate<void>;
   private _initialQuery: string = 'unset';
 
   constructor(widget: Widget) {
     super(widget);
     this._queryReceived = new PromiseDelegate();
+    this._queryEnded = new PromiseDelegate();
   }
   get queryReceived(): Promise<RegExp | null> {
     return this._queryReceived.promise;
+  }
+  get queryEnded(): Promise<void> {
+    return this._queryEnded.promise;
   }
 
   async startQuery(query: RegExp | null, filters = {}): Promise<void> {
     this._queryReceived.resolve(query);
     this._queryReceived = new PromiseDelegate();
+  }
+
+  async endQuery(): Promise<void> {
+    this._queryEnded.resolve();
   }
 
   set initialQuery(query: string) {
@@ -60,6 +69,16 @@ describe('documentsearch/searchmodel', () => {
         expect(query.test('test')).toEqual(false);
         query.lastIndex = 0;
       });
+      it('should end search when query is empty', async () => {
+        // Start a search
+        model.searchExpression = 'query';
+        expect(model.searchExpression).toEqual('query');
+        await provider.queryReceived;
+        // Empty the query
+        model.searchExpression = '';
+        await provider.queryEnded;
+        expect(model.searchExpression).toEqual('');
+      });
     });
 
     describe('#parsingError', () => {
@@ -74,18 +93,26 @@ describe('documentsearch/searchmodel', () => {
       });
     });
 
-    describe('#initialQuery', () => {
-      it('should get query from search expression or provider', () => {
+    describe('#suggestedInitialQuery', () => {
+      it('should return inital query from provider', () => {
+        expect(model.suggestedInitialQuery).toEqual('unset');
         provider.initialQuery = 'provider-set-query';
-        expect(model.initialQuery).toEqual('provider-set-query');
-        model.searchExpression = 'query';
-        expect(model.initialQuery).toEqual('query');
-        model.searchExpression = '';
-        expect(model.initialQuery).toEqual('provider-set-query');
+        expect(model.suggestedInitialQuery).toEqual('provider-set-query');
+      });
+    });
+
+    describe('#initialQuery', () => {
+      it('should set/get inital non-empty query', () => {
+        model.initialQuery = 'externally-set-query';
+        expect(model.initialQuery).toEqual('externally-set-query');
+      });
+      it('should fallback to previous search expression on empty value in setter', () => {
+        model.searchExpression = 'search-expression';
+        model.initialQuery = '';
+        expect(model.initialQuery).toEqual('search-expression');
       });
       it('should remember last query', async () => {
-        provider.initialQuery = 'provider-set-query';
-        model.searchExpression = 'query';
+        model.initialQuery = 'query';
         expect(model.initialQuery).toEqual('query');
         await model.endQuery();
         expect(model.initialQuery).toEqual('query');
@@ -131,6 +158,36 @@ describe('documentsearch/searchmodel', () => {
         query.lastIndex = 0;
         expect(query.test('XqueryX')).toEqual(true);
         query.lastIndex = 0;
+      });
+    });
+
+    describe('#replaceText', () => {
+      it('defaults to empty string', () => {
+        expect(model.replaceText).toEqual('');
+      });
+
+      it('changes after assignment with setter', () => {
+        model.replaceText = 'test';
+        expect(model.replaceText).toEqual('test');
+      });
+
+      it('emits `stateChanged` signal on assignment', () => {
+        let emitted = false;
+        model.stateChanged.connect(() => {
+          emitted = true;
+        });
+        model.replaceText = 'test';
+        expect(emitted).toEqual(true);
+      });
+
+      it('does not emit `stateChanged` signal if value has not changed', () => {
+        let emitted = 0;
+        model.stateChanged.connect(() => {
+          emitted += 1;
+        });
+        model.replaceText = '1';
+        model.replaceText = '1';
+        expect(emitted).toEqual(1);
       });
     });
   });

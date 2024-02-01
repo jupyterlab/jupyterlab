@@ -15,7 +15,6 @@ import {
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
-import { ISharedMarkdownCell, ISharedRawCell } from '@jupyter/ydoc';
 
 /**
  * The model for attachments.
@@ -95,16 +94,16 @@ export namespace IAttachmentsModel {
    */
   export interface IOptions {
     /**
+     * The initial values for the model.
+     */
+    values?: nbformat.IAttachments;
+
+    /**
      * The attachment content factory used by the model.
      *
      * If not given, a default factory will be used.
      */
     contentFactory?: IContentFactory;
-
-    /**
-     * The shared cell model.
-     */
-    sharedModel: ISharedMarkdownCell | ISharedRawCell;
   }
 
   /**
@@ -132,12 +131,11 @@ export class AttachmentsModel implements IAttachmentsModel {
    */
   constructor(options: IAttachmentsModel.IOptions) {
     this.contentFactory =
-      options.contentFactory || AttachmentsModel.defaultContentFactory;
-    const values = options.sharedModel.getAttachments();
-    if (values) {
-      for (const key of Object.keys(values)) {
-        if (values[key] !== undefined) {
-          this.set(key, values[key]!);
+      options.contentFactory ?? AttachmentsModel.defaultContentFactory;
+    if (options.values) {
+      for (const key of Object.keys(options.values)) {
+        if (options.values[key] !== undefined) {
+          this.set(key, options.values[key]!);
         }
       }
     }

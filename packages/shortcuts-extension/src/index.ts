@@ -18,6 +18,7 @@ import {
 import { CommandRegistry } from '@lumino/commands';
 import {
   JSONExt,
+  PartialJSONValue,
   ReadonlyPartialJSONObject,
   ReadonlyPartialJSONValue
 } from '@lumino/coreutils';
@@ -27,19 +28,20 @@ import { Menu } from '@lumino/widgets';
 import { IShortcutUIexternal } from './components';
 import { renderShortCut } from './renderer';
 
+const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
+
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd,
   translator: ITranslator
 ): IShortcutUIexternal {
   const { commands } = app;
-  const shortcutPluginLocation = '@jupyterlab/shortcuts-extension:shortcuts';
   return {
     translator,
     getAllShortCutSettings: () =>
-      settingRegistry.reload(shortcutPluginLocation),
+      settingRegistry.load(SHORTCUT_PLUGIN_ID, true),
     removeShortCut: (key: string) =>
-      settingRegistry.remove(shortcutPluginLocation, key),
+      settingRegistry.remove(SHORTCUT_PLUGIN_ID, key),
     createMenu: () => new Menu({ commands }),
     hasCommand: (id: string) => commands.hasCommand(id),
     addCommand: (id: string, options: CommandRegistry.ICommandOptions) =>
@@ -78,7 +80,8 @@ function getExternalForJupyterLab(
  * required, using the `'body'` selector is more appropriate.
  */
 const shortcuts: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/shortcuts-extension:shortcuts',
+  id: SHORTCUT_PLUGIN_ID,
+  description: 'Adds the keyboard shortcuts editor.',
   requires: [ISettingRegistry],
   optional: [ITranslator, IFormRendererRegistry],
   activate: async (
@@ -91,6 +94,9 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     const trans = translator_.load('jupyterlab');
     const { commands } = app;
     let canonical: ISettingRegistry.ISchema | null;
+    // Stores initial value of the shortcuts `default` value,
+    // which reflects the `overrides.json` contents.
+    let cannonicalOverrides: PartialJSONValue | undefined;
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
     if (editorRegistry) {
@@ -110,7 +116,11 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
      */
     function populate(schema: ISettingRegistry.ISchema) {
       const commands = app.commands.listCommands().join('\n');
-
+      if (!cannonicalOverrides) {
+        cannonicalOverrides = JSONExt.deepCopy(
+          schema.properties!.shortcuts.default!
+        );
+      }
       loaded = {};
       schema.properties!.shortcuts.default = Object.keys(registry.plugins)
         .map(plugin => {
@@ -119,7 +129,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
           loaded[plugin] = shortcuts;
           return shortcuts;
         })
-        .concat([schema.properties!.shortcuts.default as any[]])
+        .concat([cannonicalOverrides as any[]])
         .reduce((acc, val) => {
           if (Platform.IS_MAC) {
             return acc.concat(val);
@@ -170,8 +180,13 @@ List of keyboard shortcuts:`,
           oldShortcuts === undefined ||
           !JSONExt.deepEqual(oldShortcuts, newShortcuts)
         ) {
+          // Empty the default values to avoid shortcut collisions.
           canonical = null;
-          await registry.reload(shortcuts.id);
+          const schema = registry.plugins[shortcuts.id]!.schema;
+          schema.properties!.shortcuts.default = cannonicalOverrides;
+
+          // Reload the settings.
+          await registry.load(shortcuts.id, true);
         }
       }
     });

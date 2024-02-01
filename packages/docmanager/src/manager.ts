@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
+import { ISessionContext, SessionContextDialogs } from '@jupyterlab/apputils';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import {
   Context,
@@ -38,7 +38,9 @@ export class DocumentManager implements IDocumentManager {
     this.translator = options.translator || nullTranslator;
     this.registry = options.registry;
     this.services = options.manager;
-    this._dialogs = options.sessionDialogs || sessionContextDialogs;
+    this._dialogs =
+      options.sessionDialogs ??
+      new SessionContextDialogs({ translator: options.translator });
     this._isConnectedCallback = options.isConnectedCallback || (() => true);
 
     this._opener = options.opener;

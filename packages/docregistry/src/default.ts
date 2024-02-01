@@ -3,7 +3,6 @@
 
 import { MainAreaWidget, setToolbar } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { Mode } from '@jupyterlab/codemirror';
 import { IChangedArgs, PathExt } from '@jupyterlab/coreutils';
 import { IObservableList } from '@jupyterlab/observables';
 import { Contents } from '@jupyterlab/services';
@@ -13,6 +12,7 @@ import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Title, Widget } from '@lumino/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
+import { createReadonlyLabel } from './components';
 
 /**
  * The default implementation of a document model.
@@ -261,9 +261,7 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
   /**
    * Create a new model.
    *
-   * @param languagePreference - An optional kernel language preference.
-   * @param modelDB - An optional modelDB.
-   * @param isInitialized - An optional flag to check if the model is initialized.
+   * @param options - Model options.
    *
    * @returns A new document model.
    */
@@ -281,8 +279,7 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * Get the preferred kernel language given a file path.
    */
   preferredLanguage(path: string): string {
-    const mode = Mode.findByFileName(path);
-    return mode?.name ?? '';
+    return '';
   }
 
   private _isDisposed = false;
@@ -346,6 +343,7 @@ export abstract class ABCWidgetFactory<
     this._preferKernel = !!options.preferKernel;
     this._canStartKernel = !!options.canStartKernel;
     this._shutdownOnClose = !!options.shutdownOnClose;
+    this._autoStartDefault = !!options.autoStartDefault;
     this._toolbarFactory = options.toolbarFactory;
   }
 
@@ -458,6 +456,16 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
+   * Whether to automatically select the preferred kernel during a kernel start
+   */
+  get autoStartDefault(): boolean {
+    return this._autoStartDefault;
+  }
+  set autoStartDefault(value: boolean) {
+    this._autoStartDefault = value;
+  }
+
+  /**
    * Create a new widget given a document model and a context.
    *
    * #### Notes
@@ -505,6 +513,7 @@ export abstract class ABCWidgetFactory<
   private _translator: ITranslator;
   private _name: string;
   private _label: string;
+  private _autoStartDefault: boolean;
   private _readOnly: boolean;
   private _canStartKernel: boolean;
   private _shutdownOnClose: boolean;
@@ -537,7 +546,7 @@ export class DocumentWidget<
     // Include the context ready promise in the widget reveal promise
     options.reveal = Promise.all([options.reveal, options.context.ready]);
     super(options);
-
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.context = options.context;
 
     // Handle context path changes
@@ -608,6 +617,21 @@ export class DocumentWidget<
     if (args.name === 'dirty') {
       this._handleDirtyState();
     }
+    if (!this.context.model.dirty) {
+      if (!this.context.model.collaborative) {
+        if (!this.context.contentsModel?.writable) {
+          const readOnlyIndicator = createReadonlyLabel(this);
+          let roi = this.toolbar.insertBefore(
+            'kernelName',
+            'read-only-indicator',
+            readOnlyIndicator
+          );
+          if (!roi) {
+            this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -625,6 +649,7 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
+  protected readonly _trans;
 
   /**
    * Whether the document has an auto-generated name or not.

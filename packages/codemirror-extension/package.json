@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror-extension",
-  "version": "4.0.0-alpha.19",
+  "version": "4.1.0-rc.0",
   "description": "JupyterLab - CodeMirror Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -28,7 +28,8 @@
     "lib/*.js",
     "schema/*.json",
     "style/**/*.css",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -37,22 +38,28 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@codemirror/search": "^6.0.0",
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/codeeditor": "^4.0.0-alpha.19",
-    "@jupyterlab/codemirror": "^4.0.0-alpha.19",
-    "@jupyterlab/docregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/fileeditor": "^4.0.0-alpha.19",
-    "@jupyterlab/mainmenu": "^4.0.0-alpha.19",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/statusbar": "^4.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19",
-    "@lumino/widgets": "^2.0.0-beta.1"
+    "@codemirror/lang-markdown": "^6.1.1",
+    "@codemirror/language": "^6.6.0",
+    "@codemirror/legacy-modes": "^6.3.2",
+    "@jupyter/ydoc": "^1.1.1",
+    "@jupyterlab/application": "^4.1.0-rc.0",
+    "@jupyterlab/codeeditor": "^4.1.0-rc.0",
+    "@jupyterlab/codemirror": "^4.1.0-rc.0",
+    "@jupyterlab/settingregistry": "^4.1.0-rc.0",
+    "@jupyterlab/statusbar": "^4.1.0-rc.0",
+    "@jupyterlab/translation": "^4.1.0-rc.0",
+    "@jupyterlab/ui-components": "^4.1.0-rc.0",
+    "@lumino/coreutils": "^2.1.2",
+    "@lumino/widgets": "^2.3.1",
+    "@rjsf/utils": "^5.13.4",
+    "@rjsf/validator-ajv8": "^5.13.4",
+    "react": "^18.2.0"
   },
   "devDependencies": {
-    "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
-    "typescript": "~5.0.0-beta"
+    "@types/react": "^18.0.26",
+    "rimraf": "~5.0.5",
+    "typedoc": "~0.24.7",
+    "typescript": "~5.1.6"
   },
   "publishConfig": {
     "access": "public"

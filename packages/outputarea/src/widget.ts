@@ -44,6 +44,8 @@ const OUTPUT_AREA_OUTPUT_CLASS = 'jp-OutputArea-output';
  */
 const OUTPUT_AREA_PROMPT_CLASS = 'jp-OutputArea-prompt';
 
+const OUTPUT_AREA_STDIN_HIDING_CLASS = 'jp-OutputArea-stdin-hiding';
+
 /**
  * The class name added to OutputPrompt.
  */
@@ -74,6 +76,11 @@ const STDIN_PROMPT_CLASS = 'jp-Stdin-prompt';
  */
 const STDIN_INPUT_CLASS = 'jp-Stdin-input';
 
+/**
+ * The overlay that can be clicked to switch between output scrolling modes.
+ */
+const OUTPUT_PROMPT_OVERLAY = 'jp-OutputArea-promptOverlay';
+
 /** ****************************************************************************
  * OutputArea
  ******************************************************************************/
@@ -96,10 +103,11 @@ export class OutputArea extends Widget {
     super.layout = new PanelLayout();
     this.addClass(OUTPUT_AREA_CLASS);
     this.contentFactory =
-      options.contentFactory || OutputArea.defaultContentFactory;
+      options.contentFactory ?? OutputArea.defaultContentFactory;
     this.rendermime = options.rendermime;
     this._maxNumberOutputs = options.maxNumberOutputs ?? Infinity;
     this._translator = options.translator ?? nullTranslator;
+    this._inputHistoryScope = options.inputHistoryScope ?? 'global';
 
     const model = (this.model = options.model);
     for (
@@ -112,6 +120,9 @@ export class OutputArea extends Widget {
     }
     model.changed.connect(this.onModelChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
+    if (options.promptOverlay) {
+      this._addPromptOverlay();
+    }
   }
 
   /**
@@ -205,9 +216,11 @@ export class OutputArea extends Widget {
   }
 
   /**
-   * Signal emitted when an output area is requesting an input.
+   * Signal emitted when an output area is requesting an input. The signal
+   * carries the input widget that this class creates in response to the input
+   * request.
    */
-  get inputRequested(): ISignal<OutputArea, void> {
+  get inputRequested(): ISignal<OutputArea, IStdin> {
     return this._inputRequested;
   }
 
@@ -292,6 +305,32 @@ export class OutputArea extends Widget {
     this.outputLengthChanged.emit(
       Math.min(this.model.length, this._maxNumberOutputs)
     );
+  }
+
+  /**
+   * Emitted when user requests toggling of the output scrolling mode.
+   */
+  get toggleScrolling(): ISignal<OutputArea, void> {
+    return this._toggleScrolling;
+  }
+
+  get initialize(): ISignal<OutputArea, void> {
+    return this._initialize;
+  }
+
+  /**
+   * Add overlay allowing to toggle scrolling.
+   */
+  private _addPromptOverlay() {
+    const overlay = document.createElement('div');
+    overlay.className = OUTPUT_PROMPT_OVERLAY;
+    overlay.addEventListener('click', () => {
+      this._toggleScrolling.emit();
+    });
+    this.node.appendChild(overlay);
+    requestAnimationFrame(() => {
+      this._initialize.emit();
+    });
   }
 
   /**
@@ -410,7 +449,8 @@ export class OutputArea extends Widget {
       prompt: stdinPrompt,
       password,
       future,
-      translator: this._translator
+      translator: this._translator,
+      inputHistoryScope: this._inputHistoryScope
     });
     input.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(input);
@@ -419,9 +459,10 @@ export class OutputArea extends Widget {
     if (this.model.length >= this.maxNumberOutputs) {
       this.maxNumberOutputs = this.model.length;
     }
-    this.layout.addWidget(panel);
+    this._inputRequested.emit(input);
 
-    this._inputRequested.emit();
+    // Get the input node to ensure focus after updating the model upon user reply.
+    const inputNode = input.node.getElementsByTagName('input')[0];
 
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
@@ -432,14 +473,37 @@ export class OutputArea extends Widget {
       if (this.model.length >= this.maxNumberOutputs) {
         this.maxNumberOutputs = this.model.length + 1;
       }
+      panel.addClass(OUTPUT_AREA_STDIN_HIDING_CLASS);
       // Use stdin as the stream so it does not get combined with stdout.
+      // Note: because it modifies DOM it may (will) shift focus away from the input node.
       this.model.add({
         output_type: 'stream',
         name: 'stdin',
         text: value + '\n'
       });
-      panel.dispose();
+      // Refocus the input node after it lost focus due to update of the model.
+      inputNode.focus();
+
+      // Keep the input in view for a little while; this (along refocusing)
+      // ensures that we can avoid the cell editor stealing the focus, and
+      // leading to user inadvertently modifying editor content when executing
+      // consecutive commands in short succession.
+      window.setTimeout(() => {
+        // Tack currently focused element to ensure that it remains on it
+        // after disposal of the panel with the old input
+        // (which modifies DOM and can lead to focus jump).
+        const focusedElement = document.activeElement;
+        // Dispose the old panel with no longer needed input box.
+        panel.dispose();
+        // Refocus the element that was focused before.
+        if (focusedElement && focusedElement instanceof HTMLElement) {
+          focusedElement.focus();
+        }
+      }, 500);
     });
+
+    // Note: the `input.value` promise must be listened to before we attach the panel
+    this.layout.addWidget(panel);
   }
 
   /**
@@ -451,7 +515,9 @@ export class OutputArea extends Widget {
     }
     const panel = this.layout.widgets[index] as Panel;
     const renderer = (
-      panel.widgets ? panel.widgets[1] : panel
+      panel.widgets
+        ? panel.widgets.filter(it => 'renderModel' in it).pop()
+        : panel
     ) as IRenderMime.IRenderer;
     // Check whether it is safe to reuse renderer:
     // - Preferred mime type has not changed
@@ -668,7 +734,6 @@ export class OutputArea extends Widget {
     executionCount: number | null = null
   ): Panel {
     const panel = new Private.OutputPanel();
-
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
     const prompt = this.contentFactory.createOutputPrompt();
@@ -692,11 +757,14 @@ export class OutputArea extends Widget {
    */
   private _maxNumberOutputs: number;
   private _minHeightTimeout: number | null = null;
-  private _inputRequested = new Signal<OutputArea, void>(this);
+  private _inputRequested = new Signal<OutputArea, IStdin>(this);
+  private _toggleScrolling = new Signal<OutputArea, void>(this);
+  private _initialize = new Signal<OutputArea, void>(this);
   private _outputTracker = new WidgetTracker<Widget>({
     namespace: UUID.uuid4()
   });
   private _translator: ITranslator;
+  private _inputHistoryScope: 'global' | 'session' = 'global';
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -715,10 +783,17 @@ export class SimplifiedOutputArea extends OutputArea {
    */
   protected createOutputItem(model: IOutputModel): Widget | null {
     const output = this.createRenderedMimetype(model);
-    if (output) {
-      output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+
+    if (!output) {
+      return null;
     }
-    return output;
+
+    const panel = new Private.OutputPanel();
+    panel.addClass(OUTPUT_AREA_ITEM_CLASS);
+
+    output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
+    panel.addWidget(output);
+    return panel;
   }
 }
 
@@ -751,9 +826,19 @@ export namespace OutputArea {
     maxNumberOutputs?: number;
 
     /**
+     * Whether to show prompt overlay emitting `toggleScrolling` signal.
+     */
+    promptOverlay?: boolean;
+
+    /**
      * Translator
      */
     readonly translator?: ITranslator;
+
+    /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope?: 'global' | 'session';
   }
 
   /**
@@ -907,24 +992,82 @@ export interface IStdin extends Widget {
  * The default stdin widget.
  */
 export class Stdin extends Widget implements IStdin {
-  private static _history: string[] = [];
+  private static _history: Map<string, string[]> = new Map();
 
-  private static _historyAt(ix: number): string | undefined {
-    const len = Stdin._history.length;
-    // interpret negative ix exactly like Array.at
-    ix = ix < 0 ? len + ix : ix;
+  private static _historyIx(key: string, ix: number): number | undefined {
+    const history = Stdin._history.get(key);
+    if (!history) {
+      return undefined;
+    }
+    const len = history.length;
+    // wrap nonpositive ix to nonnegative ix
+    if (ix <= 0) {
+      return len + ix;
+    }
+  }
 
-    if (ix < len) {
-      return Stdin._history[ix];
+  private static _historyAt(key: string, ix: number): string | undefined {
+    const history = Stdin._history.get(key);
+    if (!history) {
+      return undefined;
+    }
+    const len = history.length;
+    const ixpos = Stdin._historyIx(key, ix);
+
+    if (ixpos !== undefined && ixpos < len) {
+      return history[ixpos];
     }
     // return undefined if ix is out of bounds
   }
 
-  private static _historyPush(line: string): void {
-    Stdin._history.push(line);
-    if (Stdin._history.length > 1000) {
+  private static _historyPush(key: string, line: string): void {
+    const history = Stdin._history.get(key)!;
+    history.push(line);
+    if (history.length > 1000) {
       // truncate line history if it's too long
-      Stdin._history.shift();
+      history.shift();
+    }
+  }
+
+  private static _historySearch(
+    key: string,
+    pat: string,
+    ix: number,
+    reverse = true
+  ): number | undefined {
+    const history = Stdin._history.get(key)!;
+    const len = history.length;
+    const ixpos = Stdin._historyIx(key, ix);
+    const substrFound = (x: string) => x.search(pat) !== -1;
+
+    if (ixpos === undefined) {
+      return;
+    }
+
+    if (reverse) {
+      if (ixpos === 0) {
+        // reverse search fails if already at start of history
+        return;
+      }
+
+      const ixFound = (history.slice(0, ixpos) as any).findLastIndex(
+        substrFound
+      );
+      if (ixFound !== -1) {
+        // wrap ix to negative
+        return ixFound - len;
+      }
+    } else {
+      if (ixpos >= len - 1) {
+        // forward search fails if already at end of history
+        return;
+      }
+
+      const ixFound = history.slice(ixpos + 1).findIndex(substrFound);
+      if (ixFound !== -1) {
+        // wrap ix to negative and adjust for slice
+        return ixFound - len + ixpos + 1;
+      }
     }
   }
 
@@ -936,15 +1079,28 @@ export class Stdin extends Widget implements IStdin {
       node: Private.createInputWidgetNode(options.prompt, options.password)
     });
     this.addClass(STDIN_CLASS);
-    this._historyIndex = 0;
-    this._input = this.node.getElementsByTagName('input')[0];
-    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
-    // make users aware of the line history feature
-    this._input.placeholder = this._trans.__('↑↓ for history');
     this._future = options.future;
+    this._historyIndex = 0;
+    this._historyKey =
+      options.inputHistoryScope === 'session'
+        ? options.parent_header.session
+        : '';
+    this._historyPat = '';
     this._parentHeader = options.parent_header;
-    this._value = options.prompt + ' ';
     this._password = options.password;
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    this._value = options.prompt + ' ';
+
+    this._input = this.node.getElementsByTagName('input')[0];
+    // make users aware of the line history feature
+    this._input.placeholder = this._trans.__(
+      '↑↓ for history. Search history with c-↑/c-↓'
+    );
+
+    // initialize line history
+    if (!Stdin._history.has(this._historyKey)) {
+      Stdin._history.set(this._historyKey, []);
+    }
   }
 
   /**
@@ -965,31 +1121,17 @@ export class Stdin extends Widget implements IStdin {
    * not be called directly by user code.
    */
   handleEvent(event: KeyboardEvent): void {
+    if (this._resolved) {
+      // Do not handle any more key events if the promise was resolved.
+      event.preventDefault();
+      return;
+    }
     const input = this._input;
+
     if (event.type === 'keydown') {
-      if (event.key === 'ArrowUp') {
-        const historyLine = Stdin._historyAt(this._historyIndex - 1);
-        if (historyLine) {
-          if (this._historyIndex === 0) {
-            this._valueCache = input.value;
-          }
-          input.value = historyLine;
-          --this._historyIndex;
-        }
-      } else if (event.key === 'ArrowDown') {
-        if (this._historyIndex === 0) {
-          // do nothing
-        } else if (this._historyIndex === -1) {
-          input.value = this._valueCache;
-          ++this._historyIndex;
-        } else {
-          const historyLine = Stdin._historyAt(this._historyIndex + 1);
-          if (historyLine) {
-            input.value = historyLine;
-            ++this._historyIndex;
-          }
-        }
-      } else if (event.key === 'Enter') {
+      if (event.key === 'Enter') {
+        this.resetSearch();
+
         this._future.sendInputReply(
           {
             status: 'ok',
@@ -1001,11 +1143,89 @@ export class Stdin extends Widget implements IStdin {
           this._value += '········';
         } else {
           this._value += input.value;
-          Stdin._historyPush(input.value);
+          Stdin._historyPush(this._historyKey, input.value);
         }
+        this._resolved = true;
         this._promise.resolve(void 0);
+      } else if (event.key === 'Escape') {
+        // currently this gets clobbered by the documentsearch:end command at the notebook level
+        this.resetSearch();
+        input.blur();
+      } else if (
+        event.ctrlKey &&
+        (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+      ) {
+        // if _historyPat is blank, use input as search pattern. Otherwise, reuse the current search pattern
+        if (this._historyPat === '') {
+          this._historyPat = input.value;
+        }
+
+        const reverse = event.key === 'ArrowUp';
+        const searchHistoryIx = Stdin._historySearch(
+          this._historyKey,
+          this._historyPat,
+          this._historyIndex,
+          reverse
+        );
+
+        if (searchHistoryIx !== undefined) {
+          const historyLine = Stdin._historyAt(
+            this._historyKey,
+            searchHistoryIx
+          );
+          if (historyLine !== undefined) {
+            if (this._historyIndex === 0) {
+              this._valueCache = input.value;
+            }
+
+            this._setInputValue(historyLine);
+            this._historyIndex = searchHistoryIx;
+            // The default action for ArrowUp is moving to first character
+            // but we want to keep the cursor at the end.
+            event.preventDefault();
+          }
+        }
+      } else if (event.key === 'ArrowUp') {
+        this.resetSearch();
+
+        const historyLine = Stdin._historyAt(
+          this._historyKey,
+          this._historyIndex - 1
+        );
+        if (historyLine) {
+          if (this._historyIndex === 0) {
+            this._valueCache = input.value;
+          }
+          this._setInputValue(historyLine);
+          --this._historyIndex;
+          // The default action for ArrowUp is moving to first character
+          // but we want to keep the cursor at the end.
+          event.preventDefault();
+        }
+      } else if (event.key === 'ArrowDown') {
+        this.resetSearch();
+
+        if (this._historyIndex === 0) {
+          // do nothing
+        } else if (this._historyIndex === -1) {
+          this._setInputValue(this._valueCache);
+          ++this._historyIndex;
+        } else {
+          const historyLine = Stdin._historyAt(
+            this._historyKey,
+            this._historyIndex + 1
+          );
+          if (historyLine) {
+            this._setInputValue(historyLine);
+            ++this._historyIndex;
+          }
+        }
       }
     }
+  }
+
+  protected resetSearch(): void {
+    this._historyPat = '';
   }
 
   /**
@@ -1023,8 +1243,17 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
+  private _setInputValue(value: string) {
+    this._input.value = value;
+    // Set cursor at the end; this is usually not necessary when input is
+    // focused but having the explicit placement ensures consistency.
+    this._input.setSelectionRange(value.length, value.length);
+  }
+
   private _future: Kernel.IShellFuture;
   private _historyIndex: number;
+  private _historyKey: string;
+  private _historyPat: string;
   private _input: HTMLInputElement;
   private _parentHeader: KernelMessage.IInputReplyMsg['parent_header'];
   private _password: boolean;
@@ -1032,6 +1261,7 @@ export class Stdin extends Widget implements IStdin {
   private _trans: TranslationBundle;
   private _value: string;
   private _valueCache: string;
+  private _resolved: boolean = false;
 }
 
 export namespace Stdin {
@@ -1063,6 +1293,11 @@ export namespace Stdin {
      * Translator
      */
     readonly translator?: ITranslator;
+
+    /**
+     * Whether to split stdin line history by kernel session or keep globally accessible.
+     */
+    inputHistoryScope?: 'global' | 'session';
   }
 }
 

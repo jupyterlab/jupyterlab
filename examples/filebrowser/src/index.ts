@@ -7,11 +7,8 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
   'example/'
 );
 
-import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/codemirror/style/index.css';
-import '@jupyterlab/filebrowser/style/index.css';
-import '@jupyterlab/theme-light-extension/style/theme.css';
-import '../index.css';
+// Import style through JS file to deduplicate them.
+import './style';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -23,7 +20,8 @@ import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import {
   CodeMirrorEditorFactory,
-  CodeMirrorMimeTypeService
+  CodeMirrorMimeTypeService,
+  EditorLanguageRegistry
 } from '@jupyterlab/codemirror';
 
 import { DocumentManager } from '@jupyterlab/docmanager';
@@ -96,9 +94,30 @@ function createApp(
     manager,
     opener
   });
+  const languages = new EditorLanguageRegistry();
+  EditorLanguageRegistry.getDefaultLanguages()
+    .filter(language =>
+      ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
+    )
+    .forEach(language => {
+      languages.addLanguage(language);
+    });
+  // Language for Markdown cells
+  languages.addLanguage({
+    name: 'ipythongfm',
+    mime: 'text/x-ipythongfm',
+    load: async () => {
+      const m = await import('@codemirror/lang-markdown');
+      return m.markdown({
+        codeLanguages: (info: string) => languages.findBest(info) as any
+      });
+    }
+  });
+  const factoryService = new CodeMirrorEditorFactory({ languages });
+  const mimeTypeService = new CodeMirrorMimeTypeService(languages);
   const editorServices = {
-    factoryService: new CodeMirrorEditorFactory(),
-    mimeTypeService: new CodeMirrorMimeTypeService()
+    factoryService,
+    mimeTypeService
   };
   const wFactory = new FileEditorFactory({
     editorServices,

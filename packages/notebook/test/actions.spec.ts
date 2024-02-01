@@ -71,9 +71,7 @@ describe('@jupyterlab/notebook', () => {
           windowingMode: 'none'
         }
       });
-      const model = new NotebookModel({
-        disableDocumentWideUndoRedo: true
-      });
+      const model = new NotebookModel();
       model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
       model.sharedModel.clearUndoHistory();
@@ -232,9 +230,9 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).toBeNull();
       });
 
-      it('should preserve the widget mode', () => {
+      it('should switch the widget mode to edit', () => {
         NotebookActions.splitCell(widget);
-        expect(widget.mode).toBe('command');
+        expect(widget.mode).toBe('edit');
         widget.mode = 'edit';
         NotebookActions.splitCell(widget);
         expect(widget.mode).toBe('edit');
@@ -301,6 +299,12 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.mergeCells(widget);
         const cell = widget.activeCell as CodeCell;
         expect(cell.model.outputs.length).toBe(0);
+      });
+
+      it('should mark cell as trusted as cells without output are trusted', () => {
+        NotebookActions.mergeCells(widget);
+        const cell = widget.activeCell as CodeCell;
+        expect(cell.model.trusted).toBe(true);
       });
 
       it('should preserve the widget mode', () => {
@@ -470,7 +474,7 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell).toBeNull();
       });
 
-      it('should widget mode should be preserved', () => {
+      it('widget mode should be preserved', () => {
         NotebookActions.insertAbove(widget);
         expect(widget.mode).toBe('command');
         widget.mode = 'edit';
@@ -501,6 +505,11 @@ describe('@jupyterlab/notebook', () => {
       it('should be the new active cell', () => {
         NotebookActions.insertAbove(widget);
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe('');
+      });
+
+      it('should mark inserted code cell as trusted', () => {
+        NotebookActions.insertAbove(widget);
+        expect(widget.activeCell!.model.trusted).toBe(true);
       });
     });
 
@@ -550,6 +559,11 @@ describe('@jupyterlab/notebook', () => {
       it('should be the new active cell', () => {
         NotebookActions.insertBelow(widget);
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe('');
+      });
+
+      it('should mark inserted code cell as trusted', () => {
+        NotebookActions.insertBelow(widget);
+        expect(widget.activeCell!.model.trusted).toBe(true);
       });
     });
 
@@ -601,6 +615,21 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.changeCellType(widget, 'markdown');
         const cell = widget.activeCell as MarkdownCell;
         expect(cell.rendered).toBe(false);
+      });
+
+      it('should mark code cell as trusted', () => {
+        // Switch to markdown and then to code as otherwise this is no-op.
+        NotebookActions.changeCellType(widget, 'markdown');
+        NotebookActions.changeCellType(widget, 'code');
+        const cell = widget.activeCell as CodeCell;
+        expect(cell.model.trusted).toBe(true);
+      });
+
+      it('should clear trust metadata if switching away from code cell', () => {
+        widget.activeCell!.model.trusted = true;
+        NotebookActions.changeCellType(widget, 'markdown');
+        const cell = widget.activeCell as MarkdownCell;
+        expect(cell.model.metadata.trusted).toBe(undefined);
       });
     });
 
@@ -691,7 +720,17 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.selectionExecuted.connect(() => {
           emitted += 1;
         });
-        const result = await NotebookActions.run(widget, undefined);
+        const result = await NotebookActions.run(
+          widget,
+          {
+            isTerminating: false,
+            pendingInput: false,
+            hasNoKernel: true,
+            kernelPreference: { autoStartDefault: false },
+            startKernel: () => Promise.resolve(true)
+          } as ISessionContext,
+          { selectKernel: () => Promise.resolve() } as any
+        );
         expect(result).toBe(true);
         const cell = widget.activeCell as CodeCell;
         expect(cell.model.executionCount).toBe(null);
@@ -810,6 +849,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).toBe(true);
         expect(widget.widgets.length).toBe(count + 1);
         expect(widget.activeCell).toBeInstanceOf(CodeCell);
+        expect(widget.activeCell!.model.trusted).toBe(true);
         expect(widget.mode).toBe('edit');
       });
 
@@ -906,6 +946,7 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(result).toBe(true);
         expect(widget.activeCell).toBeInstanceOf(CodeCell);
+        expect(widget.activeCell!.model.trusted).toBe(true);
         expect(widget.mode).toBe('edit');
         expect(widget.widgets.length).toBe(count + 1);
       });
@@ -956,6 +997,36 @@ describe('@jupyterlab/notebook', () => {
         expect(result).toBe(false);
         expect(cell.rendered).toBe(true);
         expect(widget.activeCellIndex).toBe(2);
+      });
+    });
+
+    describe('#runCells()', () => {
+      beforeEach(() => {
+        // Make sure all cells have valid code.
+        widget.widgets[2].model.sharedModel.setSource('a = 1');
+      });
+
+      it('should change to command mode', async () => {
+        widget.mode = 'edit';
+        const result = await NotebookActions.runCells(
+          widget,
+          [widget.widgets[2]],
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(widget.mode).toBe('command');
+      });
+
+      it('should preserve the existing selection', async () => {
+        const next = widget.widgets[2];
+        widget.select(next);
+        const result = await NotebookActions.runCells(
+          widget,
+          [widget.widgets[1]],
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(widget.isSelected(widget.widgets[2])).toBe(true);
       });
     });
 
@@ -1026,6 +1097,27 @@ describe('@jupyterlab/notebook', () => {
         await sleep(400);
         expect(result).toBe(false);
         expect(cell.rendered).toBe(true);
+      });
+    });
+
+    describe('#runAllBelow()', () => {
+      it('should run all selected cell and all below', async () => {
+        const next = widget.widgets[1] as MarkdownCell;
+        const cell = widget.activeCell as CodeCell;
+        cell.model.outputs.clear();
+        next.rendered = false;
+        const result = await NotebookActions.runAllBelow(
+          widget,
+          sessionContext
+        );
+        expect(result).toBe(true);
+        expect(cell.model.outputs.length).toBeGreaterThan(0);
+        expect(next.rendered).toBe(true);
+      });
+
+      it('should activate the last cell', async () => {
+        await NotebookActions.runAllBelow(widget, sessionContext);
+        expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
       });
     });
 
@@ -1534,8 +1626,10 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.clearOutputs(widget);
         let cell = widget.widgets[0] as CodeCell;
         expect(cell.model.outputs.length).toBe(0);
+        expect(cell.model.trusted).toBe(true);
         cell = widget.widgets[index] as CodeCell;
         expect(cell.model.outputs.length).toBe(0);
+        expect(cell.model.trusted).toBe(true);
       });
 
       it('should preserve the widget mode', () => {
@@ -1563,6 +1657,7 @@ describe('@jupyterlab/notebook', () => {
           if (cell instanceof CodeCell) {
             // eslint-disable-next-line jest/no-conditional-expect
             expect(cell.model.outputs.length).toBe(0);
+            expect(cell.model.trusted).toBe(true);
           }
         }
       });

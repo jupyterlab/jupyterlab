@@ -1,11 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { Clipboard } from '@jupyterlab/apputils';
+import {
+  Clipboard,
+  ISessionContext,
+  SessionContextDialogs
+} from '@jupyterlab/apputils';
 import { Cell, CodeCellModel } from '@jupyterlab/cells';
-import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
-import { editorServices } from '@jupyterlab/codemirror';
+import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
 import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
 import { INotebookContent } from '@jupyterlab/nbformat';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
@@ -14,12 +23,14 @@ import {
   defaultRenderMime as testRenderMime
 } from '@jupyterlab/rendermime/lib/testutils';
 import { ServiceManager } from '@jupyterlab/services';
+import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { UUID } from '@lumino/coreutils';
 import * as defaultContent from './default.json';
 import { INotebookModel, NotebookModel } from './model';
 import { NotebookModelFactory } from './modelfactory';
 import { NotebookPanel } from './panel';
 import { Notebook, StaticNotebook } from './widget';
+import { NotebookHistory } from './history';
 import { NotebookWidgetFactory } from './widgetfactory';
 
 export const DEFAULT_CONTENT: INotebookContent = defaultContent;
@@ -49,6 +60,7 @@ export async function initNotebookContext(
   await manager.ready;
 
   const context = new Context({
+    sessionDialogs: new SessionContextDialogs(),
     manager,
     factory,
     path,
@@ -77,6 +89,37 @@ export namespace NBTestUtils {
   export const DEFAULT_OUTPUTS = TEST_OUTPUTS;
 
   export const defaultEditorConfig = { ...StaticNotebook.defaultEditorConfig };
+
+  const editorServices: IEditorServices = (function () {
+    const languages = new EditorLanguageRegistry();
+    EditorLanguageRegistry.getDefaultLanguages()
+      .filter(lang => ['Python'].includes(lang.name))
+      .forEach(lang => {
+        languages.addLanguage(lang);
+      });
+    const extensions = new EditorExtensionRegistry();
+    EditorExtensionRegistry.getDefaultExtensions()
+      .filter(ext => ['autoClosingBrackets'].includes(ext.name))
+      .forEach(ext => {
+        extensions.addExtension(ext);
+      });
+    extensions.addExtension({
+      name: 'binding',
+      factory: ({ model }) =>
+        EditorExtensionRegistry.createImmutableExtension(
+          ybinding({ ytext: (model.sharedModel as any).ysource })
+        )
+    });
+    const factoryService = new CodeMirrorEditorFactory({
+      languages,
+      extensions
+    });
+    const mimeTypeService = new CodeMirrorMimeTypeService(languages);
+    return {
+      factoryService,
+      mimeTypeService
+    };
+  })();
 
   export const editorFactory =
     editorServices.factoryService.newInlineEditor.bind(
@@ -113,7 +156,7 @@ export namespace NBTestUtils {
    */
   export function createCellEditor(model?: CodeCellModel): CodeEditorWrapper {
     return new CodeEditorWrapper({
-      model: model || new CodeCellModel(),
+      model: model ?? new CodeCellModel(),
       factory: editorFactory
     });
   }
@@ -135,7 +178,12 @@ export namespace NBTestUtils {
   /**
    * Create a notebook widget.
    */
-  export function createNotebook(): Notebook {
+  export function createNotebook(sessionContext?: ISessionContext): Notebook {
+    let history = sessionContext
+      ? {
+          kernelHistory: new NotebookHistory({ sessionContext: sessionContext })
+        }
+      : {};
     return new Notebook({
       rendermime: defaultRenderMime(),
       contentFactory: createNotebookFactory(),
@@ -143,7 +191,8 @@ export namespace NBTestUtils {
       notebookConfig: {
         ...StaticNotebook.defaultNotebookConfig,
         windowingMode: 'none'
-      }
+      },
+      ...history
     });
   }
 
@@ -154,7 +203,7 @@ export namespace NBTestUtils {
     context: Context<INotebookModel>
   ): NotebookPanel {
     return new NotebookPanel({
-      content: createNotebook(),
+      content: createNotebook(context.sessionContext),
       context
     });
   }
@@ -193,6 +242,7 @@ export namespace NBTestUtils {
     const factory = new NotebookModelFactory({});
 
     const context = new Context({
+      sessionDialogs: new SessionContextDialogs(),
       manager,
       factory,
       path,
@@ -214,9 +264,7 @@ export namespace NBTestUtils {
 namespace Private {
   let manager: ServiceManager;
 
-  export const notebookFactory = new NotebookModelFactory({
-    disableDocumentWideUndoRedo: false
-  });
+  export const notebookFactory = new NotebookModelFactory();
 
   /**
    * Get or create the service manager singleton.

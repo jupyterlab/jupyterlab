@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation",
-  "version": "4.0.0-alpha.19",
+  "version": "4.1.0-rc.0",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -23,33 +23,33 @@
     "lib": "lib/"
   },
   "files": [
-    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}"
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
     "docs": "typedoc src",
-    "eslint": "eslint . --ext .ts,.tsx --fix",
-    "eslint:check": "eslint . --ext .ts,.tsx",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/rendermime-interfaces": "^3.8.0-alpha.19",
-    "@jupyterlab/services": "^7.0.0-alpha.19",
-    "@jupyterlab/statedb": "^4.0.0-alpha.19",
-    "@lumino/coreutils": "^2.0.0-beta.0"
+    "@jupyterlab/coreutils": "^6.1.0-rc.0",
+    "@jupyterlab/rendermime-interfaces": "^3.9.0-rc.0",
+    "@jupyterlab/services": "^7.1.0-rc.0",
+    "@jupyterlab/statedb": "^4.1.0-rc.0",
+    "@lumino/coreutils": "^2.1.2"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.19",
+    "@jupyterlab/testing": "^4.1.0-rc.0",
     "@types/jest": "^29.2.0",
-    "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta"
+    "jest": "^29.2.0",
+    "rimraf": "~5.0.5",
+    "typescript": "~5.1.6"
   },
   "publishConfig": {
     "access": "public"

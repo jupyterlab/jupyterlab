@@ -20,6 +20,19 @@
   height: 100%;
 }
 
+.jp-TableOfContents-placeholder {
+  text-align: center;
+}
+
+.jp-TableOfContents-placeholderContent {
+  color: var(--jp-content-font-color2);
+  padding: 8px;
+}
+
+.jp-TableOfContents-placeholderContent > h3 {
+  margin-bottom: var(--jp-content-heading-margin-bottom);
+}
+
 .jp-TableOfContents .jp-SidePanel-content {
   overflow-y: auto;
 }
@@ -32,6 +45,7 @@
   list-style-type: none;
 }
 
+/* stylelint-disable-next-line selector-max-type */
 .jp-TableOfContents li > ol {
   /* Align left border with triangle icon center */
   padding-left: 11px;

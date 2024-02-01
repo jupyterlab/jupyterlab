@@ -20,36 +20,58 @@ test.describe('Text Editor Tests', () => {
     const imageName = 'text-editor-rulers.png';
     await page.menu.clickMenuItem('File>New>Text File');
 
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.getByRole('main').getByText(DEFAULT_NAME).waitFor();
 
     await page.menu.clickMenuItem('Settings>Settings Editor');
 
-    await page.waitForSelector('text=Text Editor');
-    await page.click('text=Text Editor');
+    await page
+      .getByRole('tab', { name: 'Text Editor' })
+      .getByText('Text Editor')
+      .click();
 
     // Add two rulers
-    await page.click('text="Add"');
-    await page.click(
-      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_0"]'
-    );
-    await page.type(
-      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_0"]',
-      '50'
-    );
-    await page.click('text="Add"');
-    await page.click(
-      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_1"]'
-    );
-    await page.type(
-      '[id="jp-SettingsEditor-@jupyterlab/fileeditor-extension:plugin_editorConfig_rulers_1"]',
-      '75'
-    );
+    await page.locator('#root').getByRole('button', { name: 'Add' }).click();
+    await page.locator('input[id="root_rulers_0"]').type('50');
+    await page.locator('#root').getByRole('button', { name: 'Add' }).click();
+    await page.locator('input[id="root_rulers_1"]').type('75');
 
     await page.activity.activateTab(DEFAULT_NAME);
 
     const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
 
     expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Selection in highlighted line', async ({ page }) => {
+    const imageName = 'text-editor-active-line-with-selection.png';
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('settingeditor:open', {
+        query: 'Text Editor'
+      });
+    });
+
+    let locator = page.getByLabel('Highlight the active line');
+    await locator.click();
+
+    await page.menu.clickMenuItem('File>New>Text File');
+
+    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+
+    await page.type(
+      '.cm-content',
+      'Not active\nActive line with >>selected text<<\nNot active'
+    );
+
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('End');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    for (let i = 0; i < 13; i++) {
+      await page.keyboard.press('Shift+ArrowLeft');
+    }
+    expect(
+      await page.locator('.jp-FileEditorCodeWrapper .cm-content').screenshot()
+    ).toMatchSnapshot(imageName, { threshold: 0.01 });
   });
 
   test('Go to line with argument', async ({ page }) => {
@@ -70,7 +92,7 @@ ut elit.`
     );
 
     await page.evaluate(async () => {
-      await window.jupyterapp.commands.execute('codemirror:go-to-line', {
+      await window.jupyterapp.commands.execute('fileeditor:go-to-line', {
         line: 2,
         column: 8
       });

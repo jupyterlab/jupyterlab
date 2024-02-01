@@ -23,7 +23,8 @@ import {
   CommandToolbarButton,
   IFormRendererRegistry,
   launchIcon,
-  Toolbar
+  Toolbar,
+  ToolbarButton
 } from '@jupyterlab/ui-components';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import {
@@ -34,6 +35,7 @@ import type {
   JsonSettingEditor,
   SettingsEditor
 } from '@jupyterlab/settingeditor';
+import { IPluginManager } from '@jupyterlab/pluginmanager';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
@@ -60,6 +62,7 @@ type SettingEditorType = 'ui' | 'json';
  */
 const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:form-ui',
+  description: 'Adds the interactive settings editor and provides its tracker.',
   requires: [
     ISettingRegistry,
     IStateDB,
@@ -67,7 +70,12 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     IFormRendererRegistry,
     ILabStatus
   ],
-  optional: [ILayoutRestorer, ICommandPalette, IJSONSettingEditorTracker],
+  optional: [
+    ILayoutRestorer,
+    ICommandPalette,
+    IJSONSettingEditorTracker,
+    IPluginManager
+  ],
   autoStart: true,
   provides: ISettingEditorTracker,
   activate
@@ -85,7 +93,8 @@ function activate(
   status: ILabStatus,
   restorer: ILayoutRestorer | null,
   palette: ICommandPalette | null,
-  jsonEditor: IJSONSettingEditorTracker | null
+  jsonEditor: IJSONSettingEditorTracker | null,
+  pluginManager: IPluginManager | null
 ): ISettingEditorTracker {
   const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
@@ -133,8 +142,20 @@ function activate(
       })
     });
 
+    editor.toolbar.addItem('spacer', Toolbar.createSpacerItem());
+    if (pluginManager) {
+      editor.toolbar.addItem(
+        'open-plugin-manager',
+        new ToolbarButton({
+          onClick: async () => {
+            await pluginManager.open();
+          },
+          icon: launchIcon,
+          label: trans.__('Plugin Manager')
+        })
+      );
+    }
     if (jsonEditor) {
-      editor.toolbar.addItem('spacer', Toolbar.createSpacerItem());
       editor.toolbar.addItem(
         'open-json-editor',
         new CommandToolbarButton({
@@ -197,6 +218,7 @@ function activate(
  */
 const jsonPlugin: JupyterFrontEndPlugin<IJSONSettingEditorTracker> = {
   id: '@jupyterlab/settingeditor-extension:plugin',
+  description: 'Adds the JSON settings editor and provides its tracker.',
   requires: [
     ISettingRegistry,
     IEditorServices,

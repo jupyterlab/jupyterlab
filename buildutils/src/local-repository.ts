@@ -6,7 +6,6 @@
 /* eslint-disable camelcase */
 import * as fs from 'fs-extra';
 import * as child_process from 'child_process';
-import * as crypto from 'crypto';
 import * as path from 'path';
 import * as os from 'os';
 import * as ps from 'process';
@@ -33,17 +32,21 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
 
   // Get current registry values
   let prev_npm = utils.run('npm config get registry', { stdio: 'pipe' }, true);
-  let prev_yarn = '';
+  let prev_jlpm = '';
   try {
-    prev_yarn = utils.run('yarn config get registry', { stdio: 'pipe' }, true);
+    prev_jlpm = utils.run(
+      'jlpm config get npmRegistryServer',
+      { stdio: 'pipe' },
+      true
+    );
   } catch (e) {
     // Do nothing
   }
   if (!prev_npm || prev_npm.indexOf('0.0.0.0') !== -1) {
     prev_npm = 'https://registry.npmjs.org/';
   }
-  if (prev_yarn.indexOf('0.0.0.0') !== -1) {
-    prev_yarn = '';
+  if (prev_jlpm.indexOf('0.0.0.0') !== -1) {
+    prev_jlpm = '';
   }
 
   // write the config file
@@ -96,8 +99,8 @@ packages:
 
   // Wait for Verdaccio to boot
   let content = '';
-  let delays = 0;
-  while (delays < 100) {
+  let delays = 12000;
+  while (delays > 0) {
     ps.stdout.write('.');
     if (content.indexOf('http address') !== -1) {
       break;
@@ -110,10 +113,11 @@ packages:
     if (fs.existsSync(log_file)) {
       content = fs.readFileSync(log_file, { encoding: 'utf-8' });
     }
-    delays += 1;
+    delays -= 100;
   }
-  if (delays === 100) {
-    console.error('Timed out!');
+  if (delays <= 0) {
+    console.error('Timed out!\nLOG:');
+    console.log(content);
     process.exit(1);
   }
   console.log('\nVerdaccio started');
@@ -122,7 +126,7 @@ packages:
   const info_file = path.join(out_dir, 'info.json');
   const data = {
     prev_npm,
-    prev_yarn,
+    prev_jlpm,
     pid: subproc.pid
   };
   utils.writeJSONFile(info_file, data);
@@ -136,14 +140,21 @@ packages:
     local_registry
   ]);
   try {
-    child_process.execFileSync('yarn', [
+    child_process.execFileSync('jlpm', [
       'config',
       'set',
-      'registry',
+      'npmRegistryServer',
       local_registry
     ]);
+    child_process.execFileSync('jlpm', [
+      'config',
+      'set',
+      'unsafeHttpWhitelist',
+      '--json',
+      '["0.0.0.0"]'
+    ]);
   } catch (e) {
-    // yarn not available
+    // jlpm not available
   }
 
   // Log in using cli and temp credentials
@@ -227,44 +238,19 @@ async function stopLocalRegistry(out_dir: string) {
   } else {
     child_process.execSync(`npm config rm registry`);
   }
-  if (data.prev_yarn) {
-    child_process.execSync(`yarn config set registry ${data.prev_yarn}`);
+  if (data.prev_jlpm) {
+    child_process.execSync(
+      `jlpm config set npmRegistryServer ${data.prev_jlpm}`
+    );
+    child_process.execSync(`jlpm config unset unsafeHttpWhitelist`);
   } else {
     try {
-      child_process.execSync(`yarn config delete registry`);
+      child_process.execSync(`jlpm config unset npmRegistryServer`);
+      child_process.execSync(`jlpm config unset unsafeHttpWhitelist`);
     } catch (e) {
-      // yarn not available
+      // jlpm not available
     }
   }
-}
-
-/**
- * Fix the yarn lock links in the given directory.
- */
-function fixLinks(package_dir: string) {
-  let yarn_reg = '';
-  try {
-    yarn_reg = utils.run('yarn config get registry', { stdio: 'pipe' }, true);
-  } catch (e) {
-    // Do nothing
-  }
-  yarn_reg = yarn_reg || 'https://registry.yarnpkg.com';
-  const lock_file = path.join(package_dir, 'yarn.lock');
-  console.log(`Fixing links in ${lock_file}`);
-  const content = fs.readFileSync(lock_file, { encoding: 'utf-8' });
-
-  let shasum = crypto.createHash('sha256');
-  let hash = shasum.update(content);
-  console.log('Prior hash', hash.digest('hex'));
-
-  const regex = /http\:\/\/0\.0\.0\.0\:\d+/g;
-  const new_content = content.replace(regex, yarn_reg);
-
-  shasum = crypto.createHash('sha256');
-  hash = shasum.update(new_content);
-  console.log('After hash', hash.digest('hex'));
-
-  fs.writeFileSync(lock_file, new_content, 'utf8');
 }
 
 /**
@@ -305,14 +291,6 @@ program
     utils.exitOnUncaughtException();
     const out_dir = options.path || DEFAULT_OUT_DIR;
     await stopLocalRegistry(out_dir);
-  });
-
-program
-  .command('fix-links')
-  .option('--path <path>', 'Path to the directory with a yarn lock')
-  .action((options: any) => {
-    utils.exitOnUncaughtException();
-    fixLinks(options.path || process.cwd());
   });
 
 program

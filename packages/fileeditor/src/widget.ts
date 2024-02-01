@@ -44,7 +44,10 @@ export class FileEditor extends Widget {
 
     const editorWidget = (this._editorWidget = new CodeEditorWrapper({
       factory: options.factory,
-      model: context.model
+      model: context.model,
+      editorOptions: {
+        config: FileEditor.defaultEditorConfig
+      }
     }));
     this._editorWidget.addClass('jp-FileEditorCodeWrapper');
     this._editorWidget.node.dataset[CODE_RUNNER] = 'true';
@@ -58,8 +61,8 @@ export class FileEditor extends Widget {
     });
 
     // Listen for changes to the path.
-    context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
+    context.pathChanged.connect(this._onPathChanged, this);
 
     const layout = (this.layout = new StackedLayout());
     layout.addWidget(editorWidget);
@@ -191,6 +194,51 @@ export namespace FileEditor {
      */
     context: DocumentRegistry.CodeContext;
   }
+
+  /**
+   * File editor default configuration.
+   */
+  export const defaultEditorConfig: Record<string, any> = {
+    lineNumbers: true,
+    scrollPastEnd: true
+  };
+}
+
+/**
+ * A document widget for file editor widgets.
+ */
+export class FileEditorWidget extends DocumentWidget<FileEditor> {
+  /**
+   * Set URI fragment identifier for text files
+   */
+  async setFragment(fragment: string): Promise<void> {
+    const parsedFragments = fragment.split('=');
+
+    // TODO: expand to allow more schemes of Fragment Identification Syntax
+    // reference: https://datatracker.ietf.org/doc/html/rfc5147#section-3
+    if (parsedFragments[0] !== '#line') {
+      return;
+    }
+
+    const positionOrRange = parsedFragments[1];
+    let firstLine: string;
+    if (positionOrRange.includes(',')) {
+      // Only respect range start for now.
+      firstLine = positionOrRange.split(',')[0] || '0';
+    } else {
+      firstLine = positionOrRange;
+    }
+
+    // Reveal the line
+    return this.context.ready.then(() => {
+      const position = {
+        line: parseInt(firstLine, 10),
+        column: 0
+      };
+      this.content.editor.setCursorPosition(position);
+      this.content.editor.revealPosition(position);
+    });
+  }
 }
 
 /**
@@ -216,6 +264,7 @@ export class FileEditorFactory extends ABCWidgetFactory<
   ): IDocumentWidget<FileEditor> {
     const func = this._services.factoryService.newDocumentEditor;
     const factory: CodeEditor.Factory = options => {
+      // Use same id as document factory
       return func(options);
     };
     const content = new FileEditor({
@@ -225,7 +274,7 @@ export class FileEditorFactory extends ABCWidgetFactory<
     });
 
     content.title.icon = textEditorIcon;
-    const widget = new DocumentWidget({ content, context });
+    const widget = new FileEditorWidget({ content, context });
     return widget;
   }
 

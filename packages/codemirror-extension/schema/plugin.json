@@ -1,0 +1,15 @@
+{
+  "jupyter.lab.setting-icon": "ui-components:text-editor",
+  "jupyter.lab.setting-icon-label": "CodeMirror",
+  "title": "CodeMirror",
+  "description": "Text editor settings for all CodeMirror editors.",
+  "properties": {
+    "defaultConfig": {
+      "default": {},
+      "title": "Default editor configuration",
+      "description": "Base configuration used by all CodeMirror editors.",
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

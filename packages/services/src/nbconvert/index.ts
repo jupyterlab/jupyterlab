@@ -5,6 +5,8 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '../serverconnection';
 
+import { PromiseDelegate } from '@lumino/coreutils';
+
 /**
  * The url for the lab nbconvert service.
  */
@@ -28,9 +30,11 @@ export class NbConvertManager {
   readonly serverSettings: ServerConnection.ISettings;
 
   /**
-   * Get whether the application should be built.
+   * Fetch and cache the export formats from the expensive nbconvert handler.
    */
-  async getExportFormats(): Promise<NbConvertManager.IExportFormats> {
+  protected async fetchExportFormats(): Promise<NbConvertManager.IExportFormats> {
+    this._requestingFormats = new PromiseDelegate();
+    this._exportFormats = null;
     const base = this.serverSettings.baseUrl;
     const url = URLExt.join(base, NBCONVERT_SETTINGS_URL);
     const { serverSettings } = this;
@@ -50,8 +54,30 @@ export class NbConvertManager {
       const mimeType: string = data[key].output_mimetype;
       exportList[key] = { output_mimetype: mimeType };
     });
+    this._exportFormats = exportList;
+    this._requestingFormats.resolve(exportList);
     return exportList;
   }
+
+  /**
+   * Get the list of export formats, preferring pre-cached ones.
+   */
+  async getExportFormats(
+    force: boolean = true
+  ): Promise<NbConvertManager.IExportFormats> {
+    if (this._requestingFormats) {
+      return this._requestingFormats.promise;
+    }
+
+    if (force || !this._exportFormats) {
+      return await this.fetchExportFormats();
+    }
+
+    return this._exportFormats;
+  }
+
+  protected _requestingFormats: PromiseDelegate<NbConvertManager.IExportFormats> | null;
+  protected _exportFormats: NbConvertManager.IExportFormats | null = null;
 }
 
 /**

@@ -2,8 +2,18 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
-import { createDefaultFactory, ToolbarRegistry } from '@jupyterlab/apputils';
-import { Cell, CodeCell, ICellModel, MarkdownCell } from '@jupyterlab/cells';
+import {
+  createDefaultFactory,
+  setToolbar,
+  ToolbarRegistry
+} from '@jupyterlab/apputils';
+import {
+  Cell,
+  CellModel,
+  CodeCell,
+  ICellModel,
+  MarkdownCell
+} from '@jupyterlab/cells';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
@@ -13,6 +23,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
+import { IMapChange } from '@jupyter/ydoc';
 
 /*
  * Text mime types
@@ -27,6 +38,7 @@ const TEXT_MIME_TYPES = [
  * Widget cell toolbar classes
  */
 const CELL_TOOLBAR_CLASS = 'jp-cell-toolbar';
+// @deprecated to be removed
 const CELL_MENU_CLASS = 'jp-cell-menu';
 
 /**
@@ -38,39 +50,90 @@ const TOOLBAR_OVERLAP_CLASS = 'jp-toolbar-overlap';
  * Watch a notebook so that a cell toolbar appears on the active cell
  */
 export class CellToolbarTracker implements IDisposable {
+  /**
+   * CellToolbarTracker constructor
+   *
+   * @param panel The notebook panel
+   * @param toolbar The toolbar; deprecated use {@link toolbarFactory} instead
+   * @param toolbarFactory The toolbar factory
+   */
   constructor(
     panel: NotebookPanel,
-    toolbar: IObservableList<ToolbarRegistry.IToolbarItem>
+    toolbar?: IObservableList<ToolbarRegistry.IToolbarItem>,
+    toolbarFactory?: (
+      widget: Cell
+    ) => IObservableList<ToolbarRegistry.IToolbarItem>
   ) {
     this._panel = panel;
     this._previousActiveCell = this._panel.content.activeCell;
-    this._toolbar = toolbar;
+    this._toolbarItems = toolbar ?? null;
+    this._toolbarFactory = toolbarFactory ?? null;
 
-    this._onToolbarChanged();
-    this._toolbar.changed.connect(this._onToolbarChanged, this);
+    if (this._toolbarItems === null && this._toolbarFactory === null) {
+      throw Error('You must provide the toolbarFactory or the toolbar items.');
+    }
+
+    // deprecated to be removed when we remove toolbar from input arguments
+    if (!this._toolbarFactory && this._toolbarItems) {
+      this._onToolbarChanged();
+      this._toolbarItems.changed.connect(this._onToolbarChanged, this);
+    }
 
     // Only add the toolbar to the notebook's active cell (if any) once it has fully rendered and been revealed.
     void panel.revealed.then(() => {
-      // Wait one frame (at 60 fps) for the panel to render the first cell, then display the cell toolbar on it if possible.
-      setTimeout(() => {
-        this._onActiveCellChanged(panel.content);
-      }, 1000 / 60);
+      requestAnimationFrame(() => {
+        const notebook = panel.content;
+        this._onActiveCellChanged(notebook);
+        // Handle subsequent changes of active cell.
+        notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
+
+        // Check whether the toolbar should be rendered upon a layout change
+        notebook.renderingLayoutChanged.connect(
+          this._onActiveCellChanged,
+          this
+        );
+
+        notebook.disposed.connect(() => {
+          notebook.activeCellChanged.disconnect(this._onActiveCellChanged);
+        });
+      });
     });
-
-    // Check whether the toolbar should be rendered upon a layout change
-    panel.content.renderingLayoutChanged.connect(
-      this._onActiveCellChanged,
-      this
-    );
-
-    // Handle subsequent changes of active cell.
-    panel.content.activeCellChanged.connect(this._onActiveCellChanged, this);
   }
 
+  /**
+   * @deprecated Will become protected in JupyterLab 5
+   */
+  _onMetadataChanged(model: CellModel, args: IMapChange) {
+    if (args.key === 'jupyter') {
+      if (
+        typeof args.newValue === 'object' &&
+        args.newValue.source_hidden === true &&
+        (args.type === 'add' || args.type === 'change')
+      ) {
+        // Cell just became hidden; remove toolbar
+        this._removeToolbar(model);
+      }
+      // Check whether input visibility changed
+      else if (
+        typeof args.oldValue === 'object' &&
+        args.oldValue.source_hidden === true
+      ) {
+        // Cell just became visible; add toolbar
+        this._addToolbar(model);
+      }
+    }
+  }
+
+  /**
+   * @deprecated Will become protected in JupyterLab 5
+   */
   _onActiveCellChanged(notebook: Notebook): void {
     if (this._previousActiveCell && !this._previousActiveCell.isDisposed) {
       // Disposed cells do not have a model anymore.
       this._removeToolbar(this._previousActiveCell.model);
+      this._previousActiveCell.model.metadataChanged.disconnect(
+        this._onMetadataChanged
+      );
     }
 
     const activeCell = notebook.activeCell;
@@ -78,10 +141,10 @@ export class CellToolbarTracker implements IDisposable {
       return;
     }
 
+    activeCell.model.metadataChanged.connect(this._onMetadataChanged, this);
+
     this._addToolbar(activeCell.model);
     this._previousActiveCell = activeCell;
-
-    this._updateCellForToolbarOverlap(activeCell);
   }
 
   get isDisposed(): boolean {
@@ -94,14 +157,8 @@ export class CellToolbarTracker implements IDisposable {
     }
     this._isDisposed = true;
 
-    this._toolbar.changed.disconnect(this._onToolbarChanged, this);
-
-    const cells = this._panel?.context.model.cells;
-    if (cells) {
-      for (const model of cells) {
-        this._removeToolbar(model);
-      }
-    }
+    this._toolbarItems?.changed.disconnect(this._onToolbarChanged, this);
+    this._toolbar?.dispose();
 
     this._panel = null;
 
@@ -111,25 +168,39 @@ export class CellToolbarTracker implements IDisposable {
   private _addToolbar(model: ICellModel): void {
     const cell = this._getCell(model);
 
-    if (cell) {
-      const toolbarWidget = new Toolbar();
+    if (cell && !cell.isDisposed) {
+      const toolbarWidget = (this._toolbar = new Toolbar());
+      // Note: CELL_MENU_CLASS is deprecated.
       toolbarWidget.addClass(CELL_MENU_CLASS);
-
-      const promises: Promise<void>[] = [];
-      for (const { name, widget } of this._toolbar) {
-        toolbarWidget.addItem(name, widget);
-        if (
-          widget instanceof ReactWidget &&
-          (widget as ReactWidget).renderPromise !== undefined
-        ) {
-          promises.push((widget as ReactWidget).renderPromise!);
+      toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
+      const promises: Promise<void>[] = [cell.ready];
+      if (this._toolbarFactory) {
+        setToolbar(cell, this._toolbarFactory, toolbarWidget);
+        // FIXME toolbarWidget.update() - strangely this does not work
+        (toolbarWidget.layout as PanelLayout).widgets.forEach(w => {
+          w.update();
+        });
+      } else {
+        for (const { name, widget } of this._toolbarItems!) {
+          toolbarWidget.addItem(name, widget);
+          if (
+            widget instanceof ReactWidget &&
+            (widget as ReactWidget).renderPromise !== undefined
+          ) {
+            (widget as ReactWidget).update();
+            promises.push((widget as ReactWidget).renderPromise!);
+          }
         }
       }
 
       // Wait for all the buttons to be rendered before attaching the toolbar.
       Promise.all(promises)
         .then(() => {
-          toolbarWidget.addClass(CELL_TOOLBAR_CLASS);
+          if (cell.isDisposed || this._panel?.content.activeCell !== cell) {
+            toolbarWidget.dispose();
+            return;
+          }
+
           (cell.layout as PanelLayout).insertWidget(0, toolbarWidget);
 
           // For rendered markdown, watch for resize events.
@@ -137,9 +208,12 @@ export class CellToolbarTracker implements IDisposable {
 
           // Watch for changes in the cell's contents.
           cell.model.contentChanged.connect(this._changedEventCallback, this);
+
+          // Hide the cell toolbar if it overlaps with cell contents
+          this._updateCellForToolbarOverlap(cell);
         })
-        .catch(() => {
-          console.error('Error rendering buttons of the cell toolbar');
+        .catch(e => {
+          console.error('Error rendering buttons of the cell toolbar: ', e);
         });
     }
   }
@@ -148,27 +222,22 @@ export class CellToolbarTracker implements IDisposable {
     return this._panel?.content.widgets.find(widget => widget.model === model);
   }
 
-  private _findToolbarWidgets(cell: Cell): Widget[] {
-    const widgets = (cell.layout as PanelLayout).widgets;
-
-    // Search for header using the CSS class or use the first one if not found.
-    return widgets.filter(widget => widget.hasClass(CELL_TOOLBAR_CLASS)) || [];
-  }
-
   private _removeToolbar(model: ICellModel): void {
     const cell = this._getCell(model);
-    if (cell) {
-      this._findToolbarWidgets(cell).forEach(widget => {
-        widget.dispose();
-      });
+    if (cell && !cell.isDisposed) {
       // Attempt to remove the resize and changed event handlers.
       cell.displayChanged.disconnect(this._resizeEventCallback, this);
     }
     model.contentChanged.disconnect(this._changedEventCallback, this);
+    if (this._toolbar?.parent === cell && this._toolbar?.isDisposed === false) {
+      this._toolbar.dispose();
+    }
   }
 
   /**
    * Call back on settings changes
+   *
+   * @deprecated To remove when toolbar can not be provided directly to the tracker
    */
   private _onToolbarChanged(): void {
     // Reset toolbar when settings changes
@@ -199,23 +268,29 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _updateCellForToolbarOverlap(activeCell: Cell<ICellModel>) {
-    // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
-    const activeCellElement = activeCell.node;
-    activeCellElement.classList.remove(TOOLBAR_OVERLAP_CLASS);
-
-    if (this._cellToolbarOverlapsContents(activeCell)) {
-      // Add the "toolbar overlap" class to the cell, completely concealing the toolbar,
-      // if the first line of the content overlaps with it at all
-      activeCellElement.classList.add(TOOLBAR_OVERLAP_CLASS);
-    }
+    // When we do change in cell, If we don't wait the browser might not have
+    // completed the layout update, resulting in the previous width being returned
+    // using `getBoundingClientRect().width` in later functions.
+    requestAnimationFrame(() => {
+      // Remove the "toolbar overlap" class from the cell, rendering the cell's toolbar
+      const activeCellElement = activeCell.node;
+      activeCellElement.classList.remove(TOOLBAR_OVERLAP_CLASS);
+      if (this._cellToolbarOverlapsContents(activeCell)) {
+        // Add the "toolbar overlap" class to the cell, completely concealing the toolbar,
+        // if the first line of the content overlaps with it at all
+        activeCellElement.classList.add(TOOLBAR_OVERLAP_CLASS);
+      }
+    });
   }
 
   private _cellToolbarOverlapsContents(activeCell: Cell<ICellModel>): boolean {
     const cellType = activeCell.model.type;
 
     // If the toolbar is too large for the current cell, hide it.
-    const cellLeft = this._cellEditorWidgetLeft(activeCell);
-    const cellRight = this._cellEditorWidgetRight(activeCell);
+
+    const editorRect = activeCell.editorWidget?.node.getBoundingClientRect();
+    const cellLeft = editorRect?.left ?? 0;
+    const cellRight = editorRect?.right ?? 0;
     const toolbarLeft = this._cellToolbarLeft(activeCell);
 
     if (toolbarLeft === null) {
@@ -322,33 +397,26 @@ export class CellToolbarTracker implements IDisposable {
       return false; // Nothing in the editor
     }
 
-    const codeMirrorLines =
-      editorWidget.node.getElementsByClassName('CodeMirror-line');
+    const codeMirrorLines = editorWidget.node.getElementsByClassName('cm-line');
     if (codeMirrorLines.length < 1) {
       return false; // No lines present
     }
-    const lineRight = codeMirrorLines[0].children[0] // First span under first pre
-      .getBoundingClientRect().right;
+
+    let lineRight = codeMirrorLines[0].getBoundingClientRect().left;
+    const range = document.createRange();
+    range.selectNodeContents(codeMirrorLines[0]);
+    lineRight += range.getBoundingClientRect().width;
 
     const toolbarLeft = this._cellToolbarLeft(activeCell);
 
     return toolbarLeft === null ? false : lineRight > toolbarLeft;
   }
 
-  private _cellEditorWidgetLeft(activeCell: Cell<ICellModel>): number {
-    return activeCell.editorWidget?.node.getBoundingClientRect().left ?? 0;
-  }
-
-  private _cellEditorWidgetRight(activeCell: Cell<ICellModel>): number {
-    return activeCell.editorWidget?.node.getBoundingClientRect().right ?? 0;
-  }
-
   private _cellToolbarRect(activeCell: Cell<ICellModel>): DOMRect | null {
-    const toolbarWidgets = this._findToolbarWidgets(activeCell);
-    if (toolbarWidgets.length < 1) {
+    if (this._toolbar?.parent !== activeCell) {
       return null;
     }
-    const activeCellToolbar = toolbarWidgets[0].node;
+    const activeCellToolbar = this._toolbar.node;
 
     return activeCellToolbar.getBoundingClientRect();
   }
@@ -360,7 +428,12 @@ export class CellToolbarTracker implements IDisposable {
   private _isDisposed = false;
   private _panel: NotebookPanel | null;
   private _previousActiveCell: Cell<ICellModel> | null;
-  private _toolbar: IObservableList<ToolbarRegistry.IToolbarItem>;
+  private _toolbar: Widget | null = null;
+  private _toolbarItems: IObservableList<ToolbarRegistry.IToolbarItem> | null =
+    null;
+  private _toolbarFactory:
+    | ((widget: Cell) => IObservableList<ToolbarRegistry.IToolbarItem>)
+    | null = null;
 }
 
 const defaultToolbarItems: ToolbarRegistry.IWidget[] = [
@@ -395,7 +468,7 @@ const defaultToolbarItems: ToolbarRegistry.IWidget[] = [
  * created.
  */
 export class CellBarExtension implements DocumentRegistry.WidgetExtension {
-  static FACTORY_NAME = 'Cell';
+  static readonly FACTORY_NAME = 'Cell';
 
   constructor(
     commands: CommandRegistry,
@@ -423,7 +496,7 @@ export class CellBarExtension implements DocumentRegistry.WidgetExtension {
   }
 
   createNew(panel: NotebookPanel): IDisposable {
-    return new CellToolbarTracker(panel, this._toolbarFactory(panel));
+    return new CellToolbarTracker(panel, undefined, this._toolbarFactory);
   }
 
   private _commands: CommandRegistry;

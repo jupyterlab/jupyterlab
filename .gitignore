@@ -12,7 +12,9 @@ dev_mode/stats.json
 
 docs/_build
 docs/source/user/commands_list.md
-docs/api
+docs/source/extension/plugins_list.rst
+docs/source/extension/tokens_list.rst
+docs/source/api
 **/docs/source/_build
 
 examples/app/build
@@ -72,6 +74,7 @@ __pycache__
 pip-wheel-metadata
 Pipfile
 Pipfile.lock
+venv/
 
 # xeus-python debug logs
 xpython_debug_logs
@@ -110,6 +113,12 @@ iframe_figures/
 lerna-debug.log
 yarn-error.log
 
+# yarn >=2.x local files
+.yarn/*
+.pnp.*
+jupyterlab/staging/.yarn/*
+jupyterlab/staging/.pnp.*
+
 # copied changelog file
 docs/source/getting_started/changelog.md
 
@@ -131,3 +140,7 @@ junit.xml
 
 # generated LSP interfaces
 packages/lsp/src/_*
+
+# generated reports
+webpack-bundle-analyzer.html
+examples/**/test-results/

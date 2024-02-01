@@ -1,5 +1,5 @@
 """Handle a hash digest of the translatable strings."""
-# Copyright (c) 2021 Jupyter Development Team.
+# Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
 from hashlib import sha256
@@ -27,4 +27,4 @@ if __name__ == "__main__":
 
     proof = hash_.hexdigest()
 
-    print(proof)  # noqa
+    print(proof)

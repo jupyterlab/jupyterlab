@@ -34,6 +34,10 @@
       {
         "command": "debugger:copy-to-clipboard",
         "selector": ".jp-DebuggerVariables-body"
+      },
+      {
+        "command": "debugger:copy-to-globals",
+        "selector": ".jp-DebuggerVariables-body.jp-debuggerVariables-local"
       }
     ]
   },

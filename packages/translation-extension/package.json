@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation-extension",
-  "version": "4.0.0-alpha.19",
+  "version": "4.1.0-rc.0",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -28,25 +28,24 @@
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "schema/**/*.{json,}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
-    "style/index.js"
+    "style/index.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
-    "eslint": "eslint . --ext .ts,.tsx --fix",
-    "eslint:check": "eslint . --ext .ts,.tsx",
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.0.0-alpha.19",
-    "@jupyterlab/apputils": "^4.0.0-alpha.19",
-    "@jupyterlab/mainmenu": "^4.0.0-alpha.19",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/translation": "^4.0.0-alpha.19"
+    "@jupyterlab/application": "^4.1.0-rc.0",
+    "@jupyterlab/apputils": "^4.2.0-rc.0",
+    "@jupyterlab/mainmenu": "^4.1.0-rc.0",
+    "@jupyterlab/settingregistry": "^4.1.0-rc.0",
+    "@jupyterlab/translation": "^4.1.0-rc.0"
   },
   "devDependencies": {
-    "rimraf": "~3.0.0",
-    "typescript": "~5.0.0-beta"
+    "rimraf": "~5.0.5",
+    "typescript": "~5.1.6"
   },
   "publishConfig": {
     "access": "public"

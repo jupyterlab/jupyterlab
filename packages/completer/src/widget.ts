@@ -1,9 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISanitizer, Sanitizer } from '@jupyterlab/apputils';
+import { Sanitizer } from '@jupyterlab/apputils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { renderText } from '@jupyterlab/rendermime';
+import { IRenderMime, renderText } from '@jupyterlab/rendermime';
 import { HoverBox, LabIcon } from '@jupyterlab/ui-components';
 import { JSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
@@ -63,6 +63,7 @@ export class Completer extends Widget {
     this.sanitizer = options.sanitizer ?? new Sanitizer();
     this._defaultRenderer = Completer.getDefaultRenderer(this.sanitizer);
     this._renderer = options.renderer ?? this._defaultRenderer;
+    this._docPanel = this._createDocPanelNode();
     this.model = options.model ?? null;
     this.editor = options.editor ?? null;
     this.addClass('jp-Completer');
@@ -72,7 +73,7 @@ export class Completer extends Widget {
   /**
    * Cache style constraints from CSS.
    */
-  _updateConstraints() {
+  protected _updateConstraints() {
     const tempNode = document.createElement('div');
     tempNode.classList.add(LIST_CLASS);
     tempNode.style.visibility = 'hidden';
@@ -83,8 +84,7 @@ export class Completer extends Widget {
     this._minHeight = parseInt(computedStyle.minHeight, 10);
     this._scrollbarWidth = tempNode.offsetWidth - tempNode.clientWidth;
     document.body.removeChild(tempNode);
-    const tempDocPanel = document.createElement('div');
-    tempDocPanel.classList.add(DOC_PANEL_CLASS);
+    const tempDocPanel = this._createDocPanelNode();
     this._docPanelWidth = Private.measureSize(
       tempDocPanel,
       'inline-block'
@@ -94,7 +94,7 @@ export class Completer extends Widget {
   /**
    * The sanitizer used to sanitize untrusted HTML inputs.
    */
-  readonly sanitizer: ISanitizer;
+  readonly sanitizer: IRenderMime.ISanitizer;
 
   /**
    * The active index.
@@ -160,6 +160,16 @@ export class Completer extends Widget {
   }
 
   /**
+   * The completer used by the completer widget.
+   */
+  get renderer(): Completer.IRenderer {
+    return this._renderer;
+  }
+  set renderer(renderer: Completer.IRenderer) {
+    this._renderer = renderer;
+  }
+
+  /**
    * Enable/disable the document panel.
    */
   set showDocsPanel(showDoc: boolean) {
@@ -197,8 +207,8 @@ export class Completer extends Widget {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
         break;
-      case 'mousedown':
-        this._evtMousedown(event as MouseEvent);
+      case 'pointerdown':
+        this._evtPointerdown(event as PointerEvent);
         break;
       case 'scroll':
         this._evtScroll(event as MouseEvent);
@@ -217,6 +227,7 @@ export class Completer extends Widget {
     if (this._model) {
       this._model.reset(true);
     }
+    this._docPanel.style.display = 'none';
     // Clear size cache.
     this._sizeCache = undefined;
     this.node.scrollTop = 0;
@@ -240,7 +251,7 @@ export class Completer extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     document.addEventListener('keydown', this, USE_CAPTURE);
-    document.addEventListener('mousedown', this, USE_CAPTURE);
+    document.addEventListener('pointerdown', this, USE_CAPTURE);
     document.addEventListener('scroll', this, USE_CAPTURE);
   }
 
@@ -249,7 +260,7 @@ export class Completer extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     document.removeEventListener('keydown', this, USE_CAPTURE);
-    document.removeEventListener('mousedown', this, USE_CAPTURE);
+    document.removeEventListener('pointerdown', this, USE_CAPTURE);
     document.removeEventListener('scroll', this, USE_CAPTURE);
   }
 
@@ -326,19 +337,21 @@ export class Completer extends Widget {
 
     const node = this._createCompleterNode(model, items);
 
-    let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
+    let active = node.querySelectorAll(`.${ITEM_CLASS}`)[
+      this._activeIndex
+    ] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
+
+    const resolvedItem = this.model?.resolveItem(items[this._activeIndex]);
 
     // Add the documentation panel
     if (this._showDoc) {
-      let docPanel = document.createElement('div');
-      docPanel.className = DOC_PANEL_CLASS;
-      this._docPanel = docPanel;
-      node.appendChild(docPanel);
+      this._docPanel.innerText = '';
+      node.appendChild(this._docPanel);
       this._docPanelExpanded = false;
+      this._docPanel.style.display = 'none';
+      this._updateDocPanel(resolvedItem, active);
     }
-    const resolvedItem = this.model?.resolveItem(this._activeIndex);
-    this._updateDocPanel(resolvedItem);
 
     if (this.isHidden) {
       this.show();
@@ -358,9 +371,15 @@ export class Completer extends Widget {
       return;
     }
     return {
-      width: this._sizeCache.width,
-      height: this._sizeCache.height
+      width: this._sizeCache.width + this._sizeCache.docPanelWidth,
+      height: Math.max(this._sizeCache.height, this._sizeCache.docPanelHeight)
     };
+  }
+
+  private _createDocPanelNode() {
+    const docPanel = document.createElement('div');
+    docPanel.className = DOC_PANEL_CLASS;
+    return docPanel;
   }
 
   private _createCompleterNode(
@@ -394,7 +413,7 @@ export class Completer extends Widget {
       Math.ceil(this._maxHeight / firstItemSize.height),
       5
     );
-    // We add one item in case if height heuristic is inacurate.
+    // We add one item in case if height heuristic is inaccurate.
     const toRenderImmediately = Math.min(pageSize + 1, items.length);
 
     const start = performance.now();
@@ -410,33 +429,32 @@ export class Completer extends Widget {
       ul.appendChild(li);
     }
 
-    if (pageSize < items.length) {
-      // If the first "page" is completely filled, we can pre-calculate size:
-      //  - height will equal maximum allowed height,
-      //  - width will be estimated from the widest item.
-      // If the page size is larger than the number of items, then there are
-      // few items and the benefit from pre-computing the size is negligible.
-      const widestItemIndex = this._findWidestItemIndex(items);
-      const widestItem =
-        widestItemIndex < renderedItems.length
-          ? renderedItems[widestItemIndex]
-          : this._renderer.createCompletionItemNode(
-              items[widestItemIndex],
-              orderedTypes
-            );
+    // Pre-calculate size:
+    //  - height will equal first element height times number of items,
+    //    or maximum allowed height if there are more items than fit on a page,
+    //  - width will be estimated from the widest item.
+    const widestItemIndex = this._findWidestItemIndex(items);
+    const widestItem =
+      widestItemIndex < renderedItems.length
+        ? renderedItems[widestItemIndex]
+        : this._renderer.createCompletionItemNode(
+            items[widestItemIndex],
+            orderedTypes
+          );
 
-      // The node needs to be cloned to avoid side-effect of detaching it.
-      const widestItemSize = Private.measureSize(
-        widestItem.cloneNode(true) as HTMLElement,
-        'inline-grid'
-      );
+    // The node needs to be cloned to avoid side-effect of detaching it.
+    const widestItemSize = Private.measureSize(
+      widestItem.cloneNode(true) as HTMLElement,
+      'inline-grid'
+    );
 
-      this._sizeCache = {
-        height: this._maxHeight,
-        width: widestItemSize.width + this._scrollbarWidth,
-        items: items
-      };
-    }
+    this._sizeCache = {
+      height: Math.min(this._maxHeight, firstItemSize.height * items.length),
+      width: widestItemSize.width + this._scrollbarWidth,
+      items: items,
+      docPanelWidth: 0,
+      docPanelHeight: 0
+    };
 
     if (toRenderImmediately < items.length) {
       // Render remaining items on idle in subsequent animation frames,
@@ -522,30 +540,27 @@ export class Completer extends Widget {
   private _cycle(direction: Private.scrollType): void {
     const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
     const index = this._activeIndex;
+    const last = items.length - 1;
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     active.classList.remove(ACTIVE_CLASS);
 
-    if (direction === 'up') {
-      this._activeIndex = index === 0 ? items.length - 1 : index - 1;
-    } else if (direction === 'down') {
-      this._activeIndex = index < items.length - 1 ? index + 1 : 0;
-    } else {
-      // Measure the number of items on a page.
-      const boxHeight = this.node.getBoundingClientRect().height;
-      const itemHeight = active.getBoundingClientRect().height;
-      const pageLength = Math.floor(boxHeight / itemHeight);
-
-      // Update the index
-      if (direction === 'pageUp') {
-        this._activeIndex = index - pageLength;
-      } else {
-        this._activeIndex = index + pageLength;
+    switch (direction) {
+      case 'up':
+        this._activeIndex = index === 0 ? last : index - 1;
+        break;
+      case 'down':
+        this._activeIndex = index < last ? index + 1 : 0;
+        break;
+      case 'pageUp':
+      case 'pageDown': {
+        // Measure the number of items on a page and clamp to the list length.
+        const container = this.node.getBoundingClientRect();
+        const current = active.getBoundingClientRect();
+        const page = Math.floor(container.height / current.height);
+        const sign = direction === 'pageUp' ? -1 : 1;
+        this._activeIndex = Math.min(Math.max(0, index + sign * page), last);
+        break;
       }
-      // Clamp to the length of the list.
-      this._activeIndex = Math.min(
-        Math.max(0, this._activeIndex),
-        items.length - 1
-      );
     }
 
     active = items[this._activeIndex] as HTMLElement;
@@ -553,9 +568,14 @@ export class Completer extends Widget {
     let completionList = this.node.querySelector(`.${LIST_CLASS}`) as Element;
     ElementExt.scrollIntoViewIfNeeded(completionList, active);
     this._indexChanged.emit(this._activeIndex);
-
-    const resolvedItem = this.model?.resolveItem(this._activeIndex);
-    this._updateDocPanel(resolvedItem);
+    const visibleCompletionItems = this.model?.completionItems();
+    const activeCompletionItem = visibleCompletionItems?.[this._activeIndex];
+    if (activeCompletionItem) {
+      const resolvedItem = this.model?.resolveItem(activeCompletionItem);
+      if (this._showDoc) {
+        this._updateDocPanel(resolvedItem, active);
+      }
+    }
   }
 
   /**
@@ -593,12 +613,13 @@ export class Completer extends Widget {
         // then emit a completion signal with that `query` (=subset match),
         // but only if the query has actually changed.
         // See: https://github.com/jupyterlab/jupyterlab/issues/10439#issuecomment-875189540
-        if (model.query && model.query != this._lastSubsetMatch) {
+        if (model.query && model.query !== this._lastSubsetMatch) {
           model.subsetMatch = true;
           this._selected.emit(model.query);
           model.subsetMatch = false;
           this._lastSubsetMatch = model.query;
         }
+
         // If the query changed, update rendering of the options.
         if (populated) {
           this.update();
@@ -633,7 +654,7 @@ export class Completer extends Widget {
   /**
    * Handle mousedown events for the widget.
    */
-  private _evtMousedown(event: MouseEvent) {
+  private _evtPointerdown(event: PointerEvent) {
     if (this.isHidden || !this._editor) {
       return;
     }
@@ -764,7 +785,7 @@ export class Completer extends Widget {
       maxHeight: this._maxHeight,
       minHeight: this._minHeight,
       node: node,
-      size: this._sizeCache,
+      size: this.sizeCache,
       offset: { horizontal: borderLeft + paddingLeft },
       privilege: 'below',
       style: style,
@@ -785,10 +806,13 @@ export class Completer extends Widget {
           return;
         }
         let rect = node.getBoundingClientRect();
+        let panel = this._docPanel.getBoundingClientRect();
         this._sizeCache = {
-          width: rect.width,
+          width: rect.width - panel.width,
           height: rect.height,
-          items: items
+          items: items,
+          docPanelWidth: panel.width,
+          docPanelHeight: panel.height
         };
       });
     }
@@ -798,23 +822,20 @@ export class Completer extends Widget {
    * Update the display-state and contents of the documentation panel
    */
   private _updateDocPanel(
-    resolvedItem: Promise<CompletionHandler.ICompletionItem | null> | undefined
+    resolvedItem: Promise<CompletionHandler.ICompletionItem | null> | undefined,
+    activeNode: HTMLElement
   ): void {
     let docPanel = this._docPanel;
-    if (!docPanel) {
-      return;
-    }
-    this._toggleDocPanel(true);
 
     if (!resolvedItem) {
       this._toggleDocPanel(false);
       return;
     }
-    docPanel.textContent = '';
+
     const loadingIndicator =
       this._renderer.createLoadingDocsIndicator?.() ??
       this._defaultRenderer.createLoadingDocsIndicator();
-    docPanel.appendChild(loadingIndicator);
+    activeNode.appendChild(loadingIndicator);
 
     resolvedItem
       .then(activeItem => {
@@ -830,18 +851,20 @@ export class Completer extends Widget {
             this._defaultRenderer.createDocumentationNode(activeItem);
           docPanel.textContent = '';
           docPanel.appendChild(node);
+          this._toggleDocPanel(true);
         } else {
           this._toggleDocPanel(false);
         }
       })
-      .catch(e => console.error(e));
+      .catch(e => console.error(e))
+      .finally(() => {
+        activeNode.removeChild(loadingIndicator);
+      });
   }
 
   private _toggleDocPanel(show: boolean): void {
     let docPanel = this._docPanel;
-    if (!docPanel) {
-      return;
-    }
+
     if (show) {
       if (this._docPanelExpanded) {
         return;
@@ -857,7 +880,8 @@ export class Completer extends Widget {
     }
     const sizeCache = this._sizeCache;
     if (sizeCache) {
-      sizeCache.width += this._docPanelWidth * (show ? +1 : -1);
+      sizeCache.docPanelHeight = show ? this._maxHeight : 0;
+      sizeCache.docPanelWidth = show ? this._docPanelWidth : 0;
       if (!this._geometryLock) {
         this._setGeometry();
       }
@@ -888,7 +912,7 @@ export class Completer extends Widget {
 
   private _scrollbarWidth: number;
   private _docPanelWidth: number;
-  private _docPanel: HTMLElement | undefined;
+  private _docPanel: HTMLElement;
   private _geometryLock = false;
 
   /**
@@ -933,7 +957,7 @@ export namespace Completer {
     /**
      * Sanitizer used to sanitize html strings
      */
-    sanitizer?: ISanitizer;
+    sanitizer?: IRenderMime.ISanitizer;
   }
 
   /**
@@ -1023,14 +1047,18 @@ export namespace Completer {
     setCompletionItems(items: CompletionHandler.ICompletionItems): void;
 
     /**
-     * Lazy load missing data of item at `activeIndex`.
-     * @param {number} activeIndex - index of item
+     * Lazy load missing data of an item.
+     * @param indexOrValue - the item or its index
+     * @remarks
+     * Resolving item by index will be deprecated in
+     * the next major release.
+     *
      * @return Return `undefined` if the completion item with `activeIndex` index can not be found.
      *  Return a promise of `null` if another `resolveItem` is called. Otherwise return the
      * promise of resolved completion item.
      */
     resolveItem(
-      activeIndex: number
+      activeIndex: number | CompletionHandler.ICompletionItem
     ): Promise<CompletionHandler.ICompletionItem | null> | undefined;
 
     /**
@@ -1106,7 +1134,8 @@ export namespace Completer {
    * A renderer for completer widget nodes.
    */
   export interface IRenderer<
-    T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends
+      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
   > {
     /**
      * Create an item node (an `li` element) from a ICompletionItem
@@ -1153,7 +1182,7 @@ export namespace Completer {
       /**
        * The sanitizer used to sanitize untrusted HTML inputs.
        */
-      sanitizer?: ISanitizer;
+      sanitizer?: IRenderMime.ISanitizer;
     }
   }
 
@@ -1168,7 +1197,7 @@ export namespace Completer {
     /**
      * The sanitizer used to sanitize untrusted HTML inputs.
      */
-    readonly sanitizer: ISanitizer;
+    readonly sanitizer: IRenderMime.ISanitizer;
 
     /**
      * Create an item node from an ICompletionItem for a text completer menu.
@@ -1199,7 +1228,7 @@ export namespace Completer {
     ): HTMLElement {
       const host = document.createElement('div');
       host.classList.add('jp-RenderedText');
-      const sanitizer = { sanitize: this.sanitizer.sanitize };
+      const sanitizer = this.sanitizer;
       const source = activeItem.documentation || '';
 
       renderText({ host, sanitizer, source }).catch(console.error);
@@ -1210,9 +1239,10 @@ export namespace Completer {
      * Get a heuristic for the width of an item.
      */
     itemWidthHeuristic(item: CompletionHandler.ICompletionItem): number {
-      return (
-        item.label.replace(/<\?mark>/g, '').length + (item.type?.length || 0)
-      );
+      // Get the label text without HTML markup (`<mark>` is the only markup
+      // that is allowed in processed items, everything else gets escaped).
+      const labelText = item.label.replace(/<(\/)?mark>/g, '');
+      return labelText.length + (item.type?.length || 0);
     }
 
     /**
@@ -1312,7 +1342,9 @@ export namespace Completer {
   /**
    * The default `IRenderer` instance.
    */
-  export function getDefaultRenderer(sanitizer?: ISanitizer): Renderer {
+  export function getDefaultRenderer(
+    sanitizer?: IRenderMime.ISanitizer
+  ): Renderer {
     if (
       !_defaultRenderer ||
       (sanitizer && _defaultRenderer.sanitizer !== sanitizer)
@@ -1418,5 +1450,13 @@ namespace Private {
      * The items for which the cache was most originally computed.
      */
     items: CompletionHandler.ICompletionItems;
+    /**
+     * The width of documentation panel.
+     */
+    docPanelWidth: number;
+    /**
+     * The height of documentation panel.
+     */
+    docPanelHeight: number;
   }
 }

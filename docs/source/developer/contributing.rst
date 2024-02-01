@@ -10,9 +10,18 @@ contributing!
 
 Please take a look at the Contributor documentation, familiarize
 yourself with using JupyterLab, and introduce yourself to the community
-(on the mailing list or discourse) and share what area of the project
-you are interested in working on. Please also see the Jupyter `Community
+(on the `chat <https://gitter.im/jupyterlab/jupyterlab>`__ and/or the `forum <https://discourse.jupyter.org/c/jupyterlab/17>`__)
+and share what area of the project you are interested in working on. Please also see the Jupyter `Community
 Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
+
+You can help make it better by:
+
+* `submitting bug reports <https://github.com/jupyterlab/jupyterlab/issues/new/choose>`__,
+* `proposing new features <https://github.com/jupyterlab/jupyterlab/issues/new?assignees=&labels=enhancement%2C+status%3ANeeds+Triage&template=feature_request.md>`__,
+* `translating the application <https://crowdin.com/project/jupyterlab>`__,
+* `improving the documentation <https://jupyterlab.readthedocs.io/en/latest>`__,
+* improving the code base and fixing bug (see below)
+
 
 We have labeled some issues as `good first
 issue <https://github.com/jupyterlab/jupyterlab/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22>`__
@@ -38,6 +47,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
    repo
    components
    patterns
+   Accessibility <accessibility>
    internationalization
    css
    performance
@@ -56,20 +66,42 @@ Documentation <https://jupyter.readthedocs.io/en/latest/contributing/content-con
 and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
+.. _versioning_notes:
+
+Backwards Compatibility, Versions and Breaking Changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+New versions of JupyterLab may break backwards compatibility with extensions and other Jupyter
+customizations. Breaking changes are kept to a minimum where possible. JupyterLab development
+and release cycles follow `semantic versioning <https://semver.org/>`__, so when breaking
+changes are necessary, they are communicated via the version numbering scheme. In short, this
+means that, for a JupyterLab version X.Y.Z:
+
+- Major version (X) number changes indicate breaking changes (NOT backwards compatible)
+- Minor Version (Y) number changes indicate a backwards compatible addition of new features
+- Patch version (Z) number changes indicate backwards compatible bug fixes
+
+Contributions to JupyterLab extensions and other customizations should plan for possible
+breaking changes. Consider documenting your maintenance plans to users in these projects.
+You may also wish to consider pinning the major version of JupyterLab when developing
+extensions (in your package metadata).
+
 We maintain the **two most recently released major versions of JupyterLab**,
-JupyterLab v2 and JupyterLab v3. After JupyterLab v4 is released, we will no
-longer maintain v2.
+JupyterLab v3 and JupyterLab v4. JupyterLab v1 and v2 are no longer maintained.
 All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+
+Languages, Tools and Processes
+------------------------------
 
 All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
-All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `black <https://github.com/psf/black>`__.
+All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `ruff <https://docs.astral.sh/ruff>`__.
 When code is modified and committed, all staged files will be
 automatically formatted using pre-commit git hooks (with help from
 `pre-commit <https://github.com/pre-commit/pre-commit>`__). The benefit of
-using a code formatters like ``prettier`` and ``black`` is that it removes the topic of
+using a code formatters like ``prettier`` and ``ruff`` is that it removes the topic of
 code style from the conversation when reviewing pull requests, thereby
 speeding up the review process.
 
@@ -89,7 +121,7 @@ You can invoke the pre-commit hook by hand at any time with::
 
 which should run any autoformatting on your code
 and tell you about any errors it couldn't fix automatically.
-You may also install `black integration <https://github.com/psf/black#editor-integration>`__
+You may also install `ruff integration <https://docs.astral.sh/ruff/integrations>`__
 into your text editor to format code automatically.
 
 If you have already committed files before setting up the pre-commit
@@ -111,7 +143,7 @@ and the issues it solves before a pull request is opened. A triager will
 ensure that your issue meets our definition of ready before we can merge
 any pull requests that relate to it.
 
-Pull requests must target the development branch (= ``master``) even if
+Pull requests must target the development branch (= ``main``) even if
 it aims at addressing an issue seen in a stable release. Once the pull
 request is merged on the development branch, it will be backported to
 the stable branch using a bot action (or manually if the bot action
@@ -220,6 +252,17 @@ pass without a reply that unblocks it.
 Our expectation is that every new issue should be examined within a week of
 its creation.
 
+Triagers should label easier/lower complexity issues as ``good first issue`` to
+facilitate beginner contributions. A good first issue should have:
+
+* A clear, easily understood description with screen shots and expectations that do not require much familiarity with the project
+* Links, either in the description or in comments, to documentation and source code files that are relevant to the issue
+* Recommended points of contact, either by GitHub username or on other forums (Discourse, etc) where a contributor can get help
+
+Unless an issue is time-sensitive, such as if it is a release blocker
+for an imminent release, experienced Jupyter contributors should avoid
+picking up recent issues with the ``good first issue`` label.
+
 Tagging Issues with Labels
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -245,10 +288,10 @@ a local environment, directly from the Web browser:
    allows to prototype JupyterLab extensions from within JupyterLab and
    can be run without installation in the browser using Binder.
 
-Using `Binder <https://mybinder.org>`__, you can test the current master branch and your
+Using `Binder <https://mybinder.org>`__, you can test the current main branch and your
 changes within the browser as well. We recommend you have at least 8 GB of RAM for this.
-To build and launch an instance of the latest JupyterLab master, open
-`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/>`__
+To build and launch an instance of the latest JupyterLab main, open
+`this link <https://mybinder.org/v2/gh/jupyterlab/jupyterlab/main?urlpath=lab-dev/>`__
 in a new tab. The build takes about 7 minutes to complete.
 
 To test your own branch hosted on GitHub, enter it on https://mybinder.org.
@@ -258,7 +301,7 @@ about 7 minutes again.
 Setting up a local development environment
 ------------------------------------------
 This section explains how to set up a local development environment. We assume you use GNU/Linux,
-macOS, or Windows Subsystem for Linux.
+macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__ and then using the Anaconda command prompt for all installation steps.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -266,7 +309,7 @@ Installing Node.js and jlpm
 Building JupyterLab from its GitHub source code requires Node.js. The
 development version requires Node.js version 18+, as defined in the
 ``engines`` specification in
-`dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/master/dev_mode/package.json>`__.
+`dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/main/dev_mode/package.json>`__.
 
 If you use `conda <https://conda.io>`__, you can get it with:
 
@@ -310,11 +353,53 @@ With Homebrew:
 Using automation to set up a local development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While there is a lot to learn by following the steps above, they can be automated to save time. This section shows how
-to do that using Vagrant as an example.
-
-The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
+While there is a lot to learn by following the steps above, they can be automated to save time. The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
 re-build the environment, better standardisation ("baseline", reproducible environments).
+This section shows how to do that using Docker and Vagrant.
+
+**Setup using Docker**
+""""""""""""""""""""""""
+
+To start a JupyterLab development container in a UNIX system with docker installed:
+
+1. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab>`__.
+
+2. Start the container:
+
+.. code:: bash
+
+   git clone https://github.com/<your-github-username>/jupyterlab.git
+   cd jupyterlab
+   bash docker/start.sh
+
+The above command will build the docker image if it does not exist, then start the container with JupyterLab running in watch mode. The port 8888 is exposed and the current JupyterLab repo is mounted into the container. Then you can start developing JupyterLab with your favorite IDE, JupyterLab will be rebuilt on the fly.
+
+Other available commands:
+
+.. code:: bash
+
+   bash docker/start.sh dev 4567 # Start JupyterLab dev container at port 4567
+   bash docker/start.sh stop  # Stop the running container
+   bash docker/start.sh clean  # Remove the docker image
+   bash docker/start.sh build  # Rebuild the docker image
+
+   # Log into the container's shell with the JupyterLab environment activated.
+   # It's useful to run the tests or install dependencies.
+   bash docker/start.sh shell
+
+To add TypeScript dependencies to the project, you need to log into the container's shell, install the dependencies to update the package.json and yarn.lock files, and then rebuild the docker image.
+
+.. code:: bash
+
+   bash docker/start.sh shell
+   # In the container shell
+   jlpm add ...
+   exit
+   # Back to host shell
+   bash docker/start.sh build
+
+**Setup using Vagrant**
+""""""""""""""""""""""""""""
 
 A practical example can be found `there <https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant>`_ and
 includes a ``Vagrantfile``, the bootstrap files and additional documentation.
@@ -351,15 +436,10 @@ Notes:
    called something else (such as "python3") then parts of the build
    will fail. You may wish to build in a conda environment, or make an
    alias.
--  Some of the packages used in the development environment require
-   Python 3.0 or higher. If you encounter an ImportError during the
-   installation, make sure Python 3.0+ is installed. Also, try using the
-   Python 3.0+ version of ``pip`` or ``pip3 install -e .`` command to
-   install JupyterLab from the forked repository.
 -  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
    returned exit status 127 while in binding.gyp`` while running the
    ``pip install`` command above, you may be missing packages required
-   by ``canvas``. Please see `Installing Node.js and jlpm section`_
+   by ``canvas``. Please see the `Installing Node.js and jlpm section`_
    of this guide for instructions on how to install these packages.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
@@ -392,15 +472,7 @@ Notes:
    However, it takes a bit longer to build the sources, so is used only
    to build for production by default.
 
-If you are using a version of Jupyter Notebook earlier than 5.3, then
-you must also run the following command to enable the JupyterLab server
-extension:
-
-.. code:: bash
-
-   jupyter serverextension enable --py --sys-prefix jupyterlab
-
-For installation instructions to write documentation, please see
+For installation instructions for contributors who want to write documentation, please see
 `Writing Documentation <#writing-documentation>`__
 
 Run JupyterLab
@@ -563,7 +635,7 @@ Visual Regression and UI Tests
 ------------------------------
 
 As part of JupyterLab CI workflows, UI tests are run with visual regression checks.
-`Galata <https://github.com/jupyterlab/jupyterlab/tree/master/galata>`__ is used for UI
+`Galata <https://github.com/jupyterlab/jupyterlab/tree/main/galata>`__ is used for UI
 testing. Galata provides `Playwright <https://playwright.dev>`__ helpers to control and
 inspect JupyterLab UI programmatically.
 
@@ -602,7 +674,10 @@ Main reasons for UI test failures are:
      documentation test snapshots.
    - ``please update snapshots``: Combine the two previous comments effects.
 
-For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/master/galata/README.md>`__
+    The bot will react with +1 emoji to indicate that the run started and then comment
+    back once it concluded.
+
+For more information on UI Testing, please read the `UI Testing developer documentation <https://github.com/jupyterlab/jupyterlab/blob/main/galata/README.md>`__
 and `Playwright documentation <https://playwright.dev/docs/intro>`__.
 
 Good Practices for Integration tests
@@ -787,7 +862,7 @@ need to install the documentation dependencies with ``pip``:
 
 .. code:: bash
 
-   pip install -e .[docs]
+   pip install -e ".[docs]"
 
 
 To test the docs run:
@@ -980,16 +1055,12 @@ them out against your copy of JupyterLab, you can easily do so using the
 ``link`` command:
 
 1. Make your changes and then build the external package
-2. Register a link to the modified external package
-
-   -  navigate to the external package dir and run ``jlpm link``
-
-3. Link JupyterLab to modded package
+2. Link JupyterLab to modded package
 
    -  navigate to top level of your JupyterLab repo, then run
-      ``jlpm link "<package-of-interest>"``
+      ``jlpm link <path-to-external-repo> --all``
 
-You can then (re)build JupyterLab (eg ``jlpm run build``) and your
+3. You can then (re)build JupyterLab (eg ``jlpm run build``) and your
 changes should be picked up by the build.
 
 To restore JupyterLab to its original state, you use the ``unlink``
@@ -998,13 +1069,13 @@ command:
 1. Unlink JupyterLab and modded package
 
    -  navigate to top level of your JupyterLab repo, then run
-      ``jlpm unlink "<package-of-interest>"``
+      ``jlpm unlink <path-to-external-repo> --all``
 
 2. Reinstall original version of the external package in JupyterLab
 
    -  run ``jlpm install --check-files``
 
-You can then (re)build JupyterLab and everything should be back to
+3. You can then (re)build JupyterLab and everything should be back to
 default.
 
 Possible Linking Pitfalls

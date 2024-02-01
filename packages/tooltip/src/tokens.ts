@@ -11,7 +11,8 @@ import { Widget } from '@lumino/widgets';
  * The tooltip manager token.
  */
 export const ITooltipManager = new Token<ITooltipManager>(
-  '@jupyterlab/tooltip:ITooltipManager'
+  '@jupyterlab/tooltip:ITooltipManager',
+  'A service for the tooltip manager for the application. Use this to allow your extension to invoke a tooltip.'
 );
 
 /**

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "7.0.0-alpha.19",
+  "version": "7.1.0-rc.0",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -30,7 +30,8 @@
     "lib/*.js",
     "lib/*.d.ts",
     "dist/*.js",
-    "dist/**/*.js"
+    "dist/**/*.js",
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -40,32 +41,33 @@
     "docs": "typedoc src",
     "test": "jest -i",
     "test:cov": "jest -i --collect-coverage",
-    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
-    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk ../../node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyter/ydoc": "^0.3.1",
-    "@jupyterlab/coreutils": "^6.0.0-alpha.19",
-    "@jupyterlab/nbformat": "^4.0.0-alpha.19",
-    "@jupyterlab/settingregistry": "^4.0.0-alpha.19",
-    "@jupyterlab/statedb": "^4.0.0-alpha.19",
-    "@lumino/coreutils": "^2.0.0-beta.0",
-    "@lumino/disposable": "^2.0.0-beta.1",
-    "@lumino/polling": "^2.0.0-beta.0",
-    "@lumino/properties": "^2.0.0-beta.0",
-    "@lumino/signaling": "^2.0.0-beta.1",
+    "@jupyter/ydoc": "^1.1.1",
+    "@jupyterlab/coreutils": "^6.1.0-rc.0",
+    "@jupyterlab/nbformat": "^4.1.0-rc.0",
+    "@jupyterlab/settingregistry": "^4.1.0-rc.0",
+    "@jupyterlab/statedb": "^4.1.0-rc.0",
+    "@lumino/coreutils": "^2.1.2",
+    "@lumino/disposable": "^2.1.2",
+    "@lumino/polling": "^2.1.2",
+    "@lumino/properties": "^2.0.1",
+    "@lumino/signaling": "^2.1.2",
     "ws": "^8.11.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.0.0-alpha.19",
+    "@jupyterlab/testing": "^4.1.0-rc.0",
     "@types/jest": "^29.2.0",
     "@types/ws": "^8.5.3",
-    "rimraf": "~3.0.0",
-    "typedoc": "~0.23.25",
-    "typescript": "~5.0.0-beta",
-    "webpack": "^5.72.0",
-    "webpack-cli": "^5.0.0"
+    "jest": "^29.2.0",
+    "rimraf": "~5.0.5",
+    "typedoc": "~0.24.7",
+    "typescript": "~5.1.6",
+    "webpack": "^5.76.1",
+    "webpack-cli": "^5.0.1"
   },
   "publishConfig": {
     "access": "public"

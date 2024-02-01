@@ -108,7 +108,7 @@ export class NotebookModel implements INotebookModel {
     } else {
       this.sharedModel = YNotebook.create({
         disableDocumentWideUndoRedo:
-          options.disableDocumentWideUndoRedo ?? false,
+          options.disableDocumentWideUndoRedo ?? true,
         data: {
           nbformat: nbformat.MAJOR_VERSION,
           nbformat_minor: nbformat.MINOR_VERSION,
@@ -380,7 +380,9 @@ close the notebook without saving it.`,
 
     // Ensure there is at least one cell
     if ((copy.cells?.length ?? 0) === 0) {
-      copy['cells'] = [{ cell_type: 'code', source: '', metadata: {} }];
+      copy['cells'] = [
+        { cell_type: 'code', source: '', metadata: { trusted: true } }
+      ];
     }
     this.sharedModel.fromJSON(copy);
 
@@ -525,6 +527,11 @@ export namespace NotebookModel {
 
     /**
      * Defines if the document can be undo/redo.
+     *
+     * Default: true
+     *
+     * @experimental
+     * @alpha
      */
     disableDocumentWideUndoRedo?: boolean;
   }

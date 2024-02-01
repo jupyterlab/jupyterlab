@@ -1,0 +1,57 @@
+[
+  {
+    "name": "latest",
+    "version": "latest",
+    "url": "https://jupyterlab.readthedocs.io/en/latest/"
+  },
+  {
+    "name": "stable",
+    "version": "stable",
+    "url": "https://jupyterlab.readthedocs.io/en/stable/"
+  },
+  {
+    "name": "3.6.x",
+    "version": "3.6.x",
+    "url": "https://jupyterlab.readthedocs.io/en/3.6.x/"
+  },
+  {
+    "name": "3.5.x",
+    "version": "3.5.x",
+    "url": "https://jupyterlab.readthedocs.io/en/3.5.x/"
+  },
+  {
+    "name": "3.4.x",
+    "version": "3.4.x",
+    "url": "https://jupyterlab.readthedocs.io/en/3.4.x/"
+  },
+  {
+    "name": "3.3.x",
+    "version": "3.3.x",
+    "url": "https://jupyterlab.readthedocs.io/en/3.3.x/"
+  },
+  {
+    "name": "3.2.x",
+    "version": "3.2.x",
+    "url": "https://jupyterlab.readthedocs.io/en/3.2.x/"
+  },
+  {
+    "name": "3.1.x",
+    "version": "3.1.x",
+    "url": "https://jupyterlab.readthedocs.io/en/3.1.x/"
+  },
+  {
+    "name": "3.0.x",
+    "version": "3.0.x",
+    "url": "https://jupyterlab.readthedocs.io/en/3.0.x/"
+  },
+  {
+    "name": "2.2.x",
+    "version": "2.2.x",
+    "url": "https://jupyterlab.readthedocs.io/en/2.2.x/"
+  },
+  {
+    "name": "1.2.x",
+    "version": "1.2.x",
+    "url": "https://jupyterlab.readthedocs.io/en/1.2.x/"
+  }
+]

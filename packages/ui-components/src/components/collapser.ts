@@ -4,7 +4,20 @@
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Title, Widget } from '@lumino/widgets';
-import { caretDownIcon, caretUpIcon } from '../icon';
+
+import { caretDownIcon } from '../icon';
+
+const COLLAPSE_CLASS = 'jp-Collapse';
+
+const CONTENTS_CLASS = 'jp-Collapse-contents';
+
+const HEADER_CLASS = 'jp-Collapse-header';
+
+const HEADER_COLLAPSED_CLASS = 'jp-Collapse-header-collapsed';
+
+const ICON_CLASS = 'jp-Collapser-icon';
+
+const TITLE_CLASS = 'jp-Collapser-title';
 
 /**
  * A panel that supports a collapsible header made from the widget's title.
@@ -15,11 +28,24 @@ export class Collapser<T extends Widget = Widget> extends Widget {
     super(options);
     const { widget, collapsed = true } = options;
 
-    this.addClass('jp-Collapse');
+    this.addClass(COLLAPSE_CLASS);
     this._header = new Widget();
-    this._header.addClass('jp-Collapse-header');
+    this._header.addClass(HEADER_CLASS);
+    if (collapsed) {
+      this._header.addClass(HEADER_COLLAPSED_CLASS);
+    }
+    this._header.node.appendChild(
+      caretDownIcon.element({
+        className: ICON_CLASS
+      })
+    );
+    const titleSpan = document.createElement('span');
+    titleSpan.classList.add(TITLE_CLASS);
+    titleSpan.textContent = widget.title.label;
+    this._header.node.appendChild(titleSpan);
+
     this._content = new Panel();
-    this._content.addClass('jp-Collapse-contents');
+    this._content.addClass(CONTENTS_CLASS);
 
     const layout = new PanelLayout();
     this.layout = layout;
@@ -153,12 +179,11 @@ export class Collapser<T extends Widget = Widget> extends Widget {
   }
 
   private _setHeader(): void {
-    (this._collapsed ? caretUpIcon : caretDownIcon).element({
-      container: this._header.node,
-      label: this._widget.title.label,
-      elementPosition: 'right',
-      height: '28px'
-    });
+    if (this._collapsed) {
+      this._header.addClass(HEADER_COLLAPSED_CLASS);
+    } else {
+      this._header.removeClass(HEADER_COLLAPSED_CLASS);
+    }
   }
 
   private _collapseChanged = new Signal<this, void>(this);

@@ -1,18 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  ISessionContextDialogs,
-  sessionContextDialogs
-} from '@jupyterlab/apputils';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ITranslator } from '@jupyterlab/translation';
-import { ToolbarItems } from './default-toolbar';
 import { INotebookModel } from './model';
 import { NotebookPanel } from './panel';
 import { StaticNotebook } from './widget';
+import { NotebookHistory } from './history';
 
 /**
  * A widget factory for notebook panels.
@@ -29,14 +25,12 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
   constructor(options: NotebookWidgetFactory.IOptions<NotebookPanel>) {
     super(options);
     this.rendermime = options.rendermime;
-    this.contentFactory =
-      options.contentFactory || NotebookPanel.defaultContentFactory;
+    this.contentFactory = options.contentFactory;
     this.mimeTypeService = options.mimeTypeService;
     this._editorConfig =
       options.editorConfig || StaticNotebook.defaultEditorConfig;
     this._notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
-    this._sessionDialogs = options.sessionDialogs || sessionContextDialogs;
   }
 
   /*
@@ -85,6 +79,10 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     source?: NotebookPanel
   ): NotebookPanel {
     const translator = (context as any).translator;
+    const kernelHistory = new NotebookHistory({
+      sessionContext: context.sessionContext,
+      translator: translator
+    });
     const nbOptions = {
       rendermime: source
         ? source.content.rendermime
@@ -95,29 +93,16 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
       notebookConfig: source
         ? source.content.notebookConfig
         : this._notebookConfig,
-      translator
+      translator,
+      kernelHistory
     };
     const content = this.contentFactory.createNotebook(nbOptions);
 
     return new NotebookPanel({ context, content });
   }
 
-  /**
-   * Default factory for toolbar items to be added after the widget is created.
-   */
-  protected defaultToolbarFactory(
-    widget: NotebookPanel
-  ): DocumentRegistry.IToolbarItem[] {
-    return ToolbarItems.getDefaultItems(
-      widget,
-      this._sessionDialogs,
-      this.translator
-    );
-  }
-
   private _editorConfig: StaticNotebook.IEditorConfig;
   private _notebookConfig: StaticNotebook.INotebookConfig;
-  private _sessionDialogs: ISessionContextDialogs;
 }
 
 /**
@@ -155,11 +140,6 @@ export namespace NotebookWidgetFactory {
     notebookConfig?: StaticNotebook.INotebookConfig;
 
     /**
-     * The session context dialogs.
-     */
-    sessionDialogs?: ISessionContextDialogs;
-
-    /**
      * The application language translator.
      */
     translator?: ITranslator;
@@ -170,6 +150,11 @@ export namespace NotebookWidgetFactory {
    */
   export interface IFactory
     extends DocumentRegistry.IWidgetFactory<NotebookPanel, INotebookModel> {
+    /**
+     * Whether to automatically start the preferred kernel.
+     */
+    autoStartDefault: boolean;
+
     /**
      * A configuration object for cell editor settings.
      */

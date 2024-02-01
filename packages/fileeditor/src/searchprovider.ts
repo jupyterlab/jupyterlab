@@ -5,12 +5,14 @@ import { MainAreaWidget } from '@jupyterlab/apputils';
 import { CodeMirrorEditor, EditorSearchProvider } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
+  IFilters,
   IReplaceOptionsSupport,
   ISearchProvider
 } from '@jupyterlab/documentsearch';
 import { ITranslator } from '@jupyterlab/translation';
 import { Widget } from '@lumino/widgets';
 import { FileEditor } from './widget';
+import { ISharedText, SourceChange } from '@jupyter/ydoc';
 
 /**
  * Helper type
@@ -33,7 +35,7 @@ export class FileEditorSearchProvider
   }
 
   get isReadOnly(): boolean {
-    return this.editor.getOption('readOnly');
+    return this.editor.getOption('readOnly') as boolean;
   }
 
   /**
@@ -57,6 +59,42 @@ export class FileEditorSearchProvider
    */
   get model(): CodeEditor.IModel {
     return this.widget.content.model;
+  }
+
+  async startQuery(
+    query: RegExp,
+    filters: IFilters | undefined
+  ): Promise<void> {
+    this._searchActive = true;
+    await super.startQuery(query, filters);
+    await this.highlightNext(true, {
+      from: 'selection-start',
+      scroll: false,
+      select: false
+    });
+  }
+
+  /**
+   * Stop the search and clean any UI elements.
+   */
+  async endQuery(): Promise<void> {
+    this._searchActive = false;
+    await super.endQuery();
+  }
+
+  /**
+   * Callback on source change
+   *
+   * @param emitter Source of the change
+   * @param changes Source change
+   */
+  protected async onSharedModelChanged(
+    emitter: ISharedText,
+    changes: SourceChange
+  ): Promise<void> {
+    if (this._searchActive) {
+      return super.onSharedModelChanged(emitter, changes);
+    }
   }
 
   /**
@@ -101,7 +139,8 @@ export class FileEditorSearchProvider
       cm.state.selection.main.from,
       cm.state.selection.main.to
     );
-    // if there are newlines, just return empty string
-    return selection.search(/\r?\n|\r/g) === -1 ? selection : '';
+    return selection;
   }
+
+  private _searchActive = false;
 }

@@ -58,41 +58,45 @@ export class TableOfContentsTree extends React.PureComponent<ITableOfContentsTre
       return [];
     }
 
-    let globalIndex = 0;
+    const buildOneTree = (currentIndex: number): [JSX.Element, number] => {
+      const items = this.props.headings;
+      const children = new Array<JSX.Element>();
+      const current = items[currentIndex];
+      let nextCandidateIndex = currentIndex + 1;
 
-    const getChildren = (
-      items: TableOfContents.IHeading[],
-      level: number
-    ): JSX.Element[] => {
-      const nested = new Array<JSX.Element>();
-      while (globalIndex < items.length) {
-        const current = items[globalIndex];
-        if (current.level >= level) {
-          globalIndex += 1;
-          const next = items[globalIndex];
-
-          nested.push(
-            <TableOfContentsItem
-              key={`${current.level}-${globalIndex}-${current.text}`}
-              isActive={
-                !!this.props.activeHeading &&
-                current === this.props.activeHeading
-              }
-              heading={current}
-              onMouseDown={this.props.setActiveHeading}
-              onCollapse={this.props.onCollapseChange}
-            >
-              {next && next.level > level && getChildren(items, level + 1)}
-            </TableOfContentsItem>
-          );
-        } else {
+      while (nextCandidateIndex < items.length) {
+        const candidateItem = items[nextCandidateIndex];
+        if (candidateItem.level <= current.level) {
           break;
         }
+        const [child, nextIndex] = buildOneTree(nextCandidateIndex);
+        children.push(child);
+        nextCandidateIndex = nextIndex;
       }
-
-      return nested;
+      const currentTree = (
+        <TableOfContentsItem
+          key={`${current.level}-${currentIndex}-${current.text}`}
+          isActive={
+            !!this.props.activeHeading && current === this.props.activeHeading
+          }
+          heading={current}
+          onMouseDown={this.props.setActiveHeading}
+          onCollapse={this.props.onCollapseChange}
+        >
+          {children.length ? children : null}
+        </TableOfContentsItem>
+      );
+      return [currentTree, nextCandidateIndex];
     };
 
-    return getChildren(this.props.headings, this.props.headings[0].level);
+    const trees = new Array<JSX.Element>();
+    let currentIndex = 0;
+    while (currentIndex < this.props.headings.length) {
+      const [tree, nextIndex] = buildOneTree(currentIndex);
+      trees.push(tree);
+      currentIndex = nextIndex;
+    }
+
+    return trees;
   }
 }

@@ -2,9 +2,33 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { TableOfContentsUtils } from '@jupyterlab/toc';
+import { Sanitizer } from '@jupyterlab/apputils';
+import { createMarkdownParser } from '@jupyterlab/markedparser-extension';
+import { IMarkdownParser } from '@jupyterlab/rendermime';
+import {
+  EditorLanguageRegistry,
+  IEditorLanguageRegistry
+} from '@jupyterlab/codemirror';
 
 describe('TableOfContentsUtils', () => {
   describe('Markdown', () => {
+    describe('#getHeadingId', () => {
+      const languages: IEditorLanguageRegistry = new EditorLanguageRegistry();
+      const parser: IMarkdownParser = createMarkdownParser(languages);
+      const sanitizer = new Sanitizer();
+      it.each<[string, string]>([
+        ['# Title', 'Title'],
+        [`# test'"></title><img>test {#'"><img>}`, `test'\">test-{#'\">}`]
+      ])('should derive ID from markdown', async (markdown, expectedId) => {
+        const headingId = await TableOfContentsUtils.Markdown.getHeadingId(
+          parser,
+          markdown,
+          1,
+          sanitizer
+        );
+        expect(headingId).toEqual(expectedId);
+      });
+    });
     describe('#getHeadings', () => {
       it.each<[string, TableOfContentsUtils.Markdown.IMarkdownHeading[]]>([
         [
@@ -193,7 +217,96 @@ describe('TableOfContentsUtils', () => {
         ['\nTitle\n\n--', []],
         ['```\n# Title\n```', []],
         ['```\nTitle\n--\n```', []],
-        ['```\n<h1>Title</h1>\n```', []]
+        ['```\n<h1>Title</h1>\n```', []],
+        ['---\n<h1>Title</h1>\n---', []],
+        ['---\n# Title\n---', []],
+        [
+          `---
+<h1>Ignored</h1>
+---
+# Title`,
+          [
+            {
+              text: 'Title',
+              level: 1,
+              line: 3,
+              raw: '# Title',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ],
+        [
+          `---
+front: matter
+---
+
+# Header
+
+> this has whitespace _after_`,
+          [
+            {
+              text: 'Header',
+              level: 1,
+              line: 4,
+              raw: '# Header',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ],
+        [
+          `---
+front: matter
+---
+# Header
+
+---
+# Header between horizontal rules
+---
+
+# Header after horizontal rules`,
+          [
+            {
+              text: 'Header',
+              level: 1,
+              line: 3,
+              raw: '# Header',
+              prefix: '1. ',
+              skip: false
+            },
+            {
+              text: 'Header between horizontal rules',
+              level: 1,
+              line: 6,
+              raw: '# Header between horizontal rules',
+              prefix: '2. ',
+              skip: false
+            },
+            {
+              text: 'Header after horizontal rules',
+              level: 1,
+              line: 9,
+              raw: '# Header after horizontal rules',
+              prefix: '3. ',
+              skip: false
+            }
+          ]
+        ],
+        [
+          `---
+# Header`,
+          [
+            {
+              text: 'Header',
+              level: 1,
+              line: 1,
+              raw: '# Header',
+              prefix: '1. ',
+              skip: false
+            }
+          ]
+        ]
       ])('should extract headings from %s', (src, headers) => {
         const headings = TableOfContentsUtils.filterHeadings(
           TableOfContentsUtils.Markdown.getHeadings(src),

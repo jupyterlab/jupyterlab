@@ -349,6 +349,33 @@ export class NotebookHelper {
   }
 
   /**
+   * Trust the active notebook
+   *
+   * @returns Whether the action succeeded or not.
+   */
+  async trust(): Promise<boolean> {
+    if (
+      (await this.isAnyActive()) &&
+      (await this.page
+        .locator('[data-icon="ui-components:not-trusted"]')
+        .count()) === 1
+    ) {
+      await this.page.keyboard.press('Control+Shift+C');
+      await this.page.getByPlaceholder('SEARCH', { exact: true }).fill('trust');
+      await this.page.getByText('Trust Notebook').click();
+      await this.page.getByRole('button', { name: 'Trust' }).click();
+
+      return (
+        (await this.page
+          .locator('[data-icon="ui-components:trusted"]')
+          .count()) === 1
+      );
+    }
+
+    return true;
+  }
+
+  /**
    * Wait for notebook cells execution to finish
    *
    * @param cellIndex Cell index
@@ -426,21 +453,24 @@ export class NotebookHelper {
     if (!notebook) {
       return -1;
     }
+    const scroller = (await notebook.$(
+      '.jp-WindowedPanel-outer'
+    )) as ElementHandle<HTMLElement>;
 
-    const scrollTop = await notebook.evaluate(node => node.scrollTop);
+    const scrollTop = await scroller.evaluate(node => node.scrollTop);
 
     // Scroll to bottom
     let previousScrollHeight = scrollTop;
     let scrollHeight =
       previousScrollHeight +
-      (await notebook.evaluate(node => node.clientHeight));
+      (await scroller.evaluate(node => node.clientHeight));
     do {
-      await notebook.evaluate((node, scrollTarget) => {
+      await scroller.evaluate((node, scrollTarget) => {
         node.scrollTo({ top: scrollTarget });
       }, scrollHeight);
       await this.page.waitForTimeout(50);
       previousScrollHeight = scrollHeight;
-      scrollHeight = await notebook.evaluate(
+      scrollHeight = await scroller.evaluate(
         node => node.scrollHeight - node.clientHeight
       );
     } while (scrollHeight > previousScrollHeight);
@@ -453,7 +483,7 @@ export class NotebookHelper {
       ) + 1;
 
     // Scroll back to original position
-    await notebook.evaluate((node, scrollTarget) => {
+    await scroller.evaluate((node, scrollTarget) => {
       node.scrollTo({ top: scrollTarget });
     }, scrollTop);
 
@@ -471,6 +501,12 @@ export class NotebookHelper {
     if (!notebook) {
       return null;
     }
+    const scroller = (await notebook.$(
+      '.jp-WindowedPanel-outer'
+    )) as ElementHandle<HTMLElement>;
+    const viewport = (await notebook.$(
+      '.jp-WindowedPanel-viewport'
+    )) as ElementHandle<HTMLElement>;
 
     const allCells = await notebook.$$('div.jp-Cell');
     const filters = await Promise.all(allCells.map(c => c.isVisible()));
@@ -492,10 +528,10 @@ export class NotebookHelper {
       // Scroll up
       let scrollTop =
         (await firstCell.boundingBox())?.y ??
-        (await notebook.evaluate(node => node.scrollTop - node.clientHeight));
+        (await scroller.evaluate(node => node.scrollTop - node.clientHeight));
 
       do {
-        await notebook.evaluate((node, scrollTarget) => {
+        await scroller.evaluate((node, scrollTarget) => {
           node.scrollTo({ top: scrollTarget });
         }, scrollTop);
         await this.page.waitForTimeout(50);
@@ -511,20 +547,18 @@ export class NotebookHelper {
         );
         scrollTop =
           (await cells[firstCell].boundingBox())?.y ??
-          (await notebook.evaluate(node => node.scrollTop - node.clientHeight));
+          (await scroller.evaluate(node => node.scrollTop - node.clientHeight));
       } while (scrollTop > 0 && firstIndex > cellIndex);
     } else if (cellIndex > lastIndex) {
-      const clientHeight = await notebook.evaluate(node => node.clientHeight);
+      const clientHeight = await scroller.evaluate(node => node.clientHeight);
       // Scroll down
-      const viewport = await (
-        await notebook.$$('.jp-WindowedPanel-window')
-      )[0].boundingBox();
-      let scrollHeight = viewport!.y + viewport!.height;
+      const viewportBox = await viewport.boundingBox();
+      let scrollHeight = viewportBox!.y + viewportBox!.height;
       let previousScrollHeight = 0;
 
       do {
         previousScrollHeight = scrollHeight;
-        await notebook.evaluate((node, scrollTarget) => {
+        await scroller.evaluate((node, scrollTarget) => {
           node.scrollTo({ top: scrollTarget });
         }, scrollHeight);
         await this.page.waitForTimeout(50);
@@ -539,10 +573,8 @@ export class NotebookHelper {
           10
         );
 
-        const viewport = await (
-          await notebook.$$('.jp-WindowedPanel-window')
-        )[0].boundingBox();
-        scrollHeight = viewport!.y + viewport!.height;
+        const viewportBox = await viewport.boundingBox();
+        scrollHeight = viewportBox!.y + viewportBox!.height;
         // Avoid jitter
         scrollHeight = Math.max(
           previousScrollHeight + clientHeight,
@@ -589,6 +621,34 @@ export class NotebookHelper {
     }
 
     return cellEditor;
+  }
+
+  /**
+   * Get the content of the cell input
+   *
+   * @param cellIndex Cell index
+   * @returns the code input
+   */
+  async getCellTextInput(cellIndex: number): Promise<string> {
+    // Using textContent on handle does not preserve new lines, so we need to either:
+    // (a) use `evaluate()` operate on the codemirror instance directly to get the code
+    // (b) iterate the lines in representation and concatenate manually
+    // (c) copy-paste the content and read the clipboard
+    // Out of the three options only (c) does not touch implementation details of CodeMirror.
+    const wasInEditingMode = await this.isCellInEditingMode(cellIndex);
+    if (!wasInEditingMode) {
+      await this.enterCellEditingMode(cellIndex);
+    }
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Control+C');
+    await this.page.context().grantPermissions(['clipboard-read']);
+    const handle = await this.page.evaluateHandle(() =>
+      navigator.clipboard.readText()
+    );
+    if (!wasInEditingMode) {
+      await this.leaveCellEditingMode(cellIndex);
+    }
+    return await handle.jsonValue();
   }
 
   /**
@@ -760,7 +820,10 @@ export class NotebookHelper {
   }
 
   /**
-   * Whether the cell is in editing mode or not
+   * Whether the cell is in editing mode or not.
+   *
+   * This method is not suitable for checking if a cell is unrendered
+   * as it will return false when the cell is not active (not focused).
    *
    * @param cellIndex Cell index
    * @returns Editing mode
@@ -793,8 +856,8 @@ export class NotebookHelper {
       return false;
     }
 
-    const cellEditor = await cell.$('.jp-Cell-inputArea');
-    if (cellEditor) {
+    const cellInput = await cell.$('.jp-Cell-inputArea');
+    if (cellInput) {
       let isMarkdown = false;
       const cellType = await this.getCellType(cellIndex);
       if (cellType === 'markdown') {
@@ -805,7 +868,12 @@ export class NotebookHelper {
       }
 
       if (isMarkdown) {
-        await cellEditor.dblclick();
+        await cellInput.dblclick();
+      }
+
+      const cellEditor = await cellInput.$('.jp-InputArea-editor');
+      if (!cellEditor) {
+        return false;
       }
 
       await cellEditor.click();
@@ -1091,14 +1159,20 @@ export class NotebookHelper {
     }
 
     await this.clickToolbarItem('cellType');
-    const selectInput = await nbPanel.$(
-      'div.jp-Notebook-toolbarCellTypeDropdown select'
-    );
+    const selectInput = await nbPanel.$('.jp-Notebook-toolbarCellTypeDropdown');
     if (!selectInput) {
       return false;
     }
 
-    await selectInput.selectOption(cellType);
+    // Legay select
+    const select = await selectInput.$('select');
+    if (select) {
+      await select.selectOption(cellType);
+    } else {
+      await selectInput.evaluate((el, cellType) => {
+        (el as any).value = cellType;
+      }, cellType);
+    }
 
     // Wait for the new cell to be rendered
     let cell: ElementHandle | null;

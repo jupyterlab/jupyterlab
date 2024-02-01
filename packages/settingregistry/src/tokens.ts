@@ -21,7 +21,10 @@ import type { RJSFSchema, UiSchema } from '@rjsf/utils';
  * The setting registry token.
  */
 export const ISettingRegistry = new Token<ISettingRegistry>(
-  '@jupyterlab/coreutils:ISettingRegistry'
+  '@jupyterlab/coreutils:ISettingRegistry',
+  `A service for the JupyterLab settings system.
+  Use this if you want to store settings for your application.
+  See "schemaDir" for more information.`
 );
 
 /**
@@ -77,10 +80,15 @@ export interface ISettingRegistry {
    *
    * @param plugin - The name of the plugin whose settings are being loaded.
    *
+   * @param forceTransform - An optional parameter to force replay the transforms methods.
+   *
    * @returns A promise that resolves with a plugin settings object or rejects
    * if the plugin is not found.
    */
-  load(plugin: string): Promise<ISettingRegistry.ISettings>;
+  load(
+    plugin: string,
+    forceTransform?: boolean
+  ): Promise<ISettingRegistry.ISettings>;
 
   /**
    * Reload a plugin's settings into the registry even if they already exist.

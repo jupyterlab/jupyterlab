@@ -15,11 +15,3 @@ export * from './settings';
 export * from './view';
 export * from './tabs';
 export * from './tokens';
-
-/**
- * @deprecated since version 3.1
- */
-export {
-  IRankedMenu as IJupyterLabMenu,
-  RankedMenu as JupyterLabMenu
-} from '@jupyterlab/ui-components';

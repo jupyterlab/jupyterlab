@@ -11,7 +11,7 @@ import childProcess from 'child_process';
 import { DepGraph } from 'dependency-graph';
 import sortPackageJson from 'sort-package-json';
 
-const assert = require('assert');
+import assert from 'assert';
 
 type Dict<T> = { [key: string]: T };
 
@@ -85,7 +85,7 @@ export function getCorePaths(): string[] {
  *
  * @param data - The package data.
  *
- * @oaram pkgJsonPath - The path to the package.json file.
+ * @param pkgJsonPath - The path to the package.json file.
  *
  * @returns Whether the file has changed.
  */
@@ -242,11 +242,17 @@ export function prebump(): void {
     encoding: 'utf8'
   });
   if (status.length > 0) {
+    const diff = run('git diff', {
+      stdio: 'pipe',
+      encoding: 'utf8'
+    });
     throw new Error(
       `Must be in a clean git state with no untracked files.
 Run "git status" to see the issues.
 
-${status}`
+${status}
+
+${diff}`
     );
   }
 }

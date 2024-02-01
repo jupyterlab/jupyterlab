@@ -177,10 +177,9 @@ for (let pkg of extensionPackages) {
 const extraShared = [];
 for (let pkg of extensionPackages) {
   let pkgShared = {};
-  let {
-    dependencies = {},
-    jupyterlab: { sharedPackages = {} } = {}
-  } = require(`${pkg}/package.json`);
+  let { dependencies = {}, jupyterlab: { sharedPackages = {} } = {} } = require(
+    `${pkg}/package.json`
+  );
   for (let [dep, requiredVersion] of Object.entries(dependencies)) {
     if (!shared[dep]) {
       pkgShared[dep] = { requiredVersion };
@@ -293,7 +292,7 @@ module.exports = [
         chunks: 'all',
         cacheGroups: {
           jlab_core: {
-            test: /[\\/]node_modules[\\/]@(jupyterlab|lumino)[\\/]/,
+            test: /[\\/]node_modules[\\/]@(jupyterlab|lumino(?!\/datagrid))[\\/]/,
             name: 'jlab_core'
           }
         }

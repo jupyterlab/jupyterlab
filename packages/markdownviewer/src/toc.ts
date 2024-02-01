@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
-import { IMarkdownParser } from '@jupyterlab/rendermime';
+import { IMarkdownParser, IRenderMime } from '@jupyterlab/rendermime';
 import {
   TableOfContents,
   TableOfContentsFactory,
@@ -96,7 +96,8 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
    */
   constructor(
     tracker: IWidgetTracker<MarkdownDocument>,
-    protected parser: IMarkdownParser | null
+    protected parser: IMarkdownParser | null,
+    protected sanitizer: IRenderMime.ISanitizer
   ) {
     super(tracker);
   }
@@ -140,6 +141,13 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
           ) {
             el.scrollIntoView({ block: 'center' });
           }
+        } else {
+          console.warn(
+            'Heading element not found for heading',
+            heading,
+            'in widget',
+            widget
+          );
         }
       }
     };
@@ -158,13 +166,14 @@ export class MarkdownViewerTableOfContentsFactory extends TableOfContentsFactory
         const elementId = await TableOfContentsUtils.Markdown.getHeadingId(
           this.parser!,
           heading.raw,
-          heading.level
+          heading.level,
+          this.sanitizer
         );
 
         if (!elementId) {
           return;
         }
-        const selector = `h${heading.level}[id="${elementId}"]`;
+        const selector = `h${heading.level}[id="${CSS.escape(elementId)}"]`;
 
         headingToElement.set(
           heading,

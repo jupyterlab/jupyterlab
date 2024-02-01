@@ -29,23 +29,24 @@ type CoreData = Map<string, any>;
 // URL config for this branch
 // Source and target branches
 // Target RTD version name
-// For master these will be the same, for other branches the source
+// For main these will be the same, for other branches the source
 // branch is whichever branch it was created from
 // The current release branch should target RTD stable
-// Master should target latest
+// Main should target latest
 // All other release branches should target a specific named version
 const URL_CONFIG = {
-  source: 'master',
-  target: 'master',
+  source: 'main',
+  target: 'main',
   rtdVersion: 'latest'
 };
 
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
-  '@jupyterlab/buildutils': ['path', 'webpack'],
+  '@jupyterlab/buildutils': ['assert', 'fs', 'path', 'webpack'],
   '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
+  '@jupyterlab/markedparser-extension': ['Tokens', 'MarkedOptions'],
   '@jupyterlab/testing': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
@@ -80,7 +81,7 @@ const UNUSED: Dict<string[]> = {
     'worker-loader',
     'source-map-loader'
   ],
-  '@jupyterlab/buildutils': ['verdaccio'],
+  '@jupyterlab/buildutils': ['inquirer', 'verdaccio'],
   '@jupyterlab/codemirror': [
     '@codemirror/lang-cpp',
     '@codemirror/lang-css',
@@ -94,12 +95,21 @@ const UNUSED: Dict<string[]> = {
     '@codemirror/lang-rust',
     '@codemirror/lang-sql',
     '@codemirror/lang-wast',
-    '@codemirror/lang-xml'
+    '@codemirror/lang-xml',
+    '@codemirror/legacy-modes'
+  ],
+  '@jupyterlab/codemirror-extension': [
+    '@codemirror/lang-markdown',
+    '@codemirror/legacy-modes'
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
+  '@jupyterlab/markedparser-extension': [
+    // only (but always) imported asynchronously
+    'marked-gfm-heading-id',
+    'marked-mangle'
+  ],
   '@jupyterlab/services': ['ws'],
-  '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testing': [
     '@babel/core',
     '@babel/preset-env',
@@ -121,6 +131,14 @@ const UNUSED: Dict<string[]> = {
 
 // Packages that are allowed to have differing versions
 const DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
+
+// Packages that have backward versions support
+const BACKWARD_VERSIONS: Record<string, Record<string, string>> = {
+  '@jupyterlab/rendermime-interfaces': {
+    '@lumino/coreutils': '^1.11.0',
+    '@lumino/widgets': '^1.37.2'
+  }
+};
 
 const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
@@ -158,6 +176,7 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/galata': [
     '@jupyterlab/application',
     '@jupyterlab/apputils',
+    '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
     '@jupyterlab/notebook'
   ],
@@ -165,6 +184,7 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/application',
     '@jupyterlab/apputils',
     '@jupyterlab/cells',
+    '@jupyterlab/debugger',
     '@jupyterlab/docmanager',
     '@jupyterlab/notebook'
   ],
@@ -192,7 +212,6 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/notebook',
     '@jupyterlab/cell-toolbar',
     '@jupyterlab/cell-toolbar-extension',
-    '@jupyterlab/celltags',
     '@jupyterlab/celltags-extension',
     '@jupyterlab/fileeditor',
     '@jupyterlab/codemirror-extension',
@@ -231,13 +250,16 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/markdownviewer',
     '@jupyterlab/markdownviewer-extension',
     '@jupyterlab/markedparser-extension',
-    '@jupyterlab/mathjax2',
-    '@jupyterlab/mathjax2-extension',
+    '@jupyterlab/mathjax-extension',
+    '@jupyterlab/mermaid',
+    '@jupyterlab/mermaid-extension',
     '@jupyterlab/metadataform',
     '@jupyterlab/metadataform-extension',
     '@jupyterlab/nbconvert-css',
     '@jupyterlab/notebook-extension',
     '@jupyterlab/pdf-extension',
+    '@jupyterlab/pluginmanager',
+    '@jupyterlab/pluginmanager-extension',
     '@jupyterlab/rendermime-extension',
     '@jupyterlab/running',
     '@jupyterlab/running-extension',
@@ -314,7 +336,10 @@ function ensureBranch(): string[] {
     .trim()
     .split(/\r?\n/);
   files = files.filter(filePath => {
-    return fileTypes.indexOf(path.extname(filePath)) !== -1;
+    return (
+      fileTypes.indexOf(path.extname(filePath)) !== -1 &&
+      !filePath.endsWith('_static/switcher.json')
+    );
   });
 
   // Set up string replacements
@@ -664,37 +689,6 @@ function ensureBuildUtils() {
 }
 
 /**
- * Ensure lockfile structure
- */
-function ensureLockfile(): string[] {
-  const staging = './jupyterlab/staging';
-  const lockFile = path.join(staging, 'yarn.lock');
-  const content = fs.readFileSync(lockFile, { encoding: 'utf-8' });
-  let newContent = content;
-  const messages = [];
-
-  // Verify that all packages have resolved to the correct (default) registry
-  const resolvedPattern =
-    /^\s*resolved "((?!https:\/\/registry\.yarnpkg\.com\/).*)"\s*$/gm;
-  let badRegistry;
-  while ((badRegistry = resolvedPattern.exec(content)) !== null) {
-    messages.push(`Fixing bad npm/yarn registry: ${badRegistry[1]}`);
-    const parsed = new URL(badRegistry[1]);
-    const newUrl = badRegistry[1].replace(
-      parsed.origin,
-      'https://registry.yarnpkg.com'
-    );
-    newContent = newContent.replace(badRegistry[1], newUrl);
-  }
-
-  if (content !== newContent) {
-    // Write the updated lockfile data back
-    fs.writeFileSync(lockFile, newContent, 'utf-8');
-  }
-  return messages;
-}
-
-/**
  * Ensure the repo integrity.
  */
 export async function ensureIntegrity(): Promise<boolean> {
@@ -820,7 +814,8 @@ export async function ensureIntegrity(): Promise<boolean> {
       locals,
       cssImports: cssImports[name],
       cssModuleImports: cssModuleImports[name],
-      differentVersions: DIFFERENT_VERSIONS
+      differentVersions: DIFFERENT_VERSIONS,
+      backwardVersions: BACKWARD_VERSIONS
     };
 
     if (name === '@jupyterlab/metapackage') {
@@ -841,12 +836,6 @@ export async function ensureIntegrity(): Promise<boolean> {
       messages[pkgName] = [];
     }
     messages[pkgName] = messages[pkgName].concat(pkgMessages);
-  }
-
-  // Ensure the staging area lockfile
-  const lockFileMessages = ensureLockfile();
-  if (lockFileMessages.length > 0) {
-    messages['lockfile'] = lockFileMessages;
   }
 
   // Handle the top level package.
@@ -875,27 +864,6 @@ export async function ensureIntegrity(): Promise<boolean> {
 
   // Handle buildutils
   ensureBuildUtils();
-
-  // Handle the pyproject.toml file
-  const pyprojectPath = path.resolve('.', 'pyproject.toml');
-  const curr = utils.getPythonVersion();
-  let tag = 'latest';
-  if (!/\d+\.\d+\.\d+$/.test(curr)) {
-    tag = 'next';
-  }
-  const publishCommand = `npm publish --tag ${tag}`;
-  let pyprojectText = fs.readFileSync(pyprojectPath, { encoding: 'utf8' });
-  if (pyprojectText.indexOf(publishCommand) === -1) {
-    pyprojectText = pyprojectText.replace(
-      /npm publish --tag [a-z]+/,
-      publishCommand
-    );
-    fs.writeFileSync(pyprojectPath, pyprojectText, { encoding: 'utf8' });
-    if (!messages['top']) {
-      messages['top'] = [];
-    }
-    messages['top'].push('Update npm publish command in pyproject.toml');
-  }
 
   // Handle the federated example application
   pkgMessages = ensureFederatedExample();

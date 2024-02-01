@@ -1,0 +1,47 @@
+/*
+Copyright (c) Jupyter Development Team.
+Distributed under the terms of the Modified BSD License.
+*/
+
+/* Styling Markdown */
+
+/* Headings */
+h1,
+h2 {
+  font-family: Impact, Charcoal, sans-serif;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px #000;
+}
+
+h1 {
+  font-size: 22px;
+  margin-bottom: 40px;
+  color: #10929e;
+  text-decoration: underline;
+}
+
+h2 {
+  font-size: 48px;
+  margin-bottom: 32px;
+  color: #76b4be;
+  text-transform: uppercase;
+}
+
+/* Block Quotes */
+blockquote {
+  font-family: Georgia, serif;
+  font-size: 16px;
+  color: #19085c;
+  border-left: 8px solid #effffc;
+  background-color: #eafcff;
+  padding: 20px;
+}
+
+/* Lists */
+ul,
+ol {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 24px;
+}

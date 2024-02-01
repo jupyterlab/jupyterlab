@@ -16,6 +16,9 @@
       "path": "../codemirror"
     },
     {
+      "path": "../coreutils"
+    },
+    {
       "path": "../docregistry"
     },
     {

@@ -27,6 +27,27 @@
         ]
       },
       {
+        "id": "jp-mainmenu-view",
+        "items": [
+          {
+            "type": "separator",
+            "rank": 40
+          },
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-view-codemirror-language",
+              "label": "Text Editor Syntax Highlighting"
+            },
+            "rank": 40
+          },
+          {
+            "type": "separator",
+            "rank": 40
+          }
+        ]
+      },
+      {
         "id": "jp-mainmenu-settings",
         "items": [
           {
@@ -40,38 +61,30 @@
               "label": "Text Editor Indentation",
               "items": [
                 {
+                  "command": "fileeditor:change-tabs"
+                },
+                {
                   "command": "fileeditor:change-tabs",
                   "args": {
-                    "insertSpaces": false,
-                    "size": 4
+                    "size": "1"
                   }
                 },
                 {
                   "command": "fileeditor:change-tabs",
                   "args": {
-                    "insertSpaces": true,
-                    "size": 1
+                    "size": "2"
                   }
                 },
                 {
                   "command": "fileeditor:change-tabs",
                   "args": {
-                    "insertSpaces": true,
-                    "size": 2
+                    "size": "4"
                   }
                 },
                 {
                   "command": "fileeditor:change-tabs",
                   "args": {
-                    "insertSpaces": true,
-                    "size": 4
-                  }
-                },
-                {
-                  "command": "fileeditor:change-tabs",
-                  "args": {
-                    "insertSpaces": true,
-                    "size": 8
+                    "size": "8"
                   }
                 }
               ]
@@ -97,6 +110,19 @@
               "delta": -1,
               "isMenu": true
             }
+          },
+          {
+            "type": "submenu",
+            "submenu": {
+              "id": "jp-mainmenu-settings-codemirror-theme",
+              "label": "Text Editor Theme",
+              "items": []
+            },
+            "rank": 31
+          },
+          {
+            "type": "separator",
+            "rank": 39
           }
         ]
       }
@@ -151,26 +177,17 @@
   "properties": {
     "editorConfig": {
       "title": "Editor Configuration",
-      "description": "The configuration for all text editors.\nIf `fontFamily`, `fontSize` or `lineHeight` are `null`,\nvalues from current theme are used.",
-      "$ref": "#/definitions/editorConfig",
+      "description": "The configuration for all text editors; it will override the CodeMirror default configuration.\nIf `fontFamily`, `fontSize` or `lineHeight` are `null`,\nvalues from current theme are used.",
+      "type": "object",
       "default": {
-        "autoClosingBrackets": false,
-        "codeFolding": false,
-        "cursorBlinkRate": 530,
-        "fontFamily": null,
-        "fontSize": null,
-        "insertSpaces": true,
-        "lineHeight": null,
-        "lineNumbers": true,
-        "lineWrap": "on",
-        "matchBrackets": true,
-        "readOnly": false,
-        "rulers": [],
-        "showTrailingSpace": false,
-        "tabSize": 4,
-        "wordWrapColumn": 80,
-        "showTrailingSpace": false
+        "lineNumbers": true
       }
+    },
+    "scrollPastEnd": {
+      "title": "Scroll behavior",
+      "description": "Whether to scroll past the end of text document.",
+      "type": "boolean",
+      "default": true
     },
     "toolbar": {
       "title": "Text editor toolbar items",
@@ -185,94 +202,6 @@
   "additionalProperties": false,
   "type": "object",
   "definitions": {
-    "editorConfig": {
-      "properties": {
-        "autoClosingBrackets": {
-          "type": "boolean",
-          "default": false,
-          "title": "Auto Closing Brackets"
-        },
-        "codeFolding": {
-          "type": "boolean",
-          "default": false,
-          "title": "Code Folding"
-        },
-        "cursorBlinkRate": {
-          "type": "number",
-          "title": "Cursor blinking rate",
-          "description": "Half-period in milliseconds used for cursor blinking. The default blink rate is 530ms. By setting this to zero, blinking can be disabled. A negative value hides the cursor entirely.",
-          "cursorBlinkRate": 530
-        },
-        "fontFamily": {
-          "type": ["string", "null"],
-          "title": "Font Family",
-          "default": null
-        },
-        "fontSize": {
-          "type": ["integer", "null"],
-          "title": "Font Size",
-          "minimum": 1,
-          "maximum": 100,
-          "default": null
-        },
-        "insertSpaces": {
-          "type": "boolean",
-          "title": "Insert Spaces",
-          "default": true
-        },
-        "lineHeight": {
-          "type": ["number", "null"],
-          "title": "Line Height",
-          "default": null
-        },
-        "lineNumbers": {
-          "type": "boolean",
-          "title": "Line Numbers",
-          "default": true
-        },
-        "lineWrap": {
-          "type": "string",
-          "title": "Line Wrap",
-          "enum": ["off", "on", "wordWrapColumn", "bounded"],
-          "default": "on"
-        },
-        "matchBrackets": {
-          "type": "boolean",
-          "title": "Match Brackets",
-          "default": true
-        },
-        "readOnly": {
-          "type": "boolean",
-          "title": "Read Only",
-          "default": false
-        },
-        "rulers": {
-          "type": "array",
-          "title": "Rulers",
-          "items": {
-            "type": "number"
-          },
-          "default": []
-        },
-        "showTrailingSpace": {
-          "type": "boolean",
-          "title": "Show Trailing Space",
-          "default": false
-        },
-        "tabSize": {
-          "type": "number",
-          "title": "Tab Size",
-          "default": 4
-        },
-        "wordWrapColumn": {
-          "type": "integer",
-          "title": "Word Wrap Column",
-          "default": 80
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "toolbarItem": {
       "properties": {
         "name": {
@@ -301,6 +230,11 @@
         "label": {
           "title": "Item label",
           "description": "If defined, it will override the command label",
+          "type": "string"
+        },
+        "caption": {
+          "title": "Item caption",
+          "description": "If defined, it will override the command caption",
           "type": "string"
         },
         "type": {

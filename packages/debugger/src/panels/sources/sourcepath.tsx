@@ -19,7 +19,10 @@ export const SourcePathComponent = ({
   return (
     <UseSignal signal={model.currentSourceChanged} initialSender={model}>
       {(model): JSX.Element => (
-        <span onClick={(): void => model?.open()}>
+        <span
+          onClick={(): void => model?.open()}
+          className="jp-DebuggerSources-header-path"
+        >
           {model?.currentSource?.path ?? ''}
         </span>
       )}
