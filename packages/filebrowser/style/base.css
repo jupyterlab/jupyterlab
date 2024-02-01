@@ -23,14 +23,15 @@
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
-  flex-wrap: wrap;
+  /* flex-wrap: wrap; */
 
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
-  row-gap: min(
+
+  /* row-gap: min(
     1.7vh,
     12px
-  ); /* Using min() and vh allows the row-gap to shrink when the screen is small or when the user zooms in, which should allow at least 2 files or folders to be seen within the file browser at 400% zoom */
+  ); Using min() and vh allows the row-gap to shrink when the screen is small or when the user zooms in, which should allow at least 2 files or folders to be seen within the file browser at 400% zoom */
 
   border-bottom: none;
   height: auto;
