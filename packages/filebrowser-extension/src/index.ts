@@ -68,7 +68,6 @@ import { ContextMenu } from '@lumino/widgets';
 
 const FILE_BROWSER_FACTORY = 'FileBrowser';
 const FILE_BROWSER_PLUGIN_ID = '@jupyterlab/filebrowser-extension:browser';
-
 /**
  * The class name added to the filebrowser filterbox node.
  */
@@ -312,18 +311,11 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   id: '@jupyterlab/filebrowser-extension:default-file-browser',
   description: 'Provides the default file browser',
   provides: IDefaultFileBrowser,
-  requires: [
-    IFileBrowserFactory,
-    ISettingRegistry,
-    IToolbarWidgetRegistry,
-    ITranslator
-  ],
+  requires: [IFileBrowserFactory, ITranslator],
   optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
   activate: async (
     app: JupyterFrontEnd,
     fileBrowserFactory: IFileBrowserFactory,
-    settingRegistry: ISettingRegistry,
-    toolbarRegistry: IToolbarWidgetRegistry,
     translator: ITranslator,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
@@ -366,46 +358,6 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     app.commands.keyBindingChanged.connect(() => {
       updateBrowserTitle();
     });
-    // Toolbar
-    toolbarRegistry.addFactory(
-      FILE_BROWSER_FACTORY,
-      'uploader',
-      (browser: FileBrowser) =>
-        new Uploader({ model: browser.model, translator })
-    );
-
-    toolbarRegistry.addFactory(
-      FILE_BROWSER_FACTORY,
-      'fileNameSearcher',
-      (browser: FileBrowser) => {
-        const searcher = FilenameSearcher({
-          updateFilter: (
-            filterFn: (item: string) => Partial<IScore> | null,
-            query?: string
-          ) => {
-            browser.model.setFilter(value => {
-              return filterFn(value.name.toLowerCase());
-            });
-          },
-          useFuzzyFilter: true,
-          placeholder: trans.__('Filter files by name'),
-          forceRefresh: true
-        });
-        searcher.addClass(FILTERBOX_CLASS);
-        return searcher;
-      }
-    );
-
-    setToolbar(
-      defaultBrowser,
-      createToolbarFactory(
-        toolbarRegistry,
-        settingRegistry,
-        FILE_BROWSER_FACTORY,
-        browserWidget.id,
-        translator
-      )
-    );
 
     void Private.restoreBrowser(
       defaultBrowser,
@@ -489,6 +441,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     IDefaultFileBrowser,
     IFileBrowserFactory,
     ISettingRegistry,
+    IToolbarWidgetRegistry,
     ITranslator,
     ILabShell,
     IFileBrowserCommands
@@ -501,6 +454,7 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     browser: IDefaultFileBrowser,
     factory: IFileBrowserFactory,
     settingRegistry: ISettingRegistry,
+    toolbarRegistry: IToolbarWidgetRegistry,
     translator: ITranslator,
     labShell: ILabShell,
     // Wait until file browser commands are ready before activating file browser widget
@@ -510,6 +464,47 @@ const browserWidget: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
     const { tracker } = factory;
     const trans = translator.load('jupyterlab');
+
+    // Toolbar
+    toolbarRegistry.addFactory(
+      FILE_BROWSER_FACTORY,
+      'uploader',
+      (browser: FileBrowser) =>
+        new Uploader({ model: browser.model, translator })
+    );
+
+    toolbarRegistry.addFactory(
+      FILE_BROWSER_FACTORY,
+      'fileNameSearcher',
+      (browser: FileBrowser) => {
+        const searcher = FilenameSearcher({
+          updateFilter: (
+            filterFn: (item: string) => Partial<IScore> | null,
+            query?: string
+          ) => {
+            browser.model.setFilter(value => {
+              return filterFn(value.name.toLowerCase());
+            });
+          },
+          useFuzzyFilter: true,
+          placeholder: trans.__('Filter files by name'),
+          forceRefresh: true
+        });
+        searcher.addClass(FILTERBOX_CLASS);
+        return searcher;
+      }
+    );
+
+    setToolbar(
+      browser,
+      createToolbarFactory(
+        toolbarRegistry,
+        settingRegistry,
+        FILE_BROWSER_FACTORY,
+        browserWidget.id,
+        translator
+      )
+    );
 
     labShell.add(browser, 'left', { rank: 100, type: 'File Browser' });
 
