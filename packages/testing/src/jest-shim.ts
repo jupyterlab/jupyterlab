@@ -57,6 +57,34 @@ window.focus = () => {
   /* JSDom throws "Not Implemented" */
 };
 
+/**
+ * Shim scrollTo because jsdom still does not implement a shim for it, see:
+ * https://github.com/jsdom/jsdom/issues/2751
+ */
+window.Element.prototype.scrollTo = (
+  _optionsOrX?: ScrollToOptions | number
+) => {
+  // no-op
+};
+
+// https://github.com/jsdom/jsdom/issues/3368
+class ResizeObserverMock {
+  constructor(_callback: any) {
+    // no-op
+  }
+  observe(_target: any, _options?: any) {
+    // no-op
+  }
+  unobserve(_target: any) {
+    // no-op
+  }
+  disconnect() {
+    // no-op
+  }
+}
+
+window.ResizeObserver = ResizeObserverMock;
+
 (window as any).document.elementFromPoint = (left: number, top: number) =>
   document.body;
 
