@@ -124,9 +124,11 @@ export function makeElementVariants(element: string) {
     `<${element} />`,
     `<${element} / >`,
     `<  ${element}  /  >`,
-    `<${element} id="a"/>`,
-    `<${element} id="b" />`,
-    `<${element} id="c" / >`,
-    `<  ${element} id="d"  /  >`
+    `<${element} id="a" >`,
+    `<${element} id="b" >`,
+    `<${element} id="c"/>`,
+    `<${element} id="d" />`,
+    `<${element} id="e" / >`,
+    `<  ${element} id="f"  /  >`
   ];
 }
