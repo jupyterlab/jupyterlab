@@ -162,7 +162,7 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
-    describe('#splitCell({})', () => {
+    describe('#splitCell()', () => {
       it('should split the active cell into two cells', () => {
         const cell = widget.activeCell!;
         const source = 'thisisasamplestringwithnospaces';
