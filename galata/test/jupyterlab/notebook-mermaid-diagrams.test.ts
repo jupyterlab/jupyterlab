@@ -3,6 +3,7 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
+import { Locator } from '@playwright/test';
 
 const fileName = 'mermaid_diagrams.ipynb';
 
@@ -23,6 +24,26 @@ const EXPECTED_MERMAID_ORDER = [
   'sankey',
   'xy'
 ];
+
+/**
+ * Workaround for playwright not handling screenshots
+ * for elements larger than viewport, derived from:
+ * https://github.com/microsoft/playwright/issues/13486#issuecomment-1112012053
+ */
+async function resizePageAndScreenshot(locator: Locator) {
+  const page = locator.page();
+  const box = await locator.boundingBox();
+  const originalSize = page.viewportSize();
+  if (box.width > originalSize.width || box.height > originalSize.height)
+    await page.setViewportSize({
+      // Rounding up because box might be a float while viewport has to be an int
+      width: Math.ceil(box.width),
+      height: Math.ceil(box.height)
+    });
+  const screenshot = await locator.screenshot();
+  await page.setViewportSize(originalSize);
+  return screenshot;
+}
 
 for (const theme of ['default', 'dark']) {
   const dark = theme === 'dark';
@@ -51,11 +72,12 @@ for (const theme of ['default', 'dark']) {
       test(`Mermaid Diagram ${i} ${diagram} in ${theme} theme`, async ({
         page
       }) => {
-        const output = await page.waitForSelector(
+        const output = page.locator(
           `.jp-Cell:nth-child(${i + 1}) .jp-RenderedMermaid`
         );
+        await output.waitFor();
 
-        expect(await output.screenshot()).toMatchSnapshot(
+        expect(await resizePageAndScreenshot(output)).toMatchSnapshot(
           `mermaid-diagram-${theme}-${iZero}-${diagram}.png`
         );
       });
