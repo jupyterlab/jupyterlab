@@ -232,6 +232,8 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       const keyValueArray = sidebarElementIds[tabSide];
 
       keyValueArray.forEach(async sideBarTabName => {
+        await page.locator('#tab-key-2-0').focus();
+
         let isSideBarFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
         );
