@@ -1386,7 +1386,7 @@ export class WindowedList<
    *    (n+1) cell down out of view
    * 4. This triggers the resize observer, which calls this method and scrolls
    *    the (n+1) cell back into view
-   * 
+   *
    * On implementation level, this is ensured by scrolling to `this._scrollToItem`
    * which is cleared after a short timeout once the scrolling settles
    * (see `this._resetScrollToItem()`).
