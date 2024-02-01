@@ -34,12 +34,16 @@ async function resizePageAndScreenshot(locator: Locator) {
   const page = locator.page();
   const box = await locator.boundingBox();
   const originalSize = page.viewportSize();
-  if (box.width > originalSize.width || box.height > originalSize.height)
+  if (box.width > originalSize.width || box.height > originalSize.height) {
+    const scaleFactor = Math.max(
+      originalSize.width / box.width,
+      originalSize.height / box.height
+    );
     await page.setViewportSize({
-      // Rounding up because box might be a float while viewport has to be an int
-      width: Math.ceil(box.width),
-      height: Math.ceil(box.height)
+      width: Math.ceil(box.width * scaleFactor),
+      height: Math.ceil(box.height * scaleFactor)
     });
+  }
   const screenshot = await locator.screenshot();
   await page.setViewportSize(originalSize);
   return screenshot;
