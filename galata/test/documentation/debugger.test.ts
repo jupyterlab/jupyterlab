@@ -7,7 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { positionMouseOverLocator } from './utils';
+import { positionMouseOver } from './utils';
 
 test.use({
   autoGoto: false,
@@ -86,7 +86,7 @@ test.describe('Debugger', () => {
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [await positionMouseOverLocator(runButton!)]
+      [await positionMouseOver(runButton!)]
     );
     await runButton!.focus();
     await runButton!.focus();
@@ -206,7 +206,7 @@ test.describe('Debugger', () => {
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [await positionMouseOverLocator(sidebar, { left: 0.25 })]
+      [await positionMouseOver(sidebar, { left: 0.25 })]
     );
 
     expect(
