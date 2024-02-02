@@ -192,7 +192,9 @@ test.describe('Notebook scroll on execution (with windowing)', () => {
     await expect(thirdCell!).toBeInViewport({ ratio: 0.0 });
     await expect(thirdCell!).not.toBeInViewport({ ratio: 0.02 });
     // Only a small fraction of notebook viewport should be taken up by that cell
-    expect(await notebookViewportRatio(notebook!, thirdCell!)).toBeLessThan(0.1);
+    expect(await notebookViewportRatio(notebook!, thirdCell!)).toBeLessThan(
+      0.1
+    );
 
     // Run second cell
     await page.notebook.runCell(1);
