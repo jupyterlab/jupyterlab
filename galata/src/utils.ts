@@ -210,46 +210,33 @@ export async function waitForCondition(
  */
 export async function waitForTransition(
   page: Page,
-  element: ElementHandle<Element> | string
+  element: ElementHandle<Element> | Locator | string
 ): Promise<void> {
-  const el = typeof element === 'string' ? await page.$(element) : element;
-
-  if (el) {
-    return page.evaluate(el => {
+  let el = typeof element === 'string' ? page.locator(element) : element;
+  try {
+    return (el as Locator).evaluate(elem => {
       return new Promise(resolve => {
         const onEndHandler = () => {
-          el.removeEventListener('transitionend', onEndHandler);
+          elem.removeEventListener('transitionend', onEndHandler);
           resolve();
         };
-        el.addEventListener('transitionend', onEndHandler);
+        elem.addEventListener('transitionend', onEndHandler);
       });
-    }, el);
-  }
-
-  return Promise.reject();
-}
-
-/**
- * Wait for a element to emit 'transitionend' event.
- *
- * @param page Playwright page model object
- * @param element Element or selector to watch
- */
-export async function waitForLocatorTransition(
-  page: Page,
-  element: Locator | string
-): Promise<void> {
-  const el = typeof element === 'string' ? page.locator(element) : element;
-
-  return el.evaluate(elem => {
-    return new Promise(resolve => {
-      const onEndHandler = () => {
-        elem.removeEventListener('transitionend', onEndHandler);
-        resolve();
-      };
-      elem.addEventListener('transitionend', onEndHandler);
     });
-  });
+  } catch {
+    if (el) {
+      return page.evaluate(el => {
+        return new Promise(resolve => {
+          const onEndHandler = () => {
+            el.removeEventListener('transitionend', onEndHandler);
+            resolve();
+          };
+          el.addEventListener('transitionend', onEndHandler);
+        });
+      }, el as ElementHandle<Element>);
+    }
+    return Promise.reject();
+  }
 }
 
 // Selector builders

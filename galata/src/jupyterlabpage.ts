@@ -227,14 +227,9 @@ export interface IJupyterLabPage {
    *
    * @param element Element or selector to watch
    */
-  waitForTransition(element: ElementHandle<Element> | string): Promise<void>;
-
-  /**
-   * Wait for an element to emit 'transitionend' event.
-   *
-   * @param element Locator to the element or selector to watch
-   */
-  waitForLocatorTransition(element: Locator | string): Promise<void>;
+  waitForTransition(
+    element: ElementHandle<Element> | Locator | string
+  ): Promise<void>;
 
   /**
    * Factory for active activity tab xpath
@@ -614,7 +609,7 @@ export class JupyterLabPage implements IJupyterLabPage {
 
       if ((checked && !simple) || (!checked && simple)) {
         await Promise.all([
-          Utils.waitForLocatorTransition(this.page, toggle),
+          Utils.waitForTransition(this.page, toggle),
           toggle.click()
         ]);
       }
@@ -647,18 +642,9 @@ export class JupyterLabPage implements IJupyterLabPage {
    * @param element Element or selector to watch
    */
   async waitForTransition(
-    element: ElementHandle<Element> | string
+    element: ElementHandle<Element> | Locator | string
   ): Promise<void> {
     return Utils.waitForTransition(this.page, element);
-  }
-
-  /**
-   * Wait for an element to emit 'transitionend' event.
-   *
-   * @param element Locator to the element or selector to watch
-   */
-  async waitForLocatorTransition(element: Locator | string): Promise<void> {
-    return Utils.waitForLocatorTransition(this.page, element);
   }
 
   /**

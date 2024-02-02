@@ -7,7 +7,7 @@ import {
   filterContent,
   generateArrow,
   positionMouse,
-  positionMouseOverLocator
+  positionMouseOver
 } from './utils';
 
 test.use({
@@ -275,7 +275,7 @@ test.describe('General', () => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
       [
-        await positionMouseOverLocator(fileMenuNewItem, {
+        await positionMouseOver(fileMenuNewItem, {
           left: 0,
           // small negative offset to place the cursor before "New"
           offsetLeft: -17,
@@ -313,7 +313,7 @@ test.describe('General', () => {
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [await positionMouseOverLocator(itemLocator, { top: 0.5, left: 0.55 })]
+      [await positionMouseOver(itemLocator, { top: 0.5, left: 0.55 })]
     );
 
     expect(
@@ -492,7 +492,7 @@ test.describe('General', () => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
       [
-        await positionMouseOverLocator(anchor, {
+        await positionMouseOver(anchor, {
           left: 1,
           offsetLeft: 5,
           top: 0.25
