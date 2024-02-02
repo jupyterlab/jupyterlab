@@ -237,7 +237,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
       const fileBrowser = page.locator(`#${sidebarElementIds.leftSideBar[0]}`);
 
-      expect(fileBrowser).toBeFocused();
+      await expect(fileBrowser).toBeFocused();
 
       await page.activity.keyToSidebar(value, 'ArrowDown', fileBrowser);
 
