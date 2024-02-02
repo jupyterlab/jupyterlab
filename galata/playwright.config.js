@@ -27,7 +27,7 @@ module.exports = {
     },
     {
       name: 'jupyterlab',
-      testMatch: 'test/jupyterlab/**',
+      testMatch: 'test/jupyterlab/**/*.test.ts',
       testIgnore: '**/.ipynb_checkpoints/**',
       use: {
         contextOptions: {

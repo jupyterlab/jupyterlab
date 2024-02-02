@@ -266,6 +266,36 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.1.0rc1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.1.0rc0...5ba76a876091ca80c612a3747fe2767219a19ca5))
+
+### Bugs fixed
+
+- Fix kernels sidepanel scrollbar [#15718](https://github.com/jupyterlab/jupyterlab/pull/15718) ([@FoSuCloud](https://github.com/FoSuCloud))
+- Fix `overrides.json` not working for shortcuts [#15716](https://github.com/jupyterlab/jupyterlab/pull/15716) ([@krassowski](https://github.com/krassowski))
+- Add scroll margin to headings for better alignment [#15703](https://github.com/jupyterlab/jupyterlab/pull/15703) ([@krassowski](https://github.com/krassowski))
+- Fix scrolling on execution and switching notebook mode [#15702](https://github.com/jupyterlab/jupyterlab/pull/15702) ([@krassowski](https://github.com/krassowski))
+- Fix search highlights removal on clearing input box [#15690](https://github.com/jupyterlab/jupyterlab/pull/15690) ([@krassowski](https://github.com/krassowski))
+- Fix jupyterlab downgrade issue on extension installation [#15650](https://github.com/jupyterlab/jupyterlab/pull/15650) ([@Sarthug99](https://github.com/Sarthug99))
+
+### Maintenance and upkeep improvements
+
+- Replace `ifaxity/wait-on-action` wrapper with direct `wait-on` use [#15721](https://github.com/jupyterlab/jupyterlab/pull/15721) ([@krassowski](https://github.com/krassowski))
+- Run Mermaid tests on CI [#15717](https://github.com/jupyterlab/jupyterlab/pull/15717) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Remove Python 3.0, Notebook 5 mentions from contributor docs [#15710](https://github.com/jupyterlab/jupyterlab/pull/15710) ([@JasonWeill](https://github.com/JasonWeill))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-01-27&to=2024-02-01&type=c))
+
+[@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2024-01-27..2024-02-01&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-01-27..2024-02-01&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-01-27..2024-02-01&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-01-27..2024-02-01&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-01-27..2024-02-01&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-01-27..2024-02-01&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-01-27..2024-02-01&type=Issues) | [@Sarthug99](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASarthug99+updated%3A2024-01-27..2024-02-01&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-01-27..2024-02-01&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.1.0rc0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.1.0b2...e38e0b8d59b8cba1d559040236a142931c17c42b))
@@ -294,8 +324,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-01-19&to=2024-01-27&type=c))
 
 [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2024-01-19..2024-01-27&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-01-19..2024-01-27&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-01-19..2024-01-27&type=Issues) | [@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2024-01-19..2024-01-27&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-01-19..2024-01-27&type=Issues) | [@j264415](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aj264415+updated%3A2024-01-19..2024-01-27&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-01-19..2024-01-27&type=Issues) | [@jupyterlab-bot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-bot+updated%3A2024-01-19..2024-01-27&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-01-19..2024-01-27&type=Issues) | [@KiranmaiKalla](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AKiranmaiKalla+updated%3A2024-01-19..2024-01-27&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-01-19..2024-01-27&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-01-19..2024-01-27&type=Issues) | [@Wh1isper](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AWh1isper+updated%3A2024-01-19..2024-01-27&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.1.0b2
 

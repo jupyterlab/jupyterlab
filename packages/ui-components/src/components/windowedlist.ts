@@ -21,11 +21,12 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
- * Maximal remaining time for idle callback
+ * For how long after the scroll request should the target position
+ * be corrected to account for resize of other widgets?
  *
- * Ref: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#getting_the_most_out_of_idle_callbacks
+ * The time is given in milliseconds.
  */
-const MAXIMUM_TIME_REMAINING = 50;
+const MAXIMUM_TIME_REMAINING = 100;
 
 /*
  * Feature detection
@@ -292,13 +293,20 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   /**
    * Get the scroll offset to display an item in the viewport.
    *
-   * By default, the list will scroll as little as possible to ensure the item is fully visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
+   * By default, the list will scroll as little as possible to ensure the item is fully visible (`auto`).
+   * You can control the alignment of the item though by specifying a second alignment parameter.
+   * Acceptable values are:
    *
-   *   auto (default) - Automatically align with the top or bottom minimising the amount scrolled; if item is smaller than the viewport and fully visible, do not scroll at all.
-   *   smart - If the item is significantly visible, don't scroll at all (regardless of whether it fits in the viewport). If it is less than one viewport away or exceeds viewport in height, scroll so that it becomes visible. If it is more than one viewport away and fits the viewport, scroll so that it is centered within the viewport.
-   *   center - Center align the item within the list.
-   *   end - Align the item to the end of the list
-   *   start - Align the item to the beginning of the list
+   *   auto - Automatically align with the top or bottom minimising the amount scrolled,
+   *          If `alignPreference` is given, follow such preferred alignment.
+   *          If item is smaller than the viewport and fully visible, do not scroll at all.
+   *   smart - If the item is significantly visible, don't scroll at all (regardless of whether it fits in the viewport).
+   *           If the item is less than one viewport away, scroll so that it becomes fully visible (following the `auto` heuristics).
+   *           If the item is more than one viewport away, scroll so that it is centered within the viewport (`center` if smaller than viewport, `top-center` otherwise).
+   *   center - Align the middle of the item with the middle of the viewport (it only works well for items smaller than the viewport).
+   *   top-center - Align the top of the item with the middle of the viewport (works well for items larger than the viewport).
+   *   end - Align the bottom of the item to the bottom of the list.
+   *   start - Align the top of item to the top of the list.
    *
    * An item is considered significantly visible if:
    *  - it overlaps with the viewport by the amount specified by `scrollDownThreshold` when below the viewport
@@ -307,16 +315,26 @@ export abstract class WindowedListModel implements WindowedList.IModel {
    * @param index Item index
    * @param align Where to align the item in the viewport
    * @param margin The proportion of viewport to add when aligning with the top/bottom of the list.
+   * @param precomputed Precomputed values to use when windowing is disabled.
+   * @param alignPreference Allows to override the alignment of item when the `auto` heuristic decides that the item needs to be scrolled into view.
    * @returns The needed scroll offset
    */
   getOffsetForIndexAndAlignment(
     index: number,
     align: WindowedList.ScrollToAlign = 'auto',
-    margin: number = 0
+    margin: number = 0,
+    precomputed?: {
+      totalSize: number;
+      itemMetadata: WindowedList.ItemMetadata;
+      currentOffset: number;
+    },
+    alignPreference?: WindowedList.BaseScrollToAlignment
   ): number {
     const boundedMargin = Math.min(Math.max(0.0, margin), 1.0);
     const size = this._height;
-    const itemMetadata = this._getItemMetadata(index);
+    const itemMetadata = precomputed
+      ? precomputed.itemMetadata
+      : this._getItemMetadata(index);
 
     const scrollDownThreshold =
       this.scrollDownThreshold <= 1
@@ -327,9 +345,12 @@ export abstract class WindowedListModel implements WindowedList.IModel {
         ? itemMetadata.size * this.scrollUpThreshold
         : this.scrollUpThreshold;
 
-    // Get estimated total size after ItemMetadata is computed,
-    // To ensure it reflects actual measurements instead of just estimates.
-    const estimatedTotalSize = this.getEstimatedTotalSize();
+    // When pre-computed values are not available (we are in windowing mode),
+    // `getEstimatedTotalSize` is called after ItemMetadata is computed
+    // to ensure it reflects actual measurements instead of just estimates.
+    const estimatedTotalSize = precomputed
+      ? precomputed.totalSize
+      : this.getEstimatedTotalSize();
 
     const topOffset = Math.max(
       0,
@@ -339,14 +360,21 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       0,
       itemMetadata.offset - size + itemMetadata.size
     );
-    const currentOffset = this._scrollOffset;
+    // Current offset (+/- padding) is the top edge of the viewport.
+    const currentOffset = precomputed
+      ? precomputed.currentOffset
+      : this._scrollOffset;
 
+    const viewportPadding = this._windowingActive ? this.paddingTop : 0;
     const itemTop = itemMetadata.offset;
     const itemBottom = itemMetadata.offset + itemMetadata.size;
-    const bottomEdge = currentOffset - this.paddingTop + size;
-    const topEdge = currentOffset - this.paddingTop;
+    const bottomEdge = currentOffset - viewportPadding + size;
+    const topEdge = currentOffset - viewportPadding;
     const crossingBottomEdge = bottomEdge > itemTop && bottomEdge < itemBottom;
     const crossingTopEdge = topEdge > itemTop && topEdge < itemBottom;
+
+    const isFullyWithinViewport = bottomEdge > itemBottom && topEdge < itemTop;
+
     if (align === 'smart') {
       const edgeLessThanOneViewportAway =
         currentOffset >= bottomOffset - size &&
@@ -356,19 +384,20 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       const hiddenPartTop = topEdge - itemTop;
 
       if (
+        isFullyWithinViewport ||
         (crossingBottomEdge && visiblePartBottom >= scrollDownThreshold) ||
         (crossingTopEdge && hiddenPartTop < scrollUpThreshold)
       ) {
-        return this._scrollOffset;
+        return currentOffset;
       } else if (edgeLessThanOneViewportAway) {
         // Possibly less than one viewport away, scroll so that it becomes visible (including the margin)
         align = 'auto';
       } else {
-        // More than one viewport away, scroll so that it is centered within the list,
-        // unless the widget is larger than the viewport, in which case only scroll to
-        // align with the top or bottom edge (automatically)
+        // More than one viewport away, scroll so that it is centered within the list:
+        // - if the item is smaller than viewport align the middle of the item with the middle of the viewport
+        // - if the item is larger than viewport align the top of the item with the middle of the viewport
         if (itemMetadata.size > size) {
-          align = 'auto';
+          align = 'top-center';
         } else {
           align = 'center';
         }
@@ -376,9 +405,11 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     }
 
     if (align === 'auto') {
-      if (bottomEdge > itemBottom && topEdge < itemTop) {
+      if (isFullyWithinViewport) {
         // No need to change the position, return the current offset.
-        return this._scrollOffset;
+        return currentOffset;
+      } else if (alignPreference !== undefined) {
+        align = alignPreference;
       } else if (crossingBottomEdge || bottomEdge <= itemBottom) {
         align = 'end';
       } else {
@@ -388,13 +419,17 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
     switch (align) {
       case 'start':
-        // Align to the top edge.
-        return Math.max(0, topOffset - boundedMargin * size) + this.paddingTop;
+        // Align item top to the top edge.
+        return Math.max(0, topOffset - boundedMargin * size) + viewportPadding;
       case 'end':
-        // Align to the bottom edge.
-        return bottomOffset + boundedMargin * size + this.paddingTop;
+        // Align item bottom to the bottom edge.
+        return bottomOffset + boundedMargin * size + viewportPadding;
       case 'center':
-        return Math.round(bottomOffset + (topOffset - bottomOffset) / 2);
+        // Align item centre to the middle of the viewport
+        return bottomOffset + (topOffset - bottomOffset) / 2;
+      case 'top-center':
+        // Align item top to the middle of the viewport
+        return topOffset - size / 2;
     }
   }
 
@@ -764,7 +799,7 @@ export class WindowedList<
     this._innerElement = innerElement;
     this._isScrolling = null;
     this._outerElement = outerElement;
-    this._resizeObserver = null;
+    this._itemsResizeObserver = null;
     this._scrollbarElement = scrollbarElement;
     this._scrollToItem = null;
     this._scrollRepaint = null;
@@ -877,7 +912,7 @@ export class WindowedList<
    */
   scrollTo(scrollOffset: number): void {
     if (!this.viewModel.windowingActive) {
-      this.node.scrollTo({ top: scrollOffset });
+      this._outerElement.scrollTo({ top: scrollOffset });
       return;
     }
 
@@ -894,35 +929,32 @@ export class WindowedList<
   /**
    * Scroll to the specified item.
    *
-   * By default, the list will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
+   * By default, the list will scroll as little as possible to ensure the item is fully visible (`auto`).
+   * You can control the alignment of the item though by specifying a second alignment parameter.
+   * Acceptable values are:
    *
-   *   auto (default) - Scroll as little as possible to ensure the item is visible. (If the item is already visible, it won't scroll at all.)
-   *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away, scroll so that it becomes visible (including the margin). If it is more than one viewport away, scroll so that it is centered within the list.
-   *   center - Center align the item within the list.
-   *   end - Align the item to the end of the list
-   *   start - Align the item to the beginning of the list
+   *   auto - Automatically align with the top or bottom minimising the amount scrolled,
+   *          If `alignPreference` is given, follow such preferred alignment.
+   *          If item is smaller than the viewport and fully visible, do not scroll at all.
+   *   smart - If the item is significantly visible, don't scroll at all (regardless of whether it fits in the viewport).
+   *           If the item is less than one viewport away, scroll so that it becomes fully visible (following the `auto` heuristics).
+   *           If the item is more than one viewport away, scroll so that it is centered within the viewport (`center` if smaller than viewport, `top-center` otherwise).
+   *   center - Align the middle of the item with the middle of the viewport (it only works well for items smaller than the viewport).
+   *   top-center - Align the top of the item with the middle of the viewport (works well for items larger than the viewport).
+   *   end - Align the bottom of the item to the bottom of the list.
+   *   start - Align the top of item to the top of the list.
    *
    * @param index Item index to scroll to
    * @param align Type of alignment
    * @param margin In 'smart' mode the viewport proportion to add
+   * @param alignPreference Allows to override the alignment of item when the `auto` heuristic decides that the item needs to be scrolled into view.
    */
   scrollToItem(
     index: number,
     align: WindowedList.ScrollToAlign = 'auto',
-    margin: number = 0.25
+    margin: number = 0.25,
+    alignPreference?: WindowedList.BaseScrollToAlignment
   ): Promise<void> {
-    if (!this.viewModel.windowingActive) {
-      const widget = this.layout.widgets[index];
-      if (widget?.node.scrollIntoView) {
-        widget.node.scrollIntoView({
-          block: ['auto', 'smart'].includes(align)
-            ? 'nearest'
-            : (align as ScrollLogicalPosition)
-        });
-      }
-      return Promise.resolve();
-    }
-
     if (
       !this._isScrolling ||
       this._scrollToItem === null ||
@@ -934,15 +966,41 @@ export class WindowedList<
       }
 
       this._isScrolling = new PromiseDelegate<void>();
+      // Catch the internal reject, as otherwise this will
+      // result in an unhandled promise rejection in test.
+      this._isScrolling.promise.catch(console.debug);
     }
 
-    this._scrollToItem = [index, align];
+    this._scrollToItem = [index, align, margin, alignPreference];
+
     this._resetScrollToItem();
+
+    let precomputed = undefined;
+    if (!this.viewModel.windowingActive) {
+      const item = this._innerElement.querySelector(
+        `[data-windowed-list-index="${index}"]`
+      );
+      if (!item || !(item instanceof HTMLElement)) {
+        // Note: this can happen when scroll is requested when a cell is getting added
+        console.debug(`Element with index ${index} not found`);
+        return Promise.resolve();
+      }
+      precomputed = {
+        totalSize: this._outerElement.scrollHeight,
+        itemMetadata: {
+          offset: item.offsetTop,
+          size: item.clientHeight
+        },
+        currentOffset: this._outerElement.scrollTop
+      };
+    }
     this.scrollTo(
       this.viewModel.getOffsetForIndexAndAlignment(
         Math.max(0, Math.min(index, this.viewModel.widgetCount - 1)),
         align,
-        margin
+        margin,
+        precomputed,
+        alignPreference
       )
     );
 
@@ -955,12 +1013,13 @@ export class WindowedList<
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     if (this.viewModel.windowingActive) {
-      this._addListeners();
+      this._applyWindowingStyles();
     } else {
       this._applyNoWindowingStyles();
     }
+    this._addListeners();
     this.viewModel.height = this.node.getBoundingClientRect().height;
-    const style = window.getComputedStyle(this.node);
+    const style = window.getComputedStyle(this._viewport);
     this.viewModel.paddingTop = parseFloat(style.paddingTop);
     this._scrollbarElement.addEventListener('pointerdown', this);
   }
@@ -969,9 +1028,7 @@ export class WindowedList<
    * A message handler invoked on an `'before-detach'` message.
    */
   protected onBeforeDetach(msg: Message): void {
-    if (this.viewModel.windowingActive) {
-      this._removeListeners();
-    }
+    this._removeListeners();
     this._scrollbarElement.removeEventListener('pointerdown', this);
     super.onBeforeDetach(msg);
   }
@@ -1035,13 +1092,16 @@ export class WindowedList<
   ): void {
     switch (changes.name) {
       case 'windowingActive':
+        this._removeListeners();
         if (this.viewModel.windowingActive) {
-          this._addListeners();
+          this._applyWindowingStyles();
           this.onScroll({ currentTarget: this.node } as any);
+          this._addListeners();
           // Bail as onScroll will trigger update
           return;
         } else {
-          this._removeListeners();
+          this._applyNoWindowingStyles();
+          this._addListeners();
         }
         break;
     }
@@ -1125,25 +1185,33 @@ export class WindowedList<
    * Add listeners for viewport, contents and the virtual scrollbar.
    */
   private _addListeners() {
-    if (!this._resizeObserver) {
-      this._resizeObserver = new ResizeObserver(
-        this._onWidgetResize.bind(this)
-      );
-    }
-    for (const widget of this.layout.widgets) {
-      this._resizeObserver.observe(widget.node);
-      widget.disposed.connect(
-        () => this._resizeObserver?.unobserve(widget.node)
-      );
-    }
-    this._outerElement.addEventListener('scroll', this, passiveIfSupported);
-    this._viewport.style.position = 'absolute';
+    if (this.viewModel.windowingActive) {
+      if (!this._itemsResizeObserver) {
+        this._itemsResizeObserver = new ResizeObserver(
+          this._onItemResize.bind(this)
+        );
+      }
+      for (const widget of this.layout.widgets) {
+        this._itemsResizeObserver.observe(widget.node);
+        widget.disposed.connect(
+          () => this._itemsResizeObserver?.unobserve(widget.node)
+        );
+      }
+      this._outerElement.addEventListener('scroll', this, passiveIfSupported);
 
-    this._scrollbarResizeObserver = new ResizeObserver(
-      this._adjustDimensionsForScrollbar.bind(this)
-    );
-    this._scrollbarResizeObserver.observe(this._outerElement);
-    this._scrollbarResizeObserver.observe(this._scrollbarElement);
+      this._scrollbarResizeObserver = new ResizeObserver(
+        this._adjustDimensionsForScrollbar.bind(this)
+      );
+      this._scrollbarResizeObserver.observe(this._outerElement);
+      this._scrollbarResizeObserver.observe(this._scrollbarElement);
+    } else {
+      if (!this._areaResizeObserver) {
+        this._areaResizeObserver = new ResizeObserver(
+          this._onAreaResize.bind(this)
+        );
+        this._areaResizeObserver.observe(this._innerElement);
+      }
+    }
   }
 
   /**
@@ -1153,17 +1221,24 @@ export class WindowedList<
     this._viewport.style.position = 'relative';
     this._viewport.style.top = '0px';
   }
+  /**
+   * Turn on windowing related styles in the viewport.
+   */
+  private _applyWindowingStyles() {
+    this._viewport.style.position = 'absolute';
+  }
 
   /**
    * Remove listeners for viewport and contents (but not the virtual scrollbar).
    */
   private _removeListeners() {
     this._outerElement.removeEventListener('scroll', this);
-    this._resizeObserver?.disconnect();
-    this._resizeObserver = null;
+    this._areaResizeObserver?.disconnect();
+    this._areaResizeObserver = null;
+    this._itemsResizeObserver?.disconnect();
+    this._itemsResizeObserver = null;
     this._scrollbarResizeObserver?.disconnect();
     this._scrollbarResizeObserver = null;
-    this._applyNoWindowingStyles();
   }
 
   /**
@@ -1190,17 +1265,19 @@ export class WindowedList<
       // Remove not needed widgets
       for (let itemIdx = nWidgets - 1; itemIdx >= 0; itemIdx--) {
         if (!toAdd.includes(this.layout.widgets[itemIdx])) {
-          this._resizeObserver?.unobserve(this.layout.widgets[itemIdx].node);
+          this._itemsResizeObserver?.unobserve(
+            this.layout.widgets[itemIdx].node
+          );
           this.layout.removeWidget(this.layout.widgets[itemIdx]);
         }
       }
 
       for (let index = 0; index < toAdd.length; index++) {
         const item = toAdd[index];
-        if (this._resizeObserver && !this.layout.widgets.includes(item)) {
-          this._resizeObserver.observe(item.node);
+        if (this._itemsResizeObserver && !this.layout.widgets.includes(item)) {
+          this._itemsResizeObserver.observe(item.node);
           item.disposed.connect(
-            () => this._resizeObserver?.unobserve(item.node)
+            () => this._itemsResizeObserver?.unobserve(item.node)
           );
         }
 
@@ -1256,9 +1333,16 @@ export class WindowedList<
   }
 
   /**
-   * Handle viewport content (e.g. widgets) resize.
+   * Handle viewport area resize.
    */
-  private _onWidgetResize(entries: ResizeObserverEntry[]): void {
+  private _onAreaResize(_entries: ResizeObserverEntry[]): void {
+    this._scrollBackToItemOnResize();
+  }
+
+  /**
+   * Handle viewport content (i.e. items) resize.
+   */
+  private _onItemResize(entries: ResizeObserverEntry[]): void {
     this._resetScrollToItem();
 
     if (this.isHidden || this.isParentHidden) {
@@ -1283,15 +1367,37 @@ export class WindowedList<
 
     // If some sizes changed
     if (this.viewModel.setWidgetSize(newSizes)) {
+      this._scrollBackToItemOnResize();
       // Update the list
-      if (this._scrollToItem) {
-        this.scrollToItem(...this._scrollToItem).catch(reason => {
-          console.log(reason);
-        });
-      }
-
       this.update();
     }
+  }
+
+  /**
+   * Scroll to the item which was most recently requested.
+   *
+   * This method ensures that the app scrolls to the item even if a resize event
+   * occurs shortly after the scroll. Consider the following sequence of events:
+   *
+   * 1. User is at the nth cell, presses Shift+Enter (run current cell and
+   *    advance to next)
+   * 2. App scrolls to the next (n+1) cell
+   * 3. The nth cell finishes running and renders the output, pushing the
+   *    (n+1) cell down out of view
+   * 4. This triggers the resize observer, which calls this method and scrolls
+   *    the (n+1) cell back into view
+   *
+   * On implementation level, this is ensured by scrolling to `this._scrollToItem`
+   * which is cleared after a short timeout once the scrolling settles
+   * (see `this._resetScrollToItem()`).
+   */
+  private _scrollBackToItemOnResize() {
+    if (!this._scrollToItem) {
+      return;
+    }
+    this.scrollToItem(...this._scrollToItem).catch(reason => {
+      console.log(reason);
+    });
   }
 
   /**
@@ -1358,11 +1464,19 @@ export class WindowedList<
   private _needsUpdate = false;
   private _outerElement: HTMLElement;
   private _resetScrollToItemTimeout: number | null;
-  private _resizeObserver: ResizeObserver | null;
+  private _areaResizeObserver: ResizeObserver | null;
+  private _itemsResizeObserver: ResizeObserver | null;
   private _scrollbarElement: HTMLElement;
   private _scrollbarResizeObserver: ResizeObserver | null;
   private _scrollRepaint: number | null;
-  private _scrollToItem: [number, WindowedList.ScrollToAlign] | null;
+  private _scrollToItem:
+    | [
+        number,
+        WindowedList.ScrollToAlign,
+        number,
+        WindowedList.BaseScrollToAlignment | undefined
+      ]
+    | null;
   private _scrollUpdateWasRequested: boolean;
   private _updater: Throttler;
   private _viewModel: T;
@@ -1582,23 +1696,38 @@ export namespace WindowedList {
     /**
      * Get the scroll offset to display an item in the viewport.
      *
-     * By default, the list will scroll as little as possible to ensure the item is visible. You can control the alignment of the item though by specifying a second alignment parameter. Acceptable values are:
+     * By default, the list will scroll as little as possible to ensure the item is fully visible (`auto`).
+     * You can control the alignment of the item though by specifying a second alignment parameter.
+     * Acceptable values are:
      *
-     *   auto (default) - Scroll as little as possible to ensure the item is visible. (If the item is already visible, it won't scroll at all.)
-     *   smart - If the item is already visible (including the margin), don't scroll at all. If it is less than one viewport away, scroll so that it becomes visible (including the margin). If it is more than one viewport away, scroll so that it is centered within the list.
-     *   center - Center align the item within the list.
-     *   end - Align the item to the end of the list
-     *   start - Align the item to the beginning of the list
+     *   auto - Automatically align with the top or bottom minimising the amount scrolled,
+     *          If `alignPreference` is given, follow such preferred alignment.
+     *          If item is smaller than the viewport and fully visible, do not scroll at all.
+     *   smart - If the item is significantly visible, don't scroll at all (regardless of whether it fits in the viewport).
+     *           If the item is less than one viewport away, scroll so that it becomes fully visible (following the `auto` heuristics).
+     *           If the item is more than one viewport away, scroll so that it is centered within the viewport (`center` if smaller than viewport, `top-center` otherwise).
+     *   center - Align the middle of the item with the middle of the viewport (it only works well for items smaller than the viewport).
+     *   top-center - Align the top of the item with the middle of the viewport (works well for items larger than the viewport).
+     *   end - Align the bottom of the item to the bottom of the list.
+     *   start - Align the top of item to the top of the list.
      *
      * @param index Item index
      * @param align Where to align the item in the viewport
      * @param margin In 'smart' mode the viewport proportion to add
+     * @param precomputed Precomputed values to use when windowing is disabled.
+     * @param alignPreference Allows to override the alignment of item when the `auto` heuristic decides that the item needs to be scrolled into view.
      * @returns The needed scroll offset
      */
     getOffsetForIndexAndAlignment(
       index: number,
       align?: ScrollToAlign,
-      margin?: number
+      margin?: number,
+      precomputed?: {
+        totalSize: number;
+        itemMetadata: WindowedList.ItemMetadata;
+        currentOffset: number;
+      },
+      alignPreference?: WindowedList.BaseScrollToAlignment
     ): number;
 
     /**
@@ -1810,9 +1939,14 @@ export namespace WindowedList {
   };
 
   /**
-   * Type of scroll
+   * Basic type of scroll alignment
    */
-  export type ScrollToAlign = 'auto' | 'smart' | 'center' | 'start' | 'end';
+  export type BaseScrollToAlignment = 'center' | 'top-center' | 'start' | 'end';
+
+  /**
+   * Type of scroll alignment including `auto` and `smart`
+   */
+  export type ScrollToAlign = 'auto' | 'smart' | BaseScrollToAlignment;
 
   /**
    * Widget range in view port
