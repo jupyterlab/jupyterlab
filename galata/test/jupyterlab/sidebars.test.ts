@@ -223,62 +223,60 @@ const elementAriaLabels = {
 };
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
-  test(`Open sidebar tabs via keyboard navigation`, async ({ page }) => {
-    for (const id of sidebarElementIds.leftSideBar) {
-      test(`Should open ${id} tab`, async () => {
-        await page.sidebar.close('left');
+  sidebarElementIds.leftSideBar.forEach(value => {
+    test(`Open ${value} via keyboard navigation`, async ({ page }) => {
+      await page.sidebar.close('left');
 
-        await page.locator('#tab-key-2-0').focus();
+      await page.locator('#tab-key-2-0').focus();
 
-        let isSideBarFocused = await page.evaluate(
+      let isSideBarFocused = await page.evaluate(
+        () => document.activeElement?.getAttribute('data-id')
+      );
+      while (isSideBarFocused !== sidebarElementIds.leftSideBar[0]) {
+        await page.keyboard.press('Tab');
+        isSideBarFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
         );
-        while (isSideBarFocused !== sidebarElementIds.leftSideBar[0]) {
-          await page.keyboard.press('Tab');
-          isSideBarFocused = await page.evaluate(
-            () => document.activeElement?.getAttribute('data-id')
-          );
-        }
-        while (isSideBarFocused !== id) {
-          await page.keyboard.press('ArrowDown');
-          isSideBarFocused = await page.evaluate(
-            () => document.activeElement?.getAttribute('data-id')
-          );
-        }
-
-        await page.keyboard.press('Enter');
-
-        expect(await page.sidebar.isTabOpen(id)).toEqual(true);
-      });
-    }
-
-    for (const id of sidebarElementIds.rightSideBar) {
-      test(`Should open ${id} tab`, async () => {
-        await page.sidebar.close('right');
-
-        await page.locator('#tab-key-2-0').focus();
-
-        let isSideBarFocused = await page.evaluate(
+      }
+      while (isSideBarFocused !== value) {
+        await page.keyboard.press('ArrowDown');
+        isSideBarFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
         );
-        while (isSideBarFocused !== sidebarElementIds.rightSideBar[0]) {
-          await page.keyboard.press('Tab');
-          isSideBarFocused = await page.evaluate(
-            () => document.activeElement?.getAttribute('data-id')
-          );
-        }
-        while (isSideBarFocused !== id) {
-          await page.keyboard.press('ArrowDown');
-          isSideBarFocused = await page.evaluate(
-            () => document.activeElement?.getAttribute('data-id')
-          );
-        }
+      }
 
-        await page.keyboard.press('Enter');
+      await page.keyboard.press('Enter');
 
-        expect(await page.sidebar.isTabOpen(id)).toEqual(true);
-      });
-    }
+      expect(await page.sidebar.isTabOpen(value)).toEqual(true);
+    });
+  });
+
+  sidebarElementIds.rightSideBar.forEach(value => {
+    test(`Open ${value} via keyboard navigation`, async ({ page }) => {
+      await page.sidebar.close('right');
+
+      await page.locator('#tab-key-2-0').focus();
+
+      let isSideBarFocused = await page.evaluate(
+        () => document.activeElement?.getAttribute('data-id')
+      );
+      while (isSideBarFocused !== sidebarElementIds.rightSideBar[0]) {
+        await page.keyboard.press('Tab');
+        isSideBarFocused = await page.evaluate(
+          () => document.activeElement?.getAttribute('data-id')
+        );
+      }
+      while (isSideBarFocused !== value) {
+        await page.keyboard.press('ArrowDown');
+        isSideBarFocused = await page.evaluate(
+          () => document.activeElement?.getAttribute('data-id')
+        );
+      }
+
+      await page.keyboard.press('Enter');
+
+      expect(await page.sidebar.isTabOpen(value)).toEqual(true);
+    });
   });
 
   Object.keys(elementAriaLabels).forEach(tabName => {
