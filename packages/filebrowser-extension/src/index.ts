@@ -319,10 +319,10 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
     labShell: ILabShell | null,
-    translator: ITranslator
+    translator: ITranslator | null
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
-    const trans = translator.load('jupyterlab');
+    const trans = (translator ?? nullTranslator).load('jupyterlab');
 
     // Manually restore and load the default file browser.
     const defaultBrowser = fileBrowserFactory.createFileBrowser('filebrowser', {
