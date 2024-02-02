@@ -19,7 +19,7 @@ import {
   VDomModel,
   VDomRenderer
 } from '@jupyterlab/ui-components';
-import React from 'react';
+import React, { KeyboardEvent } from 'react';
 import { GroupItem, TextItem } from '@jupyterlab/statusbar';
 
 /**
@@ -38,7 +38,12 @@ function RunningSessionsComponent(
   props: RunningSessionsComponent.IProps
 ): React.ReactElement<RunningSessionsComponent.IProps> {
   return (
-    <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
+    <GroupItem
+      tabIndex={0}
+      spacing={HALF_SPACING}
+      onClick={props.handleClick}
+      onKeyDown={props.handleKeyDown}
+    >
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
         <terminalIcon.react left={'1px'} top={'3px'} stylesheet={'statusBar'} />
@@ -59,6 +64,11 @@ namespace RunningSessionsComponent {
    * The props for rendering the RunningSessionsComponent.
    */
   export interface IProps {
+    /**
+     * A key down handler for the component. By default this is used
+     * to activate the running sessions side panel.
+     */
+    handleKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
     /**
      * A click handler for the component. By default this is used
      * to activate the running sessions side panel.
@@ -88,6 +98,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
     super(new RunningSessions.Model());
     this._serviceManager = opts.serviceManager;
     this._handleClick = opts.onClick;
+    this._handleKeyDown = opts.onKeyDown;
     this.translator = opts.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 
@@ -122,6 +133,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
         sessions={this.model.sessions}
         terminals={this.model.terminals}
         handleClick={this._handleClick}
+        handleKeyDown={this._handleKeyDown}
       />
     );
   }
@@ -165,6 +177,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
   protected translator: ITranslator;
   private _trans: TranslationBundle;
   private _handleClick: () => void;
+  private _handleKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
   private _serviceManager: ServiceManager.IManager;
 }
 
@@ -224,6 +237,12 @@ export namespace RunningSessions {
      * to activate the running sessions side panel.
      */
     onClick: () => void;
+
+    /**
+     * A key down handler for the item. By default this is used
+     * to activate the running sessions side panel.
+     */
+    onKeyDown: (event: KeyboardEvent<HTMLImageElement>) => void;
 
     /**
      * The application language translator.

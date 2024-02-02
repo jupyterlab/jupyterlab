@@ -476,11 +476,21 @@ export class Context<
       created: model.created,
       last_modified: model.last_modified,
       mimetype: model.mimetype,
-      format: model.format
+      format: model.format,
+      hash: model.hash,
+      hash_algorithm: model.hash_algorithm
     };
     const mod = this._contentsModel?.last_modified ?? null;
+    const hash = this._contentsModel?.hash ?? null;
     this._contentsModel = newModel;
-    if (!mod || newModel.last_modified !== mod) {
+    if (
+      // If neither modification date nor hash available, assume the file has changed
+      (!mod && !hash) ||
+      // Compare last_modified if no hash
+      (!hash && newModel.last_modified !== mod) ||
+      // Compare hash if available
+      (hash && newModel.hash !== hash)
+    ) {
       this._fileChanged.emit(newModel);
     }
   }
@@ -622,6 +632,7 @@ export class Context<
     const opts: Contents.IFetchOptions = {
       type: this._factory.contentType,
       content: this._factory.fileFormat !== null,
+      hash: this._factory.fileFormat !== null,
       ...(this._factory.fileFormat !== null
         ? { format: this._factory.fileFormat }
         : {})
@@ -681,12 +692,29 @@ export class Context<
   ): Promise<Contents.IModel> {
     const path = this._path;
     // Make sure the file has not changed on disk.
-    const promise = this._manager.contents.get(path, { content: false });
+    const promise = this._manager.contents.get(path, {
+      content: false,
+      hash: true
+    });
     return promise.then(
       model => {
         if (this.isDisposed) {
           return Promise.reject(new Error('Disposed'));
         }
+        // Since jupyter server may provide hash in model, we compare hash first
+        const hashAvailable =
+          this.contentsModel?.hash !== undefined &&
+          this.contentsModel?.hash !== null &&
+          model.hash !== undefined &&
+          model.hash !== null;
+        const hClient = this.contentsModel?.hash;
+        const hDisk = model.hash;
+        if (hashAvailable && hClient !== hDisk) {
+          console.warn(`Different hash found for ${this.path}`);
+          return this._raiseConflict(model, options);
+        }
+
+        // When hash is not provided, we compare last_modified
         // We want to check last_modified (disk) > last_modified (client)
         // (our last save)
         // In some cases the filesystem reports an inconsistent time, so we allow buffer when comparing.
@@ -695,16 +723,47 @@ export class Context<
         const tClient = modified ? new Date(modified) : new Date();
         const tDisk = new Date(model.last_modified);
         if (
+          !hashAvailable &&
           modified &&
           tDisk.getTime() - tClient.getTime() > lastModifiedCheckMargin
         ) {
-          return this._timeConflict(tClient, model, options);
+          console.warn(
+            `Last saving performed ${tClient} ` +
+              `while the current file seems to have been saved ` +
+              `${tDisk}`
+          );
+          return this._raiseConflict(model, options);
         }
-        return this._manager.contents.save(path, options);
+
+        return this._manager.contents
+          .save(path, options)
+          .then(async contentsModel => {
+            const model = await this._manager.contents.get(path, {
+              content: false,
+              hash: true
+            });
+            return {
+              ...contentsModel,
+              hash: model.hash,
+              hash_algorithm: model.hash_algorithm
+            } as Contents.IModel;
+          });
       },
       err => {
         if (err.response && err.response.status === 404) {
-          return this._manager.contents.save(path, options);
+          return this._manager.contents
+            .save(path, options)
+            .then(async contentsModel => {
+              const model = await this._manager.contents.get(path, {
+                content: false,
+                hash: true
+              });
+              return {
+                ...contentsModel,
+                hash: model.hash,
+                hash_algorithm: model.hash_algorithm
+              } as Contents.IModel;
+            });
         }
         throw err;
       }
@@ -746,22 +805,14 @@ export class Context<
       }
     });
   }
-
   /**
    * Handle a time conflict.
    */
-  private _timeConflict(
-    tClient: Date,
+  private _raiseConflict(
     model: Contents.IModel,
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
-    const tDisk = new Date(model.last_modified);
-    console.warn(
-      `Last saving performed ${tClient} ` +
-        `while the current file seems to have been saved ` +
-        `${tDisk}`
-    );
-    if (this._timeConflictModalIsOpen) {
+    if (this._conflictModalIsOpen) {
       const error = new Error('Modal is already displayed');
       error.name = 'ModalDuplicateError';
       return Promise.reject(error);
@@ -780,13 +831,13 @@ or load the version on disk (revert)?`,
       label: this._trans.__('Overwrite'),
       actions: ['overwrite']
     });
-    this._timeConflictModalIsOpen = true;
+    this._conflictModalIsOpen = true;
     return showDialog({
       title: this._trans.__('File Changed'),
       body,
       buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
     }).then(result => {
-      this._timeConflictModalIsOpen = false;
+      this._conflictModalIsOpen = false;
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
@@ -917,7 +968,7 @@ or load the version on disk (revert)?`,
   private _disposed = new Signal<this, void>(this);
   private _dialogs: ISessionContext.IDialogs;
   private _lastModifiedCheckMargin = 500;
-  private _timeConflictModalIsOpen = false;
+  private _conflictModalIsOpen = false;
 }
 
 /**
