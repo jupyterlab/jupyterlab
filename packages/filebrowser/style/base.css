@@ -23,12 +23,10 @@
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
-  /* stylelint-disable-next-line csstree/validator */
-  row-gap: min(1.5vh, 12px);
   border-bottom: none;
   height: auto;
   /* stylelint-disable-next-line csstree/validator */
-  margin: min(1vh, 8px) min(1.5vw, 12px) 0;
+  margin: min(5vh, 8px) min(1.5vw, 12px) 0;
   box-shadow: none;
   padding: 0;
 }
