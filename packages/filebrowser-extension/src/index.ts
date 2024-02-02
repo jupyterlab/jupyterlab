@@ -311,15 +311,15 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
   id: '@jupyterlab/filebrowser-extension:default-file-browser',
   description: 'Provides the default file browser',
   provides: IDefaultFileBrowser,
-  requires: [IFileBrowserFactory, ITranslator],
-  optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell],
+  requires: [IFileBrowserFactory],
+  optional: [IRouter, JupyterFrontEnd.ITreeResolver, ILabShell, ITranslator],
   activate: async (
     app: JupyterFrontEnd,
     fileBrowserFactory: IFileBrowserFactory,
-    translator: ITranslator,
     router: IRouter | null,
     tree: JupyterFrontEnd.ITreeResolver | null,
-    labShell: ILabShell | null
+    labShell: ILabShell | null,
+    translator: ITranslator
   ): Promise<IDefaultFileBrowser> => {
     const { commands } = app;
     const trans = translator.load('jupyterlab');
