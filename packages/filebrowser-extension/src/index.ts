@@ -780,7 +780,7 @@ const openBrowserTabPlugin: JupyterFrontEndPlugin<void> = {
           )
         );
       },
-      icon: folderIcon.bindprops({ stylesheet: 'menuItem' }),
+      icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
       label: args =>
         args['mode'] === 'single-document'
           ? trans.__('Open in Simple Mode')
@@ -1125,7 +1125,7 @@ function addCommands(
         // ...or leave the icon blank
         return ft?.icon?.bindprops({ stylesheet: 'menuItem' });
       } else {
-        return addIcon.bindprops({ stylesheet: 'menuItem' });
+        return folderIcon.bindprops({ stylesheet: 'menuItem' });
       }
     },
     label: args =>
