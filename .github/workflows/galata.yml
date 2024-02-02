@@ -50,10 +50,7 @@ jobs:
           jlpm run build
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Test
         run: |
@@ -65,7 +62,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-galata-test-assets
           path: |
@@ -74,7 +71,7 @@ jobs:
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-galata-report
           path: |
@@ -163,10 +160,7 @@ jobs:
         working-directory: core
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Test
         run: |
@@ -176,7 +170,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-documentation-test-assets
           path: |
@@ -184,7 +178,7 @@ jobs:
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-documentation-report
           path: |

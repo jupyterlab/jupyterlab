@@ -21,7 +21,7 @@ from jupyterlab.labapp import get_app_dir
 
 here = Path(__file__).parent.resolve()
 TEST_FILE = here / "example.spec.ts"
-REF_SNAPSHOT = Path(TEST_FILE.with_suffix('.ts-snapshots').name) / "example-linux.png"
+REF_SNAPSHOT = Path(TEST_FILE.with_suffix(".ts-snapshots").name) / "example-linux.png"
 
 
 def main():
@@ -96,7 +96,7 @@ async def run_browser(url):
 
     current_env = os.environ.copy()
     current_env["BASE_URL"] = url
-    current_env["TEST_SNAPSHOT"] = '1' if has_snapshot else '0'
+    current_env["TEST_SNAPSHOT"] = "1" if has_snapshot else "0"
     try:
         await run_async_process(["npx", "playwright", "test"], env=current_env, cwd=str(target))
     finally:

@@ -111,6 +111,7 @@ module.exports = {
           'extension_data',
           'extension_name',
           'file_extension',
+          'hash_algorithm',
           'help_links',
           'hist_access_type',
           'ids_only',

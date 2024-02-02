@@ -15,6 +15,11 @@ import {
 } from '@jupyterlab/codeeditor';
 
 /**
+ * Selector for a widget that can run code.
+ */
+const CODE_RUNNER_SELECTOR = '[data-jp-code-runner]';
+
+/**
  * CodeMirror commands namespace
  */
 export namespace StateCommands {
@@ -60,5 +65,15 @@ export namespace StateCommands {
 
     const arg = { state: target.state, dispatch: target.dispatch };
     return insertNewlineAndIndent(arg);
+  }
+
+  /**
+   * Prevent insertion of new line when running cell with Ctrl/Command + Enter
+   */
+  export function preventNewLineOnRun(target: { dom: HTMLElement }): boolean {
+    if (target.dom.closest(CODE_RUNNER_SELECTOR)) {
+      return true;
+    }
+    return false;
   }
 }
