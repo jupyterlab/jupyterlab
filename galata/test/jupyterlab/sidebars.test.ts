@@ -227,23 +227,19 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     test(`Open ${value} via keyboard navigation`, async ({ page }) => {
       await page.sidebar.close('left');
 
-      await page.locator('#tab-key-2-0').focus();
+      const parentElement = page.locator('#tab-key-2-0');
 
-      let isSideBarFocused = await page.evaluate(
-        () => document.activeElement?.getAttribute('data-id')
+      await page.activity.keyToSidebar(
+        sidebarElementIds.leftSideBar[0],
+        'Tab',
+        parentElement
       );
-      while (isSideBarFocused !== sidebarElementIds.leftSideBar[0]) {
-        await page.keyboard.press('Tab');
-        isSideBarFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
-      }
-      while (isSideBarFocused !== value) {
-        await page.keyboard.press('ArrowDown');
-        isSideBarFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
-      }
+
+      const fileBrowser = page.locator(`#${sidebarElementIds.leftSideBar[0]}`);
+
+      expect(fileBrowser).toBeFocused();
+
+      await page.activity.keyToSidebar(value, 'ArrowDown', fileBrowser);
 
       await page.keyboard.press('Enter');
 
