@@ -137,7 +137,7 @@ export class CellToolbarTracker implements IDisposable {
     }
 
     const activeCell = notebook.activeCell;
-    // change previous active cell
+    // Change previously active cell.
     this._previousActiveCell = activeCell;
     if (activeCell === null || activeCell.inputHidden) {
       return;
