@@ -73,7 +73,7 @@ export class ActivityHelper {
     parentElement?: Locator
   ): Promise<void> {
     if (parentElement) {
-      parentElement.focus();
+      await parentElement.focus();
     }
 
     while (
