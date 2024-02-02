@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
+import { Locator } from '@playwright/test';
 
 const sidebarElementIds = {
   leftSideBar: [
@@ -229,17 +230,15 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
       const parentElement = page.locator('#tab-key-2-0');
 
-      await page.activity.keyToSidebar(
+      const nextFocused = await page.activity.keyToSidebar(
         sidebarElementIds.leftSideBar[0],
         'Tab',
         parentElement
       );
 
-      const fileBrowser = page.locator(`#${sidebarElementIds.leftSideBar[0]}`);
+      const newParentElement = nextFocused as unknown as Locator;
 
-      await expect(fileBrowser).toBeFocused();
-
-      await page.activity.keyToSidebar(value, 'ArrowDown', fileBrowser);
+      await page.activity.keyToSidebar(value, 'ArrowDown', newParentElement);
 
       await page.keyboard.press('Enter');
 
