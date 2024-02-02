@@ -223,14 +223,9 @@ const elementAriaLabels = {
 };
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
-  Object.keys(sidebarElementIds).forEach(tabSide => {
-    test(`Open ${tabSide} via keyboard navigation`, async ({ page }) => {
-      test.slow();
-
-      const keyValueArray = sidebarElementIds[tabSide];
-
-      keyValueArray.forEach(async sideBarTabName => {
-        await page.sidebar.close('right');
+  test(`Open sidebar tabs via keyboard navigation`, async ({ page }) => {
+    for (const id of sidebarElementIds.leftSideBar) {
+      test(`Should open ${id} tab`, async () => {
         await page.sidebar.close('left');
 
         await page.locator('#tab-key-2-0').focus();
@@ -238,13 +233,13 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         let isSideBarFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('data-id')
         );
-        while (isSideBarFocused !== keyValueArray[0]) {
+        while (isSideBarFocused !== sidebarElementIds.leftSideBar[0]) {
           await page.keyboard.press('Tab');
           isSideBarFocused = await page.evaluate(
             () => document.activeElement?.getAttribute('data-id')
           );
         }
-        while (isSideBarFocused !== sideBarTabName) {
+        while (isSideBarFocused !== id) {
           await page.keyboard.press('ArrowDown');
           isSideBarFocused = await page.evaluate(
             () => document.activeElement?.getAttribute('data-id')
@@ -253,9 +248,37 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
         await page.keyboard.press('Enter');
 
-        expect(await page.sidebar.isTabOpen(sideBarTabName)).toEqual(true);
+        expect(await page.sidebar.isTabOpen(id)).toEqual(true);
       });
-    });
+    }
+
+    for (const id of sidebarElementIds.rightSideBar) {
+      test(`Should open ${id} tab`, async () => {
+        await page.sidebar.close('right');
+
+        await page.locator('#tab-key-2-0').focus();
+
+        let isSideBarFocused = await page.evaluate(
+          () => document.activeElement?.getAttribute('data-id')
+        );
+        while (isSideBarFocused !== sidebarElementIds.rightSideBar[0]) {
+          await page.keyboard.press('Tab');
+          isSideBarFocused = await page.evaluate(
+            () => document.activeElement?.getAttribute('data-id')
+          );
+        }
+        while (isSideBarFocused !== id) {
+          await page.keyboard.press('ArrowDown');
+          isSideBarFocused = await page.evaluate(
+            () => document.activeElement?.getAttribute('data-id')
+          );
+        }
+
+        await page.keyboard.press('Enter');
+
+        expect(await page.sidebar.isTabOpen(id)).toEqual(true);
+      });
+    }
   });
 
   Object.keys(elementAriaLabels).forEach(tabName => {
