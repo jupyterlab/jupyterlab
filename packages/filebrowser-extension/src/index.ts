@@ -336,7 +336,7 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       'aria-label',
       trans.__('File Browser Section')
     );
-    defaultBrowser.node.setAttribute('title', trans.__('Default Filebrowser'));
+    defaultBrowser.node.setAttribute('title', trans.__('File Browser'));
     defaultBrowser.title.icon = folderIcon;
 
     // Show the current file browser shortcut in its title.
@@ -346,12 +346,9 @@ const defaultFileBrowser: JupyterFrontEndPlugin<IDefaultFileBrowser> = {
       );
       if (binding) {
         const ks = binding.keys.map(CommandRegistry.formatKeystroke).join(', ');
-        defaultBrowser.title.caption = trans.__(
-          'Default File Browser (%1)',
-          ks
-        );
+        defaultBrowser.title.caption = trans.__('File Browser (%1)', ks);
       } else {
-        defaultBrowser.title.caption = trans.__('Default File Browser');
+        defaultBrowser.title.caption = trans.__('File Browser');
       }
     };
     updateBrowserTitle();
