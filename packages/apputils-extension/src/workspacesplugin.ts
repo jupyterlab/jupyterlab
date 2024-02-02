@@ -51,7 +51,7 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
       name: WORKSPACE_NAME,
       contentType: 'file',
       fileFormat: 'text',
-      displayName: trans.__('JupyterLab workspace File'),
+      displayName: trans.__('JupyterLab Workspace File'),
       extensions: [WORKSPACE_EXT],
       mimeTypes: ['text/json'],
       iconClass: ICON_NAME
@@ -106,7 +106,7 @@ namespace Private {
         await this._state.save(LAST_SAVE_ID, path);
 
         // Navigate to new workspace.
-        this._open(id);
+        await this._open(id);
       });
       return dummyWidget(context);
     }

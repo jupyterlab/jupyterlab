@@ -100,6 +100,7 @@
 
 .jp-RunningSessions-item .jp-RunningSessions-itemShutdown {
   border-radius: 0;
+  margin: 0;
 }
 
 .jp-RunningSessions-item:not(:hover) .jp-RunningSessions-itemShutdown {

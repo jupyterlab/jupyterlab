@@ -6,15 +6,21 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { InputDialog, IWindowResolver } from '@jupyterlab/apputils';
+import {
+  Dialog,
+  InputDialog,
+  IWindowResolver,
+  showDialog
+} from '@jupyterlab/apputils';
+
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import { FileDialog, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { Contents, Workspace } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { ICommandPalette } from '@jupyterlab/apputils';
-import { IWorkspaceCommands } from '@jupyterlab/workspaces';
+import { IWorkspaceCommands, IWorkspacesModel } from '@jupyterlab/workspaces';
 
 namespace CommandIDs {
   /**
@@ -34,14 +40,36 @@ namespace CommandIDs {
    */
   export const createNew = 'workspace-ui:create-new';
   /**
-   * Delete a new workspace.
+   * Delete a workspace.
    */
   export const deleteWorkspace = 'workspace-ui:delete';
+  /**
+   * Clone a given workspace.
+   */
+  export const clone = 'workspace-ui:clone';
+  /**
+   * Rename a workspace.
+   */
+  export const rename = 'workspace-ui:rename';
+  /**
+   * Reset a workspace.
+   */
+  export const reset = 'workspace-ui:reset';
+  /**
+   * Import a workspace.
+   */
+  export const importWorkspace = 'workspace-ui:import';
+  /**
+   * Export a workspace.
+   */
+  export const exportWorkspace = 'workspace-ui:export';
 }
 
 const WORKSPACE_NAME = 'jupyterlab-workspace';
 const WORKSPACE_EXT = '.' + WORKSPACE_NAME;
 const LAST_SAVE_ID = 'workspace-ui:lastSave';
+
+export const WORKSPACE_ITEM_CLASS = 'jp-mod-workspace';
 
 /**
  * The workspace commands
@@ -51,6 +79,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
   description: 'Add workspace commands.',
   autoStart: true,
   requires: [
+    IWorkspacesModel,
     IDefaultFileBrowser,
     IWindowResolver,
     IStateDB,
@@ -61,6 +90,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
   optional: [IRouter, ICommandPalette],
   activate: (
     app: JupyterFrontEnd,
+    model: IWorkspacesModel,
     fileBrowser: IDefaultFileBrowser,
     resolver: IWindowResolver,
     state: IStateDB,
@@ -71,6 +101,14 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
   ): IWorkspaceCommands => {
     const trans = translator.load('jupyterlab');
 
+    const namingHintLabel = trans.__(
+      'Naming the workspace will create a unique URL. Please name your workspace without special characters.'
+    );
+    const resourcePrefix = '/lab/workspaces/';
+
+    const test = (node: HTMLElement) =>
+      node.classList.contains(WORKSPACE_ITEM_CLASS);
+
     app.commands.addCommand(CommandIDs.open, {
       label: trans.__('Open Workspace'),
       execute: async args => {
@@ -78,9 +116,11 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
 
         if (!workspaceId) {
           const result = await InputDialog.getItem({
-            title: trans.__('Choose a workspace to open'),
-            items: (await app.serviceManager.workspaces.list()).ids,
-            okLabel: trans.__('Open')
+            title: trans.__('Choose Workspace To Open'),
+            label: trans.__('Choose an existing workspace to open.'),
+            items: model.identifiers,
+            okLabel: trans.__('Choose'),
+            prefix: resourcePrefix
           });
           if (!result.value || !result.button.accept) {
             return;
@@ -108,13 +148,16 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
     app.commands.addCommand(CommandIDs.deleteWorkspace, {
       label: trans.__('Delete Workspace'),
       execute: async args => {
-        let workspaceId = args.workspace as string | undefined;
+        const node = app.contextMenuHitTest(test);
+        let workspaceId =
+          (args.workspace as string | undefined) ?? node?.dataset['context'];
 
         if (!workspaceId) {
           const result = await InputDialog.getItem({
-            title: trans.__('Choose a workspace to delete'),
-            items: (await app.serviceManager.workspaces.list()).ids,
-            okLabel: trans.__('Delete')
+            title: trans.__('Choose Workspace To Delete'),
+            label: trans.__('Choose an existing workspace to delete.'),
+            items: model.identifiers,
+            okLabel: trans.__('Choose')
           });
           if (!result.value || !result.button.accept) {
             return;
@@ -125,19 +168,36 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         if (!workspaceId) {
           return;
         }
-        await app.serviceManager.workspaces.remove(workspaceId);
+        const result = await showDialog({
+          title: trans.__('Delete workspace'),
+          body: trans.__(
+            'Deleting workspace %1 will also delete its URL. A deleted workspace cannot be recovered.',
+            workspaceId
+          ),
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.warnButton({ label: trans.__('Delete') })
+          ],
+          defaultButton: 0
+        });
+
+        if (result.button.accept) {
+          await model.remove(workspaceId);
+        }
       }
     });
 
     app.commands.addCommand(CommandIDs.createNew, {
-      label: trans.__('Create a new empty workspace'),
+      label: trans.__('Create New Workspace'),
       execute: async args => {
         let workspaceId = args.workspace as string | undefined;
 
         if (!workspaceId) {
           const result = await InputDialog.getText({
-            title: trans.__('New workspace identifier'),
-            okLabel: trans.__('Create')
+            title: trans.__('Create New Workspace'),
+            label: namingHintLabel,
+            okLabel: trans.__('Create'),
+            prefix: resourcePrefix
           });
           if (!result.value || !result.button.accept) {
             return;
@@ -147,24 +207,238 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         if (!workspaceId) {
           return;
         }
-        await app.serviceManager.workspaces.save(
-          workspaceId,
-          {} as Workspace.IWorkspace
-        );
+        await model.create(workspaceId);
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.clone, {
+      label: trans.__('Clone Workspace'),
+      execute: async args => {
+        const node = app.contextMenuHitTest(test);
+        let workspaceId =
+          (args.workspace as string | undefined) ?? node?.dataset['context'];
+        if (!workspaceId) {
+          const result = await InputDialog.getItem({
+            title: trans.__('Choose Workspace To Clone'),
+            label: trans.__('Choose an existing workspace to clone.'),
+            items: model.identifiers,
+            okLabel: trans.__('Choose')
+          });
+          if (!result.value || !result.button.accept) {
+            return;
+          }
+          workspaceId = result.value;
+        }
+
+        const result = await InputDialog.getText({
+          title: trans.__('Clone Workspace'),
+          label: namingHintLabel,
+          text: trans.__('%1-clone', workspaceId),
+          placeholder: trans.__('The name for the workspace clone'),
+          okLabel: trans.__('Clone'),
+          prefix: resourcePrefix
+        });
+
+        if (!result.button.accept || !result.value) {
+          return;
+        }
+
+        let newName = result.value;
+
+        await model.saveAs(workspaceId, newName);
+
+        if (workspaceId === resolver.name) {
+          // If the current workspace was cloned, open the cloned copy
+          return app.commands.execute(CommandIDs.open, { workspace: newName });
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.rename, {
+      label: trans.__('Rename Workspace…'),
+      execute: async args => {
+        const node = app.contextMenuHitTest(test);
+        const workspaceId =
+          (args.workspace as string | undefined) ??
+          node?.dataset['context'] ??
+          resolver.name;
+
+        const oldName = workspaceId;
+        const result = await InputDialog.getText({
+          title: trans.__('Rename Workspace'),
+          label: namingHintLabel,
+          text: oldName,
+          placeholder: trans.__('The new name for the workspace'),
+          okLabel: trans.__('Rename'),
+          prefix: resourcePrefix
+        });
+
+        if (!result.button.accept || !result.value) {
+          return;
+        }
+
+        let newName = result.value;
+
+        await model.rename(workspaceId, newName);
+
+        if (workspaceId === resolver.name) {
+          // If the current workspace was renamed, reopen it to ensure consistent state
+          return app.commands.execute(CommandIDs.open, { workspace: newName });
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.reset, {
+      label: trans.__('Reset Workspace'),
+      execute: async args => {
+        const node = app.contextMenuHitTest(test);
+        const workspaceId =
+          (args.workspace as string | undefined) ??
+          node?.dataset['context'] ??
+          resolver.name;
+
+        const workspace =
+          await app.serviceManager.workspaces.fetch(workspaceId);
+        const tabs = (workspace.data['layout-restorer:data'] as any)?.main?.dock
+          ?.widgets?.length;
+
+        const result = await showDialog({
+          title: trans.__('Reset Workspace'),
+          body: trans._n(
+            'Resetting workspace %2 will close its %1 tab and return to default layout.',
+            'Resetting workspace %2 will close its %1 tabs and return to default layout.',
+            tabs,
+            workspaceId
+          ),
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.warnButton({ label: trans.__('Reset') })
+          ],
+          defaultButton: 0
+        });
+
+        if (!result.button.accept) {
+          return;
+        }
+
+        await model.reset(workspaceId);
+
+        if (workspaceId === resolver.name) {
+          // If the current workspace was reset, refresh it to take effect
+          return app.commands.execute(CommandIDs.open, {
+            workspace: workspaceId
+          });
+        } else {
+          await model.refresh();
+        }
+      }
+    });
+
+    /**
+     * Commands persisting (or reading from) Jupyter file system
+     */
+
+    app.commands.addCommand(CommandIDs.importWorkspace, {
+      label: trans.__('Import Workspace…'),
+      execute: async () => {
+        const { contents } = app.serviceManager;
+        const result = await FileDialog.getOpenFiles({
+          manager: fileBrowser.model.manager,
+          title: trans.__('Select Workspace Files to Import'),
+          filter: (model: Contents.IModel) =>
+            model.type === 'directory' || model.path.endsWith(WORKSPACE_EXT)
+              ? {}
+              : null,
+          label: trans.__(
+            'You choose one or more workspace files to import. A Jupyter Workspace File has %1 extension.',
+            WORKSPACE_EXT
+          ),
+          translator
+        });
+        if (result.button.accept && result.value && result.value.length >= 1) {
+          for (const fileModel of result.value) {
+            // Get the file contents too
+            const fullFile = await contents.get(fileModel.path, {
+              content: true
+            });
+            const workspace = JSON.parse(
+              fullFile.content
+            ) as unknown as Workspace.IWorkspace;
+            await app.serviceManager.workspaces.save(
+              workspace.metadata.id,
+              workspace
+            );
+          }
+          await model.refresh();
+        }
+      }
+    });
+
+    app.commands.addCommand(CommandIDs.exportWorkspace, {
+      label: trans.__('Export Workspace'),
+      execute: async args => {
+        const { contents } = app.serviceManager;
+
+        const node = app.contextMenuHitTest(test);
+        let workspaceId =
+          (args.workspace as string | undefined) ??
+          node?.dataset['context'] ??
+          resolver.name;
+
+        if (!workspaceId) {
+          // When invoked from main menu or command palette we need to ask which workspace to export
+          const result = await InputDialog.getItem({
+            title: trans.__('Choose Workspace To Export'),
+            label: trans.__('Choose an existing workspace to export.'),
+            items: model.identifiers,
+            okLabel: trans.__('Choose')
+          });
+          if (!result.value || !result.button.accept) {
+            return;
+          }
+          workspaceId = result.value;
+        }
+
+        const data = app.serviceManager.workspaces.fetch(workspaceId);
+
+        const result = await FileDialog.getExistingDirectory({
+          title: trans.__('Choose Workspace Export Directory'),
+          defaultPath: fileBrowser.model.path,
+          manager: fileBrowser.model.manager,
+          label: trans.__(
+            'The %1 workspace will be saved in the chosen directory as %1%2.',
+            workspaceId,
+            WORKSPACE_EXT
+          ),
+          translator
+        });
+        if (
+          !result.button.accept ||
+          !result.value ||
+          result.value.length === 0
+        ) {
+          return;
+        }
+        if (result.value.length > 1) {
+          console.warn(
+            'More than one directory was selected; the workspace will be exported to the first directory only'
+          );
+        }
+        const exportPath =
+          result.value[0].path + '/' + workspaceId + WORKSPACE_EXT;
+
+        if (exportPath) {
+          await Private.save(exportPath, contents, data, state, false);
+        }
       }
     });
 
     app.commands.addCommand(CommandIDs.saveAs, {
       label: trans.__('Save Current Workspace As…'),
       execute: async () => {
+        const { contents } = app.serviceManager;
         const data = app.serviceManager.workspaces.fetch(resolver.name);
-        await Private.saveAs(
-          fileBrowser,
-          app.serviceManager.contents,
-          data,
-          state,
-          translator
-        );
+        await Private.saveAs(fileBrowser, contents, data, state, translator);
       }
     });
 
@@ -188,8 +462,13 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         CommandIDs.open,
         CommandIDs.save,
         CommandIDs.saveAs,
-        CommandIDs.deleteWorkspace,
-        CommandIDs.createNew
+        CommandIDs.createNew,
+        CommandIDs.rename,
+        CommandIDs.clone,
+        CommandIDs.exportWorkspace,
+        CommandIDs.importWorkspace,
+        CommandIDs.reset,
+        CommandIDs.deleteWorkspace
       ];
       for (const command of commands) {
         palette.addItem({
@@ -200,12 +479,25 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
     }
 
     return {
-      open: CommandIDs.open
+      open: CommandIDs.open,
+      deleteWorkspace: CommandIDs.deleteWorkspace
     };
   }
 };
 
 namespace Private {
+  export function createNameFromPath(path: string): string {
+    let name = path.split('/').pop();
+    if (name === undefined) {
+      return 'unnamed-workspace';
+    }
+    // Remove the workspace suffix if present
+    if (name.endsWith(WORKSPACE_EXT)) {
+      name = name.slice(0, -WORKSPACE_EXT.length);
+    }
+    return name;
+  }
+
   /**
    * Save workspace to a user provided location
    */
@@ -213,19 +505,20 @@ namespace Private {
     userPath: string,
     contents: Contents.IManager,
     data: Promise<Workspace.IWorkspace>,
-    state: IStateDB
+    state: IStateDB,
+    rememberAsLastSave = true
   ): Promise<void> {
-    let name = userPath.split('/').pop();
+    const name = createNameFromPath(userPath);
 
-    // Add extension if not provided or remove extension from name if it was.
-    if (name !== undefined && name.includes('.')) {
-      name = name.split('.')[0];
-    } else {
+    // Add extension if not provided
+    if (!userPath.endsWith(WORKSPACE_EXT)) {
       userPath = userPath + WORKSPACE_EXT;
     }
 
-    // Save last save location, for save button to work
-    await state.save(LAST_SAVE_ID, userPath);
+    if (rememberAsLastSave) {
+      // Save last save location, for save button to work
+      await state.save(LAST_SAVE_ID, userPath);
+    }
 
     const resolvedData = await data;
     resolvedData.metadata.id = `${name}`;

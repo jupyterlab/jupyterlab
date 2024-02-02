@@ -656,7 +656,7 @@ export namespace Dialog {
     checkbox: Partial<ICheckbox> | null;
 
     /**
-     * The index of the default button.  Defaults to the last button.
+     * The index of the default button. Defaults to the last button.
      */
     defaultButton: number;
 

@@ -6,51 +6,44 @@
  * @packageDocumentation
  * @module workspaces-extension
  */
-import { ICommandPalette } from '@jupyterlab/apputils';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { IWorkspaceCommands } from '@jupyterlab/workspaces';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ITranslator } from '@jupyterlab/translation';
+import {
+  IWorkspaceCommands,
+  IWorkspacesModel,
+  WorkspacesModel
+} from '@jupyterlab/workspaces';
 import { commandsPlugin } from './commands';
-
-/**
- * The workspace switcher extension.
- */
-const workspaceSwitcher: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/workspaces:switcher',
-  description: 'Provides a workspace switcher widget.',
-  requires: [ISettingRegistry, IWorkspaceCommands],
-  optional: [ICommandPalette, ITranslator],
-  autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    commands: IWorkspaceCommands,
-    translator: ITranslator | null
-  ) => {
-    console.log(commands, translator);
-    console.log(app.serviceManager.workspaces.list());
-  }
-};
+import { workspacesSidebar } from './sidebar';
 
 /**
  * The extension populating sidebar with workspaces list.
  */
-const workspacesSidebar: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/workspaces:sidebar',
-  description: 'Populates running sidebar with workspaces.',
-  requires: [ISettingRegistry, IWorkspaceCommands],
-  optional: [ICommandPalette, ITranslator],
+const workspacesModel: JupyterFrontEndPlugin<IWorkspacesModel> = {
+  id: '@jupyterlab/workspaces-extension:model',
+  description: 'Provides a model for available workspaces.',
+  provides: IWorkspacesModel,
   autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    commands: IWorkspaceCommands,
-    translator: ITranslator | null
-  ) => {
-    console.log(commands, translator);
-    console.log(app.serviceManager.workspaces.list());
+  activate: (app: JupyterFrontEnd) => {
+    return new WorkspacesModel({
+      manager: app.serviceManager.workspaces
+    });
+  }
+};
+
+/**
+ * The extension providing workspace sub-menu in the "File" main menu.
+ */
+const workspacesMenu: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/workspaces-extension:menu',
+  description: 'Populates "File" main menu with Workspaces submenu.',
+  requires: [IWorkspaceCommands],
+  autoStart: true,
+  activate: () => {
+    // TODO: remove "save current workspace as" and friends?
+    // no-op (the menu items come from schema)
   }
 };
 
@@ -58,8 +51,9 @@ const workspacesSidebar: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  workspacesModel,
   commandsPlugin,
-  workspaceSwitcher,
-  workspacesSidebar
+  workspacesSidebar,
+  workspacesMenu
 ];
 export default plugins;

@@ -17,7 +17,6 @@
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
@@ -39,20 +38,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.2.0-alpha.0",
-    "@jupyterlab/apputils": "^4.3.0-alpha.0",
-    "@jupyterlab/coreutils": "^6.2.0-alpha.0",
-    "@jupyterlab/docregistry": "^4.2.0-alpha.0",
-    "@jupyterlab/filebrowser": "^4.2.0-alpha.0",
     "@jupyterlab/services": "^7.2.0-alpha.0",
-    "@jupyterlab/statedb": "^4.2.0-alpha.0",
-    "@jupyterlab/translation": "^4.2.0-alpha.0",
-    "@lumino/commands": "^2.2.0",
     "@lumino/coreutils": "^2.1.2",
     "@lumino/disposable": "^2.1.2",
     "@lumino/polling": "^2.1.2",
-    "@lumino/signaling": "^2.1.2",
-    "@lumino/widgets": "^2.3.1"
+    "@lumino/signaling": "^2.1.2"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.2.0-alpha.0",
@@ -62,6 +52,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "styleModule": "style/index.js"
+  }
 }

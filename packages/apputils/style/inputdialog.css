@@ -12,3 +12,8 @@
 .jp-Input-Boolean-Dialog > label {
   flex: 1 1 auto;
 }
+
+.jp-InputDialog-inputWrapper {
+  display: flex;
+  align-items: baseline;
+}
