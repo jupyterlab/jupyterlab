@@ -226,12 +226,13 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
   Object.keys(sidebarElementIds).forEach(tabSide => {
     test(`Open ${tabSide} via keyboard navigation`, async ({ page }) => {
       test.slow();
-      await page.sidebar.close('right');
-      await page.sidebar.close('left');
 
       const keyValueArray = sidebarElementIds[tabSide];
 
       keyValueArray.forEach(async sideBarTabName => {
+        await page.sidebar.close('right');
+        await page.sidebar.close('left');
+
         await page.locator('#tab-key-2-0').focus();
 
         let isSideBarFocused = await page.evaluate(
