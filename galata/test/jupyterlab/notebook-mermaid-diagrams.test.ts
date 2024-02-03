@@ -22,7 +22,8 @@ const EXPECTED_MERMAID_ORDER = [
   'mindmap',
   'timeline',
   'sankey',
-  'xy'
+  'xy',
+  'block'
 ];
 
 /**
