@@ -45,12 +45,11 @@
 }
 
 .jp-Completer-list {
-  overflow-x: hidden;
   margin: 0;
   padding: 0;
   list-style-type: none;
   overflow-y: scroll;
-  overflow-x: auto;
+  overflow-x: hidden;
   max-height: calc((10 * var(--jp-private-completer-item-height)));
   min-height: calc(var(--jp-private-completer-item-height));
   width: 100%;
