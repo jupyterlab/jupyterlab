@@ -300,7 +300,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
         let stateAfter = await page.sidebar.isTabOpen(elementId as string);
 
-        expect(initialState).not.toEqual(stateAfter);
+        expect(initialState !== stateAfter);
 
         await page.keyboard.press('Enter');
 
