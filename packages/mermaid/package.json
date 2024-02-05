@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mermaid",
-  "version": "4.1.0-beta.2",
+  "version": "4.1.0",
   "description": "JupyterLab - Mermaid Renderer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,6 +32,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
+    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
     "test": "jest",
@@ -41,9 +42,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.2.0-beta.2",
-    "@jupyterlab/coreutils": "^6.1.0-beta.2",
-    "@jupyterlab/rendermime-interfaces": "^3.9.0-beta.2",
+    "@jupyterlab/apputils": "^4.2.0",
+    "@jupyterlab/coreutils": "^6.1.0",
+    "@jupyterlab/rendermime-interfaces": "^3.9.0",
     "@lumino/coreutils": "^2.1.2",
     "@lumino/widgets": "^2.3.1",
     "mermaid": "^10.7.0"
