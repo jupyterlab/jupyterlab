@@ -281,8 +281,10 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
           () => document.activeElement?.getAttribute('aria-label')
         );
 
+        const ariaLabel = keyValueArray[sectionName];
+
         const elementId = await page
-          .locator(`[aria-label='${sectionName}']`)
+          .locator(`[aria-label='${ariaLabel}']`)
           .getAttribute('id');
 
         let initialState = await page.evaluate(() => {
