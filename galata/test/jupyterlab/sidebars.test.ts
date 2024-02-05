@@ -282,7 +282,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         );
 
         const elementId = await page
-          .locator(`h3[aria-label=${sectionName}]`)
+          .locator(`[aria-label='${sectionName}']`)
           .getAttribute('id');
 
         let initialState = await page.evaluate(() => {
