@@ -66,7 +66,7 @@ export class ActivityHelper {
    * @param key navigation key to press
    * @returns Active sideBar widget id
    */
-  // keyToElement( AttributeName, AttributeValue, Key, ParentElement){ /*do stuff*/}
+
   async keyToSidebar(
     dataId: string,
     key: string,

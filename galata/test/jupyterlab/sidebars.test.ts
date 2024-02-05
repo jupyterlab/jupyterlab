@@ -287,7 +287,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
           .locator(`[aria-label='${ariaLabel}']`)
           .getAttribute('id');
 
-        let initialState = await page.sidebar.isTabOpen(elementId!);
+        let initialState = await page.sidebar.isTabOpen(elementId as string);
 
         while (IsFocused !== ariaLabel) {
           await page.keyboard.press('Tab');
@@ -298,13 +298,13 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
         await page.keyboard.press('Enter');
 
-        let stateAfter = await page.sidebar.isTabOpen(elementId!);
+        let stateAfter = await page.sidebar.isTabOpen(elementId as string);
 
         expect(initialState).not.toEqual(stateAfter);
 
         await page.keyboard.press('Enter');
 
-        let finalState = await page.sidebar.isTabOpen(elementId!);
+        let finalState = await page.sidebar.isTabOpen(elementId as string);
 
         expect(initialState).toEqual(finalState);
       }
