@@ -280,15 +280,17 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('aria-label')
         );
-        while (IsFocused !== (await sectionName)) {
-          let focused = IsFocused;
 
-          await page.keyboard.press('Tab');
-          return focused;
-        }
         let initialState = await page.evaluate(() => {
           return sectionName.isOpen();
         });
+
+        while (IsFocused !== sectionName) {
+          await page.keyboard.press('Tab');
+          IsFocused = await page.evaluate(
+            () => document.activeElement?.getAttribute('aria-label')
+          );
+        }
 
         await page.keyboard.press('Enter');
 
@@ -298,15 +300,13 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
         expect(initialState).not.toEqual(stateAfter);
 
-        const isExpanded = await page.evaluate(
-          () => document.activeElement?.getAttribute('aria-expanded')
-        );
-
-        expect(isExpanded).toBe(false);
-
         await page.keyboard.press('Enter');
 
-        expect(initialState).toEqual(stateAfter);
+        let fnalState = await page.evaluate(() => {
+          return sectionName.isOpen();
+        });
+
+        expect(initialState).toEqual(fnalState);
       });
     });
   });
