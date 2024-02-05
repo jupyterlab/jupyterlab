@@ -25,7 +25,7 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Set up browser cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/pw-browsers
@@ -116,7 +116,7 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Set up browser cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/pw-browsers
