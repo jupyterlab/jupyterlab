@@ -276,7 +276,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
       const keyValueArray: string[] = elementAriaLabels[tabName];
 
-      keyValueArray.forEach(async sectionName => {
+      for (const sectionName in keyValueArray) {
         let IsFocused = await page.evaluate(
           () => document.activeElement?.getAttribute('aria-label')
         );
@@ -311,7 +311,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         });
 
         expect(initialState).toEqual(fnalState);
-      });
+      }
     });
   });
 });
