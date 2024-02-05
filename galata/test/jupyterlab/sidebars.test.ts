@@ -250,23 +250,17 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     test(`Open ${value} via keyboard navigation`, async ({ page }) => {
       await page.sidebar.close('right');
 
-      await page.locator('#tab-key-2-0').focus();
+      const parentElement = page.locator('#tab-key-2-0');
 
-      let isSideBarFocused = await page.evaluate(
-        () => document.activeElement?.getAttribute('data-id')
+      const nextFocused = await page.activity.keyToSidebar(
+        sidebarElementIds.rightSideBar[0],
+        'Tab',
+        parentElement
       );
-      while (isSideBarFocused !== sidebarElementIds.rightSideBar[0]) {
-        await page.keyboard.press('Tab');
-        isSideBarFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
-      }
-      while (isSideBarFocused !== value) {
-        await page.keyboard.press('ArrowDown');
-        isSideBarFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('data-id')
-        );
-      }
+
+      const newParentElement = nextFocused as unknown as Locator;
+
+      await page.activity.keyToSidebar(value, 'ArrowDown', newParentElement);
 
       await page.keyboard.press('Enter');
 
