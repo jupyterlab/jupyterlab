@@ -291,7 +291,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
           return page.sidebar.isTabOpen(elementId!);
         });
 
-        while (IsFocused !== sectionName) {
+        while (IsFocused !== ariaLabel) {
           await page.keyboard.press('Tab');
           IsFocused = await page.evaluate(
             () => document.activeElement?.getAttribute('aria-label')
