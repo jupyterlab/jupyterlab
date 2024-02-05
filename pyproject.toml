@@ -91,8 +91,8 @@ docs-screenshots = [
     "jupyterlab-language-pack-zh-CN==4.0.post0",
     "matplotlib==3.7.1",
     "nbconvert>=7.0.0",
-    "pandas==2.0.2",
-    "scipy==1.10.1",
+    "pandas==2.2.0",
+    "scipy==1.12.0",
     "vega_datasets==0.9.0",
 ]
 test = [
@@ -115,7 +115,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.1.6",
+    "ruff==0.1.15",
 ]
 
 [tool.check-wheel-contents]
