@@ -281,8 +281,12 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
           () => document.activeElement?.getAttribute('aria-label')
         );
 
+        const elementId = await page
+          .locator(`h3[aria-label=${sectionName}]`)
+          .getAttribute('id');
+
         let initialState = await page.evaluate(() => {
-          return page.sidebar.isTabOpen(sectionName);
+          return page.sidebar.isTabOpen(elementId!);
         });
 
         while (IsFocused !== sectionName) {
@@ -295,7 +299,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         await page.keyboard.press('Enter');
 
         let stateAfter = await page.evaluate(() => {
-          return page.sidebar.isTabOpen(sectionName);
+          return page.sidebar.isTabOpen(elementId!);
         });
 
         expect(initialState).not.toEqual(stateAfter);
@@ -303,7 +307,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         await page.keyboard.press('Enter');
 
         let fnalState = await page.evaluate(() => {
-          return page.sidebar.isTabOpen(sectionName);
+          return page.sidebar.isTabOpen(elementId!);
         });
 
         expect(initialState).toEqual(fnalState);
