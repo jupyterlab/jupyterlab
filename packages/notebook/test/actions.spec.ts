@@ -3,7 +3,12 @@
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+import {
+  CodeCell,
+  ICodeCellModel,
+  MarkdownCell,
+  RawCell
+} from '@jupyterlab/cells';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import {
@@ -188,6 +193,32 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
           '   is a test'
         );
+      });
+
+      it('should preserve all outputs in the second cell', async () => {
+        const cell = widget.activeCell as CodeCell;
+        // Produce two outputs (note, first will be `text/plain`,
+        // while second will be `application/vnd.jupyter.stdout`,
+        // which guarantees these will not be merged).
+        const index = widget.activeCellIndex;
+        const source = 'print(1)\ndisplay(2)';
+        cell.model.sharedModel.setSource(source);
+
+        // Should populate outputs
+        await NotebookActions.run(widget, ipySessionContext);
+        expect(cell.model.outputs).toHaveLength(2);
+
+        // Split cell
+        const editor = cell.editor as CodeEditor.IEditor;
+        editor.setCursorPosition(editor.getPositionAt(9)!);
+        NotebookActions.splitCell(widget);
+
+        // The output should now be only in the second cell
+        const cells = widget.model!.cells;
+        const first = cells.get(index) as ICodeCellModel;
+        const second = cells.get(index + 1) as ICodeCellModel;
+        expect(first.outputs).toHaveLength(0);
+        expect(second.outputs).toHaveLength(2);
       });
 
       it('should clear the existing selection', () => {
