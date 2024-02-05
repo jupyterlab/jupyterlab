@@ -42,7 +42,8 @@
 
 .jp-BreadCrumbs {
   flex: 0 0 auto;
-  margin: 8px 12px;
+  /* stylelint-disable-next-line csstree/validator */
+  margin: min(1.2vh, 8px) min(1vw, 12px);
 }
 
 .jp-BreadCrumbs-item {
