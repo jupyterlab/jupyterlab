@@ -25,7 +25,7 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Set up browser cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/pw-browsers
@@ -50,10 +50,7 @@ jobs:
           jlpm run build
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Test
         run: |
@@ -119,7 +116,7 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Set up browser cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/pw-browsers
@@ -163,10 +160,7 @@ jobs:
         working-directory: core
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Test
         run: |

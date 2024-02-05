@@ -2,8 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { ElementHandle } from '@playwright/test';
 import * as path from 'path';
+
+import {
+  notebookViewportRatio,
+  positionCellPartiallyBelowViewport
+} from './utils';
 
 const fileName = 'scroll.ipynb';
 const longOutputsNb = 'long_outputs.ipynb';
@@ -18,7 +22,7 @@ test.use({
   }
 });
 
-test.describe('Notebook scroll on navigation', () => {
+test.describe('Notebook scroll on navigation (with windowing)', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
@@ -42,20 +46,23 @@ test.describe('Notebook scroll on navigation', () => {
   };
   for (const [link, cellIdx] of Object.entries(cellLinks)) {
     test(`Scroll to ${link}`, async ({ page }) => {
-      const firstCell = await page.notebook.getCell(0);
-      await firstCell.scrollIntoViewIfNeeded();
+      const firstCellLocator = page.locator(
+        '.jp-Cell[data-windowed-list-index="0"]'
+      );
+      const lastCellLocator = page.locator(
+        `.jp-Cell[data-windowed-list-index="${cellIdx}"]`
+      );
+      await firstCellLocator.scrollIntoViewIfNeeded();
 
       await page.click(`a:has-text("${link}")`);
 
-      await firstCell.waitForElementState('hidden');
-
-      const lastCell = await page.notebook.getCell(cellIdx);
-      await lastCell.waitForElementState('visible');
+      await expect(firstCellLocator).not.toBeInViewport();
+      await expect(lastCellLocator).toBeInViewport();
     });
   }
 });
 
-test.describe('Notebook scroll on execution', () => {
+test.describe('Notebook scroll on execution (with windowing)', () => {
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${longOutputsNb}`),
@@ -76,18 +83,7 @@ test.describe('Notebook scroll on execution', () => {
     const notebook = await page.notebook.getNotebookInPanel();
     const thirdCell = await page.notebook.getCell(2);
 
-    const scroller = (await notebook.$(
-      '.jp-WindowedPanel-outer'
-    )) as ElementHandle<HTMLElement>;
-    const notebookBbox = await scroller.boundingBox();
-    const thirdCellBBox = await thirdCell.boundingBox();
-    await page.mouse.move(notebookBbox.x, notebookBbox.y);
-    const scrollOffset =
-      thirdCellBBox.y -
-      notebookBbox.y -
-      notebookBbox.height +
-      thirdCellBBox.height * 0.01;
-    await Promise.all([page.mouse.wheel(0, scrollOffset)]);
+    await positionCellPartiallyBelowViewport(page, notebook, thirdCell, 0.01);
     // Select second cell
     await page.notebook.selectCells(1);
 
@@ -97,11 +93,19 @@ test.describe('Notebook scroll on execution', () => {
     // The third cell should be positioned at the bottom, revealing between 0 to 2% of its content.
     await expect(thirdCellLocator).toBeInViewport({ ratio: 0.0 });
     await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.02 });
+    // Only a small fraction of notebook viewport should be taken up by that cell
+    expect(await notebookViewportRatio(notebook, thirdCell)).toBeLessThan(0.1);
 
     // Run second cell
     await page.notebook.runCell(1);
-    // After running the second cell, the third cell should be revealed, in at least 25%
-    await expect(thirdCellLocator).toBeInViewport({ ratio: 0.25 });
+
+    // After running the second cell, the third cell should be revealed, in at least 10%
+    await expect(thirdCellLocator).toBeInViewport({ ratio: 0.1 });
+
+    // The third cell should now occupy about half of the notebook viewport
+    expect(await notebookViewportRatio(notebook, thirdCell)).toBeGreaterThan(
+      0.4
+    );
   });
 
   test('should not scroll when advancing if top is non-marginally visible', async ({
@@ -110,18 +114,7 @@ test.describe('Notebook scroll on execution', () => {
     const notebook = await page.notebook.getNotebookInPanel();
     const thirdCell = await page.notebook.getCell(2);
 
-    const scroller = (await notebook.$(
-      '.jp-WindowedPanel-outer'
-    )) as ElementHandle<HTMLElement>;
-    const notebookBbox = await scroller.boundingBox();
-    const thirdCellBBox = await thirdCell.boundingBox();
-    await page.mouse.move(notebookBbox.x, notebookBbox.y);
-    const scrollOffset =
-      thirdCellBBox.y -
-      notebookBbox.y -
-      notebookBbox.height +
-      thirdCellBBox.height * 0.15;
-    await Promise.all([page.mouse.wheel(0, scrollOffset)]);
+    await positionCellPartiallyBelowViewport(page, notebook, thirdCell, 0.15);
     // Select second cell
     await page.notebook.selectCells(1);
 
@@ -131,15 +124,52 @@ test.describe('Notebook scroll on execution', () => {
     // The third cell should be positioned at the bottom, revealing between 10 to 20% of its content.
     await expect(thirdCellLocator).toBeInViewport({ ratio: 0.1 });
     await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.2 });
+    // This cell should initially take up between 30% and 50% of the notebook viewport
+    let spaceTaken = await notebookViewportRatio(notebook, thirdCell);
+    expect(spaceTaken).toBeGreaterThan(0.3);
+    expect(spaceTaken).toBeLessThan(0.5);
 
     // Run second cell
     await page.notebook.runCell(1);
     // After running the second cell, the third cell should not be scrolled
     await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.2 });
+    // The cell should still take up between 30% and 50% of the notebook viewport
+    spaceTaken = await notebookViewportRatio(notebook, thirdCell);
+    expect(spaceTaken).toBeGreaterThan(0.3);
+    expect(spaceTaken).toBeLessThan(0.5);
+  });
+
+  test('should not scroll when running in-place', async ({ page }) => {
+    const notebook = await page.notebook.getNotebookInPanel();
+    const thirdCell = await page.notebook.getCell(2);
+
+    await positionCellPartiallyBelowViewport(page, notebook, thirdCell, 0.15);
+    // Select third cell
+    await page.notebook.enterCellEditingMode(2);
+
+    const thirdCellLocator = page.locator(
+      '.jp-Cell[data-windowed-list-index="2"]'
+    );
+    // The third cell should be positioned at the bottom, revealing between 10 to 20% of its content.
+    await expect(thirdCellLocator).toBeInViewport({ ratio: 0.1 });
+    await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.2 });
+
+    // Run third cell in-place
+    await page.notebook.runCell(2, true);
+    // After running the third cell it should not be scrolled
+    await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.2 });
+
+    // The galata implementation of `page.notebook.runCell(2, true);`
+    // first switches to command mode before cell execution,
+    // so we want to also check if this works from edit mode too.
+    await page.keyboard.press('Control+Enter');
+
+    // After running the third cell it should not be scrolled
+    await expect(thirdCellLocator).not.toBeInViewport({ ratio: 0.2 });
   });
 });
 
-test.describe('Notebook scroll over long outputs', () => {
+test.describe('Notebook scroll over long outputs (with windowing)', () => {
   const outputAndHeading = 'long_output_and_headings.ipynb';
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.contents.uploadFile(
