@@ -274,7 +274,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     }) => {
       await page.sidebar.openTab(tabName);
 
-      const keyValueArray = elementAriaLabels[tabName];
+      const keyValueArray: string[] = elementAriaLabels[tabName];
 
       keyValueArray.forEach(async sectionName => {
         let IsFocused = await page.evaluate(
@@ -282,7 +282,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         );
 
         let initialState = await page.evaluate(() => {
-          return sectionName.isOpen();
+          return page.sidebar.isTabOpen(sectionName);
         });
 
         while (IsFocused !== sectionName) {
@@ -295,7 +295,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         await page.keyboard.press('Enter');
 
         let stateAfter = await page.evaluate(() => {
-          return sectionName.isOpen();
+          return page.sidebar.isTabOpen(sectionName);
         });
 
         expect(initialState).not.toEqual(stateAfter);
@@ -303,7 +303,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         await page.keyboard.press('Enter');
 
         let fnalState = await page.evaluate(() => {
-          return sectionName.isOpen();
+          return page.sidebar.isTabOpen(sectionName);
         });
 
         expect(initialState).toEqual(fnalState);
