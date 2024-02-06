@@ -277,32 +277,23 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       const keyValueArray: string[] = elementAriaLabels[tabName];
 
       for (const sectionName in keyValueArray) {
-        let IsFocused = await page.evaluate(
-          () => document.activeElement?.getAttribute('aria-label')
-        );
-
         const ariaLabel = keyValueArray[sectionName];
 
-        const elementId = page.locator(`[aria-label='${ariaLabel}']`);
+        const elementLocator = page.locator(`[aria-label='${ariaLabel}']`);
 
-        let initialState = await elementId.getAttribute('aria-expanded'); // is not a tab  use aria expanded
+        let initialState = await elementLocator.getAttribute('aria-expanded');
 
-        while (IsFocused !== ariaLabel) {
-          await page.keyboard.press('Tab');
-          IsFocused = await page.evaluate(
-            () => document.activeElement?.getAttribute('aria-label')
-          );
-        }
+        await page.activity.keyToSidebar(ariaLabel, 'Tab');
 
         await page.keyboard.press('Enter');
 
-        let stateAfter = await elementId.getAttribute('aria-expanded');
+        let stateAfter = await elementLocator.getAttribute('aria-expanded');
 
         expect(initialState !== stateAfter).toBeTruthy();
 
         await page.keyboard.press('Enter');
 
-        let finalState = await elementId.getAttribute('aria-expanded');
+        let finalState = await elementLocator.getAttribute('aria-expanded');
 
         expect(initialState).toEqual(finalState);
       }
