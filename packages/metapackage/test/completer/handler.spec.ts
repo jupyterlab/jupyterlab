@@ -3,6 +3,7 @@
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import { Signal } from '@lumino/signaling';
 import {
   Completer,
   CompleterModel,
@@ -217,10 +218,9 @@ describe('@jupyterlab/completer', () => {
         );
         editor.model.sharedModel.setSource('bar');
         editor.setCursorPosition({ line: 0, column: 2 });
-        // This signal is emitted (again) because the cursor position that
-        // a natural user would create need to be recreated here.
-        // (editor.model.value.changed as any).emit({ type: 'set', value: 'bar' }); @todo remove?
-        (editor.model.sharedModel.changed as any).emit([]);
+        (
+          editor.model.sharedModel.changed as Signal<ISharedText, SourceChange>
+        ).emit({ sourceChange: {} as any });
         expect(model.methods).toEqual(
           expect.arrayContaining(['handleTextChange'])
         );
