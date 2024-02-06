@@ -641,13 +641,13 @@ class _AppHandler:
         # Migrate from 4.0 which did not have "locked" status
         try:
             self._maybe_mirror_disabled_in_locked(level="sys_prefix")
-        except PermissionError:
+        except (PermissionError, OSError):
             try:
                 self.logger.info(
                     "`sys_prefix` level settings are read-only, using `user` level for migration to `lockedExtensions`"
                 )
                 self._maybe_mirror_disabled_in_locked(level="user")
-            except PermissionError:
+            except (PermissionError, OSError):
                 self.logger.warning(
                     "Both `sys_prefix` and `user` level settings are read-only, cannot auto-migrate `disabledExtensions` to `lockedExtensions`"
                 )
