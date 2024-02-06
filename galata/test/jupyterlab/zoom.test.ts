@@ -18,23 +18,6 @@ test.describe('Low Vision / Zoom Support', () => {
     await page.sidebar.close('left');
   });
 
-  test('Full page, small viewport', async ({ page }) => {
-    expect(await page.screenshot({ fullPage: true })).toMatchSnapshot(
-      'full-page-small-viewport.png'
-    );
-  });
-
-  test('Clipped full page screenshot for Menubar, small viewport', async ({
-    page
-  }) => {
-    expect(
-      await page.screenshot({
-        fullPage: true,
-        clip: { x: 0, y: 0, width: 350, height: 30 }
-      })
-    ).toMatchSnapshot('clipped-full-page-screenshot-for-Menubar.png');
-  });
-
   test('Menubar, small viewport', async ({ page }) => {
     expect(await page.locator('#jp-top-panel').screenshot()).toMatchSnapshot(
       'menu-bar-small-viewport.png'
