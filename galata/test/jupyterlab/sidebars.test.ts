@@ -5,18 +5,18 @@ import { expect, galata, Handle, test } from '@jupyterlab/galata';
 import { Locator } from '@playwright/test';
 
 const sidebarElementIds = {
-  leftSideBar: [
+  'left-sidebar': [
     'filebrowser',
     'jp-running-sessions',
     'table-of-contents',
     'extensionmanager.main-view'
   ],
-  rightSideBar: ['jp-property-inspector', 'jp-debugger-sidebar']
+  'right-sidebar': ['jp-property-inspector', 'jp-debugger-sidebar']
 };
 
-const sidebarIds: galata.SidebarTabId[] = sidebarElementIds.leftSideBar.concat(
-  sidebarElementIds.rightSideBar
-);
+const sidebarIds: galata.SidebarTabId[] = sidebarElementIds[
+  'left-sidebar'
+].concat(sidebarElementIds['right-sidebar']);
 
 /**
  * Add provided text as label on first tab in given tabbar.
