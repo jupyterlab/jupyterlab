@@ -224,56 +224,33 @@ const elementAriaLabels = {
 };
 
 test.describe('Sidebar keyboard navigation @a11y', () => {
-  sidebarElementIds.leftSideBar.forEach(value => {
-    test(`Open ${value} via keyboard navigation`, async ({ page }) => {
+  Object.keys(sidebarElementIds).forEach(sideBar => {
+    test(`Open ${sideBar} via keyboard navigation`, async ({ page }) => {
+      await page.sidebar.close('right');
       await page.sidebar.close('left');
 
-      const parentElement = page.locator('#tab-key-2-0');
+      const keyValueArray: string[] = sidebarElementIds[sideBar];
 
-      const nextFocused = await page.activity.keyToSidebar(
-        sidebarElementIds.leftSideBar[0],
-        'Tab',
-        'data-id',
-        parentElement
-      );
+      for (let dataId of keyValueArray) {
+        const nextFocused = await page.activity.keyToSidebar(
+          keyValueArray[0],
+          'Tab',
+          'data-id'
+        );
 
-      const newParentElement = nextFocused as unknown as Locator;
+        const parentElement = nextFocused as unknown as Locator;
 
-      await page.activity.keyToSidebar(
-        value,
-        'ArrowDown',
-        'data-id',
-        newParentElement
-      );
+        await page.activity.keyToSidebar(
+          dataId,
+          'ArrowDown',
+          'data-id',
+          parentElement
+        );
 
-      await page.keyboard.press('Enter');
+        await page.keyboard.press('Enter');
 
-      expect(await page.sidebar.isTabOpen(value)).toEqual(true);
-    });
-  });
-
-  sidebarElementIds.rightSideBar.forEach(value => {
-    test(`Open ${value} via keyboard navigation`, async ({ page }) => {
-      await page.sidebar.close('right');
-
-      const nextFocused = await page.activity.keyToSidebar(
-        sidebarElementIds.rightSideBar[0],
-        'Tab',
-        'data-id'
-      );
-
-      const parentElement = nextFocused as unknown as Locator;
-
-      await page.activity.keyToSidebar(
-        value,
-        'ArrowDown',
-        'data-id',
-        parentElement
-      );
-
-      await page.keyboard.press('Enter');
-
-      expect(await page.sidebar.isTabOpen(value)).toEqual(true);
+        expect(await page.sidebar.isTabOpen(dataId)).toEqual(true);
+      }
     });
   });
 
