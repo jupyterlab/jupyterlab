@@ -9,7 +9,9 @@ import {
 import { Text } from '@jupyterlab/coreutils';
 import {
   CellChange,
+  FileChange,
   ISharedBaseCell,
+  ISharedFile,
   ISharedText,
   SourceChange
 } from '@jupyter/ydoc';
@@ -75,14 +77,7 @@ export class CompletionHandler implements IDisposable {
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
-
-      // The model is either a cell or editor; for cells the `changed` signal
-      // is not limited to text changes but also fires on changes to:
-      // metadata, outputs, execution count, etc.
-      (model.sharedModel as ISharedText | ISharedBaseCell).changed.disconnect(
-        this._onSharedModelChanged,
-        this
-      );
+      model.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
     }
 
     // Reset completer state.
@@ -96,7 +91,15 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.connect(this._onSharedModelChanged, this);
+      // We expect the model to be an editor, a file editor, or a cell.
+      const sharedModel = model.sharedModel as
+        | ISharedText
+        | ISharedFile
+        | ISharedBaseCell;
+      // For cells and files the `changed` signal is not limited to text,
+      // but also fires on changes to metadata, outputs, execution count,
+      // and state changes, hence we need to filter the change type.
+      sharedModel.changed.connect(this._onSharedModelChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
       if (this.inlineCompleter) {
@@ -399,7 +402,7 @@ export class CompletionHandler implements IDisposable {
    */
   private async _onSharedModelChanged(
     str: ISharedText,
-    changed: SourceChange | CellChange
+    changed: SourceChange | CellChange | FileChange
   ): Promise<void> {
     if (changed.sourceChange) {
       await this.onTextChanged(str, changed);
