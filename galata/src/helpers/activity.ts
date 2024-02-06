@@ -68,8 +68,9 @@ export class ActivityHelper {
    */
 
   async keyToSidebar(
-    dataId: string,
+    attributeValue: string,
     key: string,
+    attribute: string,
     parentElement?: Locator
   ): Promise<void> {
     if (parentElement) {
@@ -78,8 +79,8 @@ export class ActivityHelper {
 
     while (
       (await this.page.evaluate(
-        () => document.activeElement?.getAttribute('data-id')
-      )) !== dataId
+        () => document.activeElement?.getAttribute(`${attribute}`)
+      )) !== attributeValue
     ) {
       await this.page.keyboard.press(key);
     }
