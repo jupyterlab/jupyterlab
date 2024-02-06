@@ -7,7 +7,12 @@ import {
   COMPLETER_ENABLED_CLASS
 } from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import {
+  CellChange,
+  ISharedBaseCell,
+  ISharedText,
+  SourceChange
+} from '@jupyter/ydoc';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
@@ -70,7 +75,14 @@ export class CompletionHandler implements IDisposable {
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.disconnect(this.onTextChanged, this);
+
+      // The model is either a cell or editor; for cells the `changed` signal
+      // is not limited to text changes but also fires on changes to:
+      // metadata, outputs, execution count, etc.
+      (model.sharedModel as ISharedText | ISharedBaseCell).changed.disconnect(
+        this._onSharedModelChanged,
+        this
+      );
     }
 
     // Reset completer state.
@@ -84,7 +96,7 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.connect(this.onTextChanged, this);
+      model.sharedModel.changed.connect(this._onSharedModelChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
       if (this.inlineCompleter) {
@@ -379,6 +391,18 @@ export class CompletionHandler implements IDisposable {
     // Completer is active.
     if (this._editor) {
       this._editor.host.classList.add(COMPLETER_ACTIVE_CLASS);
+    }
+  }
+
+  /**
+   * Handle a text shared model change signal from an editor.
+   */
+  private async _onSharedModelChanged(
+    str: ISharedText,
+    changed: SourceChange | CellChange
+  ): Promise<void> {
+    if (changed.sourceChange) {
+      await this.onTextChanged(str, changed);
     }
   }
 
