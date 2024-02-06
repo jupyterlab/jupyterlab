@@ -60,11 +60,12 @@ export class ActivityHelper {
   }
 
   /**
-   * Keyboard navigation to sideBar using Tab key
+   * Keyboard navigation to element using navigation key
    *
-   * @param dataId sideBar widget id
+   * @param attributeValue value of selected widget attribute
    * @param key navigation key to press
-   * @returns Active sideBar widget id
+   * @param attribute name of attribute selector
+   * @returns new element focus
    */
 
   async keyToSidebar(
