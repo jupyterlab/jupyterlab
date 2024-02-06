@@ -288,9 +288,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
       const keyValueArray: string[] = elementAriaLabels[tabName];
 
-      for (const sectionName in keyValueArray) {
-        const ariaLabel = keyValueArray[sectionName];
-
+      for (const ariaLabel in keyValueArray) {
         const elementLocator = page.locator(`[aria-label='${ariaLabel}']`);
 
         let initialState = await elementLocator.getAttribute('aria-expanded');
