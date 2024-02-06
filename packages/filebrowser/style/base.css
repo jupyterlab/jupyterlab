@@ -129,7 +129,7 @@
 
 .jp-DirListing-headerItem {
   /* stylelint-disable-next-line csstree/validator */
-  padding: min(1vh, 4px) min(1vw, 12px) min(1vh, 2px);
+  padding: min(1vh, 4px) min(6vw, 12px) min(1vh, 2px);
   font-weight: 500;
 }
 
