@@ -79,9 +79,10 @@ export class ActivityHelper {
     }
 
     while (
-      (await this.page.evaluate(attribute => {
-        return document.activeElement?.getAttribute(attribute);
-      }, attribute)) !== attributeValue
+      (await this.page.evaluate(
+        attribute => document.activeElement?.getAttribute(attribute),
+        attribute
+      )) !== attributeValue
     ) {
       await this.page.keyboard.press(key);
     }

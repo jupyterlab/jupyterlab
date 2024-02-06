@@ -256,22 +256,19 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     test(`Open ${value} via keyboard navigation`, async ({ page }) => {
       await page.sidebar.close('right');
 
-      const parentElement = page.locator('#tab-key-2-0');
-
       const nextFocused = await page.activity.keyToSidebar(
         sidebarElementIds.rightSideBar[0],
         'Tab',
-        'data-id',
-        parentElement
+        'data-id'
       );
 
-      const newParentElement = nextFocused as unknown as Locator;
+      const parentElement = nextFocused as unknown as Locator;
 
       await page.activity.keyToSidebar(
         value,
         'ArrowDown',
         'data-id',
-        newParentElement
+        parentElement
       );
 
       await page.keyboard.press('Enter');
@@ -288,21 +285,17 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
 
       const keyValueArray: string[] = elementAriaLabels[tabName];
 
-      for (const ariaLabel in keyValueArray) {
+      for (let ariaLabel of keyValueArray) {
         const elementLocator = page.locator(`[aria-label='${ariaLabel}']`);
-
         let initialState = await elementLocator.getAttribute('aria-expanded');
 
         await page.activity.keyToSidebar(ariaLabel, 'Tab', 'aria-label');
-
         await page.keyboard.press('Enter');
-
         let stateAfter = await elementLocator.getAttribute('aria-expanded');
 
         expect(initialState !== stateAfter).toBeTruthy();
 
         await page.keyboard.press('Enter');
-
         let finalState = await elementLocator.getAttribute('aria-expanded');
 
         expect(initialState).toEqual(finalState);
