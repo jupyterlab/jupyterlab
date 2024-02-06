@@ -232,19 +232,21 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       const keyValueArray: string[] = sidebarElementIds[sideBar];
 
       for (let dataId of keyValueArray) {
+        const parentElement = page.locator('#tab-key-2-0');
         const nextFocused = await page.activity.keyToSidebar(
           keyValueArray[0],
           'Tab',
-          'data-id'
+          'data-id',
+          parentElement
         );
 
-        const parentElement = nextFocused as unknown as Locator;
+        const newParentElement = nextFocused as unknown as Locator;
 
         await page.activity.keyToSidebar(
           dataId,
           'ArrowDown',
           'data-id',
-          parentElement
+          newParentElement
         );
 
         await page.keyboard.press('Enter');
