@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/completer';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
 class TestCompleterModel extends CompleterModel {
@@ -396,6 +396,18 @@ describe('@jupyterlab/completer', () => {
         expect(provider.triggers).toEqual(
           expect.arrayContaining([CompletionTriggerKind.TriggerCharacter])
         );
+      });
+
+      it('should not trigger on non-source changes to the model', async () => {
+        provider.triggers.length = 0;
+
+        (handler.editor!.model.sharedModel as ISharedFile).setState(
+          'state-variable',
+          'new-value'
+        );
+        await new Promise(process.nextTick);
+
+        expect(provider.triggers.length).toEqual(0);
       });
 
       it('should pass context to `shouldShowContinuousHint()`', async () => {
