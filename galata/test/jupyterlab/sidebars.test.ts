@@ -232,6 +232,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
       await page.sidebar.close('left');
 
       for (let dataId of keyValueArray) {
+        await page.goto();
         const nextFocused = await page.activity.keyToSidebar(
           keyValueArray[0],
           'Tab',
