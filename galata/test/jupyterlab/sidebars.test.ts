@@ -228,15 +228,14 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
     test(`Open ${sideBar} via keyboard navigation`, async ({ page }) => {
       const keyValueArray: string[] = sidebarElementIds[sideBar];
 
+      await page.sidebar.close('right');
+      await page.sidebar.close('left');
+
       for (let dataId of keyValueArray) {
-        await page.sidebar.close('right');
-        await page.sidebar.close('left');
-        const parentElement = page.locator('#tab-key-2-0');
         const nextFocused = await page.activity.keyToSidebar(
           keyValueArray[0],
           'Tab',
-          'data-id',
-          parentElement
+          'data-id'
         );
 
         const newParentElement = nextFocused as unknown as Locator;
