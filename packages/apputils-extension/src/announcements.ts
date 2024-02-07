@@ -75,6 +75,13 @@ export const announcements: JupyterFrontEndPlugin<void> = {
     ]).then(async ([_, settings, config]) => {
       const trans = (translator ?? nullTranslator).load('jupyterlab');
 
+      let scanModeOffRegion = document.getElementById('jp-ScanMode-region');
+      scanModeOffRegion!.append(
+        trans.__(
+          'To get the best user experience with JupyterLab when using a screenreader, please disable scan/browse mode.'
+        )
+      );
+
       // Store dismiss state
       Notification.manager.changed.connect((manager, change) => {
         if (change.type !== 'removed') {
@@ -152,14 +159,6 @@ export const announcements: JupyterFrontEndPlugin<void> = {
               }
             ]
           }
-        );
-        let scanModeOffRegion = document.getElementById(
-          'screen-reader-aria-live'
-        );
-        scanModeOffRegion!.append(
-          trans.__(
-            'To get the best user experience with JupyterLab when using a screenreader, please disable scan/browse mode.'
-          )
         );
       } else {
         await fetchNews();
