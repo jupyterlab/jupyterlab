@@ -1561,15 +1561,14 @@ namespace Private {
       const oldSelector = shortcut.selector;
       let newSelector = oldSelector;
       for (const change of changes) {
-        if (
-          oldSelector.includes(change.old) &&
-          !selectorsAlreadyWarnedAbout.has(oldSelector)
-        ) {
+        if (oldSelector.includes(change.old)) {
           newSelector = oldSelector.replace(change.old, change.new);
-          selectorDeprecationWarnings.add(
-            `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated} (present in "${oldSelector}")`
-          );
-          selectorsAlreadyWarnedAbout.add(oldSelector);
+          if (!selectorsAlreadyWarnedAbout.has(oldSelector)) {
+            selectorDeprecationWarnings.add(
+              `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated} (present in "${oldSelector}")`
+            );
+            selectorsAlreadyWarnedAbout.add(oldSelector);
+          }
         }
       }
       shortcut.selector = newSelector;
