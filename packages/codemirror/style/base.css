@@ -43,9 +43,14 @@
   }
 }
 
-.cm-editor.jp-mod-readOnly .cm-cursor {
+/* stylelint-disable selector-max-class */
+
+/* We need all this classes for higher specificity to override CodeMirror's rule */
+.cm-editor.jp-mod-readOnly > .cm-scroller > .cm-cursorLayer .cm-cursor {
   display: none;
 }
+
+/* stylelint-enable selector-max-class */
 
 .jp-CollaboratorCursor {
   border-left: 5px solid transparent;
