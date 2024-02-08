@@ -93,6 +93,13 @@ const OTHER_SELECTED_CLASS = 'jp-mod-multiSelected';
 const UNCONFINED_CLASS = 'jp-mod-unconfined';
 
 /**
+ * The class name added to the notebook when the focused notebook element takes keyboard input.
+ *
+ * This class is also effective when the focused element is in shadow DOM.
+ */
+const READ_WRITE_CLASS = 'jp-mod-readWrite';
+
+/**
  * The class name added to drag images.
  */
 const DRAG_IMAGE_CLASS = 'jp-dragImage';
@@ -2772,9 +2779,25 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Update the notebook node with class indicating read-write state.
+   */
+  private _updateReadWrite(): void {
+    const inReadWrite = Private.inReadWrite(document, this.node);
+    const hasReadWriteClass = this.node.classList.contains(READ_WRITE_CLASS);
+    if (inReadWrite && !hasReadWriteClass) {
+      this.node.classList.add(READ_WRITE_CLASS);
+    } else if (!inReadWrite && hasReadWriteClass) {
+      this.node.classList.remove(READ_WRITE_CLASS);
+    }
+  }
+
+  /**
    * Handle `focus` events for the widget.
    */
   private _evtFocusIn(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+
     const target = event.target as HTMLElement;
     const index = this._findCell(target);
     if (index !== -1) {
@@ -2830,6 +2853,9 @@ export class Notebook extends StaticNotebook {
    * Handle `focusout` events for the notebook.
    */
   private _evtFocusOut(event: MouseEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+
     const relatedTarget = event.relatedTarget as HTMLElement;
 
     // Bail if the window is losing focus, to preserve edit mode. This test
@@ -3051,6 +3077,23 @@ namespace Private {
         );
       }
     }
+  }
+
+  /**
+   * Check whether the active element, including elements in shadow DOM, matches `:read-write` selector.
+   */
+  export function inReadWrite(
+    root: ShadowRoot | Document,
+    parent: Node | DocumentFragment
+  ): boolean {
+    const element = root.activeElement;
+    return !!(
+      element &&
+      parent.contains(element) &&
+      (element.matches(':read-write') ||
+        (element.shadowRoot &&
+          inReadWrite(element.shadowRoot, element.shadowRoot)))
+    );
   }
 
   /**
