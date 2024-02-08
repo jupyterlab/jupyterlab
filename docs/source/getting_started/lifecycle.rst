@@ -24,7 +24,11 @@ even to fix security issues.
     - 23 Dec 2021
   * - 3.0.0
     - 23 Dec 2020
-    - 15 May 2024
+    - 15 May 2024 (see below)
   * - 4.0.0
     - 15 May 2023
     - *active*
+
+To help with the transition to JupyterLab 4, JupyterLab maintainers may
+make additional patch releases to JupyterLab 3 to fix critical issues
+until 31 December 2024.
