@@ -68,6 +68,16 @@
         "command": "console:restart-kernel",
         "selector": ".jp-CodeConsole",
         "rank": 30
+      },
+      {
+        "command": "console:undo",
+        "selector": ".jp-CodeConsole-promptCell",
+        "rank": 10
+      },
+      {
+        "command": "console:redo",
+        "selector": ".jp-CodeConsole-promptCell",
+        "rank": 10
       }
     ]
   },

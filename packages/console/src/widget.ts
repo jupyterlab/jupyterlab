@@ -81,6 +81,11 @@ const EXECUTION_TIMEOUT = 250;
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 /**
+ * The data attribute added to a widget that can undo.
+ */
+const UNDOER = 'jpUndoer';
+
+/**
  * A widget containing a Jupyter console.
  *
  * #### Notes
@@ -97,6 +102,7 @@ export class CodeConsole extends Widget {
     this.addClass(CONSOLE_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
+    this.node.dataset[UNDOER] = 'true';
     this.node.tabIndex = -1; // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.
