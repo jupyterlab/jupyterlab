@@ -280,6 +280,19 @@ describe('console/widget', () => {
           expect.arrayContaining(['newPromptCell'])
         );
       });
+
+      it('should make previous cell read-only after execution', async () => {
+        Widget.attach(widget, document.body);
+
+        const old = widget.promptCell;
+        const force = true;
+        expect(old).toBeInstanceOf(CodeCell);
+
+        await (widget.sessionContext as SessionContext).initialize();
+        await widget.execute(force);
+
+        expect(old!.editor!.getOption('readOnly')).toBe(true);
+      });
     });
 
     describe('#onActivateRequest()', () => {
