@@ -1563,7 +1563,7 @@ namespace Private {
       },
       {
         old: '[data-jp-kernel-user] :focus:not(:read-write)',
-        new: '[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus',
+        new: '[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)',
         versionDeprecated: 'JupyterLab 4.1.1'
       }
     ];

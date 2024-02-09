@@ -94,7 +94,7 @@ mode; this requires all shortcut selectors to be adjusted as follows:
   - ``.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus`` for JupyterLab 4.1.1+
 - ``[data-jp-kernel-user]:focus`` should be replaced with:
   - ``[data-jp-kernel-user] :focus:not(:read-write)`` for JupyterLab 4.1.0+
-  - ``[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus`` for JupyterLab 4.1.1+
+  - ``[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)`` for JupyterLab 4.1.1+
 
 Please note that ``:not(:read-write)`` fragment disables shortcuts
 when text fields  (such as cell editor) are focused to avoid intercepting
