@@ -1334,7 +1334,7 @@ export class Notebook extends StaticNotebook {
       ...options
     });
     // Allow the node to scroll while dragging items.
-    this.node.setAttribute('data-lm-dragscroll', 'true');
+    this.outerNode.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.jumped.connect((_, index: number) => (this.activeCellIndex = index));
     this.selectionChanged.connect(this._updateSelectedCells, this);
