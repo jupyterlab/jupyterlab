@@ -5,6 +5,7 @@ import { expect, galata, test } from '@jupyterlab/galata';
 import * as path from 'path';
 
 import {
+  dragCellTo,
   notebookViewportRatio,
   positionCellPartiallyBelowViewport
 } from './utils';
@@ -60,6 +61,106 @@ test.describe('Notebook scroll on navigation (no windowing)', () => {
       await expect(lastCellLocator).toBeInViewport();
     });
   }
+});
+
+test.describe('Notebook scroll on dragging cells (no windowing)', () => {
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
+    );
+
+    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+    await page.notebook.activate(fileName);
+  });
+  const NOTEBOOK_SCROLLER = '.jp-WindowedPanel-outer';
+  const NOTEBOOK_CONTENT = '.jp-WindowedPanel-inner';
+  const EDGE_MARGIN = 10;
+
+  test.afterEach(async ({ page, tmpPath }) => {
+    await page.contents.deleteDirectory(tmpPath);
+  });
+
+  test('Scroll down on dragging cell to the bottom edge', async ({ page }) => {
+    const firstCellLocator = page.locator(
+      '.jp-Cell[data-windowed-list-index="0"]'
+    );
+    const lastCellLocator = page.locator(
+      '.jp-Cell[data-windowed-list-index="19"]'
+    );
+    const scroller = page.locator(NOTEBOOK_SCROLLER);
+    await firstCellLocator.scrollIntoViewIfNeeded();
+
+    const scrollerBBox = await scroller.boundingBox();
+    const notebookContentHeight = (
+      await page.locator(NOTEBOOK_CONTENT).boundingBox()
+    ).height;
+
+    // Ensure the notebook is scrolled correctly and last cell is not visible
+    const before = await scroller.evaluate(node => node.scrollTop);
+    expect(before).toBe(0);
+    await expect(lastCellLocator).not.toBeInViewport();
+
+    // Emulate drag and drop
+    await dragCellTo(page, {
+      cell: firstCellLocator,
+      x: scrollerBBox.x + 0.5 * scrollerBBox.width,
+      y: scrollerBBox.y + scrollerBBox.height - EDGE_MARGIN,
+      stopCondition: async () => {
+        const scrollTop = await scroller.evaluate(node => node.scrollTop);
+        return scrollTop >= notebookContentHeight - 100;
+      }
+    });
+
+    // The notebook should have scrolled down and the last cell should be visible
+    const after = await scroller.evaluate(node => node.scrollTop);
+    expect(after).toBeGreaterThan(before);
+    await expect(lastCellLocator).toBeInViewport();
+  });
+
+  test('Scroll up on dragging cell to the top edge', async ({ page }) => {
+    const firstCellLocator = page.locator(
+      '.jp-Cell[data-windowed-list-index="0"]'
+    );
+    const lastCellLocator = page.locator(
+      '.jp-Cell[data-windowed-list-index="19"]'
+    );
+
+    const scroller = page.locator(NOTEBOOK_SCROLLER);
+    const scrollerBBox = await scroller.boundingBox();
+    const notebookContentHeight = (
+      await page.locator(NOTEBOOK_CONTENT).boundingBox()
+    ).height;
+
+    // Scroll notebook to the bottom, leaving top 200px visible
+    await page.mouse.move(
+      scrollerBBox.x + 0.5 * scrollerBBox.width,
+      scrollerBBox.y + 0.5 * scrollerBBox.height
+    );
+    await page.mouse.wheel(0, notebookContentHeight - 200);
+    await lastCellLocator.scrollIntoViewIfNeeded();
+
+    // Ensure the notebook is scrolled correctly and first cell is not visible
+    const before = await scroller.evaluate(node => node.scrollTop);
+    expect(before).toBeGreaterThan(notebookContentHeight * 0.75);
+    await expect(firstCellLocator).not.toBeInViewport();
+
+    // Emulate drag and drop
+    await dragCellTo(page, {
+      cell: lastCellLocator,
+      x: scrollerBBox.x + 0.5 * scrollerBBox.width,
+      y: scrollerBBox.y + EDGE_MARGIN,
+      stopCondition: async () => {
+        const scrollTop = await scroller.evaluate(node => node.scrollTop);
+        return scrollTop <= 50;
+      }
+    });
+
+    // The notebook should have scrolled up and the first cell should be visible
+    const after = await scroller.evaluate(node => node.scrollTop);
+    expect(after).toBeLessThan(before);
+    await expect(firstCellLocator).toBeInViewport();
+  });
 });
 
 test.describe('Notebook scroll on execution (no windowing)', () => {
