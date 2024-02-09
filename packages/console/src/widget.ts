@@ -5,7 +5,6 @@ import { Prec } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { createStandaloneCell, ISharedRawCell } from '@jupyter/ydoc';
 import { ISessionContext } from '@jupyterlab/apputils';
-import { MessageLoop } from '@lumino/messaging';
 import {
   AttachmentsCellModel,
   Cell,
@@ -606,14 +605,14 @@ export class CodeConsole extends Widget {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
 
-      // Send the update message and flush it immediately to ensure that
+      // Schedule execution of signal clearance to happen later so that
       // the `readOnly` configuration gets updated before editor signals
       // get disconnected (see `Cell.onUpdateRequest`).
-      promptCell.update();
-      MessageLoop.flush();
-
-      // Clear the signals to avoid memory leaks
-      Signal.clearData(promptCell.editor);
+      const oldCell = promptCell;
+      requestIdleCallback(() => {
+        // Clear the signals to avoid memory leaks
+        Signal.clearData(oldCell.editor);
+      });
 
       // Ensure to clear the cursor
       promptCell.editor?.blur();
