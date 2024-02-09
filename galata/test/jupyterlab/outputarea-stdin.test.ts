@@ -73,11 +73,11 @@ test.describe('Stdin for ipdb', () => {
     await expect(page.locator(ACTIVE_INPUT)).toHaveValue('foofoox');
   });
 
-  const typingScecnarios = [
+  const typingScenarios = [
     { name: 'stdin box', code: 'input()', selector: '.jp-Stdin-input' },
     { name: 'shadow DOM input', code: openShadowDOM, selector: '#shadow-input' }
   ];
-  for (const testCase of typingScecnarios) {
+  for (const testCase of typingScenarios) {
     test(`Typing in ${testCase.name}`, async ({ page }) => {
       // Test to ensure that notebook shortcuts do not capture text typed into inputs.
       // This may not be sufficient to ensure no conflicts with other languages but
