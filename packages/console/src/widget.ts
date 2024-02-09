@@ -4,7 +4,7 @@
 import { Prec } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { createStandaloneCell, ISharedRawCell } from '@jupyter/ydoc';
-import { ISessionContext } from '@jupyterlab/apputils';
+import { DOMUtils, ISessionContext } from '@jupyterlab/apputils';
 import {
   AttachmentsCellModel,
   Cell,
@@ -69,6 +69,13 @@ const CONTENT_CLASS = 'jp-CodeConsole-content';
  * The class name of the panel that holds prompts.
  */
 const INPUT_CLASS = 'jp-CodeConsole-input';
+
+/**
+ * The class name added to the notebook when the focused notebook element takes keyboard input.
+ *
+ * This class is also effective when the focused element is in shadow DOM.
+ */
+const READ_WRITE_CLASS = 'jp-mod-readWrite';
 
 /**
  * The timeout in ms for execution requests to the kernel.
@@ -551,6 +558,12 @@ export class CodeConsole extends Widget {
       case 'mouseup':
         this._evtMouseUp(event as MouseEvent);
         break;
+      case 'focusin':
+        this._evtFocusIn(event as MouseEvent);
+        break;
+      case 'focusout':
+        this._evtFocusOut(event as MouseEvent);
+        break;
       default:
         break;
     }
@@ -564,6 +577,8 @@ export class CodeConsole extends Widget {
     node.addEventListener('keydown', this, true);
     node.addEventListener('click', this);
     node.addEventListener('mousedown', this);
+    node.addEventListener('focusin', this);
+    node.addEventListener('focusout', this);
     // Create a prompt if necessary.
     if (!this.promptCell) {
       this.newPromptCell();
@@ -580,6 +595,8 @@ export class CodeConsole extends Widget {
     const node = this.node;
     node.removeEventListener('keydown', this, true);
     node.removeEventListener('click', this);
+    node.removeEventListener('focusin', this);
+    node.removeEventListener('focusout', this);
   }
 
   /**
@@ -662,6 +679,22 @@ export class CodeConsole extends Widget {
     ) {
       this.promptCell.editor!.focus();
     }
+  }
+
+  /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocusIn(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+  }
+
+  /**
+   * Handle `focusout` events for the widget.
+   */
+  private _evtFocusOut(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
   }
 
   /**
@@ -843,6 +876,20 @@ export class CodeConsole extends Widget {
     if (kernel?.status === 'restarting') {
       this.addBanner();
       this._handleInfo(await kernel?.info);
+    }
+  }
+
+  /**
+   * Update the console node with class indicating read-write state.
+   */
+  private _updateReadWrite(): void {
+    // TODO: de-duplicate with code in console/src/widget.ts
+    const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
+    const hasReadWriteClass = this.node.classList.contains(READ_WRITE_CLASS);
+    if (inReadWrite && !hasReadWriteClass) {
+      this.node.classList.add(READ_WRITE_CLASS);
+    } else if (!inReadWrite && hasReadWriteClass) {
+      this.node.classList.remove(READ_WRITE_CLASS);
     }
   }
 

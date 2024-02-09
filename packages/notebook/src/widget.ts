@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DOMUtils } from '@jupyterlab/apputils';
 import {
   Cell,
   CodeCell,
@@ -2782,7 +2783,7 @@ export class Notebook extends StaticNotebook {
    * Update the notebook node with class indicating read-write state.
    */
   private _updateReadWrite(): void {
-    const inReadWrite = Private.inReadWrite(document, this.node);
+    const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
     const hasReadWriteClass = this.node.classList.contains(READ_WRITE_CLASS);
     if (inReadWrite && !hasReadWriteClass) {
       this.node.classList.add(READ_WRITE_CLASS);
@@ -2852,7 +2853,7 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle `focusout` events for the notebook.
    */
-  private _evtFocusOut(event: MouseEvent): void {
+  private _evtFocusOut(event: FocusEvent): void {
     // Update read-write class state.
     this._updateReadWrite();
 
@@ -3077,23 +3078,6 @@ namespace Private {
         );
       }
     }
-  }
-
-  /**
-   * Check whether the active element, including elements in shadow DOM, matches `:read-write` selector.
-   */
-  export function inReadWrite(
-    root: ShadowRoot | Document,
-    parent: Node | DocumentFragment
-  ): boolean {
-    const element = root.activeElement;
-    return !!(
-      element &&
-      parent.contains(element) &&
-      (element.matches(':read-write') ||
-        (element.shadowRoot &&
-          inReadWrite(element.shadowRoot, element.shadowRoot)))
-    );
   }
 
   /**
