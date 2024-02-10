@@ -72,12 +72,12 @@
       {
         "command": "console:undo",
         "selector": ".jp-CodeConsole-promptCell",
-        "rank": 10
+        "rank": 1
       },
       {
         "command": "console:redo",
         "selector": ".jp-CodeConsole-promptCell",
-        "rank": 10
+        "rank": 2
       }
     ]
   },
