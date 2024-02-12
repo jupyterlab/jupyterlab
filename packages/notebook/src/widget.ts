@@ -2784,12 +2784,7 @@ export class Notebook extends StaticNotebook {
    */
   private _updateReadWrite(): void {
     const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
-    const hasReadWriteClass = this.node.classList.contains(READ_WRITE_CLASS);
-    if (inReadWrite && !hasReadWriteClass) {
-      this.node.classList.add(READ_WRITE_CLASS);
-    } else if (!inReadWrite && hasReadWriteClass) {
-      this.node.classList.remove(READ_WRITE_CLASS);
-    }
+    this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
   }
 
   /**
