@@ -294,7 +294,7 @@
                   "rank": 11
                 },
                 {
-                  "command": "application:toggle-sidebar-widget",
+                  "command": "application:toggle-side-tabbar",
                   "rank": 12,
                   "args": {
                     "side": "left"
