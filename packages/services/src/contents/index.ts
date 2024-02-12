@@ -1169,7 +1169,13 @@ export class Drive implements Contents.IDrive {
   getDownloadUrl(localPath: string): Promise<string> {
     const baseUrl = this.serverSettings.baseUrl;
     let url = URLExt.join(baseUrl, FILES_URL, URLExt.encodeParts(localPath));
-    const xsrfTokenMatch = document.cookie.match('\\b_xsrf=([^;]*)\\b');
+    let cookie = '';
+    try {
+      cookie = document.cookie;
+    } catch (e) {
+      // e.g. SecurityError in case of CSP Sandbox
+    }
+    const xsrfTokenMatch = cookie.match('\\b_xsrf=([^;]*)\\b');
     if (xsrfTokenMatch) {
       const fullUrl = new URL(url);
       fullUrl.searchParams.append('_xsrf', xsrfTokenMatch[1]);
