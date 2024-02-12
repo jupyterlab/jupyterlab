@@ -65,19 +65,13 @@ export class ActivityHelper {
    * @param attributeValue value of selected widget attribute
    * @param key navigation key to press
    * @param attribute name of attribute selector
-   * @returns new element focus
    */
 
   async keyToSidebar(
     attributeValue: string,
     key: string,
-    attribute: string,
-    parentElement?: Locator
+    attribute: string
   ): Promise<void> {
-    if (parentElement) {
-      await parentElement.focus();
-    }
-
     while (
       (await this.page.evaluate(
         attribute => document.activeElement?.getAttribute(attribute),
