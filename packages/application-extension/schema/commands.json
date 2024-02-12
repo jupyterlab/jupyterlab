@@ -305,7 +305,7 @@
                   "rank": 13
                 },
                 {
-                  "command": "application:toggle-sidebar-widget",
+                  "command": "application:toggle-side-tabbar",
                   "rank": 14,
                   "args": {
                     "side": "right"
