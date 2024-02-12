@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
-import { Locator } from '@playwright/test';
 
 const sidebarElementIds = {
   'left-sidebar': [
