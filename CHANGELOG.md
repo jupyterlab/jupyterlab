@@ -10,7 +10,7 @@ JupyterLab 4.1 includes a number of new features (described below), bug fixes, a
 
 ### Custom CSS
 
-Jupyterlab now supports automatic loading of custom CSS.
+JupyterLab now supports automatic loading of custom CSS.
 Themes are the recommended way for customizing the JupyterLab look and feel,
 while custom CSS is intended for minor personal adjustments.
 
@@ -63,10 +63,10 @@ The default keyboard shortcuts are displayed in the small widget shown when hove
 To enable the inline suggestions based on the kernel history, go to Settings → Inline Completer → History provider → check the "enabled" checkbox.
 
 In addition to the built-in history suggestions,
-the [`jupyter-ai`](https://github.com/jupyterlab/jupyter-ai) extension will provide
+the [`jupyter-ai`](https://github.com/jupyterlab/jupyter-ai) extension can provide
 suggestions from supported models.
-The `jupyter-ai` integration with inline completer can be tested starting with the
-[v2.10.0beta1](https://github.com/jupyterlab/jupyter-ai/releases/tag/v2.10.0beta1) pre-release.
+The `jupyter-ai` integration with inline completer is available starting with the
+[v2.10.0](https://github.com/jupyterlab/jupyter-ai/releases/tag/v2.10.0) release.
 
 The Inline Completer API is still considered experimental and may be subject to changes, please share feedback!
 
@@ -77,24 +77,24 @@ Numerous improvements to keyboard navigation with focus on accessibility and usa
 - the focus can now be moved beyond the active notebook
 - the toolbars can now be navigated using arrow keys
 
-For more details, see [this post on Jupyter Blog](https://blog.jupyter.org/recent-keyboard-navigation-improvements-in-jupyter-4df32f97628d).
+For more details, see [this post on the Jupyter Blog](https://blog.jupyter.org/recent-keyboard-navigation-improvements-in-jupyter-4df32f97628d).
 
 ### Execution history in notebook
 
 The code from previously executed cells can be used to populate empty cells,
-allowing to iterate on code from previous cells or even sessions
+allowing to iterate on code from previous cells or even previous sessions
 (depending on how a specific kernel stores history).
 
-To cycle between history items press <kbd>Alt</kbd> + <kbd>Arrow Up</kbd> and  <kbd>Alt</kbd> + <kbd>Arrow Down</kbd>.
+To cycle between history items, press <kbd>Alt</kbd> + <kbd>Arrow Up</kbd> and  <kbd>Alt</kbd> + <kbd>Arrow Down</kbd>.
 
 To enable execution history, go to Settings → Notebook → check the "Kernel history access" checkbox.
 
 This feature was already available in the console in previous releases; it only works with kernels supporting execution history requests.
-To clear the execution history consult the documentation of the kernel you are using (e.g., IPython/ipykernel).
+To clear the execution history, consult the documentation of the kernel you are using (e.g., IPython/ipykernel).
 
 ### Opening files from tracebacks
 
-Paths to code files detected in the tracebacks returned by kernels on execution error are now turned into links.
+Paths to code files detected in tracebacks returned by kernels on execution error are now turned into links.
 These links will open the corresponding file for editing, if it is in the Jupyter root directory,
 or they will open a read-only preview if the file is outside of the root directory and the active kernel supports the debugger.
 
@@ -115,7 +115,7 @@ thus the plugin manager enables more extensive customization of the JupyterLab e
 
 <img alt="An example search result in the plugin extension listing" src="https://jupyterlab.readthedocs.io/en/latest/_images/plugin-manager-search-notebook.png" class="jp-screenshot">
 
-This feature is intended for advanced users and documented in depth in the [documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#managing-plugins-with-plugin-manager).
+This feature is intended for advanced users and is documented in depth in the [documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#managing-plugins-with-plugin-manager).
 
 Administrators may want to [lock specific plugins](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#locking-and-unlocking-plugins) if they are required for any reason; this will prevent users from disabling the plugins via Plugin Manager and remote API calls. The Plugin Manager itself can be [disabled using the CLI](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#enabling-and-disabling-extensions).
 
