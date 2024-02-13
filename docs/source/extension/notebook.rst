@@ -190,12 +190,14 @@ enabling quick access to cell- and notebook-specific actions.
 These shortcuts are only active when the notebook is in command mode
 and the active element is non-editable,
 as signalled by absence of ``.jp-mod-readWrite`` class on the notebook node.
-This class is set if active element is editable as ascertained by matching
+This class is set if the active element is editable as ascertained by matching
 to the ``:read-write`` pseudo-selector, and accounts for any elements nested
 in the open shadow DOM, but not for the closed shadow DOM nor non-editable
 elements with custom key event handlers (such as
 ``<div contenteditable="false" onkeydown="alert()" tabindex="0"></div>``).
-If your output widget uses closed shadow DOM or non-editable elements with custom
+If your output widget (for example created with ``IPython.display.HTML``,
+or created by your MIME renderer on cell output in a notebook or console)
+uses closed shadow DOM or non-editable elements with custom
 key event handlers, you may wish to set ``lm-suppress-shortcuts`` data attribute
 on the host element to prevent side-effects from the command-mode actions, e.g:
 

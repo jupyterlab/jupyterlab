@@ -71,7 +71,8 @@ const CONTENT_CLASS = 'jp-CodeConsole-content';
 const INPUT_CLASS = 'jp-CodeConsole-input';
 
 /**
- * The class name added to the notebook when the focused notebook element takes keyboard input.
+ * The class name added to the console when an element within it is focused
+ * and takes keyboard input, such as <input> and <div contenteditable>
  *
  * This class is also effective when the focused element is in shadow DOM.
  */
@@ -885,11 +886,7 @@ export class CodeConsole extends Widget {
   private _updateReadWrite(): void {
     // TODO: de-duplicate with code in console/src/widget.ts
     const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
-    const hasReadWriteClass = this.node.classList.contains(READ_WRITE_CLASS);
-    if (inReadWrite && !hasReadWriteClass) {
-      this.node.classList.add(READ_WRITE_CLASS);
-    } else if (!inReadWrite && hasReadWriteClass) {
-      this.node.classList.remove(READ_WRITE_CLASS);
+    this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
     }
   }
 

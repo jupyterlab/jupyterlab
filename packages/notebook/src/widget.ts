@@ -94,7 +94,8 @@ const OTHER_SELECTED_CLASS = 'jp-mod-multiSelected';
 const UNCONFINED_CLASS = 'jp-mod-unconfined';
 
 /**
- * The class name added to the notebook when the focused notebook element takes keyboard input.
+ * The class name added to the notebook when an element within it is focused
+ * and takes keyboard input, such as focused <input> or <div contenteditable>.
  *
  * This class is also effective when the focused element is in shadow DOM.
  */
