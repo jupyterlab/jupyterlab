@@ -212,6 +212,11 @@ export interface IInlineCompletionItem extends IInlineCompletionItemLSP {
    * with `token` which has to be set for incomplete completions.
    */
   isIncomplete?: boolean;
+
+  /**
+   * This field is marked when an error occurs during a stream or fetch request.
+   */
+  isError?: boolean;
 }
 
 export interface IInlineCompletionList<

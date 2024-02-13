@@ -280,6 +280,23 @@
   }
 }
 
+.jp-GhostText-errorIndicator::after {
+  animation: jp-GhostText-error 2s infinite;
+  animation-delay: 400ms;
+  content: ' ';
+  background: rgba(255, 0, 0, 0.5);
+}
+
+@keyframes jp-GhostText-error {
+  0% {
+    opacity: 0.5;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 .jp-InlineCompleter {
   box-shadow: var(--jp-elevation-z2);
   background: var(--jp-layout-color1);
