@@ -321,7 +321,7 @@ export abstract class EditorSearchProvider<
    * calling `replaceCurrentMatch()` attribute `this.currentIndex` is null.
    * It is necesary to let the caller handle highlighting because this
    * method is used in composition pattern (search engine of notebook cells)
-   * and highligthing on the composer (notebook) level needs to switch to next
+   * and highlighting on the composer (notebook) level needs to switch to next
    * engine (cell) with matches.
    *
    * @param newText The replacement text.
