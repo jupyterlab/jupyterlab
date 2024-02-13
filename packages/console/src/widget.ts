@@ -887,7 +887,6 @@ export class CodeConsole extends Widget {
     // TODO: de-duplicate with code in notebook/src/widget.ts
     const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
     this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
-    }
   }
 
   private _banner: RawCell | null = null;
