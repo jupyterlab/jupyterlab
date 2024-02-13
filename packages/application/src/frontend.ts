@@ -260,11 +260,13 @@ export abstract class JupyterFrontEnd<
         setTimeout(() => resolve(false), Private.INPUT_GUARD_TIMEOUT);
       })
     ]);
-    causesInputPromise.then(willCauseInput => {
-      if (!willCauseInput) {
-        this.commands.processKeydownEvent(event);
-      }
-    });
+    causesInputPromise
+      .then(willCauseInput => {
+        if (!willCauseInput) {
+          this.commands.processKeydownEvent(event);
+        }
+      })
+      .catch(console.warn);
   }
 
   private _contextMenuEvent: MouseEvent;
