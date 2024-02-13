@@ -884,7 +884,7 @@ export class CodeConsole extends Widget {
    * Update the console node with class indicating read-write state.
    */
   private _updateReadWrite(): void {
-    // TODO: de-duplicate with code in console/src/widget.ts
+    // TODO: de-duplicate with code in notebook/src/widget.ts
     const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
     this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
     }
