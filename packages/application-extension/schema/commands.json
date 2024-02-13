@@ -48,7 +48,7 @@
       "selector": "body"
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 1"],
       "macKeys": [""],
       "selector": "body",
@@ -58,7 +58,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 2"],
       "macKeys": [""],
       "selector": "body",
@@ -68,7 +68,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 3"],
       "macKeys": [""],
       "selector": "body",
@@ -78,7 +78,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 4"],
       "macKeys": [""],
       "selector": "body",
@@ -88,7 +88,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 5"],
       "macKeys": [""],
       "selector": "body",
@@ -98,7 +98,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 6"],
       "macKeys": [""],
       "selector": "body",
@@ -108,7 +108,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 7"],
       "macKeys": [""],
       "selector": "body",
@@ -118,7 +118,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 8"],
       "macKeys": [""],
       "selector": "body",
@@ -128,7 +128,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 9"],
       "macKeys": [""],
       "selector": "body",
@@ -138,7 +138,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt 0"],
       "macKeys": [""],
       "selector": "body",
@@ -148,7 +148,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt Shift 1"],
       "macKeys": [""],
       "selector": "body",
@@ -158,7 +158,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt Shift 2"],
       "macKeys": [""],
       "selector": "body",
@@ -168,7 +168,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt Shift 3"],
       "macKeys": [""],
       "selector": "body",
@@ -178,7 +178,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt Shift 4"],
       "macKeys": [""],
       "selector": "body",
@@ -188,7 +188,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt Shift 5"],
       "macKeys": [""],
       "selector": "body",
@@ -198,7 +198,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt Shift 6"],
       "macKeys": [""],
       "selector": "body",
@@ -208,7 +208,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt Shift 7"],
       "macKeys": [""],
       "selector": "body",
@@ -218,7 +218,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt Shift 8"],
       "macKeys": [""],
       "selector": "body",
@@ -228,7 +228,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt Shift 9"],
       "macKeys": [""],
       "selector": "body",
@@ -238,7 +238,7 @@
       }
     },
     {
-      "command": "application:toggle-side-tabbar",
+      "command": "application:toggle-sidebar-widget",
       "keys": ["Alt Shift 0"],
       "macKeys": [""],
       "selector": "body",
