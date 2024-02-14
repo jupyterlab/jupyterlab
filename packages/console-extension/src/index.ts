@@ -36,7 +36,12 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { IRenderMime, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { consoleIcon, IFormRendererRegistry } from '@jupyterlab/ui-components';
+import {
+  consoleIcon,
+  IFormRendererRegistry,
+  redoIcon,
+  undoIcon
+} from '@jupyterlab/ui-components';
 import { find } from '@lumino/algorithm';
 import {
   JSONExt,
@@ -85,9 +90,13 @@ namespace CommandIDs {
 
   export const interactionMode = 'console:interaction-mode';
 
+  export const redo = 'console:redo';
+
   export const replaceSelection = 'console:replace-selection';
 
   export const shutdown = 'console:shutdown';
+
+  export const undo = 'console:undo';
 
   export const invokeCompleter = 'completer:invoke-console';
 
@@ -550,6 +559,74 @@ async function activateConsole(
     return widget ?? null;
   }
 
+  /**
+   * Add undo command
+   */
+  commands.addCommand(CommandIDs.undo, {
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (!current) {
+        return;
+      }
+
+      const editor = current.console.promptCell?.editor;
+      if (!editor) {
+        return;
+      }
+      editor.undo();
+    },
+    isEnabled: args => {
+      if (!isEnabled()) {
+        return false;
+      }
+
+      const editor = getCurrent(args)?.console?.promptCell?.editor;
+
+      if (!editor) {
+        return false;
+      }
+
+      return editor.model.sharedModel.canUndo();
+    },
+    icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Undo')
+  });
+
+  /**
+   * Add redo command
+   */
+  commands.addCommand(CommandIDs.redo, {
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (!current) {
+        return;
+      }
+
+      const editor = current.console.promptCell?.editor;
+      if (!editor) {
+        return;
+      }
+      editor.redo();
+    },
+    isEnabled: args => {
+      if (!isEnabled()) {
+        return false;
+      }
+
+      const editor = getCurrent(args)?.console?.promptCell?.editor;
+
+      if (!editor) {
+        return false;
+      }
+
+      return editor.model.sharedModel.canRedo();
+    },
+    icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
+    label: trans.__('Redo')
+  });
+
   commands.addCommand(CommandIDs.clear, {
     label: trans.__('Clear Console Cells'),
     execute: args => {
@@ -787,6 +864,16 @@ async function activateConsole(
     // Add a clearer to the edit menu
     mainMenu.editMenu.clearers.clearCurrent.add({
       id: CommandIDs.clear,
+      isEnabled
+    });
+
+    // Add undo/redo hooks to the edit menu.
+    mainMenu.editMenu.undoers.redo.add({
+      id: CommandIDs.redo,
+      isEnabled
+    });
+    mainMenu.editMenu.undoers.undo.add({
+      id: CommandIDs.undo,
       isEnabled
     });
 

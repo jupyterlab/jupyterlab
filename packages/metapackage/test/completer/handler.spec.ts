@@ -3,6 +3,7 @@
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+import { Signal } from '@lumino/signaling';
 import {
   Completer,
   CompleterModel,
@@ -14,7 +15,7 @@ import {
 } from '@jupyterlab/completer';
 import { createEditorWidget } from '@jupyterlab/completer/lib/testutils';
 import { Widget } from '@lumino/widgets';
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import { ISharedFile, ISharedText, SourceChange } from '@jupyter/ydoc';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 
 class TestCompleterModel extends CompleterModel {
@@ -217,10 +218,9 @@ describe('@jupyterlab/completer', () => {
         );
         editor.model.sharedModel.setSource('bar');
         editor.setCursorPosition({ line: 0, column: 2 });
-        // This signal is emitted (again) because the cursor position that
-        // a natural user would create need to be recreated here.
-        // (editor.model.value.changed as any).emit({ type: 'set', value: 'bar' }); @todo remove?
-        (editor.model.sharedModel.changed as any).emit([]);
+        (
+          editor.model.sharedModel.changed as Signal<ISharedText, SourceChange>
+        ).emit({ sourceChange: {} as any });
         expect(model.methods).toEqual(
           expect.arrayContaining(['handleTextChange'])
         );
@@ -396,6 +396,18 @@ describe('@jupyterlab/completer', () => {
         expect(provider.triggers).toEqual(
           expect.arrayContaining([CompletionTriggerKind.TriggerCharacter])
         );
+      });
+
+      it('should not trigger on non-source changes to the model', async () => {
+        provider.triggers.length = 0;
+
+        (handler.editor!.model.sharedModel as ISharedFile).setState(
+          'state-variable',
+          'new-value'
+        );
+        await new Promise(process.nextTick);
+
+        expect(provider.triggers.length).toEqual(0);
       });
 
       it('should pass context to `shouldShowContinuousHint()`', async () => {
