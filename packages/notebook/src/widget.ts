@@ -1457,7 +1457,8 @@ export class Notebook extends StaticNotebook {
           // activeCell.node.focus() is called, which closes the command palette.
           // To the end user, it looks as if all the keyboard shortcut did was
           // move focus from the cell editor to the cell as a whole.
-          waitUntilReady: false
+          waitUntilReady: false,
+          preventScroll: true
         });
       }
     }

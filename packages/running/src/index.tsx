@@ -192,13 +192,13 @@ function Item(props: {
             ) : (
               <caretDownIcon.react tag="span" stylesheet="runningItem" />
             ))}
-          {typeof icon === 'string' ? (
-            icon ? (
+          {icon ? (
+            typeof icon === 'string' ? (
               <img src={icon} />
-            ) : undefined
-          ) : (
-            <icon.react tag="span" stylesheet="runningItem" />
-          )}
+            ) : (
+              <icon.react tag="span" stylesheet="runningItem" />
+            )
+          ) : undefined}
           <span
             className={ITEM_LABEL_CLASS}
             title={title}

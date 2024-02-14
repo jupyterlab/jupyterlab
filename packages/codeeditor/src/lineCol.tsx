@@ -233,11 +233,26 @@ function LineColComponent(
 ): React.ReactElement<LineColComponent.IProps> {
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
+  const keydownHandler = (event: React.KeyboardEvent<HTMLImageElement>) => {
+    if (
+      event.key === 'Enter' ||
+      event.key === 'Spacebar' ||
+      event.key === ' '
+    ) {
+      event.preventDefault();
+      event.stopPropagation();
+      props.handleClick();
+    } else {
+      return;
+    }
+  };
   return (
     <TextItem
       onClick={props.handleClick}
       source={trans.__('Ln %1, Col %2', props.line, props.column)}
       title={trans.__('Go to line number…')}
+      tabIndex={0}
+      onKeyDown={keydownHandler}
     />
   );
 }

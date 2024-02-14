@@ -200,8 +200,9 @@ export namespace NotebookActions {
 
     offsets.push(orig.length);
 
+    const cellCountAfterSplit = offsets.length - 1;
     const clones = offsets.slice(0, -1).map((offset, offsetIdx) => {
-      const { cell_type, metadata } = child.model.sharedModel.toJSON();
+      const { cell_type, metadata, outputs } = child.model.sharedModel.toJSON();
 
       return {
         cell_type,
@@ -209,7 +210,11 @@ export namespace NotebookActions {
         source: orig
           .slice(offset, offsets[offsetIdx + 1])
           .replace(/^\n+/, '')
-          .replace(/\n+$/, '')
+          .replace(/\n+$/, ''),
+        outputs:
+          offsetIdx === cellCountAfterSplit - 1 && cell_type === 'code'
+            ? outputs
+            : undefined
       };
     });
 
@@ -549,7 +554,7 @@ export namespace NotebookActions {
       translator
     );
 
-    void Private.handleRunState(notebook, state, false);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -587,7 +592,8 @@ export namespace NotebookActions {
       sessionDialogs,
       translator
     );
-    void Private.handleRunState(notebook, state, false);
+
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -652,7 +658,13 @@ export namespace NotebookActions {
       notebook.activeCellIndex++;
     }
 
-    void Private.handleRunState(notebook, state, true);
+    // If a cell is outside of viewport and scrolling is needed, the `smart`
+    // logic in `handleRunState` will choose appropriate alignment, except
+    // for the case of a small cell less than one viewport away for which it
+    // would use the `auto` heuristic, for which we set the preferred alignment
+    // to `center` as in most cases there will be space below and above a cell
+    // that is smaller than (or approximately equal to) the viewport size.
+    void Private.handleRunState(notebook, state, 'center');
     return promise;
   }
 
@@ -709,7 +721,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state, 'center');
     return promise;
   }
 
@@ -751,7 +763,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = lastIndex;
     notebook.deselectAll();
 
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -774,7 +786,7 @@ export namespace NotebookActions {
     }
     const promise = Private.runSelected(notebook);
     notebook.activeCellIndex = previousIndex;
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -816,7 +828,7 @@ export namespace NotebookActions {
 
     notebook.deselectAll();
 
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -858,7 +870,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = lastIndex;
     notebook.deselectAll();
 
-    void Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -2303,13 +2315,16 @@ namespace Private {
   export async function handleRunState(
     notebook: Notebook,
     state: IState,
-    scroll = false
+    alignPreference?: 'start' | 'end' | 'center' | 'top-center'
   ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
-    if (scroll && activeCell) {
-      await notebook.scrollToItem(activeCellIndex, 'smart', 0).catch(reason => {
-        // no-op
-      });
+
+    if (activeCell) {
+      await notebook
+        .scrollToItem(activeCellIndex, 'smart', 0, alignPreference)
+        .catch(reason => {
+          // no-op
+        });
     }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();

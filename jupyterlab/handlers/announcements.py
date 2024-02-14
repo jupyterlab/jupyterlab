@@ -43,7 +43,7 @@ class Notification:
     createdAt: float  # noqa
     message: str
     modifiedAt: float  # noqa
-    type: str = "default"  # noqa
+    type: str = "default"
     link: Tuple[str, str] = field(default_factory=tuple)
     options: dict = field(default_factory=dict)
 

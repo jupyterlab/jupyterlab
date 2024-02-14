@@ -81,6 +81,11 @@ const EXECUTION_TIMEOUT = 250;
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
 /**
+ * The data attribute added to a widget that can undo.
+ */
+const UNDOER = 'jpUndoer';
+
+/**
  * A widget containing a Jupyter console.
  *
  * #### Notes
@@ -97,6 +102,7 @@ export class CodeConsole extends Widget {
     this.addClass(CONSOLE_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
+    this.node.dataset[UNDOER] = 'true';
     this.node.tabIndex = -1; // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.
@@ -604,7 +610,16 @@ export class CodeConsole extends Widget {
     if (promptCell) {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
-      Signal.clearData(promptCell.editor);
+
+      // Schedule execution of signal clearance to happen later so that
+      // the `readOnly` configuration gets updated before editor signals
+      // get disconnected (see `Cell.onUpdateRequest`).
+      const oldCell = promptCell;
+      requestIdleCallback(() => {
+        // Clear the signals to avoid memory leaks
+        Signal.clearData(oldCell.editor);
+      });
+
       // Ensure to clear the cursor
       promptCell.editor?.blur();
       const child = input.widgets[0];
