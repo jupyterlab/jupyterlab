@@ -276,14 +276,14 @@
   user-select: none;
 }
 
-.jp-DirListing-itemText:focus {
+.jp-DirListing-itemText:focus-visible {
   outline-width: 2px;
   outline-color: var(--jp-inverse-layout-color1);
   outline-style: solid;
   outline-offset: 1px;
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText:focus {
+.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText:focus-visible {
   outline-color: var(--jp-layout-color1);
 }
 
