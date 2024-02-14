@@ -1776,7 +1776,7 @@ export abstract class AttachmentsCell<
             continue;
           }
           items[i].getAsString(text => {
-            this.editor!.replaceSelection?.(text.replace(/\r\n/g, '\n'));
+            this.editor!.replaceSelection?.((text.replace(/\r\n/g, '\n')).replace(/\r/g, '\n'));
           });
         }
         this._attachFiles(event.clipboardData.items);
