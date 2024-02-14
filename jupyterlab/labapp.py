@@ -237,7 +237,7 @@ class LabCleanAppOptions(AppOptions):
     settings = Bool(False)
     staging = Bool(True)
     static = Bool(False)
-    all = Bool(False)  # noqa
+    all = Bool(False)
 
 
 class LabCleanApp(JupyterApp):
@@ -265,7 +265,7 @@ class LabCleanApp(JupyterApp):
 
     static = Bool(False, config=True, help="Also delete <app-dir>/static")
 
-    all = Bool(  # noqa
+    all = Bool(
         False,
         config=True,
         help="Delete the entire contents of the app directory.\n%s" % ext_warn_msg,

@@ -396,17 +396,17 @@ export const setupCommands = (
       command: COMMAND_IDS.findPrevious
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['I', 'I'],
       command: COMMAND_IDS.interrupt
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['0', '0'],
       command: COMMAND_IDS.restart
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['Enter'],
       command: COMMAND_IDS.editMode
     },
@@ -416,7 +416,7 @@ export const setupCommands = (
       command: COMMAND_IDS.commandMode
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: 'jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['Shift M'],
       command: COMMAND_IDS.merge
     },
@@ -426,42 +426,42 @@ export const setupCommands = (
       command: COMMAND_IDS.split
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: 'jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['J'],
       command: COMMAND_IDS.selectBelow
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: 'jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['ArrowDown'],
       command: COMMAND_IDS.selectBelow
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: 'jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['K'],
       command: COMMAND_IDS.selectAbove
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: 'jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['ArrowUp'],
       command: COMMAND_IDS.selectAbove
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: 'jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['Shift K'],
       command: COMMAND_IDS.extendAbove
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: 'jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['Shift J'],
       command: COMMAND_IDS.extendBelow
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: 'jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['Z'],
       command: COMMAND_IDS.undo
     },
     {
-      selector: '.jp-Notebook.jp-mod-commandMode:focus',
+      selector: 'jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
       keys: ['Y'],
       command: COMMAND_IDS.redo
     }

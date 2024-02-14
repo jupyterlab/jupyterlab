@@ -624,6 +624,34 @@ export class NotebookHelper {
   }
 
   /**
+   * Get the content of the cell input
+   *
+   * @param cellIndex Cell index
+   * @returns the code input
+   */
+  async getCellTextInput(cellIndex: number): Promise<string> {
+    // Using textContent on handle does not preserve new lines, so we need to either:
+    // (a) use `evaluate()` operate on the codemirror instance directly to get the code
+    // (b) iterate the lines in representation and concatenate manually
+    // (c) copy-paste the content and read the clipboard
+    // Out of the three options only (c) does not touch implementation details of CodeMirror.
+    const wasInEditingMode = await this.isCellInEditingMode(cellIndex);
+    if (!wasInEditingMode) {
+      await this.enterCellEditingMode(cellIndex);
+    }
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Control+C');
+    await this.page.context().grantPermissions(['clipboard-read']);
+    const handle = await this.page.evaluateHandle(() =>
+      navigator.clipboard.readText()
+    );
+    if (!wasInEditingMode) {
+      await this.leaveCellEditingMode(cellIndex);
+    }
+    return await handle.jsonValue();
+  }
+
+  /**
    * Get the handle to the input expander of a cell
    *
    * @param cellIndex Cell index

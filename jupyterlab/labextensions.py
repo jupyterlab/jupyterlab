@@ -330,7 +330,7 @@ class UpdateLabExtensionApp(BaseExtensionApp):
     description = "Update labextension(s)"
     flags = update_flags
 
-    all = Bool(False, config=True, help="Whether to update all extensions")  # noqa
+    all = Bool(False, config=True, help="Whether to update all extensions")
 
     def run_task(self):
         self.deprecation_warning(
@@ -391,7 +391,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s) by name"
     flags = uninstall_flags
 
-    all = Bool(False, config=True, help="Whether to uninstall all extensions")  # noqa
+    all = Bool(False, config=True, help="Whether to uninstall all extensions")
 
     def run_task(self):
         self.deprecation_warning(

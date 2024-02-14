@@ -23,8 +23,34 @@ flowchart LR
     ${FAIL} -->
 `;
 
-export const SVG_DATA_ATTR = 'data.image/svg+xml';
+export const SVG_MIME = 'image/svg+xml';
+export const SVG_DATA_ATTR = `data.${SVG_MIME}`;
 export const MERMAID_VERSION_ATTR = ['metadata', 'text/vnd.mermaid', 'version'];
+
+export const VOID_ELEMENTS = [
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr'
+];
+
+export const SVG_XHTML_HEADER = [
+  '<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">',
+  '<foreignObject>',
+  '<div xmlns="http://www.w3.org/1999/xhtml">'
+];
+
+export const SVG_XHTML_FOOTER = ['</div>', '</foreignObject>', '</svg>'];
 
 /**
  * A mock mermaid that provides the minimal renderer API.
@@ -89,3 +115,20 @@ export const MERMAID_RENDERER = new RenderedMermaid({
     sanitize: (s: string) => s
   }
 });
+
+export function makeElementVariants(element: string) {
+  return [
+    `<${element}>`,
+    `<${element}>`,
+    `<${element} >`,
+    `<${element} />`,
+    `<${element} / >`,
+    `<  ${element}  /  >`,
+    `<${element} id="a" >`,
+    `<${element} id="b" >`,
+    `<${element} id="c"/>`,
+    `<${element} id="d" />`,
+    `<${element} id="e" / >`,
+    `<  ${element} id="f"  /  >`
+  ];
+}

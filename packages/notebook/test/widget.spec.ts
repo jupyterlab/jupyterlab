@@ -1345,6 +1345,24 @@ describe('@jupyter/notebook', () => {
           expect(widget.events).toEqual(expect.arrayContaining(['focusin']));
           expect(widget.mode).toBe('command');
         });
+
+        it('should not unrender previously active markdown cell', async () => {
+          widget.model!.sharedModel.insertCell(0, {
+            cell_type: 'markdown',
+            source: '# Hello'
+          });
+          const mdCell = widget.widgets[0] as MarkdownCell;
+          if (!mdCell.inViewport) {
+            await signalToPromise(mdCell.inViewportChanged);
+          }
+          widget.activeCellIndex = 0;
+          expect(mdCell.rendered).toBe(true);
+          const cellToActivate = widget.widgets[1];
+          expect(widget.mode).toBe('command');
+          simulate(cellToActivate.editorWidget!.node, 'focusin');
+          expect(widget.mode).toBe('edit');
+          expect(mdCell.rendered).toBe(true);
+        });
       });
 
       describe('focusout', () => {

@@ -671,6 +671,12 @@
     }
   },
   "properties": {
+    "enableKernelInitNotification": {
+      "title": "Notify about code execution if kernel is initializing",
+      "description": "Display notification if code cells are run while kernel is initializing.",
+      "type": "boolean",
+      "default": false
+    },
     "codeCellConfig": {
       "title": "Code Cell Configuration",
       "description": "The configuration for all code cells; it will override the CodeMirror default configuration.",
