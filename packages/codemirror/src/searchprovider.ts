@@ -343,26 +343,17 @@ export abstract class EditorSearchProvider<
       this.currentIndex < this.cmHandler.matches.length
     ) {
       const match = this.getCurrentMatch();
-      // If cursor there is no match selected, highlight the next match
       if (!match) {
         this.currentIndex = null;
       } else {
         this.cmHandler.matches.splice(this.currentIndex, 1);
         const cmMatchesRemaining = this.cmHandler.matches.length;
 
-        // If there are no remaining matches, make nothing selected.
-        if (cmMatchesRemaining === 0) {
-          this.currentIndex = null;
-        } else {
-          // Move to the next match, wrapping around if necessary.
-          if (loop) {
-            this.currentIndex = this.currentIndex % cmMatchesRemaining;
-          } else {
-            // End at the end of the CodeMirror matches list; do not loop
-            this.currentIndex =
-              this.currentIndex < cmMatchesRemaining ? this.currentIndex : null;
-          }
-        }
+        // End at the end of the CodeMirror matches list; do not loop
+        // Let the caller call highlightNext if we've reached the end of the current code cell
+        this.currentIndex =
+          this.currentIndex < cmMatchesRemaining ? this.currentIndex : null;
+
         const substitutedText = options?.regularExpression
           ? match!.text.replace(this.query!, newText)
           : newText;
