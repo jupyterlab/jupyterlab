@@ -353,17 +353,14 @@ export abstract class EditorSearchProvider<
         // If there are no remaining matches, make nothing selected.
         if (cmMatchesRemaining === 0) {
           this.currentIndex = null;
-        }
-        else {
-        // Move to the next match, wrapping around if necessary.
-        if (loop) {
-            this.currentIndex = (this.currentIndex) % cmMatchesRemaining;
-          }
-          else {
+        } else {
+          // Move to the next match, wrapping around if necessary.
+          if (loop) {
+            this.currentIndex = this.currentIndex % cmMatchesRemaining;
+          } else {
             // End at the end of the CodeMirror matches list; do not loop
-            this.currentIndex = this.currentIndex < cmMatchesRemaining
-              ? this.currentIndex
-              : null;
+            this.currentIndex =
+              this.currentIndex < cmMatchesRemaining ? this.currentIndex : null;
           }
         }
         const substitutedText = options?.regularExpression

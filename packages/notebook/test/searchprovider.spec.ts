@@ -223,7 +223,7 @@ describe('@jupyterlab/notebook', () => {
         // Pick the spot before the second element.
         await panel.content.activeCell!.editor!.setCursorPosition({
           line: 0,
-          column: 'test3 '.length,
+          column: 'test3 '.length
         });
         expect(provider.currentMatchIndex).toBe(1);
         let replaced = await provider.replaceCurrentMatch('bar');
