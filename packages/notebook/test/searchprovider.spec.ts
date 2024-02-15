@@ -49,7 +49,7 @@ describe('@jupyterlab/notebook', () => {
       panel = utils.createNotebookPanel(context);
       provider = new TestProvider(panel);
       panel.model!.sharedModel.insertCells(0, [
-        { cell_type: 'markdown', source: 'test1 test2' },
+        { cell_type: 'markdown', source: 'test1 test2 test4' },
         { cell_type: 'code', source: 'test3' }
       ]);
     });
@@ -210,7 +210,22 @@ describe('@jupyterlab/notebook', () => {
         let replaced = await provider.replaceCurrentMatch('bar');
         expect(replaced).toBe(true);
         const source = panel.model!.cells.get(0).sharedModel.getSource();
-        expect(source).toBe('bar test2');
+        expect(source).toBe('bar test2 test4');
+        expect(provider.currentMatchIndex).toBe(0);
+      });
+
+      it('should start in the middle, replace, and highlight next', async () => {
+        // Pick the spot before the second element.
+        await panel.content.activeCell!.editor!.setCursorPosition({
+          line: 0,
+          column: 'test1 '.length,
+        });
+        await provider.startQuery(/test\d/, undefined);
+        expect(provider.currentMatchIndex).toBe(0);
+        let replaced = await provider.replaceCurrentMatch('bar');
+        expect(replaced).toBe(true);
+        const source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test1 bar test4');
         expect(provider.currentMatchIndex).toBe(0);
       });
 
@@ -226,7 +241,7 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(replaced).toBe(true);
         const source = panel.model!.cells.get(0).sharedModel.getSource();
-        expect(source).toBe('test1 2st_bar (was test2)');
+        expect(source).toBe('test1 2st_bar (was test2) test4');
       });
 
       it('should not substitute if regular expression toggle is off', async () => {
@@ -239,7 +254,7 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(replaced).toBe(true);
         const source = panel.model!.cells.get(0).sharedModel.getSource();
-        expect(source).toBe('$1st_bar (was $&) test2');
+        expect(source).toBe('$1st_bar (was $&) test2 test4');
       });
 
       it('should replace with a longer text and highlight next', async () => {
@@ -248,13 +263,13 @@ describe('@jupyterlab/notebook', () => {
         let replaced = await provider.replaceCurrentMatch('rabarbar');
         expect(replaced).toBe(true);
         let source = panel.model!.cells.get(0).sharedModel.getSource();
-        expect(source).toBe('rabarbar test2');
+        expect(source).toBe('rabarbar test2 test4');
         expect(provider.currentMatchIndex).toBe(0);
 
         replaced = await provider.replaceCurrentMatch('rabarbar');
         expect(replaced).toBe(true);
         source = panel.model!.cells.get(0).sharedModel.getSource();
-        expect(source).toBe('rabarbar rabarbar');
+        expect(source).toBe('rabarbar rabarbar test4');
         expect(provider.currentMatchIndex).toBe(0);
 
         replaced = await provider.replaceCurrentMatch('rabarbar');
@@ -272,7 +287,7 @@ describe('@jupyterlab/notebook', () => {
         const replaced = await provider.replaceAllMatches('test0');
         expect(replaced).toBe(true);
         let source = panel.model!.cells.get(0).sharedModel.getSource();
-        expect(source).toBe('test0 test0');
+        expect(source).toBe('test0 test0 test0');
         source = panel.model!.cells.get(1).sharedModel.getSource();
         expect(source).toBe('test0');
         expect(provider.currentMatchIndex).toBe(null);
@@ -287,7 +302,7 @@ describe('@jupyterlab/notebook', () => {
         const replaced = await provider.replaceAllMatches('bar');
         expect(replaced).toBe(true);
         let source = panel.model!.cells.get(0).sharedModel.getSource();
-        expect(source).toBe('bar1 bar2');
+        expect(source).toBe('bar1 bar2 bar4');
         source = panel.model!.cells.get(1).sharedModel.getSource();
         expect(source).toBe('test3');
         await provider.endQuery();
@@ -301,7 +316,7 @@ describe('@jupyterlab/notebook', () => {
         const replaced = await provider.replaceAllMatches('bar');
         expect(replaced).toBe(true);
         let source = panel.model!.cells.get(0).sharedModel.getSource();
-        expect(source).toBe('test1 test2');
+        expect(source).toBe('test1 test2 test4');
         source = panel.model!.cells.get(1).sharedModel.getSource();
         expect(source).toBe('bar3');
         await provider.endQuery();
