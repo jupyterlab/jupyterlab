@@ -319,7 +319,7 @@ export abstract class EditorSearchProvider<
    *
    * The caller of this method is expected to call `highlightNext` if after
    * calling `replaceCurrentMatch()` attribute `this.currentIndex` is null.
-   * It is necesary to let the caller handle highlighting because this
+   * It is necessary to let the caller handle highlighting because this
    * method is used in composition pattern (search engine of notebook cells)
    * and highlighting on the composer (notebook) level needs to switch to next
    * engine (cell) with matches.
