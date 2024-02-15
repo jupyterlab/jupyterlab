@@ -51,7 +51,8 @@ export class PythonBuiltin {
     let builder = new RangeSetBuilder<Decoration>();
     for (let { from, to } of view.visibleRanges) {
       this.tree.iterate({
-        enter: node => { // use arrow function to access `this`
+        // use arrow function to access `this`
+        enter: node => {
           if (node.name !== 'VariableName') return;
           if (!pythonLanguage.isActiveAt(view.state, node.from)) return;
           const variableName = view.state.sliceDoc(node.from, node.to);
