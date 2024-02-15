@@ -4,7 +4,7 @@
 import {
   defaultHighlightStyle,
   HighlightStyle,
-  syntaxHighlighting,
+  syntaxHighlighting
 } from '@codemirror/language';
 import { Extension } from '@codemirror/state';
 import { EditorView, ViewPlugin } from '@codemirror/view';
@@ -151,7 +151,6 @@ export const jupyterHighlightStyle = HighlightStyle.define([
     fontWeight: 'bold'
   }
 ]);
-
 
 /**
  * JupyterLab CodeMirror 6 theme
