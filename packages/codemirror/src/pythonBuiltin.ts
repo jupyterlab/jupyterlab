@@ -3,13 +3,13 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { pythonLanguage } from '@codemirror/lang-python';
 import { syntaxTree } from '@codemirror/language';
 import { RangeSetBuilder } from '@codemirror/state';
 import {
   Decoration,
   DecorationSet,
   EditorView,
+  ViewPlugin,
   ViewUpdate
 } from '@codemirror/view';
 import { Tree } from '@lezer/common';
@@ -54,7 +54,6 @@ export class PythonBuiltin {
         // use arrow function to access `this`
         enter: node => {
           if (node.name !== 'VariableName') return;
-          if (!pythonLanguage.isActiveAt(view.state, node.from)) return;
           const variableName = view.state.sliceDoc(node.from, node.to);
           if (builtins.includes(variableName)) {
             builder.add(node.from, node.to, this.mark);
@@ -67,6 +66,10 @@ export class PythonBuiltin {
     return builder.finish();
   }
 }
+
+export const pythonBuiltin = ViewPlugin.fromClass(PythonBuiltin, {
+  decorations: v => v.decorations
+});
 
 const builtins = [
   'abs',

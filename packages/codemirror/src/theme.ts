@@ -7,11 +7,10 @@ import {
   syntaxHighlighting
 } from '@codemirror/language';
 import { Extension } from '@codemirror/state';
-import { EditorView, ViewPlugin } from '@codemirror/view';
+import { EditorView } from '@codemirror/view';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { tags as t } from '@lezer/highlight';
 import { IEditorTheme, IEditorThemeRegistry } from './token';
-import { PythonBuiltin } from './pythonBuiltin';
 
 export const jupyterEditorTheme = EditorView.theme({
   /**
@@ -82,6 +81,10 @@ export const jupyterEditorTheme = EditorView.theme({
 
   '.cm-tooltip': {
     backgroundColor: 'var(--jp-layout-color1)'
+  },
+
+  '.cm-builtin': {
+    color: 'var(--jp-mirror-editor-builtin-color)'
   }
 });
 
@@ -157,8 +160,7 @@ export const jupyterHighlightStyle = HighlightStyle.define([
  */
 export const jupyterTheme: Extension = [
   jupyterEditorTheme,
-  syntaxHighlighting(jupyterHighlightStyle),
-  ViewPlugin.fromClass(PythonBuiltin, { decorations: v => v.decorations })
+  syntaxHighlighting(jupyterHighlightStyle)
 ];
 
 /**

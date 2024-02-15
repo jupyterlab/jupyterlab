@@ -151,7 +151,3 @@
   opacity: 1;
   transition-delay: 0s;
 }
-
-.cm-builtin {
-  color: var(--jp-mirror-editor-builtin-color);
-}
