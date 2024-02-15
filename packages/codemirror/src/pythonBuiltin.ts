@@ -18,10 +18,11 @@ export class PythonBuiltin {
   decorations: DecorationSet;
   decoratedTo: number;
   tree: Tree;
-  enabled: boolean;
+  mark: Decoration;
 
   constructor(view: EditorView) {
     this.tree = syntaxTree(view.state);
+    this.mark = Decoration.mark({ class: 'cm-builtin' });
     this.decorations = this.buildDeco(view);
     this.decoratedTo = view.viewport.to;
   }
@@ -55,11 +56,7 @@ export class PythonBuiltin {
           if (!pythonLanguage.isActiveAt(view.state, node.from)) return;
           const variableName = view.state.sliceDoc(node.from, node.to);
           if (builtins.includes(variableName)) {
-            builder.add(
-              node.from,
-              node.to,
-              Decoration.mark({ class: 'cm-builtin' })
-            );
+            builder.add(node.from, node.to, this.mark);
           }
         },
         from,
