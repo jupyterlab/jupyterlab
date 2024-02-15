@@ -50,7 +50,7 @@ describe('@jupyterlab/notebook', () => {
       provider = new TestProvider(panel);
       panel.model!.sharedModel.insertCells(0, [
         { cell_type: 'markdown', source: 'test1 test2' },
-        { cell_type: 'code', source: 'test3 test4 test5' }
+        { cell_type: 'code', source: 'test3' }
       ]);
     });
 
@@ -215,21 +215,27 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should start in the middle of a code cell, replace, and highlight next', async () => {
-        await provider.startQuery(/test\d/, { selection: true });
-        panel.content.mode = 'command';
-        panel.content.activeCellIndex = 1;
+        panel.model!.sharedModel.deleteCellRange(0, 2);
+        panel.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code', source: 'test1 test2 test3' }
+        ]);
+        panel.content.activeCellIndex = 0;
         await provider.cellChangeHandled;
+        panel.content.mode = 'edit';
 
         // Pick the spot before the second element.
         await panel.content.activeCell!.editor!.setCursorPosition({
           line: 0,
-          column: 'test3 '.length
+          column: 'test1 '.length
         });
+
+        await provider.startQuery(/test\d/, { selection: true });
+
         expect(provider.currentMatchIndex).toBe(1);
         let replaced = await provider.replaceCurrentMatch('bar');
         expect(replaced).toBe(true);
-        const source = panel.model!.cells.get(1).sharedModel.getSource();
-        expect(source).toBe('test3 bar test5');
+        const source = panel.model!.cells.get(0).sharedModel.getSource();
+        expect(source).toBe('test1 bar test3');
         expect(provider.currentMatchIndex).toBe(1);
       });
 
@@ -279,7 +285,7 @@ describe('@jupyterlab/notebook', () => {
         replaced = await provider.replaceCurrentMatch('rabarbar');
         expect(replaced).toBe(true);
         source = panel.model!.cells.get(1).sharedModel.getSource();
-        expect(source).toBe('rabarbar test4 test5');
+        expect(source).toBe('rabarbar');
         expect(provider.currentMatchIndex).toBe(null);
       });
     });
@@ -293,7 +299,7 @@ describe('@jupyterlab/notebook', () => {
         let source = panel.model!.cells.get(0).sharedModel.getSource();
         expect(source).toBe('test0 test0');
         source = panel.model!.cells.get(1).sharedModel.getSource();
-        expect(source).toBe('test0 test0 test0');
+        expect(source).toBe('test0');
         expect(provider.currentMatchIndex).toBe(null);
       });
 
@@ -308,7 +314,7 @@ describe('@jupyterlab/notebook', () => {
         let source = panel.model!.cells.get(0).sharedModel.getSource();
         expect(source).toBe('bar1 bar2');
         source = panel.model!.cells.get(1).sharedModel.getSource();
-        expect(source).toBe('test3 test4 test5');
+        expect(source).toBe('test3');
         await provider.endQuery();
       });
 
@@ -322,7 +328,7 @@ describe('@jupyterlab/notebook', () => {
         let source = panel.model!.cells.get(0).sharedModel.getSource();
         expect(source).toBe('test1 test2');
         source = panel.model!.cells.get(1).sharedModel.getSource();
-        expect(source).toBe('bar3 bar4 bar5');
+        expect(source).toBe('bar3');
         await provider.endQuery();
       });
 
