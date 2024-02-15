@@ -4,13 +4,14 @@
 import {
   defaultHighlightStyle,
   HighlightStyle,
-  syntaxHighlighting
+  syntaxHighlighting,
 } from '@codemirror/language';
 import { Extension } from '@codemirror/state';
-import { EditorView } from '@codemirror/view';
+import { EditorView, ViewPlugin } from '@codemirror/view';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { tags as t } from '@lezer/highlight';
 import { IEditorTheme, IEditorThemeRegistry } from './token';
+import { PythonBuiltin } from './pythonBuiltin';
 
 export const jupyterEditorTheme = EditorView.theme({
   /**
@@ -151,12 +152,14 @@ export const jupyterHighlightStyle = HighlightStyle.define([
   }
 ]);
 
+
 /**
  * JupyterLab CodeMirror 6 theme
  */
 export const jupyterTheme: Extension = [
   jupyterEditorTheme,
-  syntaxHighlighting(jupyterHighlightStyle)
+  syntaxHighlighting(jupyterHighlightStyle),
+  ViewPlugin.fromClass(PythonBuiltin, { decorations: v => v.decorations })
 ];
 
 /**
