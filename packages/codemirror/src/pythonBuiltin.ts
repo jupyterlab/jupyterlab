@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { syntaxTree } from '@codemirror/language';
+import { Language, syntaxTree } from '@codemirror/language';
 import { RangeSetBuilder } from '@codemirror/state';
 import {
   Decoration,
@@ -12,15 +12,17 @@ import {
   ViewPlugin,
   ViewUpdate
 } from '@codemirror/view';
-import { Tree } from '@lezer/common';
+import { NodeProp, SyntaxNodeRef, Tree } from '@lezer/common';
 
 export class PythonBuiltin {
   decorations: DecorationSet;
   decoratedTo: number;
+  langPython: Language;
   tree: Tree;
   mark: Decoration;
 
-  constructor(view: EditorView) {
+  constructor(view: EditorView, langPython: Language) {
+    this.langPython = langPython;
     this.tree = syntaxTree(view.state);
     this.mark = Decoration.mark({ class: 'cm-builtin' });
     this.decorations = this.buildDeco(view);
@@ -49,27 +51,38 @@ export class PythonBuiltin {
     if (!this.tree.length) return Decoration.none;
 
     let builder = new RangeSetBuilder<Decoration>();
+    const enter = (node: SyntaxNodeRef) => {
+      const cursor = node.node.cursor();
+      // Handle nested language, e.g. Markdown
+      const mounted = cursor.tree && cursor.tree.prop(NodeProp.mounted);
+      if (mounted && mounted.overlay) {
+        node.node
+          .enter(mounted.overlay[0].from + node.from, 1)
+          ?.cursor()
+          .iterate(enter);
+      }
+      if (
+        this.langPython.isActiveAt(view.state, node.from + 1) &&
+        node.name === 'VariableName'
+      ) {
+        const variableName = view.state.sliceDoc(node.from, node.to);
+        if (builtins.includes(variableName)) {
+          builder.add(node.from, node.to, this.mark);
+        }
+      }
+    };
     for (let { from, to } of view.visibleRanges) {
-      this.tree.iterate({
-        // use arrow function to access `this`
-        enter: node => {
-          if (node.name !== 'VariableName') return;
-          const variableName = view.state.sliceDoc(node.from, node.to);
-          if (builtins.includes(variableName)) {
-            builder.add(node.from, node.to, this.mark);
-          }
-        },
-        from,
-        to
-      });
+      this.tree.iterate({ enter, from, to });
     }
     return builder.finish();
   }
 }
 
-export const pythonBuiltin = ViewPlugin.fromClass(PythonBuiltin, {
-  decorations: v => v.decorations
-});
+export function pythonBuiltin(langPython: Language) {
+  return ViewPlugin.define(view => new PythonBuiltin(view, langPython), {
+    decorations: v => v.decorations
+  });
+}
 
 const builtins = [
   'abs',
