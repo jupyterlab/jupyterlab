@@ -474,11 +474,7 @@ export namespace EditorLanguageRegistry {
         filename: /^(BUCK|BUILD)$/,
         async load() {
           const m = await import('@codemirror/lang-python');
-          const pythonSupport = m.python();
-          return new LanguageSupport(m.pythonLanguage, [
-            pythonSupport.support,
-            pythonBuiltin
-          ]);
+          return new LanguageSupport(m.pythonLanguage, pythonBuiltin);
         }
       },
       {
@@ -490,11 +486,7 @@ export namespace EditorLanguageRegistry {
           // to activate feature such as code folding.
           // return Promise.resolve(legacy(mkPython({ singleOperators: /\?/ })));
           const m = await import('@codemirror/lang-python');
-          const pythonSupport = m.python();
-          return new LanguageSupport(m.pythonLanguage, [
-            pythonSupport.support,
-            pythonBuiltin
-          ]);
+          return new LanguageSupport(m.pythonLanguage, pythonBuiltin);
         }
       },
       {
