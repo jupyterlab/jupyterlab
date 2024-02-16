@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { createStandaloneCell, YCodeCell } from '@jupyter/ydoc';
+import { createStandaloneCell, YCodeCell, YMarkdownCell } from '@jupyter/ydoc';
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
@@ -995,6 +995,33 @@ describe('cells/widget', () => {
         });
         widget.initializeState();
         expect(widget.model.mimeType).toEqual('text/x-ipythongfm');
+      });
+    });
+
+    describe('#getEditorOptions()', () => {
+      it('should normalise line endings on paste', () => {
+        const model = new MarkdownCellModel({
+          sharedModel: createStandaloneCell({
+            cell_type: 'markdown'
+          }) as YMarkdownCell
+        });
+        const widget = new MarkdownCell({
+          model,
+          rendermime,
+          contentFactory,
+          placeholder: false
+        });
+        widget.initializeState();
+        document.body.appendChild(widget.node);
+        // todo: replace with user-event
+        const dt = new DataTransfer();
+        dt.setData('text/plain', '\r\nTest\r\nString\r\n.\r\n');
+        const event = new ClipboardEvent('paste', { clipboardData: dt });
+        widget.editor!.host.querySelector('.cm-content')!.dispatchEvent(event);
+
+        expect(widget.model.sharedModel.getSource()).toEqual(
+          '\nTest\nString\n.\n'
+        );
       });
     });
 
