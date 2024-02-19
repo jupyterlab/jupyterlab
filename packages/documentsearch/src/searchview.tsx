@@ -729,7 +729,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
             className={BUTTON_WRAPPER_CLASS}
             onClick={() => this._onClose()}
             tabIndex={0}
-            title={trans.__('Close Search and Replace')}
+            title={trans.__('Close Search Box')}
           >
             <closeIcon.react
               className="jp-icon-hover"
