@@ -1538,23 +1538,33 @@ namespace Private {
     const changes = [
       {
         old: '.jp-Notebook:focus.jp-mod-commandMode',
-        new: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
         versionDeprecated: 'JupyterLab 4.1'
       },
       {
+        old: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        versionDeprecated: 'JupyterLab 4.1.1'
+      },
+      {
         old: '.jp-Notebook:focus',
-        new: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
         versionDeprecated: 'JupyterLab 4.1'
       },
       {
         old: '[data-jp-traversable]:focus',
-        new: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
         versionDeprecated: 'JupyterLab 4.1'
       },
       {
         old: '[data-jp-kernel-user]:focus',
-        new: '[data-jp-kernel-user] :focus:not(:read-write)',
+        new: '[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)',
         versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-kernel-user] :focus:not(:read-write)',
+        new: '[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1.1'
       }
     ];
     const upgraded = shortcuts.map(shortcut => {
