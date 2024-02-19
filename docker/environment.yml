@@ -1,0 +1,17 @@
+name: base
+
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  # runtimes
+  - nodejs ==20.1
+  - python =3.11
+  # package managers
+  - pip
+  - yarn >=3,<4
+  # build
+  - hatch-jupyter-builder >=0.3.2
+  - hatchling >=1.5.0
+  - jupyterlab >=4,<5
