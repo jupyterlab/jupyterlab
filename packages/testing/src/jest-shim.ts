@@ -71,7 +71,7 @@ class DataTransferItemMock implements DataTransferItem {
   get type() {
     return this.format;
   }
-  getAsString(callback: (v: string) => undefined): undefined {
+  getAsString(callback: (v: string) => undefined): void {
     callback(this.value);
   }
   getAsFile() {
