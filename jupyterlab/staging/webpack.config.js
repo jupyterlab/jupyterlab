@@ -311,13 +311,7 @@ module.exports = [
     },
     devtool: 'inline-source-map',
     externals: ['ws'],
-    plugins,
-    resolve: {
-      fallback: {
-        // Fix for https://github.com/jupyterlab/jupyterlab/issues/15764
-        util: false,
-      }
-    },
+    plugins
   })
 ].concat(extensionAssetConfig);
 
