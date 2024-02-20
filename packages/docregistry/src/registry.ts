@@ -664,25 +664,35 @@ export class DocumentRegistry implements IDisposable {
   getFileTypeForModel(
     model: Partial<Contents.IModel>
   ): DocumentRegistry.IFileType {
+    let ft: DocumentRegistry.IFileType | null = null;
+    if (model.name || model.path) {
+      const name = model.name || PathExt.basename(model.path!);
+      const fts = this.getFileTypesForPath(name);
+      if (fts.length > 0) {
+        ft = fts[0];
+      }
+    }
     switch (model.type) {
       case 'directory':
+        if (ft !== null && ft.contentType === 'directory') {
+          return ft;
+        }
         return (
           find(this._fileTypes, ft => ft.contentType === 'directory') ||
           DocumentRegistry.getDefaultDirectoryFileType(this.translator)
         );
       case 'notebook':
+        if (ft !== null && ft.contentType === 'notebook') {
+          return ft;
+        }
         return (
           find(this._fileTypes, ft => ft.contentType === 'notebook') ||
           DocumentRegistry.getDefaultNotebookFileType(this.translator)
         );
       default:
         // Find the best matching extension.
-        if (model.name || model.path) {
-          const name = model.name || PathExt.basename(model.path!);
-          const fts = this.getFileTypesForPath(name);
-          if (fts.length > 0) {
-            return fts[0];
-          }
+        if (ft !== null) {
+          return ft;
         }
         return (
           this.getFileType('text') ||
@@ -757,7 +767,7 @@ export namespace DocumentRegistry {
   /**
    * The item to be added to document toolbar.
    */
-  export interface IToolbarItem extends ToolbarRegistry.IToolbarItem {}
+  export interface IToolbarItem extends ToolbarRegistry.IToolbarItem { }
 
   /**
    * The options used to create a document registry.
@@ -1120,7 +1130,7 @@ export namespace DocumentRegistry {
    */
   export interface IWidgetFactory<T extends IDocumentWidget, U extends IModel>
     extends IDisposable,
-      IWidgetFactoryOptions {
+    IWidgetFactoryOptions {
     /**
      * A signal emitted when a new widget is created.
      */
@@ -1255,10 +1265,10 @@ export namespace DocumentRegistry {
      * The type of the changed item.
      */
     readonly type:
-      | 'widgetFactory'
-      | 'modelFactory'
-      | 'widgetExtension'
-      | 'fileType';
+    | 'widgetFactory'
+    | 'modelFactory'
+    | 'widgetExtension'
+    | 'fileType';
 
     /**
      * The name of the item or the widget factory being extended.
