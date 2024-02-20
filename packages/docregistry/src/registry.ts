@@ -767,7 +767,7 @@ export namespace DocumentRegistry {
   /**
    * The item to be added to document toolbar.
    */
-  export interface IToolbarItem extends ToolbarRegistry.IToolbarItem { }
+  export interface IToolbarItem extends ToolbarRegistry.IToolbarItem {}
 
   /**
    * The options used to create a document registry.
@@ -1130,7 +1130,7 @@ export namespace DocumentRegistry {
    */
   export interface IWidgetFactory<T extends IDocumentWidget, U extends IModel>
     extends IDisposable,
-    IWidgetFactoryOptions {
+      IWidgetFactoryOptions {
     /**
      * A signal emitted when a new widget is created.
      */
@@ -1265,10 +1265,10 @@ export namespace DocumentRegistry {
      * The type of the changed item.
      */
     readonly type:
-    | 'widgetFactory'
-    | 'modelFactory'
-    | 'widgetExtension'
-    | 'fileType';
+      | 'widgetFactory'
+      | 'modelFactory'
+      | 'widgetExtension'
+      | 'fileType';
 
     /**
      * The name of the item or the widget factory being extended.
