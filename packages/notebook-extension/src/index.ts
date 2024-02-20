@@ -63,6 +63,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import {
   CommandEditStatus,
   ExecutionIndicator,
+  ICellExecutor,
   INotebookTools,
   INotebookTracker,
   INotebookWidgetFactory,
@@ -77,6 +78,7 @@ import {
   NotebookTracker,
   NotebookTrustStatus,
   NotebookWidgetFactory,
+  setCellExecutor,
   StaticNotebook,
   ToolbarItems
 } from '@jupyterlab/notebook';
@@ -129,6 +131,7 @@ import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
+import { cellExecutor } from './cell-executor';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -352,7 +355,7 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   description: 'Provides the notebook widget tracker.',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory, IEditorExtensionRegistry],
+  requires: [INotebookWidgetFactory, IEditorExtensionRegistry, ICellExecutor],
   optional: [
     ICommandPalette,
     IDefaultFileBrowser,
@@ -1087,6 +1090,7 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  cellExecutor,
   factory,
   trackerPlugin,
   executionIndicator,
@@ -1585,6 +1589,7 @@ function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
   extensions: IEditorExtensionRegistry,
+  executor: ICellExecutor,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
@@ -1596,6 +1601,8 @@ function activateNotebookHandler(
   translator_: ITranslator | null,
   formRegistry: IFormRendererRegistry | null
 ): INotebookTracker {
+  setCellExecutor(executor);
+
   const translator = translator_ ?? nullTranslator;
   const sessionDialogs =
     sessionDialogs_ ?? new SessionContextDialogs({ translator });
