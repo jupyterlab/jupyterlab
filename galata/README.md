@@ -76,7 +76,7 @@ Then start the server with:
 jupyter lab --config jupyter_server_test_config.py
 ```
 
-> If you need to customize the set up for galata, you can look at the [`configure_jupyter_server`](https://github.com/jupyterlab/jupyterlab/tree/main/jupyterlab/galata/__init__.py) definition.
+> If you need to customize the set up for galata, you can look at the [`configure_jupyter_server`](https://github.com/jupyterlab/jupyterlab/tree/4.1.x/jupyterlab/galata/__init__.py) definition.
 
 ### Run test project
 

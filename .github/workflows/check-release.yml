@@ -2,9 +2,9 @@ name: Check Release
 
 on:
   push:
-    branches: [main]
+    branches: [4.1.x]
   pull_request:
-    branches: [main]
+    branches: [4.1.x]
   release:
     types: [published]
 
