@@ -77,7 +77,7 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
         });
         return new LanguageSupport(
           mdlang.language,
-          pythonBuiltin(py.pythonLanguage)
+          [mdlang.support, pythonBuiltin(py.pythonLanguage)]
         );
       }
     });
