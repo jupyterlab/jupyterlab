@@ -64,7 +64,7 @@
   display: grid;
   grid-template-columns: min-content 1fr min-content;
   position: relative;
-  whitespace: nowrap;
+  white-space: nowrap;
 }
 
 .jp-Completer-item .jp-Completer-match {
