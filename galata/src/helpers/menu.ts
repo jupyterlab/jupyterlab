@@ -32,6 +32,8 @@ export class MenuHelper {
    *
    * @param label Menu label
    * @returns Handle to the menu or null
+   *
+   * @deprecated You should use locator instead {@link getMenuBarItemLocator}
    */
   getMenuBarItem(label: string): Promise<ElementHandle<Element> | null> {
     return this.getMenuBarItemLocator(label).elementHandle();
@@ -54,6 +56,8 @@ export class MenuHelper {
    *
    * @param selector Element over which the menu should be opened
    * @returns Handle to the menu or null
+   *
+   * @deprecated You should use locator instead {@link openContextMenuLocator}
    */
   async openContextMenu(
     selector: string
@@ -81,6 +85,8 @@ export class MenuHelper {
    *
    * @param path Menu item path
    * @returns Handle to the menu item or null
+   *
+   * @deprecated You should use locator instead {@link getMenuItemLocator}
    */
   async getMenuItem(path: string): Promise<ElementHandle<Element> | null> {
     return (await this.getMenuItemLocator(path))?.elementHandle() ?? null;
@@ -134,6 +140,8 @@ export class MenuHelper {
    * @param parentMenu Menu handle
    * @param label Item label
    * @returns Handle to the menu item or null
+   *
+   * @deprecated You should use locator instead {@link getMenuItemLocatorInMenu}
    */
   async getMenuItemInMenu(
     parentMenu: ElementHandle<Element>,
@@ -194,6 +202,8 @@ export class MenuHelper {
    *
    * @param path Menu path
    * @returns Handle to the opened menu
+   *
+   * @deprecated You should use locator instead {@link openLocator}
    */
   async open(path: string): Promise<ElementHandle<Element> | null> {
     return (await this.openLocator(path))?.elementHandle() ?? null;
@@ -253,6 +263,8 @@ export class MenuHelper {
    * Get the handle to the last opened menu
    *
    * @returns Handle to the opened menu
+   *
+   * @deprecated You should use locator instead {@link getOpenMenuLocator}
    */
   async getOpenMenu(): Promise<ElementHandle<Element> | null> {
     return (await this.getOpenMenuLocator())?.elementHandle() ?? null;

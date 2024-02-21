@@ -76,6 +76,8 @@ export async function getBaseUrl(page: Page): Promise<string> {
  *
  * @param element Element handle
  * @returns Classes list
+ *
+ * @deprecated You should use locator instead {@link getLocatorClassList}
  */
 export async function getElementClassList(
   element: ElementHandle
@@ -225,6 +227,10 @@ export async function waitForTransition(
     });
   } catch {
     if (el) {
+      console.warn(
+        'ElementHandle are deprecated, you should call "WaitForTransition()" \
+        with a Locator instead'
+      );
       return page.evaluate(el => {
         return new Promise(resolve => {
           const onEndHandler = () => {

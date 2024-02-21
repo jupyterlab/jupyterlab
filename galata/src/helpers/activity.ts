@@ -64,6 +64,8 @@ export class ActivityHelper {
    *
    * @param name Activity name
    * @returns Handle on the tab or null if the tab is not found
+   *
+   * @deprecated You should use locator instead {@link getTabLocator}
    */
   async getTab(name?: string): Promise<ElementHandle<Element> | null> {
     const locator = this.getTabLocator(name);
@@ -93,6 +95,8 @@ export class ActivityHelper {
    *
    * @param name Activity name
    * @returns Handle on the tab or null if the tab is not found
+   *
+   * @deprecated You should use locator instead {@link getPanelLocator}
    */
   async getPanel(name?: string): Promise<ElementHandle<Element> | null> {
     const page = this.page;

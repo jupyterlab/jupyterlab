@@ -175,6 +175,8 @@ export class SidebarHelper {
    *
    * @param id Tab id
    * @returns Tab handle
+   *
+   * @deprecated You should use locator instead {@link getTabLocator}
    */
   async getTab(
     id: galata.SidebarTabId
@@ -216,6 +218,8 @@ export class SidebarHelper {
    *
    * @param side Position
    * @returns Panel handle
+   *
+   * @deprecated You should use locator instead {@link getContentPanelLocator}
    */
   async getContentPanel(
     side: galata.SidebarPosition = 'left'
@@ -240,6 +244,8 @@ export class SidebarHelper {
    *
    * @param side Position
    * @returns Tab bar handle
+   *
+   * @deprecated You should use locator instead {@link getTabBarLocator}
    */
   async getTabBar(
     side: galata.SidebarPosition = 'left'

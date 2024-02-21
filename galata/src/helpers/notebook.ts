@@ -98,6 +98,8 @@ export class NotebookHelper {
    *
    * @param name Notebook name
    * @returns Handle to the Notebook panel
+   *
+   * @deprecated You should use locator instead {@link getNotebookInPanelLocator}
    */
   async getNotebookInPanel(
     name?: string
@@ -130,6 +132,8 @@ export class NotebookHelper {
    *
    * @param name Notebook name
    * @returns Handle to the Notebook toolbar
+   *
+   * @deprecated You should use locator instead {@link getToolbarLocator}
    */
   async getToolbar(name?: string): Promise<ElementHandle<Element> | null> {
     return (await this.getToolbarLocator(name))?.elementHandle() ?? null;
@@ -155,6 +159,8 @@ export class NotebookHelper {
    * @param itemIndex Toolbar item index
    * @param notebookName Notebook name
    * @returns Handle to the notebook toolbar item
+   *
+   * @deprecated You should use locator instead {@link getToolbarItemLocatorByIndex}
    */
   async getToolbarItemByIndex(
     itemIndex: number,
@@ -200,6 +206,8 @@ export class NotebookHelper {
    * @param itemId Toolbar item id
    * @param notebookName Notebook name
    * @returns Handle to the notebook toolbar item
+   *
+   * @deprecated You should use locator instead {@link getToolbarItemLocator}
    */
   async getToolbarItem(
     itemId: galata.NotebookToolbarItemId,
@@ -546,6 +554,8 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @returns Handle to the cell
+   *
+   * @deprecated You should use locator instead {@link getCellLocator}
    */
   async getCell(cellIndex: number): Promise<ElementHandle<Element> | null> {
     return (await this.getCellLocator(cellIndex))?.elementHandle() ?? null;
@@ -627,6 +637,8 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @returns Handle to the cell input
+   *
+   * @deprecated You should use locator instead {@link getCellInputLocator}
    */
   async getCellInput(
     cellIndex: number
@@ -697,6 +709,8 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @returns Handle to the cell input expander
+   *
+   * @deprecated You should use locator instead {@link getCellInputExpanderLocator}
    */
   async getCellInputExpander(
     cellIndex: number
@@ -767,6 +781,8 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @returns Handle to the cell output expander
+   *
+   * @deprecated You should use locator instead {@link getCellOutputExpanderLocator}
    */
   async getCellOutputExpander(
     cellIndex: number
@@ -839,6 +855,8 @@ export class NotebookHelper {
    *
    * @param cellIndex Cell index
    * @returns Output cell handle
+   *
+   * @deprecated You should use locator instead {@link getCellOutputLocator}
    */
   async getCellOutput(
     cellIndex: number
@@ -1316,17 +1334,7 @@ export class NotebookHelper {
       return null;
     }
 
-    const classList = await Utils.getLocatorClassList(cell);
-
-    if (classList.indexOf('jp-CodeCell') !== -1) {
-      return 'code';
-    } else if (classList.indexOf('jp-MarkdownCell') !== -1) {
-      return 'markdown';
-    } else if (classList.indexOf('jp-RawCell') !== -1) {
-      return 'raw';
-    }
-
-    return null;
+    return this.getCellLocatorType(cell);
   }
 
   /**

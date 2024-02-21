@@ -82,6 +82,8 @@ export class DebuggerHelper {
 
   /**
    * Returns handle to the variables panel content
+   *
+   * @deprecated You should use locator instead {@link getVariablesPanelLocator}
    */
   async getVariablesPanel(): Promise<ElementHandle<Element> | null> {
     return (await this.getVariablesPanelLocator()).elementHandle();
@@ -116,6 +118,8 @@ export class DebuggerHelper {
 
   /**
    * Returns handle to callstack panel content
+   *
+   * @deprecated You should use locator instead {@link getCallStackPanelLocator}
    */
   async getCallStackPanel(): Promise<ElementHandle<Element> | null> {
     return (await this.getCallStackPanelLocator()).elementHandle();
@@ -140,6 +144,8 @@ export class DebuggerHelper {
 
   /**
    * Returns handle to breakpoints panel content
+   *
+   * @deprecated You should use locator instead {@link getBreakPointsPanelLocator}
    */
   async getBreakPointsPanel(): Promise<ElementHandle<Element> | null> {
     return (await this.getBreakPointsPanelLocator()).elementHandle();
@@ -164,6 +170,8 @@ export class DebuggerHelper {
 
   /**
    * Returns handle to sources panel content
+   *
+   * @deprecated You should use locator instead {@link getSourcePanelLocator}
    */
   async getSourcePanel(): Promise<ElementHandle<Element> | null> {
     return (await this.getSourcePanelLocator()).elementHandle();
