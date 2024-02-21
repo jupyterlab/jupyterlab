@@ -75,10 +75,10 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
             parseMathIPython(StreamLanguage.define(tex.stexMath).parser)
           ]
         });
-        return new LanguageSupport(
-          mdlang.language,
-          [mdlang.support, pythonBuiltin(py.pythonLanguage)]
-        );
+        return new LanguageSupport(mdlang.language, [
+          mdlang.support,
+          pythonBuiltin(py.pythonLanguage)
+        ]);
       }
     });
     return languages;
