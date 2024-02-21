@@ -470,7 +470,10 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       name !== TOOLBAR_OPENER_NAME &&
       this._widgetPositions.get(name) === undefined
     ) {
-      this._widgetPositions.set(name, index);
+      this._widgetPositions.clear();
+      (this.layout as ToolbarLayout).widgets.forEach((widget, index) => {
+        this._widgetPositions.set(Private.nameProperty.get(widget), index);
+      });
     }
     return status;
   }
