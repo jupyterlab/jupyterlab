@@ -21,7 +21,7 @@ Developers can now provide editor extensions, like themes and programming langua
 #### New extension manager
 
 Starting with JupyterLab 3, extensions can be installed via Python packages
-(or other providers of [prebuilt extensions](https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html#prebuilt-extensions)).
+(or other providers of [prebuilt extensions](https://jupyterlab.readthedocs.io/en/4.0.x/extension/extension_dev.html#prebuilt-extensions)).
 
 In JupyterLab 4, building on this feature, the Extension Manager now includes extensions from [pypi.org](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab).
 This removes the build step from installation of extension when using Extension Manager.
@@ -95,7 +95,7 @@ Here are the main tool updates that will benefit extension authors and developer
 
 We recommend using Node.js v18 or newer, because older versions will reach end of life in 2023 or earlier (see [Node release schedule](https://github.com/nodejs/release#release-schedule)).
 
-To ease code migration to JupyterLab 4, developers should review the [migration guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
+To ease code migration to JupyterLab 4, developers should review the [migration guide](https://jupyterlab.readthedocs.io/en/4.0.x/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
 - the [JupyterLab Extensions by Examples](https://github.com/jupyterlab/extension-examples/pull/232)
 - the [Jupyter MIME type renderers](https://github.com/jupyterlab/jupyter-renderers/pull/296)
 
@@ -575,9 +575,9 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 JupyterLab 4 is released! :tada:
 
-Check out the new features, improvements and bug fixes: https://jupyterlab.readthedocs.io/en/stable/getting_started/changelog.html#v4-0
+Check out the new features, improvements and bug fixes: https://jupyterlab.readthedocs.io/en/4.0.x/getting_started/changelog.html#v4-0
 
-For extension authors, there is a migration guide available to help you migrate your extensions to JupyterLab 4: https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-3-x-to-4-x
+For extension authors, there is a migration guide available to help you migrate your extensions to JupyterLab 4: https://jupyterlab.readthedocs.io/en/4.0.x/extension/extension_migration.html#jupyterlab-3-x-to-4-x
 
 ______________________________________________________________________
 
@@ -2480,7 +2480,7 @@ No merged PRs
 
 ### Enhancements made
 
-- Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder)) - activation instructions: [see documentation](https://jupyterlab.readthedocs.io/en/stable/user/files.html#displaying-hidden-files)
+- Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder)) - activation instructions: [see documentation](https://jupyterlab.readthedocs.io/en/4.0.x/user/files.html#displaying-hidden-files)
 - Restore Copy shareable link use of `shareUrl` [#11188](https://github.com/jupyterlab/jupyterlab/pull/11188) ([@fcollonval](https://github.com/fcollonval))
 - Add Galata in JupyterLab [#11179](https://github.com/jupyterlab/jupyterlab/pull/11179) ([@fcollonval](https://github.com/fcollonval))
 - Responsive Toolbar [#11178](https://github.com/jupyterlab/jupyterlab/pull/11178) ([@3coins](https://github.com/3coins))
@@ -2926,9 +2926,9 @@ No merged PRs
 - From JupyterLab 3.1, file documents and notebooks have collaborative
   editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
   Editors are not collaborative by default; to activate it, start JupyterLab
-  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/stable/user/rtc.html).
+  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/4.0.x/user/rtc.html).
 - The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future verisions will enable restoring the previous behaviour of per-cell undo/redo.
-- Table of Contents recieved multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/stable/user/toc.html).
+- Table of Contents recieved multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/4.0.x/user/toc.html).
 - The debugger recived many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
 - The closing bracket is no longer automatically added by default; the old behaviour can be re-enabled from the menu bar (`Settings` -> `Auto Close Brackets`) or from the Advanced Settings Editor.
 - A new visual indicator was introduced to highlight cells in which the code changed in the editor since last execution:
@@ -3549,21 +3549,21 @@ extensions does not require rebuilding JupyterLab and does not require
 having NodeJS installed. The previous way of distributing extensions as
 npm packages requiring rebuilding JupyterLab is still available as well.
 See the
-[documentation](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html#extensions)
+[documentation](https://jupyterlab.readthedocs.io/en/4.0.x/user/extensions.html#extensions)
 for more details.
 
 #### The JupyterLab interface supports multiple languages
 
 JupyterLab now provides the ability to set the display language of the
 user interface. See the
-[documentation](https://jupyterlab.readthedocs.io/en/stable/user/language.html)
+[documentation](https://jupyterlab.readthedocs.io/en/4.0.x/user/language.html)
 for more details.
 
 #### A new visual debugger
 
 JupyterLab now ships with a debugger front-end by default, available for
 kernels that support the new debugging protocol. See the
-[documentation](https://jupyterlab.readthedocs.io/en/stable/user/debugger.html)
+[documentation](https://jupyterlab.readthedocs.io/en/4.0.x/user/debugger.html)
 for more details.
 
 #### Improvements to Simple Interface mode and Mobile
