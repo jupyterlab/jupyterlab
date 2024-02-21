@@ -27,7 +27,7 @@ to the signal ``userChanged``.
       id: 'jupyterlab-extension',
       autoStart: true,
       activate: (app: JupyterFrontEnd) => {
-         const user = app.services.user;
+         const user = app.serviceManager.user;
          user.ready.then(() => {
             console.debug("Identity:", user.identity);
             console.debug("Permissions:", user.permissions);
