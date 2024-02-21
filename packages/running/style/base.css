@@ -47,6 +47,7 @@
   margin: 0;
   padding: 0;
   list-style-type: none;
+  padding-left: 14px;
 }
 
 .jp-RunningSessions-item {
@@ -63,17 +64,43 @@
   cursor: pointer;
 }
 
-.jp-RunningSessions-item.jp-mod-running-child {
-  padding-left: 40px;
+.jp-mod-running-leaf {
+  /** Account for lack of collapser */
+  margin-left: 16px;
 }
 
-.jp-RunningSessions-item.jp-mod-kernel:not(.jp-mod-running-child) {
+.jp-RunningSessions-sectionContainer > .jp-RunningSessions-sectionList {
+  padding-left: 0;
+}
+
+.jp-RunningSessions-item.jp-mod-kernelspec,
+.jp-RunningSessions-item.jp-mod-kernel {
   user-select: none;
 }
 
-.jp-RunningSessions-item img {
+.jp-RunningSessions-icon {
+  margin: 0 4px;
+}
+
+img.jp-RunningSessions-icon,
+span.jp-RunningSessions-icon > svg {
+  width: 16px;
   height: 16px;
+}
+
+img.jp-RunningSessions-icon {
   margin-top: 4px;
+  object-fit: contain;
+}
+
+span.jp-RunningSessions-icon {
+  align-items: center;
+  display: flex;
+}
+
+span.jp-RunningSessions-icon > svg {
+  display: block;
+  margin: 0 auto;
 }
 
 .jp-RunningSessions-itemLabel {
@@ -98,8 +125,20 @@
   white-space: nowrap;
 }
 
+.jp-RunningSessions-caret {
+  align-items: center;
+  display: flex;
+  padding-right: 4px;
+}
+
+.jp-RunningSessions-caret > svg {
+  height: 16px;
+  width: 16px;
+}
+
 .jp-RunningSessions-item .jp-RunningSessions-itemShutdown {
   border-radius: 0;
+  margin: 0;
 }
 
 .jp-RunningSessions-item:not(:hover) .jp-RunningSessions-itemShutdown {

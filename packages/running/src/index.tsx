@@ -11,6 +11,8 @@ import {
   caretDownIcon,
   caretRightIcon,
   closeIcon,
+  collapseIcon,
+  expandIcon,
   LabIcon,
   PanelWithToolbar,
   ReactWidget,
@@ -71,6 +73,16 @@ const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
  * The class name added to a running session item shutdown button.
  */
 const SHUTDOWN_ALL_BUTTON_CLASS = 'jp-RunningSessions-shutdownAll';
+
+/**
+ * The class name added to a collapse/expand carets.
+ */
+const CARET_CLASS = 'jp-RunningSessions-caret';
+
+/**
+ * The class name added to icons.
+ */
+const ITEM_ICON_CLASS = 'jp-RunningSessions-icon';
 
 /**
  * The running sessions token.
@@ -146,6 +158,7 @@ function Item(props: {
   shutdownLabel?: string;
   shutdownItemIcon?: LabIcon;
   translator?: ITranslator;
+  collapseToggled: ISignal<Section, boolean>;
 }) {
   const { runningItem } = props;
   const classList = [ITEM_CLASS];
@@ -164,18 +177,29 @@ function Item(props: {
     runningItem.shutdown?.();
   };
 
+  // Materialise getter to avoid triggering it repeatedly
+  const children = runningItem.children;
+
   // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
   const [collapsed, collapse] = React.useState(false);
-  const collapsible = !!runningItem.children?.length;
+  const collapsible = !!children?.length;
   const onClick = collapsible
     ? () => !stopPropagation && collapse(!collapsed)
     : undefined;
+
+  // Listen to signal to collapse from outside
+  props.collapseToggled.connect((_emitter, newCollapseState) =>
+    collapse(newCollapseState)
+  );
 
   if (runningItem.className) {
     classList.push(runningItem.className);
   }
   if (props.child) {
     classList.push('jp-mod-running-child');
+  }
+  if (props.child && !children) {
+    classList.push('jp-mod-running-leaf');
   }
 
   return (
@@ -188,15 +212,15 @@ function Item(props: {
         >
           {collapsible &&
             (collapsed ? (
-              <caretRightIcon.react tag="span" stylesheet="runningItem" />
+              <caretRightIcon.react tag="span" className={CARET_CLASS} />
             ) : (
-              <caretDownIcon.react tag="span" stylesheet="runningItem" />
+              <caretDownIcon.react tag="span" className={CARET_CLASS} />
             ))}
           {icon ? (
             typeof icon === 'string' ? (
-              <img src={icon} />
+              <img src={icon} className={ITEM_ICON_CLASS} />
             ) : (
-              <icon.react tag="span" stylesheet="runningItem" />
+              <icon.react tag="span" className={ITEM_ICON_CLASS} />
             )
           ) : undefined}
           <span
@@ -219,9 +243,10 @@ function Item(props: {
         {collapsible && !collapsed && (
           <List
             child={true}
-            runningItems={runningItem.children!}
+            runningItems={children!}
             shutdownItemIcon={shutdownItemIcon}
             translator={translator}
+            collapseToggled={props.collapseToggled}
           />
         )}
       </li>
@@ -236,6 +261,7 @@ function List(props: {
   shutdownAllLabel?: string;
   shutdownItemIcon?: LabIcon;
   translator?: ITranslator;
+  collapseToggled: ISignal<Section, boolean>;
 }) {
   return (
     <ul className={LIST_CLASS}>
@@ -247,6 +273,7 @@ function List(props: {
           shutdownLabel={props.shutdownLabel}
           shutdownItemIcon={props.shutdownItemIcon}
           translator={props.translator}
+          collapseToggled={props.collapseToggled}
         />
       ))}
     </ul>
@@ -260,6 +287,7 @@ class ListWidget extends ReactWidget {
       runningItems: IRunningSessions.IRunningItem[];
       shutdownAllLabel: string;
       translator?: ITranslator;
+      collapseToggled: ISignal<Section, boolean>;
     }
   ) {
     super();
@@ -297,6 +325,7 @@ class ListWidget extends ReactWidget {
                 shutdownAllLabel={options.shutdownAllLabel}
                 shutdownItemIcon={options.manager.shutdownItemIcon}
                 translator={options.translator}
+                collapseToggled={options.collapseToggled}
               />
             </div>
           );
@@ -390,10 +419,43 @@ class Section extends PanelWithToolbar {
     });
     this._manager.runningChanged.connect(this._updateButton, this);
 
+    const collapseToggled = new Signal<Section, boolean>(this);
+
+    // TODO: show/hide the buttons as needed, maybe by extending logic in `_updateButton`?
+    const hasNesting = runningItems.filter(item => item.children).length !== 0;
+
+    if (hasNesting) {
+      const expandAll = new ToolbarButton({
+        className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
+          !enabled ? ' jp-mod-disabled' : ''
+        }`,
+        enabled,
+        icon: expandIcon,
+        onClick: () => collapseToggled.emit(false),
+        tooltip: trans.__('Expand all')
+      });
+      const collapseAll = new ToolbarButton({
+        className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
+          !enabled ? ' jp-mod-disabled' : ''
+        }`,
+        enabled,
+        icon: collapseIcon,
+        onClick: () => collapseToggled.emit(true),
+        tooltip: trans.__('Collapse all')
+      });
+
+      this.toolbar.addItem('expand-all', expandAll);
+      this.toolbar.addItem('collapse-all', collapseAll);
+    }
     this.toolbar.addItem('shutdown-all', this._button);
 
     this.addWidget(
-      new ListWidget({ runningItems, shutdownAllLabel, ...options })
+      new ListWidget({
+        runningItems,
+        shutdownAllLabel,
+        collapseToggled,
+        ...options
+      })
     );
   }
 
