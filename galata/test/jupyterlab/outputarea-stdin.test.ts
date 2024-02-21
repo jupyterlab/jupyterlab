@@ -89,7 +89,7 @@ test.describe('Stdin for ipdb', () => {
       // for it to complete (as it should stay waiting for input).
       await page.keyboard.press('Control+Enter');
 
-      await page.locator('.jp-Stdin-input').waitFor();
+      await page.locator(testCase.selector).waitFor();
       await page.focus(testCase.selector);
 
       for (const letter of alphabet) {

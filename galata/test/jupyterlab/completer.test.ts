@@ -82,7 +82,6 @@ test.describe('Completer', () => {
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
-      await page.locator('.jp-Completer-loading-bar').waitFor();
       await page
         .locator('.jp-Completer-loading-bar')
         .waitFor({ state: 'detached' });
