@@ -129,7 +129,8 @@
 }
 
 .jp-DirListing-headerItem {
-  padding: 4px 12px 2px;
+  /* stylelint-disable-next-line csstree/validator */
+  padding: min(1vh, 4px) min(6vw, 12px) min(1vh, 2px);
   font-weight: 500;
 }
 
