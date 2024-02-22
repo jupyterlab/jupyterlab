@@ -150,7 +150,7 @@
       "description": "Whether to prompt to rename untitled file on first manual save.",
       "default": true
     },
-    "maximalRecents": {
+    "maxNumberRecents": {
       "type": "number",
       "title": "Recent Items Number",
       "description": "Number of recently opened/closed files and directories to remember.",

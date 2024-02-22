@@ -49,7 +49,7 @@ export const recentsManagerPlugin: JupyterFrontEndPlugin<IRecentsManager> = {
     });
 
     const updateSettings = (settings: ISettingRegistry.ISettings) => {
-      recentsManager.maximalRecentsLength = settings.get('maximalRecents')
+      recentsManager.maximalRecentsLength = settings.get('maxNumberRecents')
         .composite as number;
     };
 
