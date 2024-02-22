@@ -2,7 +2,7 @@
 Thanks for contributing to JupyterLab!
 Please fill out the following items to submit a pull request.
 See the contributing guidelines for more information:
-https://github.com/jupyterlab/jupyterlab/blob/main/CONTRIBUTING.md
+https://github.com/jupyterlab/jupyterlab/blob/4.1.x/CONTRIBUTING.md
 -->
 
 ## References

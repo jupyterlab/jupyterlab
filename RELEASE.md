@@ -262,9 +262,9 @@ These lines:
   - [ ] https://github.com/jupyterlab/jupyter-renderers
 - [ ] Publish a release (with a **updated tag**) to the [extension template](https://github.com/jupyterlab/extension-template/releases) with the new JupyterLab version
 - [ ] Update the extension examples:
-  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/main/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
-  - [ ] [Notebook widget](https://github.com/jupyterlab/jupyterlab/blob/main/docs/source/extension/notebook.rst#adding-a-widget-to-the-notebook-header)
-- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#updating-the-extension-tutorial)
+  - [ ] [Notebook toolbar button](https://github.com/jupyterlab/jupyterlab/blob/4.1.x/docs/source/extension/notebook.rst#adding-a-button-to-the-toolbar)
+  - [ ] [Notebook widget](https://github.com/jupyterlab/jupyterlab/blob/4.1.x/docs/source/extension/notebook.rst#adding-a-widget-to-the-notebook-header)
+- [ ] Update the [extension tutorial](https://github.com/jupyterlab/jupyterlab/blob/4.1.x/RELEASE.md#updating-the-extension-tutorial)
 - [ ] At this point, there may have been some more commits merged. Run `python scripts/milestone_check.py` to check the issues assigned to this milestone one more time. Update changelog if necessary.
 
 Now do the actual final release:
@@ -276,7 +276,7 @@ Now do the actual final release:
 - [ ] Update the API [docs](#updating-api-docs)
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
-- [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#publishing-to-conda-forge).
+- [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/4.1.x/RELEASE.md#publishing-to-conda-forge).
 
 After a few days (to allow for possible patch releases), set up development for
 the next release:
@@ -285,7 +285,7 @@ the next release:
 - [ ] Put the commit and tags to main
 - [ ] Run `npm run publish:all` to publish the packages
 - [ ] Release the other repos as appropriate
-- [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/main/RELEASE.md#update-version-for-binder)
+- [ ] Update version for [binder](https://github.com/jupyterlab/jupyterlab/blob/4.1.x/RELEASE.md#update-version-for-binder)
 
 ### Updating the extension tutorial
 
@@ -425,7 +425,7 @@ frozen and non-frozen version of the files.
 
 - Create a new branch from the previous release branch
 - Use a ".x" in the branch name so we can continue to use it for patches
-- Update branch and RTD config in `ensure_repo.ts` and run `jlpm integrity` to update links - source should be the previous release branch
+- Update branch and RTD config in `buildutils/src/ensure-repo.ts` and run `jlpm integrity` to update links - source should be the previous release branch
 - Update readthedocs branch config as appropriate
 - Automated Release using "minor" - edit changelog for new section
 - Move through alpha and beta phases as appropriate
@@ -452,7 +452,7 @@ frozen and non-frozen version of the files.
 
 ### Alpha and Beta Phase
 
-- Update branch and RTD config in `ensure_repo.ts` and `jlpm integrity` to update links - source should be the previous branch
+- Update branch and RTD config in `buildutils/src/ensure-repo.ts` and `jlpm integrity` to update links - source should be the previous branch
 - Update readthedocs branch config as appropriate
 - Automated Release using "major" - edit changelog for new section
 - Move through alpha and beta phases as appropriate
