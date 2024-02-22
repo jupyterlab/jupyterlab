@@ -25,7 +25,8 @@
 .jp-FileBrowser-toolbar.jp-Toolbar {
   border-bottom: none;
   height: auto;
-  margin: 8px 12px 0;
+  /* stylelint-disable-next-line csstree/validator */
+  margin: min(5vh, 8px) min(1.5vw, 12px) 0;
   box-shadow: none;
   padding: 0;
 }
