@@ -53,7 +53,7 @@ test.describe('Notebook Toolbar', () => {
 
   test('Paste cell', async ({ page }) => {
     // Cut cell to populate clipboard
-    await page.notebook.selectCells(1);
+    await page.notebook.selectCells(0);
     await page.notebook.clickToolbarItem('cut');
 
     const imageName = 'paste-cell.png';
@@ -61,9 +61,9 @@ test.describe('Notebook Toolbar', () => {
     await page.notebook.clickToolbarItem('paste');
     const nbPanel = await page.notebook.getNotebookInPanel();
 
-    await expect(
-      page.locator('.jp-Notebook-cell.jp-mod-active .jp-cell-toolbar')
-    ).toBeVisible();
+    await expect
+      .soft(page.locator('.jp-Notebook-cell.jp-mod-active .jp-cell-toolbar'))
+      .toBeVisible();
     expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
   });
 

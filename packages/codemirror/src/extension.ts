@@ -704,6 +704,10 @@ export namespace EditorExtensionRegistry {
         name: 'keymap',
         default: [
           {
+            key: 'Mod-Enter',
+            run: StateCommands.preventNewLineOnRun
+          },
+          {
             key: 'Enter',
             run: StateCommands.completerOrInsertNewLine
           },

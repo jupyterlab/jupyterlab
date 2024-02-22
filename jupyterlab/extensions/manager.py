@@ -94,7 +94,7 @@ class ExtensionPackage:
     latest_version: str = ""
     status: str = "ok"
     author: Optional[str] = None
-    license: Optional[str] = None  # noqa
+    license: Optional[str] = None
     bug_tracker_url: Optional[str] = None
     documentation_url: Optional[str] = None
     package_manager_url: Optional[str] = None

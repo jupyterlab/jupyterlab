@@ -221,6 +221,9 @@ export class SettingsFormEditor extends React.Component<
           idPrefix={`jp-SettingsEditor-${this.props.settings.id}`}
           onChange={this._onChange}
           translator={this.props.translator}
+          experimental_defaultFormStateBehavior={{
+            emptyObjectFields: 'populateRequiredDefaults'
+          }}
         />
       </>
     );

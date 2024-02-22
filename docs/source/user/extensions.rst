@@ -564,6 +564,6 @@ rebuild, you can run the command:
    If you are rebuilding JupyterLab on Windows, you may encounter a
    ``FileNotFoundError`` due to the default path length on Windows.  Node
    modules are stored in a deeply nested directory structure, so paths can get
-   quite long. If you have administrative access and are on Windows 8 or 10,
-   you can update the registry setting using these instructions:
-   https://stackoverflow.com/a/37528731.
+   quite long. If you have administrative access and are on Windows 10 or newer
+   you can enable long paths by adding a dedicated
+   `registry key <https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation>`__.

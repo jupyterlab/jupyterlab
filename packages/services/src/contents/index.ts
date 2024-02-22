@@ -112,6 +112,17 @@ export namespace Contents {
      * The indices of the matched characters in the name.
      */
     indices?: ReadonlyArray<number> | null;
+
+    /**
+     * The hexdigest hash string of content, if requested (otherwise null).
+     * It cannot be null if hash_algorithm is defined.
+     */
+    readonly hash?: string;
+
+    /**
+     * The algorithm used to compute hash value. It cannot be null if hash is defined.
+     */
+    readonly hash_algorithm?: string;
   }
 
   /**
@@ -153,6 +164,13 @@ export namespace Contents {
      * The default is `true`.
      */
     content?: boolean;
+
+    /**
+     * Whether to include a hash in the response.
+     *
+     * The default is `false`.
+     */
+    hash?: boolean;
   }
 
   /**
@@ -1122,7 +1140,8 @@ export class Drive implements Contents.IDrive {
         delete options['format'];
       }
       const content = options.content ? '1' : '0';
-      const params: PartialJSONObject = { ...options, content };
+      const hash = options.hash ? '1' : '0';
+      const params: PartialJSONObject = { ...options, content, hash };
       url += URLExt.objectToQueryString(params);
     }
 
@@ -1150,7 +1169,13 @@ export class Drive implements Contents.IDrive {
   getDownloadUrl(localPath: string): Promise<string> {
     const baseUrl = this.serverSettings.baseUrl;
     let url = URLExt.join(baseUrl, FILES_URL, URLExt.encodeParts(localPath));
-    const xsrfTokenMatch = document.cookie.match('\\b_xsrf=([^;]*)\\b');
+    let cookie = '';
+    try {
+      cookie = document.cookie;
+    } catch (e) {
+      // e.g. SecurityError in case of CSP Sandbox
+    }
+    const xsrfTokenMatch = cookie.match('\\b_xsrf=([^;]*)\\b');
     if (xsrfTokenMatch) {
       const fullUrl = new URL(url);
       fullUrl.searchParams.append('_xsrf', xsrfTokenMatch[1]);

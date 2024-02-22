@@ -771,10 +771,7 @@ export function ToolbarButtonComponent(
           props.onClick?.();
         }
       }
-    : (event: React.MouseEvent) => {
-        // Prevent the toolbar widget to steal focus
-        event.stopPropagation();
-      };
+    : undefined;
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     const { key } = event;

@@ -86,9 +86,11 @@ breaking changes. Consider documenting your maintenance plans to users in these 
 You may also wish to consider pinning the major version of JupyterLab when developing
 extensions (in your package metadata).
 
-We maintain the **two most recently released major versions of JupyterLab**,
-JupyterLab v3 and JupyterLab v4. JupyterLab v1 and v2 are no longer maintained.
-All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+We maintain a major version of JupyterLab for **one year after its successor's first release**.
+See `version lifecycle <../getting_started/lifecycle.html>`__ for details.
+JupyterLab v4 was released on May 15, 2023, so JupyterLab v3 will be maintained
+until May 15, 2024. JupyterLab v1 and v2 are no longer maintained.
+All JupyterLab v2 and v3 users are strongly advised to upgrade as soon as possible.
 
 Languages, Tools and Processes
 ------------------------------
@@ -436,15 +438,10 @@ Notes:
    called something else (such as "python3") then parts of the build
    will fail. You may wish to build in a conda environment, or make an
    alias.
--  Some of the packages used in the development environment require
-   Python 3.0 or higher. If you encounter an ImportError during the
-   installation, make sure Python 3.0+ is installed. Also, try using the
-   Python 3.0+ version of ``pip`` or ``pip3 install -e .`` command to
-   install JupyterLab from the forked repository.
 -  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
    returned exit status 127 while in binding.gyp`` while running the
    ``pip install`` command above, you may be missing packages required
-   by ``canvas``. Please see `Installing Node.js and jlpm section`_
+   by ``canvas``. Please see the `Installing Node.js and jlpm section`_
    of this guide for instructions on how to install these packages.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
@@ -477,15 +474,7 @@ Notes:
    However, it takes a bit longer to build the sources, so is used only
    to build for production by default.
 
-If you are using a version of Jupyter Notebook earlier than 5.3, then
-you must also run the following command to enable the JupyterLab server
-extension:
-
-.. code:: bash
-
-   jupyter serverextension enable --py --sys-prefix jupyterlab
-
-For installation instructions to write documentation, please see
+For installation instructions for contributors who want to write documentation, please see
 `Writing Documentation <#writing-documentation>`__
 
 Run JupyterLab
