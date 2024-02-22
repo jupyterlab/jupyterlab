@@ -288,6 +288,7 @@ interface IUpDownProps {
   onHighlightPrevious: () => void;
   onHighlightNext: () => void;
   trans: TranslationBundle;
+  isEnabled: boolean;
 }
 
 function UpDownButtons(props: IUpDownProps) {
@@ -308,9 +309,10 @@ function UpDownButtons(props: IUpDownProps) {
     <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
       <button
         className={BUTTON_WRAPPER_CLASS}
-        onClick={() => props.onHighlightPrevious()}
+        onClick={props.isEnabled ? () => props.onHighlightPrevious() : () => false}
         tabIndex={0}
         title={`${props.trans.__('Previous Match')}${prevShortcut}`}
+        disabled={!props.isEnabled}
       >
         <caretUpEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -319,9 +321,10 @@ function UpDownButtons(props: IUpDownProps) {
       </button>
       <button
         className={BUTTON_WRAPPER_CLASS}
-        onClick={() => props.onHighlightNext()}
+        onClick={props.isEnabled ? () => props.onHighlightNext() : () => false}
         tabIndex={0}
         title={`${props.trans.__('Next Match')}${nextShortcut}`}
+        disabled={!props.isEnabled}
       >
         <caretDownEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
@@ -724,6 +727,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
             }}
             trans={trans}
             keyBindings={this.props.keyBindings}
+            isEnabled={!!(this.props.searchInputRef.current?.value)}
           />
           <button
             className={BUTTON_WRAPPER_CLASS}
