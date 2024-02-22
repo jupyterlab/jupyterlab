@@ -13,7 +13,7 @@ exitOnUncaughtException();
 // Get all of the packages.
 const basePath = path.resolve('.');
 const baseConfig = readJSONFile(path.join(basePath, 'package.json'));
-const packageConfig = baseConfig.workspaces.packages;
+const packageConfig = baseConfig.workspaces.packages ?? baseConfig.workspaces;
 const skipSource = process.argv.indexOf('packages') === -1;
 const skipExamples = process.argv.indexOf('examples') === -1;
 

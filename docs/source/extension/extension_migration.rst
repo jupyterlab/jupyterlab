@@ -89,10 +89,12 @@ between cells, especially impacting users with accessibility needs.
 In JupyterLab 4.1+ the focus stays on the active cell when switching to command
 mode; this requires all shortcut selectors to be adjusted as follows:
 
-- ``.jp-Notebook:focus.jp-mod-commandMode`` should be replaced with ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)``
-- ``.jp-Notebook:focus`` should be replaced with ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)``
-- ``[data-jp-traversable]:focus`` should be replaced with ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)``
-- ``[data-jp-kernel-user]:focus`` should be replaced with ``[data-jp-kernel-user] :focus:not(:read-write)``
+- ``.jp-Notebook:focus.jp-mod-commandMode``, ``.jp-Notebook:focus``, and ``[data-jp-traversable]:focus`` should be replaced with:
+  - ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)`` for JupyterLab 4.1.0+
+  - ``.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus`` for JupyterLab 4.1.1+
+- ``[data-jp-kernel-user]:focus`` should be replaced with:
+  - ``[data-jp-kernel-user] :focus:not(:read-write)`` for JupyterLab 4.1.0+
+  - ``[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)`` for JupyterLab 4.1.1+
 
 Please note that ``:not(:read-write)`` fragment disables shortcuts
 when text fields  (such as cell editor) are focused to avoid intercepting
@@ -100,6 +102,17 @@ characters typed by the user into the text fields, however if your shortcut
 does not correspond to any key/typographic character (e.g. most shortcuts
 with :kbd:`Ctrl` modifier) you may prefer to drop this fragment
 if you want the shortcut to be active in text fields.
+
+Further, JupyterLab 4.1.1 introduced indicator class ``.jp-mod-readWrite``
+that is applied to the notebook node when the active element accepts
+keyboard input as defined by ``:read-write`` selector. This indicator
+class is required to detect ``:read-write`` elements which are nested
+within an *open* shadow DOM (such as Panel framework widgets).
+
+If your framework uses a *closed* shadow DOM, or expects keyboard
+interactions on elements that are not recognised as editable by browser
+heuristics of ``:read-write`` selector, you need to set a data attribute
+`lm-suppress-shortcuts` on the outer host element to suppress shortcuts.
 
 To prevent breaking the user experience these changes are made transparently
 in the background, but will emit a warning and extension developers should
