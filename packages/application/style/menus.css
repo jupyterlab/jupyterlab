@@ -31,7 +31,8 @@
 }
 
 .lm-MenuBar-item {
-  padding: 0 8px;
+  /* stylelint-disable-next-line csstree/validator */
+  padding: 0 min(calc(1.2vw - 2px), 8px);
   border-left: var(--jp-border-width) solid transparent;
   border-right: var(--jp-border-width) solid transparent;
   border-top: var(--jp-border-width) solid transparent;
