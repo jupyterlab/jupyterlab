@@ -18,8 +18,10 @@ import {
   ReactWidget,
   refreshIcon,
   SidePanel,
+  tableRowsIcon,
   ToolbarButton,
   ToolbarButtonComponent,
+  treeViewIcon,
   UseSignal
 } from '@jupyterlab/ui-components';
 import { Token } from '@lumino/coreutils';
@@ -83,6 +85,21 @@ const CARET_CLASS = 'jp-RunningSessions-caret';
  * The class name added to icons.
  */
 const ITEM_ICON_CLASS = 'jp-RunningSessions-icon';
+
+/**
+ * Modifier added to a section when flattened list view is requested.
+ */
+const LIST_VIEW_CLASS = 'jp-mod-running-list-view';
+
+/**
+ * The class name added to button switching between nested and flat view.
+ */
+const VIEW_BUTTON_CLASS = 'jp-RunningSessions-viewButton';
+
+/**
+ * The class name added to button switching between nested and flat view.
+ */
+const COLLAPSE_EXPAND_BUTTON_CLASS = 'jp-RunningSessions-collapseButton';
 
 /**
  * The running sessions token.
@@ -409,7 +426,8 @@ class Section extends PanelWithToolbar {
 
     let runningItems = options.manager.running();
     const enabled = runningItems.length > 0;
-    this._button = new ToolbarButton({
+
+    const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
       className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
         !enabled ? ' jp-mod-disabled' : ''
@@ -417,37 +435,57 @@ class Section extends PanelWithToolbar {
       enabled,
       onClick: onShutdown
     });
-    this._manager.runningChanged.connect(this._updateButton, this);
 
     const collapseToggled = new Signal<Section, boolean>(this);
 
-    // TODO: show/hide the buttons as needed, maybe by extending logic in `_updateButton`?
-    const hasNesting = runningItems.filter(item => item.children).length !== 0;
+    const switchViewButton = new ToolbarButton({
+      className: VIEW_BUTTON_CLASS,
+      enabled,
+      icon: tableRowsIcon,
+      pressedIcon: treeViewIcon,
+      onClick: () => {
+        switchViewButton.pressed = !switchViewButton.pressed;
+        collapseToggled.emit(false);
+        this.toggleClass(LIST_VIEW_CLASS, switchViewButton.pressed);
+        this._updateButtons();
+      },
+      tooltip: trans.__('Switch to List View'),
+      pressedTooltip: trans.__('Switch to Tree View')
+    });
+    const expandAllButton = new ToolbarButton({
+      className: COLLAPSE_EXPAND_BUTTON_CLASS,
+      enabled,
+      icon: expandIcon,
+      onClick: () => collapseToggled.emit(false),
+      tooltip: trans.__('Expand All')
+    });
+    const collapseAllButton = new ToolbarButton({
+      className: COLLAPSE_EXPAND_BUTTON_CLASS,
+      enabled,
+      icon: collapseIcon,
+      onClick: () => collapseToggled.emit(true),
+      tooltip: trans.__('Collapse All')
+    });
 
-    if (hasNesting) {
-      const expandAll = new ToolbarButton({
-        className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
-          !enabled ? ' jp-mod-disabled' : ''
-        }`,
-        enabled,
-        icon: expandIcon,
-        onClick: () => collapseToggled.emit(false),
-        tooltip: trans.__('Expand all')
-      });
-      const collapseAll = new ToolbarButton({
-        className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
-          !enabled ? ' jp-mod-disabled' : ''
-        }`,
-        enabled,
-        icon: collapseIcon,
-        onClick: () => collapseToggled.emit(true),
-        tooltip: trans.__('Collapse all')
-      });
+    this._buttons = {
+      'switch-view': switchViewButton,
+      'expand-all': expandAllButton,
+      'collapse-all': collapseAllButton,
+      'shutdown-all': shutdownAllButton
+    };
+    this._manager.runningChanged.connect(this._updateButtons, this);
 
-      this.toolbar.addItem('expand-all', expandAll);
-      this.toolbar.addItem('collapse-all', collapseAll);
+    for (const name of [
+      'expand-all',
+      'collapse-all',
+      'switch-view',
+      'shutdown-all'
+    ]) {
+      this.toolbar.addItem(
+        name,
+        this._buttons[name as keyof typeof this._buttons]
+      );
     }
-    this.toolbar.addItem('shutdown-all', this._button);
 
     this.addWidget(
       new ListWidget({
@@ -466,13 +504,36 @@ class Section extends PanelWithToolbar {
     if (this.isDisposed) {
       return;
     }
-    this._manager.runningChanged.disconnect(this._updateButton, this);
+    this._manager.runningChanged.disconnect(this._updateButtons, this);
     super.dispose();
   }
 
-  private _updateButton(): void {
-    const button = this._button;
-    button.enabled = this._manager.running().length > 0;
+  private _updateButtons(): void {
+    let runningItems = this._manager.running();
+    const enabled = runningItems.length > 0;
+
+    const hasNesting = runningItems.filter(item => item.children).length !== 0;
+
+    this._buttons['switch-view'].node.classList.toggle(
+      'jp-mod-hidden',
+      !hasNesting
+    );
+    const inTreeView = hasNesting && !this._buttons['switch-view'].pressed;
+    this._buttons['expand-all'].node.classList.toggle(
+      'jp-mod-hidden',
+      !inTreeView
+    );
+    this._buttons['collapse-all'].node.classList.toggle(
+      'jp-mod-hidden',
+      !inTreeView
+    );
+
+    this._buttons['expand-all'].enabled = enabled;
+    this._buttons['collapse-all'].enabled = enabled;
+    this._buttons['switch-view'].enabled = enabled;
+
+    const button = this._buttons['shutdown-all'];
+    button.enabled = enabled;
     if (button.enabled) {
       button.node
         .querySelector('jp-button')
@@ -482,7 +543,12 @@ class Section extends PanelWithToolbar {
     }
   }
 
-  private _button: ToolbarButton;
+  private _buttons: {
+    'expand-all': ToolbarButton;
+    'collapse-all': ToolbarButton;
+    'switch-view': ToolbarButton;
+    'shutdown-all': ToolbarButton;
+  };
   private _manager: IRunningSessions.IManager;
 }
 

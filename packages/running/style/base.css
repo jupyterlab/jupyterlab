@@ -73,9 +73,34 @@
   padding-left: 0;
 }
 
+.jp-RunningSessions-viewButton[aria-pressed='true'] {
+  box-shadow: none;
+}
+
+.jp-RunningSessions .jp-ToolbarButton.jp-mod-hidden {
+  display: none;
+}
+
+.jp-mod-running-list-view .jp-RunningSessions-sectionList {
+  padding-left: 0;
+}
+
+.jp-mod-running-list-view .jp-mod-running-leaf {
+  margin-left: 0;
+}
+
+.jp-mod-running-list-view .jp-RunningSessions-item.jp-mod-kernel,
+.jp-mod-running-list-view .jp-RunningSessions-item.jp-mod-kernelspec {
+  display: none;
+}
+
 .jp-RunningSessions-item.jp-mod-kernelspec,
 .jp-RunningSessions-item.jp-mod-kernel {
   user-select: none;
+}
+
+.jp-RunningSessions-collapseButton .jp-icon-output[fill] {
+  fill: var(--jp-inverse-layout-color3);
 }
 
 .jp-RunningSessions-icon {
