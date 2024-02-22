@@ -309,7 +309,6 @@ function UpDownButtons(props: IUpDownProps) {
   const nextShortcut = nextKeys ? ` (${nextKeys})` : '';
 
   const upButtonTitle = `${props.trans.__('Previous Match')}${prevShortcut}`;
-  // Only use "real" buttons if the buttons are enabled
   const upButton = props.isEnabled
     ? <button
         className={BUTTON_WRAPPER_CLASS}
