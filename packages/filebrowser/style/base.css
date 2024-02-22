@@ -47,7 +47,8 @@
 }
 
 .jp-BreadCrumbs-item {
-  margin: 0 2px;
+  /* stylelint-disable-next-line csstree/validator */
+  margin: min(3vh, 8px) min(2vw, 12px);
   padding: 0 2px;
   border-radius: var(--jp-border-radius);
   cursor: pointer;
