@@ -34,11 +34,17 @@
   outline: 0;
 }
 
-.jp-DocumentSearch-overlay button:hover {
+.jp-DocumentSearch-overlay button.jp-DocumentSearch-disabled-button-wrapper {
+  opacity: 0.7;
+}
+
+.jp-DocumentSearch-overlay
+  button:not(.jp-DocumentSearch-disabled-button-wrapper):hover {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DocumentSearch-overlay button:active {
+.jp-DocumentSearch-overlay
+  button:not(.jp-DocumentSearch-disabled-button-wrapper):active {
   background-color: var(--jp-layout-color3);
 }
 
@@ -73,7 +79,8 @@
 }
 
 .jp-DocumentSearch-toggle-wrapper,
-.jp-DocumentSearch-button-wrapper {
+.jp-DocumentSearch-button-wrapper,
+.jp-DocumentSearch-disabled-button-wrapper {
   all: initial;
   overflow: hidden;
   display: inline-block;
@@ -87,7 +94,8 @@
   height: 14px;
 }
 
-.jp-DocumentSearch-button-wrapper {
+.jp-DocumentSearch-button-wrapper,
+.jp-DocumentSearch-disabled-button-wrapper {
   flex-shrink: 0;
   width: var(--jp-private-document-search-button-height);
   height: var(--jp-private-document-search-button-height);
@@ -102,6 +110,7 @@
 
 .jp-DocumentSearch-toggle-wrapper,
 .jp-DocumentSearch-button-wrapper,
+.jp-DocumentSearch-disabled-button-wrapper,
 .jp-DocumentSearch-button-content:focus {
   outline: none;
 }

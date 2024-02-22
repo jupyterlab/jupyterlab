@@ -39,6 +39,8 @@ const INPUT_BUTTON_CLASS_ON = 'jp-DocumentSearch-input-button-on';
 const INDEX_COUNTER_CLASS = 'jp-DocumentSearch-index-counter';
 const UP_DOWN_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-up-down-wrapper';
 const UP_DOWN_BUTTON_CLASS = 'jp-DocumentSearch-up-down-button';
+const DISABLED_UP_DOWN_BUTTON_CLASS = 'jp-DocumentSearch-disabled-up-down-button';
+
 const FILTER_BUTTON_CLASS = 'jp-DocumentSearch-filter-button';
 const FILTER_BUTTON_ENABLED_CLASS = 'jp-DocumentSearch-filter-button-enabled';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
@@ -53,6 +55,7 @@ const TOGGLE_WRAPPER = 'jp-DocumentSearch-toggle-wrapper';
 const TOGGLE_PLACEHOLDER = 'jp-DocumentSearch-toggle-placeholder';
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
+const DISABLED_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-disabled-button-wrapper';
 const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
 interface ISearchInputProps {
@@ -305,32 +308,59 @@ function UpDownButtons(props: IUpDownProps) {
   const prevShortcut = prevKeys ? ` (${prevKeys})` : '';
   const nextShortcut = nextKeys ? ` (${nextKeys})` : '';
 
-  return (
-    <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
-      <button
+  const upButtonTitle = `${props.trans.__('Previous Match')}${prevShortcut}`;
+  // Only use "real" buttons if the buttons are enabled
+  const upButton = props.isEnabled
+    ? <button
         className={BUTTON_WRAPPER_CLASS}
-        onClick={props.isEnabled ? () => props.onHighlightPrevious() : () => false}
+        onClick={() => props.onHighlightPrevious()}
         tabIndex={0}
-        title={`${props.trans.__('Previous Match')}${prevShortcut}`}
-        disabled={!props.isEnabled}
+        title={upButtonTitle}
       >
         <caretUpEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
           tag="span"
         />
       </button>
-      <button
+    : <button
+        className={DISABLED_BUTTON_WRAPPER_CLASS}
+        title={upButtonTitle}
+        disabled={true}
+      >
+        <caretUpEmptyThinIcon.react
+          className={classes(DISABLED_UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
+          tag="span"
+        />
+      </button>;
+
+  const downButtonTitle = `${props.trans.__('Next Match')}${nextShortcut}`;
+  const downButton = props.isEnabled
+    ? <button
         className={BUTTON_WRAPPER_CLASS}
-        onClick={props.isEnabled ? () => props.onHighlightNext() : () => false}
+        onClick={() => props.onHighlightNext()}
         tabIndex={0}
-        title={`${props.trans.__('Next Match')}${nextShortcut}`}
-        disabled={!props.isEnabled}
+        title={downButtonTitle}
       >
         <caretDownEmptyThinIcon.react
           className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
           tag="span"
         />
       </button>
+    : <button
+        className={DISABLED_BUTTON_WRAPPER_CLASS}
+        title={downButtonTitle}
+        disabled={true}
+      >
+        <caretDownEmptyThinIcon.react
+          className={classes(DISABLED_UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
+          tag="span"
+        />
+      </button>;
+
+  return (
+    <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
+      {upButton}
+      {downButton}
     </div>
   );
 }
