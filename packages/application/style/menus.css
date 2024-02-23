@@ -31,11 +31,11 @@
 }
 
 .lm-MenuBar-item {
+  /* stylelint-disable-next-line csstree/validator */
   /* calc() is used for adaptive menuBar padding, it fixes UI cutoff at 100% zoom, with -2px border */
-
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
-  padding: 0 max(min(calc(7.5vw - 22px), 8px), 2px); /* Using min() and vw allows the left and right padding to shrink when the screen is small or when the user increases browser zoom level, which should allow for the "Help" menu to be shown at 400% zoom */
+  padding: 0 min(calc(1.2vw - 2px), 8px); /* Using min() and vw allows the left and right padding to shrink when the screen is small or when the user increases browser zoom level, which should allow for the "Help" menu to be shown at 400% zoom */
   border-left: var(--jp-border-width) solid transparent;
   border-right: var(--jp-border-width) solid transparent;
   border-top: var(--jp-border-width) solid transparent;

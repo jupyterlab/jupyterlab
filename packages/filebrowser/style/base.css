@@ -35,7 +35,7 @@
 
   border-bottom: none;
   height: auto;
-
+  /* stylelint-disable-next-line csstree/validator */
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
   margin: min(5vh, 8px) min(1.5vw, 12px) 0; /* Using min() and vw/vh allows the margins to shrink when the screen is small or when the user zooms in, which should allow at least 2 files or folders to be seen within the file browser at 400% zoom */
@@ -62,7 +62,8 @@
 }
 
 .jp-BreadCrumbs-item {
-  margin: 0 2px;
+  /* stylelint-disable-next-line csstree/validator */
+  margin: min(3vh, 8px) min(2vw, 12px);
   padding: 0 2px;
   border-radius: var(--jp-border-radius);
   cursor: pointer;
@@ -144,9 +145,10 @@
 }
 
 .jp-DirListing-headerItem {
+  /* stylelint-disable-next-line csstree/validator */
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
-  padding: min(1vh, 4px) min(1vw, 12px) min(1vh, 2px); /* Using min() and vw/vh allows the padding to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
+  padding: min(1vh, 4px) min(6vw, 12px) min(1vh, 2px); /* Using min() and vw/vh allows the padding to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
   font-weight: 500;
 }
 
