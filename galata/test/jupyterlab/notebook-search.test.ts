@@ -94,7 +94,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/1');
 
     // Show replace buttons to check for visual regressions
-    await page.click('button[title="Toggle Replace"]');
+    await page.click('button[title="Show Replace"]');
     await page.fill('[placeholder="Replace"]', 'line1\nline2');
 
     const overlay = page.locator('.jp-DocumentSearch-overlay');

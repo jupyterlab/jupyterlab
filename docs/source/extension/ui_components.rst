@@ -114,8 +114,7 @@ removed from the DOM, you’ll first need to clean it up:
 This cleanup step is not a special property of ``LabIcon``, but is
 instead needed for any React component that is rendered directly at the
 top level by ``ReactDOM``: failure to call ``unmountComponentAtNode``
-can result in a `memory
-leak <https://stackoverflow.com/a/48198011/425458>`__.
+can result in a memory leak.
 
 How to create your own custom ``LabIcon``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
