@@ -424,17 +424,32 @@ close the notebook without saving it.`,
     this.triggerContentChange();
   }
 
+  private _onForkChanged(
+    update: Uint8Array
+  ): void {
+    console.log('update', update);
+  }
+
   private _onStateChanged(
     sender: ISharedNotebook,
     changes: NotebookChange
   ): void {
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
+        const fork_prefix = 'fork_';
         if (value.name === 'dirty') {
           // Setting `dirty` will trigger the state change.
           // We always set `dirty` because the shared model state
           // and the local attribute are synchronized one way shared model -> _dirty
           this.dirty = value.newValue;
+        } else if (value.name.startsWith(fork_prefix)) {
+          const forkId = value.name.slice(fork_prefix.length);
+          // don't do anything if the fork is us
+          if (forkId !== this.sharedModel.forkId) {
+            const forkedSharedModel = YNotebook.create();
+            this.sharedModel.getProvider(forkId, forkedSharedModel);
+            forkedSharedModel.ydoc.on('update', this._onForkChanged);
+          }
         } else if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
             newValue: undefined,
