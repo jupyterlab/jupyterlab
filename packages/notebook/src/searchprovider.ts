@@ -236,6 +236,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       output: {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
+        disabledDescription: trans.__('Search in the cell outputs. (Not available in find and replace mode.)'),
         default: false,
         supportReplace: false
       },
