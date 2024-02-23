@@ -651,14 +651,13 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
           // Show an alternate description, if one exists, when a filter is disabled in replace mode.
           const description = isEnabled
             ? filter.description
-            : (filter.disabledDescription ?? filter.description);
+            : filter.disabledDescription ?? filter.description;
           return (
             <FilterSelection
               key={name}
               title={filter.title}
               description={
-                description +
-                (name == 'selection' ? selectionKeyHint : '')
+                description + (name == 'selection' ? selectionKeyHint : '')
               }
               isEnabled={isEnabled}
               onToggle={async () => {
