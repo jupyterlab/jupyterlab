@@ -60,23 +60,19 @@ export class ActivityHelper {
   }
 
   /**
-   * Keyboard navigation to element using navigation key
+   * Continually press navigation key until specified element is focused
    *
-   * @param attributeValue value of selected widget attribute
+   * @param selector name of attribute selector
    * @param key navigation key to press
-   * @param attribute name of attribute selector
    */
-
-  async keyToSidebar(
-    attributeValue: string,
-    key: string,
-    attribute: string
+  async keyToElement(
+    selector: string,
+    key: 'Tab' | 'ArrowDown' | 'ArrowUp'
   ): Promise<void> {
     while (
-      (await this.page.evaluate(
-        attribute => document.activeElement?.getAttribute(attribute),
-        attribute
-      )) !== attributeValue
+      !(await this.page.evaluate(
+        () => document.activeElement?.matches(selector)
+      ))
     ) {
       await this.page.keyboard.press(key);
     }
