@@ -10,13 +10,13 @@
       "path": "../apputils"
     },
     {
+      "path": "../statedb"
+    },
+    {
       "path": "../translation"
     },
     {
       "path": "../ui-components"
-    },
-    {
-      "path": "../statedb"
     }
   ]
 }
