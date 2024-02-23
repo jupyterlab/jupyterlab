@@ -28,7 +28,7 @@ test.describe('Overview', () => {
 
     await page
       .locator(
-        '.jp-RunningSessions-item.jp-mod-kernel >> text="Python 3 (ipykernel)"'
+        '.jp-RunningSessions-item.jp-mod-kernelspec >> text="Python 3 (ipykernel)"'
       )
       .waitFor();
     expect(
