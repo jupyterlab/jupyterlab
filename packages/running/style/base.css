@@ -77,10 +77,6 @@
   box-shadow: none;
 }
 
-.jp-RunningSessions .jp-ToolbarButton.jp-mod-hidden {
-  display: none;
-}
-
 .jp-mod-running-list-view .jp-RunningSessions-sectionList {
   padding-left: 0;
 }
@@ -199,10 +195,10 @@ span.jp-RunningSessions-icon > svg {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent.jp-mod-disabled {
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent[disabled] {
   color: var(--jp-ui-font-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent.jp-mod-disabled:hover {
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent[disabled]:hover {
   background: none;
 }

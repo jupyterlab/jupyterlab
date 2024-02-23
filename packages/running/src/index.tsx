@@ -532,34 +532,22 @@ class Section extends PanelWithToolbar {
     const enabled = runningItems.length > 0;
 
     const hasNesting = runningItems.filter(item => item.children).length !== 0;
-
-    this._buttons['switch-view'].node.classList.toggle(
-      'jp-mod-hidden',
-      !hasNesting
-    );
     const inTreeView = hasNesting && !this._buttons['switch-view'].pressed;
-    this._buttons['expand-all'].node.classList.toggle(
-      'jp-mod-hidden',
-      !inTreeView
-    );
-    this._buttons['collapse-all'].node.classList.toggle(
-      'jp-mod-hidden',
-      !inTreeView
-    );
+
+    this._buttons['switch-view'].node.style.display = hasNesting
+      ? 'block'
+      : 'none';
+    this._buttons['expand-all'].node.style.display = inTreeView
+      ? 'block'
+      : 'none';
+    this._buttons['collapse-all'].node.style.display = inTreeView
+      ? 'block'
+      : 'none';
 
     this._buttons['expand-all'].enabled = enabled;
     this._buttons['collapse-all'].enabled = enabled;
     this._buttons['switch-view'].enabled = enabled;
-
-    const button = this._buttons['shutdown-all'];
-    button.enabled = enabled;
-    if (button.enabled) {
-      button.node
-        .querySelector('jp-button')
-        ?.classList.remove('jp-mod-disabled');
-    } else {
-      button.node.querySelector('jp-button')?.classList.add('jp-mod-disabled');
-    }
+    this._buttons['shutdown-all'].enabled = enabled;
   }
 
   private _buttons: {
