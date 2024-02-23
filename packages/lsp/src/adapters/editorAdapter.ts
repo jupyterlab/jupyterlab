@@ -51,8 +51,8 @@ export class EditorAdapter implements IDisposable {
    * Setup the editor.
    */
   private _injectExtensions(editor: Document.IEditor): void {
-    const codeEditor = editor.getEditor()!;
-    if (codeEditor.isDisposed) {
+    const codeEditor = editor.getEditor();
+    if (!codeEditor || codeEditor.isDisposed) {
       return;
     }
 
