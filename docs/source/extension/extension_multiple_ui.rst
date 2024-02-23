@@ -3,8 +3,8 @@
 
 .. _multiple_ui_extensions:
 
-Extensions Targeting Multiple Applications
-==========================================
+Targeting Multiple Applications
+===============================
 
 *Make your extensions work in JupyterLab, Notebook 7+ and more!*
 
