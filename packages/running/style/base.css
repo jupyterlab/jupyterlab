@@ -103,6 +103,10 @@
   fill: var(--jp-inverse-layout-color3);
 }
 
+.jp-RunningSessions-collapseButton > svg {
+  scale: 0.9;
+}
+
 .jp-RunningSessions-icon {
   margin: 0 4px;
 }
