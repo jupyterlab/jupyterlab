@@ -305,10 +305,10 @@ function UpDownButtons(props: IUpDownProps) {
   const prevShortcut = prevKeys ? ` (${prevKeys})` : '';
   const nextShortcut = nextKeys ? ` (${nextKeys})` : '';
 
-  const upButton =
+  const upButton = (
     <button
       className={BUTTON_WRAPPER_CLASS}
-      onClick={() => props.isEnabled ? props.onHighlightPrevious() : false}
+      onClick={() => (props.isEnabled ? props.onHighlightPrevious() : false)}
       tabIndex={0}
       title={`${props.trans.__('Previous Match')}${prevShortcut}`}
       disabled={!props.isEnabled}
@@ -317,12 +317,13 @@ function UpDownButtons(props: IUpDownProps) {
         className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
         tag="span"
       />
-    </button>;
+    </button>
+  );
 
-  const downButton =
+  const downButton = (
     <button
       className={BUTTON_WRAPPER_CLASS}
-      onClick={() => props.isEnabled ? props.onHighlightNext() : false}
+      onClick={() => (props.isEnabled ? props.onHighlightNext() : false)}
       tabIndex={0}
       title={`${props.trans.__('Next Match')}${nextShortcut}`}
       disabled={!props.isEnabled}
@@ -331,7 +332,8 @@ function UpDownButtons(props: IUpDownProps) {
         className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
         tag="span"
       />
-    </button>;
+    </button>
+  );
 
   return (
     <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
