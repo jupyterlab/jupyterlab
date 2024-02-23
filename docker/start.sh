@@ -8,8 +8,9 @@ set -o pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ROOT_DIR=$(dirname $SCRIPT_DIR)
 
-DEV_USER="labdev"
+DEV_USER="mambauser"
 GID=$(id -g)
+USER_ID=$(id -u)
 RSYNC_CMD="rsync -ar /home/$DEV_USER/jupyterlab_cache/node_modules/. /home/$DEV_USER/jupyterlab/node_modules"
 CMD=$1 # possible command: build, clean, dev, shell
 
@@ -34,7 +35,7 @@ IMAGE_TAG="jupyterlab_dev:$ROOT_DIR_MD5"
 DEV_CONTAINER="jupyterlab_dev_container_$ROOT_DIR_MD5"
 
 build_image () {
-    docker build  --build-arg NEW_MAMBA_USER_ID=$UID --build-arg NEW_MAMBA_USER_GID=$GID $ROOT_DIR -f $SCRIPT_DIR/Dockerfile -t $IMAGE_TAG
+    docker build  --build-arg NEW_MAMBA_USER_ID=$USER_ID --build-arg NEW_MAMBA_USER_GID=$GID $ROOT_DIR -f $SCRIPT_DIR/Dockerfile -t $IMAGE_TAG
 }
 
 stop_contaniner () {
@@ -68,5 +69,5 @@ if [[ $CMD == 'build' ]]; then
     if [[ $CMD == 'dev-detach' ]]; then
         RUN_MODE="-d"
     fi
-    docker run $RUN_MODE --name $DEV_CONTAINER --rm -p $PORT:$PORT -v $ROOT_DIR:/home/$DEV_USER/jupyterlab --entrypoint "/bin/bash" $IMAGE_TAG -i -c "$DOCKER_CMD"
+    docker run $RUN_MODE --user $USER_ID:$GID --name $DEV_CONTAINER --rm -p $PORT:$PORT -v $ROOT_DIR:/home/$DEV_USER/jupyterlab --entrypoint "/bin/bash" $IMAGE_TAG -i -c "$DOCKER_CMD"
 fi

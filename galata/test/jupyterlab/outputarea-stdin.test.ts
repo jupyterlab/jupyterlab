@@ -14,6 +14,12 @@ print('before sleep')
 sleep(0.1)
 print('after sleep')`;
 
+const openShadowDOM = `\
+from IPython.display import HTML
+HTML("""<div id='root'></div><script>
+document.querySelector('#root').attachShadow({mode: 'open'}).innerHTML = '<input id="shadow-input"/>';
+</script>""")`;
+
 const ACTIVE_INPUT =
   '.jp-OutputArea-stdin-item:not(.jp-OutputArea-stdin-hiding) .jp-Stdin-input';
 
@@ -67,31 +73,39 @@ test.describe('Stdin for ipdb', () => {
     await expect(page.locator(ACTIVE_INPUT)).toHaveValue('foofoox');
   });
 
-  test('Typing in stdin box', async ({ page }) => {
-    // Test to ensure that notebook shortcuts do not capture text typed into inputs.
-    // This may not be sufficient to ensure no conflicts with other languages but
-    // should catch the most severe issues.
-    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    const digits = '0123456789';
-    await page.notebook.setCell(0, 'code', 'input()');
-    // Run the selected (only) cell without proceeding and without waiting
-    // for it to complete (as it should stay waiting for input).
-    await page.keyboard.press('Control+Enter');
+  const typingScenarios = [
+    { name: 'stdin box', code: 'input()', selector: '.jp-Stdin-input' },
+    { name: 'shadow DOM input', code: openShadowDOM, selector: '#shadow-input' }
+  ];
+  for (const testCase of typingScenarios) {
+    test(`Typing in ${testCase.name}`, async ({ page }) => {
+      // Test to ensure that notebook shortcuts do not capture text typed into inputs.
+      // This may not be sufficient to ensure no conflicts with other languages but
+      // should catch the most severe issues.
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+      const digits = '0123456789';
+      await page.notebook.setCell(0, 'code', testCase.code);
+      // Run the selected (only) cell without proceeding and without waiting
+      // for it to complete (as it should stay waiting for input).
+      await page.keyboard.press('Control+Enter');
 
-    await page.waitForSelector('.jp-Stdin-input');
-    for (const letter of alphabet) {
-      await page.keyboard.press(`Key${letter.toUpperCase()}`);
-    }
-    for (const letter of alphabet) {
-      await page.keyboard.press(`Shift+Key${letter.toUpperCase()}`);
-    }
-    for (const digit of digits) {
-      await page.keyboard.press(`Digit${digit}`);
-    }
-    await expect(page.locator('.jp-Stdin-input')).toHaveValue(
-      alphabet + alphabet.toUpperCase() + digits
-    );
-  });
+      await page.waitForSelector(testCase.selector);
+      await page.focus(testCase.selector);
+
+      for (const letter of alphabet) {
+        await page.keyboard.press(`Key${letter.toUpperCase()}`);
+      }
+      for (const letter of alphabet) {
+        await page.keyboard.press(`Shift+Key${letter.toUpperCase()}`);
+      }
+      for (const digit of digits) {
+        await page.keyboard.press(`Digit${digit}`);
+      }
+      await expect(page.locator(testCase.selector)).toHaveValue(
+        alphabet + alphabet.toUpperCase() + digits
+      );
+    });
+  }
 
   test('Subsequent execution in short succession', async ({ page }) => {
     await page.notebook.setCell(0, 'code', loopedInput);
