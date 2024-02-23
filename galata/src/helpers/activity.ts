@@ -70,10 +70,10 @@ export class ActivityHelper {
     key: 'Tab' | 'ArrowDown' | 'ArrowUp'
   ): Promise<void> {
     while (
-      !(await this.page.evaluate(
+      await this.page.evaluate(
         selector => document.activeElement?.matches(selector),
         selector
-      ))
+      )
     ) {
       await this.page.keyboard.press(key);
     }
