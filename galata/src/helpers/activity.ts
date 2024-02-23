@@ -71,7 +71,8 @@ export class ActivityHelper {
   ): Promise<void> {
     while (
       !(await this.page.evaluate(
-        () => document.activeElement?.matches(selector)
+        selector => document.activeElement?.matches(selector),
+        selector
       ))
     ) {
       await this.page.keyboard.press(key);
