@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/debugger-extension",
-  "version": "4.1.0",
+  "version": "4.1.2",
   "description": "JupyterLab - Debugger Extension",
   "keywords": [
     "jupyter",
@@ -44,24 +44,24 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.1.0",
-    "@jupyterlab/apputils": "^4.2.0",
-    "@jupyterlab/cells": "^4.1.0",
-    "@jupyterlab/codeeditor": "^4.1.0",
-    "@jupyterlab/console": "^4.1.0",
-    "@jupyterlab/coreutils": "^6.1.0",
-    "@jupyterlab/debugger": "^4.1.0",
-    "@jupyterlab/docregistry": "^4.1.0",
-    "@jupyterlab/fileeditor": "^4.1.0",
-    "@jupyterlab/logconsole": "^4.1.0",
-    "@jupyterlab/notebook": "^4.1.0",
-    "@jupyterlab/rendermime": "^4.1.0",
-    "@jupyterlab/services": "^7.1.0",
-    "@jupyterlab/settingregistry": "^4.1.0",
-    "@jupyterlab/translation": "^4.1.0"
+    "@jupyterlab/application": "^4.1.2",
+    "@jupyterlab/apputils": "^4.2.2",
+    "@jupyterlab/cells": "^4.1.2",
+    "@jupyterlab/codeeditor": "^4.1.2",
+    "@jupyterlab/console": "^4.1.2",
+    "@jupyterlab/coreutils": "^6.1.2",
+    "@jupyterlab/debugger": "^4.1.2",
+    "@jupyterlab/docregistry": "^4.1.2",
+    "@jupyterlab/fileeditor": "^4.1.2",
+    "@jupyterlab/logconsole": "^4.1.2",
+    "@jupyterlab/notebook": "^4.1.2",
+    "@jupyterlab/rendermime": "^4.1.2",
+    "@jupyterlab/services": "^7.1.2",
+    "@jupyterlab/settingregistry": "^4.1.2",
+    "@jupyterlab/translation": "^4.1.2"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.1.0",
+    "@jupyterlab/testing": "^4.1.2",
     "@types/jest": "^29.2.0",
     "@types/react-dom": "^18.0.9",
     "rimraf": "~5.0.5",

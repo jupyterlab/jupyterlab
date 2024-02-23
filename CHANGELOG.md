@@ -10,7 +10,7 @@ JupyterLab 4.1 includes a number of new features (described below), bug fixes, a
 
 ### Custom CSS
 
-Jupyterlab now supports automatic loading of custom CSS.
+JupyterLab now supports automatic loading of custom CSS.
 Themes are the recommended way for customizing the JupyterLab look and feel,
 while custom CSS is intended for minor personal adjustments.
 
@@ -63,10 +63,10 @@ The default keyboard shortcuts are displayed in the small widget shown when hove
 To enable the inline suggestions based on the kernel history, go to Settings → Inline Completer → History provider → check the "enabled" checkbox.
 
 In addition to the built-in history suggestions,
-the [`jupyter-ai`](https://github.com/jupyterlab/jupyter-ai) extension will provide
+the [`jupyter-ai`](https://github.com/jupyterlab/jupyter-ai) extension can provide
 suggestions from supported models.
-The `jupyter-ai` integration with inline completer can be tested starting with the
-[v2.10.0beta1](https://github.com/jupyterlab/jupyter-ai/releases/tag/v2.10.0beta1) pre-release.
+The `jupyter-ai` integration with inline completer is available starting with the
+[v2.10.0](https://github.com/jupyterlab/jupyter-ai/releases/tag/v2.10.0) release.
 
 The Inline Completer API is still considered experimental and may be subject to changes, please share feedback!
 
@@ -77,24 +77,24 @@ Numerous improvements to keyboard navigation with focus on accessibility and usa
 - the focus can now be moved beyond the active notebook
 - the toolbars can now be navigated using arrow keys
 
-For more details, see [this post on Jupyter Blog](https://blog.jupyter.org/recent-keyboard-navigation-improvements-in-jupyter-4df32f97628d).
+For more details, see [this post on the Jupyter Blog](https://blog.jupyter.org/recent-keyboard-navigation-improvements-in-jupyter-4df32f97628d).
 
 ### Execution history in notebook
 
 The code from previously executed cells can be used to populate empty cells,
-allowing to iterate on code from previous cells or even sessions
+allowing to iterate on code from previous cells or even previous sessions
 (depending on how a specific kernel stores history).
 
-To cycle between history items press <kbd>Alt</kbd> + <kbd>Arrow Up</kbd> and  <kbd>Alt</kbd> + <kbd>Arrow Down</kbd>.
+To cycle between history items, press <kbd>Alt</kbd> + <kbd>Arrow Up</kbd> and  <kbd>Alt</kbd> + <kbd>Arrow Down</kbd>.
 
 To enable execution history, go to Settings → Notebook → check the "Kernel history access" checkbox.
 
 This feature was already available in the console in previous releases; it only works with kernels supporting execution history requests.
-To clear the execution history consult the documentation of the kernel you are using (e.g., IPython/ipykernel).
+To clear the execution history, consult the documentation of the kernel you are using (e.g., IPython/ipykernel).
 
 ### Opening files from tracebacks
 
-Paths to code files detected in the tracebacks returned by kernels on execution error are now turned into links.
+Paths to code files detected in tracebacks returned by kernels on execution error are now turned into links.
 These links will open the corresponding file for editing, if it is in the Jupyter root directory,
 or they will open a read-only preview if the file is outside of the root directory and the active kernel supports the debugger.
 
@@ -115,7 +115,7 @@ thus the plugin manager enables more extensive customization of the JupyterLab e
 
 <img alt="An example search result in the plugin extension listing" src="https://jupyterlab.readthedocs.io/en/latest/_images/plugin-manager-search-notebook.png" class="jp-screenshot">
 
-This feature is intended for advanced users and documented in depth in the [documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#managing-plugins-with-plugin-manager).
+This feature is intended for advanced users and is documented in depth in the [documentation](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#managing-plugins-with-plugin-manager).
 
 Administrators may want to [lock specific plugins](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#locking-and-unlocking-plugins) if they are required for any reason; this will prevent users from disabling the plugins via Plugin Manager and remote API calls. The Plugin Manager itself can be [disabled using the CLI](https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#enabling-and-disabling-extensions).
 
@@ -266,6 +266,70 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.1.2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.1.1...d835cf35dfd37bbe930c79c90a6d180a800bae69))
+
+### Bugs fixed
+
+- Fix highlight sequencing when replacing text in code cells [#15803](https://github.com/jupyterlab/jupyterlab/pull/15803) ([@JasonWeill](https://github.com/JasonWeill))
+- Windows platforms, erratic pasting of text into Markdown field [#15794](https://github.com/jupyterlab/jupyterlab/pull/15794) ([@kiliansinger](https://github.com/kiliansinger))
+- Restore notebook scrolling on dragging a cell to the viewport edge [#15782](https://github.com/jupyterlab/jupyterlab/pull/15782) ([@krassowski](https://github.com/krassowski))
+- Fix typing in editable elements inside of open shadow DOM [#15774](https://github.com/jupyterlab/jupyterlab/pull/15774) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- \[docker\] Allow non-unique GID [#15699](https://github.com/jupyterlab/jupyterlab/pull/15699) ([@trungleduc](https://github.com/trungleduc))
+
+### Documentation improvements
+
+- Remove SO links, add more recent issue to FAQ [#15811](https://github.com/jupyterlab/jupyterlab/pull/15811) ([@krassowski](https://github.com/krassowski))
+- Fix outdated link to mybinder.org on index page of documentation [#15800](https://github.com/jupyterlab/jupyterlab/pull/15800) ([@nluetts](https://github.com/nluetts))
+- Fix typing in editable elements inside of open shadow DOM [#15774](https://github.com/jupyterlab/jupyterlab/pull/15774) ([@krassowski](https://github.com/krassowski))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-02-13&to=2024-02-19&type=c))
+
+[@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2024-02-13..2024-02-19&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-02-13..2024-02-19&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-02-13..2024-02-19&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-02-13..2024-02-19&type=Issues) | [@kiliansinger](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akiliansinger+updated%3A2024-02-13..2024-02-19&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-02-13..2024-02-19&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-02-13..2024-02-19&type=Issues) | [@nluetts](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Anluetts+updated%3A2024-02-13..2024-02-19&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2024-02-13..2024-02-19&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-02-13..2024-02-19&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
+## 4.1.1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.1.0...6abcf80374af290d7ba958a1f1f64f92c0394d0e))
+
+### Bugs fixed
+
+- Correct Alt + number keyboard shortcuts command map [#15791](https://github.com/jupyterlab/jupyterlab/pull/15791) ([@g547315](https://github.com/g547315))
+- Catch errors attempting to access `document.cookie` [#15788](https://github.com/jupyterlab/jupyterlab/pull/15788) ([@minrk](https://github.com/minrk))
+- Fix undo/redo in console, fix undo/redo enabled state in file editor [#15783](https://github.com/jupyterlab/jupyterlab/pull/15783) ([@krassowski](https://github.com/krassowski))
+- Fix console cells not becoming read-only after execution [#15779](https://github.com/jupyterlab/jupyterlab/pull/15779) ([@krassowski](https://github.com/krassowski))
+- Fix migration of command selectors for shortcuts [#15762](https://github.com/jupyterlab/jupyterlab/pull/15762) ([@krassowski](https://github.com/krassowski))
+- Disable (shift + ) alt + number shortcuts on Mac [#15761](https://github.com/jupyterlab/jupyterlab/pull/15761) ([@krassowski](https://github.com/krassowski))
+- Catch `OSError` in addition to `PermissionError` when `sys_prefix` is read-only [#15756](https://github.com/jupyterlab/jupyterlab/pull/15756) ([@dhml](https://github.com/dhml))
+- Fix completer auto-invoking on non-source changes [#15753](https://github.com/jupyterlab/jupyterlab/pull/15753) ([@krassowski](https://github.com/krassowski))
+- Fix outputs preservation on splitting cells [#15751](https://github.com/jupyterlab/jupyterlab/pull/15751) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Update `jupyter-collaboration` for the Binder environment [#15767](https://github.com/jupyterlab/jupyterlab/pull/15767) ([@jtpio](https://github.com/jtpio))
+- Fix failing "Notebook Toolbar › Paste cell" test [#15720](https://github.com/jupyterlab/jupyterlab/pull/15720) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Add Edge, remove IE 11 from browser support docs [#15784](https://github.com/jupyterlab/jupyterlab/pull/15784) ([@JasonWeill](https://github.com/JasonWeill))
+- Update changelog to reflect jupyter-ai release status [#15775](https://github.com/jupyterlab/jupyterlab/pull/15775) ([@krassowski](https://github.com/krassowski))
+- Add a link to postmortem for 3.6.7 release [#15743](https://github.com/jupyterlab/jupyterlab/pull/15743) ([@krassowski](https://github.com/krassowski))
+- Update maintainers affiliation [#15724](https://github.com/jupyterlab/jupyterlab/pull/15724) ([@fcollonval](https://github.com/fcollonval))
+- Update lifecycle info for JupyterLab major versions [#15626](https://github.com/jupyterlab/jupyterlab/pull/15626) ([@JasonWeill](https://github.com/JasonWeill))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-02-05&to=2024-02-13&type=c))
+
+[@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2024-02-05..2024-02-13&type=Issues) | [@dhml](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adhml+updated%3A2024-02-05..2024-02-13&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-02-05..2024-02-13&type=Issues) | [@g547315](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ag547315+updated%3A2024-02-05..2024-02-13&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-02-05..2024-02-13&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-02-05..2024-02-13&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-02-05..2024-02-13&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-02-05..2024-02-13&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-02-05..2024-02-13&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-02-05..2024-02-13&type=Issues) | [@minrk](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aminrk+updated%3A2024-02-05..2024-02-13&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2024-02-05..2024-02-13&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-02-05..2024-02-13&type=Issues)
+
 ## 4.1.0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.2...b887949d52310234144dd48496fa7a6f1fbb4645))
@@ -369,7 +433,7 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 - Remove unnecessary requirement from codemirror service plugin [#15362](https://github.com/jupyterlab/jupyterlab/pull/15362) ([@paulkim3151](https://github.com/paulkim3151))
 - Update notebook window on resize if height changes [#15357](https://github.com/jupyterlab/jupyterlab/pull/15357) ([@krassowski](https://github.com/krassowski))
 - Fix scrolling past long outputs in presence of un-rendered headings [#15356](https://github.com/jupyterlab/jupyterlab/pull/15356) ([@krassowski](https://github.com/krassowski))
-- Fix missing default property breaking codemirror `overrides.json` [#15346](https://github.com/jupyterlab/jupyterlab/pull/15346) ([@LJMP](https://github.com/LJMP))
+- Fix missing default property breaking codemirror `overrides.json` [#15346](https://github.com/jupyterlab/jupyterlab/pull/15346) ([@LJMP](https://github.com/e4e))
 - Fix update button in extension manager [#15331](https://github.com/jupyterlab/jupyterlab/pull/15331) ([@nbowditch-einblick](https://github.com/nbowditch-einblick))
 - Fix collapsed cells styling [#15322](https://github.com/jupyterlab/jupyterlab/pull/15322) ([@fcollonval](https://github.com/fcollonval))
 - Fix scrolling when dragging files in the file browser [#15318](https://github.com/jupyterlab/jupyterlab/pull/15318) ([@krassowski](https://github.com/krassowski))
@@ -659,8 +723,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 [@afshin](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aafshin+updated%3A2023-06-08..2024-02-05&type=Issues) | [@akx](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aakx+updated%3A2023-06-08..2024-02-05&type=Issues) | [@alden-ilao](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aalden-ilao+updated%3A2023-06-08..2024-02-05&type=Issues) | [@AllanChain](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAllanChain+updated%3A2023-06-08..2024-02-05&type=Issues) | [@andrewfulton9](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrewfulton9+updated%3A2023-06-08..2024-02-05&type=Issues) | [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2023-06-08..2024-02-05&type=Issues) | [@ashna1jain](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aashna1jain+updated%3A2023-06-08..2024-02-05&type=Issues) | [@bikash30851](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abikash30851+updated%3A2023-06-08..2024-02-05&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2023-06-08..2024-02-05&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2023-06-08..2024-02-05&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2023-06-08..2024-02-05&type=Issues) | [@brijsiyag](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrijsiyag+updated%3A2023-06-08..2024-02-05&type=Issues) | [@coriegulik](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Acoriegulik+updated%3A2023-06-08..2024-02-05&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2023-06-08..2024-02-05&type=Issues) | [@DcWire](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADcWire+updated%3A2023-06-08..2024-02-05&type=Issues) | [@Deepali1211](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADeepali1211+updated%3A2023-06-08..2024-02-05&type=Issues) | [@DenisaCG](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADenisaCG+updated%3A2023-06-08..2024-02-05&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2023-06-08..2024-02-05&type=Issues) | [@dharmaquark](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adharmaquark+updated%3A2023-06-08..2024-02-05&type=Issues) | [@divyansshhh](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adivyansshhh+updated%3A2023-06-08..2024-02-05&type=Issues) | [@dolevf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adolevf+updated%3A2023-06-08..2024-02-05&type=Issues) | [@DonJayamanne](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ADonJayamanne+updated%3A2023-06-08..2024-02-05&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2023-06-08..2024-02-05&type=Issues) | [@eliaslma](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aeliaslma+updated%3A2023-06-08..2024-02-05&type=Issues) | [@emmanuel-ferdman](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aemmanuel-ferdman+updated%3A2023-06-08..2024-02-05&type=Issues) | [@ericsnekbytes](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aericsnekbytes+updated%3A2023-06-08..2024-02-05&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2023-06-08..2024-02-05&type=Issues) | [@firai](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afirai+updated%3A2023-06-08..2024-02-05&type=Issues) | [@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2023-06-08..2024-02-05&type=Issues) | [@g547315](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ag547315+updated%3A2023-06-08..2024-02-05&type=Issues) | [@gabalafou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agabalafou+updated%3A2023-06-08..2024-02-05&type=Issues) | [@GabrielaVives](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AGabrielaVives+updated%3A2023-06-08..2024-02-05&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2023-06-08..2024-02-05&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2023-06-08..2024-02-05&type=Issues) | [@hbcarlos](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ahbcarlos+updated%3A2023-06-08..2024-02-05&type=Issues) | [@holzman](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aholzman+updated%3A2023-06-08..2024-02-05&type=Issues) | [@isabela-pf](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aisabela-pf+updated%3A2023-06-08..2024-02-05&type=Issues) | [@j264415](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aj264415+updated%3A2023-06-08..2024-02-05&type=Issues) | [@jans-code](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajans-code+updated%3A2023-06-08..2024-02-05&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2023-06-08..2024-02-05&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2023-06-08..2024-02-05&type=Issues) | [@jupyterlab-bot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-bot+updated%3A2023-06-08..2024-02-05&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2023-06-08..2024-02-05&type=Issues) | [@KiranmaiKalla](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AKiranmaiKalla+updated%3A2023-06-08..2024-02-05&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2023-06-08..2024-02-05&type=Issues) | [@LJMP](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ALJMP+updated%3A2023-06-08..2024-02-05&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2023-06-08..2024-02-05&type=Issues) | [@m158261](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Am158261+updated%3A2023-06-08..2024-02-05&type=Issues) | [@mctoohey](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amctoohey+updated%3A2023-06-08..2024-02-05&type=Issues) | [@mdengler](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amdengler+updated%3A2023-06-08..2024-02-05&type=Issues) | [@MFA-X-AI](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMFA-X-AI+updated%3A2023-06-08..2024-02-05&type=Issues) | [@misterfads](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amisterfads+updated%3A2023-06-08..2024-02-05&type=Issues) | [@mlucool](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amlucool+updated%3A2023-06-08..2024-02-05&type=Issues) | [@mmichilot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ammichilot+updated%3A2023-06-08..2024-02-05&type=Issues) | [@nbowditch-einblick](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Anbowditch-einblick+updated%3A2023-06-08..2024-02-05&type=Issues) | [@nishikantparmariam](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Anishikantparmariam+updated%3A2023-06-08..2024-02-05&type=Issues) | [@paolocarinci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apaolocarinci+updated%3A2023-06-08..2024-02-05&type=Issues) | [@parmentelat](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aparmentelat+updated%3A2023-06-08..2024-02-05&type=Issues) | [@pauky](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apauky+updated%3A2023-06-08..2024-02-05&type=Issues) | [@paulkim3151](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apaulkim3151+updated%3A2023-06-08..2024-02-05&type=Issues) | [@phil-zxx](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aphil-zxx+updated%3A2023-06-08..2024-02-05&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2023-06-08..2024-02-05&type=Issues) | [@Rmarieta](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARmarieta+updated%3A2023-06-08..2024-02-05&type=Issues) | [@RRosio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ARRosio+updated%3A2023-06-08..2024-02-05&type=Issues) | [@Sarthug99](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASarthug99+updated%3A2023-06-08..2024-02-05&type=Issues) | [@sinistersnare](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Asinistersnare+updated%3A2023-06-08..2024-02-05&type=Issues) | [@skyetim](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Askyetim+updated%3A2023-06-08..2024-02-05&type=Issues) | [@smacke](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Asmacke+updated%3A2023-06-08..2024-02-05&type=Issues) | [@SylvainCorlay](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASylvainCorlay+updated%3A2023-06-08..2024-02-05&type=Issues) | [@t03857785](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3At03857785+updated%3A2023-06-08..2024-02-05&type=Issues) | [@tibdex](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atibdex+updated%3A2023-06-08..2024-02-05&type=Issues) | [@timkpaine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atimkpaine+updated%3A2023-06-08..2024-02-05&type=Issues) | [@tonyfast](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atonyfast+updated%3A2023-06-08..2024-02-05&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2023-06-08..2024-02-05&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2023-06-08..2024-02-05&type=Issues) | [@Wh1isper](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AWh1isper+updated%3A2023-06-08..2024-02-05&type=Issues) | [@yuvipanda](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ayuvipanda+updated%3A2023-06-08..2024-02-05&type=Issues)
 
-<!-- <END NEW CHANGELOG ENTRY> -->
-
 ## 4.1.0rc1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.1.0rc0...5ba76a876091ca80c612a3747fe2767219a19ca5))
@@ -932,7 +994,7 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 - Remove unnecessary requirement from codemirror service plugin [#15362](https://github.com/jupyterlab/jupyterlab/pull/15362) ([@paulkim3151](https://github.com/paulkim3151))
 - Update notebook window on resize if height changes [#15357](https://github.com/jupyterlab/jupyterlab/pull/15357) ([@krassowski](https://github.com/krassowski))
 - Fix scrolling past long outputs in presence of un-rendered headings [#15356](https://github.com/jupyterlab/jupyterlab/pull/15356) ([@krassowski](https://github.com/krassowski))
-- Fix missing default property breaking codemirror `overrides.json` [#15346](https://github.com/jupyterlab/jupyterlab/pull/15346) ([@LJMP](https://github.com/LJMP))
+- Fix missing default property breaking codemirror `overrides.json` [#15346](https://github.com/jupyterlab/jupyterlab/pull/15346) ([@LJMP](https://github.com/e4e))
 - Fix update button in extension manager [#15331](https://github.com/jupyterlab/jupyterlab/pull/15331) ([@nbowditch-einblick](https://github.com/nbowditch-einblick))
 - Fix collapsed cells styling [#15322](https://github.com/jupyterlab/jupyterlab/pull/15322) ([@fcollonval](https://github.com/fcollonval))
 - Fix scrolling when dragging files in the file browser [#15318](https://github.com/jupyterlab/jupyterlab/pull/15318) ([@krassowski](https://github.com/krassowski))
