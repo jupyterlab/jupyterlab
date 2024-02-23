@@ -210,6 +210,7 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  position: relative;
 }
 
 .jp-DirListing-checkboxWrapper {
@@ -276,15 +277,20 @@
   user-select: none;
 }
 
-.jp-DirListing-itemText:focus {
-  outline-width: 2px;
-  outline-color: var(--jp-inverse-layout-color1);
-  outline-style: solid;
-  outline-offset: 1px;
+.jp-DirListing-item:focus-within::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  border: 2px solid white;
+  border-radius: 2px;
+  margin: 2px;
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText:focus {
-  outline-color: var(--jp-layout-color1);
+.jp-DirListing-item.jp-mod-selected:focus-within::after {
+  border-color: var(--jp-layout-color1);
 }
 
 .jp-DirListing-itemModified {
@@ -310,7 +316,7 @@
   content: '\25CF';
   font-size: 8px;
   position: absolute;
-  left: -8px;
+  left: -6px;
 }
 
 .jp-DirListing-item.jp-mod-running.jp-mod-selected
