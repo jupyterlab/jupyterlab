@@ -472,6 +472,8 @@ class Section extends PanelWithToolbar {
       'collapse-all': collapseAllButton,
       'shutdown-all': shutdownAllButton
     };
+    // Update buttons once defined and before adding to DOM
+    this._updateButtons();
     this._manager.runningChanged.connect(this._updateButtons, this);
 
     for (const name of [
