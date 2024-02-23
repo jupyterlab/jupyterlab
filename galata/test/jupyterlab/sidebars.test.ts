@@ -231,9 +231,12 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         await page.goto();
         await page.sidebar.close('right');
         await page.sidebar.close('left');
-        await page.activity.keyToElement(keyValueArray[0], 'Tab');
+        await page.activity.keyToElement(
+          `[data-id='${keyValueArray[0]}']`,
+          'Tab'
+        );
 
-        await page.activity.keyToElement(dataId, 'ArrowDown');
+        await page.activity.keyToElement(`[data-id='${dataId}']`, 'ArrowDown');
 
         await page.keyboard.press('Enter');
 
@@ -254,7 +257,7 @@ test.describe('Sidebar keyboard navigation @a11y', () => {
         const elementLocator = page.locator(`[aria-label='${ariaLabel}']`);
         let initialState = await elementLocator.getAttribute('aria-expanded');
 
-        await page.activity.keyToElement(ariaLabel, 'Tab');
+        await page.activity.keyToElement(`[aria-label='${ariaLabel}']`, 'Tab');
         await page.keyboard.press('Enter');
         let stateAfter = await elementLocator.getAttribute('aria-expanded');
 
