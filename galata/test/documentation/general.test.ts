@@ -567,9 +567,7 @@ test.describe('General', () => {
     await page.click('[title="Running Terminals and Kernels"]');
 
     await expect(
-      page.locator(
-        '.jp-RunningSessions-item.jp-mod-kernelspec >> text="Python 3 (ipykernel)"'
-      )
+      page.locator('.jp-RunningSessions-item.jp-mod-kernel')
     ).toHaveCount(2);
 
     expect(
