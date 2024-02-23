@@ -89,12 +89,8 @@ export async function addKernelRunningSessionManager(
   });
 
   // Add running kernels commands to the registry.
-  const test = (node: HTMLElement) => {
-    return (
-      node.classList.contains(KERNEL_ITEM_CLASS) ||
-      node.classList.contains(WIDGET_ITEM_CLASS)
-    );
-  };
+  const test = (node: HTMLElement) =>
+    node.classList.contains(KERNEL_ITEM_CLASS);
   commands.addCommand(CommandIDs.kernelNewConsole, {
     icon: consoleIcon,
     label: trans.__('New Console for Kernel'),

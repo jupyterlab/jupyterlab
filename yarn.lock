@@ -4526,6 +4526,7 @@ __metadata:
     "@jupyterlab/rendermime-interfaces": ^3.9.2
     "@jupyterlab/running": ^4.1.2
     "@jupyterlab/services": ^7.1.2
+    "@jupyterlab/statedb": ^4.1.2
     "@jupyterlab/translation": ^4.1.2
     "@jupyterlab/ui-components": ^4.1.2
     "@lumino/commands": ^2.2.0
@@ -4543,6 +4544,7 @@ __metadata:
   resolution: "@jupyterlab/running@workspace:packages/running"
   dependencies:
     "@jupyterlab/apputils": ^4.2.2
+    "@jupyterlab/statedb": ^4.1.2
     "@jupyterlab/translation": ^4.1.2
     "@jupyterlab/ui-components": ^4.1.2
     "@lumino/coreutils": ^2.1.2

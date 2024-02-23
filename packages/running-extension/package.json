@@ -44,6 +44,7 @@
     "@jupyterlab/rendermime-interfaces": "^3.9.2",
     "@jupyterlab/running": "^4.1.2",
     "@jupyterlab/services": "^7.1.2",
+    "@jupyterlab/statedb": "^4.1.2",
     "@jupyterlab/translation": "^4.1.2",
     "@jupyterlab/ui-components": "^4.1.2",
     "@lumino/commands": "^2.2.0",

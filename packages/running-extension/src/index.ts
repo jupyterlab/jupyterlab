@@ -16,6 +16,7 @@ import {
   RunningSessionManagers,
   RunningSessions
 } from '@jupyterlab/running';
+import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
 import { runningIcon } from '@jupyterlab/ui-components';
 import { addKernelRunningSessionManager } from './kernels';
@@ -41,7 +42,7 @@ const plugin: JupyterFrontEndPlugin<IRunningSessionManagers> = {
   description: 'Provides the running session managers.',
   provides: IRunningSessionManagers,
   requires: [ITranslator],
-  optional: [ILayoutRestorer, ILabShell],
+  optional: [ILayoutRestorer, ILabShell, IStateDB],
   autoStart: true
 };
 
@@ -57,11 +58,16 @@ function activate(
   app: JupyterFrontEnd,
   translator: ITranslator,
   restorer: ILayoutRestorer | null,
-  labShell: ILabShell | null
+  labShell: ILabShell | null,
+  state: IStateDB | null
 ): IRunningSessionManagers {
   const trans = translator.load('jupyterlab');
   const runningSessionManagers = new RunningSessionManagers();
-  const running = new RunningSessions(runningSessionManagers, translator);
+  const running = new RunningSessions(
+    runningSessionManagers,
+    translator,
+    state
+  );
   running.id = 'jp-running-sessions';
   running.title.caption = trans.__('Running Terminals and Kernels');
   running.title.icon = runningIcon;

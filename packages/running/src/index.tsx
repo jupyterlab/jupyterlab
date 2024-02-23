@@ -24,6 +24,7 @@ import {
   treeViewIcon,
   UseSignal
 } from '@jupyterlab/ui-components';
+import { IStateDB } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
@@ -100,6 +101,11 @@ const VIEW_BUTTON_CLASS = 'jp-RunningSessions-viewButton';
  * The class name added to button switching between nested and flat view.
  */
 const COLLAPSE_EXPAND_BUTTON_CLASS = 'jp-RunningSessions-collapseButton';
+
+/**
+ * Identifier used in the state database.
+ */
+const STATE_DB_ID = 'jp-running-sessions';
 
 /**
  * The running sessions token.
@@ -436,19 +442,12 @@ class Section extends PanelWithToolbar {
       onClick: onShutdown
     });
 
-    const collapseToggled = new Signal<Section, boolean>(this);
-
     const switchViewButton = new ToolbarButton({
       className: VIEW_BUTTON_CLASS,
       enabled,
       icon: tableRowsIcon,
       pressedIcon: treeViewIcon,
-      onClick: () => {
-        switchViewButton.pressed = !switchViewButton.pressed;
-        collapseToggled.emit(false);
-        this.toggleClass(LIST_VIEW_CLASS, switchViewButton.pressed);
-        this._updateButtons();
-      },
+      onClick: () => this.toggleListView(),
       tooltip: trans.__('Switch to List View'),
       pressedTooltip: trans.__('Switch to Tree View')
     });
@@ -456,14 +455,14 @@ class Section extends PanelWithToolbar {
       className: COLLAPSE_EXPAND_BUTTON_CLASS,
       enabled,
       icon: expandIcon,
-      onClick: () => collapseToggled.emit(false),
+      onClick: () => this._collapseToggled.emit(false),
       tooltip: trans.__('Expand All')
     });
     const collapseAllButton = new ToolbarButton({
       className: COLLAPSE_EXPAND_BUTTON_CLASS,
       enabled,
       icon: collapseIcon,
-      onClick: () => collapseToggled.emit(true),
+      onClick: () => this._collapseToggled.emit(true),
       tooltip: trans.__('Collapse All')
     });
 
@@ -491,10 +490,24 @@ class Section extends PanelWithToolbar {
       new ListWidget({
         runningItems,
         shutdownAllLabel,
-        collapseToggled,
+        collapseToggled: this._collapseToggled,
         ...options
       })
     );
+  }
+
+  /**
+   * Toggle between list and tree view.
+   */
+  toggleListView(forceOn?: boolean): void {
+    const switchViewButton = this._buttons['switch-view'];
+    const newState =
+      typeof forceOn !== 'undefined' ? forceOn : !switchViewButton.pressed;
+    switchViewButton.pressed = newState;
+    this._collapseToggled.emit(false);
+    this.toggleClass(LIST_VIEW_CLASS, newState);
+    this._updateButtons();
+    this._viewChanged.emit({ mode: newState ? 'list' : 'tree' });
   }
 
   /**
@@ -506,6 +519,10 @@ class Section extends PanelWithToolbar {
     }
     this._manager.runningChanged.disconnect(this._updateButtons, this);
     super.dispose();
+  }
+
+  get viewChanged(): ISignal<Section, Section.IViewState> {
+    return this._viewChanged;
   }
 
   private _updateButtons(): void {
@@ -550,6 +567,23 @@ class Section extends PanelWithToolbar {
     'shutdown-all': ToolbarButton;
   };
   private _manager: IRunningSessions.IManager;
+  private _collapseToggled = new Signal<Section, boolean>(this);
+  private _viewChanged = new Signal<Section, Section.IViewState>(this);
+}
+
+/**
+ * Interfaces for Section implementation.
+ */
+namespace Section {
+  /**
+   * Information about section view state.
+   */
+  export interface IViewState {
+    /**
+     * View mode
+     */
+    mode: 'tree' | 'list';
+  }
 }
 
 /**
@@ -559,9 +593,14 @@ export class RunningSessions extends SidePanel {
   /**
    * Construct a new running widget.
    */
-  constructor(managers: IRunningSessionManagers, translator?: ITranslator) {
+  constructor(
+    managers: IRunningSessionManagers,
+    translator?: ITranslator,
+    stateDB?: IStateDB | null
+  ) {
     super();
     this.managers = managers;
+    this._stateDB = stateDB ?? null;
     this.translator = translator ?? nullTranslator;
     const trans = this.translator.load('jupyterlab');
 
@@ -599,12 +638,71 @@ export class RunningSessions extends SidePanel {
    * @param managers Managers
    * @param manager New manager
    */
-  protected addSection(_: unknown, manager: IRunningSessions.IManager) {
-    this.addWidget(new Section({ manager, translator: this.translator }));
+  protected async addSection(_: unknown, manager: IRunningSessions.IManager) {
+    const section = new Section({ manager, translator: this.translator });
+    this.addWidget(section);
+
+    const state = await this._getState();
+    const sectionsInListView = state.listViewSections;
+    const sectionId = manager.name;
+
+    if (sectionsInListView && sectionsInListView.includes(sectionId)) {
+      section.toggleListView(true);
+    }
+    section.viewChanged.connect(
+      async (_emitter, viewState: Section.IViewState) => {
+        await this._updateState(sectionId, viewState.mode);
+      }
+    );
+  }
+
+  /**
+   * Update state database with the new state of a given section.
+   */
+  private async _updateState(sectionId: string, mode: 'list' | 'tree') {
+    const state = await this._getState();
+    let listViewSections = state.listViewSections ?? [];
+    if (mode === 'list' && !listViewSections.includes(sectionId)) {
+      listViewSections.push(sectionId);
+    } else {
+      listViewSections = listViewSections.filter(e => e !== sectionId);
+    }
+    const newState = { listViewSections };
+    if (this._stateDB) {
+      await this._stateDB.save(STATE_DB_ID, newState);
+    }
+  }
+
+  /**
+   * Get current state from the state database.
+   */
+  private async _getState(): Promise<RunningSessions.IStateDBLayout> {
+    if (!this._stateDB) {
+      return {};
+    }
+    return (
+      (this._stateDB.fetch(STATE_DB_ID) as RunningSessions.IStateDBLayout) ?? {}
+    );
   }
 
   protected managers: IRunningSessionManagers;
   protected translator: ITranslator;
+  private _stateDB: IStateDB | null;
+}
+
+/**
+ * Interfaces for RunningSessions implementation.
+ */
+namespace RunningSessions {
+  /**
+   * Layout of the state database.
+   */
+  export interface IStateDBLayout {
+    /**
+     * Names of sections to be presented in the list view.
+     */
+    listViewSections?: string[];
+  }
 }
 
 /**
