@@ -310,13 +310,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
-   * Editor Extensions
-   */
-  get editorExtensions(): Extension[] {
-    return this._editorExtensions;
-  }
-
-  /**
    * Cell headings
    */
   get headings(): Cell.IHeading[] {
@@ -623,7 +616,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * @returns Editor options
    */
   protected getEditorOptions(): InputArea.IOptions['editorOptions'] {
-    return { config: this.editorConfig, extensions: this.editorExtensions };
+    return { config: this.editorConfig, extensions: this._editorExtensions };
   }
 
   /**
