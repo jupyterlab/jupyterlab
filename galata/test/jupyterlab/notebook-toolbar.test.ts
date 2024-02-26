@@ -208,7 +208,7 @@ test.describe('Reactive toolbar', () => {
     await expect(toolbar.locator('.jp-Toolbar-item:visible')).toHaveCount(14);
     expect(toolbar.locator('.jp-Toolbar-responsive-opener')).not.toBeVisible();
 
-    await page.sidebar.setWidth(page, 500);
+    await page.sidebar.setWidth(page, 520);
 
     await expect(
       toolbar.locator('.jp-Toolbar-responsive-opener')
@@ -222,7 +222,7 @@ test.describe('Reactive toolbar', () => {
   }) => {
     const toolbar = page.locator('.jp-NotebookPanel-toolbar');
 
-    await page.sidebar.setWidth(page, 500);
+    await page.sidebar.setWidth(page, 520);
 
     await toolbar.locator('.jp-Toolbar-responsive-opener').click();
 
