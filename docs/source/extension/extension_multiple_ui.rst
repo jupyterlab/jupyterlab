@@ -17,7 +17,7 @@ This guide will give you an overview of compatibility features, then a
 tutorial and reference code covering some of the topics mentioned here.
 If you don't know how to make extensions, you can read more about the
 basics at :ref:`the Extension Tutorial <extension_tutorial>` or the
-:ref:`Extensions page <https://jupyterlab.readthedocs.io/en/latest/extension/extension_dev.html>`.
+`Extensions page <https://jupyterlab.readthedocs.io/en/latest/extension/extension_dev.html>`_.
 
 How Compatibility Works
 -----------------------
