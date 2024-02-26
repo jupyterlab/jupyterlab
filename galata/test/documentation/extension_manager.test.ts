@@ -198,5 +198,5 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
     '.jp-extensionmanager-view >> .jp-AccordionPanel-title[aria-expanded="false"] >> text=Warning'
   );
 
-  await page.sidebar.setWidth(page);
+  await page.sidebar.setWidth();
 }

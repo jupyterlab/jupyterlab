@@ -21,7 +21,7 @@ test.describe('General', () => {
       }`
     });
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     // README.md in preview
     await page.click('text=README.md', {
@@ -84,7 +84,7 @@ test.describe('General', () => {
       }`
     });
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
     // Wait for the `data` folder to load to have something to blur
@@ -109,7 +109,7 @@ test.describe('General', () => {
 
     await page.notebook.createNew();
     await page.click('[title="Property Inspector"]');
-    await page.sidebar.setWidth(page, 251, 'right');
+    await page.sidebar.setWidth(251, 'right');
 
     expect(
       await page.screenshot({
@@ -289,7 +289,7 @@ test.describe('General', () => {
       }`
     });
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -370,7 +370,7 @@ test.describe('General', () => {
       }`
     });
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     // Open jupyterlab.md
     await page.dblclick(
@@ -397,7 +397,7 @@ test.describe('General', () => {
       }`
     });
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     // Open Data.ipynb
     await page.dblclick(
@@ -461,7 +461,7 @@ test.describe('General', () => {
 
   test('Heading anchor', async ({ page }, testInfo) => {
     await page.goto();
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     // Open Data.ipynb
     await page.dblclick(
@@ -511,7 +511,7 @@ test.describe('General', () => {
       }`
     });
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     // Open Data.ipynb
     await page.dblclick(
@@ -546,7 +546,7 @@ test.describe('General', () => {
       }`
     });
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     // Open a terminal
     await page.click('text=File');
@@ -602,7 +602,7 @@ test.describe('General', () => {
       }`
     });
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
     await page.click('text=README.md', {

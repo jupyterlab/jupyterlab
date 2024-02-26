@@ -270,12 +270,10 @@ export class SidebarHelper {
   /**
    * Set the sidebar width
    *
-   * @param page Page object
    * @param width Sidebar width in pixels
    * @param side Which sidebar to set: 'left' or 'right'
    */
   async setWidth(
-    page: Page,
     width = 251,
     side: galata.SidebarPosition = 'left'
   ): Promise<boolean> {
@@ -283,7 +281,7 @@ export class SidebarHelper {
       return false;
     }
 
-    const handles = page.locator(
+    const handles = this.page.locator(
       '#jp-main-split-panel > .lm-SplitPanel-handle:not(.lm-mod-hidden)'
     );
     const splitHandle =
@@ -292,18 +290,18 @@ export class SidebarHelper {
         : await handles.last().elementHandle();
     const handleBBox = await splitHandle!.boundingBox();
 
-    await page.mouse.move(
+    await this.page.mouse.move(
       handleBBox!.x + 0.5 * handleBBox!.width,
       handleBBox!.y + 0.5 * handleBBox!.height
     );
-    await page.mouse.down();
-    await page.mouse.move(
+    await this.page.mouse.down();
+    await this.page.mouse.move(
       side === 'left'
         ? 33 + width
         : this.page.viewportSize()!.width - 33 - width,
       handleBBox!.y + 0.5 * handleBBox!.height
     );
-    await page.mouse.up();
+    await this.page.mouse.up();
 
     return true;
   }

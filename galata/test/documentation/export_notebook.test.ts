@@ -13,7 +13,7 @@ test.describe('Export Notebook', () => {
   test('Export Menu', async ({ page }) => {
     await page.goto();
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -39,7 +39,7 @@ test.describe('Export Notebook', () => {
   test('Slides', async ({ page }) => {
     await page.goto();
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
 
     await page
       .locator('[aria-label="File Browser Section"]')

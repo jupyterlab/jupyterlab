@@ -210,7 +210,7 @@ test.describe('Reactive toolbar', () => {
       toolbar.locator('.jp-Toolbar-responsive-opener')
     ).not.toBeVisible();
 
-    await page.sidebar.setWidth(page, 520);
+    await page.sidebar.setWidth(520);
 
     await expect(
       toolbar.locator('.jp-Toolbar-responsive-opener')
@@ -224,7 +224,7 @@ test.describe('Reactive toolbar', () => {
   }) => {
     const toolbar = page.locator('.jp-NotebookPanel-toolbar');
 
-    await page.sidebar.setWidth(page, 520);
+    await page.sidebar.setWidth(520);
 
     await toolbar.locator('.jp-Toolbar-responsive-opener').click();
 
@@ -274,7 +274,7 @@ test.describe('Reactive toolbar', () => {
       'cellType'
     );
 
-    await page.sidebar.setWidth(page, 600);
+    await page.sidebar.setWidth(600);
     await toolbar.locator('.jp-Toolbar-responsive-opener').click();
 
     // A 'visible' selector is added because there is another response popup element
@@ -287,7 +287,7 @@ test.describe('Reactive toolbar', () => {
 
     await expect(popupToolbarItems.nth(1)).toHaveText('new item 1');
 
-    await page.sidebar.setWidth(page);
+    await page.sidebar.setWidth();
     const toolbarItems = toolbar.locator('.jp-Toolbar-item:visible');
     await expect(toolbarItems.nth(10)).toHaveText('new item 1');
   });
@@ -297,7 +297,7 @@ test.describe('Reactive toolbar', () => {
   }) => {
     const toolbar = page.locator('.jp-NotebookPanel-toolbar');
 
-    await page.sidebar.setWidth(page, 600);
+    await page.sidebar.setWidth(600);
 
     await addWidgetsInNotebookToolbar(
       page,

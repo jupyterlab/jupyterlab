@@ -55,7 +55,7 @@ async function openOverview(page) {
     }`
   });
 
-  await page.sidebar.setWidth(page);
+  await page.sidebar.setWidth();
 
   // Open Data.ipynb
   await page.dblclick('[aria-label="File Browser Section"] >> text=notebooks');
