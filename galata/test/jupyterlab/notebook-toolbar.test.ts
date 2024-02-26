@@ -206,7 +206,9 @@ test.describe('Reactive toolbar', () => {
   }) => {
     const toolbar = page.locator('.jp-NotebookPanel-toolbar');
     await expect(toolbar.locator('.jp-Toolbar-item:visible')).toHaveCount(14);
-    expect(toolbar.locator('.jp-Toolbar-responsive-opener')).not.toBeVisible();
+    await expect(
+      toolbar.locator('.jp-Toolbar-responsive-opener')
+    ).not.toBeVisible();
 
     await page.sidebar.setWidth(page, 520);
 
@@ -214,7 +216,7 @@ test.describe('Reactive toolbar', () => {
       toolbar.locator('.jp-Toolbar-responsive-opener')
     ).toBeVisible();
 
-    expect(toolbar.locator('.jp-Toolbar-item:visible')).toHaveCount(12);
+    await expect(toolbar.locator('.jp-Toolbar-item:visible')).toHaveCount(12);
   });
 
   test('Items in popup toolbar should have the same order', async ({
@@ -242,9 +244,9 @@ test.describe('Reactive toolbar', () => {
     ];
 
     for (let i = 0; i < (await popupToolbarItems.count()); i++) {
-      expect(popupToolbarItems.nth(i).locator(itemChildClasses[i])).toHaveCount(
-        1
-      );
+      await expect(
+        popupToolbarItems.nth(i).locator(itemChildClasses[i])
+      ).toHaveCount(1);
     }
   });
 
@@ -260,7 +262,7 @@ test.describe('Reactive toolbar', () => {
     );
 
     const toolbarItems = toolbar.locator('.jp-Toolbar-item:visible');
-    expect(toolbarItems.nth(10)).toHaveText('new item 1');
+    await expect(toolbarItems.nth(10)).toHaveText('new item 1');
   });
 
   test('Item should be correctly placed after resize', async ({ page }) => {
@@ -283,11 +285,11 @@ test.describe('Reactive toolbar', () => {
     );
     const popupToolbarItems = popupToolbar.locator('.jp-Toolbar-item:visible');
 
-    expect(popupToolbarItems.nth(1)).toHaveText('new item 1');
+    await expect(popupToolbarItems.nth(1)).toHaveText('new item 1');
 
     await page.sidebar.setWidth(page);
     const toolbarItems = toolbar.locator('.jp-Toolbar-item:visible');
-    expect(toolbarItems.nth(10)).toHaveText('new item 1');
+    await expect(toolbarItems.nth(10)).toHaveText('new item 1');
   });
 
   test('Item added from extension should be correctly placed in popup toolbar', async ({
@@ -314,6 +316,6 @@ test.describe('Reactive toolbar', () => {
     );
     const popupToolbarItems = popupToolbar.locator('.jp-Toolbar-item:visible');
 
-    expect(popupToolbarItems.nth(1)).toHaveText('new item 1');
+    await expect(popupToolbarItems.nth(1)).toHaveText('new item 1');
   });
 });
