@@ -11,7 +11,7 @@ import childProcess from 'child_process';
 import { DepGraph } from 'dependency-graph';
 import sortPackageJson from 'sort-package-json';
 
-const assert = require('assert');
+import assert from 'assert';
 
 type Dict<T> = { [key: string]: T };
 

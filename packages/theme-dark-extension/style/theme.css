@@ -17,8 +17,10 @@ pre {
 }
 
 /* fix illegible yellow backround in exception stacktrace */
-:where(.jp-RenderedText[data-mime-type='application/vnd.jupyter.stderr']
-    pre
-    .ansi-yellow-bg) {
+:where(
+    .jp-RenderedText[data-mime-type='application/vnd.jupyter.stderr']
+      pre
+      .ansi-yellow-bg
+  ) {
   color: black;
 }

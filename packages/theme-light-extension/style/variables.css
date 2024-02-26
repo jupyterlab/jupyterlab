@@ -165,6 +165,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-content-font-color2: rgba(0, 0, 0, 0.54);
   --jp-content-font-color3: rgba(0, 0, 0, 0.38);
   --jp-content-link-color: var(--md-blue-900);
+  --jp-content-link-visited-color: var(--md-purple-700);
   --jp-content-font-family: system-ui, -apple-system, blinkmacsystemfont,
     'Segoe UI', helvetica, arial, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol';

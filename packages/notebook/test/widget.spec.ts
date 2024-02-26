@@ -1345,10 +1345,28 @@ describe('@jupyter/notebook', () => {
           expect(widget.events).toEqual(expect.arrayContaining(['focusin']));
           expect(widget.mode).toBe('command');
         });
+
+        it('should not unrender previously active markdown cell', async () => {
+          widget.model!.sharedModel.insertCell(0, {
+            cell_type: 'markdown',
+            source: '# Hello'
+          });
+          const mdCell = widget.widgets[0] as MarkdownCell;
+          if (!mdCell.inViewport) {
+            await signalToPromise(mdCell.inViewportChanged);
+          }
+          widget.activeCellIndex = 0;
+          expect(mdCell.rendered).toBe(true);
+          const cellToActivate = widget.widgets[1];
+          expect(widget.mode).toBe('command');
+          simulate(cellToActivate.editorWidget!.node, 'focusin');
+          expect(widget.mode).toBe('edit');
+          expect(mdCell.rendered).toBe(true);
+        });
       });
 
       describe('focusout', () => {
-        it('should switch to command mode', () => {
+        it('should switch to command mode', async () => {
           simulate(widget.node, 'focusin');
           widget.mode = 'edit';
           const event = generate('focusout');
@@ -1356,6 +1374,8 @@ describe('@jupyter/notebook', () => {
           widget.node.dispatchEvent(event);
           expect(widget.mode).toBe('command');
           MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+          // Wait for the activeCell to be focused
+          await framePromise();
           expect(widget.mode).toBe('command');
           expect(widget.activeCell!.editor!.hasFocus()).toBe(false);
         });
@@ -1429,13 +1449,15 @@ describe('@jupyter/notebook', () => {
     describe('#onActivateRequest()', () => {
       it('should focus the node after an update', async () => {
         const widget = createActiveWidget();
+        widget.model!.fromJSON(utils.DEFAULT_CONTENT);
         Widget.attach(widget, document.body);
+        await framePromise();
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onActivateRequest'])
         );
         await framePromise();
-        expect(document.activeElement).toBe(widget.node);
+        expect(document.activeElement).toBe(widget.activeCell!.node);
         widget.dispose();
       });
     });

@@ -44,6 +44,8 @@ test.describe('Internationalization', () => {
     await galata.Mock.freezeContentLastModified(page);
     await page.goto();
 
+    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
+
     await page.click('text=Settings');
     await page.click('.lm-Menu ul[role="menu"] >> text=Language');
     await page.click('#jp-mainmenu-settings-language >> text=Chinese');

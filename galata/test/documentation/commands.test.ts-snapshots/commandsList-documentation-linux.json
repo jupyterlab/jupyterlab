@@ -32,6 +32,13 @@
     ]
   },
   {
+    "id": "application:toggle-side-tabbar",
+    "label": "Toggle Sidebar Element",
+    "shortcuts": [
+      "Alt 1"
+    ]
+  },
+  {
     "id": "application:close",
     "label": "Close Tab",
     "caption": "",
@@ -101,7 +108,9 @@
     "id": "application:toggle-right-area",
     "label": "Show Right Sidebar",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Ctrl J"
+    ]
   },
   {
     "id": "application:toggle-side-tabbar",
@@ -118,8 +127,26 @@
     ]
   },
   {
+    "id": "apputils:adaptive-theme",
+    "label": "Synchronize with System Settings",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:change-dark-theme",
+    "label": "Switch to the provided dark `theme`.",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "apputils:change-font",
     "label": "waiting for fonts",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "apputils:change-light-theme",
+    "label": "Switch to the provided light `theme`.",
     "caption": "",
     "shortcuts": []
   },
@@ -330,7 +357,7 @@
     "label": "Insert Line Break",
     "caption": "",
     "shortcuts": [
-      "Enter"
+      "Ctrl Enter"
     ]
   },
   {
@@ -430,6 +457,12 @@
     "shortcuts": [
       "F10"
     ]
+  },
+  {
+    "id": "debugger:open-source",
+    "label": "Open Source",
+    "caption": "Open Source",
+    "shortcuts": []
   },
   {
     "id": "debugger:pause-on-exceptions",
@@ -549,7 +582,7 @@
   {
     "id": "docmanager:save",
     "label": "Save ",
-    "caption": "Save and create checkpoint",
+    "caption": "document is permissioned readonly; \"save\" is disabled, use \"save as...\" instead",
     "shortcuts": [
       "Ctrl S"
     ]
@@ -617,6 +650,14 @@
     "label": "Find and Replace…",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "documentsearch:toggleSearchInSelection",
+    "label": "Search in Selection",
+    "caption": "",
+    "shortcuts": [
+      "Alt L"
+    ]
   },
   {
     "id": "editmenu:clear-all",
@@ -865,6 +906,12 @@
   {
     "id": "filebrowser:toggle-navigate-to-current-directory",
     "label": "Show Active File in File Browser",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "filebrowser:toggle-show-full-path",
+    "label": "Show Full Path",
     "caption": "",
     "shortcuts": []
   },
@@ -1193,6 +1240,38 @@
     ]
   },
   {
+    "id": "inline-completer:accept",
+    "label": "Accept Inline Completion",
+    "caption": "",
+    "shortcuts": [
+      "Alt End"
+    ]
+  },
+  {
+    "id": "inline-completer:invoke",
+    "label": "Invoke Inline Completer",
+    "caption": "",
+    "shortcuts": [
+      "Alt \\"
+    ]
+  },
+  {
+    "id": "inline-completer:next",
+    "label": "Next Inline Completion",
+    "caption": "",
+    "shortcuts": [
+      "Alt ]"
+    ]
+  },
+  {
+    "id": "inline-completer:previous",
+    "label": "Previous Inline Completion",
+    "caption": "",
+    "shortcuts": [
+      "Alt ["
+    ]
+  },
+  {
     "id": "inspector:close",
     "label": "Hide Contextual Help",
     "caption": "Live updating code documentation from the active kernel",
@@ -1341,6 +1420,28 @@
     "label": "Mathjax Scale Reset",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "mermaid:copy-source",
+    "label": "Mermaid Copy Diagram Source",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "notebook:access-next-history-entry",
+    "label": "Access Next Kernel History Entry",
+    "caption": "",
+    "shortcuts": [
+      "Alt ArrowDown"
+    ]
+  },
+  {
+    "id": "notebook:access-previous-history-entry",
+    "label": "Access Previous Kernel History Entry",
+    "caption": "",
+    "shortcuts": [
+      "Alt ArrowUp"
+    ]
   },
   {
     "id": "notebook:change-cell-to-code",
@@ -1907,9 +2008,7 @@
     "id": "notebook:toggle-all-cell-line-numbers",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": [
-      "Shift L"
-    ]
+    "shortcuts": []
   },
   {
     "id": "notebook:toggle-autoclosing-brackets",
@@ -1932,6 +2031,12 @@
     ]
   },
   {
+    "id": "notebook:toggle-virtual-scrollbar",
+    "label": "Virtual Scrollbar",
+    "caption": "Toggle virtual scrollbar (enabled with windowing mode: full)",
+    "shortcuts": []
+  },
+  {
     "id": "notebook:trust",
     "label": "Trust Notebook",
     "caption": "",
@@ -1950,6 +2055,18 @@
     "shortcuts": [
       "Z"
     ]
+  },
+  {
+    "id": "pluginmanager:open",
+    "label": "Advanced Plugin Manager",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "pluginmanager:refresh",
+    "label": "Refresh Plugin List",
+    "caption": "Refresh plugins list",
+    "shortcuts": []
   },
   {
     "id": "property-inspector:show-panel",
@@ -2223,7 +2340,9 @@
     "id": "viewmenu:line-numbering",
     "label": "Show Line Numbers",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Shift L"
+    ]
   },
   {
     "id": "viewmenu:match-brackets",

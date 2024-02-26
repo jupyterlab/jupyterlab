@@ -43,6 +43,7 @@ from .commands import (
 from .coreconfig import CoreConfig
 from .debuglog import DebugLogFileMixin
 from .extensions import MANAGERS as EXT_MANAGERS
+from .extensions.manager import PluginManager
 from .extensions.readonly import ReadOnlyExtensionManager
 from .handlers.announcements import (
     CheckForUpdate,
@@ -55,6 +56,7 @@ from .handlers.announcements import (
 from .handlers.build_handler import Builder, BuildHandler, build_path
 from .handlers.error_handler import ErrorHandler
 from .handlers.extension_manager_handler import ExtensionHandler, extensions_handler_path
+from .handlers.plugin_manager_handler import PluginHandler, plugins_handler_path
 
 DEV_NOTE = """You're running JupyterLab from source.
 If you're working on the TypeScript sources of JupyterLab, try running
@@ -235,7 +237,7 @@ class LabCleanAppOptions(AppOptions):
     settings = Bool(False)
     staging = Bool(True)
     static = Bool(False)
-    all = Bool(False)  # noqa
+    all = Bool(False)
 
 
 class LabCleanApp(JupyterApp):
@@ -263,7 +265,7 @@ class LabCleanApp(JupyterApp):
 
     static = Bool(False, config=True, help="Also delete <app-dir>/static")
 
-    all = Bool(  # noqa
+    all = Bool(
         False,
         config=True,
         help="Delete the entire contents of the app directory.\n%s" % ext_warn_msg,
@@ -486,7 +488,16 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
     )
     flags["collaborative"] = (
         {"LabApp": {"collaborative": True}},
-        "Whether to enable collaborative mode.",
+        """To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
+        You can install it using pip for example:
+
+            python -m pip install jupyter_collaboration
+
+        This flag is now deprecated and will be removed in JupyterLab v5.""",
+    )
+    flags["custom-css"] = (
+        {"LabApp": {"custom_css": True}},
+        "Load custom CSS in template html files. Default is False",
     )
 
     subcommands = {
@@ -573,13 +584,36 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         help="Whether to expose the global app instance to browser via window.jupyterapp",
     )
 
-    collaborative = Bool(False, config=True, help="Whether to enable collaborative mode.")
+    custom_css = Bool(
+        False,
+        config=True,
+        help="""Whether custom CSS is loaded on the page.
+    Defaults to False.
+    """,
+    )
+
+    collaborative = Bool(
+        False,
+        config=True,
+        help="""To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
+        You can install it using pip for example:
+
+            python -m pip install jupyter_collaboration
+
+        This flag is now deprecated and will be removed in JupyterLab v5.""",
+    )
 
     news_url = Unicode(
         "https://jupyterlab.github.io/assets/feed.xml",
         allow_none=True,
         help="""URL that serves news Atom feed; by default the JupyterLab organization announcements will be fetched. Set to None to turn off fetching announcements.""",
         config=True,
+    )
+
+    lock_all_plugins = Bool(
+        False,
+        config=True,
+        help="Whether all plugins are locked (cannot be enabled/disabled from the UI)",
     )
 
     check_for_updates_class = Type(
@@ -688,6 +722,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
+    def _prepare_templates(self):
+        super()._prepare_templates()
+        self.jinja2_env.globals.update(custom_css=self.custom_css)
+
     def initialize_handlers(self):  # noqa
         handlers = []
 
@@ -707,13 +745,25 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         self.log.info("JupyterLab extension loaded from %s" % HERE)
         self.log.info("JupyterLab application directory is %s" % self.app_dir)
 
-        build_handler_options = AppOptions(
+        if self.custom_css:
+            handlers.append(
+                (
+                    r"/custom/(.*)(?<!\.js)$",
+                    self.serverapp.web_app.settings["static_handler_class"],
+                    {
+                        "path": self.serverapp.web_app.settings["static_custom_path"],
+                        "no_cache_paths": ["/"],  # don't cache anything in custom
+                    },
+                )
+            )
+
+        app_options = AppOptions(
             logger=self.log,
             app_dir=self.app_dir,
             labextensions_path=self.extra_labextensions_path + self.labextensions_path,
             splice_source=self.splice_source,
         )
-        builder = Builder(self.core_mode, app_options=build_handler_options)
+        builder = Builder(self.core_mode, app_options=app_options)
         build_handler = (build_path, BuildHandler, {"builder": builder})
         handlers.append(build_handler)
 
@@ -741,7 +791,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             if self.dev_mode:
                 watch_dev(self.log)
             else:
-                watch(app_options=build_handler_options)
+                watch(app_options=app_options)
                 page_config["buildAvailable"] = False
             self.cache_files = False
 
@@ -784,14 +834,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 self.log.debug(f"Extension manager will be constrained by {listings_config}")
 
             try:
-                ext_manager = manager_factory(build_handler_options, listings_config, self)
+                ext_manager = manager_factory(app_options, listings_config, self)
                 metadata = dataclasses.asdict(ext_manager.metadata)
             except Exception as err:
                 self.log.warning(
                     f"Failed to instantiate the extension manager {provider}. Falling back to read-only manager.",
                     exc_info=err,
                 )
-                ext_manager = ReadOnlyExtensionManager(build_handler_options, listings_config, self)
+                ext_manager = ReadOnlyExtensionManager(app_options, listings_config, self)
                 metadata = dataclasses.asdict(ext_manager.metadata)
 
             page_config["extensionManager"] = metadata
@@ -801,6 +851,27 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 {"manager": ext_manager},
             )
             handlers.append(ext_handler)
+
+            # Add plugin manager handlers
+            lock_rules = frozenset(
+                {rule for rule, value in page_config.get("lockedExtensions", {}).items() if value}
+            )
+            handlers.append(
+                (
+                    plugins_handler_path,
+                    PluginHandler,
+                    {
+                        "manager": PluginManager(
+                            app_options=app_options,
+                            ext_options={
+                                "lock_rules": lock_rules,
+                                "all_locked": self.lock_all_plugins,
+                            },
+                            parent=self,
+                        )
+                    },
+                )
+            )
 
             # Add announcement handlers
             page_config["news"] = {"disabled": self.news_url is None}
@@ -855,11 +926,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 import jupyter_collaboration  # noqa
             except ImportError:
                 self.log.critical(
-                    """
-To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
-You can install it using pip for example:
+                    """\
+Juptyer Lab cannot start, because `jupyter_collaboration` was configured but cannot be `import`ed.
 
-  python -m pip install jupyter_collaboration
+To fix this, either:
+
+1) install the extension `jupyter_collaboration`; for example: `python -m pip install jupyter_collaboration`
+
+2) disable collaboration; for example, remove the `--collaborative` flag from the commandline.  To see more ways to adjust the collaborative behavior, see https://jupyterlab-realtime-collaboration.readthedocs.io/en/latest/configuration.html .
 """
                 )
                 sys.exit(1)

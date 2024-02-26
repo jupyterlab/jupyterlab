@@ -418,13 +418,23 @@ export class OutputAreaModel implements IOutputAreaModel {
    */
   private _onGenericChange(itemModel: IOutputModel): void {
     let idx: number;
+    let item: IOutputModel | null = null;
     for (idx = 0; idx < this.list.length; idx++) {
-      const item = this.list.get(idx);
+      item = this.list.get(idx);
       if (item === itemModel) {
         break;
       }
     }
-    this._stateChanged.emit(idx);
+    if (item != null) {
+      this._stateChanged.emit(idx);
+      this._changed.emit({
+        type: 'set',
+        newIndex: idx,
+        oldIndex: idx,
+        oldValues: [item],
+        newValues: [item]
+      });
+    }
   }
 
   private _lastStream = '';

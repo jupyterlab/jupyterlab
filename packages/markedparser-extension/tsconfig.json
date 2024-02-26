@@ -13,6 +13,12 @@
       "path": "../codemirror"
     },
     {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../mermaid"
+    },
+    {
       "path": "../rendermime"
     }
   ]

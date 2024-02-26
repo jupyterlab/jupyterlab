@@ -3,6 +3,7 @@
 
 import { SessionContext } from '@jupyterlab/apputils';
 import { Cell, ICellModel } from '@jupyterlab/cells';
+import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 import {
   Document,
   IAdapterOptions,
@@ -67,7 +68,9 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
     } else {
       mimeType = languageMetadata.mimetype;
     }
-    return Array.isArray(mimeType) ? mimeType[0] ?? 'text/plain' : mimeType;
+    return Array.isArray(mimeType)
+      ? mimeType[0] ?? IEditorMimeTypeService.defaultMimeType
+      : mimeType;
   }
 
   /**
@@ -132,6 +135,7 @@ export class NotebookAdapter extends WidgetLSPAdapter<NotebookPanel> {
   /**
    * Get the index of editor from the cursor position in the virtual
    * document.
+   * @deprecated This is error-prone and will be removed in JupyterLab 5.0, use `getEditorIndex()` with `virtualDocument.getEditorAtVirtualLine(position)` instead.
    *
    * @param position - the position of cursor in the virtual document.
    */

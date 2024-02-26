@@ -56,7 +56,7 @@ describe('cells/model', () => {
         }) as YRawCell;
         const model = new TestModel({ sharedModel });
         expect(model).toBeInstanceOf(CellModel);
-        expect(model.sharedModel.getSource()).toBe('foo\n\nbar\n\nbaz');
+        expect(model.sharedModel.getSource()).toBe('foo\nbar\nbaz');
       });
 
       it('should use the cell id if an id is supplied', () => {
@@ -261,7 +261,7 @@ describe('cells/model', () => {
         const model = new TestModel({
           sharedModel: createStandaloneCell(cell)
         });
-        cell.source = (cell.source as string[]).join('\n');
+        cell.source = (cell.source as string[]).join('');
         expect(model.toJSON()).not.toBe(cell);
         expect(model.toJSON()).toEqual(cell);
       });

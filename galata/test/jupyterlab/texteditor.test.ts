@@ -42,6 +42,38 @@ test.describe('Text Editor Tests', () => {
     expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
   });
 
+  test('Selection in highlighted line', async ({ page }) => {
+    const imageName = 'text-editor-active-line-with-selection.png';
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('settingeditor:open', {
+        query: 'Text Editor'
+      });
+    });
+
+    let locator = page.getByLabel('Highlight the active line');
+    await locator.click();
+
+    await page.menu.clickMenuItem('File>New>Text File');
+
+    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+
+    await page.type(
+      '.cm-content',
+      'Not active\nActive line with >>selected text<<\nNot active'
+    );
+
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('End');
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    for (let i = 0; i < 13; i++) {
+      await page.keyboard.press('Shift+ArrowLeft');
+    }
+    expect(
+      await page.locator('.jp-FileEditorCodeWrapper .cm-content').screenshot()
+    ).toMatchSnapshot(imageName, { threshold: 0.01 });
+  });
+
   test('Go to line with argument', async ({ page }) => {
     const imageName = 'go-to-line-editor.png';
     await page.menu.clickMenuItem('File>New>Text File');

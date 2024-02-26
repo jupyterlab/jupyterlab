@@ -19,6 +19,7 @@ import {
   ICommandPalette,
   InputDialog,
   ISessionContextDialogs,
+  Notification,
   ReactWidget,
   SessionContextDialogs,
   showDialog,
@@ -46,7 +47,7 @@ import {
 import { saveIcon } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -569,7 +570,7 @@ export namespace ToolbarItems {
    */
   export function createSaveButton(
     commands: CommandRegistry,
-    fileChanged: ISignal<any, Contents.IModel>
+    fileChanged: ISignal<any, Omit<Contents.IModel, 'content'>>
   ): Widget {
     return addCommandToolbarButtonClass(
       ReactWidget.create(
@@ -644,6 +645,16 @@ function addCommands(
     }
     const context = docManager.contextForWidget(currentWidget);
     return !!context?.contentsModel?.writable;
+  };
+
+  const readonlyNotification = (contextPath: string) => {
+    return Notification.warning(
+      trans.__(
+        `%1 is permissioned as read-only. Use "save as..." instead.`,
+        contextPath
+      ),
+      { autoClose: 5000 }
+    );
   };
 
   // If inside a rich application like JupyterLab, add additional functionality.
@@ -824,6 +835,11 @@ function addCommands(
           'In collaborative mode, the document is saved automatically after every change'
         );
       }
+      if (!isWritable()) {
+        return trans.__(
+          `document is permissioned readonly; "save" is disabled, use "save as..." instead`
+        );
+      }
     }
 
     return trans.__('Save and create checkpoint');
@@ -835,12 +851,21 @@ function addCommands(
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
     caption,
     icon: args => (args.toolbar ? saveIcon : undefined),
-    isEnabled: isWritable,
-    execute: async () => {
+    isEnabled: args => {
+      if (args._luminoEvent) {
+        return (args._luminoEvent as ReadonlyPartialJSONObject).type ===
+          'keybinding'
+          ? true
+          : isWritable();
+      } else {
+        return isWritable();
+      }
+    },
+    execute: async args => {
       // Checks that shell.currentWidget is valid:
+      const widget = shell.currentWidget;
+      const context = docManager.contextForWidget(widget!);
       if (isEnabled()) {
-        const widget = shell.currentWidget;
-        const context = docManager.contextForWidget(widget!);
         if (!context) {
           return showDialog({
             title: trans.__('Cannot Save'),
@@ -851,13 +876,21 @@ function addCommands(
           if (saveInProgress.has(context)) {
             return;
           }
-
-          if (context.model.readOnly) {
-            return showDialog({
-              title: trans.__('Cannot Save'),
-              body: trans.__('Document is read-only'),
-              buttons: [Dialog.okButton()]
-            });
+          if (
+            !context.contentsModel?.writable &&
+            !context.model.collaborative
+          ) {
+            let type = (args._luminoEvent as ReadonlyPartialJSONObject)?.type;
+            if (args._luminoEvent && type === 'keybinding') {
+              readonlyNotification(context.path);
+              return;
+            } else {
+              return showDialog({
+                title: trans.__('Cannot Save'),
+                body: trans.__('Document is read-only'),
+                buttons: [Dialog.okButton()]
+              });
+            }
           }
 
           saveInProgress.add(context);
@@ -947,9 +980,13 @@ function addCommands(
       const paths = new Set<string>(); // Cache so we don't double save files.
       for (const widget of shell.widgets('main')) {
         const context = docManager.contextForWidget(widget);
-        if (context && !context.model.readOnly && !paths.has(context.path)) {
-          paths.add(context.path);
-          promises.push(context.save());
+        if (context && !paths.has(context.path)) {
+          if (context.contentsModel?.writable) {
+            paths.add(context.path);
+            promises.push(context.save());
+          } else {
+            readonlyNotification(context.path);
+          }
         }
       }
       return Promise.all(promises);
@@ -989,7 +1026,7 @@ function addCommands(
           }
         };
         docManager.services.contents.fileChanged.connect(onChange);
-        context
+        void context
           .saveAs()
           .finally(() =>
             docManager.services.contents.fileChanged.disconnect(onChange)

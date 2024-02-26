@@ -13,18 +13,31 @@
       { "name": "cut", "command": "notebook:cut-cell", "rank": 21 },
       { "name": "copy", "command": "notebook:copy-cell", "rank": 22 },
       { "name": "paste", "command": "notebook:paste-cell-below", "rank": 23 },
-      { "name": "run", "command": "runmenu:run", "rank": 30 },
-      { "name": "interrupt", "command": "kernelmenu:interrupt", "rank": 31 },
-      { "name": "restart", "command": "kernelmenu:restart", "rank": 32 },
+      {
+        "name": "run",
+        "command": "notebook:run-cell-and-select-next",
+        "rank": 30
+      },
+      {
+        "name": "interrupt",
+        "command": "notebook:interrupt-kernel",
+        "rank": 31
+      },
+      { "name": "restart", "command": "notebook:restart-kernel", "rank": 32 },
       {
         "name": "restart-and-run",
-        "command": "runmenu:restart-and-run-all",
+        "command": "notebook:restart-run-all",
         "rank": 33
       },
       { "name": "cellType", "rank": 40 },
       { "name": "spacer", "type": "spacer", "rank": 100 },
       { "name": "kernelName", "rank": 1000 },
-      { "name": "executionProgress", "rank": 1002 }
+      { "name": "executionProgress", "rank": 1002 },
+      {
+        "name": "scrollbar",
+        "command": "notebook:toggle-virtual-scrollbar",
+        "rank": 1003
+      }
     ]
   },
   "jupyter.lab.transform": true,
@@ -70,6 +83,11 @@
         "label": {
           "title": "Item label",
           "description": "If defined, it will override the command label",
+          "type": "string"
+        },
+        "caption": {
+          "title": "Item caption",
+          "description": "If defined, it will override the command caption",
           "type": "string"
         },
         "type": {

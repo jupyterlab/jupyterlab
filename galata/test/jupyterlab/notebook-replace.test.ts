@@ -30,7 +30,7 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.waitForSelector('text=1/21');
 
-    await page.click('button[title="Toggle Replace"]');
+    await page.click('button[title="Show Replace"]');
 
     await page.fill('[placeholder="Replace"]', 'egg');
 
@@ -50,7 +50,7 @@ test.describe('Notebook Search and Replace', () => {
     await page.fill('[placeholder="Find"]', 'text/(\\w+)');
     await page.waitForSelector('text=1/3');
 
-    await page.click('button[title="Toggle Replace"]');
+    await page.click('button[title="Show Replace"]');
     await page.fill('[placeholder="Replace"]', 'script/$1');
     const cell = await page.notebook.getCell(2);
     await expect(page.locator('body')).not.toContainText('script/plain');
@@ -71,11 +71,11 @@ test.describe('Notebook Search and Replace', () => {
     await page.waitForSelector('text=1/21');
 
     // Click next button
-    await page.click('button[title="Next Match"]', {
+    await page.click('button[title^="Next Match"]', {
       clickCount: 4
     });
 
-    await page.click('button[title="Toggle Replace"]');
+    await page.click('button[title="Show Replace"]');
 
     await page.fill('[placeholder="Replace"]', 'egg');
 
@@ -98,7 +98,7 @@ test.describe('Notebook Search and Replace', () => {
 
     await page.waitForSelector('text=1/21');
 
-    await page.click('button[title="Toggle Replace"]');
+    await page.click('button[title="Show Replace"]');
 
     await page.fill('[placeholder="Replace"]', 'egg');
 
@@ -120,13 +120,13 @@ test.describe('Notebook Search and Replace', () => {
     await page.keyboard.press('Control+f');
     await page.fill('[placeholder="Find"]', 'test');
 
-    await page.click('button[title="Toggle Replace"]');
+    await page.click('button[title="Show Replace"]');
     await page.fill('[placeholder="Replace"]', 'egg');
 
     // TODO: Next Match press count should be one less
     // (the -/4 state should not be necessary).
     await page.waitForSelector('text=-/4');
-    await page.click('button[title="Next Match"]', {
+    await page.click('button[title^="Next Match"]', {
       clickCount: 3
     });
 

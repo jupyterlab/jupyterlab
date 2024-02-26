@@ -7,6 +7,7 @@
 
 export * from './activitymonitor';
 export * from './interfaces';
+export * from './lru';
 export * from './markdowncodeblocks';
 export * from './pageconfig';
 export * from './path';

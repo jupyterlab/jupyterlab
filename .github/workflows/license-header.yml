@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -21,12 +21,13 @@ jobs:
         run: git config --global hub.protocol https
 
       - name: Checkout the branch from the PR that triggered the job
-        run: hub pr checkout ${{ github.event.pull_request.number }}
+        run: gh pr checkout ${{ github.event.pull_request.number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Fix License Header
-        uses: apache/skywalking-eyes/header@v0.4.0
+        # pin to include https://github.com/apache/skywalking-eyes/pull/168
+        uses: apache/skywalking-eyes/header@ed436a5593c63a25f394ea29da61b0ac3731a9fe
         with:
           mode: fix
 

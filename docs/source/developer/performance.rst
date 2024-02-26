@@ -15,7 +15,7 @@ This widget will have a DOM structure like this:
 
    <div class="jp-WindowedPanel-outer">
       <div class="jp-WindowedPanel-inner">
-         <div class="jp-WindowedPanel-window">
+         <div class="jp-WindowedPanel-viewport">
             <!-- Here will be the list of items in the viewport -->
          </div>
       </div>

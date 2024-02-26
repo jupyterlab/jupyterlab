@@ -546,7 +546,7 @@ describe('completer/model', () => {
         const resolved = await model.resolveItem(0);
         expect(resolved).toEqual({ label: 'foo' });
       });
-      it('should resolve missing fields and remove the `resolve` function itself', async () => {
+      it('should resolve by index missing fields and remove the `resolve` function itself', async () => {
         const model = new CompleterModel();
         const item = {
           label: 'foo',
@@ -560,6 +560,46 @@ describe('completer/model', () => {
           label: 'foo',
           documentation: 'Foo docs',
           resolve: undefined
+        });
+      });
+      it('should resolve by value missing fields and remove the `resolve` function itself', async () => {
+        const model = new CompleterModel();
+        const item = {
+          label: 'foo',
+          resolve: () =>
+            Promise.resolve({ label: 'foo', documentation: 'Foo docs' })
+        };
+        const resolved = await model.resolveItem(item);
+        expect(resolved).toEqual({ label: 'foo', documentation: 'Foo docs' });
+        expect(item).toEqual({
+          label: 'foo',
+          documentation: 'Foo docs',
+          resolve: undefined
+        });
+      });
+      it('should cancel pending resolution', async () => {
+        const model = new CompleterModel();
+        const item1 = {
+          label: 'foo',
+          resolve: async () => {
+            await new Promise(r => setTimeout(r, 100));
+            return { label: 'foo', documentation: 'Foo docs' };
+          }
+        };
+        const item2 = {
+          label: 'bar',
+          resolve: async () => {
+            await new Promise(r => setTimeout(r, 100));
+            return { label: 'bar', documentation: 'Bar docs' };
+          }
+        };
+        model.setCompletionItems([item1, item2]);
+        const first = model.resolveItem(item1);
+        const second = model.resolveItem(item2);
+        expect(await first).toEqual(null);
+        expect(await second).toEqual({
+          label: 'bar',
+          documentation: 'Bar docs'
         });
       });
       it('should escape HTML markup', async () => {

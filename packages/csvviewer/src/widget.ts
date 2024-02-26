@@ -232,7 +232,14 @@ export class CSVViewer extends Widget {
 
     this.addClass(CSV_CLASS);
 
-    void this.initialize();
+    this._ready = this.initialize();
+  }
+
+  /**
+   * Promise which resolves when the content is ready.
+   */
+  get ready(): Promise<void> {
+    return this._ready;
   }
 
   protected async initialize(): Promise<void> {
@@ -407,6 +414,7 @@ export class CSVViewer extends Widget {
   private _delimiter = ',';
   private _revealed = new PromiseDelegate<void>();
   private _baseRenderer: TextRenderConfig | null = null;
+  private _ready: Promise<void>;
 }
 
 /**

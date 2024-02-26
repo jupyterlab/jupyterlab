@@ -312,7 +312,8 @@ export abstract class KernelFutureHandler<
 }
 
 export class KernelControlFutureHandler<
-    REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,
+    REQUEST extends
+      KernelMessage.IControlMessage = KernelMessage.IControlMessage,
     REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
   >
   extends KernelFutureHandler<REQUEST, REPLY>

@@ -16,7 +16,7 @@ const SERVICE_EVENTS_URL = 'api/events';
 /**
  * The events API service manager.
  */
-export class EventManager implements IDisposable {
+export class EventManager implements Event.IManager {
   /**
    * Create a new event manager.
    */
@@ -165,5 +165,18 @@ export namespace Event {
   /**
    * The interface for the event bus front-end.
    */
-  export interface IManager extends EventManager {}
+  export interface IManager extends IDisposable {
+    /**
+     * The server settings used to make API requests.
+     */
+    readonly serverSettings: ServerConnection.ISettings;
+    /**
+     * An event stream that emits and yields each new event.
+     */
+    readonly stream: Event.Stream;
+    /**
+     * Post an event request to be emitted by the event bus.
+     */
+    emit(event: Event.Request): Promise<void>;
+  }
 }

@@ -369,62 +369,62 @@
     {
       "command": "notebook:change-cell-to-code",
       "keys": ["Y"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:change-cell-to-heading-1",
       "keys": ["1"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:change-cell-to-heading-2",
       "keys": ["2"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:change-cell-to-heading-3",
       "keys": ["3"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:change-cell-to-heading-4",
       "keys": ["4"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:change-cell-to-heading-5",
       "keys": ["5"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:change-cell-to-heading-6",
       "keys": ["6"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:change-cell-to-markdown",
       "keys": ["M"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:change-cell-to-raw",
       "keys": ["R"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:copy-cell",
       "keys": ["C"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:cut-cell",
       "keys": ["X"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:delete-cell",
       "keys": ["D", "D"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:enter-command-mode",
@@ -437,130 +437,140 @@
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
+      "command": "notebook:access-previous-history-entry",
+      "keys": ["Alt ArrowUp"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "notebook:access-next-history-entry",
+      "keys": ["Alt ArrowDown"],
+      "selector": ".jp-Notebook.jp-mod-editMode"
+    },
+    {
       "command": "notebook:enter-edit-mode",
       "keys": ["Enter"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode .jp-Cell:focus"
     },
     {
       "command": "notebook:extend-marked-cells-above",
       "keys": ["Shift ArrowUp"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:extend-marked-cells-above",
       "keys": ["Shift K"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:extend-marked-cells-top",
       "keys": ["Shift Home"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:extend-marked-cells-below",
       "keys": ["Shift ArrowDown"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:extend-marked-cells-bottom",
       "keys": ["Shift End"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:extend-marked-cells-below",
       "keys": ["Shift J"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:insert-cell-above",
       "keys": ["A"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:insert-cell-below",
       "keys": ["B"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:merge-cells",
       "keys": ["Shift M"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:merge-cell-above",
       "keys": ["Ctrl Backspace"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:merge-cell-below",
       "keys": ["Ctrl Shift M"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:move-cursor-down",
       "keys": ["ArrowDown"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:move-cursor-down",
       "keys": ["J"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:move-cursor-up",
       "keys": ["ArrowUp"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:move-cursor-up",
       "keys": ["K"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:move-cursor-heading-above-or-collapse",
       "keys": ["ArrowLeft"],
-      "selector": ".jp-Notebook:focus.jp-mod-commandMode"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:move-cursor-heading-below-or-expand",
       "keys": ["ArrowRight"],
-      "selector": ".jp-Notebook:focus.jp-mod-commandMode"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:insert-heading-above",
       "keys": ["Shift A"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:insert-heading-below",
       "keys": ["Shift B"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:collapse-all-headings",
       "keys": ["Ctrl Shift ArrowLeft"],
-      "selector": ".jp-Notebook.jp-mod-commandMode"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:expand-all-headings",
       "keys": ["Ctrl Shift ArrowRight"],
-      "selector": ".jp-Notebook.jp-mod-commandMode"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:paste-cell-below",
       "keys": ["V"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:redo-cell-action",
       "keys": ["Shift Z"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:run-cell",
       "macKeys": ["Ctrl Enter"],
       "keys": [],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:run-cell",
@@ -571,7 +581,7 @@
     {
       "command": "notebook:run-cell",
       "keys": ["Accel Enter"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:run-cell",
@@ -581,7 +591,7 @@
     {
       "command": "notebook:run-cell-and-insert-below",
       "keys": ["Alt Enter"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:run-cell-and-insert-below",
@@ -600,8 +610,8 @@
     },
     {
       "command": "viewmenu:line-numbering",
-      "keys": [""],
-      "selector": ".jp-Notebook.jp-mod-commandMode"
+      "keys": ["Shift L"],
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "viewmenu:match-brackets",
@@ -611,7 +621,7 @@
     {
       "command": "notebook:select-all",
       "keys": ["Accel A"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:split-cell-at-cursor",
@@ -619,29 +629,24 @@
       "selector": ".jp-Notebook.jp-mod-editMode"
     },
     {
-      "command": "notebook:toggle-all-cell-line-numbers",
-      "keys": ["Shift L"],
-      "selector": ".jp-Notebook:focus"
-    },
-    {
       "command": "notebook:undo-cell-action",
       "keys": ["Z"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:toggle-render-side-by-side-current",
       "keys": ["Shift R"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:move-cell-up",
       "keys": ["Ctrl Shift ArrowUp"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     },
     {
       "command": "notebook:move-cell-down",
       "keys": ["Ctrl Shift ArrowDown"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus"
     }
   ],
   "title": "Notebook",
@@ -666,6 +671,12 @@
     }
   },
   "properties": {
+    "enableKernelInitNotification": {
+      "title": "Notify about code execution if kernel is initializing",
+      "description": "Display notification if code cells are run while kernel is initializing.",
+      "type": "boolean",
+      "default": false
+    },
     "codeCellConfig": {
       "title": "Code Cell Configuration",
       "description": "The configuration for all code cells; it will override the CodeMirror default configuration.",
@@ -744,6 +755,12 @@
       "type": "number",
       "default": 50
     },
+    "scrollHeadingToTop": {
+      "title": "Scroll heading to top",
+      "description": "Whether to scroll heading to the document top when selecting it in the table of contents.",
+      "type": "boolean",
+      "default": true
+    },
     "showEditorForReadOnlyMarkdown": {
       "title": "Show editor for read-only Markdown cells",
       "description": "Should an editor be shown for read-only markdown",
@@ -801,6 +818,12 @@
       "description": "'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells - 'full': Best performance with side effects - Attach to the DOM only cells in viewport - 'none': Worst performance without side effects - Attach all cells to the viewport",
       "enum": ["defer", "full", "none"],
       "default": "defer"
+    },
+    "accessKernelHistory": {
+      "title": "Kernel history access",
+      "description": "Enable kernel history access from notebook cells. Enabling this allows you to scroll through kernel history from a given notebook cell.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

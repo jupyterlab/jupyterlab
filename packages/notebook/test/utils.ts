@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ISessionContext } from '@jupyterlab/apputils';
 import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
 import { INotebookContent } from '@jupyterlab/nbformat';
 import {
@@ -38,8 +39,8 @@ export function createNotebookPanelFactory(): NotebookPanel.IContentFactory {
 /**
  * Create a notebook widget.
  */
-export function createNotebook(): Notebook {
-  return NBTestUtils.createNotebook();
+export function createNotebook(sessionContext?: ISessionContext): Notebook {
+  return NBTestUtils.createNotebook(sessionContext);
 }
 
 /**

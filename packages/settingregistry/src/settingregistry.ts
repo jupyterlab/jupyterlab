@@ -39,13 +39,6 @@ const AJV_DEFAULT_OPTIONS: Partial<AjvOptions> = {
 };
 
 /**
- * The default number of milliseconds before a `load()` call to the registry
- * will wait before timing out if it requires a transformation that has not been
- * registered.
- */
-const DEFAULT_TRANSFORM_TIMEOUT = 1000;
-
-/**
  * The ASCII record separator character.
  */
 const RECORD_SEPARATOR = String.fromCharCode(30);
@@ -280,7 +273,6 @@ export class SettingRegistry implements ISettingRegistry {
   constructor(options: SettingRegistry.IOptions) {
     this.connector = options.connector;
     this.validator = options.validator || new DefaultSchemaValidator();
-    this._timeout = options.timeout || DEFAULT_TRANSFORM_TIMEOUT;
 
     // Plugins with transformation may not be loaded if the transformation function is
     // not yet available. To avoid fetching again the associated data when the transformation
@@ -605,8 +597,8 @@ export class SettingRegistry implements ISettingRegistry {
           // Apply a transformation to the plugin if necessary.
           await this._load(await this._transform('fetch', plugin));
         } catch (errors) {
-          /* Ignore preload timeout errors silently. */
-          if (errors[0]?.keyword !== 'timeout') {
+          /* Ignore silently if no transformers. */
+          if (errors[0]?.keyword !== 'unset') {
             console.warn('Ignored setting registry preload errors.', errors);
           }
         }
@@ -653,13 +645,10 @@ export class SettingRegistry implements ISettingRegistry {
    */
   private async _transform(
     phase: ISettingRegistry.IPlugin.Phase,
-    plugin: ISettingRegistry.IPlugin,
-    started = new Date().getTime()
+    plugin: ISettingRegistry.IPlugin
   ): Promise<ISettingRegistry.IPlugin> {
-    const elapsed = new Date().getTime() - started;
     const id = plugin.id;
     const transformers = this._transformers;
-    const timeout = this._timeout;
 
     if (!plugin.schema['jupyter.lab.transform']) {
       return plugin;
@@ -678,25 +667,14 @@ export class SettingRegistry implements ISettingRegistry {
           } as ISchemaValidator.IError
         ];
       }
-
       return transformed;
     }
-
-    // If the timeout has not been exceeded, stall and try again in 250ms.
-    if (elapsed < timeout) {
-      await new Promise<void>(resolve => {
-        setTimeout(() => {
-          resolve();
-        }, 250);
-      });
-      return this._transform(phase, plugin, started);
-    }
-
+    // If the plugin has no transformers, throw an error and bail.
     throw [
       {
         instancePath: '',
-        keyword: 'timeout',
-        message: `Transforming ${plugin.id} timed out.`,
+        keyword: 'unset',
+        message: `${plugin.id} has no transformers yet.`,
         schemaPath: ''
       } as ISchemaValidator.IError
     ];
@@ -719,7 +697,6 @@ export class SettingRegistry implements ISettingRegistry {
 
   private _pluginChanged = new Signal<this, string>(this);
   private _ready = Promise.resolve();
-  private _timeout: number;
   private _transformers: {
     [plugin: string]: {
       [phase in ISettingRegistry.IPlugin.Phase]: ISettingRegistry.IPlugin.Transform;
@@ -1247,7 +1224,7 @@ export namespace SettingRegistry {
     });
 
     // Return all the shortcuts that should be registered
-    return (
+    return Private.upgradeShortcuts(
       user
         .concat(defaults)
         .filter(shortcut => !shortcut.disabled)
@@ -1460,14 +1437,25 @@ namespace Private {
 
   /**
    * Create a fully extrapolated default value for a root key in a schema.
+   *
+   * @todo This function would ideally reuse `getDefaultFormState` from rjsf
+   * with appropriate`defaultFormStateBehavior` setting, as currently
+   * these two implementations duplicate each other.
+   *
+   * Note: absence of a property may mean something else than the default.
    */
   export function reifyDefault(
     schema: ISettingRegistry.IProperty,
     root?: string,
-    definitions?: PartialJSONObject
+    definitions?: PartialJSONObject,
+    required?: boolean
   ): PartialJSONValue | undefined {
     definitions = definitions ?? (schema.definitions as PartialJSONObject);
     // If the property is at the root level, traverse its schema.
+    required = root
+      ? schema.required instanceof Array &&
+        schema.required?.includes(root as any)
+      : required;
     schema = (root ? schema.properties?.[root] : schema) || {};
 
     if (schema.type === 'object') {
@@ -1480,14 +1468,23 @@ namespace Private {
         result[property] = reifyDefault(
           props[property],
           undefined,
-          definitions
+          definitions,
+          schema.required instanceof Array &&
+            schema.required?.includes(property as any)
         );
       }
 
       return result;
     } else if (schema.type === 'array') {
+      const defaultDefined = typeof schema.default !== 'undefined';
+      const shouldPopulateDefaultArray = defaultDefined || required;
+      if (!shouldPopulateDefaultArray) {
+        return undefined;
+      }
       // Make a copy of the default value to populate.
-      const result = JSONExt.deepCopy(schema.default as PartialJSONArray);
+      const result = defaultDefined
+        ? JSONExt.deepCopy(schema.default as PartialJSONArray)
+        : [];
 
       // Items defines the properties of each item in the array
       let props = (schema.items as PartialJSONObject) || {};
@@ -1501,21 +1498,99 @@ namespace Private {
       }
       // Iterate through the items in the array and fill in defaults
       for (const item in result) {
-        // Use the values that are hard-coded in the default array over the defaults for each field.
-        const reified =
-          (reifyDefault(props, undefined, definitions) as PartialJSONObject) ??
-          {};
-        for (const prop in reified) {
-          if ((result[item] as PartialJSONObject)?.[prop]) {
-            reified[prop] = (result[item] as PartialJSONObject)[prop];
+        if (props.type === 'object') {
+          // Use the values that are hard-coded in the default array over the defaults for each field.
+          const reified =
+            (reifyDefault(
+              props,
+              undefined,
+              definitions
+            ) as PartialJSONObject) ??
+            result[item] ??
+            {};
+          for (const prop in reified) {
+            if ((result[item] as PartialJSONObject)?.[prop]) {
+              reified[prop] = (result[item] as PartialJSONObject)[prop];
+            }
           }
+          result[item] = reified;
         }
-        result[item] = reified;
       }
 
       return result;
     } else {
       return schema.default;
     }
+  }
+
+  /**
+   * Selectors which were previously warned about.
+   */
+  const selectorsAlreadyWarnedAbout = new Set<string>();
+
+  /**
+   * Upgrade shortcuts to ensure no breaking changes between minor versions.
+   */
+  export function upgradeShortcuts(
+    shortcuts: ISettingRegistry.IShortcut[]
+  ): ISettingRegistry.IShortcut[] {
+    const selectorDeprecationWarnings = new Set();
+    const changes = [
+      {
+        old: '.jp-Notebook:focus.jp-mod-commandMode',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        versionDeprecated: 'JupyterLab 4.1.1'
+      },
+      {
+        old: '.jp-Notebook:focus',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-traversable]:focus',
+        new: '.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-kernel-user]:focus',
+        new: '[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1'
+      },
+      {
+        old: '[data-jp-kernel-user] :focus:not(:read-write)',
+        new: '[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)',
+        versionDeprecated: 'JupyterLab 4.1.1'
+      }
+    ];
+    const upgraded = shortcuts.map(shortcut => {
+      const oldSelector = shortcut.selector;
+      let newSelector = oldSelector;
+      for (const change of changes) {
+        if (oldSelector.includes(change.old)) {
+          newSelector = oldSelector.replace(change.old, change.new);
+          if (!selectorsAlreadyWarnedAbout.has(oldSelector)) {
+            selectorDeprecationWarnings.add(
+              `"${change.old}" was replaced with "${change.new}" in ${change.versionDeprecated} (present in "${oldSelector}")`
+            );
+            selectorsAlreadyWarnedAbout.add(oldSelector);
+          }
+        }
+      }
+      shortcut.selector = newSelector;
+      return shortcut;
+    });
+    if (selectorDeprecationWarnings.size > 0) {
+      console.warn(
+        'Deprecated shortcut selectors: ' +
+          [...selectorDeprecationWarnings].join('\n') +
+          '\n\nThe selectors will be substituted transparently this time, but need to be updated at source before next major release.'
+      );
+    }
+    return upgraded;
   }
 }

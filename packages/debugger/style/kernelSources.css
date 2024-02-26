@@ -34,3 +34,19 @@
 .jp-DebuggerKernelSource-filterBox-hidden {
   display: none;
 }
+
+.jp-DebuggerKernelSource-source {
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.jp-DebuggerKernelSource-source:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DebuggerKernelSource-source > svg {
+  height: 16px;
+  width: 16px;
+}

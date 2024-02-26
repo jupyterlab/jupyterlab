@@ -273,6 +273,9 @@ namespace Private {
         },
         KernelManager: {
           shutdown_wait_time: 1.0
+        },
+        LanguageServerManager: {
+          autodetect: false
         }
       },
       options.configData || {}

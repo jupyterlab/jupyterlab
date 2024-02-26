@@ -51,7 +51,7 @@ test.describe('Table of Contents', () => {
       await page.sidebar.getTabPosition('table-of-contents')
     );
     const numberingButton = await tocPanel.$$(
-      'button[data-command="toc:display-numbering"]'
+      'jp-button[data-command="toc:display-numbering"]'
     );
     expect(numberingButton.length).toBe(1);
 

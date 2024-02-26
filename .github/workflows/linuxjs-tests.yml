@@ -40,16 +40,19 @@ jobs:
             js-logconsole,
             js-lsp,
             js-mainmenu,
+            js-mermaid,
             js-metadataform,
             js-metapackage,
             js-nbformat,
             js-notebook,
             js-observables,
             js-outputarea,
+            js-pluginmanager,
             js-rendermime,
             js-services,
             js-settingeditor,
             js-settingregistry,
+            js-shortcuts-extension,
             js-statedb,
             js-statusbar,
             js-testing,
@@ -64,7 +67,7 @@ jobs:
     timeout-minutes: 40
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1

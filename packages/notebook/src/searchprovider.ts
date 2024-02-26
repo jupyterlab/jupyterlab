@@ -22,7 +22,8 @@ import {
   IReplaceOptionsSupport,
   ISearchMatch,
   ISearchProvider,
-  SearchProvider
+  SearchProvider,
+  SelectionState
 } from '@jupyterlab/documentsearch';
 import { IObservableList, IObservableMap } from '@jupyterlab/observables';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -164,6 +165,16 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     return {
       preserveCase: true
     };
+  }
+
+  getSelectionState(): SelectionState {
+    const cellMode = this._selectionSearchMode === 'cells';
+    const selectedCount = cellMode ? this._selectedCells : this._selectedLines;
+    return selectedCount > 1
+      ? 'multiple'
+      : selectedCount === 1 && !cellMode
+      ? 'single'
+      : 'none';
   }
 
   /**
@@ -347,6 +358,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       return;
     }
     await this.endQuery();
+    this._searchActive = true;
     let cells = this.widget.content.widgets;
 
     this._query = query;
@@ -415,6 +427,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       })
     );
 
+    this._searchActive = false;
     this._searchProviders.length = 0;
     this._currentProviderIndex = null;
   }
@@ -541,7 +554,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this.widget.content.isSelectedOrActive(cell)
       )
       .then(() => {
-        void cellSearchProvider.startQuery(this._query, this._filters);
+        if (this._searchActive) {
+          void cellSearchProvider.startQuery(this._query, this._filters);
+        }
       });
   }
 
@@ -710,7 +725,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // change, and if selection is getting extended, we do not want to clear
       // highlights just to re-apply them shortly after, which has side effects
       // impacting the functionality and performance.
-      this._delayedActiveCellChangeHandler = setTimeout(() => {
+      this._delayedActiveCellChangeHandler = window.setTimeout(() => {
         this.delayedActiveCellChangeHandlerReady =
           this._handleHighlightsAfterActiveCellChange();
       }, 0);
@@ -903,4 +918,5 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   > | null = null;
   private _selectionSearchMode: 'cells' | 'text' = 'cells';
   private _selectionLock: boolean = false;
+  private _searchActive: boolean = false;
 }

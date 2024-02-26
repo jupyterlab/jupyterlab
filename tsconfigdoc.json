@@ -185,6 +185,12 @@
       "path": "./packages/mathjax-extension"
     },
     {
+      "path": "./packages/mermaid"
+    },
+    {
+      "path": "./packages/mermaid-extension"
+    },
+    {
       "path": "./packages/metadataform"
     },
     {
@@ -207,6 +213,12 @@
     },
     {
       "path": "./packages/pdf-extension"
+    },
+    {
+      "path": "./packages/pluginmanager"
+    },
+    {
+      "path": "./packages/pluginmanager-extension"
     },
     {
       "path": "./packages/property-inspector"

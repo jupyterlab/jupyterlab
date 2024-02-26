@@ -120,8 +120,8 @@
   visibility: hidden;
   z-index: -999;
   position: absolute;
-  left: -999;
-  top: -999;
+  left: -999px;
+  top: -999px;
 }
 
 .jp-DebuggerVariables-colorPalette .jp-mod-void {

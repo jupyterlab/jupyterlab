@@ -11,6 +11,7 @@ files
 file_editor
 notebook
 code_console
+completer
 terminal
 running
 commands

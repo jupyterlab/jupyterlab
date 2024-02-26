@@ -15,7 +15,7 @@
 }
 
 .jp-mod-hidden {
-  display: hidden;
+  display: none;
 }
 
 @keyframes slide-animation {
@@ -31,9 +31,9 @@
 }
 
 .jp-Shortcuts-Input {
-  animation-duration: 0.5 s;
+  animation-duration: 0.5s;
   animation-timing-function: ease-out;
-  animation-name: 'slide-animation';
+  animation-name: slide-animation;
   border-width: var(--jp-border-width);
   border-color: var(--jp-border-color3);
   border-style: solid;
@@ -353,16 +353,17 @@
 
 .jp-Shortcuts-AdvancedOptionsLink {
   color: var(--jp-content-link-color);
-  text-decoration: none;
   margin-right: 15px;
 }
 
 .jp-Shortcuts-AdvancedOptionsLink:hover {
   color: var(--jp-brand-color0);
+  text-decoration: underline;
 }
 
 .jp-Shortcuts-AdvancedOptionsLink:active {
   color: var(--jp-brand-color0);
+  text-decoration: underline;
 }
 
 .jp-Shortcuts-HeaderRowContainer {

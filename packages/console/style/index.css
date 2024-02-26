@@ -11,5 +11,4 @@
 @import url('~@lumino/dragdrop/style/index.css');
 @import url('~@jupyterlab/codeeditor/style/index.css');
 @import url('~@jupyterlab/cells/style/index.css');
-
 @import url('./base.css');

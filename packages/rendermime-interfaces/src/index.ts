@@ -437,6 +437,34 @@ export namespace IRenderMime {
      * @param id: an optional element id to scroll to when the path is opened.
      */
     handleLink(node: HTMLElement, path: string, id?: string): void;
+    /**
+     * Add the path handler to the node.
+     *
+     * @param node: the anchor node for which to handle the link.
+     *
+     * @param path: the path to open when the link is clicked.
+     *
+     * @param scope: the scope to which the path is bound.
+     *
+     * @param id: an optional element id to scroll to when the path is opened.
+     */
+    handlePath?(
+      node: HTMLElement,
+      path: string,
+      scope: 'kernel' | 'server',
+      id?: string
+    ): void;
+  }
+
+  export interface IResolvedLocation {
+    /**
+     * Location scope.
+     */
+    scope: 'kernel' | 'server';
+    /**
+     * Resolved path.
+     */
+    path: string;
   }
 
   /**
@@ -460,12 +488,23 @@ export namespace IRenderMime {
      * Whether the URL should be handled by the resolver
      * or not.
      *
+     * @param allowRoot - Whether the paths starting at Unix-style filesystem root (`/`) are permitted.
+     *
      * #### Notes
      * This is similar to the `isLocal` check in `URLExt`,
      * but can also perform additional checks on whether the
      * resolver should handle a given URL.
      */
-    isLocal?: (url: string) => boolean;
+    isLocal?: (url: string, allowRoot?: boolean) => boolean;
+
+    /**
+     * Resolve a path from Jupyter kernel to a path:
+     * - relative to `root_dir` (preferrably) this is in jupyter-server scope,
+     * - path understood and known by kernel (if such a path exists).
+     * Returns `null` if there is no file matching provided path in neither
+     * kernel nor jupyter-server contents manager.
+     */
+    resolvePath?: (path: string) => Promise<IResolvedLocation | null>;
   }
 
   /**
@@ -486,10 +525,10 @@ export namespace IRenderMime {
    */
   export interface IMarkdownParser {
     /**
-     * Render a markdown source.
+     * Render a markdown source into unsanitized HTML.
      *
      * @param source - The string to render.
-     * @returns - A promise of the string.
+     * @returns - A promise of the string containing HTML which may require sanitization.
      */
     render(source: string): Promise<string>;
   }

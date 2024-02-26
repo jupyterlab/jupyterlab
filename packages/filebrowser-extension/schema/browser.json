@@ -225,6 +225,12 @@
       "description": "Whether to show checkboxes next to files and folders",
       "default": false
     },
+    "showFullPath": {
+      "type": "boolean",
+      "title": "Show full path in browser bread crumbs",
+      "description": "Whether to show full path in browser bread crumbs",
+      "default": false
+    },
     "sortNotebooksFirst": {
       "type": "boolean",
       "title": "When sorting by name, group notebooks before other files",

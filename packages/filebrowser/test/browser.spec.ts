@@ -71,6 +71,12 @@ describe('filebrowser/browser', () => {
       it('should return new FileBrowser instance', () => {
         expect(fileBrowser).toBeInstanceOf(FileBrowser);
       });
+
+      it('toolbar should have an aria label of file browser and a role of navigation', () => {
+        const toolbar = fileBrowser.toolbar.node;
+        expect(toolbar.getAttribute('aria-label')).toEqual('file browser');
+        expect(toolbar.getAttribute('role')).toEqual('toolbar');
+      });
     });
 
     describe('#createNewDirectory', () => {

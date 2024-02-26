@@ -12,6 +12,7 @@ import { PartialJSONValue } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Title, Widget } from '@lumino/widgets';
 import { DocumentRegistry, IDocumentWidget } from './index';
+import { createReadonlyLabel } from './components';
 
 /**
  * The default implementation of a document model.
@@ -545,7 +546,7 @@ export class DocumentWidget<
     // Include the context ready promise in the widget reveal promise
     options.reveal = Promise.all([options.reveal, options.context.ready]);
     super(options);
-
+    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this.context = options.context;
 
     // Handle context path changes
@@ -616,6 +617,21 @@ export class DocumentWidget<
     if (args.name === 'dirty') {
       this._handleDirtyState();
     }
+    if (!this.context.model.dirty) {
+      if (!this.context.model.collaborative) {
+        if (!this.context.contentsModel?.writable) {
+          const readOnlyIndicator = createReadonlyLabel(this);
+          let roi = this.toolbar.insertBefore(
+            'kernelName',
+            'read-only-indicator',
+            readOnlyIndicator
+          );
+          if (!roi) {
+            this.toolbar.addItem('read-only-indicator', readOnlyIndicator);
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -633,6 +649,7 @@ export class DocumentWidget<
   }
 
   readonly context: DocumentRegistry.IContext<U>;
+  protected readonly _trans;
 
   /**
    * Whether the document has an auto-generated name or not.

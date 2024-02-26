@@ -6,8 +6,10 @@
 import {
   DocumentConnectionManager,
   LanguageServerManager,
-  VirtualDocument
+  VirtualDocument,
+  WidgetLSPAdapterTracker
 } from '@jupyterlab/lsp';
+import { LabShell } from '@jupyterlab/application';
 import { ServerConnection } from '@jupyterlab/services';
 
 jest.mock('@jupyterlab/notebook');
@@ -54,7 +56,10 @@ describe('@jupyterlab/lsp', () => {
     let document: VirtualDocument;
     beforeEach(() => {
       manager = new DocumentConnectionManager({
-        languageServerManager: new LanguageServerManager({})
+        languageServerManager: new LanguageServerManager({}),
+        adapterTracker: new WidgetLSPAdapterTracker({
+          shell: new LabShell()
+        })
       });
       document = new VirtualDocument({
         language: 'python',

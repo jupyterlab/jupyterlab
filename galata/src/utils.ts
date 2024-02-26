@@ -221,6 +221,8 @@ export async function waitForTransition(
  *
  * @param className Class name
  * @returns Selector
+ *
+ * @deprecated You should use locator CSS selector `locator('.className')`
  */
 export function xpContainsClass(className: string): string {
   return `contains(concat(" ", normalize-space(@class), " "), " ${className} ")`;
@@ -231,9 +233,11 @@ export function xpContainsClass(className: string): string {
  *
  * @param name Activity name
  * @returns Selector
+ *
+ * @deprecated You should use locator selector `getByRole('main').getByRole('tab', { name })`
  */
 export function xpBuildActivityTabSelector(name: string): string {
-  return `//div[${xpContainsClass('jp-Activity')}]/ul/li[${xpContainsClass(
+  return `//div[contains(@role, "main")]//ul/li[${xpContainsClass(
     'lm-TabBar-tab'
   )} and ./div[text()="${name}" and ${xpContainsClass('lm-TabBar-tabLabel')}]]`;
 }
@@ -243,6 +247,9 @@ export function xpBuildActivityTabSelector(name: string): string {
  *
  * @param id Activity id
  * @returns Selector
+ *
+ * @deprecated You should use locator selector `getByRole('main').getByRole('tabpanel', { name })`
+ *   where `name` is the name of the tab.
  */
 export function xpBuildActivityPanelSelector(id: string): string {
   return `//div[@id='${id}' and ${xpContainsClass(
@@ -254,11 +261,21 @@ export function xpBuildActivityPanelSelector(id: string): string {
  * Get the selector to look for the currently active activity tab
  *
  * @returns Selector
+ *
+ * @deprecated You should use locator selector `getByRole('main').locator('.jp-mod-current[role="tab"]')`
  */
 export function xpBuildActiveActivityTabSelector(): string {
-  return `//div[${xpContainsClass('jp-Activity')}]/ul/li[${xpContainsClass(
+  return `//div[contains(@role, "main")]//ul/li[${xpContainsClass(
     'lm-TabBar-tab'
-  )} and ${xpContainsClass('lm-mod-current')} and ./div[${xpContainsClass(
+  )} and ${xpContainsClass('jp-mod-current')} and ./div[${xpContainsClass(
     'lm-TabBar-tabLabel'
   )}]]`;
+}
+
+/**
+ * Whether JupyterLab is in simple mode or not
+ */
+export function isInSimpleMode(page: Page): Promise<boolean> {
+  const toggle = page.getByRole('switch', { name: 'Simple' });
+  return toggle.isChecked();
 }

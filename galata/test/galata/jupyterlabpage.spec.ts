@@ -34,7 +34,7 @@ test('should reload the application page and load hook', async ({ page }) => {
 test('should reset the UI', async ({ page }) => {
   await page.resetUI();
   expect(await page.menu.isAnyOpen()).toEqual(false);
-  expect(await page.waitForSelector(page.launcherSelector)).toBeTruthy();
+  await expect(page.launcher).toBeVisible();
   expect(await page.kernel.isAnyRunning()).toEqual(false);
   expect(await page.statusbar.isVisible()).toEqual(true);
   expect(await page.sidebar.isTabOpen('filebrowser')).toEqual(true);

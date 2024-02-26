@@ -61,7 +61,7 @@ The ``lab-dev`` endpoint is the equivalent of checking out the repo locally and 
 The ``lab-spliced`` endpoint is the equivalent of building JupyterLab in spliced mode and running ``jupyter lab``.
 See the `Development workflow for source extensions <../extension/extension_dev.html#development-workflow-for-source-extensions>`__ for more information on spliced mode.
 
-Build utilities: ``builtutils/``
+Build utilities: ``buildutils/``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 An ``npm`` package that contains several utility scripts for managing

@@ -113,11 +113,11 @@ On the [Actions](https://github.com/jupyterlab/jupyterlab/actions) page, select 
 
 Fill in the information as mentioned in the body of the changelog PR, for example:
 
-| Input                                 | Value      |
-| ------------------------------------- | ---------- |
-| The target branch                     | main       |
-| The URL of the draft GitHub release   |            |
-| Comma separated list of steps to skip | ensure-sha |
+| Input                                 | Value |
+| ------------------------------------- | ----- |
+| The target branch                     | main  |
+| The URL of the draft GitHub release   |       |
+| Comma separated list of steps to skip |       |
 
 The "Publish Release" workflow:
 
@@ -477,3 +477,5 @@ new issues show up in the future:
 
 - HTTP Error 502: Bad Gateway (JupyterLab `4.0.0a23`): https://github.com/jupyterlab/jupyterlab/issues/12324
 - Degraded performance of npm publish (JupyterLab `4.0.0b2`): https://github.com/jupyterlab/jupyterlab/issues/14431
+- Wrong URLs break publishing to npm with provenance: https://github.com/jupyterlab/jupyterlab/pull/15462
+- Release team missing privileges on packages removed in 4.0: https://github.com/jupyterlab/jupyterlab/issues/15677

@@ -1,14 +1,13 @@
 name: Benchmark Tests
 
 on:
-  # schedule:
-  #   - cron: '12 1 * * 0'
-  pull_request_review:
+  issue_comment:
+    types: [created, edited]
 
 jobs:
   test:
     name: Execute benchmark tests
-    if: github.event_name == 'schedule' || (github.event_name == 'pull_request_review' && (github.event.review.state == 'approved' || contains(github.event.review.body, 'please run benchmark')))
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, 'please run benchmarks') }}
 
     runs-on: ubuntu-22.04
 
@@ -17,7 +16,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Need to fetch enough nodes to get the common ancestor - but don't want to fetch everything
           fetch-depth: 100
@@ -30,7 +29,7 @@ jobs:
 
       - name: Get hashes for PR review event
         if: ${{ github.event_name == 'pull_request_review' }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const child_process = require("child_process");
@@ -56,7 +55,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
-      - uses: iterative/setup-cml@v1
+      - uses: iterative/setup-cml@v2
 
       # First run the benchmark on the old reference
       - name: Checkout old reference
@@ -85,10 +84,7 @@ jobs:
         working-directory: galata
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Execute benchmark tests
         continue-on-error: true
@@ -129,10 +125,7 @@ jobs:
           jlpm run build
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Execute benchmark tests
         continue-on-error: true
@@ -190,7 +183,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: benchmark-assets
           path: |
@@ -212,11 +205,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get hashes for PR review event
         if: ${{ github.event_name == 'pull_request_review' }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const child_process = require("child_process");

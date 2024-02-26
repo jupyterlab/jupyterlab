@@ -10,3 +10,9 @@
   margin: 0 auto 0 0;
   padding: 4px 10px;
 }
+
+.jp-DebuggerSidebar-body
+  .jp-AccordionPanel-title
+  jp-toolbar::part(positioning-region) {
+  flex-wrap: nowrap;
+}

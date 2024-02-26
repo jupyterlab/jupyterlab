@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/buildutils",
-  "version": "4.0.2",
+  "version": "4.1.2",
   "description": "JupyterLab - Build Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -19,7 +19,8 @@
     "local-repository": "./lib/local-repository.js",
     "remove-dependency": "./lib/remove-dependency.js",
     "update-dependency": "./lib/update-dependency.js",
-    "update-dist-tag": "./lib/update-dist-tag.js"
+    "update-dist-tag": "./lib/update-dist-tag.js",
+    "update-staging-lock": "./lib/update-staging-lock.js"
   },
   "directories": {
     "lib": "lib/"
@@ -40,7 +41,8 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@yarnpkg/lockfile": "^1.1.0",
+    "@yarnpkg/core": "^3.0.0",
+    "@yarnpkg/parsers": "^2.0.0",
     "child_process": "~1.0.2",
     "commander": "^9.4.1",
     "crypto": "~1.0.1",
@@ -48,6 +50,7 @@
     "fs-extra": "^10.1.0",
     "glob": "~7.1.6",
     "inquirer": "^9.1.4",
+    "micromatch": "^4.0.2",
     "minimatch": "~3.0.4",
     "os": "~0.1.1",
     "package-json": "^7.0.0",
@@ -55,16 +58,17 @@
     "process": "^0.11.10",
     "semver": "^7.3.2",
     "sort-package-json": "~1.53.1",
-    "typescript": "~5.0.4",
-    "verdaccio": "^5.20.1"
+    "typescript": "~5.1.6",
+    "verdaccio": "^5.25.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^9.0.1",
     "@types/glob": "^7.1.1",
     "@types/inquirer": "^9.0.3",
+    "@types/micromatch": "^4.0.1",
     "@types/node": "^18.11.18",
     "@types/prettier": "~2.6.0",
-    "rimraf": "~3.0.0"
+    "rimraf": "~5.0.5"
   },
   "publishConfig": {
     "access": "public"

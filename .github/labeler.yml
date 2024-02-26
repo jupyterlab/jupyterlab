@@ -1,305 +1,437 @@
 Design System CSS:
-  - '**/*.css'
-  - '*.css'
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*.css'
+    - '*.css'
 
 documentation:
-  - docs/**/*
-  - docs/*
-  - '*.md'
-  - '**/*.md'
+- changed-files:
+  - any-glob-to-any-file:
+    - docs/**/*
+    - docs/*
+    - '*.md'
+    - '**/*.md'
 
 tag:CSS:
-  - '**/*.css'
-  - '*.css'
+- changed-files:
+  - any-glob-to-any-file:
+    - '**/*.css'
+    - '*.css'
 
 'tag:Design and UX':
-  - design/**/*
-  - design/*
+- changed-files:
+  - any-glob-to-any-file:
+    - design/**/*
+    - design/*
 
 tag:Examples:
-  - examples/**/*
-  - examples/*
+- changed-files:
+  - any-glob-to-any-file:
+    - examples/**/*
+    - examples/*
 
 tag:Testing:
-  - tests/**/*
-  - tests/*
-  - galata/**/*
-  - galata/*
+- changed-files:
+  - any-glob-to-any-file:
+    - tests/**/*
+    - tests/*
+    - galata/**/*
+    - galata/*
 
 ######################
 #   Package Labels   #
 ######################
 
 pkg:application:
-  - packages/application/**/*
-  - packages/application/*
-  - packages/application-extension/**/*
-  - packages/application-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/application/**/*
+    - packages/application/*
+    - packages/application-extension/**/*
+    - packages/application-extension/*
 
 pkg:apputils:
-  - packages/apputils/**/*
-  - packages/apputils/*
-  - packages/apputils-extension/**/*
-  - packages/apputils-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/apputils/**/*
+    - packages/apputils/*
+    - packages/apputils-extension/**/*
+    - packages/apputils-extension/*
 
 pkg:attachments:
-  - packages/attachments/**/*
-  - packages/attachments/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/attachments/**/*
+    - packages/attachments/*
 
 pkg:cell-toolbar:
-  - packages/cell-toolbar/**/*
-  - packages/cell-toolbar/*
-  - packages/cell-toolbar-extension/**/*
-  - packages/cell-toolbar-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/cell-toolbar/**/*
+    - packages/cell-toolbar/*
+    - packages/cell-toolbar-extension/**/*
+    - packages/cell-toolbar-extension/*
 
 pkg:cells:
-  - packages/cells/**/*
-  - packages/cells/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/cells/**/*
+    - packages/cells/*
 
 pkg:celltags:
-  - packages/celltags-extension/**/*
-  - packages/celltags-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/celltags-extension/**/*
+    - packages/celltags-extension/*
 
 pkg:codeeditor:
-  - packages/codeeditor/**/*
-  - packages/codeeditor/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/codeeditor/**/*
+    - packages/codeeditor/*
 
 pkg:codemirror:
-  - packages/codemirror/**/*
-  - packages/codemirror/*
-  - packages/codemirror-extension/**/*
-  - packages/codemirror-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/codemirror/**/*
+    - packages/codemirror/*
+    - packages/codemirror-extension/**/*
+    - packages/codemirror-extension/*
 
 pkg:completer:
-  - packages/completer/**/*
-  - packages/completer/*
-  - packages/completer-extension/**/*
-  - packages/completer-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/completer/**/*
+    - packages/completer/*
+    - packages/completer-extension/**/*
+    - packages/completer-extension/*
 
 pkg:console:
-  - packages/console/**/*
-  - packages/console/*
-  - packages/console-extension/**/*
-  - packages/console-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/console/**/*
+    - packages/console/*
+    - packages/console-extension/**/*
+    - packages/console-extension/*
 
 pkg:coreutils:
-  - packages/coreutils/**/*
-  - packages/coreutils/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/coreutils/**/*
+    - packages/coreutils/*
 
 pkg:csvviewer:
-  - packages/csvviewer/**/*
-  - packages/csvviewer/*
-  - packages/csvviewer-extension/**/*
-  - packages/csvviewer-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/csvviewer/**/*
+    - packages/csvviewer/*
+    - packages/csvviewer-extension/**/*
+    - packages/csvviewer-extension/*
 
 pkg:debugger:
-  - packages/debugger/**/*
-  - packages/debugger/*
-  - packages/debugger-extension/**/*
-  - packages/debugger-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/debugger/**/*
+    - packages/debugger/*
+    - packages/debugger-extension/**/*
+    - packages/debugger-extension/*
 
 pkg:docmanager:
-  - packages/docmanager/**/*
-  - packages/docmanager/*
-  - packages/docmanager-extension/**/*
-  - packages/docmanager-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/docmanager/**/*
+    - packages/docmanager/*
+    - packages/docmanager-extension/**/*
+    - packages/docmanager-extension/*
 
 pkg:docregistry:
-  - packages/docregistry/**/*
-  - packages/docregistry/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/docregistry/**/*
+    - packages/docregistry/*
 
 pkg:documentsearch:
-  - packages/documentsearch/**/*
-  - packages/documentsearch/*
-  - packages/documentsearch-extension/**/*
-  - packages/documentsearch-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/documentsearch/**/*
+    - packages/documentsearch/*
+    - packages/documentsearch-extension/**/*
+    - packages/documentsearch-extension/*
 
 pkg:extensionmanager:
-  - packages/extensionmanager/**/*
-  - packages/extensionmanager/*
-  - packages/extensionmanager-extension/**/*
-  - packages/extensionmanager-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/extensionmanager/**/*
+    - packages/extensionmanager/*
+    - packages/extensionmanager-extension/**/*
+    - packages/extensionmanager-extension/*
 
 pkg:filebrowser:
-  - packages/filebrowser/**/*
-  - packages/filebrowser/*
-  - packages/filebrowser-extension/**/*
-  - packages/filebrowser-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/filebrowser/**/*
+    - packages/filebrowser/*
+    - packages/filebrowser-extension/**/*
+    - packages/filebrowser-extension/*
 
 pkg:fileeditor:
-  - packages/fileeditor/**/*
-  - packages/fileeditor/*
-  - packages/fileeditor-extension/**/*
-  - packages/fileeditor-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/fileeditor/**/*
+    - packages/fileeditor/*
+    - packages/fileeditor-extension/**/*
+    - packages/fileeditor-extension/*
 
 pkg:help:
-  - packages/help-extension/**/*
-  - packages/help-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/help-extension/**/*
+    - packages/help-extension/*
 
 pkg:htmlviewer:
-  - packages/htmlviewer/**/*
-  - packages/htmlviewer/*
-  - packages/htmlviewer-extension/**/*
-  - packages/htmlviewer-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/htmlviewer/**/*
+    - packages/htmlviewer/*
+    - packages/htmlviewer-extension/**/*
+    - packages/htmlviewer-extension/*
 
 pkg:hub:
-  - packages/hub-extension/**/*
-  - packages/hub-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/hub-extension/**/*
+    - packages/hub-extension/*
 
 pkg:imageviewer:
-  - packages/imageviewer/**/*
-  - packages/imageviewer/*
-  - packages/imageviewer-extension/**/*
-  - packages/imageviewer-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/imageviewer/**/*
+    - packages/imageviewer/*
+    - packages/imageviewer-extension/**/*
+    - packages/imageviewer-extension/*
 
 pkg:inspector:
-  - packages/inspector/**/*
-  - packages/inspector/*
-  - packages/inspector-extension/**/*
-  - packages/inspector-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/inspector/**/*
+    - packages/inspector/*
+    - packages/inspector-extension/**/*
+    - packages/inspector-extension/*
 
 pkg:javascript:
-  - packages/javascript-extension/**/*
-  - packages/javascript-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/javascript-extension/**/*
+    - packages/javascript-extension/*
 
 pkg:json:
-  - packages/json-extension/**/*
-  - packages/json-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/json-extension/**/*
+    - packages/json-extension/*
 
 pkg:launcher:
-  - packages/launcher/**/*
-  - packages/launcher/*
-  - packages/launcher-extension/**/*
-  - packages/launcher-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/launcher/**/*
+    - packages/launcher/*
+    - packages/launcher-extension/**/*
+    - packages/launcher-extension/*
 
 pkg:logconsole:
-  - packages/logconsole/**/*
-  - packages/logconsole/*
-  - packages/logconsole-extension/**/*
-  - packages/logconsole-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/logconsole/**/*
+    - packages/logconsole/*
+    - packages/logconsole-extension/**/*
+    - packages/logconsole-extension/*
 
 pkg:lsp:
-  - packages/lsp/**/*
-  - packages/lsp/*
-  - packages/lsp-extension/**/*
-  - packages/lsp-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/lsp/**/*
+    - packages/lsp/*
+    - packages/lsp-extension/**/*
+    - packages/lsp-extension/*
 
 pkg:mainmenu:
-  - packages/mainmenu/**/*
-  - packages/mainmenu/*
-  - packages/mainmenu-extension/**/*
-  - packages/mainmenu-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/mainmenu/**/*
+    - packages/mainmenu/*
+    - packages/mainmenu-extension/**/*
+    - packages/mainmenu-extension/*
 
 pkg:markdownviewer:
-  - packages/markdownviewer/**/*
-  - packages/markdownviewer/*
-  - packages/markdownviewer-extension/**/*
-  - packages/markdownviewer-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/markdownviewer/**/*
+    - packages/markdownviewer/*
+    - packages/markdownviewer-extension/**/*
+    - packages/markdownviewer-extension/*
 
 pkg:mathjax:
-  - packages/mathjax-extension/**/*
-  - packages/mathjax-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/mathjax-extension/**/*
+    - packages/mathjax-extension/*
+
+pkg:mermaid:
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/mermaid/**/*
+    - packages/mermaid/*
+    - packages/mermaid-extension/**/*
+    - packages/mermaid-extension/*
 
 pkg:notebook:
-  - packages/notebook/**/*
-  - packages/notebook/*
-  - packages/notebook-extension/**/*
-  - packages/notebook-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/notebook/**/*
+    - packages/notebook/*
+    - packages/notebook-extension/**/*
+    - packages/notebook-extension/*
 
 pkg:observables:
-  - packages/observables/**/*
-  - packages/observables/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/observables/**/*
+    - packages/observables/*
 
 pkg:outputarea:
-  - packages/outputarea/**/*
-  - packages/outputarea/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/outputarea/**/*
+    - packages/outputarea/*
 
 pkg:pdf:
-  - packages/pdf-extension/**/*
-  - packages/pdf-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/pdf-extension/**/*
+    - packages/pdf-extension/*
 
 pkg:property-inspector:
-  - packages/property-inspector/**/*
-  - packages/property-inspector/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/property-inspector/**/*
+    - packages/property-inspector/*
+
+pkg:pluginmanager:
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/pluginmanager/**/*
+    - packages/pluginmanager/*
+    - packages/pluginmanager-extension/**/*
+    - packages/pluginmanager-extension/*
 
 pkg:rendermime:
-  - packages/rendermime/**/*
-  - packages/rendermime/*
-  - packages/rendermime-interfaces/**/*
-  - packages/rendermime-interfaces/*
-  - packages/rendermime-extension/**/*
-  - packages/rendermime-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/rendermime/**/*
+    - packages/rendermime/*
+    - packages/rendermime-interfaces/**/*
+    - packages/rendermime-interfaces/*
+    - packages/rendermime-extension/**/*
+    - packages/rendermime-extension/*
 
 pkg:running:
-  - packages/running/**/*
-  - packages/running/*
-  - packages/running-extension/**/*
-  - packages/running-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/running/**/*
+    - packages/running/*
+    - packages/running-extension/**/*
+    - packages/running-extension/*
 
 pkg:services:
-  - packages/services/**/*
-  - packages/services/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/services/**/*
+    - packages/services/*
 
 pkg:settingeditor:
-  - packages/settingeditor/**/*
-  - packages/settingeditor/*
-  - packages/settingeditor/**/*
-  - packages/settingeditor/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/settingeditor/**/*
+    - packages/settingeditor/*
+    - packages/settingeditor/**/*
+    - packages/settingeditor/*
 
 pkg:settingregistry:
-  - packages/settingregistry/**/*
-  - packages/settingregistry/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/settingregistry/**/*
+    - packages/settingregistry/*
 
 pkg:shortcuts:
-  - packages/shortcuts-extension/**/*
-  - packages/shortcuts-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/shortcuts-extension/**/*
+    - packages/shortcuts-extension/*
 
 pkg:statedb:
-  - packages/statedb/**/*
-  - packages/statedb/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/statedb/**/*
+    - packages/statedb/*
 
 pkg:statusbar:
-  - packages/statusbar/**/*
-  - packages/statusbar/*
-  - packages/statusbar-extension/**/*
-  - packages/statusbar-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/statusbar/**/*
+    - packages/statusbar/*
+    - packages/statusbar-extension/**/*
+    - packages/statusbar-extension/*
 
 pkg:terminal:
-  - packages/terminal/**/*
-  - packages/terminal/*
-  - packages/terminal-extension/**/*
-  - packages/terminal-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/terminal/**/*
+    - packages/terminal/*
+    - packages/terminal-extension/**/*
+    - packages/terminal-extension/*
 
 pkg:themes:
-  - packages/theme-dark-extension/**/*
-  - packages/theme-dark-extension/*
-  - packages/theme-light-extension/**/*
-  - packages/theme-light-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/theme-dark-extension/**/*
+    - packages/theme-dark-extension/*
+    - packages/theme-light-extension/**/*
+    - packages/theme-light-extension/*
 
 pkg:toc:
-  - packages/toc/**/*
-  - packages/toc/*
-  - packages/toc-extension/**/*
-  - packages/toc-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/toc/**/*
+    - packages/toc/*
+    - packages/toc-extension/**/*
+    - packages/toc-extension/*
 
 pkg:tooltip:
-  - packages/tooltip/**/*
-  - packages/tooltip/*
-  - packages/tooltip-extension/**/*
-  - packages/tooltip-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/tooltip/**/*
+    - packages/tooltip/*
+    - packages/tooltip-extension/**/*
+    - packages/tooltip-extension/*
 
 pkg:translation:
-  - packages/translation/**/*
-  - packages/translation/*
-  - packages/translation-extension/**/*
-  - packages/translation-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/translation/**/*
+    - packages/translation/*
+    - packages/translation-extension/**/*
+    - packages/translation-extension/*
 
 pkg:ui-components:
-  - packages/ui-components/**/*
-  - packages/ui-components/*
-  - packages/ui-components-extension/**/*
-  - packages/ui-components-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/ui-components/**/*
+    - packages/ui-components/*
+    - packages/ui-components-extension/**/*
+    - packages/ui-components-extension/*
 
 pkg:vega:
-  - packages/vega5-extension/**/*
-  - packages/vega5-extension/*
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/vega5-extension/**/*
+    - packages/vega5-extension/*

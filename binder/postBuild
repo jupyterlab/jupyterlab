@@ -19,8 +19,8 @@ mkdir _reports_
 # hoist report to where a reviewer might see it
 mv dev_mode/static/webpack-bundle-analyzer.html _reports_/
 
-# assume best-effort versions from conda-forge for all deps
-(time pip install -vv -e .[dev] --no-build-isolation)  2>&1 | tee _reports_/02_pip_install.txt
+# overload best-effort versions from conda-forge for all deps
+(time pip install -v -e .[dev] --no-build-isolation)  2>&1 | tee _reports_/02_pip_install.txt
 
 # copy configuration to well-known location
 mkdir -p ~/.jupyter

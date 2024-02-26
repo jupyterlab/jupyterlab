@@ -11,11 +11,7 @@ import { isMarkdownCellModel } from '@jupyterlab/cells';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
-import {
-  ITranslator,
-  nullTranslator,
-  TranslationBundle
-} from '@jupyterlab/translation';
+import { ITranslator } from '@jupyterlab/translation';
 import { Token } from '@lumino/coreutils';
 import { INotebookModel } from './model';
 import { Notebook, StaticNotebook } from './widget';
@@ -43,8 +39,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   constructor(options: DocumentWidget.IOptions<Notebook, INotebookModel>) {
     super(options);
-    this.translator = options.translator || nullTranslator;
-    this._trans = this.translator.load('jupyterlab');
 
     // Set up CSS classes
     this.addClass(NOTEBOOK_PANEL_CLASS);
@@ -266,13 +260,12 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     });
   }
 
-  translator: ITranslator;
-  private _trans: TranslationBundle;
   /**
    * Whether we are currently in a series of autorestarts we have already
    * notified the user about.
    */
   private _autorestarting = false;
+  translator: ITranslator;
 }
 
 /**

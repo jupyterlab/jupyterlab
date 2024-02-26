@@ -442,15 +442,16 @@ def _get_labextension_metadata(module):  # noqa
         try:
             package = (
                 subprocess.check_output(
-                    [sys.executable, "setup.py", "--name"], cwd=mod_path  # noqa S603
+                    [sys.executable, "setup.py", "--name"],  # noqa S603
+                    cwd=mod_path,
                 )
                 .decode("utf8")
                 .strip()
             )
         except subprocess.CalledProcessError:
             msg = (
-                "The Python package `{}` is not a valid package, "
-                "it is missing the `setup.py` file.".format(module)
+                f"The Python package `{module}` is not a valid package, "
+                "it is missing the `setup.py` file."
             )
             raise FileNotFoundError(msg) from None
 

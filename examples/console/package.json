@@ -1,30 +1,31 @@
 {
   "name": "@jupyterlab/example-console",
-  "version": "4.0.2",
+  "version": "4.1.2",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyter/ydoc": "^1.0.2",
-    "@jupyterlab/application": "^4.0.2",
-    "@jupyterlab/codemirror": "^4.0.2",
-    "@jupyterlab/console": "^4.0.2",
-    "@jupyterlab/coreutils": "^6.0.2",
-    "@jupyterlab/rendermime": "^4.0.2",
-    "@jupyterlab/services": "^7.0.2",
-    "@jupyterlab/theme-light-extension": "^4.0.2",
-    "@jupyterlab/translation": "^4.0.2",
-    "@lumino/commands": "^2.1.1",
-    "@lumino/widgets": "^2.1.1"
+    "@jupyter/web-components": "^0.15.2",
+    "@jupyter/ydoc": "^1.1.1",
+    "@jupyterlab/application": "^4.1.2",
+    "@jupyterlab/codemirror": "^4.1.2",
+    "@jupyterlab/console": "^4.1.2",
+    "@jupyterlab/coreutils": "^6.1.2",
+    "@jupyterlab/rendermime": "^4.1.2",
+    "@jupyterlab/services": "^7.1.2",
+    "@jupyterlab/theme-light-extension": "^4.1.2",
+    "@jupyterlab/translation": "^4.1.2",
+    "@lumino/commands": "^2.2.0",
+    "@lumino/widgets": "^2.3.1"
   },
   "devDependencies": {
     "css-loader": "^6.7.1",
     "mini-css-extract-plugin": "^2.7.0",
-    "rimraf": "~3.0.0",
+    "rimraf": "~5.0.5",
     "style-loader": "~3.3.1",
-    "typescript": "~5.0.4",
+    "typescript": "~5.1.6",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1",
     "whatwg-fetch": "^3.0.0"

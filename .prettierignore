@@ -29,12 +29,13 @@ jupyterlab/schemas
 jupyterlab/themes
 jupyterlab/geckodriver
 jupyterlab/staging/yarn.js
+jupyterlab/staging/yarn.lock
 jupyterlab/staging/index.js
 jupyterlab/staging/webpack.config.js
 packages/ui-components/src/icon/iconimports.ts
 tsconfigdoc.json
 typedoc-theme
-CHANGELOG.md
+yarn.lock
 
 # jetbrains IDE stuff
 .idea/

@@ -272,12 +272,30 @@ test.describe('Workspace in doc mode', () => {
             'running-sessions',
             '@jupyterlab/toc:plugin',
             'extensionmanager.main-view'
-          ]
+          ],
+          widgetStates: {
+            ['jp-running-sessions']: {
+              sizes: [0.25, 0.25, 0.25, 0.25],
+              expansionStates: [false, false, false, false]
+            },
+            ['extensionmanager.main-view']: {
+              sizes: [
+                0.3333333333333333, 0.3333333333333333, 0.3333333333333333
+              ],
+              expansionStates: [false, false, false]
+            }
+          }
         },
         right: {
           collapsed: true,
           visible: true,
-          widgets: []
+          widgets: ['jp-property-inspector', 'debugger-sidebar'],
+          widgetStates: {
+            ['jp-debugger-sidebar']: {
+              sizes: [0.2, 0.2, 0.2, 0.2, 0.2],
+              expansionStates: [false, false, false, false, false]
+            }
+          }
         },
         relativeSizes: [0.4, 0.6, 0],
         top: {

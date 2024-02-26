@@ -10,7 +10,9 @@ import './style.js';
 async function createModule(scope, module) {
   try {
     const factory = await window._JUPYTERLAB[scope].get(module);
-    return factory();
+    const instance = factory();
+    instance.__scope__ = scope;
+    return instance;
   } catch(e) {
     console.warn(`Failed to create module: package: ${scope}; module: ${module}`);
     throw e;
@@ -86,6 +88,8 @@ export async function main() {
     }
   });
 
+  const allPlugins = [];
+
   /**
    * Iterate over active plugins in an extension.
    *
@@ -104,7 +108,18 @@ export async function main() {
 
     let plugins = Array.isArray(exports) ? exports : [exports];
     for (let plugin of plugins) {
-      if (PageConfig.Extension.isDisabled(plugin.id)) {
+      const isDisabled = PageConfig.Extension.isDisabled(plugin.id);
+      allPlugins.push({
+        id: plugin.id,
+        description: plugin.description,
+        requires: plugin.requires ?? [],
+        optional: plugin.optional ?? [],
+        provides: plugin.provides ?? null,
+        autoStart: plugin.autoStart,
+        enabled: !isDisabled,
+        extension: extension.__scope__
+      });
+      if (isDisabled) {
         disabled.push(plugin.id);
         continue;
       }
@@ -122,6 +137,7 @@ export async function main() {
   if (!queuedFederated.includes('{{@key}}')) {
     try {
       let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+      ext.__scope__ = '{{@key}}';
       for (let plugin of activePlugins(ext)) {
         mimeExtensions.push(plugin);
       }
@@ -148,6 +164,7 @@ export async function main() {
   if (!queuedFederated.includes('{{@key}}')) {
     try {
       let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+      ext.__scope__ = '{{@key}}';
       for (let plugin of activePlugins(ext)) {
         register.push(plugin);
       }
@@ -186,9 +203,11 @@ export async function main() {
       patterns: PageConfig.Extension.deferred
         .map(function (val) { return val.raw; })
     },
+    availablePlugins: allPlugins
   });
   register.forEach(function(item) { lab.registerPluginModule(item); });
-  lab.start({ ignorePlugins });
+
+  lab.start({ ignorePlugins, bubblingKeydown: true });
 
   // Expose global app instance when in dev mode or when toggled explicitly.
   var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';

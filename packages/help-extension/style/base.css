@@ -53,9 +53,13 @@
   padding-top: 12px;
 }
 
-.jp-About-externalLinks > .jp-Button-flat,
+.jp-About-externalLinks > .jp-Button-flat {
+  text-decoration: none;
+}
+
 .jp-About-externalLinks > .jp-Button-flat:hover {
   color: var(--jp-content-link-color);
+  text-decoration: underline;
 }
 
 .jp-About-copyright {

@@ -2,10 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { WidgetLSPAdapter } from './adapters/adapter';
+import { WidgetLSPAdapter } from './adapters';
 import { LSPConnection } from './connection';
 import { ClientCapabilities } from './lsp';
 import { AskServersToSendTraceNotifications } from './plugin';
@@ -16,6 +15,7 @@ import {
   ILSPConnection,
   ILSPDocumentConnectionManager,
   ISocketConnectionOptions,
+  IWidgetLSPAdapterTracker,
   TLanguageServerConfigurations,
   TLanguageServerId,
   TServerKeys
@@ -40,6 +40,11 @@ export class DocumentConnectionManager
     this._ignoredLanguages = new Set();
     this.languageServerManager = options.languageServerManager;
     Private.setLanguageServerManager(options.languageServerManager);
+
+    options.adapterTracker.adapterAdded.connect((_, adapter) => {
+      const path = adapter.widget.context.path;
+      this.registerAdapter(path, adapter);
+    });
   }
 
   /**
@@ -49,9 +54,10 @@ export class DocumentConnectionManager
   readonly connections: Map<VirtualDocument.uri, LSPConnection>;
 
   /**
+   * @deprecated
    * Map between the path of the document and its adapter
    */
-  readonly adapters: Map<string, WidgetLSPAdapter<IDocumentWidget>>;
+  readonly adapters: Map<string, WidgetLSPAdapter>;
 
   /**
    * Map between the URI of the virtual document and the document itself.
@@ -199,16 +205,21 @@ export class DocumentConnectionManager
   }
 
   /**
+   * @deprecated
+   *
    * Register a widget adapter with this manager
    *
    * @param  path - path to the inner document of the adapter
    * @param  adapter - the adapter to be registered
    */
-  registerAdapter(
-    path: string,
-    adapter: WidgetLSPAdapter<IDocumentWidget>
-  ): void {
+  registerAdapter(path: string, adapter: WidgetLSPAdapter): void {
     this.adapters.set(path, adapter);
+
+    adapter.widget.context.pathChanged.connect((context, newPath) => {
+      this.adapters.delete(path);
+      this.adapters.set(newPath, adapter);
+    });
+
     adapter.disposed.connect(() => {
       if (adapter.virtualDocument) {
         this.documents.delete(adapter.virtualDocument.uri);
@@ -535,6 +546,11 @@ export namespace DocumentConnectionManager {
      * The language server manager instance.
      */
     languageServerManager: ILanguageServerManager;
+
+    /**
+     * The WidgetLSPAdapter's tracker.
+     */
+    adapterTracker: IWidgetLSPAdapterTracker;
   }
 
   /**

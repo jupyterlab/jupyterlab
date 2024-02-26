@@ -1,69 +1,118 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2016, Jupyter Development Team.
-|
+| Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
 :root {
   --jp-private-toolbar-height: calc(
-    28px + var(--jp-border-width)
+    31px + var(--jp-border-width)
   ); /* leave 28px for content */
 }
 
+.jp-MainAreaWidget > .jp-Toolbar {
+  border-radius: 0;
+}
+
 .jp-Toolbar {
+  /* Increase density for toolbar */
+  --design-unit: 3.5;
+  --toolbar-item-gap: 0;
+
   color: var(--jp-ui-font-color1);
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: row;
   border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
   box-shadow: var(--jp-toolbar-box-shadow);
   background: var(--jp-toolbar-background);
   min-height: var(--jp-toolbar-micro-height);
   padding: 2px;
   z-index: 8;
-  overflow-x: hidden;
 }
 
 /* Toolbar items */
 
-.jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
-  flex-grow: 1;
-  flex-shrink: 1;
-}
-
-.jp-Toolbar-item.jp-Toolbar-kernelStatus {
-  display: inline-block;
-  width: 32px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 16px;
-}
-
 .jp-Toolbar > .jp-Toolbar-item {
-  flex: 0 0 auto;
-  display: flex;
-  padding-left: 1px;
-  padding-right: 1px;
-  font-size: var(--jp-ui-font-size1);
-  line-height: var(--jp-private-toolbar-height);
+  /* Center the items in toolbar */
   height: 100%;
+  display: flex;
+  align-items: center;
+
+  /* Increase density for toolbar items */
+  --density: -4;
 }
 
-/* Toolbar buttons */
+.jp-Toolbar::part(positioning-region) {
+  align-items: center;
+}
 
-/* This is the div we use to wrap the react component into a Widget */
-div.jp-ToolbarButton {
-  color: transparent;
+.jp-ToolbarLabelComponent {
+  background: var(--jp-layout-color1);
+  background-color: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
   border: none;
   box-sizing: border-box;
   outline: none;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  padding: 0;
+  padding: 0 6px;
   margin: 0;
+  height: 24px;
+  border-radius: var(--jp-border-radius);
+  display: flex;
+  align-items: center;
+  text-align: center;
+  font-size: var(--jp-ui-font-size0);
+  min-width: unset;
+  min-height: unset;
+  user-select: none;
 }
 
+button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
+  font-size: var(--jp-ui-font-size1);
+  line-height: 100%;
+  padding-left: 2px;
+  color: var(--jp-ui-font-color1);
+  font-family: var(--jp-ui-font-family);
+}
+
+.jp-ToolbarButtonComponent::part(content) {
+  display: flex;
+  align-items: center;
+}
+
+.jp-Toolbar > .jp-Toolbar-item.jp-Toolbar-spacer {
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.jp-Toolbar-responsive-popup {
+  position: absolute;
+  height: fit-content;
+  border-bottom: var(--jp-border-width) solid var(--jp-toolbar-border-color);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  background: var(--jp-toolbar-background);
+  z-index: 1;
+  right: 0;
+  top: 0;
+}
+
+#jp-main-dock-panel[data-mode='single-document']
+  .jp-MainAreaWidget
+  > .jp-Toolbar.jp-Toolbar-micro {
+  padding: 0;
+  min-height: 0;
+}
+
+#jp-main-dock-panel[data-mode='single-document']
+  .jp-MainAreaWidget
+  > .jp-Toolbar {
+  border: none;
+  box-shadow: none;
+}
+
+/* @deprecated dead code to be removed in JupyterLab 5
+  Button in toolbar should use the ui-toolkit
+  https://github.com/jupyterlab-contrib/jupyter-ui-toolkit.
+*/
 button.jp-ToolbarButtonComponent {
   background: var(--jp-layout-color1);
   border: none;
@@ -79,7 +128,7 @@ button.jp-ToolbarButtonComponent {
   display: flex;
   align-items: center;
   text-align: center;
-  font-size: 14px;
+  font-size: var(--jp-ui-font-size0);
   min-width: unset;
   min-height: unset;
 }
@@ -91,26 +140,4 @@ button.jp-ToolbarButtonComponent:disabled {
 button.jp-ToolbarButtonComponent > span {
   padding: 0;
   flex: 0 0 auto;
-}
-
-button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
-  font-size: var(--jp-ui-font-size1);
-  line-height: 100%;
-  padding-left: 2px;
-  color: var(--jp-ui-font-color1);
-  font-family: var(--jp-ui-font-family);
-}
-
-#jp-main-dock-panel[data-mode='single-document']
-  .jp-MainAreaWidget
-  > .jp-Toolbar.jp-Toolbar-micro {
-  padding: 0;
-  min-height: 0;
-}
-
-#jp-main-dock-panel[data-mode='single-document']
-  .jp-MainAreaWidget
-  > .jp-Toolbar {
-  border: none;
-  box-shadow: none;
 }

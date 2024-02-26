@@ -18,7 +18,8 @@ export {
   waitForDialog,
   acceptDialog,
   dangerDialog,
-  dismissDialog
+  dismissDialog,
+  simulate
 } from './common';
 
 export { JupyterServer } from './start_jupyter_server';

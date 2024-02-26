@@ -246,7 +246,9 @@ test.describe('Notification center', () => {
     );
 
     await page
-      .locator('.jp-Notification-Header >> button[title="Hide notifications"]')
+      .locator(
+        '.jp-Notification-Header >> jp-button[title="Hide notifications"]'
+      )
       .click();
 
     expect(await status.getAttribute('class')).not.toMatch(

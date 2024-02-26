@@ -373,6 +373,15 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
         return Private.makeResponseError(404);
       }
       const model = files.get(path)!;
+      const overrides: { hash?: string; last_modified?: string } = {};
+      if (path == 'random-hash.txt') {
+        overrides.hash = Math.random().toString();
+      } else if (path == 'newer-timestamp-no-hash.txt') {
+        overrides.hash = undefined;
+        const tomorrow = new Date();
+        tomorrow.setDate(new Date().getDate() + 1);
+        overrides.last_modified = tomorrow.toISOString();
+      }
       if (model.type === 'directory') {
         if (options?.content !== false) {
           const content: Contents.IModel[] = [];
@@ -393,7 +402,7 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       if (options?.content != false) {
         return Promise.resolve(model);
       }
-      return Promise.resolve({ ...model, content: '' });
+      return Promise.resolve({ ...model, content: '', ...overrides });
     }),
     driveName: jest.fn(path => {
       return dummy.driveName(path);
@@ -437,10 +446,17 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       path = Private.fixSlash(path);
       const timeStamp = new Date().toISOString();
       if (files.has(path)) {
+        const updates =
+          path == 'frozen-time-and-hash.txt'
+            ? {}
+            : {
+                last_modified: timeStamp,
+                hash: timeStamp
+              };
         files.set(path, {
           ...files.get(path)!,
           ...options,
-          last_modified: timeStamp
+          ...updates
         });
       } else {
         files.set(path, {
@@ -453,7 +469,9 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
           format: 'text',
           mimetype: 'plain/text',
           ...options,
-          last_modified: timeStamp
+          last_modified: timeStamp,
+          hash: timeStamp,
+          hash_algorithm: 'static'
         });
       }
       fileChangedSignal.emit({

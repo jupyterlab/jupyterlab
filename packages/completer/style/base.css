@@ -1,6 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2016, Jupyter Development Team.
-|
+| Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
@@ -31,6 +30,7 @@
 .jp-Completer-docpanel {
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   width: 400px;
+  flex-shrink: 0;
   overflow-y: scroll;
   overflow-x: auto;
   padding: 8px;
@@ -49,7 +49,7 @@
   padding: 0;
   list-style-type: none;
   overflow-y: scroll;
-  overflow-x: auto;
+  overflow-x: hidden;
   max-height: calc((10 * var(--jp-private-completer-item-height)));
   min-height: calc(var(--jp-private-completer-item-height));
   width: 100%;
@@ -63,6 +63,7 @@
   min-width: 150px;
   display: grid;
   grid-template-columns: min-content 1fr min-content;
+  position: relative;
 }
 
 .jp-Completer-item .jp-Completer-match {
@@ -180,18 +181,17 @@
 
 .jp-Completer-loading-bar-container {
   height: 2px;
-  width: 100%;
-  background-color: var(--jp-layout-color2);
+  width: calc(100% - var(--jp-private-completer-item-height));
+  left: var(--jp-private-completer-item-height);
   position: absolute;
   overflow: hidden;
   top: 0;
-  margin-left: -8px;
 }
 
 .jp-Completer-loading-bar {
   height: 100%;
   width: 50%;
-  background-color: var(--jp-layout-color4);
+  background-color: var(--jp-accent-color2);
   position: absolute;
   left: -50%;
   animation: jp-Completer-loading 2s ease-in 0.5s infinite;
@@ -202,7 +202,134 @@
     transform: translateX(0);
   }
 
-  to {
+  100% {
     transform: translateX(400%);
   }
+}
+
+.jp-GhostText {
+  color: var(--jp-ui-font-color3);
+  white-space: pre-wrap;
+}
+
+.jp-GhostText-lineSpacer,
+.jp-GhostText-letterSpacer {
+  opacity: 0;
+  display: inline-block;
+  vertical-align: top;
+  max-width: 0;
+}
+
+.jp-GhostText-lineSpacer {
+  animation: jp-GhostText-hide 300ms 700ms ease-out forwards;
+}
+
+@keyframes jp-GhostText-hide {
+  0% {
+    font-size: unset;
+  }
+
+  100% {
+    font-size: 0;
+  }
+}
+
+.jp-GhostText[data-animation='uncover'] {
+  position: relative;
+}
+
+.jp-GhostText-streamedToken {
+  white-space: pre;
+}
+
+.jp-GhostText[data-animation='uncover'] > .jp-GhostText-streamedToken {
+  animation: jp-GhostText-typing 2s forwards;
+  display: inline-flex;
+  overflow: hidden;
+}
+
+@keyframes jp-GhostText-typing {
+  from {
+    max-width: 0;
+  }
+
+  to {
+    max-width: 100%;
+  }
+}
+
+.jp-GhostText-streamingIndicator::after {
+  animation: jp-GhostText-streaming 2s infinite;
+  animation-delay: 400ms;
+  content: ' ';
+  background: var(--jp-layout-color4);
+  opacity: 0.2;
+}
+
+@keyframes jp-GhostText-streaming {
+  0% {
+    opacity: 0.2;
+  }
+
+  20% {
+    opacity: 0.4;
+  }
+
+  40% {
+    opacity: 0.2;
+  }
+}
+
+.jp-InlineCompleter {
+  box-shadow: var(--jp-elevation-z2);
+  background: var(--jp-layout-color1);
+  color: var(--jp-content-font-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.jp-InlineCompleter-progressBar {
+  height: 2px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: var(--jp-accent-color2);
+}
+
+.jp-InlineCompleter[data-display='onHover'] {
+  opacity: 0;
+  transition:
+    visibility 0s linear 0.1s,
+    opacity 0.1s linear;
+  visibility: hidden;
+}
+
+.jp-InlineCompleter[data-display='onHover']:hover,
+.jp-InlineCompleter-hover[data-display='onHover'] {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.jp-InlineCompleter[data-display='never'] {
+  display: none;
+}
+
+.jp-InlineCompleter > .jp-Toolbar {
+  box-shadow: none;
+  border-bottom: none;
+  background: none;
+}
+
+.jp-InlineCompleter[data-show-shortcuts='false']
+  .jp-ToolbarButtonComponent-label {
+  display: none;
+}
+
+.jp-InlineCompleter [data-command='inline-completer:next'] > svg,
+.jp-InlineCompleter [data-command='inline-completer:previous'] > svg {
+  scale: 1.5;
 }

@@ -19,13 +19,13 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Set up browser cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/pw-browsers
@@ -50,10 +50,7 @@ jobs:
           jlpm run build
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Test
         run: |
@@ -65,7 +62,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-galata-test-assets
           path: |
@@ -74,7 +71,7 @@ jobs:
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-galata-report
           path: |
@@ -99,12 +96,12 @@ jobs:
         python-version: ['3.10.6']
     steps:
       - name: Checkout JupyterLab
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: core
 
       - name: Checkout demo project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: jupyterlab/jupyterlab-demo
           ref: master
@@ -119,7 +116,7 @@ jobs:
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
       - name: Set up browser cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ github.workspace }}/pw-browsers
@@ -150,7 +147,7 @@ jobs:
         run: |
           set -ex
           cd galata
-          (jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode > /tmp/jupyterlab_server.log 2>&1) &
+          (jupyter lab --config jupyter_server_test_config.py --extensions-in-dev-mode --custom-css > /tmp/jupyterlab_server.log 2>&1) &
         working-directory: core
 
       - name: Install browser
@@ -163,10 +160,7 @@ jobs:
         working-directory: core
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Test
         run: |
@@ -176,7 +170,7 @@ jobs:
 
       - name: Upload Galata Test assets
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-documentation-test-assets
           path: |
@@ -184,7 +178,7 @@ jobs:
 
       - name: Upload Galata Test report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-documentation-report
           path: |

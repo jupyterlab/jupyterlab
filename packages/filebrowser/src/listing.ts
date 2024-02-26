@@ -2251,6 +2251,8 @@ export namespace DirListing {
       const node = document.createElement('div');
       const header = document.createElement('div');
       const content = document.createElement('ul');
+      // Allow the node to scroll while dragging items.
+      content.setAttribute('data-lm-dragscroll', 'true');
       content.className = CONTENT_CLASS;
       header.className = HEADER_CLASS;
       node.appendChild(header);

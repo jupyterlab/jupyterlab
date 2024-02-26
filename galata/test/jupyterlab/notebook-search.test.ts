@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
+import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import * as path from 'path';
 
@@ -14,21 +14,21 @@ function getSelectionRange(textarea: HTMLTextAreaElement) {
   };
 }
 
+test.beforeEach(async ({ page, tmpPath }) => {
+  await page.contents.uploadFile(
+    path.resolve(__dirname, `./notebooks/${fileName}`),
+    `${tmpPath}/${fileName}`
+  );
+
+  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+  await page.notebook.activate(fileName);
+});
+
+test.afterEach(async ({ page, tmpPath }) => {
+  await page.contents.deleteDirectory(tmpPath);
+});
+
 test.describe('Notebook Search', () => {
-  test.beforeEach(async ({ page, tmpPath }) => {
-    await page.contents.uploadFile(
-      path.resolve(__dirname, `./notebooks/${fileName}`),
-      `${tmpPath}/${fileName}`
-    );
-
-    await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-    await page.notebook.activate(fileName);
-  });
-
-  test.afterEach(async ({ page, tmpPath }) => {
-    await page.contents.deleteDirectory(tmpPath);
-  });
-
   test('Search', async ({ page }) => {
     // Open search box
     await page.keyboard.press('Control+f');
@@ -40,6 +40,19 @@ test.describe('Notebook Search', () => {
     const nbPanel = await page.notebook.getNotebookInPanel();
 
     expect(await nbPanel.screenshot()).toMatchSnapshot('search.png');
+  });
+
+  test('Should open search box in edit mode', async ({ page }) => {
+    // Enter edit mode
+    await page.notebook.enterCellEditingMode(0);
+
+    await page.keyboard.press('Control+f');
+
+    // Wait for the search box
+    await page.getByPlaceholder('Find').waitFor();
+
+    // Check the CM search panel is not displayed.
+    await expect(page.locator('.cm-search.cm-panel')).toHaveCount(0);
   });
 
   test('Typing in search box', async ({ page }) => {
@@ -81,7 +94,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/1');
 
     // Show replace buttons to check for visual regressions
-    await page.click('button[title="Toggle Replace"]');
+    await page.click('button[title="Show Replace"]');
     await page.fill('[placeholder="Replace"]', 'line1\nline2');
 
     const overlay = page.locator('.jp-DocumentSearch-overlay');
@@ -162,6 +175,28 @@ test.describe('Notebook Search', () => {
     await expect(inputWithTestLocator).toBeVisible();
     // Expect the search to be active again
     await page.waitForSelector('text=1/2');
+  });
+
+  test('Clear search when box is empty', async ({ page }) => {
+    // Open search box
+    await page.keyboard.press('Control+f');
+
+    // Search for "test"
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'test');
+
+    // Should find "test" matches
+    await page.locator('text=1/2').waitFor();
+    await expect(page.locator('[placeholder="Find"]')).toHaveValue('test');
+
+    // Remove the "test" query
+    for (let i = 0; i < 4; i++) {
+      await page.press('[placeholder="Find"]', 'Backspace');
+    }
+    await expect(page.locator('[placeholder="Find"]')).toHaveValue('');
+
+    // Should reset the search to a clean state
+    await page.locator('text=-/-').waitFor();
   });
 
   test('Close with Escape', async ({ page }) => {
@@ -363,7 +398,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/21');
 
     // Click next button
-    await page.click('button[title="Next Match"]');
+    await page.click('button[title^="Next Match"]');
 
     const cell = await page.notebook.getCell(0);
 
@@ -381,7 +416,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/21');
 
     // Click next button
-    await page.click('button[title="Next Match"]', {
+    await page.click('button[title^="Next Match"]', {
       clickCount: 4
     });
 
@@ -399,13 +434,13 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/21');
 
     // Click previous button
-    await page.click('button[title="Previous Match"]');
+    await page.click('button[title^="Previous Match"]');
     // Should cycle back
     await page.waitForSelector('text=21/21');
 
     // Click previous button twice
-    await page.click('button[title="Previous Match"]');
-    await page.click('button[title="Previous Match"]');
+    await page.click('button[title^="Previous Match"]');
+    await page.click('button[title^="Previous Match"]');
     // Should move up by two
     await page.waitForSelector('text=19/21');
 
@@ -427,7 +462,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=20/21');
 
     // Click previous button
-    await page.click('button[title="Previous Match"]');
+    await page.click('button[title^="Previous Match"]');
     await page.waitForSelector('text=19/21');
   });
 
@@ -440,7 +475,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/21');
 
     // Click next button
-    await page.click('button[title="Next Match"]', {
+    await page.click('button[title^="Next Match"]', {
       clickCount: 4
     });
 
@@ -533,5 +568,183 @@ test.describe('Notebook Search', () => {
     expect(await nbPanel.screenshot()).toMatchSnapshot(
       'search-on-deleted-cell.png'
     );
+  });
+
+  test('Toggle search in selection with shortcut', async ({ page }) => {
+    const filterCheckbox = page.getByLabel('Search in 1 Selected Cell');
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    await expect(filterCheckbox).not.toBeChecked();
+    // Toggle search in selection on
+    await page.keyboard.press('Alt+l');
+    await expect(filterCheckbox).toBeChecked();
+    // Toggle search in selection off
+    await page.keyboard.press('Alt+l');
+    await expect(filterCheckbox).not.toBeChecked();
+  });
+
+  test('Show shortcuts in tooltips', async ({ page }) => {
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+
+    await expect(
+      page.locator('button[title="Next Match (Ctrl+G)"]')
+    ).toHaveCount(1);
+    await expect(
+      page.locator('button[title="Previous Match (Ctrl+Shift+G)"]')
+    ).toHaveCount(1);
+    await expect(
+      page.locator(
+        'label[title="Search only in the selected cells or text (depending on edit/command mode). (Alt+L)"]'
+      )
+    ).toHaveCount(1);
+  });
+});
+
+test.describe('Auto search in multiple selection', async () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/documentsearch-extension:plugin': {
+        autoSearchInSelection: 'multiple-selected'
+      }
+    }
+  });
+
+  test('Toggles search in cell selection', async ({ page }) => {
+    // Bring focus to first cell without switching away from command mode
+    let cell = await page.notebook.getCell(0);
+    await (await cell.$('.jp-InputPrompt')).click();
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled when only 1 cell is selected
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+    // Close search box
+    await page.keyboard.press('Escape');
+
+    // Select a cell below
+    await page.keyboard.press('Shift+ArrowDown');
+    // Open search box (filters should already be shown)
+    await page.keyboard.press('Control+f');
+    // Expect search in selection to be enabled since 2 cells are selected
+    await expect(page.getByLabel('Search in 2 Selected Cells')).toBeChecked();
+  });
+
+  test('Toggles search in line selection', async ({ page }) => {
+    // Activate third cell
+    const cell = await page.notebook.getCell(2);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Select 1st line
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.press('Shift+End');
+
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled when only 1 cell is selected
+    // As only one line is selected, the filter proposes to search in the cell.
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+
+    // Select 1st and 2nd line
+    await editor.click();
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.press('Shift+End');
+    await page.keyboard.press('Shift+ArrowDown');
+    // Open search box (filters should already be shown)
+    await page.keyboard.press('Control+f');
+    // Expect search in selection to be enabled since 2 lines are selected
+    await expect(page.getByLabel('Search in 2 Selected Lines')).toBeChecked();
+  });
+});
+
+test.describe('Auto search in any selection', async () => {
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/documentsearch-extension:plugin': {
+        autoSearchInSelection: 'any-selected'
+      }
+    }
+  });
+
+  test('Toggles search in cell selection', async ({ page }) => {
+    // Bring focus to first cell without switching away from command mode
+    let cell = await page.notebook.getCell(0);
+    await (await cell.$('.jp-InputPrompt')).click();
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled as while there is an >active<
+    // cell, no cells are >selected<; the label is not ideal but it may be
+    // preferred as-is for consistency.
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+  });
+
+  test('Toggles search in line selection', async ({ page }) => {
+    // Activate third cell
+    const cell = await page.notebook.getCell(2);
+    const editor = await cell.$('.jp-Editor');
+    await editor.click();
+
+    // Open search box and show filters
+    await page.keyboard.press('Control+f');
+    await page.click('button[title="Show Search Filters"]');
+    // Expect search in selection to be disabled as no character is selected.
+    await expect(
+      page.getByLabel('Search in 1 Selected Cell')
+    ).not.toBeChecked();
+
+    // Select 1st line
+    await editor.click();
+    await page.keyboard.press('Control+Home');
+    await page.keyboard.press('Shift+End');
+
+    // Open search box (filters should already be shown)
+    await page.keyboard.press('Control+f');
+    // Expect search in selection to be enabled as 1 line is selected.
+    await expect(page.getByLabel('Search in 1 Selected Line')).toBeChecked();
+  });
+});
+
+test.describe('Search from selection', () => {
+  test('should expand the selection to the next occurence', async ({
+    page
+  }) => {
+    // This could be improved as the following statement will double click
+    // on the last line within the first cell that will result in the last word being selected.
+    await page.getByRole('textbox').getByText('with').nth(1).dblclick();
+
+    await page.keyboard.press('Control+d');
+
+    await expect(
+      page.getByRole('main').locator('.cm-selectionBackground')
+    ).toHaveCount(2);
+  });
+
+  test('should expand the selection to all occurence', async ({ page }) => {
+    // This could be improved as the following statement will double click
+    // on the last line within the first cell that will result in the last word being selected.
+    await page.getByRole('textbox').getByText('with').nth(1).dblclick();
+
+    await page.keyboard.press('Control+Shift+l');
+
+    // Switch back to notebook
+    // FIXME it should not be needed when we get https://github.com/jupyterlab/lumino/pull/662
+    await page.activity.activateTab(fileName);
+
+    await expect(
+      page.getByRole('main').locator('.cm-selectionBackground')
+    ).toHaveCount(4);
   });
 });

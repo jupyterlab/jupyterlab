@@ -25,12 +25,12 @@ ideas with others.
 
 JupyterLab is a sibling to other notebook authoring applications under
 the `Project Jupyter <https://docs.jupyter.org/en/latest/>`_ umbrella, like
-`Jupyter Notebook <https://jupyterlab.readthedocs.io/en/latest/>`_ and
+`Jupyter Notebook <https://jupyter-notebook.readthedocs.io/en/latest/>`_ and
 `Jupyter Desktop <https://github.com/jupyterlab/jupyterlab-desktop>`_. JupyterLab
 offers a more advanced, feature rich, customizable experience compared to
 Jupyter Notebook.
 
-`Try JupyterLab on Binder <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/3818244?urlpath=lab/tree/demo>`__.  JupyterLab follows the Jupyter `Community Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
+`Try JupyterLab on Binder <https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/HEAD?urlpath=lab/tree/demo>`__.  JupyterLab follows the Jupyter `Community Guides <https://jupyter.readthedocs.io/en/latest/community/content-community.html>`__.
 
 .. image:: ./images/jupyterlab.png
    :align: center

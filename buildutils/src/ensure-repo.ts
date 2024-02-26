@@ -43,9 +43,10 @@ const URL_CONFIG = {
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
-  '@jupyterlab/buildutils': ['path', 'webpack'],
+  '@jupyterlab/buildutils': ['assert', 'fs', 'path', 'webpack'],
   '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
+  '@jupyterlab/markedparser-extension': ['Tokens', 'MarkedOptions'],
   '@jupyterlab/testing': ['fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
@@ -103,6 +104,11 @@ const UNUSED: Dict<string[]> = {
   ],
   '@jupyterlab/coreutils': ['path-browserify'],
   '@jupyterlab/fileeditor': ['regexp-match-indices'],
+  '@jupyterlab/markedparser-extension': [
+    // only (but always) imported asynchronously
+    'marked-gfm-heading-id',
+    'marked-mangle'
+  ],
   '@jupyterlab/services': ['ws'],
   '@jupyterlab/testing': [
     '@babel/core',
@@ -245,11 +251,15 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/markdownviewer-extension',
     '@jupyterlab/markedparser-extension',
     '@jupyterlab/mathjax-extension',
+    '@jupyterlab/mermaid',
+    '@jupyterlab/mermaid-extension',
     '@jupyterlab/metadataform',
     '@jupyterlab/metadataform-extension',
     '@jupyterlab/nbconvert-css',
     '@jupyterlab/notebook-extension',
     '@jupyterlab/pdf-extension',
+    '@jupyterlab/pluginmanager',
+    '@jupyterlab/pluginmanager-extension',
     '@jupyterlab/rendermime-extension',
     '@jupyterlab/running',
     '@jupyterlab/running-extension',
@@ -854,27 +864,6 @@ export async function ensureIntegrity(): Promise<boolean> {
 
   // Handle buildutils
   ensureBuildUtils();
-
-  // Handle the pyproject.toml file
-  const pyprojectPath = path.resolve('.', 'pyproject.toml');
-  const curr = utils.getPythonVersion();
-  let tag = 'latest';
-  if (!/\d+\.\d+\.\d+$/.test(curr)) {
-    tag = 'next';
-  }
-  const publishCommand = `npm publish --tag ${tag}`;
-  let pyprojectText = fs.readFileSync(pyprojectPath, { encoding: 'utf8' });
-  if (pyprojectText.indexOf(publishCommand) === -1) {
-    pyprojectText = pyprojectText.replace(
-      /npm publish --tag [a-z]+/,
-      publishCommand
-    );
-    fs.writeFileSync(pyprojectPath, pyprojectText, { encoding: 'utf8' });
-    if (!messages['top']) {
-      messages['top'] = [];
-    }
-    messages['top'].push('Update npm publish command in pyproject.toml');
-  }
 
   // Handle the federated example application
   pkgMessages = ensureFederatedExample();

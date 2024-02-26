@@ -37,4 +37,13 @@ test.describe('General Tests', () => {
 
     expect(await page.theme.getTheme()).toEqual('JupyterLab Light');
   });
+
+  test('Toggle adaptive theme', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.menu.clickMenuItem(
+      'Settings>Theme>Synchronize with System Settings'
+    );
+    await page.reload();
+    expect(await page.theme.getTheme()).toEqual('JupyterLab Dark');
+  });
 });

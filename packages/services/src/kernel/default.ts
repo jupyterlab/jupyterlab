@@ -21,8 +21,6 @@ import {
   KernelShellFutureHandler
 } from './future';
 
-import { deserialize, serialize } from './serialize';
-
 import * as validate from './validate';
 import { KernelSpec, KernelSpecAPI } from '../kernelspec';
 
@@ -407,7 +405,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       KernelMessage.isInfoRequestMsg(msg)
     ) {
       if (this.connectionStatus === 'connected') {
-        this._ws!.send(serialize(msg, this._ws!.protocol));
+        this._ws!.send(
+          this.serverSettings.serializer.serialize(msg, this._ws!.protocol)
+        );
         return;
       } else {
         throw new Error('Could not send message: status is not connected');
@@ -425,7 +425,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this.connectionStatus === 'connected' &&
       this._kernelSession !== RESTARTING_KERNEL_SESSION
     ) {
-      this._ws!.send(serialize(msg, this._ws!.protocol));
+      this._ws!.send(
+        this.serverSettings.serializer.serialize(msg, this._ws!.protocol)
+      );
     } else if (queue) {
       this._pendingMessages.push(msg);
     } else {
@@ -1571,7 +1573,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // Notify immediately if there is an error with the message.
     let msg: KernelMessage.IMessage;
     try {
-      msg = deserialize(evt.data, this._ws!.protocol);
+      msg = this.serverSettings.serializer.deserialize(
+        evt.data,
+        this._ws!.protocol
+      );
       validate.validateMessage(msg);
     } catch (error) {
       error.message = `Kernel message validation error: ${error.message}`;

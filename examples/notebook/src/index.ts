@@ -7,23 +7,23 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
   'example/'
 );
 
-import '@jupyterlab/application/style/index.css';
-import '@jupyterlab/codemirror/style/index.css';
-import '@jupyterlab/completer/style/index.css';
-import '@jupyterlab/documentsearch/style/index.css';
-import '@jupyterlab/notebook/style/index.css';
-import '@jupyterlab/theme-light-extension/style/theme.css';
-import '../index.css';
+// Import style through JS file to deduplicate them.
+import './style';
 
-import { ServiceManager } from '@jupyterlab/services';
-import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
-
+import { IYText } from '@jupyter/ydoc';
 import {
-  NotebookModelFactory,
-  NotebookPanel,
-  NotebookWidgetFactory
-} from '@jupyterlab/notebook';
-
+  Toolbar as AppToolbar,
+  CommandToolbarButton,
+  SessionContextDialogs
+} from '@jupyterlab/apputils';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService,
+  EditorExtensionRegistry,
+  EditorLanguageRegistry,
+  EditorThemeRegistry,
+  ybinding
+} from '@jupyterlab/codemirror';
 import {
   Completer,
   CompleterModel,
@@ -31,31 +31,28 @@ import {
   KernelCompleterProvider,
   ProviderReconciliator
 } from '@jupyterlab/completer';
-
-import {
-  CodeMirrorEditorFactory,
-  CodeMirrorMimeTypeService,
-  EditorExtensionRegistry,
-  EditorLanguageRegistry,
-  ybinding
-} from '@jupyterlab/codemirror';
-
 import { DocumentManager } from '@jupyterlab/docmanager';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
-
+import { createMarkdownParser } from '@jupyterlab/markedparser-extension';
+import { MathJaxTypesetter } from '@jupyterlab/mathjax-extension';
+import {
+  ExecutionIndicator,
+  NotebookModelFactory,
+  NotebookPanel,
+  NotebookWidgetFactory,
+  StaticNotebook,
+  ToolbarItems
+} from '@jupyterlab/notebook';
 import {
   standardRendererFactories as initialFactories,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-
-import { IYText } from '@jupyter/ydoc';
-
+import { ServiceManager } from '@jupyterlab/services';
+import { Toolbar } from '@jupyterlab/ui-components';
 import { CommandRegistry } from '@lumino/commands';
-
 import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
 
-import { SetupCommands } from './commands';
+import { COMMAND_IDS, setupCommands } from './commands';
 
 function main(): void {
   const manager = new ServiceManager();
@@ -78,9 +75,12 @@ function createApp(manager: ServiceManager.IManager): void {
     useCapture
   );
 
+  const languages = new EditorLanguageRegistry();
+
   const rendermime = new RenderMimeRegistry({
     initialFactories: initialFactories,
-    latexTypesetter: new MathJaxTypesetter()
+    latexTypesetter: new MathJaxTypesetter(),
+    markdownParser: createMarkdownParser(languages)
   });
 
   const opener = {
@@ -107,12 +107,17 @@ function createApp(manager: ServiceManager.IManager): void {
   });
   const mFactory = new NotebookModelFactory({});
   const editorExtensions = () => {
+    const themes = new EditorThemeRegistry();
+    EditorThemeRegistry.getDefaultThemes().forEach(theme => {
+      themes.addTheme(theme);
+    });
     const registry = new EditorExtensionRegistry();
-    for (const extensionFactory of EditorExtensionRegistry.getDefaultExtensions(
-      {}
-    )) {
-      registry.addExtension(extensionFactory);
-    }
+
+    EditorExtensionRegistry.getDefaultExtensions({ themes }).forEach(
+      extensionFactory => {
+        registry.addExtension(extensionFactory);
+      }
+    );
     registry.addExtension({
       name: 'shared-model-binding',
       factory: options => {
@@ -127,7 +132,6 @@ function createApp(manager: ServiceManager.IManager): void {
     });
     return registry;
   };
-  const languages = new EditorLanguageRegistry();
   EditorLanguageRegistry.getDefaultLanguages()
     .filter(language =>
       ['ipython', 'julia', 'python'].includes(language.name.toLowerCase())
@@ -154,6 +158,44 @@ function createApp(manager: ServiceManager.IManager): void {
   const editorFactory = factoryService.newInlineEditor;
   const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
+  const sessionContextDialogs = new SessionContextDialogs();
+  const toolbarFactory = (panel: NotebookPanel) =>
+    [
+      COMMAND_IDS.save,
+      COMMAND_IDS.insert,
+      COMMAND_IDS.deleteCell,
+      COMMAND_IDS.cut,
+      COMMAND_IDS.copy,
+      COMMAND_IDS.paste,
+      COMMAND_IDS.runAndAdvance,
+      COMMAND_IDS.interrupt,
+      COMMAND_IDS.restart,
+      COMMAND_IDS.restartAndRun
+    ]
+      .map<DocumentRegistry.IToolbarItem>(id => ({
+        name: id,
+        widget: new CommandToolbarButton({
+          commands,
+          id,
+          args: { toolbar: true }
+        })
+      }))
+      .concat([
+        { name: 'cellType', widget: ToolbarItems.createCellTypeItem(panel) },
+        { name: 'spacer', widget: Toolbar.createSpacerItem() },
+        {
+          name: 'kernelName',
+          widget: AppToolbar.createKernelNameItem(
+            panel.sessionContext,
+            sessionContextDialogs
+          )
+        },
+        {
+          name: 'executionProgress',
+          widget: ExecutionIndicator.createExecutionIndicatorItem(panel)
+        }
+      ]);
+
   const wFactory = new NotebookWidgetFactory({
     name: 'Notebook',
     modelName: 'notebook',
@@ -163,7 +205,12 @@ function createApp(manager: ServiceManager.IManager): void {
     canStartKernel: true,
     rendermime,
     contentFactory,
-    mimeTypeService
+    mimeTypeService,
+    toolbarFactory,
+    notebookConfig: {
+      ...StaticNotebook.defaultNotebookConfig,
+      windowingMode: 'none'
+    }
   });
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
@@ -227,7 +274,7 @@ function createApp(manager: ServiceManager.IManager): void {
     panel.update();
   });
 
-  SetupCommands(commands, palette, nbWidget, handler);
+  setupCommands(commands, palette, nbWidget, handler, sessionContextDialogs);
 
   console.debug('Example started!');
 }

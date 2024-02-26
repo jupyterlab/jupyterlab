@@ -9,7 +9,8 @@ import {
   IFilter,
   IFilters,
   IReplaceOptionsSupport,
-  ISearchProvider
+  ISearchProvider,
+  SelectionState
 } from './tokens';
 
 /**
@@ -38,7 +39,7 @@ export class SearchDocumentModel
       }
     }
 
-    searchProvider.stateChanged.connect(this.refresh, this);
+    searchProvider.stateChanged.connect(this._onProviderStateChanged, this);
 
     this._searchDebouncer = new Debouncer(() => {
       this._updateSearch().catch(reason => {
@@ -119,6 +120,18 @@ export class SearchDocumentModel
    */
   get suggestedInitialQuery(): string {
     return this.searchProvider.getInitialQuery();
+  }
+
+  /**
+   * Whether the selection includes a single item or multiple items;
+   * this is used by the heuristic auto-enabling "search in selection" mode.
+   *
+   * Returns `undefined` if the provider does not expose this information.
+   */
+  get selectionState(): SelectionState | undefined {
+    return this.searchProvider.getSelectionState
+      ? this.searchProvider.getSelectionState()
+      : undefined;
   }
 
   /**
@@ -235,7 +248,10 @@ export class SearchDocumentModel
       });
     }
 
-    this.searchProvider.stateChanged.disconnect(this.refresh, this);
+    this.searchProvider.stateChanged.disconnect(
+      this._onProviderStateChanged,
+      this
+    );
 
     this._searchDebouncer.dispose();
     super.dispose();
@@ -245,6 +261,7 @@ export class SearchDocumentModel
    * End the query.
    */
   async endQuery(): Promise<void> {
+    this._searchActive = false;
     await this.searchProvider.endQuery();
     this.stateChanged.emit();
   }
@@ -338,10 +355,14 @@ export class SearchDocumentModel
           )
         : null;
       if (query) {
+        this._searchActive = true;
         await this.searchProvider.startQuery(query, this._filters);
-        // Emit state change as the index needs to be updated
-        this.stateChanged.emit();
+      } else {
+        this._searchActive = false;
+        await this.searchProvider.endQuery();
       }
+      // Emit state change as the index needs to be updated
+      this.stateChanged.emit();
     } catch (reason) {
       this._parsingError = reason.toString();
       this.stateChanged.emit();
@@ -352,6 +373,12 @@ export class SearchDocumentModel
     }
   }
 
+  private _onProviderStateChanged() {
+    if (this._searchActive) {
+      this.refresh();
+    }
+  }
+
   private _caseSensitive = false;
   private _disposed = new Signal<this, void>(this);
   private _parsingError = '';
@@ -359,6 +386,7 @@ export class SearchDocumentModel
   private _initialQuery = '';
   private _filters: IFilters = {};
   private _replaceText: string = '';
+  private _searchActive = false;
   private _searchDebouncer: Debouncer;
   private _searchExpression = '';
   private _useRegex = false;

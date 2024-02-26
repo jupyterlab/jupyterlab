@@ -1,27 +1,36 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  COMPLETER_ACTIVE_CLASS,
+  COMPLETER_ENABLED_CLASS
+} from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import {
+  CellChange,
+  FileChange,
+  ISharedBaseCell,
+  ISharedFile,
+  ISharedText,
+  SourceChange
+} from '@jupyter/ydoc';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
-import { Signal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { IProviderReconciliator } from './tokens';
+import {
+  CompletionTriggerKind,
+  IInlineCompletionItem,
+  IInlineCompletionList,
+  IInlineCompletionProviderInfo,
+  InlineCompletionTriggerKind,
+  IProviderReconciliator
+} from './tokens';
 import { Completer } from './widget';
-
-/**
- * A class added to editors that can host a completer.
- */
-const COMPLETER_ENABLED_CLASS: string = 'jp-mod-completer-enabled';
-
-/**
- * A class added to editors that have an active completer.
- */
-const COMPLETER_ACTIVE_CLASS: string = 'jp-mod-completer-active';
+import { InlineCompleter } from './inline';
 
 /**
  * A completion handler for editors.
@@ -32,6 +41,7 @@ export class CompletionHandler implements IDisposable {
    */
   constructor(options: CompletionHandler.IOptions) {
     this.completer = options.completer;
+    this.inlineCompleter = options.inlineCompleter;
     this.completer.selected.connect(this.onCompletionSelected, this);
     this.completer.visibilityChanged.connect(this.onVisibilityChanged, this);
     this._reconciliator = options.reconciliator;
@@ -41,6 +51,7 @@ export class CompletionHandler implements IDisposable {
    * The completer widget managed by the handler.
    */
   readonly completer: Completer;
+  readonly inlineCompleter: InlineCompleter | undefined;
 
   set reconciliator(reconciliator: IProviderReconciliator) {
     this._reconciliator = reconciliator;
@@ -66,7 +77,7 @@ export class CompletionHandler implements IDisposable {
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.disconnect(this.onTextChanged, this);
+      model.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
     }
 
     // Reset completer state.
@@ -80,9 +91,20 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.connect(this.onTextChanged, this);
+      // We expect the model to be an editor, a file editor, or a cell.
+      const sharedModel = model.sharedModel as
+        | ISharedText
+        | ISharedFile
+        | ISharedBaseCell;
+      // For cells and files the `changed` signal is not limited to text,
+      // but also fires on changes to metadata, outputs, execution count,
+      // and state changes, hence we need to filter the change type.
+      sharedModel.changed.connect(this._onSharedModelChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
+      if (this.inlineCompleter) {
+        this.inlineCompleter.editor = editor;
+      }
     }
   }
 
@@ -113,6 +135,21 @@ export class CompletionHandler implements IDisposable {
     }
     this._isDisposed = true;
     Signal.clearData(this);
+  }
+
+  /**
+   * Invoke the inline completer on explicit user request.
+   */
+  invokeInline(): void {
+    const editor = this._editor;
+    if (editor) {
+      this._makeInlineRequest(
+        editor.getCursorPosition(),
+        InlineCompletionTriggerKind.Invoke
+      ).catch(reason => {
+        console.warn('Inline invoke request bailed', reason);
+      });
+    }
   }
 
   /**
@@ -189,7 +226,10 @@ export class CompletionHandler implements IDisposable {
 
     const editor = this._editor;
     if (editor) {
-      this._makeRequest(editor.getCursorPosition()).catch(reason => {
+      this._makeRequest(
+        editor.getCursorPosition(),
+        CompletionTriggerKind.Invoked
+      ).catch(reason => {
         console.warn('Invoke request bailed', reason);
       });
     }
@@ -224,6 +264,12 @@ export class CompletionHandler implements IDisposable {
 
     if (!editor) {
       return;
+    }
+
+    const inlineModel = this.inlineCompleter?.model;
+    if (inlineModel) {
+      // Dispatch selection change.
+      inlineModel.handleSelectionChange(editor.getSelection());
     }
 
     const host = editor.host;
@@ -280,35 +326,56 @@ export class CompletionHandler implements IDisposable {
   /**
    * Handle a text changed signal from an editor.
    */
-  protected onTextChanged(str: ISharedText, changed: SourceChange): void {
-    const model = this.completer.model;
-    if (!model || !this._enabled) {
+  protected async onTextChanged(
+    str: ISharedText,
+    changed: SourceChange
+  ): Promise<void> {
+    if (!this._enabled) {
       return;
     }
 
-    // If there is a text selection, no completion is allowed.
+    const model = this.completer.model;
     const editor = this.editor;
     if (!editor) {
       return;
     }
     if (
+      model &&
       this._autoCompletion &&
-      (this._reconciliator as IProviderReconciliator)
-        .shouldShowContinuousHint &&
-      (this._reconciliator as IProviderReconciliator).shouldShowContinuousHint(
+      this._reconciliator.shouldShowContinuousHint &&
+      (await this._reconciliator.shouldShowContinuousHint(
         this.completer.isVisible,
         changed
-      )
+      ))
     ) {
-      void this._makeRequest(editor.getCursorPosition());
-    }
-    const { start, end } = editor.getSelection();
-    if (start.column !== end.column || start.line !== end.line) {
-      return;
+      void this._makeRequest(
+        editor.getCursorPosition(),
+        CompletionTriggerKind.TriggerCharacter
+      );
     }
 
-    // Dispatch the text change.
-    model.handleTextChange(this.getState(editor, editor.getCursorPosition()));
+    const inlineModel = this.inlineCompleter?.model;
+    if (inlineModel) {
+      // Dispatch the text change to inline completer
+      // (this happens before request is sent)
+      inlineModel.handleTextChange(changed);
+      if (this._continuousInline) {
+        void this._makeInlineRequest(
+          editor.getCursorPosition(),
+          InlineCompletionTriggerKind.Automatic
+        );
+      }
+    }
+
+    if (model) {
+      // If there is a text selection, no completion is allowed.
+      const { start, end } = editor.getSelection();
+      if (start.column !== end.column || start.line !== end.line) {
+        return;
+      }
+      // Dispatch the text change.
+      model.handleTextChange(this.getState(editor, editor.getCursorPosition()));
+    }
   }
 
   /**
@@ -331,21 +398,34 @@ export class CompletionHandler implements IDisposable {
   }
 
   /**
+   * Handle a text shared model change signal from an editor.
+   */
+  private async _onSharedModelChanged(
+    str: ISharedText,
+    changed: SourceChange | CellChange | FileChange
+  ): Promise<void> {
+    if (changed.sourceChange) {
+      await this.onTextChanged(str, changed);
+    }
+  }
+
+  /**
    * Make a completion request.
    */
-  private _makeRequest(position: CodeEditor.IPosition): Promise<void> {
+  private _makeRequest(
+    position: CodeEditor.IPosition,
+    trigger: CompletionTriggerKind
+  ): Promise<void> {
     const editor = this.editor;
 
     if (!editor) {
       return Promise.reject(new Error('No active editor'));
     }
 
-    const text = editor.model.sharedModel.getSource();
-    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
+    const request = this._composeRequest(editor, position);
     const state = this.getState(editor, position);
-    const request: CompletionHandler.IRequest = { text, offset };
     return this._reconciliator
-      .fetch(request)
+      .fetch(request, trigger)
       .then(reply => {
         if (!reply) {
           return;
@@ -363,6 +443,83 @@ export class CompletionHandler implements IDisposable {
       .catch(p => {
         /* Fails silently. */
       });
+  }
+
+  private async _makeInlineRequest(
+    position: CodeEditor.IPosition,
+    trigger: InlineCompletionTriggerKind
+  ) {
+    const editor = this.editor;
+
+    if (!editor) {
+      return Promise.reject(new Error('No active editor'));
+    }
+    if (!this.inlineCompleter) {
+      return Promise.reject(new Error('No inline completer'));
+    }
+
+    const line = editor.getLine(position.line);
+    if (typeof line === 'undefined' || position.column < line.length) {
+      // only auto-trigger on end of line
+      return;
+    }
+
+    const request = this._composeRequest(editor, position);
+
+    const model = this.inlineCompleter.model;
+    if (!model) {
+      return;
+    }
+    model.cursor = position;
+
+    const current = ++this._fetchingInline;
+    const promises = this._reconciliator.fetchInline(request, trigger);
+
+    const completed = new Set<
+      Promise<IInlineCompletionList<CompletionHandler.IInlineItem> | null>
+    >();
+    for (const promise of promises) {
+      promise
+        .then(result => {
+          if (!result || !result.items) {
+            return;
+          }
+          if (current !== this._fetchingInline) {
+            return;
+          }
+          completed.add(promise);
+          if (completed.size === 1) {
+            model.setCompletions(result);
+          } else {
+            model.appendCompletions(result);
+          }
+        })
+        .catch(e => {
+          // Emit warning for debugging.
+          console.warn(e);
+        })
+        .finally(() => {
+          // Mark the provider promise as completed.
+          completed.add(promise);
+          // Let the model know that we are awaiting for fewer providers now.
+          const remaining = promises.length - completed.size;
+          model.notifyProgress({
+            pendingProviders: remaining,
+            totalProviders: promises.length
+          });
+        });
+    }
+  }
+  private _fetchingInline = 0;
+
+  private _composeRequest(
+    editor: CodeEditor.IEditor,
+    position: CodeEditor.IPosition
+  ): CompletionHandler.IRequest {
+    const text = editor.model.sharedModel.getSource();
+    const mimeType = editor.model.mimeType;
+    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), text);
+    return { text, offset, mimeType };
   }
 
   /**
@@ -395,6 +552,7 @@ export class CompletionHandler implements IDisposable {
   private _enabled = false;
   private _isDisposed = false;
   private _autoCompletion = false;
+  private _continuousInline = true;
 }
 
 /**
@@ -409,6 +567,11 @@ export namespace CompletionHandler {
      * The completion widget the handler will connect to.
      */
     completer: Completer;
+
+    /**
+     * The inline completer widget; when absent inline completion is disabled.
+     */
+    inlineCompleter?: InlineCompleter;
 
     /**
      * The reconciliator that will fetch and merge completions from active providers.
@@ -489,7 +652,8 @@ export namespace CompletionHandler {
    * A reply to a completion items fetch request.
    */
   export interface ICompletionItemsReply<
-    T extends CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
+    T extends
+      CompletionHandler.ICompletionItem = CompletionHandler.ICompletionItem
   > {
     /**
      * The starting index for the substring being replaced by completion.
@@ -506,6 +670,34 @@ export namespace CompletionHandler {
   }
 
   /**
+   * Stream event type.
+   */
+  export enum StraemEvent {
+    opened,
+    update,
+    closed
+  }
+
+  export interface IInlineItem extends IInlineCompletionItem {
+    /**
+     * The source provider information.
+     */
+    provider: IInlineCompletionProviderInfo;
+    /**
+     * Signal emitted when the item gets updated by streaming.
+     */
+    stream: ISignal<IInlineItem, StraemEvent>;
+    /**
+     * Most recent streamed token if any.
+     */
+    lastStreamed?: string;
+    /**
+     * Whether streaming is in progress.
+     */
+    streaming: boolean;
+  }
+
+  /**
    * The details of a completion request.
    */
   export interface IRequest {
@@ -518,6 +710,11 @@ export namespace CompletionHandler {
      * The text being completed.
      */
     text: string;
+
+    /**
+     * The MIME type under the cursor.
+     */
+    mimeType?: string;
   }
 
   /**

@@ -501,7 +501,7 @@ export namespace EditorLanguageRegistry {
       {
         name: 'SQL',
         displayName: trans.__('SQL'),
-        mime: 'text/x-sql',
+        mime: ['application/sql', 'text/x-sql'],
         extensions: ['sql'],
         load() {
           return sql('StandardSQL');

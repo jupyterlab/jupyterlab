@@ -1,6 +1,8 @@
-// Copyright (c) Jupyter Development Team.
-// Copyright (c) Bloomberg Finance LP.
-// Distributed under the terms of the Modified BSD License.
+/*
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ * Copyright (c) Bloomberg Finance LP.
+ */
 
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type { IRouter } from '@jupyterlab/application';

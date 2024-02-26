@@ -1,6 +1,5 @@
 /*-----------------------------------------------------------------------------
-| Copyright (c) 2014-2017, Jupyter Development Team.
-|
+| Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
@@ -120,11 +119,6 @@ button.jp-Dialog-close-button {
 
 .jp-Dialog-checkbox {
   padding-right: 5px;
-}
-
-.jp-Dialog-checkbox > input:focus-visible {
-  outline: 1px solid var(--jp-input-active-border-color);
-  outline-offset: 1px;
 }
 
 .jp-Dialog-spacer {

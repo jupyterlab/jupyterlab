@@ -205,7 +205,7 @@ export namespace Build {
           rules: [
             {
               test: /\.css$/,
-              use: [MiniCssExtractPlugin.loader, 'css-loader']
+              use: [MiniCssExtractPlugin.loader, require.resolve('css-loader')]
             },
             {
               test: /\.svg/,

@@ -99,6 +99,7 @@ directory open.
 Right-click on a file or directory and select "Copy Path" to copy the
 filesystem relative path. This can be used for passing arguments to open
 files in functions called in various kernels.
+If you want to copy the filesystem absolute path, you must add the jupyterlab server config `LabServerApp.copy_absolute_path=True` and `ServerApp.root_dir = 'xxx'`.
 
 Creating Files and Activities
 -----------------------------
