@@ -279,7 +279,7 @@ export class SidebarHelper {
     width = 251,
     side: galata.SidebarPosition = 'left'
   ): Promise<boolean> {
-    if (!this.isOpen(side)) {
+    if (!(await this.isOpen(side))) {
       return false;
     }
 
