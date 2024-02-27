@@ -36,6 +36,7 @@
 
 .jp-DocumentSearch-overlay button.jp-DocumentSearch-button-wrapper:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .jp-DocumentSearch-overlay button:not(:disabled):hover {
