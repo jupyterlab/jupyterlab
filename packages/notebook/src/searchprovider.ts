@@ -525,7 +525,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
         ),
         buttons: [
           Dialog.cancelButton({ label: trans.__('Cancel') }),
-          Dialog.okButton({ label: trans.__('OK') })
+          Dialog.okButton({ label: trans.__('Ok') })
         ]
       });
       if (reply.button.accept) {
