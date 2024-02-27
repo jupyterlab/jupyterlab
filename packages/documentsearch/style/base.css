@@ -164,7 +164,7 @@ button:not(:disabled) > .jp-DocumentSearch-up-down-button:hover {
   background-color: var(--jp-layout-color2);
 }
 
-button:not(:disabled) .jp-DocumentSearch-up-down-button:active {
+button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
   background-color: var(--jp-layout-color3);
 }
 
