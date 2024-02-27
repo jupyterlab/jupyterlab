@@ -160,7 +160,7 @@
   margin: 1px 5px 2px;
 }
 
-button:not(:disabled) .jp-DocumentSearch-up-down-button:hover {
+button:not(:disabled) > .jp-DocumentSearch-up-down-button:hover {
   background-color: var(--jp-layout-color2);
 }
 
