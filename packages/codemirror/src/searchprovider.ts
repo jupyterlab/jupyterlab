@@ -351,6 +351,13 @@ export abstract class EditorSearchProvider<
 
         // End at the end of the CodeMirror matches list; do not loop
         // Let the caller call highlightNext if we've reached the end of the current code cell
+
+        // If the query also matches the replacement text, move to the next match, to prevent
+        // an infinite loop of replacing only the first match
+        if (this.query !== null && newText.match(this.query)) {
+          this.currentIndex++;
+        }
+
         this.currentIndex =
           this.currentIndex < cmMatchesRemaining ? this.currentIndex : null;
 
