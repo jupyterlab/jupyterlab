@@ -346,7 +346,16 @@ export abstract class EditorSearchProvider<
       if (!match) {
         this.currentIndex = null;
       } else {
-        this.cmHandler.matches.splice(this.currentIndex, 1);
+        const substitutedText = options?.regularExpression
+          ? match!.text.replace(this.query!, newText)
+          : newText;
+
+        // If the replacement text matches the query, consider there to be an extra match.
+        // TODO: Rerun the entire query, if a regex might cause the number of matches to
+        // change further?
+        if (this.query === null || !substitutedText.match(this.query)) {
+          this.cmHandler.matches.splice(this.currentIndex, 1);
+        }
         const cmMatchesRemaining = this.cmHandler.matches.length;
 
         // End at the end of the CodeMirror matches list; do not loop
@@ -361,9 +370,6 @@ export abstract class EditorSearchProvider<
         this.currentIndex =
           this.currentIndex < cmMatchesRemaining ? this.currentIndex : null;
 
-        const substitutedText = options?.regularExpression
-          ? match!.text.replace(this.query!, newText)
-          : newText;
         const insertText = options?.preserveCase
           ? GenericSearchProvider.preserveCase(match.text, substitutedText)
           : substitutedText;
