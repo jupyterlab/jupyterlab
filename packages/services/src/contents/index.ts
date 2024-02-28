@@ -1109,7 +1109,7 @@ export class Drive implements Contents.IDrive {
    *
    * @returns A promise which resolves with the file content.
    *
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async get(
     localPath: string,
@@ -1168,7 +1168,7 @@ export class Drive implements Contents.IDrive {
    *    file is created.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async newUntitled(
     options: Contents.ICreateOptions = {}
@@ -1210,7 +1210,7 @@ export class Drive implements Contents.IDrive {
    * @returns A promise which resolves when the file is deleted.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
    */
   async delete(localPath: string): Promise<void> {
     const url = this._getUrl(localPath);
@@ -1241,7 +1241,7 @@ export class Drive implements Contents.IDrive {
    *   the file is renamed.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async rename(
     oldLocalPath: string,
@@ -1281,7 +1281,7 @@ export class Drive implements Contents.IDrive {
    * #### Notes
    * Ensure that `model.content` is populated for the file.
    *
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async save(
     localPath: string,
@@ -1322,7 +1322,7 @@ export class Drive implements Contents.IDrive {
    * #### Notes
    * The server will select the name of the copied file.
    *
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
     const settings = this.serverSettings;
@@ -1355,7 +1355,7 @@ export class Drive implements Contents.IDrive {
    *   checkpoint is created.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async createCheckpoint(
     localPath: string
@@ -1385,7 +1385,7 @@ export class Drive implements Contents.IDrive {
    *    the file.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents) and validates the response model.
    */
   async listCheckpoints(
     localPath: string
@@ -1420,7 +1420,7 @@ export class Drive implements Contents.IDrive {
    * @returns A promise which resolves when the checkpoint is restored.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
    */
   async restoreCheckpoint(
     localPath: string,
@@ -1449,7 +1449,7 @@ export class Drive implements Contents.IDrive {
    * @returns A promise which resolves when the checkpoint is deleted.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
    */
   async deleteCheckpoint(
     localPath: string,
@@ -1524,7 +1524,7 @@ export namespace Drive {
     /**
      * A REST endpoint for drive requests.
      * If not given, defaults to the Jupyter
-     * REST API given by [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
+     * REST API given by [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/contents).
      */
     apiEndpoint?: string;
   }
