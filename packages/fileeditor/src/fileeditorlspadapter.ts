@@ -44,6 +44,9 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
       .then(async () => {
         await this.initOnceReady();
         this._readyDelegate.resolve();
+        this._editorAdded.emit({
+          editor: this._virtualEditor
+        });
       })
       .catch(console.error);
   }
@@ -150,6 +153,9 @@ export class FileEditorAdapter extends WidgetLSPAdapter<
     if (this.isDisposed) {
       return;
     }
+    this._editorRemoved.emit({
+      editor: this._virtualEditor
+    });
     this.editor.model.mimeTypeChanged.disconnect(this.reloadConnection);
     super.dispose();
   }
