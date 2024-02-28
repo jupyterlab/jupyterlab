@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { StreamLanguage } from '@codemirror/language';
+import { LanguageSupport, StreamLanguage } from '@codemirror/language';
 import { IYText } from '@jupyter/ydoc';
 import {
   JupyterFrontEnd,
@@ -20,6 +20,7 @@ import {
   IEditorLanguageRegistry,
   IEditorThemeRegistry,
   parseMathIPython,
+  pythonBuiltin,
   ybinding
 } from '@jupyterlab/codemirror';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -62,17 +63,22 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
       name: 'ipythongfm',
       mime: 'text/x-ipythongfm',
       load: async () => {
-        const [m, tex] = await Promise.all([
+        const [m, py, tex] = await Promise.all([
           import('@codemirror/lang-markdown'),
+          import('@codemirror/lang-python'),
           import('@codemirror/legacy-modes/mode/stex')
         ]);
-        return m.markdown({
+        const mdlang = m.markdown({
           base: m.markdownLanguage,
           codeLanguages: (info: string) => languages.findBest(info) as any,
           extensions: [
             parseMathIPython(StreamLanguage.define(tex.stexMath).parser)
           ]
         });
+        return new LanguageSupport(mdlang.language, [
+          mdlang.support,
+          pythonBuiltin(py.pythonLanguage)
+        ]);
       }
     });
     return languages;
