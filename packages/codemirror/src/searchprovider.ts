@@ -351,8 +351,8 @@ export abstract class EditorSearchProvider<
           : newText;
 
         // If the replacement text matches the query, consider there to be an extra match.
-        // TODO: Rerun the entire query, if a regex might cause the number of matches to
-        // change further?
+        // TODO: Rerun the query starting from the point after the replacement
+        // text ends, and highlight the first match from that point to the end?
         if (this.query === null || !substitutedText.match(this.query)) {
           this.cmHandler.matches.splice(this.currentIndex, 1);
         }
