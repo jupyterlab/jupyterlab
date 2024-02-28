@@ -6,7 +6,7 @@ import { expect, test } from '@jupyterlab/galata';
 //Viewport of 320x256 CSS pixels is equilavent to an initial starting viewport of 1280x1024 CSS pixels at 400% zoom.
 //Ensures accessibility for varying visual acuity.
 //Constraints include balancing device requirements and maintaining responsiveness.
-test.use({ viewport: { width: 1280, height: 720 } });
+test.use({ viewport: { width: 320, height: 256 } });
 
 test.describe('Low Vision / Zoom Support', () => {
   test.beforeEach(async ({ page }) => {
