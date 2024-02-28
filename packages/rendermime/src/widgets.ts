@@ -184,7 +184,7 @@ export class RenderedHTML extends RenderedHTMLCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    return renderers.renderHTML({
+    return (this._rendered = renderers.renderHTML({
       host: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
@@ -194,17 +194,24 @@ export class RenderedHTML extends RenderedHTMLCommon {
       shouldTypeset: this.isAttached,
       latexTypesetter: this.latexTypesetter,
       translator: this.translator
-    });
+    }));
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
-    }
+    this._rendered
+      .then(() => {
+        if (this.latexTypesetter) {
+          this.latexTypesetter.typeset(this.node);
+        }
+      })
+      .catch(console.warn);
   }
+
+  // A promise which resolves when most recent rendering is complete.
+  private _rendered: Promise<void> = Promise.resolve();
 }
 
 /**
@@ -229,22 +236,29 @@ export class RenderedLatex extends RenderedCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    return renderers.renderLatex({
+    return (this._rendered = renderers.renderLatex({
       host: this.node,
       source: String(model.data[this.mimeType]),
       shouldTypeset: this.isAttached,
       latexTypesetter: this.latexTypesetter
-    });
+    }));
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
-    }
+    this._rendered
+      .then(() => {
+        if (this.latexTypesetter) {
+          this.latexTypesetter.typeset(this.node);
+        }
+      })
+      .catch(console.warn);
   }
+
+  // A promise which resolves when most recent rendering is complete.
+  private _rendered: Promise<void> = Promise.resolve();
 }
 
 /**
@@ -306,7 +320,7 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    return renderers.renderMarkdown({
+    return (this._rendered = renderers.renderMarkdown({
       host: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
@@ -317,7 +331,7 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
       latexTypesetter: this.latexTypesetter,
       markdownParser: this.markdownParser,
       translator: this.translator
-    });
+    }));
   }
 
   /**
@@ -335,10 +349,17 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
-    }
+    this._rendered
+      .then(() => {
+        if (this.latexTypesetter) {
+          this.latexTypesetter.typeset(this.node);
+        }
+      })
+      .catch(console.warn);
   }
+
+  // A promise which resolves when most recent rendering is complete.
+  private _rendered: Promise<void> = Promise.resolve();
 }
 
 /**
@@ -366,23 +387,30 @@ export class RenderedSVG extends RenderedCommon {
     const metadata = model.metadata[this.mimeType] as
       | ReadonlyJSONObject
       | undefined;
-    return renderers.renderSVG({
+    return (this._rendered = renderers.renderSVG({
       host: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
       unconfined: metadata && (metadata.unconfined as boolean | undefined),
       translator: this.translator
-    });
+    }));
   }
 
   /**
    * A message handler invoked on an `'after-attach'` message.
    */
   onAfterAttach(msg: Message): void {
-    if (this.latexTypesetter) {
-      this.latexTypesetter.typeset(this.node);
-    }
+    this._rendered
+      .then(() => {
+        if (this.latexTypesetter) {
+          this.latexTypesetter.typeset(this.node);
+        }
+      })
+      .catch(console.warn);
   }
+
+  // A promise which resolves when most recent rendering is complete.
+  private _rendered: Promise<void> = Promise.resolve();
 }
 
 /**
