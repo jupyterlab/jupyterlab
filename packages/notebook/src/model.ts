@@ -424,12 +424,6 @@ close the notebook without saving it.`,
     this.triggerContentChange();
   }
 
-  private _onForkChanged(
-    update: Uint8Array
-  ): void {
-    console.log('update', update);
-  }
-
   private _onStateChanged(
     sender: ISharedNotebook,
     changes: NotebookChange
@@ -443,12 +437,24 @@ close the notebook without saving it.`,
           // and the local attribute are synchronized one way shared model -> _dirty
           this.dirty = value.newValue;
         } else if (value.name.startsWith(fork_prefix)) {
-          const forkId = value.name.slice(fork_prefix.length);
+          // a fork has been published
           // don't do anything if the fork is us
-          if (forkId !== this.sharedModel.forkId) {
-            const forkedSharedModel = YNotebook.create();
-            this.sharedModel.getProvider(forkId, forkedSharedModel);
-            forkedSharedModel.ydoc.on('update', this._onForkChanged);
+          const forkId = value.name.slice(fork_prefix.length);
+          if (forkId !== this.sharedModel.roomId) {
+            const dialog = new Dialog({
+              title: this._trans.__('New suggestion'),
+              body: this._trans.__('Open notebook for suggestion?'),
+              buttons: [
+                Dialog.okButton({ label: 'Open' }),
+                Dialog.cancelButton({ label: 'Discard' }),
+              ],
+            });
+            dialog.launch().then(resp => {
+              dialog.close();
+              if (resp.button.label === 'Open') {
+                this.sharedModel.provider.connectFork(forkId);
+              }
+            });
           }
         } else if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
