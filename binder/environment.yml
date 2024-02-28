@@ -55,11 +55,5 @@ dependencies:
   - xeus-python
   # extra conda stuff
   - jsonschema-with-format-nongpl
-  # jupyter-collaboration 1.2.0
-  - jupyter_ydoc >=1.0.1,<2.0.0
-  - ypy-websocket >=0.12.1,<0.13.0
+  - jupyter-collaboration >= 2.0.1
   - jupyter_events >=0.7.0
-  - jupyter_server_fileid >=0.7.0,<1
-  - pip:
-    # can't be installed with `conda` in binder, due to `jupyterlab-link-share``
-    - jupyter-collaboration ==1.2.0

@@ -478,3 +478,4 @@ new issues show up in the future:
 - HTTP Error 502: Bad Gateway (JupyterLab `4.0.0a23`): https://github.com/jupyterlab/jupyterlab/issues/12324
 - Degraded performance of npm publish (JupyterLab `4.0.0b2`): https://github.com/jupyterlab/jupyterlab/issues/14431
 - Wrong URLs break publishing to npm with provenance: https://github.com/jupyterlab/jupyterlab/pull/15462
+- Release team missing privileges on packages removed in 4.0: https://github.com/jupyterlab/jupyterlab/issues/15677

@@ -610,7 +610,8 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
             console.debug('scrolling to heading: using fallback strategy');
             await widget.content.scrollToItem(
               widget.content.activeCellIndex,
-              this.scrollToTop ? 'start' : undefined
+              this.scrollToTop ? 'start' : undefined,
+              0
             );
           }
         };

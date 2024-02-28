@@ -276,6 +276,14 @@ pkg:mathjax:
     - packages/mathjax-extension/**/*
     - packages/mathjax-extension/*
 
+pkg:mermaid:
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/mermaid/**/*
+    - packages/mermaid/*
+    - packages/mermaid-extension/**/*
+    - packages/mermaid-extension/*
+
 pkg:notebook:
 - changed-files:
   - any-glob-to-any-file:

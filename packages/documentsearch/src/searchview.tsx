@@ -682,7 +682,11 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
               className={TOGGLE_WRAPPER}
               onClick={() => this._onReplaceToggled()}
               tabIndex={0}
-              title={trans.__('Toggle Replace')}
+              title={
+                showReplace
+                  ? trans.__('Hide Replace')
+                  : trans.__('Show Replace')
+              }
             >
               <icon.react
                 className={`${REPLACE_TOGGLE_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -729,6 +733,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
             className={BUTTON_WRAPPER_CLASS}
             onClick={() => this._onClose()}
             tabIndex={0}
+            title={trans.__('Close Search Box')}
           >
             <closeIcon.react
               className="jp-icon-hover"
