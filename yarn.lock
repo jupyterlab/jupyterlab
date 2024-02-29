@@ -2375,7 +2375,6 @@ __metadata:
     "@types/prettier": ~2.6.0
     "@yarnpkg/core": ^3.0.0
     "@yarnpkg/parsers": ^2.0.0
-    child_process: ~1.0.2
     commander: ^9.4.1
     crypto: ~1.0.1
     dependency-graph: ^0.11.0
@@ -4818,7 +4817,6 @@ __metadata:
     "@types/jest": ^29.2.0
     "@types/node": ^18.11.18
     "@types/node-fetch": ^2.6.2
-    child_process: ~1.0.2
     deepmerge: ^4.2.2
     fs-extra: ^10.1.0
     identity-obj-proxy: ^3.0.0
@@ -9189,13 +9187,6 @@ __metadata:
     "@chevrotain/utils": ^9.1.0
     regexp-to-ast: 0.5.0
   checksum: 632d0d7c69081e3cc3a08c071cb738c46499a05f1a513b7f9101f7a9b5570d6ee62cac5ba506659a85bf9e71e1029c462dbb7bd9fe1bfe019b6c1879ca29c525
-  languageName: node
-  linkType: hard
-
-"child_process@npm:~1.0.2":
-  version: 1.0.2
-  resolution: "child_process@npm:1.0.2"
-  checksum: bd814d82bc8c6e85ed6fb157878978121cd03b5296c09f6135fa3d081fd9a6a617a6d509c50397711df713af403331241a9c0397a7fad30672051485e156c2a1
   languageName: node
   linkType: hard
 
