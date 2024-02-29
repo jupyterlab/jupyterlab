@@ -302,8 +302,15 @@ about 7 minutes again.
 
 Setting up a local development environment
 ------------------------------------------
+
+.. note::
+
+   Look at the :ref:`automated dev environment <automatic_local_dev_env>` section,
+   for some automation ways to set up a local development environment.
+
 This section explains how to set up a local development environment. We assume you use GNU/Linux,
-macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__ and then using the Anaconda command prompt for all installation steps.
+macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__
+and then using the Anaconda command prompt for all installation steps.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -352,19 +359,48 @@ With Homebrew:
 
    brew install pkg-config cairo pango libpng jpeg giflib librsvg
 
+.. _automatic_local_dev_env:
+
 Using automation to set up a local development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While there is a lot to learn by following the steps above, they can be automated to save time. The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
+While there is a lot to learn by following the steps above, they can be automated to save time.
+The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
 re-build the environment, better standardisation ("baseline", reproducible environments).
-This section shows how to do that using Docker and Vagrant.
+This section shows how to do that using VS Code dev containers, Docker and Vagrant.
+
+**Setup for VS Code**
+"""""""""""""""""""""
+
+To start a local development environment for JupyterLab using VS Code dev containers,
+you need to:
+
+1. Install the VS Code `Dev Containers extension <https://code.visualstudio.com/docs/devcontainers/tutorial>`__.
+
+2. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab/fork>`__.
+
+3. Clone your fork locally:
+
+.. code:: bash
+
+   git clone https://github.com/<your-github-username>/jupyterlab.git
+
+4. Open the local clone with VS Code.
+
+5. Open the repository in a container.
+   VS Code should prompt you with a pop-up to do so. In case it does not, you can click on the
+   icon ``><`` on the bottom left. Then choose *Reopen in container*.
+
+.. note::
+
+   It will take quite some times the first time.
 
 **Setup using Docker**
-""""""""""""""""""""""""
+""""""""""""""""""""""
 
 To start a JupyterLab development container in a UNIX system with docker installed:
 
-1. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab>`__.
+1. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab/fork>`__.
 
 2. Start the container:
 
@@ -401,7 +437,7 @@ To add TypeScript dependencies to the project, you need to log into the containe
    bash docker/start.sh build
 
 **Setup using Vagrant**
-""""""""""""""""""""""""""""
+"""""""""""""""""""""""
 
 A practical example can be found `there <https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant>`_ and
 includes a ``Vagrantfile``, the bootstrap files and additional documentation.
