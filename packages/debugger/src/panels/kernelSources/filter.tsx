@@ -22,24 +22,7 @@ const FilterBox = (props: IFilterBoxProps) => {
     props.model.filter = filter;
   };
   return (
-    
-    // appearance?: 'outline' | 'filled';
-    // autofocus?: boolean;
-    // disabled?: boolean;
-    // form?: string;
-    // label?: string;
-    // list?: string;
-    // maxlength?: number;
-    // minlength?: number;
-    // name?: string;
-    // pattern?: string;
-    // placeholder?: string;
-    // readonly?: boolean;
-    // required?: boolean;
-    // size?: number;
-    // value?: string;
     <Search
-      // type="text"
       onChange={onFilterChange}
       placeholder="Filter the kernel sources"
       value={props.model.filter}
