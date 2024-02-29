@@ -14,9 +14,9 @@ import { LabIconStyle } from '../style';
 import { classes, getReactAttrs } from '../utils';
 
 export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
-  /* ****
+  /** *********
    * statics *
-   *****/
+   ***********/
 
   /**
    * Remove any rendered icon from the element that contains it
@@ -205,9 +205,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   private static _debug: boolean = false;
   private static _instances = new Map<string, LabIcon>();
 
-  /* ****
+  /** *********
    * members *
-   *****/
+   ***********/
 
   constructor({
     name,
@@ -291,7 +291,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * provided, this tag will be used when creating the container
    *
    * @param stylesheet - optional string naming a builtin icon
-   * stylesheet, for example 'menuItem' or statusBar. Can also be an
+   * stylesheet, for example 'menuItem' or `statusBar`. Can also be an
    * object defining a custom icon stylesheet, or a list of builtin
    * stylesheet names and/or custom stylesheet objects. If array,
    * the given stylesheets will be merged.
@@ -594,7 +594,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * provided, this tag will be used when creating the container
    *
    * @param stylesheet - optional string naming a builtin icon
-   * stylesheet, for example 'menuItem' or statusBar. Can also be an
+   * stylesheet, for example 'menuItem' or `statusBar`. Can also be an
    * object defining a custom icon stylesheet, or a list of builtin
    * stylesheet names and/or custom stylesheet objects. If array,
    * the given stylesheets will be merged.
@@ -636,7 +636,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
 export namespace LabIcon {
   /** ***********
    * interfaces *
-  *************/
+   *************/
 
   /**
    * The simplest possible interface for defining a generic icon.
@@ -688,7 +688,7 @@ export namespace LabIcon {
      * if no container is passed in
      *
      * #### Notes
-     * If null is provided and no container is defined, the icon SVG will return directly
+     * If `null` is provided and no container is defined, the icon SVG will return directly
      * ignoring all other attributes (label, title,...)
      */
     tag?: 'div' | 'span' | null;
@@ -712,7 +712,7 @@ export namespace LabIcon {
 
   /** ******
    * types *
-  *********/
+   *********/
 
   /**
    * A type that can be resolved to a LabIcon instance.
@@ -885,9 +885,9 @@ namespace Private {
       .match(
         strict
           ? // match based on data url schema
-          /^(?:data:.*?(;base64)?,)?(.*)/
+        /^(?:data:.*?(;base64)?,)?(.*)/
           : // match based on open of svg tag
-          /(?:(base64).*)?(<svg.*)/
+        /(?:(base64).*)?(<svg.*)/
       )!;
 
     // decode from base64, if needed
