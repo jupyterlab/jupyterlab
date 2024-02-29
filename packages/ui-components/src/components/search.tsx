@@ -184,7 +184,6 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
       target.value
     );
   };
-  
   return (
     <Search
       ref={props.inputRef}
@@ -192,11 +191,8 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
       onChange={handleChange}
       placeholder={props.placeholder}
       disabled={props.disabled}
-      slot='end'
     >
-      <div slot='end'>
-        <searchIcon.react stylesheet="menuItem" tag="span"/>
-      </div>
+        <searchIcon.react slot='end' />
       </Search>
   );
 };
