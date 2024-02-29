@@ -1,11 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { InputGroup, UseSignal } from '@jupyterlab/ui-components';
+import { UseSignal } from '@jupyterlab/ui-components';
 
 import React from 'react';
 
 import { IDebugger } from '../../tokens';
+
+import { Search } from '@jupyter/react-components';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -20,8 +22,24 @@ const FilterBox = (props: IFilterBoxProps) => {
     props.model.filter = filter;
   };
   return (
-    <InputGroup
-      type="text"
+    
+    // appearance?: 'outline' | 'filled';
+    // autofocus?: boolean;
+    // disabled?: boolean;
+    // form?: string;
+    // label?: string;
+    // list?: string;
+    // maxlength?: number;
+    // minlength?: number;
+    // name?: string;
+    // pattern?: string;
+    // placeholder?: string;
+    // readonly?: boolean;
+    // required?: boolean;
+    // size?: number;
+    // value?: string;
+    <Search
+      // type="text"
       onChange={onFilterChange}
       placeholder="Filter the kernel sources"
       value={props.model.filter}
