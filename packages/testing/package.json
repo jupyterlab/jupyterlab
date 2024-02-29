@@ -38,7 +38,6 @@
     "@jupyterlab/coreutils": "^6.1.2",
     "@lumino/coreutils": "^2.1.2",
     "@lumino/signaling": "^2.1.2",
-    "child_process": "~1.0.2",
     "deepmerge": "^4.2.2",
     "fs-extra": "^10.1.0",
     "identity-obj-proxy": "^3.0.0",
