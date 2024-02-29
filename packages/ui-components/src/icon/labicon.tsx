@@ -634,9 +634,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
  * A namespace for LabIcon statics.
  */
 export namespace LabIcon {
-  /* ****
+  /** ***********
    * interfaces *
-   *****/
+  *************/
 
   /**
    * The simplest possible interface for defining a generic icon.
@@ -710,9 +710,9 @@ export namespace LabIcon {
     fallback?: LabIcon;
   }
 
-  /* ***
+  /** ******
    * types *
-   ***/
+  *********/
 
   /**
    * A type that can be resolved to a LabIcon instance.
@@ -885,9 +885,9 @@ namespace Private {
       .match(
         strict
           ? // match based on data url schema
-            /^(?:data:.?(;base64)?,)?(.)/
+          /^(?:data:.*?(;base64)?,)?(.*)/
           : // match based on open of svg tag
-            /(?:(base64).)?(<svg.)/
+          /(?:(base64).*)?(<svg.*)/
       )!;
 
     // decode from base64, if needed
