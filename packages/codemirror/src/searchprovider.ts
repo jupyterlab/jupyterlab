@@ -350,22 +350,20 @@ export abstract class EditorSearchProvider<
           ? match!.text.replace(this.query!, newText)
           : newText;
 
-        // If the replacement text matches the query, consider there to be an extra match.
         // TODO: Rerun the query starting from the point after the replacement
         // text ends, and highlight the first match from that point to the end?
         if (this.query === null || !substitutedText.match(this.query)) {
           this.cmHandler.matches.splice(this.currentIndex, 1);
         }
+        else {
+          // If the query also matches the replacement text, move to the next match, to prevent
+          // an infinite loop of replacing only the first match
+          this.currentIndex++;
+        }
         const cmMatchesRemaining = this.cmHandler.matches.length;
 
         // End at the end of the CodeMirror matches list; do not loop
         // Let the caller call highlightNext if we've reached the end of the current code cell
-
-        // If the query also matches the replacement text, move to the next match, to prevent
-        // an infinite loop of replacing only the first match
-        if (this.query !== null && newText.match(this.query)) {
-          this.currentIndex++;
-        }
 
         this.currentIndex =
           this.currentIndex < cmMatchesRemaining ? this.currentIndex : null;
