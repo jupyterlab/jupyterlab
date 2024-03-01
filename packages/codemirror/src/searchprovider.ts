@@ -349,17 +349,22 @@ export abstract class EditorSearchProvider<
         const substitutedText = options?.regularExpression
           ? match!.text.replace(this.query!, newText)
           : newText;
+        const insertText = options?.preserveCase
+          ? GenericSearchProvider.preserveCase(match.text, substitutedText)
+          : substitutedText;
 
         // TODO: Rerun the query starting from the point after the replacement
         // text ends, and highlight the first match from that point to the end?
-        if (this.query === null || !substitutedText.match(this.query)) {
-          this.cmHandler.matches.splice(this.currentIndex, 1);
-        }
-        else {
+        if (this.query !== null && substitutedText.match(this.query)) {
           // If the query also matches the replacement text, move to the next match, to prevent
           // an infinite loop of replacing only the first match
           this.currentIndex++;
+          this.highlightNext();
         }
+        else {
+          this.cmHandler.matches.splice(this.currentIndex, 1);
+        }
+
         const cmMatchesRemaining = this.cmHandler.matches.length;
 
         // End at the end of the CodeMirror matches list; do not loop
@@ -368,9 +373,6 @@ export abstract class EditorSearchProvider<
         this.currentIndex =
           this.currentIndex < cmMatchesRemaining ? this.currentIndex : null;
 
-        const insertText = options?.preserveCase
-          ? GenericSearchProvider.preserveCase(match.text, substitutedText)
-          : substitutedText;
         this.model.sharedModel.updateSource(
           match!.position,
           match!.position + match!.text.length,
