@@ -90,6 +90,7 @@ export class NotebookModelFactory
       languagePreference: options.languagePreference,
       sharedModel: options.sharedModel,
       collaborationEnabled: options.collaborationEnabled && this.collaborative,
+      suggestions: options.suggestions,
       disableDocumentWideUndoRedo: this._disableDocumentWideUndoRedo
     });
   }

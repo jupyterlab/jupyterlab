@@ -2091,7 +2091,7 @@ __metadata:
 
 "@jupyter/ydoc@file:.yalc/@jupyter/ydoc::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
   version: 2.0.1
-  resolution: "@jupyter/ydoc@file:.yalc/@jupyter/ydoc#.yalc/@jupyter/ydoc::hash=d13236&locator=%40jupyterlab%2Frepo-top%40workspace%3A."
+  resolution: "@jupyter/ydoc@file:.yalc/@jupyter/ydoc#.yalc/@jupyter/ydoc::hash=dfd892&locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
     "@jupyterlab/nbformat": ^3.0.0 || ^4.0.0-alpha.21 || ^4.0.0
     "@lumino/coreutils": ^1.11.0 || ^2.0.0
@@ -2099,7 +2099,7 @@ __metadata:
     "@lumino/signaling": ^1.10.0 || ^2.0.0
     y-protocols: ^1.0.5
     yjs: ^13.5.40
-  checksum: 4b906adf8d1eb9461463456f39be7225281d8f9f59213af58dad3d1383f2436760f7a6a60b6d87795e95662c6ff4323c41069644cf6833b2ad2d1310aa9a46fd
+  checksum: 9f6a80d6c7e736f28004bcd0dd4abe8216ecb4f0e19dbc55e0a1ac3fa94136b5013224735ea33a27e64d1c7ae06990005b2f924352dce12529ed61d38b1f1c55
   languageName: node
   linkType: hard
 
