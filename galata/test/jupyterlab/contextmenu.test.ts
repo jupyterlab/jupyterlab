@@ -192,4 +192,30 @@ test.describe('Application Context Menu', () => {
     const menu = await page.menu.getOpenMenu();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
+
+  test('Open console context menu', async ({ page }) => {
+    await page.menu.clickMenuItem('File>New>Console');
+    await page.click('button:has-text("Select")');
+
+    await page.locator('[aria-label="Code Cell Content"]').waitFor();
+    await page.locator('text=| Idle').waitFor();
+
+    // Over prompt cell
+    await page.click('.jp-CodeConsole-promptCell', {
+      button: 'right'
+    });
+    expect(await page.menu.isAnyOpen()).toBe(true);
+    let imageName = `console-prompt.png`;
+    let menu = await page.menu.getOpenMenu();
+    expect.soft(await menu.screenshot()).toMatchSnapshot(imageName);
+
+    // Over console content
+    await page.click('.jp-CodeConsole-content', {
+      button: 'right'
+    });
+    imageName = `console-content.png`;
+    menu = await page.menu.getOpenMenu();
+    expect(await page.menu.isAnyOpen()).toBe(true);
+    expect(await menu.screenshot()).toMatchSnapshot(imageName);
+  });
 });

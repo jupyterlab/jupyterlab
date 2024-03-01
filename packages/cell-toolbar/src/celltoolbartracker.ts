@@ -137,6 +137,8 @@ export class CellToolbarTracker implements IDisposable {
     }
 
     const activeCell = notebook.activeCell;
+    // Change previously active cell.
+    this._previousActiveCell = activeCell;
     if (activeCell === null || activeCell.inputHidden) {
       return;
     }
@@ -144,7 +146,6 @@ export class CellToolbarTracker implements IDisposable {
     activeCell.model.metadataChanged.connect(this._onMetadataChanged, this);
 
     this._addToolbar(activeCell.model);
-    this._previousActiveCell = activeCell;
   }
 
   get isDisposed(): boolean {

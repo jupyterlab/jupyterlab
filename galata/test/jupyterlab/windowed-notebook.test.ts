@@ -328,32 +328,38 @@ test('should remove all cells including hidden outputs artifacts', async ({
   expect(found).toEqual(false);
 });
 
-test('should scroll as little as possible on markdown rendering', async ({
+test('should center on next cell after rendering markdown cell and advancing', async ({
   page,
   tmpPath
 }) => {
   await page.notebook.openByPath(`${tmpPath}/${fileName}`);
-  const h = await page.notebook.getNotebookInPanel();
-  const mdCell = await h.waitForSelector(
-    '.jp-MarkdownCell[data-windowed-list-index="2"]'
-  );
+  const mdCell = page.locator('.jp-MarkdownCell[data-windowed-list-index="2"]');
+  const thirdCell = page.locator('.jp-CodeCell[data-windowed-list-index="3"]');
+  const fourthCell = page.locator('.jp-RawCell[data-windowed-list-index="4"]');
 
   await page
     .locator('.jp-Notebook-ExecutionIndicator[data-status="idle"]')
     .waitFor();
 
-  await mdCell.click();
+  // Un-render markdown cell
+  await page.notebook.enterCellEditingMode(2);
 
-  const thirdCell = page.locator('.jp-CodeCell[data-windowed-list-index="3"]');
-  const fourthCell = page.locator('.jp-RawCell[data-windowed-list-index="4"]');
-
+  // The next cells should not be (significantly) visible (yet)
   await expect.soft(thirdCell).not.toBeInViewport({ ratio: 0.1 });
   await expect.soft(fourthCell).not.toBeInViewport();
 
+  // Render current (markdown) cell and advance
   await page.keyboard.press('Shift+Enter');
 
-  await expect(thirdCell).toBeInViewport();
-  await expect(fourthCell).not.toBeInViewport({ ratio: 0.1 });
+  // The notebook should advance to next (third) cell and make it fully visible
+  await expect(thirdCell).toBeInViewport({ ratio: 1 });
+
+  // Because the third cell is not larger than the notebook viewport,
+  // the surrounding cells should be visible after it got centered:
+  // - the previous cell should still be visible
+  await expect(mdCell).toBeInViewport({ ratio: 1 });
+  // - the next cell should now be visible too
+  await expect(fourthCell).toBeInViewport({ ratio: 1 });
 });
 
 test('should rendered injected styles of out-of-viewport cells', async ({

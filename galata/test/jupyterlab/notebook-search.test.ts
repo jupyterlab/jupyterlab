@@ -94,7 +94,7 @@ test.describe('Notebook Search', () => {
     await page.waitForSelector('text=1/1');
 
     // Show replace buttons to check for visual regressions
-    await page.click('button[title="Toggle Replace"]');
+    await page.click('button[title="Show Replace"]');
     await page.fill('[placeholder="Replace"]', 'line1\nline2');
 
     const overlay = page.locator('.jp-DocumentSearch-overlay');
@@ -175,6 +175,28 @@ test.describe('Notebook Search', () => {
     await expect(inputWithTestLocator).toBeVisible();
     // Expect the search to be active again
     await page.waitForSelector('text=1/2');
+  });
+
+  test('Clear search when box is empty', async ({ page }) => {
+    // Open search box
+    await page.keyboard.press('Control+f');
+
+    // Search for "test"
+    await page.keyboard.press('Control+f');
+    await page.fill('[placeholder="Find"]', 'test');
+
+    // Should find "test" matches
+    await page.locator('text=1/2').waitFor();
+    await expect(page.locator('[placeholder="Find"]')).toHaveValue('test');
+
+    // Remove the "test" query
+    for (let i = 0; i < 4; i++) {
+      await page.press('[placeholder="Find"]', 'Backspace');
+    }
+    await expect(page.locator('[placeholder="Find"]')).toHaveValue('');
+
+    // Should reset the search to a clean state
+    await page.locator('text=-/-').waitFor();
   });
 
   test('Close with Escape', async ({ page }) => {
