@@ -488,9 +488,21 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           return <></>;
         }
 
+        const svgProps = { ...this.svgReactAttrs };
+        if (!tag) {
+          Object.assign(svgProps, {
+            className:
+              className || styleProps
+                ? classes(className, LabIconStyle.styleClass(styleProps))
+                : undefined,
+            title: title,
+            slot: slot
+          });
+        }
+               
         const svgComponent = (
           <svg
-            {...this.svgReactAttrs}
+            {...svgProps}
             dangerouslySetInnerHTML={{ __html: this.svgInnerHTML }}
             ref={ref}
           />
@@ -514,7 +526,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
                   ? classes(className, LabIconStyle.styleClass(styleProps))
                   : undefined,
               title: title,
-              slot: slot,
             };
           }
           return (
