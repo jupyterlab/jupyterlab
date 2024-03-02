@@ -19,13 +19,16 @@ If you don't know how to make extensions, you can read more about the
 basics at :ref:`the Extension Tutorial <extension_tutorial>` or the
 `Extensions page <https://jupyterlab.readthedocs.io/en/latest/extension/extension_dev.html>`_.
 
-How Compatibility Works
------------------------
+Getting started
+---------------
 
 At a high level, extensions for JupyterLab and Jupyter Notebook both
 typically start from a template project, which you can download and set up
 using instructions from `the extension tutorial <https://jupyterlab.readthedocs.io/en/latest/extension/extension_tutorial.html>`_).
 Once your template is ready, you can start adding components and features to build your extension.
+
+How Compatibility Works
+-----------------------
 
 An extension for JupyterLab (and for Notebook 7) is made up of a `series <https://jupyterlab.readthedocs.io/en/latest/extension/extension_dev.html>`_
 of bundled `plugins <https://lumino.readthedocs.io/en/latest/api/interfaces/application.IPlugin.html#requires>`_,
@@ -36,7 +39,7 @@ Lumino and JupyterLab API are written in Typescript.
 
 This is how basic compatibility features work: both apps use the same building
 blocks and methods. For instance, both JupyterLab and Notebook 7 accept Lumino widgets
-as interface components, both apps allow you to add them to the interface by
+as interface components, both apps enable you to add them to the interface by
 specifying an "area" to place them into, and extensions for both use the same
 basic ``JupyterFrontendPlugin`` class.
 
@@ -206,7 +209,7 @@ example code there):
 .. code:: TypeScript
 
     /**
-     * Initialization data for the @jupyterlab-examples/clap-button JupyterLab extension.
+     * Data for the @jupyterlab-examples/clap-button JupyterLab plugin.
      */
     const pluginJupyterLab: JupyterFrontEndPlugin<void> = {
       id: '@jupyterlab-examples/clap-button:pluginLab',
@@ -220,13 +223,13 @@ example code there):
 
         // Create a ClapWidget and add it to the interface in the top area
         const clapWidget = new ClapWidget();
-        clapWidget.id = 'JupyterLabClapWidgetLab'; // Widgets need an id
+        clapWidget.id = 'JupyterLabClapWidgetLab';
         app.shell.add(clapWidget, 'top');
       }
     };
 
     /**
-     * Initialization data for the @jupyterlab-examples/clap-button Jupyter Notebook extension.
+     * Data for the @jupyterlab-examples/clap-button Jupyter Notebook plugin.
      */
     const pluginJupyterNotebook: JupyterFrontEndPlugin<void> = {
       id: '@jupyterlab-examples/clap-button:pluginNotebook',
@@ -240,7 +243,7 @@ example code there):
 
         // Create a ClapWidget and add it to the interface in the right area
         const clapWidget = new ClapWidget();
-        clapWidget.id = 'JupyterNotebookClapWidgetNotebook'; // Widgets need an id
+        clapWidget.id = 'JupyterNotebookClapWidgetNotebook';
         app.shell.add(clapWidget, 'right');
       }
     };
