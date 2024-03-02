@@ -46,7 +46,7 @@ basic ``JupyterFrontendPlugin`` class.
 How to Achieve Compatibility
 ----------------------------
 
-Compatibility can be achieved with literally no effort in some simple
+Compatibility can be achieved without additional effort in some simple
 cases. But for more complex cases, where the extension uses features in
 one app that are not available in other apps, you will need to decide
 how to handle those features in the other apps.
