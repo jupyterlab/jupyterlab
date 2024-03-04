@@ -2413,28 +2413,26 @@ def _log_multiple_compat_errors(logger, errors_map):
     """Log compatibility errors for multiple extensions at once"""
 
     outdated = []
-    others = []
 
     for name, (_, errors) in errors_map.items():
         age = _compat_error_age(errors)
         if age > 0:
             outdated.append(name)
-        else:
-            others.append(name)
 
     if outdated:
         logger.warning(
             "\n        ".join(
                 [
-                    "\n   The following extensions are outdated:",
+                    "\n   The following extensions might be outdated or specify dependencies incorrectly:",
                     *outdated,
                     "\n   Consider checking if an update is available for these packages.\n",
                 ]
             )
         )
 
-    for name in others:
-        version, errors = errors_map[name]
+    # Print out compatibility errors for all extensions, even the ones inferred
+    # to be possibly outdated, to guide developers upgrading their extensions.
+    for name, (version, errors) in errors_map.items():
         msg = _format_compatibility_errors(name, version, errors)
         logger.warning(f"{msg}\n")
 
