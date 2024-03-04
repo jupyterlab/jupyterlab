@@ -51,6 +51,7 @@
   "dependencies": {
     "@codemirror/state": "^6.2.0",
     "@codemirror/view": "^6.9.6",
+    "@jupyter/react-components": "^0.15.2",
     "@jupyter/ydoc": "^1.1.1",
     "@jupyterlab/application": "^4.1.2",
     "@jupyterlab/apputils": "^4.2.2",
