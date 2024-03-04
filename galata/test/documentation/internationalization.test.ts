@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import { setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -13,7 +14,7 @@ test.describe('Internationalization', () => {
   test('Menu', async ({ page }) => {
     await page.goto();
 
-    await page.sidebar.setWidth();
+    await setSidebarWidth(page);
 
     await page.click('text=Settings');
     await page.click('.lm-Menu ul[role="menu"] >> text=Language');
@@ -26,7 +27,7 @@ test.describe('Internationalization', () => {
   test('Confirm language', async ({ page }) => {
     await page.goto();
 
-    await page.sidebar.setWidth();
+    await setSidebarWidth(page);
 
     await page.click('text=Settings');
     await page.click('.lm-Menu ul[role="menu"] >> text=Language');
@@ -68,7 +69,7 @@ test.describe('Internationalization', () => {
     // Wait for the launcher to be loaded
     await page.waitForSelector('text=README.md');
 
-    await page.sidebar.setWidth();
+    await setSidebarWidth(page);
 
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });

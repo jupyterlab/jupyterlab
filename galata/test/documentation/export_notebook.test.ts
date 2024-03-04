@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+import { setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -13,7 +14,7 @@ test.describe('Export Notebook', () => {
   test('Export Menu', async ({ page }) => {
     await page.goto();
 
-    await page.sidebar.setWidth();
+    await setSidebarWidth(page);
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -39,7 +40,7 @@ test.describe('Export Notebook', () => {
   test('Slides', async ({ page }) => {
     await page.goto();
 
-    await page.sidebar.setWidth();
+    await setSidebarWidth(page);
 
     await page
       .locator('[aria-label="File Browser Section"]')
