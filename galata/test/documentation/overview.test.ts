@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -56,7 +55,7 @@ async function openOverview(page) {
     }`
   });
 
-  await setSidebarWidth(page);
+  await page.sidebar.setWidth();
 
   // Open Data.ipynb
   await page.dblclick('[aria-label="File Browser Section"] >> text=notebooks');
