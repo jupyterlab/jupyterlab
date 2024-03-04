@@ -61,7 +61,7 @@ if [[ $CMD == 'build' ]]; then
     fi
     stop_contaniner
     if [[ $CMD == 'dev' || $CMD == '' || $CMD == 'dev-detach' ]]; then
-        DOCKER_CMD="$RSYNC_CMD && jupyter lab --allow-root --dev-mode --extensions-in-dev-mode --watch --ip 0.0.0.0 --port $PORT"
+        DOCKER_CMD="$RSYNC_CMD && jupyter lab --dev-mode --extensions-in-dev-mode --watch --ip 0.0.0.0 --port $PORT"
     else
         DOCKER_CMD="$RSYNC_CMD && bash"
     fi

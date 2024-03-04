@@ -7,7 +7,7 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jupyter/web-components": "^0.15.3",
+    "@jupyter/web-components": "^0.15.2",
     "@jupyterlab/application": "^4.1.2",
     "@jupyterlab/apputils": "^4.2.2",
     "@jupyterlab/codemirror": "^4.1.2",
