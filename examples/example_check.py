@@ -10,6 +10,7 @@ string being printed.
 
 e.g. python example_check.py ./app
 """
+
 import importlib.util
 import os
 import shutil
