@@ -103,8 +103,16 @@
   scale: 0.9;
 }
 
+.jp-RunningSessions-collapseButton {
+  margin: 4px 2px;
+}
+
 .jp-RunningSessions-icon {
   margin: 0 4px;
+}
+
+.jp-RunningSessions-toolbar {
+  min-width: max-content;
 }
 
 img.jp-RunningSessions-icon,

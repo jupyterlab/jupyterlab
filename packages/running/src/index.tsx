@@ -487,6 +487,7 @@ class Section extends PanelWithToolbar {
         this._buttons[name as keyof typeof this._buttons]
       );
     }
+    this.toolbar.addClass('jp-RunningSessions-toolbar');
 
     this.addWidget(
       new ListWidget({
