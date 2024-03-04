@@ -7,7 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { positionMouseOver, setSidebarWidth } from './utils';
+import { positionMouseOver } from './utils';
 
 test.use({
   autoGoto: false,
@@ -43,7 +43,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await setSidebarWidth(page, 251, 'right');
+    await page.sidebar.setWidth(251, 'right');
 
     expect(
       await page.screenshot({ clip: { y: 62, x: 780, width: 210, height: 32 } })
@@ -57,7 +57,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await setSidebarWidth(page, 251, 'right');
+    await page.sidebar.setWidth(251, 'right');
 
     await setBreakpoint(page);
 
@@ -105,7 +105,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await setSidebarWidth(page, 251, 'right');
+    await page.sidebar.setWidth(251, 'right');
 
     await setBreakpoint(page);
 
@@ -131,7 +131,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await setSidebarWidth(page, 251, 'right');
+    await page.sidebar.setWidth(251, 'right');
 
     await expect(
       page.locator('jp-button.jp-PauseOnExceptions')
@@ -201,7 +201,7 @@ test.describe('Debugger', () => {
       '[data-id="jp-debugger-sidebar"]'
     );
     await sidebar.click();
-    await setSidebarWidth(page, 251, 'right');
+    await page.sidebar.setWidth(251, 'right');
 
     // Inject mouse pointer
     await page.evaluate(
@@ -225,7 +225,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await setSidebarWidth(page, 251, 'right');
+    await page.sidebar.setWidth(251, 'right');
 
     await setBreakpoint(page);
 
@@ -252,7 +252,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await setSidebarWidth(page, 251, 'right');
+    await page.sidebar.setWidth(251, 'right');
 
     await setBreakpoint(page);
 
@@ -283,7 +283,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await setSidebarWidth(page, 251, 'right');
+    await page.sidebar.setWidth(251, 'right');
 
     await setBreakpoint(page);
 
@@ -313,7 +313,7 @@ test.describe('Debugger', () => {
 
     await page.debugger.switchOn();
     await page.waitForCondition(() => page.debugger.isOpen());
-    await setSidebarWidth(page, 251, 'right');
+    await page.sidebar.setWidth(251, 'right');
 
     await setBreakpoint(page);
 
@@ -340,7 +340,7 @@ test.describe('Debugger', () => {
 async function createNotebook(page: IJupyterLabPageFixture) {
   await page.notebook.createNew();
 
-  await setSidebarWidth(page);
+  await page.sidebar.setWidth();
 
   await page.waitForSelector('text=Python 3 (ipykernel) | Idle');
 }
