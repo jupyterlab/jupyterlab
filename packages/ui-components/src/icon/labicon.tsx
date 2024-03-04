@@ -526,6 +526,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
                   ? classes(className, LabIconStyle.styleClass(styleProps))
                   : undefined,
               title: title,
+              slot: slot,
             };
           }
           return (
