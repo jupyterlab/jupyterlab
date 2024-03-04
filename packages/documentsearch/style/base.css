@@ -34,7 +34,7 @@
   outline: 0;
 }
 
-.jp-DocumentSearch-overlay button.jp-DocumentSearch-button-wrapper:disabled {
+.jp-DocumentSearch-button-wrapper:disabled > .jp-DocumentSearch-button-content {
   opacity: 0.6;
   cursor: not-allowed;
 }
