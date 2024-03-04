@@ -93,39 +93,6 @@ export async function positionMouseOver(
   });
 }
 
-/**
- * Set the sidebar width
- *
- * @param page Page object
- * @param width Sidebar width in pixels
- * @param side Which sidebar to set: 'left' or 'right'
- */
-export async function setSidebarWidth(
-  page: Page,
-  width = 251,
-  side: 'left' | 'right' = 'left'
-): Promise<void> {
-  const handles = page.locator(
-    '#jp-main-split-panel > .lm-SplitPanel-handle:not(.lm-mod-hidden)'
-  );
-  const splitHandle =
-    side === 'left'
-      ? await handles.first().elementHandle()
-      : await handles.last().elementHandle();
-  const handleBBox = await splitHandle.boundingBox();
-
-  await page.mouse.move(
-    handleBBox.x + 0.5 * handleBBox.width,
-    handleBBox.y + 0.5 * handleBBox.height
-  );
-  await page.mouse.down();
-  await page.mouse.move(
-    side === 'left' ? 33 + width : page.viewportSize().width - 33 - width,
-    handleBBox.y + 0.5 * handleBBox.height
-  );
-  await page.mouse.up();
-}
-
 export async function stubGitHubUserIcons(page: Page): Promise<void> {
   // stub out github user icons
   // only first and last icon for now
