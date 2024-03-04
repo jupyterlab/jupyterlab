@@ -7,7 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { setSidebarWidth, stubGitHubUserIcons } from './utils';
+import { stubGitHubUserIcons } from './utils';
 import { default as extensionsList } from './data/extensions.json';
 import { default as allExtensionsList } from './data/extensions-search-all.json';
 import { default as drawioExtensionsList } from './data/extensions-search-drawio.json';
@@ -198,5 +198,5 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
     '.jp-extensionmanager-view >> .jp-AccordionPanel-title[aria-expanded="false"] >> text=Warning'
   );
 
-  await setSidebarWidth(page);
+  await page.sidebar.setWidth();
 }

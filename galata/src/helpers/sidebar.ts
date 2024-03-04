@@ -268,6 +268,45 @@ export class SidebarHelper {
   }
 
   /**
+   * Set the sidebar width
+   *
+   * @param width Sidebar width in pixels
+   * @param side Which sidebar to set: 'left' or 'right'
+   */
+  async setWidth(
+    width = 251,
+    side: galata.SidebarPosition = 'left'
+  ): Promise<boolean> {
+    if (!(await this.isOpen(side))) {
+      return false;
+    }
+
+    const handles = this.page.locator(
+      '#jp-main-split-panel > .lm-SplitPanel-handle:not(.lm-mod-hidden)'
+    );
+    const splitHandle =
+      side === 'left'
+        ? await handles.first().elementHandle()
+        : await handles.last().elementHandle();
+    const handleBBox = await splitHandle!.boundingBox();
+
+    await this.page.mouse.move(
+      handleBBox!.x + 0.5 * handleBBox!.width,
+      handleBBox!.y + 0.5 * handleBBox!.height
+    );
+    await this.page.mouse.down();
+    await this.page.mouse.move(
+      side === 'left'
+        ? 33 + width
+        : this.page.viewportSize()!.width - 33 - width,
+      handleBBox!.y + 0.5 * handleBBox!.height
+    );
+    await this.page.mouse.up();
+
+    return true;
+  }
+
+  /**
    * Get the selector for a given tab
    *
    * @param id Tab id
