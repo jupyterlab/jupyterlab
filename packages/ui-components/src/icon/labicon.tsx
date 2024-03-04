@@ -499,7 +499,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
             slot: slot
           });
         }
-               
+
         const svgComponent = (
           <svg
             {...svgProps}
