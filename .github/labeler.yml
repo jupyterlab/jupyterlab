@@ -284,6 +284,14 @@ pkg:mermaid:
     - packages/mermaid-extension/**/*
     - packages/mermaid-extension/*
 
+pkg:metadataform:
+- changed-files:
+  - any-glob-to-any-file:
+    - packages/metadataform/**/*
+    - packages/metadataform/*
+    - packages/metadataform-extension/**/*
+    - packages/metadataform-extension/*
+
 pkg:notebook:
 - changed-files:
   - any-glob-to-any-file:
