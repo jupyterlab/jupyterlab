@@ -118,6 +118,8 @@
     "@jupyterlab/ui-components": "~4.2.0-alpha.0",
     "@jupyterlab/ui-components-extension": "~4.2.0-alpha.0",
     "@jupyterlab/vega5-extension": "~4.2.0-alpha.0",
+    "@jupyterlab/workspaces": "~4.2.0-alpha.0",
+    "@jupyterlab/workspaces-extension": "~4.2.0-alpha.0",
     "@lezer/common": "^1.0.0",
     "@lezer/highlight": "^1.0.0",
     "@lumino/algorithm": "^2.0.0",
@@ -189,7 +191,8 @@
     "@jupyterlab/tooltip-extension": "~4.2.0-alpha.0",
     "@jupyterlab/translation-extension": "~4.2.0-alpha.0",
     "@jupyterlab/ui-components-extension": "~4.2.0-alpha.0",
-    "@jupyterlab/vega5-extension": "~4.2.0-alpha.0"
+    "@jupyterlab/vega5-extension": "~4.2.0-alpha.0",
+    "@jupyterlab/workspaces-extension": "~4.2.0-alpha.0"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.2.0-alpha.0",
@@ -265,7 +268,8 @@
       "@jupyterlab/toc-extension": "",
       "@jupyterlab/tooltip-extension": "",
       "@jupyterlab/translation-extension": "",
-      "@jupyterlab/ui-components-extension": ""
+      "@jupyterlab/ui-components-extension": "",
+      "@jupyterlab/workspaces-extension": ""
     },
     "mimeExtensions": {
       "@jupyterlab/javascript-extension": "",
@@ -321,6 +325,7 @@
       "@jupyterlab/tooltip",
       "@jupyterlab/translation",
       "@jupyterlab/ui-components",
+      "@jupyterlab/workspaces",
       "@lezer/common",
       "@lezer/highlight",
       "@lumino/algorithm",
@@ -441,6 +446,8 @@
       "@jupyterlab/ui-components": "../packages/ui-components",
       "@jupyterlab/ui-components-extension": "../packages/ui-components-extension",
       "@jupyterlab/vega5-extension": "../packages/vega5-extension",
+      "@jupyterlab/workspaces": "../packages/workspaces",
+      "@jupyterlab/workspaces-extension": "../packages/workspaces-extension",
       "@jupyterlab/builder": "../builder",
       "@jupyterlab/buildutils": "../buildutils",
       "@jupyterlab/template": "../buildutils/template",

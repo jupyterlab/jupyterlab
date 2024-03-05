@@ -16,16 +16,10 @@
       "path": "../coreutils"
     },
     {
-      "path": "../docregistry"
-    },
-    {
       "path": "../filebrowser"
     },
     {
-      "path": "../mainmenu"
-    },
-    {
-      "path": "../rendermime-interfaces"
+      "path": "../running"
     },
     {
       "path": "../services"
@@ -35,9 +29,6 @@
     },
     {
       "path": "../statedb"
-    },
-    {
-      "path": "../statusbar"
     },
     {
       "path": "../translation"

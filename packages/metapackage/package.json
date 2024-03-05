@@ -15,6 +15,7 @@
   "sideEffects": false,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "directories": {
     "lib": "lib/"
   },
@@ -22,7 +23,9 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "src/**/*.{ts,tsx}"
+    "src/**/*.{ts,tsx}",
+    "style/index.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -130,7 +133,9 @@
     "@jupyterlab/translation-extension": "^4.2.0-alpha.0",
     "@jupyterlab/ui-components": "^4.2.0-alpha.0",
     "@jupyterlab/ui-components-extension": "^4.2.0-alpha.0",
-    "@jupyterlab/vega5-extension": "^4.2.0-alpha.0"
+    "@jupyterlab/vega5-extension": "^4.2.0-alpha.0",
+    "@jupyterlab/workspaces": "^4.2.0-alpha.0",
+    "@jupyterlab/workspaces-extension": "^4.2.0-alpha.0"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.2.0-alpha.0",
@@ -144,5 +149,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "styleModule": "style/index.js"
 }
