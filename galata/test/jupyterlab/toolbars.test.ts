@@ -37,3 +37,15 @@ toolbars.forEach(([plugin, parameter]) => {
     expect(missingCommands).toEqual([]);
   });
 });
+
+test('Render Switch Kernel ToolbarButton', async ({ page }) => {
+  await page.notebook.createNew();
+
+  const label = page.locator(
+    'jp-button.jp-ToolbarButtonComponent.jp-Toolbar-kernelName'
+  );
+
+  expect(await label.screenshot()).toMatchSnapshot(
+    'switch-kernel-toolbar-button.png'
+  );
+});
