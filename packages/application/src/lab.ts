@@ -206,10 +206,15 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    */
   protected evtKeydown(event: KeyboardEvent): void {
     // Process select keys which may call `preventDefault()` immediately
+    // TODO: generalise with https://github.com/jupyterlab/lumino/issues/688
     if (
+      // Navigation shortcuts which do not result in user input
+      // (except for Tab which is handled specially).
       ['Tab', 'ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(
         event.key
-      )
+      ) ||
+      // Saving shortcut which competes with the default browser action
+      (event.ctrlKey && event.key.toLowerCase() == 's')
     ) {
       return this.commands.processKeydownEvent(event);
     }
