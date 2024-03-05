@@ -566,9 +566,10 @@ test.describe('General', () => {
 
     await page.click('[title="Running Terminals and Kernels"]');
 
+    // Wait up to 5s for both kernels to startup
     await expect(
       page.locator('.jp-RunningSessions-item.jp-mod-kernel')
-    ).toHaveCount(2);
+    ).toHaveCount(2, { timeout: 5000 });
 
     expect(
       await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
