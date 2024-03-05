@@ -16,6 +16,7 @@ import { highlightTree } from '@lezer/highlight';
 
 import { jupyterHighlightStyle } from './theme';
 import { IEditorLanguage, IEditorLanguageRegistry } from './token';
+import { pythonBuiltin } from './pythonBuiltin';
 
 /**
  * CodeMirror language registry
@@ -473,7 +474,10 @@ export namespace EditorLanguageRegistry {
         filename: /^(BUCK|BUILD)$/,
         async load() {
           const m = await import('@codemirror/lang-python');
-          return m.python();
+          return new LanguageSupport(
+            m.pythonLanguage,
+            pythonBuiltin(m.pythonLanguage)
+          );
         }
       },
       {
@@ -485,7 +489,10 @@ export namespace EditorLanguageRegistry {
           // to activate feature such as code folding.
           // return Promise.resolve(legacy(mkPython({ singleOperators: /\?/ })));
           const m = await import('@codemirror/lang-python');
-          return m.python();
+          return new LanguageSupport(
+            m.pythonLanguage,
+            pythonBuiltin(m.pythonLanguage)
+          );
         }
       },
       {

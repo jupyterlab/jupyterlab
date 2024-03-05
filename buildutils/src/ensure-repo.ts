@@ -43,11 +43,17 @@ const URL_CONFIG = {
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
-  '@jupyterlab/buildutils': ['assert', 'fs', 'path', 'webpack'],
+  '@jupyterlab/buildutils': [
+    'assert',
+    'child_process',
+    'fs',
+    'path',
+    'webpack'
+  ],
   '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
   '@jupyterlab/markedparser-extension': ['Tokens', 'MarkedOptions'],
-  '@jupyterlab/testing': ['fs', 'path'],
+  '@jupyterlab/testing': ['child_process', 'fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
