@@ -9,75 +9,75 @@ on:
     types: [published]
 
 jobs:
-  linuxtests:
-    name: Linux
-    strategy:
-      matrix:
-        group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
-        # This will be used by the base setup action
-        python-version: ["3.8", "3.12"]
-        include:
-          - group: examples
-            upload-output: true
-          - group: release_test
-            upload-output: true
-        exclude:
-          - group: integrity
-            python-version: "3.8"
-          - group: integrity2
-            python-version: "3.8"
-          - group: integrity3
-            python-version: "3.8"
-          - group: release_test
-            python-version: "3.8"
-          - group: docs
-            python-version: "3.8"
-          - group: usage
-            python-version: "3.8"
-          - group: usage2
-            python-version: "3.8"
-          - group: nonode
-            python-version: "3.8"
-          - group: lint
-            python-version: "3.8"
-          - group: examples
-            python-version: "3.8"
-          - group: splice_source
-            python-version: "3.8"
-      fail-fast: false
-    timeout-minutes: 45
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  # linuxtests:
+  #   name: Linux
+  #   strategy:
+  #     matrix:
+  #       group: [integrity, integrity2, integrity3, release_test, docs, usage, usage2, splice_source, python, examples, interop, nonode, lint]
+  #       # This will be used by the base setup action
+  #       python-version: ["3.8", "3.12"]
+  #       include:
+  #         - group: examples
+  #           upload-output: true
+  #         - group: release_test
+  #           upload-output: true
+  #       exclude:
+  #         - group: integrity
+  #           python-version: "3.8"
+  #         - group: integrity2
+  #           python-version: "3.8"
+  #         - group: integrity3
+  #           python-version: "3.8"
+  #         - group: release_test
+  #           python-version: "3.8"
+  #         - group: docs
+  #           python-version: "3.8"
+  #         - group: usage
+  #           python-version: "3.8"
+  #         - group: usage2
+  #           python-version: "3.8"
+  #         - group: nonode
+  #           python-version: "3.8"
+  #         - group: lint
+  #           python-version: "3.8"
+  #         - group: examples
+  #           python-version: "3.8"
+  #         - group: splice_source
+  #           python-version: "3.8"
+  #     fail-fast: false
+  #   timeout-minutes: 45
+  #   runs-on: ubuntu-22.04
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Base Setup
-        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+  #     - name: Base Setup
+  #       uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
-      - name: Setup firefox
-        uses: browser-actions/setup-firefox@latest
+  #     - name: Setup firefox
+  #       uses: browser-actions/setup-firefox@latest
 
-      - name: Install dependencies
-        env:
-          GROUP: ${{ matrix.group }}
-        run: |
-          bash ./scripts/ci_install.sh
+  #     - name: Install dependencies
+  #       env:
+  #         GROUP: ${{ matrix.group }}
+  #       run: |
+  #         bash ./scripts/ci_install.sh
 
-      - name: Run test ${{ matrix.group }}
-        env:
-          GROUP: ${{ matrix.group }}
-          JLAB_BROWSER_TYPE: firefox
-        run: |
-          bash ./scripts/ci_script.sh
+  #     - name: Run test ${{ matrix.group }}
+  #       env:
+  #         GROUP: ${{ matrix.group }}
+  #         JLAB_BROWSER_TYPE: firefox
+  #       run: |
+  #         bash ./scripts/ci_script.sh
 
-      - name: Upload ${{ matrix.group }} results
-        if: ${{ matrix.upload-output && always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.group }} ${{ github.run_number }}
-          path: |
-            ./build/${{ matrix.group }}_output
-            ./examples/*/test-results
+  #     - name: Upload ${{ matrix.group }} results
+  #       if: ${{ matrix.upload-output && always() }}
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: ${{ matrix.group }} ${{ github.run_number }}
+  #         path: |
+  #           ./build/${{ matrix.group }}_output
+  #           ./examples/*/test-results
 
   test_minimum_versions:
     name: Test Minimum Versions

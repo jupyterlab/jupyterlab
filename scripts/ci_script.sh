@@ -13,11 +13,6 @@ export YARN_ENABLE_GLOBAL_CACHE=1
 export YARN_ENABLE_INLINE_BUILDS=1
 
 
-if [[ $GROUP != nonode ]]; then
-    python -c "from jupyterlab.commands import build_check; build_check()"
-fi
-
-
 if [[ $GROUP == python ]]; then
     export JUPYTERLAB_DIR="${HOME}/share/jupyter/lab/"
     mkdir -p $JUPYTERLAB_DIR

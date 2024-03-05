@@ -59,3 +59,17 @@ WORKDIR /home/$MAMBA_USER/jupyterlab
 RUN micromamba install -n base -c conda-forge rsync -y && \
     micromamba run rsync -ar /home/$MAMBA_USER/jupyterlab_cache/. /home/$MAMBA_USER/jupyterlab && \
     micromamba run python -m pip install -e  "."
+
+FROM base as build
+
+WORKDIR /home/$MAMBA_USER/jupyterlab
+
+COPY --chown=$MAMBA_USER:$MAMBA_USER . .
+
+ENV YARN_CACHE_FOLDER=/home/$MAMBA_USER/.yarn/cache YARN_ENABLE_INLINE_BUILDS=1
+
+# Build should work without yarn
+RUN micromamba remove -yn base yarn && \
+    micromamba run python -m pip install -e  "."
+
+RUN micromamba run python -c "from jupyterlab.commands import build_check; build_check()"

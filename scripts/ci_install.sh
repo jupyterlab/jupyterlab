@@ -44,3 +44,7 @@ if [[ $GROUP == nonode ]]; then
     sudo rm -rf $(which node)
     ! node
 fi
+
+if [[ $GROUP != nonode ]]; then
+    python -c "from jupyterlab.commands import build_check; build_check()"
+fi

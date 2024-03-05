@@ -1,0 +1,162 @@
+name: Tests on Linux
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+
+env:
+  IMAGE: jupyterlab:${{ github.event.pull_request.number || github.ref }}
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build and export
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: build
+          tags: ${{ env.IMAGE }}
+          outputs: type=docker,dest=/tmp/jlab-build.tar
+      - name: Upload docker image
+        uses: actions/upload-artifact@v4
+        with:
+          name: jupyterlab-docker
+          path: /tmp/jlab-build.tar
+          retention-days: 1
+
+  tests:
+    name: Tests
+    needs: build
+    strategy:
+      matrix:
+        group: [lint, integrity, integrity2, integrity3, usage, usage2, python, release_test, docs, splice_source, examples, interop, nonode]
+        # FIXME This will be used by the base setup action
+        python-version: ["3.8", "3.11"]
+        include:
+          - group: examples
+            upload-output: true
+          - group: release_test
+            upload-output: true
+        exclude:
+          - group: integrity
+            python-version: "3.8"
+          - group: integrity2
+            python-version: "3.8"
+          - group: integrity3
+            python-version: "3.8"
+          - group: release_test
+            python-version: "3.8"
+          - group: docs
+            python-version: "3.8"
+          - group: usage
+            python-version: "3.8"
+          - group: usage2
+            python-version: "3.8"
+          - group: nonode
+            python-version: "3.8"
+          - group: lint
+            python-version: "3.8"
+          - group: examples
+            python-version: "3.8"
+          - group: splice_source
+            python-version: "3.8"
+      fail-fast: false
+    timeout-minutes: 45
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: jupyterlab-docker
+        path: /tmp
+    - name: Load image
+      run: |
+        docker load --input /tmp/jlab-build.tar
+        docker image ls -a
+    - name: Run test ${{ matrix.group }}
+      run: |
+        docker run --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
+    # FIXME upload artifacts
+
+  tests-js:
+    name: JS ${{ matrix.group }}
+    strategy:
+      matrix:
+        # Fix for https://github.com/jupyterlab/jupyterlab/issues/13903
+        include:
+          - group: js-debugger
+            python-version: '3.11'
+        group:
+          [
+            js-application,
+            js-apputils,
+            js-cell-toolbar,
+            js-cells,
+            js-codeeditor,
+            js-codemirror,
+            js-completer,
+            js-console,
+            js-coreutils,
+            js-csvviewer,
+            js-debugger,
+            js-docmanager,
+            js-docregistry,
+            js-documentsearch,
+            js-filebrowser,
+            js-fileeditor,
+            js-imageviewer,
+            js-inspector,
+            js-logconsole,
+            js-lsp,
+            js-mainmenu,
+            js-mermaid,
+            js-metadataform,
+            js-metapackage,
+            js-nbformat,
+            js-notebook,
+            js-observables,
+            js-outputarea,
+            js-pluginmanager,
+            js-rendermime,
+            js-services,
+            js-settingeditor,
+            js-settingregistry,
+            js-shortcuts-extension,
+            js-statedb,
+            js-statusbar,
+            js-testing,
+            js-terminal,
+            js-toc,
+            js-translation,
+            js-ui-components,
+            js-vega5-extension,
+            js-workspaces,
+          ]
+      fail-fast: false
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jupyterlab-docker
+          path: /tmp
+      - name: Load image
+        run: |
+          docker load --input /tmp/jlab-build.tar
+          docker image ls -a
+
+      - name: Run test ${{ matrix.group }}
+        run: |
+          docker run --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
