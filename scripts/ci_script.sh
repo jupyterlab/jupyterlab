@@ -44,7 +44,8 @@ if [[ $GROUP == docs ]]; then
     # Build the docs (includes API docs)
     python -m pip install .[docs]
     pushd docs
-    make html
+    # Identical to make html but avoid requiring make to be installed
+    python -msphinx -M html "source" "build" -W --keep-going
     popd
 fi
 

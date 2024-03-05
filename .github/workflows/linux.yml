@@ -36,13 +36,14 @@ jobs:
           retention-days: 1
 
   tests:
-    name: Tests
+    name: ${{ matrix.group }} python-${{ matrix.python-version }} test
     needs: build
     strategy:
       matrix:
         group: [lint, integrity, integrity2, integrity3, usage, usage2, python, release_test, docs, splice_source, examples, interop, nonode]
         # FIXME This will be used by the base setup action
-        python-version: ["3.8", "3.11"]
+        # python-version: ["3.8", "3.11"]
+        python-version: ["3.11"]
         include:
           - group: examples
             upload-output: true
@@ -90,7 +91,8 @@ jobs:
     # FIXME upload artifacts
 
   tests-js:
-    name: JS ${{ matrix.group }}
+    name: Test ${{ matrix.group }}
+    needs: build
     strategy:
       matrix:
         # Fix for https://github.com/jupyterlab/jupyterlab/issues/13903
