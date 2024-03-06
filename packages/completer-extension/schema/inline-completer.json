@@ -8,12 +8,14 @@
     {
       "command": "inline-completer:next",
       "keys": ["Alt ]"],
-      "selector": ".jp-mod-completer-enabled"
+      "selector": ".jp-mod-completer-enabled",
+      "preventDefault": false
     },
     {
       "command": "inline-completer:previous",
       "keys": ["Alt ["],
-      "selector": ".jp-mod-completer-enabled"
+      "selector": ".jp-mod-completer-enabled",
+      "preventDefault": false
     },
     {
       "command": "inline-completer:accept",
@@ -23,7 +25,8 @@
     {
       "command": "inline-completer:invoke",
       "keys": ["Alt \\"],
-      "selector": ".jp-mod-completer-enabled"
+      "selector": ".jp-mod-completer-enabled",
+      "preventDefault": false
     }
   ],
   "properties": {

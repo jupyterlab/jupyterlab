@@ -205,24 +205,15 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    * This introduces a slight delay to the command invocation, but no delay to user input.
    */
   protected evtKeydown(event: KeyboardEvent): void {
-    // Process select keys which may call `preventDefault()` immediately
-    // TODO: generalise with https://github.com/jupyterlab/lumino/issues/688
-    if (
-      // Navigation shortcuts which do not result in user input
-      // (except for Tab which is handled specially).
-      ['Tab', 'ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(
-        event.key
-      ) ||
-      // Saving shortcut which competes with the default browser action;
-      // metaKey is `Command` on Mac.
-      ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() == 's') ||
-      // Command + Shift + C on Mac should only open the Command Palette
-      // (rather than also opening the Dev Tools)
-      (event.metaKey && event.shiftKey && event.key.toLowerCase() == 'c')
-    ) {
-      return this.commands.processKeydownEvent(event);
-    }
-    // Process remaining events conditionally, depending on whether they would lead to text insertion
+    const permissionToExecute = new PromiseDelegate();
+
+    // Hold the execution of any keybinding until we know if this event would cause text insertion
+    this.commands.holdKeyBindingExecution(event, permissionToExecute.promise);
+
+    // Process the key immediately to invoke the prevent default handlers as needed
+    this.commands.processKeydownEvent(event);
+
+    // Permit the execution conditionally, depending on whether the event would lead to text insertion
     const causesInputPromise = Promise.race([
       new Promise(resolve => {
         if (!event.target) {
@@ -267,9 +258,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     ]);
     causesInputPromise
       .then(willCauseInput => {
-        if (!willCauseInput) {
-          this.commands.processKeydownEvent(event);
-        }
+        permissionToExecute.resolve(!willCauseInput);
       })
       .catch(console.warn);
   }
