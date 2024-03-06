@@ -30,6 +30,10 @@ export interface IFilter {
    */
   description: string;
   /**
+   * Filter description to be used when the filter is disabled in replace mode.
+   */
+  disabledDescription?: string;
+  /**
    * Default value
    */
   default: boolean;

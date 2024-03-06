@@ -670,7 +670,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
               description={
                 description + (name == 'selection' ? selectionKeyHint : '')
               }
-              isEnabled={!showReplace || filter.supportReplace}
+              isEnabled={isEnabled}
               onToggle={async () => {
                 await this.props.onFilterChanged(
                   name,
