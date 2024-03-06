@@ -451,12 +451,15 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       return Promise.resolve(newValue);
     }),
     delete: jest.fn(path => {
-      path = Private.fixSlash(path);
-      if (!files.has(path)) {
+      const driveName = dummy.driveName(path);
+      const localPath = dummy.localPath(path);
+      const drive = files.get(driveName)!;
+      path = Private.fixSlash(localPath);
+      if (!drive.has(path)) {
         return Private.makeResponseError(404);
       }
-      const oldValue = files.get(path)!;
-      files.delete(path);
+      const oldValue = drive.get(path)!;
+      drive.delete(path);
       fileChangedSignal.emit({
         type: 'delete',
         oldValue,
