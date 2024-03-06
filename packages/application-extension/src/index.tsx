@@ -369,7 +369,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       commands.addCommand(CommandIDs.activateSidebarOverlays, {
         label: trans.__('Show Sidebar Overlays'),
         execute: args => {
-          if (args.side != 'left' && args.side != 'right') {
+          if (args.side !== 'left' && args.side !== 'right') {
             throw Error(`Unsupported sidebar: ${args.side}`);
           }
 
