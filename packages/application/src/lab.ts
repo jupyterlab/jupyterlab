@@ -213,10 +213,11 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       ['Tab', 'ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft'].includes(
         event.key
       ) ||
-      // Saving shortcut which competes with the default browser action
-      (event.ctrlKey && event.key.toLowerCase() == 's') ||
+      // Saving shortcut which competes with the default browser action;
+      // metaKey is `Command` on Mac.
+      ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() == 's') ||
       // Command + Shift + C on Mac should only open the Command Palette
-      // (rather than also opening the Dev Tools; metaKey is `Command` on Mac)
+      // (rather than also opening the Dev Tools)
       (event.metaKey && event.shiftKey && event.key.toLowerCase() == 'c')
     ) {
       return this.commands.processKeydownEvent(event);
