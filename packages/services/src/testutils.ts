@@ -503,7 +503,7 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       fileChangedSignal.emit({
         type: 'save',
         oldValue: null,
-        newValue: files.get(path)!
+        newValue: drive.get(path)!
       });
       return Promise.resolve(drive.get(path)!);
     }),
