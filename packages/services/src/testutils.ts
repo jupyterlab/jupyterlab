@@ -486,6 +486,7 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
     }),
     addDrive: jest.fn(drive => {
       dummy.addDrive(drive);
+      files.set(`${drive.name}:`, { ...baseModel, path: '', name: '' });
     }),
     dispose: jest.fn()
   };
