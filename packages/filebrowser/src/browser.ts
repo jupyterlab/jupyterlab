@@ -255,7 +255,8 @@ export class FileBrowser extends SidePanel {
   ): Promise<Contents.IModel> {
     // normalize the path if the file is created from a custom drive
     if (options.path) {
-      options.path = this._toDrivePath(this.model.driveName, options.path);
+      const localPath = this._manager.services.contents.localPath(options.path);
+      options.path = this._toDrivePath(this.model.driveName, localPath);
     }
     try {
       const model = await this._manager.newUntitled(options);
