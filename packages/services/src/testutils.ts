@@ -369,7 +369,8 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       if (!checkpoints.has(path)) {
         return Private.makeResponseError(404);
       }
-      (files.get(path) as any).content = checkPointContent.get(path);
+      // TODO: handle drives
+      (files.get('')!.get(path) as any).content = checkPointContent.get(path);
       return Promise.resolve();
     }),
     getSharedModelFactory: jest.fn(() => {
