@@ -46,6 +46,9 @@
     },
     "macOptionIsMeta": {
       "type": "boolean"
+    },
+    "frontEnd": {
+      "enum": ["WebGL", "canvas", "HTML"]
     }
   },
   "properties": {
