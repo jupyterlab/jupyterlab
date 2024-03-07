@@ -300,6 +300,8 @@ the default values given by extensions, as well as the default overrides from
 the :ref:`overrides.json <overridesjson>` file in the application's settings
 directory.
 
+.. _workspaces-directory:
+
 JupyterLab Workspaces Directory
 -------------------------------
 
