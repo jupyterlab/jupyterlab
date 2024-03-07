@@ -48,7 +48,10 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
-import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import {
   ILSPCodeExtractorsManager,
@@ -363,7 +366,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     ISettingRegistry,
     ISessionContextDialogs,
     ITranslator,
-    IFormRendererRegistry
+    IFormRendererRegistry,
+    IFileBrowserFactory
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -1594,7 +1598,8 @@ function activateNotebookHandler(
   settingRegistry: ISettingRegistry | null,
   sessionDialogs_: ISessionContextDialogs | null,
   translator_: ITranslator | null,
-  formRegistry: IFormRendererRegistry | null
+  formRegistry: IFormRendererRegistry | null,
+  filebrowserFactory: IFileBrowserFactory | null
 ): INotebookTracker {
   const translator = translator_ ?? nullTranslator;
   const sessionDialogs =
@@ -1957,7 +1962,9 @@ function activateNotebookHandler(
     caption: trans.__('Create a new notebook'),
     icon: args => (args['isPalette'] ? undefined : notebookIcon),
     execute: args => {
-      const cwd = (args['cwd'] as string) || (defaultBrowser?.model.path ?? '');
+      const currentBrowser =
+        filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
+      const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
       return createNew(cwd, kernelId, kernelName);

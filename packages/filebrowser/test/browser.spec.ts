@@ -10,6 +10,7 @@ import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 import { ServiceManager } from '@jupyterlab/services';
 import { signalToPromise } from '@jupyterlab/testing';
+import { Drive } from '@jupyterlab/services';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { simulate } from 'simulate-event';
@@ -127,6 +128,70 @@ describe('filebrowser/browser', () => {
         await created;
         expect(itemNode.contains(document.activeElement)).toBe(true);
       });
+    });
+  });
+});
+
+describe('FileBrowser with Drives', () => {
+  const DRIVE_NAME = 'TestDrive';
+  let fileBrowser: TestFileBrowser;
+  let manager: IDocumentManager;
+  let serviceManager: ServiceManager.IManager;
+  let registry: DocumentRegistry;
+  let model: FilterFileBrowserModel;
+
+  beforeAll(async () => {
+    const opener = new DocumentWidgetOpenerMock();
+
+    registry = new DocumentRegistry({
+      textModelFactory: new TextModelFactory()
+    });
+    serviceManager = new ServiceManagerMock();
+    manager = new DocumentManager({
+      registry,
+      opener,
+      manager: serviceManager
+    });
+
+    const drive = new Drive({
+      name: DRIVE_NAME,
+      serverSettings: serviceManager.serverSettings
+    });
+    serviceManager.contents.addDrive(drive);
+    model = new FilterFileBrowserModel({ manager, driveName: drive.name });
+  });
+
+  beforeEach(() => {
+    const options: FileBrowser.IOptions = {
+      model,
+      id: ''
+    };
+    fileBrowser = new TestFileBrowser(options);
+    Widget.attach(fileBrowser, document.body);
+  });
+
+  describe('#createNewFile', () => {
+    it('should create the file in the drive', async () => {
+      const created = fileBrowser.createNewFile({ ext: '.txt' });
+      await signalToPromise(fileBrowser.renameCalled);
+      const editNode = document.querySelector(`.${EDITOR_CLASS}`);
+      if (!editNode) {
+        throw new Error('Edit node not found');
+      }
+      const itemNode = Array.from(
+        document.querySelectorAll(`.${ITEM_CLASS}`)
+      ).find(el => {
+        return el.contains(editNode);
+      });
+      if (!itemNode) {
+        throw new Error('Item node not found');
+      }
+      simulate(editNode, 'keydown', {
+        keyCode: 13,
+        key: 'Enter'
+      });
+      const fileModel = await created;
+      expect(fileModel.path).toContain(DRIVE_NAME);
     });
   });
 });
