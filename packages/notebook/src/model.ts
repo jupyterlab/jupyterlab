@@ -10,7 +10,6 @@ import { IObservableList } from '@jupyterlab/observables';
 import {
   IMapChange,
   ISharedNotebook,
-  ISuggestions,
   NotebookChange,
   YNotebook
 } from '@jupyter/ydoc';
@@ -129,8 +128,6 @@ export class NotebookModel implements INotebookModel {
     this._cells.changed.connect(this._onCellsChanged, this);
     this.sharedModel.changed.connect(this._onStateChanged, this);
     this.sharedModel.metadataChanged.connect(this._onMetadataChanged, this);
-
-    this._suggestions = options.suggestions;
   }
 
   /**
@@ -433,33 +430,11 @@ close the notebook without saving it.`,
   ): void {
     if (changes.stateChange) {
       changes.stateChange.forEach(value => {
-        const fork_prefix = 'fork_';
         if (value.name === 'dirty') {
           // Setting `dirty` will trigger the state change.
           // We always set `dirty` because the shared model state
           // and the local attribute are synchronized one way shared model -> _dirty
           this.dirty = value.newValue;
-        } else if (value.name.startsWith(fork_prefix)) {
-          // a fork has been published
-          const forkId = value.name.slice(fork_prefix.length);
-          this._suggestions.add(forkId);
-          // don't do anything if the fork is us
-          if (forkId !== this.sharedModel.roomId) {
-            const dialog = new Dialog({
-              title: this._trans.__('New suggestion'),
-              body: this._trans.__('Open notebook for suggestion?'),
-              buttons: [
-                Dialog.okButton({ label: 'Open' }),
-                Dialog.cancelButton({ label: 'Discard' }),
-              ],
-            });
-            dialog.launch().then(resp => {
-              dialog.close();
-              if (resp.button.label === 'Open') {
-                this.sharedModel.provider.connectFork(forkId);
-              }
-            });
-          }
         } else if (value.oldValue !== value.newValue) {
           this.triggerStateChange({
             newValue: undefined,
@@ -529,7 +504,6 @@ close the notebook without saving it.`,
   private _isDisposed = false;
   private _metadataChanged = new Signal<NotebookModel, IMapChange>(this);
   private _collaborationEnabled: boolean;
-  private _suggestions?: ISuggestions;
 }
 
 /**
@@ -560,7 +534,5 @@ export namespace NotebookModel {
      * @alpha
      */
     disableDocumentWideUndoRedo?: boolean;
-
-    suggestions?: ISuggestions;
   }
 }

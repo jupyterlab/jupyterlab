@@ -114,7 +114,6 @@ import {
   stopIcon,
   tableRowsIcon
 } from '@jupyterlab/ui-components';
-import { ISuggestions } from '@jupyter/ydoc';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
 import {
@@ -742,8 +741,7 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
       NotebookPanel.IContentFactory,
       IEditorServices,
       IRenderMimeRegistry,
-      IToolbarWidgetRegistry,
-      ISuggestions,
+      IToolbarWidgetRegistry
     ],
     optional: [ISettingRegistry, ISessionContextDialogs, ITranslator],
     activate: activateWidgetFactory,

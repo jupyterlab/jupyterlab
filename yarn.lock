@@ -2091,15 +2091,16 @@ __metadata:
 
 "@jupyter/ydoc@file:.yalc/@jupyter/ydoc::locator=%40jupyterlab%2Frepo-top%40workspace%3A.":
   version: 2.0.1
-  resolution: "@jupyter/ydoc@file:.yalc/@jupyter/ydoc#.yalc/@jupyter/ydoc::hash=dfd892&locator=%40jupyterlab%2Frepo-top%40workspace%3A."
+  resolution: "@jupyter/ydoc@file:.yalc/@jupyter/ydoc#.yalc/@jupyter/ydoc::hash=63b59a&locator=%40jupyterlab%2Frepo-top%40workspace%3A."
   dependencies:
+    "@jupyterlab/application": ^4.0.0
     "@jupyterlab/nbformat": ^3.0.0 || ^4.0.0-alpha.21 || ^4.0.0
     "@lumino/coreutils": ^1.11.0 || ^2.0.0
     "@lumino/disposable": ^1.10.0 || ^2.0.0
     "@lumino/signaling": ^1.10.0 || ^2.0.0
     y-protocols: ^1.0.5
     yjs: ^13.5.40
-  checksum: 9f6a80d6c7e736f28004bcd0dd4abe8216ecb4f0e19dbc55e0a1ac3fa94136b5013224735ea33a27e64d1c7ae06990005b2f924352dce12529ed61d38b1f1c55
+  checksum: 9e034badb962ea9d26e8ed279feb7fb85130d11920841e8cdeb930586c23c1b27071a32bf78211043c6dcc1f303736e3abe11f2bfc33cfbc024a2f2cf8e7bd2f
   languageName: node
   linkType: hard
 
@@ -4500,6 +4501,26 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@jupyterlab/rendermime@npm:^4.1.4":
+  version: 4.1.4
+  resolution: "@jupyterlab/rendermime@npm:4.1.4"
+  dependencies:
+    "@jupyterlab/apputils": ^4.2.4
+    "@jupyterlab/coreutils": ^6.1.4
+    "@jupyterlab/nbformat": ^4.1.4
+    "@jupyterlab/observables": ^5.1.4
+    "@jupyterlab/rendermime-interfaces": ^3.9.4
+    "@jupyterlab/services": ^7.1.4
+    "@jupyterlab/translation": ^4.1.4
+    "@lumino/coreutils": ^2.1.2
+    "@lumino/messaging": ^2.0.1
+    "@lumino/signaling": ^2.1.2
+    "@lumino/widgets": ^2.3.1
+    lodash.escape: ^4.0.1
+  checksum: 05e52e99c13616cf4eaaa3c162ef38df1dda262751c29361972d3de917efdcc10e3e29baa6f29e70fd1d14457cca2cf138cdc8b792d49242fe85c64e195673e8
+  languageName: node
+  linkType: hard
+
 "@jupyterlab/repo-top@workspace:.":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/repo-top@workspace:."
@@ -4754,6 +4775,22 @@ __metadata:
     typescript: ~5.1.6
   languageName: unknown
   linkType: soft
+
+"@jupyterlab/statusbar@npm:^4.1.4":
+  version: 4.1.4
+  resolution: "@jupyterlab/statusbar@npm:4.1.4"
+  dependencies:
+    "@jupyterlab/ui-components": ^4.1.4
+    "@lumino/algorithm": ^2.0.1
+    "@lumino/coreutils": ^2.1.2
+    "@lumino/disposable": ^2.1.2
+    "@lumino/messaging": ^2.0.1
+    "@lumino/signaling": ^2.1.2
+    "@lumino/widgets": ^2.3.1
+    react: ^18.2.0
+  checksum: 5b5491fb5acd835138ed6bcae70cab3d0f5c8a4bd8684df4b37e42d5a6562de8e31d0a9ec539f7efba9d2080d2acf0e0e7aae3a6dcb2a3767302b9e171ca401b
+  languageName: node
+  linkType: hard
 
 "@jupyterlab/template@workspace:buildutils/template":
   version: 0.0.0-use.local
@@ -12923,7 +12960,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"htmlparser2@npm:^6.1.0":
+"htmlparser2@npm:^6.0.0, htmlparser2@npm:^6.1.0":
   version: 6.1.0
   resolution: "htmlparser2@npm:6.1.0"
   dependencies:
@@ -18680,6 +18717,20 @@ __metadata:
     parse-srcset: ^1.0.2
     postcss: ^8.3.11
   checksum: fb96ea7170d51b5af2607f5cfd84464c78fc6f47e339407f55783e781c6a0288a8d40bbf97ea6a8758924ba9b2d33dcc4846bb94caacacd90d7f2de10ed8541a
+  languageName: node
+  linkType: hard
+
+"sanitize-html@npm:~2.7.3":
+  version: 2.7.3
+  resolution: "sanitize-html@npm:2.7.3"
+  dependencies:
+    deepmerge: ^4.2.2
+    escape-string-regexp: ^4.0.0
+    htmlparser2: ^6.0.0
+    is-plain-object: ^5.0.0
+    parse-srcset: ^1.0.2
+    postcss: ^8.3.11
+  checksum: 2399d1fdbbc3a263fb413c1fe1971b3dc2b51abc6cc5cb49490624539d1c57a8fe31e2b21408c118e2a957f4e673e3169b1f9a5807654408f17b130a9d78aed7
   languageName: node
   linkType: hard
 
