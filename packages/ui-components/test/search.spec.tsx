@@ -4,7 +4,7 @@
 import { fuzzySearch } from '@jupyterlab/ui-components';
 
 describe('@jupyterlab/ui-components', () => {
-  describe('Search', () => {
+  describe('fuzzySearch()', () => {
     // The search logic is in StringExt.matchSumOfDeltas, which is already
     // tested in the lumino package.
     it('should find an ASCII match in text', () => {
