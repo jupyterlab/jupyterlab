@@ -307,31 +307,48 @@ export const SessionConnectionMock = jest.fn<
  * A mock contents manager.
  */
 export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
-  const files = new Map<string, Contents.IModel>();
+  const files = new Map<string, Map<string, Contents.IModel>>();
   const dummy = new ContentsManager();
   const checkpoints = new Map<string, Contents.ICheckpointModel>();
   const checkPointContent = new Map<string, string>();
 
   const baseModel = Private.createFile({ type: 'directory' });
-  files.set('', { ...baseModel, path: '', name: '' });
+  // create the default drive
+  files.set(
+    '',
+    new Map<string, Contents.IModel>([
+      ['', { ...baseModel, path: '', name: '' }]
+    ])
+  );
 
   const thisObject: Contents.IManager = {
     ...jest.requireActual('@jupyterlab/services'),
     newUntitled: jest.fn(options => {
-      const model = Private.createFile(options || {});
-      files.set(model.path, model);
+      const driveName = dummy.driveName(options?.path || '');
+      const localPath = dummy.localPath(options?.path || '');
+      // create the test file without the drive name
+      const createOptions = { ...options, path: localPath };
+      const model = Private.createFile(createOptions || {});
+      // re-add the drive name to the model
+      const drivePath = driveName ? `${driveName}:${model.path}` : model.path;
+      const driveModel = {
+        ...model,
+        path: drivePath
+      };
+      files.get(driveName)!.set(model.path, driveModel);
       fileChangedSignal.emit({
         type: 'new',
         oldValue: null,
-        newValue: model
+        newValue: driveModel
       });
-      return Promise.resolve(model);
+      return Promise.resolve(driveModel);
     }),
     createCheckpoint: jest.fn(path => {
       const lastModified = new Date().toISOString();
       const data = { id: UUID.uuid4(), last_modified: lastModified };
       checkpoints.set(path, data);
-      checkPointContent.set(path, files.get(path)?.content);
+      // TODO: handle drives
+      checkPointContent.set(path, files.get('')!.get(path)?.content);
       return Promise.resolve(data);
     }),
     listCheckpoints: jest.fn(path => {
@@ -352,7 +369,8 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       if (!checkpoints.has(path)) {
         return Private.makeResponseError(404);
       }
-      (files.get(path) as any).content = checkPointContent.get(path);
+      // TODO: handle drives
+      (files.get('')!.get(path) as any).content = checkPointContent.get(path);
       return Promise.resolve();
     }),
     getSharedModelFactory: jest.fn(() => {
@@ -368,11 +386,14 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       return dummy.resolvePath(root, path);
     }),
     get: jest.fn((path, options) => {
-      path = Private.fixSlash(path);
-      if (!files.has(path)) {
+      const driveName = dummy.driveName(path);
+      const localPath = dummy.localPath(path);
+      const drive = files.get(driveName)!;
+      path = Private.fixSlash(localPath);
+      if (!drive.has(path)) {
         return Private.makeResponseError(404);
       }
-      const model = files.get(path)!;
+      const model = drive.get(path)!;
       const overrides: { hash?: string; last_modified?: string } = {};
       if (path == 'random-hash.txt') {
         overrides.hash = Math.random().toString();
@@ -385,10 +406,11 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       if (model.type === 'directory') {
         if (options?.content !== false) {
           const content: Contents.IModel[] = [];
-          files.forEach(fileModel => {
+          drive.forEach(fileModel => {
+            const localPath = dummy.localPath(fileModel.path);
             if (
               // If file path is under this directory, add it to contents array.
-              PathExt.dirname(fileModel.path) == model.path &&
+              PathExt.dirname(localPath) == model.path &&
               // But the directory should exclude itself from the contents array.
               fileModel !== model
             ) {
@@ -408,16 +430,20 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       return dummy.driveName(path);
     }),
     rename: jest.fn((oldPath, newPath) => {
-      oldPath = Private.fixSlash(oldPath);
-      newPath = Private.fixSlash(newPath);
-      if (!files.has(oldPath)) {
+      const driveName = dummy.driveName(oldPath);
+      const drive = files.get(driveName)!;
+      let oldLocalPath = dummy.localPath(oldPath);
+      let newLocalPath = dummy.localPath(newPath);
+      oldLocalPath = Private.fixSlash(oldLocalPath);
+      newLocalPath = Private.fixSlash(newLocalPath);
+      if (!drive.has(oldLocalPath)) {
         return Private.makeResponseError(404);
       }
-      const oldValue = files.get(oldPath)!;
-      files.delete(oldPath);
-      const name = PathExt.basename(newPath);
-      const newValue = { ...oldValue, name, path: newPath };
-      files.set(newPath, newValue);
+      const oldValue = drive.get(oldPath)!;
+      drive.delete(oldPath);
+      const name = PathExt.basename(newLocalPath);
+      const newValue = { ...oldValue, name, path: newLocalPath };
+      drive.set(newPath, newValue);
       fileChangedSignal.emit({
         type: 'rename',
         oldValue,
@@ -426,12 +452,15 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       return Promise.resolve(newValue);
     }),
     delete: jest.fn(path => {
-      path = Private.fixSlash(path);
-      if (!files.has(path)) {
+      const driveName = dummy.driveName(path);
+      const localPath = dummy.localPath(path);
+      const drive = files.get(driveName)!;
+      path = Private.fixSlash(localPath);
+      if (!drive.has(path)) {
         return Private.makeResponseError(404);
       }
-      const oldValue = files.get(path)!;
-      files.delete(path);
+      const oldValue = drive.get(path)!;
+      drive.delete(path);
       fileChangedSignal.emit({
         type: 'delete',
         oldValue,
@@ -445,7 +474,8 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       }
       path = Private.fixSlash(path);
       const timeStamp = new Date().toISOString();
-      if (files.has(path)) {
+      const drive = files.get(dummy.driveName(path))!;
+      if (drive.has(path)) {
         const updates =
           path == 'frozen-time-and-hash.txt'
             ? {}
@@ -453,13 +483,13 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
                 last_modified: timeStamp,
                 hash: timeStamp
               };
-        files.set(path, {
-          ...files.get(path)!,
+        drive.set(path, {
+          ...drive.get(path)!,
           ...options,
           ...updates
         });
       } else {
-        files.set(path, {
+        drive.set(path, {
           path,
           name: PathExt.basename(path),
           content: '',
@@ -477,15 +507,21 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       fileChangedSignal.emit({
         type: 'save',
         oldValue: null,
-        newValue: files.get(path)!
+        newValue: drive.get(path)!
       });
-      return Promise.resolve(files.get(path)!);
+      return Promise.resolve(drive.get(path)!);
     }),
     getDownloadUrl: jest.fn(path => {
       return dummy.getDownloadUrl(path);
     }),
     addDrive: jest.fn(drive => {
       dummy.addDrive(drive);
+      files.set(
+        drive.name,
+        new Map<string, Contents.IModel>([
+          ['', { ...baseModel, path: '', name: '' }]
+        ])
+      );
     }),
     dispose: jest.fn()
   };
