@@ -77,9 +77,8 @@ export function fuzzySearch(source: string, query: string): IScore | null {
   let score = Infinity;
   let indices: number[] | null = null;
 
-  // The regex for search word boundaries
-  const rgx = /\b\w/g;
-
+  // Look for letters (including in Asian scripts), numbers, and diacritical marks.
+  const rgx = /[\p{L}\p{N}\p{M}]+/gu;
   let continueSearch = true;
 
   // Search the source by word boundary.
