@@ -666,9 +666,7 @@ export class NotebookHelper {
     const isRenderedMarkdown = (
       await Utils.getLocatorClassList(cellEditor)
     ).includes('lm-mod-hidden');
-    // const isRenderedMarkdown = await cellEditor.evaluate(editor =>
-    //   editor.classList.contains('lm-mod-hidden')
-    // );
+
     if (isRenderedMarkdown) {
       return cell.locator('.jp-MarkdownOutput');
     }
