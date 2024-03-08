@@ -43,7 +43,7 @@ test.describe.serial('Notebook Run', () => {
 
     await page.notebook.runCellByCell({
       onBeforeScroll: async () => {
-        const nbPanel = await page.notebook.getNotebookInPanel();
+        const nbPanel = await page.notebook.getNotebookInPanelLocator();
         if (nbPanel) {
           captures.push(await nbPanel.screenshot());
           numNBImages++;
@@ -54,8 +54,8 @@ test.describe.serial('Notebook Run', () => {
     // Save outputs for the next tests
     await page.notebook.save();
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
-    captures.push(await nbPanel.screenshot());
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+    captures.push(await nbPanel!.screenshot());
     numNBImages++;
 
     for (let c = 0; c < numNBImages; ++c) {
