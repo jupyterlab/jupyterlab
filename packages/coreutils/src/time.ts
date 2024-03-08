@@ -13,6 +13,25 @@ const UNITS: { name: Intl.RelativeTimeFormatUnit; milliseconds: number }[] = [
   { name: 'seconds', milliseconds: 1000 }
 ];
 
+const SUPERSHORT_UNITS = {
+  'year': 'y',
+  'years': 'y',
+  'quarter': 'q',
+  'quarters': 'q',
+  'months': 'mo',
+  'month': 'mo',
+  'weeks': 'w',
+  'week': 'w',
+  'days': 'd',
+  'day': 'd',
+  'hours': 'h',
+  'hour': 'h',
+  'minutes': 'min',
+  'minute': 'min',
+  'seconds': 's',
+  'second': 's',
+};
+
 /**
  * The namespace for date functions.
  */
@@ -25,17 +44,17 @@ export namespace Time {
    * @returns A formatted date.
    */
   export function formatHuman(value: string | Date): string {
-    const lang = document.documentElement.lang || 'en';
-    const formatter = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
     const delta = new Date(value).getTime() - Date.now();
     for (let unit of UNITS) {
       const amount = Math.ceil(delta / unit.milliseconds);
       if (amount === 0) {
         continue;
       }
-      return formatter.format(amount, unit.name);
+      // In the rare case that the timestamp is in the future, prepend a "+"
+      const stringAmount = (amount > 0) ? `+${amount}` : `${-amount}`;
+      return stringAmount + SUPERSHORT_UNITS[unit.name];
     }
-    return formatter.format(0, 'seconds');
+    return '0s';
   }
 
   /**
