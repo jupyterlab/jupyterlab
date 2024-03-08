@@ -14,7 +14,7 @@ import { IWorkspacesModel } from './tokens';
 const DEFAULT_REFRESH_INTERVAL = 10000;
 
 /**
- * An implementation of a workspaces listing model.
+ * An implementation of a workspaces model.
  */
 export class WorkspacesModel implements IWorkspacesModel {
   constructor(options: WorkspacesModel.IOptions) {
@@ -71,7 +71,6 @@ export class WorkspacesModel implements IWorkspacesModel {
   async refresh(): Promise<void> {
     await this._poll.refresh();
     await this._poll.tick;
-    this._refreshed.emit(void 0);
   }
 
   /**
@@ -135,6 +134,7 @@ export class WorkspacesModel implements IWorkspacesModel {
 
   private async _fetchList() {
     this._workspaceData = await this._manager.list();
+    this._refreshed.emit(void 0);
   }
 
   private _refreshed = new Signal<WorkspacesModel, void>(this);
@@ -159,11 +159,13 @@ export namespace WorkspacesModel {
      * The workspaces manager.
      */
     manager: Workspace.IManager;
+
     /**
      * Whether a to automatically loads initial list of workspaces.
      * The default is `true`.
      */
     auto?: boolean;
+
     /**
      * The time interval for browser refreshing, in ms.
      */

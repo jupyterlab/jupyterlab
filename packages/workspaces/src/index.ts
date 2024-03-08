@@ -5,7 +5,5 @@
  * @module workspaces
  */
 
-// TODO: move implementation bits from -extension/commands here
-
 export * from './model';
 export * from './tokens';
