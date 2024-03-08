@@ -9,6 +9,7 @@ Workspaces
 A JupyterLab Workspace defines the layout and state of the user interface such as the position of files, notebooks, sidebars, and open/closed state of the panels.
 
 Workspaces can be managed in three ways:
+
 - :ref:`via Graphical User Interface <workspaces-gui>`
 - :ref:`via Command Line Interface <workspaces-cli>`
 - :ref:`via URL schema and parameters <url-workspaces>`
@@ -19,10 +20,11 @@ Managing Workspaces (GUI)
 -------------------------
 
 A number of commands is available to manage workspaces from the main menu, sidebar, and command palette:
-- `create-new`, `clone`, `rename`, `reset` and `delete` act on the workspaces stored by on the server in :ref:`the dedicated location <workspaces-directory>`.
-- `save` `save as`, `import` and `export` can load and store the workspace to/from the file system (contained within the Jupyter root directory); `save` will save the workspace to the most recently saved file
 
-In the sidebar the current workspace is indicated with check mark (✓). A different workspace can be opened by clicking on the corresponding sidebar item. Opening context menu over the workspace item in the sidebar will present actions available for management of that workspace:
+- `create-new`, `clone`, `rename`, `reset`, and `delete` act on the workspaces stored by on the server in :ref:`the dedicated location <workspaces-directory>`.
+- `save`, `save as`, `import`, and `export` can load and store the workspace to/from the file system (contained within the Jupyter root directory); `save` will save the workspace to the most recently saved file.
+
+In the sidebar the current workspace is indicated with check mark (✓). A different workspace can be opened by clicking on the corresponding sidebar item. Opening context menu (right click) over the workspace item in the sidebar will present actions available for management of that workspace:
 
 .. image:: ../images/workspaces-sidebar.png
    :align: center
@@ -74,7 +76,7 @@ There are two top level keys requires, `data`, and `metadata`.
 
 The `metadata` must be a mapping with an `id`
 key that has the same value as the ID of the workspace. This should also be the relative URL path to access the workspace,
-like `/lab/workspaces/foo`. Additionally, `metadata` may contain `created` and `last_modified` fields with date and time of creation and most recent modification, respectively.
+like `/lab/workspaces/foo`. Additionally, `metadata` may contain `created` and `last_modified` fields with date and time creation and most recent modification, respectively. The date and time are encoded using ISO 8601 format.
 
 The `data` key maps to the initial state of the ``IStateDB``. Many plugins look in the State DB for the configuration.
 Also any plugins that register with the ``ILayoutRestorer`` will look up all keys in the State DB

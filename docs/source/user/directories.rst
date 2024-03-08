@@ -317,4 +317,4 @@ environments. The location can be modified using the
 ``JUPYTERLAB_WORKSPACES_DIR`` environment variable.
 
 These files can be imported and exported to create default "profiles", using
-the :ref:`workspace command line tool <url-workspaces-cli>`.
+the :ref:`workspace command line tool <workspaces-cli>`.
