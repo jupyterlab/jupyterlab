@@ -21,7 +21,7 @@ const OPEN_DIALOG_CLASS = 'jp-Open-Dialog';
 /**
  * The class name added to (optional) label in the file dialog
  */
-const OPEN_DIALOG_LABLE_CLASS = 'jp-Open-Dialog-label';
+const OPEN_DIALOG_LABEL_CLASS = 'jp-Open-Dialog-label';
 
 /**
  * Namespace for file dialog
@@ -205,7 +205,7 @@ class OpenDialog
         const layout = new PanelLayout();
         if (label) {
           const labelWidget = new Widget();
-          labelWidget.addClass(OPEN_DIALOG_LABLE_CLASS);
+          labelWidget.addClass(OPEN_DIALOG_LABEL_CLASS);
           labelWidget.node.textContent = label;
           layout.addWidget(labelWidget);
         }

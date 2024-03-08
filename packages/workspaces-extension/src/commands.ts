@@ -102,9 +102,25 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
     const trans = translator.load('jupyterlab');
 
     const namingHintLabel = trans.__(
-      'Naming the workspace will create a unique URL. Please name your workspace without special characters.'
+      'Naming the workspace will create a unique URL. The name may contain letters, numbers, hyphens (-), and underscores (_).'
     );
-    const resourcePrefix = '/lab/workspaces/';
+    const workspacesBase = URLExt.join(paths.urls.app, 'workspaces');
+    const resourcePrefix = workspacesBase + '/';
+    // `-` needs double backslashes to be escaped in `v` mode used for patterns
+    const namePattern = '[a-zA-Z0-9\\-_]+';
+
+    const getNameForWorkspace = async (
+      options: Omit<InputDialog.ITextOptions, 'prefix' | 'pattern' | 'label'>
+    ) => {
+      return InputDialog.getText({
+        label: namingHintLabel,
+        prefix: resourcePrefix,
+        pattern: namePattern,
+        required: true,
+        placeholder: trans.__('workspace-name'),
+        ...options
+      });
+    };
 
     const test = (node: HTMLElement) =>
       node.classList.contains(WORKSPACE_ITEM_CLASS);
@@ -132,7 +148,6 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           return;
         }
 
-        const workspacesBase = URLExt.join(paths.urls.app, 'workspaces');
         const url = URLExt.join(workspacesBase, workspaceId);
         if (!url.startsWith(workspacesBase)) {
           throw new Error('Can only be used for workspaces');
@@ -193,11 +208,9 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         let workspaceId = args.workspace as string | undefined;
 
         if (!workspaceId) {
-          const result = await InputDialog.getText({
+          const result = await getNameForWorkspace({
             title: trans.__('Create New Workspace'),
-            label: namingHintLabel,
-            okLabel: trans.__('Create'),
-            prefix: resourcePrefix
+            okLabel: trans.__('Create')
           });
           if (!result.value || !result.button.accept) {
             return;
@@ -230,13 +243,10 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           workspaceId = result.value;
         }
 
-        const result = await InputDialog.getText({
+        const result = await getNameForWorkspace({
           title: trans.__('Clone Workspace'),
-          label: namingHintLabel,
           text: trans.__('%1-clone', workspaceId),
-          placeholder: trans.__('The name for the workspace clone'),
-          okLabel: trans.__('Clone'),
-          prefix: resourcePrefix
+          okLabel: trans.__('Clone')
         });
 
         if (!result.button.accept || !result.value) {
@@ -264,13 +274,10 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           resolver.name;
 
         const oldName = workspaceId;
-        const result = await InputDialog.getText({
+        const result = await getNameForWorkspace({
           title: trans.__('Rename Workspace'),
-          label: namingHintLabel,
           text: oldName,
-          placeholder: trans.__('The new name for the workspace'),
-          okLabel: trans.__('Rename'),
-          prefix: resourcePrefix
+          okLabel: trans.__('Rename')
         });
 
         if (!result.button.accept || !result.value) {

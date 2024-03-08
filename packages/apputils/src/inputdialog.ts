@@ -215,6 +215,14 @@ export namespace InputDialog {
      * Default is to select the whole input text if present.
      */
     selectionRange?: number;
+    /**
+     * Pattern used by the browser to validate the input value.
+     */
+    pattern?: string;
+    /**
+     * Whether the input is required (has to be non-empty).
+     */
+    required?: boolean;
   }
 
   /**
@@ -389,9 +397,40 @@ class InputNumberDialog extends InputDialogBase<number> {
 }
 
 /**
+ * Base widget body for input text/password/email dialog
+ */
+class InputDialogTextualBase extends InputDialogBase<string> {
+  /**
+   * InputDialogTextualBase constructor
+   *
+   * @param options Constructor options
+   */
+  constructor(options: Omit<InputDialog.ITextOptions, 'selectionRange'>) {
+    super(options);
+    this._input.value = options.text ? options.text : '';
+    if (options.placeholder) {
+      this._input.placeholder = options.placeholder;
+    }
+    if (options.pattern) {
+      this._input.pattern = options.pattern;
+    }
+    if (options.required) {
+      this._input.required = options.required;
+    }
+  }
+
+  /**
+   * Get the text specified by the user
+   */
+  getValue(): string {
+    return this._input.value;
+  }
+}
+
+/**
  * Widget body for input text dialog
  */
-class InputTextDialog extends InputDialogBase<string> {
+class InputTextDialog extends InputDialogTextualBase {
   /**
    * InputTextDialog constructor
    *
@@ -399,12 +438,8 @@ class InputTextDialog extends InputDialogBase<string> {
    */
   constructor(options: InputDialog.ITextOptions) {
     super(options);
-
     this._input.type = 'text';
-    this._input.value = options.text ? options.text : '';
-    if (options.placeholder) {
-      this._input.placeholder = options.placeholder;
-    }
+
     this._initialSelectionRange = Math.min(
       this._input.value.length,
       Math.max(0, options.selectionRange ?? this._input.value.length)
@@ -421,20 +456,13 @@ class InputTextDialog extends InputDialogBase<string> {
     }
   }
 
-  /**
-   * Get the text specified by the user
-   */
-  getValue(): string {
-    return this._input.value;
-  }
-
   private _initialSelectionRange: number;
 }
 
 /**
  * Widget body for input password dialog
  */
-class InputPasswordDialog extends InputDialogBase<string> {
+class InputPasswordDialog extends InputDialogTextualBase {
   /**
    * InputPasswordDialog constructor
    *
@@ -442,12 +470,7 @@ class InputPasswordDialog extends InputDialogBase<string> {
    */
   constructor(options: InputDialog.ITextOptions) {
     super(options);
-
     this._input.type = 'password';
-    this._input.value = options.text ? options.text : '';
-    if (options.placeholder) {
-      this._input.placeholder = options.placeholder;
-    }
   }
 
   /**
@@ -458,13 +481,6 @@ class InputPasswordDialog extends InputDialogBase<string> {
     if (this._input.value) {
       this._input.select();
     }
-  }
-
-  /**
-   * Get the text specified by the user
-   */
-  getValue(): string {
-    return this._input.value;
   }
 }
 

@@ -42,8 +42,7 @@ const workspacesMenu: JupyterFrontEndPlugin<void> = {
   requires: [IWorkspaceCommands],
   autoStart: true,
   activate: () => {
-    // TODO: remove "save current workspace as" and friends?
-    // no-op (the menu items come from schema)
+    // no-op - the menu items come from schema matching the name of the plugin
   }
 };
 

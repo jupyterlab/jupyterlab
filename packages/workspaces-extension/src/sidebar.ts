@@ -7,7 +7,6 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { IWindowResolver } from '@jupyterlab/apputils';
-import { PageConfig } from '@jupyterlab/coreutils';
 import { IWorkspaceCommands, IWorkspacesModel } from '@jupyterlab/workspaces';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
@@ -59,10 +58,9 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
         await model.refresh();
       }
       icon() {
-        const current = PageConfig.getOption('workspace');
-        const currentByResolver = resolver.name;
-        console.log({ current, currentByResolver });
-        return current === this._workspace.metadata.id ? checkIcon : blankIcon;
+        return resolver.name === this._workspace.metadata.id
+          ? checkIcon
+          : blankIcon;
       }
       label() {
         return this._workspace.metadata.id;
