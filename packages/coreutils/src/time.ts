@@ -14,22 +14,22 @@ const UNITS: { name: Intl.RelativeTimeFormatUnit; milliseconds: number }[] = [
 ];
 
 const SUPERSHORT_UNITS = {
-  'year': 'y',
-  'years': 'y',
-  'quarter': 'q',
-  'quarters': 'q',
-  'months': 'mo',
-  'month': 'mo',
-  'weeks': 'w',
-  'week': 'w',
-  'days': 'd',
-  'day': 'd',
-  'hours': 'h',
-  'hour': 'h',
-  'minutes': 'min',
-  'minute': 'min',
-  'seconds': 's',
-  'second': 's',
+  year: 'y',
+  years: 'y',
+  quarter: 'q',
+  quarters: 'q',
+  months: 'mo',
+  month: 'mo',
+  weeks: 'w',
+  week: 'w',
+  days: 'd',
+  day: 'd',
+  hours: 'h',
+  hour: 'h',
+  minutes: 'min',
+  minute: 'min',
+  seconds: 's',
+  second: 's'
 };
 
 /**
@@ -51,7 +51,7 @@ export namespace Time {
         continue;
       }
       // In the rare case that the timestamp is in the future, prepend a "+"
-      const stringAmount = (amount > 0) ? `+${amount}` : `${-amount}`;
+      const stringAmount = amount > 0 ? `+${amount}` : `${-amount}`;
       return stringAmount + SUPERSHORT_UNITS[unit.name];
     }
     return '0s';

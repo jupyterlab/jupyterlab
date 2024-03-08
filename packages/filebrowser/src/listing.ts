@@ -2299,7 +2299,7 @@ export namespace DirListing {
       const narrow = document.createElement('div');
       const modified = this.createHeaderItemNode(
         trans.__('Mod'),
-        trans.__('Last Modified')  
+        trans.__('Last Modified')
       );
       const fileSize = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
