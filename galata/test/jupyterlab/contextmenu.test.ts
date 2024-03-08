@@ -206,16 +206,16 @@ test.describe('Application Context Menu', () => {
     });
     expect(await page.menu.isAnyOpen()).toBe(true);
     let imageName = `console-prompt.png`;
-    let menu = await page.menu.getOpenMenu();
-    expect.soft(await menu.screenshot()).toMatchSnapshot(imageName);
+    let menu = await page.menu.getOpenMenuLocator();
+    expect.soft(await menu?.screenshot()).toMatchSnapshot(imageName);
 
     // Over console content
     await page.click('.jp-CodeConsole-content', {
       button: 'right'
     });
     imageName = `console-content.png`;
-    menu = await page.menu.getOpenMenu();
+    menu = await page.menu.getOpenMenuLocator();
     expect(await page.menu.isAnyOpen()).toBe(true);
-    expect(await menu.screenshot()).toMatchSnapshot(imageName);
+    expect(await menu?.screenshot()).toMatchSnapshot(imageName);
   });
 });
