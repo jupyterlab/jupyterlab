@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { setSidebarWidth } from './utils';
 
 test.use({
   autoGoto: false,
@@ -23,7 +22,7 @@ test.describe('Default', () => {
       }`
     });
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.menu.clickMenuItem('File>New>Terminal');
 
@@ -42,7 +41,7 @@ test.describe('Default', () => {
       }`
     });
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -75,7 +74,7 @@ test.describe('Default', () => {
       }`
     });
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.click('text=Tabs');
 
@@ -95,7 +94,7 @@ test.describe('Default', () => {
       }`
     });
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -199,13 +198,13 @@ test.describe('Customized', () => {
       }`
     });
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.menu.clickMenuItem('File>New>Terminal');
 
     await page.waitForSelector('.jp-Terminal');
 
-    await setSidebarWidth(page, 271, 'right');
+    await page.sidebar.setWidth(271, 'right');
 
     expect(await page.screenshot()).toMatchSnapshot(
       'customized-terminal-position-single.png'
@@ -220,7 +219,7 @@ test.describe('Customized', () => {
       }`
     });
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
@@ -247,7 +246,7 @@ test.describe('Customized', () => {
       }`
     });
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.click('text=Tabs');
 
@@ -267,7 +266,7 @@ test.describe('Customized', () => {
       }`
     });
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.dblclick(
       '[aria-label="File Browser Section"] >> text=notebooks'
