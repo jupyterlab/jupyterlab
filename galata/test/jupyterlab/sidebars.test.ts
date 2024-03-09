@@ -71,7 +71,9 @@ test.describe('Sidebars', () => {
         // filtering results
         '.jp-DirListing-content mark',
         // only added after resizing
-        'jp-DirListing-narrow'
+        'jp-DirListing-narrow',
+        // used in "open file" dialog containing a file browser
+        '.jp-Open-Dialog'
       ]
     });
     expect(unusedRules.length).toEqual(0);

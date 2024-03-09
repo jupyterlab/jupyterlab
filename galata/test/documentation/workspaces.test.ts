@@ -63,7 +63,9 @@ test.describe('Workspaces sidebar', () => {
     );
     // Open menu for the shot
     await workspaceItem.click({ button: 'right' });
-    const renameWorkspace = page.locator('text=Rename Workspace');
+    const renameWorkspace = page.locator(
+      '.lm-Menu-itemLabel:text("Rename Workspace")'
+    );
     await renameWorkspace.hover();
     // Inject mouse
     await page.evaluate(
@@ -71,8 +73,7 @@ test.describe('Workspaces sidebar', () => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
       [
-        // TODO use renameWorkspace once https://github.com/jupyterlab/jupyterlab/pull/15375 is in
-        await positionMouseOver((await page.$('text=Rename Workspace'))!, {
+        await positionMouseOver(renameWorkspace, {
           left: 1,
           offsetLeft: 5,
           top: 0.25
