@@ -121,7 +121,7 @@ test.describe('Notebook Tests', () => {
     expect(cellOutput4).toBeTruthy();
     expect(parseFloat(cellOutput4![0])).toBeGreaterThan(1.5);
 
-    const panel = await page.activity.getPanel();
+    const panel = await page.activity.getPanelLocator();
 
     expect(await panel!.screenshot()).toMatchSnapshot('example-run.png');
   });
@@ -182,7 +182,7 @@ test.describe('Access cells in windowed notebook', () => {
     await page.filebrowser.open(target);
     await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
 
-    expect(await page.notebook.getCell(12)).toBeTruthy();
+    expect(await page.notebook.getCellLocator(12)).toBeTruthy();
   });
 
   test('getCell above the viewport', async ({ page, tmpPath }) => {
@@ -196,8 +196,8 @@ test.describe('Access cells in windowed notebook', () => {
     await page.locator('#jp-main-statusbar').getByText('Idle').waitFor();
     await page.waitForTimeout(50);
 
-    await page.notebook.getCell(12);
+    await page.notebook.getCellLocator(12);
 
-    expect(await page.notebook.getCell(0)).toBeTruthy();
+    expect(await page.notebook.getCellLocator(0)).toBeTruthy();
   });
 });
