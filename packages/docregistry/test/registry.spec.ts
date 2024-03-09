@@ -708,12 +708,12 @@ describe('docregistry/registry', () => {
         });
         const regularDirectoryFt = registry.getFileTypeForModel({
           path: '/foo',
-          mimetype: 'directory'
+          type: 'directory'
         });
         expect(regularDirectoryFt.name).toBe('directory');
         const nodeNoduleFt = registry.getFileTypeForModel({
           path: '/foo/node_modules',
-          mimetype: 'directory'
+          type: 'directory'
         });
         expect(nodeNoduleFt.name).toBe('node_module');
       });
@@ -726,12 +726,12 @@ describe('docregistry/registry', () => {
         });
         const regularDirectoryFt = registry.getFileTypeForModel({
           name: 'foo.ipynb',
-          mimetype: 'notebook'
+          type: 'notebook'
         });
         expect(regularDirectoryFt.name).toBe('notebook');
         const nodeNoduleFt = registry.getFileTypeForModel({
           path: 'test.ipynb',
-          mimetype: 'notebook'
+          type: 'notebook'
         });
         expect(nodeNoduleFt.name).toBe('test_ipynb');
       });
