@@ -526,7 +526,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
                   ? classes(className, LabIconStyle.styleClass(styleProps))
                   : undefined,
               title: title,
-              slot: slot,
+              slot: slot
             };
           }
           return (
@@ -897,9 +897,9 @@ namespace Private {
       .match(
         strict
           ? // match based on data url schema
-          /^(?:data:.*?(;base64)?,)?(.*)/
+            /^(?:data:.*?(;base64)?,)?(.*)/
           : // match based on open of svg tag
-          /(?:(base64).*)?(<svg.*)/
+            /(?:(base64).*)?(<svg.*)/
       )!;
 
     // decode from base64, if needed
