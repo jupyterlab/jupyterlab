@@ -37,9 +37,7 @@ export class StatusBarHelper {
     }
 
     await this.menu.clickMenuItem('View>Show Status Bar');
-    await this.page.waitForSelector('#jp-main-statusbar', {
-      state: 'visible'
-    });
+    await this.page.locator('#jp-main-statusbar').waitFor({ state: 'visible' });
   }
 
   /**
@@ -52,8 +50,6 @@ export class StatusBarHelper {
     }
 
     await this.menu.clickMenuItem('View>Show Status Bar');
-    await this.page.waitForSelector('#jp-main-statusbar', {
-      state: 'hidden'
-    });
+    await this.page.locator('#jp-main-statusbar').waitFor({ state: 'hidden' });
   }
 }
