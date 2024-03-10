@@ -60,7 +60,7 @@ export class Context<
       this._path
     );
     const sharedModel = sharedFactory?.createNew({
-      path: localPath,
+      path: this._path,
       format: this._factory.fileFormat,
       contentType: this._factory.contentType,
       collaborative: this._factory.collaborative
@@ -80,7 +80,7 @@ export class Context<
     this.sessionContext = new SessionContext({
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
-      path: localPath,
+      path: this._path,
       type: ext === '.ipynb' ? 'notebook' : 'file',
       name: PathExt.basename(localPath),
       kernelPreference: options.kernelPreference || { shouldStart: false },
@@ -454,7 +454,9 @@ export class Context<
     // The session uses local paths.
     // We need to convert it to a global path.
     const driveName = this._manager.contents.driveName(this.path);
-    let newPath = this.sessionContext.session!.path;
+    let newPath = this._manager.contents.localPath(
+      this.sessionContext.session!.path
+    );
     if (driveName) {
       newPath = `${driveName}:${newPath}`;
     }
@@ -503,8 +505,8 @@ export class Context<
     this._path = newPath;
     const localPath = this._manager.contents.localPath(newPath);
     const name = PathExt.basename(localPath);
-    if (this.sessionContext.session?.path !== localPath) {
-      void this.sessionContext.session?.setPath(localPath);
+    if (this.sessionContext.session?.path !== newPath) {
+      void this.sessionContext.session?.setPath(newPath);
     }
     if (this.sessionContext.session?.name !== name) {
       void this.sessionContext.session?.setName(name);
