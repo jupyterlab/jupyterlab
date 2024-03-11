@@ -203,7 +203,6 @@
 }
 
 .jp-Shortcuts-ShortcutContainer:focus-within .jp-Shortcuts-ShortcutKeys {
-  border-color: var(--jp-border-color3);
   background: var(--jp-layout-color3);
 }
 
@@ -272,7 +271,7 @@
   background-color: var(--jp-brand-color2);
 }
 
-.jp-Shortcuts-Plus:focus-within {
+.jp-Shortcuts-Plus:focus {
   background-color: var(--jp-brand-color2);
 }
 
