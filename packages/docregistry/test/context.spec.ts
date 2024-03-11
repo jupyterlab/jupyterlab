@@ -55,15 +55,16 @@ describe('docregistry/context', () => {
         expect(context).toBeInstanceOf(Context);
       });
 
-      it('should set the session path with local path', () => {
+      it('should set the session path with global path', () => {
         const localPath = `${UUID.uuid4()}.txt`;
+        const globalPath = `TestDrive:${localPath}`;
         context = new Context({
           manager,
           factory,
-          path: `TestDrive:${localPath}`
+          path: globalPath
         });
 
-        expect(context.sessionContext.path).toEqual(localPath);
+        expect(context.sessionContext.path).toEqual(globalPath);
       });
     });
 
