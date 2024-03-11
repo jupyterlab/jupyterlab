@@ -58,7 +58,6 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
         Array.from(shortcutList.children).forEach(child => {
           focusable.push(child);
         });
-        console.log(`Array length: ${focusable.length}`);
         // If focusable contains only one element, nothing to do.
         if (focusable.length <= 1) {
           return;
