@@ -14,7 +14,7 @@ import {
 } from './ShortcutInput';
 import { IShortcutUIexternal } from './TopNav';
 
-const ARROW_KEYS = [
+const NAV_KEYS = [
   'ArrowLeft',
   'ArrowUp',
   'ArrowRight',
@@ -501,7 +501,7 @@ export class ShortcutItem extends React.Component<
 
   handleKeyDown(event: React.KeyboardEvent): void {
     // Handle the arrow keys to navigate through rows.
-    if (ARROW_KEYS.includes(event.key)) {
+    if (NAV_KEYS.includes(event.key)) {
       const focusedElement = document.activeElement;
 
       const parentRow = focusedElement?.closest('.jp-Shortcuts-Row');
@@ -606,7 +606,6 @@ export class ShortcutItem extends React.Component<
           role="tab"
           className="jp-Shortcuts-Row"
           tabIndex={this.props.tabIndex}
-          ref={this.props.shortcut.id}
           onKeyDown={event => {
             this.props.handleRowKeyDown(event);
             this.handleEvent(event);
