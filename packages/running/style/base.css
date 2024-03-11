@@ -99,16 +99,12 @@
   color: var(--jp-ui-font-color3);
 }
 
-.jp-RunningSessions-collapseButton .jp-icon-output[fill] {
-  fill: var(--jp-inverse-layout-color3);
-}
-
-.jp-RunningSessions-collapseButton > svg {
-  scale: 0.9;
-}
-
 .jp-RunningSessions-collapseButton {
   margin: 4px 2px;
+}
+
+.jp-RunningSessions-collapseButton[aria-pressed='true'] {
+  box-shadow: none;
 }
 
 .jp-RunningSessions-icon {

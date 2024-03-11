@@ -451,37 +451,30 @@ class Section extends PanelWithToolbar {
       tooltip: trans.__('Switch to List View'),
       pressedTooltip: trans.__('Switch to Tree View')
     });
-    const expandAllButton = new ToolbarButton({
-      className: COLLAPSE_EXPAND_BUTTON_CLASS,
-      enabled,
-      icon: expandAllIcon,
-      onClick: () => this._collapseToggled.emit(false),
-      tooltip: trans.__('Expand All')
-    });
-    const collapseAllButton = new ToolbarButton({
+    const collapseExpandAllButton = new ToolbarButton({
       className: COLLAPSE_EXPAND_BUTTON_CLASS,
       enabled,
       icon: collapseAllIcon,
-      onClick: () => this._collapseToggled.emit(true),
-      tooltip: trans.__('Collapse All')
+      pressedIcon: expandAllIcon,
+      onClick: () => {
+        const newState = !collapseExpandAllButton.pressed;
+        this._collapseToggled.emit(newState);
+        collapseExpandAllButton.pressed = newState;
+      },
+      tooltip: trans.__('Collapse All'),
+      pressedTooltip: trans.__('Expand All')
     });
 
     this._buttons = {
       'switch-view': switchViewButton,
-      'expand-all': expandAllButton,
-      'collapse-all': collapseAllButton,
+      'collapse-expand': collapseExpandAllButton,
       'shutdown-all': shutdownAllButton
     };
     // Update buttons once defined and before adding to DOM
     this._updateButtons();
     this._manager.runningChanged.connect(this._updateButtons, this);
 
-    for (const name of [
-      'expand-all',
-      'collapse-all',
-      'switch-view',
-      'shutdown-all'
-    ]) {
+    for (const name of ['collapse-expand', 'switch-view', 'shutdown-all']) {
       this.toolbar.addItem(
         name,
         this._buttons[name as keyof typeof this._buttons]
@@ -538,22 +531,17 @@ class Section extends PanelWithToolbar {
     this._buttons['switch-view'].node.style.display = hasNesting
       ? 'block'
       : 'none';
-    this._buttons['expand-all'].node.style.display = inTreeView
-      ? 'block'
-      : 'none';
-    this._buttons['collapse-all'].node.style.display = inTreeView
+    this._buttons['collapse-expand'].node.style.display = inTreeView
       ? 'block'
       : 'none';
 
-    this._buttons['expand-all'].enabled = enabled;
-    this._buttons['collapse-all'].enabled = enabled;
+    this._buttons['collapse-expand'].enabled = enabled;
     this._buttons['switch-view'].enabled = enabled;
     this._buttons['shutdown-all'].enabled = enabled;
   }
 
   private _buttons: {
-    'expand-all': ToolbarButton;
-    'collapse-all': ToolbarButton;
+    'collapse-expand': ToolbarButton;
     'switch-view': ToolbarButton;
     'shutdown-all': ToolbarButton;
   };
