@@ -37,3 +37,23 @@ toolbars.forEach(([plugin, parameter]) => {
     expect(missingCommands).toEqual([]);
   });
 });
+
+test('Render Switch Kernel ToolbarButton', async ({ page }) => {
+  await page.notebook.createNew();
+
+  const label = await page.$(
+    'jp-button.jp-Toolbar-kernelName .jp-ToolbarButtonComponent-label'
+  );
+  const labelColor = await page.evaluate(
+    el => getComputedStyle(el).color,
+    label
+  );
+
+  const color = await page.evaluate(() =>
+    getComputedStyle(document.body)
+      .getPropertyValue('--jp-ui-font-color1')
+      .trim()
+  );
+
+  expect(labelColor).toEqual(color);
+});
