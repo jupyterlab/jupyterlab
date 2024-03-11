@@ -566,6 +566,16 @@ test.describe('General', () => {
       page.locator('.jp-RunningSessions-item.jp-mod-kernel')
     ).toHaveCount(2, { timeout: 5000 });
 
+    // Freeze kernel IDs
+    await page.evaluate(() => {
+      const mockedKernelIds = ['abcd1234', 'wxyz5678'];
+      document
+        .querySelectorAll('.jp-RunningSessions-item-label-kernel-id')
+        .forEach((span, i) => {
+          span.innerText = `(${mockedKernelIds[i]})`;
+        });
+    });
+
     expect(
       await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
     ).toMatchSnapshot('running_layout.png');

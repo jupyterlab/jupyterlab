@@ -30,6 +30,14 @@ test.describe('Overview', () => {
         '.jp-RunningSessions-item.jp-mod-kernelspec >> text="Python 3 (ipykernel)"'
       )
       .waitFor();
+
+    // Freeze kernel ID
+    await page.evaluate(() => {
+      document.querySelector(
+        '.jp-RunningSessions-item-label-kernel-id'
+      ).innerText = '(abcd1234)';
+    });
+
     expect(
       await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
     ).toMatchSnapshot('interface_tabs.png');
