@@ -64,7 +64,7 @@ test.describe('listeners', () => {
     });
 
     await page.menu.clickMenuItem('File>New>Text File');
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     await Promise.all([
       page.locator('.jp-Dialog').waitFor(),
@@ -86,7 +86,7 @@ test.describe('listeners', () => {
     });
 
     await page.menu.clickMenuItem('File>New>Text File');
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     await Promise.all([
       page.locator('.jp-Dialog').waitFor(),
@@ -114,7 +114,7 @@ test.describe('listeners', () => {
     });
 
     await page.menu.clickMenuItem('File>New>Text File');
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     await Promise.all([
       page.locator('.jp-Dialog').waitFor(),

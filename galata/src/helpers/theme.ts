@@ -45,6 +45,6 @@ export class ThemeHelper {
       await window.galata.setTheme(themeName);
     }, themeName);
 
-    await page.waitForSelector('#jupyterlab-splash', { state: 'detached' });
+    await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
   }
 }

@@ -82,10 +82,9 @@ test.describe('Completer', () => {
       await page.keyboard.press('Tab');
       completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
-      await page.waitForSelector('.jp-Completer-loading-bar');
-      await page.waitForSelector('.jp-Completer-loading-bar', {
-        state: 'detached'
-      });
+      await page
+        .locator('.jp-Completer-loading-bar')
+        .waitFor({ state: 'detached' });
       await session?.detach();
       const imageName = 'completer-with-doc-panel.png';
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
@@ -158,8 +157,8 @@ test.describe('Completer', () => {
 
       await page.click('button:has-text("Select")');
 
-      await page.waitForSelector('[aria-label="Code Cell Content"]');
-      await page.waitForSelector('text=| Idle');
+      await page.locator('[aria-label="Code Cell Content"]').waitFor();
+      await page.locator('text=| Idle').waitFor();
 
       await page.keyboard.type('import getopt\ngetopt.');
       await page.keyboard.press('Tab');

@@ -321,9 +321,7 @@ export const test: TestType<
       page: Page,
       helpers: IJupyterLabPage
     ): Promise<void> => {
-      await page.waitForSelector('#jupyterlab-splash', {
-        state: 'detached'
-      });
+      await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
       await helpers.waitForCondition(() => {
         return helpers.activity.isTabActive('Launcher');
       });
