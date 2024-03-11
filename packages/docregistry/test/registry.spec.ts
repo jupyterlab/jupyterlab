@@ -711,11 +711,11 @@ describe('docregistry/registry', () => {
           type: 'directory'
         });
         expect(regularDirectoryFt.name).toBe('directory');
-        const nodeNoduleFt = registry.getFileTypeForModel({
+        const nodeModuleFt = registry.getFileTypeForModel({
           path: '/foo/node_modules',
           type: 'directory'
         });
-        expect(nodeNoduleFt.name).toBe('node_module');
+        expect(nodeModuleFt.name).toBe('node_module');
       });
 
       it('should allow to customise filetype for notebook', () => {
@@ -724,7 +724,7 @@ describe('docregistry/registry', () => {
           contentType: 'notebook',
           pattern: '^test.ipynb$'
         });
-        const regularNotebookFt  = registry.getFileTypeForModel({
+        const regularNotebookFt = registry.getFileTypeForModel({
           name: 'foo.ipynb',
           type: 'notebook'
         });
