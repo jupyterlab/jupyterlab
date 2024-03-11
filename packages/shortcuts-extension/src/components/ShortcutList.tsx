@@ -30,16 +30,6 @@ export interface IShortcutListProps {
 
 /** React component for list of shortcuts */
 export class ShortcutList extends React.Component<IShortcutListProps> {
-  handleTabIndex(shortcut: ShortcutObject): number {
-    let title = shortcut.commandName;
-    let firstElement = this.props.shortcuts[0].commandName;
-
-    if (firstElement === title) {
-      return 0;
-    }
-    return -1;
-  }
-
   /**
    * Handle key down for row navigation
    */
