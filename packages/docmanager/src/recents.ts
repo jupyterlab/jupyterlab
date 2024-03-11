@@ -197,7 +197,7 @@ export class RecentsManager implements IRecentsManager, IDisposable {
           return a.root !== this._serverRoot ? 1 : -1;
         }
       });
-    this.saveRecents();
+    this._saveDebouncer.invoke().catch(console.warn);
   }
 
   /**
@@ -235,13 +235,6 @@ export class RecentsManager implements IRecentsManager, IDisposable {
       })
     );
     return invalidPathsOrNulls.filter(x => typeof x === 'string') as string[];
-  }
-
-  /**
-   * Save the recent items to the state with debouncing.
-   */
-  protected saveRecents(): void {
-    this._saveDebouncer.invoke();
   }
 
   /**
