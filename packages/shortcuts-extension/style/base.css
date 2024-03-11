@@ -282,7 +282,7 @@
 
 .jp-Shortcuts-Reset {
   color: var(--jp-brand-color2);
-  padding-left: 10px;
+  margin-left: 10px;
   background: none;
   border: none;
 }
