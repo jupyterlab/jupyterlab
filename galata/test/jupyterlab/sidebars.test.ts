@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, Handle, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
 import { Locator } from '@playwright/test';
 
 const sidebarIds: galata.SidebarTabId[] = [
@@ -11,6 +11,10 @@ const sidebarIds: galata.SidebarTabId[] = [
   'table-of-contents',
   'extensionmanager.main-view'
 ];
+
+test.use({
+  mockState: true
+});
 
 /**
  * Add provided text as label on first tab in given tabbar.

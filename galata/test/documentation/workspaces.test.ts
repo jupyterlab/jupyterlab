@@ -81,6 +81,8 @@ test.describe('Workspaces sidebar', () => {
       ]
     );
 
+    await page.launcher.waitFor();
+
     expect(
       await page.screenshot({ clip: { y: 0, x: 0, width: 400, height: 420 } })
     ).toMatchSnapshot('workspaces_sidebar.png');
