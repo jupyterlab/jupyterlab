@@ -7,6 +7,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
 import { IDisposable } from '@lumino/disposable';
+import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import { IRecentsManager, RecentDocument } from './tokens';
 
@@ -15,6 +16,7 @@ import { IRecentsManager, RecentDocument } from './tokens';
  */
 export class RecentsManager implements IRecentsManager, IDisposable {
   constructor(options: RecentsManager.IOptions) {
+    this._saveDebouncer = new Debouncer(this._save.bind(this), 500);
     this._stateDB = options.stateDB;
     this._contentsManager = options.contents;
     this.updateRootDir();
@@ -83,6 +85,7 @@ export class RecentsManager implements IRecentsManager, IDisposable {
     }
     this._isDisposed = true;
     Signal.clearData(this);
+    this._saveDebouncer.dispose();
   }
 
   /**
@@ -233,29 +236,23 @@ export class RecentsManager implements IRecentsManager, IDisposable {
     );
     return invalidPathsOrNulls.filter(x => typeof x === 'string') as string[];
   }
+
+  /**
+   * Save the recent items to the state with debouncing.
+   */
+  protected saveRecents(): void {
+    this._saveDebouncer.invoke();
+  }
+
   /**
    * Save the recent items to the state.
    */
-  protected saveRecents(): void {
-    clearTimeout(this._saveRoutine);
-    // Save _recents 500 ms after the last time saveRecents has been called
-    this._saveRoutine = setTimeout(async () => {
-      // If there's a previous request pending, wait 500 ms and try again
-      if (this._awaitingSaveCompletion) {
-        this.saveRecents();
-      } else {
-        this._awaitingSaveCompletion = true;
-        try {
-          await this._stateDB.save(Private.stateDBKey, this._recents);
-          this._awaitingSaveCompletion = false;
-        } catch (e) {
-          this._awaitingSaveCompletion = false;
-          console.log('Saving recents failed');
-          // Try again
-          this.saveRecents();
-        }
-      }
-    }, 500);
+  private async _save(): Promise<void> {
+    try {
+      await this._stateDB.save(Private.stateDBKey, this._recents);
+    } catch (e) {
+      console.log('Saving recents failed', e);
+    }
   }
 
   private _recentsChanged = new Signal<this, void>(this);
@@ -266,10 +263,7 @@ export class RecentsManager implements IRecentsManager, IDisposable {
     opened: [],
     closed: []
   };
-  // Will store a Timemout call that saves recents changes after a delay
-  private _saveRoutine: ReturnType<typeof setTimeout> | undefined;
-  // Whether there are local changes sent to be recorded without verification
-  private _awaitingSaveCompletion = false;
+  private _saveDebouncer: Debouncer<void>;
   private _isDisposed = false;
   private _maxRecentsLength = 10;
 }
