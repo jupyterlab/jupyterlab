@@ -390,7 +390,6 @@ export class ShortcutItem extends React.Component<
           <button
             className="jp-Shortcuts-ShortcutKeys"
             aria-label={this.punctuationToText(keyBinding)}
-            role="text"
             onKeyDown={this.handleKeyDown}
             tabIndex={-1}
           >
