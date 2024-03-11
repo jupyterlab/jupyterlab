@@ -18,7 +18,7 @@
   align-items: center;
 }
 
-#jp-Overlay {
+.jp-Overlay {
   position: absolute;
   top: 67%;
   left: 45%;
@@ -27,7 +27,7 @@
   border-radius: 25%;
   z-index: inherit;
   text-align: center;
-  color: rgb(255, 255, 255);
-  background: rgb(51, 51, 51);
+  color: var(--md-grey-50);
+  background: var(--md-grey-700);
   visibility: hidden;
 }

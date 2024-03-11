@@ -377,7 +377,7 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
           for (let index = 0; index < widgets.length; index++) {
             let elementId = widgets[index].id;
             let focusElement = document.querySelector(
-              `[data-id='${elementId}']`
+              `[data-id='#${CSS.escape(elementId)}']`
             );
 
             if (focusElement && !focusElement.querySelector('.jp-Overlay')) {
