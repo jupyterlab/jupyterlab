@@ -9,7 +9,6 @@ import { Platform } from '@lumino/domutils';
 import { signalToPromise } from '@jupyterlab/testing';
 
 import pluginSchema from '../schema/shortcuts.json';
-import expect from 'expect';
 
 describe('@jupyterlab/shortcut-extension', () => {
   const pluginId = 'test-plugin:settings';
