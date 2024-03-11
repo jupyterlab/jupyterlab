@@ -17,7 +17,6 @@ export interface IShortcutInputProps {
   shortcut: ShortcutObject;
   shortcutId: string;
   toSymbols: Function;
-  punctuationToText: Function;
   keyBindingsUsed: { [index: string]: TakenByObject };
   sortConflict: Function;
   clearConflicts: Function;

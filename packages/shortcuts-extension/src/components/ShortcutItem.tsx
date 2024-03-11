@@ -371,7 +371,6 @@ export class ShortcutItem extends React.Component<
         shortcut={this.props.shortcut}
         shortcutId={key}
         toSymbols={this.toSymbols}
-        punctuationToText={this.punctuationToText}
         keyBindingsUsed={this.props.keyBindingsUsed}
         sortConflict={this.props.sortConflict}
         clearConflicts={this.props.clearConflicts}
@@ -470,7 +469,6 @@ export class ShortcutItem extends React.Component<
         newOrReplace={'new'}
         placeholder={''}
         translator={this.props.external.translator}
-        punctuationToText={this.punctuationToText}
       />
     ) : (
       <div />
