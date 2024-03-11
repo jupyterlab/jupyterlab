@@ -11,8 +11,8 @@ import {
   caretDownIcon,
   caretRightIcon,
   closeIcon,
-  collapseIcon,
-  expandIcon,
+  collapseAllIcon,
+  expandAllIcon,
   LabIcon,
   PanelWithToolbar,
   ReactWidget,
@@ -30,7 +30,7 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import * as React from 'react';
+import React, { ReactNode } from 'react';
 
 /**
  * The class name added to a running widget.
@@ -454,14 +454,14 @@ class Section extends PanelWithToolbar {
     const expandAllButton = new ToolbarButton({
       className: COLLAPSE_EXPAND_BUTTON_CLASS,
       enabled,
-      icon: expandIcon,
+      icon: expandAllIcon,
       onClick: () => this._collapseToggled.emit(false),
       tooltip: trans.__('Expand All')
     });
     const collapseAllButton = new ToolbarButton({
       className: COLLAPSE_EXPAND_BUTTON_CLASS,
       enabled,
-      icon: collapseIcon,
+      icon: collapseAllIcon,
       onClick: () => this._collapseToggled.emit(true),
       tooltip: trans.__('Collapse All')
     });
@@ -788,7 +788,7 @@ export namespace IRunningSessions {
     /**
      * Called to determine the label for each item.
      */
-    label: () => string;
+    label: () => ReactNode;
 
     /**
      * Called to determine the `title` attribute for each item, which is

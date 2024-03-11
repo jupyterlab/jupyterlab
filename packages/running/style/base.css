@@ -95,6 +95,10 @@
   user-select: none;
 }
 
+.jp-RunningSessions-item-label-kernel-id {
+  color: var(--jp-ui-font-color3);
+}
+
 .jp-RunningSessions-collapseButton .jp-icon-output[fill] {
   fill: var(--jp-inverse-layout-color3);
 }

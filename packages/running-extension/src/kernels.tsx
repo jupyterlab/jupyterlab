@@ -21,10 +21,12 @@ import { CommandRegistry } from '@lumino/commands';
 import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 import { CommandIDs } from '.';
+import React, { ReactNode } from 'react';
 
 const KERNEL_ITEM_CLASS = 'jp-mod-kernel';
 const KERNELSPEC_ITEM_CLASS = 'jp-mod-kernelspec';
 const WIDGET_ITEM_CLASS = 'jp-mod-kernel-widget';
+const KERNEL_LABEL_ID = 'jp-RunningSessions-item-label-kernel-id';
 
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.
@@ -291,7 +293,7 @@ namespace Private {
       return kernelIcon;
     }
 
-    label(): string {
+    label(): ReactNode {
       const { kernel } = this;
       const children = this.children;
       const summary =
@@ -302,7 +304,12 @@ namespace Private {
               children[0].label(),
               children.length - 1
             );
-      return summary + ' (' + kernel.id.split('-')[0] + ')';
+      const kernelIdPrefix = kernel.id.split('-')[0];
+      return (
+        <>
+          {summary} <span className={KERNEL_LABEL_ID}>({kernelIdPrefix})</span>
+        </>
+      );
     }
 
     labelTitle(): string {
