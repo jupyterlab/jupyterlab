@@ -57,9 +57,7 @@ export function displayShortcuts(options: IOptions) {
       "'": trans.__('Single quote'),
       '-': trans.__('Hyphen-minus')
     };
-    if (Object.keys(keyToText).includes(ch)) {
-      return keyToText[ch];
-    }
+    return keyToText[ch];
   }
 
   /**
