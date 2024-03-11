@@ -270,7 +270,7 @@ export class ShortcutItem extends React.Component<
 
   getCategoryCell(): JSX.Element {
     return (
-      <div className="jp-Shortcuts-Cell">{this.props.shortcut.category} </div>
+      <div className="jp-Shortcuts-Cell">{this.props.shortcut.category}</div>
     );
   }
 
