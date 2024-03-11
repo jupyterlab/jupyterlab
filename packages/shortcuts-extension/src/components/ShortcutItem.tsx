@@ -221,22 +221,16 @@ export class ShortcutItem extends React.Component<
 
   punctuationToText = (value: string): string => {
     const trans = this.props.external.translator.load('jupyterlab');
+    const keyToText: { [key: string]: string } = {
+      ']': trans.__('Closing bracket'),
+      '[': trans.__('Opening bracket'),
+      ',': trans.__('Comma'),
+      '.': trans.__('Full stop'),
+      "'": trans.__('Single quote'),
+      '-': trans.__('Hyphen-minus')
+    }
     return value.split(' ').reduce((result, key) => {
-      if (key === ']') {
-        return (result + trans.__(' Closing bracket')).trim();
-      } else if (key === '[') {
-        return (result + trans.__(' Opening bracket')).trim();
-      } else if (key === ',') {
-        return (result + trans.__(' Comma')).trim();
-      } else if (key === '.') {
-        return (result + trans.__(' Full stop')).trim();
-      } else if (key === " '") {
-        return (result + trans.__(' Single quote')).trim();
-      } else if (key === ' -') {
-        return (result + trans.__(' Hyphen-minus')).trim();
-      } else {
-        return (result + ' ' + key).trim();
-      }
+      return (result + ' ' + (keyToText[key] || key)).trim();
     }, '');
   };
 
