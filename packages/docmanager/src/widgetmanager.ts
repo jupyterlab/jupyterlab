@@ -264,7 +264,7 @@ export class DocumentWidgetManager implements IDisposable {
         if (context) {
           context.ready
             .then(() => {
-              // contentsModel is null until the the context is ready
+              // contentsModel is null until the context is ready
               this._recordAsRecentlyOpened(widget, context.contentsModel!);
             })
             .catch(() => {

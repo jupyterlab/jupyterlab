@@ -291,7 +291,7 @@ export interface IDocumentWidgetOpener {
 /**
  * Recent opened items manager.
  */
-export interface IRecentsManager {
+export interface IRecentsManager extends IDisposable {
   /**
    * Get the recently opened documents.
    */
