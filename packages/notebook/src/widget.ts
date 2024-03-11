@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DOMUtils } from '@jupyterlab/apputils';
 import {
   Cell,
   CodeCell,
@@ -91,6 +92,14 @@ const OTHER_SELECTED_CLASS = 'jp-mod-multiSelected';
  * The class name added to unconfined images.
  */
 const UNCONFINED_CLASS = 'jp-mod-unconfined';
+
+/**
+ * The class name added to the notebook when an element within it is focused
+ * and takes keyboard input, such as focused <input> or <div contenteditable>.
+ *
+ * This class is also effective when the focused element is in shadow DOM.
+ */
+const READ_WRITE_CLASS = 'jp-mod-readWrite';
 
 /**
  * The class name added to drag images.
@@ -1334,7 +1343,7 @@ export class Notebook extends StaticNotebook {
       ...options
     });
     // Allow the node to scroll while dragging items.
-    this.node.setAttribute('data-lm-dragscroll', 'true');
+    this.outerNode.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.jumped.connect((_, index: number) => (this.activeCellIndex = index));
     this.selectionChanged.connect(this._updateSelectedCells, this);
@@ -2772,9 +2781,20 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Update the notebook node with class indicating read-write state.
+   */
+  private _updateReadWrite(): void {
+    const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
+    this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
+  }
+
+  /**
    * Handle `focus` events for the widget.
    */
   private _evtFocusIn(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+
     const target = event.target as HTMLElement;
     const index = this._findCell(target);
     if (index !== -1) {
@@ -2829,7 +2849,10 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle `focusout` events for the notebook.
    */
-  private _evtFocusOut(event: MouseEvent): void {
+  private _evtFocusOut(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+
     const relatedTarget = event.relatedTarget as HTMLElement;
 
     // Bail if the window is losing focus, to preserve edit mode. This test

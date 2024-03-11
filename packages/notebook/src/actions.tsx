@@ -200,8 +200,9 @@ export namespace NotebookActions {
 
     offsets.push(orig.length);
 
+    const cellCountAfterSplit = offsets.length - 1;
     const clones = offsets.slice(0, -1).map((offset, offsetIdx) => {
-      const { cell_type, metadata } = child.model.sharedModel.toJSON();
+      const { cell_type, metadata, outputs } = child.model.sharedModel.toJSON();
 
       return {
         cell_type,
@@ -209,7 +210,11 @@ export namespace NotebookActions {
         source: orig
           .slice(offset, offsets[offsetIdx + 1])
           .replace(/^\n+/, '')
-          .replace(/\n+$/, '')
+          .replace(/\n+$/, ''),
+        outputs:
+          offsetIdx === cellCountAfterSplit - 1 && cell_type === 'code'
+            ? outputs
+            : undefined
       };
     });
 

@@ -204,6 +204,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
     // For cells disable searching with CodeMirror search panel.
     this._editorConfig = { searchWithCM: false, ...options.editorConfig };
+    this._editorExtensions = options.editorExtensions ?? [];
     this._placeholder = true;
     this._inViewport = false;
     this.placeholder = options.placeholder ?? true;
@@ -615,7 +616,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * @returns Editor options
    */
   protected getEditorOptions(): InputArea.IOptions['editorOptions'] {
-    return { config: this.editorConfig };
+    return { config: this.editorConfig, extensions: this._editorExtensions };
   }
 
   /**
@@ -694,6 +695,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   protected _displayChanged = new Signal<this, void>(this);
 
   private _editorConfig: Record<string, any> = {};
+  private _editorExtensions: Extension[] = [];
   private _input: InputArea | null;
   private _inputHidden = false;
   private _inputWrapper: Widget | null;
@@ -1776,7 +1778,9 @@ export abstract class AttachmentsCell<
             continue;
           }
           items[i].getAsString(text => {
-            this.editor!.replaceSelection?.(text);
+            this.editor!.replaceSelection?.(
+              text.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+            );
           });
         }
         this._attachFiles(event.clipboardData.items);

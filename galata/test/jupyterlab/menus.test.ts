@@ -28,11 +28,10 @@ test.describe('General Tests', () => {
   menuPaths.forEach(menuPath => {
     test(`Open menu item ${menuPath}`, async ({ page }) => {
       await page.goto();
-      await page.menu.open(menuPath);
+      await page.menu.openLocator(menuPath);
       expect(await page.menu.isOpen(menuPath)).toBeTruthy();
-
       const imageName = `opened-menu-${menuPath.replace(/>/g, '-')}.png`;
-      const menu = await page.menu.getOpenMenu();
+      const menu = await page.menu.getOpenMenuLocator();
       expect(await menu.screenshot()).toMatchSnapshot(imageName.toLowerCase());
     });
   });
@@ -51,17 +50,17 @@ test.describe('General Tests', () => {
     await page.goto();
 
     const menuPath = 'Settings>Language';
-    await page.menu.open(menuPath);
+    await page.menu.openLocator(menuPath);
     expect(await page.menu.isOpen(menuPath)).toBeTruthy();
 
     const imageName = `opened-menu-settings-language.png`;
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
 
   test('Close all menus', async ({ page }) => {
     await page.goto();
-    await page.menu.open('File>New');
+    await page.menu.openLocator('File>New');
     await page.menu.closeAll();
     expect(await page.menu.isAnyOpen()).toEqual(false);
   });
