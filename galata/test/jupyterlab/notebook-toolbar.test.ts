@@ -80,9 +80,9 @@ test.describe('Notebook Toolbar', () => {
     await page.notebook.clickToolbarItem('insert');
     await page.notebook.selectCells(2);
     await page.notebook.clickToolbarItem('insert');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Copy-Paste cell', async ({ page }) => {
@@ -91,18 +91,18 @@ test.describe('Notebook Toolbar', () => {
     await page.notebook.clickToolbarItem('copy');
     await page.notebook.selectCells(0);
     await page.notebook.clickToolbarItem('paste');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Cut cell', async ({ page }) => {
     const imageName = 'cut-cell.png';
     await page.notebook.selectCells(1);
     await page.notebook.clickToolbarItem('cut');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Paste cell', async ({ page }) => {
@@ -113,21 +113,21 @@ test.describe('Notebook Toolbar', () => {
     const imageName = 'paste-cell.png';
     await page.notebook.selectCells(1);
     await page.notebook.clickToolbarItem('paste');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    await expect
-      .soft(page.locator('.jp-Notebook-cell.jp-mod-active .jp-cell-toolbar'))
-      .toBeVisible();
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    await expect(
+      page.locator('.jp-Notebook-cell.jp-mod-active .jp-cell-toolbar')
+    ).toBeVisible();
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Delete cells', async ({ page }) => {
     const imageName = 'delete-cell.png';
     await page.notebook.selectCells(1, 2);
     await page.menu.clickMenuItem('Edit>Delete Cells');
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Run cell', async ({ page }) => {
@@ -135,11 +135,11 @@ test.describe('Notebook Toolbar', () => {
     await page.notebook.selectCells(2);
 
     await page.notebook.clickToolbarItem('run');
-    await page.waitForSelector('text=8');
+    await page.getByText('8', { exact: true }).waitFor();
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Change cell type to Markdown', async ({ page }) => {
@@ -149,9 +149,9 @@ test.describe('Notebook Toolbar', () => {
     await page.keyboard.press('m');
     await page.keyboard.press('Enter');
     await page.notebook.selectCells(2);
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });
 
@@ -159,19 +159,19 @@ test('Toolbar items act on owner widget', async ({ page }) => {
   // Given two side-by-side notebooks and the second being active
   const file1 = 'notebook1.ipynb';
   await page.notebook.createNew(file1);
-  const panel1 = await page.activity.getPanel(file1);
-  const tab1 = await page.activity.getTab(file1);
+  const panel1 = await page.activity.getPanelLocator(file1);
+  const tab1 = page.activity.getTabLocator(file1);
 
   // FIXME Calling a second time `page.notebook.createNew` is not robust
   await page.menu.clickMenuItem('File>New>Notebook');
   try {
-    await page.waitForSelector('.jp-Dialog', { timeout: 5000 });
+    await page.locator('.jp-Dialog').waitFor({ timeout: 5000 });
     await page.click('.jp-Dialog .jp-mod-accept');
   } catch (reason) {
     // no-op
   }
 
-  const tab2 = await page.activity.getTab();
+  const tab2 = page.activity.getTabLocator();
 
   const tab2BBox = await tab2.boundingBox();
   await page.mouse.move(
@@ -186,9 +186,10 @@ test('Toolbar items act on owner widget', async ({ page }) => {
   expect(classlist.split(' ')).not.toContain('jp-mod-current');
 
   // When clicking on toolbar item of the first file
-  await (
-    await panel1.$('jp-button[data-command="notebook:insert-cell-below"]')
-  ).click();
+  await panel1
+    ?.locator('jp-button[data-command="notebook:insert-cell-below"]')
+    .first()
+    .click();
 
   // Then the first file is activated and the action is performed
   const classlistEnd = await tab1.getAttribute('class');
