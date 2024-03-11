@@ -119,10 +119,10 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
         id="shortcutListContainer"
       >
         <div className="jp-Shortcuts-ShortcutList" id={this.props.id}>
-          {this.props.shortcuts.map((shortcut: ShortcutObject) => {
+          {this.props.shortcuts.map((shortcut: ShortcutObject, index) => {
             return (
               <ShortcutItem
-                tabIndex={this.handleTabIndex(shortcut)}
+                tabIndex={index === 0 ? 0 : -1}
                 key={shortcut.commandName + '_' + shortcut.selector}
                 resetShortcut={this.props.resetShortcut}
                 shortcut={shortcut}
