@@ -118,12 +118,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
         }}
         id="shortcutListContainer"
       >
-        <div
-          className="jp-Shortcuts-ShortcutList"
-          role="tablist"
-          tabIndex={0}
-          id={this.props.id}
-        >
+        <div className="jp-Shortcuts-ShortcutList" id={this.props.id}>
           {this.props.shortcuts.map((shortcut: ShortcutObject) => {
             return (
               <ShortcutItem

@@ -228,7 +228,7 @@ export class ShortcutItem extends React.Component<
       '.': trans.__('Full stop'),
       "'": trans.__('Single quote'),
       '-': trans.__('Hyphen-minus')
-    }
+    };
     return value.split(' ').reduce((result, key) => {
       return (result + ' ' + (keyToText[key] || key)).trim();
     }, '');
@@ -390,7 +390,6 @@ export class ShortcutItem extends React.Component<
           <button
             className="jp-Shortcuts-ShortcutKeys"
             aria-label={this.punctuationToText(keyBinding)}
-            role="text"
             onKeyDown={this.handleKeyDown}
             tabIndex={-1}
           >
