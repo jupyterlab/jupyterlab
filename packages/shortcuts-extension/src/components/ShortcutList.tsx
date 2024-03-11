@@ -8,7 +8,7 @@ import { ShortcutObject, TakenByObject } from './ShortcutInput';
 import { ShortcutItem } from './ShortcutItem';
 import { IShortcutUIexternal } from './TopNav';
 
-const ARROW_KEYS = ['ArrowUp', 'ArrowDown'];
+const ARROW_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowRight'];
 
 const TOPNAV_HEIGHT: number = 115;
 
@@ -80,6 +80,26 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
         activeNode.setAttribute('tabindex', '-1');
         prvNode.focus();
         currentNode -= 1;
+      }
+    } else if (event.key === 'ArrowRight') {
+      const focusedElement = document.activeElement;
+
+      // Create a list of all focusable elements in the focused shortcuts row.
+      if (focusedElement?.className === 'jp-Shortcuts-Row') {
+        const elements = Array.from(focusedElement.querySelectorAll('button'));
+
+        const focusable: Element[] = [...elements];
+
+        // If the row contains elements, set focus to next element.
+        if (focusable.length >= 1) {
+          (focusable[0] as HTMLButtonElement).focus();
+
+          // If the row contains no elements, nothing to do.
+        } else {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
       }
     }
   };

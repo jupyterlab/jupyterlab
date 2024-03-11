@@ -511,9 +511,7 @@ export class ShortcutItem extends React.Component<
 
       // Get the current focused element.
       let focusedIndex = focusable.indexOf(document.activeElement as Element);
-      if (focusedIndex === -1) {
-        focusedIndex = this._currentIndex;
-      }
+
       if (event.key === 'Tab') {
         event.preventDefault();
         event.stopPropagation();
@@ -544,55 +542,6 @@ export class ShortcutItem extends React.Component<
     }
   }
 
-  handleEvent(event: React.KeyboardEvent): void {
-    let nextElement = document.getElementsByClassName(
-      'jp-property-inspector'
-    )[0] as HTMLLIElement;
-    let previousElement = document.getElementsByClassName(
-      'jp-InputGroup jp-Shortcuts-Search'
-    )[0] as HTMLElement;
-
-    if (event.shiftKey && event.key === 'Tab') {
-      event.preventDefault();
-      event.stopPropagation();
-      previousElement.setAttribute('tabindex', '0');
-      previousElement.focus();
-      return;
-    } else if (event.key === 'Tab') {
-      nextElement.setAttribute('tabindex', '0');
-      nextElement.focus();
-      return;
-    }
-
-    if (event.eventPhase === Event.CAPTURING_PHASE) {
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-    // Handle the arrow keys to navigate through rows.
-    if (event.key === 'ArrowRight') {
-      const focusedElement = document.activeElement;
-
-      // Create a list of all focusable elements in the focused shortcuts row.
-      if (focusedElement?.className === 'jp-Shortcuts-Row') {
-        const elements = Array.from(focusedElement.querySelectorAll('button'));
-
-        const focusable: Element[] = [...elements];
-
-        // If the row contains elements, set focus to next element.
-        if (focusable.length >= 1) {
-          (focusable[0] as HTMLButtonElement).focus();
-
-          // If the row contains no elements, nothing to do.
-        } else {
-          return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-      }
-    }
-  }
-
   render(): JSX.Element {
     const nonEmptyKeys = Object.keys(this.props.shortcut.keys).filter(
       (key: string) => this.props.shortcut.keys[key][0] !== ''
@@ -608,7 +557,6 @@ export class ShortcutItem extends React.Component<
           tabIndex={this.props.tabIndex}
           onKeyDown={event => {
             this.props.handleRowKeyDown(event);
-            this.handleEvent(event);
           }}
           onContextMenu={e => {
             e.persist();
@@ -624,7 +572,6 @@ export class ShortcutItem extends React.Component<
       );
     }
   }
-  private _currentIndex: -1;
   private _commands: {
     [key: string]: { commandId: string; label: string; caption: string };
   };
