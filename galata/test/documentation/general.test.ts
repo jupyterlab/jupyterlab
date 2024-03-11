@@ -3,7 +3,12 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 import path from 'path';
-import { generateArrow, positionMouse, positionMouseOver } from './utils';
+import {
+  filterContent,
+  generateArrow,
+  positionMouse,
+  positionMouseOver
+} from './utils';
 
 test.use({
   autoGoto: false,
@@ -13,7 +18,7 @@ test.use({
 
 test.describe('General', () => {
   test('Welcome', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -52,7 +57,7 @@ test.describe('General', () => {
 
     await page.notebook.run();
 
-    const cell = await page.$(
+    const cell = page.locator(
       '[aria-label="Code Cell Content with Output"] >> text=interactive'
     );
     await cell.click();
@@ -60,7 +65,9 @@ test.describe('General', () => {
     await page.click('text=Create New View for Cell Output');
 
     // Emulate drag and drop
-    const viewerHandle = await page.$('div[role="main"] >> text=lorenz.py');
+    const viewerHandle = page.locator(
+      '.lm-TabBar-tabLabel:text-is("lorenz.py")'
+    );
     await viewerHandle.click();
     const viewerBBox = await viewerHandle.boundingBox();
 
@@ -76,7 +83,7 @@ test.describe('General', () => {
   });
 
   test('Left Sidebar', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -88,7 +95,7 @@ test.describe('General', () => {
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
     // Wait for the `data` folder to load to have something to blur
-    await page.waitForSelector('text=1024px');
+    await page.locator('text=1024px').waitFor();
 
     await page.evaluate(() => {
       (document.activeElement as HTMLElement).blur();
@@ -196,7 +203,7 @@ test.describe('General', () => {
     await expect(
       page.locator('.jp-ActiveCellTool .jp-InputPrompt')
     ).toHaveClass(/lm-mod-hidden/);
-    await (await page.notebook.getCellInput(1))?.click();
+    await (await page.notebook.getCellInputLocator(1))?.click();
     await page.keyboard.type(' content');
     await expect(
       page.locator('.jp-ActiveCellTool .jp-ActiveCellTool-Content pre')
@@ -256,9 +263,10 @@ test.describe('General', () => {
 
     await page.click('text=File');
     await page.mouse.move(70, 40);
-    const fileMenuNewItem = await page.waitForSelector(
-      '.lm-Menu ul[role="menu"] >> text=New'
-    );
+    const fileMenuNewItem = page
+      .locator('.lm-Menu ul[role="menu"]')
+      .getByText('New', { exact: true });
+    await fileMenuNewItem.waitFor();
     await fileMenuNewItem.click();
 
     // Inject mouse
@@ -298,14 +306,14 @@ test.describe('General', () => {
     await page.click('text=Lorenz.ipynb', { button: 'right' });
     await page.hover('text=Copy Shareable Link');
 
-    const itemHandle = await page.$('text=Copy Shareable Link');
+    const itemLocator = page.locator('text=Copy Shareable Link');
 
     // Inject mouse
     await page.evaluate(
       ([mouse]) => {
         document.body.insertAdjacentHTML('beforeend', mouse);
       },
-      [await positionMouseOver(itemHandle, { top: 0.5, left: 0.55 })]
+      [await positionMouseOver(itemLocator, { top: 0.5, left: 0.55 })]
     );
 
     expect(
@@ -447,8 +455,7 @@ test.describe('General', () => {
     const trustPromise = page.evaluate(() => {
       return window.jupyterapp.commands.execute('notebook:trust');
     });
-    const dialogSelector = '.jp-Dialog-content';
-    await page.waitForSelector(dialogSelector);
+    await page.locator('.jp-Dialog-content').waitFor();
     // Accept option to trust the notebook
     await page.click('.jp-Dialog-button.jp-mod-accept');
     // Wait until dialog is gone
@@ -469,14 +476,15 @@ test.describe('General', () => {
     );
     await page.dblclick('text=Data.ipynb');
 
-    const heading = await page.waitForSelector(
-      'h2[id="Open-a-CSV-file-using-Pandas"]'
-    );
-    const anchor = await heading.$('text=¶');
+    const heading = page.locator('h2[id="Open-a-CSV-file-using-Pandas"]');
+    await heading.waitFor();
+    const anchor = heading.locator('text=¶');
     await heading.hover();
 
     // Get parent cell which includes the heading
-    const cell = await heading.evaluateHandle(node => node.closest('.jp-Cell'));
+    const cell = await heading.evaluateHandle((node: HTMLElement) =>
+      node.closest('.jp-Cell')
+    );
 
     // Inject mouse
     await page.evaluate(
@@ -492,7 +500,7 @@ test.describe('General', () => {
       ]
     );
 
-    expect(await cell.screenshot()).toMatchSnapshot(
+    expect(await cell!.screenshot()).toMatchSnapshot(
       'notebook_heading_anchor_link.png'
     );
   });
@@ -525,7 +533,7 @@ test.describe('General', () => {
     await page.click('#jp-mainmenu-file-new >> text=Terminal');
 
     // Wait for the xterm.js element to be added in the DOM
-    await page.waitForSelector('.jp-Terminal-body');
+    await page.locator('.jp-Terminal-body').waitFor();
 
     await page.keyboard.type('cd $JUPYTERLAB_GALATA_ROOT_DIR');
     await page.keyboard.press('Enter');
@@ -578,7 +586,7 @@ test.describe('General', () => {
     await page.keyboard.press('Control+Shift+C');
 
     expect(
-      await (await page.$('#modal-command-palette')).screenshot()
+      await page.locator('#modal-command-palette').screenshot()
     ).toMatchSnapshot('command_palette.png');
   });
 
@@ -673,7 +681,7 @@ test.describe('General', () => {
     await page.notebook.run();
 
     // Need to wait for altair to update the canvas
-    await page.waitForSelector('summary');
+    await page.locator('summary').waitFor();
 
     // The menu button '...' color of Altair is flaky increase threshold tolerance
     expect(await page.screenshot()).toMatchSnapshot('file_formats_altair.png', {
