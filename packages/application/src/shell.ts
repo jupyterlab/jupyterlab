@@ -335,7 +335,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     // Scan Mode Off notification
     const scanModeOffWidget = (this._ScanModeOffWidget =
-      new Private.scanModeOffWidget(this));
+      new Private.ScanModeOffWidget(this));
     this._ScanModeOffWidget.show();
     //  Wrap the Scan Mode notification widget to customize its position and size
     const scanModeOffWrapper = new Panel();
@@ -1798,7 +1798,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _topHandlerHiddenByUser = false;
   private _menuHandler: Private.PanelHandler;
   private _skipLinkWidget: Private.SkipLinkWidget;
-  private _ScanModeOffWidget: Private.scanModeOffWidget;
+  private _ScanModeOffWidget: Private.ScanModeOffWidget;
   private _titleHandler: Private.TitleHandler;
   private _bottomPanel: Panel;
   private _idTypeMap = new Map<string, string>();
@@ -2296,7 +2296,7 @@ namespace Private {
     }
   }
 
-  export class scanModeOffWidget extends Widget {
+  export class ScanModeOffWidget extends Widget {
     /**
      * Construct a new scan mode notification widget.
      */
