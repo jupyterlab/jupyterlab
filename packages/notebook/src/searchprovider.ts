@@ -236,6 +236,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       output: {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
+        disabledDescription: trans.__(
+          'Search in the cell outputs (not available when replace options are shown).'
+        ),
         default: false,
         supportReplace: false
       },
@@ -521,7 +524,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const reply = await showDialog({
         title: trans.__('Confirmation'),
         body: trans.__(
-          'Searching outputs is expensive and requires to first rendered all outputs. Are you sure you want to search in the cell outputs?'
+          'Searching outputs requires you to run all cells and render their outputs. Are you sure you want to search in the cell outputs?'
         ),
         buttons: [
           Dialog.cancelButton({ label: trans.__('Cancel') }),

@@ -50,11 +50,11 @@ export class ActivityHelper {
         .inputValue();
       return activeTab === name;
     } else {
-      const tab = await this.getTab(name);
-      if (!tab) {
+      const tab = this.getTabLocator(name);
+      if (!(await tab.count())) {
         return false;
       }
-      const classes = ((await tab.getAttribute('class')) ?? '').split(' ');
+      const classes = await Utils.getLocatorClassList(tab);
       return classes.includes('jp-mod-current');
     }
   }
@@ -64,15 +64,19 @@ export class ActivityHelper {
    *
    * @param name Activity name
    * @returns Handle on the tab or null if the tab is not found
+   *
+   * @deprecated You should use locator instead {@link getTabLocator}
    */
   async getTab(name?: string): Promise<ElementHandle<Element> | null> {
-    let handle: ElementHandle<Element> | null = null;
-    try {
-      handle = await this.getTabLocator(name).elementHandle({ timeout: 500 });
-    } catch {
-      handle = null;
+    const locator = this.getTabLocator(name);
+    const start = Date.now();
+    while ((await locator.count()) == 0 && Date.now() - start < 500) {
+      await this.page.waitForTimeout(50);
     }
-    return handle;
+    if ((await locator.count()) > 0) {
+      return locator.elementHandle();
+    }
+    return null;
   }
 
   /**
@@ -91,6 +95,8 @@ export class ActivityHelper {
    *
    * @param name Activity name
    * @returns Handle on the tab or null if the tab is not found
+   *
+   * @deprecated You should use locator instead {@link getPanelLocator}
    */
   async getPanel(name?: string): Promise<ElementHandle<Element> | null> {
     const page = this.page;
@@ -108,14 +114,14 @@ export class ActivityHelper {
       locator = page.getByRole('main').locator(`[role="tabpanel"][id="${id}"]`);
     }
 
-    let handle: ElementHandle<Element> | null = null;
-    try {
-      handle = await locator.elementHandle({ timeout: 500 });
-    } catch {
-      handle = null;
+    const start = Date.now();
+    while ((await locator.count()) == 0 && Date.now() - start < 500) {
+      await this.page.waitForTimeout(50);
     }
-
-    return handle;
+    if ((await locator.count()) > 0) {
+      return locator.elementHandle();
+    }
+    return null;
   }
 
   /**
@@ -161,16 +167,12 @@ export class ActivityHelper {
    * @returns Whether the action is successful
    */
   async activateTab(name: string): Promise<boolean> {
-    const tab = await this.getTab(name);
-    if (tab) {
+    const tab = this.getTabLocator(name);
+    if ((await tab.count()) === 1) {
       await tab.click();
-      await this.page.waitForFunction(
-        ({ tab }) => {
-          return tab.ariaSelected === 'true';
-        },
-        { tab }
+      await Utils.waitForCondition(
+        async () => (await tab.getAttribute('aria-selected')) === 'true'
       );
-
       return true;
     }
 

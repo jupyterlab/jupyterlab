@@ -56,16 +56,16 @@ test.describe('Notebook Create', () => {
   menuPaths.forEach(menuPath => {
     test(`Open menu item ${menuPath}`, async ({ page, sessions }) => {
       // Wait for kernel to be idle as some menu depend of kernel information
-      expect(
-        await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
-      ).toBeTruthy();
+      await expect(
+        page.locator(`#jp-main-statusbar >> text=Idle`).first()
+      ).toHaveCount(1);
 
-      await page.menu.open(menuPath);
+      await page.menu.openLocator(menuPath);
       expect(await page.menu.isOpen(menuPath)).toBeTruthy();
 
       const imageName = `opened-menu-${menuPath.replace(/>/g, '-')}.png`;
-      const menu = await page.menu.getOpenMenu();
-      expect(await menu.screenshot()).toMatchSnapshot(imageName.toLowerCase());
+      const menu = await page.menu.getOpenMenuLocator();
+      expect(await menu!.screenshot()).toMatchSnapshot(imageName.toLowerCase());
     });
   });
 
@@ -78,18 +78,18 @@ test.describe('Notebook Create', () => {
     expect((await page.notebook.getCellTextOutput(2))[0]).toBe('8');
     await expect(page.locator(TRUSTED_SELECTOR)).toHaveCount(1);
 
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Toggle Dark theme', async ({ page }) => {
     await populateNotebook(page);
     await page.notebook.run();
     await page.theme.setDarkTheme();
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
     const imageName = 'dark-theme.png';
 
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });
