@@ -503,8 +503,9 @@ export class ShortcutItem extends React.Component<
       const focusedElement = document.activeElement;
 
       const parentRow = focusedElement?.closest('.jp-Shortcuts-Row');
+      const rowBelow = parentRow?.nextElementSibling;
+      const rowAbove = parentRow?.previousElementSibling;
       const elements = parentRow!.querySelectorAll('button');
-
       const focusable: Element[] = [...elements];
 
       // Get the current focused element.
@@ -517,6 +518,8 @@ export class ShortcutItem extends React.Component<
       }
       // Find the next element to focus on.
       let nextFocused: Element | null | undefined;
+      let rowBelowFocused: Element | null | undefined;
+      let rowAboveFocused: Element | null | undefined;
       if (event.key === 'ArrowRight') {
         nextFocused = focusable[focusedIndex + 1] ?? focusable[0];
       } else if (event.key === 'ArrowLeft') {
@@ -530,6 +533,24 @@ export class ShortcutItem extends React.Component<
         focusedElement?.setAttribute('tabindex', '-1');
         const parentRow = focusedElement?.closest('.jp-Shortcuts-Row');
         (parentRow as HTMLDivElement).focus();
+      } else if (event.key === 'ArrowDown') {
+        if (rowBelow !== null) {
+          const rowBelowShortcuts = rowBelow!.querySelectorAll('button');
+          const rowBelowFocusable: Element[] = [...rowBelowShortcuts];
+          rowBelowFocused = rowBelowFocusable[0];
+          focusedElement?.setAttribute('tabindex', '-1');
+          rowBelowFocused?.setAttribute('tabindex', '0');
+          (rowBelowFocused as HTMLButtonElement).focus();
+        }
+      } else if (event.key === 'ArrowUp') {
+        if (rowAbove !== null) {
+          const rowAboveShortcuts = rowAbove!.querySelectorAll('button');
+          const rowAboveFocusable: Element[] = [...rowAboveShortcuts];
+          rowAboveFocused = rowAboveFocusable[0];
+          focusedElement?.setAttribute('tabindex', '-1');
+          rowAboveFocused?.setAttribute('tabindex', '0');
+          (rowAboveFocused as HTMLButtonElement).focus();
+        }
       }
       // Change the focused element and the tabindex value.
       if (nextFocused) {

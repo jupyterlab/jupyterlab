@@ -287,15 +287,13 @@ test.describe('shorcuts list @A11y', () => {
   }) => {
     const propertyInspector = page.getByTitle('Property Inspector');
 
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
+    while (
+      !(await page.evaluate(
+        selector => document.activeElement?.matches(selector),
+        `[title='Property Inspector']`
+      ))
+    ) {
       await page.keyboard.press('Tab');
-      let activeElementTitle = await page.evaluate(
-        () => document.activeElement?.getAttribute('title')
-      );
-      if (activeElementTitle === 'Property Inspector') {
-        break;
-      }
     }
 
     await expect(propertyInspector).toBeFocused();

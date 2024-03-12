@@ -63,8 +63,9 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
     let activeNode = focusable[currentNode] as HTMLElement;
     let nextNode = focusable[currentNode + 1] as HTMLElement;
     let previousNode = focusable[currentNode - 1] as HTMLElement;
+    let evTarget = event.target as HTMLElement;
 
-    if (event.key === 'ArrowDown') {
+    if (event.key === 'ArrowDown' && evTarget.tagName !== 'BUTTON') {
       let nxtNode = nextNode;
       if (nxtNode) {
         nxtNode.setAttribute('tabindex', '0');
@@ -72,7 +73,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
         nxtNode.focus();
         currentNode += 1;
       }
-    } else if (event.key === 'ArrowUp') {
+    } else if (event.key === 'ArrowUp' && evTarget.tagName !== 'BUTTON') {
       let prvNode = previousNode;
       let activeNode = focusable[currentNode] as HTMLElement;
       if (prvNode && currentNode >= 0) {
