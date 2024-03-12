@@ -71,8 +71,6 @@ jobs:
 
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
-        with:
-          node_version: '20.x'
 
       - name: Install dependencies
         env:
