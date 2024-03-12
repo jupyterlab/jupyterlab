@@ -2169,7 +2169,7 @@ __metadata:
     "@jupyterlab/statusbar-extension": ~4.2.0-alpha.0
     "@jupyterlab/terminal-extension": ~4.2.0-alpha.0
     "@jupyterlab/theme-dark-extension": ~4.2.0-alpha.0
-    "@jupyterlab/theme-high-contrast-extension": ~4.2.0-alpha.0
+    "@jupyterlab/theme-dark-high-contrast-extension": ~4.2.0-alpha.0
     "@jupyterlab/theme-light-extension": ~4.2.0-alpha.0
     "@jupyterlab/toc-extension": ~6.2.0-alpha.0
     "@jupyterlab/tooltip-extension": ~4.2.0-alpha.0
@@ -4145,7 +4145,7 @@ __metadata:
     "@jupyterlab/terminal-extension": ^4.2.0-alpha.0
     "@jupyterlab/testing": ^4.2.0-alpha.0
     "@jupyterlab/theme-dark-extension": ^4.2.0-alpha.0
-    "@jupyterlab/theme-high-contrast-extension": ^4.2.0-alpha.0
+    "@jupyterlab/theme-dark-high-contrast-extension": ^4.2.0-alpha.0
     "@jupyterlab/theme-light-extension": ^4.2.0-alpha.0
     "@jupyterlab/toc": ^6.2.0-alpha.0
     "@jupyterlab/toc-extension": ^6.2.0-alpha.0
@@ -4871,12 +4871,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/theme-high-contrast-extension@^4.2.0-alpha.0, @jupyterlab/theme-high-contrast-extension@workspace:packages/theme-high-contrast-extension, @jupyterlab/theme-high-contrast-extension@~4.2.0-alpha.0":
+"@jupyterlab/theme-dark-high-contrast-extension@^4.2.0-alpha.0, @jupyterlab/theme-dark-high-contrast-extension@workspace:packages/theme-dark-high-contrast-extension, @jupyterlab/theme-dark-high-contrast-extension@~4.2.0-alpha.0":
   version: 0.0.0-use.local
-  resolution: "@jupyterlab/theme-high-contrast-extension@workspace:packages/theme-high-contrast-extension"
+  resolution: "@jupyterlab/theme-dark-high-contrast-extension@workspace:packages/theme-dark-high-contrast-extension"
   dependencies:
     "@jupyterlab/application": ^4.2.0-alpha.0
-    "@jupyterlab/apputils": ^4.2.0-alpha.0
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
     "@jupyterlab/translation": ^4.2.0-alpha.0
     rimraf: ~5.0.5
     typedoc: ~0.24.7

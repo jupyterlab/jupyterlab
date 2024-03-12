@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 /**
  * @packageDocumentation
- * @module theme-high-contrast-extension
+ * @module theme-dark-high-contrast-extension
  */
 
 import {
@@ -16,7 +16,7 @@ import { ITranslator } from '@jupyterlab/translation';
  * A plugin for the Jupyter Dark Theme.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/theme-high-contrast-extension:plugin',
+  id: '@jupyterlab/theme-dark-high-contrast-extension:plugin',
   description: 'Adds a dark high contrast theme.',
   requires: [IThemeManager, ITranslator],
   activate: (
@@ -25,7 +25,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     translator: ITranslator
   ) => {
     const trans = translator.load('jupyterlab');
-    const style = '@jupyterlab/theme-high-contrast-extension/index.css';
+    const style = '@jupyterlab/theme-dark-high-contrast-extension/index.css';
     manager.register({
       name: 'JupyterLab Dark High Contrast',
       displayName: trans.__('JupyterLab Dark High Contrast'),

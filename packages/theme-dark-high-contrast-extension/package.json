@@ -1,7 +1,7 @@
 {
-  "name": "@jupyterlab/theme-high-contrast-extension",
+  "name": "@jupyterlab/theme-dark-high-contrast-extension",
   "version": "4.2.0-alpha.0",
-  "description": "JupyterLab - High Contrast Theme",
+  "description": "JupyterLab - Dark High Contrast Theme",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
     "url": "https://github.com/jupyterlab/jupyterlab/issues"
@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.2.0-alpha.0",
-    "@jupyterlab/apputils": "^4.2.0-alpha.0",
+    "@jupyterlab/apputils": "^4.3.0-alpha.0",
     "@jupyterlab/translation": "^4.2.0-alpha.0"
   },
   "devDependencies": {
