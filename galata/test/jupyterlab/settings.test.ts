@@ -307,7 +307,7 @@ test.describe('shorcuts list @A11y', () => {
     while (
       !(await page.evaluate(
         selector => document.activeElement?.matches(selector),
-        `[class='jp-InputGroup jp-Shortcuts-Search']`
+        `[class='jp-Shortcuts-Search']`
       ))
     ) {
       await page.keyboard.press('Shift+Tab');
