@@ -126,7 +126,14 @@ To debug tests, a good way is to use the inspector tool of playwright:
 
 ```
 jupyter lab --config jupyter_server_test_config.py &
-PWDEBUG=1 jlpm playwright test
+jlpm playwright test --debug
+```
+
+Or the [UI mode](https://playwright.dev/docs/test-ui-mode):
+
+```
+jupyter lab --config jupyter_server_test_config.py &
+jlpm playwright test --ui
 ```
 
 ### Dealing with login

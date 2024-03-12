@@ -14,14 +14,11 @@ test.describe('Notebook Layout on Mobile', () => {
 
   test('Execute code cell', async ({ page }) => {
     await page.sidebar.close('left');
-    // TODO: calling `setCell` just once leads to very flaky test
-    // See https://github.com/jupyterlab/jupyterlab/issues/15252 for more information
-    await page.notebook.setCell(0, 'code', 'print("hello")');
     await page.notebook.setCell(0, 'code', 'print("hello")');
     await page.notebook.addCell('code', '2 * 3');
     await page.notebook.runCellByCell();
-    const nbPanel = await page.notebook.getNotebookInPanel();
+    const nbPanel = await page.notebook.getNotebookInPanelLocator();
     const imageName = 'mobile-layout.png';
-    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
   });
 });
