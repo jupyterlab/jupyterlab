@@ -501,6 +501,7 @@ export class ShortcutItem extends React.Component<
     // Handle the arrow keys to navigate through rows.
     if (NAV_KEYS.includes(event.key)) {
       const focusedElement = document.activeElement;
+      const evTarget = event.target as HTMLElement;
 
       const parentRow = focusedElement?.closest('.jp-Shortcuts-Row');
       const rowBelow = parentRow?.nextElementSibling;
@@ -533,7 +534,10 @@ export class ShortcutItem extends React.Component<
         focusedElement?.setAttribute('tabindex', '-1');
         const parentRow = focusedElement?.closest('.jp-Shortcuts-Row');
         (parentRow as HTMLDivElement).focus();
-      } else if (event.key === 'ArrowDown') {
+      } else if (
+        event.key === 'ArrowDown' &&
+        evTarget.className !== 'jp-Shortcuts-Reset'
+      ) {
         if (rowBelow !== null) {
           const rowBelowShortcuts = rowBelow!.querySelectorAll('button');
           const rowBelowFocusable: Element[] = [...rowBelowShortcuts];
@@ -542,7 +546,10 @@ export class ShortcutItem extends React.Component<
           rowBelowFocused?.setAttribute('tabindex', '0');
           (rowBelowFocused as HTMLButtonElement).focus();
         }
-      } else if (event.key === 'ArrowUp') {
+      } else if (
+        event.key === 'ArrowUp' &&
+        evTarget.className !== 'jp-Shortcuts-Reset'
+      ) {
         if (rowAbove !== null) {
           const rowAboveShortcuts = rowAbove!.querySelectorAll('button');
           const rowAboveFocusable: Element[] = [...rowAboveShortcuts];
@@ -550,6 +557,34 @@ export class ShortcutItem extends React.Component<
           focusedElement?.setAttribute('tabindex', '-1');
           rowAboveFocused?.setAttribute('tabindex', '0');
           (rowAboveFocused as HTMLButtonElement).focus();
+        }
+      } else if (
+        event.key === 'ArrowDown' &&
+        evTarget.className === 'jp-Shortcuts-Reset'
+      ) {
+        if (rowBelow !== null) {
+          const rowBelowShortcuts = rowBelow!.querySelectorAll('button');
+          const rowBelowFocusable: Element[] = [...rowBelowShortcuts];
+          rowBelowFocused = rowBelowFocusable[rowBelowFocusable.length - 1];
+          focusedElement?.setAttribute('tabindex', '-1');
+          rowBelowFocused?.setAttribute('tabindex', '0');
+          if (rowBelowFocused.className === 'jp-Shortcuts-Reset') {
+            (rowBelowFocused as HTMLButtonElement).focus();
+          }
+        }
+      } else if (
+        event.key === 'ArrowUp' &&
+        evTarget.className === 'jp-Shortcuts-Reset'
+      ) {
+        if (rowAbove !== null) {
+          const rowAboveShortcuts = rowAbove!.querySelectorAll('button');
+          const rowAboveFocusable: Element[] = [...rowAboveShortcuts];
+          rowAboveFocused = rowAboveFocusable[rowAboveFocusable.length - 1];
+          focusedElement?.setAttribute('tabindex', '-1');
+          rowAboveFocused?.setAttribute('tabindex', '0');
+          if (rowAboveFocused.className === 'jp-Shortcuts-Reset') {
+            (rowAboveFocused as HTMLButtonElement).focus();
+          }
         }
       }
       // Change the focused element and the tabindex value.

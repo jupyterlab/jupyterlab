@@ -303,17 +303,14 @@ test.describe('shorcuts list @A11y', () => {
     page
   }) => {
     const searchInput = page.locator('.jp-Shortcuts-Search');
-    const searchInputClass = await searchInput.getAttribute('class');
 
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
+    while (
+      !(await page.evaluate(
+        selector => document.activeElement?.matches(selector),
+        `[class='jp-InputGroup jp-Shortcuts-Search']`
+      ))
+    ) {
       await page.keyboard.press('Shift+Tab');
-      let activeElementClass = await page.evaluate(
-        () => document.activeElement?.getAttribute('class')
-      );
-      if (activeElementClass === searchInputClass) {
-        break;
-      }
     }
 
     await expect(searchInput).toBeFocused();
