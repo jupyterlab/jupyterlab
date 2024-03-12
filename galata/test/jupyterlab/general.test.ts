@@ -38,8 +38,8 @@ test.describe('General Tests', () => {
     expect(await page.theme.getTheme()).toEqual('JupyterLab Light');
   });
 
-  test('Toggle High Contrast theme', async ({ page }) => {
-    await page.theme.setHighContrastTheme();
+  test('Toggle Dark High Contrast theme', async ({ page }) => {
+    await page.theme.setDarkHighContrastTheme();
     expect(await page.theme.getTheme()).toEqual(
       'JupyterLab Dark High Contrast'
     );
