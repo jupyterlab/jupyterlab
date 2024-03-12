@@ -647,6 +647,11 @@ export class DirListing extends Widget {
    * @returns A promise that resolves when the name is selected.
    */
   async selectItemByName(name: string, focus: boolean = false): Promise<void> {
+    if (this.isSelected(name)) {
+      // Avoid API polling and DOM updates if already selected
+      return;
+    }
+
     // Make sure the file is available.
     await this.model.refresh();
 
