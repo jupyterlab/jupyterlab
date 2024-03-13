@@ -389,20 +389,19 @@ describe('shortcuts list @A11y', () => {
     for (let i = 0; i < keyboardShortcuts.length; i++) {
       const keyboardLabelAria = keyboardShortcuts[i].getAttribute('aria-label');
       const keyboardLabelText = keyboardShortcuts[i].innerHTML;
-      const punctuation = [',', '}', '{', '.', "'", '-'];
-      const text = [
-        'Comma',
-        'Closing bracket',
-        'Opening bracket',
-        'Full stop',
-        'Single quote',
-        'Hyphen-minus'
-      ];
-      if (punctuation.some(punct => keyboardLabelText.includes(punct))) {
-        expect(
-          punctuation.some(punct => keyboardLabelAria?.includes(punct))
-        ).toBeFalsy();
-        expect(text.some(txt => keyboardLabelAria?.includes(txt))).toBeTruthy();
+
+      const keyToText: { [key: string]: string } = {
+        ']': 'Closing bracket',
+        '[': 'Opening bracket',
+        ',': 'Comma',
+        '.': 'Full stop',
+        "'": 'Single quote',
+        '-': 'Hyphen-minus'
+      };
+
+      for (let key in keyToText) {
+        const ariaLabel = keyboardLabelText.replace(key, keyToText[key] || key);
+        expect(keyboardLabelAria).toEqual(ariaLabel);
       }
     }
   });
