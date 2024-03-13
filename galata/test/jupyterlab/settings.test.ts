@@ -306,8 +306,7 @@ test.describe('shorcuts list @A11y', () => {
 
     while (
       !(await page.evaluate(
-        selector => document.activeElement?.matches(selector),
-        `[class='jp-Shortcuts-Search']`
+        () => document.activeElement?.matches(`[class='jp-Shortcuts-Search']`)
       ))
     ) {
       await page.keyboard.press('Shift+Tab');
@@ -347,8 +346,6 @@ test.describe('shorcuts list @A11y', () => {
   });
 
   test('Should navigate rows using up arrow keys', async ({ page }) => {
-    await page.keyboard.press('Tab');
-
     const shortcutRows = page.locator('.jp-Shortcuts-Row');
 
     for (let i = 0; i < (await shortcutRows.count()) - 1; i++) {
@@ -357,8 +354,6 @@ test.describe('shorcuts list @A11y', () => {
 
       if (shortcutRows.nth(i) !== shortcutRows.first()) {
         await expect(shortcutRows.nth(i - 1)).toBeFocused();
-      } else if (shortcutRows.nth(i) === shortcutRows.first()) {
-        await expect(shortcutRows.last()).toBeFocused();
       }
     }
   });
