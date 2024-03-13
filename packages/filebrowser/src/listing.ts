@@ -2297,10 +2297,7 @@ export namespace DirListing {
       const trans = translator.load('jupyterlab');
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
-      const modified = this.createHeaderItemNode(
-        trans.__('Mod'),
-        trans.__('Last Modified')
-      );
+      const modified = this.createHeaderItemNode(trans.__('Modified'));
       const fileSize = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
@@ -2666,7 +2663,8 @@ export namespace DirListing {
       let modText = '';
       let modTitle = '';
       if (model.last_modified) {
-        modText = Time.formatHuman(new Date(model.last_modified));
+        // Provide multiple formats, with container queries used to display exactly one?
+        modText = Time.formatHuman(new Date(model.last_modified), 'narrow');
         modTitle = Time.format(new Date(model.last_modified));
       }
       modified.textContent = modText;
