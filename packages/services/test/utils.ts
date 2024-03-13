@@ -135,7 +135,8 @@ export function handleRequest(item: IService, status: number, body: any): void {
     if (typeof body !== 'string') {
       body = JSON.stringify(body);
     }
-    if (status === 204) {
+    // Body should be null for these status codes
+    if (status === 204 || status === 205) {
       body = null;
     }
 
