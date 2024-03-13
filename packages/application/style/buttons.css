@@ -45,21 +45,21 @@ button.jp-mod-styled.jp-mod-accept:focus-visible {
 }
 
 button.jp-mod-styled.jp-mod-reject {
-  background: var(--jp-reject-color-normal, var(--md-grey-500, #607d8b));
+  background: var(--jp-reject-color-normal, var(--md-grey-500, #9e9e9e));
   border: 0;
   color: white;
 }
 
 button.jp-mod-styled.jp-mod-reject:hover {
-  background: var(--jp-reject-color-hover, var(--md-grey-600, #546e7a));
+  background: var(--jp-reject-color-hover, var(--md-grey-600, #757575));
 }
 
 button.jp-mod-styled.jp-mod-reject:active {
-  background: var(--jp-reject-color-active, var(--md-grey-700, #455a64));
+  background: var(--jp-reject-color-active, var(--md-grey-700, #616161));
 }
 
 button.jp-mod-styled.jp-mod-reject:focus-visible {
-  outline: 1px solid var(--jp-reject-color-active, var(--md-grey-700, #455a64));
+  outline: 1px solid var(--jp-reject-color-active, var(--md-grey-700, #616161));
 }
 
 button.jp-mod-styled.jp-mod-warn {
