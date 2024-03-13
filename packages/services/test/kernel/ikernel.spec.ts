@@ -668,7 +668,7 @@ describe('Kernel.IKernel', () => {
       const { id, name } = defaultKernel;
       handleRequest(defaultKernel, 205, { id, name });
       await expect(defaultKernel.restart()).rejects.toThrow(
-        /Invalid response: 205 Reset Content/
+        /Invalid response: 205/
       );
     });
 

@@ -100,7 +100,7 @@ export function getRequestHandler(
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any
 ): ServerConnection.ISettings {
-  const fetch = (info: RequestInfo, init: RequestInit) => {
+  const customFetch = (info: RequestInfo, init?: RequestInit) => {
     // Normalize the body.
     body = JSON.stringify(body);
 
@@ -108,7 +108,7 @@ export function getRequestHandler(
     const response = new Response(body, { status });
     return Promise.resolve(response as any);
   };
-  return ServerConnection.makeSettings({ fetch });
+  return ServerConnection.makeSettings({ fetch: customFetch });
 }
 
 /**
