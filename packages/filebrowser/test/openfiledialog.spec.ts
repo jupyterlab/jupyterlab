@@ -129,56 +129,6 @@ describe('@jupyterlab/filebrowser', () => {
         expect(notebooks.length).toBeGreaterThan(0);
       });
     });
-
-    it('should return one selected file whose path matches default path', async () => {
-      const node = document.createElement('div');
-
-      document.body.appendChild(node);
-
-      const dialog = FileDialog.getOpenFiles({
-        manager,
-        title: 'Select a notebook',
-        host: node,
-        defaultPath: testDirectory,
-        filter: (value: Contents.IModel) =>
-          value.type === 'notebook' ? {} : null
-      });
-
-      await waitForDialog();
-      await framePromise();
-
-      let counter = 0;
-      const listing = node.getElementsByClassName('jp-DirListing-content')[0];
-      expect(listing).toBeTruthy();
-
-      let items = listing.getElementsByTagName('li');
-      counter = 0;
-      // Wait for the directory listing to be populated
-      while (items.length === 0 && counter < 100) {
-        await sleep(10);
-        items = listing.getElementsByTagName('li');
-        counter++;
-      }
-
-      // Fails if there is no items shown
-      expect(items.length).toBeGreaterThan(0);
-
-      // Emulate notebook file selection
-      const item = listing.querySelector('li[data-file-type="notebook"]')!;
-      simulate(item, 'mousedown');
-
-      await acceptDialog();
-      const result = await dialog;
-      const files = result.value!;
-      expect(files.length).toBe(1);
-      expect(files[0].type).toBe('notebook');
-      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*.ipynb/));
-
-      const fileDirectory = PathExt.dirname(files[0].path);
-      expect(fileDirectory).toEqual(testDirectory);
-
-      document.body.removeChild(node);
-    });
   });
 
   describe('FileDialog.getOpenFiles()', () => {
@@ -278,6 +228,56 @@ describe('@jupyterlab/filebrowser', () => {
       expect(items.length).toBe(1);
       expect(items[0].type).toBe('directory');
       expect(items[0].path).toBe('');
+    });
+
+    it('should return one selected file whose path matches default path', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      const dialog = FileDialog.getOpenFiles({
+        manager,
+        title: 'Select a notebook',
+        host: node,
+        defaultPath: testDirectory,
+        filter: (value: Contents.IModel) =>
+          value.type === 'notebook' ? {} : null
+      });
+
+      await waitForDialog();
+      await framePromise();
+
+      let counter = 0;
+      const listing = node.getElementsByClassName('jp-DirListing-content')[0];
+      expect(listing).toBeTruthy();
+
+      let items = listing.getElementsByTagName('li');
+      counter = 0;
+      // Wait for the directory listing to be populated
+      while (items.length === 0 && counter < 100) {
+        await sleep(10);
+        items = listing.getElementsByTagName('li');
+        counter++;
+      }
+
+      // Fails if there is no items shown
+      expect(items.length).toBeGreaterThan(0);
+
+      // Emulate notebook file selection
+      const item = listing.querySelector('li[data-file-type="notebook"]')!;
+      simulate(item, 'mousedown');
+
+      await acceptDialog();
+      const result = await dialog;
+      const files = result.value!;
+      expect(files.length).toBe(1);
+      expect(files[0].type).toBe('notebook');
+      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*.ipynb/));
+
+      const fileDirectory = PathExt.dirname(files[0].path);
+      expect(fileDirectory).toEqual(testDirectory);
+
+      document.body.removeChild(node);
     });
   });
 

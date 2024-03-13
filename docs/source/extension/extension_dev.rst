@@ -32,6 +32,7 @@ See the sections below for more detailed information, or browse the rest of this
    internationalization
    identity
    extension_tutorial
+   extension_multiple_ui
    extension_migration
 
 Other resources
@@ -42,9 +43,11 @@ Before we get started, here are some resources for hands-on practice or more in-
 Tutorials
 ^^^^^^^^^
 
-We provide a set of guides to get started writing extensions for JupyterLab:
+Learn how to write JupyterLab extensions with these guides:
 
 - :ref:`extension_tutorial`: A tutorial to learn how to make a simple JupyterLab extension.
+- :ref:`Making Extensions Compatible with Multiple Applications Tutorial <multiple_ui_extensions>`
+  A tutorial for making extensions that work in both JupyterLab, Jupyter Notebook 7+ and more
 - The `JupyterLab Extension Examples Repository <https://github.com/jupyterlab/extension-examples>`_: A short tutorial series to learn how to develop extensions for JupyterLab by example.
 - :ref:`developer-extension-points`: A list of the most common JupyterLab extension points.
 - Another common pattern for extending JupyterLab document widgets with application plugins is covered in :ref:`documents`.
@@ -132,14 +135,18 @@ A Jupyter front-end application object is given to a plugin's ``activate`` funct
 
 See the JupyterLab API reference documentation for the ``JupyterFrontEnd`` class for more details.
 
+.. _dependency-injection-basic-info:
+
 .. _services:
 
 Plugins Interacting with Each Other
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+*(The Provider-Consumer pattern is explained here)*
+
 One of the foundational features of the JupyterLab plugin system is that application plugins can interact with other plugins by providing a service to the system and requiring services provided by other plugins. A service can be any JavaScript value, and typically is a JavaScript object with methods and data attributes. For example, the core plugin that supplies the JupyterLab main menu provides a :ref:`mainmenu` service object to the system with a method to add a new top-level menu and attributes to interact with existing top-level application menus.
 
-In the following discussion, the plugin that is providing a service to the system is the *provider* plugin, and the plugin that is requiring and using the service is the *consumer* plugin.
+In the following discussion, the plugin that is providing a service to the system is the *provider* plugin, and the plugin that is requiring and using the service is the *consumer* plugin. Note that these kinds of *provider* and *consumer* plugins are fundamental parts of JupyterLab's Provider-Consumer pattern (which is a type of `dependency-injection <https://en.wikipedia.org/wiki/Dependency_injection>`_ pattern).
 
 .. _tokens:
 

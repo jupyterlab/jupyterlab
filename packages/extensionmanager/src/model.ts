@@ -177,6 +177,19 @@ const EXTENSION_API_PATH = 'lab/api/extensions';
 export type Action = 'install' | 'uninstall' | 'enable' | 'disable';
 
 /**
+ * Additional options for an action.
+ */
+export interface IActionOptions {
+  /**
+   * Install the version of the entry.
+   *
+   * #### Note
+   * This is ignored by all actions except install.
+   */
+  useVersion?: string;
+}
+
+/**
  * Model for an extension list.
  */
 export class ListModel extends VDomModel {
@@ -343,9 +356,13 @@ export class ListModel extends VDomModel {
    * Install an extension.
    *
    * @param entry An entry indicating which extension to install.
+   * @param options Additional options for the action.
    */
-  async install(entry: IEntry): Promise<void> {
-    await this.performAction('install', entry).then(data => {
+  async install(
+    entry: IEntry,
+    options: { useVersion?: string } = {}
+  ): Promise<void> {
+    await this.performAction('install', entry, options).then(data => {
       if (data.status !== 'ok') {
         reportInstallError(entry.name, data.message, this.translator);
       }
@@ -480,19 +497,27 @@ export class ListModel extends VDomModel {
    *
    * @param action A valid action to perform.
    * @param entry The extension to perform the action on.
+   * @param actionOptions Additional options for the action.
    */
   protected performAction(
     action: string,
-    entry: IEntry
+    entry: IEntry,
+    actionOptions: IActionOptions = {}
   ): Promise<IActionReply> {
+    const bodyJson: Record<string, string> = {
+      cmd: action,
+      extension_name: entry.name
+    };
+
+    if (actionOptions.useVersion) {
+      bodyJson['extension_version'] = actionOptions.useVersion;
+    }
+
     const actionRequest = Private.requestAPI<IActionReply>(
       {},
       {
         method: 'POST',
-        body: JSON.stringify({
-          cmd: action,
-          extension_name: entry.name
-        })
+        body: JSON.stringify(bodyJson)
       }
     );
 

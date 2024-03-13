@@ -59,7 +59,7 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     const imageName = 'folder.png';
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -74,7 +74,7 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     const imageName = 'file.png';
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -84,9 +84,9 @@ test.describe('Application Context Menu', () => {
   }) => {
     await page.notebook.openByPath(`${tmpPath}/${testNotebook}`);
     // Wait for kernel to be idle
-    expect(
-      await page.waitForSelector(`#jp-main-statusbar >> text=Idle`)
-    ).toBeTruthy();
+    await expect(
+      page.locator(`#jp-main-statusbar >> text=Idle`).first()
+    ).toHaveCount(1);
 
     await page.click(`.jp-DirListing-item span:has-text("${testNotebook}")`, {
       button: 'right'
@@ -95,7 +95,7 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     const imageName = 'running-notebook.png';
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -110,13 +110,13 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     await page.hover('text=Open With');
-    await page.waitForSelector(
-      '.lm-Menu li[role="menuitem"]:has-text("Editor")'
-    );
+    await page
+      .locator('.lm-Menu li[role="menuitem"]:has-text("Editor")')
+      .waitFor();
 
     const imageName = `file-openwith.png`;
     // Get the last menu -> will be submenu
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
 
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
@@ -129,7 +129,7 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     const imageName = `tab-launcher.png`;
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
   });
 
@@ -150,7 +150,7 @@ test.describe('Application Context Menu', () => {
       expect(await page.menu.isAnyOpen()).toBe(true);
 
       const imageName = `tab-notebook.png`;
-      const menu = await page.menu.getOpenMenu();
+      const menu = await page.menu.getOpenMenuLocator();
       expect(await menu.screenshot()).toMatchSnapshot(imageName);
     });
 
@@ -161,7 +161,7 @@ test.describe('Application Context Menu', () => {
       expect(await page.menu.isAnyOpen()).toBe(true);
 
       const imageName = `notebook-md.png`;
-      const menu = await page.menu.getOpenMenu();
+      const menu = await page.menu.getOpenMenuLocator();
       expect(await menu.screenshot()).toMatchSnapshot(imageName);
     });
 
@@ -172,7 +172,7 @@ test.describe('Application Context Menu', () => {
       expect(await page.menu.isAnyOpen()).toBe(true);
 
       const imageName = `notebook-code.png`;
-      const menu = await page.menu.getOpenMenu();
+      const menu = await page.menu.getOpenMenuLocator();
       expect(await menu.screenshot()).toMatchSnapshot(imageName);
     });
   });
@@ -189,7 +189,33 @@ test.describe('Application Context Menu', () => {
     expect(await page.menu.isAnyOpen()).toBe(true);
 
     const imageName = `fileeditor.png`;
-    const menu = await page.menu.getOpenMenu();
+    const menu = await page.menu.getOpenMenuLocator();
     expect(await menu.screenshot()).toMatchSnapshot(imageName);
+  });
+
+  test('Open console context menu', async ({ page }) => {
+    await page.menu.clickMenuItem('File>New>Console');
+    await page.click('button:has-text("Select")');
+
+    await page.locator('[aria-label="Code Cell Content"]').waitFor();
+    await page.locator('text=| Idle').waitFor();
+
+    // Over prompt cell
+    await page.click('.jp-CodeConsole-promptCell', {
+      button: 'right'
+    });
+    expect(await page.menu.isAnyOpen()).toBe(true);
+    let imageName = `console-prompt.png`;
+    let menu = await page.menu.getOpenMenuLocator();
+    expect.soft(await menu?.screenshot()).toMatchSnapshot(imageName);
+
+    // Over console content
+    await page.click('.jp-CodeConsole-content', {
+      button: 'right'
+    });
+    imageName = `console-content.png`;
+    menu = await page.menu.getOpenMenuLocator();
+    expect(await page.menu.isAnyOpen()).toBe(true);
+    expect(await menu?.screenshot()).toMatchSnapshot(imageName);
   });
 });

@@ -40,6 +40,7 @@ import {
   ReadonlyJSONObject,
   ReadonlyJSONValue
 } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import type {
@@ -629,6 +630,15 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         align: 'right',
         rank: -1
       });
+    } else {
+      // if the status bar is not available, position the notification
+      // status in the bottom right corner of the page
+      notificationStatus.node.style.position = 'fixed';
+      notificationStatus.node.style.bottom = '0';
+      // 10px is the default padding for the status bar
+      notificationStatus.node.style.right = '10px';
+      Widget.attach(notificationStatus, document.body);
+      notificationStatus.show();
     }
   }
 };

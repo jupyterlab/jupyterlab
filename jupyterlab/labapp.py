@@ -237,7 +237,7 @@ class LabCleanAppOptions(AppOptions):
     settings = Bool(False)
     staging = Bool(True)
     static = Bool(False)
-    all = Bool(False)  # noqa
+    all = Bool(False)
 
 
 class LabCleanApp(JupyterApp):
@@ -265,7 +265,7 @@ class LabCleanApp(JupyterApp):
 
     static = Bool(False, config=True, help="Also delete <app-dir>/static")
 
-    all = Bool(  # noqa
+    all = Bool(
         False,
         config=True,
         help="Delete the entire contents of the app directory.\n%s" % ext_warn_msg,
@@ -495,6 +495,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         This flag is now deprecated and will be removed in JupyterLab v5.""",
     )
+    flags["custom-css"] = (
+        {"LabApp": {"custom_css": True}},
+        "Load custom CSS in template html files. Default is False",
+    )
 
     subcommands = {
         "build": (LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -578,6 +582,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         False,
         config=True,
         help="Whether to expose the global app instance to browser via window.jupyterapp",
+    )
+
+    custom_css = Bool(
+        False,
+        config=True,
+        help="""Whether custom CSS is loaded on the page.
+    Defaults to False.
+    """,
     )
 
     collaborative = Bool(
@@ -710,6 +722,10 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
+    def _prepare_templates(self):
+        super()._prepare_templates()
+        self.jinja2_env.globals.update(custom_css=self.custom_css)
+
     def initialize_handlers(self):  # noqa
         handlers = []
 
@@ -728,6 +744,18 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
 
         self.log.info("JupyterLab extension loaded from %s" % HERE)
         self.log.info("JupyterLab application directory is %s" % self.app_dir)
+
+        if self.custom_css:
+            handlers.append(
+                (
+                    r"/custom/(.*)(?<!\.js)$",
+                    self.serverapp.web_app.settings["static_handler_class"],
+                    {
+                        "path": self.serverapp.web_app.settings["static_custom_path"],
+                        "no_cache_paths": ["/"],  # don't cache anything in custom
+                    },
+                )
+            )
 
         app_options = AppOptions(
             logger=self.log,
@@ -839,6 +867,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                                 "lock_rules": lock_rules,
                                 "all_locked": self.lock_all_plugins,
                             },
+                            parent=self,
                         )
                     },
                 )
@@ -897,13 +926,14 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
                 import jupyter_collaboration  # noqa
             except ImportError:
                 self.log.critical(
-                    """
-To enable real-time collaboration, you must install the extension `jupyter_collaboration`.
-You can install it using pip for example:
+                    """\
+Juptyer Lab cannot start, because `jupyter_collaboration` was configured but cannot be `import`ed.
 
-  python -m pip install jupyter_collaboration
+To fix this, either:
 
-This flag is now deprecated and will be removed in JupyterLab v5.
+1) install the extension `jupyter_collaboration`; for example: `python -m pip install jupyter_collaboration`
+
+2) disable collaboration; for example, remove the `--collaborative` flag from the commandline.  To see more ways to adjust the collaborative behavior, see https://jupyterlab-realtime-collaboration.readthedocs.io/en/latest/configuration.html .
 """
                 )
                 sys.exit(1)

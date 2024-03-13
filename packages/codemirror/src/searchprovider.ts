@@ -319,9 +319,9 @@ export abstract class EditorSearchProvider<
    *
    * The caller of this method is expected to call `highlightNext` if after
    * calling `replaceCurrentMatch()` attribute `this.currentIndex` is null.
-   * It is necesary to let the caller handle highlighting because this
+   * It is necessary to let the caller handle highlighting because this
    * method is used in composition pattern (search engine of notebook cells)
-   * and highligthing on the composer (notebook) level needs to switch to next
+   * and highlighting on the composer (notebook) level needs to switch to next
    * engine (cell) with matches.
    *
    * @param newText The replacement text.
@@ -343,15 +343,17 @@ export abstract class EditorSearchProvider<
       this.currentIndex < this.cmHandler.matches.length
     ) {
       const match = this.getCurrentMatch();
-      // If cursor there is no match selected, highlight the next match
       if (!match) {
         this.currentIndex = null;
       } else {
         this.cmHandler.matches.splice(this.currentIndex, 1);
+        const cmMatchesRemaining = this.cmHandler.matches.length;
+
+        // End at the end of the CodeMirror matches list; do not loop
+        // Let the caller call highlightNext if we've reached the end of the current code cell
         this.currentIndex =
-          this.currentIndex < this.cmHandler.matches.length
-            ? Math.max(this.currentIndex - 1, 0)
-            : null;
+          this.currentIndex < cmMatchesRemaining ? this.currentIndex : null;
+
         const substitutedText = options?.regularExpression
           ? match!.text.replace(this.query!, newText)
           : newText;
@@ -813,8 +815,17 @@ export class CodeMirrorSearchHighlighter {
       return null;
     }
 
+    // If the editor has not be instantiated yet (e.g. a cell that has not yet be seen in the viewport),
+    // force the behavior
+    if (!this._cm && !['previous-match', 'start'].includes(from)) {
+      from = 'previous-match';
+    }
+
     let lastPosition = 0;
-    if ((from === 'auto' && this._cm!.hasFocus()) || from === 'selection') {
+    if (
+      (from === 'auto' && (this._cm?.hasFocus() ?? false)) ||
+      from === 'selection'
+    ) {
       const cursor = this._cm!.state.selection.main;
       lastPosition = reverse ? cursor.anchor : cursor.head;
     } else if (from === 'selection-start') {
@@ -829,7 +840,10 @@ export class CodeMirrorSearchHighlighter {
     }
     if (lastPosition === 0 && reverse && this.currentIndex === null) {
       // The default position is (0, 0) but we want to start from the end in that case
-      lastPosition = this._cm!.doc.length;
+      // Fallback to the end of the latest match if the editor is not instantiated
+      lastPosition =
+        this._cm?.doc.length ??
+        endLastMatch(this._matches[this._matches.length - 1]);
     }
 
     const position = lastPosition;
@@ -855,6 +869,10 @@ export class CodeMirrorSearchHighlighter {
     }
 
     return found;
+
+    function endLastMatch(lastMatch?: ISearchMatch): number {
+      return lastMatch ? lastMatch.position + lastMatch.text.length : 0;
+    }
   }
 
   private _cm: CodeMirrorEditor | null;

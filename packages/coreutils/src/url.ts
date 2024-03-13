@@ -141,16 +141,18 @@ export namespace URLExt {
   /**
    * Test whether the url is a local url.
    *
+   * @param allowRoot - Whether the paths starting at Unix-style filesystem root (`/`) are permitted.
+   *
    * #### Notes
    * This function returns `false` for any fully qualified url, including
    * `data:`, `file:`, and `//` protocol URLs.
    */
-  export function isLocal(url: string): boolean {
+  export function isLocal(url: string, allowRoot: boolean = false): boolean {
     const { protocol } = parse(url);
 
     return (
       (!protocol || url.toLowerCase().indexOf(protocol) !== 0) &&
-      url.indexOf('/') !== 0
+      (allowRoot ? url.indexOf('//') !== 0 : url.indexOf('/') !== 0)
     );
   }
 

@@ -250,8 +250,7 @@ export class GridModel extends DataModel {
   setData(scopes: IDebugger.IScope[]): void {
     this._clearData();
     this.emitChanged({
-      type: 'model-reset',
-      region: 'body'
+      type: 'model-reset'
     });
     const scope = scopes.find(scope => scope.name === this._scope) ?? scopes[0];
     const variables = scope?.variables ?? [];

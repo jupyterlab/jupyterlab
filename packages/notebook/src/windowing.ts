@@ -68,6 +68,20 @@ export class NotebookViewModel extends WindowedListModel {
   widgetRenderer = (index: number): Widget => {
     return this.cells[index];
   };
+
+  /**
+   * Threshold used to decide if the cell should be scrolled to in the `smart` mode.
+   * Defaults to scrolling when less than a full line of the cell is visible.
+   */
+  readonly scrollDownThreshold =
+    NotebookViewModel.DEFAULT_CELL_MARGIN / 2 +
+    NotebookViewModel.DEFAULT_EDITOR_LINE_HEIGHT;
+
+  /**
+   * Threshold used to decide if the cell should be scrolled to in the `smart` mode.
+   * Defaults to scrolling when the cell margin or more is invisible.
+   */
+  readonly scrollUpThreshold = NotebookViewModel.DEFAULT_CELL_MARGIN / 2;
 }
 
 /**
@@ -105,7 +119,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
     this._footer = footer;
     if (this._footer && this.parent?.isAttached) {
-      Widget.attach(this._footer, this.parent!.node);
+      Widget.attach(this._footer, this.parent!.outerNode);
     }
   }
 
@@ -353,7 +367,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
       );
     }
     if (this._footer && !this._footer.isAttached) {
-      Widget.attach(this._footer, this.parent!.node);
+      Widget.attach(this._footer, this.parent!.outerNode);
     }
   }
 

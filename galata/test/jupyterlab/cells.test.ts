@@ -32,3 +32,25 @@ test.describe('Cells', () => {
     );
   });
 });
+
+test.describe('Run Cells With Keyboard', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.notebook.createNew();
+  });
+
+  test('Run code cell with Ctrl + Enter', async ({ page }) => {
+    await page.notebook.setCell(0, 'code', '2**32');
+    await page.notebook.enterCellEditingMode(0);
+    const initialOutput = await page.notebook.getCellTextOutput(0);
+    expect(initialOutput).toBe(null);
+    await page.keyboard.press('Control+Enter');
+
+    // Confirm that the cell has be executed by checking output
+    const output = await page.notebook.getCellTextOutput(0);
+    expect(output).toEqual(['4294967296']);
+
+    // Expect the input to NOT include an extra line;
+    const text = await page.notebook.getCellTextInput(0);
+    expect(text).toBe('2**32');
+  });
+});

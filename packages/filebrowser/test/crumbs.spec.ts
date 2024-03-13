@@ -223,6 +223,59 @@ describe('filebrowser/model', () => {
         expect(items.length).toBe(3);
         model.dispose();
       });
+
+      it('should trigger DOM updates if state changes', async () => {
+        const model = new FileBrowserModel({ manager });
+        crumbs = new LogCrumbs({ model });
+        let modifications = 0;
+        const observer = new MutationObserver(() => modifications++);
+        observer.observe(crumbs.node, {
+          attributes: true,
+          childList: true,
+          subtree: true
+        });
+
+        // Should modify the DOM once
+        await model.cd(path);
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(1);
+
+        // Should modify the DOM once
+        await model.cd('..');
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(2);
+
+        observer.disconnect();
+        model.dispose();
+      });
+
+      it('should not touch DOM if state is unchanged', async () => {
+        const model = new FileBrowserModel({ manager });
+        crumbs = new LogCrumbs({ model });
+        let modifications = 0;
+        const observer = new MutationObserver(() => modifications++);
+        observer.observe(crumbs.node, {
+          attributes: true,
+          childList: true,
+          subtree: true
+        });
+
+        // Should modify the DOM once
+        await model.cd(path);
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(1);
+
+        // Should not increase the number of modifications
+        crumbs.update();
+        await framePromise();
+        expect(modifications).toBe(1);
+
+        observer.disconnect();
+        model.dispose();
+      });
     });
   });
 });

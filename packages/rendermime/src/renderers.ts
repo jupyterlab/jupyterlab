@@ -1270,10 +1270,11 @@ namespace Private {
     let locator = anchor.dataset.locator ? '#' + anchor.dataset.locator : '';
     delete anchor.dataset.path;
     delete anchor.dataset.locator;
+    const allowRoot = true;
 
     const isLocal = resolver.isLocal
-      ? resolver.isLocal(path)
-      : URLExt.isLocal(path);
+      ? resolver.isLocal(path, allowRoot)
+      : URLExt.isLocal(path, allowRoot);
 
     // Bail if:
     // - it is not a file-like url,

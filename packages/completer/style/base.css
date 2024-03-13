@@ -49,7 +49,7 @@
   padding: 0;
   list-style-type: none;
   overflow-y: scroll;
-  overflow-x: auto;
+  overflow-x: hidden;
   max-height: calc((10 * var(--jp-private-completer-item-height)));
   min-height: calc(var(--jp-private-completer-item-height));
   width: 100%;
@@ -329,7 +329,7 @@
   display: none;
 }
 
-[data-command='inline-completer:next'] > .jp-ToolbarButtonComponent-icon,
-[data-command='inline-completer:previous'] > .jp-ToolbarButtonComponent-icon {
+.jp-InlineCompleter [data-command='inline-completer:next'] > svg,
+.jp-InlineCompleter [data-command='inline-completer:previous'] > svg {
   scale: 1.5;
 }

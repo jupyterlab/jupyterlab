@@ -283,6 +283,7 @@
   font-style: normal;
   margin: var(--jp-content-heading-margin-top) 0
     var(--jp-content-heading-margin-bottom) 0;
+  scroll-margin-top: var(--jp-content-heading-margin-top);
 }
 
 .jp-RenderedHTMLCommon h1:first-child,
@@ -292,6 +293,7 @@
 .jp-RenderedHTMLCommon h5:first-child,
 .jp-RenderedHTMLCommon h6:first-child {
   margin-top: calc(0.5 * var(--jp-content-heading-margin-top));
+  scroll-margin-top: calc(0.5 * var(--jp-content-heading-margin-top));
 }
 
 .jp-RenderedHTMLCommon h1:last-child,

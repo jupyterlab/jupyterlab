@@ -332,28 +332,39 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       return document.createElement('div');
     }
 
-    let returnSvgElement = true;
     if (container) {
       // take ownership by removing any existing children
       while (container.firstChild) {
         container.firstChild.remove();
       }
-    } else {
+    } else if (tag) {
       // create a container if needed
       container = document.createElement(tag);
-
-      returnSvgElement = false;
     }
+
+    const svgElement = this.svgElement.cloneNode(true) as HTMLElement;
+    if (!container) {
+      if (label) {
+        console.warn();
+      }
+      return svgElement;
+    }
+
     if (label != null) {
       container.textContent = label;
     }
-    Private.initContainer({ container, className, styleProps, title });
+
+    Private.initContainer({
+      container: container!,
+      className,
+      styleProps,
+      title
+    });
 
     // add the svg node to the container
-    const svgElement = this.svgElement.cloneNode(true) as HTMLElement;
     container.appendChild(svgElement);
 
-    return returnSvgElement ? svgElement : container;
+    return container;
   }
 
   render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
@@ -468,7 +479,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         });
 
         // make it so that tag can be used as a jsx component
-        const Tag = tag;
+        const Tag = tag ?? React.Fragment;
 
         // ensure that svg html is valid
         if (!(this.svgInnerHTML && this.svgReactAttrs)) {
@@ -494,15 +505,18 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
             </React.Fragment>
           );
         } else {
-          return (
-            <Tag
-              className={
+          let attributes = {};
+          if (Tag !== React.Fragment) {
+            attributes = {
+              className:
                 className || styleProps
                   ? classes(className, LabIconStyle.styleClass(styleProps))
-                  : undefined
-              }
-              title={title}
-            >
+                  : undefined,
+              title: title
+            };
+          }
+          return (
+            <Tag {...attributes}>
               {svgComponent}
               {label}
             </Tag>
@@ -670,8 +684,12 @@ export namespace LabIcon {
     /**
      * HTML element tag used to create the icon's outermost container node,
      * if no container is passed in
+     *
+     * #### Notes
+     * If `null` is provided and no container is defined, the icon SVG will return directly
+     * ignoring all other attributes (label, title,...)
      */
-    tag?: 'div' | 'span';
+    tag?: 'div' | 'span' | null;
 
     /**
      * Optional title that will be set on the icon's outermost container node
@@ -741,7 +759,7 @@ namespace Private {
       }
     } else {
       // create a container if needed
-      container = document.createElement(tag);
+      container = document.createElement(tag ?? 'div');
     }
     if (label != null) {
       container.textContent = label;
@@ -764,7 +782,7 @@ namespace Private {
       ref: LabIcon.IReactRef
     ) => {
       // make it so that tag can be used as a jsx component
-      const Tag = tag;
+      const Tag = tag ?? 'div';
 
       if (container) {
         initContainer({ container, className, styleProps, title });

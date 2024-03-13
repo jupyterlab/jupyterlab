@@ -233,7 +233,7 @@ export namespace AccordionToolbar {
    *
    * #### Note
    *
-   * Default titleSpace is 29 px (default var(--jp-private-toolbar-height) - but not styled)
+   * Default titleSpace is 32 px (default var(--jp-private-toolbar-height) - but not styled)
    */
   export function createLayout(
     options: AccordionPanel.IOptions
@@ -245,7 +245,7 @@ export namespace AccordionToolbar {
         orientation: options.orientation,
         alignment: options.alignment,
         spacing: options.spacing,
-        titleSpace: options.titleSpace ?? 29
+        titleSpace: options.titleSpace ?? 32
       })
     );
   }

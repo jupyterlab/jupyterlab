@@ -7,6 +7,7 @@ const fileName = 'notebook.ipynb';
 const COMPLETER_SELECTOR = '.jp-InlineCompleter';
 const GHOST_SELECTOR = '.jp-GhostText';
 const PLUGIN_ID = '@jupyterlab/completer-extension:inline-completer';
+const SHORTCUTS_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 
 const SHARED_SETTINGS = {
   providers: {
@@ -60,8 +61,8 @@ test.describe('Inline Completer', () => {
       expect(await completer.screenshot()).toMatchSnapshot(imageName);
 
       // Should hide on moving cursor away
-      const toolbar = await page.notebook.getToolbar();
-      await toolbar.hover();
+      const toolbar = await page.notebook.getToolbarLocator();
+      await toolbar!.hover();
       await completer.waitFor({ state: 'hidden' });
     });
   });
@@ -117,6 +118,73 @@ test.describe('Inline Completer', () => {
     });
   });
 
+  test.describe('Invoke on Tab', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        [PLUGIN_ID]: {
+          showWidget: 'always',
+          ...SHARED_SETTINGS
+        },
+        [SHORTCUTS_ID]: {
+          shortcuts: [
+            {
+              command: 'inline-completer:invoke',
+              keys: ['Tab'],
+              selector: '.jp-mod-completer-enabled'
+            }
+          ]
+        }
+      }
+    });
+
+    test('Shows up on Tab', async ({ page }) => {
+      await page.keyboard.press('Tab');
+
+      // Widget shows up
+      const completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+    });
+  });
+
+  test.describe('Accept on Tab', () => {
+    test.use({
+      mockSettings: {
+        ...galata.DEFAULT_SETTINGS,
+        [PLUGIN_ID]: {
+          showWidget: 'always',
+          ...SHARED_SETTINGS
+        },
+        [SHORTCUTS_ID]: {
+          shortcuts: [
+            {
+              command: 'inline-completer:accept',
+              keys: ['Tab'],
+              selector: '.jp-mod-inline-completer-active'
+            }
+          ]
+        }
+      }
+    });
+
+    test('Accepts suggestion on Tab', async ({ page }) => {
+      await page.keyboard.press('u');
+
+      await page.evaluate(async () => {
+        await window.jupyterapp.commands.execute('inline-completer:invoke');
+      });
+
+      const completer = page.locator(COMPLETER_SELECTOR);
+      await completer.waitFor();
+
+      await page.keyboard.press('Tab');
+
+      const cellEditor = await page.notebook.getCellInputLocator(2);
+      const text = await cellEditor!.textContent();
+      expect(text).toMatch(/estion.*/);
+    });
+  });
+
   test.describe('Ghost text', () => {
     test.use({
       mockSettings: {
@@ -139,9 +207,9 @@ test.describe('Inline Completer', () => {
       await page.keyboard.type('gg');
       await expect(ghostText).toHaveText(/estion.*/);
 
-      const cellEditor = await page.notebook.getCellInput(2);
+      const cellEditor = await page.notebook.getCellInputLocator(2);
       const imageName = 'editor-with-ghost-text.png';
-      expect(await cellEditor.screenshot()).toMatchSnapshot(imageName);
+      expect(await cellEditor!.screenshot()).toMatchSnapshot(imageName);
 
       // Ghost text should hide
       await page.keyboard.press('Escape');
