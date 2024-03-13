@@ -55,7 +55,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
-      - uses: iterative/setup-cml@v2
+      - uses: iterative/setup-cml@v3
 
       # First run the benchmark on the old reference
       - name: Checkout old reference
