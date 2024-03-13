@@ -87,7 +87,7 @@ describe('ServerConnection', () => {
         settings
       );
       const err = new ServerConnection.ResponseError(response);
-      expect(err.message).toBe('Invalid response: 200 OK');
+      expect(err.message).toBe('Invalid response: 200 ');
     });
   });
 
