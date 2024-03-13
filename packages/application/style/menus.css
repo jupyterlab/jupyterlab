@@ -31,7 +31,6 @@
 }
 
 .lm-MenuBar-item {
-  /* stylelint-disable-next-line csstree/validator */
   /* calc() is used for adaptive menuBar padding, it fixes UI cutoff at 100% zoom, with -2px border */
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
