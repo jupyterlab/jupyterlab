@@ -664,25 +664,35 @@ export class DocumentRegistry implements IDisposable {
   getFileTypeForModel(
     model: Partial<Contents.IModel>
   ): DocumentRegistry.IFileType {
+    let ft: DocumentRegistry.IFileType | null = null;
+    if (model.name || model.path) {
+      const name = model.name || PathExt.basename(model.path!);
+      const fts = this.getFileTypesForPath(name);
+      if (fts.length > 0) {
+        ft = fts[0];
+      }
+    }
     switch (model.type) {
       case 'directory':
+        if (ft !== null && ft.contentType === 'directory') {
+          return ft;
+        }
         return (
           find(this._fileTypes, ft => ft.contentType === 'directory') ||
           DocumentRegistry.getDefaultDirectoryFileType(this.translator)
         );
       case 'notebook':
+        if (ft !== null && ft.contentType === 'notebook') {
+          return ft;
+        }
         return (
           find(this._fileTypes, ft => ft.contentType === 'notebook') ||
           DocumentRegistry.getDefaultNotebookFileType(this.translator)
         );
       default:
         // Find the best matching extension.
-        if (model.name || model.path) {
-          const name = model.name || PathExt.basename(model.path!);
-          const fts = this.getFileTypesForPath(name);
-          if (fts.length > 0) {
-            return fts[0];
-          }
+        if (ft !== null) {
+          return ft;
         }
         return (
           this.getFileType('text') ||

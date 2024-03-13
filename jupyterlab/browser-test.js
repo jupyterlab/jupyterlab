@@ -28,6 +28,7 @@ if (OUTPUT) {
 async function main() {
   /* eslint-disable no-console */
   console.info(`Starting headless ${BROWSER}...`);
+  let testError = null;
 
   const pwBrowser = playwright[BROWSER];
   const browser = await pwBrowser.launch({
@@ -65,11 +66,12 @@ async function main() {
   console.log('Waiting for page content..');
 
   try {
-    await page.locator('#jupyter-config-data').waitFor();
+    await page.locator('#jupyter-config-data').waitFor({ state: 'attached' });
   } catch (reason) {
-    console.error('Error loading JupyterLab page:');
+    console.error('Error loading JupyterLab page:', reason);
     // Limit to 1000 characters
     console.error((await page.content()).substring(0, 1000));
+    testError = reason;
   }
 
   console.log('Waiting for #main selector...');
@@ -81,7 +83,6 @@ async function main() {
     state: 'attached'
   });
   console.log('Waiting for application to start...');
-  let testError = null;
 
   try {
     await page.waitForSelector('.completed', { state: 'attached' });
