@@ -279,9 +279,9 @@ Contributing from within the browser
 Contributing to JupyterLab codebase is also possible without setting up
 a local environment, directly from the Web browser:
 
--  GitHub's 
+-  GitHub's
    `codespace <https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository>`__
-   is available (free account have 
+   is available (free account have
    `limited monthly resources <https://docs.github.com/en/billing/managing-billing-for-github-codespaces/about-billing-for-github-codespaces#monthly-included-storage-and-core-hours-for-personal-accounts>`__).
 -  GitHub's
    `built-in editor <https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files>`__
