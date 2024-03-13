@@ -345,7 +345,7 @@ test.describe('shorcuts list @A11y', () => {
   test('Should navigate rows using up arrow keys', async ({ page }) => {
     const shortcutRows = page.locator('.jp-Shortcuts-Row');
 
-    for (let i = 0; i < (await shortcutRows.count()) - 1; i++) {
+    for (let i = (await shortcutRows.count()) - 1; i > 0; i--) {
       await shortcutRows.nth(i).focus();
       await page.keyboard.press('ArrowUp');
 
