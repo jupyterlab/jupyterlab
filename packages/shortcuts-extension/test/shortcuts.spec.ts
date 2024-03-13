@@ -312,6 +312,73 @@ describe('@jupyterlab/shortcut-extension', () => {
       expect(shortcuts).toHaveLength(1);
     });
   });
+
+  it('should add punctuation aria-label @A11y', async () => {
+    const bar: ISettingRegistry.IPlugin = {
+      data: {
+        composite: {},
+        user: {}
+      },
+      id: pluginId,
+      raw: '{}',
+      schema: {
+        'jupyter.lab.shortcuts': [
+          {
+            command: 'application:activate-previous-tab',
+            keys: ['Ctrl Shift ['],
+            selector: 'body'
+          },
+          {
+            command: 'settingeditor:open',
+            keys: ['Ctrl ,'],
+            selector: 'body'
+          }
+        ],
+        type: 'object'
+      },
+      version: 'test'
+    };
+
+    const connector: IDataConnector<
+      ISettingRegistry.IPlugin,
+      string,
+      string,
+      string
+    > = {
+      fetch: jest.fn().mockImplementation((id: string) => {
+        switch (id) {
+          case bar.id:
+            return bar;
+          case plugin.default.id:
+            return dummySettings;
+          default:
+            return {};
+        }
+      }),
+      list: jest.fn(),
+      save: jest.fn(),
+      remove: jest.fn()
+    };
+
+    const settingRegistry = new SettingRegistry({
+      connector
+    });
+
+    await settingRegistry.load(bar.id);
+
+    void plugin.default.activate(
+      {
+        commands: new CommandRegistry()
+      } as any,
+      settingRegistry
+    );
+
+    const settings = await settingRegistry.load(plugin.default.id);
+    const shortcuts = (await settings.get('shortcuts')
+      .composite) as ISettingRegistry.IShortcut[];
+
+    expect(shortcuts).toHaveLength(2);
+  });
 });
 
 describe('shortcuts list @A11y', () => {
@@ -322,16 +389,20 @@ describe('shortcuts list @A11y', () => {
     for (let i = 0; i < keyboardShortcuts.length; i++) {
       const keyboardLabelAria = keyboardShortcuts[i].getAttribute('aria-label');
       const keyboardLabelText = keyboardShortcuts[i].innerHTML;
-      const punctuation = ",}{.'-";
-      if (punctuation.includes(keyboardLabelText)) {
-        expect(keyboardLabelAria).toEqual([
-          'Comma',
-          'Closing bracket',
-          'Opening bracket',
-          'Full stop',
-          'Single quote',
-          'Hyphen-minus'
-        ]);
+      const punctuation = [',', '}', '{', '.', "'", '-'];
+      const text = [
+        'Comma',
+        'Closing bracket',
+        'Opening bracket',
+        'Full stop',
+        'Single quote',
+        'Hyphen-minus'
+      ];
+      if (punctuation.some(punct => keyboardLabelText.includes(punct))) {
+        expect(
+          punctuation.some(punct => keyboardLabelAria?.includes(punct))
+        ).toBeFalsy();
+        expect(text.some(txt => keyboardLabelAria?.includes(txt))).toBeTruthy();
       }
     }
   });
