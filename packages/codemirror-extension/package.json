@@ -41,7 +41,7 @@
     "@codemirror/lang-markdown": "^6.1.1",
     "@codemirror/language": "^6.6.0",
     "@codemirror/legacy-modes": "^6.3.2",
-    "@jupyter/ydoc": "^1.1.1",
+    "@jupyter/ydoc": "^2.0.1",
     "@jupyterlab/application": "^4.2.0-alpha.0",
     "@jupyterlab/codeeditor": "^4.2.0-alpha.0",
     "@jupyterlab/codemirror": "^4.2.0-alpha.0",
