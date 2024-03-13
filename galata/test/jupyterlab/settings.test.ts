@@ -261,7 +261,7 @@ test.describe('shorcuts list @A11y', () => {
     ).toHaveCount(1);
 
     const shorcutRow = page.locator('.jp-Shortcuts-Row').first();
-    const shorcutRowId = await shorcutRow.getAttribute('title');
+    const shorcutRowTitle = await shorcutRow.getAttribute('title');
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -269,7 +269,7 @@ test.describe('shorcuts list @A11y', () => {
       let activeElementId = await page.evaluate(
         () => document.activeElement?.getAttribute('title')
       );
-      if (activeElementId === shorcutRowId) {
+      if (activeElementId === shorcutRowTitle) {
         break;
       }
     }
@@ -302,11 +302,12 @@ test.describe('shorcuts list @A11y', () => {
   test('Should retain tab order by focusing seach input using shift tab', async ({
     page
   }) => {
-    const searchInput = page.locator('.jp-Shortcuts-Search');
+    const searchInput = page.locator(`[placeholder='Search…']`);
 
     while (
       !(await page.evaluate(
-        () => document.activeElement?.matches(`[class='jp-Shortcuts-Search']`)
+        selector => document.activeElement?.matches(selector),
+        `[placeholder='Search…']`
       ))
     ) {
       await page.keyboard.press('Shift+Tab');
@@ -329,8 +330,6 @@ test.describe('shorcuts list @A11y', () => {
     }
   });
   test('Should navigate rows using down arrow key', async ({ page }) => {
-    await page.keyboard.press('Tab');
-
     const shortcutRows = page.locator('.jp-Shortcuts-Row');
 
     for (let i = 0; i < (await shortcutRows.count()) - 1; i++) {
@@ -339,8 +338,6 @@ test.describe('shorcuts list @A11y', () => {
 
       if (shortcutRows.nth(i) !== shortcutRows.last()) {
         await expect(shortcutRows.nth(i + 1)).toBeFocused();
-      } else if (shortcutRows.nth(i) === shortcutRows.last()) {
-        await expect(shortcutRows.first()).toBeFocused();
       }
     }
   });
