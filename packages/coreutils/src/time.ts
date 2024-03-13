@@ -17,6 +17,9 @@ const UNITS: { name: Intl.RelativeTimeFormatUnit; milliseconds: number }[] = [
  * The namespace for date functions.
  */
 export namespace Time {
+  // Intl.RelativeTimeFormatStyle contains these, but we can't compile with it yet
+  export type HumanStyle = 'long' | 'short' | 'narrow';
+
   /**
    * Convert a timestring to a human readable string (e.g. 'two minutes ago').
    *
@@ -26,8 +29,7 @@ export namespace Time {
    */
   export function formatHuman(
     value: string | Date,
-    // Intl.RelativeTimeFormatStyle contains these, but we can't compile with it yet
-    format: 'long' | 'short' | 'narrow' = 'long'
+    format: HumanStyle = 'long'
   ): string {
     const lang = document.documentElement.lang || 'en';
     const formatter = new Intl.RelativeTimeFormat(lang, {

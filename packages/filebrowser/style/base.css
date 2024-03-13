@@ -144,11 +144,11 @@
 }
 
 .jp-DirListing-headerItem.jp-id-name {
-  flex: 1 0 126px;
+  flex: 1 1 126px;
 }
 
 .jp-DirListing-headerItem.jp-id-modified {
-  flex: 0 0 70px;
+  flex: 1 0 70px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
 }
@@ -276,7 +276,7 @@
 }
 
 .jp-DirListing-itemText {
-  flex: 1 0 106px;
+  flex: 1 1 106px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -301,8 +301,51 @@
 }
 
 .jp-DirListing-itemModified {
-  flex: 0 0 83px;
+  flex: 1 0 83px;
   text-align: right;
+  container-type: inline-size;
+}
+
+@container (width < 90px) {
+  .jp-DirListing-itemModified-narrow {
+    display: block;
+  }
+
+  .jp-DirListing-itemModified-short {
+    display: none;
+  }
+
+  .jp-DirListing-itemModified-long {
+    display: none;
+  }
+}
+
+@container (width >= 90px) and (width <= 110px) {
+  .jp-DirListing-itemModified-narrow {
+    display: none;
+  }
+
+  .jp-DirListing-itemModified-short {
+    display: block;
+  }
+
+  .jp-DirListing-itemModified-long {
+    display: none;
+  }
+}
+
+@container (width > 110px) {
+  .jp-DirListing-itemModified-narrow {
+    display: none;
+  }
+
+  .jp-DirListing-itemModified-short {
+    display: none;
+  }
+
+  .jp-DirListing-itemModified-long {
+    display: block;
+  }
 }
 
 .jp-DirListing-itemFileSize {
