@@ -639,7 +639,18 @@ class _AppHandler:
         # Do this last since it relies on other attributes
         self.info = self._get_app_info()
         # Migrate from 4.0 which did not have "locked" status
-        self._maybe_mirror_disabled_in_locked()
+        try:
+            self._maybe_mirror_disabled_in_locked(level="sys_prefix")
+        except (PermissionError, OSError):
+            try:
+                self.logger.info(
+                    "`sys_prefix` level settings are read-only, using `user` level for migration to `lockedExtensions`"
+                )
+                self._maybe_mirror_disabled_in_locked(level="user")
+            except (PermissionError, OSError):
+                self.logger.warning(
+                    "Both `sys_prefix` and `user` level settings are read-only, cannot auto-migrate `disabledExtensions` to `lockedExtensions`"
+                )
 
     def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.
@@ -1130,7 +1141,7 @@ class _AppHandler:
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
         )
         if "lockedExtensions" in page_config:
-            # short-circut if migration already happened
+            # short-circuit if migration already happened
             return False
 
         # copy disabled onto lockedExtensions, ensuring the mapping format
@@ -2054,7 +2065,9 @@ def _yarn_config(logger):
 
     try:
         output_binary = subprocess.check_output(
-            [node, YARN_PATH, "config", "--json"], stderr=subprocess.PIPE, cwd=HERE  # noqa S603
+            [node, YARN_PATH, "config", "--json"],  # noqa S603
+            stderr=subprocess.PIPE,
+            cwd=HERE,
         )
         output = output_binary.decode("utf-8")
         lines = iter(output.splitlines())
@@ -2363,7 +2376,7 @@ def _is_locked(name, locked=None) -> LockStatus:
             continue
         if name == lock:
             return LockStatus(entire_extension_locked=True)
-        extension_part = lock.partition(':')[0]
+        extension_part = lock.partition(":")[0]
         if name == extension_part:
             locked_plugins.add(lock)
 
@@ -2415,7 +2428,7 @@ def _log_multiple_compat_errors(logger, errors_map):
                 [
                     "\n   The following extensions are outdated:",
                     *outdated,
-                    '\n   Consider checking if an update is available for these packages.\n',
+                    "\n   Consider checking if an update is available for these packages.\n",
                 ]
             )
         )

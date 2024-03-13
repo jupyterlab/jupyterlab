@@ -32,10 +32,10 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
 
   // Get current registry values
   let prev_npm = utils.run('npm config get registry', { stdio: 'pipe' }, true);
-  let prev_yarn = '';
+  let prev_jlpm = '';
   try {
-    prev_yarn = utils.run(
-      'yarn config get npmRegistryServer',
+    prev_jlpm = utils.run(
+      'jlpm config get npmRegistryServer',
       { stdio: 'pipe' },
       true
     );
@@ -45,8 +45,8 @@ async function startLocalRegistry(out_dir: string, port = DEFAULT_PORT) {
   if (!prev_npm || prev_npm.indexOf('0.0.0.0') !== -1) {
     prev_npm = 'https://registry.npmjs.org/';
   }
-  if (prev_yarn.indexOf('0.0.0.0') !== -1) {
-    prev_yarn = '';
+  if (prev_jlpm.indexOf('0.0.0.0') !== -1) {
+    prev_jlpm = '';
   }
 
   // write the config file
@@ -126,7 +126,7 @@ packages:
   const info_file = path.join(out_dir, 'info.json');
   const data = {
     prev_npm,
-    prev_yarn,
+    prev_jlpm,
     pid: subproc.pid
   };
   utils.writeJSONFile(info_file, data);
@@ -140,13 +140,13 @@ packages:
     local_registry
   ]);
   try {
-    child_process.execFileSync('yarn', [
+    child_process.execFileSync('jlpm', [
       'config',
       'set',
       'npmRegistryServer',
       local_registry
     ]);
-    child_process.execFileSync('yarn', [
+    child_process.execFileSync('jlpm', [
       'config',
       'set',
       'unsafeHttpWhitelist',
@@ -154,7 +154,7 @@ packages:
       '["0.0.0.0"]'
     ]);
   } catch (e) {
-    // yarn not available
+    // jlpm not available
   }
 
   // Log in using cli and temp credentials
@@ -238,17 +238,17 @@ async function stopLocalRegistry(out_dir: string) {
   } else {
     child_process.execSync(`npm config rm registry`);
   }
-  if (data.prev_yarn) {
+  if (data.prev_jlpm) {
     child_process.execSync(
-      `yarn config set npmRegistryServer ${data.prev_yarn}`
+      `jlpm config set npmRegistryServer ${data.prev_jlpm}`
     );
-    child_process.execSync(`yarn config unset unsafeHttpWhitelist`);
+    child_process.execSync(`jlpm config unset unsafeHttpWhitelist`);
   } else {
     try {
-      child_process.execSync(`yarn config unset npmRegistryServer`);
-      child_process.execSync(`yarn config unset unsafeHttpWhitelist`);
+      child_process.execSync(`jlpm config unset npmRegistryServer`);
+      child_process.execSync(`jlpm config unset unsafeHttpWhitelist`);
     } catch (e) {
-      // yarn not available
+      // jlpm not available
     }
   }
 }

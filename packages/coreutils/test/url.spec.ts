@@ -106,6 +106,10 @@ describe('@jupyterlab/coreutils', () => {
         expect(URLExt.isLocal('foo/bar.txt')).toBe(true);
         expect(URLExt.isLocal('bar.txt')).toBe(true);
       });
+      it('should optionally allow references to root', () => {
+        expect(URLExt.isLocal('/foo/bar.txt', true)).toBe(true);
+        expect(URLExt.isLocal('//foo/bar.txt', true)).toBe(false);
+      });
     });
   });
 });

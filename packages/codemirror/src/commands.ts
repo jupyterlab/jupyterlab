@@ -4,6 +4,7 @@
  */
 
 import {
+  indentLess,
   indentMore,
   insertNewlineAndIndent,
   insertTab
@@ -13,6 +14,17 @@ import {
   COMPLETER_ACTIVE_CLASS,
   COMPLETER_ENABLED_CLASS
 } from '@jupyterlab/codeeditor';
+
+/**
+ * Selector for a widget that can run code.
+ */
+const CODE_RUNNER_SELECTOR = '[data-jp-code-runner]';
+
+/**
+ * Selector for a widget that can open a tooltip.
+ */
+const TOOLTIP_OPENER_SELECTOR =
+  '.jp-CodeMirrorEditor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace):not(.jp-mod-completer-active)';
 
 /**
  * CodeMirror commands namespace
@@ -60,5 +72,33 @@ export namespace StateCommands {
 
     const arg = { state: target.state, dispatch: target.dispatch };
     return insertNewlineAndIndent(arg);
+  }
+
+  /**
+   * Prevent insertion of new line when running cell with Ctrl/Command + Enter
+   */
+  export function preventNewLineOnRun(target: { dom: HTMLElement }): boolean {
+    if (target.dom.closest(CODE_RUNNER_SELECTOR)) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Prevent dedenting when launching inspection request (a.k.a tooltip).
+   *
+   * This function should be removed once a better way to prevent default
+   * CodeMirror commands is implemented, as tracked in
+   * https://github.com/jupyterlab/jupyterlab/issues/15897
+   */
+  export function dedentIfNotLaunchingTooltip(target: {
+    dom: HTMLElement;
+    state: EditorState;
+    dispatch: (transaction: Transaction) => void;
+  }): boolean {
+    if (target.dom.closest(TOOLTIP_OPENER_SELECTOR)) {
+      return true;
+    }
+    return indentLess(target);
   }
 }

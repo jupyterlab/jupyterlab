@@ -47,6 +47,7 @@ export const lineColItem: JupyterFrontEndPlugin<IPositionModel> = {
     if (statusBar) {
       // Add the status item to the status bar.
       statusBar.registerStatusItem(lineColItem.id, {
+        priority: 1,
         item,
         align: 'right',
         rank: 2,

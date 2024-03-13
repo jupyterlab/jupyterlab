@@ -8,7 +8,7 @@ Language Server Protocol support
 
 .. warning::
 
-    Language Server Protocol (LSP) support for JupyrterLab is an experimental feature. It is based on the  `jupyterlab-lsp <https://jupyterlab-lsp.readthedocs.io/>`_ extension. More detailed documentation can be found on their page.
+    Language Server Protocol (LSP) support for JupyterLab is an experimental feature. It is based on the  `jupyterlab-lsp <https://jupyterlab-lsp.readthedocs.io/>`_ extension. More detailed documentation can be found on their page.
 
 JupyterLab 4.0 ships with components on both backend and frontend to lay the infrastructure for handling and communicating with language servers.
 
@@ -19,7 +19,7 @@ The LSP service is disabled by default, it can be enabled by togging the *Activa
 Requirements
 ------------
 
-By default JupyterLab does not come with any language servers preinstalled, you need to install the servers by yourself. Supported language servers and the suggested package managers to install them are listed in the tables below:
+By default JupyterLab does not come with any language servers preinstalled; you need to install the servers yourself. Supported language servers and the suggested package managers to install them are listed in the tables below:
 
 .. role:: raw-html(raw)
     :format: html

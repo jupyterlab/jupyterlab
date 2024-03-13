@@ -42,13 +42,15 @@
 }
 
 .jp-Notebook {
-  padding: var(--jp-notebook-padding);
   outline: none;
-  overflow: auto;
   background: var(--jp-layout-color0);
 }
 
-.jp-Notebook.jp-mod-scrollPastEnd::after {
+.jp-Notebook .jp-WindowedPanel-viewport {
+  padding: var(--jp-notebook-padding);
+}
+
+.jp-Notebook.jp-mod-scrollPastEnd > .jp-WindowedPanel-outer::after {
   display: block;
   content: '';
   min-height: var(--jp-notebook-scroll-padding);
@@ -466,6 +468,22 @@ div.jp-Cell-Placeholder-content-2 {
 
 div.jp-Cell-Placeholder-content-3 {
   top: 140px;
+}
+
+/*-----------------------------------------------------------------------------
+| Virtual scrollbar
+|----------------------------------------------------------------------------*/
+
+.jp-Notebook
+  .jp-WindowedPanel-scrollbar-content
+  .jp-mod-active.jp-mod-selected {
+  background: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
+}
+
+.jp-Notebook .jp-WindowedPanel-scrollbar-content .jp-mod-selected {
+  background: var(--jp-brand-color2);
+  color: var(--jp-ui-inverse-font-color2);
 }
 
 /*-----------------------------------------------------------------------------

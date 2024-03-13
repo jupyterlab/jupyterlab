@@ -112,7 +112,6 @@ export class SidePanel extends Widget {
   private addToolbar(toolbar?: Toolbar) {
     const theToolbar = (this._toolbar = toolbar ?? new Toolbar());
     theToolbar.addClass('jp-SidePanel-toolbar');
-    theToolbar.node.setAttribute('role', 'navigation');
     theToolbar.node.setAttribute(
       'aria-label',
       this._trans.__('side panel actions')

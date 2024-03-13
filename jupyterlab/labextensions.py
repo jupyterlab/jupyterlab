@@ -308,9 +308,9 @@ class WatchLabExtensionApp(BaseExtensionApp):
     )
 
     aliases = {
-        "development": "BuildLabExtensionApp.development",
-        "source-map": "BuildLabExtensionApp.source_map",
-        "core-path": "BuildLabExtensionApp.core_path",
+        "core-path": "WatchLabExtensionApp.core_path",
+        "development": "WatchLabExtensionApp.development",
+        "source-map": "WatchLabExtensionApp.source_map",
     }
 
     def run_task(self):
@@ -330,7 +330,7 @@ class UpdateLabExtensionApp(BaseExtensionApp):
     description = "Update labextension(s)"
     flags = update_flags
 
-    all = Bool(False, config=True, help="Whether to update all extensions")  # noqa
+    all = Bool(False, config=True, help="Whether to update all extensions")
 
     def run_task(self):
         self.deprecation_warning(
@@ -391,7 +391,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
     description = "Uninstall labextension(s) by name"
     flags = uninstall_flags
 
-    all = Bool(False, config=True, help="Whether to uninstall all extensions")  # noqa
+    all = Bool(False, config=True, help="Whether to uninstall all extensions")
 
     def run_task(self):
         self.deprecation_warning(

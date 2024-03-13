@@ -40,3 +40,4 @@ tests/**/coverage
 tests/**/.cache-loader
 
 **/node_modules
+.yarn

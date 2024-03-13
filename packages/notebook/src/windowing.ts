@@ -119,7 +119,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
     this._footer = footer;
     if (this._footer && this.parent?.isAttached) {
-      Widget.attach(this._footer, this.parent!.node);
+      Widget.attach(this._footer, this.parent!.outerNode);
     }
   }
 
@@ -367,7 +367,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
       );
     }
     if (this._footer && !this._footer.isAttached) {
-      Widget.attach(this._footer, this.parent!.node);
+      Widget.attach(this._footer, this.parent!.outerNode);
     }
   }
 

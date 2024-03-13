@@ -193,6 +193,18 @@ class OpenDialog
         const layout = new PanelLayout();
         layout.addWidget(this._browser);
 
+        /**
+         * Dispose browser model when OpenDialog
+         * is disposed.
+         */
+        this.dispose = () => {
+          if (this.isDisposed) {
+            return;
+          }
+          this._browser.model.dispose();
+          super.dispose();
+        };
+
         // Set Widget content
         this.layout = layout;
 
@@ -285,15 +297,15 @@ namespace Private {
       filterDirectories
     });
 
-    if (defaultPath) {
-      await model.cd(defaultPath);
-    }
-
     const widget = new FileBrowser({
       id,
       model,
       translator
     });
+
+    if (defaultPath) {
+      await widget.model.cd(defaultPath);
+    }
 
     return widget;
   };

@@ -46,7 +46,9 @@ test.describe('HTML Viewer', () => {
   });
 
   test('should allow links for trusted file', async ({ page }) => {
-    await page.getByRole('button', { name: 'Trust HTML' }).click();
+    await page
+      .getByRole('button', { name: 'Trust HTML' })
+      .click({ force: true });
     const frame = page.frame({ url: url => url.protocol == 'blob:' });
     await frame!.getByRole('link', { name: 'GitHub' }).hover();
 

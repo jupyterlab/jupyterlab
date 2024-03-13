@@ -98,7 +98,8 @@ def update_extension(  # noqa
         if setup_file.exists():
             python_name = (
                 subprocess.check_output(
-                    [sys.executable, "setup.py", "--name"], cwd=target  # noqa S603
+                    [sys.executable, "setup.py", "--name"],  # noqa: S603
+                    cwd=target,
                 )
                 .decode("utf8")
                 .strip()
@@ -149,7 +150,7 @@ def update_extension(  # noqa
     }
 
     template = "https://github.com/jupyterlab/extension-template"
-    if tuple(copier.__version__.split('.')) < ('8', '0', '0'):
+    if tuple(copier.__version__.split(".")) < ("8", "0", "0"):
         copier.run_auto(template, output_dir, vcs_ref=vcs_ref, data=extra_context, defaults=True)
     else:
         copier.run_copy(
@@ -281,7 +282,7 @@ def update_extension(  # noqa
                 pyproject = tomllib.loads(pyproject_file.read_text())
 
                 # Backport requirements
-                requirements_raw = config.get('options', 'install_requires', fallback=None)
+                requirements_raw = config.get("options", "install_requires", fallback=None)
                 if requirements_raw is not None:
                     requirements = list(
                         filter(
@@ -297,8 +298,8 @@ def update_extension(  # noqa
                 )
 
                 # Backport extras
-                if config.has_section('options.extras_require'):
-                    for extra, deps_raw in config.items('options.extras_require'):
+                if config.has_section("options.extras_require"):
+                    for extra, deps_raw in config.items("options.extras_require"):
                         deps = list(filter(lambda r: r, deps_raw.splitlines()))
                         if extra in pyproject["project"].get("optional-dependencies", {}):
                             if pyproject["project"].get("optional-dependencies") is None:
@@ -339,7 +340,7 @@ if __name__ == "__main__":
 
     if answer_file.exists():
         msg = "This script won't do anything for copier template, instead execute in your extension directory:\n\n    copier update"
-        if tuple(copier.__version__.split('.')) >= ('8', '0', '0'):
+        if tuple(copier.__version__.split(".")) >= ("8", "0", "0"):
             msg += " --UNSAFE"
         print(msg)
     else:

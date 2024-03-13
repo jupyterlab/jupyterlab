@@ -18,7 +18,7 @@
     {
       "command": "inline-completer:accept",
       "keys": ["Alt End"],
-      "selector": ".jp-mod-completer-enabled"
+      "selector": ".jp-mod-inline-completer-active"
     },
     {
       "command": "inline-completer:invoke",
@@ -29,7 +29,8 @@
   "properties": {
     "providers": {
       "title": "Inline completion providers",
-      "type": "object"
+      "type": "object",
+      "default": {}
     },
     "showWidget": {
       "title": "Show widget",

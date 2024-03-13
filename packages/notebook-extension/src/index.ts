@@ -48,7 +48,10 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
-import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import {
   ILSPCodeExtractorsManager,
@@ -108,7 +111,8 @@ import {
   pasteIcon,
   refreshIcon,
   runIcon,
-  stopIcon
+  stopIcon,
+  tableRowsIcon
 } from '@jupyterlab/ui-components';
 import { ArrayExt } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
@@ -319,6 +323,8 @@ namespace CommandIDs {
   export const accessPreviousHistory = 'notebook:access-previous-history-entry';
 
   export const accessNextHistory = 'notebook:access-next-history-entry';
+
+  export const virtualScrollbar = 'notebook:toggle-virtual-scrollbar';
 }
 
 /**
@@ -360,7 +366,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     ISettingRegistry,
     ISessionContextDialogs,
     ITranslator,
-    IFormRendererRegistry
+    IFormRendererRegistry,
+    IFileBrowserFactory
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -429,6 +436,7 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
     });
 
     statusBar.registerStatusItem('@jupyterlab/notebook-extension:mode-status', {
+      priority: 1,
       item,
       align: 'right',
       rank: 4,
@@ -877,16 +885,35 @@ const tocPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/notebook-extension:toc',
   description: 'Adds table of content capability to the notebooks',
   requires: [INotebookTracker, ITableOfContentsRegistry, ISanitizer],
-  optional: [IMarkdownParser],
+  optional: [IMarkdownParser, ISettingRegistry],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     tracker: INotebookTracker,
     tocRegistry: ITableOfContentsRegistry,
     sanitizer: IRenderMime.ISanitizer,
-    mdParser: IMarkdownParser | null
+    mdParser: IMarkdownParser | null,
+    settingRegistry: ISettingRegistry | null
   ): void => {
-    tocRegistry.add(new NotebookToCFactory(tracker, mdParser, sanitizer));
+    const nbTocFactory = new NotebookToCFactory(tracker, mdParser, sanitizer);
+    tocRegistry.add(nbTocFactory);
+    if (settingRegistry) {
+      Promise.all([app.restored, settingRegistry.load(trackerPlugin.id)])
+        .then(([_, setting]) => {
+          const onSettingsUpdate = () => {
+            nbTocFactory.scrollToTop =
+              (setting.composite['scrollHeadingToTop'] as boolean) ?? true;
+          };
+          onSettingsUpdate();
+          setting.changed.connect(onSettingsUpdate);
+        })
+        .catch(error => {
+          console.error(
+            'Failed to load notebook table of content settings.',
+            error
+          );
+        });
+    }
   }
 };
 
@@ -1571,7 +1598,8 @@ function activateNotebookHandler(
   settingRegistry: ISettingRegistry | null,
   sessionDialogs_: ISessionContextDialogs | null,
   translator_: ITranslator | null,
-  formRegistry: IFormRendererRegistry | null
+  formRegistry: IFormRendererRegistry | null,
+  filebrowserFactory: IFileBrowserFactory | null
 ): INotebookTracker {
   const translator = translator_ ?? nullTranslator;
   const sessionDialogs =
@@ -1610,6 +1638,7 @@ function activateNotebookHandler(
       updateConfig(settings);
       settings.changed.connect(() => {
         updateConfig(settings);
+        commands.notifyCommandChanged(CommandIDs.virtualScrollbar);
       });
 
       const updateSessionSettings = (
@@ -1704,6 +1733,14 @@ function activateNotebookHandler(
             .catch(console.error);
         }
       });
+      addCommands(
+        app,
+        tracker,
+        translator,
+        sessionDialogs,
+        settings,
+        isEnabled
+      );
     })
     .catch((reason: Error) => {
       console.warn(reason.message);
@@ -1713,6 +1750,7 @@ function activateNotebookHandler(
         kernelShutdown: factory.shutdownOnClose,
         autoStartDefault: factory.autoStartDefault
       });
+      addCommands(app, tracker, translator, sessionDialogs, null, isEnabled);
     });
 
   if (formRegistry) {
@@ -1753,8 +1791,6 @@ function activateNotebookHandler(
   });
   registry.addModelFactory(modelFactory);
 
-  addCommands(app, tracker, translator, sessionDialogs, isEnabled);
-
   if (palette) {
     populatePalette(palette, translator);
   }
@@ -1787,6 +1823,14 @@ function activateNotebookHandler(
     tracker.forEach(widget => {
       widget.setConfig(options);
     });
+    if (options.notebookConfig.windowingMode !== 'full') {
+      // Disable all virtual scrollbars if any was enabled
+      tracker.forEach(widget => {
+        if (widget.content.scrollbar) {
+          widget.content.scrollbar = false;
+        }
+      });
+    }
   }
 
   /**
@@ -1810,6 +1854,8 @@ function activateNotebookHandler(
 
     factory.editorConfig = { code, markdown, raw };
     factory.notebookConfig = {
+      enableKernelInitNotification: settings.get('enableKernelInitNotification')
+        .composite as boolean,
       showHiddenCellsButton: settings.get('showHiddenCellsButton')
         .composite as boolean,
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
@@ -1916,7 +1962,9 @@ function activateNotebookHandler(
     caption: trans.__('Create a new notebook'),
     icon: args => (args['isPalette'] ? undefined : notebookIcon),
     execute: args => {
-      const cwd = (args['cwd'] as string) || (defaultBrowser?.model.path ?? '');
+      const currentBrowser =
+        filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
+      const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
       return createNew(cwd, kernelId, kernelName);
@@ -2100,6 +2148,7 @@ function addCommands(
   tracker: NotebookTracker,
   translator: ITranslator,
   sessionDialogs: ISessionContextDialogs,
+  settings: ISettingRegistry.ISettings | null,
   isEnabled: () => boolean
 ): void {
   const trans = translator.load('jupyterlab');
@@ -3379,7 +3428,6 @@ function addCommands(
       }
     }
   });
-
   commands.addCommand(CommandIDs.tocRunCells, {
     label: trans.__('Select and Run Cell(s) for this Heading'),
     execute: args => {
@@ -3437,6 +3485,33 @@ function addCommands(
       if (current) {
         return await NotebookActions.accessNextHistory(current.content);
       }
+    }
+  });
+
+  commands.addCommand(CommandIDs.virtualScrollbar, {
+    label: trans.__('Virtual Scrollbar'),
+    caption: trans.__(
+      'Toggle virtual scrollbar (enabled with windowing mode: full)'
+    ),
+    execute: args => {
+      const current = getCurrent(tracker, shell, args);
+
+      if (current) {
+        current.content.scrollbar = !current.content.scrollbar;
+      }
+    },
+    icon: args => (args.toolbar ? tableRowsIcon : undefined),
+    isEnabled: args => {
+      const enabled =
+        (args.toolbar ? true : isEnabled()) &&
+        (settings?.composite.windowingMode === 'full' ?? false);
+      return enabled;
+    },
+    isVisible: args => {
+      const visible =
+        (args.toolbar ? true : isEnabled()) &&
+        (settings?.composite.windowingMode === 'full' ?? false);
+      return visible;
     }
   });
 

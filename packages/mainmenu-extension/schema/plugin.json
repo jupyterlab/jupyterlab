@@ -270,22 +270,22 @@
     {
       "command": "kernelmenu:interrupt",
       "keys": ["I", "I"],
-      "selector": "[data-jp-kernel-user]:focus"
+      "selector": "[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)"
     },
     {
       "command": "kernelmenu:restart",
       "keys": ["0", "0"],
-      "selector": "[data-jp-kernel-user]:focus"
+      "selector": "[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)"
     },
     {
       "command": "kernelmenu:restart-and-clear",
       "keys": [""],
-      "selector": "[data-jp-kernel-user]:focus"
+      "selector": "[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)"
     },
     {
       "command": "kernelmenu:shutdown",
       "keys": [""],
-      "selector": "[data-jp-kernel-user]:focus"
+      "selector": "[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)"
     },
     {
       "command": "runmenu:restart-and-run-all",
