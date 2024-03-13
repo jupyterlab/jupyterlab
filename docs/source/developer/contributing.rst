@@ -279,13 +279,17 @@ Contributing from within the browser
 Contributing to JupyterLab codebase is also possible without setting up
 a local environment, directly from the Web browser:
 
--  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
-   however it is not actively maintained,
+-  GitHub's 
+   `codespace <https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository>`__
+   is available (free account have 
+   `limited monthly resources <https://docs.github.com/en/billing/managing-billing-for-github-codespaces/about-billing-for-github-codespaces#monthly-included-storage-and-core-hours-for-personal-accounts>`__).
 -  GitHub's
    `built-in editor <https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files>`__
    is suitable for contributing very small fixes,
 -  more advanced `github.dev <https://docs.github.com/en/codespaces/the-githubdev-web-based-editor>`__
    editor can be accessed by pressing the dot (``.``) key while in the JupyterLab GitHub repository,
+-  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
+   however it is not actively maintained,
 -  `jupyterlab-playground <https://github.com/jupyterlab/jupyterlab-plugin-playground>`__,
    allows to prototype JupyterLab extensions from within JupyterLab and
    can be run without installation in the browser using Binder.
