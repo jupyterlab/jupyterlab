@@ -963,7 +963,7 @@ export namespace galata {
     ): Promise<void> {
       return page.route(Routes.workspaces, (route, request) => {
         switch (request.method()) {
-          case 'GET':
+          case 'GET': {
             const id = Routes.workspaces.exec(request.url())?.groups?.id;
             if (id) {
               return route.fulfill({
@@ -981,6 +981,7 @@ export namespace galata {
                 })
               });
             }
+          }
           case 'PUT': {
             const data = request.postDataJSON();
             workspace.data = { ...workspace.data, ...data.data };
