@@ -135,6 +135,9 @@ export function handleRequest(item: IService, status: number, body: any): void {
     if (typeof body !== 'string') {
       body = JSON.stringify(body);
     }
+    if (status === 204) {
+      body = null;
+    }
 
     // Create the response and return it as a promise.
     const response = new Response(body, { status });
