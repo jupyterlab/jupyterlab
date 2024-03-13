@@ -58,7 +58,7 @@
 
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
-  margin: min(1.2vh, 8px) min(1vw, 12px); /* Using min() and vw/vh allows the margins to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
+  margin: min(3vh, 8px) min(2vw, 12px); /* Using min() and vw/vh allows the margins to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
 }
 
 .jp-BreadCrumbs-item {
