@@ -23,19 +23,9 @@
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
-  /* flex-wrap: wrap; */
-
-  /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
-  /* stylelint-disable-next-line csstree/validator */
-
-  /* row-gap: min(
-    1.7vh,
-    12px
-  ); Using min() and vh allows the row-gap to shrink when the screen is small or when the user zooms in, which should allow at least 2 files or folders to be seen within the file browser at 400% zoom */
-
   border-bottom: none;
   height: auto;
-  /* stylelint-disable-next-line csstree/validator */
+
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
   margin: min(5vh, 8px) min(1.5vw, 12px) 0; /* Using min() and vw/vh allows the margins to shrink when the screen is small or when the user zooms in, which should allow at least 2 files or folders to be seen within the file browser at 400% zoom */
@@ -146,6 +136,7 @@
 
 .jp-DirListing-headerItem {
   /* stylelint-disable-next-line csstree/validator */
+
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
   padding: min(1vh, 4px) min(6vw, 12px) min(1vh, 2px); /* Using min() and vw/vh allows the padding to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
