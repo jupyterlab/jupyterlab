@@ -235,6 +235,12 @@ namespace Private {
       trans: IRenderMime.TranslationBundle;
     }
   }
+
+  type DocumentWidgetWithKernelItem = Omit<
+    IRunningSessions.IRunningItem,
+    'label'
+  > & { label(): string };
+
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
       this.className = KERNEL_ITEM_CLASS;
@@ -260,8 +266,8 @@ namespace Private {
 
     readonly trans: IRenderMime.TranslationBundle;
 
-    get children(): IRunningSessions.IRunningItem[] {
-      const children: IRunningSessions.IRunningItem[] = [];
+    get children(): DocumentWidgetWithKernelItem[] {
+      const children: DocumentWidgetWithKernelItem[] = [];
       const open = CommandIDs.kernelOpenSession;
       const { commands } = this;
       for (const session of this.sessions.running()) {
@@ -295,19 +301,11 @@ namespace Private {
 
     label(): ReactNode {
       const { kernel } = this;
-      const children = this.children;
-      const summary =
-        children.length == 1
-          ? children[0].label()
-          : this.trans.__(
-              '%1 and %2 more',
-              children[0].label(),
-              children.length - 1
-            );
       const kernelIdPrefix = kernel.id.split('-')[0];
       return (
         <>
-          {summary} <span className={KERNEL_LABEL_ID}>({kernelIdPrefix})</span>
+          {this._summary}{' '}
+          <span className={KERNEL_LABEL_ID}>({kernelIdPrefix})</span>
         </>
       );
     }
@@ -315,7 +313,7 @@ namespace Private {
     labelTitle(): string {
       const { trans } = this;
       const { id } = this.kernel;
-      const title = [`${this.label()}: ${id}`];
+      const title = [`${this._summary}: ${id}`];
       for (const session of this.sessions.running()) {
         if (this.kernel.id === session.kernel?.id) {
           const { path, type } = session;
@@ -323,6 +321,17 @@ namespace Private {
         }
       }
       return title.join('\n\n');
+    }
+
+    private get _summary(): string {
+      const children = this.children;
+      return children.length == 1
+        ? children[0].label()
+        : this.trans.__(
+            '%1 and %2 more',
+            children[0].label(),
+            children.length - 1
+          );
     }
   }
 
