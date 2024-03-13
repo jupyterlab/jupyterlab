@@ -74,9 +74,7 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           Widget.attach(item, document.body);
           await framePromise();
-          const node = item.node.querySelector(
-            '.jp-ToolbarButtonComponent-label'
-          )!;
+          const node = item.node.querySelector('.jp-Toolbar-kernelName')!;
           expect(node.textContent).toBe(sessionContext.kernelDisplayName);
         });
       });

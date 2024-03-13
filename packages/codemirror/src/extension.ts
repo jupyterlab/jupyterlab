@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
-import { defaultKeymap, indentLess } from '@codemirror/commands';
+import { defaultKeymap } from '@codemirror/commands';
 import {
   bracketMatching,
   foldGutter,
@@ -44,6 +44,14 @@ import {
   IEditorThemeRegistry,
   IExtensionsHandler
 } from './token';
+import {
+  closeSearchPanel,
+  findNext,
+  findPrevious,
+  openSearchPanel,
+  selectNextOccurrence,
+  selectSelectionMatches
+} from '@codemirror/search';
 
 /**
  * The class name added to read only editor widgets.
@@ -695,11 +703,19 @@ export namespace EditorExtensionRegistry {
       Object.freeze({
         name: 'keymap',
         default: [
+          {
+            key: 'Mod-Enter',
+            run: StateCommands.preventNewLineOnRun
+          },
+          {
+            key: 'Enter',
+            run: StateCommands.completerOrInsertNewLine
+          },
           ...defaultKeymap,
           {
             key: 'Tab',
             run: StateCommands.indentMoreOrInsertTab,
-            shift: indentLess
+            shift: StateCommands.dedentIfNotLaunchingTooltip
           }
         ],
         factory: () =>
@@ -781,6 +797,55 @@ export namespace EditorExtensionRegistry {
         }
       }),
       Object.freeze({
+        name: 'extendSelection',
+        default: true,
+        factory: () =>
+          createConditionalExtension(
+            keymap.of([
+              {
+                key: 'Mod-Shift-l',
+                run: selectSelectionMatches,
+                preventDefault: true
+              },
+              { key: 'Mod-d', run: selectNextOccurrence, preventDefault: true }
+            ])
+          )
+      }),
+      Object.freeze({
+        // Whether to activate the native CodeMirror search panel or not.
+        name: 'searchWithCM',
+        default: false,
+        factory: () =>
+          createConditionalExtension(
+            keymap.of([
+              {
+                key: 'Mod-f',
+                run: openSearchPanel,
+                scope: 'editor search-panel'
+              },
+              {
+                key: 'F3',
+                run: findNext,
+                shift: findPrevious,
+                scope: 'editor search-panel',
+                preventDefault: true
+              },
+              {
+                key: 'Mod-g',
+                run: findNext,
+                shift: findPrevious,
+                scope: 'editor search-panel',
+                preventDefault: true
+              },
+              {
+                key: 'Escape',
+                run: closeSearchPanel,
+                scope: 'editor search-panel'
+              }
+            ])
+          )
+      }),
+      Object.freeze({
         name: 'scrollPastEnd',
         default: false,
         factory: (options: IEditorExtensionFactory.IOptions) =>
@@ -794,6 +859,42 @@ export namespace EditorExtensionRegistry {
           type: 'boolean',
           title: trans.__('Smart Indentation')
         }
+      }),
+      /**
+       * tabFocusable
+       *
+       * Can the user use the tab key to focus on / enter the CodeMirror editor?
+       * If this is false, the CodeMirror editor can still be focused (via
+       * mouse-click, for example), just not via tab key navigation.
+       *
+       * It can be useful to set tabFocusable to false when the editor is
+       * embedded in a context that provides an alternative to the tab key for
+       * navigation. For example, the Notebook widget allows the user to move
+       * from one cell to another using the up and down arrow keys and to enter
+       * and exit the CodeMirror editor associated with that cell by pressing
+       * the enter and escape keys, respectively.
+       */
+      Object.freeze({
+        name: 'tabFocusable',
+        // The default for this needs to be true because the CodeMirror editor
+        // is used in lots of different places. By default, a user should be
+        // able to tab into a CodeMirror editor on the page, and by default, the
+        // user should be able to get out of the editor by pressing the escape
+        // key then immediately pressing the tab key (or shift+tab to go
+        // backwards on the page). If there are places in the app where this
+        // model of user interaction doesn't make sense or is broken, those
+        // places should be remedied on a case-by-case basis, **not** by making
+        // `tabFocusable` false by default.
+        default: true,
+        factory: () =>
+          createConditionalExtension(
+            EditorView.contentAttributes.of({
+              tabIndex: '0'
+            }),
+            EditorView.contentAttributes.of({
+              tabIndex: '-1'
+            })
+          )
       }),
       Object.freeze({
         name: 'tabSize',

@@ -423,7 +423,6 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
         if (!currentWidget) {
           return;
         }
-
         searchViews.get(currentWidget.id)?.close();
       }
     });

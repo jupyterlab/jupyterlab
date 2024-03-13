@@ -17,6 +17,7 @@ import {
   isRawCellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
+import { Notification } from '@jupyterlab/apputils';
 import { signalToPromise } from '@jupyterlab/coreutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { KernelMessage } from '@jupyterlab/services';
@@ -199,8 +200,9 @@ export namespace NotebookActions {
 
     offsets.push(orig.length);
 
+    const cellCountAfterSplit = offsets.length - 1;
     const clones = offsets.slice(0, -1).map((offset, offsetIdx) => {
-      const { cell_type, metadata } = child.model.sharedModel.toJSON();
+      const { cell_type, metadata, outputs } = child.model.sharedModel.toJSON();
 
       return {
         cell_type,
@@ -208,7 +210,11 @@ export namespace NotebookActions {
         source: orig
           .slice(offset, offsets[offsetIdx + 1])
           .replace(/^\n+/, '')
-          .replace(/\n+$/, '')
+          .replace(/\n+$/, ''),
+        outputs:
+          offsetIdx === cellCountAfterSplit - 1 && cell_type === 'code'
+            ? outputs
+            : undefined
       };
     });
 
@@ -229,7 +235,7 @@ export namespace NotebookActions {
         // no-op
       });
 
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -344,7 +350,7 @@ export namespace NotebookActions {
       (notebook.activeCell as MarkdownCell).rendered = false;
     }
 
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -365,7 +371,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     Private.deleteCells(notebook);
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -402,7 +408,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = newIndex;
 
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -439,7 +445,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = newIndex;
 
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   function move(notebook: Notebook, shift: number): void {
@@ -468,7 +474,7 @@ export namespace NotebookActions {
       notebook.moveCell(firstIndex, firstIndex + shift, lastIndex - firstIndex);
     }
 
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -513,7 +519,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     Private.changeCellType(notebook, value);
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -548,7 +554,7 @@ export namespace NotebookActions {
       translator
     );
 
-    Private.handleRunState(notebook, state, false);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -586,7 +592,8 @@ export namespace NotebookActions {
       sessionDialogs,
       translator
     );
-    Private.handleRunState(notebook, state, false);
+
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -651,7 +658,13 @@ export namespace NotebookActions {
       notebook.activeCellIndex++;
     }
 
-    Private.handleRunState(notebook, state, true);
+    // If a cell is outside of viewport and scrolling is needed, the `smart`
+    // logic in `handleRunState` will choose appropriate alignment, except
+    // for the case of a small cell less than one viewport away for which it
+    // would use the `auto` heuristic, for which we set the preferred alignment
+    // to `center` as in most cases there will be space below and above a cell
+    // that is smaller than (or approximately equal to) the viewport size.
+    void Private.handleRunState(notebook, state, 'center');
     return promise;
   }
 
@@ -708,7 +721,7 @@ export namespace NotebookActions {
       );
     }
     notebook.mode = 'edit';
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state, 'center');
     return promise;
   }
 
@@ -750,7 +763,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = lastIndex;
     notebook.deselectAll();
 
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -773,7 +786,7 @@ export namespace NotebookActions {
     }
     const promise = Private.runSelected(notebook);
     notebook.activeCellIndex = previousIndex;
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -815,7 +828,7 @@ export namespace NotebookActions {
 
     notebook.deselectAll();
 
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -857,7 +870,7 @@ export namespace NotebookActions {
     notebook.activeCellIndex = lastIndex;
     notebook.deselectAll();
 
-    Private.handleRunState(notebook, state, true);
+    void Private.handleRunState(notebook, state);
     return promise;
   }
 
@@ -912,10 +925,9 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-
     notebook.activeCellIndex = possibleNextCellIndex;
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -942,6 +954,7 @@ export namespace NotebookActions {
     ) {
       maxCellIndex -= 1;
     }
+
     if (notebook.activeCellIndex === maxCellIndex) {
       const footer = (notebook.layout as NotebookWindowedLayout).footer;
       footer?.node.focus();
@@ -960,10 +973,9 @@ export namespace NotebookActions {
     }
 
     const state = Private.getState(notebook);
-
     notebook.activeCellIndex = possibleNextCellIndex;
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /** Insert new heading of same level above active cell.
@@ -1055,7 +1067,7 @@ export namespace NotebookActions {
     }
     // clear selection and handle state
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1087,7 +1099,7 @@ export namespace NotebookActions {
       }
     }
     notebook.deselectAll();
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1121,7 +1133,7 @@ export namespace NotebookActions {
     } else {
       notebook.extendContiguousSelectionTo(notebook.activeCellIndex - 1);
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1155,7 +1167,7 @@ export namespace NotebookActions {
     } else {
       notebook.extendContiguousSelectionTo(notebook.activeCellIndex + 1);
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1235,6 +1247,7 @@ export namespace NotebookActions {
     const values = clipboard.getData(JUPYTER_CELL_MIME) as nbformat.IBaseCell[];
 
     addCells(notebook, mode, values, true);
+    void focusActiveCell(notebook);
   }
 
   /**
@@ -1370,7 +1383,7 @@ export namespace NotebookActions {
     if (cellsFromClipboard) {
       notebook.lastClipboardInteraction = 'paste';
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1391,7 +1404,7 @@ export namespace NotebookActions {
     notebook.mode = 'command';
     notebook.model.sharedModel.undo();
     notebook.deselectAll();
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1412,7 +1425,7 @@ export namespace NotebookActions {
     notebook.mode = 'command';
     notebook.model.sharedModel.redo();
     notebook.deselectAll();
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1443,7 +1456,7 @@ export namespace NotebookActions {
     };
 
     notebook.editorConfig = newConfig;
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1472,7 +1485,7 @@ export namespace NotebookActions {
         Private.outputCleared.emit({ notebook, cell: child });
       }
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1501,7 +1514,7 @@ export namespace NotebookActions {
         Private.outputCleared.emit({ notebook, cell: child });
       }
     }
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1521,7 +1534,7 @@ export namespace NotebookActions {
         cell.inputHidden = true;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1541,7 +1554,7 @@ export namespace NotebookActions {
         cell.inputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1561,7 +1574,7 @@ export namespace NotebookActions {
         cell.inputHidden = true;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1581,7 +1594,7 @@ export namespace NotebookActions {
         cell.inputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1601,7 +1614,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = true;
       }
     });
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1621,7 +1634,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1641,7 +1654,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = true;
       }
     });
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1679,7 +1692,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputHidden = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1699,7 +1712,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputsScrolled = true;
       }
     });
-    Private.handleState(notebook, state, true);
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -1719,7 +1732,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputsScrolled = false;
       }
     });
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1788,7 +1801,7 @@ export namespace NotebookActions {
       }
     });
     Private.changeCellType(notebook, 'markdown');
-    Private.handleState(notebook, state);
+    void Private.handleState(notebook, state);
   }
 
   /**
@@ -1797,12 +1810,15 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    */
   export function collapseAllHeadings(notebook: Notebook): any {
+    const state = Private.getState(notebook);
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
         NotebookActions.setHeadingCollapse(cell, true, notebook);
         NotebookActions.setCellCollapse(cell, true);
       }
     }
+    notebook.activeCellIndex = 0;
+    void Private.handleState(notebook, state, true);
   }
 
   /**
@@ -2129,6 +2145,44 @@ export namespace NotebookActions {
   }
 
   /**
+   * If the notebook has an active cell, focus it.
+   *
+   * @param notebook The target notebook widget
+   * @param options Optional options to change the behavior of this function
+   * @param options.waitUntilReady If true, do not call focus until activeCell.ready is resolved
+   * @param options.preventScroll If true, do not scroll the active cell into view
+   *
+   * @returns a promise that resolves when focus has been called on the active
+   * cell's node.
+   *
+   * #### Notes
+   * By default, waits until after the active cell has been attached unless
+   * called with { waitUntilReady: false }
+   */
+  export async function focusActiveCell(
+    notebook: Notebook,
+    options: {
+      waitUntilReady?: boolean;
+      preventScroll?: boolean;
+    } = { waitUntilReady: true, preventScroll: false }
+  ): Promise<void> {
+    const { activeCell } = notebook;
+    const { waitUntilReady, preventScroll } = options;
+    if (!activeCell) {
+      return;
+    }
+    if (waitUntilReady) {
+      await activeCell.ready;
+    }
+    if (notebook.isDisposed || activeCell.isDisposed) {
+      return;
+    }
+    activeCell.node.focus({
+      preventScroll
+    });
+  }
+
+  /*
    * Access last notebook history.
    *
    * @param notebook - The target notebook widget.
@@ -2239,40 +2293,41 @@ namespace Private {
   /**
    * Handle the state of a widget after running an action.
    */
-  export function handleState(
+  export async function handleState(
     notebook: Notebook,
     state: IState,
     scrollIfNeeded = false
-  ): void {
+  ): Promise<void> {
     const { activeCell, activeCellIndex } = notebook;
-
-    if (state.wasFocused || notebook.mode === 'edit') {
-      notebook.activate();
-    }
-
     if (scrollIfNeeded && activeCell) {
-      notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
+      await notebook.scrollToItem(activeCellIndex, 'auto', 0).catch(reason => {
         // no-op
       });
+    }
+    if (state.wasFocused || notebook.mode === 'edit') {
+      notebook.activate();
     }
   }
 
   /**
    * Handle the state of a widget after running a run action.
    */
-  export function handleRunState(
+  export async function handleRunState(
     notebook: Notebook,
     state: IState,
-    scroll = false
-  ): void {
+    alignPreference?: 'start' | 'end' | 'center' | 'top-center'
+  ): Promise<void> {
+    const { activeCell, activeCellIndex } = notebook;
+
+    if (activeCell) {
+      await notebook
+        .scrollToItem(activeCellIndex, 'smart', 0, alignPreference)
+        .catch(reason => {
+          // no-op
+        });
+    }
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
-    }
-    const { activeCell, activeCellIndex } = notebook;
-    if (scroll && activeCell) {
-      notebook.scrollToItem(activeCellIndex, 'smart', 0).catch(reason => {
-        // no-op
-      });
     }
   }
 
@@ -2295,10 +2350,45 @@ namespace Private {
     const lastCell = cells[-1];
     notebook.mode = 'command';
 
+    let initializingDialogShown = false;
     return Promise.all(
-      cells.map(cell =>
-        runCell(notebook, cell, sessionContext, sessionDialogs, translator)
-      )
+      cells.map(cell => {
+        if (
+          cell.model.type === 'code' &&
+          notebook.notebookConfig.enableKernelInitNotification &&
+          sessionContext &&
+          sessionContext.kernelDisplayStatus === 'initializing' &&
+          !initializingDialogShown
+        ) {
+          initializingDialogShown = true;
+          translator = translator || nullTranslator;
+          const trans = translator.load('jupyterlab');
+          Notification.emit(
+            trans.__(
+              `Kernel '${sessionContext.kernelDisplayName}' for '${sessionContext.path}' is still initializing. You can run code cells when the kernel has initialized.`
+            ),
+            'warning',
+            {
+              autoClose: false
+            }
+          );
+          return Promise.resolve(false);
+        }
+        if (
+          cell.model.type === 'code' &&
+          notebook.notebookConfig.enableKernelInitNotification &&
+          initializingDialogShown
+        ) {
+          return Promise.resolve(false);
+        }
+        return runCell(
+          notebook,
+          cell,
+          sessionContext,
+          sessionDialogs,
+          translator
+        );
+      })
     )
       .then(results => {
         if (notebook.isDisposed) {
@@ -2606,7 +2696,7 @@ namespace Private {
     } else {
       notebook.lastClipboardInteraction = 'copy';
     }
-    handleState(notebook, state);
+    void handleState(notebook, state);
   }
 
   /**
@@ -2938,7 +3028,8 @@ namespace Private {
         );
       }
       notebook.deselectAll();
-      Private.handleState(notebook, state, true);
+
+      void Private.handleState(notebook, state, true);
       notebook.mode = 'edit';
       notebook.widgets[cellIndex].setHidden(false);
     }

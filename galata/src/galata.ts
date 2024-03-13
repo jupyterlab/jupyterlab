@@ -41,6 +41,9 @@ export namespace galata {
       defaultConfig: {
         cursorBlinkRate: 0
       }
+    },
+    '@jupyterlab/terminal-extension:plugin': {
+      cursorBlink: false
     }
   };
 
@@ -395,6 +398,11 @@ export namespace galata {
     export const contents = /.*\/api\/contents(?<path>\/.+)?\?/;
 
     /**
+     * Custom CSS
+     */
+    export const customCSS = /.*\/custom\/custom.css/;
+
+    /**
      * Extensions API
      */
     export const extensions = /.*\/lab\/api\/extensions.*/;
@@ -570,7 +578,10 @@ export namespace galata {
      * #### Notes
      * The goal is to freeze the file browser display
      */
-    export async function freezeContentLastModified(page: Page): Promise<void> {
+    export async function freezeContentLastModified(
+      page: Page,
+      filter?: <T = any>(directoryList: T[]) => T[]
+    ): Promise<void> {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
@@ -601,6 +612,9 @@ export namespace galata {
               data['type'] === 'directory' &&
               Array.isArray(data['content'])
             ) {
+              if (filter) {
+                data['content'] = filter(data['content']);
+              }
               const now = Date.now();
               const aDayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
               for (const entry of data['content'] as any[]) {
@@ -609,6 +623,58 @@ export namespace galata {
               }
             }
 
+            if (!page.isClosed() && !isClosed) {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify(data),
+                contentType: 'application/json'
+              });
+            }
+            break;
+          }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Set a notebook's writable attribute to false
+     *
+     * @param page Page model object
+     *
+     * #### Notes
+     * The goal is to have the notebook to appear as read-only
+     */
+    export async function makeNotebookReadonly(page: Page): Promise<void> {
+      // Listen for closing connection (may happen when request are still being processed)
+      let isClosed = false;
+      const ctxt = page.context();
+      ctxt.once('close', () => {
+        isClosed = true;
+      });
+      ctxt.browser()?.once('disconnected', () => {
+        isClosed = true;
+      });
+
+      return page.route(Routes.contents, async (route, request) => {
+        switch (request.method()) {
+          case 'GET': {
+            // Proxy the GET request
+            const response = await ctxt.request.fetch(request);
+            if (!response.ok()) {
+              if (!page.isClosed() && !isClosed) {
+                return route.fulfill({
+                  status: response.status(),
+                  body: await response.text()
+                });
+              }
+              break;
+            }
+            const data = await response.json();
+            if (data['type'] === 'notebook') {
+              data['writable'] = false;
+            }
             if (!page.isClosed() && !isClosed) {
               return route.fulfill({
                 status: 200,
@@ -683,6 +749,30 @@ export namespace galata {
             config[section] = data;
             return route.fulfill({ status: 204 });
           }
+          default:
+            return route.continue();
+        }
+      });
+    }
+
+    /**
+     * Mock custom CSS.
+     *
+     * @param page Page model object
+     * @param customCSS Custom CSS content
+     */
+    export function mockCustomCSS(
+      page: Page,
+      customCSS: string
+    ): Promise<void> {
+      return page.route(Routes.customCSS, async (route, request) => {
+        switch (request.method()) {
+          case 'GET':
+            return route.fulfill({
+              status: 200,
+              body: customCSS,
+              contentType: 'text/css'
+            });
           default:
             return route.continue();
         }

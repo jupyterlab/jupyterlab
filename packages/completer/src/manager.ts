@@ -189,9 +189,8 @@ export class CompletionProviderManager implements ICompletionProviderManager {
 
       if (editor) {
         handler.editor = editor;
-        handler.reconciliator = await this.generateReconciliator(
-          newCompleterContext
-        );
+        handler.reconciliator =
+          await this.generateReconciliator(newCompleterContext);
       }
     }
   }

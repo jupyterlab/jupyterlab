@@ -21,8 +21,6 @@ import {
   KernelShellFutureHandler
 } from './future';
 
-import { deserialize, serialize } from './serialize';
-
 import * as validate from './validate';
 import { KernelSpec, KernelSpecAPI } from '../kernelspec';
 
@@ -407,7 +405,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       KernelMessage.isInfoRequestMsg(msg)
     ) {
       if (this.connectionStatus === 'connected') {
-        this._ws!.send(serialize(msg, this._ws!.protocol));
+        this._ws!.send(
+          this.serverSettings.serializer.serialize(msg, this._ws!.protocol)
+        );
         return;
       } else {
         throw new Error('Could not send message: status is not connected');
@@ -425,7 +425,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
       this.connectionStatus === 'connected' &&
       this._kernelSession !== RESTARTING_KERNEL_SESSION
     ) {
-      this._ws!.send(serialize(msg, this._ws!.protocol));
+      this._ws!.send(
+        this.serverSettings.serializer.serialize(msg, this._ws!.protocol)
+      );
     } else if (queue) {
       this._pendingMessages.push(msg);
     } else {
@@ -437,7 +439,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Interrupt a kernel.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    *
@@ -458,7 +460,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Request a kernel restart.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels)
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels)
    * and validates the response model.
    *
    * Any existing Future or Comm objects are cleared once the kernel has
@@ -526,7 +528,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Shutdown a kernel.
    *
    * #### Notes
-   * Uses the [Jupyter Notebook API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
+   * Uses the [Jupyter Server API](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter-server/jupyter_server/main/jupyter_server/services/api/api.yaml#!/kernels).
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    *
@@ -1571,7 +1573,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // Notify immediately if there is an error with the message.
     let msg: KernelMessage.IMessage;
     try {
-      msg = deserialize(evt.data, this._ws!.protocol);
+      msg = this.serverSettings.serializer.deserialize(
+        evt.data,
+        this._ws!.protocol
+      );
       validate.validateMessage(msg);
     } catch (error) {
       error.message = `Kernel message validation error: ${error.message}`;

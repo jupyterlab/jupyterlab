@@ -60,6 +60,16 @@
     ],
     "context": [
       {
+        "command": "console:undo",
+        "selector": ".jp-CodeConsole-promptCell",
+        "rank": 1
+      },
+      {
+        "command": "console:redo",
+        "selector": ".jp-CodeConsole-promptCell",
+        "rank": 2
+      },
+      {
         "command": "console:clear",
         "selector": ".jp-CodeConsole-content",
         "rank": 10
@@ -72,11 +82,6 @@
     ]
   },
   "jupyter.lab.shortcuts": [
-    {
-      "command": "console:linebreak",
-      "keys": ["Enter"],
-      "selector": ".jp-CodeConsole[data-jp-interaction-mode='notebook'] .jp-CodeConsole-promptCell"
-    },
     {
       "command": "console:run-forced",
       "keys": ["Shift Enter"],

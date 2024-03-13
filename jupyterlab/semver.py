@@ -410,7 +410,7 @@ class SemVer:
 
         self.format()  # xxx:
 
-    def format(self):  # noqa
+    def format(self):
         self.version = f"{self.major}.{self.minor}.{self.patch}"
         if len(self.prerelease) > 0:
             self.version += "-{}".format(".".join(str(v) for v in self.prerelease))
@@ -761,7 +761,7 @@ class Range:
     def __repr__(self):
         return f'<SemVer Range "{self.range}">'
 
-    def format(self):  # noqa
+    def format(self):
         self.range = "||".join(
             [" ".join(c.value for c in comps).strip() for comps in self.set]
         ).strip()

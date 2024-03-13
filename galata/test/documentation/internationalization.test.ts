@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { setSidebarWidth } from './utils';
+import { filterContent } from './utils';
 
 test.use({
   autoGoto: false,
@@ -12,9 +12,10 @@ test.use({
 
 test.describe('Internationalization', () => {
   test('Menu', async ({ page }) => {
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.click('text=Settings');
     await page.click('.lm-Menu ul[role="menu"] >> text=Language');
@@ -27,7 +28,7 @@ test.describe('Internationalization', () => {
   test('Confirm language', async ({ page }) => {
     await page.goto();
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     await page.click('text=Settings');
     await page.click('.lm-Menu ul[role="menu"] >> text=Language');
@@ -41,8 +42,10 @@ test.describe('Internationalization', () => {
   });
 
   test('UI in Chinese', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
+
+    await page.dblclick('[aria-label="File Browser Section"] >> text=data');
 
     await page.click('text=Settings');
     await page.click('.lm-Menu ul[role="menu"] >> text=Language');
@@ -50,13 +53,11 @@ test.describe('Internationalization', () => {
 
     await Promise.all([
       page.waitForNavigation(),
-      page.waitForSelector('#jupyterlab-splash'),
+      page.locator('#jupyterlab-splash').waitFor(),
       page.click('button:has-text("Change and reload")')
     ]);
 
-    await page.waitForSelector('#jupyterlab-splash', {
-      state: 'detached'
-    });
+    await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
 
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -65,9 +66,9 @@ test.describe('Internationalization', () => {
     });
 
     // Wait for the launcher to be loaded
-    await page.waitForSelector('text=README.md');
+    await page.locator('text=README.md').waitFor();
 
-    await setSidebarWidth(page);
+    await page.sidebar.setWidth();
 
     expect(await page.screenshot()).toMatchSnapshot('language_chinese.png');
   });

@@ -144,5 +144,9 @@ describe('session', () => {
         SessionAPI.shutdownSession(UUID.uuid4())
       ).resolves.not.toThrow();
     });
+
+    it('should reject invalid on invalid id', async () => {
+      await expect(SessionAPI.shutdownSession('../')).rejects.toThrow();
+    });
   });
 });

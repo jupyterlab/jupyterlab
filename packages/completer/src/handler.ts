@@ -1,9 +1,20 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import {
+  CodeEditor,
+  COMPLETER_ACTIVE_CLASS,
+  COMPLETER_ENABLED_CLASS
+} from '@jupyterlab/codeeditor';
 import { Text } from '@jupyterlab/coreutils';
-import { ISharedText, SourceChange } from '@jupyter/ydoc';
+import {
+  CellChange,
+  FileChange,
+  ISharedBaseCell,
+  ISharedFile,
+  ISharedText,
+  SourceChange
+} from '@jupyter/ydoc';
 import { IDataConnector } from '@jupyterlab/statedb';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
@@ -20,16 +31,6 @@ import {
 } from './tokens';
 import { Completer } from './widget';
 import { InlineCompleter } from './inline';
-
-/**
- * A class added to editors that can host a completer.
- */
-const COMPLETER_ENABLED_CLASS: string = 'jp-mod-completer-enabled';
-
-/**
- * A class added to editors that have an active completer.
- */
-const COMPLETER_ACTIVE_CLASS: string = 'jp-mod-completer-active';
 
 /**
  * A completion handler for editors.
@@ -76,7 +77,7 @@ export class CompletionHandler implements IDisposable {
       editor.host.classList.remove(COMPLETER_ENABLED_CLASS);
       editor.host.classList.remove(COMPLETER_ACTIVE_CLASS);
       model.selections.changed.disconnect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.disconnect(this.onTextChanged, this);
+      model.sharedModel.changed.disconnect(this._onSharedModelChanged, this);
     }
 
     // Reset completer state.
@@ -90,7 +91,15 @@ export class CompletionHandler implements IDisposable {
       const model = editor.model;
       this._enabled = false;
       model.selections.changed.connect(this.onSelectionsChanged, this);
-      model.sharedModel.changed.connect(this.onTextChanged, this);
+      // We expect the model to be an editor, a file editor, or a cell.
+      const sharedModel = model.sharedModel as
+        | ISharedText
+        | ISharedFile
+        | ISharedBaseCell;
+      // For cells and files the `changed` signal is not limited to text,
+      // but also fires on changes to metadata, outputs, execution count,
+      // and state changes, hence we need to filter the change type.
+      sharedModel.changed.connect(this._onSharedModelChanged, this);
       // On initial load, manually check the cursor position.
       this.onSelectionsChanged();
       if (this.inlineCompleter) {
@@ -385,6 +394,18 @@ export class CompletionHandler implements IDisposable {
     // Completer is active.
     if (this._editor) {
       this._editor.host.classList.add(COMPLETER_ACTIVE_CLASS);
+    }
+  }
+
+  /**
+   * Handle a text shared model change signal from an editor.
+   */
+  private async _onSharedModelChanged(
+    str: ISharedText,
+    changed: SourceChange | CellChange | FileChange
+  ): Promise<void> {
+    if (changed.sourceChange) {
+      await this.onTextChanged(str, changed);
     }
   }
 
