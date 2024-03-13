@@ -26,7 +26,7 @@ describe('ServerConnection', () => {
         {},
         settings
       );
-      expect(response.statusText).toBe('OK');
+      expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toBe('hello');
     });
