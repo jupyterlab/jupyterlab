@@ -898,12 +898,12 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         if (['defer', 'full'].includes(this.notebookConfig.windowingMode)) {
           await this._updateForDeferMode(cell, cellIdx);
           if (this.notebookConfig.windowingMode === 'full') {
-            this.viewModel.setEstimatedWidgetSize(
-              cell.model.id,
-              cell.node.getBoundingClientRect().height
-            );
             // We need to delay slightly the removal to let codemirror properly initialize
             requestAnimationFrame(() => {
+              this.viewModel.setEstimatedWidgetSize(
+                cell.model.id,
+                cell.node.getBoundingClientRect().height
+              );
               this.layout.removeWidget(cell);
             });
           }
