@@ -48,7 +48,7 @@
   "dependencies": {
     "@codemirror/state": "^6.2.0",
     "@codemirror/view": "^6.9.6",
-    "@jupyter/ydoc": "^1.1.1",
+    "@jupyter/ydoc": "^2.0.1",
     "@jupyterlab/apputils": "^4.3.0-alpha.0",
     "@jupyterlab/codeeditor": "^4.2.0-alpha.0",
     "@jupyterlab/codemirror": "^4.2.0-alpha.0",
