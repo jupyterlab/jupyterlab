@@ -83,7 +83,10 @@ async def run_test_async(app, func):
     env_patch = TestEnv()
     env_patch.start()
 
-    app.log.info("Running async test")
+    browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
+    if browser not in {"chromium", "firefox", "webkit"}:
+        browser = "chromium"
+    app.log.info(f"Running async test in browser {browser}")
 
     # The entry URL for browser tests is different in notebook >= 6.0,
     # since that uses a local HTML file to point the user at the app.
@@ -94,12 +97,12 @@ async def run_test_async(app, func):
 
     # Allow a synchronous function to be passed in.
     if inspect.iscoroutinefunction(func):
-        test = func(url)
+        test = func(url, browser)
     else:
         app.log.info("Using thread pool executor to run test")
         loop = asyncio.get_event_loop()
         executor = ThreadPoolExecutor()
-        task = loop.run_in_executor(executor, func, url)
+        task = loop.run_in_executor(executor, func, url, browser)
         test = asyncio.wait([task])
 
     try:
@@ -139,7 +142,7 @@ async def run_async_process(cmd, **kwargs):
     return stdout, stderr
 
 
-async def run_browser(url):
+async def run_browser(url, browser="chromium"):
     """Run the browser test and return an exit code."""
     target = osp.join(get_app_dir(), "browser_test")
     if not osp.exists(osp.join(target, "node_modules")):
@@ -147,20 +150,22 @@ async def run_browser(url):
             os.makedirs(osp.join(target))
         await run_async_process(["npm", "init", "-y"], cwd=target)
         await run_async_process(["npm", "install", "playwright@^1.9.2"], cwd=target)
-    await run_async_process(["npx", "playwright", "install"], cwd=target)
-    shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
+    await run_async_process(["npx", "playwright", "install", browser], cwd=target)
+    shutil.copy(osp.join(here, "browser-test.js"),
+                osp.join(target, "browser-test.js"))
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
 
-def run_browser_sync(url):
+def run_browser_sync(url, browser="chromium"):
     """Run the browser test and return an exit code."""
     target = osp.join(get_app_dir(), "browser_test")
     if not osp.exists(osp.join(target, "node_modules")):
         os.makedirs(target)
         subprocess.call(["npm", "init", "-y"], cwd=target)  # noqa S603 S607
         subprocess.call(["npm", "install", "playwright@^1.9.2"], cwd=target)  # noqa S603 S607
-    subprocess.call(["npx", "playwright", "install"], cwd=target)  # noqa S603 S607
-    shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
+    subprocess.call(["npx", "playwright", "install", browser], cwd=target)  # noqa S603 S607
+    shutil.copy(osp.join(here, "browser-test.js"),
+                osp.join(target, "browser-test.js"))
     return subprocess.check_call(["node", "browser-test.js", url], cwd=target)  # noqa S603 S607
 
 
@@ -173,7 +178,8 @@ class BrowserApp(LabApp):
     open_browser = False
 
     serverapp_config = {"base_url": "/foo/"}
-    default_url = Unicode("/lab?reset", config=True, help="The default URL to redirect to from `/`")
+    default_url = Unicode("/lab?reset", config=True,
+                          help="The default URL to redirect to from `/`")
     ip = "127.0.0.1"
     flags = test_flags
     aliases = test_aliases
@@ -187,9 +193,11 @@ class BrowserApp(LabApp):
         super().initialize_settings()
 
     def initialize_handlers(self):
-        func = run_browser if self.test_browser else lambda url: 0
-        if os.name == "nt" and func == run_browser:
-            func = run_browser_sync
+        def func(*args, **kwargs):
+            return 0
+
+        if self.test_browser:
+            func = run_browser_sync if os.name == "nt" else run_browser
         run_test(self.serverapp, func)
         super().initialize_handlers()
 
