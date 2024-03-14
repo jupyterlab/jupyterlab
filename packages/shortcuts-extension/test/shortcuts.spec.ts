@@ -404,7 +404,7 @@ describe('shortcuts list @A11y', () => {
       const innerHTML = keyboardShortcuts[i].innerHTML;
       // Create an object with the data and add it to the array
       if (ariaLabel !== null) {
-        keyboardShortcutsData.push({ ariaLabel, innerHTML });
+        keyboardShortcutsData.push({ ariaLabel, innerHTML }); // [ { [ ],[ ] }, { } , { } ]
       }
     }
 
@@ -415,7 +415,7 @@ describe('shortcuts list @A11y', () => {
       const shortcutKeysAria = keyboardShortcuts[i][0].split(' '); // ['ctrl', 'Opening bracket' , 'full stop']
       for (const shortcutKey of shortcutKeysHTML) {
         if (keyToText.hasOwnProperty(shortcutKey)) {
-          foundPunctuation.push(shortcutKey[keyToText]);
+          foundPunctuation.push(keyToText[shortcutKey]);
         }
       }
       for (const shortcutText of Object.values(keyToText)) {
