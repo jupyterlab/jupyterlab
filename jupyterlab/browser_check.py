@@ -151,8 +151,7 @@ async def run_browser(url, browser="chromium"):
         await run_async_process(["npm", "init", "-y"], cwd=target)
         await run_async_process(["npm", "install", "playwright@^1.9.2"], cwd=target)
     await run_async_process(["npx", "playwright", "install", browser], cwd=target)
-    shutil.copy(osp.join(here, "browser-test.js"),
-                osp.join(target, "browser-test.js"))
+    shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
 
@@ -164,8 +163,7 @@ def run_browser_sync(url, browser="chromium"):
         subprocess.call(["npm", "init", "-y"], cwd=target)  # noqa S603 S607
         subprocess.call(["npm", "install", "playwright@^1.9.2"], cwd=target)  # noqa S603 S607
     subprocess.call(["npx", "playwright", "install", browser], cwd=target)  # noqa S603 S607
-    shutil.copy(osp.join(here, "browser-test.js"),
-                osp.join(target, "browser-test.js"))
+    shutil.copy(osp.join(here, "browser-test.js"), osp.join(target, "browser-test.js"))
     return subprocess.check_call(["node", "browser-test.js", url], cwd=target)  # noqa S603 S607
 
 
@@ -178,8 +176,7 @@ class BrowserApp(LabApp):
     open_browser = False
 
     serverapp_config = {"base_url": "/foo/"}
-    default_url = Unicode("/lab?reset", config=True,
-                          help="The default URL to redirect to from `/`")
+    default_url = Unicode("/lab?reset", config=True, help="The default URL to redirect to from `/`")
     ip = "127.0.0.1"
     flags = test_flags
     aliases = test_aliases
