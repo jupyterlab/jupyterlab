@@ -386,23 +386,44 @@ describe('shortcuts list @A11y', () => {
     const keyboardShortcuts = document.getElementsByClassName(
       'jp-contextualShortcut-key'
     );
+
+    const keyboardShortcutsData: object[] = [];
+
+    const keyToText: { [key: string]: string } = {
+      ']': 'Closing bracket',
+      '[': 'Opening bracket',
+      ',': 'Comma',
+      '.': 'Full stop',
+      "'": 'Single quote',
+      '-': 'Hyphen-minus'
+    };
+
     for (let i = 0; i < keyboardShortcuts.length; i++) {
-      const keyboardLabelAria = keyboardShortcuts[i].getAttribute('aria-label');
-      const keyboardLabelText = keyboardShortcuts[i].innerHTML;
-
-      const keyToText: { [key: string]: string } = {
-        ']': 'Closing bracket',
-        '[': 'Opening bracket',
-        ',': 'Comma',
-        '.': 'Full stop',
-        "'": 'Single quote',
-        '-': 'Hyphen-minus'
-      };
-
-      for (let key in keyToText) {
-        const ariaLabel = keyboardLabelText.replace(key, keyToText[key] || key);
-        expect(keyboardLabelAria).toEqual(ariaLabel);
+      //Get the current element's aria-label and innerHTML
+      const ariaLabel = keyboardShortcuts[i].getAttribute('aria-label');
+      const innerHTML = keyboardShortcuts[i].innerHTML;
+      // Create an object with the data and add it to the array
+      if (ariaLabel !== null) {
+        keyboardShortcutsData.push({ ariaLabel, innerHTML });
       }
+    }
+
+    for (let i = 0; i < keyboardShortcutsData.length; i++) {
+      const foundPunctuation: string[] = []; //['Opening bracket' , 'full stop']
+      const shortcutKeysHTML = keyboardShortcuts[i][1].split(' '); // ['⌃', '[' , '.']
+      const foundText: string[] = []; //['Opening bracket' , 'full stop']
+      const shortcutKeysAria = keyboardShortcuts[i][0].split(' '); // ['ctrl', 'Opening bracket' , 'full stop']
+      for (const shortcutKey of shortcutKeysHTML) {
+        if (keyToText.hasOwnProperty(shortcutKey)) {
+          foundPunctuation.push(shortcutKey[keyToText]);
+        }
+      }
+      for (const shortcutText of Object.values(keyToText)) {
+        if (shortcutKeysAria.includes(shortcutText)) {
+          foundText.push(shortcutText);
+        }
+      }
+      expect(foundText).toEqual(foundPunctuation);
     }
   });
 });
