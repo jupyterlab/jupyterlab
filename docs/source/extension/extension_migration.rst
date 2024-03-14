@@ -36,7 +36,7 @@ The Toolbar and ToolbarButtonComponent (from the package *ui-components*) now re
 This library uses the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
 and is based on `FAST <https://www.fast.design/>`_ library by Microsoft.
 
-See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
+See https://github.com/jupyterlab/frontends-team-compass/issues/143 for more context on the change.
 
 - Changes the selectors of the ``Toolbar`` and ``ToolbarButtonComponent``.
 
