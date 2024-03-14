@@ -216,16 +216,12 @@ export class CodeEditorWrapper extends Widget {
     if (data === undefined) {
       return;
     }
-    const coordinate = {
+    const coordinate: CodeEditor.ICoordinate = {
       top: event.y,
       bottom: event.y,
       left: event.x,
-      right: event.x,
-      x: event.x,
-      y: event.y,
-      width: 0,
-      height: 0
-    } as CodeEditor.ICoordinate;
+      right: event.x
+    };
     const position = this.editor.getPositionForCoordinate(coordinate);
     if (position === null) {
       return;

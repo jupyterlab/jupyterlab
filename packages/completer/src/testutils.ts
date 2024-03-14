@@ -8,12 +8,12 @@ import { CodeMirrorEditor, ybinding } from '@jupyterlab/codemirror';
 import { YFile } from '@jupyter/ydoc';
 
 export function createEditorWidget(): CodeEditorWrapper {
-  const model = new CodeEditor.Model({ sharedModel: new YFile() });
+  const sharedModel = new YFile();
+  const model = new CodeEditor.Model({ sharedModel });
   const factory = (options: CodeEditor.IOptions) => {
-    const m = options.model.sharedModel as any;
     options.extensions = [
       ...(options.extensions ?? []),
-      ybinding({ ytext: m.ysource })
+      ybinding({ ytext: sharedModel.ysource })
     ];
     return new CodeMirrorEditor(options);
   };
