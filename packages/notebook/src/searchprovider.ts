@@ -9,10 +9,7 @@ import {
   ICellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import {
-  CodeMirrorEditor,
-  IHighlightAdjacentMatchOptions
-} from '@jupyterlab/codemirror';
+import { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import {
@@ -286,16 +283,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * @returns Initial value used to populate the search box.
    */
   getInitialQuery(): string {
-    const activeCell = this.widget.content.activeCell;
-    const editor = activeCell?.editor as CodeMirrorEditor | undefined;
-    if (!editor) {
-      return '';
-    }
-    const selection = editor.state.sliceDoc(
-      editor.state.selection.main.from,
-      editor.state.selection.main.to
-    );
-    return selection;
+    // Get whatever is selected in the browser window.
+    return window.getSelection()?.toString() || '';
   }
 
   /**
