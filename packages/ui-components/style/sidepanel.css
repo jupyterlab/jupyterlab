@@ -55,6 +55,11 @@
   font-size: var(--jp-ui-font-size0);
 }
 
+.lm-AccordionPanel .jp-AccordionPanel-title:focus-visible {
+  outline: 4px solid var(--jp-accept-color-active, var(--jp-brand-color1));
+  outline-offset: -1px;
+}
+
 .jp-AccordionPanel-title {
   cursor: pointer;
   user-select: none;

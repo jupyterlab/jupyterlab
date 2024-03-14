@@ -38,6 +38,13 @@ test.describe('General Tests', () => {
     expect(await page.theme.getTheme()).toEqual('JupyterLab Light');
   });
 
+  test('Toggle Dark High Contrast theme', async ({ page }) => {
+    await page.theme.setDarkHighContrastTheme();
+    expect(await page.theme.getTheme()).toEqual(
+      'JupyterLab Dark High Contrast'
+    );
+  });
+
   test('Toggle adaptive theme', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await page.menu.clickMenuItem(
