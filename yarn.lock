@@ -4680,6 +4680,7 @@ __metadata:
   resolution: "@jupyterlab/shortcuts-extension@workspace:packages/shortcuts-extension"
   dependencies:
     "@jupyterlab/application": ^4.2.0-alpha.0
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
     "@jupyterlab/settingregistry": ^4.2.0-alpha.0
     "@jupyterlab/testing": ^4.2.0-alpha.0
     "@jupyterlab/translation": ^4.2.0-alpha.0

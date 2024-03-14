@@ -6,6 +6,9 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../settingregistry"
     },
     {
