@@ -33,7 +33,9 @@ RUN --mount=type=cache,target=/jupyterlab/conda-cache,uid=${NEW_MAMBA_USER_ID},g
     CONDA_PKGS_DIRS="/jupyterlab/conda-cache" micromamba install -c nodefaults -c conda-forge -yn base \
       nodejs=${NODE_VERSION} yarn=${YARN_VERSION} git python=${PYTHON_VERSION}
 
-# Install dependencies for Playwright
+USER root
+
+# Install dependencies for Playwright - must be root to install packages with apt
 RUN mkdir /ms-playwright && cd /ms-playwright \
     && micromamba run npm init -y \
     && micromamba run npm install playwright \
@@ -42,6 +44,8 @@ RUN mkdir /ms-playwright && cd /ms-playwright \
     && rm -rf /var/lib/apt/lists/* \
     && cd / && rm -rf /ms-playwright \
     && micromamba run npm cache clean --force
+
+USER $MAMBA_USER
 
 WORKDIR /home/$MAMBA_USER/jupyterlab_cache
 
