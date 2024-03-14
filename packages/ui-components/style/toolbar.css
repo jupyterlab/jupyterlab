@@ -74,7 +74,7 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   font-family: var(--jp-ui-font-family);
 }
 
-jp-button.jp-Toolbar-kernelName {
+.jp-Toolbar .jp-ToolbarButtonComponent {
   color: var(--jp-ui-font-color1);
 }
 
