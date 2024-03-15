@@ -3,10 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import miniSVGDataURI from 'mini-svg-data-uri';
 
-import * as webpack from 'webpack';
+import * as rspack from '@rspack/core';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import * as path from 'path';
@@ -112,7 +111,7 @@ export namespace Build {
    */
   export function ensureAssets(
     options: IEnsureOptions
-  ): webpack.Configuration[] {
+  ): rspack.Configuration[] {
     const {
       output,
       schemaOutput = output,
@@ -120,7 +119,7 @@ export namespace Build {
       packageNames
     } = options;
 
-    const themeConfig: webpack.Configuration[] = [];
+    const themeConfig: rspack.Configuration[] = [];
 
     const packagePaths: string[] = options.packagePaths?.slice() || [];
 
@@ -199,19 +198,22 @@ export namespace Build {
           path: path.resolve(path.join(themeOutput, 'themes', name)),
           // we won't use these JS files, only the extracted CSS
           filename: '[name].js',
-          hashFunction: 'sha256'
+          hashFunction: 'xxhash64'
         },
         module: {
           rules: [
             {
-              test: /\.css$/,
-              use: [MiniCssExtractPlugin.loader, require.resolve('css-loader')]
+              test: /\.css$/i,
+              use: [rspack.CssExtractRspackPlugin.loader, 'css-loader']
             },
             {
               test: /\.svg/,
               type: 'asset/inline',
               generator: {
-                dataUrl: (content: any) => miniSVGDataURI(content.toString())
+                dataUrl: {
+                  content: (content: any) => miniSVGDataURI(content.content),
+                  mimetype: 'image/svg+xml'
+                }
               }
             },
             {
@@ -220,14 +222,8 @@ export namespace Build {
             }
           ]
         },
-        plugins: [
-          new MiniCssExtractPlugin({
-            // Options similar to the same options in webpackOptions.output
-            // both options are optional
-            filename: '[name].css',
-            chunkFilename: '[id].css'
-          })
-        ]
+        plugins: [new rspack.CssExtractRspackPlugin()],
+        experiments: { css: false }
       });
     });
 

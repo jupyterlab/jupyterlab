@@ -3,7 +3,7 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-const webpack = require('webpack');
+const rspack = require('@rspack/core');
 
 module.exports = {
   entry: './build/index.js',
@@ -13,7 +13,7 @@ module.exports = {
     filename: 'bundle.js'
   },
   plugins: [
-    new webpack.DefinePlugin({
+    new rspack.DefinePlugin({
       // Needed for various packages using cwd(), like the path polyfill
       process: { cwd: () => '/', env: {} }
     })
