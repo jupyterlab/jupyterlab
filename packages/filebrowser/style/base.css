@@ -23,22 +23,23 @@
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
-  /* flex-wrap: wrap; */
-
-  /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
-  /* stylelint-disable-next-line csstree/validator */
-
-  /* row-gap: min(
-    1.7vh,
-    12px
-  ); Using min() and vh allows the row-gap to shrink when the screen is small or when the user zooms in, which should allow at least 2 files or folders to be seen within the file browser at 400% zoom */
-
+  flex-wrap: wrap;
   border-bottom: none;
   height: auto;
-  /* stylelint-disable-next-line csstree/validator */
+
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
-  margin: min(5vh, 8px) min(1.5vw, 12px) 0; /* Using min() and vw/vh allows the margins to shrink when the screen is small or when the user zooms in, which should allow at least 2 files or folders to be seen within the file browser at 400% zoom */
+  margin: min(
+      5vh,
+      8px
+        /* pull top margin down from 8px as viewport height drops below 160px */
+    )
+    min(
+      1.5vw,
+      12px
+        /* pull horizontal margin down from 12px as viewport width drops below 800px */
+    )
+    0;
   box-shadow: none;
   padding: 0;
 }
@@ -58,12 +59,19 @@
 
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
-  margin: min(1.2vh, 8px) min(1vw, 12px); /* Using min() and vw/vh allows the margins to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
+  margin: min(
+      1.2vh,
+      8px
+        /* start pulling vertical margin down from 8px once viewport height drops below ~666px */
+    )
+    min(
+      1vw,
+      12px
+        /* start pulling horizontal margin down from 12px once viewport width drops below 1200px */
+    ); /* Using min() and vw/vh allows the margins to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
 }
 
 .jp-BreadCrumbs-item {
-  /* stylelint-disable-next-line csstree/validator */
-  margin: min(3vh, 8px) min(2vw, 12px);
   padding: 0 2px;
   border-radius: var(--jp-border-radius);
   cursor: pointer;
@@ -145,10 +153,23 @@
 }
 
 .jp-DirListing-headerItem {
-  /* stylelint-disable-next-line csstree/validator */
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
-  padding: min(1vh, 4px) min(6vw, 12px) min(1vh, 2px); /* Using min() and vw/vh allows the padding to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
+  padding: min(
+      1vh,
+      4px
+        /* pull top padding down from 4px as viewport height drops below 400px */
+    )
+    min(
+      6vw,
+      12px
+        /* pull horizontal padding down from 12px as viewport width drops below 200px */
+    )
+    min(
+      1vh,
+      2px
+        /* pull bottom padding down from 2px as viewport height drops below 200px */
+    );
   font-weight: 500;
 }
 
@@ -228,7 +249,17 @@
 
   /* TODO: remove ignore directive when fixed: https://github.com/csstree/csstree/issues/164 */
   /* stylelint-disable-next-line csstree/validator */
-  padding: min(1vh, 4px) min(1vw, 12px); /* Using min() and vw/vh allows the padding to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
+  padding: min(
+      1vh,
+      4px
+        /* pull vertical padding down from 4px as viewport height drops below 400px */
+    )
+    min(
+      1vw,
+      12px
+        /* pull horizontal padding down from 12px as viewport width drops below 1200px */
+    ); /* Using min() and vw/vh allows the padding to shrink when the screen is small or when the user zooms in, which should allow at least two files or folders to be seen within the file browser at 400% zoom */
+
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
