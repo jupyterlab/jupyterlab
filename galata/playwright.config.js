@@ -23,7 +23,8 @@ module.exports = {
     {
       name: 'galata',
       testMatch: 'test/galata/**',
-      testIgnore: '**/.ipynb_checkpoints/**'
+      testIgnore: '**/.ipynb_checkpoints/**',
+      workers: 1
     },
     {
       name: 'jupyterlab',
@@ -33,7 +34,8 @@ module.exports = {
         contextOptions: {
           permissions: ['clipboard-read', 'clipboard-write']
         }
-      }
+      },
+      workers: 1
     }
   ],
   // Switch to 'always' to keep raw assets for all tests

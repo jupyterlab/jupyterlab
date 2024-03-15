@@ -162,3 +162,60 @@ jobs:
       - name: Run test ${{ matrix.group }}
         run: |
           docker run --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
+
+  e2e-base:
+    name: Visual Regression Tests
+    needs: tests
+    timeout-minutes: 80
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2, 3, 4, 5, 6, 7, 8]
+        shardTotal: [8]
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jupyterlab-docker
+          path: /tmp
+      - name: Load image
+        run: |
+          docker load --input /tmp/jlab-build.tar
+          docker image ls -a
+
+      # FIXME
+      # - name: Set up browser cache
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       ${{ github.workspace }}/pw-browsers
+      #     key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
+
+      - name: Run test galata integration test
+        run: |
+          docker run --env GROUP=e2e-galata ${{ env.IMAGE }} bash ./scripts/ci_script.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+
+
+      # FIXME
+      # - name: Upload Galata Test assets
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: jupyterlab-galata-test-assets
+      #     path: |
+      #       galata/test-jupyterlab-results
+      #       galata/test-results
+
+      # - name: Upload Galata Test report
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: jupyterlab-galata-report
+      #     path: |
+      #       galata/playwright-report
+
+      # - name: Print JupyterLab logs
+      #   if: always()
+      #   run: |
+      #     cat /tmp/jupyterlab_server.log

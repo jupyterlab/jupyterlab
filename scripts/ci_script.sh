@@ -447,3 +447,19 @@ if [[ $GROUP == nonode ]]; then
     ./test_sdist/bin/pip install dist/*.tar.gz
     ./test_sdist/bin/python -m jupyterlab.browser_check --no-browser-test
 fi
+
+if [[ $GROUP == e2e* ]]; then
+    pushd galata
+    jlpm start 2>&1 > /tmp/jupyterlab_server.log &
+    # Install only Chromium browser
+    jlpm playwright install chromium
+    jlpm run build
+    npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
+
+    jlpm run test --project galata jupyterlab "$@"
+    # FIXME
+    # mv galata/test-results galata/test-jupyterlab-results || true
+    # # Run once benchmark tests to ensure they have no regression
+    # BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+    popd
+fi
