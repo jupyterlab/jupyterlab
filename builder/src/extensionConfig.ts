@@ -2,16 +2,17 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as path from 'path';
-import * as webpack from 'webpack';
+import * as rspack from '@rspack/core';
 import { Build } from './build';
-import { WPPlugin } from './webpack-plugins';
+// TODO: fix handling of licenses
+// import { WPPlugin } from './webpack-plugins';
 import { merge } from 'webpack-merge';
 import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import Ajv from 'ajv';
 
 const baseConfig = require('./webpack.config.base');
-const { ModuleFederationPlugin } = webpack.container;
+const { ModuleFederationPlugin } = rspack.container;
 
 export interface IOptions {
   packagePath?: string;
@@ -29,7 +30,7 @@ function generateConfig({
   mode = 'production',
   devtool = mode === 'development' ? 'source-map' : undefined,
   watchMode = false
-}: IOptions = {}): webpack.Configuration[] {
+}: IOptions = {}): rspack.Configuration[] {
   const data = require(path.join(packagePath, 'package.json'));
 
   const ajv = new Ajv({ useDefaults: true, strict: false });
@@ -236,13 +237,14 @@ function generateConfig({
     new CleanupPlugin()
   ];
 
-  if (mode === 'production') {
-    plugins.push(
-      new WPPlugin.JSONLicenseWebpackPlugin({
-        excludedPackageTest: packageName => packageName === data.name
-      })
-    );
-  }
+  // TODO: re-enable
+  // if (mode === 'production') {
+  //   plugins.push(
+  //     new WPPlugin.JSONLicenseWebpackPlugin({
+  //       excludedPackageTest: packageName => packageName === data.name
+  //     })
+  //   );
+  // }
 
   // Add version argument when in production so the Jupyter server
   // allows caching of files (i.e., does not set the CacheControl header to no-cache to prevent caching static files)
