@@ -7,7 +7,7 @@ const webpack = require('webpack');
 const miniSVGDataURI = require('mini-svg-data-uri');
 
 module.exports = {
-  entry: ['whatwg-fetch', './build/index.js'],
+  entry: ['./build/index.js'],
   output: {
     path: __dirname + '/build',
     filename: 'bundle.js'
