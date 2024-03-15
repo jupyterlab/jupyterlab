@@ -7,7 +7,7 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
-import { setSidebarWidth, stubGitHubUserIcons } from './utils';
+import { stubGitHubUserIcons } from './utils';
 import { default as extensionsList } from './data/extensions.json';
 import { default as allExtensionsList } from './data/extensions-search-all.json';
 import { default as drawioExtensionsList } from './data/extensions-search-drawio.json';
@@ -96,7 +96,7 @@ test.describe('Extension Manager', () => {
     });
 
     // We can not wait for extension kept by the keyword as they are already in the DOM
-    await page.waitForSelector('text=No entries');
+    await page.locator('text=No entries').waitFor();
 
     expect(
       await page.screenshot({ clip: { y: 31, x: 0, width: 283, height: 600 } })
@@ -194,9 +194,11 @@ async function openExtensionSidebar(page: IJupyterLabPageFixture) {
     ),
     page.click('button:has-text("Yes")')
   ]);
-  await page.waitForSelector(
-    '.jp-extensionmanager-view >> .jp-AccordionPanel-title[aria-expanded="false"] >> text=Warning'
-  );
+  await page
+    .locator(
+      '.jp-extensionmanager-view >> .jp-AccordionPanel-title[aria-expanded="false"] >> text=Warning'
+    )
+    .waitFor();
 
-  await setSidebarWidth(page);
+  await page.sidebar.setWidth();
 }

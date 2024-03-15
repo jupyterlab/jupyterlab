@@ -29,7 +29,8 @@
   "properties": {
     "providers": {
       "title": "Inline completion providers",
-      "type": "object"
+      "type": "object",
+      "default": {}
     },
     "showWidget": {
       "title": "Show widget",

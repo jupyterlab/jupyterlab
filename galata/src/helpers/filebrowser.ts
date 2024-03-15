@@ -54,9 +54,7 @@ export class FileBrowserHelper {
       await this.openDirectory(dirPath);
     }
 
-    await Utils.waitForCondition(async () => {
-      return await this.isFileListedInBrowser(fileName);
-    });
+    await Utils.waitForCondition(() => this.isFileListedInBrowser(fileName));
   }
 
   /**
@@ -66,10 +64,11 @@ export class FileBrowserHelper {
    * @returns File status
    */
   async isFileListedInBrowser(fileName: string): Promise<boolean> {
-    const item = await this.page.$(
-      `xpath=${this.xpBuildFileSelector(fileName)}`
-    );
-    return item !== null;
+    const item = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByRole('listitem', { name: new RegExp(`^Name: ${fileName}`) });
+
+    return (await item.count()) > 0;
   }
 
   /**
@@ -106,10 +105,10 @@ export class FileBrowserHelper {
     await this.revealFileInBrowser(filePath);
     const name = path.basename(filePath);
 
-    const fileItem = await this.page.$(
-      `xpath=${this.xpBuildFileSelector(name)}`
-    );
-    if (fileItem) {
+    const fileItem = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByRole('listitem', { name: new RegExp(`^Name: ${name}`) });
+    if (await fileItem.count()) {
       if (factory) {
         await fileItem.click({ button: 'right' });
         await this.page
@@ -127,7 +126,7 @@ export class FileBrowserHelper {
       // to know that from the DOM).
       await this.page
         .getByRole('main')
-        .getByRole('tab', { name })
+        .getByRole('tab', { name: new RegExp(`^${name}`) })
         .last()
         .waitFor({
           state: 'visible'
@@ -145,10 +144,10 @@ export class FileBrowserHelper {
    * @returns Action success status
    */
   async openHomeDirectory(): Promise<boolean> {
-    const homeButton = await this.page.$(
-      '.jp-FileBrowser .jp-FileBrowser-crumbs span'
-    );
-    if (!homeButton) {
+    const homeButton = this.page
+      .locator('.jp-FileBrowser .jp-FileBrowser-crumbs span')
+      .first();
+    if (!(await homeButton.count())) {
       return false;
     }
     await homeButton.click();
@@ -210,7 +209,7 @@ export class FileBrowserHelper {
    */
   async refresh(): Promise<void> {
     const page = this.page;
-    const item = page
+    const button = page
       .locator('#filebrowser')
       .locator(
         '.jp-ToolbarButtonComponent[data-command="filebrowser:refresh"]'
@@ -222,7 +221,7 @@ export class FileBrowserHelper {
     await Promise.race([
       page.waitForTimeout(2000),
       this.contents.waitForAPIResponse(async () => {
-        await item.click();
+        await button.click();
       })
     ]);
     // wait for DOM rerender
@@ -230,18 +229,18 @@ export class FileBrowserHelper {
   }
 
   protected async _openDirectory(dirName: string): Promise<boolean> {
-    const item = await this.page.$(
-      `xpath=${this.xpBuildDirectorySelector(dirName)}`
-    );
-    if (item === null) {
-      return false;
-    }
+    const item = this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByRole('listitem', { name: new RegExp(`^Name: ${dirName}`) });
 
+    await Utils.waitForCondition(async () => (await item.count()) > 0);
     await this.contents.waitForAPIResponse(async () => {
-      await item.click({ clickCount: 2 });
+      await item.dblclick();
     });
-    // wait for DOM rerender
-    await this.page.waitForTimeout(200);
+    await this.page
+      .getByRole('region', { name: 'File Browser Section' })
+      .getByText(`/${dirName}/`)
+      .waitFor();
 
     return true;
   }

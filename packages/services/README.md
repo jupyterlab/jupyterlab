@@ -8,9 +8,8 @@ Javascript client for the Jupyter services REST APIs
 
 Note: All functions and classes using the REST API allow a `serverSettings`
 parameter to configure requests.
-Requests are made using the `fetch` API, which is available in modern browsers
-or via `npm install fetch` for node users. The `whatwg-fetch` npm package
-can be used to polyfill browsers that do not support the `fetch` API.
+
+Requests are made using the `fetch` API, which is available in modern browsers or in Node 18+.
 
 ## Package Install
 
