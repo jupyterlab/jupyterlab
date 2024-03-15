@@ -239,6 +239,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     layout.insertWidget(j, widget);
 
     Private.nameProperty.set(widget, name);
+    widget.node.dataset['jpItemName'] = name;
     return true;
   }
 
@@ -486,7 +487,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       // Invokes resizing to ensure correct display of items after an addition, only
       // if the toolbar is rendered.
       if (this.isVisible) {
-        void this._onResize();
+        void this._resizer.invoke();
       }
     }
     return status;
