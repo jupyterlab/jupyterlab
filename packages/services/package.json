@@ -35,7 +35,7 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "build:all": "npm run build && webpack",
+    "build:all": "npm run build && rspack",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "test": "jest -i",
@@ -59,13 +59,12 @@
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.5.0",
+    "@rspack/cli": "^1.0.0-beta.2",
     "@types/jest": "^29.2.0",
     "@types/ws": "^8.5.3",
     "jest": "^29.2.0",
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4",
-    "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1"
+    "typescript": "~5.5.4"
   },
   "publishConfig": {
     "access": "public"

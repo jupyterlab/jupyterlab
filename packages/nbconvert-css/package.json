@@ -22,13 +22,14 @@
   },
   "files": [
     "style/*.js",
-    "style/*.css"
+    "style/*.css",
+    "style/*.css.map"
   ],
   "scripts": {
-    "build": "webpack --mode=production",
+    "build": "rspack --mode=production",
     "build:all": "npm run build",
     "clean": "rimraf style/",
-    "watch": "webpack --watch"
+    "watch": "rspack --watch"
   },
   "dependencies": {
     "@jupyterlab/application": "^4.5.0",
@@ -40,12 +41,11 @@
     "@jupyterlab/rendermime": "^4.5.0"
   },
   "devDependencies": {
-    "css-loader": "^6.7.1",
-    "mini-css-extract-plugin": "^2.7.0",
+    "@rspack/cli": "^1.0.0-beta.2",
+    "@rspack/core": "^1.0.0-beta.2",
+    "css-loader": "^7.1.1",
     "null-loader": "^4.0.0",
-    "rimraf": "~5.0.5",
-    "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1"
+    "rimraf": "~5.0.5"
   },
   "publishConfig": {
     "access": "public"

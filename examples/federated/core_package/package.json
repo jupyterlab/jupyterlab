@@ -3,9 +3,9 @@
   "version": "3.5.0",
   "private": true,
   "scripts": {
-    "build": "npm run clean && webpack",
+    "build": "npm run clean && rspack",
     "clean": "rimraf static",
-    "watch": "npm run clean && webpack --watch"
+    "watch": "npm run clean && rspack --watch"
   },
   "resolutions": {
     "@jupyterlab/application": "~4.5.0",
@@ -140,17 +140,13 @@
   },
   "devDependencies": {
     "@jupyterlab/builder": "^4.5.0",
+    "@rspack/cli": "^1.0.0-beta.2",
     "copy-webpack-plugin": "^11.0.0",
-    "css-loader": "^6.7.1",
     "fs-extra": "^10.1.0",
     "glob": "~7.1.6",
     "handlebars": "^4.7.8",
-    "mini-css-extract-plugin": "^2.7.0",
     "mini-svg-data-uri": "^1.4.4",
     "rimraf": "~5.0.5",
-    "style-loader": "~3.3.1",
-    "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1",
     "webpack-merge": "^5.8.0"
   },
   "jupyterlab": {

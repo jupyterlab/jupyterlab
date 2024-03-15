@@ -6,7 +6,7 @@
     "lib/*.{d.ts,js,js.map}"
   ],
   "scripts": {
-    "build": "tsc && webpack",
+    "build": "tsc && rspack",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo"
   },
   "dependencies": {
@@ -15,9 +15,9 @@
     "@lumino/coreutils": "^2.2.2"
   },
   "devDependencies": {
+    "@rspack/cli": "^1.0.0-beta.2",
+    "@rspack/core": "^1.0.0-beta.2",
     "rimraf": "~5.0.5",
-    "typescript": "~5.5.4",
-    "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1"
+    "typescript": "~5.5.4"
   }
 }

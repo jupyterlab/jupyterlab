@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 const data = require('./package.json');
-const webpack = require('webpack');
+const rspack = require('@rspack/core');
 const Build = require('@jupyterlab/builder').Build;
 const miniSVGDataURI = require('mini-svg-data-uri');
 
@@ -24,7 +24,6 @@ module.exports = [
     mode: 'development',
     module: {
       rules: [
-        { test: /\.css$/, use: ['style-loader', 'css-loader'] },
         { test: /\.html$/, type: 'asset/resource' },
         { test: /\.md$/, type: 'asset/source' },
         { test: /\.(jpg|png|gif)$/, type: 'asset/resource' },
@@ -48,7 +47,10 @@ module.exports = [
           issuer: /\.css$/,
           type: 'asset/inline',
           generator: {
-            dataUrl: content => miniSVGDataURI(content.toString())
+            dataUrl: {
+              content: content => miniSVGDataURI(content.content),
+              mimetype: 'image/svg+xml'
+            }
           }
         },
         {
@@ -61,7 +63,7 @@ module.exports = [
       ]
     },
     plugins: [
-      new webpack.DefinePlugin({
+      new rspack.DefinePlugin({
         // Needed for various packages using cwd(), like the path polyfill
         process: { cwd: () => '/', env: {} }
       })

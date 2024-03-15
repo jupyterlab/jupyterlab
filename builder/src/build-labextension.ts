@@ -43,7 +43,7 @@
 
 import * as path from 'path';
 import { program as commander } from 'commander';
-import webpack from 'webpack';
+import { rspack } from '@rspack/core';
 import generateConfig from './extensionConfig';
 import { stdout as colors } from 'supports-color';
 
@@ -71,7 +71,7 @@ commander
       devtool,
       watchMode: options.watch
     });
-    const compiler = webpack(config);
+    const compiler = rspack(config);
 
     let lastHash: string | null = null;
 

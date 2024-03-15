@@ -3,7 +3,7 @@
   "version": "4.5.0",
   "private": true,
   "scripts": {
-    "build": "webpack",
+    "build": "rspack",
     "clean": "rimraf build"
   },
   "dependencies": {
@@ -44,15 +44,12 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "css-loader": "^6.7.1",
+    "@rspack/cli": "^1.0.0-beta.2",
+    "@rspack/core": "^1.0.0-beta.2",
     "fs-extra": "^10.1.0",
     "glob": "~7.1.6",
-    "mini-css-extract-plugin": "^2.7.0",
     "mini-svg-data-uri": "^1.4.4",
-    "rimraf": "~5.0.5",
-    "style-loader": "~3.3.1",
-    "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1"
+    "rimraf": "~5.0.5"
   },
   "jupyterlab": {
     "extensions": [

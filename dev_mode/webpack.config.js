@@ -7,12 +7,12 @@ const path = require('path');
 const fs = require('fs-extra');
 const Handlebars = require('handlebars');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
+const rspack = require('@rspack/core');
 const merge = require('webpack-merge').default;
 const BundleAnalyzerPlugin =
   require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
-const { ModuleFederationPlugin } = webpack.container;
+const { ModuleFederationPlugin } = rspack.container;
 
 const Build = require('@jupyterlab/builder').Build;
 const WPPlugin = require('@jupyterlab/builder').WPPlugin;
@@ -258,7 +258,8 @@ const plugins = [
     title: jlab.name || 'JupyterLab'
   }),
   // custom plugin for ignoring files during a `--watch` build
-  new WPPlugin.FilterWatchIgnorePlugin(ignored),
+  // TODO: re-addd
+  // new WPPlugin.FilterWatchIgnorePlugin(ignored),
   // custom plugin that copies the assets to the static directory
   new WPPlugin.FrontEndPlugin(buildDir, jlab.staticDir),
   new ModuleFederationPlugin({

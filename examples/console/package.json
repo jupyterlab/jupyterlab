@@ -3,7 +3,7 @@
   "version": "4.5.0",
   "private": true,
   "scripts": {
-    "build": "tsc -p src && webpack",
+    "build": "tsc -p src && rspack",
     "clean": "rimraf build"
   },
   "dependencies": {
@@ -21,12 +21,9 @@
     "@lumino/widgets": "^2.7.2"
   },
   "devDependencies": {
-    "css-loader": "^6.7.1",
-    "mini-css-extract-plugin": "^2.7.0",
+    "@rspack/cli": "^1.0.0-beta.2",
+    "@rspack/core": "^1.0.0-beta.2",
     "rimraf": "~5.0.5",
-    "style-loader": "~3.3.1",
-    "typescript": "~5.5.4",
-    "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1"
+    "typescript": "~5.5.4"
   }
 }
