@@ -266,6 +266,54 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.2.0a1
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0a0...eab4af9feda8169d5d20103f6eca5e1003828b4c))
+
+### Enhancements made
+
+- Allow to customise directory and notebook icon [#15828](https://github.com/jupyterlab/jupyterlab/pull/15828) ([@linlol](https://github.com/linlol))
+
+### Bugs fixed
+
+- Short-circuit `selectItemByName()` if already selected [#15970](https://github.com/jupyterlab/jupyterlab/pull/15970) ([@krassowski](https://github.com/krassowski))
+- Fix Theme color is not applied to Toolbar Button [#15957](https://github.com/jupyterlab/jupyterlab/pull/15957) ([@FoSuCloud](https://github.com/FoSuCloud))
+- Avoid concurrency when computing the items in notebook toolbar [#15954](https://github.com/jupyterlab/jupyterlab/pull/15954) ([@brichet](https://github.com/brichet))
+- Revert "Prevent command shortcuts from preventing user input" [#15938](https://github.com/jupyterlab/jupyterlab/pull/15938) ([@krassowski](https://github.com/krassowski))
+- Fixes filter for Chinese, other non-ASCII filenames [#15935](https://github.com/jupyterlab/jupyterlab/pull/15935) ([@JasonWeill](https://github.com/JasonWeill))
+- Fix Theme color is not applied to SwitchKernel ToolbarButton [#15924](https://github.com/jupyterlab/jupyterlab/pull/15924) ([@FoSuCloud](https://github.com/FoSuCloud))
+- Add an explicit default for inline completer providers [#15899](https://github.com/jupyterlab/jupyterlab/pull/15899) ([@krassowski](https://github.com/krassowski))
+- Fix spurious dedent when opening inspector tooltip [#15898](https://github.com/jupyterlab/jupyterlab/pull/15898) ([@krassowski](https://github.com/krassowski))
+- Fix browser-test.js [#15892](https://github.com/jupyterlab/jupyterlab/pull/15892) ([@fcollonval](https://github.com/fcollonval))
+- Disable next/previous match buttons when no text is in Find box [#15857](https://github.com/jupyterlab/jupyterlab/pull/15857) ([@JasonWeill](https://github.com/JasonWeill))
+- Uses the browser window's selection as the default search query [#15834](https://github.com/jupyterlab/jupyterlab/pull/15834) ([@JasonWeill](https://github.com/JasonWeill))
+- Fix creating files in custom drives, fix `ContentsManagerMock` [#15291](https://github.com/jupyterlab/jupyterlab/pull/15291) ([@jtpio](https://github.com/jtpio))
+
+### Maintenance and upkeep improvements
+
+- Update to `@jupyter/ydoc` v2.0.1 [#15982](https://github.com/jupyterlab/jupyterlab/pull/15982) ([@jtpio](https://github.com/jtpio))
+- Handle drives for checkpoints in `ContentsManagerMock` [#15974](https://github.com/jupyterlab/jupyterlab/pull/15974) ([@jtpio](https://github.com/jtpio))
+- Update Release Scripts [#15973](https://github.com/jupyterlab/jupyterlab/pull/15973) ([@blink1073](https://github.com/blink1073))
+- Remove `node-fetch` dependency [#15969](https://github.com/jupyterlab/jupyterlab/pull/15969) ([@jtpio](https://github.com/jtpio))
+- Ignore links to GitHub user and organisation profiles [#15959](https://github.com/jupyterlab/jupyterlab/pull/15959) ([@krassowski](https://github.com/krassowski))
+- Bump the actions group with 2 updates [#15891](https://github.com/jupyterlab/jupyterlab/pull/15891) ([@dependabot](https://github.com/dependabot))
+- Some galata improvements [#15375](https://github.com/jupyterlab/jupyterlab/pull/15375) ([@fcollonval](https://github.com/fcollonval))
+
+### Documentation improvements
+
+- Update links to the Jupyter Frontends team compass [#15998](https://github.com/jupyterlab/jupyterlab/pull/15998) ([@jtpio](https://github.com/jtpio))
+- Remove `node-fetch` dependency [#15969](https://github.com/jupyterlab/jupyterlab/pull/15969) ([@jtpio](https://github.com/jtpio))
+- Add end of maintenance date to README [#15920](https://github.com/jupyterlab/jupyterlab/pull/15920) ([@JasonWeill](https://github.com/JasonWeill))
+- Some galata improvements [#15375](https://github.com/jupyterlab/jupyterlab/pull/15375) ([@fcollonval](https://github.com/fcollonval))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-03-05&to=2024-03-14&type=c))
+
+[@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2024-03-05..2024-03-14&type=Issues) | [@blink1073](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ablink1073+updated%3A2024-03-05..2024-03-14&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2024-03-05..2024-03-14&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-03-05..2024-03-14&type=Issues) | [@diyoyo](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adiyoyo+updated%3A2024-03-05..2024-03-14&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-03-05..2024-03-14&type=Issues) | [@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2024-03-05..2024-03-14&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-03-05..2024-03-14&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-03-05..2024-03-14&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-03-05..2024-03-14&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-03-05..2024-03-14&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-03-05..2024-03-14&type=Issues) | [@linlol](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alinlol+updated%3A2024-03-05..2024-03-14&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-03-05..2024-03-14&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.2.0a0
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.1.2...afeb9553f0389e63795aed289fe4670bd8fdc4f1))
@@ -313,8 +361,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-02-19&to=2024-03-05&type=c))
 
 [@AllanChain](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAllanChain+updated%3A2024-02-19..2024-03-05&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2024-02-19..2024-03-05&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-02-19..2024-03-05&type=Issues) | [@ericsnekbytes](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aericsnekbytes+updated%3A2024-02-19..2024-03-05&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-02-19..2024-03-05&type=Issues) | [@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2024-02-19..2024-03-05&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-02-19..2024-03-05&type=Issues) | [@HaudinFlorence](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AHaudinFlorence+updated%3A2024-02-19..2024-03-05&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-02-19..2024-03-05&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-02-19..2024-03-05&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-02-19..2024-03-05&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-02-19..2024-03-05&type=Issues) | [@linlol](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alinlol+updated%3A2024-02-19..2024-03-05&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-02-19..2024-03-05&type=Issues) | [@trungleduc](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Atrungleduc+updated%3A2024-02-19..2024-03-05&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-02-19..2024-03-05&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.1.2
 
