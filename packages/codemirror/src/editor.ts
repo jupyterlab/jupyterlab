@@ -358,10 +358,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   getCoordinateForPosition(
     position: CodeEditor.IPosition
-  ): CodeEditor.ICoordinate {
+  ): CodeEditor.ICoordinate | null {
     const offset = this.getOffsetAt(position);
     const rect = this.editor.coordsAtPos(offset);
-    return rect as CodeEditor.ICoordinate;
+    return rect;
   }
 
   /**
