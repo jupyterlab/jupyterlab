@@ -19754,6 +19754,41 @@ __metadata:
   languageName: node
   linkType: hard
 
+"test-hyphens-underscore@workspace:jupyterlab/tests/mock_packages/test-hyphens-underscore":
+  version: 0.0.0-use.local
+  resolution: "test-hyphens-underscore@workspace:jupyterlab/tests/mock_packages/test-hyphens-underscore"
+  dependencies:
+    "@jupyterlab/builder": ^4.2.0-alpha.1
+    "@jupyterlab/launcher": ^4.2.0-alpha.1
+    rimraf: ~5.0.5
+  languageName: unknown
+  linkType: soft
+
+"test-hyphens@workspace:jupyterlab/tests/mock_packages/test-hyphens":
+  version: 0.0.0-use.local
+  resolution: "test-hyphens@workspace:jupyterlab/tests/mock_packages/test-hyphens"
+  dependencies:
+    "@jupyterlab/builder": ^4.2.0-alpha.1
+    "@jupyterlab/launcher": ^4.2.0-alpha.1
+    "@types/react": ^18.0.26
+    css-loader: ^6.7.1
+    rimraf: ~5.0.5
+    source-map-loader: ~1.0.2
+    style-loader: ~3.3.1
+    yjs: ^13.5.40
+  languageName: unknown
+  linkType: soft
+
+"test_no_hyphens@workspace:jupyterlab/tests/mock_packages/test_no_hyphens":
+  version: 0.0.0-use.local
+  resolution: "test_no_hyphens@workspace:jupyterlab/tests/mock_packages/test_no_hyphens"
+  dependencies:
+    "@jupyterlab/builder": ^4.2.0-alpha.1
+    "@jupyterlab/launcher": ^4.2.0-alpha.1
+    rimraf: ~5.0.5
+  languageName: unknown
+  linkType: soft
+
 "text-extensions@npm:^1.0.0":
   version: 1.9.0
   resolution: "text-extensions@npm:1.9.0"
