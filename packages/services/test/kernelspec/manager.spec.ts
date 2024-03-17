@@ -62,13 +62,13 @@ describe('kernel/manager', () => {
     describe('#isDisposed', () => {
       it('should be false when instantiating', () => {
         expect(manager.isDisposed).toBe(false);
-      })
+      });
 
       it('should true when disposing', () => {
         manager.dispose()
         expect(manager.isDisposed).toBe(true);
-      })
-    })
+      });
+    });
 
     describe('#serverSettings', () => {
       it('should get the server settings', () => {
