@@ -7,15 +7,38 @@
     "index.js"
   ],
   "scripts": {
+    "build": "jlpm build:labextension:dev",
     "build:labextension": "jupyter labextension build .",
-    "clean": "rimraf ./test_hyphens/labextension"
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "clean": "rimraf test_hyphens/labextension test_hyphens/_version.py",
+    "install:extension": "jlpm build"
   },
   "dependencies": {
-    "@jupyterlab/launcher": "^4.0.0-alpha.21"
+    "@jupyterlab/launcher": "^4.1.2"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0-alpha.21",
-    "rimraf": "~3.0.0"
+    "@jupyterlab/builder": "^4.0.0",
+    "@types/json-schema": "^7.0.11",
+    "@types/react": "^18.0.26",
+    "@types/react-addons-linked-state-mixin": "^0.14.22",
+    "@typescript-eslint/eslint-plugin": "^6.1.0",
+    "@typescript-eslint/parser": "^6.1.0",
+    "css-loader": "^6.7.1",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.0.0",
+    "rimraf": "^5.0.1",
+    "source-map-loader": "^1.0.2",
+    "style-loader": "^3.3.1",
+    "stylelint": "^15.10.1",
+    "stylelint-config-recommended": "^13.0.0",
+    "stylelint-config-standard": "^34.0.0",
+    "stylelint-csstree-validator": "^3.0.0",
+    "stylelint-prettier": "^4.0.0",
+    "typescript": "~5.0.2",
+    "yjs": "^13.5.40"
   },
   "jupyterlab": {
     "extension": true,

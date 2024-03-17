@@ -22,7 +22,8 @@
     "tests/test-*",
     "testutils",
     "jupyterlab/tests/mock_packages/extension",
-    "jupyterlab/tests/mock_packages/interop/*"
+    "jupyterlab/tests/mock_packages/interop/*",
+    "jupyterlab/tests/mock_packages/test*"
   ],
   "scripts": {
     "after:publish:assets": "jlpm && npm run build:utils && node buildutils/lib/publish --skip-publish",
