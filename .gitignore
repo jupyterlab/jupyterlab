@@ -34,6 +34,9 @@ jupyterlab/style.js
 jupyterlab/tests/**/static
 jupyterlab/tests/**/labextension
 
+jupyterlab/tests/mock_packages/test*/**/_version.py
+jupyterlab/tests/mock_packages/**/.yarn
+
 ui-tests/test-output
 
 # Remove after next release
