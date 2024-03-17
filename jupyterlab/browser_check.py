@@ -97,7 +97,7 @@ async def run_test_async(app, func):
 
     # Allow a synchronous function to be passed in.
     if inspect.iscoroutinefunction(func):
-        test = func(url, browser)
+        test = func(url, browser=browser)
     else:
         app.log.info("Using thread pool executor to run test")
         loop = asyncio.get_event_loop()

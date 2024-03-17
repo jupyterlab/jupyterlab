@@ -76,6 +76,9 @@ RUN micromamba install -n base -c conda-forge rsync -y \
 
 FROM base as build
 
+RUN  git config --global user.name foo \
+     && git config --global user.email foo@bar.com
+
 WORKDIR /home/$MAMBA_USER/jupyterlab
 
 COPY --chown=$MAMBA_USER:$MAMBA_USER . .

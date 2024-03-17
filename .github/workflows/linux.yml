@@ -165,7 +165,7 @@ jobs:
 
   e2e-base:
     name: Visual Regression Tests
-    needs: tests
+    needs: build
     timeout-minutes: 80
     runs-on: ubuntu-22.04
     strategy:
