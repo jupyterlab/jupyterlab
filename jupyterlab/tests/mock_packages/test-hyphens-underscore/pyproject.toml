@@ -54,5 +54,5 @@ npm = ["jlpm"]
 [tool.hatch.build.hooks.jupyter-builder.editable-build-kwargs]
 build_cmd = "install:extension"
 npm = ["jlpm"]
-source_dir = "src"
+source_dir = "."
 build_dir = "test_hyphens_underscore/labextension"
