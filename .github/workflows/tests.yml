@@ -1,4 +1,4 @@
-name: Tests on Linux
+name: Tests
 
 on:
   push:
@@ -35,13 +35,98 @@ jobs:
           path: /tmp/jlab-build.tar
           retention-days: 1
 
-  tests:
-    name: ${{ matrix.group }} python-${{ matrix.python-version }} test
+  python-linux-tests:
+    name: Linux ${{ matrix.group }} python test
     needs: build
     strategy:
       matrix:
-        group: [lint, integrity, integrity2, integrity3, usage, usage2, python, release_test, docs, splice_source, examples, interop, nonode]
+        group: [integrity, usage, usage2, python]
+        python-version: ["3.11"]
+      fail-fast: false
+    timeout-minutes: 45
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: jupyterlab-docker
+        path: /tmp
+    - name: Load image
+      run: |
+        docker load --input /tmp/jlab-build.tar
+        docker image ls -a
+    - name: Run test ${{ matrix.group }}
+      run: |
+        docker run --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
+    # FIXME upload artifacts
+
+  python-macos-tests:
+    name: macOS ${{ matrix.group }} python test
+    # Run costly MacOS jobs only if Linux tests are passing
+    needs: python-linux-tests
+    strategy:
+      matrix:
+        group: [integrity, python, usage, usage2]
+      fail-fast: false
+    timeout-minutes: 45
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          bash ./scripts/ci_install.sh
+
+      - name: Run test ${{ matrix.group }}
+        env:
+          GROUP: ${{ matrix.group }}
+          JLAB_BROWSER_TYPE: webkit
+        run: |
+          bash ./scripts/ci_script.sh
+
+  python-windows-tests:
+    name: Windows ${{ matrix.group }} python test
+    # Run costly Windows jobs only if Linux tests are passing
+    needs: python-linux-tests
+    strategy:
+      matrix:
+        group: [integrity, python]
+      fail-fast: false
+    runs-on: windows-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+
+      - name: Install dependencies
+        env:
+          GROUP: ${{ matrix.group }}
+        run: .\scripts\ci_install
+        shell: pwsh
+
+      - name: Run test ${{ matrix.group }}
+        env:
+          GROUP: ${{ matrix.group }}
+        run: .\scripts\ci_script
+        shell: pwsh
+
+  python-tests:
+    name: ${{ matrix.group }} python-${{ matrix.python-version }} test
+    needs: python-linux-tests
+    strategy:
+      matrix:
+        group: [lint, integrity2, integrity3, release_test, docs, splice_source, examples, interop, nonode]
         # FIXME This will be used by the base setup action
+        # apply for other python version: group: [integrity, usage, usage2, python]
         # python-version: ["3.8", "3.11"]
         python-version: ["3.11"]
         include:
@@ -90,7 +175,7 @@ jobs:
         docker run --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
     # FIXME upload artifacts
 
-  tests-js:
+  js-tests:
     name: Test ${{ matrix.group }}
     needs: build
     strategy:
@@ -219,3 +304,83 @@ jobs:
       #   if: always()
       #   run: |
       #     cat /tmp/jupyterlab_server.log
+
+  check_links:
+    # FIXME we should use the docker image as it builds the JS assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - run: |
+          node ./jupyterlab/staging/yarn.js install
+          node ./jupyterlab/staging/yarn.js run build:packages
+          node ./jupyterlab/staging/yarn.js run docs
+      - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
+        with:
+          ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
+          ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.* https://github.com/[^/]+/?$"
+
+  test_minimum_versions:
+    name: Test Minimum Versions
+    needs: python-linux-tests
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+        with:
+          python_version: "3.8"
+      - name: Install minimum versions
+        uses: jupyterlab/maintainer-tools/.github/actions/install-minimums@v1
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+      - name: Run the unit tests
+        run: pytest -vv || pytest -vv --lf
+
+  make_sdist:
+    name: Make SDist
+    needs: test_minimum_versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Install dependencies
+        run: |
+          bash ./scripts/ci_install.sh
+      - name: Build SDist
+        run: |
+          pip install build
+          python -m build --sdist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: "sdist"
+          path: dist/*.tar.gz
+
+  test_sdist:
+    runs-on: ubuntu-latest
+    needs: [make_sdist]
+    name: Install from SDist and Test
+    timeout-minutes: 20
+    steps:
+      - name: Base Setup
+        uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
+      - name: Download sdist
+        uses: actions/download-artifact@v4
+      - name: Install From SDist
+        run: |
+          set -ex
+          cd sdist
+          mkdir test
+          tar --strip-components=1 -zxvf *.tar.gz -C ./test
+          cd test
+          pip install -e .[dev,test]
+          pip install pytest-github-actions-annotate-failures
+      - name: Run Test
+        run: |
+          cd sdist/test
+          pytest -vv || pytest -vv --lf
