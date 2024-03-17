@@ -83,10 +83,7 @@ async def run_test_async(app, func):
     env_patch = TestEnv()
     env_patch.start()
 
-    browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
-    if browser not in {"chromium", "firefox", "webkit"}:
-        browser = "chromium"
-    app.log.info(f"Running async test in browser {browser}")
+    app.log.info("Running async test")
 
     # The entry URL for browser tests is different in notebook >= 6.0,
     # since that uses a local HTML file to point the user at the app.
@@ -97,12 +94,12 @@ async def run_test_async(app, func):
 
     # Allow a synchronous function to be passed in.
     if inspect.iscoroutinefunction(func):
-        test = func(url, browser=browser)
+        test = func(url)
     else:
         app.log.info("Using thread pool executor to run test")
         loop = asyncio.get_event_loop()
         executor = ThreadPoolExecutor()
-        task = loop.run_in_executor(executor, func, url, browser)
+        task = loop.run_in_executor(executor, func, url)
         test = asyncio.wait([task])
 
     try:
@@ -142,8 +139,12 @@ async def run_async_process(cmd, **kwargs):
     return stdout, stderr
 
 
-async def run_browser(url, browser="chromium"):
+async def run_browser(url):
     """Run the browser test and return an exit code."""
+    browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
+    if browser not in {"chromium", "firefox", "webkit"}:
+        browser = "chromium"
+
     target = osp.join(get_app_dir(), "browser_test")
     if not osp.exists(osp.join(target, "node_modules")):
         if not osp.exists(target):
@@ -155,8 +156,12 @@ async def run_browser(url, browser="chromium"):
     await run_async_process(["node", "browser-test.js", url], cwd=target)
 
 
-def run_browser_sync(url, browser="chromium"):
+def run_browser_sync(url):
     """Run the browser test and return an exit code."""
+    browser = os.environ.get("JLAB_BROWSER_TYPE", "chromium")
+    if browser not in {"chromium", "firefox", "webkit"}:
+        browser = "chromium"
+
     target = osp.join(get_app_dir(), "browser_test")
     if not osp.exists(osp.join(target, "node_modules")):
         os.makedirs(target)
