@@ -36,7 +36,7 @@ jobs:
           retention-days: 1
 
   python-linux-tests:
-    name: Linux ${{ matrix.group }} python test
+    name: Linux ${{ matrix.group }} test
     needs: build
     strategy:
       matrix:
@@ -61,12 +61,13 @@ jobs:
     # FIXME upload artifacts
 
   python-macos-tests:
-    name: macOS ${{ matrix.group }} python test
+    name: macOS ${{ matrix.group }} test
     # Run costly MacOS jobs only if Linux tests are passing
     needs: python-linux-tests
     strategy:
       matrix:
         group: [integrity, python, usage, usage2]
+        python-version: ["3.11"]
       fail-fast: false
     timeout-minutes: 45
     runs-on: macos-latest
@@ -91,12 +92,13 @@ jobs:
           bash ./scripts/ci_script.sh
 
   python-windows-tests:
-    name: Windows ${{ matrix.group }} python test
+    name: Windows ${{ matrix.group }} test
     # Run costly Windows jobs only if Linux tests are passing
     needs: python-linux-tests
     strategy:
       matrix:
         group: [integrity, python]
+        python-version: ["3.11"]
       fail-fast: false
     runs-on: windows-latest
     timeout-minutes: 40
