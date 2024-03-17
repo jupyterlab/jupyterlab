@@ -57,7 +57,7 @@ jobs:
         docker image ls -a
     - name: Run test ${{ matrix.group }}
       run: |
-        docker run --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
+        docker run --env CI=1 --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
     # FIXME upload artifacts
 
   python-macos-tests:
@@ -172,7 +172,7 @@ jobs:
         docker image ls -a
     - name: Run test ${{ matrix.group }}
       run: |
-        docker run --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
+        docker run --env CI=1 --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
     # FIXME upload artifacts
 
   js-tests:
@@ -246,7 +246,7 @@ jobs:
 
       - name: Run test ${{ matrix.group }}
         run: |
-          docker run --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
+          docker run --env CI=1 --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
 
   e2e-base:
     name: Visual Regression Tests
@@ -279,7 +279,7 @@ jobs:
 
       - name: Run test galata integration test
         run: |
-          docker run --env GROUP=e2e-galata ${{ env.IMAGE }} bash ./scripts/ci_script.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+          docker run --env CI=1 --env GROUP=e2e-galata ${{ env.IMAGE }} bash ./scripts/ci_script.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
 
       # FIXME
