@@ -286,6 +286,8 @@ test.describe('Scrolling on keyboard interaction when active editor is above the
       // Press the key as many times as requested
       for (let i = 0; i < testCase.times; i++) {
         await page.keyboard.press(testCase.key);
+        // Allow for small delay between pressing keys
+        await page.waitForTimeout(100);
       }
 
       if (testCase.showCell === 'neither') {
