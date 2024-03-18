@@ -175,7 +175,7 @@ fi
 
 if [[ $GROUP == usage ]]; then
     # TODO: remove
-    python -m pip install --pre pyzmq
+    python -m pip install --pre -U pyzmq
 
     # Run the integrity script to link binary files
     jlpm integrity
