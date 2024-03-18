@@ -65,7 +65,7 @@ describe('kernel/manager', () => {
       });
 
       it('should true when disposing', () => {
-        manager.dispose()
+        manager.dispose();
         expect(manager.isDisposed).toBe(true);
       });
     });
