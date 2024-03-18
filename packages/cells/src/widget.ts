@@ -559,10 +559,10 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
-   * Signal emitted when cell editor requests scrolling.
+   * Signal emitted when cell requests scrolling to its element.
    */
-  get editorScrollRequested(): ISignal<Cell, Cell.IEditorScrollRequest> {
-    return this._editorScrollRequested;
+  get scrollRequested(): ISignal<Cell, Cell.IScrollRequest> {
+    return this._scrollRequested;
   }
 
   /**
@@ -708,11 +708,11 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   protected _displayChanged = new Signal<this, void>(this);
 
   /**
-   * Editor extension emitting `editorScrollRequested` signal on scroll.
+   * Editor extension emitting `scrollRequested` signal on scroll.
    *
    * Scrolling within editor will be prevented when a cell is out out viewport.
    * Windowed containers including cells should listen to the scroll request
-   * signal and invoke the `scrollEditor()` callback after scrolling the cell
+   * signal and invoke the `scrollWithinCell()` callback after scrolling the cell
    * back into the view (and after updating the `inViewport` property).
    */
   private _scrollHandlerExtension = EditorView.scrollHandler.of(
@@ -723,9 +723,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
       // calculate the correct scroll delta) before invoking scrolling in editor.
       const inWindowedContainer = this._inViewport !== null;
       const preventDefault = inWindowedContainer && !this._inViewport;
-      this._editorScrollRequested.emit({
+      this._scrollRequested.emit({
         defaultPrevented: preventDefault,
-        scrollEditor: () => {
+        scrollWithinCell: () => {
           view.dispatch({
             effects: EditorView.scrollIntoView(range, options)
           });
@@ -736,9 +736,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   );
 
   private _editorConfig: Record<string, any> = {};
-  private _editorScrollRequested = new Signal<Cell, Cell.IEditorScrollRequest>(
-    this
-  );
+  private _scrollRequested = new Signal<Cell, Cell.IScrollRequest>(this);
   private _editorExtensions: Extension[] = [];
   private _input: InputArea | null;
   private _inputHidden = false;
@@ -951,16 +949,16 @@ export namespace Cell {
   /**
    * Value of the signal emitted by cell on editor scroll request.
    */
-  export interface IEditorScrollRequest {
+  export interface IScrollRequest {
     /**
-     * A method which scrolls the editor, fulfilling the scroll request.
+     * Scrolls to the target cell part, fulfilling the scroll request.
      *
      * ### Notes
      * This method is intended for use by windowed containers that
-     * require the cell to be first scrolled into the viewport and
-     * to allow for proper scrolling of the editor.
+     * require the cell to be first scrolled into the viewport to
+     * then enable proper scrolling within cell.
      */
-    scrollEditor: () => void;
+    scrollWithinCell: () => void;
     /**
      * Whether the default scrolling was prevented due to the cell being out of viewport.
      */
