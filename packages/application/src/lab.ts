@@ -205,7 +205,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    * This introduces a slight delay to the command invocation, but no delay to user input.
    */
   protected evtKeydown(event: KeyboardEvent): void {
-    const permissionToExecute = new PromiseDelegate();
+    const permissionToExecute = new PromiseDelegate<boolean>();
 
     // Hold the execution of any keybinding until we know if this event would cause text insertion
     this.commands.holdKeyBindingExecution(event, permissionToExecute.promise);
