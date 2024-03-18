@@ -43,7 +43,9 @@ export class ProviderReconciliator implements IProviderReconciliator {
     const isApplicablePromises = this._providers.map(p =>
       p.isApplicable(this._context)
     );
-    const applicableProviders = await Promise.all(isApplicablePromises);
+    const applicableProviders = await Promise.allSettled(isApplicablePromises).then((providers)=>{
+      providers.forEach((provider) => { provider.status == 'rejected' && console.log(`Error: ${provider.reason}`) }
+    });
     return this._providers.filter((_, idx) => applicableProviders[idx]);
   }
 
