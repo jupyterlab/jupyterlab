@@ -84,8 +84,9 @@
 }
 
 .jp-current-match > .cm-searching::selection,
+.jp-current-match > .cm-searching span::selection,
 .cm-searching > .jp-current-match::selection,
-.jp-current-match > .cm-searching span::selection {
+.cm-searching > .jp-current-match span::selection {
   background-color: var(--jp-search-selected-match-background-color);
   color: var(--jp-search-selected-match-color);
 }
