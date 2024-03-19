@@ -399,9 +399,9 @@ class InputNumberDialog extends InputDialogBase<number> {
 /**
  * Base widget body for input text/password/email dialog
  */
-class InputDialogTextualBase extends InputDialogBase<string> {
+class InputDialogTextBase extends InputDialogBase<string> {
   /**
-   * InputDialogTextualBase constructor
+   * InputDialogTextBase constructor
    *
    * @param options Constructor options
    */
@@ -430,7 +430,7 @@ class InputDialogTextualBase extends InputDialogBase<string> {
 /**
  * Widget body for input text dialog
  */
-class InputTextDialog extends InputDialogTextualBase {
+class InputTextDialog extends InputDialogTextBase {
   /**
    * InputTextDialog constructor
    *
@@ -462,7 +462,7 @@ class InputTextDialog extends InputDialogTextualBase {
 /**
  * Widget body for input password dialog
  */
-class InputPasswordDialog extends InputDialogTextualBase {
+class InputPasswordDialog extends InputDialogTextBase {
   /**
    * InputPasswordDialog constructor
    *
