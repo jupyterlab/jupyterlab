@@ -404,26 +404,31 @@ describe('shortcuts list @A11y', () => {
       const innerHTML = keyboardShortcuts[i].innerHTML;
       // Create an object with the data and add it to the array
       if (ariaLabel !== null) {
-        keyboardShortcutsData.push({ ariaLabel, innerHTML }); // [ { [ ],[ ] }, { } , { } ]
+        keyboardShortcutsData.push({ ariaLabel, innerHTML }); // [ { [ ],[ ] }, { [ ],[ ] } , { [ ],[ ] } ]
       }
     }
 
     for (let i = 0; i < keyboardShortcutsData.length; i++) {
       const foundPunctuation: string[] = []; //['Opening bracket' , 'full stop']
-      const shortcutKeysHTML = keyboardShortcuts[i][1].split(' '); // ['⌃', '[' , '.']
+      const shortcutKeysHTML = keyboardShortcutsData[i][1].split(' '); // ['⌃', '[' , '.']
       const foundText: string[] = []; //['Opening bracket' , 'full stop']
-      const shortcutKeysAria = keyboardShortcuts[i][0].split(' '); // ['ctrl', 'Opening bracket' , 'full stop']
+      const shortcutKeysAria = keyboardShortcutsData[i][0].split(' '); // ['ctrl', 'Opening bracket' , 'full stop']
+
+      //loop through individual keys of inner HTML
       for (const shortcutKey of shortcutKeysHTML) {
+        //check if any keys appear in object keys
         if (keyToText.hasOwnProperty(shortcutKey)) {
-          foundPunctuation.push(keyToText[shortcutKey]);
+          foundPunctuation.push(keyToText[shortcutKey]); //push corresponding punctuation text value
         }
       }
+      //loop through individual words of aria label
       for (const shortcutText of Object.values(keyToText)) {
+        //check if any words appear in object values
         if (shortcutKeysAria.includes(shortcutText)) {
-          foundText.push(shortcutText);
+          foundText.push(shortcutText); //push text value
         }
       }
-      expect(foundText).toEqual(foundPunctuation);
+      expect(foundText).toEqual(foundPunctuation); // check that each array of pushed values match
     }
   });
 });
