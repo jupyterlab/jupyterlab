@@ -95,7 +95,8 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
         await model.refresh();
       },
       runningChanged: model.refreshed,
-      shutdownLabel: trans.__('Delete'),
+      shutdownLabel: (item: IRunningSessions.IRunningItem) =>
+        trans.__('Delete %1', item.label() as string),
       shutdownAllLabel: trans.__('Delete All'),
       shutdownAllConfirmationText: trans.__(
         'Are you sure you want to delete all workspaces?'
