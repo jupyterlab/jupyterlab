@@ -14,6 +14,9 @@ Workspaces can be managed in three ways:
 - :ref:`via Command Line Interface <workspaces-cli>`
 - :ref:`via URL schema and parameters <url-workspaces>`
 
+
+A workspace name may only contain ASCII letters (a-z and A-Z), digits (0-9), hyphen-minuses (``-``) and underscores (``_``).
+
 .. _workspaces-gui:
 
 Managing Workspaces (GUI)
