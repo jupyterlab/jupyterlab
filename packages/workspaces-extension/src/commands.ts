@@ -191,7 +191,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
         const result = await showDialog({
           title: trans.__('Delete workspace'),
           body: trans.__(
-            'Deleting workspace %1 will also delete its URL. A deleted workspace cannot be recovered.',
+            'Deleting workspace "%1" will also delete its URL. A deleted workspace cannot be recovered.',
             workspaceId
           ),
           buttons: [
@@ -418,7 +418,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
           defaultPath: fileBrowser.model.path,
           manager: fileBrowser.model.manager,
           label: trans.__(
-            'The %1 workspace will be saved in the chosen directory as %1%2.',
+            'The "%1" workspace will be saved in the chosen directory as "%1%2".',
             workspaceId,
             WORKSPACE_EXT
           ),
