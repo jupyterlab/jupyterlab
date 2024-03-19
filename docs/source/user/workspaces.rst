@@ -22,12 +22,12 @@ A workspace name may only contain ASCII letters (a-z and A-Z), digits (0-9), hyp
 Managing Workspaces (GUI)
 -------------------------
 
-A number of commands is available to manage workspaces from the main menu, sidebar, and command palette:
+There are several commands for managing workspaces from the main menu, sidebar, and command palette:
 
 - `create-new`, `clone`, `rename`, `reset`, and `delete` act on the workspaces stored by on the server in :ref:`the dedicated location <workspaces-directory>`.
 - `save`, `save as`, `import`, and `export` can load and store the workspace to/from the file system (contained within the Jupyter root directory); `save` will save the workspace to the most recently saved file.
 
-In the sidebar the current workspace is indicated with check mark (✓). A different workspace can be opened by clicking on the corresponding sidebar item. Opening context menu (right click) over the workspace item in the sidebar will present actions available for management of that workspace:
+In the sidebar, in the "Running Terminals and Kernels" panel, under "Workspaces", the current workspace has a check mark (✓). Clicking on another workspace will open. Opening the context menu (right click) over the workspace item in the sidebar will present actions available for management of that workspace:
 
 .. image:: ../images/workspaces-sidebar.png
    :align: center
@@ -39,7 +39,7 @@ In the sidebar the current workspace is indicated with check mark (✓). A diffe
 Managing Workspaces (CLI)
 -------------------------
 
-JupyterLab provides a command-line interface for workspace ``import`` and
+JupyterLab provides a command line interface for workspace ``import`` and
 ``export``:
 
 .. code-block:: bash
@@ -59,8 +59,9 @@ JupyterLab provides a command-line interface for workspace ``import`` and
   $ jupyter lab workspaces import file_name.json
   Saved workspace: <workspaces-directory>/labworkspacesfoo-54d5.jupyterlab-workspace
 
-The ``export`` functionality is as friendly as possible: if a workspace does not
-exist, it will still generate an empty workspace for export.
+The ``export`` command will generate a URL for any workspace you provide as an argument,
+even if the workspace does not yet exist. Visiting a URL for a nonexistent workspace will create
+a new workspace with that name.
 
 The ``import`` functionality validates the structure of the workspace file and
 validates the ``id`` field in the workspace ``metadata`` to make sure its URL is
@@ -72,10 +73,7 @@ default workspace.
 Workspace File Format
 ---------------------
 
-A workspace file in a JSON file with a specific spec.
-
-
-There are two top level keys requires, `data`, and `metadata`.
+A workspace file is a JSON file that contains one object with two required top-level keys, `data`, and `metadata`.
 
 The `metadata` must be a mapping with an `id`
 key that has the same value as the ID of the workspace. This should also be the relative URL path to access the workspace,
