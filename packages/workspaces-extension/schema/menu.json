@@ -11,7 +11,7 @@
             "rank": 10,
             "submenu": {
               "id": "jp-mainmenu-file-workspaces",
-              "label": "Workspaces…",
+              "label": "Workspaces",
               "items": [
                 {
                   "command": "workspace-ui:open",

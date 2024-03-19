@@ -126,7 +126,12 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
       node.classList.contains(WORKSPACE_ITEM_CLASS);
 
     app.commands.addCommand(CommandIDs.open, {
-      label: trans.__('Open Workspace'),
+      label: args => {
+        const workspaceId = args.workspace as string | undefined;
+        return workspaceId
+          ? trans.__('Open Workspace')
+          : trans.__('Open Workspace…');
+      },
       execute: async args => {
         let workspaceId = args.workspace as string | undefined;
 
@@ -161,7 +166,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
     });
 
     app.commands.addCommand(CommandIDs.deleteWorkspace, {
-      label: trans.__('Delete Workspace'),
+      label: trans.__('Delete Workspace…'),
       execute: async args => {
         const node = app.contextMenuHitTest(test);
         let workspaceId =
@@ -203,7 +208,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
     });
 
     app.commands.addCommand(CommandIDs.createNew, {
-      label: trans.__('Create New Workspace'),
+      label: trans.__('Create New Workspace…'),
       execute: async args => {
         let workspaceId = args.workspace as string | undefined;
 
@@ -225,7 +230,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
     });
 
     app.commands.addCommand(CommandIDs.clone, {
-      label: trans.__('Clone Workspace'),
+      label: trans.__('Clone Workspace…'),
       execute: async args => {
         const node = app.contextMenuHitTest(test);
         let workspaceId =
@@ -296,7 +301,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
     });
 
     app.commands.addCommand(CommandIDs.reset, {
-      label: trans.__('Reset Workspace'),
+      label: trans.__('Reset Workspace…'),
       execute: async args => {
         const node = app.contextMenuHitTest(test);
         const workspaceId =
@@ -382,7 +387,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
     });
 
     app.commands.addCommand(CommandIDs.exportWorkspace, {
-      label: trans.__('Export Workspace'),
+      label: trans.__('Export Workspace…'),
       execute: async args => {
         const { contents } = app.serviceManager;
 
@@ -450,7 +455,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
     });
 
     app.commands.addCommand(CommandIDs.save, {
-      label: trans.__('Save Current Workspace'),
+      label: trans.__('Save Current Workspace…'),
       execute: async () => {
         const { contents } = app.serviceManager;
         const data = app.serviceManager.workspaces.fetch(resolver.name);
