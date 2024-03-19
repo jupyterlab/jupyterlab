@@ -367,7 +367,7 @@ test.describe('shorcuts list @A11y', () => {
 
       await page.keyboard.press('Escape');
 
-      expect(shortcutRows.nth(i)).toBeFocused();
+      await expect(shortcutRows.nth(i)).toBeFocused();
     }
   });
 });
