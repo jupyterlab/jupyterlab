@@ -20,6 +20,7 @@ import {
   SearchableSessions
 } from '@jupyterlab/running';
 import { IRecentsManager } from '@jupyterlab/docmanager';
+import { IStateDB } from '@jupyterlab/statedb';
 import { ITranslator } from '@jupyterlab/translation';
 import {
   CommandToolbarButton,
@@ -80,16 +81,17 @@ const sidebarPlugin: JupyterFrontEndPlugin<IRunningSessionSidebar> = {
   description: 'Provides the running session sidebar.',
   provides: IRunningSessionSidebar,
   requires: [IRunningSessionManagers, ITranslator],
-  optional: [ILayoutRestorer],
+  optional: [ILayoutRestorer, IStateDB],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     manager: IRunningSessionManagers,
     translator: ITranslator,
-    restorer: ILayoutRestorer | null
+    restorer: ILayoutRestorer | null,
+    state: IStateDB | null
   ): IRunningSessionSidebar => {
     const trans = translator.load('jupyterlab');
-    const running = new RunningSessions(manager, translator);
+    const running = new RunningSessions(manager, translator, state);
     running.id = 'jp-running-sessions';
     running.title.caption = trans.__('Running Terminals and Kernels');
     running.title.icon = runningIcon;

@@ -5,6 +5,7 @@
 This module is meant to run JupyterLab in a headless browser, making sure
 the application launches and starts up without errors.
 """
+
 import asyncio
 import inspect
 import logging

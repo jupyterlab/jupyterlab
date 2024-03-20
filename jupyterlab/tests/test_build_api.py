@@ -2,6 +2,7 @@
 # Distributed under the terms of the Modified BSD License.
 
 """Test the kernels service API."""
+
 import asyncio
 import json
 import os

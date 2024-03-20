@@ -569,13 +569,22 @@ test.describe('General', () => {
 
     await page.click('[title="Running Terminals and Kernels"]');
 
+    // Wait up to 5s for both kernels to startup
     await expect
-      .soft(
-        page.locator(
-          '.jp-RunningSessions-item.jp-mod-kernel >> text="Python 3 (ipykernel)"'
-        )
-      )
-      .toHaveCount(2);
+      .soft(page.locator('.jp-RunningSessions-item.jp-mod-kernel'))
+      .toHaveCount(2, { timeout: 5000 });
+
+    const freeezeKernelIds = async () => {
+      return page.evaluate(() => {
+        const mockedKernelIds = ['abcd1234', 'wxyz5678'];
+        document
+          .querySelectorAll('.jp-RunningSessions-item-label-kernel-id')
+          .forEach((span, i) => {
+            span.innerText = `(${mockedKernelIds[i]})`;
+          });
+      });
+    };
+    await freeezeKernelIds();
 
     expect
       .soft(
@@ -586,6 +595,7 @@ test.describe('General', () => {
       .toMatchSnapshot('running_layout.png');
 
     await page.click('jp-button[data-command="running:show-modal"]');
+    await freeezeKernelIds();
 
     expect(
       await page
