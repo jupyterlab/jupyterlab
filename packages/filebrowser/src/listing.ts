@@ -2307,7 +2307,8 @@ export namespace DirListing {
       narrow.textContent = '...';
       if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode({
-          alwaysVisible: true
+          alwaysVisible: true,
+          headerNode:true
         });
         node.appendChild(checkboxWrapper);
       }
@@ -2493,6 +2494,7 @@ export namespace DirListing {
      */
     createCheckboxWrapperNode(options?: {
       alwaysVisible: boolean;
+      headerNode: boolean
     }): HTMLElement {
       // Wrap the checkbox in a label element in order to increase its hit area.
       const labelWrapper = document.createElement('label');
