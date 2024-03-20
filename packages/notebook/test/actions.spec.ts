@@ -18,6 +18,7 @@ import {
   NotebookModel,
   StaticNotebook
 } from '@jupyterlab/notebook';
+import { Stdin } from '@jupyterlab/outputarea';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISharedCodeCell } from '@jupyter/ydoc';
 import {
@@ -25,7 +26,8 @@ import {
   dismissDialog,
   JupyterServer,
   signalToPromise,
-  sleep
+  sleep,
+  waitForDialog
 } from '@jupyterlab/testing';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
 import * as utils from './utils';
@@ -682,9 +684,14 @@ describe('@jupyterlab/notebook', () => {
         // Cell type should stay unchanged.
         expect(widget.activeCell).toBeInstanceOf(CodeCell);
 
+        // Should show a dialog informing user why cell type could not be changed
+        await waitForDialog();
+        await acceptDialog();
+
         // Submit the input
-        const input = stdin.node.querySelector('input')!;
-        input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+        (stdin as Stdin).handleEvent(
+          new KeyboardEvent('keydown', { key: 'Enter' })
+        );
         await donePromise;
 
         // Try to change cell type again, it should work now
