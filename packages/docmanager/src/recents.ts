@@ -14,7 +14,7 @@ import { IRecentsManager, RecentDocument } from './tokens';
 /**
  * Manager for recently opened and closed documents.
  */
-export class RecentsManager implements IRecentsManager, IDisposable {
+export class RecentsManager implements IRecentsManager {
   constructor(options: RecentsManager.IOptions) {
     this._saveDebouncer = new Debouncer(this._save.bind(this), 500);
     this._stateDB = options.stateDB;
