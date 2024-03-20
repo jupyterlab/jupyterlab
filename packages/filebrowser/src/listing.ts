@@ -2505,9 +2505,11 @@ export namespace DirListing {
       // Prevent the user from clicking (via mouse, keyboard, or touch) the
       // checkbox since other code handles the mouse and keyboard events and
       // controls the checked state of the checkbox.
-      checkbox.addEventListener('click', event => {
-        event.preventDefault();
-      });
+      if (!options?.headerNode) {
+        checkbox.addEventListener('click', event => {
+            onClickHandler(event);
+        });
+    }
 
       // The individual file checkboxes are visible on hover, but the header
       // check-all checkbox is always visible.
