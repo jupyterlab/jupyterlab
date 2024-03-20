@@ -398,36 +398,49 @@ describe('shortcuts list @A11y', () => {
       '-': 'Hyphen-minus'
     };
 
+    const punctuationText: string[] = [
+      'Closing bracket',
+      'Opening bracket',
+      'Comma',
+      'Full stop',
+      'Single quote',
+      'Hyphen-minus'
+    ];
+
     for (let i = 0; i < keyboardShortcuts.length; i++) {
       //Get the current element's aria-label and innerHTML
       const ariaLabel = keyboardShortcuts[i].getAttribute('aria-label');
       const innerHTML = keyboardShortcuts[i].innerHTML;
       // Create an object with the data and add it to the array
       if (ariaLabel !== null) {
-        keyboardShortcutsData.push({ ariaLabel, innerHTML }); // [ { [ ],[ ] }, { [ ],[ ] } , { [ ],[ ] } ]
+        keyboardShortcutsData.push({
+          ariaLabel: ariaLabel,
+          innerHTML: innerHTML
+        });
       }
     }
 
     for (let i = 0; i < keyboardShortcutsData.length; i++) {
       const foundPunctuation: string[] = []; //['Opening bracket' , 'full stop']
-      const shortcutKeysHTML = keyboardShortcutsData[i][1].split(' '); // ['⌃', '[' , '.']
+      const shortcutKeysHTML = keyboardShortcutsData[i]['innerHTML'].split(' '); // ['⌃', '[' , '.']
       const foundText: string[] = []; //['Opening bracket' , 'full stop']
-      const shortcutKeysAria = keyboardShortcutsData[i][0].split(' '); // ['ctrl', 'Opening bracket' , 'full stop']
+      const shortcutKeysAria = keyboardShortcutsData[i]['ariaLabel'].split(' '); // ['ctrl', 'Opening bracket' , 'full stop']
 
       //loop through individual keys of inner HTML
-      for (const shortcutKey of shortcutKeysHTML) {
+      for (let i = 0; i < shortcutKeysHTML.length; i++) {
         //check if any keys appear in object keys
-        if (keyToText.hasOwnProperty(shortcutKey)) {
-          foundPunctuation.push(keyToText[shortcutKey]); //push corresponding punctuation text value
+        if (keyToText.hasOwnProperty(shortcutKeysHTML[i])) {
+          foundPunctuation.push(keyToText[shortcutKeysHTML[i]]); //push corresponding punctuation text value
         }
       }
-      //loop through individual words of aria label
-      for (const shortcutText of Object.values(keyToText)) {
+
+      for (let i = 0; i < shortcutKeysAria.length; i++) {
         //check if any words appear in object values
-        if (shortcutKeysAria.includes(shortcutText)) {
-          foundText.push(shortcutText); //push text value
+        if (punctuationText.includes(shortcutKeysAria[i])) {
+          foundText.push(shortcutKeysAria[i]); //push text value
         }
       }
+
       expect(foundText).toEqual(foundPunctuation); // check that each array of pushed values match
     }
   });
