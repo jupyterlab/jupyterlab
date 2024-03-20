@@ -4533,12 +4533,14 @@ __metadata:
     "@jupyterlab/rendermime-interfaces": ^3.10.0-alpha.1
     "@jupyterlab/running": ^4.2.0-alpha.1
     "@jupyterlab/services": ^7.2.0-alpha.1
+    "@jupyterlab/statedb": ^4.2.0-alpha.1
     "@jupyterlab/translation": ^4.2.0-alpha.1
     "@jupyterlab/ui-components": ^4.2.0-alpha.1
     "@lumino/commands": ^2.2.0
     "@lumino/polling": ^2.1.2
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
+    react: ^18.2.0
     rimraf: ~5.0.5
     typedoc: ~0.24.7
     typescript: ~5.1.6
@@ -4550,6 +4552,7 @@ __metadata:
   resolution: "@jupyterlab/running@workspace:packages/running"
   dependencies:
     "@jupyterlab/apputils": ^4.3.0-alpha.1
+    "@jupyterlab/statedb": ^4.2.0-alpha.1
     "@jupyterlab/translation": ^4.2.0-alpha.1
     "@jupyterlab/ui-components": ^4.2.0-alpha.1
     "@lumino/coreutils": ^2.1.2

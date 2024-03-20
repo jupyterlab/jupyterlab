@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^4.3.0-alpha.1",
+    "@jupyterlab/statedb": "^4.2.0-alpha.1",
     "@jupyterlab/translation": "^4.2.0-alpha.1",
     "@jupyterlab/ui-components": "^4.2.0-alpha.1",
     "@lumino/coreutils": "^2.1.2",
