@@ -6,7 +6,6 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
-import { IDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import { IRecentsManager, RecentDocument } from './tokens';
