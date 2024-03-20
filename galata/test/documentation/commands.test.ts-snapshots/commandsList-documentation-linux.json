@@ -109,15 +109,15 @@
     "id": "application:toggle-side-tabbar",
     "label": "Show Left Activity Bar",
     "caption": "",
-    "shortcuts": []
+    "shortcuts": [
+      "Alt 1"
+    ]
   },
   {
     "id": "application:toggle-sidebar-widget",
     "label": "Toggle Sidebar Element",
     "caption": "",
-    "shortcuts": [
-      "Alt 1"
-    ]
+    "shortcuts": []
   },
   {
     "id": "apputils:activate-command-palette",
@@ -368,12 +368,6 @@
     "shortcuts": []
   },
   {
-    "id": "console:redo",
-    "label": "Redo",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
     "id": "console:replace-selection",
     "label": "Replace Selection in Console",
     "caption": "",
@@ -416,12 +410,6 @@
   {
     "id": "console:toggle-show-all-kernel-activity",
     "label": "Show All Kernel Activity",
-    "caption": "",
-    "shortcuts": []
-  },
-  {
-    "id": "console:undo",
-    "label": "Undo",
     "caption": "",
     "shortcuts": []
   },
