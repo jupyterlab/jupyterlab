@@ -41,8 +41,8 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@yarnpkg/core": "^3.0.0",
-    "@yarnpkg/parsers": "^2.0.0",
+    "@yarnpkg/core": "^4.0.3",
+    "@yarnpkg/parsers": "^3.0.0",
     "commander": "^9.4.1",
     "crypto": "~1.0.1",
     "dependency-graph": "^0.11.0",
