@@ -180,4 +180,4 @@ Anyone is welcome to attend, if they would like to discuss a topic or just liste
 - Where: [`jovyan` Zoom](https://zoom.us/my/jovyan?pwd=c0JZTHlNdS9Sek9vdzR3aTJ4SzFTQT09)
 - What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both)
 
-> Notes are archived on [GitHub JupyterLab team compass](https://github.com/jupyterlab/team-compass/issues).
+> Notes are archived on [GitHub Jupyter Frontends team compass](https://github.com/jupyterlab/frontends-team-compass/issues).
