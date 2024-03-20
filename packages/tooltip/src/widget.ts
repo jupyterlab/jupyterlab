@@ -220,6 +220,11 @@ export class Tooltip extends Widget {
     const editor = this._editor;
 
     const anchor = editor.getCoordinateForPosition(position);
+
+    if (!anchor) {
+      return;
+    }
+
     const style = window.getComputedStyle(this.node);
     const paddingLeft = parseInt(style.paddingLeft!, 10) || 0;
 

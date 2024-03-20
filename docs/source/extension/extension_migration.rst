@@ -6,6 +6,21 @@
 Extension Migration Guide
 ================================================
 
+
+JupyterLab 4.1 to 4.2
+---------------------
+
+API updates
+^^^^^^^^^^^
+
+- The ``CodeEditor.ICoordinate`` interface was corrected to not include ``toJSON()``, ``x``, ``y``,
+  ``width`` and ``height``; these properties were never set by methods returning ``ICoordinate``
+  and they were never used by methods accepting it.
+- ``CodeEditor.getCoordinateForPosition`` return type was corrected to clarify that it can return
+  ``null``; previously ``null`` could be returned despite the return type indicating it would always
+  return a non-null ``ICoordinate`` value.
+
+
 JupyterLab 4.0 to 4.1
 ---------------------
 
@@ -36,7 +51,7 @@ The Toolbar and ToolbarButtonComponent (from the package *ui-components*) now re
 This library uses the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
 and is based on `FAST <https://www.fast.design/>`_ library by Microsoft.
 
-See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
+See https://github.com/jupyterlab/frontends-team-compass/issues/143 for more context on the change.
 
 - Changes the selectors of the ``Toolbar`` and ``ToolbarButtonComponent``.
 
