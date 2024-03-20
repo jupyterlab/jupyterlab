@@ -68,6 +68,12 @@ test.describe('Sidebars', () => {
     await contents.createDirectory(`${tmpPath}/${testFolderName}`);
   });
 
+  test.afterAll(async ({ request, tmpPath }) => {
+    // Clean up the test files
+    const contents = galata.newContentsHelper(request);
+    await contents.deleteDirectory(tmpPath);
+  });
+
   sidebarIds.forEach(sidebarId => {
     test(`Open Sidebar tab ${sidebarId}`, async ({ page }) => {
       await page.sidebar.openTab(sidebarId);
@@ -82,30 +88,24 @@ test.describe('Sidebars', () => {
         imageName.toLowerCase()
       );
     });
-
-    // Treat file browser as two additional test cases for resized widths
-    for (const [sizeName, size] of Object.entries(sidebarWidths)) {
-      test(`Open Sidebar tab filebrowser ${sizeName}`, async ({ page }) => {
-        await page.sidebar.openTab('filebrowser');
-        // Resize the sidebar to the desired width.
-        await page.sidebar.setWidth(size, 'left');
-        const imageName = `opened-sidebar-filebrowser-${sizeName}.png`;
-        const position = await page.sidebar.getTabPosition('filebrowser');
-        const sidebar = page.sidebar.getContentPanelLocator(
-          position ?? undefined
-        );
-        expect(await sidebar.screenshot()).toMatchSnapshot(
-          imageName.toLowerCase()
-        );
-      });
-    }
-
-    test.afterAll(async ({ request, tmpPath }) => {
-      // Clean up the test files
-      const contents = galata.newContentsHelper(request);
-      await contents.deleteDirectory(tmpPath);
-    });
   });
+
+  // Treat file browser as two additional test cases for resized widths
+  for (const [sizeName, size] of Object.entries(sidebarWidths)) {
+    test(`Open Sidebar tab filebrowser ${sizeName}`, async ({ page }) => {
+      await page.sidebar.openTab('filebrowser');
+      // Resize the sidebar to the desired width.
+      await page.sidebar.setWidth(size, 'left');
+      const imageName = `opened-sidebar-filebrowser-${sizeName}.png`;
+      const position = await page.sidebar.getTabPosition('filebrowser');
+      const sidebar = page.sidebar.getContentPanelLocator(
+        position ?? undefined
+      );
+      expect(await sidebar.screenshot()).toMatchSnapshot(
+        imageName.toLowerCase()
+      );
+    });
+  }
 
   test('File Browser has no unused rules', async ({ page }) => {
     await page.sidebar.openTab('filebrowser');
