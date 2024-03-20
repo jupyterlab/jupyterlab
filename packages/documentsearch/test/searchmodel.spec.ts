@@ -87,9 +87,12 @@ describe('documentsearch/searchmodel', () => {
         expect(model.parsingError).toEqual('');
         model.searchExpression = 'query\\';
         await signalToPromise(model.stateChanged);
-        expect(model.parsingError).toEqual(
-          'SyntaxError: Invalid regular expression: /query\\/: \\ at end of pattern'
-        );
+        expect([
+          // Node 18.x and older
+          'SyntaxError: Invalid regular expression: /query\\/: \\ at end of pattern',
+          // Node 20.x and newer
+          'SyntaxError: Invalid regular expression: /query\\/gim: \\ at end of pattern'
+        ]).toContain(model.parsingError);
       });
     });
 
