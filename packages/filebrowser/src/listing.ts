@@ -2507,9 +2507,9 @@ export namespace DirListing {
       // controls the checked state of the checkbox.
       if (!options?.headerNode) {
         checkbox.addEventListener('click', event => {
-            onClickHandler(event);
+            event.preventDefault()
         });
-    }
+      }
 
       // The individual file checkboxes are visible on hover, but the header
       // check-all checkbox is always visible.
