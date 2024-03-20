@@ -3501,7 +3501,7 @@ __metadata:
     path: ~0.12.7
     rimraf: ~5.0.5
     systeminformation: ^5.8.6
-    typescript: ~5.1.6
+    typescript: ~5.4.3
     vega: ^5.20.0
     vega-lite: ^5.6.1
     vega-statistics: ^1.7.9
@@ -20310,6 +20310,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"typescript@npm:~5.4.3":
+  version: 5.4.3
+  resolution: "typescript@npm:5.4.3"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: d74d731527e35e64d8d2dcf2f897cf8cfbc3428be0ad7c48434218ba4ae41239f53be7c90714089db1068c05cae22436af2ecba71fd36ecc5e7a9118af060198
+  languageName: node
+  linkType: hard
+
 "typescript@patch:typescript@>=3 < 6#~builtin<compat/typescript>, typescript@patch:typescript@~5.1.6#~builtin<compat/typescript>":
   version: 5.1.6
   resolution: "typescript@patch:typescript@npm%3A5.1.6#~builtin<compat/typescript>::version=5.1.6&hash=85af82"
@@ -20317,6 +20327,16 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 21e88b0a0c0226f9cb9fd25b9626fb05b4c0f3fddac521844a13e1f30beb8f14e90bd409a9ac43c812c5946d714d6e0dee12d5d02dfc1c562c5aacfa1f49b606
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@~5.4.3#~builtin<compat/typescript>":
+  version: 5.4.3
+  resolution: "typescript@patch:typescript@npm%3A5.4.3#~builtin<compat/typescript>::version=5.4.3&hash=85af82"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 3a62fe90aa79d68c9ce38ea5edb2957e62801c733b99f0e5a2b8b50922761f68f7d9a40d28c544b449866e81185cddb93cba2496d0ff3fa52ef5b1f8bcace38c
   languageName: node
   linkType: hard
 
