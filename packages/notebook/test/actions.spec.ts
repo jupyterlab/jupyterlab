@@ -24,6 +24,7 @@ import {
   acceptDialog,
   dismissDialog,
   JupyterServer,
+  signalToPromise,
   sleep
 } from '@jupyterlab/testing';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
@@ -661,6 +662,34 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.changeCellType(widget, 'markdown');
         const cell = widget.activeCell as MarkdownCell;
         expect(cell.model.metadata.trusted).toBe(undefined);
+      });
+
+      it('should not change cell type away from code cell when input is pending', async () => {
+        let cell = widget.activeCell as CodeCell;
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
+
+        const inputRequested = signalToPromise(cell.outputArea.inputRequested);
+
+        // Execute input request
+        cell.model.sharedModel.setSource('input()');
+        // Do not wait for completion yet: it will not complete until input is submitted
+        const donePromise = NotebookActions.run(widget, sessionContext);
+        // Wait for the input being requested from kernel
+        const stdin = (await inputRequested)[1];
+
+        // Try to change cell type
+        NotebookActions.changeCellType(widget, 'raw');
+        // Cell type should stay unchanged.
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
+
+        // Submit the input
+        const input = stdin.node.querySelector('input')!;
+        input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+        await donePromise;
+
+        // Try to change cell type again, it should work now
+        NotebookActions.changeCellType(widget, 'raw');
+        expect(widget.activeCell).toBeInstanceOf(RawCell);
       });
     });
 
