@@ -6,7 +6,6 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 import { Contents, ServerConnection } from '@jupyterlab/services';
 import { IStateDB } from '@jupyterlab/statedb';
-import { IDisposable } from '@lumino/disposable';
 import { Debouncer } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 import { IRecentsManager, RecentDocument } from './tokens';
@@ -14,7 +13,7 @@ import { IRecentsManager, RecentDocument } from './tokens';
 /**
  * Manager for recently opened and closed documents.
  */
-export class RecentsManager implements IRecentsManager, IDisposable {
+export class RecentsManager implements IRecentsManager {
   constructor(options: RecentsManager.IOptions) {
     this._saveDebouncer = new Debouncer(this._save.bind(this), 500);
     this._stateDB = options.stateDB;
