@@ -90,7 +90,7 @@ test.describe('Sidebars', () => {
     });
   });
 
-  // Treat file browser as two additional test cases for resized widths
+  // Additional test cases for resized widths of the file browser
   for (const [sizeName, size] of Object.entries(sidebarWidths)) {
     test(`Open Sidebar tab filebrowser ${sizeName}`, async ({ page }) => {
       await page.sidebar.openTab('filebrowser');
