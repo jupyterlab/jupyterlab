@@ -2308,7 +2308,7 @@ export namespace DirListing {
       if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode({
           alwaysVisible: true,
-          headerNode:true
+          headerNode: true
         });
         node.appendChild(checkboxWrapper);
       }
