@@ -390,7 +390,7 @@ export class CompleterModel implements Completer.IModel {
         index > -1
           ? originalItem.label.substring(0, index)
           : originalItem.label;
-      const match = StringExt.matchSumOfSquares(escapeHTML(text), query);
+      const match = StringExt.matchSumOfSquares(escapeHTML(text.toLowerCase()), query.toLowerCase());
       // Filter non-matching items.
       if (match) {
         // Highlight label text if there's a match
