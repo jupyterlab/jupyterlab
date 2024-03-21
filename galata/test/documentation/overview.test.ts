@@ -25,13 +25,16 @@ test.describe('Overview', () => {
 
     await page.click('[title="Running Terminals and Kernels"]');
 
-    await page
-      .locator(
-        '.jp-RunningSessions-item.jp-mod-kernel >> text="Python 3 (ipykernel)"'
-      )
-      .waitFor();
+    // Close all other sections
+    const otherSession = page.locator(
+      '#jp-running-sessions .jp-AccordionPanel-title.lm-mod-expanded:not([aria-label="Open Tabs Section"]) .lm-AccordionPanel-titleCollapser'
+    );
+    while ((await otherSession.count()) != 0) {
+      await otherSession.first().click();
+    }
+
     expect(
-      await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
+      await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 200 } })
     ).toMatchSnapshot('interface_tabs.png');
   });
 

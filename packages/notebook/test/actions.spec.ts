@@ -18,13 +18,16 @@ import {
   NotebookModel,
   StaticNotebook
 } from '@jupyterlab/notebook';
+import { Stdin } from '@jupyterlab/outputarea';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISharedCodeCell } from '@jupyter/ydoc';
 import {
   acceptDialog,
   dismissDialog,
   JupyterServer,
-  sleep
+  signalToPromise,
+  sleep,
+  waitForDialog
 } from '@jupyterlab/testing';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
 import * as utils from './utils';
@@ -661,6 +664,39 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.changeCellType(widget, 'markdown');
         const cell = widget.activeCell as MarkdownCell;
         expect(cell.model.metadata.trusted).toBe(undefined);
+      });
+
+      it('should not change cell type away from code cell when input is pending', async () => {
+        let cell = widget.activeCell as CodeCell;
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
+
+        const inputRequested = signalToPromise(cell.outputArea.inputRequested);
+
+        // Execute input request
+        cell.model.sharedModel.setSource('input()');
+        // Do not wait for completion yet: it will not complete until input is submitted
+        const donePromise = NotebookActions.run(widget, sessionContext);
+        // Wait for the input being requested from kernel
+        const stdin = (await inputRequested)[1];
+
+        // Try to change cell type
+        NotebookActions.changeCellType(widget, 'raw');
+        // Cell type should stay unchanged.
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
+
+        // Should show a dialog informing user why cell type could not be changed
+        await waitForDialog();
+        await acceptDialog();
+
+        // Submit the input
+        (stdin as Stdin).handleEvent(
+          new KeyboardEvent('keydown', { key: 'Enter' })
+        );
+        await donePromise;
+
+        // Try to change cell type again, it should work now
+        NotebookActions.changeCellType(widget, 'raw');
+        expect(widget.activeCell).toBeInstanceOf(RawCell);
       });
     });
 

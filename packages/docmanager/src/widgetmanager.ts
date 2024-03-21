@@ -12,6 +12,7 @@ import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
+import { IRecentsManager } from './tokens';
 
 /**
  * The class name added to document widgets.
@@ -28,6 +29,7 @@ export class DocumentWidgetManager implements IDisposable {
   constructor(options: DocumentWidgetManager.IOptions) {
     this._registry = options.registry;
     this.translator = options.translator || nullTranslator;
+    this._recentsManager = options.recentsManager || null;
   }
 
   /**
@@ -257,8 +259,17 @@ export class DocumentWidgetManager implements IDisposable {
         void this.onClose(handler as Widget);
         return false;
       case 'activate-request': {
-        const context = this.contextForWidget(handler as Widget);
+        const widget = handler as Widget;
+        const context = this.contextForWidget(widget);
         if (context) {
+          context.ready
+            .then(() => {
+              // contentsModel is null until the context is ready
+              this._recordAsRecentlyOpened(widget, context.contentsModel!);
+            })
+            .catch(() => {
+              console.warn('Could not record the recents status for', context);
+            });
           this._activateRequested.emit(context.path);
         }
         break;
@@ -326,8 +337,8 @@ export class DocumentWidgetManager implements IDisposable {
       return true;
     }
     if (shouldClose) {
+      const context = Private.contextProperty.get(widget);
       if (!ignoreSave) {
-        const context = Private.contextProperty.get(widget);
         if (!context) {
           return true;
         }
@@ -335,6 +346,22 @@ export class DocumentWidgetManager implements IDisposable {
           await context.save();
         } else {
           await context.saveAs();
+        }
+      }
+      if (context) {
+        const result = await Promise.race([
+          context.ready,
+          new Promise(resolve => setTimeout(resolve, 3000, 'timeout'))
+        ]);
+        if (result === 'timeout') {
+          console.warn(
+            'Could not record the widget as recently closed because the context did not become ready in 3 seconds'
+          );
+        } else {
+          // Note: `contentsModel` is null until the the context is ready;
+          // we have to handle it after `await` rather than in a `then`
+          // to ensure we record it as recent before the widget gets disposed.
+          this._recordAsRecentlyClosed(widget, context.contentsModel!);
         }
       }
       if (widget.isDisposed) {
@@ -353,6 +380,50 @@ export class DocumentWidgetManager implements IDisposable {
   protected onDelete(widget: Widget): Promise<void> {
     widget.dispose();
     return Promise.resolve(void 0);
+  }
+
+  /**
+   * Record the activated file, and its parent directory, as recently opened.
+   */
+  private _recordAsRecentlyOpened(
+    widget: Widget,
+    model: Omit<Contents.IModel, 'content'>
+  ) {
+    const recents = this._recentsManager;
+    if (!recents) {
+      // no-op
+      return;
+    }
+    const path = model.path;
+    const fileType = this._registry.getFileTypeForModel(model);
+    const contentType = fileType.contentType;
+    const factory = Private.factoryProperty.get(widget)?.name;
+    recents.addRecent({ path, contentType, factory }, 'opened');
+    // Add the containing directory, too
+    if (contentType !== 'directory') {
+      const parent =
+        path.lastIndexOf('/') > 0 ? path.slice(0, path.lastIndexOf('/')) : '';
+      recents.addRecent({ path: parent, contentType: 'directory' }, 'opened');
+    }
+  }
+
+  /**
+   * Record the activated file, and its parent directory, as recently opened.
+   */
+  private _recordAsRecentlyClosed(
+    widget: Widget,
+    model: Omit<Contents.IModel, 'content'>
+  ) {
+    const recents = this._recentsManager;
+    if (!recents) {
+      // no-op
+      return;
+    }
+    const path = model.path;
+    const fileType = this._registry.getFileTypeForModel(model);
+    const contentType = fileType.contentType;
+    const factory = Private.factoryProperty.get(widget)?.name;
+    recents.addRecent({ path, contentType, factory }, 'closed');
   }
 
   /**
@@ -513,6 +584,7 @@ export class DocumentWidgetManager implements IDisposable {
   private _stateChanged = new Signal<DocumentWidgetManager, IChangedArgs<any>>(
     this
   );
+  private _recentsManager: IRecentsManager | null;
 }
 
 /**
@@ -527,6 +599,11 @@ export namespace DocumentWidgetManager {
      * A document registry instance.
      */
     registry: DocumentRegistry;
+
+    /**
+     * The manager for recent documents.
+     */
+    recentsManager?: IRecentsManager;
 
     /**
      * The application language translator.
