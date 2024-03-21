@@ -326,12 +326,12 @@ describe('@jupyterlab/shortcut-extension', () => {
           {
             command: 'application:activate-previous-tab',
             keys: ['Ctrl Shift ['],
-            selector: 'body'
+            selector: '.jp-contextualShortcut-key'
           },
           {
             command: 'settingeditor:open',
             keys: ['Ctrl ,'],
-            selector: 'body'
+            selector: '.jp-contextualShortcut-key'
           }
         ],
         type: 'object'
@@ -377,7 +377,12 @@ describe('@jupyterlab/shortcut-extension', () => {
     const shortcuts = (await settings.get('shortcuts')
       .composite) as ISettingRegistry.IShortcut[];
 
+    const keyboardShortcuts = document.getElementsByClassName(
+      'jp-contextualShortcut-key'
+    );
+
     expect(shortcuts).toHaveLength(2);
+    expect(keyboardShortcuts).toHaveLength(2);
   });
 });
 
