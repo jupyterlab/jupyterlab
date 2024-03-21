@@ -2426,9 +2426,9 @@ def _log_multiple_compat_errors(logger, errors_map, verbose: bool):
         logger.warning(
             "\n        ".join(
                 [
-                    "\n   The following extensions might be outdated or specify dependencies incorrectly:",
+                    "\n   The following extensions may be outdated or specify dependencies that are incompatible with the current version of jupyterlab:",
                     *outdated,
-                    "\n   As a user, consider checking if an update is available for these packages.\n"
+                    "\n   If you are a user, check if an update is available for these packages.\n"
                     + (
                         "   If you are a developer, re-run with `--verbose` flag for more details.\n"
                         if not verbose
