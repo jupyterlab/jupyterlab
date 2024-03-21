@@ -52,7 +52,7 @@ test.use({
 });
 
 test.describe('Sidebars', () => {
-  test.beforeAll(async ({ request, tmpPath }) => {
+  test.beforeAll(async ({ page, request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
 
     // Create some dummy content
@@ -66,6 +66,9 @@ test.describe('Sidebars', () => {
     );
     // Create a dummy folder
     await contents.createDirectory(`${tmpPath}/${testFolderName}`);
+
+    // Freeze all items' last modified dates as one day ago.
+    await galata.Mock.freezeContentLastModified(page, filterContent);
   });
 
   test.afterAll(async ({ request, tmpPath }) => {
