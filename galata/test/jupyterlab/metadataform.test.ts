@@ -17,7 +17,9 @@ test.use({
   tmpPath: 'metadataform-test',
   waitForApplication: async ({ baseURL }, use, testInfo) => {
     const simpleWait = async (page: Page): Promise<void> => {
-      await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
+      await page.waitForSelector('#jupyterlab-splash', {
+        state: 'detached'
+      });
     };
     void use(simpleWait);
   }

@@ -39,21 +39,18 @@ test.describe('Table of Contents scrolling to heading', () => {
     await page.keyboard.press('Enter');
     await page.getByText('Mode: Edit').waitFor();
 
-    const contentPanel = page.sidebar.getContentPanelLocator(
-      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
+    await page.sidebar.getContentPanel(
+      await page.sidebar.getTabPosition('table-of-contents')
     );
-    await contentPanel.waitFor();
 
     await page
       .locator('.jp-TableOfContents-tree')
       .getByText('the last one')
       .click();
-    await page.waitForTimeout(100);
-
     // Should switch to command mode
     await expect.soft(page.getByText('Mode: Command')).toBeVisible();
 
-    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+    const nbPanel = await page.notebook.getNotebookInPanel();
     expect
       .soft(await nbPanel!.screenshot())
       .toMatchSnapshot('scrolled-to-bottom-heading.png');
@@ -71,7 +68,6 @@ test.describe('Table of Contents scrolling to heading', () => {
       .locator('.jp-TableOfContents-tree')
       .getByText('the last one')
       .click();
-    await page.waitForTimeout(100);
 
     expect(await nbPanel!.screenshot()).toMatchSnapshot(
       'scrolled-to-bottom-heading.png'

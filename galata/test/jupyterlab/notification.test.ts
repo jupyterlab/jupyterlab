@@ -27,7 +27,7 @@ test.describe('Toast', () => {
         });
       }, type);
 
-      await page.locator('.Toastify__toast').waitFor();
+      await page.waitForSelector('.Toastify__toast');
 
       expect(
         await page.locator('.Toastify__toast').screenshot({
@@ -70,8 +70,7 @@ test.describe('Toast', () => {
       });
     });
 
-    const handle = page.locator('.Toastify__toast');
-    await handle.waitFor();
+    const handle = await page.waitForSelector('.Toastify__toast');
 
     expect(await handle.screenshot({ animations: 'disabled' })).toMatchSnapshot(
       {
@@ -80,7 +79,7 @@ test.describe('Toast', () => {
     );
 
     await Promise.all([
-      handle.last().waitFor({ state: 'hidden' }),
+      handle.waitForElementState('hidden'),
       page.click('.Toastify__toast >> text=Button 2')
     ]);
 
@@ -114,8 +113,7 @@ test.describe('Toast', () => {
         });
       }, displayType);
 
-      const handle = page.locator('.Toastify__toast').first();
-      await handle.waitFor();
+      const handle = await page.waitForSelector('.Toastify__toast');
 
       expect(
         await handle.screenshot({ animations: 'disabled' })
@@ -136,7 +134,7 @@ test.describe('Toast', () => {
       });
     });
 
-    await page.locator('.Toastify__toast').first().waitFor();
+    await page.waitForSelector('.Toastify__toast');
 
     expect(
       await page.locator('.Toastify__toast-body').innerHTML()
@@ -153,7 +151,7 @@ test.describe('Toast', () => {
       });
     });
 
-    await page.locator('.Toastify__toast >> text=Simple note').waitFor();
+    await page.waitForSelector('.Toastify__toast >> text=Simple note');
 
     await page.evaluate(id => {
       return window.jupyterapp.commands.execute(
@@ -179,12 +177,12 @@ test.describe('Toast', () => {
       });
     });
 
-    await page.locator('.Toastify__toast >> text=Simple note').waitFor();
+    await page.waitForSelector('.Toastify__toast >> text=Simple note');
 
     await Promise.all([
-      page
-        .locator('.Toastify__toast >> text=Simple note')
-        .waitFor({ state: 'detached' }),
+      page.waitForSelector('.Toastify__toast >> text=Simple note', {
+        state: 'detached'
+      }),
       page.evaluate(id => {
         return window.jupyterapp.commands.execute(
           'apputils:dismiss-notification',

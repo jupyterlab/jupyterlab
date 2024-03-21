@@ -227,9 +227,7 @@ export interface IJupyterLabPage {
    *
    * @param element Element or selector to watch
    */
-  waitForTransition(
-    element: ElementHandle<Element> | Locator | string
-  ): Promise<void>;
+  waitForTransition(element: ElementHandle<Element> | string): Promise<void>;
 
   /**
    * Factory for active activity tab xpath
@@ -601,7 +599,7 @@ export class JupyterLabPage implements IJupyterLabPage {
    * @returns Whether this operation succeeds or not
    */
   async setSimpleMode(simple: boolean): Promise<boolean> {
-    const toggle = this.page.locator(
+    const toggle = await this.page.$(
       '#jp-single-document-mode button.jp-switch'
     );
     if (toggle) {
@@ -642,7 +640,7 @@ export class JupyterLabPage implements IJupyterLabPage {
    * @param element Element or selector to watch
    */
   async waitForTransition(
-    element: ElementHandle<Element> | Locator | string
+    element: ElementHandle<Element> | string
   ): Promise<void> {
     return Utils.waitForTransition(this.page, element);
   }

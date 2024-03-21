@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, test } from '@jupyterlab/galata';
+import { test } from '@jupyterlab/galata';
+import { expect } from '@playwright/test';
 import * as fs from 'fs-extra';
 
 test('All commands must have a default label', async ({ page }, testInfo) => {

@@ -37,8 +37,8 @@ test.describe('Table of Contents', () => {
 
   test('Open Table of Contents panel', async ({ page }) => {
     const imageName = 'toc-panel.png';
-    const tocPanel = page.sidebar.getContentPanelLocator(
-      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
+    const tocPanel = await page.sidebar.getContentPanel(
+      await page.sidebar.getTabPosition('table-of-contents')
     );
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
@@ -47,16 +47,16 @@ test.describe('Table of Contents', () => {
   test('Toggle list', async ({ page }) => {
     await page.notebook.selectCells(0);
 
-    const tocPanel = page.sidebar.getContentPanelLocator(
-      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
+    const tocPanel = await page.sidebar.getContentPanel(
+      await page.sidebar.getTabPosition('table-of-contents')
     );
-    const numberingButton = tocPanel.locator(
+    const numberingButton = await tocPanel.$$(
       'jp-button[data-command="toc:display-numbering"]'
     );
-    await expect(numberingButton).toHaveCount(1);
+    expect(numberingButton.length).toBe(1);
 
     const imageName = 'toggle-numbered-list.png';
-    await numberingButton.click();
+    await numberingButton[0].click();
 
     expect(await tocPanel.screenshot()).toMatchSnapshot(imageName);
   });
@@ -64,8 +64,8 @@ test.describe('Table of Contents', () => {
   test('Notebook context menu', async ({ page }) => {
     await page.notebook.selectCells(0);
 
-    const tocPanel = page.sidebar.getContentPanelLocator(
-      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
+    const tocPanel = await page.sidebar.getContentPanel(
+      await page.sidebar.getTabPosition('table-of-contents')
     );
 
     await Promise.all([
@@ -79,11 +79,11 @@ test.describe('Table of Contents', () => {
         })
     ]);
 
-    const menu = await page.menu.getOpenMenuLocator();
+    const menu = await page.menu.getOpenMenu();
 
-    await menu
-      ?.locator('text=Select and Run Cell(s) for this Heading')
-      ?.click();
+    await (
+      await menu.$('text=Select and Run Cell(s) for this Heading')
+    ).click();
 
     await page
       .locator('.jp-TableOfContents-tree >> text="2. HTML title"')

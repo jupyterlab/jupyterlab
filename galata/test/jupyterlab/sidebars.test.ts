@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, Handle, test } from '@jupyterlab/galata';
-import { Locator } from '@playwright/test';
 
 const sidebarIds: galata.SidebarTabId[] = [
   'filebrowser',
@@ -17,13 +16,14 @@ const sidebarIds: galata.SidebarTabId[] = [
  * By default we only have icons, but we should test for the
  * styling of labels which are used downstream (e.g. sidecar).
  */
-async function mockLabelOnFirstTab(tabbar: Locator, text: string) {
-  await tabbar
-    .locator('.lm-TabBar-tabLabel')
-    .first()
-    .evaluate((node: HTMLElement, text: string) => {
+async function mockLabelOnFirstTab(tabbar: Handle, text: string) {
+  await tabbar.$eval(
+    '.lm-TabBar-tabLabel',
+    (node: HTMLElement, text: string) => {
       node.innerText = text;
-    }, text);
+    },
+    text
+  );
 }
 
 test.describe('Sidebars', () => {
@@ -34,9 +34,7 @@ test.describe('Sidebars', () => {
 
       const imageName = `opened-sidebar-${sidebarId.replace('.', '-')}.png`;
       const position = await page.sidebar.getTabPosition(sidebarId);
-      const sidebar = page.sidebar.getContentPanelLocator(
-        position ?? undefined
-      );
+      const sidebar = await page.sidebar.getContentPanel(position);
       expect(await sidebar.screenshot()).toMatchSnapshot(
         imageName.toLowerCase()
       );
@@ -46,14 +44,11 @@ test.describe('Sidebars', () => {
   test('File Browser has no unused rules', async ({ page }) => {
     await page.sidebar.openTab('filebrowser');
     const clickMenuItem = async (command): Promise<void> => {
-      const contextmenu = await page.menu.openContextMenuLocator(
+      const contextmenu = await page.menu.openContextMenu(
         '.jp-DirListing-headerItem'
       );
-      const item = await page.menu.getMenuItemLocatorInMenu(
-        contextmenu,
-        command
-      );
-      await item?.click();
+      const item = await page.menu.getMenuItemInMenu(contextmenu, command);
+      await item.click();
     };
     await clickMenuItem('Show File Checkboxes');
     await clickMenuItem('Show File Size Column');
@@ -80,7 +75,7 @@ test.describe('Sidebars', () => {
   test('Left light tabbar (with text)', async ({ page }) => {
     await page.theme.setLightTheme();
     const imageName = 'left-light-tabbar-with-text.png';
-    const tabbar = page.sidebar.getTabBarLocator();
+    const tabbar = await page.sidebar.getTabBar();
     await mockLabelOnFirstTab(tabbar, 'File Browser');
     expect(await tabbar.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });
@@ -88,7 +83,7 @@ test.describe('Sidebars', () => {
   test('Right dark tabbar (with text)', async ({ page }) => {
     await page.theme.setDarkTheme();
     const imageName = 'right-dark-tabbar-with-text.png';
-    const tabbar = page.sidebar.getTabBarLocator('right');
+    const tabbar = await page.sidebar.getTabBar('right');
     await mockLabelOnFirstTab(tabbar, 'Property Inspector');
     expect(await tabbar.screenshot()).toMatchSnapshot(imageName.toLowerCase());
   });

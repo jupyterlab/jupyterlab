@@ -112,20 +112,20 @@ test.describe('Benchmark', () => {
       const openTime = await perf.measure(async () => {
         // Open the notebook and wait for the spinner
         await Promise.all([
-          page.locator('[role="main"] >> .jp-SpinnerContent').waitFor(),
+          page.waitForSelector('[role="main"] >> .jp-SpinnerContent'),
           page.dblclick(`#filebrowser >> text=${file}`)
         ]);
 
         // Wait for spinner to be hidden
-        await page
-          .locator('[role="main"] >> .jp-SpinnerContent')
-          .waitFor({ state: 'hidden' });
+        await page.waitForSelector('[role="main"] >> .jp-SpinnerContent', {
+          state: 'hidden'
+        });
       });
 
       // Check the notebook is correctly opened
-      let panel = page.locator('[role="main"] >> .jp-NotebookPanel');
+      let panel = await page.$('[role="main"] >> .jp-NotebookPanel');
       // Get only the document node to avoid noise from kernel and debugger in the toolbar
-      let document = panel.locator('.jp-Notebook');
+      let document = await panel.$('.jp-Notebook');
 
       // Wait for the cell toolbar to be visible in code cell.
       if (file === codeNotebook) {
@@ -158,13 +158,11 @@ test.describe('Benchmark', () => {
       // Open text file
       const fromTime = await perf.measure(async () => {
         await page.dblclick(`#filebrowser >> text=${textFile}`);
-        await page
-          .locator(
-            `div[role="main"] >> .lm-DockPanel-tabBar >> text=${path.basename(
-              textFile
-            )}`
-          )
-          .waitFor();
+        await page.waitForSelector(
+          `div[role="main"] >> .lm-DockPanel-tabBar >> text=${path.basename(
+            textFile
+          )}`
+        );
       });
 
       let editorPanel = page.locator(
@@ -188,6 +186,9 @@ test.describe('Benchmark', () => {
       });
 
       // Check the notebook is correctly opened
+      panel = await page.$('[role="main"] >> .jp-NotebookPanel');
+      // Get only the document node to avoid noise from kernel and debugger in the toolbar
+      document = await panel.$('.jp-Notebook');
       expect(await document.screenshot()).toMatchSnapshot(
         `${file.replace('.', '-')}.png`
       );

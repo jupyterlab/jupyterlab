@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import { ElementHandle, Page } from '@playwright/test';
 import * as Utils from '../utils';
 
 /**
@@ -15,14 +15,17 @@ export class MenuHelper {
    */
   async closeAll(): Promise<void> {
     const page = this.page;
-    const existingMenus = page.locator('.lm-Menu');
-    const numOpenMenus = await existingMenus.count();
+    const existingMenus = await page.$$('.lm-Menu');
+    const numOpenMenus = existingMenus.length;
     // close menus
     for (let i = 0; i < numOpenMenus; ++i) {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(100);
-      await Utils.waitForCondition(
-        async () => (await existingMenus.count()) === numOpenMenus - (i + 1)
+      await page.waitForFunction(
+        (menuCount: number) => {
+          return document.querySelectorAll('.lm-Menu').length === menuCount;
+        },
+        numOpenMenus - (i + 1)
       );
     }
   }
@@ -32,22 +35,12 @@ export class MenuHelper {
    *
    * @param label Menu label
    * @returns Handle to the menu or null
-   *
-   * @deprecated You should use locator instead {@link getMenuBarItemLocator}
    */
   getMenuBarItem(label: string): Promise<ElementHandle<Element> | null> {
-    return this.getMenuBarItemLocator(label).elementHandle();
-  }
-
-  /**
-   * Get the locator on a menu from its label.
-   *
-   * @param label Menu label
-   * @returns Locator to the menu
-   */
-  getMenuBarItemLocator(label: string): Locator {
-    return this.page.locator(
-      `li:has(div.lm-MenuBar-itemLabel:text-is("${label}"))`
+    return this.page.$(
+      `xpath=//li[./div[text()="${label}" and ${Utils.xpContainsClass(
+        'lm-MenuBar-itemLabel'
+      )}]]`
     );
   }
 
@@ -56,26 +49,14 @@ export class MenuHelper {
    *
    * @param selector Element over which the menu should be opened
    * @returns Handle to the menu or null
-   *
-   * @deprecated You should use locator instead {@link openContextMenuLocator}
    */
   async openContextMenu(
     selector: string
   ): Promise<ElementHandle<Element> | null> {
-    return (await this.openContextMenuLocator(selector)).elementHandle();
-  }
-
-  /**
-   * Open a context menu and get its locator.
-   *
-   * @param selector Element over which the menu should be opened
-   * @returns Locator to the menu
-   */
-  async openContextMenuLocator(selector: string): Promise<Locator> {
     await this.page.click(selector, {
       button: 'right'
     });
-    return this.page.locator('.lm-Menu');
+    return await this.page.$('.lm-Menu');
   }
 
   /**
@@ -84,43 +65,30 @@ export class MenuHelper {
    * The separator used is '>'; e.g. to look for the new Notebook item 'File>New>Notebook'.
    *
    * @param path Menu item path
-   * @returns Handle to the menu item or null
-   *
-   * @deprecated You should use locator instead {@link getMenuItemLocator}
+   * @returns Handle to the menu item
    */
   async getMenuItem(path: string): Promise<ElementHandle<Element> | null> {
-    return (await this.getMenuItemLocator(path))?.elementHandle() ?? null;
-  }
-
-  /**
-   * Get the locator on a menu item from its path.
-   *
-   * The separator used is '>'; e.g. to look for the new Notebook item 'File>New>Notebook'.
-   *
-   * @param path Menu item path
-   * @returns Locator to the menu item or null
-   */
-  async getMenuItemLocator(path: string): Promise<Locator | null> {
     const page = this.page;
     const parts = path.split('>');
     const numParts = parts.length;
-    let subMenu: Locator | null = null;
+    let subMenu: ElementHandle<Element> | null = null;
 
     for (let i = 0; i < numParts; ++i) {
       const part = parts[i];
       const menuItem =
         i === 0
-          ? this.getMenuBarItemLocator(part)
-          : await this.getMenuItemLocatorInMenu(subMenu!, part);
+          ? await this.getMenuBarItem(part)
+          : await this.getMenuItemInMenu(subMenu!, part);
       if (menuItem) {
         if (i === numParts - 1) {
           return menuItem;
         } else {
           if (i === 0) {
-            subMenu = page.locator('.lm-Menu.lm-MenuBar-menu');
+            subMenu = await page.$('.lm-Menu.lm-MenuBar-menu');
           } else {
-            const newMenus = page.locator('.lm-Menu');
-            subMenu = (await newMenus.count()) > 0 ? newMenus.last() : null;
+            const newMenus = await page.$$('.lm-Menu');
+            subMenu =
+              newMenus?.length > 0 ? newMenus[newMenus.length - 1] : null;
           }
           if (!subMenu) {
             return null;
@@ -139,9 +107,7 @@ export class MenuHelper {
    *
    * @param parentMenu Menu handle
    * @param label Item label
-   * @returns Handle to the menu item or null
-   *
-   * @deprecated You should use locator instead {@link getMenuItemLocatorInMenu}
+   * @returns Handle to the menu item
    */
   async getMenuItemInMenu(
     parentMenu: ElementHandle<Element>,
@@ -159,32 +125,12 @@ export class MenuHelper {
   }
 
   /**
-   * Get a menu item locator from its label.
-   *
-   * @param parentMenu Menu locator
-   * @param label Item label
-   * @returns Locator to the menu item or null
-   */
-  async getMenuItemLocatorInMenu(
-    parentMenu: Locator,
-    label: string
-  ): Promise<Locator | null> {
-    const items = parentMenu.locator(
-      `ul li:has(div.lm-Menu-itemLabel:text-is("${label}"))`
-    );
-    if ((await items.count()) > 1) {
-      throw new Error(`More than one menu item matches label '${label}'`);
-    }
-    return (await items.count()) > 0 ? items.first() : null;
-  }
-
-  /**
    * Whether any menus are opened or not
    *
    * @returns Opened menus status
    */
   async isAnyOpen(): Promise<boolean> {
-    return (await this.page.locator('.lm-Menu').count()) > 0;
+    return (await this.page.$('.lm-Menu')) !== null;
   }
 
   /**
@@ -194,7 +140,7 @@ export class MenuHelper {
    * @returns Opened menu status
    */
   async isOpen(path: string): Promise<boolean> {
-    return (await (await this.getMenuItemLocator(path))?.isVisible()) ?? false;
+    return (await this.getMenuItem(path)) !== null;
   }
 
   /**
@@ -202,56 +148,45 @@ export class MenuHelper {
    *
    * @param path Menu path
    * @returns Handle to the opened menu
-   *
-   * @deprecated You should use locator instead {@link openLocator}
    */
   async open(path: string): Promise<ElementHandle<Element> | null> {
-    return (await this.openLocator(path))?.elementHandle() ?? null;
-  }
-
-  /**
-   * Open a menu from its path
-   *
-   * @param path Menu path
-   * @returns Locator to the opened menu
-   */
-  async openLocator(path: string): Promise<Locator | null> {
     await this.closeAll();
 
     const page = this.page;
     const parts = path.split('>');
     const numParts = parts.length;
-    let subMenu: Locator | null = null;
+    let subMenu: ElementHandle<Element> | null = null;
 
     for (let i = 0; i < numParts; ++i) {
       const part = parts[i];
       const menuItem =
         i === 0
-          ? this.getMenuBarItemLocator(part)
-          : await this.getMenuItemLocatorInMenu(subMenu!, part);
+          ? await this.getMenuBarItem(part)
+          : await this.getMenuItemInMenu(subMenu!, part);
       if (menuItem) {
         if (i === 0) {
           await menuItem.click();
-          subMenu = page.locator('.lm-Menu.lm-MenuBar-menu');
-          await subMenu.waitFor({ state: 'visible' });
-        } else {
-          const expectedMenusCount =
-            (await page.locator('.lm-Menu').count()) + 1;
-          await menuItem.hover();
-          await Utils.waitForCondition(async () => {
-            return (
-              (await page.locator('.lm-Menu').count()) === expectedMenusCount &&
-              (await Utils.getLocatorClassList(menuItem)).includes(
-                'lm-mod-active'
-              )
-            );
+          subMenu = await page.waitForSelector('.lm-Menu.lm-MenuBar-menu', {
+            state: 'visible'
           });
+        } else {
+          const existingMenus = await page.$$('.lm-Menu');
+          await menuItem.hover();
+          await page.waitForFunction(
+            ({ n, item }) => {
+              return (
+                document.querySelectorAll('.lm-Menu').length === n &&
+                item.classList.contains('lm-mod-active')
+              );
+            },
+            { n: existingMenus.length + 1, item: menuItem }
+          );
           await page.waitForTimeout(200);
 
           // Fetch a new list of menus, and fetch the last one.
           // We are assuming the last menu is the most recently opened.
-          const newMenus = page.locator('.lm-Menu');
-          subMenu = newMenus.last();
+          const newMenus = await page.$$('.lm-Menu');
+          subMenu = newMenus[newMenus.length - 1];
         }
       }
     }
@@ -263,22 +198,11 @@ export class MenuHelper {
    * Get the handle to the last opened menu
    *
    * @returns Handle to the opened menu
-   *
-   * @deprecated You should use locator instead {@link getOpenMenuLocator}
    */
   async getOpenMenu(): Promise<ElementHandle<Element> | null> {
-    return (await this.getOpenMenuLocator())?.elementHandle() ?? null;
-  }
-
-  /**
-   * Get the locator to the last opened menu
-   *
-   * @returns Handle to the opened menu
-   */
-  async getOpenMenuLocator(): Promise<Locator | null> {
-    const openMenus = this.page.locator('.lm-Widget.lm-Menu .lm-Menu-content');
-    if ((await openMenus.count()) > 0) {
-      return openMenus.last();
+    const openMenus = await this.page.$$('.lm-Widget.lm-Menu .lm-Menu-content');
+    if (openMenus.length > 0) {
+      return openMenus[openMenus.length - 1];
     }
 
     return null;
@@ -296,9 +220,9 @@ export class MenuHelper {
     path = parts.slice(0, numParts - 1).join('>');
 
     // open parent menu
-    const parentMenu = await this.openLocator(path);
+    const parentMenu = await this.open(path);
     const menuItem =
-      parentMenu && (await this.getMenuItemLocatorInMenu(parentMenu, label));
+      parentMenu && (await this.getMenuItemInMenu(parentMenu, label));
 
     if (menuItem) {
       await menuItem.click();

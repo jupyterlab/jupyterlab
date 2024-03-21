@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IJupyterLabPageFixture, test } from '@jupyterlab/galata';
-import { expect, Locator } from '@playwright/test';
+import { test } from '@jupyterlab/galata';
+import { expect } from '@playwright/test';
 
 test('Open the settings editor with a specific search query', async ({
   page
@@ -35,56 +35,54 @@ test('Open the settings editor with a specific search query', async ({
 test.describe('change font-size', () => {
   const ipynbFileName = 'create_test.ipynb';
 
-  const createNewCodeCell = async (page: IJupyterLabPageFixture) => {
+  const createNewCodeCell = async page => {
     await page.notebook.createNew(ipynbFileName);
     await page.notebook.addCell('code', '2 + 2');
   };
-  const createMarkdownFile = async (page: IJupyterLabPageFixture) => {
-    await page.locator('div[role="main"] >> text=Launcher').waitFor();
+  const createMarkdownFile = async page => {
+    await page.waitForSelector('div[role="main"] >> text=Launcher');
     await page.click('.jp-LauncherCard[title="Create a new markdown file"]');
-    await page.locator('.jp-FileEditor .cm-content').waitFor();
-    return page.locator('.jp-FileEditor .cm-content');
+    return await page.waitForSelector('.jp-FileEditor .cm-content');
   };
-  const inputMarkdownFile = async (
-    page: IJupyterLabPageFixture,
-    markdownFile: Locator
-  ) => {
+  const inputMarkdownFile = async (page, markdownFile) => {
     await markdownFile.focus();
     await markdownFile.type('markdown cell');
     await page.keyboard.press('Control');
     await page.keyboard.press('s');
   };
-  const getCodeCellFontSize = async (page: IJupyterLabPageFixture) => {
-    const cellElement = page.locator(
+  const getCodeCellFontSize = async page => {
+    const cellElement = await page.$(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const computedStyle = await cellElement.evaluate(el =>
-      getComputedStyle(el)
+    const computedStyle = await page.evaluate(
+      el => getComputedStyle(el),
+      cellElement
     );
     return parseInt(computedStyle.fontSize);
   };
-  const getMarkdownFontSize = async (page: IJupyterLabPageFixture) => {
-    const markdownElement = page.locator('.jp-RenderedHTMLCommon');
-    await markdownElement.waitFor();
-    const computedStyle = await markdownElement.evaluate(el =>
-      getComputedStyle(el)
+  const getMarkdownFontSize = async page => {
+    await page.waitForSelector('.jp-RenderedHTMLCommon');
+    const markdownElement = await page.$('.jp-RenderedHTMLCommon');
+    const computedStyle = await page.evaluate(
+      el => getComputedStyle(el),
+      markdownElement
     );
     return parseInt(computedStyle.fontSize);
   };
-  const getFileListFontSize = async (page: IJupyterLabPageFixture) => {
-    const itemElement = page.locator(
+  const getFileListFontSize = async page => {
+    await page.waitForSelector(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    await itemElement.waitFor();
-    const computedStyle = await itemElement.evaluate(el =>
-      getComputedStyle(el)
+    const itemElement = await page.$(
+      '.jp-DirListing-content .jp-DirListing-itemText'
+    );
+    const computedStyle = await page.evaluate(
+      el => getComputedStyle(el),
+      itemElement
     );
     return parseInt(computedStyle.fontSize);
   };
-  const changeCodeFontSize = async (
-    page: IJupyterLabPageFixture,
-    menuOption
-  ) => {
+  const changeCodeFontSize = async (page, menuOption) => {
     await page.click('text=Settings');
     await page.click('.lm-Menu ul[role="menu"] >> text=Theme');
     await page.click(`.lm-Menu ul[role="menu"] >> text="${menuOption}"`);
@@ -95,14 +93,15 @@ test.describe('change font-size', () => {
     const fontSize = await getCodeCellFontSize(page);
     await changeCodeFontSize(page, 'Increase Code Font Size');
 
-    await page.locator('div[role="main"] >> text=Launcher').waitFor();
-    await page.locator('.jp-Notebook-cell').first().waitFor();
+    await page.waitForSelector('div[role="main"] >> text=Launcher');
+    await page.waitForSelector('.jp-Notebook-cell');
 
-    const cellElement = page.locator(
+    const cellElement = await page.$(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const computedStyle = await cellElement.evaluate(el =>
-      getComputedStyle(el)
+    const computedStyle = await page.evaluate(
+      el => getComputedStyle(el),
+      cellElement
     );
     expect(computedStyle.fontSize).toEqual(`${fontSize + 1}px`);
   });
@@ -112,14 +111,15 @@ test.describe('change font-size', () => {
     const fontSize = await getCodeCellFontSize(page);
     await changeCodeFontSize(page, 'Decrease Code Font Size');
 
-    await page.locator('div[role="main"] >> text=Launcher').waitFor();
-    await page.locator('.jp-Notebook-cell').first().waitFor();
+    await page.waitForSelector('div[role="main"] >> text=Launcher');
+    await page.waitForSelector('.jp-Notebook-cell');
 
-    const cellElement = page.locator(
+    const cellElement = await page.$(
       'div.lm-Widget.jp-Cell.jp-CodeCell.jp-Notebook-cell.jp-mod-noOutputs.jp-mod-active.jp-mod-selected .cm-line'
     );
-    const computedStyle = await cellElement.evaluate(el =>
-      getComputedStyle(el)
+    const computedStyle = await page.evaluate(
+      el => getComputedStyle(el),
+      cellElement
     );
     expect(computedStyle.fontSize).toEqual(`${fontSize - 1}px`);
   });
@@ -134,10 +134,11 @@ test.describe('change font-size', () => {
 
     await changeCodeFontSize(page, 'Increase Content Font Size');
 
-    await page.locator('.jp-FileEditor .cm-content').waitFor();
-    const fileElement = page.locator('.jp-RenderedHTMLCommon');
-    const computedStyle = await fileElement.evaluate(el =>
-      getComputedStyle(el)
+    await page.waitForSelector('.jp-FileEditor .cm-content');
+    const fileElement = await page.$('.jp-RenderedHTMLCommon');
+    const computedStyle = await page.evaluate(
+      el => getComputedStyle(el),
+      fileElement
     );
     expect(computedStyle.fontSize).toEqual(`${fontSize + 1}px`);
   });
@@ -152,10 +153,11 @@ test.describe('change font-size', () => {
 
     await changeCodeFontSize(page, 'Decrease Content Font Size');
 
-    await page.locator('.jp-FileEditor .cm-content').waitFor();
-    const fileElement = page.locator('.jp-RenderedHTMLCommon');
-    const computedStyle = await fileElement.evaluate(el =>
-      getComputedStyle(el)
+    await page.waitForSelector('.jp-FileEditor .cm-content');
+    const fileElement = await page.$('.jp-RenderedHTMLCommon');
+    const computedStyle = await page.evaluate(
+      el => getComputedStyle(el),
+      fileElement
     );
     expect(computedStyle.fontSize).toEqual(`${fontSize - 1}px`);
   });
@@ -165,14 +167,15 @@ test.describe('change font-size', () => {
     const fontSize = await getFileListFontSize(page);
     await changeCodeFontSize(page, 'Increase UI Font Size');
 
-    await page
-      .locator('.jp-DirListing-content .jp-DirListing-itemText')
-      .waitFor();
-    const fileElement = page.locator(
+    await page.waitForSelector(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    const computedStyle = await fileElement.evaluate(el =>
-      getComputedStyle(el)
+    const fileElement = await page.$(
+      '.jp-DirListing-content .jp-DirListing-itemText'
+    );
+    const computedStyle = await page.evaluate(
+      el => getComputedStyle(el),
+      fileElement
     );
     expect(computedStyle.fontSize).toEqual(`${fontSize + 1}px`);
   });
@@ -182,14 +185,15 @@ test.describe('change font-size', () => {
     const fontSize = await getFileListFontSize(page);
     await changeCodeFontSize(page, 'Decrease UI Font Size');
 
-    await page
-      .locator('.jp-DirListing-content .jp-DirListing-itemText')
-      .waitFor();
-    const fileElement = page.locator(
+    await page.waitForSelector(
       '.jp-DirListing-content .jp-DirListing-itemText'
     );
-    const computedStyle = await fileElement.evaluate(el =>
-      getComputedStyle(el)
+    const fileElement = await page.$(
+      '.jp-DirListing-content .jp-DirListing-itemText'
+    );
+    const computedStyle = await page.evaluate(
+      el => getComputedStyle(el),
+      fileElement
     );
     expect(computedStyle.fontSize).toEqual(`${fontSize - 1}px`);
   });

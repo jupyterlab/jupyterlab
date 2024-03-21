@@ -51,11 +51,11 @@ test.describe('Notebook Run Mermaid', () => {
     const imageName = 'run-cells-mermaid.png';
 
     await page.notebook.run();
-    await page.locator('.jp-RenderedMermaid').waitFor();
+    await page.waitForSelector('.jp-RenderedMermaid');
 
-    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+    const nbPanel = await page.notebook.getNotebookInPanel();
 
-    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
     expect(await nbDiskContent(page, nbPath)).toContain(SVG_MIME_TYPE);
   });
 
@@ -73,11 +73,11 @@ test.describe('Notebook Run Mermaid', () => {
     const imageName = 'run-cells-dark-mermaid.png';
 
     await page.notebook.run();
-    await page.locator('.jp-RenderedMermaid').waitFor();
+    await page.waitForSelector('.jp-RenderedMermaid');
 
-    const nbPanel = await page.notebook.getNotebookInPanelLocator();
+    const nbPanel = await page.notebook.getNotebookInPanel();
 
-    expect(await nbPanel!.screenshot()).toMatchSnapshot(imageName);
+    expect(await nbPanel.screenshot()).toMatchSnapshot(imageName);
     expect(await nbDiskContent(page, nbPath)).toContain(SVG_MIME_TYPE);
   });
 });

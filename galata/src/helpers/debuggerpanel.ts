@@ -3,10 +3,12 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import { ElementHandle, Page } from '@playwright/test';
 import { SidebarHelper } from './sidebar';
 import { NotebookHelper } from './notebook';
 import { waitForCondition } from '../utils';
+
+const DEBUGGER_ITEM = 'debugger-icon';
 
 /**
  * Debugger Helper
@@ -20,57 +22,47 @@ export class DebuggerHelper {
 
   /**
    * Returns true if debugger toolbar item is enabled, false otherwise
-   *
-   * @param name Notebook name
    */
-  async isOn(name?: string): Promise<boolean> {
-    const toolbar = await this.notebook.getToolbarLocator(name);
-    const button = toolbar?.locator('.jp-DebuggerBugButton');
-    if (((await button?.count()) ?? 0) > 0) {
-      return (await button!.getAttribute('aria-pressed')) === 'true';
+  async isOn(): Promise<boolean> {
+    if (!(await this.notebook.isAnyActive())) {
+      return false;
+    }
+    const item = await this.notebook.getToolbarItem(DEBUGGER_ITEM);
+    if (item) {
+      const button = await item.$('button');
+      if (button) {
+        return (await button.getAttribute('aria-pressed')) === 'true';
+      }
     }
     return false;
   }
 
   /**
    * Enables the debugger toolbar item
-   *
-   * @param name Notebook name
    */
-  async switchOn(name?: string): Promise<void> {
-    const toolbar = await this.notebook.getToolbarLocator(name);
-    if (!toolbar) {
-      return;
+  async switchOn(): Promise<void> {
+    await waitForCondition(async () => {
+      const item = await this.notebook.getToolbarItem(DEBUGGER_ITEM);
+      if (item) {
+        const button = await item.$('button');
+        if (button) {
+          return (await button.getAttribute('aria-disabled')) !== 'true';
+        }
+      }
+      return false;
+    }, 2000);
+    if (!(await this.isOn())) {
+      await this.notebook.clickToolbarItem(DEBUGGER_ITEM);
     }
-    const button = toolbar.locator('.jp-DebuggerBugButton');
-    await waitForCondition(async () => (await button.count()) === 1);
-    await waitForCondition(
-      async () => (await button!.isDisabled()) === false,
-      2000
-    );
-
-    if (!(await this.isOn(name))) {
-      await button!.click();
-    }
-    await waitForCondition(async () => await this.isOn(name));
   }
 
   /**
    * Disables the debugger toolbar item
-   *
-   * @param name Notebook name
    */
-  async switchOff(name?: string): Promise<void> {
-    const toolbar = await this.notebook.getToolbarLocator(name);
-    if (!toolbar) {
-      return;
+  async switchOff(): Promise<void> {
+    if (await this.isOn()) {
+      await this.notebook.clickToolbarItem(DEBUGGER_ITEM);
     }
-    const button = toolbar.locator('.jp-DebuggerBugButton');
-    await waitForCondition(async () => (await button.count()) === 1);
-    if (await this.isOn(name)) {
-      await button!.click();
-    }
-    await waitForCondition(async () => !(await this.isOn(name)));
   }
 
   /**
@@ -82,17 +74,8 @@ export class DebuggerHelper {
 
   /**
    * Returns handle to the variables panel content
-   *
-   * @deprecated You should use locator instead {@link getVariablesPanelLocator}
    */
   async getVariablesPanel(): Promise<ElementHandle<Element> | null> {
-    return (await this.getVariablesPanelLocator()).elementHandle();
-  }
-
-  /**
-   * Returns locator to the variables panel content
-   */
-  async getVariablesPanelLocator(): Promise<Locator> {
     return this._getPanel('.jp-DebuggerVariables');
   }
 
@@ -100,7 +83,7 @@ export class DebuggerHelper {
    * Waits for variables to be populated in the variables panel
    */
   async waitForVariables(): Promise<void> {
-    await this.page.locator('.jp-DebuggerVariables-body ul').waitFor();
+    await this.page.waitForSelector('.jp-DebuggerVariables-body ul');
   }
 
   /**
@@ -113,22 +96,13 @@ export class DebuggerHelper {
     await this.page
       .locator('.lm-Menu-itemLabel:text("Render Variable")')
       .click();
-    await this.page.locator('.jp-VariableRendererPanel-renderer').waitFor();
+    await this.page.waitForSelector('.jp-VariableRendererPanel-renderer');
   }
 
   /**
    * Returns handle to callstack panel content
-   *
-   * @deprecated You should use locator instead {@link getCallStackPanelLocator}
    */
   async getCallStackPanel(): Promise<ElementHandle<Element> | null> {
-    return (await this.getCallStackPanelLocator()).elementHandle();
-  }
-
-  /**
-   * Returns locator to callstack panel content
-   */
-  async getCallStackPanelLocator(): Promise<Locator> {
     return this._getPanel('.jp-DebuggerCallstack');
   }
 
@@ -136,25 +110,15 @@ export class DebuggerHelper {
    * Waits for the callstack body to populate in the callstack panel
    */
   async waitForCallStack(): Promise<void> {
-    await this.page
-      .locator('.jp-DebuggerCallstack-body >> .jp-DebuggerCallstackFrame')
-      .first()
-      .waitFor();
+    await this.page.waitForSelector(
+      '.jp-DebuggerCallstack-body >> .jp-DebuggerCallstackFrame'
+    );
   }
 
   /**
    * Returns handle to breakpoints panel content
-   *
-   * @deprecated You should use locator instead {@link getBreakPointsPanelLocator}
    */
   async getBreakPointsPanel(): Promise<ElementHandle<Element> | null> {
-    return (await this.getBreakPointsPanelLocator()).elementHandle();
-  }
-
-  /**
-   * Returns locator to breakpoints panel content
-   */
-  async getBreakPointsPanelLocator(): Promise<Locator> {
     return this._getPanel('.jp-DebuggerBreakpoints');
   }
 
@@ -162,25 +126,15 @@ export class DebuggerHelper {
    * Waits for the breakpoints to appear in the breakpoints panel
    */
   async waitForBreakPoints(): Promise<void> {
-    await this.page
-      .locator('.jp-DebuggerBreakpoints >> .jp-DebuggerBreakpoint')
-      .first()
-      .waitFor();
+    await this.page.waitForSelector(
+      '.jp-DebuggerBreakpoints >> .jp-DebuggerBreakpoint'
+    );
   }
 
   /**
    * Returns handle to sources panel content
-   *
-   * @deprecated You should use locator instead {@link getSourcePanelLocator}
    */
   async getSourcePanel(): Promise<ElementHandle<Element> | null> {
-    return (await this.getSourcePanelLocator()).elementHandle();
-  }
-
-  /**
-   * Returns locator to sources panel content
-   */
-  async getSourcePanelLocator(): Promise<Locator> {
     return this._getPanel('.jp-DebuggerSources');
   }
 
@@ -188,14 +142,18 @@ export class DebuggerHelper {
    * Waits for sources to be populated in the sources panel
    */
   async waitForSources(): Promise<void> {
-    await this.page
-      .locator('.jp-DebuggerSources-body >> .jp-Editor')
-      .first()
-      .waitFor({ state: 'visible' });
+    await this.page.waitForSelector('.jp-DebuggerSources-body >> .jp-Editor', {
+      state: 'visible'
+    });
   }
 
-  private async _getPanel(selector: string): Promise<Locator> {
-    const panel = this.sidebar.getContentPanelLocator('right');
-    return panel.locator(selector);
+  private async _getPanel(
+    selector: string
+  ): Promise<ElementHandle<Element> | null> {
+    const panel = await this.sidebar.getContentPanel('right');
+    if (panel) {
+      return panel.$(selector);
+    }
+    return null;
   }
 }

@@ -50,7 +50,9 @@ describe('config', () => {
         name: randomName(),
         serverSettings
       });
-      await expect(configPromise).rejects.toThrow(/Invalid response: 201/);
+      await expect(configPromise).rejects.toThrow(
+        /Invalid response: 201 Created/
+      );
     });
   });
 
@@ -81,7 +83,7 @@ describe('config', () => {
       const config = await ConfigSection.create({ name: randomName() });
       handleRequest(config, 201, {});
       const update = config.update({ foo: 'baz' });
-      await expect(update).rejects.toThrow(/Invalid response: 201/);
+      await expect(update).rejects.toThrow(/Invalid response: 201 Created/);
     });
   });
 });
@@ -196,7 +198,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
       const config = new ConfigWithDefaults({ section });
       const set = config.set('foo', 'bar');
       expect(section.data['foo']).toBe('bar');
-      await expectFailure(set, 'Invalid response: 201');
+      await expectFailure(set, 'Invalid response: 201 Created');
     });
   });
 });

@@ -1,13 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import {
-  expect,
-  galata,
-  IJupyterLabPageFixture,
-  test
-} from '@jupyterlab/galata';
-import { filterContent } from './utils';
+import { expect, galata, test } from '@jupyterlab/galata';
 
 test.use({
   autoGoto: false,
@@ -20,7 +14,7 @@ test.describe.configure({ mode: 'serial' });
 
 test.describe('Overview', () => {
   test('Overview', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page, filterContent);
+    await galata.Mock.freezeContentLastModified(page);
     await openOverview(page);
 
     expect(await page.screenshot()).toMatchSnapshot('interface_jupyterlab.png');
@@ -42,7 +36,7 @@ test.describe('Overview', () => {
   });
 
   test('Tabs menu', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page, filterContent);
+    await galata.Mock.freezeContentLastModified(page);
     await openOverview(page);
 
     await page.click('text="Tabs"');
@@ -53,7 +47,7 @@ test.describe('Overview', () => {
   });
 });
 
-async function openOverview(page: IJupyterLabPageFixture) {
+async function openOverview(page) {
   await page.goto();
   await page.addStyleTag({
     content: `.jp-LabShell.jp-mod-devMode {
@@ -89,7 +83,7 @@ async function openOverview(page: IJupyterLabPageFixture) {
   );
 
   // Move notebook panel
-  const notebookHandle = page.locator('div[role="main"] >> text=Data.ipynb');
+  const notebookHandle = await page.$('div[role="main"] >> text=Data.ipynb');
   await notebookHandle.click();
   const notebookBBox = await notebookHandle.boundingBox();
 
@@ -102,10 +96,10 @@ async function openOverview(page: IJupyterLabPageFixture) {
   await page.mouse.up();
 
   // Move md panel
-  const mdHandle = page.locator('div[role="main"] >> text=jupyterlab.md');
+  const mdHandle = await page.$('div[role="main"] >> text=jupyterlab.md');
   await mdHandle.click();
   const mdBBox = await mdHandle.boundingBox();
-  const panelHandle = await page.activity.getPanelLocator();
+  const panelHandle = await page.activity.getPanel();
   const panelBBox = await panelHandle.boundingBox();
 
   await page.mouse.move(

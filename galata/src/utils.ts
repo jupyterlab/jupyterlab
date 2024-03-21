@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import { ElementHandle, Page } from '@playwright/test';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
@@ -76,8 +76,6 @@ export async function getBaseUrl(page: Page): Promise<string> {
  *
  * @param element Element handle
  * @returns Classes list
- *
- * @deprecated You should use locator instead {@link getLocatorClassList}
  */
 export async function getElementClassList(
   element: ElementHandle
@@ -92,21 +90,6 @@ export async function getElementClassList(
     if (typeof classNameList === 'string') {
       return classNameList.split(' ');
     }
-  }
-
-  return [];
-}
-
-/**
- * Get the classes of an locator
- *
- * @param locator Element locator
- * @returns Classes list
- */
-export async function getLocatorClassList(locator: Locator): Promise<string[]> {
-  const className = await locator.getAttribute('class');
-  if (className) {
-    return className.split(/\s/);
   }
 
   return [];
@@ -212,37 +195,23 @@ export async function waitForCondition(
  */
 export async function waitForTransition(
   page: Page,
-  element: ElementHandle<Element> | Locator | string
+  element: ElementHandle<Element> | string
 ): Promise<void> {
-  let el = typeof element === 'string' ? page.locator(element) : element;
-  try {
-    return (el as Locator).evaluate(elem => {
+  const el = typeof element === 'string' ? await page.$(element) : element;
+
+  if (el) {
+    return page.evaluate(el => {
       return new Promise(resolve => {
         const onEndHandler = () => {
-          elem.removeEventListener('transitionend', onEndHandler);
+          el.removeEventListener('transitionend', onEndHandler);
           resolve();
         };
-        elem.addEventListener('transitionend', onEndHandler);
+        el.addEventListener('transitionend', onEndHandler);
       });
-    });
-  } catch {
-    if (el) {
-      console.warn(
-        'ElementHandle are deprecated, you should call "WaitForTransition()" \
-        with a Locator instead'
-      );
-      return page.evaluate(el => {
-        return new Promise(resolve => {
-          const onEndHandler = () => {
-            el.removeEventListener('transitionend', onEndHandler);
-            resolve();
-          };
-          el.addEventListener('transitionend', onEndHandler);
-        });
-      }, el as ElementHandle<Element>);
-    }
-    return Promise.reject();
+    }, el);
   }
+
+  return Promise.reject();
 }
 
 // Selector builders

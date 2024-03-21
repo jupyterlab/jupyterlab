@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 import { IJupyterLabPageFixture } from '@jupyterlab/galata';
-import { Locator } from '@playwright/test';
+import { ElementHandle, Locator } from '@playwright/test';
 
 const OUTER_SELECTOR = '.jp-WindowedPanel-outer';
 const DRAGGABLE_AREA = '.jp-InputArea-prompt';
@@ -10,10 +10,12 @@ const DRAGGABLE_AREA = '.jp-InputArea-prompt';
  * Measure how much of the **notebook** viewport does a cell take up.
  */
 export async function notebookViewportRatio(
-  notebook: Locator,
-  cell: Locator
+  notebook: ElementHandle,
+  cell: ElementHandle
 ): Promise<number> {
-  const scroller = notebook.locator(OUTER_SELECTOR).first();
+  const scroller = (await notebook.$(
+    OUTER_SELECTOR
+  )) as ElementHandle<HTMLElement>;
   const n = await scroller.boundingBox();
   const c = await cell.boundingBox();
   const cellBottom = c.y + c.height;
@@ -34,11 +36,13 @@ export async function notebookViewportRatio(
  */
 export async function positionCellPartiallyBelowViewport(
   page: IJupyterLabPageFixture,
-  notebook: Locator,
-  cell: Locator,
+  notebook: ElementHandle,
+  cell: ElementHandle,
   ratio: number
 ): Promise<void> {
-  const scroller = notebook.locator(OUTER_SELECTOR).first();
+  const scroller = (await notebook.$(
+    OUTER_SELECTOR
+  )) as ElementHandle<HTMLElement>;
   const notebookBbox = await scroller.boundingBox();
   const cellBbox = await cell.boundingBox();
   await page.mouse.move(notebookBbox.x, notebookBbox.y);

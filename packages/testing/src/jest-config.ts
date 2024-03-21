@@ -22,7 +22,7 @@ const esModules = [
 
 module.exports = function (baseDir: string) {
   return {
-    testEnvironment: '@jupyterlab/testing/lib/jest-env.js',
+    testEnvironment: 'jsdom',
     moduleNameMapper: {
       '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
       '\\.(gif|ttf|eot)$': '@jupyterlab/testing/lib/jest-file-mock.js'

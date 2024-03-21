@@ -32,6 +32,13 @@
     ]
   },
   {
+    "id": "application:toggle-side-tabbar",
+    "label": "Toggle Sidebar Element",
+    "shortcuts": [
+      "Alt 1"
+    ]
+  },
+  {
     "id": "application:close",
     "label": "Close Tab",
     "caption": "",
@@ -108,14 +115,6 @@
   {
     "id": "application:toggle-side-tabbar",
     "label": "Show Left Activity Bar",
-    "caption": "",
-    "shortcuts": [
-      "Alt 1"
-    ]
-  },
-  {
-    "id": "application:toggle-sidebar-widget",
-    "label": "Toggle Sidebar Element",
     "caption": "",
     "shortcuts": []
   },

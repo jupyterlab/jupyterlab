@@ -13,11 +13,9 @@ test.describe('ToC Running indicator', () => {
 
     await page.sidebar.openTab('table-of-contents');
     // Wait until the last heading has loaded into the ToC
-    await page
-      .locator(
-        '.jp-TableOfContents-content[data-document-type="notebook"] >> text=Title 1.3'
-      )
-      .waitFor();
+    await page.waitForSelector(
+      '.jp-TableOfContents-content[data-document-type="notebook"] >> text=Title 1.3'
+    );
   });
 
   test.beforeAll(async ({ request, tmpPath }) => {
@@ -35,11 +33,11 @@ test.describe('ToC Running indicator', () => {
   });
 
   test('should display running indicators', async ({ page }) => {
-    const tocPanel = page.sidebar.getContentPanelLocator(
-      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
+    const tocPanel = await page.sidebar.getContentPanel(
+      await page.sidebar.getTabPosition('table-of-contents')
     );
     const executed = page.notebook.run();
-    await tocPanel.locator('[data-running="1"]').waitFor();
+    await tocPanel.waitForSelector('[data-running="1"]');
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicators.png'
     );
@@ -48,11 +46,11 @@ test.describe('ToC Running indicator', () => {
   });
 
   test('should display error indicators', async ({ page }) => {
-    const tocPanel = page.sidebar.getContentPanelLocator(
-      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
+    const tocPanel = await page.sidebar.getContentPanel(
+      await page.sidebar.getTabPosition('table-of-contents')
     );
     const executed = page.notebook.run();
-    await tocPanel.locator('[data-running="-0.5"]').waitFor();
+    await tocPanel.waitForSelector('[data-running="-0.5"]');
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicator-error.png'
     );
@@ -63,8 +61,8 @@ test.describe('ToC Running indicator', () => {
   test('should display running indicator on first visible top level', async ({
     page
   }) => {
-    const tocPanel = page.sidebar.getContentPanelLocator(
-      (await page.sidebar.getTabPosition('table-of-contents')) ?? undefined
+    const tocPanel = await page.sidebar.getContentPanel(
+      await page.sidebar.getTabPosition('table-of-contents')
     );
     await page.notebook.run();
 
@@ -75,7 +73,7 @@ test.describe('ToC Running indicator', () => {
 
     const executed = page.notebook.runCell(5);
 
-    await tocPanel.locator('[data-running="1"]').waitFor();
+    await tocPanel.waitForSelector('[data-running="1"]');
     expect(await tocPanel.screenshot()).toMatchSnapshot(
       'toc-running-indicator-top-level.png'
     );

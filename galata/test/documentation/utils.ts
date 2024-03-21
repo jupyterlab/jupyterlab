@@ -3,23 +3,9 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import { ElementHandle, Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
-
-/**
- * Filter directory content
- *
- * @param array Array of content models
- * @returns Filtered array
- */
-export function filterContent(array: any[]): any[] {
-  return array.filter(
-    item =>
-      item['type'] !== 'directory' ||
-      !(item['name'] as string).startsWith('test-')
-  );
-}
 
 /**
  * Generate a SVG arrow to inject in a HTML document.
@@ -88,12 +74,12 @@ export interface IPositionInElement {
 /**
  * Generate a SVG mouse pointer to inject in a HTML document over a DOM element.
  *
- * @param element A playwright handle or locator for the target DOM element
+ * @param element A playwright handle for the target DOM element
  * @param position A position within the target element (default: bottom right quarter).
  * @returns The svg to inject in the page
  */
 export async function positionMouseOver(
-  element: ElementHandle | Locator,
+  element: ElementHandle,
   position: IPositionInElement = {}
 ): Promise<string> {
   const top = position.top ?? 0.75;

@@ -34,16 +34,11 @@
   outline: 0;
 }
 
-.jp-DocumentSearch-button-wrapper:disabled > .jp-DocumentSearch-button-content {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.jp-DocumentSearch-overlay button:not(:disabled):hover {
+.jp-DocumentSearch-overlay button:hover {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DocumentSearch-overlay button:not(:disabled):active {
+.jp-DocumentSearch-overlay button:active {
   background-color: var(--jp-layout-color3);
 }
 
@@ -160,11 +155,11 @@
   margin: 1px 5px 2px;
 }
 
-button:not(:disabled) > .jp-DocumentSearch-up-down-button:hover {
+.jp-DocumentSearch-up-down-button:hover {
   background-color: var(--jp-layout-color2);
 }
 
-button:not(:disabled) > .jp-DocumentSearch-up-down-button:active {
+.jp-DocumentSearch-up-down-button:active {
   background-color: var(--jp-layout-color3);
 }
 

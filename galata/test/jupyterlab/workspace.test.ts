@@ -13,7 +13,9 @@ test.use({
   tmpPath: 'workspace-test',
   waitForApplication: async ({ baseURL }, use, testInfo) => {
     const simpleWait = async (page: Page): Promise<void> => {
-      await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
+      await page.waitForSelector('#jupyterlab-splash', {
+        state: 'detached'
+      });
     };
     void use(simpleWait);
   }
@@ -149,11 +151,9 @@ test.describe('Workspace', () => {
     ).toBeVisible();
 
     // Wait for the kernel to be ready so it does not unfocus the menu
-    await page.locator('text= | Idle').waitFor();
+    await page.waitForSelector('text= | Idle');
 
-    const menuItem = await page.menu.getMenuItemLocator(`Tabs>${mdFile}`);
-    expect(menuItem).toBeDefined();
-    expect(menuItem).toBeNull();
+    await expect(page.menu.getMenuItem(`Tabs>${mdFile}`)).toBeDefined();
   });
 
   test('should clone the default workspace', async ({ page, tmpPath }) => {
@@ -169,7 +169,7 @@ test.describe('Workspace', () => {
           /api\/workspaces/.test(response.request().url()) &&
           response.request().postDataJSON().data['terminal:1']
       ),
-      page.locator('[role="main"] >> .jp-Terminal').waitFor(),
+      page.waitForSelector('[role="main"] >> .jp-Terminal'),
       page.menu.clickMenuItem('File>New>Terminal')
     ]);
 
@@ -205,7 +205,7 @@ test.describe('Workspace', () => {
           /api\/workspaces/.test(response.request().url()) &&
           response.request().postDataJSON().data['terminal:1']
       ),
-      page.locator('[role="main"] >> .jp-Terminal').waitFor(),
+      page.waitForSelector('[role="main"] >> .jp-Terminal'),
       page.menu.clickMenuItem('File>New>Terminal')
     ]);
 

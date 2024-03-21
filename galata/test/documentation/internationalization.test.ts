@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
-import { filterContent } from './utils';
 
 test.use({
   autoGoto: false,
@@ -12,7 +11,6 @@ test.use({
 
 test.describe('Internationalization', () => {
   test('Menu', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page, filterContent);
     await page.goto();
 
     await page.sidebar.setWidth();
@@ -42,7 +40,7 @@ test.describe('Internationalization', () => {
   });
 
   test('UI in Chinese', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page, filterContent);
+    await galata.Mock.freezeContentLastModified(page);
     await page.goto();
 
     await page.dblclick('[aria-label="File Browser Section"] >> text=data');
@@ -53,11 +51,13 @@ test.describe('Internationalization', () => {
 
     await Promise.all([
       page.waitForNavigation(),
-      page.locator('#jupyterlab-splash').waitFor(),
+      page.waitForSelector('#jupyterlab-splash'),
       page.click('button:has-text("Change and reload")')
     ]);
 
-    await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
+    await page.waitForSelector('#jupyterlab-splash', {
+      state: 'detached'
+    });
 
     await page.addStyleTag({
       content: `.jp-LabShell.jp-mod-devMode {
@@ -66,7 +66,7 @@ test.describe('Internationalization', () => {
     });
 
     // Wait for the launcher to be loaded
-    await page.locator('text=README.md').waitFor();
+    await page.waitForSelector('text=README.md');
 
     await page.sidebar.setWidth();
 

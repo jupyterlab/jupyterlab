@@ -578,10 +578,7 @@ export namespace galata {
      * #### Notes
      * The goal is to freeze the file browser display
      */
-    export async function freezeContentLastModified(
-      page: Page,
-      filter?: <T = any>(directoryList: T[]) => T[]
-    ): Promise<void> {
+    export async function freezeContentLastModified(page: Page): Promise<void> {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
@@ -612,9 +609,6 @@ export namespace galata {
               data['type'] === 'directory' &&
               Array.isArray(data['content'])
             ) {
-              if (filter) {
-                data['content'] = filter(data['content']);
-              }
               const now = Date.now();
               const aDayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
               for (const entry of data['content'] as any[]) {

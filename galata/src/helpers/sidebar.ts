@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ElementHandle, Locator, Page } from '@playwright/test';
+import { ElementHandle, Page } from '@playwright/test';
 import type { IPluginNameToInterfaceMap } from '../extension';
 import { galata } from '../galata';
 import * as Utils from '../utils';
@@ -24,7 +24,7 @@ export class SidebarHelper {
    * @returns Opened status
    */
   isOpen = async (side: galata.SidebarPosition = 'left'): Promise<boolean> => {
-    return (await this.getContentPanelLocator(side).count()) > 0;
+    return (await this.getContentPanel(side)) !== null;
   };
 
   /**
@@ -34,10 +34,10 @@ export class SidebarHelper {
    * @returns Tab opened status
    */
   async isTabOpen(id: galata.SidebarTabId): Promise<boolean> {
-    const tabButton = this.page.locator(
+    const tabButton = await this.page.$(
       `${this.buildTabSelector(id)}.lm-mod-current`
     );
-    return (await tabButton.count()) > 0;
+    return tabButton !== null;
   }
 
   /**
@@ -114,19 +114,19 @@ export class SidebarHelper {
    * @param id Tab id
    */
   async toggleTabPosition(id: galata.SidebarTabId): Promise<void> {
-    const tab = this.getTabLocator(id);
+    const tab = await this.getTab(id);
 
-    if (!(await tab.count())) {
+    if (!tab) {
       return;
     }
 
     await tab.click({ button: 'right' });
 
-    const switchMenuItem = this.page.locator(
-      '.lm-Menu-content .lm-Menu-item[data-command="sidebar:switch"]'
+    const switchMenuItem = await this.page.waitForSelector(
+      '.lm-Menu-content .lm-Menu-item[data-command="sidebar:switch"]',
+      { state: 'visible' }
     );
-    await switchMenuItem.waitFor({ state: 'visible' });
-    if (await switchMenuItem.count()) {
+    if (switchMenuItem) {
       await switchMenuItem.click();
     }
   }
@@ -175,23 +175,11 @@ export class SidebarHelper {
    *
    * @param id Tab id
    * @returns Tab handle
-   *
-   * @deprecated You should use locator instead {@link getTabLocator}
    */
   async getTab(
     id: galata.SidebarTabId
   ): Promise<ElementHandle<Element> | null> {
-    return await this.getTabLocator(id).elementHandle();
-  }
-
-  /**
-   * Get the locator on a given tab
-   *
-   * @param id Tab id
-   * @returns Tab locator
-   */
-  getTabLocator(id: galata.SidebarTabId): Locator {
-    return this.page.locator(this.buildTabSelector(id));
+    return await this.page.$(this.buildTabSelector(id));
   }
 
   /**
@@ -205,8 +193,8 @@ export class SidebarHelper {
       return;
     }
 
-    const tabButton = this.getTabLocator(id);
-    if (!((await tabButton.count()) === 1)) {
+    const tabButton = await this.page.$(this.buildTabSelector(id));
+    if (tabButton === null) {
       throw new Error(`Unable to find the tab ${id} button`);
     }
     await tabButton.click();
@@ -218,23 +206,11 @@ export class SidebarHelper {
    *
    * @param side Position
    * @returns Panel handle
-   *
-   * @deprecated You should use locator instead {@link getContentPanelLocator}
    */
   async getContentPanel(
     side: galata.SidebarPosition = 'left'
   ): Promise<ElementHandle<Element> | null> {
-    return await this.getContentPanelLocator(side).elementHandle();
-  }
-
-  /**
-   * Get the locator on a sidebar content panel
-   *
-   * @param side Position
-   * @returns Panel handle
-   */
-  getContentPanelLocator(side: galata.SidebarPosition = 'left'): Locator {
-    return this.page.locator(
+    return await this.page.$(
       `#jp-${side}-stack .lm-StackedPanel-child:not(.lm-mod-hidden)`
     );
   }
@@ -244,23 +220,11 @@ export class SidebarHelper {
    *
    * @param side Position
    * @returns Tab bar handle
-   *
-   * @deprecated You should use locator instead {@link getTabBarLocator}
    */
   async getTabBar(
     side: galata.SidebarPosition = 'left'
   ): Promise<ElementHandle<Element> | null> {
-    return await this.getTabBarLocator(side).elementHandle();
-  }
-
-  /**
-   * Get the locator of the tab bar of the sidebar
-   *
-   * @param side Position
-   * @returns Tab bar locator
-   */
-  getTabBarLocator(side: galata.SidebarPosition = 'left'): Locator {
-    return this.page.locator(`.jp-SideBar.jp-mod-${side}`);
+    return await this.page.$(`.jp-SideBar.jp-mod-${side}`);
   }
 
   /**
@@ -353,14 +317,15 @@ export class SidebarHelper {
   }
 
   protected async _waitForTabActivate(
-    tab: Locator,
+    tab: ElementHandle<Element>,
     activate = true
   ): Promise<void> {
-    await Utils.waitForCondition(async () => {
-      const current = (await Utils.getLocatorClassList(tab)).includes(
-        'lm-mod-current'
-      );
-      return activate ? current : !current;
-    });
+    await this.page.waitForFunction(
+      ({ tab, activate }) => {
+        const current = tab.classList.contains('lm-mod-current');
+        return activate ? current : !current;
+      },
+      { tab, activate }
+    );
   }
 }

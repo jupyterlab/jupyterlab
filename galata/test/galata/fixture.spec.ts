@@ -48,8 +48,8 @@ test.describe('mockSettings', () => {
       page.click('.lm-Menu ul[role="menu"] >> text=JupyterLab Light')
     ]);
 
-    await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
-    await page.locator('div[role="main"] >> text=Launcher').waitFor();
+    await page.waitForSelector('#jupyterlab-splash', { state: 'detached' });
+    await page.waitForSelector('div[role="main"] >> text=Launcher');
 
     expect(((await response.json()) as any).raw).toMatch(/JupyterLab Light/);
 
@@ -98,7 +98,7 @@ test.describe('mockState', () => {
 
   test('should return the mocked state', async ({ page }) => {
     expect(
-      await page.locator(
+      await page.waitForSelector(
         '[aria-label="Running Sessions section"] >> text=Open Tabs'
       )
     ).toBeTruthy();
@@ -120,9 +120,9 @@ test.describe('sessions', () => {
     expect(sessions.size).toEqual(1);
 
     await page.menu.clickMenuItem('File>New>Console');
-    await page.locator('.jp-Dialog').waitFor();
+    await page.waitForSelector('.jp-Dialog');
     await page.click('.jp-Dialog .jp-mod-accept');
-    await page.locator('text= | Idle').waitFor();
+    await page.waitForSelector('text= | Idle');
 
     expect(sessions.size).toEqual(2);
   });

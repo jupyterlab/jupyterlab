@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-console",
-  "version": "4.2.0-alpha.1",
+  "version": "4.2.0-alpha.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",

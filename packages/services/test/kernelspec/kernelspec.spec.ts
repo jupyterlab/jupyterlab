@@ -121,7 +121,7 @@ describe('kernel', () => {
     it('should throw an error for an invalid response', async () => {
       const serverSettings = getRequestHandler(201, {});
       const promise = KernelSpecAPI.getSpecs(serverSettings);
-      await expect(promise).rejects.toThrow(/Invalid response: 201/);
+      await expect(promise).rejects.toThrow(/Invalid response: 201 Created/);
     });
 
     it('should handle metadata', async () => {
