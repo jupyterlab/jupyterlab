@@ -32,11 +32,11 @@ test.describe('Overview', () => {
     await page.click('[title="Running Terminals and Kernels"]');
 
     // Close all other sections
-    const otherSections = page.locator(
+    const otherSession = page.locator(
       '#jp-running-sessions .jp-AccordionPanel-title.lm-mod-expanded:not([aria-label="Open Tabs Section"])'
     );
-    for (const section of await otherSections.all()) {
-      await section.click();
+    while ((await otherSession.count()) != 0) {
+      await otherSession.first().click();
     }
 
     expect(
