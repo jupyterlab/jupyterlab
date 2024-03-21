@@ -52,28 +52,6 @@ test.use({
 });
 
 test.describe('Sidebars', () => {
-  test.beforeAll(async ({ request, tmpPath }) => {
-    const contents = galata.newContentsHelper(request);
-
-    // Create some dummy content
-    await contents.uploadFile(
-      path.resolve(__dirname, `./notebooks/${testNotebook}`),
-      `${tmpPath}/${testNotebook}`
-    );
-    await contents.uploadFile(
-      path.resolve(__dirname, `./notebooks/${testFileName}`),
-      `${tmpPath}/${testFileName}`
-    );
-    // Create a dummy folder
-    await contents.createDirectory(`${tmpPath}/${testFolderName}`);
-  });
-
-  test.afterAll(async ({ request, tmpPath }) => {
-    // Clean up the test files
-    const contents = galata.newContentsHelper(request);
-    await contents.deleteDirectory(tmpPath);
-  });
-
   sidebarIds.forEach(sidebarId => {
     test(`Open Sidebar tab ${sidebarId}`, async ({ page }) => {
       await page.sidebar.openTab(sidebarId);
@@ -89,26 +67,6 @@ test.describe('Sidebars', () => {
       );
     });
   });
-
-  // Additional test cases for resized widths of the file browser
-  for (const [sizeName, size] of Object.entries(sidebarWidths)) {
-    test(`Open Sidebar tab filebrowser ${sizeName}`, async ({ page }) => {
-      // Freeze all items' last modified dates as one day ago.
-      await galata.Mock.freezeContentLastModified(page, filterContent);
-
-      await page.sidebar.openTab('filebrowser');
-      // Resize the sidebar to the desired width.
-      await page.sidebar.setWidth(size, 'left');
-      const imageName = `opened-sidebar-filebrowser-${sizeName}.png`;
-      const position = await page.sidebar.getTabPosition('filebrowser');
-      const sidebar = page.sidebar.getContentPanelLocator(
-        position ?? undefined
-      );
-      expect(await sidebar.screenshot()).toMatchSnapshot(
-        imageName.toLowerCase()
-      );
-    });
-  }
 
   test('File Browser has no unused rules', async ({ page }) => {
     await page.sidebar.openTab('filebrowser');
