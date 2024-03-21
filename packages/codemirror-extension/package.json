@@ -38,9 +38,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@codemirror/lang-markdown": "^6.1.1",
-    "@codemirror/language": "^6.6.0",
-    "@codemirror/legacy-modes": "^6.3.2",
+    "@codemirror/lang-markdown": "^6.2.4",
+    "@codemirror/language": "^6.10.1",
+    "@codemirror/legacy-modes": "^6.3.3",
     "@jupyter/ydoc": "^2.0.1",
     "@jupyterlab/application": "^4.2.0-alpha.1",
     "@jupyterlab/codeeditor": "^4.2.0-alpha.1",

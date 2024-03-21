@@ -317,7 +317,7 @@ If you use `conda <https://conda.io>`__, you can get it with:
 
 .. code:: bash
 
-   conda install -c conda-forge nodejs
+   conda install -c conda-forge nodejs=20
 
 If you use `Homebrew <https://brew.sh>`__ on macOS:
 

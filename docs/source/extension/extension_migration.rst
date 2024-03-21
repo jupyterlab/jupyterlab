@@ -6,6 +6,21 @@
 Extension Migration Guide
 ================================================
 
+
+JupyterLab 4.1 to 4.2
+---------------------
+
+API updates
+^^^^^^^^^^^
+
+- The ``CodeEditor.ICoordinate`` interface was corrected to not include ``toJSON()``, ``x``, ``y``,
+  ``width`` and ``height``; these properties were never set by methods returning ``ICoordinate``
+  and they were never used by methods accepting it.
+- ``CodeEditor.getCoordinateForPosition`` return type was corrected to clarify that it can return
+  ``null``; previously ``null`` could be returned despite the return type indicating it would always
+  return a non-null ``ICoordinate`` value.
+
+
 JupyterLab 4.0 to 4.1
 ---------------------
 

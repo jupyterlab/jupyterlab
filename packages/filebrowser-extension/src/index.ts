@@ -156,7 +156,7 @@ const namespace = 'filebrowser';
 /**
  * The default file browser extension.
  */
-const browser: JupyterFrontEndPlugin<void> = {
+const browser: JupyterFrontEndPlugin<IFileBrowserCommands> = {
   id: FILE_BROWSER_PLUGIN_ID,
   description: 'Set up the default file browser (commands, settings,...).',
   requires: [IDefaultFileBrowser, IFileBrowserFactory, ITranslator],
@@ -177,7 +177,7 @@ const browser: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     treePathUpdater: ITreePathUpdater | null,
     commandPalette: ICommandPalette | null
-  ): Promise<void> => {
+  ): Promise<IFileBrowserCommands> => {
     const browser = defaultFileBrowser;
 
     // Let the application restorer track the primary file browser (that is
@@ -205,7 +205,7 @@ const browser: JupyterFrontEndPlugin<void> = {
       commandPalette
     );
 
-    return void Promise.all([app.restored, browser.model.restored]).then(() => {
+    void Promise.all([app.restored, browser.model.restored]).then(() => {
       if (treePathUpdater) {
         browser.model.pathChanged.connect((sender, args) => {
           treePathUpdater(args.newValue);
@@ -250,6 +250,9 @@ const browser: JupyterFrontEndPlugin<void> = {
         });
       }
     });
+    return {
+      openPath: CommandIDs.openPath
+    };
   }
 };
 
