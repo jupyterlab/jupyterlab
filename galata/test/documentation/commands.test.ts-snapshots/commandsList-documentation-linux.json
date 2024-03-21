@@ -32,13 +32,6 @@
     ]
   },
   {
-    "id": "application:toggle-side-tabbar",
-    "label": "Toggle Sidebar Element",
-    "shortcuts": [
-      "Alt 1"
-    ]
-  },
-  {
     "id": "application:close",
     "label": "Close Tab",
     "caption": "",

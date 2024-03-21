@@ -229,7 +229,7 @@ furthers the goals of the Jupyter project.
 * The issue represents work that one developer can commit to owning, even if
   they collaborate with other developers for feedback. Excessively large issues
   should be split into multiple issues, each triaged individually, or into
-  `team-compass <https://github.com/jupyterlab/team-compass>`__ issues to discuss
+  `team-compass <https://github.com/jupyterlab/frontends-team-compass>`__ issues to discuss
   more substantive changes.
 
 Labels Used by Triagers
@@ -309,7 +309,7 @@ Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Building JupyterLab from its GitHub source code requires Node.js. The
-development version requires Node.js version 18+, as defined in the
+development version requires Node.js version 20+, as defined in the
 ``engines`` specification in
 `dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/main/dev_mode/package.json>`__.
 
