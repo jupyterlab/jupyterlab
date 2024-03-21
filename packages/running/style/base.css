@@ -47,6 +47,7 @@
   margin: 0;
   padding: 0;
   list-style-type: none;
+  padding-left: 14px;
 }
 
 .jp-RunningSessions-item {
@@ -63,17 +64,76 @@
   cursor: pointer;
 }
 
-.jp-RunningSessions-item.jp-mod-running-child {
-  padding-left: 40px;
+.jp-mod-running-leaf {
+  /** Account for lack of collapser */
+  margin-left: 16px;
 }
 
-.jp-RunningSessions-item.jp-mod-kernel:not(.jp-mod-running-child) {
+.jp-RunningSessions-sectionContainer > .jp-RunningSessions-sectionList {
+  padding-left: 0;
+}
+
+.jp-RunningSessions-viewButton[aria-pressed='true'] {
+  box-shadow: none;
+}
+
+.jp-mod-running-list-view .jp-RunningSessions-sectionList {
+  padding-left: 0;
+}
+
+.jp-mod-running-list-view .jp-mod-running-leaf {
+  margin-left: 0;
+}
+
+.jp-mod-running-list-view .jp-RunningSessions-item.jp-mod-kernel,
+.jp-mod-running-list-view .jp-RunningSessions-item.jp-mod-kernelspec {
+  display: none;
+}
+
+.jp-RunningSessions-item.jp-mod-kernelspec,
+.jp-RunningSessions-item.jp-mod-kernel {
   user-select: none;
 }
 
-.jp-RunningSessions-item img {
+.jp-RunningSessions-item-label-kernel-id {
+  color: var(--jp-ui-font-color3);
+}
+
+.jp-RunningSessions-collapseButton {
+  margin: 4px 2px;
+}
+
+.jp-RunningSessions-collapseButton[aria-pressed='true'] {
+  box-shadow: none;
+}
+
+.jp-RunningSessions-icon {
+  margin: 0 4px;
+}
+
+.jp-RunningSessions-toolbar {
+  min-width: max-content;
+}
+
+img.jp-RunningSessions-icon,
+span.jp-RunningSessions-icon > svg {
+  width: 16px;
   height: 16px;
+}
+
+img.jp-RunningSessions-icon {
   margin-top: 4px;
+  object-fit: contain;
+}
+
+span.jp-RunningSessions-icon {
+  align-items: center;
+  display: flex;
+}
+
+span.jp-RunningSessions-icon > svg {
+  display: block;
+  margin: 0 auto;
 }
 
 .jp-RunningSessions-itemLabel {
@@ -98,8 +158,20 @@
   white-space: nowrap;
 }
 
+.jp-RunningSessions-caret {
+  align-items: center;
+  display: flex;
+  padding-right: 4px;
+}
+
+.jp-RunningSessions-caret > svg {
+  height: 16px;
+  width: 16px;
+}
+
 .jp-RunningSessions-item .jp-RunningSessions-itemShutdown {
   border-radius: 0;
+  margin: 0;
 }
 
 .jp-RunningSessions-item:not(:hover) .jp-RunningSessions-itemShutdown {
@@ -131,10 +203,10 @@
   background-color: var(--jp-layout-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent.jp-mod-disabled {
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent[disabled] {
   color: var(--jp-ui-font-color2);
 }
 
-.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent.jp-mod-disabled:hover {
+.jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent[disabled]:hover {
   background: none;
 }

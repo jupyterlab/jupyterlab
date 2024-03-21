@@ -11,21 +11,26 @@ import {
   caretDownIcon,
   caretRightIcon,
   closeIcon,
+  collapseAllIcon,
+  expandAllIcon,
   LabIcon,
   PanelWithToolbar,
   ReactWidget,
   refreshIcon,
   SidePanel,
+  tableRowsIcon,
   ToolbarButton,
   ToolbarButtonComponent,
+  treeViewIcon,
   UseSignal
 } from '@jupyterlab/ui-components';
+import { IStateDB } from '@jupyterlab/statedb';
 import { Token } from '@lumino/coreutils';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
-import * as React from 'react';
+import React, { ReactNode } from 'react';
 
 /**
  * The class name added to a running widget.
@@ -71,6 +76,36 @@ const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
  * The class name added to a running session item shutdown button.
  */
 const SHUTDOWN_ALL_BUTTON_CLASS = 'jp-RunningSessions-shutdownAll';
+
+/**
+ * The class name added to a collapse/expand carets.
+ */
+const CARET_CLASS = 'jp-RunningSessions-caret';
+
+/**
+ * The class name added to icons.
+ */
+const ITEM_ICON_CLASS = 'jp-RunningSessions-icon';
+
+/**
+ * Modifier added to a section when flattened list view is requested.
+ */
+const LIST_VIEW_CLASS = 'jp-mod-running-list-view';
+
+/**
+ * The class name added to button switching between nested and flat view.
+ */
+const VIEW_BUTTON_CLASS = 'jp-RunningSessions-viewButton';
+
+/**
+ * The class name added to button switching between nested and flat view.
+ */
+const COLLAPSE_EXPAND_BUTTON_CLASS = 'jp-RunningSessions-collapseButton';
+
+/**
+ * Identifier used in the state database.
+ */
+const STATE_DB_ID = 'jp-running-sessions';
 
 /**
  * The running sessions token.
@@ -146,6 +181,7 @@ function Item(props: {
   shutdownLabel?: string;
   shutdownItemIcon?: LabIcon;
   translator?: ITranslator;
+  collapseToggled: ISignal<Section, boolean>;
 }) {
   const { runningItem } = props;
   const classList = [ITEM_CLASS];
@@ -164,18 +200,29 @@ function Item(props: {
     runningItem.shutdown?.();
   };
 
+  // Materialise getter to avoid triggering it repeatedly
+  const children = runningItem.children;
+
   // Manage collapsed state. Use the shutdown flag in lieu of `stopPropagation`.
   const [collapsed, collapse] = React.useState(false);
-  const collapsible = !!runningItem.children?.length;
+  const collapsible = !!children?.length;
   const onClick = collapsible
     ? () => !stopPropagation && collapse(!collapsed)
     : undefined;
+
+  // Listen to signal to collapse from outside
+  props.collapseToggled.connect((_emitter, newCollapseState) =>
+    collapse(newCollapseState)
+  );
 
   if (runningItem.className) {
     classList.push(runningItem.className);
   }
   if (props.child) {
     classList.push('jp-mod-running-child');
+  }
+  if (props.child && !children) {
+    classList.push('jp-mod-running-leaf');
   }
 
   return (
@@ -188,15 +235,15 @@ function Item(props: {
         >
           {collapsible &&
             (collapsed ? (
-              <caretRightIcon.react tag="span" stylesheet="runningItem" />
+              <caretRightIcon.react tag="span" className={CARET_CLASS} />
             ) : (
-              <caretDownIcon.react tag="span" stylesheet="runningItem" />
+              <caretDownIcon.react tag="span" className={CARET_CLASS} />
             ))}
           {icon ? (
             typeof icon === 'string' ? (
-              <img src={icon} />
+              <img src={icon} className={ITEM_ICON_CLASS} />
             ) : (
-              <icon.react tag="span" stylesheet="runningItem" />
+              <icon.react tag="span" className={ITEM_ICON_CLASS} />
             )
           ) : undefined}
           <span
@@ -219,9 +266,10 @@ function Item(props: {
         {collapsible && !collapsed && (
           <List
             child={true}
-            runningItems={runningItem.children!}
+            runningItems={children!}
             shutdownItemIcon={shutdownItemIcon}
             translator={translator}
+            collapseToggled={props.collapseToggled}
           />
         )}
       </li>
@@ -236,6 +284,7 @@ function List(props: {
   shutdownAllLabel?: string;
   shutdownItemIcon?: LabIcon;
   translator?: ITranslator;
+  collapseToggled: ISignal<Section, boolean>;
 }) {
   return (
     <ul className={LIST_CLASS}>
@@ -247,6 +296,7 @@ function List(props: {
           shutdownLabel={props.shutdownLabel}
           shutdownItemIcon={props.shutdownItemIcon}
           translator={props.translator}
+          collapseToggled={props.collapseToggled}
         />
       ))}
     </ul>
@@ -260,6 +310,7 @@ class ListWidget extends ReactWidget {
       runningItems: IRunningSessions.IRunningItem[];
       shutdownAllLabel: string;
       translator?: ITranslator;
+      collapseToggled: ISignal<Section, boolean>;
     }
   ) {
     super();
@@ -297,6 +348,7 @@ class ListWidget extends ReactWidget {
                 shutdownAllLabel={options.shutdownAllLabel}
                 shutdownItemIcon={options.manager.shutdownItemIcon}
                 translator={options.translator}
+                collapseToggled={options.collapseToggled}
               />
             </div>
           );
@@ -380,7 +432,8 @@ class Section extends PanelWithToolbar {
 
     let runningItems = options.manager.running();
     const enabled = runningItems.length > 0;
-    this._button = new ToolbarButton({
+
+    const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
       className: `${SHUTDOWN_ALL_BUTTON_CLASS}${
         !enabled ? ' jp-mod-disabled' : ''
@@ -388,13 +441,69 @@ class Section extends PanelWithToolbar {
       enabled,
       onClick: onShutdown
     });
-    this._manager.runningChanged.connect(this._updateButton, this);
 
-    this.toolbar.addItem('shutdown-all', this._button);
+    const switchViewButton = new ToolbarButton({
+      className: VIEW_BUTTON_CLASS,
+      enabled,
+      icon: tableRowsIcon,
+      pressedIcon: treeViewIcon,
+      onClick: () => this.toggleListView(),
+      tooltip: trans.__('Switch to List View'),
+      pressedTooltip: trans.__('Switch to Tree View')
+    });
+    const collapseExpandAllButton = new ToolbarButton({
+      className: COLLAPSE_EXPAND_BUTTON_CLASS,
+      enabled,
+      icon: collapseAllIcon,
+      pressedIcon: expandAllIcon,
+      onClick: () => {
+        const newState = !collapseExpandAllButton.pressed;
+        this._collapseToggled.emit(newState);
+        collapseExpandAllButton.pressed = newState;
+      },
+      tooltip: trans.__('Collapse All'),
+      pressedTooltip: trans.__('Expand All')
+    });
+
+    this._buttons = {
+      'switch-view': switchViewButton,
+      'collapse-expand': collapseExpandAllButton,
+      'shutdown-all': shutdownAllButton
+    };
+    // Update buttons once defined and before adding to DOM
+    this._updateButtons();
+    this._manager.runningChanged.connect(this._updateButtons, this);
+
+    for (const name of ['collapse-expand', 'switch-view', 'shutdown-all']) {
+      this.toolbar.addItem(
+        name,
+        this._buttons[name as keyof typeof this._buttons]
+      );
+    }
+    this.toolbar.addClass('jp-RunningSessions-toolbar');
 
     this.addWidget(
-      new ListWidget({ runningItems, shutdownAllLabel, ...options })
+      new ListWidget({
+        runningItems,
+        shutdownAllLabel,
+        collapseToggled: this._collapseToggled,
+        ...options
+      })
     );
+  }
+
+  /**
+   * Toggle between list and tree view.
+   */
+  toggleListView(forceOn?: boolean): void {
+    const switchViewButton = this._buttons['switch-view'];
+    const newState =
+      typeof forceOn !== 'undefined' ? forceOn : !switchViewButton.pressed;
+    switchViewButton.pressed = newState;
+    this._collapseToggled.emit(false);
+    this.toggleClass(LIST_VIEW_CLASS, newState);
+    this._updateButtons();
+    this._viewChanged.emit({ mode: newState ? 'list' : 'tree' });
   }
 
   /**
@@ -404,24 +513,56 @@ class Section extends PanelWithToolbar {
     if (this.isDisposed) {
       return;
     }
-    this._manager.runningChanged.disconnect(this._updateButton, this);
+    this._manager.runningChanged.disconnect(this._updateButtons, this);
     super.dispose();
   }
 
-  private _updateButton(): void {
-    const button = this._button;
-    button.enabled = this._manager.running().length > 0;
-    if (button.enabled) {
-      button.node
-        .querySelector('jp-button')
-        ?.classList.remove('jp-mod-disabled');
-    } else {
-      button.node.querySelector('jp-button')?.classList.add('jp-mod-disabled');
-    }
+  get viewChanged(): ISignal<Section, Section.IViewState> {
+    return this._viewChanged;
   }
 
-  private _button: ToolbarButton;
+  private _updateButtons(): void {
+    let runningItems = this._manager.running();
+    const enabled = runningItems.length > 0;
+
+    const hasNesting = runningItems.filter(item => item.children).length !== 0;
+    const inTreeView = hasNesting && !this._buttons['switch-view'].pressed;
+
+    this._buttons['switch-view'].node.style.display = hasNesting
+      ? 'block'
+      : 'none';
+    this._buttons['collapse-expand'].node.style.display = inTreeView
+      ? 'block'
+      : 'none';
+
+    this._buttons['collapse-expand'].enabled = enabled;
+    this._buttons['switch-view'].enabled = enabled;
+    this._buttons['shutdown-all'].enabled = enabled;
+  }
+
+  private _buttons: {
+    'collapse-expand': ToolbarButton;
+    'switch-view': ToolbarButton;
+    'shutdown-all': ToolbarButton;
+  };
   private _manager: IRunningSessions.IManager;
+  private _collapseToggled = new Signal<Section, boolean>(this);
+  private _viewChanged = new Signal<Section, Section.IViewState>(this);
+}
+
+/**
+ * Interfaces for Section implementation.
+ */
+namespace Section {
+  /**
+   * Information about section view state.
+   */
+  export interface IViewState {
+    /**
+     * View mode
+     */
+    mode: 'tree' | 'list';
+  }
 }
 
 /**
@@ -431,9 +572,14 @@ export class RunningSessions extends SidePanel {
   /**
    * Construct a new running widget.
    */
-  constructor(managers: IRunningSessionManagers, translator?: ITranslator) {
+  constructor(
+    managers: IRunningSessionManagers,
+    translator?: ITranslator,
+    stateDB?: IStateDB | null
+  ) {
     super();
     this.managers = managers;
+    this._stateDB = stateDB ?? null;
     this.translator = translator ?? nullTranslator;
     const trans = this.translator.load('jupyterlab');
 
@@ -471,12 +617,71 @@ export class RunningSessions extends SidePanel {
    * @param managers Managers
    * @param manager New manager
    */
-  protected addSection(_: unknown, manager: IRunningSessions.IManager) {
-    this.addWidget(new Section({ manager, translator: this.translator }));
+  protected async addSection(_: unknown, manager: IRunningSessions.IManager) {
+    const section = new Section({ manager, translator: this.translator });
+    this.addWidget(section);
+
+    const state = await this._getState();
+    const sectionsInListView = state.listViewSections;
+    const sectionId = manager.name;
+
+    if (sectionsInListView && sectionsInListView.includes(sectionId)) {
+      section.toggleListView(true);
+    }
+    section.viewChanged.connect(
+      async (_emitter, viewState: Section.IViewState) => {
+        await this._updateState(sectionId, viewState.mode);
+      }
+    );
+  }
+
+  /**
+   * Update state database with the new state of a given section.
+   */
+  private async _updateState(sectionId: string, mode: 'list' | 'tree') {
+    const state = await this._getState();
+    let listViewSections = state.listViewSections ?? [];
+    if (mode === 'list' && !listViewSections.includes(sectionId)) {
+      listViewSections.push(sectionId);
+    } else {
+      listViewSections = listViewSections.filter(e => e !== sectionId);
+    }
+    const newState = { listViewSections };
+    if (this._stateDB) {
+      await this._stateDB.save(STATE_DB_ID, newState);
+    }
+  }
+
+  /**
+   * Get current state from the state database.
+   */
+  private async _getState(): Promise<RunningSessions.IStateDBLayout> {
+    if (!this._stateDB) {
+      return {};
+    }
+    return (
+      (this._stateDB.fetch(STATE_DB_ID) as RunningSessions.IStateDBLayout) ?? {}
+    );
   }
 
   protected managers: IRunningSessionManagers;
   protected translator: ITranslator;
+  private _stateDB: IStateDB | null;
+}
+
+/**
+ * Interfaces for RunningSessions implementation.
+ */
+namespace RunningSessions {
+  /**
+   * Layout of the state database.
+   */
+  export interface IStateDBLayout {
+    /**
+     * Names of sections to be presented in the list view.
+     */
+    listViewSections?: string[];
+  }
 }
 
 /**
@@ -571,7 +776,7 @@ export namespace IRunningSessions {
     /**
      * Called to determine the label for each item.
      */
-    label: () => string;
+    label: () => ReactNode;
 
     /**
      * Called to determine the `title` attribute for each item, which is
