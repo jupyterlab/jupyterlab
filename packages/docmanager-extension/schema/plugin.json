@@ -149,6 +149,13 @@
       "title": "Rename Untitled File On First Save",
       "description": "Whether to prompt to rename untitled file on first manual save.",
       "default": true
+    },
+    "maxNumberRecents": {
+      "type": "number",
+      "title": "Recent Items Number",
+      "description": "Number of recently opened/closed files and directories to remember.",
+      "default": 10,
+      "minimum": 0
     }
   },
   "additionalProperties": false,

@@ -11,11 +11,6 @@
   --jp-private-running-item-height: 24px;
 }
 
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
-
 .jp-RunningSessions {
   display: flex;
   flex-direction: column;
@@ -209,4 +204,84 @@ span.jp-RunningSessions-icon > svg {
 
 .jp-RunningSessions-shutdownAll.jp-ToolbarButtonComponent[disabled]:hover {
   background: none;
+}
+
+/*-----------------------------------------------------------------------------
+| SearchableSessions
+|----------------------------------------------------------------------------*/
+
+.jp-RunningSessions-item.jp-mod-active {
+  background-color: var(--jp-layout-color2);
+  outline: 1px solid var(--jp-brand-color1);
+  outline-offset: -2px;
+}
+
+.jp-SearchableSessions-list > .jp-RunningSessions-section {
+  min-height: auto;
+}
+
+.jp-SearchableSessions-title {
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size0);
+  margin: 0;
+  padding: 4px 0;
+}
+
+.jp-SearchableSessions-titleLabel {
+  text-transform: uppercase;
+}
+
+.jp-SearchableSessions-acceptButton {
+  display: none;
+}
+
+.jp-SearchableSessions-list > .jp-RunningSessions-section.jp-mod-empty {
+  display: none;
+}
+
+.jp-SearchableSessions-filter {
+  overflow: visible;
+}
+
+.jp-SearchableSessions-list {
+  overflow: auto;
+}
+
+.jp-SearchableSessions.jp-Dialog-body {
+  display: flex;
+}
+
+.jp-SearchableSessions-modal .jp-Dialog-content {
+  padding: 16px;
+  box-shadow: var(--jp-elevation-z4);
+  border-radius: 4px;
+  min-height: 100px;
+  max-height: 95%;
+}
+
+.jp-SearchableSessions-modal .jp-Dialog-footer {
+  display: none;
+}
+
+.jp-SearchableSessions-modal .jp-Dialog-header {
+  font-size: var(--jp-ui-font-size2);
+}
+
+.jp-SearchableSessions-modal.jp-Dialog {
+  background: transparent;
+  justify-content: start;
+  padding-top: 38px;
+  border: 0;
+}
+
+.jp-SearchableSessions-emptyIndicator {
+  color: var(--jp-ui-font-color2);
+  padding: 16px;
+  text-align: center;
+  padding-bottom: 8px;
+}
+
+.jp-RunningSessions-section:not(.jp-mod-empty)
+  ~ .jp-SearchableSessions-emptyIndicator {
+  display: none;
 }

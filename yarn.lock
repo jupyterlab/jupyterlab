@@ -2859,6 +2859,7 @@ __metadata:
     "@jupyterlab/docregistry": ^4.2.0-alpha.1
     "@jupyterlab/services": ^7.2.0-alpha.1
     "@jupyterlab/settingregistry": ^4.2.0-alpha.1
+    "@jupyterlab/statedb": ^4.2.0-alpha.1
     "@jupyterlab/statusbar": ^4.2.0-alpha.1
     "@jupyterlab/translation": ^4.2.0-alpha.1
     "@jupyterlab/ui-components": ^4.2.0-alpha.1
@@ -2883,6 +2884,7 @@ __metadata:
     "@jupyterlab/coreutils": ^6.2.0-alpha.1
     "@jupyterlab/docregistry": ^4.2.0-alpha.1
     "@jupyterlab/services": ^7.2.0-alpha.1
+    "@jupyterlab/statedb": ^4.2.0-alpha.1
     "@jupyterlab/statusbar": ^4.2.0-alpha.1
     "@jupyterlab/testing": ^4.2.0-alpha.1
     "@jupyterlab/translation": ^4.2.0-alpha.1
@@ -2891,6 +2893,7 @@ __metadata:
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/messaging": ^2.0.1
+    "@lumino/polling": ^2.1.2
     "@lumino/properties": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
@@ -3856,6 +3859,8 @@ __metadata:
     "@jupyterlab/application": ^4.2.0-alpha.1
     "@jupyterlab/apputils": ^4.3.0-alpha.1
     "@jupyterlab/coreutils": ^6.2.0-alpha.1
+    "@jupyterlab/docmanager": ^4.2.0-alpha.1
+    "@jupyterlab/filebrowser": ^4.2.0-alpha.1
     "@jupyterlab/mainmenu": ^4.2.0-alpha.1
     "@jupyterlab/services": ^7.2.0-alpha.1
     "@jupyterlab/settingregistry": ^4.2.0-alpha.1
@@ -3864,6 +3869,7 @@ __metadata:
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
+    "@lumino/messaging": ^2.0.1
     "@lumino/widgets": ^2.3.1
     rimraf: ~5.0.5
     typedoc: ~0.24.7
@@ -4514,7 +4520,9 @@ __metadata:
   resolution: "@jupyterlab/running-extension@workspace:packages/running-extension"
   dependencies:
     "@jupyterlab/application": ^4.2.0-alpha.1
+    "@jupyterlab/apputils": ^4.3.0-alpha.1
     "@jupyterlab/coreutils": ^6.2.0-alpha.1
+    "@jupyterlab/docmanager": ^4.2.0-alpha.1
     "@jupyterlab/docregistry": ^4.2.0-alpha.1
     "@jupyterlab/rendermime-interfaces": ^3.10.0-alpha.1
     "@jupyterlab/running": ^4.2.0-alpha.1
@@ -4543,6 +4551,7 @@ __metadata:
     "@jupyterlab/ui-components": ^4.2.0-alpha.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
+    "@lumino/domutils": ^2.0.1
     "@lumino/messaging": ^2.0.1
     "@lumino/signaling": ^2.1.2
     "@lumino/widgets": ^2.3.1
