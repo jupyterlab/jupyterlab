@@ -191,6 +191,15 @@ export class OutputArea extends Widget {
     }
     this._future = value;
 
+    value.done
+      .finally(() => {
+        this._pendingInput = false;
+      })
+      .catch(() => {
+        // No-op, required because `finally` re-raises any rejections,
+        // even if caught on the `done` promise level before.
+      });
+
     this.model.clear();
 
     // Make sure there were no input widgets.
@@ -222,6 +231,13 @@ export class OutputArea extends Widget {
    */
   get inputRequested(): ISignal<OutputArea, IStdin> {
     return this._inputRequested;
+  }
+
+  /**
+   * A flag indicating if the output area has pending input.
+   */
+  get pendingInput(): boolean {
+    return this._pendingInput;
   }
 
   /**
@@ -444,6 +460,9 @@ export class OutputArea extends Widget {
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
+    // Indicate that input is pending
+    this._pendingInput = true;
+
     const input = factory.createStdin({
       parent_header: msg.header,
       prompt: stdinPrompt,
@@ -483,6 +502,9 @@ export class OutputArea extends Widget {
       });
       // Refocus the input node after it lost focus due to update of the model.
       inputNode.focus();
+
+      // Indicate that input is no longer pending
+      this._pendingInput = false;
 
       // Keep the input in view for a little while; this (along refocusing)
       // ensures that we can avoid the cell editor stealing the focus, and
@@ -660,7 +682,6 @@ export class OutputArea extends Widget {
     const transient = ((msg.content as any).transient || {}) as JSONObject;
     const displayId = transient['display_id'] as string;
     let targets: number[] | undefined;
-
     switch (msgType) {
       case 'execute_result':
       case 'display_data':
@@ -683,6 +704,15 @@ export class OutputArea extends Widget {
           }
         }
         break;
+      case 'status': {
+        const executionState = (msg as KernelMessage.IStatusMsg).content
+          .execution_state;
+        if (executionState === 'idle') {
+          // If status is idle, the kernel is no longer blocked by the input
+          this._pendingInput = false;
+        }
+        break;
+      }
       default:
         break;
     }
@@ -765,6 +795,7 @@ export class OutputArea extends Widget {
   });
   private _translator: ITranslator;
   private _inputHistoryScope: 'global' | 'session' = 'global';
+  private _pendingInput: boolean = false;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
