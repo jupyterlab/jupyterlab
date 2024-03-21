@@ -38,7 +38,7 @@ import { ElementExt } from '@lumino/domutils';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, Widget } from '@lumino/widgets';
-import React, { ReactNode } from 'react';
+import React, { isValidElement, ReactNode } from 'react';
 
 /**
  * The class name added to a running widget.
@@ -370,11 +370,32 @@ class FilterWidget extends ReactWidget implements IFilterProvider {
   }
 
   filter(item: IRunningSessions.IRunningItem): Partial<IScore> | null {
-    let labels = [item.label()];
+    const labels: string[] = [this._getTextContent(item.label())];
     for (const child of item.children ?? []) {
-      labels.push(child.label());
+      labels.push(this._getTextContent(child.label()));
     }
-    return this._filterFn(labels.join(''));
+    return this._filterFn(labels.join(' '));
+  }
+
+  private _getTextContent(node: ReactNode): string {
+    if (typeof node === 'string') {
+      return node;
+    }
+    if (typeof node === 'number') {
+      return '' + node;
+    }
+    if (typeof node === 'boolean') {
+      return '' + node;
+    }
+    if (Array.isArray(node)) {
+      return node.map(n => this._getTextContent(n)).join(' ');
+    }
+    if (node && isValidElement(node)) {
+      return node.props.children
+        .map((n: ReactNode) => this._getTextContent(n))
+        .join(' ');
+    }
+    return '';
   }
 
   private _updateFilter(
@@ -526,10 +547,12 @@ class Section extends PanelWithToolbar {
    * Toggle between list and tree view.
    */
   toggleListView(forceOn?: boolean): void {
-    const switchViewButton = this._buttons['switch-view'];
-    const newState =
-      typeof forceOn !== 'undefined' ? forceOn : !switchViewButton.pressed;
-    switchViewButton.pressed = newState;
+    const newState = typeof forceOn !== 'undefined' ? forceOn : !this._listView;
+    this._listView = newState;
+    if (this._buttons) {
+      const switchViewButton = this._buttons['switch-view'];
+      switchViewButton.pressed = newState;
+    }
     this._collapseToggled.emit(false);
     this.toggleClass(LIST_VIEW_CLASS, newState);
     this._updateButtons();
@@ -646,6 +669,9 @@ class Section extends PanelWithToolbar {
   }
 
   private _updateButtons(): void {
+    if (!this._buttons) {
+      return;
+    }
     let runningItems = this._manager.running();
     const enabled = runningItems.length > 0;
 
@@ -668,8 +694,9 @@ class Section extends PanelWithToolbar {
     'collapse-expand': ToolbarButton;
     'switch-view': ToolbarButton;
     'shutdown-all': ToolbarButton;
-  };
+  } | null = null;
   private _manager: IRunningSessions.IManager;
+  private _listView: boolean = false;
   private _filterProvider?: IFilterProvider;
   private _collapseToggled = new Signal<Section, boolean>(this);
   private _viewChanged = new Signal<Section, Section.IViewState>(this);
@@ -807,7 +834,9 @@ export class RunningSessions
       return {};
     }
     return (
-      (this._stateDB.fetch(STATE_DB_ID) as RunningSessions.IStateDBLayout) ?? {}
+      ((await this._stateDB.fetch(
+        STATE_DB_ID
+      )) as RunningSessions.IStateDBLayout) ?? {}
     );
   }
 
@@ -964,9 +993,9 @@ export class SearchableSessions extends Panel {
    * Returns whether an active item was set.
    */
   private _updateActive(direction: -1 | 0 | 1): boolean {
-    const items = [
-      ...this.node.querySelectorAll('.' + ITEM_CLASS)
-    ] as HTMLElement[];
+    const items = [...this.node.querySelectorAll('.' + ITEM_CLASS)].filter(e =>
+      e.checkVisibility()
+    ) as HTMLElement[];
     if (!items.length) {
       return false;
     }
@@ -1047,6 +1076,8 @@ export class SearchableSessionsList extends Panel {
       showToolbar: false,
       filterProvider: this._filterWidget
     });
+    // Do not use tree view in searchable list
+    section.toggleListView(true);
     this.addWidget(section);
     // Move empty indicator to the end
     this.addWidget(this._emptyIndicator);
