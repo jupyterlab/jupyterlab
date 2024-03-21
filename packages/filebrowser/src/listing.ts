@@ -2494,7 +2494,7 @@ export namespace DirListing {
      */
     createCheckboxWrapperNode(options?: {
       alwaysVisible: boolean;
-      headerNode: boolean
+      headerNode?: boolean
     }): HTMLElement {
       // Wrap the checkbox in a label element in order to increase its hit area.
       const labelWrapper = document.createElement('label');
