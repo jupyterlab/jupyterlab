@@ -2438,23 +2438,23 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.4.1
     "@codemirror/view": ^6.26.0
-    "@jupyter/ydoc": ^2.0.1
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/attachments": ^4.2.0-alpha.1
-    "@jupyterlab/codeeditor": ^4.2.0-alpha.1
-    "@jupyterlab/codemirror": ^4.2.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/documentsearch": ^4.2.0-alpha.1
-    "@jupyterlab/filebrowser": ^4.2.0-alpha.1
-    "@jupyterlab/nbformat": ^4.2.0-alpha.1
-    "@jupyterlab/observables": ^5.2.0-alpha.1
-    "@jupyterlab/outputarea": ^4.2.0-alpha.1
-    "@jupyterlab/rendermime": ^4.2.0-alpha.1
-    "@jupyterlab/services": ^7.2.0-alpha.1
-    "@jupyterlab/testing": ^4.2.0-alpha.1
-    "@jupyterlab/toc": ^6.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyter/ydoc": ^1.1.1
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/attachments": ^4.2.0-alpha.0
+    "@jupyterlab/codeeditor": ^4.2.0-alpha.0
+    "@jupyterlab/codemirror": ^4.2.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/documentsearch": ^4.2.0-alpha.0
+    "@jupyterlab/filebrowser": ^4.2.0-alpha.0
+    "@jupyterlab/nbformat": ^4.2.0-alpha.0
+    "@jupyterlab/observables": ^5.2.0-alpha.0
+    "@jupyterlab/outputarea": ^4.2.0-alpha.0
+    "@jupyterlab/rendermime": ^4.2.0-alpha.0
+    "@jupyterlab/services": ^7.2.0-alpha.0
+    "@jupyterlab/testing": ^4.2.0-alpha.0
+    "@jupyterlab/toc": ^6.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/domutils": ^2.0.1
@@ -2495,15 +2495,15 @@ __metadata:
   resolution: "@jupyterlab/codeeditor@workspace:packages/codeeditor"
   dependencies:
     "@codemirror/state": ^6.4.1
-    "@jupyter/ydoc": ^2.0.1
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/nbformat": ^4.2.0-alpha.1
-    "@jupyterlab/observables": ^5.2.0-alpha.1
-    "@jupyterlab/statusbar": ^4.2.0-alpha.1
-    "@jupyterlab/testing": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyter/ydoc": ^1.1.1
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/nbformat": ^4.2.0-alpha.0
+    "@jupyterlab/observables": ^5.2.0-alpha.0
+    "@jupyterlab/statusbar": ^4.2.0-alpha.0
+    "@jupyterlab/testing": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/dragdrop": ^2.1.4
@@ -2526,14 +2526,14 @@ __metadata:
     "@codemirror/lang-markdown": ^6.2.4
     "@codemirror/language": ^6.10.1
     "@codemirror/legacy-modes": ^6.3.3
-    "@jupyter/ydoc": ^2.0.1
-    "@jupyterlab/application": ^4.2.0-alpha.1
-    "@jupyterlab/codeeditor": ^4.2.0-alpha.1
-    "@jupyterlab/codemirror": ^4.2.0-alpha.1
-    "@jupyterlab/settingregistry": ^4.2.0-alpha.1
-    "@jupyterlab/statusbar": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyter/ydoc": ^1.1.1
+    "@jupyterlab/application": ^4.2.0-alpha.0
+    "@jupyterlab/codeeditor": ^4.2.0-alpha.0
+    "@jupyterlab/codemirror": ^4.2.0-alpha.0
+    "@jupyterlab/settingregistry": ^4.2.0-alpha.0
+    "@jupyterlab/statusbar": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/widgets": ^2.3.1
     "@rjsf/utils": ^5.13.4
@@ -2570,13 +2570,13 @@ __metadata:
     "@codemirror/search": ^6.5.6
     "@codemirror/state": ^6.4.1
     "@codemirror/view": ^6.26.0
-    "@jupyter/ydoc": ^2.0.1
-    "@jupyterlab/codeeditor": ^4.2.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/documentsearch": ^4.2.0-alpha.1
-    "@jupyterlab/nbformat": ^4.2.0-alpha.1
-    "@jupyterlab/testing": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
+    "@jupyter/ydoc": ^1.1.1
+    "@jupyterlab/codeeditor": ^4.2.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/documentsearch": ^4.2.0-alpha.0
+    "@jupyterlab/nbformat": ^4.2.0-alpha.0
+    "@jupyterlab/testing": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
     "@lezer/common": ^1.2.1
     "@lezer/generator": ^1.7.0
     "@lezer/highlight": ^1.2.0
@@ -2619,18 +2619,18 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.4.1
     "@codemirror/view": ^6.26.0
-    "@jupyter/ydoc": ^2.0.1
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/codeeditor": ^4.2.0-alpha.1
-    "@jupyterlab/codemirror": ^4.2.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/rendermime": ^4.2.0-alpha.1
-    "@jupyterlab/services": ^7.2.0-alpha.1
-    "@jupyterlab/settingregistry": ^4.2.0-alpha.1
-    "@jupyterlab/statedb": ^4.2.0-alpha.1
-    "@jupyterlab/testing": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyter/ydoc": ^1.1.1
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/codeeditor": ^4.2.0-alpha.0
+    "@jupyterlab/codemirror": ^4.2.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/rendermime": ^4.2.0-alpha.0
+    "@jupyterlab/services": ^7.2.0-alpha.0
+    "@jupyterlab/settingregistry": ^4.2.0-alpha.0
+    "@jupyterlab/statedb": ^4.2.0-alpha.0
+    "@jupyterlab/testing": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -2679,19 +2679,19 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.4.1
     "@codemirror/view": ^6.26.0
-    "@jupyter/ydoc": ^2.0.1
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/cells": ^4.2.0-alpha.1
-    "@jupyterlab/codeeditor": ^4.2.0-alpha.1
-    "@jupyterlab/codemirror": ^4.2.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/nbformat": ^4.2.0-alpha.1
-    "@jupyterlab/observables": ^5.2.0-alpha.1
-    "@jupyterlab/rendermime": ^4.2.0-alpha.1
-    "@jupyterlab/services": ^7.2.0-alpha.1
-    "@jupyterlab/testing": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyter/ydoc": ^1.1.1
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/cells": ^4.2.0-alpha.0
+    "@jupyterlab/codeeditor": ^4.2.0-alpha.0
+    "@jupyterlab/codemirror": ^4.2.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/nbformat": ^4.2.0-alpha.0
+    "@jupyterlab/observables": ^5.2.0-alpha.0
+    "@jupyterlab/rendermime": ^4.2.0-alpha.0
+    "@jupyterlab/services": ^7.2.0-alpha.0
+    "@jupyterlab/testing": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/dragdrop": ^2.1.4
@@ -2811,23 +2811,24 @@ __metadata:
   dependencies:
     "@codemirror/state": ^6.4.1
     "@codemirror/view": ^6.26.0
-    "@jupyter/ydoc": ^2.0.1
-    "@jupyterlab/application": ^4.2.0-alpha.1
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/cells": ^4.2.0-alpha.1
-    "@jupyterlab/codeeditor": ^4.2.0-alpha.1
-    "@jupyterlab/codemirror": ^4.2.0-alpha.1
-    "@jupyterlab/console": ^4.2.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/docregistry": ^4.2.0-alpha.1
-    "@jupyterlab/fileeditor": ^4.2.0-alpha.1
-    "@jupyterlab/notebook": ^4.2.0-alpha.1
-    "@jupyterlab/observables": ^5.2.0-alpha.1
-    "@jupyterlab/rendermime": ^4.2.0-alpha.1
-    "@jupyterlab/services": ^7.2.0-alpha.1
-    "@jupyterlab/testing": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyter/react-components": ^0.15.3
+    "@jupyter/ydoc": ^1.1.1
+    "@jupyterlab/application": ^4.2.0-alpha.0
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/cells": ^4.2.0-alpha.0
+    "@jupyterlab/codeeditor": ^4.2.0-alpha.0
+    "@jupyterlab/codemirror": ^4.2.0-alpha.0
+    "@jupyterlab/console": ^4.2.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/docregistry": ^4.2.0-alpha.0
+    "@jupyterlab/fileeditor": ^4.2.0-alpha.0
+    "@jupyterlab/notebook": ^4.2.0-alpha.0
+    "@jupyterlab/observables": ^5.2.0-alpha.0
+    "@jupyterlab/rendermime": ^4.2.0-alpha.0
+    "@jupyterlab/services": ^7.2.0-alpha.0
+    "@jupyterlab/testing": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -2852,17 +2853,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/docmanager-extension@workspace:packages/docmanager-extension"
   dependencies:
-    "@jupyterlab/application": ^4.2.0-alpha.1
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/docmanager": ^4.2.0-alpha.1
-    "@jupyterlab/docregistry": ^4.2.0-alpha.1
-    "@jupyterlab/services": ^7.2.0-alpha.1
-    "@jupyterlab/settingregistry": ^4.2.0-alpha.1
-    "@jupyterlab/statedb": ^4.2.0-alpha.1
-    "@jupyterlab/statusbar": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyterlab/application": ^4.2.0-alpha.0
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/docmanager": ^4.2.0-alpha.0
+    "@jupyterlab/docregistry": ^4.2.0-alpha.0
+    "@jupyterlab/services": ^7.2.0-alpha.0
+    "@jupyterlab/settingregistry": ^4.2.0-alpha.0
+    "@jupyterlab/statedb": ^4.2.0-alpha.0
+    "@jupyterlab/statusbar": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -2880,15 +2881,15 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/docmanager@workspace:packages/docmanager"
   dependencies:
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/docregistry": ^4.2.0-alpha.1
-    "@jupyterlab/services": ^7.2.0-alpha.1
-    "@jupyterlab/statedb": ^4.2.0-alpha.1
-    "@jupyterlab/statusbar": ^4.2.0-alpha.1
-    "@jupyterlab/testing": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/docregistry": ^4.2.0-alpha.0
+    "@jupyterlab/services": ^7.2.0-alpha.0
+    "@jupyterlab/statedb": ^4.2.0-alpha.0
+    "@jupyterlab/statusbar": ^4.2.0-alpha.0
+    "@jupyterlab/testing": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -3417,28 +3418,28 @@ __metadata:
   dependencies:
     "@codemirror/commands": ^6.3.3
     "@codemirror/search": ^6.5.6
-    "@jupyterlab/application": ^4.2.0-alpha.1
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/codeeditor": ^4.2.0-alpha.1
-    "@jupyterlab/codemirror": ^4.2.0-alpha.1
-    "@jupyterlab/completer": ^4.2.0-alpha.1
-    "@jupyterlab/console": ^4.2.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/docregistry": ^4.2.0-alpha.1
-    "@jupyterlab/documentsearch": ^4.2.0-alpha.1
-    "@jupyterlab/filebrowser": ^4.2.0-alpha.1
-    "@jupyterlab/fileeditor": ^4.2.0-alpha.1
-    "@jupyterlab/launcher": ^4.2.0-alpha.1
-    "@jupyterlab/lsp": ^4.2.0-alpha.1
-    "@jupyterlab/mainmenu": ^4.2.0-alpha.1
-    "@jupyterlab/observables": ^5.2.0-alpha.1
-    "@jupyterlab/rendermime-interfaces": ^3.10.0-alpha.1
-    "@jupyterlab/services": ^7.2.0-alpha.1
-    "@jupyterlab/settingregistry": ^4.2.0-alpha.1
-    "@jupyterlab/statusbar": ^4.2.0-alpha.1
-    "@jupyterlab/toc": ^6.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyterlab/application": ^4.2.0-alpha.0
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/codeeditor": ^4.2.0-alpha.0
+    "@jupyterlab/codemirror": ^4.2.0-alpha.0
+    "@jupyterlab/completer": ^4.2.0-alpha.0
+    "@jupyterlab/console": ^4.2.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/docregistry": ^4.2.0-alpha.0
+    "@jupyterlab/documentsearch": ^4.2.0-alpha.0
+    "@jupyterlab/filebrowser": ^4.2.0-alpha.0
+    "@jupyterlab/fileeditor": ^4.2.0-alpha.0
+    "@jupyterlab/launcher": ^4.2.0-alpha.0
+    "@jupyterlab/lsp": ^4.2.0-alpha.0
+    "@jupyterlab/mainmenu": ^4.2.0-alpha.0
+    "@jupyterlab/observables": ^5.2.0-alpha.0
+    "@jupyterlab/rendermime-interfaces": ^3.10.0-alpha.0
+    "@jupyterlab/services": ^7.2.0-alpha.0
+    "@jupyterlab/settingregistry": ^4.2.0-alpha.0
+    "@jupyterlab/statusbar": ^4.2.0-alpha.0
+    "@jupyterlab/toc": ^6.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/algorithm": ^2.0.1
     "@lumino/commands": ^2.2.0
     "@lumino/coreutils": ^2.1.2
@@ -3694,11 +3695,11 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/json-extension@workspace:packages/json-extension"
   dependencies:
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/codemirror": ^4.2.0-alpha.1
-    "@jupyterlab/rendermime-interfaces": ^3.10.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/codemirror": ^4.2.0-alpha.0
+    "@jupyterlab/rendermime-interfaces": ^3.10.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lezer/highlight": ^1.2.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/messaging": ^2.0.1
@@ -3856,16 +3857,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/mainmenu-extension@workspace:packages/mainmenu-extension"
   dependencies:
-    "@jupyterlab/application": ^4.2.0-alpha.1
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/docmanager": ^4.2.0-alpha.1
-    "@jupyterlab/filebrowser": ^4.2.0-alpha.1
-    "@jupyterlab/mainmenu": ^4.2.0-alpha.1
-    "@jupyterlab/services": ^7.2.0-alpha.1
-    "@jupyterlab/settingregistry": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyterlab/application": ^4.2.0-alpha.0
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/docmanager": ^4.2.0-alpha.0
+    "@jupyterlab/filebrowser": ^4.2.0-alpha.0
+    "@jupyterlab/mainmenu": ^4.2.0-alpha.0
+    "@jupyterlab/services": ^7.2.0-alpha.0
+    "@jupyterlab/settingregistry": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/algorithm": ^2.0.1
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
@@ -4519,17 +4520,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/running-extension@workspace:packages/running-extension"
   dependencies:
-    "@jupyterlab/application": ^4.2.0-alpha.1
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/coreutils": ^6.2.0-alpha.1
-    "@jupyterlab/docmanager": ^4.2.0-alpha.1
-    "@jupyterlab/docregistry": ^4.2.0-alpha.1
-    "@jupyterlab/rendermime-interfaces": ^3.10.0-alpha.1
-    "@jupyterlab/running": ^4.2.0-alpha.1
-    "@jupyterlab/services": ^7.2.0-alpha.1
-    "@jupyterlab/statedb": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyterlab/application": ^4.2.0-alpha.0
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/coreutils": ^6.2.0-alpha.0
+    "@jupyterlab/docmanager": ^4.2.0-alpha.0
+    "@jupyterlab/docregistry": ^4.2.0-alpha.0
+    "@jupyterlab/rendermime-interfaces": ^3.10.0-alpha.0
+    "@jupyterlab/running": ^4.2.0-alpha.0
+    "@jupyterlab/services": ^7.2.0-alpha.0
+    "@jupyterlab/statedb": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/commands": ^2.2.0
     "@lumino/polling": ^2.1.2
     "@lumino/signaling": ^2.1.2
@@ -4545,10 +4546,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/running@workspace:packages/running"
   dependencies:
-    "@jupyterlab/apputils": ^4.3.0-alpha.1
-    "@jupyterlab/statedb": ^4.2.0-alpha.1
-    "@jupyterlab/translation": ^4.2.0-alpha.1
-    "@jupyterlab/ui-components": ^4.2.0-alpha.1
+    "@jupyterlab/apputils": ^4.3.0-alpha.0
+    "@jupyterlab/statedb": ^4.2.0-alpha.0
+    "@jupyterlab/translation": ^4.2.0-alpha.0
+    "@jupyterlab/ui-components": ^4.2.0-alpha.0
     "@lumino/coreutils": ^2.1.2
     "@lumino/disposable": ^2.1.2
     "@lumino/domutils": ^2.0.1
@@ -11972,17 +11973,6 @@ __metadata:
   version: 0.6.1
   resolution: "forever-agent@npm:0.6.1"
   checksum: 766ae6e220f5fe23676bb4c6a99387cec5b7b62ceb99e10923376e27bfea72f3c3aeec2ba5f45f3f7ba65d6616965aa7c20b15002b6860833bb6e394dea546a8
-  languageName: node
-  linkType: hard
-
-"form-data@npm:^3.0.0":
-  version: 3.0.1
-  resolution: "form-data@npm:3.0.1"
-  dependencies:
-    asynckit: ^0.4.0
-    combined-stream: ^1.0.8
-    mime-types: ^2.1.12
-  checksum: b019e8d35c8afc14a2bd8a7a92fa4f525a4726b6d5a9740e8d2623c30e308fbb58dc8469f90415a856698933c8479b01646a9dff33c87cc4e76d72aedbbf860d
   languageName: node
   linkType: hard
 
