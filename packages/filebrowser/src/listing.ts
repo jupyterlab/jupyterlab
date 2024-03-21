@@ -2507,7 +2507,7 @@ export namespace DirListing {
       // controls the checked state of the checkbox.
       if (!options?.headerNode) {
         checkbox.addEventListener('click', event => {
-            event.preventDefault()
+          event.preventDefault()
         });
       }
 
