@@ -52,7 +52,7 @@ test.use({
 });
 
 test.describe('Sidebars', () => {
-  test.beforeAll(async ({ page, request, tmpPath }) => {
+  test.beforeAll(async ({ request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
 
     // Create some dummy content
@@ -66,9 +66,6 @@ test.describe('Sidebars', () => {
     );
     // Create a dummy folder
     await contents.createDirectory(`${tmpPath}/${testFolderName}`);
-
-    // Freeze all items' last modified dates as one day ago.
-    await galata.Mock.freezeContentLastModified(page, filterContent);
   });
 
   test.afterAll(async ({ request, tmpPath }) => {
@@ -96,6 +93,9 @@ test.describe('Sidebars', () => {
   // Additional test cases for resized widths of the file browser
   for (const [sizeName, size] of Object.entries(sidebarWidths)) {
     test(`Open Sidebar tab filebrowser ${sizeName}`, async ({ page }) => {
+      // Freeze all items' last modified dates as one day ago.
+      await galata.Mock.freezeContentLastModified(page, filterContent);
+
       await page.sidebar.openTab('filebrowser');
       // Resize the sidebar to the desired width.
       await page.sidebar.setWidth(size, 'left');
