@@ -33,7 +33,7 @@ test.describe('Overview', () => {
 
     // Close all other sections
     const otherSession = page.locator(
-      '#jp-running-sessions .jp-AccordionPanel-title.lm-mod-expanded:not([aria-label="Open Tabs Section"])'
+      '#jp-running-sessions .jp-AccordionPanel-title.lm-mod-expanded:not([aria-label="Open Tabs Section"]) .lm-AccordionPanel-titleCollapser'
     );
     while ((await otherSession.count()) != 0) {
       await otherSession.first().click();
