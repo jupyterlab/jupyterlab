@@ -25,12 +25,7 @@ import {
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
 import { Menu } from '@lumino/widgets';
-import {
-  CommandIDs,
-  IExternalBundle,
-  IShortcutsSettingsLayout,
-  KebindingRequest
-} from './types';
+import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
 import { renderShortCut } from './renderer';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -40,8 +35,8 @@ function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd,
   translator: ITranslator,
-  actionRequested: ISignal<unknown, KebindingRequest>
-): IExternalBundle {
+  actionRequested: ISignal<unknown, IShortcutUI.KebindingRequest>
+): IShortcutUI.IExternalBundle {
   const { commands } = app;
   return {
     translator,
@@ -107,7 +102,9 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
     if (editorRegistry) {
-      const actionRequested = new Signal<unknown, KebindingRequest>({});
+      const actionRequested = new Signal<unknown, IShortcutUI.KebindingRequest>(
+        {}
+      );
       const isKeybindingNode = (node: HTMLElement) =>
         node.dataset['shortcut'] !== undefined;
 

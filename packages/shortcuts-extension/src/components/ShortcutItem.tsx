@@ -8,7 +8,6 @@ import { Platform } from '@lumino/domutils';
 import * as React from 'react';
 import { IConflicts, ShortcutInput } from './ShortcutInput';
 import {
-  IExternalBundle,
   IKeybinding,
   IShortcutRegistry,
   IShortcutTarget,
@@ -24,7 +23,7 @@ export interface IShortcutItemProps {
   deleteKeybinding: IShortcutUI['deleteKeybinding'];
   findConflictsFor: IShortcutRegistry['findConflictsFor'];
   showSelectors: boolean;
-  external: IExternalBundle;
+  external: IShortcutUI.IExternalBundle;
 }
 
 /** State for ShortcutItem component */
@@ -61,7 +60,7 @@ export class ShortcutItem extends React.Component<
       if (action.request === 'delete-keybinding') {
         const target = this.props.shortcut;
         const binding = target.keybindings[action.keybinding];
-        this.props.deleteKeybinding(target, binding);
+        this.props.deleteKeybinding(target, binding).catch(console.error);
       }
     });
   }
