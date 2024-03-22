@@ -120,8 +120,8 @@ export class TopNav extends React.Component<ITopNavProps> {
       commands.addCommand(CommandIDs.resetAll, {
         label: trans.__('Reset All'),
         caption: trans.__('Reset all shortcuts'),
-        execute: () => {
-          this.props.resetShortcuts();
+        execute: async () => {
+          await this.props.resetShortcuts();
         }
       });
     }
