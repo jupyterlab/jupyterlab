@@ -44,8 +44,6 @@ function getExternalForJupyterLab(
       settingRegistry.load(SHORTCUT_PLUGIN_ID, true) as Promise<
         ISettingRegistry.ISettings<IShortcutsSettingsLayout>
       >,
-    removeShortCut: (key: string) =>
-      settingRegistry.remove(SHORTCUT_PLUGIN_ID, key),
     createMenu: () => new Menu({ commands }),
     commandRegistry: app.commands,
     actionRequested

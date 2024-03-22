@@ -265,12 +265,12 @@ export class ShortcutUI
     return filteredShortcuts;
   }
 
-  /** Reset all keybindings to their defaults */
+  /**
+   * Reset all keybindings to their defaults
+   */
   resetShortcuts = async (): Promise<void> => {
     const settings = await this.props.external.getSettings();
-    for (const key of Object.keys(settings.user)) {
-      await this.props.external.removeShortCut(key);
-    }
+    await settings.set('shortcuts', []);
     await this._refreshShortcutList();
   };
 

@@ -121,7 +121,6 @@ export namespace IShortcutUI {
     getSettings: () => Promise<
       ISettingRegistry.ISettings<IShortcutsSettingsLayout>
     >;
-    removeShortCut: (key: string) => Promise<void>;
     createMenu: () => Menu;
     commandRegistry: Omit<CommandRegistry, 'execute'>;
     actionRequested: ISignal<unknown, KebindingRequest>;
