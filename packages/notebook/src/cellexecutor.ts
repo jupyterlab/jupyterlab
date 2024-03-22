@@ -13,7 +13,7 @@ import { nullTranslator } from '@jupyterlab/translation';
 import { findIndex } from '@lumino/algorithm';
 import { KernelError } from './actions';
 import type { IExecutionOptions } from './tokens';
-import type { Notebook } from './widget';
+import type { NotebookModel } from './model';
 
 /**
  * Run a single notebook cell.
@@ -24,8 +24,9 @@ import type { Notebook } from './widget';
 export async function runCell({
   cell,
   notebook,
-  executed,
-  executionScheduled,
+  notebookConfig,
+  onCellExecuted,
+  onCellExecutionScheduled,
   sessionContext,
   sessionDialogs,
   translator
@@ -36,7 +37,7 @@ export async function runCell({
     case 'markdown':
       (cell as MarkdownCell).rendered = true;
       cell.inputHidden = false;
-      executed.emit({ notebook, cell, success: true });
+      onCellExecuted({ cell, success: true });
       break;
     case 'code':
       if (sessionContext) {
@@ -75,8 +76,8 @@ export async function runCell({
           return true;
         }
 
-        const deletedCells = notebook.model?.deletedCells ?? [];
-        executionScheduled.emit({ notebook, cell });
+        const deletedCells = notebook.deletedCells;
+        onCellExecutionScheduled({ cell });
 
         let ran = false;
         try {
@@ -85,7 +86,7 @@ export async function runCell({
             sessionContext,
             {
               deletedCells,
-              recordTiming: notebook.notebookConfig.recordTiming
+              recordTiming: notebookConfig.recordTiming
             }
           );
           deletedCells.splice(0, deletedCells.length);
@@ -114,8 +115,7 @@ export async function runCell({
           if (cell.isDisposed || reason.message.startsWith('Canceled')) {
             ran = false;
           } else {
-            executed.emit({
-              notebook,
+            onCellExecuted({
               cell,
               success: false,
               error: reason
@@ -125,7 +125,7 @@ export async function runCell({
         }
 
         if (ran) {
-          executed.emit({ notebook, cell, success: true });
+          onCellExecuted({ cell, success: true });
         }
 
         return ran;
@@ -151,7 +151,7 @@ export async function runCell({
  */
 function handlePayload(
   content: KernelMessage.IExecuteReply,
-  notebook: Notebook,
+  notebook: NotebookModel,
   cell: Cell
 ) {
   const setNextInput = content.payload?.filter(i => {
@@ -171,8 +171,8 @@ function handlePayload(
   }
 
   // Create a new code cell and add as the next cell.
-  const notebookModel = notebook.model!.sharedModel;
-  const cells = notebook.model!.cells;
+  const notebookModel = notebook.sharedModel;
+  const cells = notebook.cells;
   const index = findIndex(cells, model => model === cell.model);
 
   // While this cell has no outputs and could be trusted following the letter

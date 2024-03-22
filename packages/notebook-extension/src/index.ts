@@ -63,7 +63,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import {
   CommandEditStatus,
   ExecutionIndicator,
-  ICellExecutor,
+  INotebookCellExecutor,
   INotebookTools,
   INotebookTracker,
   INotebookWidgetFactory,
@@ -125,13 +125,13 @@ import {
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
+import { cellExecutor } from './cell-executor';
 import { logNotebookOutput } from './nboutput';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
   CellMetadataField,
   NotebookMetadataField
 } from './tool-widgets/metadataEditorFields';
-import { cellExecutor } from './cell-executor';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -355,7 +355,11 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   description: 'Provides the notebook widget tracker.',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory, IEditorExtensionRegistry, ICellExecutor],
+  requires: [
+    INotebookWidgetFactory,
+    IEditorExtensionRegistry,
+    INotebookCellExecutor
+  ],
   optional: [
     ICommandPalette,
     IDefaultFileBrowser,
@@ -1589,7 +1593,7 @@ function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
   extensions: IEditorExtensionRegistry,
-  executor: ICellExecutor,
+  executor: INotebookCellExecutor,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,

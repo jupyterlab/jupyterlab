@@ -9,13 +9,14 @@ import type {
 import type { Cell } from '@jupyterlab/cells';
 import type { ITranslator } from '@jupyterlab/translation';
 import { Token } from '@lumino/coreutils';
-import type { ISignal, Signal } from '@lumino/signaling';
+import type { ISignal } from '@lumino/signaling';
 import type { Widget } from '@lumino/widgets';
+import type { KernelError } from './actions';
+import type { INotebookModel } from './model';
 import type { NotebookTools } from './notebooktools';
 import type { NotebookPanel } from './panel';
-import type { Notebook } from './widget';
+import type { StaticNotebook } from './widget';
 import type { NotebookWidgetFactory } from './widgetfactory';
-import type { KernelError } from './actions';
 
 /**
  * The notebook widget factory token.
@@ -146,23 +147,23 @@ export interface IExecutionOptions {
   /**
    * Notebook to which the cell belongs
    */
-  notebook: Notebook;
+  notebook: INotebookModel;
   /**
-   * A signal that emits whenever a cell completes execution.
+   * Notebook widget configuration
    */
-  executed: Signal<
-    any,
-    {
-      notebook: Notebook;
-      cell: Cell;
-      success: boolean;
-      error?: KernelError | null;
-    }
-  >;
+  notebookConfig: StaticNotebook.INotebookConfig;
   /**
-   * A signal that emits whenever a cell execution is scheduled.
+   * A callback to notify a cell completed execution.
    */
-  executionScheduled: Signal<any, { notebook: Notebook; cell: Cell }>;
+  onCellExecuted: (args: {
+    cell: Cell;
+    success: boolean;
+    error?: KernelError | null;
+  }) => void;
+  /**
+   * A callback to notify that a cell execution is scheduled.
+   */
+  onCellExecutionScheduled: (args: { cell: Cell }) => void;
   /**
    * Document session context
    */
@@ -180,7 +181,7 @@ export interface IExecutionOptions {
 /**
  * Notebook cell executor interface
  */
-export interface ICellExecutor {
+export interface INotebookCellExecutor {
   /**
    * Execute a cell.
    *
@@ -192,7 +193,7 @@ export interface ICellExecutor {
 /**
  * The notebook cell executor token.
  */
-export const ICellExecutor = new Token<ICellExecutor>(
-  '@jupyterlab/notebook:ICellExecutor',
+export const INotebookCellExecutor = new Token<INotebookCellExecutor>(
+  '@jupyterlab/notebook:INotebookCellExecutor',
   `The notebook cell executor`
 );

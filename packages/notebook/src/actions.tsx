@@ -30,7 +30,7 @@ import * as React from 'react';
 import { runCell as defaultRunCell } from './cellexecutor';
 import { Notebook, StaticNotebook } from './widget';
 import { NotebookWindowedLayout } from './windowing';
-import { ICellExecutor } from './tokens';
+import { type IExecutionOptions, INotebookCellExecutor } from './tokens';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -2226,7 +2226,7 @@ export namespace NotebookActions {
 /**
  * Set the notebook cell executor and the related signals.
  */
-export function setCellExecutor(executor: ICellExecutor): void {
+export function setCellExecutor(executor: INotebookCellExecutor): void {
   if (Private.executor) {
     throw new Error('Cell executor can only be set once.');
   }
@@ -2240,7 +2240,7 @@ namespace Private {
   /**
    * Notebook cell executor
    */
-  export let executor: ICellExecutor;
+  export let executor: INotebookCellExecutor;
 
   /**
    * A signal that emits whenever a cell completes execution.
@@ -2502,13 +2502,18 @@ namespace Private {
     }
     const options = {
       cell,
-      notebook,
-      executed,
-      executionScheduled,
+      notebook: notebook.model!,
+      notebookConfig: notebook.notebookConfig,
+      onCellExecuted: args => {
+        executed.emit({ notebook, ...args });
+      },
+      onCellExecutionScheduled: args => {
+        executionScheduled.emit({ notebook, ...args });
+      },
       sessionContext,
       sessionDialogs,
       translator
-    };
+    } satisfies IExecutionOptions;
     return executor ? executor.runCell(options) : defaultRunCell(options);
   }
 
