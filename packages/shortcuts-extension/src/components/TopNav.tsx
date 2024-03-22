@@ -12,9 +12,9 @@ import { ShortcutTitleItem } from './ShortcutTitleItem';
 import { IShortcutUI } from '../types';
 
 export interface IAdvancedOptionsProps {
-  toggleSelectors: Function;
+  toggleSelectors: IShortcutUI['toggleSelectors'];
   showSelectors: boolean;
-  resetShortcuts: Function;
+  resetShortcuts: IShortcutUI['resetShortcuts'];
   menu: Menu;
   translator: ITranslator;
 }
@@ -81,9 +81,9 @@ function AdvancedOptions(props: IAdvancedOptionsProps): JSX.Element {
 
 /** State for TopNav component */
 export interface ITopNavProps {
-  resetShortcuts: Function;
-  updateSearchQuery: Function;
-  toggleSelectors: Function;
+  resetShortcuts: IShortcutUI['resetShortcuts'];
+  updateSearchQuery: IShortcutUI['updateSearchQuery'];
+  toggleSelectors: IShortcutUI['toggleSelectors'];
   showSelectors: boolean;
   updateSort: IShortcutUI['updateSort'];
   currentSort: string;
@@ -150,7 +150,9 @@ export class TopNav extends React.Component<ITopNavProps> {
             className="jp-Shortcuts-Search"
             aria-label={trans.__('Search shortcuts')}
             type="text"
-            onChange={event => this.props.updateSearchQuery(event)}
+            onChange={event =>
+              this.props.updateSearchQuery(event.target['value'])
+            }
             placeholder={trans.__('Search…')}
             rightIcon="ui-components:search"
           />

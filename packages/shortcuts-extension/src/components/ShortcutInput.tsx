@@ -27,11 +27,11 @@ export interface IShortcutInputProps {
   deleteKeybinding: IShortcutUI['deleteKeybinding'];
   findConflictsFor: IShortcutRegistry['findConflictsFor'];
   displayConflicts: (conflicts: IConflicts) => void;
-  toggleInput: Function;
+  toggleInput: () => void;
   shortcut: IShortcutTarget;
   /* If keybinding is not given, the input is used for adding a keybinding, otherwise for replacing a keybinding */
   keybinding?: IKeybinding;
-  toSymbols: Function;
+  toSymbols: (value: string) => string;
   displayInput: boolean;
   placeholder: string;
   translator: ITranslator;
