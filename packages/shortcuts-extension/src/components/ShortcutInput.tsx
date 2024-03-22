@@ -80,9 +80,9 @@ export class ShortcutInput extends React.Component<
     });
   }
 
-  handleSubmit = () => {
+  handleSubmit = async () => {
     if (!this._isReplacingExistingKeybinding) {
-      this._updateShortcut();
+      await this._updateShortcut();
       this.setState({
         value: '',
         keys: [],
@@ -98,23 +98,23 @@ export class ShortcutInput extends React.Component<
           userInput: ''
         });
       } else {
-        this._updateShortcut();
+        await this._updateShortcut();
       }
     }
     this._updateConflictDisplay();
   };
 
-  private _updateShortcut = () => {
+  private _updateShortcut = async () => {
     const keys = [...this.state.keys, this.state.currentChain];
     this.setState({ keys });
     if (this.props.keybinding) {
-      this.props.replaceKeybinding(
+      await this.props.replaceKeybinding(
         this.props.shortcut,
         this.props.keybinding,
         keys
       );
     } else {
-      this.props.addKeybinding(this.props.shortcut, keys);
+      await this.props.addKeybinding(this.props.shortcut, keys);
     }
   };
 
@@ -135,7 +135,7 @@ export class ShortcutInput extends React.Component<
       await this.props.deleteKeybinding(conflict, conflictingBinding);
     }
     this.setState({ conflicts: [] });
-    this._updateShortcut();
+    await this._updateShortcut();
     this._updateConflictDisplay();
   };
 
