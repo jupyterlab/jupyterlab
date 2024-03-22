@@ -25,28 +25,35 @@ import {
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
 import { Menu } from '@lumino/widgets';
-import { IShortcutUIexternal } from './components';
+import {
+  CommandIDs,
+  IExternalBundle,
+  IShortcutsSettingsLayout,
+  KebindingRequest
+} from './types';
 import { renderShortCut } from './renderer';
+import { ISignal, Signal } from '@lumino/signaling';
 
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd,
-  translator: ITranslator
-): IShortcutUIexternal {
+  translator: ITranslator,
+  actionRequested: ISignal<unknown, KebindingRequest>
+): IExternalBundle {
   const { commands } = app;
   return {
     translator,
-    getAllShortCutSettings: () =>
-      settingRegistry.load(SHORTCUT_PLUGIN_ID, true),
+    getSettings: () =>
+      settingRegistry.load(SHORTCUT_PLUGIN_ID, true) as Promise<
+        ISettingRegistry.ISettings<IShortcutsSettingsLayout>
+      >,
     removeShortCut: (key: string) =>
       settingRegistry.remove(SHORTCUT_PLUGIN_ID, key),
     createMenu: () => new Menu({ commands }),
-    hasCommand: (id: string) => commands.hasCommand(id),
-    addCommand: (id: string, options: CommandRegistry.ICommandOptions) =>
-      commands.addCommand(id, options),
-    getLabel: (id: string) => commands.label(id)
+    commandRegistry: app.commands,
+    actionRequested
   };
 }
 
@@ -100,10 +107,71 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
     if (editorRegistry) {
+      const actionRequested = new Signal<unknown, KebindingRequest>({});
+      const isKeybindingNode = (node: HTMLElement) =>
+        node.dataset['shortcut'] !== undefined;
+
+      app.commands.addCommand(CommandIDs.editBinding, {
+        label: trans.__('Edit Keybinding'),
+        caption: trans.__('Edit existing keybinding'),
+        execute: () => {
+          const node = app.contextMenuHitTest(isKeybindingNode);
+          const keybinding = node?.dataset['keybinding'];
+          const shortcutId = node?.dataset['shortcut'];
+          if (!shortcutId || !keybinding) {
+            return console.log('Missing shortcut id/keybinding information');
+          }
+          actionRequested.emit({
+            request: 'edit-keybinding',
+            keybinding: parseInt(keybinding, 10),
+            shortcutId
+          });
+        }
+      });
+
+      app.commands.addCommand(CommandIDs.deleteBinding, {
+        label: trans.__('Delete Keybinding'),
+        caption: trans.__('Delete chosen keybinding'),
+        execute: () => {
+          const node = app.contextMenuHitTest(isKeybindingNode);
+          const keybinding = node?.dataset['keybinding'];
+          const shortcutId = node?.dataset['shortcut'];
+          if (!shortcutId || !keybinding) {
+            return console.log('Missing shortcut id/keybinding information');
+          }
+          actionRequested.emit({
+            request: 'delete-keybinding',
+            keybinding: parseInt(keybinding, 10),
+            shortcutId
+          });
+        }
+      });
+
+      app.commands.addCommand(CommandIDs.addBinding, {
+        label: trans.__('Add Keybinding'),
+        caption: trans.__('Add new keybinding for existing shortcut target'),
+        execute: () => {
+          const node = app.contextMenuHitTest(isKeybindingNode);
+          const shortcutId = node?.dataset['shortcut'];
+          if (!shortcutId) {
+            return console.log('Missing shortcut id to add keybinding to');
+          }
+          actionRequested.emit({
+            request: 'add-keybinding',
+            shortcutId
+          });
+        }
+      });
+
       const component: IFormRenderer = {
         fieldRenderer: (props: any) => {
           return renderShortCut({
-            external: getExternalForJupyterLab(registry, app, translator_),
+            external: getExternalForJupyterLab(
+              registry,
+              app,
+              translator_,
+              actionRequested
+            ),
             ...props
           });
         }

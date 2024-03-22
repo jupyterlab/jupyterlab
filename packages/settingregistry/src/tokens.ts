@@ -480,7 +480,9 @@ export namespace ISettingRegistry {
   /**
    * An interface for manipulating the settings of a specific plugin.
    */
-  export interface ISettings extends IDisposable {
+  export interface ISettings<
+    O extends ReadonlyPartialJSONObject = ReadonlyPartialJSONObject
+  > extends IDisposable {
     /**
      * A signal that emits when the plugin's settings have changed.
      */
@@ -489,7 +491,7 @@ export namespace ISettingRegistry {
     /**
      * The composite of user settings and extension defaults.
      */
-    readonly composite: ReadonlyPartialJSONObject;
+    readonly composite: O;
 
     /**
      * The plugin's ID.
@@ -514,7 +516,7 @@ export namespace ISettingRegistry {
     /**
      * The user settings.
      */
-    readonly user: ReadonlyPartialJSONObject;
+    readonly user: O;
 
     /**
      * The published version of the NPM package containing these settings.
