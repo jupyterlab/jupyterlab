@@ -29,7 +29,11 @@ import {
   IPositionModel
 } from '@jupyterlab/codeeditor';
 import { ICompletionProviderManager } from '@jupyterlab/completer';
-import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
+import {
+  ConsolePanel,
+  type IConsoleCellExecutor,
+  IConsoleTracker
+} from '@jupyterlab/console';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import { IMainMenu } from '@jupyterlab/mainmenu';
@@ -53,6 +57,7 @@ import {
 import { DisposableSet } from '@lumino/disposable';
 import { DockLayout, Widget } from '@lumino/widgets';
 import foreign from './foreign';
+import { cellExecutor } from './cellexecutor';
 
 /**
  * The command IDs used by the console plugin.
@@ -241,7 +246,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   foreign,
   kernelStatus,
   lineColStatus,
-  completerPlugin
+  completerPlugin,
+  cellExecutor
 ];
 export default plugins;
 
@@ -252,6 +258,7 @@ async function activateConsole(
   app: JupyterFrontEnd,
   contentFactory: ConsolePanel.IContentFactory,
   editorServices: IEditorServices,
+  executor: IConsoleCellExecutor,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
   restorer: ILayoutRestorer | null,
@@ -380,6 +387,7 @@ async function activateConsole(
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
       sessionDialogs,
+      executor,
       translator,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
