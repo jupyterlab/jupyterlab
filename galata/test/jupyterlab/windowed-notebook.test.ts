@@ -208,33 +208,101 @@ for (const cellType of ['code', 'markdown']) {
   });
 }
 
-test('should scroll back to the cell below the active cell on arrow down key', async ({
-  page,
-  tmpPath
-}) => {
-  await page.notebook.openByPath(`${tmpPath}/${fileName}`);
+const scrollOnKeyPressCases: {
+  key: string;
+  showCell: 'first' | 'second' | 'neither';
+  times: number;
+  enterEditor: boolean;
+}[] = [
+  {
+    // When pressing arrow down the second cell should become selected.
+    key: 'ArrowDown',
+    showCell: 'second',
+    times: 1,
+    enterEditor: false
+  },
+  {
+    // Pressing Alt does not cause any input nor cursor movement so it should
+    // not cause any scrolling. This test in particular tests against an easy
+    // mistake of force-focusing the active editor which is out of view which
+    // can cause partial scrolling in the direction of the editor. Because the
+    // scrolling is only partial multiple presses are needed.
+    key: 'Alt',
+    showCell: 'neither',
+    times: 10,
+    enterEditor: true
+  },
+  {
+    // Because the cursor starts at the beginning of the first cell, a single
+    // press of PageDown should just move the cursor to the end, which should
+    // reveal the editor by scrolling to the first cell.
+    key: 'PageDown',
+    showCell: 'first',
+    times: 1,
+    enterEditor: true
+  },
+  {
+    // Pressing `PageDown` multiple times should scroll the notebook in a way
+    // which hides both cells (even though the first press would reveal them).
+    key: 'PageDown',
+    showCell: 'neither',
+    times: 10,
+    enterEditor: true
+  }
+];
+test.describe('Scrolling on keyboard interaction when active editor is above the viewport', () => {
+  for (const testCase of scrollOnKeyPressCases) {
+    test(`Show ${testCase.showCell} cell on pressing ${testCase.key} ${testCase.times} times`, async ({
+      page,
+      tmpPath
+    }) => {
+      await page.notebook.openByPath(`${tmpPath}/${fileName}`);
 
-  // Activate the first cell.
-  await page.notebook.selectCells(0);
-  const h = await page.notebook.getNotebookInPanelLocator();
-  const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="0"]');
-  const secondCell = h!.locator('.jp-Cell[data-windowed-list-index="1"]');
-  await firstCell.waitFor();
-  await secondCell.waitFor();
+      // Activate the first cell.
+      await page.notebook.selectCells(0);
+      const h = await page.notebook.getNotebookInPanelLocator();
+      const firstCell = h!.locator('.jp-Cell[data-windowed-list-index="0"]');
+      const secondCell = h!.locator('.jp-Cell[data-windowed-list-index="1"]');
+      await firstCell.waitFor();
+      await secondCell.waitFor();
 
-  const bbox = await h!.boundingBox();
-  await page.mouse.move(bbox!.x, bbox!.y);
-  await Promise.all([
-    firstCell.waitFor({ state: 'hidden' }),
-    secondCell.waitFor({ state: 'hidden' }),
-    page.mouse.wheel(0, 1200)
-  ]);
+      if (testCase.enterEditor) {
+        await page.notebook.enterCellEditingMode(0);
+        // Move cursor in the first cell to the beginning of the source code
+        await page.keyboard.press('Home');
+      }
 
-  // Select cell below the active cell
-  await page.keyboard.press('ArrowDown');
+      // Position the mouse in the bounding box to allow for scrolling with mouse wheel
+      const bbox = await h!.boundingBox();
+      await page.mouse.move(bbox!.x, bbox!.y);
 
-  // Expect the second cell to become visible again.
-  await secondCell.waitFor({ state: 'visible' });
+      // Scroll down to hide the first and second cell
+      await Promise.all([
+        firstCell.waitFor({ state: 'hidden' }),
+        secondCell.waitFor({ state: 'hidden' }),
+        page.mouse.wheel(0, 1200)
+      ]);
+
+      // Press the key as many times as requested
+      for (let i = 0; i < testCase.times; i++) {
+        await page.keyboard.press(testCase.key);
+        // Allow for small delay between pressing keys
+        await page.waitForTimeout(100);
+      }
+
+      if (testCase.showCell === 'neither') {
+        // For negative test case we need to add an explicit timeout to test
+        // against the possibility of the scroll happening with a small delay.
+        await page.waitForTimeout(400);
+        await expect(firstCell).toBeHidden();
+        await expect(secondCell).toBeHidden();
+      } else {
+        const cell = testCase.showCell === 'first' ? firstCell : secondCell;
+        // Expect the cell to become visible again.
+        await cell.waitFor({ state: 'visible' });
+      }
+    });
+  }
 });
 
 test('should detach a markdown code cell when scrolling out of the viewport', async ({

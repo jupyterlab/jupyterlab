@@ -39,7 +39,9 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^4.2.0-alpha.1",
+    "@jupyterlab/apputils": "^4.3.0-alpha.1",
     "@jupyterlab/coreutils": "^6.2.0-alpha.1",
+    "@jupyterlab/docmanager": "^4.2.0-alpha.1",
     "@jupyterlab/docregistry": "^4.2.0-alpha.1",
     "@jupyterlab/rendermime-interfaces": "^3.10.0-alpha.1",
     "@jupyterlab/running": "^4.2.0-alpha.1",

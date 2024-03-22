@@ -570,23 +570,38 @@ test.describe('General', () => {
     await page.click('[title="Running Terminals and Kernels"]');
 
     // Wait up to 5s for both kernels to startup
-    await expect(
-      page.locator('.jp-RunningSessions-item.jp-mod-kernel')
-    ).toHaveCount(2, { timeout: 5000 });
+    await expect
+      .soft(page.locator('.jp-RunningSessions-item.jp-mod-kernel'))
+      .toHaveCount(2, { timeout: 5000 });
 
-    // Freeze kernel IDs
-    await page.evaluate(() => {
-      const mockedKernelIds = ['abcd1234', 'wxyz5678'];
-      document
-        .querySelectorAll('.jp-RunningSessions-item-label-kernel-id')
-        .forEach((span, i) => {
-          span.innerText = `(${mockedKernelIds[i]})`;
-        });
-    });
+    const freeezeKernelIds = async () => {
+      return page.evaluate(() => {
+        const mockedKernelIds = ['abcd1234', 'wxyz5678'];
+        document
+          .querySelectorAll('.jp-RunningSessions-item-label-kernel-id')
+          .forEach((span, i) => {
+            span.innerText = `(${mockedKernelIds[i]})`;
+          });
+      });
+    };
+    await freeezeKernelIds();
+
+    expect
+      .soft(
+        await page.screenshot({
+          clip: { y: 27, x: 0, width: 283, height: 400 }
+        })
+      )
+      .toMatchSnapshot('running_layout.png');
+
+    await page.click('jp-button[data-command="running:show-modal"]');
+    await freeezeKernelIds();
 
     expect(
-      await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
-    ).toMatchSnapshot('running_layout.png');
+      await page
+        .locator('.jp-SearchableSessions-modal .jp-Dialog-content')
+        .screenshot()
+    ).toMatchSnapshot('running_modal.png');
   });
 
   test('Command Palette', async ({ page }) => {
