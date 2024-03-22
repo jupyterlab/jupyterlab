@@ -20,6 +20,16 @@
         "command": "shortcuts:add-keybinding",
         "selector": ".jp-Shortcuts-Row",
         "rank": 2
+      },
+      {
+        "command": "shortcuts:toggle-selectors",
+        "selector": ".jp-Shortcuts-Top",
+        "rank": 3
+      },
+      {
+        "command": "shortcuts:reset-all",
+        "selector": ".jp-Shortcuts-Top",
+        "rank": 4
       }
     ]
   },

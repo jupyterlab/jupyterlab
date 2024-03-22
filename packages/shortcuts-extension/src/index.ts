@@ -24,7 +24,6 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
-import { Menu } from '@lumino/widgets';
 import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
 import { renderShortCut } from './renderer';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -35,16 +34,14 @@ function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd,
   translator: ITranslator,
-  actionRequested: ISignal<unknown, IShortcutUI.KebindingRequest>
+  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>
 ): IShortcutUI.IExternalBundle {
-  const { commands } = app;
   return {
     translator,
     getSettings: () =>
       settingRegistry.load(SHORTCUT_PLUGIN_ID, true) as Promise<
         ISettingRegistry.ISettings<IShortcutsSettingsLayout>
       >,
-    createMenu: () => new Menu({ commands }),
     commandRegistry: app.commands,
     actionRequested
   };
@@ -100,7 +97,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
     if (editorRegistry) {
-      const actionRequested = new Signal<unknown, IShortcutUI.KebindingRequest>(
+      const actionRequested = new Signal<unknown, IShortcutUI.ActionRequest>(
         {}
       );
       const isKeybindingNode = (node: HTMLElement) =>
@@ -154,6 +151,26 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
           actionRequested.emit({
             request: 'add-keybinding',
             shortcutId
+          });
+        }
+      });
+
+      commands.addCommand(CommandIDs.toggleSelectors, {
+        label: trans.__('Toggle Selectors'),
+        caption: trans.__('Toggle command selectors'),
+        execute: () => {
+          actionRequested.emit({
+            request: 'toggle-selectors'
+          });
+        }
+      });
+
+      commands.addCommand(CommandIDs.resetAll, {
+        label: trans.__('Reset All'),
+        caption: trans.__('Reset all shortcuts'),
+        execute: () => {
+          actionRequested.emit({
+            request: 'reset-all'
           });
         }
       });
@@ -233,7 +250,7 @@ List of keyboard shortcuts:`,
       );
     }
 
-    registry.pluginChanged.connect(async (sender, plugin) => {
+    registry.pluginChanged.connect(async (_, plugin) => {
       if (plugin !== shortcuts.id) {
         // If the plugin changed its shortcuts, reload everything.
         const oldShortcuts = loaded[plugin];

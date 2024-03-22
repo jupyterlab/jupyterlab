@@ -208,8 +208,29 @@ export class ShortcutUI
 
   /** Fetch shortcut list on mount */
   componentDidMount(): void {
+    this.props.external.actionRequested.connect(this._onActionRequested, this);
     void this._refreshShortcutList();
   }
+
+  componentWillUnmount(): void {
+    this.props.external.actionRequested.disconnect(
+      this._onActionRequested,
+      this
+    );
+  }
+
+  private async _onActionRequested(
+    _: unknown,
+    action: IShortcutUI.ActionRequest
+  ): Promise<void> {
+    if (action.request === 'toggle-selectors') {
+      return this.toggleSelectors();
+    }
+    if (action.request === 'reset-all') {
+      await this.resetShortcuts();
+    }
+  }
+
   /** Fetch shortcut list from SettingRegistry  */
   private async _refreshShortcutList(): Promise<void> {
     const settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> =
@@ -444,7 +465,7 @@ export class ShortcutUI
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
           width={this.props.width}
-          external={this.props.external}
+          translator={this.props.external.translator}
         />
         <ShortcutList
           shortcuts={this.state.filteredShortcutList}
