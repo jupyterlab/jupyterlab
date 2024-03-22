@@ -2132,6 +2132,34 @@ export class Notebook extends StaticNotebook {
         cell.editor!.edgeRequested.connect(this._onEdgeRequest, this);
       }
     });
+    cell.scrollRequested.connect((_emitter, scrollRequest) => {
+      if (cell !== this.activeCell) {
+        // Do nothing for cells other than the active cell
+        // to avoid scroll requests from editor extensions
+        // stealing user focus (this may be revisited).
+        return;
+      }
+      if (!scrollRequest.defaultPrevented) {
+        // Nothing to do if scroll request was already handled.
+        return;
+      }
+      if (cell.inViewport) {
+        // If cell got scrolled to the viewport in the meantime,
+        // proceed with scrolling within the cell.
+        return scrollRequest.scrollWithinCell();
+      }
+      // If cell is not in the viewport and needs scrolling,
+      // first scroll to the cell and then scroll within the cell.
+      this.scrollToItem(this.activeCellIndex)
+        .then(() => {
+          void cell.ready.then(() => {
+            scrollRequest.scrollWithinCell();
+          });
+        })
+        .catch(reason => {
+          // no-op
+        });
+    });
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
     this.activeCellIndex =
@@ -2212,7 +2240,7 @@ export class Notebook extends StaticNotebook {
     const activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
       // Test for !== true to cover hasFocus is false and editor is not yet rendered.
-      if (activeCell.editor?.hasFocus() !== true || !activeCell.inViewport) {
+      if (activeCell.editor?.hasFocus() !== true) {
         if (activeCell.inViewport) {
           activeCell.editor?.focus();
         } else {
