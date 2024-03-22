@@ -66,7 +66,7 @@ module.exports = {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/ban-ts-comment': ['warn', { 'ts-ignore': true }],
-    '@typescript-eslint/ban-types': 'warn',
+    '@typescript-eslint/ban-types': 'error',
     '@typescript-eslint/no-non-null-asserted-optional-chain': 'warn',
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/no-empty-interface': 'off',

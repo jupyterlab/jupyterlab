@@ -148,9 +148,21 @@ export interface IShortcutUI {
    */
   resetKeybindings(target: IShortcutTarget): Promise<void>;
   /**
+   * Reset all keybindings to their defaults.
+   */
+  resetShortcuts(): Promise<void>;
+  /**
+   * Toggles showing command selectors.
+   */
+  toggleSelectors(): void;
+  /**
    * Add a new keybinding.
    */
   addKeybinding(target: IShortcutTarget, keys: string[]): Promise<void>;
+  /**
+   * Set the current search query
+   */
+  updateSearchQuery(query: string): void;
   /**
    * Replace the given keybinding with a new keybinding as defined by given keys.
    */

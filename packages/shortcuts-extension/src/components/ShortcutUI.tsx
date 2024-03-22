@@ -231,10 +231,10 @@ export class ShortcutUI
   }
 
   /** Set the current search query */
-  updateSearchQuery = (event: MouseEvent): void => {
+  updateSearchQuery = (query: string): void => {
     this.setState(
       {
-        searchQuery: (event.target as any)['value']
+        searchQuery: query
       },
       () => {
         const registry = this.state.shortcutRegistry;
