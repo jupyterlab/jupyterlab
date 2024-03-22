@@ -587,7 +587,7 @@
 a.jp-InternalAnchorLink {
   visibility: hidden;
   margin-left: 8px;
-  color: var(--md-blue-800);
+  color: var(--md-blue-800, #1565c0);
 }
 
 h1:hover .jp-InternalAnchorLink,
