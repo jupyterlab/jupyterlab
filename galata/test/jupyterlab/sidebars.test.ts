@@ -19,20 +19,6 @@ const sidebarIds: galata.SidebarTabId[] = sidebarElementIds[
   'left-sidebar'
 ].concat(sidebarElementIds['right-sidebar']);
 
-test.use({
-  mockState: true
-});
-
-const testFileName = 'simple.md';
-const testNotebook = 'simple_notebook.ipynb';
-const testFolderName = 'test-folder';
-
-const sidebarWidths = {
-  small: 226,
-  medium: 308,
-  large: 371
-};
-
 /**
  * Add provided text as label on first tab in given tabbar.
  * By default we only have icons, but we should test for the
