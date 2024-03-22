@@ -647,6 +647,28 @@ export class DirListing extends Widget {
    * @returns A promise that resolves when the name is selected.
    */
   async selectItemByName(name: string, focus: boolean = false): Promise<void> {
+    return this._selectItemByName(name, focus);
+  }
+
+  /**
+   * Select an item by name.
+   *
+   * @param name - The name of the item to select.
+   * @param focus - Whether to move focus to the selected item.
+   * @param force - Whether to proceed with selection even if the file was already selected.
+   *
+   * @returns A promise that resolves when the name is selected.
+   */
+  private async _selectItemByName(
+    name: string,
+    focus: boolean = false,
+    force: boolean = false
+  ): Promise<void> {
+    if (!force && this.isSelected(name)) {
+      // Avoid API polling and DOM updates if already selected
+      return;
+    }
+
     // Make sure the file is available.
     await this.model.refresh();
 
@@ -662,7 +684,6 @@ export class DirListing extends Widget {
     MessageLoop.sendMessage(this, Widget.Msg.UpdateRequest);
     ElementExt.scrollIntoViewIfNeeded(this.contentNode, this._items[index]);
   }
-
   /**
    * Handle the DOM events for the directory listing.
    *
@@ -1935,7 +1956,7 @@ export class DirListing extends Widget {
       this.selection[item.path]
     ) {
       try {
-        await this.selectItemByName(finalFilename, true);
+        await this._selectItemByName(finalFilename, true, true);
       } catch {
         // do nothing
         console.warn('After rename, failed to select file', finalFilename);

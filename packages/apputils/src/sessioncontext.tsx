@@ -420,7 +420,7 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * A flag indicating if the session has ending input, proxied from the kernel.
+   * A flag indicating if the session has pending input, proxied from the kernel.
    */
   get pendingInput(): boolean {
     return this._pendingInput;

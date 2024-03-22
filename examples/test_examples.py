@@ -9,6 +9,7 @@ there are no console errors or uncaught errors prior to a sentinel
 string being printed (see test/example.spec.ts for the sentinel strings
 checked before the browser.close() call).
 """
+
 import argparse
 import glob
 import os.path as osp
