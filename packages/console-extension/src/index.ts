@@ -31,7 +31,7 @@ import {
 import { ICompletionProviderManager } from '@jupyterlab/completer';
 import {
   ConsolePanel,
-  type IConsoleCellExecutor,
+  IConsoleCellExecutor,
   IConsoleTracker
 } from '@jupyterlab/console';
 import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
@@ -118,6 +118,7 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   requires: [
     ConsolePanel.IContentFactory,
     IEditorServices,
+    IConsoleCellExecutor,
     IRenderMimeRegistry,
     ISettingRegistry
   ],

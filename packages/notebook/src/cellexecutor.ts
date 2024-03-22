@@ -13,7 +13,7 @@ import { nullTranslator } from '@jupyterlab/translation';
 import { findIndex } from '@lumino/algorithm';
 import { KernelError } from './actions';
 import type { IExecutionOptions } from './tokens';
-import type { NotebookModel } from './model';
+import type { INotebookModel } from './model';
 
 /**
  * Run a single notebook cell.
@@ -151,7 +151,7 @@ export async function runCell({
  */
 function handlePayload(
   content: KernelMessage.IExecuteReply,
-  notebook: NotebookModel,
+  notebook: INotebookModel,
   cell: Cell
 ) {
   const setNextInput = content.payload?.filter(i => {
