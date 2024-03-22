@@ -5,7 +5,6 @@
 
 import { ITranslator } from '@jupyterlab/translation';
 import { InputGroup } from '@jupyterlab/ui-components';
-import { Menu } from '@lumino/widgets';
 import * as React from 'react';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
@@ -15,16 +14,10 @@ export interface IAdvancedOptionsProps {
   toggleSelectors: IShortcutUI['toggleSelectors'];
   showSelectors: boolean;
   resetShortcuts: IShortcutUI['resetShortcuts'];
-  menu: Menu;
   translator: ITranslator;
 }
 
 export interface ISymbolsProps {}
-
-export namespace CommandIDs {
-  export const showSelectors = 'shortcutui:showSelectors';
-  export const resetAll = 'shortcutui:resetAll';
-}
 
 function Symbols(props: ISymbolsProps): JSX.Element {
   return (
@@ -88,43 +81,13 @@ export interface ITopNavProps {
   updateSort: IShortcutUI['updateSort'];
   currentSort: string;
   width: number;
-  external: IShortcutUI.IExternalBundle;
+  translator: ITranslator;
 }
 
 /** React component for top navigation */
 export class TopNav extends React.Component<ITopNavProps> {
-  menu: Menu;
   constructor(props: ITopNavProps) {
     super(props);
-
-    this.addMenuCommands();
-    this.menu = this.props.external.createMenu();
-    this.menu.addItem({ command: CommandIDs.showSelectors });
-    this.menu.addItem({ command: CommandIDs.resetAll });
-  }
-
-  addMenuCommands() {
-    const trans = this.props.external.translator.load('jupyterlab');
-    const commands = this.props.external.commandRegistry;
-    if (!commands.hasCommand(CommandIDs.showSelectors)) {
-      commands.addCommand(CommandIDs.showSelectors, {
-        label: trans.__('Toggle Selectors'),
-        caption: trans.__('Toggle command selectors'),
-        execute: () => {
-          this.props.toggleSelectors();
-        }
-      });
-    }
-
-    if (!commands.hasCommand(CommandIDs.resetAll)) {
-      commands.addCommand(CommandIDs.resetAll, {
-        label: trans.__('Reset All'),
-        caption: trans.__('Reset all shortcuts'),
-        execute: async () => {
-          await this.props.resetShortcuts();
-        }
-      });
-    }
   }
 
   getShortCutTitleItem(title: string, columnId: IShortcutUI.ColumnId) {
@@ -141,7 +104,7 @@ export class TopNav extends React.Component<ITopNavProps> {
   }
 
   render() {
-    const trans = this.props.external.translator.load('jupyterlab');
+    const trans = this.props.translator.load('jupyterlab');
     return (
       <div className="jp-Shortcuts-Top">
         <div className="jp-Shortcuts-TopNav">
@@ -160,8 +123,7 @@ export class TopNav extends React.Component<ITopNavProps> {
             toggleSelectors={this.props.toggleSelectors}
             showSelectors={this.props.showSelectors}
             resetShortcuts={this.props.resetShortcuts}
-            menu={this.menu}
-            translator={this.props.external.translator}
+            translator={this.props.translator}
           />
         </div>
         <div className="jp-Shortcuts-HeaderRowContainer">

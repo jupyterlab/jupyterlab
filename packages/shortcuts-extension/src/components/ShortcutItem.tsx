@@ -47,22 +47,40 @@ export class ShortcutItem extends React.Component<
       displayReplaceInput: Object.freeze({}),
       conflicts: new Map()
     };
-    this.props.external.actionRequested.connect((_, action) => {
-      if (action.shortcutId !== this.props.shortcut.id) {
-        return;
-      }
-      if (action.request === 'add-keybinding') {
-        return this.toggleInputNew();
-      }
-      if (action.request === 'edit-keybinding') {
-        this.toggleInputReplaceMethod(action.keybinding);
-      }
-      if (action.request === 'delete-keybinding') {
-        const target = this.props.shortcut;
-        const binding = target.keybindings[action.keybinding];
-        this.props.deleteKeybinding(target, binding).catch(console.error);
-      }
-    });
+  }
+
+  componentDidMount(): void {
+    this.props.external.actionRequested.connect(this._onActionRequested, this);
+  }
+
+  componentWillUnmount(): void {
+    this.props.external.actionRequested.disconnect(
+      this._onActionRequested,
+      this
+    );
+  }
+
+  private async _onActionRequested(
+    _: unknown,
+    action: IShortcutUI.ActionRequest
+  ): Promise<void> {
+    if (
+      'shortcutId' in action &&
+      action.shortcutId !== this.props.shortcut.id
+    ) {
+      return;
+    }
+    if (action.request === 'add-keybinding') {
+      return this.toggleInputNew();
+    }
+    if (action.request === 'edit-keybinding') {
+      this.toggleInputReplaceMethod(action.keybinding);
+    }
+    if (action.request === 'delete-keybinding') {
+      const target = this.props.shortcut;
+      const binding = target.keybindings[action.keybinding];
+      this.props.deleteKeybinding(target, binding).catch(console.error);
+    }
   }
 
   /** Toggle display state of input box */

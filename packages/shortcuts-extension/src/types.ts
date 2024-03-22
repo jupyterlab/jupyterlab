@@ -6,7 +6,6 @@
 import type { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import type { CommandRegistry } from '@lumino/commands';
 import type { ISignal } from '@lumino/signaling';
-import type { Menu } from '@lumino/widgets';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 
@@ -17,6 +16,8 @@ export namespace CommandIDs {
   export const editBinding = 'shortcuts:edit-keybinding';
   export const addBinding = 'shortcuts:add-keybinding';
   export const deleteBinding = 'shortcuts:delete-keybinding';
+  export const toggleSelectors = 'shortcuts:toggle-selectors';
+  export const resetAll = 'shortcuts:reset-all';
 }
 
 /**
@@ -97,7 +98,7 @@ export namespace IShortcutUI {
     keybinding: number;
   }
 
-  interface IAddKeybindingReuest {
+  interface IAddKeybindingRequest {
     /**
      * Identifier of the requested action.
      */
@@ -108,10 +109,28 @@ export namespace IShortcutUI {
     shortcutId: string;
   }
 
+  interface IToggleSelectorsRequest {
+    /**
+     * Identifier of the requested action.
+     */
+    request: 'toggle-selectors';
+  }
+
+  interface IResetAllRequest {
+    /**
+     * Identifier of the requested action.
+     */
+    request: 'reset-all';
+  }
+
   /**
    * Attributes of a request to perform an action within shortcuts UI.
    */
-  export type KebindingRequest = IChangeKebindingRequest | IAddKeybindingReuest;
+  export type ActionRequest =
+    | IChangeKebindingRequest
+    | IAddKeybindingRequest
+    | IToggleSelectorsRequest
+    | IResetAllRequest;
 
   /**
    * A bundle of actions and objects passed down from the extension entry point.
@@ -121,9 +140,8 @@ export namespace IShortcutUI {
     getSettings: () => Promise<
       ISettingRegistry.ISettings<IShortcutsSettingsLayout>
     >;
-    createMenu: () => Menu;
     commandRegistry: Omit<CommandRegistry, 'execute'>;
-    actionRequested: ISignal<unknown, KebindingRequest>;
+    actionRequested: ISignal<unknown, ActionRequest>;
   }
 }
 
