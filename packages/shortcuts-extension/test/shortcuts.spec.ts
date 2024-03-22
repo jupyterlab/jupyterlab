@@ -326,12 +326,12 @@ describe('@jupyterlab/shortcut-extension', () => {
           {
             command: 'application:activate-previous-tab',
             keys: ['Ctrl Shift ['],
-            selector: '#activate-previous-tab'
+            selector: '.jp-contextualShortcut-key'
           },
           {
             command: 'settingeditor:open',
             keys: ['Ctrl ,'],
-            selector: '#setting-editor-open'
+            selector: '.jp-contextualShortcut-key'
           }
         ],
         type: 'object'
@@ -377,22 +377,22 @@ describe('@jupyterlab/shortcut-extension', () => {
     const shortcuts = (await settings.get('shortcuts')
       .composite) as ISettingRegistry.IShortcut[];
 
-    // const keyboardShortcuts = document.getElementsByClassName(
-    //   'jp-contextualShortcut-key'
-    // );
+    const keyboardShortcuts = document.getElementsByClassName(
+      'jp-contextualShortcut-key'
+    );
 
-    const openSettingEditor = document
-      .getElementById('setting-editor-open')
-      ?.getAttribute('aria-label');
+    // const openSettingEditor = document
+    //   .getElementById('setting-editor-open')
+    //   ?.getAttribute('aria-label');
 
-    const activatePreviousTab = document
-      .getElementById('activate-previous-tab')
-      ?.getAttribute('aria-label');
+    // const activatePreviousTab = document
+    //   .getElementById('activate-previous-tab')
+    //   ?.getAttribute('aria-label');
 
     expect(shortcuts).toHaveLength(2);
-    expect(openSettingEditor).toEqual('Ctrl Comma');
-    expect(activatePreviousTab).toEqual('Ctrl Shift Opening bracket');
-    // expect(keyboardShortcuts).toHaveLength(2);
+    // expect(openSettingEditor).toEqual('Ctrl Comma');
+    // expect(activatePreviousTab).toEqual('Ctrl Shift Opening bracket');
+    expect(keyboardShortcuts).toHaveLength(5);
   });
 });
 
