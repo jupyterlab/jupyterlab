@@ -91,9 +91,18 @@ describe('@jupyterlab/settingeditor', () => {
           keyA: { type: 'string', default: 'A' },
           keyB: { type: 'string', default: 'B' },
           keyC: { title: 'Third key', type: 'string', default: 'C' },
-          keyD: { type: 'string', default: 'D' }
+          keyD: { type: 'string', default: 'D' },
+          keyComma: { type: 'string', default: ',' }
         }
       };
+      const ariaLabels = {
+        keyA: 'A',
+        keyB: 'B',
+        keyC: 'C',
+        keyD: 'D',
+        keyComma: 'Comma'
+      };
+
       connector.schemas[id] = schema;
       settings = (await registry.load(id)) as Settings;
 
@@ -101,7 +110,7 @@ describe('@jupyterlab/settingeditor', () => {
       const component = renderer.create(
         <SettingsFormEditor
           // Filter by field and by title
-          filteredValues={['keyA', 'Third key']}
+          filteredValues={['keyA', 'Third key', 'keyComma']}
           hasError={() => void 0}
           onSelect={() => void 0}
           renderers={{}}
@@ -114,10 +123,16 @@ describe('@jupyterlab/settingeditor', () => {
       // Then
       const instance = component.root;
       const form = instance.findByType(FormComponent);
-      expect(form.props.formData).toEqual({ keyA: 'A', keyC: 'C' });
+      expect(form.props.formData).toEqual({
+        keyA: 'A',
+        keyC: 'C',
+        keyComma: ','
+      });
       expect(Object.keys(form.props.schema.properties)).toEqual(
         Object.keys(form.props.formData)
       );
+      //check AriaLabels are
+      expect(ariaLabels).toEqual(form.props.formData.ariaLabel);
     });
   });
 });
