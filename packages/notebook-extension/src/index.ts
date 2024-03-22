@@ -2556,7 +2556,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.content, 'code');
+        return NotebookActions.changeCellType(
+          current.content,
+          'code',
+          translator
+        );
       }
     },
     isEnabled
@@ -2567,7 +2571,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.content, 'markdown');
+        return NotebookActions.changeCellType(
+          current.content,
+          'markdown',
+          translator
+        );
       }
     },
     isEnabled
@@ -2578,7 +2586,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.content, 'raw');
+        return NotebookActions.changeCellType(
+          current.content,
+          'raw',
+          translator
+        );
       }
     },
     isEnabled
@@ -3184,7 +3196,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 1);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          1,
+          translator
+        );
       }
     },
     isEnabled
@@ -3195,7 +3211,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 2);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          2,
+          translator
+        );
       }
     },
     isEnabled
@@ -3206,7 +3226,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 3);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          3,
+          translator
+        );
       }
     },
     isEnabled
@@ -3217,7 +3241,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 4);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          4,
+          translator
+        );
       }
     },
     isEnabled
@@ -3228,7 +3256,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 5);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          5,
+          translator
+        );
       }
     },
     isEnabled
@@ -3239,7 +3271,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 6);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          6,
+          translator
+        );
       }
     },
     isEnabled

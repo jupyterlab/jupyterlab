@@ -41,8 +41,8 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@yarnpkg/core": "^3.0.0",
-    "@yarnpkg/parsers": "^2.0.0",
+    "@yarnpkg/core": "^4.0.3",
+    "@yarnpkg/parsers": "^3.0.0",
     "commander": "^9.4.1",
     "crypto": "~1.0.1",
     "dependency-graph": "^0.11.0",
@@ -65,7 +65,7 @@
     "@types/glob": "^7.1.1",
     "@types/inquirer": "^9.0.3",
     "@types/micromatch": "^4.0.1",
-    "@types/node": "^18.11.18",
+    "@types/node": "^20.11.27",
     "@types/prettier": "~2.6.0",
     "rimraf": "~5.0.5"
   },

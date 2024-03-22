@@ -177,10 +177,7 @@ export abstract class TableOfContentsModel<
         return this.refresh();
       }
 
-      if (
-        newHeadings &&
-        !Private.areHeadingsEqual(newHeadings, this._headings)
-      ) {
+      if (newHeadings && !this._areHeadingsEqual(newHeadings, this._headings)) {
         this._headings = newHeadings;
         this.stateChanged.emit();
         this._headingsChanged.emit();
@@ -245,6 +242,41 @@ export abstract class TableOfContentsModel<
     }
   }
 
+  /**
+   * Test if two headings are equal or not.
+   *
+   * @param heading1 First heading
+   * @param heading2 Second heading
+   * @returns Whether the headings are equal.
+   */
+  protected isHeadingEqual(heading1: H, heading2: H): boolean {
+    return (
+      heading1.level === heading2.level &&
+      heading1.text === heading2.text &&
+      heading1.prefix === heading2.prefix
+    );
+  }
+
+  /**
+   * Test if two list of headings are equal or not.
+   *
+   * @param headings1 First list of headings
+   * @param headings2 Second list of headings
+   * @returns Whether the array are equal.
+   */
+  private _areHeadingsEqual(headings1: H[], headings2: H[]): boolean {
+    if (headings1.length === headings2.length) {
+      for (let i = 0; i < headings1.length; i++) {
+        if (!this.isHeadingEqual(headings1[i], headings2[i])) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    return false;
+  }
+
   private _activeHeading: H | null;
   private _activeHeadingChanged: Signal<TableOfContentsModel<H, T>, H | null>;
   private _collapseChanged: Signal<TableOfContentsModel<H, T>, H | null>;
@@ -255,36 +287,4 @@ export abstract class TableOfContentsModel<
   private _isRefreshing: boolean;
   private _needsRefreshing: boolean;
   private _title?: string;
-}
-
-/**
- * Private functions namespace
- */
-namespace Private {
-  /**
-   * Test if two list of headings are equal or not.
-   *
-   * @param headings1 First list of headings
-   * @param headings2 Second list of headings
-   * @returns Whether the array are identical or not.
-   */
-  export function areHeadingsEqual(
-    headings1: TableOfContents.IHeading[],
-    headings2: TableOfContents.IHeading[]
-  ): boolean {
-    if (headings1.length === headings2.length) {
-      for (let i = 0; i < headings1.length; i++) {
-        if (
-          headings1[i].level !== headings2[i].level ||
-          headings1[i].text !== headings2[i].text ||
-          headings1[i].prefix !== headings2[i].prefix
-        ) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-    return false;
-  }
 }

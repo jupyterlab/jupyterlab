@@ -2307,7 +2307,8 @@ export namespace DirListing {
       narrow.textContent = '...';
       if (!hiddenColumns?.has('is_selected')) {
         const checkboxWrapper = this.createCheckboxWrapperNode({
-          alwaysVisible: true
+          alwaysVisible: true,
+          headerNode: true
         });
         node.appendChild(checkboxWrapper);
       }
@@ -2493,6 +2494,7 @@ export namespace DirListing {
      */
     createCheckboxWrapperNode(options?: {
       alwaysVisible: boolean;
+      headerNode?: boolean;
     }): HTMLElement {
       // Wrap the checkbox in a label element in order to increase its hit area.
       const labelWrapper = document.createElement('label');
@@ -2503,9 +2505,11 @@ export namespace DirListing {
       // Prevent the user from clicking (via mouse, keyboard, or touch) the
       // checkbox since other code handles the mouse and keyboard events and
       // controls the checked state of the checkbox.
-      checkbox.addEventListener('click', event => {
-        event.preventDefault();
-      });
+      if (!options?.headerNode) {
+        checkbox.addEventListener('click', event => {
+          event.preventDefault();
+        });
+      }
 
       // The individual file checkboxes are visible on hover, but the header
       // check-all checkbox is always visible.
