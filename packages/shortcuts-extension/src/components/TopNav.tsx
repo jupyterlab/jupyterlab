@@ -3,15 +3,13 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator } from '@jupyterlab/translation';
 import { InputGroup } from '@jupyterlab/ui-components';
-import { CommandRegistry } from '@lumino/commands';
-import { IDisposable } from '@lumino/disposable';
 import { Menu } from '@lumino/widgets';
 import * as React from 'react';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
+import { IExternalBundle, IShortcutUI } from '../types';
 
 export interface IAdvancedOptionsProps {
   toggleSelectors: Function;
@@ -22,20 +20,6 @@ export interface IAdvancedOptionsProps {
 }
 
 export interface ISymbolsProps {}
-
-/** All external actions, setting commands, getting command list ... */
-export interface IShortcutUIexternal {
-  translator: ITranslator;
-  getAllShortCutSettings: () => Promise<ISettingRegistry.ISettings>;
-  removeShortCut: (key: string) => Promise<void>;
-  createMenu: () => Menu;
-  hasCommand: (id: string) => boolean;
-  addCommand: (
-    id: string,
-    options: CommandRegistry.ICommandOptions
-  ) => IDisposable;
-  getLabel: (id: string) => string;
-}
 
 export namespace CommandIDs {
   export const showSelectors = 'shortcutui:showSelectors';
@@ -101,10 +85,10 @@ export interface ITopNavProps {
   updateSearchQuery: Function;
   toggleSelectors: Function;
   showSelectors: boolean;
-  updateSort: Function;
+  updateSort: IShortcutUI['updateSort'];
   currentSort: string;
   width: number;
-  external: IShortcutUIexternal;
+  external: IExternalBundle;
 }
 
 /** React component for top navigation */
@@ -121,8 +105,9 @@ export class TopNav extends React.Component<ITopNavProps> {
 
   addMenuCommands() {
     const trans = this.props.external.translator.load('jupyterlab');
-    if (!this.props.external.hasCommand(CommandIDs.showSelectors)) {
-      this.props.external.addCommand(CommandIDs.showSelectors, {
+    const commands = this.props.external.commandRegistry;
+    if (!commands.hasCommand(CommandIDs.showSelectors)) {
+      commands.addCommand(CommandIDs.showSelectors, {
         label: trans.__('Toggle Selectors'),
         caption: trans.__('Toggle command selectors'),
         execute: () => {
@@ -131,8 +116,8 @@ export class TopNav extends React.Component<ITopNavProps> {
       });
     }
 
-    if (!this.props.external.hasCommand(CommandIDs.resetAll)) {
-      this.props.external.addCommand(CommandIDs.resetAll, {
+    if (!commands.hasCommand(CommandIDs.resetAll)) {
+      commands.addCommand(CommandIDs.resetAll, {
         label: trans.__('Reset All'),
         caption: trans.__('Reset all shortcuts'),
         execute: () => {
@@ -142,13 +127,14 @@ export class TopNav extends React.Component<ITopNavProps> {
     }
   }
 
-  getShortCutTitleItem(title: string) {
+  getShortCutTitleItem(title: string, columnId: IShortcutUI.ColumnId) {
     return (
       <div className="jp-Shortcuts-Cell">
         <ShortcutTitleItem
           title={title}
           updateSort={this.props.updateSort}
           active={this.props.currentSort}
+          columnId={columnId}
         />
       </div>
     );
@@ -178,14 +164,14 @@ export class TopNav extends React.Component<ITopNavProps> {
         </div>
         <div className="jp-Shortcuts-HeaderRowContainer">
           <div className="jp-Shortcuts-HeaderRow">
-            {this.getShortCutTitleItem(trans.__('Category'))}
-            {this.getShortCutTitleItem(trans.__('Command'))}
+            {this.getShortCutTitleItem(trans.__('Category'), 'category')}
+            {this.getShortCutTitleItem(trans.__('Command'), 'command')}
             <div className="jp-Shortcuts-Cell">
               <div className="title-div">{trans.__('Shortcut')}</div>
             </div>
-            {this.getShortCutTitleItem(trans.__('Source'))}
+            {this.getShortCutTitleItem(trans.__('Source'), 'source')}
             {this.props.showSelectors &&
-              this.getShortCutTitleItem(trans.__('Selectors'))}
+              this.getShortCutTitleItem(trans.__('Selectors'), 'selector')}
           </div>
         </div>
       </div>
