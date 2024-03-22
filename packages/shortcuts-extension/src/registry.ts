@@ -57,6 +57,9 @@ export class ShortcutRegistry
     }
   }
 
+  /**
+   * Find targets that would conflict with given keys chord under given sequence.
+   */
   findConflictsFor(keys: string[], selector: string): IShortcutTarget[] {
     const checker = new KeybindingsConflictChecker({ registry: this });
 

@@ -9,7 +9,7 @@ import { Menu } from '@lumino/widgets';
 import * as React from 'react';
 
 import { ShortcutTitleItem } from './ShortcutTitleItem';
-import { IExternalBundle, IShortcutUI } from '../types';
+import { IShortcutUI } from '../types';
 
 export interface IAdvancedOptionsProps {
   toggleSelectors: Function;
@@ -88,7 +88,7 @@ export interface ITopNavProps {
   updateSort: IShortcutUI['updateSort'];
   currentSort: string;
   width: number;
-  external: IExternalBundle;
+  external: IShortcutUI.IExternalBundle;
 }
 
 /** React component for top navigation */

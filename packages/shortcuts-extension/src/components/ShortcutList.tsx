@@ -5,12 +5,7 @@
 
 import * as React from 'react';
 import { ShortcutItem } from './ShortcutItem';
-import {
-  IExternalBundle,
-  IShortcutRegistry,
-  IShortcutTarget,
-  IShortcutUI
-} from '../types';
+import { IShortcutRegistry, IShortcutTarget, IShortcutUI } from '../types';
 
 const TOPNAV_HEIGHT: number = 115;
 
@@ -24,7 +19,7 @@ export interface IShortcutListProps {
   findConflictsFor: IShortcutRegistry['findConflictsFor'];
   showSelectors: boolean;
   height: number;
-  external: IExternalBundle;
+  external: IShortcutUI.IExternalBundle;
 }
 
 /** React component for list of shortcuts */

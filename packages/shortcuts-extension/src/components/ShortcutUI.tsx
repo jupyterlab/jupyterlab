@@ -10,7 +10,6 @@ import { ShortcutList } from './ShortcutList';
 import { TopNav } from './TopNav';
 import { ShortcutRegistry } from '../registry';
 import {
-  IExternalBundle,
   IKeybinding,
   IShortcutRegistry,
   IShortcutsSettingsLayout,
@@ -28,7 +27,7 @@ const enum MatchType {
 
 /** Props for ShortcutUI component */
 export interface IShortcutUIProps {
-  external: IExternalBundle;
+  external: IShortcutUI.IExternalBundle;
   height: number;
   width: number;
 }
@@ -231,23 +230,23 @@ export class ShortcutUI
     );
   }
 
-  /** Set the current seach query */
+  /** Set the current search query */
   updateSearchQuery = (event: MouseEvent): void => {
     this.setState(
       {
         searchQuery: (event.target as any)['value']
       },
-      () =>
+      () => {
+        const registry = this.state.shortcutRegistry;
         this.setState(
           {
-            filteredShortcutList: this._searchFilterShortcuts(
-              this.state.shortcutRegistry
-            )
+            filteredShortcutList: this._searchFilterShortcuts(registry)
           },
           () => {
             this.sortShortcuts();
           }
-        )
+        );
+      }
     );
   };
 
@@ -280,7 +279,7 @@ export class ShortcutUI
    */
   resetKeybindings = async (target: IShortcutTarget): Promise<void> => {
     for (const binding of target.keybindings) {
-      this._setKeybinding(
+      await this._setKeybinding(
         target,
         binding.isDefault ? binding.keys : [],
         binding
@@ -366,11 +365,11 @@ export class ShortcutUI
       const shouldDisableDefault =
         keybinding && keybinding.isDefault && requiresChange;
       if (shouldDisableDefault) {
-        // if the replaced keybinding is the default, disable it
+        // If the replaced keybinding is the default, disable it.
         newUserShortcuts.push({
           command: target.command,
           selector: target.selector,
-          disabled: true, // TODO: check how these render
+          disabled: true,
           keys: keybinding.keys
         });
       }

@@ -10,58 +10,26 @@ import type { Menu } from '@lumino/widgets';
 import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 import type { ITranslator } from '@jupyterlab/translation';
 
+/**
+ * Identifiers of commands registered by shortcuts UI.
+ */
 export namespace CommandIDs {
   export const editBinding = 'shortcuts:edit-keybinding';
   export const addBinding = 'shortcuts:add-keybinding';
   export const deleteBinding = 'shortcuts:delete-keybinding';
 }
 
+/**
+ * The layout of shortcuts settings as defined in schema.
+ */
 export interface IShortcutsSettingsLayout {
   [index: string]: any;
   shortcuts: CommandRegistry.IKeyBindingOptions[];
 }
 
-interface IChangeKebindingRequest {
-  /**
-   * Identifier of the requested action.
-   */
-  request: 'edit-keybinding' | 'delete-keybinding';
-  /**
-   * Identifier of the shortcut target.
-   */
-  shortcutId: string;
-  /**
-   * Index of the keybinding to edit.
-   */
-  keybinding: number;
-}
-
-interface IAddKeybindingReuest {
-  /**
-   * Identifier of the requested action.
-   */
-  request: 'add-keybinding';
-  /**
-   * Identifier of the shortcut target.
-   */
-  shortcutId: string;
-}
-export type KebindingRequest = IChangeKebindingRequest | IAddKeybindingReuest;
-
 /**
- * A bundle of actions and objects passed down from the extension entry point.
+ * A keybinding assigned to a specific shortcut target.
  */
-export interface IExternalBundle {
-  translator: ITranslator;
-  getSettings: () => Promise<
-    ISettingRegistry.ISettings<IShortcutsSettingsLayout>
-  >;
-  removeShortCut: (key: string) => Promise<void>;
-  createMenu: () => Menu;
-  commandRegistry: Omit<CommandRegistry, 'execute'>;
-  actionRequested: ISignal<unknown, KebindingRequest>;
-}
-
 export interface IKeybinding {
   /**
    * A chain of keys that needs to be pressed to invoke the keybinding.
@@ -73,7 +41,7 @@ export interface IKeybinding {
   /**
    * Whether this keybinding comes from default values (schema or default overrides), or is set by user.
    */
-  isDefault: boolean;
+  readonly isDefault: boolean;
 }
 
 /**
@@ -100,15 +68,69 @@ export interface IShortcutTarget {
   readonly args: ReadonlyPartialJSONObject | undefined;
 }
 
+/**
+ * Types and interfaces specific to shortcut UI implementation.
+ */
 export namespace IShortcutUI {
+  /**
+   * The column IDs which are also used for sorting; should not be translated.
+   */
   export type ColumnId =
     | 'label'
     | 'selector'
     | 'category'
     | 'source'
     | 'command';
+
+  interface IChangeKebindingRequest {
+    /**
+     * Identifier of the requested action.
+     */
+    request: 'edit-keybinding' | 'delete-keybinding';
+    /**
+     * Identifier of the shortcut target.
+     */
+    shortcutId: string;
+    /**
+     * Index of the keybinding to edit.
+     */
+    keybinding: number;
+  }
+
+  interface IAddKeybindingReuest {
+    /**
+     * Identifier of the requested action.
+     */
+    request: 'add-keybinding';
+    /**
+     * Identifier of the shortcut target.
+     */
+    shortcutId: string;
+  }
+
+  /**
+   * Attributes of a request to perform an action within shortcuts UI.
+   */
+  export type KebindingRequest = IChangeKebindingRequest | IAddKeybindingReuest;
+
+  /**
+   * A bundle of actions and objects passed down from the extension entry point.
+   */
+  export interface IExternalBundle {
+    translator: ITranslator;
+    getSettings: () => Promise<
+      ISettingRegistry.ISettings<IShortcutsSettingsLayout>
+    >;
+    removeShortCut: (key: string) => Promise<void>;
+    createMenu: () => Menu;
+    commandRegistry: Omit<CommandRegistry, 'execute'>;
+    actionRequested: ISignal<unknown, KebindingRequest>;
+  }
 }
 
+/**
+ * Types of `ShortcutUI` methods which are passed down to React components.
+ */
 export interface IShortcutUI {
   /**
    * Set the sort order for the shortcuts listing.
@@ -139,6 +161,13 @@ export interface IShortcutUI {
   ): Promise<void>;
 }
 
-export interface IShortcutRegistry extends Map<string, IShortcutTarget> {
+/**
+ * Registry of shortcuts targets.
+ */
+export interface IShortcutRegistry
+  extends ReadonlyMap<string, IShortcutTarget> {
+  /**
+   * Find targets that would conflict with given keys chord under given sequence.
+   */
   findConflictsFor(keys: string[], selector: string): IShortcutTarget[];
 }
