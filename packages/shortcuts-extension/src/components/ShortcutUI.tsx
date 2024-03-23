@@ -355,7 +355,7 @@ export class ShortcutUI
       keys = [];
     }
     const settings = await this.props.external.getSettings();
-    const userShortcuts = settings.user.shortcuts;
+    const userShortcuts = settings.user.shortcuts ?? [];
     const newUserShortcuts = [];
     let found = false;
     for (let shortcut of userShortcuts) {

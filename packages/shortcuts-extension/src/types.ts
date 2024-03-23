@@ -25,7 +25,7 @@ export namespace CommandIDs {
  */
 export interface IShortcutsSettingsLayout {
   [index: string]: any;
-  shortcuts: CommandRegistry.IKeyBindingOptions[];
+  shortcuts?: CommandRegistry.IKeyBindingOptions[];
 }
 
 /**
@@ -63,9 +63,31 @@ export interface IShortcutTarget {
    * A list of keybindings assigned to this target.
    */
   readonly keybindings: IKeybinding[];
+  /**
+   * The CSS selector used to define the target.
+   *
+   * When active element, or one of its ancestors, matches the selector,
+   * the target command will be invoked (by logic in the command registry).
+   */
   readonly selector: string;
+  /**
+   * Label of the command, pre-computed for caching.
+   *
+   * The label should be computed with respect to the arguments (`args`)
+   * and may be missing if the command did not define a label.
+   */
   readonly label?: string;
+  /**
+   * The target category inferred from the command identifier.
+   *
+   * Defined as the ID part prior to the first colon (`:`).
+   */
   readonly category: string;
+  /**
+   * Arguments associated with the shortcut target.
+   *
+   * Arguments influence the command label and execution.
+   */
   readonly args: ReadonlyPartialJSONObject | undefined;
 }
 

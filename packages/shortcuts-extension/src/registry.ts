@@ -19,12 +19,12 @@ export class ShortcutRegistry
     super();
     const { settings, commandRegistry } = options;
 
-    const userBindings = settings.user.shortcuts;
+    const userBindings = settings.user.shortcuts ?? [];
     const setByUser = new Set(
       userBindings.map(this._computeKeybindingId.bind(this))
     );
 
-    const luminoKeybindings = settings.composite.shortcuts;
+    const luminoKeybindings = settings.composite.shortcuts ?? [];
 
     for (const shortcut of luminoKeybindings) {
       const targetKey = this._computeTargetId(shortcut);
