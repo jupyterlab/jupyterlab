@@ -14,7 +14,7 @@ USER_ID=$(id -u)
 RSYNC_CMD="rsync -ar /home/$DEV_USER/jupyterlab_cache/node_modules/. /home/$DEV_USER/jupyterlab/node_modules"
 CMD=$1 # possible command: build, clean, dev, shell
 
-PORT=8888 # Optional, only used for the ⁠ `dev` ⁠ command
+PORT=8888 # Optional, only used for the ⁠`dev`⁠ command
 re='^[0-9]+$'
 if [[ $2 =~ $re ]] ; then
     PORT=$2
