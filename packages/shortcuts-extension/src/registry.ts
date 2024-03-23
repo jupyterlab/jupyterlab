@@ -11,6 +11,9 @@ import {
   IShortcutTarget
 } from './types';
 
+/**
+ * Shortcut registry used by Shortcut UI component.
+ */
 export class ShortcutRegistry
   extends Map<string, IShortcutTarget>
   implements IShortcutRegistry
@@ -135,6 +138,9 @@ class KeybindingsConflictChecker {
   private _keybindingsMap: Map<string, IShortcutTarget[]>;
 }
 
+/**
+ * Interfaces for ShortcutRegistry class.
+ */
 export namespace ShortcutRegistry {
   /**
    * Initialization options for ShortcutRegistry
