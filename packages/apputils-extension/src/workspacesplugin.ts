@@ -39,7 +39,7 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
     translator: ITranslator,
     paths: JupyterFrontEnd.IPaths,
     router: IRouter | null,
-    commands: IWorkspaceCommands | null
+    workspaceCommands: IWorkspaceCommands | null
   ): void => {
     // The workspace factory creates dummy widgets to load a new workspace.
     const factory = new Private.WorkspaceFactory({
@@ -47,8 +47,8 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
       state,
       translator,
       open: async (id: string) => {
-        if (commands) {
-          await app.commands.execute(commands.open, { workspace: id });
+        if (workspaceCommands) {
+          await app.commands.execute(workspaceCommands.open, { workspace: id });
         } else {
           const workspacesBase = URLExt.join(paths.urls.app, 'workspaces');
           const url = URLExt.join(workspacesBase, id);
