@@ -28,9 +28,9 @@ import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
+import { runCell } from './cellexecutor';
 import { ConsoleHistory, IConsoleHistory } from './history';
 import type { IConsoleCellExecutor, IExecutionOptions } from './tokens';
-import { runCell } from './executor';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -739,14 +739,12 @@ export class CodeConsole extends Widget {
         success: boolean;
         error?: Error | null;
       }) => {
-        if (args.success) {
-          this._executed.emit(args.executionDate);
-        } else {
-          if (args.error) {
-            for (const cell of this._cells) {
-              if ((cell.model as ICodeCellModel).executionCount === null) {
-                cell.setPrompt('');
-              }
+        this._executed.emit(args.executionDate);
+
+        if (args.error) {
+          for (const cell of this._cells) {
+            if ((cell.model as ICodeCellModel).executionCount === null) {
+              cell.setPrompt('');
             }
           }
         }
