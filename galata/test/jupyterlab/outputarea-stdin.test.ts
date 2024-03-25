@@ -40,33 +40,33 @@ test.describe('Stdin for ipdb', () => {
     await page.keyboard.press('Control+Enter');
 
     // enter a bunch of nonsense commands into the stdin attached to ipdb
-    await page.waitForSelector(ACTIVE_INPUT);
+    await page.locator(ACTIVE_INPUT).waitFor();
     await page.keyboard.insertText('foofoo');
     await page.keyboard.press('Enter');
 
-    await page.waitForSelector(ACTIVE_INPUT);
+    await page.locator(ACTIVE_INPUT).waitFor();
     await page.keyboard.insertText('barbar');
     await page.keyboard.press('Enter');
 
-    await page.waitForSelector(ACTIVE_INPUT);
+    await page.locator(ACTIVE_INPUT).waitFor();
     await page.keyboard.insertText('bazbaz');
     await page.keyboard.press('Enter');
 
     // search for the first nonsense command
-    await page.waitForSelector(ACTIVE_INPUT);
+    await page.locator(ACTIVE_INPUT).waitFor();
     await page.keyboard.insertText('foo');
     await page.keyboard.press('Control+ArrowUp');
 
     // Mask out random kernel temporary file path
     // e.g. `/tmp/ipykernel_104185/2235509928.py`
-    const filePath = await page.$(
+    const filePath = page.locator(
       '.jp-OutputArea-output :text-matches("/tmp/")'
     );
     await filePath.evaluate(node => (node.textContent = '/tmp/masked.py'));
 
     const imageName = 'stdin-history-search.png';
-    const cell = await page.notebook.getCell(1);
-    expect(await cell.screenshot()).toMatchSnapshot(imageName);
+    const cell = await page.notebook.getCellLocator(1);
+    expect(await cell!.screenshot()).toMatchSnapshot(imageName);
 
     // Check that the input remains focused and cursor is at the end.
     await page.keyboard.insertText('x');
@@ -89,7 +89,7 @@ test.describe('Stdin for ipdb', () => {
       // for it to complete (as it should stay waiting for input).
       await page.keyboard.press('Control+Enter');
 
-      await page.waitForSelector(testCase.selector);
+      await page.locator(testCase.selector).waitFor();
       await page.focus(testCase.selector);
 
       for (const letter of alphabet) {
@@ -114,7 +114,7 @@ test.describe('Stdin for ipdb', () => {
     await page.keyboard.press('Control+Enter');
 
     // Wait for first input
-    await page.waitForSelector('.jp-Stdin-input');
+    await page.locator('.jp-Stdin-input').waitFor();
 
     // Note: this test does not wait for subsequent inputs on purpose
 
@@ -134,8 +134,8 @@ test.describe('Stdin for ipdb', () => {
       await page.keyboard.press('Enter');
     }
 
-    const cellInput = await page.notebook.getCellInput(0);
-    const editor = await cellInput.$('.cm-content');
+    const cellInput = await page.notebook.getCellInputLocator(0);
+    const editor = cellInput!.locator('.cm-content');
     const contentAfter = await editor.evaluate((e: any) =>
       e.cmView.view.state.doc.toString()
     );

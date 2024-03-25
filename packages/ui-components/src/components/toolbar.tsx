@@ -198,9 +198,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    *
    * @param widget - The widget to add to the toolbar.
    *
-   * @param index - The optional name of the item to insert after.
-   *
-   * @returns Whether the item was added to toolbar.  Returns false if
+   * @returns Whether the item was added to toolbar. Returns false if
    *   an item of the same name is already in the toolbar.
    *
    * #### Notes
@@ -239,6 +237,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     layout.insertWidget(j, widget);
 
     Private.nameProperty.set(widget, name);
+    widget.node.dataset['jpItemName'] = name;
     return true;
   }
 
@@ -486,7 +485,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       // Invokes resizing to ensure correct display of items after an addition, only
       // if the toolbar is rendered.
       if (this.isVisible) {
-        void this._onResize();
+        void this._resizer.invoke();
       }
     }
     return status;

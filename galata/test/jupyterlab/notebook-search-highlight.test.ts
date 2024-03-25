@@ -34,7 +34,7 @@ test('Open and close Search dialog, then add new code cell', async ({
   }, TEST_NEEDLE);
 
   // wait for the search to complete
-  await page.waitForSelector('text=1/21');
+  await page.locator('text=1/21').waitFor();
   expect(await page.locator(HIGHLIGHTS_LOCATOR).count()).toBeGreaterThanOrEqual(
     4
   );

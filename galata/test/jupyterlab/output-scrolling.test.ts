@@ -35,9 +35,9 @@ test.describe('Output Scrolling', () => {
       /jp-mod-outputsScrolled/
     );
 
-    const cell = await page.notebook.getCell(0);
+    const cell = await page.notebook.getCellLocator(0);
 
-    expect(await (await cell.$('.jp-OutputArea')).screenshot()).toMatchSnapshot(
+    expect(await cell!.locator('.jp-OutputArea').screenshot()).toMatchSnapshot(
       'cell-output-area-scrolling-mode.png'
     );
 
@@ -55,8 +55,8 @@ test.describe('Output Scrolling', () => {
     await page
       .locator(`${cellSelector} >> nth=1 >> .jp-OutputArea-promptOverlay`)
       .hover();
-    const cell = await page.notebook.getCell(1);
-    expect(await cell.screenshot()).toMatchSnapshot(
+    const cell = await page.notebook.getCellLocator(1);
+    expect(await cell!.screenshot()).toMatchSnapshot(
       'prompt-overlay-hover-normal.png'
     );
     await page.click(
@@ -65,7 +65,7 @@ test.describe('Output Scrolling', () => {
     await expect(page.locator(`${cellSelector} >> nth=1`)).toHaveClass(
       /jp-mod-outputsScrolled/
     );
-    expect(await cell.screenshot()).toMatchSnapshot(
+    expect(await cell!.screenshot()).toMatchSnapshot(
       'prompt-overlay-hover-scroll.png'
     );
     await page.click(

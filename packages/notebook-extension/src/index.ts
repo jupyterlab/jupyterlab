@@ -48,7 +48,10 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ToolbarItems as DocToolbarItems } from '@jupyterlab/docmanager-extension';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
-import { IDefaultFileBrowser } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { ILauncher } from '@jupyterlab/launcher';
 import {
   ILSPCodeExtractorsManager,
@@ -363,7 +366,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     ISettingRegistry,
     ISessionContextDialogs,
     ITranslator,
-    IFormRendererRegistry
+    IFormRendererRegistry,
+    IFileBrowserFactory
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -1594,7 +1598,8 @@ function activateNotebookHandler(
   settingRegistry: ISettingRegistry | null,
   sessionDialogs_: ISessionContextDialogs | null,
   translator_: ITranslator | null,
-  formRegistry: IFormRendererRegistry | null
+  formRegistry: IFormRendererRegistry | null,
+  filebrowserFactory: IFileBrowserFactory | null
 ): INotebookTracker {
   const translator = translator_ ?? nullTranslator;
   const sessionDialogs =
@@ -1957,7 +1962,9 @@ function activateNotebookHandler(
     caption: trans.__('Create a new notebook'),
     icon: args => (args['isPalette'] ? undefined : notebookIcon),
     execute: args => {
-      const cwd = (args['cwd'] as string) || (defaultBrowser?.model.path ?? '');
+      const currentBrowser =
+        filebrowserFactory?.tracker.currentWidget ?? defaultBrowser;
+      const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
       const kernelId = (args['kernelId'] as string) || '';
       const kernelName = (args['kernelName'] as string) || '';
       return createNew(cwd, kernelId, kernelName);
@@ -2549,7 +2556,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.content, 'code');
+        return NotebookActions.changeCellType(
+          current.content,
+          'code',
+          translator
+        );
       }
     },
     isEnabled
@@ -2560,7 +2571,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.content, 'markdown');
+        return NotebookActions.changeCellType(
+          current.content,
+          'markdown',
+          translator
+        );
       }
     },
     isEnabled
@@ -2571,7 +2586,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.changeCellType(current.content, 'raw');
+        return NotebookActions.changeCellType(
+          current.content,
+          'raw',
+          translator
+        );
       }
     },
     isEnabled
@@ -3177,7 +3196,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 1);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          1,
+          translator
+        );
       }
     },
     isEnabled
@@ -3188,7 +3211,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 2);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          2,
+          translator
+        );
       }
     },
     isEnabled
@@ -3199,7 +3226,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 3);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          3,
+          translator
+        );
       }
     },
     isEnabled
@@ -3210,7 +3241,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 4);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          4,
+          translator
+        );
       }
     },
     isEnabled
@@ -3221,7 +3256,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 5);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          5,
+          translator
+        );
       }
     },
     isEnabled
@@ -3232,7 +3271,11 @@ function addCommands(
       const current = getCurrent(tracker, shell, args);
 
       if (current) {
-        return NotebookActions.setMarkdownHeader(current.content, 6);
+        return NotebookActions.setMarkdownHeader(
+          current.content,
+          6,
+          translator
+        );
       }
     },
     isEnabled

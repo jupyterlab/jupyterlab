@@ -259,7 +259,7 @@ describe('docregistry/context', () => {
         });
 
         await expect(context.initialize(true)).rejects.toThrow(
-          'Invalid response: 403 Forbidden'
+          /Invalid response: 403/
         );
         expect(called).toBe(2);
         expect(checked).toBe('failed');
