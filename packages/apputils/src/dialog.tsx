@@ -245,6 +245,9 @@ export class Dialog<T> extends Widget {
       case 'click':
         this._evtClick(event as MouseEvent);
         break;
+      case 'input':
+        this._evtInput(event as InputEvent);
+        break;
       case 'focus':
         this._evtFocus(event as FocusEvent);
         break;
@@ -267,6 +270,7 @@ export class Dialog<T> extends Widget {
     node.addEventListener('click', this, true);
     document.addEventListener('mousedown', this, true);
     document.addEventListener('focus', this, true);
+    document.addEventListener('input', this, true);
     this._first = Private.findFirstFocusable(this.node);
     this._original = document.activeElement as HTMLElement;
 
@@ -309,6 +313,7 @@ export class Dialog<T> extends Widget {
     node.removeEventListener('click', this, true);
     document.removeEventListener('focus', this, true);
     document.removeEventListener('mousedown', this, true);
+    document.removeEventListener('input', this, true);
     this._original.focus();
   }
 
@@ -320,6 +325,19 @@ export class Dialog<T> extends Widget {
       this.reject();
     }
     super.onCloseRequest(msg);
+  }
+  /**
+   * Handle the `'input'` event for dialog's children.
+   *
+   * @param event - The DOM event sent to the widget
+   */
+  protected _evtInput(_event: InputEvent): void {
+    this._hasValidationErrors = !!this.node.querySelector(':invalid');
+    for (let i = 0; i < this._buttons.length; i++) {
+      if (this._buttons[i].accept) {
+        this._buttonNodes[i].disabled = this._hasValidationErrors;
+      }
+    }
   }
 
   /**
@@ -367,7 +385,7 @@ export class Dialog<T> extends Widget {
         const activeEl = document.activeElement;
 
         if (activeEl instanceof HTMLButtonElement) {
-          let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) - 1;
+          let idx = this._buttonNodes.indexOf(activeEl) - 1;
 
           // Handle a left arrows on the first button
           if (idx < 0) {
@@ -386,7 +404,7 @@ export class Dialog<T> extends Widget {
         const activeEl = document.activeElement;
 
         if (activeEl instanceof HTMLButtonElement) {
-          let idx = this._buttonNodes.indexOf(activeEl as HTMLElement) + 1;
+          let idx = this._buttonNodes.indexOf(activeEl) + 1;
 
           // Handle a right arrows on the last button
           if (idx == this._buttons.length) {
@@ -420,7 +438,7 @@ export class Dialog<T> extends Widget {
         let index: number | undefined;
 
         if (activeEl instanceof HTMLButtonElement) {
-          index = this._buttonNodes.indexOf(activeEl as HTMLElement);
+          index = this._buttonNodes.indexOf(activeEl);
         }
         this.resolve(index);
         break;
@@ -460,6 +478,10 @@ export class Dialog<T> extends Widget {
    * Resolve a button item.
    */
   private _resolve(button: Dialog.IButton): void {
+    if (this._hasValidationErrors && button.accept) {
+      // Do not allow accepting with validation errors
+      return;
+    }
     // Prevent loopback.
     const promise = this._promise;
     if (!promise) {
@@ -487,8 +509,9 @@ export class Dialog<T> extends Widget {
     });
   }
 
+  private _hasValidationErrors: boolean = false;
   private _ready: PromiseDelegate<void> = new PromiseDelegate<void>();
-  private _buttonNodes: ReadonlyArray<HTMLElement>;
+  private _buttonNodes: ReadonlyArray<HTMLButtonElement>;
   private _buttons: ReadonlyArray<Dialog.IButton>;
   private _checkboxNode: HTMLElement | null;
   private _original: HTMLElement;
@@ -656,7 +679,7 @@ export namespace Dialog {
     checkbox: Partial<ICheckbox> | null;
 
     /**
-     * The index of the default button.  Defaults to the last button.
+     * The index of the default button. Defaults to the last button.
      */
     defaultButton: number;
 
@@ -726,7 +749,7 @@ export namespace Dialog {
      *
      * @returns A node for the button.
      */
-    createButtonNode(button: IButton): HTMLElement;
+    createButtonNode(button: IButton): HTMLButtonElement;
 
     /**
      * Create a checkbox node for the dialog.
@@ -964,7 +987,7 @@ export namespace Dialog {
      *
      * @returns A node for the button.
      */
-    createButtonNode(button: IButton): HTMLElement {
+    createButtonNode(button: IButton): HTMLButtonElement {
       const e = document.createElement('button');
       e.className = this.createItemClass(button);
       e.appendChild(this.renderIcon(button));
