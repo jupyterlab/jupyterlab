@@ -3014,7 +3014,6 @@ __metadata:
     "@jupyterlab/translation": ^4.2.0-alpha.2
     "@jupyterlab/translation-extension": ^4.2.0-alpha.2
     "@jupyterlab/ui-components-extension": ^4.2.0-alpha.2
-    "@jupyterlab/workspaces-extension": ^4.2.0-alpha.2
     css-loader: ^6.7.1
     fs-extra: ^10.1.0
     glob: ~7.1.6
@@ -3130,7 +3129,6 @@ __metadata:
     "@jupyterlab/translation-extension": ^4.2.0-alpha.2
     "@jupyterlab/ui-components-extension": ^4.2.0-alpha.2
     "@jupyterlab/vega5-extension": ^4.2.0-alpha.2
-    "@jupyterlab/workspaces-extension": ^4.2.0-alpha.2
     copy-webpack-plugin: ^11.0.0
     css-loader: ^6.7.1
     fs-extra: ^10.1.0
