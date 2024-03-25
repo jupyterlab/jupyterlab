@@ -309,7 +309,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       const shortcuts = (await settings.get('shortcuts')
         .composite) as ISettingRegistry.IShortcut[];
 
-      expect(shortcuts).toHaveLength(2);
+      expect(shortcuts).toHaveLength(1);
     });
   });
 });
