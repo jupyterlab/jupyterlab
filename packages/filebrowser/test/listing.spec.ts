@@ -725,6 +725,8 @@ describe('filebrowser/listing', () => {
             ) as HTMLInputElement;
             simulate(headerCheckbox, 'click');
             await signalToPromise(dirListing.updated);
+            expect(headerCheckbox.checked).toBe(true);
+            expect(headerCheckbox.indeterminate).toBe(false);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(4);
             expect(headerCheckbox.getAttribute('aria-label')).toBe(
               ariaDeselectAll
@@ -743,6 +745,7 @@ describe('filebrowser/listing', () => {
               dirListing.headerNode
             ) as HTMLInputElement;
             expect(headerCheckbox.indeterminate).toBe(true);
+            expect(headerCheckbox.checked).toBe(false);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(1);
             expect(headerCheckbox.getAttribute('aria-label')).toBe(
               ariaDeselectAll
@@ -755,6 +758,8 @@ describe('filebrowser/listing', () => {
             ) as HTMLInputElement;
             simulate(headerCheckbox, 'click');
             await signalToPromise(dirListing.updated);
+            expect(headerCheckbox.checked).toBe(false);
+            expect(headerCheckbox.indeterminate).toBe(false);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
             expect(headerCheckbox.getAttribute('aria-label')).toBe(
               ariaSelectAll
@@ -786,6 +791,8 @@ describe('filebrowser/listing', () => {
             ) as HTMLInputElement;
             simulate(headerCheckbox, 'click');
             await signalToPromise(dirListing.updated);
+            expect(headerCheckbox.checked).toBe(false);
+            expect(headerCheckbox.indeterminate).toBe(false);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
           });
         });

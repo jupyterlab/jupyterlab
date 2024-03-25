@@ -620,7 +620,7 @@ describe('Kernel.IKernel', () => {
         name: defaultKernel.name
       });
       const interrupt = defaultKernel.interrupt();
-      await expect(interrupt).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(interrupt).rejects.toThrow(/Invalid response: 200/);
     });
 
     it('should throw an error for an error response', async () => {
@@ -668,7 +668,7 @@ describe('Kernel.IKernel', () => {
       const { id, name } = defaultKernel;
       handleRequest(defaultKernel, 205, { id, name });
       await expect(defaultKernel.restart()).rejects.toThrow(
-        /Invalid response: 205 Reset Content/
+        /Invalid response: 205/
       );
     });
 
@@ -737,7 +737,7 @@ describe('Kernel.IKernel', () => {
         name: 'foo'
       });
       const shutdown = defaultKernel.shutdown();
-      await expect(shutdown).rejects.toThrow(/Invalid response: 200 OK/);
+      await expect(shutdown).rejects.toThrow(/Invalid response: 200/);
     });
 
     it('should handle a 404 error', async () => {

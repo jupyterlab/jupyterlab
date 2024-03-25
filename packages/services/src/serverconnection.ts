@@ -246,6 +246,18 @@ namespace Private {
     // Otherwise fall back on the default wsUrl.
     wsUrl = wsUrl ?? pageWsUrl;
 
+    const appendTokenConfig = PageConfig.getOption('appendToken').toLowerCase();
+    let appendToken;
+    if (appendTokenConfig === '') {
+      appendToken =
+        typeof window === 'undefined' ||
+        (typeof process !== 'undefined' &&
+          process?.env?.JEST_WORKER_ID !== undefined) ||
+        URLExt.getHostName(pageBaseUrl) !== URLExt.getHostName(wsUrl);
+    } else {
+      appendToken = appendTokenConfig === 'true';
+    }
+
     return {
       init: { cache: 'no-store', credentials: 'same-origin' },
       fetch,
@@ -254,11 +266,7 @@ namespace Private {
       WebSocket: WEBSOCKET,
       token: PageConfig.getToken(),
       appUrl: PageConfig.getOption('appUrl'),
-      appendToken:
-        typeof window === 'undefined' ||
-        (typeof process !== 'undefined' &&
-          process?.env?.JEST_WORKER_ID !== undefined) ||
-        URLExt.getHostName(pageBaseUrl) !== URLExt.getHostName(wsUrl),
+      appendToken,
       serializer: { serialize, deserialize },
       ...options,
       baseUrl,
