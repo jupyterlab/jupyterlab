@@ -605,7 +605,7 @@ export class ShortcutItem extends React.Component<
     } else {
       return (
         <div
-          title={this.props.shortcut.commandName}
+          title={this.props.shortcut.label}
           role="tab"
           className="jp-Shortcuts-Row"
           tabIndex={this.props.tabIndex}
