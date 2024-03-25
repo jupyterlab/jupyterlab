@@ -450,7 +450,7 @@ fi
 
 if [[ $GROUP == e2e* ]]; then
     pushd galata
-    jlpm start 2>&1 > /tmp/jupyterlab_server.log &
+    jlpm start &
     # Install only Chromium browser
     jlpm playwright install chromium
     jlpm run build

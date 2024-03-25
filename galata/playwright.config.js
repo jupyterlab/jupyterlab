@@ -5,6 +5,7 @@ var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
 
 module.exports = {
   ...baseConfig,
+  outputDir: process.env.CI ? `${process.env.DOCKER_VOLUME}pw-test-results` : undefined,
   projects: [
     {
       name: 'documentation',
@@ -40,6 +41,12 @@ module.exports = {
   ],
   // Switch to 'always' to keep raw assets for all tests
   preserveOutput: 'failures-only', // Breaks HTML report if use.video == 'on'
+  reporter: [
+    [process.env.CI ? 'github' : 'list'],
+    process.env.CI
+      ? ['blob', { outputDir: `${process.env.DOCKER_VOLUME}pw-blob-report` }]
+      : ['html', { open: 'on-failure' }]
+  ],
   // Try one retry as some tests are flaky
   retries: process.env.CI ? 1 : 0
 };

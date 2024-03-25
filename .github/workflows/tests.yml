@@ -162,6 +162,8 @@ jobs:
       fail-fast: false
     timeout-minutes: 45
     runs-on: ubuntu-22.04
+    env:
+      DOCKER_VOLUME: ${{ github.workspace }}/shared-volume
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
@@ -174,8 +176,19 @@ jobs:
         docker image ls -a
     - name: Run test ${{ matrix.group }}
       run: |
-        docker run --env CI=1 --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
-    # FIXME upload artifacts
+        mkdir -p ${DOCKER_VOLUME}
+        docker run \
+          -v ${DOCKER_VOLUME}:/shared-volume \
+          --env CI=1 --env GROUP=${{ matrix.group }} \
+          ${{ env.IMAGE }} \
+          bash ./scripts/ci_script.sh
+
+    - name: Upload Test assets
+      if: ${{ matrix.upload-output && always() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.group }} ${{ github.run_number }}
+        path: ${DOCKER_VOLUME}
 
   js-tests:
     name: Test ${{ matrix.group }}
@@ -260,6 +273,8 @@ jobs:
       matrix:
         shardIndex: [1, 2, 3, 4, 5, 6, 7, 8]
         shardTotal: [8]
+    env:
+      DOCKER_VOLUME: ${{ github.workspace }}/shared-volume
     steps:
       - name: Download artifact
         uses: actions/download-artifact@v4
@@ -281,18 +296,22 @@ jobs:
 
       - name: Run test galata integration test
         run: |
-          docker run --env CI=1 --env GROUP=e2e-galata ${{ env.IMAGE }} bash ./scripts/ci_script.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+          mkdir -p ${DOCKER_VOLUME}
+          docker run \
+            -v ${DOCKER_VOLUME}:/shared-volume \
+            --env CI=1 --env GROUP=e2e-galata --env DOCKER_VOLUME=/shared-volume \
+            ${{ env.IMAGE }} \
+            bash ./scripts/ci_script.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
-
-      # FIXME
-      # - name: Upload Galata Test assets
-      #   if: always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: jupyterlab-galata-test-assets
-      #     path: |
-      #       galata/test-jupyterlab-results
-      #       galata/test-results
+      - name: Upload Galata Test assets
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jupyterlab-galata-test-assets-${{ matrix.shardIndex }}
+          path: ${DOCKER_VOLUME}
+            # galata/test-jupyterlab-results
+            # galata/test-results
+          retention-days: 1
 
       # - name: Upload Galata Test report
       #   if: always()
@@ -306,6 +325,38 @@ jobs:
       #   if: always()
       #   run: |
       #     cat /tmp/jupyterlab_server.log
+
+  e2e-base-report:
+    name: Merge integration tests reports
+    if: always()
+    needs: [e2e-base]
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Download blob reports from GitHub Actions Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: pw-assets
+        pattern: jupyterlab-galata-test-assets-*
+        merge-multiple: true
+
+    - name: Merge into HTML Report
+      run: npx playwright merge-reports --reporter html ./pw-assets/pw-blob-report
+
+    - name: Upload HTML report
+      uses: actions/upload-artifact@v4
+      with:
+        name: jupyterlab-galata-test-assets-${{ github.run_attempt }}
+        path: |
+          playwright-report
+          pw-assets
+        retention-days: 14
 
   check_links:
     # FIXME we should use the docker image as it builds the JS assets
