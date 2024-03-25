@@ -139,43 +139,51 @@ export interface INotebookTracker extends IWidgetTracker<NotebookPanel> {
   readonly selectionChanged: ISignal<this, void>;
 }
 
-export interface IExecutionOptions {
-  /**
-   * Cell to execute
-   */
-  cell: Cell;
-  /**
-   * Notebook to which the cell belongs
-   */
-  notebook: INotebookModel;
-  /**
-   * Notebook widget configuration
-   */
-  notebookConfig: StaticNotebook.INotebookConfig;
-  /**
-   * A callback to notify a cell completed execution.
-   */
-  onCellExecuted: (args: {
+/**
+ * Notebook cell executor namespace
+ */
+export namespace NotebookCellExecutor {
+  /**  
+   * Execution options for notebook cell executor.  
+   */  
+  export interface IRunCellOptions {
+    /**
+     * Cell to execute
+     */
     cell: Cell;
-    success: boolean;
-    error?: KernelError | null;
-  }) => void;
-  /**
-   * A callback to notify that a cell execution is scheduled.
-   */
-  onCellExecutionScheduled: (args: { cell: Cell }) => void;
-  /**
-   * Document session context
-   */
-  sessionContext?: ISessionContext;
-  /**
-   * Session dialogs
-   */
-  sessionDialogs?: ISessionContextDialogs;
-  /**
-   * Application translator
-   */
-  translator?: ITranslator;
+    /**
+     * Notebook to which the cell belongs
+     */
+    notebook: INotebookModel;
+    /**
+     * Notebook widget configuration
+     */
+    notebookConfig: StaticNotebook.INotebookConfig;
+    /**
+     * A callback to notify a cell completed execution.
+     */
+    onCellExecuted: (args: {
+      cell: Cell;
+      success: boolean;
+      error?: KernelError | null;
+    }) => void;
+    /**
+     * A callback to notify that a cell execution is scheduled.
+     */
+    onCellExecutionScheduled: (args: { cell: Cell }) => void;
+    /**
+     * Document session context
+     */
+    sessionContext?: ISessionContext;
+    /**
+     * Session dialogs
+     */
+    sessionDialogs?: ISessionContextDialogs;
+    /**
+     * Application translator
+     */
+    translator?: ITranslator;
+  }
 }
 
 /**
@@ -187,7 +195,7 @@ export interface INotebookCellExecutor {
    *
    * @param options Cell execution options
    */
-  runCell(options: IExecutionOptions): Promise<boolean>;
+  runCell(options: NotebookCellExecutor.IRunCellOptions): Promise<boolean>;
 }
 
 /**

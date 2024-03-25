@@ -21,25 +21,33 @@ export const IConsoleTracker = new Token<IConsoleTracker>(
  */
 export interface IConsoleTracker extends IWidgetTracker<ConsolePanel> {}
 
-export interface IExecutionOptions {
-  /**
-   * Cell to execute
-   */
-  cell: CodeCell;
-  /**
-   * A callback to notify a cell completed execution.
-   */
-  onCellExecuted: (args: {
+/**
+ * Console cell executor namespace
+ */
+export namespace ConsoleCellExecutor {
+  /**  
+   * Execution options for console cell executor.  
+   */   
+  export interface IRunCellOptions {
+    /**
+     * Cell to execute
+     */
     cell: CodeCell;
-    executionDate: Date;
-    success: boolean;
-    error?: Error | null;
-  }) => void;
+    /**
+     * A callback to notify a cell completed execution.
+     */
+    onCellExecuted: (args: {
+      cell: CodeCell;
+      executionDate: Date;
+      success: boolean;
+      error?: Error | null;
+    }) => void;
 
-  /**
-   * Document session context
-   */
-  sessionContext: ISessionContext;
+    /**
+     * Document session context
+     */
+    sessionContext: ISessionContext;
+  }
 }
 
 /**
@@ -51,7 +59,7 @@ export interface IConsoleCellExecutor {
    *
    * @param options Cell execution options
    */
-  runCell(options: IExecutionOptions): Promise<boolean>;
+  runCell(options: ConsoleCellExecutor.IRunCellOptions): Promise<boolean>;
 }
 
 /**

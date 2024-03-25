@@ -12,8 +12,8 @@ import type { KernelMessage } from '@jupyterlab/services';
 import { nullTranslator } from '@jupyterlab/translation';
 import { findIndex } from '@lumino/algorithm';
 import { KernelError } from './actions';
-import type { IExecutionOptions } from './tokens';
 import type { INotebookModel } from './model';
+import type { NotebookCellExecutor } from './tokens';
 
 /**
  * Run a single notebook cell.
@@ -30,7 +30,7 @@ export async function runCell({
   sessionContext,
   sessionDialogs,
   translator
-}: IExecutionOptions): Promise<boolean> {
+}: NotebookCellExecutor.IRunCellOptions): Promise<boolean> {
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab');
   switch (cell.model.type) {

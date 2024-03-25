@@ -30,7 +30,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
 import { runCell } from './cellexecutor';
 import { ConsoleHistory, IConsoleHistory } from './history';
-import type { IConsoleCellExecutor, IExecutionOptions } from './tokens';
+import type { ConsoleCellExecutor, IConsoleCellExecutor } from './tokens';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -749,7 +749,7 @@ export class CodeConsole extends Widget {
           }
         }
       }
-    } satisfies IExecutionOptions;
+    } satisfies ConsoleCellExecutor.IRunCellOptions;
 
     try {
       await this._executor.runCell(options);

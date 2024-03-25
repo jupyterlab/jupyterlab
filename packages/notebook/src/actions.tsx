@@ -30,7 +30,7 @@ import * as React from 'react';
 import { runCell as defaultRunCell } from './cellexecutor';
 import { Notebook, StaticNotebook } from './widget';
 import { NotebookWindowedLayout } from './windowing';
-import { type IExecutionOptions, INotebookCellExecutor } from './tokens';
+import { INotebookCellExecutor, type NotebookCellExecutor } from './tokens';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -2513,7 +2513,7 @@ namespace Private {
       sessionContext,
       sessionDialogs,
       translator
-    } satisfies IExecutionOptions;
+    } satisfies NotebookCellExecutor.IRunCellOptions;
     return executor ? executor.runCell(options) : defaultRunCell(options);
   }
 
