@@ -336,8 +336,11 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: 20
-    - name: Install dependencies
-      run: npm ci
+
+    - name: Install Playwright
+      run: |
+        npm init -y
+        npm install playwright
 
     - name: Download blob reports from GitHub Actions Artifacts
       uses: actions/download-artifact@v4
