@@ -188,7 +188,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.group }} ${{ github.run_number }}
-        path: ${DOCKER_VOLUME}
+        path: ${{ env.DOCKER_VOLUME }}
 
   js-tests:
     name: Test ${{ matrix.group }}
@@ -308,7 +308,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-galata-test-assets-${{ matrix.shardIndex }}
-          path: ${DOCKER_VOLUME}
+          path: ${{ env.DOCKER_VOLUME }}
             # galata/test-jupyterlab-results
             # galata/test-results
           retention-days: 1
