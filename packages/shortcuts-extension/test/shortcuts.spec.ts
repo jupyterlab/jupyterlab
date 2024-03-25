@@ -341,8 +341,6 @@ describe('@jupyterlab/shortcut-extension', () => {
 
     const connector: IDataConnector<
       ISettingRegistry.IPlugin,
-      string,
-      string,
       string
     > = {
       fetch: jest.fn().mockImplementation((id: string) => {
