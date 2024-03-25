@@ -79,7 +79,7 @@
     "@jupyterlab/ui-components": "~4.1.0-alpha.0",
     "@jupyterlab/ui-components-extension": "~4.2.0-alpha.2",
     "@jupyterlab/vega5-extension": "~4.2.0-alpha.2",
-    "@jupyterlab/workspaces-extension": "^4.2.0-alpha.2",
+    "@jupyterlab/workspaces-extension": "~4.2.0-alpha.2",
     "@lumino/algorithm": "^2.0.0",
     "@lumino/application": "^2.3.0-alpha.0",
     "@lumino/commands": "^2.0.1",
