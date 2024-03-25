@@ -50,6 +50,10 @@
   overflow: visible;
 }
 
+button.jp-Dialog-button:disabled {
+  opacity: 0.6;
+}
+
 button.jp-Dialog-button:focus {
   outline: 1px solid var(--jp-brand-color1);
   outline-offset: 4px;
