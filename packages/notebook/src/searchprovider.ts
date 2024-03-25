@@ -9,10 +9,7 @@ import {
   ICellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import {
-  CodeMirrorEditor,
-  IHighlightAdjacentMatchOptions
-} from '@jupyterlab/codemirror';
+import { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import {
@@ -236,6 +233,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       output: {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
+        disabledDescription: trans.__(
+          'Search in the cell outputs (not available when replace options are shown).'
+        ),
         default: false,
         supportReplace: false
       },
@@ -286,16 +286,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * @returns Initial value used to populate the search box.
    */
   getInitialQuery(): string {
-    const activeCell = this.widget.content.activeCell;
-    const editor = activeCell?.editor as CodeMirrorEditor | undefined;
-    if (!editor) {
-      return '';
-    }
-    const selection = editor.state.sliceDoc(
-      editor.state.selection.main.from,
-      editor.state.selection.main.to
-    );
-    return selection;
+    // Get whatever is selected in the browser window.
+    return window.getSelection()?.toString() || '';
   }
 
   /**
@@ -521,7 +513,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const reply = await showDialog({
         title: trans.__('Confirmation'),
         body: trans.__(
-          'Searching outputs is expensive and requires to first rendered all outputs. Are you sure you want to search in the cell outputs?'
+          'Searching outputs requires you to run all cells and render their outputs. Are you sure you want to search in the cell outputs?'
         ),
         buttons: [
           Dialog.cancelButton({ label: trans.__('Cancel') }),

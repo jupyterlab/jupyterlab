@@ -6,10 +6,12 @@ import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
 import {
   IOutputAreaModel,
   OutputArea,
-  OutputAreaModel
+  OutputAreaModel,
+  SimplifiedOutputArea,
+  Stdin
 } from '@jupyterlab/outputarea';
-import { KernelManager } from '@jupyterlab/services';
-import { JupyterServer } from '@jupyterlab/testing';
+import { Kernel, KernelManager } from '@jupyterlab/services';
+import { JupyterServer, signalToPromise } from '@jupyterlab/testing';
 import {
   DEFAULT_OUTPUTS,
   defaultRenderMime
@@ -190,6 +192,76 @@ describe('outputarea/widget', () => {
         expect(widget.widgets.length).toBe(DEFAULT_OUTPUTS.length - 1);
         widget.model.clear();
         expect(widget.widgets.length).toBe(0);
+      });
+    });
+
+    describe('#pendingInput', () => {
+      let kernel: Kernel.IKernelConnection;
+
+      beforeEach(async () => {
+        const manager = new KernelManager();
+        kernel = await manager.startNew({ name: 'ipython' });
+      });
+
+      afterEach(async () => {
+        await kernel.shutdown();
+      });
+
+      it('should default to `false`', () => {
+        expect(widget.pendingInput).toBe(false);
+      });
+
+      it('should be `true` when pending user input', async () => {
+        // Prompt kernel to request input and wait until it is requested
+        const future = kernel.requestExecute({ code: 'input()' });
+        const inputRequested = signalToPromise(widget.inputRequested);
+        widget.future = future;
+        const input = (await inputRequested)[1];
+
+        // Input is now pending
+        expect(widget.pendingInput).toBe(true);
+
+        // Submit input
+        (input as Stdin).handleEvent(
+          new KeyboardEvent('keydown', { key: 'Enter' })
+        );
+        await future.done;
+
+        // Input should no longer be flagged as pending.
+        expect(widget.pendingInput).toBe(false);
+      });
+
+      it('should reset to `false` when kernel gets shut down', async () => {
+        const future = kernel.requestExecute({ code: 'input()' });
+        const inputRequested = signalToPromise(widget.inputRequested);
+        widget.future = future;
+        await inputRequested;
+        await kernel.shutdown();
+        expect(widget.pendingInput).toBe(false);
+      });
+
+      it('should reset to `false` when kernel restarts', async () => {
+        const future = kernel.requestExecute({ code: 'input()' });
+        const inputRequested = signalToPromise(widget.inputRequested);
+        widget.future = future;
+        await inputRequested;
+        await kernel.restart();
+        expect(widget.pendingInput).toBe(false);
+      });
+
+      it('should reset to `false` when kernel cancels input after getting interrupted', async () => {
+        // This test requires an ipython kernel because the default echo kernel
+        // does not actually do anything on getting interrupted.
+        const future = kernel.requestExecute({ code: 'input()' });
+        const inputRequested = signalToPromise(widget.inputRequested);
+        widget.future = future;
+        await inputRequested;
+        // Need to wait for status change because futures are not disposed on
+        // interrupt (differently to shutdown and restart).
+        const statusChanged = signalToPromise(kernel.statusChanged);
+        await kernel.interrupt();
+        await statusChanged;
+        expect(widget.pendingInput).toBe(false);
       });
     });
 
@@ -435,6 +507,27 @@ describe('outputarea/widget', () => {
         expect(reply2!.content.status).toBe('ok');
         widget1.dispose();
         await ipySessionContext.shutdown();
+      });
+
+      it('should continuously render delayed outputs', async () => {
+        const model0 = new OutputAreaModel({ trusted: true });
+        const widget0 = new SimplifiedOutputArea({
+          model: model0,
+          rendermime: rendermime
+        });
+        let ipySessionContext: SessionContext;
+        ipySessionContext = await createSessionContext({
+          kernelPreference: { name: 'python3' }
+        });
+        await ipySessionContext.initialize();
+        const code = [
+          'import time',
+          'for i in range(3):',
+          '    print(f"Hello Jupyter! {i}")',
+          '    time.sleep(1)'
+        ].join('\n');
+        await SimplifiedOutputArea.execute(code, widget0, ipySessionContext);
+        expect(model0.toJSON()[0].text).toBe(widget0.node.textContent);
       });
     });
 

@@ -27,23 +27,23 @@ test.describe('Collapsible Headings; showHCB', () => {
   });
 
   test('Show Collapser Unselected; showHCB', async ({ page }) => {
-    expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
-      'showHCB_heading_unselected.png'
-    );
+    expect(
+      await (await page.notebook.getCellLocator(0))!.screenshot()
+    ).toMatchSnapshot('showHCB_heading_unselected.png');
   });
 
   test('Show Collapser Selected; showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
-      'showHCB_heading_selected.png'
-    );
+    expect(
+      await (await page.notebook.getCellLocator(0))!.screenshot()
+    ).toMatchSnapshot('showHCB_heading_selected.png');
   });
 
   test('Collapse Heading; showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
     await page.click('text=# Heading 1Heading 1¶ >> button');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('showHCB_collapse_heading.png');
   });
 
@@ -52,7 +52,7 @@ test.describe('Collapsible Headings; showHCB', () => {
     await page.click('text=# Heading 1Heading 1¶ >> button');
     await page.click('text=# Heading 1Heading 1¶ >> button');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('showHCB_expand_heading_via_collapser.png');
   });
 });
@@ -76,23 +76,23 @@ test.describe('Collapsible Headings; no_showHCB', () => {
   });
 
   test('Show Collapser Unselected; no_showHCB', async ({ page }) => {
-    expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
-      'no_showHCB_heading_unselected.png'
-    );
+    expect(
+      await (await page.notebook.getCellLocator(0))!.screenshot()
+    ).toMatchSnapshot('no_showHCB_heading_unselected.png');
   });
 
   test('Show Collapser Selected; no_showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
-    expect(await (await page.notebook.getCell(0)).screenshot()).toMatchSnapshot(
-      'no_showHCB_heading_selected.png'
-    );
+    expect(
+      await (await page.notebook.getCellLocator(0))!.screenshot()
+    ).toMatchSnapshot('no_showHCB_heading_selected.png');
   });
 
   test('Collapse Heading; no_showHCB', async ({ page }) => {
     await page.notebook.selectCells(0);
     await page.click('text=# Heading 1Heading 1¶ >> button');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('no_showHCB_collapse_heading.png');
   });
 
@@ -101,7 +101,7 @@ test.describe('Collapsible Headings; no_showHCB', () => {
     await page.click('text=# Heading 1Heading 1¶ >> button');
     await page.click('text=# Heading 1Heading 1¶ >> button');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('no_showHCB_expand_heading_via_collapser.png');
   });
 });
@@ -128,7 +128,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('jump_previous_header.png');
   });
 
@@ -137,7 +137,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('collapse_previous_header.png');
   });
 
@@ -148,7 +148,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('collapse_previous_headers.png');
   });
 
@@ -164,7 +164,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowLeft');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('reexpand_headers_01.png');
   });
 
@@ -177,7 +177,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowDown');
     await page.keyboard.press('ArrowRight');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('reexpand_headers_02.png');
   });
 
@@ -191,13 +191,13 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('ArrowLeft');
     await page.keyboard.press('ArrowLeft');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('reexpand_headers_03a.png');
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');
     await page.keyboard.press('ArrowRight');
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('reexpand_headers_03b.png');
   });
 
@@ -211,7 +211,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(2);
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_below_01.png');
   });
 
@@ -228,7 +228,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(0);
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_below_02.png');
   });
 
@@ -244,7 +244,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('Shift+Enter');
     await page.notebook.selectCells(2);
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_below_03.png');
   });
 
@@ -254,7 +254,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('Shift+A');
     await page.waitForTimeout(200);
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_01.png');
   });
 
@@ -264,7 +264,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('Shift+A');
     await page.waitForTimeout(200);
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_02.png');
   });
 
@@ -274,7 +274,7 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.keyboard.press('Shift+A');
     await page.waitForTimeout(200);
     expect(
-      await (await page.notebook.getNotebookInPanel()).screenshot()
+      await (await page.notebook.getNotebookInPanelLocator())!.screenshot()
     ).toMatchSnapshot('add_header_above_03.png');
   });
 });

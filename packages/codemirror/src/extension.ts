@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
-import { defaultKeymap, indentLess } from '@codemirror/commands';
+import { defaultKeymap } from '@codemirror/commands';
 import {
   bracketMatching,
   foldGutter,
@@ -704,6 +704,10 @@ export namespace EditorExtensionRegistry {
         name: 'keymap',
         default: [
           {
+            key: 'Mod-Enter',
+            run: StateCommands.preventNewLineOnRun
+          },
+          {
             key: 'Enter',
             run: StateCommands.completerOrInsertNewLine
           },
@@ -711,7 +715,7 @@ export namespace EditorExtensionRegistry {
           {
             key: 'Tab',
             run: StateCommands.indentMoreOrInsertTab,
-            shift: indentLess
+            shift: StateCommands.dedentIfNotLaunchingTooltip
           }
         ],
         factory: () =>

@@ -42,10 +42,9 @@ test.describe('Notebook Trust', () => {
     });
     await page.hover('text=Open With');
     await page.click('.lm-Menu li[role="menuitem"]:has-text("Editor")');
-    const editorContent = await page.waitForSelector(
-      '.jp-FileEditor .cm-content'
-    );
-    await editorContent.waitForSelector('text=TEST_TEXT');
+    const editorContent = page.locator('.jp-FileEditor .cm-content');
+    await editorContent.waitFor();
+    await editorContent.locator('text=TEST_TEXT').waitFor();
     const originalContent = await page.evaluate(async () => {
       await window.jupyterapp.commands.execute('fileeditor:select-all');
       await window.jupyterapp.commands.execute('fileeditor:cut');

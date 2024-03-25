@@ -5,6 +5,7 @@
 This module is meant to run JupyterLab in a headless browser, making sure
 the application launches and starts up without errors.
 """
+
 import asyncio
 import inspect
 import logging
@@ -43,7 +44,7 @@ class LogErrorHandler(logging.Handler):
         super().__init__(level=logging.ERROR)
         self.errored = False
 
-    def filter(self, record):  # noqa
+    def filter(self, record):
         # Handle known StreamClosedError from Tornado
         # These occur when we forcibly close Websockets or
         # browser connections during the test.

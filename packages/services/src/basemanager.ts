@@ -86,6 +86,7 @@ export abstract class BaseManager implements IManager {
     if (this.isDisposed) {
       return;
     }
+    this._isDisposed = true;
     this._disposed.emit(undefined);
     Signal.clearData(this);
   }

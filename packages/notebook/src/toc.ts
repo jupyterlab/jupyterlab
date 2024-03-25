@@ -296,6 +296,23 @@ export class NotebookToCModel extends TableOfContentsModel<
   }
 
   /**
+   * Test if two headings are equal or not.
+   *
+   * @param heading1 First heading
+   * @param heading2 Second heading
+   * @returns Whether the headings are equal.
+   */
+  protected override isHeadingEqual(
+    heading1: INotebookHeading,
+    heading2: INotebookHeading
+  ): boolean {
+    return (
+      super.isHeadingEqual(heading1, heading2) &&
+      heading1.cellRef === heading2.cellRef
+    );
+  }
+
+  /**
    * Read table of content configuration from notebook metadata.
    *
    * @returns ToC configuration from metadata
@@ -610,7 +627,8 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
             console.debug('scrolling to heading: using fallback strategy');
             await widget.content.scrollToItem(
               widget.content.activeCellIndex,
-              this.scrollToTop ? 'start' : undefined
+              this.scrollToTop ? 'start' : undefined,
+              0
             );
           }
         };
@@ -649,10 +667,14 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
 
     const findHeadingElement = (cell: Cell): void => {
       model.getCellHeadings(cell).forEach(async heading => {
-        const elementId = await getIdForHeading(heading, this.parser!);
+        const elementId = await getIdForHeading(
+          heading,
+          this.parser!,
+          this.sanitizer
+        );
 
         const selector = elementId
-          ? `h${heading.level}[id="${elementId}"]`
+          ? `h${heading.level}[id="${CSS.escape(elementId)}"]`
           : `h${heading.level}`;
 
         if (heading.outputIndex !== undefined) {
@@ -771,7 +793,8 @@ export class NotebookToCFactory extends TableOfContentsFactory<NotebookPanel> {
  */
 export async function getIdForHeading(
   heading: INotebookHeading,
-  parser: IRenderMime.IMarkdownParser
+  parser: IRenderMime.IMarkdownParser,
+  sanitizer: IRenderMime.ISanitizer
 ) {
   let elementId: string | null = null;
   if (heading.type === Cell.HeadingType.Markdown) {
@@ -779,7 +802,8 @@ export async function getIdForHeading(
       parser,
       // Type from TableOfContentsUtils.Markdown.IMarkdownHeading
       (heading as any).raw,
-      heading.level
+      heading.level,
+      sanitizer
     );
   } else if (heading.type === Cell.HeadingType.HTML) {
     // Type from TableOfContentsUtils.IHTMLHeading

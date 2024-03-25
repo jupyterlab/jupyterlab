@@ -161,6 +161,11 @@ namespace Private {
     const idsOnlyParam = idsOnly
       ? URLExt.objectToQueryString({ ids_only: true })
       : '';
-    return `${URLExt.join(base, SERVICE_SETTINGS_URL, id)}${idsOnlyParam}`;
+    const settingsBase = URLExt.join(base, SERVICE_SETTINGS_URL);
+    const result = URLExt.join(settingsBase, id);
+    if (!result.startsWith(settingsBase)) {
+      throw new Error('Can only be used for workspaces requests');
+    }
+    return `${result}${idsOnlyParam}`;
   }
 }

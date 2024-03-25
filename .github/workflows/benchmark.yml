@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     name: Execute benchmark tests
-    if: ${{ github.event.issue.pull_request && (contains(github.event.comment.body, 'please run benchmarks') }}
+    if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, 'please run benchmarks') }}
 
     runs-on: ubuntu-22.04
 
@@ -55,7 +55,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
 
-      - uses: iterative/setup-cml@v2
+      - uses: iterative/setup-cml@v3
 
       # First run the benchmark on the old reference
       - name: Checkout old reference
@@ -84,10 +84,7 @@ jobs:
         working-directory: galata
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Execute benchmark tests
         continue-on-error: true
@@ -128,10 +125,7 @@ jobs:
           jlpm run build
 
       - name: Wait for JupyterLab
-        uses: ifaxity/wait-on-action@v1
-        with:
-          resource: http-get://localhost:8888/lab
-          timeout: 360000
+        run: npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
 
       - name: Execute benchmark tests
         continue-on-error: true

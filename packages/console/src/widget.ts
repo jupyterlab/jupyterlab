@@ -4,7 +4,7 @@
 import { Prec } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { createStandaloneCell, ISharedRawCell } from '@jupyter/ydoc';
-import { ISessionContext } from '@jupyterlab/apputils';
+import { DOMUtils, ISessionContext } from '@jupyterlab/apputils';
 import {
   AttachmentsCellModel,
   Cell,
@@ -71,6 +71,14 @@ const CONTENT_CLASS = 'jp-CodeConsole-content';
 const INPUT_CLASS = 'jp-CodeConsole-input';
 
 /**
+ * The class name added to the console when an element within it is focused
+ * and takes keyboard input, such as <input> and <div contenteditable>
+ *
+ * This class is also effective when the focused element is in shadow DOM.
+ */
+const READ_WRITE_CLASS = 'jp-mod-readWrite';
+
+/**
  * The timeout in ms for execution requests to the kernel.
  */
 const EXECUTION_TIMEOUT = 250;
@@ -79,6 +87,16 @@ const EXECUTION_TIMEOUT = 250;
  * The mimetype used for Jupyter cell data.
  */
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+
+/**
+ * The data attribute added to a widget that can undo.
+ */
+const UNDOER = 'jpUndoer';
+/**
+ * The data attribute Whether the console interaction mimics the notebook
+ * or terminal keyboard shortcuts.
+ */
+const INTERACTION_MODE = 'jpInteractionMode';
 
 /**
  * A widget containing a Jupyter console.
@@ -97,6 +115,7 @@ export class CodeConsole extends Widget {
     this.addClass(CONSOLE_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
+    this.node.dataset[UNDOER] = 'true';
     this.node.tabIndex = -1; // Allow the widget to take focus.
 
     // Create the panels that hold the content and input.
@@ -551,6 +570,12 @@ export class CodeConsole extends Widget {
       case 'mouseup':
         this._evtMouseUp(event as MouseEvent);
         break;
+      case 'focusin':
+        this._evtFocusIn(event as MouseEvent);
+        break;
+      case 'focusout':
+        this._evtFocusOut(event as MouseEvent);
+        break;
       default:
         break;
     }
@@ -564,6 +589,8 @@ export class CodeConsole extends Widget {
     node.addEventListener('keydown', this, true);
     node.addEventListener('click', this);
     node.addEventListener('mousedown', this);
+    node.addEventListener('focusin', this);
+    node.addEventListener('focusout', this);
     // Create a prompt if necessary.
     if (!this.promptCell) {
       this.newPromptCell();
@@ -580,6 +607,8 @@ export class CodeConsole extends Widget {
     const node = this.node;
     node.removeEventListener('keydown', this, true);
     node.removeEventListener('click', this);
+    node.removeEventListener('focusin', this);
+    node.removeEventListener('focusout', this);
   }
 
   /**
@@ -604,7 +633,16 @@ export class CodeConsole extends Widget {
     if (promptCell) {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
-      Signal.clearData(promptCell.editor);
+
+      // Schedule execution of signal clearance to happen later so that
+      // the `readOnly` configuration gets updated before editor signals
+      // get disconnected (see `Cell.onUpdateRequest`).
+      const oldCell = promptCell;
+      requestIdleCallback(() => {
+        // Clear the signals to avoid memory leaks
+        Signal.clearData(oldCell.editor);
+      });
+
       // Ensure to clear the cursor
       promptCell.editor?.blur();
       const child = input.widgets[0];
@@ -662,6 +700,22 @@ export class CodeConsole extends Widget {
     ) {
       this.promptCell.editor!.focus();
     }
+  }
+
+  /**
+   * Handle `focus` events for the widget.
+   */
+  private _evtFocusIn(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+  }
+
+  /**
+   * Handle `focusout` events for the widget.
+   */
+  private _evtFocusOut(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
   }
 
   /**
@@ -740,6 +794,7 @@ export class CodeConsole extends Widget {
    * Create the options used to initialize a code cell widget.
    */
   private _createCodeCellOptions(): CodeCell.IOptions {
+    const { node } = this;
     const contentFactory = this.contentFactory;
     const modelFactory = this.modelFactory;
     const model = modelFactory.createCodeCell({});
@@ -749,7 +804,10 @@ export class CodeConsole extends Widget {
     // Suppress the default "Enter" key handling.
     const onKeyDown = EditorView.domEventHandlers({
       keydown: (event: KeyboardEvent, view: EditorView) => {
-        if (event.keyCode === 13) {
+        if (
+          event.keyCode === 13 &&
+          node.dataset[INTERACTION_MODE] === 'terminal'
+        ) {
           event.preventDefault();
           return true;
         }
@@ -844,6 +902,15 @@ export class CodeConsole extends Widget {
       this.addBanner();
       this._handleInfo(await kernel?.info);
     }
+  }
+
+  /**
+   * Update the console node with class indicating read-write state.
+   */
+  private _updateReadWrite(): void {
+    // TODO: de-duplicate with code in notebook/src/widget.ts
+    const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
+    this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
   }
 
   private _banner: RawCell | null = null;

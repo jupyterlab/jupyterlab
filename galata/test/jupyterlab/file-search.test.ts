@@ -65,9 +65,6 @@ test('Search with a text and replacement', async ({ page }) => {
 test('Populate search box with selected text', async ({ page }) => {
   const imageName = 'text-editor-search-from-selection.png';
 
-  // Enter first cell
-  await page.notebook.enterCellEditingMode(0);
-
   // Go to first line
   await page.keyboard.press('PageUp');
   // Select first line
@@ -94,11 +91,11 @@ test('Populate search box with selected text', async ({ page }) => {
   await expect(page.locator('.cm-search.cm-panel')).toHaveCount(0);
 
   // Expect the first match to be highlighted
-  await page.waitForSelector('text=1/2');
+  await page.locator('text=1/2').waitFor();
 
-  const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
+  const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
 
-  expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+  expect(await tabHandle?.screenshot()).toMatchSnapshot(imageName);
 });
 
 test.describe('File search from selection', () => {

@@ -11,13 +11,13 @@ async function enterEditingModeForScreenshot(
   cellIndex: number
 ) {
   await page.notebook.enterCellEditingMode(cellIndex);
-  const cell = await page.notebook.getCell(cellIndex);
+  const cell = await page.notebook.getCellLocator(cellIndex);
   // Make sure cursor is consistently in the same position to avoid screenshot flake
   await page.keyboard.press('Home');
   await page.keyboard.press('PageUp');
   // Add some timeout to stabilize codemirror bounding box
   const cellBox = await cell.boundingBox();
-  const cellNew = await page.notebook.getCell(cellIndex);
+  const cellNew = await page.notebook.getCellLocator(cellIndex);
   const cellNewBox = await cellNew.boundingBox();
   if (
     cellBox.x != cellNewBox.x ||
@@ -42,9 +42,9 @@ test.describe('Notebook Markdown', () => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     const imageName = 'highlight-latex.png';
     await page.notebook.enterCellEditingMode(0);
-    const cell = await page.notebook.getCell(0);
+    const cell = await page.notebook.getCellLocator(0);
 
-    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
+    expect(await cell!.locator('.jp-Editor').screenshot()).toMatchSnapshot(
       imageName
     );
   });
@@ -54,9 +54,9 @@ test.describe('Notebook Markdown', () => {
 
     const imageName = 'do-not-highlight-not-latex.png';
     await enterEditingModeForScreenshot(page, 1);
-    const cell = await page.notebook.getCell(1);
+    const cell = await page.notebook.getCellLocator(1);
 
-    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
+    expect(await cell!.locator('.jp-Editor').screenshot()).toMatchSnapshot(
       imageName
     );
   });
@@ -69,9 +69,9 @@ test.describe('Notebook Markdown', () => {
 
     const imageName = 'do-not-highlight-standalone-dollar.png';
     await enterEditingModeForScreenshot(page, 2);
-    const cell = await page.notebook.getCell(2);
+    const cell = await page.notebook.getCellLocator(2);
 
-    expect(await (await cell.$('.jp-Editor')).screenshot()).toMatchSnapshot(
+    expect(await cell!.locator('.jp-Editor').screenshot()).toMatchSnapshot(
       imageName
     );
   });
@@ -79,14 +79,14 @@ test.describe('Notebook Markdown', () => {
   test('Render a MermaidJS flowchart', async ({ page, tmpPath }) => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     const imageName = 'render-mermaid-flowchart.png';
-    const cell = await page.notebook.getCell(3);
-    expect(await cell.screenshot()).toMatchSnapshot(imageName);
+    const cell = await page.notebook.getCellLocator(3);
+    expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Render a MermaidJS error', async ({ page, tmpPath }) => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     const imageName = 'render-mermaid-error.png';
-    const cell = await page.notebook.getCell(4);
-    expect(await cell.screenshot()).toMatchSnapshot(imageName);
+    const cell = await page.notebook.getCellLocator(4);
+    expect(await cell!.screenshot()).toMatchSnapshot(imageName);
   });
 });

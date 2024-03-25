@@ -237,7 +237,7 @@ class LabCleanAppOptions(AppOptions):
     settings = Bool(False)
     staging = Bool(True)
     static = Bool(False)
-    all = Bool(False)  # noqa
+    all = Bool(False)
 
 
 class LabCleanApp(JupyterApp):
@@ -265,7 +265,7 @@ class LabCleanApp(JupyterApp):
 
     static = Bool(False, config=True, help="Also delete <app-dir>/static")
 
-    all = Bool(  # noqa
+    all = Bool(
         False,
         config=True,
         help="Delete the entire contents of the app directory.\n%s" % ext_warn_msg,
@@ -734,7 +734,7 @@ class LabApp(NotebookConfigShimMixin, LabServerApp):
         page_config.setdefault("buildAvailable", not self.core_mode and not self.dev_mode)
         page_config.setdefault("buildCheck", not self.core_mode and not self.dev_mode)
         page_config["devMode"] = self.dev_mode
-        page_config["token"] = self.serverapp.token
+        page_config["token"] = self.serverapp.identity_provider.token
         page_config["exposeAppInBrowser"] = self.expose_app_in_browser
         page_config["quitButton"] = self.serverapp.quit_button
         page_config["allow_hidden_files"] = self.serverapp.contents_manager.allow_hidden

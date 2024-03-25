@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { DOMUtils } from '@jupyterlab/apputils';
 import {
   Cell,
   CodeCell,
@@ -91,6 +92,14 @@ const OTHER_SELECTED_CLASS = 'jp-mod-multiSelected';
  * The class name added to unconfined images.
  */
 const UNCONFINED_CLASS = 'jp-mod-unconfined';
+
+/**
+ * The class name added to the notebook when an element within it is focused
+ * and takes keyboard input, such as focused <input> or <div contenteditable>.
+ *
+ * This class is also effective when the focused element is in shadow DOM.
+ */
+const READ_WRITE_CLASS = 'jp-mod-readWrite';
 
 /**
  * The class name added to drag images.
@@ -1139,6 +1148,11 @@ export namespace StaticNotebook {
     disableDocumentWideUndoRedo: boolean;
 
     /**
+     * Whether to display notification if code cell is run while kernel is still initializing.
+     */
+    enableKernelInitNotification: boolean;
+
+    /**
      * Defines the maximum number of outputs per cell.
      */
     maxNumberOutputs: number;
@@ -1215,6 +1229,7 @@ export namespace StaticNotebook {
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
+    enableKernelInitNotification: false,
     showHiddenCellsButton: true,
     scrollPastEnd: true,
     defaultCell: 'code',
@@ -1328,7 +1343,7 @@ export class Notebook extends StaticNotebook {
       ...options
     });
     // Allow the node to scroll while dragging items.
-    this.node.setAttribute('data-lm-dragscroll', 'true');
+    this.outerNode.setAttribute('data-lm-dragscroll', 'true');
     this.activeCellChanged.connect(this._updateSelectedCells, this);
     this.jumped.connect((_, index: number) => (this.activeCellIndex = index));
     this.selectionChanged.connect(this._updateSelectedCells, this);
@@ -1451,7 +1466,8 @@ export class Notebook extends StaticNotebook {
           // activeCell.node.focus() is called, which closes the command palette.
           // To the end user, it looks as if all the keyboard shortcut did was
           // move focus from the cell editor to the cell as a whole.
-          waitUntilReady: false
+          waitUntilReady: false,
+          preventScroll: true
         });
       }
     }
@@ -2116,6 +2132,34 @@ export class Notebook extends StaticNotebook {
         cell.editor!.edgeRequested.connect(this._onEdgeRequest, this);
       }
     });
+    cell.scrollRequested.connect((_emitter, scrollRequest) => {
+      if (cell !== this.activeCell) {
+        // Do nothing for cells other than the active cell
+        // to avoid scroll requests from editor extensions
+        // stealing user focus (this may be revisited).
+        return;
+      }
+      if (!scrollRequest.defaultPrevented) {
+        // Nothing to do if scroll request was already handled.
+        return;
+      }
+      if (cell.inViewport) {
+        // If cell got scrolled to the viewport in the meantime,
+        // proceed with scrolling within the cell.
+        return scrollRequest.scrollWithinCell();
+      }
+      // If cell is not in the viewport and needs scrolling,
+      // first scroll to the cell and then scroll within the cell.
+      this.scrollToItem(this.activeCellIndex)
+        .then(() => {
+          void cell.ready.then(() => {
+            scrollRequest.scrollWithinCell();
+          });
+        })
+        .catch(reason => {
+          // no-op
+        });
+    });
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
     this.activeCellIndex =
@@ -2196,7 +2240,7 @@ export class Notebook extends StaticNotebook {
     const activeCell = this.activeCell;
     if (this.mode === 'edit' && activeCell) {
       // Test for !== true to cover hasFocus is false and editor is not yet rendered.
-      if (activeCell.editor?.hasFocus() !== true || !activeCell.inViewport) {
+      if (activeCell.editor?.hasFocus() !== true) {
         if (activeCell.inViewport) {
           activeCell.editor?.focus();
         } else {
@@ -2299,14 +2343,15 @@ export class Notebook extends StaticNotebook {
               id = await TableOfContentsUtils.Markdown.getHeadingId(
                 this.rendermime.markdownParser!,
                 mdHeading.raw,
-                mdHeading.level
+                mdHeading.level,
+                this.rendermime.sanitizer
               );
             }
             break;
         }
         if (id === queryId) {
           const element = this.node.querySelector(
-            `h${heading.level}[id="${id}"]`
+            `h${heading.level}[id="${CSS.escape(id)}"]`
           ) as HTMLElement;
 
           return {
@@ -2764,9 +2809,20 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Update the notebook node with class indicating read-write state.
+   */
+  private _updateReadWrite(): void {
+    const inReadWrite = DOMUtils.hasActiveEditableElement(this.node);
+    this.node.classList.toggle(READ_WRITE_CLASS, inReadWrite);
+  }
+
+  /**
    * Handle `focus` events for the widget.
    */
   private _evtFocusIn(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+
     const target = event.target as HTMLElement;
     const index = this._findCell(target);
     if (index !== -1) {
@@ -2775,13 +2831,16 @@ export class Notebook extends StaticNotebook {
       if (widget.editorWidget && !widget.editorWidget.node.contains(target)) {
         this.setMode('command', { focus: false });
       }
+
+      // Cell index needs to be updated before changing mode,
+      // otherwise the previous cell may get un-rendered.
+      this.activeCellIndex = index;
+
       // If the editor has focus, ensure edit mode.
       const node = widget.editorWidget?.node;
       if (node?.contains(target)) {
         this.setMode('edit', { focus: false });
       }
-      // This will set the focus
-      this.activeCellIndex = index;
     } else {
       // No cell has focus, ensure command mode.
       this.setMode('command', { focus: false });
@@ -2818,7 +2877,10 @@ export class Notebook extends StaticNotebook {
   /**
    * Handle `focusout` events for the notebook.
    */
-  private _evtFocusOut(event: MouseEvent): void {
+  private _evtFocusOut(event: FocusEvent): void {
+    // Update read-write class state.
+    this._updateReadWrite();
+
     const relatedTarget = event.relatedTarget as HTMLElement;
 
     // Bail if the window is losing focus, to preserve edit mode. This test

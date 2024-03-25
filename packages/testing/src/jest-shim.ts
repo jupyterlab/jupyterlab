@@ -18,11 +18,6 @@ if (
   globalThis.TextEncoder = util.TextEncoder;
 }
 
-const fetchMod = ((window as any).fetch = require('node-fetch'));
-(window as any).Request = fetchMod.Request;
-(window as any).Headers = fetchMod.Headers;
-(window as any).Response = fetchMod.Response;
-
 globalThis.Image = (window as any).Image;
 globalThis.Range = function Range() {
   /* no-op */
@@ -56,6 +51,103 @@ globalThis.Range.prototype.createContextualFragment = (html: string) =>
 window.focus = () => {
   /* JSDom throws "Not Implemented" */
 };
+
+/**
+ * Shim scrollTo because jsdom still does not implement a shim for it, see:
+ * https://github.com/jsdom/jsdom/issues/2751
+ */
+window.Element.prototype.scrollTo = (
+  _optionsOrX?: ScrollToOptions | number
+) => {
+  // no-op
+};
+
+// https://github.com/jsdom/jsdom/issues/3368
+class ResizeObserverMock {
+  constructor(_callback: any) {
+    // no-op
+  }
+  observe(_target: any, _options?: any) {
+    // no-op
+  }
+  unobserve(_target: any) {
+    // no-op
+  }
+  disconnect() {
+    // no-op
+  }
+}
+
+window.ResizeObserver = ResizeObserverMock;
+
+// https://github.com/jsdom/jsdom/issues/2913
+class DataTransferItemMock implements DataTransferItem {
+  constructor(
+    protected format: string,
+    protected value: string
+  ) {
+    // no-op
+  }
+  get kind() {
+    return 'string';
+  }
+  get type() {
+    return this.format;
+  }
+  getAsString(callback: (v: string) => undefined): undefined {
+    callback(this.value);
+  }
+  getAsFile() {
+    return null as any;
+  }
+  webkitGetAsEntry() {
+    return null as any;
+  }
+}
+
+// https://github.com/jsdom/jsdom/issues/2913
+class DataTransferMock implements DataTransfer {
+  dropEffect: DataTransfer['dropEffect'] = 'none';
+  effectAllowed: DataTransfer['dropEffect'] = 'none';
+  files: DataTransfer['files'];
+  get items(): DataTransfer['items'] {
+    return [
+      ...Object.entries(this._data).map(
+        ([k, v]) => new DataTransferItemMock(k, v)
+      )
+    ] as unknown as DataTransferItemList;
+  }
+  readonly types: DataTransfer['types'] = [];
+  getData(format: string) {
+    return this._data[format];
+  }
+  setData(format: string, data: string) {
+    this._data[format] = data;
+  }
+  clearData() {
+    this._data = {};
+  }
+  setDragImage(imgElement: Element, xOffset: number, yOffset: number) {
+    // no-op
+  }
+  private _data: Record<string, string> = {};
+}
+
+window.DataTransfer = DataTransferMock;
+
+// https://github.com/jsdom/jsdom/issues/1568
+class ClipboardEventMock extends Event implements ClipboardEvent {
+  constructor(
+    type: 'copy' | 'cut' | 'paste',
+    options: { clipboardData: DataTransfer }
+  ) {
+    super(type);
+    this.clipboardData = options.clipboardData;
+  }
+  clipboardData: DataTransfer;
+}
+
+window.ClipboardEvent = ClipboardEventMock;
 
 (window as any).document.elementFromPoint = (left: number, top: number) =>
   document.body;

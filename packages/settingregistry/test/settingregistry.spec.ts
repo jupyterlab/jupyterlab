@@ -10,6 +10,7 @@ import {
 import { StateDB } from '@jupyterlab/statedb';
 import { signalToPromise } from '@jupyterlab/testing';
 import { JSONObject } from '@lumino/coreutils';
+import * as json5 from 'json5';
 
 class TestConnector extends StateDB {
   schemas: { [key: string]: ISettingRegistry.ISchema } = {};
@@ -830,6 +831,58 @@ describe('@jupyterlab/settingregistry', () => {
 
         settings = new Settings({ plugin, registry });
         expect(settings.registry).toBe(registry);
+      });
+    });
+
+    describe('#annotatedDefaults()', () => {
+      it('should represent arrays correctly', () => {
+        const id = 'alpha';
+        const data = { composite: {}, user: {} };
+        const schema: ISettingRegistry.ISchema = {
+          type: 'object',
+          properties: {
+            optionalArray: { type: 'array' },
+            requiredArray: { type: 'array' },
+            arrayWithDefault: { type: 'array', default: [1, 2] },
+            arrayWithObjects: {
+              type: 'array',
+              default: [{ foo: 'a' }],
+              items: { $ref: '#/definitions/item' }
+            }
+          },
+          required: ['requiredArray'],
+          definitions: {
+            item: {
+              type: 'object',
+              properties: {
+                foo: {
+                  type: 'string'
+                },
+                bar: {
+                  type: 'number',
+                  default: 0
+                },
+                baz: {
+                  type: 'string',
+                  default: 'zip'
+                }
+              }
+            }
+          }
+        };
+        const raw = '{ }';
+        const version = 'test';
+        const plugin = { id, data, raw, schema, version };
+
+        settings = new Settings({ plugin, registry });
+        const annotatedDefaults = settings.annotatedDefaults();
+        const defaults = json5.parse(annotatedDefaults);
+        expect(defaults.optionalArray).toBe(undefined);
+        expect(defaults.requiredArray).toEqual([]);
+        expect(defaults.arrayWithDefault).toEqual([1, 2]);
+        expect(defaults.arrayWithObjects).toEqual([
+          { foo: 'a', bar: 0, baz: 'zip' }
+        ]);
       });
     });
 

@@ -6,6 +6,21 @@
 Extension Migration Guide
 ================================================
 
+
+JupyterLab 4.1 to 4.2
+---------------------
+
+API updates
+^^^^^^^^^^^
+
+- The ``CodeEditor.ICoordinate`` interface was corrected to not include ``toJSON()``, ``x``, ``y``,
+  ``width`` and ``height``; these properties were never set by methods returning ``ICoordinate``
+  and they were never used by methods accepting it.
+- ``CodeEditor.getCoordinateForPosition`` return type was corrected to clarify that it can return
+  ``null``; previously ``null`` could be returned despite the return type indicating it would always
+  return a non-null ``ICoordinate`` value.
+
+
 JupyterLab 4.0 to 4.1
 ---------------------
 
@@ -36,7 +51,7 @@ The Toolbar and ToolbarButtonComponent (from the package *ui-components*) now re
 This library uses the web component technology (https://developer.mozilla.org/en-US/docs/Web/API/Web_components),
 and is based on `FAST <https://www.fast.design/>`_ library by Microsoft.
 
-See https://github.com/jupyterlab/team-compass/issues/143 for more context on the change.
+See https://github.com/jupyterlab/frontends-team-compass/issues/143 for more context on the change.
 
 - Changes the selectors of the ``Toolbar`` and ``ToolbarButtonComponent``.
 
@@ -78,6 +93,52 @@ CSS class name change in the ``WindowedList`` superclass of ``StaticNotebook``
 - The class ``.jp-WindowedPanel-window`` has been renamed to ``.jp-WindowedPanel-viewport``.
 - The notebook scroll container is now ``.jp-WindowedPanel-outer`` rather than ``.jp-Notebook``
 - Galata notebook helpers `getCell` and `getCellCount` were updated accordingly
+
+
+Change of notebook focus handling impacting command-mode shortcut selectors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Previously, focus in the notebook would revert to the notebook HTML node
+when switching to command mode, which was preventing :kbd:`Tab` navigation
+between cells, especially impacting users with accessibility needs.
+In JupyterLab 4.1+ the focus stays on the active cell when switching to command
+mode; this requires all shortcut selectors to be adjusted as follows:
+
+- ``.jp-Notebook:focus.jp-mod-commandMode``, ``.jp-Notebook:focus``, and ``[data-jp-traversable]:focus`` should be replaced with:
+  - ``.jp-Notebook.jp-mod-commandMode :focus:not(:read-write)`` for JupyterLab 4.1.0+
+  - ``.jp-Notebook.jp-mod-commandMode:not(.jp-mod-readWrite) :focus`` for JupyterLab 4.1.1+
+- ``[data-jp-kernel-user]:focus`` should be replaced with:
+  - ``[data-jp-kernel-user] :focus:not(:read-write)`` for JupyterLab 4.1.0+
+  - ``[data-jp-kernel-user]:not(.jp-mod-readWrite) :focus:not(:read-write)`` for JupyterLab 4.1.1+
+
+Please note that ``:not(:read-write)`` fragment disables shortcuts
+when text fields  (such as cell editor) are focused to avoid intercepting
+characters typed by the user into the text fields, however if your shortcut
+does not correspond to any key/typographic character (e.g. most shortcuts
+with :kbd:`Ctrl` modifier) you may prefer to drop this fragment
+if you want the shortcut to be active in text fields.
+
+Further, JupyterLab 4.1.1 introduced indicator class ``.jp-mod-readWrite``
+that is applied to the notebook node when the active element accepts
+keyboard input as defined by ``:read-write`` selector. This indicator
+class is required to detect ``:read-write`` elements which are nested
+within an *open* shadow DOM (such as Panel framework widgets).
+
+If your framework uses a *closed* shadow DOM, or expects keyboard
+interactions on elements that are not recognised as editable by browser
+heuristics of ``:read-write`` selector, you need to set a data attribute
+`lm-suppress-shortcuts` on the outer host element to suppress shortcuts.
+
+To prevent breaking the user experience these changes are made transparently
+in the background, but will emit a warning and extension developers should
+make the change at the source before the next major JupyterLab release.
+
+
+Visibility of ``StatusBar`` elements at high magnifications
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- Statusbar items are now hidden by default at high magnification/low resolution to prevent overlap for those using the application at high magnifications.
+- An additional ``priority`` property has been added to the options of ``IStatusBar.registerStatusItem`` method to allow the status bar item to remain visible;
+  the intended usage is for small statusbar items that either add functionality that would be particularly useful at high zoom or is inaccessible otherwise.
 
 JupyterLab 3.x to 4.x
 ---------------------
@@ -156,7 +217,7 @@ package configuration.
 .. note::
 
    You can find more information on upgrading Yarn from version 1 to version 3 in
-   [Yarn documentation](https://v3.yarnpkg.com/getting-started/migration).
+   `Yarn documentation <https://v3.yarnpkg.com/getting-started/migration>`_.
 
 If you are hit by multiple versions of the same packages (like ``@lumino/widgets``),
 TypeScript may complain that the types are not matching. One possible solution

@@ -49,7 +49,7 @@
   padding: 0;
   list-style-type: none;
   overflow-y: scroll;
-  overflow-x: auto;
+  overflow-x: hidden;
   max-height: calc((10 * var(--jp-private-completer-item-height)));
   min-height: calc(var(--jp-private-completer-item-height));
   width: 100%;
@@ -74,6 +74,7 @@
   font-family: var(--jp-code-font-family);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
+  white-space: nowrap;
 }
 
 .jp-Completer-deprecated .jp-Completer-match {
