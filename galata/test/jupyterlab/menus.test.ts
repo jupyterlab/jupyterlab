@@ -7,6 +7,7 @@ import type { ISettingRegistry } from '@jupyterlab/settingregistry';
 const menuPaths = [
   'File',
   'File>New',
+  'File>Workspaces',
   'Edit',
   'View',
   'View>Appearance',
