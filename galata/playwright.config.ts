@@ -1,11 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
+import { defineConfig } from '@playwright/test';
+import * as baseConfig from '@jupyterlab/galata/lib/playwright-config';
 
-module.exports = {
+export default defineConfig({
   ...baseConfig,
-  outputDir: process.env.CI ? `${process.env.DOCKER_VOLUME}pw-test-results` : undefined,
+  outputDir: process.env.CI
+    ? `${process.env.DOCKER_VOLUME}pw-test-results`
+    : undefined,
   projects: [
     {
       name: 'documentation',
@@ -24,8 +27,7 @@ module.exports = {
     {
       name: 'galata',
       testMatch: 'test/galata/**',
-      testIgnore: '**/.ipynb_checkpoints/**',
-      workers: 1
+      testIgnore: '**/.ipynb_checkpoints/**'
     },
     {
       name: 'jupyterlab',
@@ -35,8 +37,7 @@ module.exports = {
         contextOptions: {
           permissions: ['clipboard-read', 'clipboard-write']
         }
-      },
-      workers: 1
+      }
     }
   ],
   // Switch to 'always' to keep raw assets for all tests
@@ -49,4 +50,4 @@ module.exports = {
   ],
   // Try one retry as some tests are flaky
   retries: process.env.CI ? 1 : 0
-};
+});
