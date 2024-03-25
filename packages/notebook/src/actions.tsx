@@ -501,8 +501,8 @@ export namespace NotebookActions {
    * Change the selected cell type(s).
    *
    * @param notebook - The target notebook widget.
-   *
    * @param value - The target cell type.
+   * @param translator - The application translator.
    *
    * #### Notes
    * It should preserve the widget mode.
@@ -512,7 +512,8 @@ export namespace NotebookActions {
    */
   export function changeCellType(
     notebook: Notebook,
-    value: nbformat.CellType
+    value: nbformat.CellType,
+    translator?: ITranslator
   ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
@@ -520,7 +521,7 @@ export namespace NotebookActions {
 
     const state = Private.getState(notebook);
 
-    Private.changeCellType(notebook, value);
+    Private.changeCellType(notebook, value, translator);
     void Private.handleState(notebook, state);
   }
 
@@ -1778,8 +1779,8 @@ export namespace NotebookActions {
    * Set the markdown header level.
    *
    * @param notebook - The target notebook widget.
-   *
    * @param level - The header level.
+   * @param translator - The application translator.
    *
    * #### Notes
    * All selected cells will be switched to markdown.
@@ -1788,7 +1789,11 @@ export namespace NotebookActions {
    * There will always be one blank space after the header.
    * The cells will be unrendered.
    */
-  export function setMarkdownHeader(notebook: Notebook, level: number): void {
+  export function setMarkdownHeader(
+    notebook: Notebook,
+    level: number,
+    translator?: ITranslator
+  ): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
@@ -1802,7 +1807,7 @@ export namespace NotebookActions {
         Private.setMarkdownHeader(cells.get(index), level);
       }
     });
-    Private.changeCellType(notebook, 'markdown');
+    Private.changeCellType(notebook, 'markdown', translator);
     void Private.handleState(notebook, state);
   }
 
@@ -2076,6 +2081,7 @@ export namespace NotebookActions {
    * Trust the notebook after prompting the user.
    *
    * @param notebook - The target notebook widget.
+   * @param translator - The application translator.
    *
    * @returns a promise that resolves when the transaction is finished.
    *
@@ -2585,11 +2591,28 @@ namespace Private {
    */
   export function changeCellType(
     notebook: Notebook,
-    value: nbformat.CellType
+    value: nbformat.CellType,
+    translator?: ITranslator
   ): void {
     const notebookSharedModel = notebook.model!.sharedModel;
     notebook.widgets.forEach((child, index) => {
       if (!notebook.isSelectedOrActive(child)) {
+        return;
+      }
+      if (
+        child.model.type === 'code' &&
+        (child as CodeCell).outputArea.pendingInput
+      ) {
+        translator = translator || nullTranslator;
+        const trans = translator.load('jupyterlab');
+        // Do not permit changing cell type when input is pending
+        void showDialog({
+          title: trans.__('Cell type not changed due to pending input'),
+          body: trans.__(
+            'The cell type has not been changed to avoid kernel deadlock as this cell has pending input! Submit your pending input and try again.'
+          ),
+          buttons: [Dialog.okButton()]
+        });
         return;
       }
       if (child.model.type !== value) {

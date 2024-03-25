@@ -43,11 +43,17 @@ const URL_CONFIG = {
 // Data to ignore.
 const MISSING: Dict<string[]> = {
   '@jupyterlab/coreutils': ['path'],
-  '@jupyterlab/buildutils': ['assert', 'fs', 'path', 'webpack'],
+  '@jupyterlab/buildutils': [
+    'assert',
+    'child_process',
+    'fs',
+    'path',
+    'webpack'
+  ],
   '@jupyterlab/builder': ['path'],
   '@jupyterlab/galata': ['fs', 'path', '@jupyterlab/galata'],
   '@jupyterlab/markedparser-extension': ['Tokens', 'MarkedOptions'],
-  '@jupyterlab/testing': ['fs', 'path'],
+  '@jupyterlab/testing': ['child_process', 'fs', 'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
@@ -114,7 +120,6 @@ const UNUSED: Dict<string[]> = {
     '@babel/core',
     '@babel/preset-env',
     'fs-extra',
-    'node-fetch',
     'identity-obj-proxy',
     'jest-environment-jsdom',
     'jest-junit'
@@ -277,7 +282,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/tooltip-extension',
     '@jupyterlab/translation-extension',
     '@jupyterlab/ui-components-extension',
-    '@jupyterlab/vega5-extension'
+    '@jupyterlab/vega5-extension',
+    '@jupyterlab/workspaces-extension'
   ],
   '@jupyterlab/notebook': ['@jupyterlab/application'],
   '@jupyterlab/rendermime-interfaces': ['@lumino/widgets'],

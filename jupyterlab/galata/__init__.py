@@ -31,10 +31,12 @@ def configure_jupyter_server(c):
     #   c.LabServerApp.extra_labextensions_path = str(Path(jupyterlab.__file__).parent / "galata")
     c.LabServerApp.extra_labextensions_path = str(Path(__file__).parent)
 
+    c.LabApp.workspaces_dir = mkdtemp(prefix="galata-workspaces-")
+
     c.ServerApp.root_dir = os.environ.get(
         "JUPYTERLAB_GALATA_ROOT_DIR", mkdtemp(prefix="galata-test-")
     )
-    c.ServerApp.token = ""
+    c.IdentityProvider.token = ""
     c.ServerApp.password = ""
     c.ServerApp.disable_check_xsrf = True
     c.LabApp.expose_app_in_browser = True

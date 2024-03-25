@@ -17,7 +17,11 @@ import { AttachedProperty } from '@lumino/properties';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { SaveHandler } from './savehandler';
-import { IDocumentManager, IDocumentWidgetOpener } from './tokens';
+import {
+  IDocumentManager,
+  IDocumentWidgetOpener,
+  IRecentsManager
+} from './tokens';
 import { DocumentWidgetManager } from './widgetmanager';
 
 /**
@@ -48,7 +52,8 @@ export class DocumentManager implements IDocumentManager {
 
     const widgetManager = new DocumentWidgetManager({
       registry: this.registry,
-      translator: this.translator
+      translator: this.translator,
+      recentsManager: options.recentsManager
     });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
     widgetManager.stateChanged.connect(this._onWidgetStateChanged, this);
@@ -766,6 +771,11 @@ export namespace DocumentManager {
      * By default, it always returns `true`.
      */
     isConnectedCallback?: () => boolean;
+
+    /**
+     * The manager for recent documents.
+     */
+    recentsManager?: IRecentsManager;
   }
 }
 

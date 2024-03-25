@@ -6,7 +6,7 @@ channels:
 
 dependencies:
   # runtimes
-  - nodejs >=18,<19
+  - nodejs >=20,<21
   - python =3.11
   # package managers
   - pip
