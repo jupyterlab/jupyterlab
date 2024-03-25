@@ -23,11 +23,12 @@ cell tools inspector <notebook>`, and the :ref:`tabs list <tabs>`.
    :class: jp-screenshot
    :alt: A screenshot of the default JupyterLab interface. The main work area is in the middle. There is also a left sidebar and a top menu bar.
 
-JupyterLab sessions always reside in a :ref:`workspace <url-workspaces-ui>`.
+JupyterLab sessions always reside in a :ref:`workspace <workspaces>`.
 Workspaces contain the state of JupyterLab: the files that are currently open,
 the layout of the application areas and tabs, etc.
 Workspaces can be saved on the server with
-:ref:`named workspace URLs <url-workspaces-ui>`.
+:ref:`named workspace URLs <url-workspaces>` or
+:ref:`using workspace commands <workspaces-gui>` available in the menu and sidebar.
 To learn more about URLs in Jupyterlab, visit :ref:`urls`.
 
 
