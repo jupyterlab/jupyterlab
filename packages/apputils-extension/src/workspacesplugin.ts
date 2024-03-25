@@ -2,9 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
+  IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { URLExt } from '@jupyterlab/coreutils';
 import {
   ABCWidgetFactory,
   DocumentRegistry,
@@ -29,12 +31,15 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:workspaces',
   description: 'Add workspace file type.',
   autoStart: true,
-  requires: [IStateDB, IWorkspaceCommands, ITranslator],
+  requires: [IStateDB, ITranslator, JupyterFrontEnd.IPaths],
+  optional: [IRouter, IWorkspaceCommands],
   activate: (
     app: JupyterFrontEnd,
     state: IStateDB,
-    commands: IWorkspaceCommands,
-    translator: ITranslator
+    translator: ITranslator,
+    paths: JupyterFrontEnd.IPaths,
+    router: IRouter | null,
+    commands: IWorkspaceCommands | null
   ): void => {
     // The workspace factory creates dummy widgets to load a new workspace.
     const factory = new Private.WorkspaceFactory({
@@ -42,7 +47,20 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
       state,
       translator,
       open: async (id: string) => {
-        await app.commands.execute(commands.open, { workspace: id });
+        if (commands) {
+          await app.commands.execute(commands.open, { workspace: id });
+        } else {
+          const workspacesBase = URLExt.join(paths.urls.app, 'workspaces');
+          const url = URLExt.join(workspacesBase, id);
+          if (!url.startsWith(workspacesBase)) {
+            throw new Error('Can only be used for workspaces');
+          }
+          if (router) {
+            router.navigate(url, { hard: true });
+          } else {
+            document.location.href = url;
+          }
+        }
       }
     });
     const trans = translator.load('jupyterlab');

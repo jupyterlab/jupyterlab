@@ -19,11 +19,11 @@ API updates
 - ``CodeEditor.getCoordinateForPosition`` return type was corrected to clarify that it can return
   ``null``; previously ``null`` could be returned despite the return type indicating it would always
   return a non-null ``ICoordinate`` value.
-- The ``@jupyterlab/apputils-extension:workspaces`` plugin  now depends on the new
-  ``@jupyterlab/workspaces-extension`` package which defines the workspace-related commands
-  and provides a new ``IWorkspaceCommands`` token.  Applications authors who relied
-  on the old plugin to define the ``workspace-ui:save`` and ``workspace-ui:save-as``
-  commands should now use ``@jupyterlab/workspaces-extension:commands`` instead.
+- The commands ``workspace-ui:save`` and ``workspace-ui:save-as`` were moved
+  from the ``@jupyterlab/apputils-extension:workspaces`` plugin to a new dedicated
+  ``@jupyterlab/workspaces-extension`` package and can be explicitly required by
+  requesting the ``IWorkspaceCommands`` token. This token is by default provided
+  by the new ``@jupyterlab/workspaces-extension:commands`` plugin.
   The ``@jupyterlab/apputils-extension:workspaces`` plugin now only defines the
   workspace MIME type renderer used to open files with ``.jupyterlab-workspace``
   extension as JupyterLab workspaces.
