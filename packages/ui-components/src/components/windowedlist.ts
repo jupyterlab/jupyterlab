@@ -1654,7 +1654,7 @@ export class WindowedLayout extends PanelLayout {
 /**
  * Windowed list model interface
  */
-export interface ISimpleObservableList {
+export interface ISimpleObservableList<T = any> {
   get?: (index: number) => T;
   length: number;
   changed: ISignal<any, IObservableList.IChangedArgs<any>>;
@@ -1799,7 +1799,7 @@ export namespace WindowedList {
     /**
      * Items list to be rendered
      */
-    itemsList: ISimpleObservableList | null;
+    itemsList: ISimpleObservableList<T> | null;
 
     /**
      * Number of widgets to render in addition to those
