@@ -126,7 +126,16 @@ jobs:
     needs: python-linux-tests
     strategy:
       matrix:
-        group: [lint, integrity2, integrity3, release_test, docs, splice_source, examples, interop, nonode]
+        group:
+          - lint
+          - integrity2
+          - integrity3
+          # FIXME merge with releaser test - release_test
+          - docs
+          - splice_source
+          - examples
+          - interop
+          - nonode
         # FIXME This will be used by the base setup action
         # apply for other python version: group: [integrity, usage, usage2, python]
         # python-version: ["3.8", "3.11"]
@@ -397,6 +406,7 @@ jobs:
         run: pytest -vv || pytest -vv --lf
 
   make_sdist:
+    # FIXME drop this and use the sdist from the releaser check
     name: Make SDist
     needs: test_minimum_versions
     runs-on: ubuntu-latest
