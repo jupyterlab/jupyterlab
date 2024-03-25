@@ -143,9 +143,9 @@ export interface INotebookTracker extends IWidgetTracker<NotebookPanel> {
  * Notebook cell executor namespace
  */
 export namespace NotebookCellExecutor {
-  /**  
-   * Execution options for notebook cell executor.  
-   */  
+  /**
+   * Execution options for notebook cell executor.
+   */
   export interface IRunCellOptions {
     /**
      * Cell to execute
