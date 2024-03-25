@@ -19,6 +19,11 @@ import { PromiseDelegate } from '@lumino/coreutils';
 const OPEN_DIALOG_CLASS = 'jp-Open-Dialog';
 
 /**
+ * The class name added to (optional) label in the file dialog
+ */
+const OPEN_DIALOG_LABEL_CLASS = 'jp-Open-Dialog-label';
+
+/**
  * Namespace for file dialog
  */
 export namespace FileDialog {
@@ -49,6 +54,11 @@ export namespace FileDialog {
      * Default path to open
      */
     defaultPath?: string;
+
+    /**
+     * Text to display above the file browser.
+     */
+    label?: string;
   }
 
   /**
@@ -85,7 +95,8 @@ export namespace FileDialog {
       options.manager,
       options.filter,
       translator,
-      options.defaultPath
+      options.defaultPath,
+      options.label
     );
     const dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
       title: options.title,
@@ -141,6 +152,7 @@ class OpenDialog
     filter?: (value: Contents.IModel) => Partial<IScore> | null,
     translator?: ITranslator,
     defaultPath?: string,
+    label?: string,
     filterDirectories?: boolean
   ) {
     super();
@@ -191,6 +203,12 @@ class OpenDialog
 
         // Build the sub widgets
         const layout = new PanelLayout();
+        if (label) {
+          const labelWidget = new Widget();
+          labelWidget.addClass(OPEN_DIALOG_LABEL_CLASS);
+          labelWidget.node.textContent = label;
+          layout.addWidget(labelWidget);
+        }
         layout.addWidget(this._browser);
 
         /**

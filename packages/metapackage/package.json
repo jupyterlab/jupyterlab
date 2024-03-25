@@ -130,7 +130,9 @@
     "@jupyterlab/translation-extension": "^4.2.0-alpha.1",
     "@jupyterlab/ui-components": "^4.2.0-alpha.1",
     "@jupyterlab/ui-components-extension": "^4.2.0-alpha.1",
-    "@jupyterlab/vega5-extension": "^4.2.0-alpha.1"
+    "@jupyterlab/vega5-extension": "^4.2.0-alpha.1",
+    "@jupyterlab/workspaces": "^4.2.0-alpha.1",
+    "@jupyterlab/workspaces-extension": "^4.2.0-alpha.1"
   },
   "devDependencies": {
     "@jupyterlab/testing": "^4.2.0-alpha.1",

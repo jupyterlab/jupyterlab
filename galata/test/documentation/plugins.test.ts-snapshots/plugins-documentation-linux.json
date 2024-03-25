@@ -41,7 +41,7 @@
   "@jupyterlab/apputils-extension:toggle-header": "Adds a command to display the main area widget content header.",
   "@jupyterlab/apputils-extension:toolbar-registry": "Provides toolbar items registry.",
   "@jupyterlab/apputils-extension:utilityCommands": "Adds meta commands to run set of other commands.",
-  "@jupyterlab/apputils-extension:workspaces": "Add workspace file type and commands.",
+  "@jupyterlab/apputils-extension:workspaces": "Add workspace file type.",
   "@jupyterlab/cell-toolbar-extension:plugin": "Add the cells toolbar.",
   "@jupyterlab/celltags-extension:plugin": "Adds the cell tags editor.",
   "@jupyterlab/codemirror-extension:languages": "Provides the CodeMirror languages registry.",
@@ -174,5 +174,9 @@
   "@jupyterlab/translation:translator": "Provides the application translation object.",
   "@jupyterlab/translation-extension:plugin": "Adds translation commands and settings.",
   "@jupyterlab/ui-components-extension:labicon-manager": "Provides the icon manager.",
-  "@jupyterlab/ui-components-extension:form-renderer-registry": "Provides the settings form renderer registry."
+  "@jupyterlab/ui-components-extension:form-renderer-registry": "Provides the settings form renderer registry.",
+  "@jupyterlab/workspaces-extension:model": "Provides a model for available workspaces.",
+  "@jupyterlab/workspaces:commands": "Add workspace commands.",
+  "@jupyterlab/workspaces-extension:sidebar": "Populates running sidebar with workspaces.",
+  "@jupyterlab/workspaces-extension:menu": "Populates \"File\" main menu with Workspaces submenu."
 }
