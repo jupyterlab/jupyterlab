@@ -7,7 +7,7 @@ import * as baseConfig from '@jupyterlab/galata/lib/playwright-config';
 export default defineConfig({
   ...baseConfig,
   outputDir: process.env.CI
-    ? `${process.env.DOCKER_VOLUME}pw-test-results`
+    ? `${process.env.DOCKER_VOLUME ?? ''}pw-test-results`
     : undefined,
   projects: [
     {
@@ -42,12 +42,15 @@ export default defineConfig({
   ],
   // Switch to 'always' to keep raw assets for all tests
   preserveOutput: 'failures-only', // Breaks HTML report if use.video == 'on'
-  reporter: [
-    [process.env.CI ? 'github' : 'list'],
-    process.env.CI
-      ? ['blob', { outputDir: `${process.env.DOCKER_VOLUME}pw-blob-report` }]
-      : ['html', { open: 'on-failure' }]
-  ],
+  reporter: process.env.CI
+    ? [
+        ['github'],
+        [
+          'blob',
+          { outputDir: `${process.env.DOCKER_VOLUME ?? ''}pw-blob-report` }
+        ]
+      ]
+    : [['list'], ['html', { open: 'on-failure' }]],
   // Try one retry as some tests are flaky
   retries: process.env.CI ? 1 : 0
 });
