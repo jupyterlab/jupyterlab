@@ -8,6 +8,8 @@ import { ShortcutObject, TakenByObject } from './ShortcutInput';
 import { ShortcutItem } from './ShortcutItem';
 import { IShortcutUIexternal } from './TopNav';
 
+const ARROW_KEYS = ['ArrowUp', 'ArrowDown', 'ArrowRight'];
+
 const TOPNAV_HEIGHT: number = 115;
 
 /** Props for ShortcutList component */
@@ -23,10 +25,86 @@ export interface IShortcutListProps {
   height: number;
   contextMenu: Function;
   external: IShortcutUIexternal;
+  id?: string;
 }
 
 /** React component for list of shortcuts */
 export class ShortcutList extends React.Component<IShortcutListProps> {
+  /**
+   * Handle key down for row navigation
+   */
+  handleRowKeyDown = (event: React.KeyboardEvent): void => {
+    if (!ARROW_KEYS.includes(event.key)) {
+      return;
+    }
+
+    let shortcutList;
+
+    if (this.props.id) {
+      shortcutList = document.getElementById(this.props.id) as HTMLElement;
+    }
+
+    const focusable: Element[] = [];
+
+    if (shortcutList) {
+      // Get focusable children within the shortcut list
+      Array.from(shortcutList.children).forEach(child => {
+        focusable.push(child);
+      });
+      // If focusable contains only one element, nothing to do.
+      if (focusable.length <= 1) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    let activeElement = document.activeElement as HTMLElement;
+    let currentNode = focusable.indexOf(activeElement);
+    let activeNode = focusable[currentNode] as HTMLElement;
+    let nextNode = focusable[currentNode + 1] as HTMLElement;
+    let previousNode = focusable[currentNode - 1] as HTMLElement;
+    let evTarget = event.target as HTMLElement;
+
+    if (event.key === 'ArrowDown' && evTarget.tagName !== 'BUTTON') {
+      let nxtNode = nextNode;
+      if (nxtNode) {
+        nxtNode.setAttribute('tabindex', '0');
+        activeNode.setAttribute('tabindex', '-1');
+        nxtNode.focus();
+        currentNode += 1;
+      }
+    } else if (event.key === 'ArrowUp' && evTarget.tagName !== 'BUTTON') {
+      let prvNode = previousNode;
+      let activeNode = focusable[currentNode] as HTMLElement;
+      if (prvNode && currentNode >= 0) {
+        prvNode.setAttribute('tabindex', '0');
+        activeNode.setAttribute('tabindex', '-1');
+        prvNode.focus();
+        currentNode -= 1;
+      }
+    } else if (event.key === 'ArrowRight') {
+      const focusedElement = document.activeElement;
+
+      // Create a list of all focusable elements in the focused shortcuts row.
+      if (focusedElement?.className === 'jp-Shortcuts-Row') {
+        const elements = Array.from(focusedElement.querySelectorAll('button'));
+
+        const focusable: Element[] = [...elements];
+
+        // If the row contains elements, set focus to next element.
+        if (focusable.length >= 1) {
+          (focusable[0] as HTMLButtonElement).focus();
+
+          // If the row contains no elements, nothing to do.
+        } else {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    }
+  };
+
   render(): JSX.Element {
     return (
       <div
@@ -36,10 +114,11 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
         }}
         id="shortcutListContainer"
       >
-        <div className="jp-Shortcuts-ShortcutList">
-          {this.props.shortcuts.map((shortcut: ShortcutObject) => {
+        <div className="jp-Shortcuts-ShortcutList" id={this.props.id}>
+          {this.props.shortcuts.map((shortcut: ShortcutObject, index) => {
             return (
               <ShortcutItem
+                tabIndex={index === 0 ? 0 : -1}
                 key={shortcut.commandName + '_' + shortcut.selector}
                 resetShortcut={this.props.resetShortcut}
                 shortcut={shortcut}
@@ -51,6 +130,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
                 clearConflicts={this.props.clearConflicts}
                 contextMenu={this.props.contextMenu}
                 external={this.props.external}
+                handleRowKeyDown={this.handleRowKeyDown}
               />
             );
           })}

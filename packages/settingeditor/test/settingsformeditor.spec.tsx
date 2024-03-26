@@ -94,6 +94,7 @@ describe('@jupyterlab/settingeditor', () => {
           keyD: { type: 'string', default: 'D' }
         }
       };
+
       connector.schemas[id] = schema;
       settings = (await registry.load(id)) as Settings;
 
@@ -114,7 +115,10 @@ describe('@jupyterlab/settingeditor', () => {
       // Then
       const instance = component.root;
       const form = instance.findByType(FormComponent);
-      expect(form.props.formData).toEqual({ keyA: 'A', keyC: 'C' });
+      expect(form.props.formData).toEqual({
+        keyA: 'A',
+        keyC: 'C'
+      });
       expect(Object.keys(form.props.schema.properties)).toEqual(
         Object.keys(form.props.formData)
       );
