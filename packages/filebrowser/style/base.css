@@ -140,11 +140,11 @@
 }
 
 .jp-DirListing-headerItem.jp-id-name {
-  flex: 1 0 84px;
+  flex: 1 1 126px;
 }
 
 .jp-DirListing-headerItem.jp-id-modified {
-  flex: 0 0 112px;
+  flex: 1 0 70px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
 }
@@ -272,7 +272,7 @@
 }
 
 .jp-DirListing-itemText {
-  flex: 1 0 64px;
+  flex: 1 1 106px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -296,9 +296,65 @@
   outline: 0;
 }
 
+/* This file uses container queries, which are supported by all the
+ * browsers that JupyterLab works with, but which stylelint cannot
+ * validate.
+ */
+
 .jp-DirListing-itemModified {
-  flex: 0 0 125px;
+  flex: 1 0 83px;
   text-align: right;
+  /* stylelint-disable */
+  container-type: inline-size;
+  /* stylelint-enable */
+}
+
+/* stylelint-disable */
+@container (width < 90px) {
+  /* stylelint-enable */
+  .jp-DirListing-itemModified-narrow {
+    display: block;
+  }
+
+  .jp-DirListing-itemModified-short {
+    display: none;
+  }
+
+  .jp-DirListing-itemModified-long {
+    display: none;
+  }
+}
+
+/* stylelint-disable */
+@container (width >= 90px) and (width <= 110px) {
+  /* stylelint-enable */
+  .jp-DirListing-itemModified-narrow {
+    display: none;
+  }
+
+  .jp-DirListing-itemModified-short {
+    display: block;
+  }
+
+  .jp-DirListing-itemModified-long {
+    display: none;
+  }
+}
+
+/* stylelint-disable */
+@container (width > 110px) {
+  /* stylelint-enable */
+  .jp-DirListing-itemModified-narrow {
+    display: none;
+  }
+
+  .jp-DirListing-itemModified-short {
+    display: none;
+  }
+
+  .jp-DirListing-itemModified-long {
+    display: block;
+  }
 }
 
 .jp-DirListing-itemFileSize {

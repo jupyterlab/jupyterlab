@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { expect, galata, test } from '@jupyterlab/galata';
+
 import { Locator } from '@playwright/test';
 
 const sidebarIds: galata.SidebarTabId[] = [
@@ -11,10 +12,6 @@ const sidebarIds: galata.SidebarTabId[] = [
   'table-of-contents',
   'extensionmanager.main-view'
 ];
-
-test.use({
-  mockState: true
-});
 
 /**
  * Add provided text as label on first tab in given tabbar.
@@ -29,6 +26,10 @@ async function mockLabelOnFirstTab(tabbar: Locator, text: string) {
       node.innerText = text;
     }, text);
 }
+
+test.use({
+  tmpPath: 'test-sidebars'
+});
 
 test.describe('Sidebars', () => {
   sidebarIds.forEach(sidebarId => {
@@ -65,7 +66,6 @@ test.describe('Sidebars', () => {
     await page.notebook.createNew('notebook.ipynb');
 
     const unusedRules = await page.style.findUnusedStyleRules({
-      page,
       fragments: ['jp-DirListing', 'jp-FileBrowser'],
       exclude: [
         // active during renaming
