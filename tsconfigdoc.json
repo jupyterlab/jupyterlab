@@ -2,6 +2,11 @@
   "$schema": "http://json.schemastore.org/tsconfig",
   "extends": "./tsconfigbase",
   "exclude": [
+    "dev_mode",
+    "docs",
+    "examples",
+    "galata",
+    "jupyterlab",
     "**/test/**",
     "**/testutils/**",
     "packages/testing/**"
