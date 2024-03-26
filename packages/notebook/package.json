@@ -65,6 +65,7 @@
     "@lumino/domutils": "^2.0.1",
     "@lumino/dragdrop": "^2.1.4",
     "@lumino/messaging": "^2.0.1",
+    "@lumino/polling": "^2.1.2",
     "@lumino/properties": "^2.0.1",
     "@lumino/signaling": "^2.1.2",
     "@lumino/virtualdom": "^2.0.1",

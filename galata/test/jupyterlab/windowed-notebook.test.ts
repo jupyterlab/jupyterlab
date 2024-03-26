@@ -514,7 +514,7 @@ test('should navigate to a search hit in a out-of-viewport cell', async ({
   await page.getByText('1/2').waitFor();
   await expect
     .soft(page.locator('.jp-Cell[data-windowed-list-index="11"]'))
-    .toHaveCount(0);
+    .not.toBeVisible();
 
   await page.getByRole('button', { name: 'Next Match (Ctrl+G)' }).click();
 
@@ -527,7 +527,7 @@ test('should navigate to a search hit in a out-of-viewport cell', async ({
   await page.getByText('1/1').waitFor();
   await expect
     .soft(page.locator('.jp-Cell[data-windowed-list-index="18"]'))
-    .toHaveCount(0);
+    .not.toBeVisible();
 
   await page
     .getByRole('button', { name: 'Previous Match (Ctrl+Shift+G)' })
