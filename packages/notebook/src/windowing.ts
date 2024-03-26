@@ -53,7 +53,6 @@ export class NotebookViewModel extends WindowedListModel {
     const model = this.cells[index].model;
     const height = this.cellsEstimatedHeight.get(model.id);
     if (typeof height === 'number') {
-      console.log(`Estimated size for ${index} (${model.id}): ${height}`);
       return height;
     }
 
