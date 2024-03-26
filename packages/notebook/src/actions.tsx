@@ -27,8 +27,10 @@ import { every, findIndex } from '@lumino/algorithm';
 import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { ISignal, Signal } from '@lumino/signaling';
 import * as React from 'react';
+import { runCell as defaultRunCell } from './cellexecutor';
 import { Notebook, StaticNotebook } from './widget';
 import { NotebookWindowedLayout } from './windowing';
+import { INotebookCellExecutor } from './tokens';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -2228,9 +2230,24 @@ export namespace NotebookActions {
 }
 
 /**
+ * Set the notebook cell executor and the related signals.
+ */
+export function setCellExecutor(executor: INotebookCellExecutor): void {
+  if (Private.executor) {
+    throw new Error('Cell executor can only be set once.');
+  }
+  Private.executor = executor;
+}
+
+/**
  * A namespace for private data.
  */
 namespace Private {
+  /**
+   * Notebook cell executor
+   */
+  export let executor: INotebookCellExecutor;
+
   /**
    * A signal that emits whenever a cell completes execution.
    */
@@ -2484,172 +2501,26 @@ namespace Private {
     sessionDialogs?: ISessionContextDialogs,
     translator?: ITranslator
   ): Promise<boolean> {
-    translator = translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
-    switch (cell.model.type) {
-      case 'markdown':
-        (cell as MarkdownCell).rendered = true;
-        cell.inputHidden = false;
-        executed.emit({ notebook, cell, success: true });
-        break;
-      case 'code':
-        if (sessionContext) {
-          if (sessionContext.isTerminating) {
-            await showDialog({
-              title: trans.__('Kernel Terminating'),
-              body: trans.__(
-                'The kernel for %1 appears to be terminating. You can not run any cell for now.',
-                sessionContext.session?.path
-              ),
-              buttons: [Dialog.okButton()]
-            });
-            break;
-          }
-          if (sessionContext.pendingInput) {
-            await showDialog({
-              title: trans.__('Cell not executed due to pending input'),
-              body: trans.__(
-                'The cell has not been executed to avoid kernel deadlock as there is another pending input! Submit your pending input and try again.'
-              ),
-              buttons: [Dialog.okButton()]
-            });
-            return false;
-          }
-          if (sessionContext.hasNoKernel) {
-            const shouldSelect = await sessionContext.startKernel();
-            if (shouldSelect && sessionDialogs) {
-              await sessionDialogs.selectKernel(sessionContext);
-            }
-          }
-
-          if (sessionContext.hasNoKernel) {
-            cell.model.sharedModel.transact(() => {
-              (cell.model as ICodeCellModel).clearExecution();
-            });
-            return true;
-          }
-
-          const deletedCells = notebook.model?.deletedCells ?? [];
-          executionScheduled.emit({ notebook, cell });
-
-          let ran = false;
-          try {
-            const reply = await CodeCell.execute(
-              cell as CodeCell,
-              sessionContext,
-              {
-                deletedCells,
-                recordTiming: notebook.notebookConfig.recordTiming
-              }
-            );
-            deletedCells.splice(0, deletedCells.length);
-
-            ran = (() => {
-              if (cell.isDisposed) {
-                return false;
-              }
-
-              if (!reply) {
-                return true;
-              }
-              if (reply.content.status === 'ok') {
-                const content = reply.content;
-
-                if (content.payload && content.payload.length) {
-                  handlePayload(content, notebook, cell);
-                }
-
-                return true;
-              } else {
-                throw new KernelError(reply.content);
-              }
-            })();
-          } catch (reason) {
-            if (cell.isDisposed || reason.message.startsWith('Canceled')) {
-              ran = false;
-            } else {
-              executed.emit({
-                notebook,
-                cell,
-                success: false,
-                error: reason
-              });
-              throw reason;
-            }
-          }
-
-          if (ran) {
-            executed.emit({ notebook, cell, success: true });
-          }
-
-          return ran;
-        }
-        cell.model.sharedModel.transact(() => {
-          (cell.model as ICodeCellModel).clearExecution();
-        }, false);
-        break;
-      default:
-        break;
+    if (!executor) {
+      console.warn(
+        'Requesting cell execution without any cell executor defined. Falling back to default execution.'
+      );
     }
-
-    return Promise.resolve(true);
-  }
-
-  /**
-   * Handle payloads from an execute reply.
-   *
-   * #### Notes
-   * Payloads are deprecated and there are no official interfaces for them in
-   * the kernel type definitions.
-   * See [Payloads (DEPRECATED)](https://jupyter-client.readthedocs.io/en/latest/messaging.html#payloads-deprecated).
-   */
-  function handlePayload(
-    content: KernelMessage.IExecuteReply,
-    notebook: Notebook,
-    cell: Cell
-  ) {
-    const setNextInput = content.payload?.filter(i => {
-      return (i as any).source === 'set_next_input';
-    })[0];
-
-    if (!setNextInput) {
-      return;
-    }
-
-    const text = setNextInput.text as string;
-    const replace = setNextInput.replace;
-
-    if (replace) {
-      cell.model.sharedModel.setSource(text);
-      return;
-    }
-
-    // Create a new code cell and add as the next cell.
-    const notebookModel = notebook.model!.sharedModel;
-    const cells = notebook.model!.cells;
-    const index = findIndex(cells, model => model === cell.model);
-
-    // While this cell has no outputs and could be trusted following the letter
-    // of Jupyter trust model, its content comes from kernel and hence is not
-    // necessarily controlled by the user; if we set it as trusted, a user
-    // executing cells in succession could end up with unwanted trusted output.
-    if (index === -1) {
-      notebookModel.insertCell(notebookModel.cells.length, {
-        cell_type: 'code',
-        source: text,
-        metadata: {
-          trusted: false
-        }
-      });
-    } else {
-      notebookModel.insertCell(index + 1, {
-        cell_type: 'code',
-        source: text,
-        metadata: {
-          trusted: false
-        }
-      });
-    }
+    const options = {
+      cell,
+      notebook: notebook.model!,
+      notebookConfig: notebook.notebookConfig,
+      onCellExecuted: args => {
+        executed.emit({ notebook, ...args });
+      },
+      onCellExecutionScheduled: args => {
+        executionScheduled.emit({ notebook, ...args });
+      },
+      sessionContext,
+      sessionDialogs,
+      translator
+    } satisfies INotebookCellExecutor.IRunCellOptions;
+    return executor ? executor.runCell(options) : defaultRunCell(options);
   }
 
   /**
