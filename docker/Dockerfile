@@ -3,25 +3,37 @@
 
 # Image must be ubuntu or debian based
 ARG BASE_TAG=1.5.5-jammy
-
+# Path of shared assets from the prepare step
 ARG PREPARE_SHARE_PATH=/tmp/share
 
+#
+# Step 1: Create an archive with only package.json files and yarn.lock
+#
+# > This is useful to populate the Yarn cache
+#
 FROM bash:5-alpine3.19 as prepare
 
 ARG PREPARE_SHARE_PATH
 
+# Create the archive for setting up the Yarn cache
 RUN --mount=type=bind,target=/tmp/jupyterlab \
     mkdir -p ${PREPARE_SHARE_PATH} \
     && /usr/local/bin/bash -c "shopt -s globstar; tar -cvf ${PREPARE_SHARE_PATH}/packages.tar /tmp/jupyterlab/**/package.json /tmp/jupyterlab/yarn.lock"
 
+#
+# Step 2: Set up the development environment
+#
+# > This container will be used by the devcontainer feature in VS Code or GitHub codespace
+#
 FROM --platform=linux/amd64 mambaorg/micromamba:${BASE_TAG} as base
 
-ARG PREPARE_SHARE_PATH
-
+# Base dev tools version
 ARG NODE_VERSION=20.1
 ARG PYTHON_VERSION=3.12
 ARG YARN_VERSION=3.5
+
 # Create new user
+# > using ARGs to align uid and gid with host OS user
 ARG NEW_MAMBA_USER_ID=57440
 ARG NEW_MAMBA_USER_GID=57440
 
@@ -47,7 +59,7 @@ RUN --mount=type=cache,target=/jupyterlab/conda-cache,uid=${NEW_MAMBA_USER_ID},g
 
 USER root
 
-# Install dependencies for Playwright - must be root to install packages with apt
+# Install OS dependencies for Playwright - must be root to install packages with apt
 RUN --mount=type=cache,target=/var/cache/apt \
     export WORKDIR=/ms-playwright && mkdir -p ${WORKDIR} && cd ${WORKDIR} \
     && micromamba run npx playwright install-deps \
@@ -69,19 +81,11 @@ RUN --mount=type=cache,target=/jupyterlab/pip-cache,uid=${NEW_MAMBA_USER_ID},gid
     PIP_CACHE_DIR="/jupyterlab/pip-cache" SKIP_JUPYTER_BUILDER=1 micromamba run python -m pip install -e  ".[dev,docs,test]" \
     && cd / && rm -rf /home/$MAMBA_USER/jupyterlab_cache
 
-ENV YARN_CACHE_FOLDER=/home/$MAMBA_USER/.caches/yarn YARN_ENABLE_GLOBAL_CACHE=false YARN_ENABLE_MIRROR=false
-
-# Initialize the yarn cache
-RUN --mount=type=bind,from=prepare,source=${PREPARE_SHARE_PATH},target=${PREPARE_SHARE_PATH} \
-    export WORKDIR=/tmp/packages \
-    && mkdir -p ${WORKDIR} \
-    && tar -xvf ${PREPARE_SHARE_PATH}/packages.tar -C ${WORKDIR} --strip-components=2 \
-    && cd ${WORKDIR} \
-    && micromamba run yarn install --mode skip-build \
-    && cd / && rm -rf ${WORKDIR} && export WORKDIR=
-
 EXPOSE 8888
 
+#
+# Step 3a: Development environment for local docker
+#
 FROM base as dev
 
 COPY --chown=$MAMBA_USER:$MAMBA_USER . .
@@ -95,7 +99,23 @@ RUN micromamba install -n base -c conda-forge rsync -y \
     && micromamba run rsync -ar /home/$MAMBA_USER/jupyterlab_cache/. /home/$MAMBA_USER/jupyterlab \
     && micromamba run python -m pip install -e  "."
 
+#
+# Step 3b: Development environment for CI testing
+#
 FROM base as build
+ARG PREPARE_SHARE_PATH
+
+ENV YARN_CACHE_FOLDER=/home/$MAMBA_USER/.caches/yarn YARN_ENABLE_GLOBAL_CACHE=false YARN_ENABLE_MIRROR=false
+
+RUN --mount=type=bind,from=prepare,source=${PREPARE_SHARE_PATH},target=${PREPARE_SHARE_PATH} \
+    export WORKDIR=/tmp/packages \
+    && mkdir -p ${WORKDIR} \
+    && tar -xvf ${PREPARE_SHARE_PATH}/packages.tar -C ${WORKDIR} --strip-components=2 \
+    && cd ${WORKDIR} \
+    && micromamba run yarn install --mode skip-build \
+    && micromamba run npx playwright install chromium \
+    && cd / && rm -rf ${WORKDIR} && export WORKDIR=
+
 
 RUN micromamba run git config --global user.name foo \
     && micromamba run git config --global user.email foo@bar.com
