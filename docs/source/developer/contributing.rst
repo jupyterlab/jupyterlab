@@ -277,13 +277,17 @@ Contributing from within the browser
 Contributing to JupyterLab codebase is also possible without setting up
 a local environment, directly from the Web browser:
 
--  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
-   however it is not actively maintained,
+-  GitHub's
+   `codespace <https://docs.github.com/en/codespaces/developing-in-a-codespace/creating-a-codespace-for-a-repository>`__
+   is available (free account have
+   `limited monthly resources <https://docs.github.com/en/billing/managing-billing-for-github-codespaces/about-billing-for-github-codespaces#monthly-included-storage-and-core-hours-for-personal-accounts>`__).
 -  GitHub's
    `built-in editor <https://docs.github.com/en/repositories/working-with-files/managing-files/editing-files>`__
    is suitable for contributing very small fixes,
 -  more advanced `github.dev <https://docs.github.com/en/codespaces/the-githubdev-web-based-editor>`__
    editor can be accessed by pressing the dot (``.``) key while in the JupyterLab GitHub repository,
+-  `Gitpod <https://www.gitpod.io/>`__ integration is enabled,
+   however it is not actively maintained,
 -  `jupyterlab-playground <https://github.com/jupyterlab/jupyterlab-plugin-playground>`__,
    allows to prototype JupyterLab extensions from within JupyterLab and
    can be run without installation in the browser using Binder.
@@ -300,8 +304,15 @@ about 7 minutes again.
 
 Setting up a local development environment
 ------------------------------------------
+
+.. note::
+
+   Look at the :ref:`automated dev environment <automatic_local_dev_env>` section,
+   for some automation ways to set up a local development environment.
+
 This section explains how to set up a local development environment. We assume you use GNU/Linux,
-macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__ and then using the Anaconda command prompt for all installation steps.
+macOS, or Windows Subsystem for Linux. If using Windows, we recommend installing `Anaconda for windows <https://www.anaconda.com/download>`__
+and then using the Anaconda command prompt for all installation steps.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -350,14 +361,85 @@ With Homebrew:
 
    brew install pkg-config cairo pango libpng jpeg giflib librsvg
 
+.. _automatic_local_dev_env:
+
 Using automation to set up a local development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-While there is a lot to learn by following the steps above, they can be automated to save time. This section shows how
-to do that using Vagrant as an example.
-
+While there is a lot to learn by following the steps above, they can be automated to save time.
 The main advantages of using automation are: reduced time to get the environment up-and-running, reduced time to
 re-build the environment, better standardisation ("baseline", reproducible environments).
+This section shows how to do that using VS Code dev containers, Docker and Vagrant.
+
+**Setup for VS Code**
+"""""""""""""""""""""
+
+To start a local development environment for JupyterLab using VS Code dev containers,
+you need to:
+
+1. Install the VS Code `Dev Containers extension <https://code.visualstudio.com/docs/devcontainers/tutorial>`__.
+
+2. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab/fork>`__.
+
+3. Clone your fork locally:
+
+.. code:: bash
+
+   git clone https://github.com/<your-github-username>/jupyterlab.git
+
+4. Open the local clone with VS Code.
+
+5. Open the repository in a container.
+   VS Code should prompt you with a pop-up to do so. In case it does not, you can click on the
+   icon ``><`` on the bottom left. Then choose *Reopen in container*.
+
+.. note::
+
+   It will take quite some times the first time.
+
+**Setup using Docker**
+""""""""""""""""""""""
+
+To start a JupyterLab development container in a UNIX system with docker installed:
+
+1. Fork the JupyterLab `repository <https://github.com/jupyterlab/jupyterlab/fork>`__.
+
+2. Start the container:
+
+.. code:: bash
+
+   git clone https://github.com/<your-github-username>/jupyterlab.git
+   cd jupyterlab
+   bash docker/start.sh
+
+The above command will build the docker image if it does not exist, then start the container with JupyterLab running in watch mode. The port 8888 is exposed and the current JupyterLab repo is mounted into the container. Then you can start developing JupyterLab with your favorite IDE, JupyterLab will be rebuilt on the fly.
+
+Other available commands:
+
+.. code:: bash
+
+   bash docker/start.sh dev 4567 # Start JupyterLab dev container at port 4567
+   bash docker/start.sh stop  # Stop the running container
+   bash docker/start.sh clean  # Remove the docker image
+   bash docker/start.sh build  # Rebuild the docker image
+
+   # Log into the container's shell with the JupyterLab environment activated.
+   # It's useful to run the tests or install dependencies.
+   bash docker/start.sh shell
+
+To add TypeScript dependencies to the project, you need to log into the container's shell, install the dependencies to update the package.json and yarn.lock files, and then rebuild the docker image.
+
+.. code:: bash
+
+   bash docker/start.sh shell
+   # In the container shell
+   jlpm add ...
+   exit
+   # Back to host shell
+   bash docker/start.sh build
+
+**Setup using Vagrant**
+"""""""""""""""""""""""
 
 A practical example can be found `there <https://github.com/markgreene74/jupyterlab-local-dev-with-vagrant>`_ and
 includes a ``Vagrantfile``, the bootstrap files and additional documentation.
