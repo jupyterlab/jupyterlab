@@ -470,7 +470,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       }
     }
 
-    // TODO: markdown undrendering/highlighting sequence is likely incorrect
+    // TODO: markdown unrendering/highlighting sequence is likely incorrect
     // Force highlighting the first hit in the unrendered cell
     await unrenderMarkdownCell(true);
     return replaceOccurred;
