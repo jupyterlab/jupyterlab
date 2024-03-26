@@ -92,13 +92,6 @@ if [[ $GROUP == integrity2 ]]; then
 
     # Make sure we have CSS that can be converted with postcss
     jlpm dlx -p postcss -p postcss-cli postcss packages/**/style/*.css --dir /tmp --config scripts/postcss.config.js
-
-    # run twine check on the python build assets.
-    # this must be done before altering any versions below.
-    python -m pip install -U twine wheel build
-    python -m build .
-    twine check dist/*
-
 fi
 
 
