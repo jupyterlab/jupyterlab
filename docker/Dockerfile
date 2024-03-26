@@ -4,11 +4,23 @@
 # Image must be ubuntu or debian based
 ARG BASE_TAG=1.5.5-jammy
 
+ARG PREPARE_SHARE_PATH=/tmp/share
+
+FROM bash:5-alpine3.19 as prepare
+
+ARG PREPARE_SHARE_PATH
+
+RUN --mount=type=bind,target=/tmp/jupyterlab \
+    mkdir -p ${PREPARE_SHARE_PATH} \
+    && /usr/local/bin/bash -c "shopt -s globstar; tar -cvf ${PREPARE_SHARE_PATH}/packages.tar /tmp/jupyterlab/**/package.json /tmp/jupyterlab/yarn.lock"
+
 FROM --platform=linux/amd64 mambaorg/micromamba:${BASE_TAG} as base
+
+ARG PREPARE_SHARE_PATH
 
 ARG NODE_VERSION=20.1
 ARG PYTHON_VERSION=3
-ARG YARN_VERSION=3
+ARG YARN_VERSION=3.5
 # Create new user
 ARG NEW_MAMBA_USER_ID=57440
 ARG NEW_MAMBA_USER_GID=57440
@@ -36,13 +48,12 @@ RUN --mount=type=cache,target=/jupyterlab/conda-cache,uid=${NEW_MAMBA_USER_ID},g
 USER root
 
 # Install dependencies for Playwright - must be root to install packages with apt
-RUN mkdir /ms-playwright && cd /ms-playwright \
-    && micromamba run npm init -y \
-    && micromamba run npm install playwright \
+RUN --mount=type=cache,target=/var/cache/apt \
+    export WORKDIR=/ms-playwright && mkdir -p ${WORKDIR} && cd ${WORKDIR} \
     && micromamba run npx playwright install-deps \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && cd / && rm -rf /ms-playwright \
+    && cd / && rm -rf ${WORKDIR} \
     && micromamba run npm cache clean --force
 
 USER $MAMBA_USER
@@ -56,8 +67,18 @@ COPY --chown=$MAMBA_USER:$MAMBA_USER jupyterlab/_version.py ./jupyterlab/_versio
 # Install all python dependencies only with pip to maximize using its cache
 RUN --mount=type=cache,target=/jupyterlab/pip-cache,uid=${NEW_MAMBA_USER_ID},gid=${NEW_MAMBA_USER_GID} \
     PIP_CACHE_DIR="/jupyterlab/pip-cache" SKIP_JUPYTER_BUILDER=1 micromamba run python -m pip install -e  ".[dev,docs,test]" \
-    && cd / \
-    && rm -rf /home/$MAMBA_USER/jupyterlab_cache
+    && cd / && rm -rf /home/$MAMBA_USER/jupyterlab_cache
+
+ENV YARN_CACHE_FOLDER=/home/$MAMBA_USER/.caches/yarn YARN_ENABLE_GLOBAL_CACHE=false YARN_ENABLE_MIRROR=false
+
+# Initialize the yarn cache
+RUN --mount=type=bind,from=prepare,source=${PREPARE_SHARE_PATH},target=${PREPARE_SHARE_PATH} \
+    export WORKDIR=/tmp/packages \
+    && mkdir -p ${WORKDIR} \
+    && tar -xvf ${PREPARE_SHARE_PATH}/packages.tar -C ${WORKDIR} --strip-components=2 \
+    && cd ${WORKDIR} \
+    && micromamba run yarn install --mode skip-build \
+    && cd / && rm -rf ${WORKDIR} && export WORKDIR=
 
 EXPOSE 8888
 
@@ -83,11 +104,10 @@ WORKDIR /home/$MAMBA_USER/jupyterlab
 
 COPY --chown=$MAMBA_USER:$MAMBA_USER . .
 
-ENV YARN_CACHE_FOLDER=/home/$MAMBA_USER/.yarn/cache YARN_ENABLE_INLINE_BUILDS=1
+ENV YARN_ENABLE_INLINE_BUILDS=1
 
 # Build should work without yarn
-RUN --mount=type=cache,target=/jupyterlab/yarn-cache,uid=${NEW_MAMBA_USER_ID},gid=${NEW_MAMBA_USER_GID} \
-    micromamba remove -yn base yarn \
-    && YARN_CACHE_FOLDER=/jupyterlab/yarn-cache micromamba run python -m pip install -e  "."
+RUN micromamba remove -yn base yarn \
+    && micromamba run python -m pip install -e  "."
 
 RUN micromamba run python -c "from jupyterlab.commands import build_check; build_check()"
