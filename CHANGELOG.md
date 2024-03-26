@@ -21,7 +21,7 @@ Developers can now provide editor extensions, like themes and programming langua
 #### New extension manager
 
 Starting with JupyterLab 3, extensions can be installed via Python packages
-(or other providers of [prebuilt extensions](https://jupyterlab.readthedocs.io/en/stable/extension/extension_dev.html#prebuilt-extensions)).
+(or other providers of [prebuilt extensions](https://jupyterlab.readthedocs.io/en/4.0.x/extension/extension_dev.html#prebuilt-extensions)).
 
 In JupyterLab 4, building on this feature, the Extension Manager now includes extensions from [pypi.org](https://pypi.org/search/?c=Framework+%3A%3A+Jupyter+%3A%3A+JupyterLab).
 This removes the build step from installation of extension when using Extension Manager.
@@ -95,11 +95,49 @@ Here are the main tool updates that will benefit extension authors and developer
 
 We recommend using Node.js v18 or newer, because older versions will reach end of life in 2023 or earlier (see [Node release schedule](https://github.com/nodejs/release#release-schedule)).
 
-To ease code migration to JupyterLab 4, developers should review the [migration guide](https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
+To ease code migration to JupyterLab 4, developers should review the [migration guide](https://jupyterlab.readthedocs.io/en/4.0.x/extension/extension_migration.html). A few existing extensions have already been migrated and can be used as examples:
 - the [JupyterLab Extensions by Examples](https://github.com/jupyterlab/extension-examples/pull/232)
 - the [Jupyter MIME type renderers](https://github.com/jupyterlab/jupyter-renderers/pull/296)
 
 <!-- <START NEW CHANGELOG ENTRY> -->
+
+## 4.0.13
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.0.12...224ef42f2a0c7a155b30be81486b34725f4beb60))
+
+### Bugs fixed
+
+- Fix workspaces loading [#15842](https://github.com/jupyterlab/jupyterlab/pull/15842) ([@krassowski](https://github.com/krassowski))
+- Windows platforms, erratic pasting of text into Markdown field [#15794](https://github.com/jupyterlab/jupyterlab/pull/15794) ([@kiliansinger](https://github.com/kiliansinger))
+- Fix highlight sequencing when replacing text in code cells [#15803](https://github.com/jupyterlab/jupyterlab/pull/15803) ([@JasonWeill](https://github.com/JasonWeill))
+- Fix console cells not becoming read-only after execution [#15779](https://github.com/jupyterlab/jupyterlab/pull/15779) ([@krassowski](https://github.com/krassowski))
+- Fix completer auto-invoking on non-source changes [#15753](https://github.com/jupyterlab/jupyterlab/pull/15753) ([@krassowski](https://github.com/krassowski))
+- Fix outputs preservation on splitting cells [#15751](https://github.com/jupyterlab/jupyterlab/pull/15751) ([@krassowski](https://github.com/krassowski))
+- Fix scrollbars partially blocking code completion [#15736](https://github.com/jupyterlab/jupyterlab/pull/15736) ([@phil-zxx](https://github.com/phil-zxx))
+- Fix cell toolbar getting stuck when using collapse cell [#15732](https://github.com/jupyterlab/jupyterlab/pull/15732) ([@FoSuCloud](https://github.com/FoSuCloud))
+- Fix running kernels listing for kernels without icons [#15735](https://github.com/jupyterlab/jupyterlab/pull/15735) ([@paolocarinci](https://github.com/paolocarinci))
+- Fix `overrides.json` not working for shortcuts [#15716](https://github.com/jupyterlab/jupyterlab/pull/15716) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Reconfigure the 4.0.x branch (4.1.x is new stable) [#15849](https://github.com/jupyterlab/jupyterlab/pull/15849) ([@krassowski](https://github.com/krassowski))
+- Bump ip from 2.0.0 to 2.0.1 [#15831](https://github.com/jupyterlab/jupyterlab/pull/15831) ([@dependabot\[bot\]](https://github.com/apps/dependabot))
+- Bump the actions group with 3 updates [#15727](https://github.com/jupyterlab/jupyterlab/pull/15727) ([@dependabot\[bot\]](https://github.com/apps/dependabot))
+- Replace `ifaxity/wait-on-action` wrapper with direct `wait-on` use [#15721](https://github.com/jupyterlab/jupyterlab/pull/15721) ([@krassowski](https://github.com/krassowski))
+
+### Documentation improvements
+
+- Reconfigure the 4.0.x branch (4.1.x is new stable) [#15849](https://github.com/jupyterlab/jupyterlab/pull/15849) ([@krassowski](https://github.com/krassowski))
+- Remove SO links, add more recent issue to FAQ [#15811](https://github.com/jupyterlab/jupyterlab/pull/15811) ([@krassowski](https://github.com/krassowski))
+- Copy edits in LSP support [#15730](https://github.com/jupyterlab/jupyterlab/pull/15730) ([@JasonWeill](https://github.com/JasonWeill))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-01-30&to=2024-02-26&type=c))
+
+[@AllanChain](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAllanChain+updated%3A2024-01-30..2024-02-26&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2024-01-30..2024-02-26&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2024-01-30..2024-02-26&type=Issues) | [@ericsnekbytes](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aericsnekbytes+updated%3A2024-01-30..2024-02-26&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-01-30..2024-02-26&type=Issues) | [@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2024-01-30..2024-02-26&type=Issues) | [@g547315](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ag547315+updated%3A2024-01-30..2024-02-26&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-01-30..2024-02-26&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-01-30..2024-02-26&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-01-30..2024-02-26&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-01-30..2024-02-26&type=Issues) | [@kiliansinger](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akiliansinger+updated%3A2024-01-30..2024-02-26&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-01-30..2024-02-26&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-01-30..2024-02-26&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2024-01-30..2024-02-26&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-01-30..2024-02-26&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.12
 
@@ -127,8 +165,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-01-19&to=2024-01-30&type=c))
 
 [@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2024-01-19..2024-01-30&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-01-19..2024-01-30&type=Issues) | [@j264415](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aj264415+updated%3A2024-01-19..2024-01-30&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-01-19..2024-01-30&type=Issues) | [@jupyterlab-bot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-bot+updated%3A2024-01-19..2024-01-30&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-01-19..2024-01-30&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-01-19..2024-01-30&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-01-19..2024-01-30&type=Issues) | [@meeseeksmachine](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ameeseeksmachine+updated%3A2024-01-19..2024-01-30&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-01-19..2024-01-30&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.0.11
 
@@ -194,7 +230,7 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 - Don't show default value for objects in Settings Editor [#15380](https://github.com/jupyterlab/jupyterlab/pull/15380) ([@firai](https://github.com/firai))
 - Fix highlighting search in an out-of-viewport cell [#15376](https://github.com/jupyterlab/jupyterlab/pull/15376) ([@fcollonval](https://github.com/fcollonval))
 - Fix overreactive scrolling to next cell after `Shift + Enter` [#15288](https://github.com/jupyterlab/jupyterlab/pull/15288) ([@krassowski](https://github.com/krassowski))
-- Fix missing default property breaking codemirror `overrides.json` [#15346](https://github.com/jupyterlab/jupyterlab/pull/15346) ([@LJMP](https://github.com/LJMP))
+- Fix missing default property breaking codemirror `overrides.json` [#15346](https://github.com/jupyterlab/jupyterlab/pull/15346) ([@LJMP](https://github.com/e4e))
 - Fix update button in extension manager [#15331](https://github.com/jupyterlab/jupyterlab/pull/15331) ([@nbowditch-einblick](https://github.com/nbowditch-einblick))
 - Fix scrolling when dragging files in the file browser [#15318](https://github.com/jupyterlab/jupyterlab/pull/15318) ([@krassowski](https://github.com/krassowski))
 - Fix scrolling past long outputs in presence of un-rendered headings [#15356](https://github.com/jupyterlab/jupyterlab/pull/15356) ([@krassowski](https://github.com/krassowski))
@@ -575,9 +611,9 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 JupyterLab 4 is released! :tada:
 
-Check out the new features, improvements and bug fixes: https://jupyterlab.readthedocs.io/en/stable/getting_started/changelog.html#v4-0
+Check out the new features, improvements and bug fixes: https://jupyterlab.readthedocs.io/en/4.0.x/getting_started/changelog.html#v4-0
 
-For extension authors, there is a migration guide available to help you migrate your extensions to JupyterLab 4: https://jupyterlab.readthedocs.io/en/stable/extension/extension_migration.html#jupyterlab-3-x-to-4-x
+For extension authors, there is a migration guide available to help you migrate your extensions to JupyterLab 4: https://jupyterlab.readthedocs.io/en/4.0.x/extension/extension_migration.html#jupyterlab-3-x-to-4-x
 
 ______________________________________________________________________
 
@@ -2480,7 +2516,7 @@ No merged PRs
 
 ### Enhancements made
 
-- Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder)) - activation instructions: [see documentation](https://jupyterlab.readthedocs.io/en/stable/user/files.html#displaying-hidden-files)
+- Add a menu entry to show/hide hidden files in the filebrowser [#11206](https://github.com/jupyterlab/jupyterlab/pull/11206) ([@loichuder](https://github.com/loichuder)) - activation instructions: [see documentation](https://jupyterlab.readthedocs.io/en/4.0.x/user/files.html#displaying-hidden-files)
 - Restore Copy shareable link use of `shareUrl` [#11188](https://github.com/jupyterlab/jupyterlab/pull/11188) ([@fcollonval](https://github.com/fcollonval))
 - Add Galata in JupyterLab [#11179](https://github.com/jupyterlab/jupyterlab/pull/11179) ([@fcollonval](https://github.com/fcollonval))
 - Responsive Toolbar [#11178](https://github.com/jupyterlab/jupyterlab/pull/11178) ([@3coins](https://github.com/3coins))
@@ -2926,9 +2962,9 @@ No merged PRs
 - From JupyterLab 3.1, file documents and notebooks have collaborative
   editing using the [Yjs shared editing framework](https://github.com/yjs/yjs).
   Editors are not collaborative by default; to activate it, start JupyterLab
-  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/stable/user/rtc.html).
+  with the `--collaborative` flag. See full documentation on [collaboration](https://jupyterlab.readthedocs.io/en/4.0.x/user/rtc.html).
 - The undo/redo history in the notebook is now document-wide (tracking changes across all cells); the future verisions will enable restoring the previous behaviour of per-cell undo/redo.
-- Table of Contents recieved multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/stable/user/toc.html).
+- Table of Contents recieved multiple new features and settings described in the [user documentation](https://jupyterlab.readthedocs.io/en/4.0.x/user/toc.html).
 - The debugger recived many improvements, including basic support for evaluating code at a breakpoint, and for variable inspection.
 - The closing bracket is no longer automatically added by default; the old behaviour can be re-enabled from the menu bar (`Settings` -> `Auto Close Brackets`) or from the Advanced Settings Editor.
 - A new visual indicator was introduced to highlight cells in which the code changed in the editor since last execution:
@@ -3549,21 +3585,21 @@ extensions does not require rebuilding JupyterLab and does not require
 having NodeJS installed. The previous way of distributing extensions as
 npm packages requiring rebuilding JupyterLab is still available as well.
 See the
-[documentation](https://jupyterlab.readthedocs.io/en/stable/user/extensions.html#extensions)
+[documentation](https://jupyterlab.readthedocs.io/en/4.0.x/user/extensions.html#extensions)
 for more details.
 
 #### The JupyterLab interface supports multiple languages
 
 JupyterLab now provides the ability to set the display language of the
 user interface. See the
-[documentation](https://jupyterlab.readthedocs.io/en/stable/user/language.html)
+[documentation](https://jupyterlab.readthedocs.io/en/4.0.x/user/language.html)
 for more details.
 
 #### A new visual debugger
 
 JupyterLab now ships with a debugger front-end by default, available for
 kernels that support the new debugging protocol. See the
-[documentation](https://jupyterlab.readthedocs.io/en/stable/user/debugger.html)
+[documentation](https://jupyterlab.readthedocs.io/en/4.0.x/user/debugger.html)
 for more details.
 
 #### Improvements to Simple Interface mode and Mobile

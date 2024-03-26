@@ -212,7 +212,7 @@ namespace Private {
         // Navigate to new workspace.
         const workspacesBase = URLExt.join(this._application, 'workspaces');
         const url = URLExt.join(workspacesBase, id);
-        if (!workspacesBase.startsWith(url)) {
+        if (!url.startsWith(workspacesBase)) {
           throw new Error('Can only be used for workspaces');
         }
         if (this._router) {

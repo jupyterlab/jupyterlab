@@ -604,7 +604,16 @@ export class CodeConsole extends Widget {
     if (promptCell) {
       promptCell.readOnly = true;
       promptCell.removeClass(PROMPT_CLASS);
-      Signal.clearData(promptCell.editor);
+
+      // Schedule execution of signal clearance to happen later so that
+      // the `readOnly` configuration gets updated before editor signals
+      // get disconnected (see `Cell.onUpdateRequest`).
+      const oldCell = promptCell;
+      requestIdleCallback(() => {
+        // Clear the signals to avoid memory leaks
+        Signal.clearData(oldCell.editor);
+      });
+
       // Ensure to clear the cursor
       promptCell.editor?.blur();
       const child = input.widgets[0];

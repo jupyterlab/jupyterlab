@@ -35,9 +35,9 @@ type CoreData = Map<string, any>;
 // Main should target latest
 // All other release branches should target a specific named version
 const URL_CONFIG = {
-  source: 'main',
+  source: '3.6.x',
   target: '4.0.x',
-  rtdVersion: 'stable'
+  rtdVersion: '4.0.x'
 };
 
 // Data to ignore.
