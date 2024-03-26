@@ -18,13 +18,13 @@ declare module 'duplicate-package-checker-webpack-plugin';
 
 // Then we expand the definition with the things we use.
 declare module 'duplicate-package-checker-webpack-plugin' {
-  import * as webpack from 'webpack';
+  import * as rspack from '@rspack/core';
 
   export = DuplicatePackageCheckerWebpackPlugin;
 
   class DuplicatePackageCheckerWebpackPlugin {
     constructor(options?: DuplicatePackageCheckerWebpackPlugin.Options);
-    apply(compiler: webpack.Compiler): void;
+    apply(compiler: rspack.Compiler): void;
   }
 
   namespace DuplicatePackageCheckerWebpackPlugin {

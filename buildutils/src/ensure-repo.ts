@@ -78,12 +78,9 @@ const UNUSED: Dict<string[]> = {
     // The libraries needed for building other extensions.
     '@babel/core',
     '@babel/preset-env',
-    'css-loader',
     'path-browserify',
     'process',
-    'style-loader',
     'terser-webpack-plugin',
-    'webpack-cli',
     'worker-loader',
     'source-map-loader'
   ],
