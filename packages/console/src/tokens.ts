@@ -24,7 +24,7 @@ export interface IConsoleTracker extends IWidgetTracker<ConsolePanel> {}
 /**
  * Console cell executor namespace
  */
-export namespace ConsoleCellExecutor {
+export namespace IConsoleCellExecutor {
   /**
    * Execution options for console cell executor.
    */
@@ -59,7 +59,7 @@ export interface IConsoleCellExecutor {
    *
    * @param options Cell execution options
    */
-  runCell(options: ConsoleCellExecutor.IRunCellOptions): Promise<boolean>;
+  runCell(options: IConsoleCellExecutor.IRunCellOptions): Promise<boolean>;
 }
 
 /**

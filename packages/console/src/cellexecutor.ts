@@ -5,7 +5,7 @@
 
 import { CodeCell } from '@jupyterlab/cells';
 import type { KernelMessage } from '@jupyterlab/services';
-import type { ConsoleCellExecutor } from './tokens';
+import type { IConsoleCellExecutor } from './tokens';
 
 /**
  * Run a console cell.
@@ -17,7 +17,7 @@ export async function runCell({
   cell,
   onCellExecuted,
   sessionContext
-}: ConsoleCellExecutor.IRunCellOptions): Promise<boolean> {
+}: IConsoleCellExecutor.IRunCellOptions): Promise<boolean> {
   const onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
     if (value && value.content.status === 'ok') {
       const content = value.content;

@@ -142,7 +142,7 @@ export interface INotebookTracker extends IWidgetTracker<NotebookPanel> {
 /**
  * Notebook cell executor namespace
  */
-export namespace NotebookCellExecutor {
+export namespace INotebookCellExecutor {
   /**
    * Execution options for notebook cell executor.
    */
@@ -195,7 +195,7 @@ export interface INotebookCellExecutor {
    *
    * @param options Cell execution options
    */
-  runCell(options: NotebookCellExecutor.IRunCellOptions): Promise<boolean>;
+  runCell(options: INotebookCellExecutor.IRunCellOptions): Promise<boolean>;
 }
 
 /**

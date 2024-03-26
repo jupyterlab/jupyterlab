@@ -13,7 +13,7 @@ import { nullTranslator } from '@jupyterlab/translation';
 import { findIndex } from '@lumino/algorithm';
 import { KernelError } from './actions';
 import type { INotebookModel } from './model';
-import type { NotebookCellExecutor } from './tokens';
+import type { INotebookCellExecutor } from './tokens';
 
 /**
  * Run a single notebook cell.
@@ -30,7 +30,7 @@ export async function runCell({
   sessionContext,
   sessionDialogs,
   translator
-}: NotebookCellExecutor.IRunCellOptions): Promise<boolean> {
+}: INotebookCellExecutor.IRunCellOptions): Promise<boolean> {
   translator = translator ?? nullTranslator;
   const trans = translator.load('jupyterlab');
   switch (cell.model.type) {
