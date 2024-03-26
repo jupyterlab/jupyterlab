@@ -20,6 +20,7 @@ file_formats
 debugger
 toc
 extensions
+workspaces
 jupyterhub
 export
 language

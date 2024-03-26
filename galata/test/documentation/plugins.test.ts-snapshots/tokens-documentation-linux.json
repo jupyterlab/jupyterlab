@@ -76,5 +76,7 @@
   "@jupyterlab/tooltip:ITooltipManager": "A service for the tooltip manager for the application. Use this to allow your extension to invoke a tooltip.",
   "@jupyterlab/translation:ITranslator": "A service to translate strings.",
   "@jupyterlab/ui-components:ILabIconManager": "A service to register and request icons.",
-  "@jupyterlab/ui-components:IFormRendererRegistry": "A service for settings form renderer registration."
+  "@jupyterlab/ui-components:IFormRendererRegistry": "A service for settings form renderer registration.",
+  "@jupyterlab/workspaces:IWorkspacesModel": "Provides a model for available workspaces.",
+  "@jupyterlab/workspaces:IWorkspaceCommands": "Provides identifiers of workspace commands."
 }

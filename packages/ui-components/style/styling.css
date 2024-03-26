@@ -42,8 +42,8 @@ input[type='checkbox'].jp-mod-styled {
 }
 
 input.jp-mod-styled:focus {
-  border: var(--jp-border-width) solid var(--md-blue-500);
-  box-shadow: inset 0 0 4px var(--md-blue-300);
+  border: var(--jp-border-width) solid var(--md-blue-500, #2196f3);
+  box-shadow: inset 0 0 4px var(--md-blue-300, #64b5f6);
 }
 
 input[type='checkbox'].jp-mod-styled:focus-visible {

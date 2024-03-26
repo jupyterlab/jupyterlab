@@ -79,6 +79,12 @@ uninstall_flags["all"] = (
     "Uninstall all extensions",
 )
 
+list_flags = copy(flags)
+list_flags["verbose"] = (
+    {"ListLabExtensionsApp": {"verbose": True}},
+    "Increase verbosity level",
+)
+
 aliases = dict(base_aliases)
 aliases["app-dir"] = "BaseExtensionApp.app_dir"
 aliases["dev-build"] = "BaseExtensionApp.dev_build"
@@ -412,6 +418,8 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
 class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
+    verbose = Bool(False, help="Increase verbosity level.").tag(config=True)
+    flags = list_flags
 
     def run_task(self):
         list_extensions(
@@ -420,6 +428,7 @@ class ListLabExtensionsApp(BaseExtensionApp):
                 logger=self.log,
                 core_config=self.core_config,
                 labextensions_path=self.labextensions_path,
+                verbose=self.verbose,
             )
         )
 

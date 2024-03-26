@@ -12,11 +12,6 @@
   --jp-private-filebrowser-button-width: 48px;
 }
 
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
-
 .jp-FileBrowser .jp-SidePanel-content {
   display: flex;
   flex-direction: column;
@@ -102,6 +97,14 @@
 
 .jp-FileBrowser .lm-AccordionPanel > h3:first-child {
   display: none;
+}
+
+.jp-Open-Dialog > .jp-FileBrowser {
+  min-height: 200px;
+}
+
+.jp-Open-Dialog-label {
+  overflow: visible;
 }
 
 /*-----------------------------------------------------------------------------

@@ -19,7 +19,7 @@
 }
 
 #jupyterlab-splash.dark {
-  background-color: var(--md-grey-900);
+  background-color: var(--md-grey-900, #212121);
 }
 
 .splash-fade {

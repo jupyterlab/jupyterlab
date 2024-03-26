@@ -300,6 +300,12 @@
     },
     {
       "path": "./packages/vega5-extension"
+    },
+    {
+      "path": "./packages/workspaces"
+    },
+    {
+      "path": "./packages/workspaces-extension"
     }
   ]
 }

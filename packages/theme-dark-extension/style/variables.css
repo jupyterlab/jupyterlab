@@ -89,11 +89,11 @@ all of MD as it is not optimized for dense, information rich UIs.
    */
 
   --jp-border-width: 1px;
-  --jp-border-color0: var(--md-grey-700);
-  --jp-border-color1: var(--md-grey-700);
-  --jp-border-color2: var(--md-grey-800);
-  --jp-border-color3: var(--md-grey-900);
-  --jp-inverse-border-color: var(--md-grey-600);
+  --jp-border-color0: var(--md-grey-700, #616161);
+  --jp-border-color1: var(--md-grey-700, #616161);
+  --jp-border-color2: var(--md-grey-800, #424242);
+  --jp-border-color3: var(--md-grey-900, #212121);
+  --jp-inverse-border-color: var(--md-grey-600, #757575);
   --jp-border-radius: 2px;
 
   /* UI Fonts
@@ -166,9 +166,9 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-content-font-color1: rgba(255, 255, 255, 1);
   --jp-content-font-color2: rgba(255, 255, 255, 0.7);
   --jp-content-font-color3: rgba(255, 255, 255, 0.5);
-  --jp-content-link-color: var(--md-blue-300);
-  --jp-content-link-visited-color: var(--md-purple-300);
-  --jp-content-link-hover-color: var(--md-blue-400);
+  --jp-content-link-color: var(--md-blue-300, #64b5f6);
+  --jp-content-link-visited-color: var(--md-purple-300, #ba68c8);
+  --jp-content-link-hover-color: var(--md-blue-400, #42a5f5);
   --jp-content-font-family: system-ui, -apple-system, blinkmacsystemfont,
     'Segoe UI', helvetica, arial, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol';
@@ -200,10 +200,10 @@ all of MD as it is not optimized for dense, information rich UIs.
    */
 
   --jp-layout-color0: #111;
-  --jp-layout-color1: var(--md-grey-900);
-  --jp-layout-color2: var(--md-grey-800);
-  --jp-layout-color3: var(--md-grey-700);
-  --jp-layout-color4: var(--md-grey-600);
+  --jp-layout-color1: var(--md-grey-900, #212121);
+  --jp-layout-color2: var(--md-grey-800, #424242);
+  --jp-layout-color3: var(--md-grey-700, #616161);
+  --jp-layout-color4: var(--md-grey-600, #757575);
 
   /* Inverse Layout
    *
@@ -213,40 +213,40 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   --jp-inverse-layout-color0: white;
   --jp-inverse-layout-color1: white;
-  --jp-inverse-layout-color2: var(--md-grey-200);
-  --jp-inverse-layout-color3: var(--md-grey-400);
-  --jp-inverse-layout-color4: var(--md-grey-600);
+  --jp-inverse-layout-color2: var(--md-grey-200, #eee);
+  --jp-inverse-layout-color3: var(--md-grey-400, #bdbdbd);
+  --jp-inverse-layout-color4: var(--md-grey-600, #757575);
 
   /* Brand/accent */
 
-  --jp-brand-color0: var(--md-blue-700);
-  --jp-brand-color1: var(--md-blue-500);
-  --jp-brand-color2: var(--md-blue-300);
-  --jp-brand-color3: var(--md-blue-100);
-  --jp-brand-color4: var(--md-blue-50);
-  --jp-accent-color0: var(--md-green-700);
-  --jp-accent-color1: var(--md-green-500);
-  --jp-accent-color2: var(--md-green-300);
-  --jp-accent-color3: var(--md-green-100);
+  --jp-brand-color0: var(--md-blue-700, #1976d2);
+  --jp-brand-color1: var(--md-blue-500, #2196f3);
+  --jp-brand-color2: var(--md-blue-300, #64b5f6);
+  --jp-brand-color3: var(--md-blue-100, #bbdefb);
+  --jp-brand-color4: var(--md-blue-50, #e3f2fd);
+  --jp-accent-color0: var(--md-green-700, #388e3c);
+  --jp-accent-color1: var(--md-green-500, #4caf50);
+  --jp-accent-color2: var(--md-green-300, #81c784);
+  --jp-accent-color3: var(--md-green-100, #c8e6c9);
 
   /* State colors (warn, error, success, info) */
 
-  --jp-warn-color0: var(--md-orange-700);
-  --jp-warn-color1: var(--md-orange-500);
-  --jp-warn-color2: var(--md-orange-300);
-  --jp-warn-color3: var(--md-orange-100);
-  --jp-error-color0: var(--md-red-700);
-  --jp-error-color1: var(--md-red-500);
-  --jp-error-color2: var(--md-red-300);
-  --jp-error-color3: var(--md-red-100);
-  --jp-success-color0: var(--md-green-700);
-  --jp-success-color1: var(--md-green-500);
-  --jp-success-color2: var(--md-green-300);
-  --jp-success-color3: var(--md-green-100);
-  --jp-info-color0: var(--md-cyan-700);
-  --jp-info-color1: var(--md-cyan-500);
-  --jp-info-color2: var(--md-cyan-300);
-  --jp-info-color3: var(--md-cyan-100);
+  --jp-warn-color0: var(--md-orange-700, #f57c00);
+  --jp-warn-color1: var(--md-orange-500, #ff9800);
+  --jp-warn-color2: var(--md-orange-300, #ffb74d);
+  --jp-warn-color3: var(--md-orange-100, #ffe0b2);
+  --jp-error-color0: var(--md-red-700, #d32f2f);
+  --jp-error-color1: var(--md-red-500, #f44336);
+  --jp-error-color2: var(--md-red-300, #e57373);
+  --jp-error-color3: var(--md-red-100, #ffcdd2);
+  --jp-success-color0: var(--md-green-700, #388e3c);
+  --jp-success-color1: var(--md-green-500, #4caf50);
+  --jp-success-color2: var(--md-green-300, #81c784);
+  --jp-success-color3: var(--md-green-100, #c8e6c9);
+  --jp-info-color0: var(--md-cyan-700, #0097a7);
+  --jp-info-color1: var(--md-cyan-500, #00bcd4);
+  --jp-info-color2: var(--md-cyan-300, #4dd0e1);
+  --jp-info-color3: var(--md-cyan-100, #b2ebf2);
 
   /* Cell specific styles */
 
@@ -255,8 +255,8 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-collapser-min-height: 20px;
   --jp-cell-collapser-not-active-hover-opacity: 0.6;
   --jp-cell-editor-background: var(--jp-layout-color1);
-  --jp-cell-editor-border-color: var(--md-grey-700);
-  --jp-cell-editor-box-shadow: inset 0 0 2px var(--md-blue-300);
+  --jp-cell-editor-border-color: var(--md-grey-700, #616161);
+  --jp-cell-editor-box-shadow: inset 0 0 2px var(--md-blue-300, #64b5f6);
   --jp-cell-editor-active-background: var(--jp-layout-color0);
   --jp-cell-editor-active-border-color: var(--jp-brand-color1);
   --jp-cell-prompt-width: 64px;
@@ -264,7 +264,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-cell-prompt-letter-spacing: 0;
   --jp-cell-prompt-opacity: 1;
   --jp-cell-prompt-not-active-opacity: 1;
-  --jp-cell-prompt-not-active-font-color: var(--md-grey-300);
+  --jp-cell-prompt-not-active-font-color: var(--md-grey-300, #e0e0e0);
 
   /* A custom blend of MD grey and blue 600
    * See https://meyerweb.com/eric/tools/color-blend/#546E7A:1E88E5:5:hex */
@@ -294,7 +294,7 @@ all of MD as it is not optimized for dense, information rich UIs.
   /* Rendermime styles */
 
   --jp-rendermime-error-background: rgba(244, 67, 54, 0.28);
-  --jp-rendermime-table-row-background: var(--md-grey-900);
+  --jp-rendermime-table-row-background: var(--md-grey-900, #212121);
   --jp-rendermime-table-row-hover-background: rgba(3, 169, 244, 0.2);
 
   /* Dialog specific styles */
@@ -320,10 +320,10 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Input field styles */
 
-  --jp-input-box-shadow: inset 0 0 2px var(--md-blue-300);
+  --jp-input-box-shadow: inset 0 0 2px var(--md-blue-300, #64b5f6);
   --jp-input-active-background: var(--jp-layout-color0);
   --jp-input-hover-background: var(--jp-layout-color2);
-  --jp-input-background: var(--md-grey-800);
+  --jp-input-background: var(--md-grey-800, #424242);
   --jp-input-border-color: var(--jp-inverse-border-color);
   --jp-input-active-border-color: var(--jp-brand-color1);
   --jp-input-active-box-shadow-color: rgba(19, 124, 189, 0.3);
@@ -336,28 +336,28 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Code mirror specific styles */
 
-  --jp-mirror-editor-keyword-color: var(--md-green-500);
-  --jp-mirror-editor-atom-color: var(--md-blue-300);
-  --jp-mirror-editor-number-color: var(--md-green-400);
-  --jp-mirror-editor-def-color: var(--md-blue-600);
-  --jp-mirror-editor-variable-color: var(--md-grey-300);
-  --jp-mirror-editor-variable-2-color: var(--md-blue-500);
-  --jp-mirror-editor-variable-3-color: var(--md-green-600);
-  --jp-mirror-editor-punctuation-color: var(--md-blue-400);
-  --jp-mirror-editor-property-color: var(--md-blue-400);
+  --jp-mirror-editor-keyword-color: var(--md-green-500, #4caf50);
+  --jp-mirror-editor-atom-color: var(--md-blue-300, #64b5f6);
+  --jp-mirror-editor-number-color: var(--md-green-400, #66bb6a);
+  --jp-mirror-editor-def-color: var(--md-blue-600, #1e88e5);
+  --jp-mirror-editor-variable-color: var(--md-grey-300, #e0e0e0);
+  --jp-mirror-editor-variable-2-color: var(--md-blue-500, #2196f3);
+  --jp-mirror-editor-variable-3-color: var(--md-green-600, #43a047);
+  --jp-mirror-editor-punctuation-color: var(--md-blue-400, #42a5f5);
+  --jp-mirror-editor-property-color: var(--md-blue-400, #42a5f5);
   --jp-mirror-editor-operator-color: #a2f;
   --jp-mirror-editor-comment-color: #408080;
   --jp-mirror-editor-string-color: #ff7070;
-  --jp-mirror-editor-string-2-color: var(--md-purple-300);
+  --jp-mirror-editor-string-2-color: var(--md-purple-300, #ba68c8);
   --jp-mirror-editor-meta-color: #a2f;
   --jp-mirror-editor-qualifier-color: #555;
-  --jp-mirror-editor-builtin-color: var(--md-green-600);
+  --jp-mirror-editor-builtin-color: var(--md-green-600, #43a047);
   --jp-mirror-editor-bracket-color: #997;
-  --jp-mirror-editor-tag-color: var(--md-green-700);
-  --jp-mirror-editor-attribute-color: var(--md-blue-700);
-  --jp-mirror-editor-header-color: var(--md-blue-500);
-  --jp-mirror-editor-quote-color: var(--md-green-300);
-  --jp-mirror-editor-link-color: var(--md-blue-700);
+  --jp-mirror-editor-tag-color: var(--md-green-700, #388e3c);
+  --jp-mirror-editor-attribute-color: var(--md-blue-700, #1976d2);
+  --jp-mirror-editor-header-color: var(--md-blue-500, #2196f3);
+  --jp-mirror-editor-quote-color: var(--md-green-300, #81c784);
+  --jp-mirror-editor-link-color: var(--md-blue-700, #1976d2);
   --jp-mirror-editor-error-color: #f00;
   --jp-mirror-editor-hr-color: #999;
 
@@ -377,7 +377,7 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* Vega extension styles */
 
-  --jp-vega-background: var(--md-grey-400);
+  --jp-vega-background: var(--md-grey-400, #bdbdbd);
 
   /* Sidebar-related styles */
 
@@ -409,32 +409,32 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-scrollbar-thumb-radius: 9px; /* set to a large-ish value for rounded endcaps on the thumb */
 
   /* Icon colors that work well with light or dark backgrounds */
-  --jp-icon-contrast-color0: var(--md-purple-600);
-  --jp-icon-contrast-color1: var(--md-green-600);
-  --jp-icon-contrast-color2: var(--md-pink-600);
-  --jp-icon-contrast-color3: var(--md-blue-600);
+  --jp-icon-contrast-color0: var(--md-purple-600, #8e24aa);
+  --jp-icon-contrast-color1: var(--md-green-600, #43a047);
+  --jp-icon-contrast-color2: var(--md-pink-600, #d81b60);
+  --jp-icon-contrast-color3: var(--md-blue-600, #1e88e5);
 
   /* Button colors */
-  --jp-accept-color-normal: var(--md-blue-700);
-  --jp-accept-color-hover: var(--md-blue-800);
-  --jp-accept-color-active: var(--md-blue-900);
-  --jp-warn-color-normal: var(--md-red-700);
-  --jp-warn-color-hover: var(--md-red-800);
-  --jp-warn-color-active: var(--md-red-900);
-  --jp-reject-color-normal: var(--md-grey-600);
-  --jp-reject-color-hover: var(--md-grey-700);
-  --jp-reject-color-active: var(--md-grey-800);
+  --jp-accept-color-normal: var(--md-blue-700, #1976d2);
+  --jp-accept-color-hover: var(--md-blue-800, #1565c0);
+  --jp-accept-color-active: var(--md-blue-900, #0d47a1);
+  --jp-warn-color-normal: var(--md-red-700, #d32f2f);
+  --jp-warn-color-hover: var(--md-red-800, #c62828);
+  --jp-warn-color-active: var(--md-red-900, #b71c1c);
+  --jp-reject-color-normal: var(--md-grey-600, #757575);
+  --jp-reject-color-hover: var(--md-grey-700, #616161);
+  --jp-reject-color-active: var(--md-grey-800, #424242);
 
   /* File or activity icons and switch semantic variables */
   --jp-jupyter-icon-color: #f37626;
   --jp-notebook-icon-color: #f37626;
-  --jp-json-icon-color: var(--md-orange-500);
-  --jp-console-icon-background-color: var(--md-blue-500);
+  --jp-json-icon-color: var(--md-orange-500, #ff9800);
+  --jp-console-icon-background-color: var(--md-blue-500, #2196f3);
   --jp-console-icon-color: white;
-  --jp-terminal-icon-background-color: var(--md-grey-200);
-  --jp-terminal-icon-color: var(--md-grey-800);
-  --jp-text-editor-icon-color: var(--md-grey-200);
-  --jp-inspector-icon-color: var(--md-grey-200);
-  --jp-switch-color: var(--md-grey-400);
-  --jp-switch-true-position-color: var(--md-orange-700);
+  --jp-terminal-icon-background-color: var(--md-grey-200, #eee);
+  --jp-terminal-icon-color: var(--md-grey-800, #424242);
+  --jp-text-editor-icon-color: var(--md-grey-200, #eee);
+  --jp-inspector-icon-color: var(--md-grey-200, #eee);
+  --jp-switch-color: var(--md-grey-400, #bdbdbd);
+  --jp-switch-true-position-color: var(--md-orange-700, #f57c00);
 }
