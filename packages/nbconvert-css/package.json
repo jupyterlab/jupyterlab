@@ -41,7 +41,7 @@
     "@jupyterlab/rendermime": "^4.2.0-alpha.2"
   },
   "devDependencies": {
-    "@rspack/cli": "^0.5.8",
+    "@rspack/cli": "^0.5.9",
     "null-loader": "^4.0.0",
     "rimraf": "~5.0.5"
   },
