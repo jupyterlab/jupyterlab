@@ -174,8 +174,7 @@ exclude = [
     "/jupyterlab/staging/.yarn",
     "/packages",
     "/release",
-    "/testutils",
-    "/typedoc-theme"
+    "/testutils"
 ]
 
 [tool.hatch.build.targets.wheel]

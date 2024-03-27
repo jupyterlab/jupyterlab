@@ -1,0 +1,18 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.2.5
+_src_path: https://github.com/jupyterlab/extension-template
+author_email: ''
+author_name: <author_name>
+data_format: string
+file_extension: ''
+has_binder: false
+has_settings: false
+kind: frontend
+labextension_name: test_no_hyphens
+mimetype: ''
+mimetype_name: ''
+project_short_description: <description>
+python_name: test_no_hyphens
+repository: <repository
+test: false
+viewer_name: ''

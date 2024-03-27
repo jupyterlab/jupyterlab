@@ -124,10 +124,3 @@ Test Utilities: ``testutils/``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A small ``npm`` package which is aids in running the tests in ``tests/``.
-
-
-TypeDoc Theming: ``typedoc-theme``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-A small theme used to help render our
-`TypeDoc <../api/index.html>`__ documentation.

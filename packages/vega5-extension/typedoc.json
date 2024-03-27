@@ -1,4 +1,4 @@
 {
-  "out": "../../docs/api/vega5-extension",
-  "theme": "../../typedoc-theme"
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.ts"]
 }

@@ -34,7 +34,6 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "docs": "typedoc src",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -53,7 +52,6 @@
   "devDependencies": {
     "@types/webpack-env": "^1.18.0",
     "rimraf": "~5.0.5",
-    "typedoc": "~0.24.7",
     "typescript": "~5.1.6"
   },
   "publishConfig": {

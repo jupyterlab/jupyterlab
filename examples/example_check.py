@@ -98,8 +98,13 @@ async def run_browser(url):
     current_env = os.environ.copy()
     current_env["BASE_URL"] = url
     current_env["TEST_SNAPSHOT"] = "1" if has_snapshot else "0"
+    cmd = ["npx", "playwright", "test"]
+    if os.environ.get("CI") is not None:
+        cmd.extend(
+            ["--output", str(Path(os.environ.get("DOCKER_VOLUME", "")).joinpath("pw-test-results"))]
+        )
     try:
-        await run_async_process(["npx", "playwright", "test"], env=current_env, cwd=str(target))
+        await run_async_process(cmd, env=current_env, cwd=str(target))
     finally:
         # Copy back test-results folder to analyze snapshot error
         if results_target.exists():
