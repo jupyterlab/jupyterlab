@@ -28,7 +28,9 @@ import { Drag } from '@lumino/dragdrop';
 import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel, PanelLayout, Widget } from '@lumino/widgets';
+import { runCell } from './cellexecutor';
 import { ConsoleHistory, IConsoleHistory } from './history';
+import type { IConsoleCellExecutor } from './tokens';
 
 /**
  * The data attribute added to a widget that has an active kernel.
@@ -112,6 +114,7 @@ export class CodeConsole extends Widget {
   constructor(options: CodeConsole.IOptions) {
     super();
     this._translator = options.translator ?? nullTranslator;
+    this._executor = options.executor ?? Object.freeze({ runCell });
     this.addClass(CONSOLE_CLASS);
     this.node.dataset[KERNEL_USER] = 'true';
     this.node.dataset[CODE_RUNNER] = 'true';
@@ -721,7 +724,7 @@ export class CodeConsole extends Widget {
   /**
    * Execute the code in the current prompt cell.
    */
-  private _execute(cell: CodeCell): Promise<void> {
+  private async _execute(cell: CodeCell): Promise<void> {
     const source = cell.model.sharedModel.getSource();
     this._history.push(source);
     // If the source of the console is just "clear", clear the console as we
@@ -731,45 +734,36 @@ export class CodeConsole extends Widget {
       return Promise.resolve(void 0);
     }
     cell.model.contentChanged.connect(this.update, this);
-    const onSuccess = (value: KernelMessage.IExecuteReplyMsg) => {
-      if (this.isDisposed) {
-        return;
-      }
-      if (value && value.content.status === 'ok') {
-        const content = value.content;
-        // Use deprecated payloads for backwards compatibility.
-        if (content.payload && content.payload.length) {
-          const setNextInput = content.payload.filter(i => {
-            return (i as any).source === 'set_next_input';
-          })[0];
-          if (setNextInput) {
-            const text = (setNextInput as any).text;
-            // Ignore the `replace` value and always set the next cell.
-            cell.model.sharedModel.setSource(text);
-          }
-        }
-      } else if (value && value.content.status === 'error') {
-        for (const cell of this._cells) {
-          if ((cell.model as ICodeCellModel).executionCount === null) {
-            cell.setPrompt('');
+
+    const options = {
+      cell,
+      sessionContext: this.sessionContext,
+      onCellExecuted: (args: {
+        cell: CodeCell;
+        executionDate: Date;
+        success: boolean;
+        error?: Error | null;
+      }) => {
+        this._executed.emit(args.executionDate);
+
+        if (args.error) {
+          for (const cell of this._cells) {
+            if ((cell.model as ICodeCellModel).executionCount === null) {
+              cell.setPrompt('');
+            }
           }
         }
       }
-      cell.model.contentChanged.disconnect(this.update, this);
-      this.update();
-      this._executed.emit(new Date());
-    };
-    const onFailure = () => {
-      if (this.isDisposed) {
-        return;
+    } satisfies IConsoleCellExecutor.IRunCellOptions;
+
+    try {
+      await this._executor.runCell(options);
+    } finally {
+      if (!this.isDisposed) {
+        cell.model.contentChanged.disconnect(this.update, this);
+        this.update();
       }
-      cell.model.contentChanged.disconnect(this.update, this);
-      this.update();
-    };
-    return CodeCell.execute(cell, this.sessionContext).then(
-      onSuccess,
-      onFailure
-    );
+    }
   }
 
   /**
@@ -916,6 +910,7 @@ export class CodeConsole extends Widget {
   private _banner: RawCell | null = null;
   private _cells: IObservableList<Cell>;
   private _content: Panel;
+  private _executor: IConsoleCellExecutor;
   private _executed = new Signal<this, Date>(this);
   private _history: IConsoleHistory;
   private _input: Panel;
@@ -946,6 +941,11 @@ export namespace CodeConsole {
      * The content factory for the console widget.
      */
     contentFactory: IContentFactory;
+
+    /**
+     * Console cell executor
+     */
+    executor?: IConsoleCellExecutor;
 
     /**
      * The model factory for the console widget.

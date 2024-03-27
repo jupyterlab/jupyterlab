@@ -137,10 +137,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   /**
    * Items list to be rendered
    */
-  get itemsList(): IObservableList<any> | null {
+  get itemsList(): ISimpleObservableList | null {
     return this._itemsList;
   }
-  set itemsList(v: IObservableList<any> | null) {
+  set itemsList(v: ISimpleObservableList | null) {
     if (this._itemsList !== v) {
       if (this._itemsList) {
         this._itemsList.changed.disconnect(this.onListChanged, this);
@@ -248,7 +248,13 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     IChangedArgs<
       any,
       any,
-      'count' | 'index' | 'list' | 'overscanCount' | 'windowingActive'
+      | 'count'
+      | 'estimatedWidgetSize'
+      | 'index'
+      | 'list'
+      | 'overscanCount'
+      | 'windowingActive'
+      | string
     >
   > {
     return this._stateChanged;
@@ -282,10 +288,10 @@ export abstract class WindowedListModel implements WindowedList.IModel {
       totalSizeOfMeasuredItems = itemMetadata.offset + itemMetadata.size;
     }
 
-    // We can do better than this
-    const numUnmeasuredItems = this.widgetCount - this._lastMeasuredIndex - 1;
-    const totalSizeOfUnmeasuredItems =
-      numUnmeasuredItems * this._estimatedWidgetSize;
+    let totalSizeOfUnmeasuredItems = 0;
+    for (let i = this._lastMeasuredIndex + 1; i < this.widgetCount; i++) {
+      totalSizeOfUnmeasuredItems += this.estimateWidgetSize(i);
+    }
 
     return totalSizeOfMeasuredItems + totalSizeOfUnmeasuredItems;
   }
@@ -548,8 +554,8 @@ export abstract class WindowedListModel implements WindowedList.IModel {
         this._widgetSizers.splice(
           changes.newIndex,
           0,
-          ...new Array(changes.newValues.length).map(() => {
-            return { offset: 0, size: this._estimatedWidgetSize };
+          ...new Array(changes.newValues.length).map((_, i) => {
+            return { offset: 0, size: this.estimateWidgetSize(i) };
           })
         );
         this.resetAfterIndex(changes.newIndex - 1);
@@ -729,6 +735,8 @@ export abstract class WindowedListModel implements WindowedList.IModel {
 
   /**
    * Default widget size estimation
+   *
+   * @deprecated we always use {@link estimateWidgetSize}
    */
   protected _estimatedWidgetSize: number = WindowedList.DEFAULT_WIDGET_SIZE;
   protected _stateChanged = new Signal<
@@ -736,14 +744,20 @@ export abstract class WindowedListModel implements WindowedList.IModel {
     IChangedArgs<
       any,
       any,
-      'count' | 'index' | 'list' | 'overscanCount' | 'windowingActive'
+      | 'count'
+      | 'estimatedWidgetSize'
+      | 'index'
+      | 'list'
+      | 'overscanCount'
+      | 'windowingActive'
+      | string
     >
   >(this);
 
   private _currentWindow: WindowedList.WindowIndex = [-1, -1, -1, -1];
   private _height: number = 0;
   private _isDisposed = false;
-  private _itemsList: IObservableList<any> | null = null;
+  private _itemsList: ISimpleObservableList | null = null;
   private _lastMeasuredIndex: number = -1;
   private _overscanCount = 1;
   private _scrollOffset: number = 0;
@@ -1104,6 +1118,11 @@ export class WindowedList<
           this._addListeners();
         }
         break;
+      case 'estimatedWidgetSize':
+        // This only impact the container height and should not
+        // impact the elements in the viewport.
+        this._updateTotalSize();
+        return;
     }
     this.update();
   }
@@ -1289,10 +1308,7 @@ export class WindowedList<
         if (stopIndex >= 0) {
           // Read this value after creating the cells.
           // So their actual sizes are taken into account
-          const estimatedTotalHeight = this.viewModel.getEstimatedTotalSize();
-
-          // Update inner container height
-          this._innerElement.style.height = `${estimatedTotalHeight}px`;
+          this._updateTotalSize();
 
           // Update position of window container
           const [top, minHeight] = this.viewModel.getSpan(
@@ -1458,6 +1474,19 @@ export class WindowedList<
     }
   }
 
+  /**
+   * Update the total size
+   */
+  private _updateTotalSize(): void {
+    if (this.viewModel.windowingActive) {
+      const estimatedTotalHeight = this.viewModel.getEstimatedTotalSize();
+
+      // Update inner container height
+      this._innerElement.style.height = `${estimatedTotalHeight}px`;
+    }
+  }
+
+  protected _viewModel: T;
   private _innerElement: HTMLElement;
   private _isParentHidden: boolean;
   private _isScrolling: PromiseDelegate<void> | null;
@@ -1479,7 +1508,6 @@ export class WindowedList<
     | null;
   private _scrollUpdateWasRequested: boolean;
   private _updater: Throttler;
-  private _viewModel: T;
   private _viewport: HTMLElement;
 }
 
@@ -1624,6 +1652,15 @@ export class WindowedLayout extends PanelLayout {
 }
 
 /**
+ * Windowed list model interface
+ */
+export interface ISimpleObservableList<T = any> {
+  get?: (index: number) => T;
+  length: number;
+  changed: ISignal<any, IObservableList.IChangedArgs<any>>;
+}
+
+/**
  * A namespace for windowed list
  */
 export namespace WindowedList {
@@ -1762,11 +1799,7 @@ export namespace WindowedList {
     /**
      * Items list to be rendered
      */
-    itemsList: {
-      get?: (index: number) => T;
-      length: number;
-      changed: ISignal<any, IObservableList.IChangedArgs<any>>;
-    } | null;
+    itemsList: ISimpleObservableList<T> | null;
 
     /**
      * Number of widgets to render in addition to those
@@ -1808,7 +1841,12 @@ export namespace WindowedList {
       IChangedArgs<
         any,
         any,
-        'count' | 'index' | 'list' | 'overscanCount' | 'windowingActive'
+        | 'count'
+        | 'index'
+        | 'list'
+        | 'overscanCount'
+        | 'windowingActive'
+        | string
       >
     >;
 

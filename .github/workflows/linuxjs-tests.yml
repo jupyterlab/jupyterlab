@@ -61,6 +61,7 @@ jobs:
             js-translation,
             js-ui-components,
             js-vega5-extension,
+            js-workspaces,
           ]
       fail-fast: false
     runs-on: ubuntu-22.04

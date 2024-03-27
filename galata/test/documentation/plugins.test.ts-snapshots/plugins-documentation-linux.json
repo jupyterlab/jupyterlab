@@ -41,7 +41,7 @@
   "@jupyterlab/apputils-extension:toggle-header": "Adds a command to display the main area widget content header.",
   "@jupyterlab/apputils-extension:toolbar-registry": "Provides toolbar items registry.",
   "@jupyterlab/apputils-extension:utilityCommands": "Adds meta commands to run set of other commands.",
-  "@jupyterlab/apputils-extension:workspaces": "Add workspace file type and commands.",
+  "@jupyterlab/apputils-extension:workspaces": "Add workspace file type.",
   "@jupyterlab/cell-toolbar-extension:plugin": "Add the cells toolbar.",
   "@jupyterlab/celltags-extension:plugin": "Adds the cell tags editor.",
   "@jupyterlab/codemirror-extension:languages": "Provides the CodeMirror languages registry.",
@@ -61,6 +61,7 @@
   "@jupyterlab/console-extension:kernel-status": "Adds the console to the kernel status indicator model.",
   "@jupyterlab/console-extension:cursor-position": "Adds the console to the code editor cursor position model.",
   "@jupyterlab/console-extension:completer": "Adds completion to the console.",
+  "@jupyterlab/console-extension:cell-executor": "Provides the console cell executor.",
   "@jupyterlab/csvviewer-extension:csv": "Adds viewer for CSV file types",
   "@jupyterlab/csvviewer-extension:tsv": "Adds viewer for TSV file types.",
   "@jupyterlab/debugger-extension:service": "Provides the debugger service.",
@@ -131,6 +132,7 @@
   "@jupyterlab/mermaid-extension:markdown": "Provides the Mermaid markdown renderer.",
   "@jupyterlab/mermaid-extension:context-commands": "Provides context menu commands for mermaid diagrams.",
   "@jupyterlab/metadataform-extension:metadataforms": "Provides the metadata form registry.",
+  "@jupyterlab/notebook-extension:cell-executor": "Provides the notebook cell executor.",
   "@jupyterlab/notebook-extension:factory": "Provides the notebook cell factory.",
   "@jupyterlab/notebook-extension:tracker": "Provides the notebook widget tracker.",
   "@jupyterlab/notebook-extension:execution-indicator": "Adds a notebook execution status widget.",
@@ -174,5 +176,9 @@
   "@jupyterlab/translation:translator": "Provides the application translation object.",
   "@jupyterlab/translation-extension:plugin": "Adds translation commands and settings.",
   "@jupyterlab/ui-components-extension:labicon-manager": "Provides the icon manager.",
-  "@jupyterlab/ui-components-extension:form-renderer-registry": "Provides the settings form renderer registry."
+  "@jupyterlab/ui-components-extension:form-renderer-registry": "Provides the settings form renderer registry.",
+  "@jupyterlab/workspaces-extension:model": "Provides a model for available workspaces.",
+  "@jupyterlab/workspaces:commands": "Add workspace commands.",
+  "@jupyterlab/workspaces-extension:sidebar": "Populates running sidebar with workspaces.",
+  "@jupyterlab/workspaces-extension:menu": "Populates \"File\" main menu with Workspaces submenu."
 }

@@ -1,14 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IWidgetTracker } from '@jupyterlab/apputils';
-import { Cell } from '@jupyterlab/cells';
+import type {
+  ISessionContext,
+  ISessionContextDialogs,
+  IWidgetTracker
+} from '@jupyterlab/apputils';
+import type { Cell } from '@jupyterlab/cells';
+import type { ITranslator } from '@jupyterlab/translation';
 import { Token } from '@lumino/coreutils';
-import { ISignal } from '@lumino/signaling';
-import { Widget } from '@lumino/widgets';
-import { NotebookTools } from './notebooktools';
-import { NotebookPanel } from './panel';
-import { NotebookWidgetFactory } from './widgetfactory';
+import type { ISignal } from '@lumino/signaling';
+import type { Widget } from '@lumino/widgets';
+import type { KernelError } from './actions';
+import type { INotebookModel } from './model';
+import type { NotebookTools } from './notebooktools';
+import type { NotebookPanel } from './panel';
+import type { StaticNotebook } from './widget';
+import type { NotebookWidgetFactory } from './widgetfactory';
 
 /**
  * The notebook widget factory token.
@@ -130,3 +138,70 @@ export interface INotebookTracker extends IWidgetTracker<NotebookPanel> {
    */
   readonly selectionChanged: ISignal<this, void>;
 }
+
+/**
+ * Notebook cell executor namespace
+ */
+export namespace INotebookCellExecutor {
+  /**
+   * Execution options for notebook cell executor.
+   */
+  export interface IRunCellOptions {
+    /**
+     * Cell to execute
+     */
+    cell: Cell;
+    /**
+     * Notebook to which the cell belongs
+     */
+    notebook: INotebookModel;
+    /**
+     * Notebook widget configuration
+     */
+    notebookConfig: StaticNotebook.INotebookConfig;
+    /**
+     * A callback to notify a cell completed execution.
+     */
+    onCellExecuted: (args: {
+      cell: Cell;
+      success: boolean;
+      error?: KernelError | null;
+    }) => void;
+    /**
+     * A callback to notify that a cell execution is scheduled.
+     */
+    onCellExecutionScheduled: (args: { cell: Cell }) => void;
+    /**
+     * Document session context
+     */
+    sessionContext?: ISessionContext;
+    /**
+     * Session dialogs
+     */
+    sessionDialogs?: ISessionContextDialogs;
+    /**
+     * Application translator
+     */
+    translator?: ITranslator;
+  }
+}
+
+/**
+ * Notebook cell executor interface
+ */
+export interface INotebookCellExecutor {
+  /**
+   * Execute a cell.
+   *
+   * @param options Cell execution options
+   */
+  runCell(options: INotebookCellExecutor.IRunCellOptions): Promise<boolean>;
+}
+
+/**
+ * The notebook cell executor token.
+ */
+export const INotebookCellExecutor = new Token<INotebookCellExecutor>(
+  '@jupyterlab/notebook:INotebookCellExecutor',
+  `The notebook cell executor`
+);
