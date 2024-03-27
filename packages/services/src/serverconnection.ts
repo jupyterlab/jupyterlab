@@ -2,6 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { KernelMessage } from './kernel';
+import { deserialize, serialize } from './kernel/serialize';
 
 let WEBSOCKET: typeof WebSocket;
 
@@ -11,6 +13,20 @@ if (typeof window === 'undefined') {
   WEBSOCKET = require('ws');
 } else {
   WEBSOCKET = WebSocket;
+}
+
+interface ISerializer {
+  /**
+   * Serialize a kernel message for transport.
+   */
+  serialize(
+    msg: KernelMessage.IMessage,
+    protocol?: string
+  ): string | ArrayBuffer;
+  /**
+   * Deserialize and return the unpacked message.
+   */
+  deserialize(data: ArrayBuffer, protocol?: string): KernelMessage.IMessage;
 }
 
 /**
@@ -31,7 +47,7 @@ export namespace ServerConnection {
   /**
    * A Jupyter server settings object.
    * Note that all of the settings are optional when passed to
-   * [[makeSettings]].  The default settings are given in [[defaultSettings]].
+   * [[makeSettings]]. The default settings are given in [[defaultSettings]].
    */
   export interface ISettings {
     /**
@@ -87,6 +103,11 @@ export namespace ServerConnection {
      * The `WebSocket` object constructor.
      */
     readonly WebSocket: typeof WebSocket;
+
+    /**
+     * Serializer used to serialize/deserialize kernel messages.
+     */
+    readonly serializer: ISerializer;
   }
 
   /**
@@ -225,6 +246,18 @@ namespace Private {
     // Otherwise fall back on the default wsUrl.
     wsUrl = wsUrl ?? pageWsUrl;
 
+    const appendTokenConfig = PageConfig.getOption('appendToken').toLowerCase();
+    let appendToken;
+    if (appendTokenConfig === '') {
+      appendToken =
+        typeof window === 'undefined' ||
+        (typeof process !== 'undefined' &&
+          process?.env?.JEST_WORKER_ID !== undefined) ||
+        URLExt.getHostName(pageBaseUrl) !== URLExt.getHostName(wsUrl);
+    } else {
+      appendToken = appendTokenConfig === 'true';
+    }
+
     return {
       init: { cache: 'no-store', credentials: 'same-origin' },
       fetch,
@@ -233,11 +266,8 @@ namespace Private {
       WebSocket: WEBSOCKET,
       token: PageConfig.getToken(),
       appUrl: PageConfig.getOption('appUrl'),
-      appendToken:
-        typeof window === 'undefined' ||
-        (typeof process !== 'undefined' &&
-          process?.env?.JEST_WORKER_ID !== undefined) ||
-        URLExt.getHostName(pageBaseUrl) !== URLExt.getHostName(wsUrl),
+      appendToken,
+      serializer: { serialize, deserialize },
       ...options,
       baseUrl,
       wsUrl
@@ -284,7 +314,7 @@ namespace Private {
       authenticated = true;
       request.headers.append('Authorization', `token ${settings.token}`);
     }
-    if (typeof document !== 'undefined' && document?.cookie) {
+    if (typeof document !== 'undefined') {
       const xsrfToken = getCookie('_xsrf');
       if (xsrfToken !== undefined) {
         authenticated = true;
@@ -312,7 +342,14 @@ namespace Private {
    */
   function getCookie(name: string): string | undefined {
     // From http://www.tornadoweb.org/en/stable/guide/security.html
-    const matches = document.cookie.match('\\b' + name + '=([^;]*)\\b');
+    let cookie = '';
+    try {
+      cookie = document.cookie;
+    } catch (e) {
+      // e.g. SecurityError in case of CSP Sandbox
+      return;
+    }
+    const matches = cookie.match('\\b' + name + '=([^;]*)\\b');
     return matches?.[1];
   }
 }

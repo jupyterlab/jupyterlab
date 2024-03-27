@@ -9,10 +9,7 @@ import {
   ICellModel,
   MarkdownCell
 } from '@jupyterlab/cells';
-import {
-  CodeMirrorEditor,
-  IHighlightAdjacentMatchOptions
-} from '@jupyterlab/codemirror';
+import { IHighlightAdjacentMatchOptions } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IChangedArgs } from '@jupyterlab/coreutils';
 import {
@@ -236,6 +233,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       output: {
         title: trans.__('Search Cell Outputs'),
         description: trans.__('Search in the cell outputs.'),
+        disabledDescription: trans.__(
+          'Search in the cell outputs (not available when replace options are shown).'
+        ),
         default: false,
         supportReplace: false
       },
@@ -286,16 +286,8 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
    * @returns Initial value used to populate the search box.
    */
   getInitialQuery(): string {
-    const activeCell = this.widget.content.activeCell;
-    const editor = activeCell?.editor as CodeMirrorEditor | undefined;
-    if (!editor) {
-      return '';
-    }
-    const selection = editor.state.sliceDoc(
-      editor.state.selection.main.from,
-      editor.state.selection.main.to
-    );
-    return selection;
+    // Get whatever is selected in the browser window.
+    return window.getSelection()?.toString() || '';
   }
 
   /**
@@ -358,6 +350,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       return;
     }
     await this.endQuery();
+    this._searchActive = true;
     let cells = this.widget.content.widgets;
 
     this._query = query;
@@ -426,6 +419,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       })
     );
 
+    this._searchActive = false;
     this._searchProviders.length = 0;
     this._currentProviderIndex = null;
   }
@@ -519,7 +513,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       const reply = await showDialog({
         title: trans.__('Confirmation'),
         body: trans.__(
-          'Searching outputs is expensive and requires to first rendered all outputs. Are you sure you want to search in the cell outputs?'
+          'Searching outputs requires you to run all cells and render their outputs. Are you sure you want to search in the cell outputs?'
         ),
         buttons: [
           Dialog.cancelButton({ label: trans.__('Cancel') }),
@@ -552,7 +546,9 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
           this.widget.content.isSelectedOrActive(cell)
       )
       .then(() => {
-        void cellSearchProvider.startQuery(this._query, this._filters);
+        if (this._searchActive) {
+          void cellSearchProvider.startQuery(this._query, this._filters);
+        }
       });
   }
 
@@ -721,7 +717,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
       // change, and if selection is getting extended, we do not want to clear
       // highlights just to re-apply them shortly after, which has side effects
       // impacting the functionality and performance.
-      this._delayedActiveCellChangeHandler = setTimeout(() => {
+      this._delayedActiveCellChangeHandler = window.setTimeout(() => {
         this.delayedActiveCellChangeHandlerReady =
           this._handleHighlightsAfterActiveCellChange();
       }, 0);
@@ -914,4 +910,5 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
   > | null = null;
   private _selectionSearchMode: 'cells' | 'text' = 'cells';
   private _selectionLock: boolean = false;
+  private _searchActive: boolean = false;
 }

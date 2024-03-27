@@ -31,6 +31,7 @@ import {
   DocumentManager,
   IDocumentManager,
   IDocumentWidgetOpener,
+  IRecentsManager,
   PathStatus,
   renameDialog,
   SavingStatus
@@ -47,11 +48,12 @@ import {
 import { saveIcon } from '@jupyterlab/ui-components';
 import { some } from '@lumino/algorithm';
 import { CommandRegistry } from '@lumino/commands';
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { recentsManagerPlugin } from './recents';
 
 /**
  * The command IDs used by the document manager plugin.
@@ -168,14 +170,21 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   description: 'Provides the document manager.',
   provides: IDocumentManager,
   requires: [IDocumentWidgetOpener],
-  optional: [ITranslator, ILabStatus, ISessionContextDialogs, JupyterLab.IInfo],
+  optional: [
+    ITranslator,
+    ILabStatus,
+    ISessionContextDialogs,
+    JupyterLab.IInfo,
+    IRecentsManager
+  ],
   activate: (
     app: JupyterFrontEnd,
     widgetOpener: IDocumentWidgetOpener,
     translator_: ITranslator | null,
     status: ILabStatus | null,
     sessionDialogs_: ISessionContextDialogs | null,
-    info: JupyterLab.IInfo | null
+    info: JupyterLab.IInfo | null,
+    recentsManager: IRecentsManager | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
     const translator = translator_ ?? nullTranslator;
@@ -196,7 +205,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
           return info.isConnected;
         }
         return true;
-      }
+      },
+      recentsManager: recentsManager ?? undefined
     });
 
     return docManager;
@@ -556,7 +566,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   savingStatusPlugin,
   downloadPlugin,
   openBrowserTabPlugin,
-  openerPlugin
+  openerPlugin,
+  recentsManagerPlugin
 ];
 export default plugins;
 
@@ -645,6 +656,16 @@ function addCommands(
     }
     const context = docManager.contextForWidget(currentWidget);
     return !!context?.contentsModel?.writable;
+  };
+
+  const readonlyNotification = (contextPath: string) => {
+    return Notification.warning(
+      trans.__(
+        `%1 is permissioned as read-only. Use "save as..." instead.`,
+        contextPath
+      ),
+      { autoClose: 5000 }
+    );
   };
 
   // If inside a rich application like JupyterLab, add additional functionality.
@@ -841,8 +862,17 @@ function addCommands(
     label: () => trans.__('Save %1', fileType(shell.currentWidget, docManager)),
     caption,
     icon: args => (args.toolbar ? saveIcon : undefined),
-    isEnabled: isWritable,
-    execute: async () => {
+    isEnabled: args => {
+      if (args._luminoEvent) {
+        return (args._luminoEvent as ReadonlyPartialJSONObject).type ===
+          'keybinding'
+          ? true
+          : isWritable();
+      } else {
+        return isWritable();
+      }
+    },
+    execute: async args => {
       // Checks that shell.currentWidget is valid:
       const widget = shell.currentWidget;
       const context = docManager.contextForWidget(widget!);
@@ -857,13 +887,21 @@ function addCommands(
           if (saveInProgress.has(context)) {
             return;
           }
-
-          if (context.model.readOnly) {
-            return showDialog({
-              title: trans.__('Cannot Save'),
-              body: trans.__('Document is read-only'),
-              buttons: [Dialog.okButton()]
-            });
+          if (
+            !context.contentsModel?.writable &&
+            !context.model.collaborative
+          ) {
+            let type = (args._luminoEvent as ReadonlyPartialJSONObject)?.type;
+            if (args._luminoEvent && type === 'keybinding') {
+              readonlyNotification(context.path);
+              return;
+            } else {
+              return showDialog({
+                title: trans.__('Cannot Save'),
+                body: trans.__('Document is read-only'),
+                buttons: [Dialog.okButton()]
+              });
+            }
           }
 
           saveInProgress.add(context);
@@ -958,13 +996,7 @@ function addCommands(
             paths.add(context.path);
             promises.push(context.save());
           } else {
-            Notification.warning(
-              trans.__(
-                `%1 is permissioned as readonly. Use "save as..." instead.`,
-                context.path
-              ),
-              { autoClose: 5000 }
-            );
+            readonlyNotification(context.path);
           }
         }
       }
@@ -1005,7 +1037,7 @@ function addCommands(
           }
         };
         docManager.services.contents.fileChanged.connect(onChange);
-        context
+        void context
           .saveAs()
           .finally(() =>
             docManager.services.contents.fileChanged.disconnect(onChange)

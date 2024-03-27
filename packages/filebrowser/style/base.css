@@ -23,14 +23,15 @@
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
-  flex-wrap: wrap;
-  row-gap: 12px;
   border-bottom: none;
   height: auto;
   margin: 8px 12px 0;
   box-shadow: none;
   padding: 0;
-  justify-content: flex-start;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar::part(positioning-region) {
+  row-gap: 12px;
 }
 
 .jp-FileBrowser-Panel {
@@ -71,7 +72,6 @@
 .jp-FileBrowser-toolbar > .jp-Toolbar-item {
   flex: 0 0 auto;
   padding-left: 0;
-  padding-right: 2px;
   align-items: center;
   height: unset;
 }
@@ -276,15 +276,21 @@
   user-select: none;
 }
 
-.jp-DirListing-itemText:focus {
+.jp-DirListing-item:has(.jp-DirListing-itemText:focus-visible) {
+  /* Targeting `.jp-DirListing-itemText` specifically to avoid an extra outline
+  when it gets replaced with `jp-DirListing-editor` when editing the file name */
   outline-width: 2px;
   outline-color: var(--jp-inverse-layout-color1);
   outline-style: solid;
-  outline-offset: 1px;
+  outline-offset: -4px;
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText:focus {
+.jp-DirListing-item.jp-mod-selected:focus-within {
   outline-color: var(--jp-layout-color1);
+}
+
+.jp-DirListing-item > .jp-DirListing-itemText:focus {
+  outline: 0;
 }
 
 .jp-DirListing-itemModified {

@@ -86,9 +86,11 @@ breaking changes. Consider documenting your maintenance plans to users in these 
 You may also wish to consider pinning the major version of JupyterLab when developing
 extensions (in your package metadata).
 
-We maintain the **two most recently released major versions of JupyterLab**,
-JupyterLab v3 and JupyterLab v4. JupyterLab v1 and v2 are no longer maintained.
-All JupyterLab v2 users are strongly advised to upgrade as soon as possible.
+We maintain a major version of JupyterLab for **one year after its successor's first release**.
+See `version lifecycle <../getting_started/lifecycle.html>`__ for details.
+JupyterLab v4 was released on May 15, 2023, so JupyterLab v3 will be maintained
+until May 15, 2024. JupyterLab v1 and v2 are no longer maintained.
+All JupyterLab v2 and v3 users are strongly advised to upgrade as soon as possible.
 
 Languages, Tools and Processes
 ------------------------------
@@ -97,11 +99,11 @@ All source code is written in
 `TypeScript <https://www.typescriptlang.org/Handbook>`__. See the `Style
 Guide <https://github.com/jupyterlab/jupyterlab/wiki/TypeScript-Style-Guide>`__.
 
-All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `black <https://github.com/psf/black>`__.
+All non-python source code is formatted using `prettier <https://prettier.io>`__, and python source code is formatted using `ruff <https://docs.astral.sh/ruff>`__.
 When code is modified and committed, all staged files will be
 automatically formatted using pre-commit git hooks (with help from
 `pre-commit <https://github.com/pre-commit/pre-commit>`__). The benefit of
-using a code formatters like ``prettier`` and ``black`` is that it removes the topic of
+using a code formatters like ``prettier`` and ``ruff`` is that it removes the topic of
 code style from the conversation when reviewing pull requests, thereby
 speeding up the review process.
 
@@ -121,7 +123,7 @@ You can invoke the pre-commit hook by hand at any time with::
 
 which should run any autoformatting on your code
 and tell you about any errors it couldn't fix automatically.
-You may also install `black integration <https://github.com/psf/black#editor-integration>`__
+You may also install `ruff integration <https://docs.astral.sh/ruff/integrations>`__
 into your text editor to format code automatically.
 
 If you have already committed files before setting up the pre-commit
@@ -227,7 +229,7 @@ furthers the goals of the Jupyter project.
 * The issue represents work that one developer can commit to owning, even if
   they collaborate with other developers for feedback. Excessively large issues
   should be split into multiple issues, each triaged individually, or into
-  `team-compass <https://github.com/jupyterlab/team-compass>`__ issues to discuss
+  `team-compass <https://github.com/jupyterlab/frontends-team-compass>`__ issues to discuss
   more substantive changes.
 
 Labels Used by Triagers
@@ -307,7 +309,7 @@ Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Building JupyterLab from its GitHub source code requires Node.js. The
-development version requires Node.js version 18+, as defined in the
+development version requires Node.js version 20+, as defined in the
 ``engines`` specification in
 `dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/main/dev_mode/package.json>`__.
 
@@ -315,7 +317,7 @@ If you use `conda <https://conda.io>`__, you can get it with:
 
 .. code:: bash
 
-   conda install -c conda-forge nodejs
+   conda install -c conda-forge nodejs=20
 
 If you use `Homebrew <https://brew.sh>`__ on macOS:
 
@@ -436,15 +438,10 @@ Notes:
    called something else (such as "python3") then parts of the build
    will fail. You may wish to build in a conda environment, or make an
    alias.
--  Some of the packages used in the development environment require
-   Python 3.0 or higher. If you encounter an ImportError during the
-   installation, make sure Python 3.0+ is installed. Also, try using the
-   Python 3.0+ version of ``pip`` or ``pip3 install -e .`` command to
-   install JupyterLab from the forked repository.
 -  If you see an error that says ``Call to 'pkg-config pixman-1 --libs'
    returned exit status 127 while in binding.gyp`` while running the
    ``pip install`` command above, you may be missing packages required
-   by ``canvas``. Please see `Installing Node.js and jlpm section`_
+   by ``canvas``. Please see the `Installing Node.js and jlpm section`_
    of this guide for instructions on how to install these packages.
 -  The ``jlpm`` command is a JupyterLab-provided, locked version of the
    `yarn <https://classic.yarnpkg.com/en/>`__ package manager. If you have
@@ -477,15 +474,7 @@ Notes:
    However, it takes a bit longer to build the sources, so is used only
    to build for production by default.
 
-If you are using a version of Jupyter Notebook earlier than 5.3, then
-you must also run the following command to enable the JupyterLab server
-extension:
-
-.. code:: bash
-
-   jupyter serverextension enable --py --sys-prefix jupyterlab
-
-For installation instructions to write documentation, please see
+For installation instructions for contributors who want to write documentation, please see
 `Writing Documentation <#writing-documentation>`__
 
 Run JupyterLab

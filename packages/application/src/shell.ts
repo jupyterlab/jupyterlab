@@ -729,7 +729,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       TabBarSvg.translator = value;
 
       const trans = value.load('jupyterlab');
-      this._menuHandler.panel.node.setAttribute('aria-label', trans.__('main'));
+      this._menuHandler.panel.node.setAttribute(
+        'aria-label',
+        trans.__('main menu')
+      );
       this._leftHandler.sideBar.node.setAttribute(
         'aria-label',
         trans.__('main sidebar')
@@ -789,6 +792,40 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
+  /**
+   * Activate widget in specified area.
+   *
+   * ### Notes
+   * The alpha version of this method only supports activating the "main" area.
+   *
+   * @alpha
+   * @param area Name of area to activate
+   */
+  activateArea(area: ILabShell.Area = 'main'): void {
+    switch (area) {
+      case 'main':
+        {
+          const current = this._currentTabBar();
+          if (!current) {
+            return;
+          }
+          if (current.currentTitle) {
+            current.currentTitle.owner.activate();
+          }
+        }
+        return;
+      case 'left':
+      case 'right':
+      case 'header':
+      case 'top':
+      case 'menu':
+      case 'bottom':
+        console.debug(`Area: ${area} activation not yet implemented`);
+        break;
+      default:
+        throw new Error(`Invalid area: ${area}`);
+    }
+  }
   /**
    * Activate the next Tab in the active TabBar.
    */
@@ -2204,13 +2241,17 @@ namespace Private {
       this.addClass('jp-skiplink');
       this.id = 'jp-skiplink';
       this._shell = shell;
-      this._createSkipLink('Skip to left side bar');
+      this._createSkipLink('Skip to main panel', 'main');
     }
 
     handleEvent(event: Event): void {
       switch (event.type) {
         case 'click':
-          this._focusLeftSideBar();
+          if (event.target instanceof HTMLElement) {
+            this._shell.activateArea(
+              event.target?.dataset?.targetarea as ILabShell.Area
+            );
+          }
           break;
       }
     }
@@ -2231,18 +2272,15 @@ namespace Private {
       this.node.removeEventListener('click', this);
       super.onBeforeDetach(msg);
     }
-
-    private _focusLeftSideBar() {
-      this._shell.expandLeft();
-    }
     private _shell: ILabShell;
 
-    private _createSkipLink(skipLinkText: string): void {
+    private _createSkipLink(skipLinkText: string, area: ILabShell.Area): void {
       const skipLink = document.createElement('a');
       skipLink.href = '#';
-      skipLink.tabIndex = 1;
+      skipLink.tabIndex = 0;
       skipLink.text = skipLinkText;
       skipLink.className = 'skip-link';
+      skipLink.dataset['targetarea'] = area;
       this.node.appendChild(skipLink);
     }
   }

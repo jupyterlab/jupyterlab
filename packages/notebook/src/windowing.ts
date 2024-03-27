@@ -119,7 +119,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
     }
     this._footer = footer;
     if (this._footer && this.parent?.isAttached) {
-      Widget.attach(this._footer, this.parent!.node);
+      Widget.attach(this._footer, this.parent!.outerNode);
     }
   }
 
@@ -261,7 +261,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
 
     // Note: `index` is relative to the displayed cells, not all cells,
     // hence we compare with the widget itself.
-    if (widget === this.activeCell) {
+    if (widget === this.activeCell && widget !== this._willBeRemoved) {
       // Do not change display of the active cell to allow user to continue providing input
       // into the code mirror editor when out of view. We still hide the cell so to prevent
       // minor visual glitches when scrolling.
@@ -367,7 +367,7 @@ export class NotebookWindowedLayout extends WindowedLayout {
       );
     }
     if (this._footer && !this._footer.isAttached) {
-      Widget.attach(this._footer, this.parent!.node);
+      Widget.attach(this._footer, this.parent!.outerNode);
     }
   }
 

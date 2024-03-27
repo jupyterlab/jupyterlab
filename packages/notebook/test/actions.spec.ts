@@ -3,7 +3,12 @@
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import { createSessionContext } from '@jupyterlab/apputils/lib/testutils';
-import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
+import {
+  CodeCell,
+  ICodeCellModel,
+  MarkdownCell,
+  RawCell
+} from '@jupyterlab/cells';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CellType, IMimeBundle } from '@jupyterlab/nbformat';
 import {
@@ -13,6 +18,7 @@ import {
   NotebookModel,
   StaticNotebook
 } from '@jupyterlab/notebook';
+import { Stdin } from '@jupyterlab/outputarea';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISharedCodeCell } from '@jupyter/ydoc';
 import {
@@ -20,7 +26,8 @@ import {
   dismissDialog,
   JupyterServer,
   signalToPromise,
-  sleep
+  sleep,
+  waitForDialog
 } from '@jupyterlab/testing';
 import { JSONArray, JSONObject, UUID } from '@lumino/coreutils';
 import * as utils from './utils';
@@ -163,7 +170,7 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
-    describe('#splitCell({})', () => {
+    describe('#splitCell()', () => {
       it('should split the active cell into two cells', () => {
         const cell = widget.activeCell!;
         const source = 'thisisasamplestringwithnospaces';
@@ -189,6 +196,32 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.activeCell!.model.sharedModel.getSource()).toBe(
           '   is a test'
         );
+      });
+
+      it('should preserve all outputs in the second cell', async () => {
+        const cell = widget.activeCell as CodeCell;
+        // Produce two outputs (note, first will be `text/plain`,
+        // while second will be `application/vnd.jupyter.stdout`,
+        // which guarantees these will not be merged).
+        const index = widget.activeCellIndex;
+        const source = 'print(1)\ndisplay(2)';
+        cell.model.sharedModel.setSource(source);
+
+        // Should populate outputs
+        await NotebookActions.run(widget, ipySessionContext);
+        expect(cell.model.outputs).toHaveLength(2);
+
+        // Split cell
+        const editor = cell.editor as CodeEditor.IEditor;
+        editor.setCursorPosition(editor.getPositionAt(9)!);
+        NotebookActions.splitCell(widget);
+
+        // The output should now be only in the second cell
+        const cells = widget.model!.cells;
+        const first = cells.get(index) as ICodeCellModel;
+        const second = cells.get(index + 1) as ICodeCellModel;
+        expect(first.outputs).toHaveLength(0);
+        expect(second.outputs).toHaveLength(2);
       });
 
       it('should clear the existing selection', () => {
@@ -631,6 +664,39 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.changeCellType(widget, 'markdown');
         const cell = widget.activeCell as MarkdownCell;
         expect(cell.model.metadata.trusted).toBe(undefined);
+      });
+
+      it('should not change cell type away from code cell when input is pending', async () => {
+        let cell = widget.activeCell as CodeCell;
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
+
+        const inputRequested = signalToPromise(cell.outputArea.inputRequested);
+
+        // Execute input request
+        cell.model.sharedModel.setSource('input()');
+        // Do not wait for completion yet: it will not complete until input is submitted
+        const donePromise = NotebookActions.run(widget, sessionContext);
+        // Wait for the input being requested from kernel
+        const stdin = (await inputRequested)[1];
+
+        // Try to change cell type
+        NotebookActions.changeCellType(widget, 'raw');
+        // Cell type should stay unchanged.
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
+
+        // Should show a dialog informing user why cell type could not be changed
+        await waitForDialog();
+        await acceptDialog();
+
+        // Submit the input
+        (stdin as Stdin).handleEvent(
+          new KeyboardEvent('keydown', { key: 'Enter' })
+        );
+        await donePromise;
+
+        // Try to change cell type again, it should work now
+        NotebookActions.changeCellType(widget, 'raw');
+        expect(widget.activeCell).toBeInstanceOf(RawCell);
       });
     });
 
@@ -1123,153 +1189,75 @@ describe('@jupyterlab/notebook', () => {
     });
 
     describe('#selectAbove()', () => {
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => {
-          reject('expected timeout');
-        }, 5000);
-      });
-      timeoutPromise.catch(() => null);
-
-      it('should select the cell above the active cell', async () => {
+      it('should select the cell above the active cell', () => {
         widget.activeCellIndex = 1;
-        const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectAbove(widget);
-        await waitForChange;
         expect(widget.activeCellIndex).toBe(0);
       });
 
-      it('should be a no-op if there is no model', async () => {
+      it('should be a no-op if there is no model', () => {
         widget.model = null;
-        const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectAbove(widget);
-        // should timeout as there is no change.
-        let err: string = '';
-        try {
-          await Promise.race([waitForChange, timeoutPromise]);
-        } catch (e) {
-          err = e;
-        } finally {
-          expect(err).toMatch('expected timeout');
-        }
         expect(widget.activeCellIndex).toBe(-1);
       });
 
-      it('should not wrap around to the bottom', async () => {
-        const waitForChange = signalToPromise(widget.stateChanged);
+      it('should not wrap around to the bottom', () => {
         NotebookActions.selectAbove(widget);
-        // should timeout as there is no change.
-        let err: string = '';
-        try {
-          await Promise.race([waitForChange, timeoutPromise]);
-        } catch (e) {
-          err = e;
-        } finally {
-          expect(err).toMatch('expected timeout');
-        }
         expect(widget.activeCellIndex).toBe(0);
       });
 
-      it('should preserve the mode', async () => {
+      it('should preserve the mode', () => {
         widget.activeCellIndex = 2;
-        let waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectAbove(widget);
-        await waitForChange;
         expect(widget.mode).toBe('command');
         widget.mode = 'edit';
-        waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectAbove(widget);
-        await waitForChange;
         expect(widget.mode).toBe('edit');
       });
 
-      it('should skip collapsed cells in edit mode', async () => {
+      it('should skip collapsed cells in edit mode', () => {
         widget.activeCellIndex = 3;
         widget.mode = 'edit';
         widget.widgets[1].inputHidden = true;
         widget.widgets[2].inputHidden = true;
         widget.widgets[3].inputHidden = false;
-        const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectAbove(widget);
-        await waitForChange;
         expect(widget.activeCellIndex).toBe(0);
       });
     });
 
     describe('#selectBelow()', () => {
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => {
-          reject('expected timeout');
-        }, 5000);
-      });
-      timeoutPromise.catch(() => null);
-
-      it('should select the cell below the active cell', async () => {
-        const waitForChange = signalToPromise(widget.stateChanged);
+      it('should select the cell below the active cell', () => {
         NotebookActions.selectBelow(widget);
-        await waitForChange;
         expect(widget.activeCellIndex).toBe(1);
       });
 
-      it('should be a no-op if there is no model', async () => {
+      it('should be a no-op if there is no model', () => {
         widget.model = null;
-        const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectBelow(widget);
-        // should timeout as there is no change.
-        let err: string = '';
-        try {
-          await Promise.race([waitForChange, timeoutPromise]);
-        } catch (e) {
-          err = e;
-        } finally {
-          expect(err).toMatch('expected timeout');
-        }
         expect(widget.activeCellIndex).toBe(-1);
       });
 
-      it('should not wrap around to the top', async () => {
+      it('should not wrap around to the top', () => {
         widget.activeCellIndex = widget.widgets.length - 1;
-        const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectBelow(widget);
-        // should timeout as there is no change.
-        let err: string = '';
-        try {
-          await Promise.race([waitForChange, timeoutPromise]);
-        } catch (e) {
-          err = e;
-        } finally {
-          expect(err).toMatch('expected timeout');
-        }
         expect(widget.activeCellIndex).not.toBe(0);
       });
 
-      it('should preserve the mode', async () => {
+      it('should preserve the mode', () => {
         widget.activeCellIndex = 2;
-        let waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectBelow(widget);
-        await waitForChange;
         expect(widget.mode).toBe('command');
         widget.mode = 'edit';
-        waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectBelow(widget);
-        await waitForChange;
         expect(widget.mode).toBe('edit');
       });
 
-      it('should not change if in edit mode and no non-collapsed cells below', async () => {
+      it('should not change if in edit mode and no non-collapsed cells below', () => {
         widget.activeCellIndex = widget.widgets.length - 2;
         widget.mode = 'edit';
         widget.widgets[widget.widgets.length - 1].inputHidden = true;
-        const waitForChange = signalToPromise(widget.stateChanged);
         NotebookActions.selectBelow(widget);
-        // should timeout as there is no change.
-        let err: string = '';
-        try {
-          await Promise.race([waitForChange, timeoutPromise]);
-        } catch (e) {
-          err = e;
-        } finally {
-          expect(err).toMatch('expected timeout');
-        }
         expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
       });
     });

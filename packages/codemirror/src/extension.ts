@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
-import { defaultKeymap, indentLess } from '@codemirror/commands';
+import { defaultKeymap } from '@codemirror/commands';
 import {
   bracketMatching,
   foldGutter,
@@ -44,6 +44,14 @@ import {
   IEditorThemeRegistry,
   IExtensionsHandler
 } from './token';
+import {
+  closeSearchPanel,
+  findNext,
+  findPrevious,
+  openSearchPanel,
+  selectNextOccurrence,
+  selectSelectionMatches
+} from '@codemirror/search';
 
 /**
  * The class name added to read only editor widgets.
@@ -696,6 +704,10 @@ export namespace EditorExtensionRegistry {
         name: 'keymap',
         default: [
           {
+            key: 'Mod-Enter',
+            run: StateCommands.preventNewLineOnRun
+          },
+          {
             key: 'Enter',
             run: StateCommands.completerOrInsertNewLine
           },
@@ -703,7 +715,7 @@ export namespace EditorExtensionRegistry {
           {
             key: 'Tab',
             run: StateCommands.indentMoreOrInsertTab,
-            shift: indentLess
+            shift: StateCommands.dedentIfNotLaunchingTooltip
           }
         ],
         factory: () =>
@@ -783,6 +795,55 @@ export namespace EditorExtensionRegistry {
             minimum: 0
           }
         }
+      }),
+      Object.freeze({
+        name: 'extendSelection',
+        default: true,
+        factory: () =>
+          createConditionalExtension(
+            keymap.of([
+              {
+                key: 'Mod-Shift-l',
+                run: selectSelectionMatches,
+                preventDefault: true
+              },
+              { key: 'Mod-d', run: selectNextOccurrence, preventDefault: true }
+            ])
+          )
+      }),
+      Object.freeze({
+        // Whether to activate the native CodeMirror search panel or not.
+        name: 'searchWithCM',
+        default: false,
+        factory: () =>
+          createConditionalExtension(
+            keymap.of([
+              {
+                key: 'Mod-f',
+                run: openSearchPanel,
+                scope: 'editor search-panel'
+              },
+              {
+                key: 'F3',
+                run: findNext,
+                shift: findPrevious,
+                scope: 'editor search-panel',
+                preventDefault: true
+              },
+              {
+                key: 'Mod-g',
+                run: findNext,
+                shift: findPrevious,
+                scope: 'editor search-panel',
+                preventDefault: true
+              },
+              {
+                key: 'Escape',
+                run: closeSearchPanel,
+                scope: 'editor search-panel'
+              }
+            ])
+          )
       }),
       Object.freeze({
         name: 'scrollPastEnd',

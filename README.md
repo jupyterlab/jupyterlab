@@ -38,6 +38,9 @@ To learn more about extensions, see the [user documentation](https://jupyterlab.
 
 Read the current JupyterLab documentation on [ReadTheDocs](http://jupyterlab.readthedocs.io/en/stable/).
 
+> [!IMPORTANT]
+> JupyterLab 3 will reach its end of maintenance date on May 15, 2024, anywhere on Earth. To help us make this transition, fixes for critical issues will still be backported until December 31, 2024. If you are still running JupyterLab 3, we strongly encourage you to **upgrade to JupyterLab 4 as soon as possible.** For more information, see [JupyterLab 3 end of maintenance](https://blog.jupyter.org/jupyterlab-3-end-of-maintenance-879778927db2) on the Jupyter Blog.
+
 ---
 
 ## Getting started
@@ -127,22 +130,22 @@ copyright on their contributions. All code is licensed under the terms of the re
 
 ### Team
 
-JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by an open community. The maintenance team is assisted by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
+JupyterLab is part of [Project Jupyter](https://jupyter.org/) and is developed by an open community. The maintenance team is assisted by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.
 
 JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
 - Mehmet Bektas, Netflix (general development, extensions).
 - Alex Bozarth, IBM (general development, extensions).
 - Eric Charles, Datalayer, (general development, extensions).
-- Frédéric Collonval, QuantStack (general development, extensions).
-- Martha Cryan, IBM (general development, extensions).
+- Frédéric Collonval, WebScIT (general development, extensions).
+- Martha Cryan, Mito (general development, extensions).
 - Afshin Darian, QuantStack (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 - Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
 - Jason Grout, Databricks (co-creator, vision, general development).
-- Michał Krassowski, University of Oxford (general development, extensions).
+- Michał Krassowski, Quansight (general development, extensions).
 - Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
 - Gonzalo Peña-Castellanos, QuanSight (general development, i18n, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
@@ -177,4 +180,4 @@ Anyone is welcome to attend, if they would like to discuss a topic or just liste
 - Where: [`jovyan` Zoom](https://zoom.us/my/jovyan?pwd=c0JZTHlNdS9Sek9vdzR3aTJ4SzFTQT09)
 - What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both)
 
-> Notes are archived on [GitHub JupyterLab team compass](https://github.com/jupyterlab/team-compass/issues).
+> Notes are archived on [GitHub Jupyter Frontends team compass](https://github.com/jupyterlab/frontends-team-compass/issues).

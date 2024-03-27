@@ -50,7 +50,6 @@
     "rimraf": "~3.0.0",
     "style-loader": "~3.3.1",
     "webpack": "^5.72.0",
-    "webpack-cli": "^5.0.0",
-    "whatwg-fetch": "^3.0.0"
+    "webpack-cli": "^5.0.0"
   }
 }
