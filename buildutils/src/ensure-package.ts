@@ -168,11 +168,17 @@ export async function ensurePackage(
 
   // Make sure typedoc config files are consistent
   if (fs.existsSync(path.join(pkgPath, 'typedoc.json'))) {
-    const name = data.name.split('/');
-    utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
-      out: `../../docs/api/${name[name.length - 1]}`,
-      theme: '../../typedoc-theme'
-    });
+    let entryPoint = fs.existsSync(path.join(pkgPath, 'src/index.ts'))
+      ? 'src/index.ts'
+      : fs.existsSync(path.join(pkgPath, 'src/index.tsx'))
+      ? 'src/index.tsx'
+      : null;
+    if (entryPoint) {
+      utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
+        extends: ['../../typedoc.base.json'],
+        entryPoints: [entryPoint]
+      });
+    }
   }
 
   let imports: string[] = [];

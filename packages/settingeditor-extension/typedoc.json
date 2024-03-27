@@ -1,4 +1,4 @@
 {
-  "out": "../../docs/api/settingeditor-extension",
-  "theme": "../../typedoc-theme"
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.ts"]
 }

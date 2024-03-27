@@ -1,4 +1,4 @@
 {
-  "out": "../../docs/api/htmlviewer-extension",
-  "theme": "../../typedoc-theme"
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.tsx"]
 }

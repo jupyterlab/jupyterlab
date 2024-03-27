@@ -37,7 +37,6 @@
     "build": "tsc -b",
     "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "docs": "typedoc src",
     "test": "jest -i",
     "test:cov": "jest -i --collect-coverage",
     "test:debug": "node --inspect-brk ../../node_modules/.bin/jest --runInBand",
@@ -73,7 +72,6 @@
     "@types/sanitize-html": "^2.11.0",
     "jest": "^29.2.0",
     "rimraf": "~5.0.5",
-    "typedoc": "~0.24.7",
     "typescript": "~5.1.6"
   },
   "publishConfig": {
