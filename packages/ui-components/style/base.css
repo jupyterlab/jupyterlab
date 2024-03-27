@@ -49,6 +49,11 @@ a:hover {
 }
 
 /* Styles for ui-components */
+.jp-FilterBox {
+  --design-unit: 3;
+  --density: 0;
+}
+
 .jp-Button {
   color: var(--jp-ui-font-color2);
   border-radius: var(--jp-border-radius);

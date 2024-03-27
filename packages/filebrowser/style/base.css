@@ -99,6 +99,10 @@
   display: none;
 }
 
+.jp-FileBrowser-toolbar > .jp-FileBrowser-filterBox {
+  width: 100%;
+}
+
 .jp-Open-Dialog > .jp-FileBrowser {
   min-height: 200px;
 }
