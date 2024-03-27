@@ -2305,7 +2305,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/builder@^4.2.0-alpha.1, @jupyterlab/builder@^4.2.0-alpha.2, @jupyterlab/builder@workspace:builder":
+"@jupyterlab/builder@^4.2.0-alpha.2, @jupyterlab/builder@workspace:builder":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/builder@workspace:builder"
   dependencies:
@@ -3702,7 +3702,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@jupyterlab/launcher@^4.2.0-alpha.1, @jupyterlab/launcher@^4.2.0-alpha.2, @jupyterlab/launcher@workspace:packages/launcher":
+"@jupyterlab/launcher@^4.2.0-alpha.2, @jupyterlab/launcher@workspace:packages/launcher":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/launcher@workspace:packages/launcher"
   dependencies:
@@ -19694,8 +19694,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "test-hyphens-underscore@workspace:jupyterlab/tests/mock_packages/test-hyphens-underscore"
   dependencies:
-    "@jupyterlab/builder": ^4.2.0-alpha.1
-    "@jupyterlab/launcher": ^4.2.0-alpha.1
+    "@jupyterlab/builder": ^4.2.0-alpha.2
+    "@jupyterlab/launcher": ^4.2.0-alpha.2
     rimraf: ~5.0.5
   languageName: unknown
   linkType: soft
@@ -19704,8 +19704,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "test-hyphens@workspace:jupyterlab/tests/mock_packages/test-hyphens"
   dependencies:
-    "@jupyterlab/builder": ^4.2.0-alpha.1
-    "@jupyterlab/launcher": ^4.2.0-alpha.1
+    "@jupyterlab/builder": ^4.2.0-alpha.2
+    "@jupyterlab/launcher": ^4.2.0-alpha.2
     "@types/react": ^18.0.26
     css-loader: ^6.7.1
     rimraf: ~5.0.5
@@ -19719,8 +19719,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "test_no_hyphens@workspace:jupyterlab/tests/mock_packages/test_no_hyphens"
   dependencies:
-    "@jupyterlab/builder": ^4.2.0-alpha.1
-    "@jupyterlab/launcher": ^4.2.0-alpha.1
+    "@jupyterlab/builder": ^4.2.0-alpha.2
+    "@jupyterlab/launcher": ^4.2.0-alpha.2
     rimraf: ~5.0.5
   languageName: unknown
   linkType: soft

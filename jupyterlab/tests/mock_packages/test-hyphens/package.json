@@ -14,10 +14,10 @@
     "install:extension": "jlpm build"
   },
   "dependencies": {
-    "@jupyterlab/launcher": "^4.2.0-alpha.1"
+    "@jupyterlab/launcher": "^4.2.0-alpha.2"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.2.0-alpha.1",
+    "@jupyterlab/builder": "^4.2.0-alpha.2",
     "@types/react": "^18.0.26",
     "css-loader": "^6.7.1",
     "rimraf": "~5.0.5",
