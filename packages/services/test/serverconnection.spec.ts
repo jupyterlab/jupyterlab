@@ -26,7 +26,7 @@ describe('ServerConnection', () => {
         {},
         settings
       );
-      expect(response.statusText).toBe('OK');
+      expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toBe('hello');
     });
@@ -87,7 +87,7 @@ describe('ServerConnection', () => {
         settings
       );
       const err = new ServerConnection.ResponseError(response);
-      expect(err.message).toBe('Invalid response: 200 OK');
+      expect(err.message).toBe('Invalid response: 200 ');
     });
   });
 

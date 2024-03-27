@@ -120,7 +120,6 @@ const UNUSED: Dict<string[]> = {
     '@babel/core',
     '@babel/preset-env',
     'fs-extra',
-    'node-fetch',
     'identity-obj-proxy',
     'jest-environment-jsdom',
     'jest-junit'
@@ -283,7 +282,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/tooltip-extension',
     '@jupyterlab/translation-extension',
     '@jupyterlab/ui-components-extension',
-    '@jupyterlab/vega5-extension'
+    '@jupyterlab/vega5-extension',
+    '@jupyterlab/workspaces-extension'
   ],
   '@jupyterlab/notebook': ['@jupyterlab/application'],
   '@jupyterlab/rendermime-interfaces': ['@lumino/widgets'],

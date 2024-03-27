@@ -12,6 +12,7 @@ import {
   consoleIcon,
   IDisposableMenuItem,
   jupyterIcon,
+  kernelIcon,
   LabIcon,
   notebookIcon,
   RankedMenu
@@ -20,8 +21,12 @@ import { CommandRegistry } from '@lumino/commands';
 import { Throttler } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
 import { CommandIDs } from '.';
+import React, { ReactNode } from 'react';
 
-const ITEM_CLASS = 'jp-mod-kernel';
+const KERNEL_ITEM_CLASS = 'jp-mod-kernel';
+const KERNELSPEC_ITEM_CLASS = 'jp-mod-kernelspec';
+const WIDGET_ITEM_CLASS = 'jp-mod-kernel-widget';
+const KERNEL_LABEL_ID = 'jp-RunningSessions-item-label-kernel-id';
 
 /**
  * Add the running kernel manager (notebooks & consoles) to the running panel.
@@ -47,18 +52,33 @@ export async function addKernelRunningSessionManager(
   // Add the kernels pane to the running sidebar.
   managers.add({
     name: trans.__('Kernels'),
-    running: () =>
-      Array.from(kernels.running()).map(
-        kernel =>
+    running: () => {
+      const kernelsBySpec = new Map<string, Private.RunningKernel[]>();
+
+      for (const kernel of kernels.running()) {
+        const list = kernelsBySpec.get(kernel.name) ?? [];
+        kernelsBySpec.set(kernel.name, list);
+        list.push(
           new RunningKernel({
             commands,
             kernel,
             kernels,
             sessions,
-            spec: kernelspecs.specs?.kernelspecs[kernel.name],
             trans
           })
-      ),
+        );
+      }
+
+      return Array.from(kernelsBySpec.entries()).map(
+        ([spec, kernels]) =>
+          new Private.KernelSpecItem({
+            name: spec,
+            kernels,
+            spec: kernelspecs.specs?.kernelspecs[spec],
+            trans
+          })
+      );
+    },
     shutdownAll: () => kernels.shutdownAll(),
     refreshRunning: () =>
       Promise.all([kernels.refreshRunning(), sessions.refreshRunning()]),
@@ -71,7 +91,8 @@ export async function addKernelRunningSessionManager(
   });
 
   // Add running kernels commands to the registry.
-  const test = (node: HTMLElement) => node.classList.contains(ITEM_CLASS);
+  const test = (node: HTMLElement) =>
+    node.classList.contains(KERNEL_ITEM_CLASS);
   commands.addCommand(CommandIDs.kernelNewConsole, {
     icon: consoleIcon,
     label: trans.__('New Console for Kernel'),
@@ -166,15 +187,68 @@ export async function addKernelRunningSessionManager(
 }
 
 namespace Private {
+  export class KernelSpecItem implements IRunningSessions.IRunningItem {
+    constructor(options: KernelSpecItem.IOptions) {
+      this._name = options.name;
+      this.className = KERNELSPEC_ITEM_CLASS;
+      this._kernels = options.kernels;
+      this.spec = options.spec || null;
+      this.trans = options.trans;
+    }
+
+    readonly className: string;
+
+    readonly spec: KernelSpec.ISpecModel | null;
+
+    readonly trans: IRenderMime.TranslationBundle;
+
+    private _name: string;
+    private _kernels: RunningKernel[];
+
+    icon(): LabIcon | string {
+      const { spec } = this;
+      if (!spec || !spec.resources) {
+        return jupyterIcon;
+      }
+      return (
+        spec.resources['logo-svg'] ||
+        spec.resources['logo-64x64'] ||
+        spec.resources['logo-32x32']
+      );
+    }
+
+    label(): string {
+      const { _name, spec } = this;
+      return spec?.display_name || _name;
+    }
+
+    get children(): IRunningSessions.IRunningItem[] {
+      return this._kernels;
+    }
+  }
+
+  export namespace KernelSpecItem {
+    export interface IOptions {
+      kernels: RunningKernel[];
+      name: string;
+      spec?: KernelSpec.ISpecModel;
+      trans: IRenderMime.TranslationBundle;
+    }
+  }
+
+  type DocumentWidgetWithKernelItem = Omit<
+    IRunningSessions.IRunningItem,
+    'label'
+  > & { label(): string };
+
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
-      this.className = ITEM_CLASS;
+      this.className = KERNEL_ITEM_CLASS;
       this.commands = options.commands;
       this.kernel = options.kernel;
       this.context = this.kernel.id;
       this.kernels = options.kernels;
       this.sessions = options.sessions;
-      this.spec = options.spec || null;
       this.trans = options.trans;
     }
 
@@ -190,19 +264,17 @@ namespace Private {
 
     readonly sessions: Session.IManager;
 
-    readonly spec: KernelSpec.ISpecModel | null;
-
     readonly trans: IRenderMime.TranslationBundle;
 
-    get children(): IRunningSessions.IRunningItem[] {
-      const children: IRunningSessions.IRunningItem[] = [];
+    get children(): DocumentWidgetWithKernelItem[] {
+      const children: DocumentWidgetWithKernelItem[] = [];
       const open = CommandIDs.kernelOpenSession;
       const { commands } = this;
       for (const session of this.sessions.running()) {
         if (this.kernel.id === session.kernel?.id) {
           const { name, path, type } = session;
           children.push({
-            className: ITEM_CLASS,
+            className: WIDGET_ITEM_CLASS,
             context: this.kernel.id,
             open: () => void commands.execute(open, { name, path, type }),
             icon: () =>
@@ -224,26 +296,24 @@ namespace Private {
     }
 
     icon(): LabIcon | string {
-      const { spec } = this;
-      if (!spec || !spec.resources) {
-        return jupyterIcon;
-      }
-      return (
-        spec.resources['logo-svg'] ||
-        spec.resources['logo-64x64'] ||
-        spec.resources['logo-32x32']
-      );
+      return kernelIcon;
     }
 
-    label(): string {
-      const { kernel, spec } = this;
-      return spec?.display_name || kernel.name;
+    label(): ReactNode {
+      const { kernel } = this;
+      const kernelIdPrefix = kernel.id.split('-')[0];
+      return (
+        <>
+          {this._summary}{' '}
+          <span className={KERNEL_LABEL_ID}>({kernelIdPrefix})</span>
+        </>
+      );
     }
 
     labelTitle(): string {
       const { trans } = this;
       const { id } = this.kernel;
-      const title = [`${this.label()}: ${id}`];
+      const title = [`${this._summary}: ${id}`];
       for (const session of this.sessions.running()) {
         if (this.kernel.id === session.kernel?.id) {
           const { path, type } = session;
@@ -251,6 +321,17 @@ namespace Private {
         }
       }
       return title.join('\n\n');
+    }
+
+    private get _summary(): string {
+      const children = this.children;
+      return children.length == 1
+        ? children[0].label()
+        : this.trans.__(
+            '%1 and %2 more',
+            children[0].label(),
+            children.length - 1
+          );
     }
   }
 

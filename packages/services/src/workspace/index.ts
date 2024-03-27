@@ -166,6 +166,16 @@ export namespace Workspace {
        * The workspace ID.
        */
       id: string;
+
+      /**
+       * The last modification date and time for this workspace (ISO 8601 format).
+       */
+      last_modified?: string;
+
+      /**
+       * The creation date and time for this workspace (ISO 8601 format).
+       */
+      created?: string;
     };
   }
 }

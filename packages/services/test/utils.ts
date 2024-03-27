@@ -100,7 +100,7 @@ export function getRequestHandler(
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
   body: any
 ): ServerConnection.ISettings {
-  const fetch = (info: RequestInfo, init: RequestInit) => {
+  const customFetch = (info: RequestInfo, init?: RequestInit) => {
     // Normalize the body.
     body = JSON.stringify(body);
 
@@ -108,7 +108,7 @@ export function getRequestHandler(
     const response = new Response(body, { status });
     return Promise.resolve(response as any);
   };
-  return ServerConnection.makeSettings({ fetch });
+  return ServerConnection.makeSettings({ fetch: customFetch });
 }
 
 /**
@@ -134,6 +134,10 @@ export function handleRequest(item: IService, status: number, body: any): void {
     // Normalize the body.
     if (typeof body !== 'string') {
       body = JSON.stringify(body);
+    }
+    // Body should be null for these status codes
+    if (status === 204 || status === 205) {
+      body = null;
     }
 
     // Create the response and return it as a promise.
