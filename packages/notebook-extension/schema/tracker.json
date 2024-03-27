@@ -817,7 +817,7 @@
       "title": "Windowing mode",
       "description": "'defer': Improve loading time - Wait for idle CPU cycles to attach out of viewport cells - 'full': Best performance with side effects - Attach to the DOM only cells in viewport - 'none': Worst performance without side effects - Attach all cells to the viewport",
       "enum": ["defer", "full", "none"],
-      "default": "defer"
+      "default": "full"
     },
     "accessKernelHistory": {
       "title": "Kernel history access",
