@@ -237,6 +237,12 @@ function activateCsv(
       isEnabled
     });
   }
+
+  const notify = () => {
+    commands.notifyCommandChanged(CommandIDs.CSVGoToLine);
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 }
 
 /**
@@ -391,6 +397,10 @@ function activateTsv(
       isEnabled
     });
   }
+
+  tracker.currentChanged.connect(() => {
+    commands.notifyCommandChanged(CommandIDs.TSVGoToLine);
+  });
 }
 
 /**

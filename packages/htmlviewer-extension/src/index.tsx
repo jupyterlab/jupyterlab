@@ -200,6 +200,11 @@ function activateHTMLViewer(
       current.trusted = !current.trusted;
     }
   });
+
+  tracker.currentChanged.connect(() => {
+    app.commands.notifyCommandChanged(CommandIDs.trustHTML);
+  });
+
   if (palette) {
     palette.addItem({
       command: CommandIDs.trustHTML,

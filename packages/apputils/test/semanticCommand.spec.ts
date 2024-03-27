@@ -95,5 +95,48 @@ describe('@jupyterlab/apputils', () => {
         expect(semanticCmd.getActiveCommandId(new Widget())).toEqual(commandId);
       });
     });
+
+    describe('#ids', () => {
+      it('should list the command ids', () => {
+        const commandIds = ['not:selected', 'test:command'];
+        semanticCmd.add({
+          id: commandIds[0],
+          rank: 20
+        });
+
+        semanticCmd.add({
+          id: commandIds[1],
+          rank: 10
+        });
+
+        expect(semanticCmd.ids).toEqual(commandIds);
+      });
+    });
+
+    describe('#remove', () => {
+      it('should remove the provide command id', () => {
+        const commandId = 'test:command';
+        semanticCmd.add({
+          id: commandId,
+          rank: 10
+        });
+
+        expect(semanticCmd.ids).toHaveLength(1);
+        semanticCmd.remove(commandId);
+        expect(semanticCmd.ids).toHaveLength(0);
+      });
+
+      it('should do nothing if the command id is not part of the semantic command', () => {
+        const commandId = 'test:command';
+        semanticCmd.add({
+          id: commandId,
+          rank: 10
+        });
+
+        expect(semanticCmd.ids).toHaveLength(1);
+        semanticCmd.remove('dummy:command');
+        expect(semanticCmd.ids).toHaveLength(1);
+      });
+    });
   });
 });

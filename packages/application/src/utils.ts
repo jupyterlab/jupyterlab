@@ -4,13 +4,13 @@
  */
 
 import { SemanticCommand } from '@jupyterlab/apputils';
-import { TranslationBundle } from '@jupyterlab/translation';
+import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 import { CommandRegistry } from '@lumino/commands';
 import { JupyterFrontEnd } from './frontend';
 
 export interface ISemanticCommandDefault {
   /**
-   * Default command to execute if no command is enabled
+   * Default command id to execute if no command is enabled
    */
   execute?: string;
   /**
@@ -36,6 +36,106 @@ export interface ISemanticCommandDefault {
 }
 
 /**
+ * Semantic command(s) options
+ */
+export interface ISemanticCommandOptions {
+  /**
+   * Semantic command ID
+   */
+  id: string;
+  /**
+   * Application command registry
+   */
+  commands: CommandRegistry;
+  /**
+   * Application shell
+   */
+  shell: JupyterFrontEnd.IShell;
+  /**
+   * Semantic commands
+   */
+  semanticCommands: SemanticCommand | SemanticCommand[];
+  /**
+   * Default commands options
+   *
+   * It will be used if the enabled command is not defining one
+   * or if no command is enabled.
+   */
+  default?: ISemanticCommandDefault;
+  /**
+   * Override commands options
+   *
+   * It will override the enabled command attribute.
+   */
+  overrides?: Omit<CommandRegistry.ICommandOptions, 'execute'>;
+  /**
+   * Domain specific translation object.
+   */
+  trans?: TranslationBundle;
+}
+
+/**
+ * Add a semantic commands to the application and take care
+ * of setting up the command changed signal.
+ *
+ * @param options Semantic command options
+ */
+export function addSemanticCommand(options: ISemanticCommandOptions): void {
+  const {
+    id,
+    commands,
+    shell,
+    semanticCommands,
+    default: defaultValues,
+    overrides,
+    trans
+  } = options;
+  commands.addCommand(id, {
+    ...createSemanticCommand(
+      { commands, shell },
+      semanticCommands,
+      defaultValues ?? {},
+      trans ?? nullTranslator.load('jupyterlab')
+    ),
+    ...overrides
+  });
+  const commandList = Array.isArray(semanticCommands)
+    ? semanticCommands
+    : [semanticCommands];
+
+  const onCommandChanged = (
+    commands: CommandRegistry,
+    args: CommandRegistry.ICommandChangedArgs
+  ) => {
+    if (args.id) {
+      if (args.id === id && args.type === 'removed') {
+        commands.commandChanged.disconnect(onCommandChanged);
+      } else {
+        const commandIds = commandList.reduce<string[]>(
+          (agg, cmd) => agg.concat(cmd.ids),
+          []
+        );
+        if (commandIds.includes(args.id)) {
+          switch (args.type) {
+            case 'changed':
+            case 'many-changed':
+              commands.notifyCommandChanged(id);
+              break;
+            case 'removed':
+              for (const cmd of commandList) {
+                cmd.remove(args.id);
+              }
+              break;
+          }
+        }
+      }
+    }
+  };
+
+  commands.commandChanged.connect(onCommandChanged);
+}
+
+/**
  * Create the command options from the given semantic commands list
  * and the given default values.
  *
@@ -44,9 +144,14 @@ export interface ISemanticCommandDefault {
  * @param defaultValues Default values
  * @param trans Translation bundle
  * @returns Command options
+ *
+ * @deprecated Please use {@link addSemanticCommand}. This function will
+ * be removed of the public API in JupyterLab 5.
  */
 export function createSemanticCommand(
-  app: JupyterFrontEnd,
+  app:
+    | JupyterFrontEnd
+    | { commands: CommandRegistry; shell: JupyterFrontEnd.IShell },
   semanticCommands: SemanticCommand | SemanticCommand[],
   defaultValues: ISemanticCommandDefault,
   trans: TranslationBundle

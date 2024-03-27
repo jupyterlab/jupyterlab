@@ -300,6 +300,10 @@ const print: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    app.shell.currentChanged?.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.print);
+    });
   }
 };
 
@@ -336,6 +340,11 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
         }
       }
     });
+
+    app.shell.currentChanged?.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.toggleHeader);
+    });
+
     if (palette) {
       palette.addItem({ command: CommandIDs.toggleHeader, category });
     }
