@@ -65,7 +65,7 @@ export namespace TabBarSvg {
           className,
           title,
           // TODO once Lumino PR #655 is incorporated into JupyterLab, make this
-          // element a button rather and a div with role=button
+          // element a button rather than a div[role=button]
           role: 'button'
         },
         closeIcon
