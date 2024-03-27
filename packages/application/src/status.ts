@@ -73,13 +73,22 @@ export class LabStatus implements ILabStatus {
    */
   setBusy(): IDisposable {
     const oldBusy = this.isBusy;
+    const ariaLiveRegion = document.getElementById('commands-aria-live');
+    let timeout: any;
     this._busyCount++;
     if (this.isBusy !== oldBusy) {
       this._busySignal.emit(this.isBusy);
+      timeout = setTimeout(() => {
+        ariaLiveRegion!.append(
+          'A notebook cell is processing. Kernel status is busy.'
+        );
+      }, 10000);
     }
     return new DisposableDelegate(() => {
       const oldBusy = this.isBusy;
       this._busyCount--;
+      clearTimeout(timeout);
+      ariaLiveRegion!.append('Processing complete. Kernel status is idle.');
       if (this.isBusy !== oldBusy) {
         this._busySignal.emit(this.isBusy);
       }
