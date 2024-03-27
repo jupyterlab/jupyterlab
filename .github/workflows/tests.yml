@@ -20,11 +20,19 @@ jobs:
         uses: actions/checkout@v4
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      - run: |
+          echo "DOCKER_UID=$(id -u)" >> "$GITHUB_ENV"
+          echo "DOCKER_GID=$(id -g)" >> "$GITHUB_ENV"
       - name: Build and export
         uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/Dockerfile
+          build-args: |
+            NEW_MAMBA_USER_ID=${{ env.DOCKER_UID }}
+            NEW_MAMBA_USER_GID=${{ env.DOCKER_GID }}
+            NODE_VERSION=20.1
+            PYTHON_VERSION=3.12
           target: build
           tags: ${{ env.IMAGE }}
           outputs: type=docker,dest=/tmp/jlab-build.tar
@@ -41,23 +49,22 @@ jobs:
     strategy:
       matrix:
         group: [integrity, usage, usage2, python]
-        python-version: ["3.11"]
       fail-fast: false
     timeout-minutes: 45
     runs-on: ubuntu-22.04
     steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: jupyterlab-docker
-        path: /tmp
-    - name: Load image
-      run: |
-        docker load --input /tmp/jlab-build.tar
-        docker image ls -a
-    - name: Run test ${{ matrix.group }}
-      run: |
-        docker run --env CI=1 --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jupyterlab-docker
+          path: /tmp
+      - name: Load image
+        run: |
+          docker load --input /tmp/jlab-build.tar
+          docker image ls -a
+      - name: Run test ${{ matrix.group }}
+        run: |
+          docker run --env CI=1 --env GROUP=${{ matrix.group }} ${{ env.IMAGE }} bash ./scripts/ci_script.sh
     # FIXME upload artifacts
 
   python-macos-tests:
@@ -67,7 +74,7 @@ jobs:
     strategy:
       matrix:
         group: [integrity, python, usage, usage2]
-        python-version: ["3.11"]
+        python-version: ['3.11']
       fail-fast: false
     timeout-minutes: 45
     runs-on: macos-latest
@@ -98,7 +105,7 @@ jobs:
     strategy:
       matrix:
         group: [integrity, python]
-        python-version: ["3.11"]
+        python-version: ['3.11']
       fail-fast: false
     runs-on: windows-latest
     timeout-minutes: 40
@@ -139,7 +146,7 @@ jobs:
         # FIXME This will be used by the base setup action
         # apply for other python version: group: [integrity, usage, usage2, python]
         # python-version: ["3.8", "3.11"]
-        python-version: ["3.11"]
+        python-version: ['3.11']
         include:
           - group: examples
             upload-output: true
@@ -147,67 +154,63 @@ jobs:
             upload-output: true
         exclude:
           - group: integrity
-            python-version: "3.8"
+            python-version: '3.8'
           - group: integrity2
-            python-version: "3.8"
+            python-version: '3.8'
           - group: integrity3
-            python-version: "3.8"
+            python-version: '3.8'
           - group: release_test
-            python-version: "3.8"
+            python-version: '3.8'
           - group: docs
-            python-version: "3.8"
+            python-version: '3.8'
           - group: usage
-            python-version: "3.8"
+            python-version: '3.8'
           - group: usage2
-            python-version: "3.8"
+            python-version: '3.8'
           - group: nonode
-            python-version: "3.8"
+            python-version: '3.8'
           - group: lint
-            python-version: "3.8"
+            python-version: '3.8'
           - group: examples
-            python-version: "3.8"
+            python-version: '3.8'
           - group: splice_source
-            python-version: "3.8"
+            python-version: '3.8'
       fail-fast: false
     timeout-minutes: 45
     runs-on: ubuntu-22.04
     env:
       DOCKER_VOLUME: ${{ github.workspace }}/shared-volume
     steps:
-    - name: Download artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: jupyterlab-docker
-        path: /tmp
-    - name: Load image
-      run: |
-        docker load --input /tmp/jlab-build.tar
-        docker image ls -a
-    - name: Run test ${{ matrix.group }}
-      run: |
-        mkdir -p ${DOCKER_VOLUME}
-        docker run \
-          -v ${DOCKER_VOLUME}:/shared-volume \
-          --env CI=1 --env GROUP=${{ matrix.group }} --env DOCKER_VOLUME="/shared-volume" \
-          ${{ env.IMAGE }} \
-          bash ./scripts/ci_script.sh
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jupyterlab-docker
+          path: /tmp
+      - name: Load image
+        run: |
+          docker load --input /tmp/jlab-build.tar
+          docker image ls -a
+      - name: Run test ${{ matrix.group }}
+        run: |
+          mkdir -p ${DOCKER_VOLUME}
+          docker run \
+            -v ${DOCKER_VOLUME}:/shared-volume \
+            --env CI=1 --env GROUP=${{ matrix.group }} --env DOCKER_VOLUME="/shared-volume" \
+            ${{ env.IMAGE }} \
+            bash ./scripts/ci_script.sh
 
-    - name: Upload Test assets
-      if: ${{ matrix.upload-output && always() }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.group }} ${{ github.run_number }}
-        path: ${{ env.DOCKER_VOLUME }}
+      - name: Upload Test assets
+        if: ${{ matrix.upload-output && always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.group }} ${{ github.run_number }}
+          path: ${{ env.DOCKER_VOLUME }}
 
   js-tests:
     name: Test ${{ matrix.group }}
     needs: build
     strategy:
       matrix:
-        # Fix for https://github.com/jupyterlab/jupyterlab/issues/13903
-        include:
-          - group: js-debugger
-            python-version: '3.11'
         group:
           [
             js-application,
@@ -252,7 +255,7 @@ jobs:
             js-translation,
             js-ui-components,
             js-vega5-extension,
-            js-workspaces,
+            js-workspaces
           ]
       fail-fast: false
     runs-on: ubuntu-22.04
@@ -280,8 +283,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shardIndex: [1, 2, 3, 4, 5, 6, 7, 8]
-        shardTotal: [8]
+        shardIndex: [1, 2, 3, 4]
+        shardTotal: [4]
     env:
       DOCKER_VOLUME: ${{ github.workspace }}/shared-volume
     steps:
@@ -294,14 +297,6 @@ jobs:
         run: |
           docker load --input /tmp/jlab-build.tar
           docker image ls -a
-
-      # FIXME
-      # - name: Set up browser cache
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: |
-      #       ${{ github.workspace }}/pw-browsers
-      #     key: ${{ runner.os }}-${{ hashFiles('ui-tests/yarn.lock') }}
 
       - name: Run test galata integration test
         run: |
@@ -317,7 +312,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jupyterlab-galata-test-assets-${{ matrix.shardIndex }}
-          path: ${{ env.DOCKER_VOLUME }}
+          path:
+            ${{ env.DOCKER_VOLUME }}
             # galata/test-jupyterlab-results
             # galata/test-results
           retention-days: 1
@@ -342,33 +338,33 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 20
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    - name: Install Playwright
-      run: |
-        npm init -y
-        npm install playwright
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install playwright
 
-    - name: Download blob reports from GitHub Actions Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: pw-assets
-        pattern: jupyterlab-galata-test-assets-*
-        merge-multiple: true
+      - name: Download blob reports from GitHub Actions Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: pw-assets
+          pattern: jupyterlab-galata-test-assets-*
+          merge-multiple: true
 
-    - name: Merge into HTML Report
-      run: npx playwright merge-reports --reporter html ./pw-assets/pw-blob-report
+      - name: Merge into HTML Report
+        run: npx playwright merge-reports --reporter html ./pw-assets/pw-blob-report
 
-    - name: Upload HTML report
-      uses: actions/upload-artifact@v4
-      with:
-        name: jupyterlab-galata-test-assets-${{ github.run_attempt }}
-        path: |
-          playwright-report
-          pw-assets
-        retention-days: 14
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jupyterlab-galata-test-assets-${{ github.run_attempt }}
+          path: |
+            playwright-report
+            pw-assets
+          retention-days: 14
 
   check_links:
     # FIXME we should use the docker image as it builds the JS assets
@@ -383,7 +379,7 @@ jobs:
           node ./jupyterlab/staging/yarn.js run docs
       - uses: jupyterlab/maintainer-tools/.github/actions/check-links@v1
         with:
-          ignore_glob: "docs/api packages/ui-components/docs/source/ui_components.rst images"
+          ignore_glob: 'docs/api packages/ui-components/docs/source/ui_components.rst images'
           ignore_links: ".*/images/[\\w-]+.png https://docs.github.com/en/.* https://jupyterlab.github.io https://mybinder.org/v2/gh/jupyterlab/.* https://github.com/[^/]+/?$"
 
   test_minimum_versions:
@@ -396,7 +392,7 @@ jobs:
       - name: Base Setup
         uses: jupyterlab/maintainer-tools/.github/actions/base-setup@v1
         with:
-          python_version: "3.8"
+          python_version: '3.8'
       - name: Install minimum versions
         uses: jupyterlab/maintainer-tools/.github/actions/install-minimums@v1
       - name: Install dependencies
@@ -424,7 +420,7 @@ jobs:
           python -m build --sdist
       - uses: actions/upload-artifact@v4
         with:
-          name: "sdist"
+          name: 'sdist'
           path: dist/*.tar.gz
 
   test_sdist:
