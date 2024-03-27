@@ -323,15 +323,6 @@ export async function ensurePackage(
     });
   }
 
-  // Handle typedoc config output.
-  const tdOptionsPath = path.join(pkgPath, 'tdoptions.json');
-  if (fs.existsSync(tdOptionsPath)) {
-    const tdConfigData = utils.readJSONFile(tdOptionsPath);
-    const pkgDirName = pkgPath.split('/').pop();
-    tdConfigData['out'] = `../../docs/api/${pkgDirName}`;
-    utils.writeJSONFile(tdOptionsPath, tdConfigData);
-  }
-
   // Handle references.
   const references: { [key: string]: string } = Object.create(null);
   Object.keys(deps).forEach(name => {
