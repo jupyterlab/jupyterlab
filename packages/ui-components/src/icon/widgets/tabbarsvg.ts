@@ -60,11 +60,11 @@ export namespace TabBarSvg {
       );
 
       return hpass(
-        'button',
+        'div',
         {
           className,
           title,
-          type: 'button'
+          role: 'button'
         },
         closeIcon
       ) as unknown as VirtualElement;
