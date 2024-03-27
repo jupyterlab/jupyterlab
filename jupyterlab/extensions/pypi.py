@@ -332,7 +332,9 @@ class PyPIExtensionManager(ExtensionManager):
             The action result
         """
         current_loop = tornado.ioloop.IOLoop.current()
-        with tempfile.NamedTemporaryFile(mode="w+", delete=True) as fconstraint:
+        with tempfile.TemporaryDirectory() as ve_dir, tempfile.NamedTemporaryFile(
+            mode="w+", dir=ve_dir, delete=False
+        ) as fconstraint:
             fconstraint.write(f"jupyterlab=={__version__}")
             fconstraint.flush()
 
