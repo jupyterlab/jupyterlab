@@ -188,7 +188,7 @@ jobs:
         mkdir -p ${DOCKER_VOLUME}
         docker run \
           -v ${DOCKER_VOLUME}:/shared-volume \
-          --env CI=1 --env GROUP=${{ matrix.group }} \
+          --env CI=1 --env GROUP=${{ matrix.group }} --env DOCKER_VOLUME="/shared-volume" \
           ${{ env.IMAGE }} \
           bash ./scripts/ci_script.sh
 
@@ -308,7 +308,7 @@ jobs:
           mkdir -p ${DOCKER_VOLUME}
           docker run \
             -v ${DOCKER_VOLUME}:/shared-volume \
-            --env CI=1 --env GROUP=e2e-galata --env DOCKER_VOLUME=/shared-volume \
+            --env CI=1 --env GROUP=e2e-galata --env DOCKER_VOLUME="/shared-volume/" \
             ${{ env.IMAGE }} \
             bash ./scripts/ci_script.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
