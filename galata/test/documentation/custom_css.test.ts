@@ -46,9 +46,10 @@ test.describe('Use custom CSS layout', () => {
 
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     await page.notebook.activate(fileName);
+    const panel = (await page.activity.getPanelLocator())!;
 
-    expect(
-      await (await page.activity.getPanelLocator())?.screenshot()
-    ).toMatchSnapshot('custom-css-notebook-markdown.png');
+    expect(await panel.locator('.jp-Notebook').screenshot()).toMatchSnapshot(
+      'custom-css-notebook-markdown.png'
+    );
   });
 });
