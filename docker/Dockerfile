@@ -63,7 +63,7 @@ USER root
 RUN --mount=type=cache,target=/var/cache/apt \
     export WORKDIR=/ms-playwright && mkdir -p ${WORKDIR} && cd ${WORKDIR} \
     && micromamba run npx playwright install-deps \
-    && apt-get install fonts-dejavu fonts-noto \
+    && DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends install -y fonts-dejavu \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && cd / && rm -rf ${WORKDIR} \
