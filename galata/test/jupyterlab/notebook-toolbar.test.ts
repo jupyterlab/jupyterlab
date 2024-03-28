@@ -206,7 +206,7 @@ test.describe('Reactive toolbar', () => {
     page
   }) => {
     const toolbar = page.locator('.jp-NotebookPanel-toolbar');
-    await expect(toolbar.locator('.jp-Toolbar-item:visible')).toHaveCount(14);
+    await expect(toolbar.locator('.jp-Toolbar-item:visible')).toHaveCount(15);
     await expect(
       toolbar.locator('.jp-Toolbar-responsive-opener')
     ).not.toBeVisible();
