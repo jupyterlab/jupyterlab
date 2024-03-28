@@ -7,6 +7,8 @@ import { Extension } from '@codemirror/state';
 
 import { EditorView } from '@codemirror/view';
 
+import { ElementExt } from '@lumino/domutils';
+
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { DOMUtils, ISessionContext } from '@jupyterlab/apputils';
@@ -706,6 +708,8 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   protected prompt = '';
   protected translator: ITranslator;
   protected _displayChanged = new Signal<this, void>(this);
+  protected _scrollRequested = new Signal<Cell, Cell.IScrollRequest>(this);
+  protected _inViewport: boolean | null;
 
   /**
    * Editor extension emitting `scrollRequested` signal on scroll.
@@ -736,13 +740,11 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   );
 
   private _editorConfig: Record<string, any> = {};
-  private _scrollRequested = new Signal<Cell, Cell.IScrollRequest>(this);
   private _editorExtensions: Extension[] = [];
   private _input: InputArea | null;
   private _inputHidden = false;
   private _inputWrapper: Widget | null;
   private _inputPlaceholder: InputPlaceholder | null;
-  private _inViewport: boolean | null;
   private _inViewportChanged: Signal<Cell, boolean> = new Signal<Cell, boolean>(
     this
   );
@@ -958,7 +960,7 @@ export namespace Cell {
      * require the cell to be first scrolled into the viewport to
      * then enable proper scrolling within cell.
      */
-    scrollWithinCell: () => void;
+    scrollWithinCell: (options: { scroller: HTMLElement }) => void;
     /**
      * Whether the default scrolling was prevented due to the cell being out of viewport.
      */
@@ -1083,6 +1085,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
       promptOverlay: true,
       inputHistoryScope: options.inputHistoryScope
     }));
+    this._observeCaretMovementInOuput(output);
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
       this.outputsScrolled = !this.outputsScrolled;
@@ -1096,6 +1099,70 @@ export class CodeCell extends Cell<ICodeCellModel> {
     model.outputs.changed.connect(this.onOutputChanged, this);
     model.outputs.stateChanged.connect(this.onOutputChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
+  }
+
+  /**
+   * Observe the movement of the caret in the output area.
+   *
+   * Emits scroll request if the caret moved.
+   */
+  private _observeCaretMovementInOuput(output: OutputArea) {
+    let lastOnCaretMovedHandler: () => void;
+    let lastTarget: HTMLElement | null;
+
+    output.node.addEventListener('keydown', (e: KeyboardEvent) => {
+      const inWindowedContainer = this._inViewport !== null;
+      const defaultPrevented = inWindowedContainer && !this._inViewport;
+
+      // Because we do not want to scroll on any key, but only on keys which
+      // move the caret (this on keys which cause input and on keys like left,
+      // right, top, bottom arrow, home, end, page down/up - but only if the
+      // cursor is not at the respective end of the input) we need to listen
+      // to the `selectionchange` event on target inputs/textareas, etc.
+      const target = e.target;
+
+      if (!target || !(target instanceof HTMLElement)) {
+        return;
+      }
+
+      // Make sure the previous listener gets disconnected
+      if (lastTarget) {
+        lastTarget.removeEventListener(
+          'selectionchange',
+          lastOnCaretMovedHandler
+        );
+        document.removeEventListener(
+          'selectionchange',
+          lastOnCaretMovedHandler
+        );
+      }
+
+      const onCaretMoved = () => {
+        this._scrollRequested.emit({
+          scrollWithinCell: ({ scroller }) => {
+            ElementExt.scrollIntoViewIfNeeded(scroller, target);
+          },
+          defaultPrevented
+        });
+      };
+
+      // Remember the most recent target/handler to disconnect them next time.
+      lastTarget = target;
+      lastOnCaretMovedHandler = onCaretMoved;
+
+      // Firefox only supports `selectionchange` on the actual input element,
+      // all other browsers only support it on the top-level document.
+      target.addEventListener('selectionchange', onCaretMoved, { once: true });
+      document.addEventListener('selectionchange', onCaretMoved, {
+        once: true
+      });
+
+      // Schedule removal of the listener.
+      setTimeout(() => {
+        target.removeEventListener('selectionchange', onCaretMoved);
+        document.removeEventListener('selectionchange', onCaretMoved);
+      }, 250);
+    });
   }
 
   /**
