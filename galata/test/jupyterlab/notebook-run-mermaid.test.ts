@@ -28,24 +28,25 @@ async function nbDiskContent(
 }
 
 test.describe('Notebook Run Mermaid', () => {
-  test.beforeAll(async ({ page, request, tmpPath }) => {
+  test.beforeAll(async ({ request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
     await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
     );
+  });
 
+  test.beforeEach(async ({ page, tmpPath }) => {
     await page.filebrowser.openDirectory(tmpPath);
+    const nbPath = `${tmpPath}/${fileName}`;
+    await page.notebook.openByPath(nbPath);
+    await page.notebook.activate(fileName);
   });
 
   test('Run notebook with Mermaid cell in default theme', async ({
     page,
     tmpPath
   }) => {
-    const nbPath = `${tmpPath}/${fileName}`;
-    await page.notebook.openByPath(nbPath);
-    await page.notebook.activate(fileName);
-
     expect(await nbDiskContent(page, nbPath)).not.toContain(SVG_MIME_TYPE);
 
     const imageName = 'run-cells-mermaid.png';
@@ -63,9 +64,6 @@ test.describe('Notebook Run Mermaid', () => {
     page,
     tmpPath
   }) => {
-    const nbPath = `${tmpPath}/${fileName}`;
-    await page.notebook.openByPath(nbPath);
-    await page.notebook.activate(fileName);
     await page.theme.setDarkTheme();
 
     expect(await nbDiskContent(page, nbPath)).not.toContain(SVG_MIME_TYPE);
