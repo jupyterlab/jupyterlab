@@ -70,9 +70,7 @@ test.describe('Collapsible Headings; no_showHCB', () => {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/notebook-extension:tracker': {
         ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
-        showHiddenCellsButton: false,
-        // `ReExpand Headers 01` is flaky in full windowing mode
-        windowingMode: 'none'
+        showHiddenCellsButton: false
       }
     }
   });
@@ -124,6 +122,17 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.notebook.createNew(fileName);
     await populateNotebook2(page);
     await page.notebook.run();
+  });
+
+  // use non-standard showHiddenCellsButton=false
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        // `ReExpand Headers 01` is flaky in full windowing mode
+        windowingMode: 'none'
+      }
+    }
   });
 
   test('Jump to Previous Header', async ({ page }) => {
