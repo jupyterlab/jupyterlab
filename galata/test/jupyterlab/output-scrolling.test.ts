@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
+import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import * as path from 'path';
 
 const fileName = 'output_scrolling.ipynb';
 
 const cellSelector = '[role="main"] >> .jp-NotebookPanel >> .jp-Cell';
+
+test.use({ tmpPath: 'test-output-scrolling' });
 
 test.describe('Output Scrolling', () => {
   test.beforeAll(async ({ request, tmpPath }) => {

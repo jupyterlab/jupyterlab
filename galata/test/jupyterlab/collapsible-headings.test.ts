@@ -109,6 +109,8 @@ const keyboardNavigationNotebook =
   'collapsible_headings_keyboard_navigation.ipynb';
 
 test.describe('Collapsible Headings; keyboard navigation', () => {
+  test.use({ tmpPath: 'test-collapsible-headings-keyboard' });
+
   // create an empty notebook for each test
   test.beforeAll(async ({ request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);

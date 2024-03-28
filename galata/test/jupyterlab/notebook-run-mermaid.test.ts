@@ -28,6 +28,8 @@ async function nbDiskContent(
 }
 
 test.describe('Notebook Run Mermaid', () => {
+  test.use({ tmpPath: 'test-run-mermaid' });
+
   test.beforeAll(async ({ request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
     await contents.uploadFile(
