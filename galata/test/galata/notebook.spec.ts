@@ -89,7 +89,7 @@ test.describe('Notebook Tests', () => {
     await page.notebook.setCell(0, 'markdown', '## This is a markdown cell');
 
     const tabList = page.getByRole('main').getByRole('tablist');
-    const notSavedIndicator = tabList.locator('jp-mod-dirty');
+    const notSavedIndicator = tabList.locator('.jp-mod-dirty');
     await expect(notSavedIndicator).toHaveCount(1);
 
     await page.notebook.save();
