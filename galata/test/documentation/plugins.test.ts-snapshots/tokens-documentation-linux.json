@@ -28,6 +28,7 @@
   "@jupyterlab/completer:IInlineCompleterFactory": "A factory of inline completer widgets.",
   "@jupyterlab/console:IContentFactory": "A factory object that creates new code consoles. Use this if you want to create and host code consoles in your own UI elements.",
   "@jupyterlab/console:IConsoleTracker": "A widget tracker for code consoles.\n  Use this if you want to be able to iterate over and interact with code consoles\n  created by the application.",
+  "@jupyterlab/console:IConsoleCellExecutor": "The console cell executor",
   "@jupyterlab/debugger:IDebugger": "A debugger user interface.",
   "@jupyterlab/debugger:IDebuggerHandler": "A service for handling notebook debugger.",
   "@jupyterlab/debugger:IDebuggerSidebar": "A service for the debugger sidebar.",
@@ -59,6 +60,7 @@
   "@jupyterlab/mermaid:IMermaidManager": "a manager for rendering mermaid text-based diagrams",
   "@jupyterlab/mermaid:IMermaidMarkdown": "a manager for rendering mermaid text-based diagrams in markdown fenced code blocks",
   "@jupyterlab/metadataform:IMetadataFormProvider": "A service to register new metadata editor widgets.",
+  "@jupyterlab/notebook:INotebookCellExecutor": "The notebook cell executor",
   "@jupyterlab/notebook:IContentFactory": "A factory object that creates new notebooks.\n    Use this if you want to create and host notebooks in your own UI elements.",
   "@jupyterlab/notebook:INotebookTracker": "A widget tracker for notebooks.\n  Use this if you want to be able to iterate over and interact with notebooks\n  created by the application.",
   "@jupyterlab/notebook:INotebookTools": "A service for the \"Notebook Tools\" panel in the\n  right sidebar. Use this to add your own functionality to the panel.",
@@ -76,5 +78,7 @@
   "@jupyterlab/tooltip:ITooltipManager": "A service for the tooltip manager for the application. Use this to allow your extension to invoke a tooltip.",
   "@jupyterlab/translation:ITranslator": "A service to translate strings.",
   "@jupyterlab/ui-components:ILabIconManager": "A service to register and request icons.",
-  "@jupyterlab/ui-components:IFormRendererRegistry": "A service for settings form renderer registration."
+  "@jupyterlab/ui-components:IFormRendererRegistry": "A service for settings form renderer registration.",
+  "@jupyterlab/workspaces:IWorkspacesModel": "Provides a model for available workspaces.",
+  "@jupyterlab/workspaces:IWorkspaceCommands": "Provides identifiers of workspace commands."
 }

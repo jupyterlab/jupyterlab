@@ -16,7 +16,7 @@ export namespace InputDialog {
   /**
    * Common constructor options for input dialogs
    */
-  export interface IOptions {
+  export interface IOptions extends IBaseOptions {
     /**
      * The top level text for the dialog. Defaults to an empty string.
      */
@@ -26,11 +26,6 @@ export namespace InputDialog {
      * The host element for the dialog. Defaults to `document.body`.
      */
     host?: HTMLElement;
-
-    /**
-     * Label of the requested input
-     */
-    label?: string;
 
     /**
      * An optional renderer for dialog items. Defaults to a shared
@@ -52,6 +47,11 @@ export namespace InputDialog {
      * The checkbox to display in the footer. Defaults no checkbox.
      */
     checkbox?: Partial<Dialog.ICheckbox> | null;
+
+    /**
+     * The index of the default button. Defaults to the last button.
+     */
+    defaultButton?: number;
   }
 
   /**
@@ -215,6 +215,14 @@ export namespace InputDialog {
      * Default is to select the whole input text if present.
      */
     selectionRange?: number;
+    /**
+     * Pattern used by the browser to validate the input value.
+     */
+    pattern?: string;
+    /**
+     * Whether the input is required (has to be non-empty).
+     */
+    required?: boolean;
   }
 
   /**
@@ -261,6 +269,26 @@ export namespace InputDialog {
 }
 
 /**
+ * Constructor options for base input dialog body.
+ */
+interface IBaseOptions {
+  /**
+   * Label of the requested input
+   */
+  label?: string;
+
+  /**
+   * Additional prefix string preceding the input (e.g. £).
+   */
+  prefix?: string;
+
+  /**
+   * Additional suffix string following the input (e.g. $).
+   */
+  suffix?: string;
+}
+
+/**
  * Base widget for input dialog body
  */
 class InputDialogBase<T> extends Widget implements Dialog.IBodyWidget<T> {
@@ -269,7 +297,7 @@ class InputDialogBase<T> extends Widget implements Dialog.IBodyWidget<T> {
    *
    * @param label Input field label
    */
-  constructor(label?: string) {
+  constructor(options: IBaseOptions) {
     super();
     this.addClass(INPUT_DIALOG_CLASS);
 
@@ -277,16 +305,38 @@ class InputDialogBase<T> extends Widget implements Dialog.IBodyWidget<T> {
     this._input.classList.add('jp-mod-styled');
     this._input.id = 'jp-dialog-input-id';
 
-    if (label !== undefined) {
+    if (options.label !== undefined) {
       const labelElement = document.createElement('label');
-      labelElement.textContent = label;
+      labelElement.textContent = options.label;
       labelElement.htmlFor = this._input.id;
 
       // Initialize the node
       this.node.appendChild(labelElement);
     }
 
-    this.node.appendChild(this._input);
+    const wrapper = document.createElement('div');
+    wrapper.className = 'jp-InputDialog-inputWrapper';
+
+    if (options.prefix) {
+      const prefix = document.createElement('span');
+      prefix.className = 'jp-InputDialog-inputPrefix';
+      prefix.textContent = options.prefix;
+      // Both US WDS (https://designsystem.digital.gov/components/input-prefix-suffix/)
+      // and UK DS (https://design-system.service.gov.uk/components/text-input/) recommend
+      // hiding prefixes and suffixes from screen readers.
+      prefix.ariaHidden = 'true';
+      wrapper.appendChild(prefix);
+    }
+    wrapper.appendChild(this._input);
+    if (options.suffix) {
+      const suffix = document.createElement('span');
+      suffix.className = 'jp-InputDialog-inputSuffix';
+      suffix.textContent = options.suffix;
+      suffix.ariaHidden = 'true';
+      wrapper.appendChild(suffix);
+    }
+
+    this.node.appendChild(wrapper);
   }
 
   /** Input HTML node */
@@ -303,7 +353,7 @@ class InputBooleanDialog extends InputDialogBase<boolean> {
    * @param options Constructor options
    */
   constructor(options: InputDialog.IBooleanOptions) {
-    super(options.label);
+    super(options);
     this.addClass(INPUT_BOOLEAN_DIALOG_CLASS);
 
     this._input.type = 'checkbox';
@@ -328,7 +378,7 @@ class InputNumberDialog extends InputDialogBase<number> {
    * @param options Constructor options
    */
   constructor(options: InputDialog.INumberOptions) {
-    super(options.label);
+    super(options);
 
     this._input.type = 'number';
     this._input.value = options.value ? options.value.toString() : '0';
@@ -347,22 +397,49 @@ class InputNumberDialog extends InputDialogBase<number> {
 }
 
 /**
+ * Base widget body for input text/password/email dialog
+ */
+class InputDialogTextBase extends InputDialogBase<string> {
+  /**
+   * InputDialogTextBase constructor
+   *
+   * @param options Constructor options
+   */
+  constructor(options: Omit<InputDialog.ITextOptions, 'selectionRange'>) {
+    super(options);
+    this._input.value = options.text ? options.text : '';
+    if (options.placeholder) {
+      this._input.placeholder = options.placeholder;
+    }
+    if (options.pattern) {
+      this._input.pattern = options.pattern;
+    }
+    if (options.required) {
+      this._input.required = options.required;
+    }
+  }
+
+  /**
+   * Get the text specified by the user
+   */
+  getValue(): string {
+    return this._input.value;
+  }
+}
+
+/**
  * Widget body for input text dialog
  */
-class InputTextDialog extends InputDialogBase<string> {
+class InputTextDialog extends InputDialogTextBase {
   /**
    * InputTextDialog constructor
    *
    * @param options Constructor options
    */
   constructor(options: InputDialog.ITextOptions) {
-    super(options.label);
-
+    super(options);
     this._input.type = 'text';
-    this._input.value = options.text ? options.text : '';
-    if (options.placeholder) {
-      this._input.placeholder = options.placeholder;
-    }
+
     this._initialSelectionRange = Math.min(
       this._input.value.length,
       Math.max(0, options.selectionRange ?? this._input.value.length)
@@ -379,33 +456,21 @@ class InputTextDialog extends InputDialogBase<string> {
     }
   }
 
-  /**
-   * Get the text specified by the user
-   */
-  getValue(): string {
-    return this._input.value;
-  }
-
   private _initialSelectionRange: number;
 }
 
 /**
  * Widget body for input password dialog
  */
-class InputPasswordDialog extends InputDialogBase<string> {
+class InputPasswordDialog extends InputDialogTextBase {
   /**
    * InputPasswordDialog constructor
    *
    * @param options Constructor options
    */
   constructor(options: InputDialog.ITextOptions) {
-    super(options.label);
-
+    super(options);
     this._input.type = 'password';
-    this._input.value = options.text ? options.text : '';
-    if (options.placeholder) {
-      this._input.placeholder = options.placeholder;
-    }
   }
 
   /**
@@ -416,13 +481,6 @@ class InputPasswordDialog extends InputDialogBase<string> {
     if (this._input.value) {
       this._input.select();
     }
-  }
-
-  /**
-   * Get the text specified by the user
-   */
-  getValue(): string {
-    return this._input.value;
   }
 }
 
@@ -436,7 +494,7 @@ class InputItemsDialog extends InputDialogBase<string> {
    * @param options Constructor options
    */
   constructor(options: InputDialog.IItemOptions) {
-    super(options.label);
+    super(options);
 
     this._editable = options.editable || false;
 
@@ -474,8 +532,7 @@ class InputItemsDialog extends InputDialogBase<string> {
       this.node.appendChild(data);
     } else {
       /* Use select directly */
-      this._input.remove();
-      this.node.appendChild(this._list);
+      this._input.parentElement!.replaceChild(this._list, this._input);
     }
   }
 
@@ -504,7 +561,7 @@ class InputMultipleItemsDialog extends InputDialogBase<string> {
    * @param options Constructor options
    */
   constructor(options: InputDialog.IMultipleItemsOptions) {
-    super(options.label);
+    super(options);
 
     let defaults = options.defaults || [];
 
