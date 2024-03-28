@@ -7,6 +7,18 @@ import { Locator } from '@playwright/test';
 
 const fileName = 'mermaid_diagrams.ipynb';
 
+test.use({
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/notebook-extension:tracker': {
+      ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+      // Do not use windowing as it simplifies the test as we do not
+      // need to scroll the notebook before calling `output.waitFor()`.
+      windowingMode: 'none'
+    }
+  }
+});
+
 const EXPECTED_MERMAID_ORDER = [
   'flowchart',
   'sequence',
