@@ -70,7 +70,9 @@ test.describe('Collapsible Headings; no_showHCB', () => {
       ...galata.DEFAULT_SETTINGS,
       '@jupyterlab/notebook-extension:tracker': {
         ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
-        showHiddenCellsButton: false
+        showHiddenCellsButton: false,
+        // `ReExpand Headers 01` is flaky in full windowing mode
+        windowingMode: 'none'
       }
     }
   });
