@@ -28,6 +28,7 @@
   "@jupyterlab/completer:IInlineCompleterFactory": "A factory of inline completer widgets.",
   "@jupyterlab/console:IContentFactory": "A factory object that creates new code consoles. Use this if you want to create and host code consoles in your own UI elements.",
   "@jupyterlab/console:IConsoleTracker": "A widget tracker for code consoles.\n  Use this if you want to be able to iterate over and interact with code consoles\n  created by the application.",
+  "@jupyterlab/console:IConsoleCellExecutor": "The console cell executor",
   "@jupyterlab/debugger:IDebugger": "A debugger user interface.",
   "@jupyterlab/debugger:IDebuggerHandler": "A service for handling notebook debugger.",
   "@jupyterlab/debugger:IDebuggerSidebar": "A service for the debugger sidebar.",
@@ -36,6 +37,7 @@
   "@jupyterlab/debugger:IDebuggerConfig": "A service to handle the debugger configuration.",
   "@jupyterlab/docmanager:IDocumentManager": "A service for the manager for all\n  documents used by the application. Use this if you want to open and close documents,\n  create and delete files, and otherwise interact with the file system.",
   "@jupyterlab/docmanager:IDocumentWidgetOpener": "A service to open a widget.",
+  "@jupyterlab/docmanager:IRecentsManager": "A service providing information about recently opened and closed documents",
   "@jupyterlab/documentsearch:ISearchProviderRegistry": "A service for a registry of search\n  providers for the application. Plugins can register their UI elements with this registry\n  to provide find/replace support.",
   "@jupyterlab/filebrowser:IFileBrowserFactory": "A factory object that creates file browsers.\n  Use this if you want to create your own file browser (e.g., for a custom storage backend),\n  or to interact with other file browsers that have been created by extensions.",
   "@jupyterlab/filebrowser:IDefaultFileBrowser": "A service for the default file browser.",
@@ -58,6 +60,7 @@
   "@jupyterlab/mermaid:IMermaidManager": "a manager for rendering mermaid text-based diagrams",
   "@jupyterlab/mermaid:IMermaidMarkdown": "a manager for rendering mermaid text-based diagrams in markdown fenced code blocks",
   "@jupyterlab/metadataform:IMetadataFormProvider": "A service to register new metadata editor widgets.",
+  "@jupyterlab/notebook:INotebookCellExecutor": "The notebook cell executor",
   "@jupyterlab/notebook:IContentFactory": "A factory object that creates new notebooks.\n    Use this if you want to create and host notebooks in your own UI elements.",
   "@jupyterlab/notebook:INotebookTracker": "A widget tracker for notebooks.\n  Use this if you want to be able to iterate over and interact with notebooks\n  created by the application.",
   "@jupyterlab/notebook:INotebookTools": "A service for the \"Notebook Tools\" panel in the\n  right sidebar. Use this to add your own functionality to the panel.",
@@ -65,6 +68,7 @@
   "@jupyterlab/pluginmanager:IPluginManager": "A canary for plugin manager presence, with a method to open the plugin manager widget.",
   "@jupyterlab/rendermime:IRenderMimeRegistry": "A service for the rendermime registry for the application. Use this to create renderers for various mime-types in your extension. Many times it will be easier to create a \"mime renderer extension\" rather than using this service directly.",
   "@jupyterlab/running:IRunningSessionManagers": "A service to add running session managers.",
+  "@jupyterlab/running:IRunningSessionsSidebar": "A token allowing to modify the running sessions sidebar.",
   "@jupyterlab/settingeditor:ISettingEditorTracker": "A widget tracker for the interactive setting editor.\n  Use this if you want to be able to iterate over and interact with setting editors\n  created by the application.",
   "@jupyterlab/settingeditor:IJSONSettingEditorTracker": "A widget tracker for the JSON setting editor.\n  Use this if you want to be able to iterate over and interact with setting editors\n  created by the application.",
   "@jupyterlab/statusbar:IStatusBar": "A service for the status bar on the application. Use this if you want to add new status bar items.",
@@ -74,5 +78,7 @@
   "@jupyterlab/tooltip:ITooltipManager": "A service for the tooltip manager for the application. Use this to allow your extension to invoke a tooltip.",
   "@jupyterlab/translation:ITranslator": "A service to translate strings.",
   "@jupyterlab/ui-components:ILabIconManager": "A service to register and request icons.",
-  "@jupyterlab/ui-components:IFormRendererRegistry": "A service for settings form renderer registration."
+  "@jupyterlab/ui-components:IFormRendererRegistry": "A service for settings form renderer registration.",
+  "@jupyterlab/workspaces:IWorkspacesModel": "Provides a model for available workspaces.",
+  "@jupyterlab/workspaces:IWorkspaceCommands": "Provides identifiers of workspace commands."
 }

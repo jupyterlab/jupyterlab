@@ -1,8 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect, galata, test } from '@jupyterlab/galata';
-import { setSidebarWidth } from './utils';
+import {
+  expect,
+  galata,
+  IJupyterLabPageFixture,
+  test
+} from '@jupyterlab/galata';
+import { filterContent } from './utils';
 
 test.use({
   autoGoto: false,
@@ -15,7 +20,7 @@ test.describe.configure({ mode: 'serial' });
 
 test.describe('Overview', () => {
   test('Overview', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await openOverview(page);
 
     expect(await page.screenshot()).toMatchSnapshot('interface_jupyterlab.png');
@@ -26,18 +31,21 @@ test.describe('Overview', () => {
 
     await page.click('[title="Running Terminals and Kernels"]');
 
-    await page
-      .locator(
-        '.jp-RunningSessions-item.jp-mod-kernel >> text="Python 3 (ipykernel)"'
-      )
-      .waitFor();
+    // Close all other sections
+    const otherSession = page.locator(
+      '#jp-running-sessions .jp-AccordionPanel-title.lm-mod-expanded:not([aria-label="Open Tabs Section"]) .lm-AccordionPanel-titleCollapser'
+    );
+    while ((await otherSession.count()) != 0) {
+      await otherSession.first().click();
+    }
+
     expect(
-      await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 400 } })
+      await page.screenshot({ clip: { y: 27, x: 0, width: 283, height: 200 } })
     ).toMatchSnapshot('interface_tabs.png');
   });
 
   test('Tabs menu', async ({ page }) => {
-    await galata.Mock.freezeContentLastModified(page);
+    await galata.Mock.freezeContentLastModified(page, filterContent);
     await openOverview(page);
 
     await page.click('text="Tabs"');
@@ -48,7 +56,7 @@ test.describe('Overview', () => {
   });
 });
 
-async function openOverview(page) {
+async function openOverview(page: IJupyterLabPageFixture) {
   await page.goto();
   await page.addStyleTag({
     content: `.jp-LabShell.jp-mod-devMode {
@@ -56,7 +64,7 @@ async function openOverview(page) {
     }`
   });
 
-  await setSidebarWidth(page);
+  await page.sidebar.setWidth();
 
   // Open Data.ipynb
   await page.dblclick('[aria-label="File Browser Section"] >> text=notebooks');
@@ -84,7 +92,7 @@ async function openOverview(page) {
   );
 
   // Move notebook panel
-  const notebookHandle = await page.$('div[role="main"] >> text=Data.ipynb');
+  const notebookHandle = page.locator('div[role="main"] >> text=Data.ipynb');
   await notebookHandle.click();
   const notebookBBox = await notebookHandle.boundingBox();
 
@@ -97,10 +105,10 @@ async function openOverview(page) {
   await page.mouse.up();
 
   // Move md panel
-  const mdHandle = await page.$('div[role="main"] >> text=jupyterlab.md');
+  const mdHandle = page.locator('div[role="main"] >> text=jupyterlab.md');
   await mdHandle.click();
   const mdBBox = await mdHandle.boundingBox();
-  const panelHandle = await page.activity.getPanel();
+  const panelHandle = await page.activity.getPanelLocator();
   const panelBBox = await panelHandle.boundingBox();
 
   await page.mouse.move(

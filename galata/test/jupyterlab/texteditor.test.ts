@@ -10,10 +10,10 @@ test.describe('Text Editor Tests', () => {
     const imageName = 'text-editor.png';
     await page.menu.clickMenuItem('File>New>Text File');
 
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
-    const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
-    expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+    const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
+    expect(await tabHandle?.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Changing a text editor settings', async ({ page }) => {
@@ -37,9 +37,9 @@ test.describe('Text Editor Tests', () => {
 
     await page.activity.activateTab(DEFAULT_NAME);
 
-    const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
+    const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
 
-    expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+    expect(await tabHandle?.screenshot()).toMatchSnapshot(imageName);
   });
 
   test('Selection in highlighted line', async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe('Text Editor Tests', () => {
 
     await page.menu.clickMenuItem('File>New>Text File');
 
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     await page.type(
       '.cm-content',
@@ -78,7 +78,7 @@ test.describe('Text Editor Tests', () => {
     const imageName = 'go-to-line-editor.png';
     await page.menu.clickMenuItem('File>New>Text File');
 
-    await page.waitForSelector(`[role="main"] >> text=${DEFAULT_NAME}`);
+    await page.locator(`[role="main"] >> text=${DEFAULT_NAME}`).waitFor();
 
     await page.type(
       '.cm-content',
@@ -100,7 +100,7 @@ ut elit.`
 
     await page.keyboard.type('#2:8#');
 
-    const tabHandle = await page.activity.getPanel(DEFAULT_NAME);
-    expect(await tabHandle.screenshot()).toMatchSnapshot(imageName);
+    const tabHandle = await page.activity.getPanelLocator(DEFAULT_NAME);
+    expect(await tabHandle?.screenshot()).toMatchSnapshot(imageName);
   });
 });

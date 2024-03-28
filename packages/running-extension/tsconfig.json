@@ -10,7 +10,13 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../coreutils"
+    },
+    {
+      "path": "../docmanager"
     },
     {
       "path": "../docregistry"
@@ -23,6 +29,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../statedb"
     },
     {
       "path": "../translation"

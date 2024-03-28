@@ -27,17 +27,17 @@ button:focus-visible {
 }
 
 button.jp-mod-styled.jp-mod-accept {
-  background: var(--jp-accept-color-normal, var(--md-blue-500));
+  background: var(--jp-accept-color-normal, var(--md-blue-500, #2196f3));
   border: 0;
   color: white;
 }
 
 button.jp-mod-styled.jp-mod-accept:hover {
-  background: var(--jp-accept-color-hover, var(--md-blue-600));
+  background: var(--jp-accept-color-hover, var(--md-blue-600, #1e88e5));
 }
 
 button.jp-mod-styled.jp-mod-accept:active {
-  background: var(--jp-accept-color-active, var(--md-blue-700));
+  background: var(--jp-accept-color-active, var(--md-blue-700, #1976d2));
 }
 
 button.jp-mod-styled.jp-mod-accept:focus-visible {
@@ -45,21 +45,21 @@ button.jp-mod-styled.jp-mod-accept:focus-visible {
 }
 
 button.jp-mod-styled.jp-mod-reject {
-  background: var(--jp-reject-color-normal, var(--md-grey-500));
+  background: var(--jp-reject-color-normal, var(--md-grey-500, #9e9e9e));
   border: 0;
   color: white;
 }
 
 button.jp-mod-styled.jp-mod-reject:hover {
-  background: var(--jp-reject-color-hover, var(--md-grey-600));
+  background: var(--jp-reject-color-hover, var(--md-grey-600, #757575));
 }
 
 button.jp-mod-styled.jp-mod-reject:active {
-  background: var(--jp-reject-color-active, var(--md-grey-700));
+  background: var(--jp-reject-color-active, var(--md-grey-700, #616161));
 }
 
 button.jp-mod-styled.jp-mod-reject:focus-visible {
-  outline: 1px solid var(--jp-reject-color-active, var(--md-grey-700));
+  outline: 1px solid var(--jp-reject-color-active, var(--md-grey-700, #616161));
 }
 
 button.jp-mod-styled.jp-mod-warn {
@@ -69,15 +69,15 @@ button.jp-mod-styled.jp-mod-warn {
 }
 
 button.jp-mod-styled.jp-mod-warn:hover {
-  background: var(--jp-warn-color-hover, var(--md-red-600));
+  background: var(--jp-warn-color-hover, var(--md-red-600, #e53935));
 }
 
 button.jp-mod-styled.jp-mod-warn:active {
-  background: var(--jp-warn-color-active, var(--md-red-700));
+  background: var(--jp-warn-color-active, var(--md-red-700, #d32f2f));
 }
 
 button.jp-mod-styled.jp-mod-warn:focus-visible {
-  outline: 1px solid var(--jp-warn-color-active, var(--md-red-700));
+  outline: 1px solid var(--jp-warn-color-active, var(--md-red-700, #d32f2f));
 }
 
 .jp-Button-flat {

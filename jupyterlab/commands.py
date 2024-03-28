@@ -367,6 +367,8 @@ class AppOptions(HasTraits):
         ),
     )
 
+    verbose = Bool(False, help="Increase verbosity level.")
+
     @default("logger")
     def _default_logger(self):
         return logging.getLogger("jupyterlab")
@@ -632,6 +634,7 @@ class _AppHandler:
         # Make a deep copy of the core data so we don't influence the original copy
         self.core_data = deepcopy(options.core_config._data)
         self.labextensions_path = options.labextensions_path
+        self.verbose = options.verbose
         self.kill_event = options.kill_event
         self.registry = options.registry
         self.skip_full_build_check = options.skip_full_build_check
@@ -1683,7 +1686,7 @@ class _AppHandler:
                 error_accumulator[name] = (version, errors)
 
         # Write all errors at end:
-        _log_multiple_compat_errors(logger, error_accumulator)
+        _log_multiple_compat_errors(logger, error_accumulator, self.verbose)
 
         # Write a blank line separator
         logger.info("")
@@ -1721,7 +1724,7 @@ class _AppHandler:
             logger.info("")
 
         # Write all errors at end:
-        _log_multiple_compat_errors(logger, error_accumulator)
+        _log_multiple_compat_errors(logger, error_accumulator, self.verbose)
 
     def _compose_extra_status(self, name: str, info: dict, data: dict, errors) -> str:
         extra = ""
@@ -2409,32 +2412,37 @@ def _format_compatibility_errors(name, version, errors):
     return msg
 
 
-def _log_multiple_compat_errors(logger, errors_map):
+def _log_multiple_compat_errors(logger, errors_map, verbose: bool):
     """Log compatibility errors for multiple extensions at once"""
 
     outdated = []
-    others = []
 
     for name, (_, errors) in errors_map.items():
         age = _compat_error_age(errors)
         if age > 0:
             outdated.append(name)
-        else:
-            others.append(name)
 
     if outdated:
         logger.warning(
             "\n        ".join(
                 [
-                    "\n   The following extensions are outdated:",
+                    "\n   The following extensions may be outdated or specify dependencies that are incompatible with the current version of jupyterlab:",
                     *outdated,
-                    "\n   Consider checking if an update is available for these packages.\n",
+                    "\n   If you are a user, check if an update is available for these packages.\n"
+                    + (
+                        "   If you are a developer, re-run with `--verbose` flag for more details.\n"
+                        if not verbose
+                        else "   See below for the details.\n"
+                    ),
                 ]
             )
         )
 
-    for name in others:
-        version, errors = errors_map[name]
+    # Print out compatibility errors for all extensions, even the ones inferred
+    # to be possibly outdated, to guide developers upgrading their extensions.
+    for name, (version, errors) in errors_map.items():
+        if name in outdated and not verbose:
+            continue
         msg = _format_compatibility_errors(name, version, errors)
         logger.warning(f"{msg}\n")
 

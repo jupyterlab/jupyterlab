@@ -449,8 +449,9 @@ export namespace galata {
      * The space name can be found in the named group `id`.
      *
      * The id will be prefixed by '/'.
+     * The id will be undefined for workspaces listing route.
      */
-    export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)/;
+    export const workspaces = /.*\/api\/workspaces(?<id>(\/[-\w]+)+)?/;
 
     /**
      * User API
@@ -578,7 +579,10 @@ export namespace galata {
      * #### Notes
      * The goal is to freeze the file browser display
      */
-    export async function freezeContentLastModified(page: Page): Promise<void> {
+    export async function freezeContentLastModified(
+      page: Page,
+      filter?: <T = any>(directoryList: T[]) => T[]
+    ): Promise<void> {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
       const ctxt = page.context();
@@ -609,6 +613,9 @@ export namespace galata {
               data['type'] === 'directory' &&
               Array.isArray(data['content'])
             ) {
+              if (filter) {
+                data['content'] = filter(data['content']);
+              }
               const now = Date.now();
               const aDayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
               for (const entry of data['content'] as any[]) {
@@ -956,11 +963,25 @@ export namespace galata {
     ): Promise<void> {
       return page.route(Routes.workspaces, (route, request) => {
         switch (request.method()) {
-          case 'GET':
-            return route.fulfill({
-              status: 200,
-              body: JSON.stringify(workspace)
-            });
+          case 'GET': {
+            const id = Routes.workspaces.exec(request.url())?.groups?.id;
+            if (id) {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify(workspace)
+              });
+            } else {
+              return route.fulfill({
+                status: 200,
+                body: JSON.stringify({
+                  workspaces: {
+                    ids: [workspace.metadata.id],
+                    values: [workspace]
+                  }
+                })
+              });
+            }
+          }
           case 'PUT': {
             const data = request.postDataJSON();
             workspace.data = { ...workspace.data, ...data.data };

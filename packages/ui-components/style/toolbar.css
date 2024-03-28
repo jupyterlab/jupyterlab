@@ -74,6 +74,10 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   font-family: var(--jp-ui-font-family);
 }
 
+.jp-Toolbar .jp-ToolbarButtonComponent {
+  color: var(--jp-ui-font-color1);
+}
+
 .jp-ToolbarButtonComponent::part(content) {
   display: flex;
   align-items: center;

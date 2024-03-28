@@ -74,6 +74,7 @@
   font-family: var(--jp-code-font-family);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
+  white-space: nowrap;
 }
 
 .jp-Completer-deprecated .jp-Completer-match {
