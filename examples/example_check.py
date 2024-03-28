@@ -105,6 +105,11 @@ async def run_browser(url):
         )
     try:
         await run_async_process(cmd, env=current_env, cwd=str(target))
+        # FIXME debug to be removed
+        await run_async_process(
+            ["ls", "-l", str(Path(os.environ.get("DOCKER_VOLUME", "")).joinpath("pw-test-results"))]
+        )
+        await run_async_process(["ls", "-l", str(results_target)])
     finally:
         # Copy back test-results folder to analyze snapshot error
         if results_target.exists():

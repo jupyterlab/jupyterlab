@@ -52,5 +52,7 @@ export default defineConfig({
       ]
     : [['list'], ['html', { open: 'on-failure' }]],
   // Try one retry as some tests are flaky
-  retries: process.env.CI ? 1 : 0
+  retries: process.env.CI ? 1 : 0,
+  // On CI only run on single worker to limit cross test interactions
+  workers: process.env.CI ? 1 : undefined
 });
