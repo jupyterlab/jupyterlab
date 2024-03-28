@@ -1255,14 +1255,37 @@ export class NotebookHelper {
 
     await this._setCellMode(cell, 'Edit');
     await cell.getByRole('textbox').press('Control+A');
-    await cell
-      .getByRole('textbox')
-      .type(source, { delay: cellType === 'code' ? 100 : 0 });
+    await cell.getByRole('textbox').type(source, { delay: 0 });
     await this._setCellMode(cell, 'Command');
 
-    // give CodeMirror time to style properly
     if (cellType === 'code') {
-      await this.page.waitForTimeout(500);
+      // Wait until the CodeMirror highlighting is stable
+      // over 10 consecutive animation frames.
+      await cell.evaluate((cell: HTMLElement) => {
+        let _resolve: () => void;
+        const promise = new Promise<void>(resolve => {
+          _resolve = resolve;
+        });
+        let framesWithoutChange = 0;
+        let content = cell.querySelector('.cm-content')!.innerHTML;
+        const waitUntilNextFrame = () => {
+          window.requestAnimationFrame(() => {
+            const newContent = cell.querySelector('.cm-content')!.innerHTML;
+            if (content === newContent) {
+              framesWithoutChange += 1;
+            } else {
+              framesWithoutChange = 0;
+            }
+            if (framesWithoutChange < 10) {
+              waitUntilNextFrame();
+            } else {
+              _resolve();
+            }
+          });
+        };
+        waitUntilNextFrame();
+        return promise;
+      });
     }
 
     return true;
