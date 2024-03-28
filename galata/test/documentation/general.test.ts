@@ -650,11 +650,6 @@ test.describe('General', () => {
 
   test('HTML Display', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
-    await page.addStyleTag({
-      content: `.jp-LabShell.jp-mod-devMode {
-        border-top: none;
-      }`
-    });
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -675,22 +670,21 @@ test.describe('General', () => {
 
     await page.click('.jp-CodeConsole-input >> .cm-content');
     await page.keyboard.type(
-      "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))"
+      "from IPython.display import display, HTML\ndisplay(HTML('<h1>Hello World</h1>'))",
+      {
+        delay: 0
+      }
     );
     await page.keyboard.press('Shift+Enter');
 
-    expect(await page.screenshot()).toMatchSnapshot(
+    const main = page.getByRole('main');
+    expect(await main.screenshot()).toMatchSnapshot(
       'file_formats_html_display.png'
     );
   });
 
   test('Altair', async ({ page, tmpPath }) => {
     await page.goto(`tree/${tmpPath}`);
-    await page.addStyleTag({
-      content: `.jp-LabShell.jp-mod-devMode {
-        border-top: none;
-      }`
-    });
 
     // Hide file browser
     await page.click('[title^="File Browser"]');
@@ -707,8 +701,10 @@ test.describe('General', () => {
     // Need to wait for altair to update the canvas
     await page.locator('summary').waitFor();
 
+    const main = page.getByRole('main');
+
     // The menu button '...' color of Altair is flaky increase threshold tolerance
-    expect(await page.screenshot()).toMatchSnapshot('file_formats_altair.png', {
+    expect(await main.screenshot()).toMatchSnapshot('file_formats_altair.png', {
       threshold: 0.3
     });
   });
