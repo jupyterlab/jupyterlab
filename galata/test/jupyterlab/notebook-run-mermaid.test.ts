@@ -37,7 +37,6 @@ test.describe('Notebook Run Mermaid', () => {
   });
 
   test.beforeEach(async ({ page, tmpPath }) => {
-    await page.filebrowser.openDirectory(tmpPath);
     const nbPath = `${tmpPath}/${fileName}`;
     await page.notebook.openByPath(nbPath);
     await page.notebook.activate(fileName);
@@ -47,6 +46,7 @@ test.describe('Notebook Run Mermaid', () => {
     page,
     tmpPath
   }) => {
+    const nbPath = `${tmpPath}/${fileName}`;
     expect(await nbDiskContent(page, nbPath)).not.toContain(SVG_MIME_TYPE);
 
     const imageName = 'run-cells-mermaid.png';
@@ -64,6 +64,7 @@ test.describe('Notebook Run Mermaid', () => {
     page,
     tmpPath
   }) => {
+    const nbPath = `${tmpPath}/${fileName}`;
     await page.theme.setDarkTheme();
 
     expect(await nbDiskContent(page, nbPath)).not.toContain(SVG_MIME_TYPE);

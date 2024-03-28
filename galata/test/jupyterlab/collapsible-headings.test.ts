@@ -119,7 +119,6 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
   });
 
   test.beforeEach(async ({ page, tmpPath }) => {
-    await page.filebrowser.openDirectory(tmpPath);
     await page.notebook.openByPath(`${tmpPath}/${keyboardNavigationNotebook}`);
     await page.notebook.activate(keyboardNavigationNotebook);
   });
