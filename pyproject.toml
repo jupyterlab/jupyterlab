@@ -242,22 +242,24 @@ after-publish-assets = "npm run after:publish:assets"
 [tool.ruff]
 target-version = "py38"
 line-length = 100
+
+[tool.ruff.lint]
 select = [
   "A", "B", "C", "DTZ", "E", "EM", "F", "FBT", "I", "ICN", "N",
   "PLC", "PLE", "PLR", "PLW", "Q", "RUF", "S", "SIM", "T", "TID", "UP",
   "W", "YTT",
 ]
 ignore = [
-# Q000 Single quotes found but double quotes preferred
-"Q000",
-# FBT001 Boolean positional arg in function definition
-"FBT001", "FBT002", "FBT003",
-# E501 Line too long (158 > 100 characters)
-"E501",
-# PLR0913 Too many arguments to function call
-"PLR0913",
-# SIM105 Use `contextlib.suppress(...)`
-"SIM105",
+  # Q000 Single quotes found but double quotes preferred
+  "Q000",
+  # FBT001 Boolean positional arg in function definition
+  "FBT001", "FBT002", "FBT003",
+  # E501 Line too long (158 > 100 characters)
+  "E501",
+  # PLR0913 Too many arguments to function call
+  "PLR0913",
+  # SIM105 Use `contextlib.suppress(...)`
+  "SIM105",
 ]
 
 [tool.ruff.lint.per-file-ignores]
