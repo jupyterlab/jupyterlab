@@ -346,33 +346,21 @@ export namespace galata {
       ? new Map<string, TerminalAPI.IModel>()
       : null;
 
-    const labPage = await initTestPage(
-      appPath,
-      autoGoto,
-      baseURL,
-      mockConfig,
-      mockSettings,
-      mockState,
-      mockUser,
-      page,
-      sessions,
-      terminals,
-      tmpPath,
-      waitForApplication
-    );
-
-    // When any `.route()` is used, it disables cache;
-    // here we force-enable cache.
-    const browserName = context.browser()!.browserType().name();
-    if (browserName === 'chromium') {
-      const cdpSession = await context.newCDPSession(page);
-      await cdpSession.send('Network.setCacheDisabled', {
-        cacheDisabled: false
-      });
-    }
-
     return {
-      page: labPage,
+      page: await initTestPage(
+        appPath,
+        autoGoto,
+        baseURL,
+        mockConfig,
+        mockSettings,
+        mockState,
+        mockUser,
+        page,
+        sessions,
+        terminals,
+        tmpPath,
+        waitForApplication
+      ),
       sessions,
       terminals
     };
