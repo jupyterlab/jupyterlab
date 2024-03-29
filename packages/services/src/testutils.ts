@@ -347,8 +347,12 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       const lastModified = new Date().toISOString();
       const data = { id: UUID.uuid4(), last_modified: lastModified };
       checkpoints.set(path, data);
-      // TODO: handle drives
-      checkPointContent.set(path, files.get('')!.get(path)?.content);
+      const driveName = dummy.driveName(path);
+      const localPath = dummy.localPath(path);
+      checkPointContent.set(
+        path,
+        files.get(driveName)!.get(localPath)?.content
+      );
       return Promise.resolve(data);
     }),
     listCheckpoints: jest.fn(path => {
@@ -369,8 +373,10 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       if (!checkpoints.has(path)) {
         return Private.makeResponseError(404);
       }
-      // TODO: handle drives
-      (files.get('')!.get(path) as any).content = checkPointContent.get(path);
+      const driveName = dummy.driveName(path);
+      const localPath = dummy.localPath(path);
+      (files.get(driveName)!.get(localPath) as any).content =
+        checkPointContent.get(path);
       return Promise.resolve();
     }),
     getSharedModelFactory: jest.fn(() => {

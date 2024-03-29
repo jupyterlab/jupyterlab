@@ -32,6 +32,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
     "async_lru>=1.0.0",
@@ -87,12 +88,12 @@ docs = [
 docs-screenshots = [
     "altair==5.2.0",
     "ipython==8.16.1",
-    "ipywidgets==8.1.1",
+    "ipywidgets==8.1.2",
     "jupyterlab-geojson==3.4.0",
-    "jupyterlab-language-pack-zh-CN==4.0.post6",
-    "matplotlib==3.8.2",
+    "jupyterlab-language-pack-zh-CN==4.1.post0",
+    "matplotlib==3.8.3",
     "nbconvert>=7.0.0",
-    "pandas==2.2.0",
+    "pandas==2.2.1",
     "scipy==1.12.0",
     "vega_datasets==0.9.0",
 ]
@@ -117,7 +118,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.2.0",
+    "ruff==0.3.0",
 ]
 
 [tool.check-wheel-contents]

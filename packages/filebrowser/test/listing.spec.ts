@@ -7,7 +7,7 @@ import { DocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DocumentWidgetOpenerMock } from '@jupyterlab/docregistry/lib/testutils';
 import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
-import { signalToPromise } from '@jupyterlab/testing';
+import { framePromise, signalToPromise } from '@jupyterlab/testing';
 import { Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import expect from 'expect';
@@ -98,6 +98,42 @@ describe('filebrowser/listing', () => {
         expect(
           dirListing.node.querySelector('[data-lm-dragscroll]')
         ).toBeDefined();
+      });
+    });
+
+    describe('#selectItemByName()', () => {
+      it('should select item in the current directory by name', async () => {
+        const name = [...dirListing.sortedItems()][2].name;
+        expect(dirListing.isSelected(name)).toBe(false);
+        await dirListing.selectItemByName(name);
+        expect(dirListing.isSelected(name)).toBe(true);
+      });
+
+      it('should trigger update when selecting an item', async () => {
+        const name = [...dirListing.sortedItems()][2].name;
+        let updateEmitted = false;
+        const listener = () => {
+          updateEmitted = true;
+        };
+        dirListing.updated.connect(listener);
+        await dirListing.selectItemByName(name);
+        await framePromise();
+        dirListing.updated.disconnect(listener);
+        expect(updateEmitted).toBe(true);
+      });
+
+      it('should be a no-op if the item is already selected', async () => {
+        const name = [...dirListing.sortedItems()][2].name;
+        await dirListing.selectItemByName(name);
+        let updateEmitted = false;
+        const listener = () => {
+          updateEmitted = true;
+        };
+        dirListing.updated.connect(listener);
+        await dirListing.selectItemByName(name);
+        await framePromise();
+        dirListing.updated.disconnect(listener);
+        expect(updateEmitted).toBe(false);
       });
     });
 
@@ -689,6 +725,8 @@ describe('filebrowser/listing', () => {
             ) as HTMLInputElement;
             simulate(headerCheckbox, 'click');
             await signalToPromise(dirListing.updated);
+            expect(headerCheckbox.checked).toBe(true);
+            expect(headerCheckbox.indeterminate).toBe(false);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(4);
             expect(headerCheckbox.getAttribute('aria-label')).toBe(
               ariaDeselectAll
@@ -707,6 +745,7 @@ describe('filebrowser/listing', () => {
               dirListing.headerNode
             ) as HTMLInputElement;
             expect(headerCheckbox.indeterminate).toBe(true);
+            expect(headerCheckbox.checked).toBe(false);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(1);
             expect(headerCheckbox.getAttribute('aria-label')).toBe(
               ariaDeselectAll
@@ -719,6 +758,8 @@ describe('filebrowser/listing', () => {
             ) as HTMLInputElement;
             simulate(headerCheckbox, 'click');
             await signalToPromise(dirListing.updated);
+            expect(headerCheckbox.checked).toBe(false);
+            expect(headerCheckbox.indeterminate).toBe(false);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
             expect(headerCheckbox.getAttribute('aria-label')).toBe(
               ariaSelectAll
@@ -750,6 +791,8 @@ describe('filebrowser/listing', () => {
             ) as HTMLInputElement;
             simulate(headerCheckbox, 'click');
             await signalToPromise(dirListing.updated);
+            expect(headerCheckbox.checked).toBe(false);
+            expect(headerCheckbox.indeterminate).toBe(false);
             expect(Array.from(dirListing.selectedItems())).toHaveLength(0);
           });
         });

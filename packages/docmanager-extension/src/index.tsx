@@ -31,6 +31,7 @@ import {
   DocumentManager,
   IDocumentManager,
   IDocumentWidgetOpener,
+  IRecentsManager,
   PathStatus,
   renameDialog,
   SavingStatus
@@ -52,6 +53,7 @@ import { IDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import * as React from 'react';
+import { recentsManagerPlugin } from './recents';
 
 /**
  * The command IDs used by the document manager plugin.
@@ -168,14 +170,21 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
   description: 'Provides the document manager.',
   provides: IDocumentManager,
   requires: [IDocumentWidgetOpener],
-  optional: [ITranslator, ILabStatus, ISessionContextDialogs, JupyterLab.IInfo],
+  optional: [
+    ITranslator,
+    ILabStatus,
+    ISessionContextDialogs,
+    JupyterLab.IInfo,
+    IRecentsManager
+  ],
   activate: (
     app: JupyterFrontEnd,
     widgetOpener: IDocumentWidgetOpener,
     translator_: ITranslator | null,
     status: ILabStatus | null,
     sessionDialogs_: ISessionContextDialogs | null,
-    info: JupyterLab.IInfo | null
+    info: JupyterLab.IInfo | null,
+    recentsManager: IRecentsManager | null
   ) => {
     const { serviceManager: manager, docRegistry: registry } = app;
     const translator = translator_ ?? nullTranslator;
@@ -196,7 +205,8 @@ const manager: JupyterFrontEndPlugin<IDocumentManager> = {
           return info.isConnected;
         }
         return true;
-      }
+      },
+      recentsManager: recentsManager ?? undefined
     });
 
     return docManager;
@@ -556,7 +566,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   savingStatusPlugin,
   downloadPlugin,
   openBrowserTabPlugin,
-  openerPlugin
+  openerPlugin,
+  recentsManagerPlugin
 ];
 export default plugins;
 
