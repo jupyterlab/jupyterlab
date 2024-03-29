@@ -353,32 +353,35 @@ export abstract class EditorSearchProvider<
           ? GenericSearchProvider.preserveCase(match.text, substitutedText)
           : substitutedText;
 
-        // TODO: Rerun the query starting from the point after the replacement
-        // text ends, and highlight the first match from that point to the end?
-        if (this.query !== null && substitutedText.match(this.query)) {
-          // If the query also matches the replacement text, move to the next match, to prevent
-          // an infinite loop of replacing only the first match
-          this.currentIndex++;
-          this.highlightNext();
-        }
-        else {
-          this.cmHandler.matches.splice(this.currentIndex, 1);
-        }
-
-        const cmMatchesRemaining = this.cmHandler.matches.length;
-
-        // End at the end of the CodeMirror matches list; do not loop
-        // Let the caller call highlightNext if we've reached the end of the current code cell
-
-        this.currentIndex =
-          this.currentIndex < cmMatchesRemaining ? this.currentIndex : null;
-
         this.model.sharedModel.updateSource(
           match!.position,
           match!.position + match!.text.length,
           insertText
         );
         occurred = true;
+
+        // Regenerate the match list, then iterate through it.
+        this.updateCodeMirror(this.model.sharedModel.getSource()).then(() => {
+          const allMatches = this.cmHandler.matches;
+          const positionAfterReplacement = match!.position + insertText.length;
+          let nextMatchFound = false;
+          for (
+            let matchIdx = this.currentIndex || 0;
+            matchIdx < allMatches.length;
+            matchIdx++
+          ) {
+            if (allMatches[matchIdx].position >= positionAfterReplacement) {
+              this.currentIndex = matchIdx;
+              nextMatchFound = true;
+              break;
+            }
+            // Move the highlight forward.
+            this.highlightNext();
+          }
+          if (!nextMatchFound) {
+            this.currentIndex = null; // No more matches in this string
+          }
+        });
       }
     }
 
