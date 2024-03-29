@@ -6,7 +6,7 @@ import * as path from 'path';
 
 const fileName = 'toc_scrolling_notebook.ipynb';
 
-test.use({ tmpPath: 'test-toc' });
+test.use({ tmpPath: 'test-toc-scrolling' });
 
 test.describe('Table of Contents scrolling to heading', () => {
   test.beforeAll(async ({ request, tmpPath }) => {
