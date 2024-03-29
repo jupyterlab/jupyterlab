@@ -5,11 +5,8 @@
 
 import { expect, galata, test } from '@jupyterlab/galata';
 
-test.describe('Readonly status', () => {
-  // Use shorter tmpPath name to capture full text of the notification
-  test.use({ tmpPath: 'test-readonly-status' });
-
-  test('Readonly status notification', async ({ page }) => {
+test.describe('test readonly status', () => {
+  test('test readonly status', async ({ page }) => {
     await page.notebook.createNew('notebook.ipynb');
     // We need to save the notebook to preserve the default kernel choice
     // otherwise when we reopen it, it would show "Select Kernel" dialog,
