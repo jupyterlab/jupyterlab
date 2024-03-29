@@ -14,6 +14,11 @@
   /* Changed to auto to autogrow */
 }
 
+/* Suppress automatic focus indicator outline */
+.cm-editor.cm-focused {
+  outline: unset;
+}
+
 .cm-editor pre {
   padding: 0 var(--jp-code-padding);
 }
