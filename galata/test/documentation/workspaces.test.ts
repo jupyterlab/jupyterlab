@@ -43,6 +43,8 @@ test.describe('Workspaces sidebar', () => {
       )
       .waitFor();
 
+    await galata.Mock.mockRunners(page, new Map(), 'sessions');
+
     // Create additional workspaces for the shot
     await page.evaluate(async () => {
       for (const workspaceName of ['my-coding-space', 'default']) {
