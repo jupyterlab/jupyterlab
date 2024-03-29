@@ -2660,24 +2660,24 @@ export namespace DirListing {
         checkbox.checked = selected ?? false;
       }
 
-      let modHTML = '';
       let modTitle = '';
       if (model.last_modified) {
         // Provide multiple formats, with container queries used to display exactly one
-        modHTML = ['narrow', 'short', 'long']
-          .map(
-            style =>
-              `<div class='${ITEM_MODIFIED_CLASS}-${style}'>` +
+        VirtualDOM.render(
+          ['narrow', 'short', 'long'].map(style =>
+            h.div(
+              { className: `${ITEM_MODIFIED_CLASS}-${style}` },
               Time.formatHuman(
                 new Date(model.last_modified),
                 style as Time.HumanStyle
-              ) +
-              '</div>'
-          )
-          .join('');
+              )
+            )
+          ),
+          modified
+        );
+
         modTitle = Time.format(new Date(model.last_modified));
       }
-      modified.innerHTML = modHTML;
       modified.title = modTitle;
     }
 
