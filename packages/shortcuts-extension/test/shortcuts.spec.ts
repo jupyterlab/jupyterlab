@@ -55,12 +55,7 @@ describe('@jupyterlab/shortcut-extension', () => {
         version: 'test'
       };
 
-      const connector: IDataConnector<
-        ISettingRegistry.IPlugin,
-        string,
-        string,
-        string
-      > = {
+      const connector: IDataConnector<ISettingRegistry.IPlugin, string> = {
         fetch: jest.fn().mockImplementation((id: string) => {
           switch (id) {
             case bar.id:
@@ -174,12 +169,7 @@ describe('@jupyterlab/shortcut-extension', () => {
         }
       };
 
-      const connector: IDataConnector<
-        ISettingRegistry.IPlugin,
-        string,
-        string,
-        string
-      > = {
+      const connector: IDataConnector<ISettingRegistry.IPlugin, string> = {
         fetch: jest.fn().mockImplementation((id: string) => {
           switch (id) {
             case foo.id:
@@ -271,12 +261,7 @@ describe('@jupyterlab/shortcut-extension', () => {
         version: 'test'
       };
 
-      const connector: IDataConnector<
-        ISettingRegistry.IPlugin,
-        string,
-        string,
-        string
-      > = {
+      const connector: IDataConnector<ISettingRegistry.IPlugin, string> = {
         fetch: jest.fn().mockImplementation((id: string) => {
           switch (id) {
             case bar.id:

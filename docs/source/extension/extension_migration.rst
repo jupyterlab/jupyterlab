@@ -28,6 +28,16 @@ API updates
   workspace MIME type renderer used to open files with ``.jupyterlab-workspace``
   extension as JupyterLab workspaces.
 
+Shortcuts extension rework
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``@jupyterlab/shortcuts-extension`` package was reworked to fix multiple bugs and increase type safety.
+While this package does not expose any programmatic APIs, and changes to the theming were minimal,
+the major version of the package was increased to 5.0 to reflect the extend of the changes.
+
+No action is required from extension authors (unless you used non-public components from `/lib`),
+however the authors of applications built on top of JupyterLab components are encouraged to upgrade
+to this new version as it can significantly improve the user experience.
 
 JupyterLab 4.0 to 4.1
 ---------------------
