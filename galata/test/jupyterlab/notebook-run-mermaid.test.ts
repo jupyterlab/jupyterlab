@@ -44,6 +44,10 @@ test.describe('Notebook Run Mermaid', () => {
     await page.notebook.activate(fileName);
   });
 
+  test.afterEach(async ({ page }) => {
+    await page.notebook.revertChanges();
+  });
+
   test('Run notebook with Mermaid cell in default theme', async ({
     page,
     tmpPath

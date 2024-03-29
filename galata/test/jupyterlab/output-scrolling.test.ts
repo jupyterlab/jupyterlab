@@ -9,9 +9,9 @@ const fileName = 'output_scrolling.ipynb';
 
 const cellSelector = '[role="main"] >> .jp-NotebookPanel >> .jp-Cell';
 
-test.use({ tmpPath: 'test-output-scrolling' });
-
 test.describe('Output Scrolling', () => {
+  test.use({ tmpPath: 'test-output-scrolling' });
+
   test.beforeAll(async ({ request, tmpPath }) => {
     const contents = galata.newContentsHelper(request);
     await contents.uploadFile(
@@ -25,8 +25,9 @@ test.describe('Output Scrolling', () => {
     await page.notebook.activate(fileName);
   });
 
-  test.afterAll(async ({ page, tmpPath }) => {
-    await page.contents.deleteDirectory(tmpPath);
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.deleteDirectory(tmpPath);
   });
 
   test('Scrolling mode', async ({ page }) => {

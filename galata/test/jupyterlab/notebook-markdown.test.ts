@@ -36,6 +36,8 @@ async function enterEditingModeForScreenshot(
 }
 
 test.describe('Notebook Markdown', () => {
+  test.use({ tmpPath: 'test-notebook-markdown' });
+
   test.beforeAll(async ({ tmpPath, request }) => {
     const contents = galata.newContentsHelper(request);
     await contents.uploadFile(
@@ -48,7 +50,7 @@ test.describe('Notebook Markdown', () => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
   });
 
-  test('Highlight LaTeX syntax', async ({ page, tmpPath }) => {
+  test('Highlight LaTeX syntax', async ({ page }) => {
     const imageName = 'highlight-latex.png';
     await page.notebook.enterCellEditingMode(0);
     const cell = await page.notebook.getCellLocator(0);
@@ -58,7 +60,7 @@ test.describe('Notebook Markdown', () => {
     );
   });
 
-  test('Do not highlight TeX in code blocks', async ({ page, tmpPath }) => {
+  test('Do not highlight TeX in code blocks', async ({ page }) => {
     const imageName = 'do-not-highlight-not-latex.png';
     await enterEditingModeForScreenshot(page, 1);
     const cell = await page.notebook.getCellLocator(1);
