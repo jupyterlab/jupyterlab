@@ -602,12 +602,6 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
       });
     }
 
-    // If the application shell layout is modified,
-    // trigger a refresh of the commands.
-    app.shell.layoutModified.connect(() => {
-      app.commands.notifyCommandChanged();
-    });
-
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.
     app.shell.modeChanged.connect((_, args: DockPanel.Mode) => {

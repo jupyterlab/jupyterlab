@@ -3534,6 +3534,7 @@ function addCommands(
       }
     }
   });
+
   commands.addCommand(CommandIDs.virtualScrollbar, {
     label: trans.__('Virtual Scrollbar'),
     caption: trans.__(
@@ -3560,6 +3561,17 @@ function addCommands(
       return visible;
     }
   });
+
+  // All commands with isEnabled defined directly or in a semantic commands
+  // To simplify here we added all commands as most of them have isEnabled
+  const skip = [CommandIDs.createNew];
+  const notify = () => {
+    Object.values(CommandIDs)
+      .filter(id => !skip.includes(id))
+      .forEach(id => app.commands.notifyCommandChanged(id));
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 }
 
 /**
