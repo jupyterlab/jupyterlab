@@ -380,7 +380,7 @@ running the ``jupyter labextension enable`` or ``jupyter labextension disable`` 
 
 Plugins can be enabled/disabled on ``system``, ``sys-prefix`` (default) or
 ``user`` level, which influences where the ``page_config.json`` configuration
-file is written to (see ``config` section in results of ``jupyter --paths``).
+file is written to (see ``config`` section in results of ``jupyter --paths``).
 To change the level for the plugin manager and the default extension manager
 use ``PluginManager.level`` trait (extension manager inherits from plugin manager).
 
