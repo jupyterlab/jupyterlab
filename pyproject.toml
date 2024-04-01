@@ -86,11 +86,11 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
-    "altair==5.2.0",
+    "altair==5.3.0",
     "ipython==8.16.1",
     "ipywidgets==8.1.2",
     "jupyterlab-geojson==3.4.0",
-    "jupyterlab-language-pack-zh-CN==4.1.post0",
+    "jupyterlab-language-pack-zh-CN==4.1.post2",
     "matplotlib==3.8.3",
     "nbconvert>=7.0.0",
     "pandas==2.2.1",
@@ -118,7 +118,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.3.0",
+    "ruff==0.3.4",
 ]
 
 [tool.check-wheel-contents]
