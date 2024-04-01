@@ -97,6 +97,12 @@ function activateForeign(
       tracker.currentWidget === shell.currentWidget
   });
 
+  const notify = () => {
+    commands.notifyCommandChanged(toggleShowAllActivity);
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
+
   if (palette) {
     palette.addItem({
       command: toggleShowAllActivity,

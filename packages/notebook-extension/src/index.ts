@@ -66,6 +66,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import {
   CommandEditStatus,
   ExecutionIndicator,
+  INotebookCellExecutor,
   INotebookTools,
   INotebookTracker,
   INotebookWidgetFactory,
@@ -80,6 +81,7 @@ import {
   NotebookTracker,
   NotebookTrustStatus,
   NotebookWidgetFactory,
+  setCellExecutor,
   StaticNotebook,
   ToolbarItems
 } from '@jupyterlab/notebook';
@@ -126,6 +128,7 @@ import {
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Message, MessageLoop } from '@lumino/messaging';
 import { Menu, Panel, Widget } from '@lumino/widgets';
+import { cellExecutor } from './cellexecutor';
 import { logNotebookOutput } from './nboutput';
 import { ActiveCellTool } from './tool-widgets/activeCellToolWidget';
 import {
@@ -355,7 +358,11 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   description: 'Provides the notebook widget tracker.',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory, IEditorExtensionRegistry],
+  requires: [
+    INotebookWidgetFactory,
+    IEditorExtensionRegistry,
+    INotebookCellExecutor
+  ],
   optional: [
     ICommandPalette,
     IDefaultFileBrowser,
@@ -1091,6 +1098,7 @@ const activeCellTool: JupyterFrontEndPlugin<void> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  cellExecutor,
   factory,
   trackerPlugin,
   executionIndicator,
@@ -1589,6 +1597,7 @@ function activateNotebookHandler(
   app: JupyterFrontEnd,
   factory: NotebookWidgetFactory.IFactory,
   extensions: IEditorExtensionRegistry,
+  executor: INotebookCellExecutor,
   palette: ICommandPalette | null,
   defaultBrowser: IDefaultFileBrowser | null,
   launcher: ILauncher | null,
@@ -1601,6 +1610,8 @@ function activateNotebookHandler(
   formRegistry: IFormRendererRegistry | null,
   filebrowserFactory: IFileBrowserFactory | null
 ): INotebookTracker {
+  setCellExecutor(executor);
+
   const translator = translator_ ?? nullTranslator;
   const sessionDialogs =
     sessionDialogs_ ?? new SessionContextDialogs({ translator });
@@ -3523,6 +3534,7 @@ function addCommands(
       }
     }
   });
+
   commands.addCommand(CommandIDs.virtualScrollbar, {
     label: trans.__('Virtual Scrollbar'),
     caption: trans.__(
@@ -3549,6 +3561,17 @@ function addCommands(
       return visible;
     }
   });
+
+  // All commands with isEnabled defined directly or in a semantic commands
+  // To simplify here we added all commands as most of them have isEnabled
+  const skip = [CommandIDs.createNew];
+  const notify = () => {
+    Object.values(CommandIDs)
+      .filter(id => !skip.includes(id))
+      .forEach(id => app.commands.notifyCommandChanged(id));
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 }
 
 /**
