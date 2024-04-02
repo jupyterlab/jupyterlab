@@ -146,15 +146,14 @@ First, make sure to update to JupyterLab 4 and install ``copier`` and some depen
 
 .. code:: bash
 
-   pip install -U jupyterlab
-   pip install "copier~=8.0" jinja2-time tomli-w
+   pip install -U jupyterlab[upgrade-extension]
 
 
 Or with ``conda``:
 
 .. code:: bash
 
-   conda install -c conda-forge jupyterlab=4 "copier=8" jinja2-time tomli-w
+   conda install -c conda-forge jupyterlab=4 "copier=8" jinja2-time tomli-w "pydantic<2" "pyyaml-include<2.0"
 
 
 Then at the root folder of the extension, run:
