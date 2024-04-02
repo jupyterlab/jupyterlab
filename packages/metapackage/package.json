@@ -114,7 +114,7 @@
     "@jupyterlab/settingeditor": "^4.2.0-alpha.2",
     "@jupyterlab/settingeditor-extension": "^4.2.0-alpha.2",
     "@jupyterlab/settingregistry": "^4.2.0-alpha.2",
-    "@jupyterlab/shortcuts-extension": "^4.2.0-alpha.2",
+    "@jupyterlab/shortcuts-extension": "^5.0.0-alpha.2",
     "@jupyterlab/statedb": "^4.2.0-alpha.2",
     "@jupyterlab/statusbar": "^4.2.0-alpha.2",
     "@jupyterlab/statusbar-extension": "^4.2.0-alpha.2",

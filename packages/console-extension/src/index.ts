@@ -89,10 +89,6 @@ namespace CommandIDs {
 
   export const getKernel = 'console:get-kernel';
 
-  export const enterToExecute = 'console:enter-to-execute';
-
-  export const shiftEnterToExecute = 'console:shift-enter-to-execute';
-
   export const interactionMode = 'console:interaction-mode';
 
   export const redo = 'console:redo';
@@ -503,8 +499,7 @@ async function activateConsole(
     activate?: boolean;
   }
 
-  let command = CommandIDs.open;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.open, {
     label: trans.__('Open a console for the provided `path`.'),
     execute: (args: IOpenOptions) => {
       const path = args['path'];
@@ -530,8 +525,7 @@ async function activateConsole(
     }
   });
 
-  command = CommandIDs.create;
-  commands.addCommand(command, {
+  commands.addCommand(CommandIDs.create, {
     label: args => {
       if (args['isPalette']) {
         return trans.__('New Console');
@@ -817,6 +811,17 @@ async function activateConsole(
     },
     isEnabled
   });
+
+  // All commands with isEnabled defined directly or in a semantic commands
+
+  const skip = [CommandIDs.create];
+  const notify = () => {
+    Object.values(CommandIDs)
+      .filter(id => !skip.includes(id))
+      .forEach(id => app.commands.notifyCommandChanged(id));
+  };
+  tracker.currentChanged.connect(notify);
+  shell.currentChanged?.connect(notify);
 
   if (palette) {
     // Add command palette items
