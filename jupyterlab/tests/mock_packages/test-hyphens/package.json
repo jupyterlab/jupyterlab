@@ -7,15 +7,23 @@
     "index.js"
   ],
   "scripts": {
+    "build": "jlpm build:labextension:dev",
     "build:labextension": "jupyter labextension build .",
-    "clean": "rimraf ./test_hyphens/labextension"
+    "build:labextension:dev": "jupyter labextension build --development True .",
+    "clean": "rimraf test_hyphens/labextension test_hyphens/_version.py",
+    "install:extension": "jlpm build"
   },
   "dependencies": {
-    "@jupyterlab/launcher": "^4.0.0-alpha.21"
+    "@jupyterlab/launcher": "^4.2.0-alpha.2"
   },
   "devDependencies": {
-    "@jupyterlab/builder": "^4.0.0-alpha.21",
-    "rimraf": "~3.0.0"
+    "@jupyterlab/builder": "^4.2.0-alpha.2",
+    "@types/react": "^18.0.26",
+    "css-loader": "^6.7.1",
+    "rimraf": "~5.0.5",
+    "source-map-loader": "~1.0.2",
+    "style-loader": "~3.3.1",
+    "yjs": "^13.5.40"
   },
   "jupyterlab": {
     "extension": true,

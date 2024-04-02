@@ -64,22 +64,20 @@ const packages = [
   'tooltip',
   'translation',
   'ui-components',
-  'vega5-extension'
+  'vega5-extension',
+  'workspaces'
 ];
 
 const entryPoints = packages
-  .flatMap(p => [`packages/${p}/src/index.ts`, `packages/${p}/src/index.tsx`])
+  .map(p => `packages/${p}`)
   .filter(function (path) {
     return fs.existsSync(path);
   });
 
-const exclude =
-  packages.flatMap(p => [`packages/${p}/test`]) +
-  ['packages/application-extension'];
-
 module.exports = {
   entryPoints,
-  exclude,
+  entryPointStrategy: 'packages',
+  includeVersion: false,
   externalSymbolLinkMappings: {
     '@codemirror/language': {
       LanguageSupport:
@@ -221,11 +219,10 @@ module.exports = {
     GitHub: 'https://github.com/jupyterlab/jupyterlab',
     Jupyter: 'https://jupyter.org'
   },
-  name: '@jupyterlab',
+  name: 'JupyterLab',
   plugin: ['typedoc-plugin-mdn-links'],
   out: 'docs/source/api',
   readme: 'README.md',
   theme: 'default',
-  titleLink: 'https://jupyterlab.readthedocs.io/en/latest',
-  tsconfig: 'tsconfigdoc.json'
+  titleLink: 'https://jupyterlab.readthedocs.io/en/latest'
 };

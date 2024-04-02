@@ -6,16 +6,8 @@
 set -ex
 set -o pipefail
 
-# use a single global cache dir
-export YARN_ENABLE_GLOBAL_CACHE=1
-
 # display verbose output for pkg builds run during `jlpm install`
 export YARN_ENABLE_INLINE_BUILDS=1
-
-
-if [[ $GROUP != nonode ]]; then
-    python -c "from jupyterlab.commands import build_check; build_check()"
-fi
 
 
 if [[ $GROUP == python ]]; then
@@ -49,7 +41,8 @@ if [[ $GROUP == docs ]]; then
     # Build the docs (includes API docs)
     python -m pip install .[docs]
     pushd docs
-    make html
+    # Identical to make html but avoid requiring make to be installed
+    python -msphinx -M html "source" "build" -W --keep-going
     popd
 fi
 
@@ -82,7 +75,7 @@ if [[ $GROUP == lint ]]; then
 
     # Python checks
     ruff format .
-    ruff .
+    ruff check .
     pipx run 'validate-pyproject[all]' pyproject.toml
 fi
 
@@ -99,13 +92,6 @@ if [[ $GROUP == integrity2 ]]; then
 
     # Make sure we have CSS that can be converted with postcss
     jlpm dlx -p postcss -p postcss-cli postcss packages/**/style/*.css --dir /tmp --config scripts/postcss.config.js
-
-    # run twine check on the python build assets.
-    # this must be done before altering any versions below.
-    python -m pip install -U twine wheel build
-    python -m build .
-    twine check dist/*
-
 fi
 
 
@@ -450,4 +436,20 @@ if [[ $GROUP == nonode ]]; then
     virtualenv -p $(which python3) test_sdist
     ./test_sdist/bin/pip install dist/*.tar.gz
     ./test_sdist/bin/python -m jupyterlab.browser_check --no-browser-test
+fi
+
+if [[ $GROUP == e2e* ]]; then
+    pushd galata
+    jlpm start &
+    # Install only Chromium browser
+    jlpm playwright install chromium
+    jlpm run build
+    npx wait-on@7.2.0 http-get://localhost:8888/lab -t 360000
+
+    jlpm run test --project galata jupyterlab "$@"
+    # FIXME
+    # mv galata/test-results galata/test-jupyterlab-results || true
+    # # Run once benchmark tests to ensure they have no regression
+    # BENCHMARK_NUMBER_SAMPLES=1 jlpm run test:benchmark
+    popd
 fi

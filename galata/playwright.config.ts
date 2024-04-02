@@ -1,10 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-var baseConfig = require('@jupyterlab/galata/lib/playwright-config');
+import { defineConfig } from '@playwright/test';
+import * as baseConfig from '@jupyterlab/galata/lib/playwright-config';
 
-module.exports = {
+export default defineConfig({
   ...baseConfig,
+  outputDir: process.env.CI
+    ? `${process.env.DOCKER_VOLUME ?? ''}pw-test-results`
+    : undefined,
   projects: [
     {
       name: 'documentation',
@@ -38,6 +42,17 @@ module.exports = {
   ],
   // Switch to 'always' to keep raw assets for all tests
   preserveOutput: 'failures-only', // Breaks HTML report if use.video == 'on'
+  reporter: process.env.CI
+    ? [
+        ['github'],
+        [
+          'blob',
+          { outputDir: `${process.env.DOCKER_VOLUME ?? ''}pw-blob-report` }
+        ]
+      ]
+    : [['list'], ['html', { open: 'on-failure' }]],
   // Try one retry as some tests are flaky
-  retries: process.env.CI ? 1 : 0
-};
+  retries: process.env.CI ? 1 : 0,
+  // On CI only run on single worker to limit cross test interactions
+  workers: process.env.CI ? 1 : undefined
+});

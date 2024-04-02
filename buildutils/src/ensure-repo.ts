@@ -851,23 +851,6 @@ export async function ensureIntegrity(): Promise<boolean> {
     messages['top'] = ['Update package.json'];
   }
 
-  // Handle the refs in the top level tsconfigdoc.json
-  const tsConfigDocExclude = [
-    'application-extension',
-    'metapackage',
-    'nbconvert-css',
-    'testing'
-  ];
-  const tsConfigdocPath = path.resolve('.', 'tsconfigdoc.json');
-  const tsConfigdocData = utils.readJSONFile(tsConfigdocPath);
-  tsConfigdocData.references = utils
-    .getCorePaths()
-    .filter(pth => !tsConfigDocExclude.some(pkg => pth.includes(pkg)))
-    .map(pth => {
-      return { path: './' + path.relative('.', pth).replace(/\\/g, '/') };
-    });
-  utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
-
   // Handle buildutils
   ensureBuildUtils();
 

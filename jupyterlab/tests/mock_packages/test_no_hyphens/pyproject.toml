@@ -2,18 +2,57 @@
 # Distributed under the terms of the Modified BSD License.
 
 [build-system]
-requires = ["jupyter_packaging~=0.10,<2", "jupyterlab~=4.0"]
-build-backend = "jupyter_packaging.build_api"
+requires = ["hatchling>=1.5.0", "jupyterlab>=4.0.0,<5", "hatch-nodejs-version>=0.3.2"]
+build-backend = "hatchling.build"
 
-[tool.jupyter-packaging.options]
-ensured-targets = ["test_no_underscore/labextension/package.json"]
+[project]
+name = "test_no_hyphens"
+requires-python = ">=3.8"
+classifiers = [
+    "Framework :: Jupyter",
+    "Framework :: Jupyter :: JupyterLab",
+    "Framework :: Jupyter :: JupyterLab :: 4",
+    "Framework :: Jupyter :: JupyterLab :: Extensions",
+    "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dynamic = ["version", "description", "authors", "urls", "keywords"]
 
-[tool.jupyter-packaging.builder]
-factory = "jupyter_packaging.npm_builder"
+[tool.hatch.version]
+source = "nodejs"
 
-[tool.jupyter-packaging.build-args]
+[tool.hatch.metadata.hooks.nodejs]
+fields = ["description", "authors", "urls"]
+
+[tool.hatch.build.targets.sdist]
+artifacts = ["test_no_hyphens/labextension"]
+
+[tool.hatch.build.targets.wheel.shared-data]
+"test_no_hyphens/labextension" = "share/jupyter/labextensions/test_no_hyphens"
+
+[tool.hatch.build.hooks.version]
+path = "test_no_hyphens/_version.py"
+
+[tool.hatch.build.hooks.jupyter-builder]
+dependencies = ["hatch-jupyter-builder>=0.5"]
+build-function = "hatch_jupyter_builder.npm_builder"
+ensured-targets = [
+    "test_no_hyphens/labextension/package.json",
+]
+
+[tool.hatch.build.hooks.jupyter-builder.build-kwargs]
 build_cmd = "build:labextension"
 npm = ["jlpm"]
 
-[tool.check-manifest]
-ignore = ["test_no_underscore/labextension/**", "yarn.lock", ".*", "package-lock.json"]
+[tool.hatch.build.hooks.jupyter-builder.editable-build-kwargs]
+build_cmd = "install:extension"
+npm = ["jlpm"]
+source_dir = "."
+build_dir = "test_no_hyphens/labextension"

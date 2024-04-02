@@ -5,9 +5,6 @@
 set -ex
 set -o pipefail
 
-# use a single global cache dir
-export YARN_ENABLE_GLOBAL_CACHE=1
-
 # display verbose output for pkg builds run during `jlpm install`
 export YARN_ENABLE_INLINE_BUILDS=1
 
@@ -43,4 +40,8 @@ if [[ $GROUP == nonode ]]; then
     sudo rm -rf $(which node)
     sudo rm -rf $(which node)
     ! node
+fi
+
+if [[ $GROUP != nonode ]]; then
+    python -c "from jupyterlab.commands import build_check; build_check()"
 fi

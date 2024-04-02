@@ -168,11 +168,17 @@ export async function ensurePackage(
 
   // Make sure typedoc config files are consistent
   if (fs.existsSync(path.join(pkgPath, 'typedoc.json'))) {
-    const name = data.name.split('/');
-    utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
-      out: `../../docs/api/${name[name.length - 1]}`,
-      theme: '../../typedoc-theme'
-    });
+    let entryPoint = fs.existsSync(path.join(pkgPath, 'src/index.ts'))
+      ? 'src/index.ts'
+      : fs.existsSync(path.join(pkgPath, 'src/index.tsx'))
+      ? 'src/index.tsx'
+      : null;
+    if (entryPoint) {
+      utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
+        extends: ['../../typedoc.base.json'],
+        entryPoints: [entryPoint]
+      });
+    }
   }
 
   let imports: string[] = [];
@@ -315,15 +321,6 @@ export async function ensurePackage(
         );
       }
     });
-  }
-
-  // Handle typedoc config output.
-  const tdOptionsPath = path.join(pkgPath, 'tdoptions.json');
-  if (fs.existsSync(tdOptionsPath)) {
-    const tdConfigData = utils.readJSONFile(tdOptionsPath);
-    const pkgDirName = pkgPath.split('/').pop();
-    tdConfigData['out'] = `../../docs/api/${pkgDirName}`;
-    utils.writeJSONFile(tdOptionsPath, tdConfigData);
   }
 
   // Handle references.
