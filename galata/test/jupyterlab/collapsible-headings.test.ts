@@ -124,6 +124,17 @@ test.describe('Collapsible Headings; keyboard navigation', () => {
     await page.notebook.run();
   });
 
+  // use non-standard showHiddenCellsButton=false
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        // `ReExpand Headers 01` is flaky in full windowing mode
+        windowingMode: 'none'
+      }
+    }
+  });
+
   test('Jump to Previous Header', async ({ page }) => {
     await page.notebook.selectCells(6);
     await page.keyboard.press('ArrowLeft');
