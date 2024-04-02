@@ -599,7 +599,7 @@ class Section extends PanelWithToolbar {
           this._manager.shutdownAll();
         }
       });
-    }
+    };
 
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
