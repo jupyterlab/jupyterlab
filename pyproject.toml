@@ -120,6 +120,13 @@ dev = [
     "bump2version",
     "ruff==0.3.0",
 ]
+upgrade-extension = [
+    "pyyaml-include<2.0",
+    "copier~=8.0",
+    "jinja2-time<0.3",
+    "pydantic<2.0",
+    "tomli-w<2.0"
+]
 
 [tool.check-wheel-contents]
 ignore = ["W002", "W004"]
