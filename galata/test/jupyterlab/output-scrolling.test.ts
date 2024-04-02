@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { test } from '@jupyterlab/galata';
+import { galata, test } from '@jupyterlab/galata';
 import { expect } from '@playwright/test';
 import * as path from 'path';
 
@@ -10,18 +10,24 @@ const fileName = 'output_scrolling.ipynb';
 const cellSelector = '[role="main"] >> .jp-NotebookPanel >> .jp-Cell';
 
 test.describe('Output Scrolling', () => {
-  test.beforeEach(async ({ page, tmpPath }) => {
-    await page.contents.uploadFile(
+  test.use({ tmpPath: 'test-output-scrolling' });
+
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.uploadFile(
       path.resolve(__dirname, `./notebooks/${fileName}`),
       `${tmpPath}/${fileName}`
     );
+  });
 
+  test.beforeEach(async ({ page, tmpPath }) => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     await page.notebook.activate(fileName);
   });
 
-  test.afterEach(async ({ page, tmpPath }) => {
-    await page.contents.deleteDirectory(tmpPath);
+  test.afterAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.deleteDirectory(tmpPath);
   });
 
   test('Scrolling mode', async ({ page }) => {

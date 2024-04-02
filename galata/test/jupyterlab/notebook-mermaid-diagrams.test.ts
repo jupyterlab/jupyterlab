@@ -64,12 +64,17 @@ async function resizePageAndScreenshot(locator: Locator) {
 for (const theme of ['default', 'dark']) {
   const dark = theme === 'dark';
   test.describe(`Notebook Mermaid Diagrams ${theme}`, () => {
-    test.beforeEach(async ({ page, request, tmpPath }) => {
+    test.use({ tmpPath: 'test-mermaid' });
+
+    test.beforeAll(async ({ request, tmpPath }) => {
       const contents = galata.newContentsHelper(request);
       await contents.uploadFile(
         path.resolve(__dirname, `./notebooks/${fileName}`),
         `${tmpPath}/${fileName}`
       );
+    });
+
+    test.beforeEach(async ({ page, tmpPath }) => {
       await page.filebrowser.openDirectory(tmpPath);
       const nbPath = `${tmpPath}/${fileName}`;
 
