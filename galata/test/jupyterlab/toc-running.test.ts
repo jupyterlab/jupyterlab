@@ -7,6 +7,8 @@ const fileName = 'toc_running.ipynb';
 import * as path from 'path';
 
 test.describe('ToC Running indicator', () => {
+  test.use({ tmpPath: 'test-toc-running-indicator' });
+
   test.beforeEach(async ({ page, tmpPath }) => {
     await page.notebook.openByPath(`${tmpPath}/${fileName}`);
     await page.notebook.activate(fileName);

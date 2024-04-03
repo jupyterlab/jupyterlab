@@ -186,7 +186,7 @@ export async function waitForCondition(
         }
         resolve();
       } else {
-        checkTimer = setTimeout(check, 200);
+        checkTimer = setTimeout(check, 50);
       }
     };
 

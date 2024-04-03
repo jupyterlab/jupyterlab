@@ -586,7 +586,7 @@ class Section extends PanelWithToolbar {
       this._manager.shutdownAllConfirmationText ||
       `${shutdownAllLabel} ${this._manager.name}`;
 
-    function onShutdown() {
+    const onShutdown = () => {
       void showDialog({
         title: shutdownTitle,
         body: shutdownAllConfirmationText,
@@ -599,7 +599,7 @@ class Section extends PanelWithToolbar {
           this._manager.shutdownAll();
         }
       });
-    }
+    };
 
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
@@ -607,7 +607,7 @@ class Section extends PanelWithToolbar {
         !enabled ? ' jp-mod-disabled' : ''
       }`,
       enabled,
-      onClick: onShutdown
+      onClick: onShutdown.bind(this)
     });
     const switchViewButton = new ToolbarButton({
       className: VIEW_BUTTON_CLASS,
