@@ -118,7 +118,7 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.3.0",
+    "ruff==0.3.5",
 ]
 upgrade-extension = [
     "pyyaml-include<2.0",
@@ -250,12 +250,12 @@ after-publish-assets = "npm run after:publish:assets"
 [tool.ruff]
 target-version = "py38"
 line-length = 100
-select = [
+lint.select = [
   "A", "B", "C", "DTZ", "E", "EM", "F", "FBT", "I", "ICN", "N",
   "PLC", "PLE", "PLR", "PLW", "Q", "RUF", "S", "SIM", "T", "TID", "UP",
   "W", "YTT",
 ]
-ignore = [
+lint.ignore = [
 # Q000 Single quotes found but double quotes preferred
 "Q000",
 # FBT001 Boolean positional arg in function definition
