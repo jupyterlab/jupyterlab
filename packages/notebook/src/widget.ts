@@ -2120,17 +2120,20 @@ export class Notebook extends StaticNotebook {
         // Nothing to do if scroll request was already handled.
         return;
       }
+      // Node which allows to scroll the notebook
+      const scroller = this.outerNode;
+
       if (cell.inViewport) {
         // If cell got scrolled to the viewport in the meantime,
         // proceed with scrolling within the cell.
-        return scrollRequest.scrollWithinCell();
+        return scrollRequest.scrollWithinCell({ scroller });
       }
       // If cell is not in the viewport and needs scrolling,
       // first scroll to the cell and then scroll within the cell.
       this.scrollToItem(this.activeCellIndex)
         .then(() => {
           void cell.ready.then(() => {
-            scrollRequest.scrollWithinCell();
+            scrollRequest.scrollWithinCell({ scroller });
           });
         })
         .catch(reason => {
