@@ -47,7 +47,7 @@ dependencies = [
     "jupyterlab_server>=2.19.0,<3",
     "notebook_shim>=0.2",
     "packaging",
-    "tomli;python_version<\"3.11\"",
+    "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",
     "traitlets>=3.0",
 ]
