@@ -341,14 +341,11 @@ describe('@jupyterlab/shortcut-extension', () => {
         ];
       });
 
-      it('should test sortBy `category` column', () => {
+      it('should test sort by the `category` column', () => {
         shortcutUI.state = {
+          ...shortcutUI.state,
           currentSort: 'category',
-          filteredShortcutList: mockedFilteredShortcutList,
-          shortcutRegistry: null,
-          shortcutsFetched: false,
-          searchQuery: '',
-          showSelectors: false
+          filteredShortcutList: mockedFilteredShortcutList
         };
 
         expect(shortcutUI.state.filteredShortcutList[0].category).not.toBe(
@@ -365,14 +362,11 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(shortcutUI.state.filteredShortcutList[3].category).toBe('Zebra');
       });
 
-      it('should test sortBy `command` column', () => {
+      it('should test sort by the `command` column', () => {
         shortcutUI.state = {
+          ...shortcutUI.state,
           currentSort: 'command',
-          filteredShortcutList: mockedFilteredShortcutList,
-          shortcutRegistry: null,
-          shortcutsFetched: false,
-          searchQuery: '',
-          showSelectors: false
+          filteredShortcutList: mockedFilteredShortcutList
         };
 
         expect(shortcutUI.state.filteredShortcutList[0].label).not.toBe(
@@ -385,14 +379,11 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(shortcutUI.state.filteredShortcutList[3].label).toBe('Zebra');
       });
 
-      it('should test sortBy `selector` column', () => {
+      it('should test sort by the `selector` column', () => {
         shortcutUI.state = {
+          ...shortcutUI.state,
           currentSort: 'selector',
-          filteredShortcutList: mockedFilteredShortcutList,
-          shortcutRegistry: null,
-          shortcutsFetched: false,
-          searchQuery: '',
-          showSelectors: false
+          filteredShortcutList: mockedFilteredShortcutList
         };
 
         expect(shortcutUI.state.filteredShortcutList[0].selector).not.toBe(
@@ -409,14 +400,11 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(shortcutUI.state.filteredShortcutList[3].selector).toBe('Zebra');
       });
 
-      it('should test sortBy `source` column', () => {
+      it('should test sort by the `source` column', () => {
         shortcutUI.state = {
+          ...shortcutUI.state,
           currentSort: 'source',
-          filteredShortcutList: mockedFilteredShortcutList,
-          shortcutRegistry: null,
-          shortcutsFetched: false,
-          searchQuery: '',
-          showSelectors: false
+          filteredShortcutList: mockedFilteredShortcutList
         };
 
         expect(
