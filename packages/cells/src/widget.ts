@@ -1085,7 +1085,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       promptOverlay: true,
       inputHistoryScope: options.inputHistoryScope
     }));
-    this._observeCaretMovementInOuput(output);
+    output.node.addEventListener('keydown', this._detectCaretMovementInOuput);
+
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
       this.outputsScrolled = !this.outputsScrolled;
@@ -1102,68 +1103,63 @@ export class CodeCell extends Cell<ICodeCellModel> {
   }
 
   /**
-   * Observe the movement of the caret in the output area.
+   * Detect the movement of the caret in the output area.
    *
    * Emits scroll request if the caret moved.
    */
-  private _observeCaretMovementInOuput(output: OutputArea) {
-    let lastOnCaretMovedHandler: () => void;
-    let lastTarget: HTMLElement | null;
+  private _detectCaretMovementInOuput = (e: KeyboardEvent) => {
+    const inWindowedContainer = this._inViewport !== null;
+    const defaultPrevented = inWindowedContainer && !this._inViewport;
 
-    output.node.addEventListener('keydown', (e: KeyboardEvent) => {
-      const inWindowedContainer = this._inViewport !== null;
-      const defaultPrevented = inWindowedContainer && !this._inViewport;
+    // Because we do not want to scroll on any key, but only on keys which
+    // move the caret (this on keys which cause input and on keys like left,
+    // right, top, bottom arrow, home, end, page down/up - but only if the
+    // cursor is not at the respective end of the input) we need to listen
+    // to the `selectionchange` event on target inputs/textareas, etc.
+    const target = e.target;
 
-      // Because we do not want to scroll on any key, but only on keys which
-      // move the caret (this on keys which cause input and on keys like left,
-      // right, top, bottom arrow, home, end, page down/up - but only if the
-      // cursor is not at the respective end of the input) we need to listen
-      // to the `selectionchange` event on target inputs/textareas, etc.
-      const target = e.target;
+    if (!target || !(target instanceof HTMLElement)) {
+      return;
+    }
 
-      if (!target || !(target instanceof HTMLElement)) {
-        return;
-      }
+    // Make sure the previous listener gets disconnected
+    if (this._lastTarget) {
+      this._lastTarget.removeEventListener(
+        'selectionchange',
+        this._lastOnCaretMovedHandler
+      );
+      document.removeEventListener(
+        'selectionchange',
+        this._lastOnCaretMovedHandler
+      );
+    }
 
-      // Make sure the previous listener gets disconnected
-      if (lastTarget) {
-        lastTarget.removeEventListener(
-          'selectionchange',
-          lastOnCaretMovedHandler
-        );
-        document.removeEventListener(
-          'selectionchange',
-          lastOnCaretMovedHandler
-        );
-      }
-
-      const onCaretMoved = () => {
-        this._scrollRequested.emit({
-          scrollWithinCell: ({ scroller }) => {
-            ElementExt.scrollIntoViewIfNeeded(scroller, target);
-          },
-          defaultPrevented
-        });
-      };
-
-      // Remember the most recent target/handler to disconnect them next time.
-      lastTarget = target;
-      lastOnCaretMovedHandler = onCaretMoved;
-
-      // Firefox only supports `selectionchange` on the actual input element,
-      // all other browsers only support it on the top-level document.
-      target.addEventListener('selectionchange', onCaretMoved, { once: true });
-      document.addEventListener('selectionchange', onCaretMoved, {
-        once: true
+    const onCaretMoved = () => {
+      this._scrollRequested.emit({
+        scrollWithinCell: ({ scroller }) => {
+          ElementExt.scrollIntoViewIfNeeded(scroller, target);
+        },
+        defaultPrevented
       });
+    };
 
-      // Schedule removal of the listener.
-      setTimeout(() => {
-        target.removeEventListener('selectionchange', onCaretMoved);
-        document.removeEventListener('selectionchange', onCaretMoved);
-      }, 250);
+    // Remember the most recent target/handler to disconnect them next time.
+    this._lastTarget = target;
+    this._lastOnCaretMovedHandler = onCaretMoved;
+
+    // Firefox only supports `selectionchange` on the actual input element,
+    // all other browsers only support it on the top-level document.
+    target.addEventListener('selectionchange', onCaretMoved, { once: true });
+    document.addEventListener('selectionchange', onCaretMoved, {
+      once: true
     });
-  }
+
+    // Schedule removal of the listener.
+    setTimeout(() => {
+      target.removeEventListener('selectionchange', onCaretMoved);
+      document.removeEventListener('selectionchange', onCaretMoved);
+    }, 250);
+  };
 
   /**
    * Maximum number of outputs to display.
@@ -1565,6 +1561,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
       this._outputLengthHandler,
       this
     );
+    this._output.node.removeEventListener(
+      'keydown',
+      this._detectCaretMovementInOuput
+    );
     this._rendermime = null!;
     this._output = null!;
     this._outputWrapper = null!;
@@ -1653,6 +1653,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _outputPlaceholder: OutputPlaceholder | null = null;
   private _output: OutputArea;
   private _syncScrolled = false;
+  private _lastOnCaretMovedHandler: () => void;
+  private _lastTarget: HTMLElement | null = null;
 }
 
 /**
