@@ -452,11 +452,11 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     if (widget instanceof ToolbarPopupOpener) {
       status = super.insertItem(index, name, widget);
     } else {
-      const j = Math.max(
+      index = Math.max(
         0,
         Math.min(index, (this.layout as ToolbarLayout).widgets.length - 1)
       );
-      status = super.insertItem(j, name, widget);
+      status = super.insertItem(index, name, widget);
     }
 
     // Save the widgets position when a widget is inserted or moved.
