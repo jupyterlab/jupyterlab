@@ -49,7 +49,7 @@ dependencies = [
     "packaging",
     "tomli;python_version<\"3.11\"",
     "tornado>=6.2.0",
-    "traitlets",
+    "traitlets>=3.0",
 ]
 dynamic = [
     "version",
