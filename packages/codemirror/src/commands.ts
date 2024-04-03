@@ -6,6 +6,7 @@
 import {
   indentLess,
   indentMore,
+  insertBlankLine,
   insertNewlineAndIndent,
   insertTab
 } from '@codemirror/commands';
@@ -76,12 +77,30 @@ export namespace StateCommands {
 
   /**
    * Prevent insertion of new line when running cell with Ctrl/Command + Enter
+   * @deprecated
    */
   export function preventNewLineOnRun(target: { dom: HTMLElement }): boolean {
     if (target.dom.closest(CODE_RUNNER_SELECTOR)) {
       return true;
     }
     return false;
+  }
+
+  /**
+   * Insertion new line or running cell with Ctrl/Command + Enter
+   */
+  export function insertBlankLineOnRun(target: {
+    dom: HTMLElement;
+    state: EditorState;
+    dispatch: (transaction: Transaction) => void;
+  }): boolean {
+    if (target.dom.closest(CODE_RUNNER_SELECTOR)) {
+      // do not prevent default to allow `run` action to be handled by lumino
+      return false;
+    } else {
+      const arg = { state: target.state, dispatch: target.dispatch };
+      return insertBlankLine(arg);
+    }
   }
 
   /**
