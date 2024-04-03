@@ -340,6 +340,7 @@ describe('@jupyterlab/shortcut-extension', () => {
           }
         ];
       });
+
       it('should test sortBy `category` column', () => {
         shortcutUI.state = {
           currentSort: 'category',
@@ -406,54 +407,55 @@ describe('@jupyterlab/shortcut-extension', () => {
           'Tomato'
         );
         expect(shortcutUI.state.filteredShortcutList[3].selector).toBe('Zebra');
-      }),
-        it('should test sortBy `source` column', () => {
-          shortcutUI.state = {
-            currentSort: 'source',
-            filteredShortcutList: mockedFilteredShortcutList,
-            shortcutRegistry: null,
-            shortcutsFetched: false,
-            searchQuery: '',
-            showSelectors: false
-          };
+      });
 
-          expect(
-            shortcutUI.state.filteredShortcutList[0].keybindings.every(
-              k => k.isDefault
-            )
-              ? 'default'
-              : 'other'
-          ).toBe('other');
-          shortcutUI.sortShortcuts();
-          expect(
-            shortcutUI.state.filteredShortcutList[0].keybindings.every(
-              k => k.isDefault
-            )
-              ? 'default'
-              : 'other'
-          ).toBe('default');
-          expect(
-            shortcutUI.state.filteredShortcutList[1].keybindings.every(
-              k => k.isDefault
-            )
-              ? 'default'
-              : 'other'
-          ).toBe('default');
-          expect(
-            shortcutUI.state.filteredShortcutList[2].keybindings.every(
-              k => k.isDefault
-            )
-              ? 'default'
-              : 'other'
-          ).toBe('other');
-          expect(
-            shortcutUI.state.filteredShortcutList[3].keybindings.every(
-              k => k.isDefault
-            )
-              ? 'default'
-              : 'other'
-          ).toBe('other');
-        });
+      it('should test sortBy `source` column', () => {
+        shortcutUI.state = {
+          currentSort: 'source',
+          filteredShortcutList: mockedFilteredShortcutList,
+          shortcutRegistry: null,
+          shortcutsFetched: false,
+          searchQuery: '',
+          showSelectors: false
+        };
+
+        expect(
+          shortcutUI.state.filteredShortcutList[0].keybindings.every(
+            k => k.isDefault
+          )
+            ? 'default'
+            : 'other'
+        ).toBe('other');
+        shortcutUI.sortShortcuts();
+        expect(
+          shortcutUI.state.filteredShortcutList[0].keybindings.every(
+            k => k.isDefault
+          )
+            ? 'default'
+            : 'other'
+        ).toBe('default');
+        expect(
+          shortcutUI.state.filteredShortcutList[1].keybindings.every(
+            k => k.isDefault
+          )
+            ? 'default'
+            : 'other'
+        ).toBe('default');
+        expect(
+          shortcutUI.state.filteredShortcutList[2].keybindings.every(
+            k => k.isDefault
+          )
+            ? 'default'
+            : 'other'
+        ).toBe('other');
+        expect(
+          shortcutUI.state.filteredShortcutList[3].keybindings.every(
+            k => k.isDefault
+          )
+            ? 'default'
+            : 'other'
+        ).toBe('other');
+      });
     });
   });
 });
