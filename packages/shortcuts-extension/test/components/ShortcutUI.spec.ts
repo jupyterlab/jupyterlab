@@ -297,5 +297,163 @@ describe('@jupyterlab/shortcut-extension', () => {
         expect(data.user.shortcuts).toHaveLength(1);
       });
     });
+
+    describe('#sortShortcuts()', () => {
+      let mockedFilteredShortcutList: IShortcutTarget[];
+      beforeEach(() => {
+        mockedFilteredShortcutList = [
+          {
+            id: '1',
+            label: 'Zebra',
+            command: 'Zebra',
+            selector: 'Zebra',
+            category: 'Zebra',
+            keybindings: [{ keys: ['Ctrl+Z', 'Z'], isDefault: false }],
+            args: undefined
+          },
+          {
+            id: '2',
+            label: 'Apple',
+            command: 'Apple',
+            selector: 'Apple',
+            category: 'Apple',
+            keybindings: [{ keys: ['Shift+A', 'A'], isDefault: true }],
+            args: undefined
+          },
+          {
+            id: '3',
+            label: 'Banana',
+            command: 'Banana',
+            selector: 'Banana',
+            category: 'Banana',
+            keybindings: [{ keys: ['Ctrl+B', 'B'], isDefault: false }],
+            args: undefined
+          },
+          {
+            id: '4',
+            label: 'Tomato',
+            command: 'Tomato',
+            selector: 'Tomato',
+            category: 'Tomato',
+            keybindings: [{ keys: ['Tab+T', 'T'], isDefault: true }],
+            args: undefined
+          }
+        ];
+      });
+      it('should test sortBy `category` column', () => {
+        shortcutUI.state = {
+          currentSort: 'category',
+          filteredShortcutList: mockedFilteredShortcutList,
+          shortcutRegistry: null,
+          shortcutsFetched: false,
+          searchQuery: '',
+          showSelectors: false
+        };
+
+        expect(shortcutUI.state.filteredShortcutList[0].category).not.toBe(
+          'Apple'
+        );
+        shortcutUI.sortShortcuts();
+        expect(shortcutUI.state.filteredShortcutList[0].category).toBe('Apple');
+        expect(shortcutUI.state.filteredShortcutList[1].category).toBe(
+          'Banana'
+        );
+        expect(shortcutUI.state.filteredShortcutList[2].category).toBe(
+          'Tomato'
+        );
+        expect(shortcutUI.state.filteredShortcutList[3].category).toBe('Zebra');
+      });
+
+      it('should test sortBy `command` column', () => {
+        shortcutUI.state = {
+          currentSort: 'command',
+          filteredShortcutList: mockedFilteredShortcutList,
+          shortcutRegistry: null,
+          shortcutsFetched: false,
+          searchQuery: '',
+          showSelectors: false
+        };
+
+        expect(shortcutUI.state.filteredShortcutList[0].label).not.toBe(
+          'Apple'
+        );
+        shortcutUI.sortShortcuts();
+        expect(shortcutUI.state.filteredShortcutList[0].label).toBe('Apple');
+        expect(shortcutUI.state.filteredShortcutList[1].label).toBe('Banana');
+        expect(shortcutUI.state.filteredShortcutList[2].label).toBe('Tomato');
+        expect(shortcutUI.state.filteredShortcutList[3].label).toBe('Zebra');
+      });
+
+      it('should test sortBy `selector` column', () => {
+        shortcutUI.state = {
+          currentSort: 'selector',
+          filteredShortcutList: mockedFilteredShortcutList,
+          shortcutRegistry: null,
+          shortcutsFetched: false,
+          searchQuery: '',
+          showSelectors: false
+        };
+
+        expect(shortcutUI.state.filteredShortcutList[0].selector).not.toBe(
+          'Apple'
+        );
+        shortcutUI.sortShortcuts();
+        expect(shortcutUI.state.filteredShortcutList[0].selector).toBe('Apple');
+        expect(shortcutUI.state.filteredShortcutList[1].selector).toBe(
+          'Banana'
+        );
+        expect(shortcutUI.state.filteredShortcutList[2].selector).toBe(
+          'Tomato'
+        );
+        expect(shortcutUI.state.filteredShortcutList[3].selector).toBe('Zebra');
+      }),
+        it('should test sortBy `source` column', () => {
+          shortcutUI.state = {
+            currentSort: 'source',
+            filteredShortcutList: mockedFilteredShortcutList,
+            shortcutRegistry: null,
+            shortcutsFetched: false,
+            searchQuery: '',
+            showSelectors: false
+          };
+
+          expect(
+            shortcutUI.state.filteredShortcutList[0].keybindings.every(
+              k => k.isDefault
+            )
+              ? 'default'
+              : 'other'
+          ).toBe('other');
+          shortcutUI.sortShortcuts();
+          expect(
+            shortcutUI.state.filteredShortcutList[0].keybindings.every(
+              k => k.isDefault
+            )
+              ? 'default'
+              : 'other'
+          ).toBe('default');
+          expect(
+            shortcutUI.state.filteredShortcutList[1].keybindings.every(
+              k => k.isDefault
+            )
+              ? 'default'
+              : 'other'
+          ).toBe('default');
+          expect(
+            shortcutUI.state.filteredShortcutList[2].keybindings.every(
+              k => k.isDefault
+            )
+              ? 'default'
+              : 'other'
+          ).toBe('other');
+          expect(
+            shortcutUI.state.filteredShortcutList[3].keybindings.every(
+              k => k.isDefault
+            )
+              ? 'default'
+              : 'other'
+          ).toBe('other');
+        });
+    });
   });
 });
