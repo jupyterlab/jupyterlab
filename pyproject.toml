@@ -39,7 +39,7 @@ dependencies = [
     "httpx>=0.25.0",
     "importlib-metadata>=4.8.3;python_version<\"3.10\"",
     "importlib-resources>=1.4;python_version<\"3.9\"",
-    "ipykernel",
+    "ipykernel>=6.5.0",
     "jinja2>=3.0.3",
     "jupyter_core",
     "jupyter_server>=2.4.0,<3",
