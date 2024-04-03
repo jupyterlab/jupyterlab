@@ -438,14 +438,13 @@ export class ShortcutUI
     shortcuts.sort((a: IShortcutTarget, b: IShortcutTarget) => {
       const compareA: string = getValue(a);
       const compareB: string = getValue(b);
-      if (compareA < compareB) {
-        return -1;
-      } else if (compareA > compareB) {
-        return 1;
+      const compareResult = compareA.localeCompare(compareB);
+      if (compareResult) {
+        return compareResult;
       } else {
         const aLabel = a['label'] ?? '';
         const bLabel = b['label'] ?? '';
-        return aLabel < bLabel ? -1 : aLabel > bLabel ? 1 : 0;
+        return aLabel.localeCompare(bLabel);
       }
     });
     this.setState({ filteredShortcutList: shortcuts });

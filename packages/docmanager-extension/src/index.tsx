@@ -501,6 +501,10 @@ export const downloadPlugin: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    app.shell.currentChanged?.connect(() => {
+      app.commands.notifyCommandChanged(CommandIDs.download);
+    });
+
     const category = trans.__('File Operations');
     if (palette) {
       palette.addItem({ command: CommandIDs.download, category });
@@ -1046,6 +1050,18 @@ function addCommands(
     }
   });
 
+  app.shell.currentChanged?.connect(() => {
+    [
+      CommandIDs.reload,
+      CommandIDs.restoreCheckpoint,
+      CommandIDs.save,
+      CommandIDs.saveAll,
+      CommandIDs.saveAs
+    ].forEach(cmd => {
+      app.commands.notifyCommandChanged(cmd);
+    });
+  });
+
   commands.addCommand(CommandIDs.toggleAutosave, {
     label: trans.__('Autosave Documents'),
     isToggled: () => docManager.autosave,
@@ -1202,6 +1218,18 @@ function addLabCommands(
       await commands.execute('filebrowser:activate', { path: context.path });
       await commands.execute('filebrowser:go-to-path', { path: context.path });
     }
+  });
+
+  labShell.currentChanged.connect(() => {
+    [
+      CommandIDs.clone,
+      CommandIDs.rename,
+      CommandIDs.duplicate,
+      CommandIDs.del,
+      CommandIDs.showInFileBrowser
+    ].forEach(cmd => {
+      app.commands.notifyCommandChanged(cmd);
+    });
   });
 }
 
