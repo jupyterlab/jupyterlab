@@ -22,8 +22,8 @@ from pathlib import Path
 
 try:
     import copier
-except ImportError:
-    msg = "Please install copier and jinja2-time"
+except ModuleNotFoundError:
+    msg = "Please install copier; you can use `pip install jupyterlab[upgrade-extension]`"
     raise RuntimeError(msg) from None
 
 # List of files recommended to be overridden

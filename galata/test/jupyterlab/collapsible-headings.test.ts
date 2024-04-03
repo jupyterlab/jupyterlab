@@ -7,10 +7,9 @@ import {
   IJupyterLabPageFixture,
   test
 } from '@jupyterlab/galata';
+import * as path from 'path';
 
 const fileName = 'notebook.ipynb';
-
-// const menuPaths = ['File', 'Edit', 'View', 'Run', 'Kernel', 'Help'];
 
 async function populateNotebook(page: IJupyterLabPageFixture) {
   await page.notebook.setCell(0, 'markdown', '# Heading 1');
@@ -106,22 +105,35 @@ test.describe('Collapsible Headings; no_showHCB', () => {
   });
 });
 
-async function populateNotebook2(page: IJupyterLabPageFixture) {
-  await page.notebook.setCell(0, 'markdown', '# Heading 1');
-  await page.notebook.addCell('code', '1+1');
-  await page.notebook.addCell('markdown', '## Heading 1.1');
-  await page.notebook.addCell('code', '2+2');
-  await page.notebook.addCell('markdown', '# Heading 2');
-  await page.notebook.addCell('code', '3+3');
-  await page.notebook.addCell('code', '4+4');
-}
+const keyboardNavigationNotebook =
+  'collapsible_headings_keyboard_navigation.ipynb';
 
 test.describe('Collapsible Headings; keyboard navigation', () => {
+  test.use({ tmpPath: 'test-collapsible-headings-keyboard' });
+
   // create an empty notebook for each test
-  test.beforeEach(async ({ page }) => {
-    await page.notebook.createNew(fileName);
-    await populateNotebook2(page);
-    await page.notebook.run();
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${keyboardNavigationNotebook}`),
+      `${tmpPath}/${keyboardNavigationNotebook}`
+    );
+  });
+
+  test.beforeEach(async ({ page, tmpPath }) => {
+    await page.notebook.openByPath(`${tmpPath}/${keyboardNavigationNotebook}`);
+    await page.notebook.activate(keyboardNavigationNotebook);
+  });
+
+  // use non-standard showHiddenCellsButton=false
+  test.use({
+    mockSettings: {
+      ...galata.DEFAULT_SETTINGS,
+      '@jupyterlab/notebook-extension:tracker': {
+        // `ReExpand Headers 01` is flaky in full windowing mode
+        windowingMode: 'none'
+      }
+    }
   });
 
   test('Jump to Previous Header', async ({ page }) => {

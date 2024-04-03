@@ -525,7 +525,7 @@ test('should return the active terminals', async ({ page, terminals }) => {
 
 - type: \< string >
 
-Unique test temporary path created on the server.
+Unique test temporary path created on the server. Required if uploading files in `beforeAll()` as otherwise the files would not be accessible from consecutive tests because by default `tmpPath` has a random component added for each test.
 
 Note: if you override this string, you will need to take care of creating the
 folder and cleaning it.
