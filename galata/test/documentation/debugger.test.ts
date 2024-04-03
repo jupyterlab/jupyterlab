@@ -31,7 +31,7 @@ test.describe('Debugger', () => {
 
     expect(
       await page.screenshot({
-        clip: { x: 1030, y: 62, width: 210, height: 32 }
+        clip: { x: 1015, y: 62, width: 225, height: 32 }
       })
     ).toMatchSnapshot('debugger_kernel.png');
   });
@@ -46,7 +46,7 @@ test.describe('Debugger', () => {
     await page.sidebar.setWidth(251, 'right');
 
     expect(
-      await page.screenshot({ clip: { y: 62, x: 780, width: 210, height: 32 } })
+      await page.screenshot({ clip: { y: 62, x: 765, width: 225, height: 32 } })
     ).toMatchSnapshot('debugger_activate.png');
   });
 
