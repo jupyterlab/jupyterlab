@@ -8,7 +8,8 @@ import {
   indentMore,
   insertBlankLine,
   insertNewlineAndIndent,
-  insertTab
+  insertTab,
+  simplifySelection
 } from '@codemirror/commands';
 import { EditorState, Transaction } from '@codemirror/state';
 import {
@@ -26,6 +27,12 @@ const CODE_RUNNER_SELECTOR = '[data-jp-code-runner]';
  */
 const TOOLTIP_OPENER_SELECTOR =
   '.jp-CodeMirrorEditor:not(.jp-mod-has-primary-selection):not(.jp-mod-in-leading-whitespace):not(.jp-mod-completer-active)';
+
+/**
+ * Selector for an active cell in edit mode.
+ */
+const ACTIVE_CELL_IN_EDIT_MODE_SELECTOR =
+  '.jp-mod-editMode .jp-Cell.jp-mod-active';
 
 /**
  * CodeMirror commands namespace
@@ -87,7 +94,7 @@ export namespace StateCommands {
   }
 
   /**
-   * Insertion new line or running cell with Ctrl/Command + Enter
+   * Insert a new line or run a cell with Ctrl/Command + Enter
    */
   export function insertBlankLineOnRun(target: {
     dom: HTMLElement;
@@ -100,6 +107,24 @@ export namespace StateCommands {
     } else {
       const arg = { state: target.state, dispatch: target.dispatch };
       return insertBlankLine(arg);
+    }
+  }
+
+  /**
+   * Simplify selection but do not prevent default to allow switching to command mode.
+   */
+  export function simplifySelectionAndMaybeSwitchToCommandMode(target: {
+    dom: HTMLElement;
+    state: EditorState;
+    dispatch: (transaction: Transaction) => void;
+  }): boolean {
+    const arg = { state: target.state, dispatch: target.dispatch };
+    const preventDefault = simplifySelection(arg);
+    if (target.dom.closest(ACTIVE_CELL_IN_EDIT_MODE_SELECTOR)) {
+      // do not prevent default to allow switching to command mode
+      return false;
+    } else {
+      return preventDefault;
     }
   }
 

@@ -710,6 +710,10 @@ export namespace EditorExtensionRegistry {
             key: 'Enter',
             run: StateCommands.completerOrInsertNewLine
           },
+          {
+            key: 'Escape',
+            run: StateCommands.simplifySelectionAndMaybeSwitchToCommandMode
+          },
           ...defaultKeymap.filter(binding => {
             // - Disable the default Mod-Enter handler as it always prevents default,
             //   preventing us from running cells with Ctrl + Enter. Instead we provide
@@ -720,9 +724,15 @@ export namespace EditorExtensionRegistry {
             //   with Ctrl+Shift+K.
             // - Disable shortcuts for toggling comments ("Mod-/" and "Alt-A")
             //   as these as handled by lumino command
-            return !['Mod-Enter', 'Shift-Mod-k', 'Mod-/', 'Alt-A'].includes(
-              binding.key as string
-            );
+            // - Disable Escape handler because it prevents default and we
+            //   want to run a cell action (switch to command mode) on Esc
+            return ![
+              'Mod-Enter',
+              'Shift-Mod-k',
+              'Mod-/',
+              'Alt-A',
+              'Escape'
+            ].includes(binding.key as string);
           }),
           {
             key: 'Tab',
@@ -810,7 +820,7 @@ export namespace EditorExtensionRegistry {
       }),
       Object.freeze({
         name: 'extendSelection',
-        default: false,
+        default: true,
         factory: () =>
           createConditionalExtension(
             keymap.of([
