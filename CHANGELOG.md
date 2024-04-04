@@ -10,7 +10,7 @@
 
 It is now possible to switch and manage [workspaces](https://jupyterlab.readthedocs.io/en/latest/user/workspaces.html) from within JupyterLab.
 
-<img alt="A context menu opened over the sidebar with workspaces list. The menu has options to manager the workspace over which it was opened: clone, rename, reset delete, export and import." src="https://raw.githubusercontent.com/krassowski/jupyterlab/ufc4.2/docs/source/getting_started/changelog_assets/4.2-workspaces-sidebar.png" class="jp-screenshot">
+<img alt="A context menu opened over the sidebar with workspaces list. The menu has options to manager the workspace over which it was opened - clone, rename, reset delete, export and import." src="https://raw.githubusercontent.com/krassowski/jupyterlab/ufc4.2/docs/source/getting_started/changelog_assets/4.2-workspaces-sidebar.png" class="jp-screenshot">
 
 ### Recently opened/closed files
 
