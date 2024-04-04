@@ -421,7 +421,7 @@ export class CellToolbarTracker implements IDisposable {
   }
 
   private _cellToolbarRect(activeCell: Cell<ICellModel>): DOMRect | null {
-    if (this._toolbar?.parent !== activeCell) {
+    if (this._toolbar?.parent !== activeCell.inputArea) {
       return null;
     }
     const activeCellToolbar = this._toolbar.node;
