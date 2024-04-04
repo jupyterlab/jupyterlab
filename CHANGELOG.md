@@ -40,6 +40,13 @@ Among numerous improvements and bug fixes for keyboard shortcuts editor:
 
 <img alt="A context menu opened over a keybinding in the Keyboard Shortcuts setting panel within the Settings widget" src="https://raw.githubusercontent.com/krassowski/jupyterlab/ufc4.2/docs/source/getting_started/changelog_assets/4.2-delete-shortcut.png" class="jp-screenshot">
 
+### Dark high contrast theme
+
+A new dark high contrast theme, which is intended to benefit users with the need for higher contrast, following the WCAG AAA accessibility standard for color contrast.
+To select this theme choose from the menu bar: Settings → Theme → JupyterLab Dark High Contrast. Please do provide feedback and suggestions on further improvements to this theme.
+
+<img alt="A dark high contrast theme" src="https://raw.githubusercontent.com/krassowski/jupyterlab/ufc4.2/docs/source/getting_started/changelog_assets/4.2-dark-high-contrast.png" class="jp-screenshot">
+
 ## v4.1
 
 JupyterLab 4.1 includes a number of new features (described below), bug fixes, and enhancements for extension developers. This release is compatible with extensions supporting JupyterLab 4.0. Extension authors are recommended to consult the [Extension Migration Guide](https://jupyterlab.readthedocs.io/en/latest/extension/extension_migration.html#jupyterlab-4-0-to-4-1) which lists deprecations and changes to the public API.
