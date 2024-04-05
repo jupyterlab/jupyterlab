@@ -453,11 +453,23 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     if (widget instanceof ToolbarPopupOpener) {
       status = super.insertItem(index, name, widget);
     } else {
+      // Insert the widget in the toolbar at axpected index if possible, otherwise
+      // before the popup opener. This position may change when invoking the resizer
+      // at the end of this function.
       const j = Math.max(
         0,
         Math.min(index, (this.layout as ToolbarLayout).widgets.length - 1)
       );
       status = super.insertItem(j, name, widget);
+
+      if (j !== index) {
+        // This happens if the widget has been inserted at a wrong position:
+        // - not enough widgets in the toolbar to insert it at the expected index
+        // - the widget at the expected index should be in the popup
+        // In the first situation, the stored index should be changed to match a
+        // realistic index.
+        index = Math.max(0, Math.min(index, this._widgetPositions.size));
+      }
     }
 
     // Save the widgets position when a widget is inserted or moved.

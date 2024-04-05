@@ -426,6 +426,39 @@ describe('@jupyterlab/ui-components', () => {
         ).toEqual(-1);
       });
     });
+
+    describe('#storedPositions', () => {
+      it('should store the correct position of items', () => {
+        const w = new Widget();
+        const names = ['test0', 'test1', 'test2', 'test3'];
+        for (let i = 0; i < 3; i++) {
+          toolbar.insertItem(i, names[i], w);
+        }
+        toolbar.insertItem(1, names[3], w);
+        const positions = (toolbar as any)._widgetPositions;
+        let stored: number[] = [];
+        for (let i = 0; i < 4; i++) {
+          stored.push(positions.get(names[i]));
+        }
+        expect(stored).toEqual([0, 2, 3, 1]);
+      });
+
+      it('should not store unexpected index', () => {
+        const w = new Widget();
+        const names = ['test0', 'test1', 'test2', 'test3'];
+        for (let i = 0; i < 2; i++) {
+          toolbar.insertItem(i, names[i], w);
+        }
+        toolbar.insertItem(-5, names[2], w);
+        toolbar.insertItem(10, names[3], w);
+        const positions = (toolbar as any)._widgetPositions;
+        let stored: number[] = [];
+        for (let i = 0; i < 4; i++) {
+          stored.push(positions.get(names[i]));
+        }
+        expect(stored).toEqual([1, 2, 0, 3]);
+      });
+    });
   });
 
   describe('ToolbarButton', () => {
