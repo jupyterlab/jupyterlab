@@ -14,7 +14,7 @@ test('Open the settings editor with a specific search query', async ({
   });
 
   expect(
-    await page.locator('.jp-PluginList jp-search').evaluate(elem => 
+    await page.locator('.jp-PluginList jp-search').evaluate(elem =>
       (elem as any).value
     )
   ).toEqual('Command Palette');
