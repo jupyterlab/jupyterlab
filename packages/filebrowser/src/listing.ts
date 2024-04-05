@@ -2747,7 +2747,7 @@ export namespace DirListing {
     /**
      * Create a node for a header item.
      */
-    protected createHeaderItemNode(label: string, title?: string): HTMLElement {
+    protected createHeaderItemNode(label: string): HTMLElement {
       const node = document.createElement('div');
       const text = document.createElement('span');
       const icon = document.createElement('span');
@@ -2755,9 +2755,6 @@ export namespace DirListing {
       text.className = HEADER_ITEM_TEXT_CLASS;
       icon.className = HEADER_ITEM_ICON_CLASS;
       text.textContent = label;
-      if (title) {
-        text.title = title;
-      }
       node.appendChild(text);
       node.appendChild(icon);
       return node;
