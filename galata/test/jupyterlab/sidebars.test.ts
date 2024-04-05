@@ -19,6 +19,10 @@ const sidebarIds: galata.SidebarTabId[] = sidebarElementIds[
   'left-sidebar'
 ].concat(sidebarElementIds['right-sidebar']);
 
+test.use({
+  mockState: true
+});
+
 /**
  * Add provided text as label on first tab in given tabbar.
  * By default we only have icons, but we should test for the
@@ -32,10 +36,6 @@ async function mockLabelOnFirstTab(tabbar: Locator, text: string) {
       node.innerText = text;
     }, text);
 }
-
-test.use({
-  tmpPath: 'test-sidebars'
-});
 
 test.describe('Sidebars', () => {
   sidebarIds.forEach(sidebarId => {
