@@ -714,7 +714,7 @@ export namespace LabIcon {
     /**
      * Optional slot property to specify the position of the icon in the template
      */
-    slot?: 'end' | 'start' | null;
+    slot?: string | null;
   }
 
   export interface IResolverProps {
