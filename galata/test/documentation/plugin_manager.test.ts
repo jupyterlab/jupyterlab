@@ -20,10 +20,8 @@ test.describe('Advanced Plugin Manager', () => {
       });
     });
 
-    const shadowHost = page.locator('.jp-pluginmanager');
-    const shadowRoot = await shadowHost.shadowRoot();
-    const inputValue = await shadowRoot.locator('input').inputValue();
-    expect(inputValue).toEqual('Notebook');
+    await page.locator('.jp-PluginList jp-search').evaluate(elem => 
+      (elem as any).value).toEqual('Notebook');
 
     const pluginManager = page.locator('.jp-pluginmanager');
     await page.sidebar.close('left');
