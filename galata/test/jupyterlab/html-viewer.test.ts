@@ -3,25 +3,24 @@
  * Distributed under the terms of the Modified BSD License.
  */
 
-import { expect, test } from '@jupyterlab/galata';
+import { expect, galata, test } from '@jupyterlab/galata';
+import * as path from 'path';
+
+const fileName = 'test.html';
 
 test.describe('HTML Viewer', () => {
+  test.use({ tmpPath: 'test-html-viewer' });
+
+  test.beforeAll(async ({ request, tmpPath }) => {
+    const contents = galata.newContentsHelper(request);
+    await contents.uploadFile(
+      path.resolve(__dirname, `./notebooks/${fileName}`),
+      `${tmpPath}/${fileName}`
+    );
+  });
+
   test.beforeEach(async ({ page }) => {
-    await page.menu.clickMenuItem('File>New>Text File');
-
-    await page.getByRole('main').getByRole('textbox').fill(`<html>
-<body>
-    <div style="height: 300px;"></div>
-    <a href="https://github.com" target="_blank">GitHub</a>
-</body>
-</html>`);
-
-    await page.menu.clickMenuItem('File>Save Text');
-
-    await page.getByPlaceholder('File name').fill('test.html');
-    await page.getByRole('button', { name: 'Rename' }).click();
-
-    await page.getByRole('listitem', { name: 'test.html' }).dblclick();
+    await page.getByRole('listitem', { name: fileName }).dblclick();
   });
 
   test('should notify links are blocked for untrusted file', async ({
