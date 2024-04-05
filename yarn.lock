@@ -3179,7 +3179,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-filebrowser@workspace:examples/filebrowser"
   dependencies:
-    "@jupyter/web-components": ^0.15.2
+    "@jupyter/web-components": ^0.15.3
     "@jupyterlab/application": ^4.2.0-beta.0
     "@jupyterlab/apputils": ^4.3.0-beta.0
     "@jupyterlab/codemirror": ^4.2.0-beta.0
@@ -3297,7 +3297,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-terminal@workspace:examples/terminal"
   dependencies:
-    "@jupyter/web-components": ^0.15.2
+    "@jupyter/web-components": ^0.15.3
     "@jupyterlab/application": ^4.2.0-beta.0
     "@jupyterlab/coreutils": ^6.2.0-beta.0
     "@jupyterlab/services": ^7.2.0-beta.0
@@ -5027,8 +5027,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@jupyterlab/ui-components@workspace:packages/ui-components"
   dependencies:
-    "@jupyter/react-components": ^0.15.2
-    "@jupyter/web-components": ^0.15.2
+    "@jupyter/react-components": ^0.15.3
+    "@jupyter/web-components": ^0.15.3
     "@jupyterlab/coreutils": ^6.2.0-beta.0
     "@jupyterlab/observables": ^5.2.0-beta.0
     "@jupyterlab/rendermime-interfaces": ^3.10.0-beta.0
