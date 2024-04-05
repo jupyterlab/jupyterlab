@@ -4804,11 +4804,11 @@ __metadata:
     "@lumino/messaging": ^2.0.1
     "@lumino/widgets": ^2.3.1
     "@types/jest": ^29.2.0
-    "@xterm/addon-canvas": ~0.6.0
-    "@xterm/addon-fit": ~0.9.0
-    "@xterm/addon-web-links": ~0.10.0
-    "@xterm/addon-webgl": ~0.17.0
-    "@xterm/xterm": ~5.4.0
+    "@xterm/addon-canvas": ~0.7.0
+    "@xterm/addon-fit": ~0.10.0
+    "@xterm/addon-web-links": ~0.11.0
+    "@xterm/addon-webgl": ~0.18.0
+    "@xterm/xterm": ~5.5.0
     canvas: ^2.11.2
     jest: ^29.2.0
     rimraf: ~5.0.5
@@ -7904,46 +7904,46 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xterm/addon-canvas@npm:~0.6.0":
-  version: 0.6.0
-  resolution: "@xterm/addon-canvas@npm:0.6.0"
+"@xterm/addon-canvas@npm:~0.7.0":
+  version: 0.7.0
+  resolution: "@xterm/addon-canvas@npm:0.7.0"
   peerDependencies:
     "@xterm/xterm": ^5.0.0
-  checksum: 513e27891eadbcb9fd31f8c184bbc97bd64003077efbf4b0e99055926965527581c13bb2c050515df7e98902623b9e9d3275a103f0217f81d75eb2de5c93d4f2
+  checksum: 28b9965f34e01a9bbcc31651dee2d4a9380aad528039484cce372b856be820705b293c4b5091cee65208c3dfbf6f944f27ecc6c3b794df5a96036cbf6dba0d74
   languageName: node
   linkType: hard
 
-"@xterm/addon-fit@npm:~0.9.0":
-  version: 0.9.0
-  resolution: "@xterm/addon-fit@npm:0.9.0"
-  peerDependencies:
-    "@xterm/xterm": ^5.0.0
-  checksum: 2417b3f9a6e2cd671aac179df6d71570aed81f27a9e4fa704a7af002dc754dce7a8f28c9d7d5865d79b4ae45c3be099ea0aa8cac6bd093dd5cd56ad883d81800
-  languageName: node
-  linkType: hard
-
-"@xterm/addon-web-links@npm:~0.10.0":
+"@xterm/addon-fit@npm:~0.10.0":
   version: 0.10.0
-  resolution: "@xterm/addon-web-links@npm:0.10.0"
+  resolution: "@xterm/addon-fit@npm:0.10.0"
   peerDependencies:
     "@xterm/xterm": ^5.0.0
-  checksum: 8f1ee36143a5cb21ef7cd7746c1cbc8d97d69b9eb9e3d419326c02046fcfb5783a9687daec33fab362273cf996004a1dd337a5794ce855c58b59159b8407c054
+  checksum: 8edfad561c0d0316c5883cbe2ce56109f105a2b2bf53b71d5f8c788e656a3205c1093a659dddcf4025a459e4b7ff8e07b6c6a19815c8711deeded560de5f1893
   languageName: node
   linkType: hard
 
-"@xterm/addon-webgl@npm:~0.17.0":
-  version: 0.17.0
-  resolution: "@xterm/addon-webgl@npm:0.17.0"
+"@xterm/addon-web-links@npm:~0.11.0":
+  version: 0.11.0
+  resolution: "@xterm/addon-web-links@npm:0.11.0"
   peerDependencies:
     "@xterm/xterm": ^5.0.0
-  checksum: aaf5424c464ba422086f914b1263ee5606f36557562955dc2395c0f1550d9bcf77861302302e107d234089a8c0446b60d9dfd2165b5639ad004262eae63fd63f
+  checksum: c1b36b649b8cddc613213eb9e835daf3106a8be359a19ccacca1f1d9ff883b59d478f166109ee017fa3994d224dcdd82976ad5d5a1221271ab8d3d5684eb141d
   languageName: node
   linkType: hard
 
-"@xterm/xterm@npm:~5.4.0":
-  version: 5.4.0
-  resolution: "@xterm/xterm@npm:5.4.0"
-  checksum: 6d61cbd476591cdf1b86d5014bdc3b9656fb44c4f0d966dacd8856f06394aab60e8c3d502707f9f94c0336657341f0b9ee944a89d73edb0ec4280e0e1a4b775e
+"@xterm/addon-webgl@npm:~0.18.0":
+  version: 0.18.0
+  resolution: "@xterm/addon-webgl@npm:0.18.0"
+  peerDependencies:
+    "@xterm/xterm": ^5.0.0
+  checksum: 942ecaa4e08423563a795a1a63fa79637e60d4e3aba1b5fa2f426e1d7b19c553e8c8f1cfad1258461f22e05362e791f642dc6aab7e8766e26d4d3876617d8320
+  languageName: node
+  linkType: hard
+
+"@xterm/xterm@npm:~5.5.0":
+  version: 5.5.0
+  resolution: "@xterm/xterm@npm:5.5.0"
+  checksum: 393c1891b95fdd50d05e7a063abdc95a6643d2c45a4231637c23db90511426a95b1b56a5c4c91831121d2710aee9de97cf5e426016c589ca87dea8fff9a41b33
   languageName: node
   linkType: hard
 
