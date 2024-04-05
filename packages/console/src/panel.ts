@@ -21,6 +21,7 @@ import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
 import { Panel } from '@lumino/widgets';
 import { CodeConsole } from './widget';
+import type { IConsoleCellExecutor } from './tokens';
 
 /**
  * The class name added to console panels.
@@ -38,6 +39,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     super({ content: new Panel() });
     this.addClass(PANEL_CLASS);
     let {
+      executor,
       rendermime,
       mimeTypeService,
       path,
@@ -76,6 +78,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     rendermime = rendermime.clone({ resolver });
 
     this.console = contentFactory.createConsole({
+      executor,
       rendermime,
       sessionContext: sessionContext,
       mimeTypeService,
@@ -187,6 +190,11 @@ export namespace ConsolePanel {
      * The content factory for the panel.
      */
     contentFactory: IContentFactory;
+
+    /**
+     * Console cell executor
+     */
+    executor?: IConsoleCellExecutor;
 
     /**
      * The service manager used by the panel.

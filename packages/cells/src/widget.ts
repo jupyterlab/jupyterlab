@@ -7,6 +7,8 @@ import { Extension } from '@codemirror/state';
 
 import { EditorView } from '@codemirror/view';
 
+import { ElementExt } from '@lumino/domutils';
+
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { DOMUtils, ISessionContext } from '@jupyterlab/apputils';
@@ -205,8 +207,9 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     // For cells disable searching with CodeMirror search panel.
     this._editorConfig = { searchWithCM: false, ...options.editorConfig };
     this._editorExtensions = options.editorExtensions ?? [];
+    this._editorExtensions.push(this._scrollHandlerExtension);
     this._placeholder = true;
-    this._inViewport = false;
+    this._inViewport = null;
     this.placeholder = options.placeholder ?? true;
 
     model.metadataChanged.connect(this.onMetadataChanged, this);
@@ -239,9 +242,14 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
 
   /**
    * Whether the cell is in viewport or not.
+   *
+   * #### Notes
+   * This property is managed by the windowed container which holds the cell.
+   * When a cell is not in a windowed container, it always returns `false`,
+   * but this may change in the future major version.
    */
   get inViewport(): boolean {
-    return this._inViewport;
+    return this._inViewport ?? false;
   }
   set inViewport(v: boolean) {
     if (this._inViewport !== v) {
@@ -553,6 +561,13 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   }
 
   /**
+   * Signal emitted when cell requests scrolling to its element.
+   */
+  get scrollRequested(): ISignal<Cell, Cell.IScrollRequest> {
+    return this._scrollRequested;
+  }
+
+  /**
    * Create children widgets.
    */
   protected initializeDOM(): void {
@@ -693,6 +708,36 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   protected prompt = '';
   protected translator: ITranslator;
   protected _displayChanged = new Signal<this, void>(this);
+  protected _scrollRequested = new Signal<Cell, Cell.IScrollRequest>(this);
+  protected _inViewport: boolean | null;
+
+  /**
+   * Editor extension emitting `scrollRequested` signal on scroll.
+   *
+   * Scrolling within editor will be prevented when a cell is out out viewport.
+   * Windowed containers including cells should listen to the scroll request
+   * signal and invoke the `scrollWithinCell()` callback after scrolling the cell
+   * back into the view (and after updating the `inViewport` property).
+   */
+  private _scrollHandlerExtension = EditorView.scrollHandler.of(
+    (view, range, options) => {
+      // When cell is in the viewport we can scroll within the editor immediately.
+      // When cell is out of viewport, the windowed container needs to first
+      // scroll the cell into the viewport (otherwise CodeMirror is unable to
+      // calculate the correct scroll delta) before invoking scrolling in editor.
+      const inWindowedContainer = this._inViewport !== null;
+      const preventDefault = inWindowedContainer && !this._inViewport;
+      this._scrollRequested.emit({
+        defaultPrevented: preventDefault,
+        scrollWithinCell: () => {
+          view.dispatch({
+            effects: EditorView.scrollIntoView(range, options)
+          });
+        }
+      });
+      return preventDefault;
+    }
+  );
 
   private _editorConfig: Record<string, any> = {};
   private _editorExtensions: Extension[] = [];
@@ -700,7 +745,6 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   private _inputHidden = false;
   private _inputWrapper: Widget | null;
   private _inputPlaceholder: InputPlaceholder | null;
-  private _inViewport: boolean;
   private _inViewportChanged: Signal<Cell, boolean> = new Signal<Cell, boolean>(
     this
   );
@@ -903,6 +947,25 @@ export namespace Cell {
       editorFactory: CodeEditor.Factory;
     }
   }
+
+  /**
+   * Value of the signal emitted by cell on editor scroll request.
+   */
+  export interface IScrollRequest {
+    /**
+     * Scrolls to the target cell part, fulfilling the scroll request.
+     *
+     * ### Notes
+     * This method is intended for use by windowed containers that
+     * require the cell to be first scrolled into the viewport to
+     * then enable proper scrolling within cell.
+     */
+    scrollWithinCell: (options: { scroller: HTMLElement }) => void;
+    /**
+     * Whether the default scrolling was prevented due to the cell being out of viewport.
+     */
+    defaultPrevented: boolean;
+  }
 }
 
 /** ****************************************************************************
@@ -1022,6 +1085,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
       promptOverlay: true,
       inputHistoryScope: options.inputHistoryScope
     }));
+    output.node.addEventListener('keydown', this._detectCaretMovementInOuput);
+
     output.addClass(CELL_OUTPUT_AREA_CLASS);
     output.toggleScrolling.connect(() => {
       this.outputsScrolled = !this.outputsScrolled;
@@ -1036,6 +1101,65 @@ export class CodeCell extends Cell<ICodeCellModel> {
     model.outputs.stateChanged.connect(this.onOutputChanged, this);
     model.stateChanged.connect(this.onStateChanged, this);
   }
+
+  /**
+   * Detect the movement of the caret in the output area.
+   *
+   * Emits scroll request if the caret moved.
+   */
+  private _detectCaretMovementInOuput = (e: KeyboardEvent) => {
+    const inWindowedContainer = this._inViewport !== null;
+    const defaultPrevented = inWindowedContainer && !this._inViewport;
+
+    // Because we do not want to scroll on any key, but only on keys which
+    // move the caret (this on keys which cause input and on keys like left,
+    // right, top, bottom arrow, home, end, page down/up - but only if the
+    // cursor is not at the respective end of the input) we need to listen
+    // to the `selectionchange` event on target inputs/textareas, etc.
+    const target = e.target;
+
+    if (!target || !(target instanceof HTMLElement)) {
+      return;
+    }
+
+    // Make sure the previous listener gets disconnected
+    if (this._lastTarget) {
+      this._lastTarget.removeEventListener(
+        'selectionchange',
+        this._lastOnCaretMovedHandler
+      );
+      document.removeEventListener(
+        'selectionchange',
+        this._lastOnCaretMovedHandler
+      );
+    }
+
+    const onCaretMoved = () => {
+      this._scrollRequested.emit({
+        scrollWithinCell: ({ scroller }) => {
+          ElementExt.scrollIntoViewIfNeeded(scroller, target);
+        },
+        defaultPrevented
+      });
+    };
+
+    // Remember the most recent target/handler to disconnect them next time.
+    this._lastTarget = target;
+    this._lastOnCaretMovedHandler = onCaretMoved;
+
+    // Firefox only supports `selectionchange` on the actual input element,
+    // all other browsers only support it on the top-level document.
+    target.addEventListener('selectionchange', onCaretMoved, { once: true });
+    document.addEventListener('selectionchange', onCaretMoved, {
+      once: true
+    });
+
+    // Schedule removal of the listener.
+    setTimeout(() => {
+      target.removeEventListener('selectionchange', onCaretMoved);
+      document.removeEventListener('selectionchange', onCaretMoved);
+    }, 250);
+  };
 
   /**
    * Maximum number of outputs to display.
@@ -1437,6 +1561,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
       this._outputLengthHandler,
       this
     );
+    this._output.node.removeEventListener(
+      'keydown',
+      this._detectCaretMovementInOuput
+    );
     this._rendermime = null!;
     this._output = null!;
     this._outputWrapper = null!;
@@ -1525,6 +1653,8 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _outputPlaceholder: OutputPlaceholder | null = null;
   private _output: OutputArea;
   private _syncScrolled = false;
+  private _lastOnCaretMovedHandler: () => void;
+  private _lastTarget: HTMLElement | null = null;
 }
 
 /**

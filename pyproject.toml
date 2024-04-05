@@ -32,13 +32,14 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
     "async_lru>=1.0.0",
     "httpx>=0.25.0",
     "importlib-metadata>=4.8.3;python_version<\"3.10\"",
     "importlib-resources>=1.4;python_version<\"3.9\"",
-    "ipykernel",
+    "ipykernel>=6.5.0",
     "jinja2>=3.0.3",
     "jupyter_core",
     "jupyter_server>=2.4.0,<3",
@@ -46,9 +47,9 @@ dependencies = [
     "jupyterlab_server>=2.19.0,<3",
     "notebook_shim>=0.2",
     "packaging",
-    "tomli;python_version<\"3.11\"",
+    "tomli>=1.2.2;python_version<\"3.11\"",
     "tornado>=6.2.0",
-    "traitlets",
+    "traitlets>=3.0",
 ]
 dynamic = [
     "version",
@@ -85,14 +86,14 @@ docs = [
     "myst-parser",
 ]
 docs-screenshots = [
-    "altair==5.2.0",
+    "altair==5.3.0",
     "ipython==8.16.1",
-    "ipywidgets==8.1.1",
+    "ipywidgets==8.1.2",
     "jupyterlab-geojson==3.4.0",
-    "jupyterlab-language-pack-zh-CN==4.0.post6",
-    "matplotlib==3.8.2",
+    "jupyterlab-language-pack-zh-CN==4.1.post2",
+    "matplotlib==3.8.3",
     "nbconvert>=7.0.0",
-    "pandas==2.2.0",
+    "pandas==2.2.1",
     "scipy==1.12.0",
     "vega_datasets==0.9.0",
 ]
@@ -117,7 +118,14 @@ dev = [
     "coverage",
     "hatch",
     "bump2version",
-    "ruff==0.2.0",
+    "ruff==0.3.5",
+]
+upgrade-extension = [
+    "pyyaml-include<2.0",
+    "copier>=8,<10",
+    "jinja2-time<0.3",
+    "pydantic<2.0",
+    "tomli-w<2.0"
 ]
 
 [tool.check-wheel-contents]
@@ -242,12 +250,12 @@ after-publish-assets = "npm run after:publish:assets"
 [tool.ruff]
 target-version = "py38"
 line-length = 100
-select = [
+lint.select = [
   "A", "B", "C", "DTZ", "E", "EM", "F", "FBT", "I", "ICN", "N",
   "PLC", "PLE", "PLR", "PLW", "Q", "RUF", "S", "SIM", "T", "TID", "UP",
   "W", "YTT",
 ]
-ignore = [
+lint.ignore = [
 # Q000 Single quotes found but double quotes preferred
 "Q000",
 # FBT001 Boolean positional arg in function definition

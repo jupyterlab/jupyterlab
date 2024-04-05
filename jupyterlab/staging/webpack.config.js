@@ -280,7 +280,7 @@ module.exports = [
   merge(baseConfig, {
     mode: 'development',
     entry: {
-      main: ['./publicpath', 'whatwg-fetch', entryPoint]
+      main: ['./publicpath', entryPoint]
     },
     output: {
       path: path.resolve(buildDir),

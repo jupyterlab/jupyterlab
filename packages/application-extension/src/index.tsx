@@ -283,6 +283,14 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       }
     });
 
+    shell.currentChanged?.connect(() => {
+      [
+        CommandIDs.close,
+        CommandIDs.closeOtherTabs,
+        CommandIDs.closeRightTabs
+      ].forEach(cmd => commands.notifyCommandChanged(cmd));
+    });
+
     if (labShell) {
       commands.addCommand(CommandIDs.activateNextTab, {
         label: trans.__('Activate Next Tab'),
@@ -593,12 +601,6 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         message: body
       });
     }
-
-    // If the application shell layout is modified,
-    // trigger a refresh of the commands.
-    app.shell.layoutModified.connect(() => {
-      app.commands.notifyCommandChanged();
-    });
 
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.

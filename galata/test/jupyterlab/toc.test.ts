@@ -6,7 +6,7 @@ import * as path from 'path';
 
 const fileName = 'toc_notebook.ipynb';
 
-test.use({ tmpPath: 'test-toc' });
+test.use({ tmpPath: 'test-toc-general' });
 
 test.describe('Table of Contents', () => {
   test.beforeAll(async ({ request, tmpPath }) => {

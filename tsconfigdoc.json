@@ -272,6 +272,9 @@
       "path": "./packages/theme-dark-extension"
     },
     {
+      "path": "./packages/theme-dark-high-contrast-extension"
+    },
+    {
       "path": "./packages/theme-light-extension"
     },
     {
@@ -300,6 +303,12 @@
     },
     {
       "path": "./packages/vega5-extension"
+    },
+    {
+      "path": "./packages/workspaces"
+    },
+    {
+      "path": "./packages/workspaces-extension"
     }
   ]
 }

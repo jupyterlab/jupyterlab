@@ -312,9 +312,9 @@ src[STAR] = "(<|>)?=?\\s*\\*"
 
 # version name recovery for convenient
 RECOVERYVERSIONNAME = R()
-src[RECOVERYVERSIONNAME] = "v?({n})(?:\\.({n}))?{pre}?".format(
-    n=src[NUMERICIDENTIFIER], pre=src[PRERELEASELOOSE]
-)
+_n = src[NUMERICIDENTIFIER]
+_pre = src[PRERELEASELOOSE]
+src[RECOVERYVERSIONNAME] = f"v?({_n})(?:\\.({_n}))?{_pre}?"
 
 #  Compile to actual regexp objects.
 #  All are flag-free, unless they were created above with a flag.
