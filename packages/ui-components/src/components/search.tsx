@@ -187,6 +187,7 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
 
   return (
     <Search
+      className="jp-FilterBox"
       ref={props.inputRef}
       value={filter}
       onChange={handleChange}
