@@ -199,7 +199,7 @@ export class RunningSessionManagers implements IRunningSessionManagers {
 function Item(props: {
   child?: boolean;
   runningItem: IRunningSessions.IRunningItem;
-  shutdownLabel?: string;
+  shutdownLabel?: string | ((item: IRunningSessions.IRunningItem) => string);
   shutdownItemIcon?: LabIcon;
   translator?: ITranslator;
   collapseToggled: ISignal<Section, boolean>;
@@ -215,7 +215,10 @@ function Item(props: {
   // Handle shutdown requests.
   let stopPropagation = false;
   const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
-  const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
+  const shutdownLabel =
+    (typeof props.shutdownLabel === 'function'
+      ? props.shutdownLabel(runningItem)
+      : props.shutdownLabel) ?? trans.__('Shut Down');
   const shutdown = () => {
     stopPropagation = true;
     runningItem.shutdown?.();
@@ -301,7 +304,7 @@ function Item(props: {
 function List(props: {
   child?: boolean;
   runningItems: IRunningSessions.IRunningItem[];
-  shutdownLabel?: string;
+  shutdownLabel?: string | ((item: IRunningSessions.IRunningItem) => string);
   shutdownAllLabel?: string;
   shutdownItemIcon?: LabIcon;
   filter?: (item: IRunningSessions.IRunningItem) => Partial<IScore> | null;
@@ -583,7 +586,7 @@ class Section extends PanelWithToolbar {
       this._manager.shutdownAllConfirmationText ||
       `${shutdownAllLabel} ${this._manager.name}`;
 
-    function onShutdown() {
+    const onShutdown = () => {
       void showDialog({
         title: shutdownTitle,
         body: shutdownAllConfirmationText,
@@ -596,7 +599,7 @@ class Section extends PanelWithToolbar {
           this._manager.shutdownAll();
         }
       });
-    }
+    };
 
     const shutdownAllButton = new ToolbarButton({
       label: shutdownAllLabel,
@@ -604,7 +607,7 @@ class Section extends PanelWithToolbar {
         !enabled ? ' jp-mod-disabled' : ''
       }`,
       enabled,
-      onClick: onShutdown
+      onClick: onShutdown.bind(this)
     });
     const switchViewButton = new ToolbarButton({
       className: VIEW_BUTTON_CLASS,
@@ -1125,7 +1128,7 @@ export namespace IRunningSessions {
     /**
      * A string used to describe the shutdown action.
      */
-    shutdownLabel?: string;
+    shutdownLabel?: string | ((item: IRunningSessions.IRunningItem) => string);
 
     /**
      * A string used to describe the shutdown all action.

@@ -196,7 +196,7 @@ if ((window as any).requestIdleCallback === undefined) {
  * `null` model, and may want to listen to the `modelChanged`
  * signal.
  */
-export class StaticNotebook extends WindowedList {
+export class StaticNotebook extends WindowedList<NotebookViewModel> {
   /**
    * Construct a notebook widget.
    */
@@ -895,13 +895,18 @@ export class StaticNotebook extends WindowedList {
     ) {
       const cell = this.cellsArray[cellIdx];
       if (cell.isPlaceholder()) {
-        switch (this.notebookConfig.windowingMode) {
-          case 'defer':
-            await this._updateForDeferMode(cell, cellIdx);
-            break;
-          case 'full':
-            this._renderCSSAndJSOutputs(cell, cellIdx);
-            break;
+        if (['defer', 'full'].includes(this.notebookConfig.windowingMode)) {
+          await this._updateForDeferMode(cell, cellIdx);
+          if (this.notebookConfig.windowingMode === 'full') {
+            // We need to delay slightly the removal to let codemirror properly initialize
+            requestAnimationFrame(() => {
+              this.viewModel.setEstimatedWidgetSize(
+                cell.model.id,
+                cell.node.getBoundingClientRect().height
+              );
+              this.layout.removeWidget(cell);
+            });
+          }
         }
       }
       cellIdx++;
@@ -935,34 +940,6 @@ export class StaticNotebook extends WindowedList {
     cell.dataset.windowedListIndex = `${cellIdx}`;
     this.layout.insertWidget(cellIdx, cell);
     await cell.ready;
-  }
-
-  private _renderCSSAndJSOutputs(
-    cell: Cell<ICellModel>,
-    cellIdx: number
-  ): void {
-    // Only render cell with text/html outputs containing scripts or/and styles
-    // Note:
-    //   We don't need to render JavaScript mimetype outputs because they get
-    //   directly evaluate without adding DOM elements (see @jupyterlab/javascript-extension)
-    if (cell instanceof CodeCell) {
-      for (
-        let outputIdx = 0;
-        outputIdx < (cell.model.outputs?.length ?? 0);
-        outputIdx++
-      ) {
-        const output = cell.model.outputs.get(outputIdx);
-        const html = (output.data['text/html'] as string) ?? '';
-        if (
-          html.match(
-            /(<style[^>]*>[^<]*<\/style[^>]*>|<script[^>]*>.*?<\/script[^>]*>)/gims
-          )
-        ) {
-          this.renderCellOutputs(cellIdx);
-          break;
-        }
-      }
-    }
   }
 
   /**
@@ -2143,17 +2120,20 @@ export class Notebook extends StaticNotebook {
         // Nothing to do if scroll request was already handled.
         return;
       }
+      // Node which allows to scroll the notebook
+      const scroller = this.outerNode;
+
       if (cell.inViewport) {
         // If cell got scrolled to the viewport in the meantime,
         // proceed with scrolling within the cell.
-        return scrollRequest.scrollWithinCell();
+        return scrollRequest.scrollWithinCell({ scroller });
       }
       // If cell is not in the viewport and needs scrolling,
       // first scroll to the cell and then scroll within the cell.
       this.scrollToItem(this.activeCellIndex)
         .then(() => {
           void cell.ready.then(() => {
-            scrollRequest.scrollWithinCell();
+            scrollRequest.scrollWithinCell({ scroller });
           });
         })
         .catch(reason => {
