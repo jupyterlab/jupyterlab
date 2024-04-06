@@ -1123,10 +1123,12 @@ export class Stdin extends Widget implements IStdin {
     this._value = options.prompt + ' ';
 
     this._input = this.node.getElementsByTagName('input')[0];
-    // make users aware of the line history feature
-    this._input.placeholder = this._trans.__(
-      '↑↓ for history. Search history with c-↑/c-↓'
-    );
+    if (!this._password) {
+      // make users aware of the line history feature
+      this._input.placeholder = this._trans.__(
+        '↑↓ for history. Search history with c-↑/c-↓'
+      );
+    }
 
     // initialize line history
     if (!Stdin._history.has(this._historyKey)) {
