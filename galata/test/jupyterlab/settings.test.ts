@@ -299,7 +299,7 @@ test.describe('shorcuts list @A11y', () => {
     await expect(propertyInspector).toBeFocused();
   });
 
-  test('Should retain tab order by focusing seach input using shift tab', async ({
+  test('Should retain tab order by focusing search input using shift tab', async ({
     page
   }) => {
     const searchInput = page.locator(`[placeholder='Search…']`);
