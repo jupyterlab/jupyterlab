@@ -22,11 +22,15 @@ export interface IShortcutListProps {
   showSelectors: boolean;
   height: number;
   external: IShortcutUI.IExternalBundle;
-  id?: string;
 }
 
 /** React component for list of shortcuts */
 export class ShortcutList extends React.Component<IShortcutListProps> {
+  constructor(props: IShortcutListProps) {
+    super(props);
+    this._shortcutListRef = React.createRef<HTMLDivElement>();
+  }
+
   /**
    * Handle key down for row navigation
    */
@@ -34,12 +38,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
     if (!ARROW_KEYS.includes(event.key)) {
       return;
     }
-
-    let shortcutList;
-
-    if (this.props.id) {
-      shortcutList = document.getElementById(this.props.id) as HTMLElement;
-    }
+    const shortcutList = this._shortcutListRef.current;
 
     const focusable: Element[] = [];
 
@@ -111,7 +110,7 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
         }}
         id="shortcutListContainer"
       >
-        <div className="jp-Shortcuts-ShortcutList" id={this.props.id}>
+        <div className="jp-Shortcuts-ShortcutList" ref={this._shortcutListRef}>
           {this.props.shortcuts.map(
             (shortcut: IShortcutTarget, index: number) => {
               return (
@@ -135,4 +134,6 @@ export class ShortcutList extends React.Component<IShortcutListProps> {
       </div>
     );
   }
+
+  private _shortcutListRef: React.RefObject<HTMLDivElement>;
 }

@@ -17,7 +17,6 @@ import {
   IShortcutUI
 } from '../types';
 import * as React from 'react';
-import { DOMUtils } from '@jupyterlab/apputils';
 
 const enum MatchType {
   Label,
@@ -489,7 +488,6 @@ export class ShortcutUI
           }}
           height={this.props.height}
           external={this.props.external}
-          id={DOMUtils.createDomID() + '-shortcut-list'}
         />
       </div>
     );

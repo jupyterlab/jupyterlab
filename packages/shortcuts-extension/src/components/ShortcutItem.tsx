@@ -34,7 +34,7 @@ export interface IShortcutItemProps {
   findConflictsFor: IShortcutRegistry['findConflictsFor'];
   showSelectors: boolean;
   tabIndex: number;
-  handleRowKeyDown: (event: any) => void;
+  handleRowKeyDown: (event: React.KeyboardEvent) => void;
   external: IShortcutUI.IExternalBundle;
 }
 
