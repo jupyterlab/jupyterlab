@@ -105,9 +105,11 @@ export class DebuggerSources implements IDebugger.ISources {
         if (focus) {
           notebook.activeCellIndex = i;
           if (notebook.activeCell) {
-            notebook.scrollToItem(notebook.activeCellIndex).catch(reason => {
-              // no-op
-            });
+            notebook
+              .scrollToItem(notebook.activeCellIndex, 'smart')
+              .catch(reason => {
+                // no-op
+              });
           }
           this._shell.activateById(notebookPanel.id);
         }
@@ -115,7 +117,7 @@ export class DebuggerSources implements IDebugger.ISources {
         editors.push(
           Object.freeze({
             get: () => cell.editor,
-            reveal: () => notebook.scrollToItem(i),
+            reveal: () => notebook.scrollToItem(i, 'smart'),
             src: cell.model.sharedModel
           })
         );
