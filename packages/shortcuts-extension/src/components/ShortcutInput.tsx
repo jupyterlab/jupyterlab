@@ -431,6 +431,7 @@ export class ShortcutInput extends React.Component<
           className={inputClassName}
           onKeyDown={this.handleInput}
           ref={input => input && input.focus()}
+          data-lm-suppress-shortcuts="true"
         >
           <p
             className={
