@@ -1129,7 +1129,7 @@ export class Stdin extends Widget implements IStdin {
         '↑↓ for history. Search history with c-↑/c-↓'
       );
     } else {
-      this._input.placeholder = this._trans.__('');
+      this._input.placeholder = '';
     }
 
     // initialize line history
