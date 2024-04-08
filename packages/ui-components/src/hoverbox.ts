@@ -33,7 +33,7 @@ export namespace HoverBox {
      * coordinate position, which can be retrieved via calling the
      * `getCoordinateForPosition` method.
      */
-    anchor: DOMRect;
+    anchor: IAnchor;
 
     /**
      * The node that hosts the anchor.
@@ -122,6 +122,12 @@ export namespace HoverBox {
       height: number;
     };
   }
+
+  /**
+   * An interface describing anchor coordinates.
+   */
+  export interface IAnchor
+    extends Pick<DOMRect, 'left' | 'right' | 'top' | 'bottom'> {}
 
   /**
    * Set the visible dimensions of a hovering box anchored to an editor cursor.

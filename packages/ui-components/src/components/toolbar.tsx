@@ -198,9 +198,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    *
    * @param widget - The widget to add to the toolbar.
    *
-   * @param index - The optional name of the item to insert after.
-   *
-   * @returns Whether the item was added to toolbar.  Returns false if
+   * @returns Whether the item was added to toolbar. Returns false if
    *   an item of the same name is already in the toolbar.
    *
    * #### Notes
@@ -239,6 +237,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     layout.insertWidget(j, widget);
 
     Private.nameProperty.set(widget, name);
+    widget.node.dataset['jpItemName'] = name;
     return true;
   }
 
@@ -376,7 +375,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     this.popupOpener.hide();
     this._resizer = new Throttler(async (callTwice = false) => {
       await this._onResize(callTwice);
-    }, 300);
+    }, 500);
   }
 
   /**
@@ -429,11 +428,6 @@ export class ReactiveToolbar extends Toolbar<Widget> {
   ): boolean {
     const targetPosition = this._widgetPositions.get(at);
     const position = (targetPosition ?? 0) + offset;
-    this._widgetPositions.forEach((value, key) => {
-      if (key !== TOOLBAR_OPENER_NAME && value >= position) {
-        this._widgetPositions.set(key, value + 1);
-      }
-    });
     return this.insertItem(position, name, widget);
   }
 
@@ -458,19 +452,53 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     if (widget instanceof ToolbarPopupOpener) {
       status = super.insertItem(index, name, widget);
     } else {
+      // Insert the widget in the toolbar at axpected index if possible, otherwise
+      // before the popup opener. This position may change when invoking the resizer
+      // at the end of this function.
       const j = Math.max(
         0,
         Math.min(index, (this.layout as ToolbarLayout).widgets.length - 1)
       );
       status = super.insertItem(j, name, widget);
+
+      if (j !== index) {
+        // This happens if the widget has been inserted at a wrong position:
+        // - not enough widgets in the toolbar to insert it at the expected index
+        // - the widget at the expected index should be in the popup
+        // In the first situation, the stored index should be changed to match a
+        // realistic index.
+        index = Math.max(0, Math.min(index, this._widgetPositions.size));
+      }
     }
 
-    // Save the widgets position when a new widget is inserted.
+    // Save the widgets position when a widget is inserted or moved.
     if (
       name !== TOOLBAR_OPENER_NAME &&
-      this._widgetPositions.get(name) === undefined
+      this._widgetPositions.get(name) !== index
     ) {
+      // If the widget is inserted, set its current position as last.
+      const currentPosition =
+        this._widgetPositions.get(name) ?? this._widgetPositions.size;
+
+      // Change the position of moved widgets.
+      this._widgetPositions.forEach((value, key) => {
+        if (key !== TOOLBAR_OPENER_NAME) {
+          if (value >= index && value < currentPosition) {
+            this._widgetPositions.set(key, value + 1);
+          } else if (value <= index && value > currentPosition) {
+            this._widgetPositions.set(key, value - 1);
+          }
+        }
+      });
+
+      // Save the new position of the widget.
       this._widgetPositions.set(name, index);
+
+      // Invokes resizing to ensure correct display of items after an addition, only
+      // if the toolbar is rendered.
+      if (this.isVisible) {
+        void this._resizer.invoke();
+      }
     }
     return status;
   }
@@ -526,7 +554,7 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     }
     const toolbarWidth = this.node.clientWidth;
     const opener = this.popupOpener;
-    const openerWidth = 30;
+    const openerWidth = 32;
     // left and right padding.
     const toolbarPadding = 2 + 5;
     let width = opener.isHidden ? toolbarPadding : toolbarPadding + openerWidth;
@@ -535,13 +563,27 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       .then(values => {
         let { width, widgetsToRemove } = values;
         while (widgetsToRemove.length > 0) {
-          // Insert the widget in the right position in the opener popup.
+          // Insert the widget at the right position in the opener popup, relatively
+          // to the saved position of the first item of the popup toolbar.
+
+          // Get the saved position of the widget to insert.
           const widget = widgetsToRemove.pop() as Widget;
           const name = Private.nameProperty.get(widget);
-          width -= this._widgetWidths![name];
+          width -= this._widgetWidths.get(name) || 0;
           const position = this._widgetPositions.get(name) ?? 0;
-          const index =
-            opener.widgetCount() + position - this._widgetPositions.size;
+
+          // Get the saved position of the first item in the popup toolbar.
+          // If there is no widget, set the value at last item.
+          let openerFirstIndex = this._widgetPositions.size;
+          const openerFirst = opener.widgetAt(0);
+          if (openerFirst) {
+            const openerFirstName = Private.nameProperty.get(openerFirst);
+            openerFirstIndex =
+              this._widgetPositions.get(openerFirstName) ?? openerFirstIndex;
+          }
+
+          // Insert the widget in the popup toolbar.
+          const index = position - openerFirstIndex;
           opener.insertWidget(index, widget);
         }
         if (opener.widgetCount() > 0) {
@@ -606,17 +648,19 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     let index = 0;
     while (index < toIndex) {
       const widget = layout.widgets[index];
+      const name = Private.nameProperty.get(widget);
       // Compute the widget size only if
       // - the zoom has changed.
       // - the widget size has not been computed yet.
       let widgetWidth: number;
       if (this._zoomChanged) {
-        widgetWidth = await this._saveWidgetWidth(widget);
+        widgetWidth = await this._saveWidgetWidth(name, widget);
       } else {
         // The widget widths can be 0px if it has been added to the toolbar but
         // not rendered, this is why we must use '||' instead of '??'.
         widgetWidth =
-          this._getWidgetWidth(widget) || (await this._saveWidgetWidth(widget));
+          this._getWidgetWidth(widget) ||
+          (await this._saveWidgetWidth(name, widget));
       }
       width += widgetWidth;
       if (
@@ -626,12 +670,18 @@ export class ReactiveToolbar extends Toolbar<Widget> {
       ) {
         width += openerWidth;
       }
-      if (width > toolbarWidth) {
+      // Remove the widget if it is out of the toolbar or incorrectly positioned.
+      // Incorrect positioning can occur when the widget is added after the toolbar
+      // has been rendered and should be in the popup. E.g. debugger icon with a
+      // narrow notebook toolbar.
+      if (
+        width > toolbarWidth ||
+        (this._widgetPositions.get(name) ?? 0) > index
+      ) {
         widgetsToRemove.push(widget);
       }
       index++;
     }
-
     this._zoomChanged = false;
     return {
       width: width,
@@ -639,27 +689,28 @@ export class ReactiveToolbar extends Toolbar<Widget> {
     };
   }
 
-  private async _saveWidgetWidth(widget: Widget): Promise<number> {
+  private async _saveWidgetWidth(
+    name: string,
+    widget: Widget
+  ): Promise<number> {
     if (widget instanceof ReactWidget) {
       await widget.renderPromise;
     }
-    const widgetName = Private.nameProperty.get(widget);
-
     const widgetWidth = widget.hasClass(TOOLBAR_SPACER_CLASS)
       ? 2
       : widget.node.clientWidth;
-    this._widgetWidths![widgetName] = widgetWidth;
+    this._widgetWidths.set(name, widgetWidth);
     return widgetWidth;
   }
 
   private _getWidgetWidth(widget: Widget): number {
     const widgetName = Private.nameProperty.get(widget);
-    return this._widgetWidths![widgetName];
+    return this._widgetWidths.get(widgetName) || 0;
   }
 
   protected readonly popupOpener: ToolbarPopupOpener = new ToolbarPopupOpener();
-  private readonly _widgetWidths: { [key: string]: number } = {};
   private readonly _resizer: Throttler;
+  private readonly _widgetWidths = new Map<string, number>();
   private _widgetPositions = new Map<string, number>();
   // The zoom property is not the real browser zoom, but a value proportional to
   // the zoom, which is modified when the zoom changes.

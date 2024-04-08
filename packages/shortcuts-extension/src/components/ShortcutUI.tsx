@@ -4,21 +4,19 @@
  */
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ArrayExt, StringExt } from '@lumino/algorithm';
-
-import { CommandRegistry } from '@lumino/commands';
-
-import { ReadonlyJSONArray } from '@lumino/coreutils';
-
-import { Menu } from '@lumino/widgets';
-
+import { JSONExt } from '@lumino/coreutils';
 import { ShortcutList } from './ShortcutList';
-
-import { IShortcutUIexternal, TopNav } from './TopNav';
-
+import { TopNav } from './TopNav';
+import { ShortcutRegistry } from '../registry';
+import {
+  IKeybinding,
+  IShortcutRegistry,
+  IShortcutsSettingsLayout,
+  IShortcutTarget,
+  IShortcutUI
+} from '../types';
 import * as React from 'react';
-import { ErrorObject, ShortcutObject, TakenByObject } from './ShortcutInput';
 
 const enum MatchType {
   Label,
@@ -29,21 +27,19 @@ const enum MatchType {
 
 /** Props for ShortcutUI component */
 export interface IShortcutUIProps {
-  external: IShortcutUIexternal;
+  external: IShortcutUI.IExternalBundle;
   height: number;
   width: number;
 }
 
 /** State for ShortcutUI component */
 export interface IShortcutUIState {
-  shortcutList: { [index: string]: ShortcutObject };
-  filteredShortcutList: ShortcutObject[];
+  shortcutRegistry: IShortcutRegistry | null;
+  filteredShortcutList: IShortcutTarget[];
   shortcutsFetched: boolean;
   searchQuery: string;
   showSelectors: boolean;
-  currentSort: string;
-  keyBindingsUsed: { [index: string]: TakenByObject };
-  contextMenu: Menu;
+  currentSort: IShortcutUI.ColumnId;
 }
 
 /** Search result data **/
@@ -52,7 +48,7 @@ interface ISearchResult {
   categoryIndices: number[] | null;
   labelIndices: number[] | null;
   score: number;
-  item: ShortcutObject;
+  item: IShortcutTarget;
 }
 
 /** Normalize the query text for a fuzzy search. */
@@ -62,12 +58,12 @@ function normalizeQuery(text: string): string {
 
 /** Perform a fuzzy search on a single command item. */
 function fuzzySearch(
-  item: ShortcutObject,
+  item: IShortcutTarget,
   query: string
 ): ISearchResult | null {
   // Create the source text to be searched.
   const category = item.category.toLowerCase();
-  const label = item['label'].toLowerCase();
+  const label = (item['label'] ?? '').toLowerCase();
   const source = `${category} ${label}`;
 
   // Set up the match score and indices array.
@@ -156,17 +152,15 @@ function fuzzySearch(
 }
 
 /** Perform a fuzzy match on an array of command items. */
-function matchItems(items: ShortcutRegistry, query: string): ISearchResult[] {
+function matchItems(items: IShortcutRegistry, query: string): ISearchResult[] {
   // Normalize the query text to lower case with no whitespace.
   query = normalizeQuery(query);
 
   // Create the array to hold the scores.
   let scores: ISearchResult[] = [];
-  // Iterate over the items and match against the query.
-  let itemList = Object.keys(items);
-  for (let i = 0, n = itemList.length; i < n; ++i) {
-    let item = items[itemList[i]];
 
+  // Iterate over the items and match against the query.
+  for (const item of items.values()) {
     // If the query is empty, all items are matched by default.
     if (!query) {
       scores.push({
@@ -195,312 +189,266 @@ function matchItems(items: ShortcutRegistry, query: string): ISearchResult[] {
   return scores;
 }
 
-type ShortcutRegistry = { [index: string]: ShortcutObject };
-
-/** Transform SettingRegistry's shortcut list to list of ShortcutObjects */
-export function getShortcutObjects(
-  external: IShortcutUIexternal,
-  settings: ISettingRegistry.ISettings
-): ShortcutRegistry {
-  const shortcuts = settings.composite
-    .shortcuts as unknown as CommandRegistry.IKeyBindingOptions[];
-  let shortcutObjects: ShortcutRegistry = {};
-  shortcuts.forEach((shortcut: CommandRegistry.IKeyBindingOptions) => {
-    let key = shortcut.command + '_' + shortcut.selector;
-    if (Object.keys(shortcutObjects).indexOf(key) !== -1) {
-      let currentCount = shortcutObjects[key].numberOfShortcuts;
-      shortcutObjects[key].keys[currentCount] = shortcut.keys;
-      shortcutObjects[key].numberOfShortcuts++;
-    } else {
-      let shortcutObject = new ShortcutObject();
-      shortcutObject.commandName = shortcut.command;
-      let label = external.getLabel(shortcut.command);
-      const commandParts = shortcut.command.split(':');
-      if (!label) {
-        // TODO needs translation
-        label =
-          commandParts.length > 1 ? commandParts[1] : '(Command label missing)';
-      }
-      shortcutObject.label = label;
-      shortcutObject.category = commandParts[0];
-      shortcutObject.keys[0] = shortcut.keys;
-      shortcutObject.selector = shortcut.selector;
-      // TODO needs translation
-      shortcutObject.source = 'Default';
-      shortcutObject.id = key;
-      shortcutObject.numberOfShortcuts = 1;
-      shortcutObjects[key] = shortcutObject;
-    }
-  });
-  // find all the shortcuts that have custom settings
-  const userShortcuts = settings.user
-    .shortcuts as unknown as CommandRegistry.IKeyBindingOptions[];
-  userShortcuts.forEach((userSetting: CommandRegistry.IKeyBindingOptions) => {
-    const command: string = userSetting.command;
-    const selector: string = userSetting.selector;
-    const keyTo = command + '_' + selector;
-    if (shortcutObjects[keyTo]) {
-      // TODO needs translation
-      shortcutObjects[keyTo].source = 'Custom';
-    }
-  });
-  return shortcutObjects;
-}
-
-/** Get list of all shortcut keybindings currently in use
- * An object where keys are unique keyBinding_selector and values are shortcut objects **/
-function getKeyBindingsUsed(shortcutObjects: {
-  [index: string]: ShortcutObject;
-}): { [index: string]: TakenByObject } {
-  let keyBindingsUsed: { [index: string]: TakenByObject } = {};
-
-  Object.keys(shortcutObjects).forEach((shortcut: string) => {
-    Object.keys(shortcutObjects[shortcut].keys).forEach((key: string) => {
-      const takenBy = new TakenByObject(shortcutObjects[shortcut]);
-      takenBy.takenByKey = key;
-
-      keyBindingsUsed[
-        shortcutObjects[shortcut].keys[key].join(' ') +
-          '_' +
-          shortcutObjects[shortcut].selector
-      ] = takenBy;
-    });
-  });
-  return keyBindingsUsed;
-}
-
 /** Top level React component for widget */
-export class ShortcutUI extends React.Component<
-  IShortcutUIProps,
-  IShortcutUIState
-> {
+export class ShortcutUI
+  extends React.Component<IShortcutUIProps, IShortcutUIState>
+  implements IShortcutUI
+{
   constructor(props: IShortcutUIProps) {
     super(props);
     this.state = {
-      shortcutList: {},
-      filteredShortcutList: new Array<ShortcutObject>(),
+      shortcutRegistry: null,
+      filteredShortcutList: new Array<IShortcutTarget>(),
       shortcutsFetched: false,
       searchQuery: '',
       showSelectors: false,
-      currentSort: 'category',
-      keyBindingsUsed: {},
-      contextMenu: this.props.external.createMenu()
+      currentSort: 'category'
     };
   }
 
   /** Fetch shortcut list on mount */
   componentDidMount(): void {
+    this.props.external.actionRequested.connect(this._onActionRequested, this);
     void this._refreshShortcutList();
   }
+
+  componentWillUnmount(): void {
+    this.props.external.actionRequested.disconnect(
+      this._onActionRequested,
+      this
+    );
+  }
+
+  private async _onActionRequested(
+    _: unknown,
+    action: IShortcutUI.ActionRequest
+  ): Promise<void> {
+    if (action.request === 'toggle-selectors') {
+      return this.toggleSelectors();
+    }
+    if (action.request === 'reset-all') {
+      await this.resetShortcuts();
+    }
+  }
+
   /** Fetch shortcut list from SettingRegistry  */
   private async _refreshShortcutList(): Promise<void> {
-    const shortcuts: ISettingRegistry.ISettings =
-      await this.props.external.getAllShortCutSettings();
-    const shortcutObjects = getShortcutObjects(this.props.external, shortcuts);
+    const settings: ISettingRegistry.ISettings<IShortcutsSettingsLayout> =
+      await this.props.external.getSettings();
+    const shortcutRegistry = new ShortcutRegistry({
+      commandRegistry: this.props.external.commandRegistry,
+      settings
+    });
     this.setState(
       {
-        shortcutList: shortcutObjects,
-        filteredShortcutList: this._searchFilterShortcuts(shortcutObjects),
+        shortcutRegistry: shortcutRegistry,
+        filteredShortcutList: this._searchFilterShortcuts(shortcutRegistry),
         shortcutsFetched: true
       },
       () => {
-        let keyBindingsUsed = getKeyBindingsUsed(shortcutObjects);
-        this.setState({ keyBindingsUsed });
         this.sortShortcuts();
       }
     );
   }
 
-  /** Set the current seach query */
-  updateSearchQuery = (event: MouseEvent): void => {
+  /** Set the current search query */
+  updateSearchQuery = (query: string): void => {
     this.setState(
       {
-        searchQuery: (event.target as any)['value']
+        searchQuery: query
       },
-      () =>
+      () => {
+        const registry = this.state.shortcutRegistry;
         this.setState(
           {
-            filteredShortcutList: this._searchFilterShortcuts(
-              this.state.shortcutList
-            )
+            filteredShortcutList: this._searchFilterShortcuts(registry)
           },
           () => {
             this.sortShortcuts();
           }
-        )
+        );
+      }
     );
   };
 
   /** Filter shortcut list using current search query */
   private _searchFilterShortcuts(
-    shortcutObjects: ShortcutRegistry
-  ): ShortcutObject[] {
-    const filteredShortcuts = matchItems(
-      shortcutObjects,
-      this.state.searchQuery
-    ).map((item: ISearchResult) => {
-      return item.item;
-    });
+    registry: IShortcutRegistry | null
+  ): IShortcutTarget[] {
+    if (!registry) {
+      return [];
+    }
+    const filteredShortcuts = matchItems(registry, this.state.searchQuery).map(
+      (item: ISearchResult) => {
+        return item.item;
+      }
+    );
     return filteredShortcuts;
   }
 
-  /** Reset all shortcuts to their defaults */
+  /**
+   * Reset all keybindings to their defaults
+   */
   resetShortcuts = async (): Promise<void> => {
-    const settings = await this.props.external.getAllShortCutSettings();
-    for (const key of Object.keys(settings.user)) {
-      await this.props.external.removeShortCut(key);
-    }
+    const settings = await this.props.external.getSettings();
+    await settings.set('shortcuts', []);
     await this._refreshShortcutList();
   };
 
-  /** Set new shortcut for command, refresh state */
-  handleUpdate = async (
-    shortcutObject: ShortcutObject,
+  /**
+   * Reset keybindings for given target to defaults.
+   */
+  resetKeybindings = async (target: IShortcutTarget): Promise<void> => {
+    for (const binding of target.keybindings) {
+      await this._setKeybinding(
+        target,
+        binding.isDefault ? binding.keys : [],
+        binding
+      );
+    }
+  };
+
+  /**
+   * Replace the given keybinding with a new keybinding as defined by given keys.
+   */
+  replaceKeybinding = async (
+    target: IShortcutTarget,
+    keybinding: IKeybinding,
     keys: string[]
   ): Promise<void> => {
-    const settings: ISettingRegistry.ISettings =
-      await this.props.external.getAllShortCutSettings();
-    const userShortcuts = settings.user.shortcuts as ReadonlyJSONArray;
+    return this._setKeybinding(target, keys, keybinding);
+  };
+
+  /**
+   * Delete a single keybinding for given shortcut target.
+   */
+  deleteKeybinding = async (
+    target: IShortcutTarget,
+    keybinding: IKeybinding
+  ): Promise<void> => {
+    await this._setKeybinding(target, [], keybinding);
+  };
+
+  /**
+   * Add a new keybinding.
+   */
+  addKeybinding = async (
+    target: IShortcutTarget,
+    keys: string[]
+  ): Promise<void> => {
+    await this._setKeybinding(target, keys);
+  };
+
+  /**
+   * Replace the given keybinding with a new keybinding as defined by given keys.
+   *
+   * If keybinding is not given a new keybinding will be created.
+   * If keys are empty (or include a single empty string) the keybinding will be deleted.
+   * If keybinding is a default keybinding and the provided keys differ from default, it will be disabled.
+   */
+  private async _setKeybinding(
+    target: IShortcutTarget,
+    keys: string[],
+    keybinding?: IKeybinding
+  ): Promise<void> {
+    if (keys.length === 1 && keys[0] == '') {
+      keys = [];
+    }
+    const settings = await this.props.external.getSettings();
+    const userShortcuts = settings.user.shortcuts ?? [];
     const newUserShortcuts = [];
     let found = false;
-    for (let shortcut of userShortcuts as any) {
+    for (let shortcut of userShortcuts) {
       if (
-        shortcut['command'] === shortcutObject.commandName &&
-        shortcut['selector'] === shortcutObject.selector
+        shortcut.command === target.command &&
+        shortcut.selector === target.selector &&
+        JSONExt.deepEqual(shortcut.args ?? {}, target.args ?? {})
       ) {
-        newUserShortcuts.push({
-          command: shortcut['command'],
-          selector: shortcut['selector'],
-          keys: keys
-        });
+        const matchesDefault =
+          keybinding &&
+          keybinding.isDefault &&
+          JSONExt.deepEqual(keybinding.keys, keys);
+        if (keys.length !== 0 && !matchesDefault) {
+          newUserShortcuts.push({
+            command: shortcut.command,
+            selector: shortcut.selector,
+            keys: keys
+          });
+        }
         found = true;
       } else {
         newUserShortcuts.push(shortcut);
       }
     }
     if (!found) {
-      newUserShortcuts.push({
-        command: shortcutObject.commandName,
-        selector: shortcutObject.selector,
-        keys: keys
-      });
-    }
-    await settings.set('shortcuts', newUserShortcuts);
-    await this._refreshShortcutList();
-  };
-
-  /** Delete shortcut for command, refresh state */
-  deleteShortcut = async (
-    shortcutObject: ShortcutObject,
-    shortcutId: string
-  ): Promise<void> => {
-    await this.handleUpdate(shortcutObject, ['']);
-    await this._refreshShortcutList();
-  };
-
-  /** Reset a specific shortcut to its default settings */
-  resetShortcut = async (shortcutObject: ShortcutObject): Promise<void> => {
-    const settings: ISettingRegistry.ISettings =
-      await this.props.external.getAllShortCutSettings();
-    const userShortcuts = settings.user.shortcuts as ReadonlyJSONArray;
-    const newUserShortcuts = [];
-    for (let shortcut of userShortcuts as any) {
-      if (
-        shortcut['command'] !== shortcutObject.commandName ||
-        shortcut['selector'] !== shortcutObject.selector
-      ) {
-        newUserShortcuts.push(shortcut);
+      const requiresChange =
+        !keybinding || !JSONExt.deepEqual(keybinding.keys, keys);
+      const shouldDisableDefault =
+        keybinding && keybinding.isDefault && requiresChange;
+      if (shouldDisableDefault) {
+        // If the replaced keybinding is the default, disable it.
+        newUserShortcuts.push({
+          command: target.command,
+          selector: target.selector,
+          disabled: true,
+          keys: keybinding.keys
+        });
+      }
+      if (keys.length !== 0) {
+        newUserShortcuts.push({
+          command: target.command,
+          selector: target.selector,
+          keys: keys
+        });
       }
     }
-    await settings.set('shortcuts', newUserShortcuts);
+    await settings.set('shortcuts', newUserShortcuts as any);
     await this._refreshShortcutList();
-  };
+  }
 
   /** Toggles showing command selectors */
   toggleSelectors = (): void => {
     this.setState({ showSelectors: !this.state.showSelectors });
   };
 
-  /** Set the current list sort order */
-  updateSort = (value: string): void => {
+  /**
+   * Set the sort order for the shortcuts listing.
+   */
+  updateSort = (value: IShortcutUI.ColumnId): void => {
     if (value !== this.state.currentSort) {
       this.setState({ currentSort: value }, this.sortShortcuts);
     }
   };
 
-  /** Sort shortcut list using current sort property  */
+  /**
+   * Sort shortcut list using current sort property.
+   */
   sortShortcuts(): void {
-    const shortcuts: ShortcutObject[] = this.state.filteredShortcutList;
-    let filterCritera = this.state.currentSort;
-    if (filterCritera === 'command') {
-      filterCritera = 'label';
+    const shortcuts: IShortcutTarget[] = this.state.filteredShortcutList;
+    let sortCriteria = this.state.currentSort;
+    if (sortCriteria === 'command') {
+      sortCriteria = 'label';
     }
-    if (filterCritera !== '') {
-      shortcuts.sort((a: ShortcutObject, b: ShortcutObject) => {
-        const compareA: string = a.get(filterCritera);
-        const compareB: string = b.get(filterCritera);
-        if (compareA < compareB) {
-          return -1;
-        } else if (compareA > compareB) {
-          return 1;
-        } else {
-          return a['label'] < b['label'] ? -1 : a['label'] > b['label'] ? 1 : 0;
-        }
-      });
-    }
+    const getValue = (target: IShortcutTarget): string => {
+      if (sortCriteria === 'source') {
+        return target.keybindings.every(k => k.isDefault) ? 'default' : 'other';
+      }
+      return target[sortCriteria] ?? '';
+    };
+    shortcuts.sort((a: IShortcutTarget, b: IShortcutTarget) => {
+      const compareA: string = getValue(a);
+      const compareB: string = getValue(b);
+      const compareResult = compareA.localeCompare(compareB);
+      if (compareResult) {
+        return compareResult;
+      } else {
+        const aLabel = a['label'] ?? '';
+        const bLabel = b['label'] ?? '';
+        return aLabel.localeCompare(bLabel);
+      }
+    });
     this.setState({ filteredShortcutList: shortcuts });
   }
-
-  /** Sort shortcut list so that an error row is right below the one currently being set */
-  sortConflict = (
-    newShortcut: ShortcutObject,
-    takenBy: TakenByObject
-  ): void => {
-    const shortcutList = this.state.filteredShortcutList;
-
-    if (
-      shortcutList.filter(shortcut => shortcut.id === 'error_row').length === 0
-    ) {
-      const errorRow = new ErrorObject();
-      errorRow.takenBy = takenBy;
-      errorRow.id = 'error_row';
-
-      shortcutList.splice(shortcutList.indexOf(newShortcut) + 1, 0, errorRow);
-
-      errorRow.hasConflict = true;
-      this.setState({ filteredShortcutList: shortcutList });
-    }
-  };
-
-  /** Remove conflict flag from all shortcuts */
-  clearConflicts = (): void => {
-    /** Remove error row */
-    const shortcutList = this.state.filteredShortcutList.filter(
-      shortcut => shortcut.id !== 'error_row'
-    );
-
-    shortcutList.forEach((shortcut: ShortcutObject) => {
-      shortcut.hasConflict = false;
-    });
-
-    this.setState({ filteredShortcutList: shortcutList });
-  };
-
-  contextMenu = (event: React.MouseEvent, commandIDs: string[]): void => {
-    event.persist();
-    this.setState(
-      {
-        contextMenu: this.props.external.createMenu()
-      },
-      () => {
-        event.preventDefault();
-        for (let command of commandIDs) {
-          this.state.contextMenu.addItem({ command });
-        }
-        this.state.contextMenu.open(event.clientX, event.clientY);
-      }
-    );
-  };
 
   render(): JSX.Element | null {
     if (!this.state.shortcutsFetched) {
@@ -516,19 +464,29 @@ export class ShortcutUI extends React.Component<
           updateSort={this.updateSort}
           currentSort={this.state.currentSort}
           width={this.props.width}
-          external={this.props.external}
+          translator={this.props.external.translator}
         />
         <ShortcutList
           shortcuts={this.state.filteredShortcutList}
-          resetShortcut={this.resetShortcut}
-          handleUpdate={this.handleUpdate}
-          deleteShortcut={this.deleteShortcut}
+          resetKeybindings={this.resetKeybindings}
+          addKeybinding={this.addKeybinding}
+          replaceKeybinding={this.replaceKeybinding}
+          deleteKeybinding={this.deleteKeybinding}
           showSelectors={this.state.showSelectors}
-          keyBindingsUsed={this.state.keyBindingsUsed}
-          sortConflict={this.sortConflict}
-          clearConflicts={this.clearConflicts}
+          findConflictsFor={(keys: string[], selector: string) => {
+            if (this.state.shortcutRegistry) {
+              return this.state.shortcutRegistry.findConflictsFor(
+                keys,
+                selector
+              );
+            } else {
+              console.error(
+                'Cannot search for keybinding conflicts at this time: registry is not ready'
+              );
+              return [];
+            }
+          }}
           height={this.props.height}
-          contextMenu={this.contextMenu}
           external={this.props.external}
         />
       </div>

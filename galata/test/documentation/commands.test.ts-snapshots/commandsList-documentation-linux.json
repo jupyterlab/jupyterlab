@@ -32,13 +32,6 @@
     ]
   },
   {
-    "id": "application:toggle-side-tabbar",
-    "label": "Toggle Sidebar Element",
-    "shortcuts": [
-      "Alt 1"
-    ]
-  },
-  {
     "id": "application:close",
     "label": "Close Tab",
     "caption": "",
@@ -117,6 +110,14 @@
     "label": "Show Left Activity Bar",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "application:toggle-sidebar-widget",
+    "label": "Toggle Sidebar Element",
+    "caption": "",
+    "shortcuts": [
+      "Alt 1"
+    ]
   },
   {
     "id": "apputils:activate-command-palette",
@@ -367,6 +368,12 @@
     "shortcuts": []
   },
   {
+    "id": "console:redo",
+    "label": "Redo",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "console:replace-selection",
     "label": "Replace Selection in Console",
     "caption": "",
@@ -409,6 +416,12 @@
   {
     "id": "console:toggle-show-all-kernel-activity",
     "label": "Show All Kernel Activity",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "console:undo",
+    "label": "Undo",
     "caption": "",
     "shortcuts": []
   },
@@ -512,6 +525,12 @@
     "shortcuts": [
       "Shift F9"
     ]
+  },
+  {
+    "id": "docmanager:clear-recents",
+    "label": "Clear Recent Documents",
+    "caption": "Clear the list of recently opened items.",
+    "shortcuts": []
   },
   {
     "id": "docmanager:clone",
@@ -2077,6 +2096,20 @@
     ]
   },
   {
+    "id": "recentmenu:open-recent",
+    "label": "Open a Recent Document (given by `recent` argument)",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "recentmenu:reopen-last",
+    "label": "Reopen Closed Document",
+    "caption": "Reopen recently closed file or notebook.",
+    "shortcuts": [
+      "Ctrl Shift T"
+    ]
+  },
+  {
     "id": "rendermime:handle-local-link",
     "label": "Handle Local Link",
     "caption": "",
@@ -2131,6 +2164,14 @@
     "label": "Shut Down Kernel",
     "caption": "",
     "shortcuts": []
+  },
+  {
+    "id": "running:show-modal",
+    "label": "Search Tabs and Running Sessions",
+    "caption": "",
+    "shortcuts": [
+      "Ctrl Alt A"
+    ]
   },
   {
     "id": "running:show-panel",
@@ -2363,8 +2404,56 @@
     "shortcuts": []
   },
   {
+    "id": "workspace-ui:clone",
+    "label": "Clone Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:create-new",
+    "label": "Create New Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:delete",
+    "label": "Delete Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:export",
+    "label": "Export Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:import",
+    "label": "Import Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:open",
+    "label": "Open Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:rename",
+    "label": "Rename Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
+    "id": "workspace-ui:reset",
+    "label": "Reset Workspace…",
+    "caption": "",
+    "shortcuts": []
+  },
+  {
     "id": "workspace-ui:save",
-    "label": "Save Current Workspace",
+    "label": "Save Current Workspace…",
     "caption": "",
     "shortcuts": []
   },

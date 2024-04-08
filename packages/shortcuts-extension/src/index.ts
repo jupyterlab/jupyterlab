@@ -24,29 +24,26 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
-import { Menu } from '@lumino/widgets';
-import { IShortcutUIexternal } from './components';
+import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
 import { renderShortCut } from './renderer';
+import { ISignal, Signal } from '@lumino/signaling';
 
 const SHORTCUT_PLUGIN_ID = '@jupyterlab/shortcuts-extension:shortcuts';
 
 function getExternalForJupyterLab(
   settingRegistry: ISettingRegistry,
   app: JupyterFrontEnd,
-  translator: ITranslator
-): IShortcutUIexternal {
-  const { commands } = app;
+  translator: ITranslator,
+  actionRequested: ISignal<unknown, IShortcutUI.ActionRequest>
+): IShortcutUI.IExternalBundle {
   return {
     translator,
-    getAllShortCutSettings: () =>
-      settingRegistry.load(SHORTCUT_PLUGIN_ID, true),
-    removeShortCut: (key: string) =>
-      settingRegistry.remove(SHORTCUT_PLUGIN_ID, key),
-    createMenu: () => new Menu({ commands }),
-    hasCommand: (id: string) => commands.hasCommand(id),
-    addCommand: (id: string, options: CommandRegistry.ICommandOptions) =>
-      commands.addCommand(id, options),
-    getLabel: (id: string) => commands.label(id)
+    getSettings: () =>
+      settingRegistry.load(SHORTCUT_PLUGIN_ID, true) as Promise<
+        ISettingRegistry.ISettings<IShortcutsSettingsLayout>
+      >,
+    commandRegistry: app.commands,
+    actionRequested
   };
 }
 
@@ -100,10 +97,93 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
     let loaded: { [name: string]: ISettingRegistry.IShortcut[] } = {};
 
     if (editorRegistry) {
+      const actionRequested = new Signal<unknown, IShortcutUI.ActionRequest>(
+        {}
+      );
+      const isKeybindingNode = (node: HTMLElement) =>
+        node.dataset['shortcut'] !== undefined;
+
+      app.commands.addCommand(CommandIDs.editBinding, {
+        label: trans.__('Edit Keybinding'),
+        caption: trans.__('Edit existing keybinding'),
+        execute: () => {
+          const node = app.contextMenuHitTest(isKeybindingNode);
+          const keybinding = node?.dataset['keybinding'];
+          const shortcutId = node?.dataset['shortcut'];
+          if (!shortcutId || !keybinding) {
+            return console.log('Missing shortcut id/keybinding information');
+          }
+          actionRequested.emit({
+            request: 'edit-keybinding',
+            keybinding: parseInt(keybinding, 10),
+            shortcutId
+          });
+        }
+      });
+
+      app.commands.addCommand(CommandIDs.deleteBinding, {
+        label: trans.__('Delete Keybinding'),
+        caption: trans.__('Delete chosen keybinding'),
+        execute: () => {
+          const node = app.contextMenuHitTest(isKeybindingNode);
+          const keybinding = node?.dataset['keybinding'];
+          const shortcutId = node?.dataset['shortcut'];
+          if (!shortcutId || !keybinding) {
+            return console.log('Missing shortcut id/keybinding information');
+          }
+          actionRequested.emit({
+            request: 'delete-keybinding',
+            keybinding: parseInt(keybinding, 10),
+            shortcutId
+          });
+        }
+      });
+
+      app.commands.addCommand(CommandIDs.addBinding, {
+        label: trans.__('Add Keybinding'),
+        caption: trans.__('Add new keybinding for existing shortcut target'),
+        execute: () => {
+          const node = app.contextMenuHitTest(isKeybindingNode);
+          const shortcutId = node?.dataset['shortcut'];
+          if (!shortcutId) {
+            return console.log('Missing shortcut id to add keybinding to');
+          }
+          actionRequested.emit({
+            request: 'add-keybinding',
+            shortcutId
+          });
+        }
+      });
+
+      commands.addCommand(CommandIDs.toggleSelectors, {
+        label: trans.__('Toggle Selectors'),
+        caption: trans.__('Toggle command selectors'),
+        execute: () => {
+          actionRequested.emit({
+            request: 'toggle-selectors'
+          });
+        }
+      });
+
+      commands.addCommand(CommandIDs.resetAll, {
+        label: trans.__('Reset All'),
+        caption: trans.__('Reset all shortcuts'),
+        execute: () => {
+          actionRequested.emit({
+            request: 'reset-all'
+          });
+        }
+      });
+
       const component: IFormRenderer = {
         fieldRenderer: (props: any) => {
           return renderShortCut({
-            external: getExternalForJupyterLab(registry, app, translator_),
+            external: getExternalForJupyterLab(
+              registry,
+              app,
+              translator_,
+              actionRequested
+            ),
             ...props
           });
         }
@@ -170,7 +250,7 @@ List of keyboard shortcuts:`,
       );
     }
 
-    registry.pluginChanged.connect(async (sender, plugin) => {
+    registry.pluginChanged.connect(async (_, plugin) => {
       if (plugin !== shortcuts.id) {
         // If the plugin changed its shortcuts, reload everything.
         const oldShortcuts = loaded[plugin];

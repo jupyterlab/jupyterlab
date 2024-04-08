@@ -12,11 +12,6 @@
   --jp-private-filebrowser-button-width: 48px;
 }
 
-/*-----------------------------------------------------------------------------
-| Copyright (c) Jupyter Development Team.
-| Distributed under the terms of the Modified BSD License.
-|----------------------------------------------------------------------------*/
-
 .jp-FileBrowser .jp-SidePanel-content {
   display: flex;
   flex-direction: column;
@@ -102,6 +97,14 @@
 
 .jp-FileBrowser .lm-AccordionPanel > h3:first-child {
   display: none;
+}
+
+.jp-Open-Dialog > .jp-FileBrowser {
+  min-height: 200px;
+}
+
+.jp-Open-Dialog-label {
+  overflow: visible;
 }
 
 /*-----------------------------------------------------------------------------
@@ -276,15 +279,21 @@
   user-select: none;
 }
 
-.jp-DirListing-itemText:focus {
+.jp-DirListing-item:has(.jp-DirListing-itemText:focus-visible) {
+  /* Targeting `.jp-DirListing-itemText` specifically to avoid an extra outline
+  when it gets replaced with `jp-DirListing-editor` when editing the file name */
   outline-width: 2px;
   outline-color: var(--jp-inverse-layout-color1);
   outline-style: solid;
-  outline-offset: 1px;
+  outline-offset: -4px;
 }
 
-.jp-DirListing-item.jp-mod-selected .jp-DirListing-itemText:focus {
+.jp-DirListing-item.jp-mod-selected:focus-within {
   outline-color: var(--jp-layout-color1);
+}
+
+.jp-DirListing-item > .jp-DirListing-itemText:focus {
+  outline: 0;
 }
 
 .jp-DirListing-itemModified {

@@ -288,6 +288,7 @@ interface IUpDownProps {
   onHighlightPrevious: () => void;
   onHighlightNext: () => void;
   trans: TranslationBundle;
+  isEnabled: boolean;
 }
 
 function UpDownButtons(props: IUpDownProps) {
@@ -304,30 +305,40 @@ function UpDownButtons(props: IUpDownProps) {
   const prevShortcut = prevKeys ? ` (${prevKeys})` : '';
   const nextShortcut = nextKeys ? ` (${nextKeys})` : '';
 
+  const upButton = (
+    <button
+      className={BUTTON_WRAPPER_CLASS}
+      onClick={() => (props.isEnabled ? props.onHighlightPrevious() : false)}
+      tabIndex={0}
+      title={`${props.trans.__('Previous Match')}${prevShortcut}`}
+      disabled={!props.isEnabled}
+    >
+      <caretUpEmptyThinIcon.react
+        className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
+        tag="span"
+      />
+    </button>
+  );
+
+  const downButton = (
+    <button
+      className={BUTTON_WRAPPER_CLASS}
+      onClick={() => (props.isEnabled ? props.onHighlightNext() : false)}
+      tabIndex={0}
+      title={`${props.trans.__('Next Match')}${nextShortcut}`}
+      disabled={!props.isEnabled}
+    >
+      <caretDownEmptyThinIcon.react
+        className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
+        tag="span"
+      />
+    </button>
+  );
+
   return (
     <div className={UP_DOWN_BUTTON_WRAPPER_CLASS}>
-      <button
-        className={BUTTON_WRAPPER_CLASS}
-        onClick={() => props.onHighlightPrevious()}
-        tabIndex={0}
-        title={`${props.trans.__('Previous Match')}${prevShortcut}`}
-      >
-        <caretUpEmptyThinIcon.react
-          className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
-          tag="span"
-        />
-      </button>
-      <button
-        className={BUTTON_WRAPPER_CLASS}
-        onClick={() => props.onHighlightNext()}
-        tabIndex={0}
-        title={`${props.trans.__('Next Match')}${nextShortcut}`}
-      >
-        <caretDownEmptyThinIcon.react
-          className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
-          tag="span"
-        />
-      </button>
+      {upButton}
+      {downButton}
     </div>
   );
 }
@@ -646,15 +657,20 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
       <div className={SEARCH_OPTIONS_CLASS}>
         {Object.keys(filters).map(name => {
           const filter = filters[name];
+
+          const isEnabled = !showReplace || filter.supportReplace;
+          // Show an alternate description, if one exists, when a filter is disabled in replace mode.
+          const description = isEnabled
+            ? filter.description
+            : filter.disabledDescription ?? filter.description;
           return (
             <FilterSelection
               key={name}
               title={filter.title}
               description={
-                filter.description +
-                (name == 'selection' ? selectionKeyHint : '')
+                description + (name == 'selection' ? selectionKeyHint : '')
               }
-              isEnabled={!showReplace || filter.supportReplace}
+              isEnabled={isEnabled}
               onToggle={async () => {
                 await this.props.onFilterChanged(
                   name,
@@ -682,7 +698,11 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
               className={TOGGLE_WRAPPER}
               onClick={() => this._onReplaceToggled()}
               tabIndex={0}
-              title={trans.__('Toggle Replace')}
+              title={
+                showReplace
+                  ? trans.__('Hide Replace')
+                  : trans.__('Show Replace')
+              }
             >
               <icon.react
                 className={`${REPLACE_TOGGLE_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -724,11 +744,13 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
             }}
             trans={trans}
             keyBindings={this.props.keyBindings}
+            isEnabled={!!this.props.searchInputRef.current?.value}
           />
           <button
             className={BUTTON_WRAPPER_CLASS}
             onClick={() => this._onClose()}
             tabIndex={0}
+            title={trans.__('Close Search Box')}
           >
             <closeIcon.react
               className="jp-icon-hover"

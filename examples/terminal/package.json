@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-terminal",
-  "version": "4.1.2",
+  "version": "4.2.0-beta.0",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,11 +8,11 @@
   },
   "dependencies": {
     "@jupyter/web-components": "^0.15.2",
-    "@jupyterlab/application": "^4.1.2",
-    "@jupyterlab/coreutils": "^6.1.2",
-    "@jupyterlab/services": "^7.1.2",
-    "@jupyterlab/terminal": "^4.1.2",
-    "@jupyterlab/theme-light-extension": "^4.1.2",
+    "@jupyterlab/application": "^4.2.0-beta.0",
+    "@jupyterlab/coreutils": "^6.2.0-beta.0",
+    "@jupyterlab/services": "^7.2.0-beta.0",
+    "@jupyterlab/terminal": "^4.2.0-beta.0",
+    "@jupyterlab/theme-light-extension": "^4.2.0-beta.0",
     "@lumino/widgets": "^2.3.1"
   },
   "devDependencies": {
@@ -23,7 +23,6 @@
     "style-loader": "~3.3.1",
     "typescript": "~5.1.6",
     "webpack": "^5.76.1",
-    "webpack-cli": "^5.0.1",
-    "whatwg-fetch": "^3.0.0"
+    "webpack-cli": "^5.0.1"
   }
 }

@@ -7,6 +7,18 @@ import { Locator } from '@playwright/test';
 
 const fileName = 'mermaid_diagrams.ipynb';
 
+test.use({
+  mockSettings: {
+    ...galata.DEFAULT_SETTINGS,
+    '@jupyterlab/notebook-extension:tracker': {
+      ...galata.DEFAULT_SETTINGS['@jupyterlab/notebook-extension:tracker'],
+      // Do not use windowing as it simplifies the test as we do not
+      // need to scroll the notebook before calling `output.waitFor()`.
+      windowingMode: 'none'
+    }
+  }
+});
+
 const EXPECTED_MERMAID_ORDER = [
   'flowchart',
   'sequence',
@@ -52,12 +64,17 @@ async function resizePageAndScreenshot(locator: Locator) {
 for (const theme of ['default', 'dark']) {
   const dark = theme === 'dark';
   test.describe(`Notebook Mermaid Diagrams ${theme}`, () => {
-    test.beforeEach(async ({ page, request, tmpPath }) => {
+    test.use({ tmpPath: 'test-mermaid' });
+
+    test.beforeAll(async ({ request, tmpPath }) => {
       const contents = galata.newContentsHelper(request);
       await contents.uploadFile(
         path.resolve(__dirname, `./notebooks/${fileName}`),
         `${tmpPath}/${fileName}`
       );
+    });
+
+    test.beforeEach(async ({ page, tmpPath }) => {
       await page.filebrowser.openDirectory(tmpPath);
       const nbPath = `${tmpPath}/${fileName}`;
 

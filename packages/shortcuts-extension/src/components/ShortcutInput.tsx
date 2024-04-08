@@ -4,24 +4,35 @@
  */
 
 import * as React from 'react';
-
 import { ITranslator } from '@jupyterlab/translation';
-
+import { JSONExt } from '@lumino/coreutils';
 import { EN_US } from '@lumino/keyboard';
 import { checkIcon, errorIcon } from '@jupyterlab/ui-components';
+import {
+  IKeybinding,
+  IShortcutRegistry,
+  IShortcutTarget,
+  IShortcutUI
+} from '../types';
+
+export interface IConflicts {
+  keys: string[];
+  conflictsWith: IShortcutTarget[];
+  overwrite: () => void;
+}
 
 export interface IShortcutInputProps {
-  handleUpdate: Function;
-  deleteShortcut: Function;
-  toggleInput: Function;
-  shortcut: ShortcutObject;
-  shortcutId: string;
-  toSymbols: Function;
-  keyBindingsUsed: { [index: string]: TakenByObject };
-  sortConflict: Function;
-  clearConflicts: Function;
+  addKeybinding: IShortcutUI['addKeybinding'];
+  replaceKeybinding: IShortcutUI['replaceKeybinding'];
+  deleteKeybinding: IShortcutUI['deleteKeybinding'];
+  findConflictsFor: IShortcutRegistry['findConflictsFor'];
+  displayConflicts: (conflicts: IConflicts) => void;
+  toggleInput: () => void;
+  shortcut: IShortcutTarget;
+  /* If keybinding is not given, the input is used for adding a keybinding, otherwise for replacing a keybinding */
+  keybinding?: IKeybinding;
+  toSymbols: (value: string) => string;
   displayInput: boolean;
-  newOrReplace: string;
   placeholder: string;
   translator: ITranslator;
 }
@@ -31,80 +42,10 @@ export interface IShortcutInputState {
   userInput: string;
   isAvailable: boolean;
   isFunctional: boolean;
-  takenByObject: TakenByObject;
-  keys: Array<string>;
+  conflicts: IShortcutTarget[];
+  keys: string[];
   currentChain: string;
   selected: boolean;
-}
-
-/** Object for shortcut items */
-export class ShortcutObject {
-  commandName: string;
-  label: string;
-  keys: { [index: string]: Array<string> };
-  source: string;
-  selector: string;
-  category: string;
-  id: string;
-  hasConflict: boolean;
-  numberOfShortcuts: number;
-
-  constructor() {
-    this.commandName = '';
-    this.label = '';
-    this.keys = {};
-    this.source = '';
-    this.selector = '';
-    this.category = '';
-    this.id = '';
-    this.numberOfShortcuts = 0;
-    this.hasConflict = false;
-  }
-
-  get(sortCriteria: string): string {
-    if (sortCriteria === 'label') {
-      return this.label;
-    } else if (sortCriteria === 'selector') {
-      return this.selector;
-    } else if (sortCriteria === 'category') {
-      return this.category;
-    } else if (sortCriteria === 'source') {
-      return this.source;
-    } else {
-      return '';
-    }
-  }
-}
-/** Object for conflicting shortcut error messages */
-export class ErrorObject extends ShortcutObject {
-  takenBy: TakenByObject;
-
-  constructor() {
-    super();
-    this.takenBy = new TakenByObject();
-  }
-}
-
-/** Object for showing which shortcut conflicts with the new one */
-export class TakenByObject {
-  takenBy: ShortcutObject;
-  takenByKey: string;
-  takenByLabel: string;
-  id: string;
-
-  constructor(shortcut?: ShortcutObject) {
-    if (shortcut) {
-      this.takenBy = shortcut;
-      this.takenByKey = '';
-      this.takenByLabel = shortcut.category + ': ' + shortcut.label;
-      this.id = shortcut.commandName + '_' + shortcut.selector;
-    } else {
-      this.takenBy = new ShortcutObject();
-      this.takenByKey = '';
-      this.takenByLabel = '';
-      this.id = '';
-    }
-  }
 }
 
 export class ShortcutInput extends React.Component<
@@ -118,36 +59,84 @@ export class ShortcutInput extends React.Component<
       value: this.props.placeholder,
       userInput: '',
       isAvailable: true,
-      isFunctional: this.props.newOrReplace === 'replace',
-      takenByObject: new TakenByObject(),
-      keys: new Array<string>(),
+      isFunctional: this._isReplacingExistingKeybinding,
+      conflicts: [],
+      keys: [],
       currentChain: '',
       selected: true
     };
   }
 
-  handleUpdate = () => {
-    let keys = this.state.keys;
-    keys.push(this.state.currentChain);
-    this.setState({ keys: keys });
-    this.props.handleUpdate(this.props.shortcut, this.state.keys);
+  /** Whether this input replaces existing keybinding or creates a new one */
+  private get _isReplacingExistingKeybinding() {
+    return !!this.props.keybinding;
+  }
+
+  private _updateConflictDisplay() {
+    this.props.displayConflicts({
+      conflictsWith: this.state.conflicts,
+      keys: this.state.keys,
+      overwrite: this.handleOverwrite
+    });
+  }
+
+  handleSubmit = async () => {
+    if (!this._isReplacingExistingKeybinding) {
+      await this._updateShortcut();
+      this.setState({
+        value: '',
+        keys: [],
+        currentChain: ''
+      });
+      this.props.toggleInput();
+    } else {
+      /** don't replace if field has not been edited */
+      if (this.state.selected) {
+        this.props.toggleInput();
+        this.setState({
+          value: '',
+          userInput: ''
+        });
+      } else {
+        await this._updateShortcut();
+      }
+    }
+    this._updateConflictDisplay();
+  };
+
+  private _updateShortcut = async () => {
+    const keys = [...this.state.keys, this.state.currentChain];
+    this.setState({ keys });
+    if (this.props.keybinding) {
+      await this.props.replaceKeybinding(
+        this.props.shortcut,
+        this.props.keybinding,
+        keys
+      );
+    } else {
+      await this.props.addKeybinding(this.props.shortcut, keys);
+    }
   };
 
   handleOverwrite = async () => {
-    this.props
-      .deleteShortcut(
-        this.state.takenByObject.takenBy,
-        this.state.takenByObject.takenByKey
-      )
-      .then(this.handleUpdate());
-  };
-
-  handleReplace = async () => {
-    let keys = this.state.keys;
-    keys.push(this.state.currentChain);
-    this.props.toggleInput();
-    await this.props.deleteShortcut(this.props.shortcut, this.props.shortcutId);
-    this.props.handleUpdate(this.props.shortcut, keys);
+    const keys = [...this.state.keys, this.state.currentChain];
+    for (const conflict of this.state.conflicts) {
+      const conflictingBinding = conflict.keybindings.filter(
+        binding =>
+          JSONExt.deepEqual(binding.keys, keys) ||
+          keys.some(key => JSONExt.deepEqual(binding.keys, [key]))
+      )[0];
+      if (!conflictingBinding) {
+        console.error(
+          `Conflicting binding could not be found for ${conflict} using keys ${keys}`
+        );
+        continue;
+      }
+      await this.props.deleteKeybinding(conflict, conflictingBinding);
+    }
+    this.setState({ conflicts: [] });
+    await this._updateShortcut();
+    this._updateConflictDisplay();
   };
 
   /** Parse user input for chained shortcuts */
@@ -178,13 +167,13 @@ export class ShortcutInput extends React.Component<
         .substr(userInput.lastIndexOf(' ') + 1, userInput.length)
         .trim();
 
-      /** if last key was not a modefier then there is a chain */
+      /** if last key was not a modifier then there is a chain */
       if (modKeys.lastIndexOf(lastKey) === -1 && lastKey != '') {
         userInput = userInput + ',';
         keys.push(currentChain);
         currentChain = '';
 
-        /** check if a modefier key was held down through chain */
+        /** check if a modifier key was held down through chain */
         if (event.ctrlKey && event.key != 'Control') {
           userInput = (userInput + ' Ctrl').trim();
           currentChain = (currentChain + ' Ctrl').trim();
@@ -202,12 +191,12 @@ export class ShortcutInput extends React.Component<
           currentChain = (currentChain + ' Shift').trim();
         }
 
-        /** if not a modefier key, add to user input and current chain */
+        /** if not a modifier key, add to user input and current chain */
         if (modKeys.lastIndexOf(event.key) === -1) {
           userInput = (userInput + ' ' + key).trim();
           currentChain = (currentChain + ' ' + key).trim();
 
-          /** if a modefier key, add to user input and current chain */
+          /** if a modifier key, add to user input and current chain */
         } else {
           if (event.key === 'Meta') {
             userInput = (userInput + ' Accel').trim();
@@ -229,7 +218,7 @@ export class ShortcutInput extends React.Component<
 
         /** if not a chain, add the key to user input and current chain */
       } else {
-        /** if modefier key, rename */
+        /** if modifier key, rename */
         if (event.key === 'Control') {
           userInput = (userInput + ' Ctrl').trim();
           currentChain = (currentChain + ' Ctrl').trim();
@@ -243,7 +232,7 @@ export class ShortcutInput extends React.Component<
           userInput = (userInput + ' Alt').trim();
           currentChain = (currentChain + ' Alt').trim();
 
-          /** if not a modefier key, add it regularly */
+          /** if not a modifier key, add it regularly */
         } else {
           userInput = (userInput + ' ' + key).trim();
           currentChain = (currentChain + ' ' + key).trim();
@@ -260,10 +249,10 @@ export class ShortcutInput extends React.Component<
   };
 
   /**
-   * Check if shorcut being typed will work
+   * Check if shortcut being typed will work
    * (does not end with ctrl, alt, command, or shift)
    * */
-  checkNonFunctional = (shortcut: string): boolean => {
+  checkNonFunctional = (): boolean => {
     const dontEnd = ['Ctrl', 'Alt', 'Accel', 'Shift'];
     const shortcutKeys = this.state.currentChain.split(' ');
     const last = shortcutKeys[shortcutKeys.length - 1];
@@ -279,84 +268,31 @@ export class ShortcutInput extends React.Component<
     userInput: string,
     keys: string[],
     currentChain: string
-  ): TakenByObject => {
-    /** First, check whole shortcut */
-    let isAvailable =
-      Object.keys(this.props.keyBindingsUsed).indexOf(
-        keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
-      ) === -1 || userInput === '';
-    let takenByObject: TakenByObject = new TakenByObject();
-    if (isAvailable) {
-      /** Next, check each piece of a chain */
-      for (let binding of keys) {
-        if (
-          Object.keys(this.props.keyBindingsUsed).indexOf(
-            binding + '_' + this.props.shortcut.selector
-          ) !== -1 &&
-          binding !== ''
-        ) {
-          isAvailable = false;
-          takenByObject =
-            this.props.keyBindingsUsed[
-              binding + '_' + this.props.shortcut.selector
-            ];
-          break;
-        }
-      }
+  ): IShortcutTarget[] => {
+    const conflicts = this.props.findConflictsFor(
+      [...keys, currentChain],
+      this.props.shortcut.selector
+    );
+    const isAvailable = userInput === '' || conflicts.length === 0;
 
-      /** Check current chain */
-      if (
-        isAvailable &&
-        Object.keys(this.props.keyBindingsUsed).indexOf(
-          currentChain + '_' + this.props.shortcut.selector
-        ) !== -1 &&
-        currentChain !== ''
-      ) {
-        isAvailable = false;
-        takenByObject =
-          this.props.keyBindingsUsed[
-            currentChain + '_' + this.props.shortcut.selector
-          ];
-      }
-
-      /** If unavailable set takenByObject */
-    } else {
-      takenByObject =
-        this.props.keyBindingsUsed[
-          keys.join(' ') + currentChain + '_' + this.props.shortcut.selector
-        ];
-    }
-
-    /** allow to set shortcut to what it initially was if replacing */
+    // Allow to set shortcut to what it initially was if replacing.
     if (!isAvailable) {
+      // TODO: should we keep this logic? It masks what may be a genuine
+      // conflict in the defaults or between extensions; ideally we would
+      // allow saving, but still warn the user.
       if (
-        takenByObject.takenBy.id === this.props.shortcut.id &&
-        this.props.newOrReplace === 'replace'
+        conflicts.length === 1 &&
+        conflicts[0].id === this.props.shortcut.id &&
+        this._isReplacingExistingKeybinding
       ) {
-        isAvailable = true;
-        takenByObject = new TakenByObject();
+        this.setState({ isAvailable: true });
+        return [];
       }
     }
 
     this.setState({ isAvailable: isAvailable });
-    return takenByObject;
+    return conflicts;
   };
-
-  checkConflict(takenByObject: TakenByObject, keys: string): void {
-    if (
-      takenByObject.id !== '' &&
-      takenByObject.takenBy.id !== this.props.shortcut.id
-    ) {
-      this.props.sortConflict(
-        this.props.shortcut,
-        takenByObject,
-        takenByObject.takenByLabel,
-        ''
-      );
-    } else {
-      this.props.clearConflicts();
-    }
-  }
 
   /** Parse and normalize user input */
   handleInput = (event: React.KeyboardEvent): void => {
@@ -374,37 +310,44 @@ export class ShortcutInput extends React.Component<
     const currentChain = parsed[2];
 
     const value = this.props.toSymbols(userInput);
-    let takenByObject = this.checkShortcutAvailability(
+    let conflicts = this.checkShortcutAvailability(
       userInput,
       keys,
       currentChain
     );
-    this.checkConflict(takenByObject, keys);
 
     this.setState(
       {
         value: value,
         userInput: userInput,
-        takenByObject: takenByObject,
+        conflicts: conflicts,
         keys: keys,
         currentChain: currentChain
       },
-      () => this.checkNonFunctional(this.state.userInput)
+      () => {
+        this.checkNonFunctional();
+        this._updateConflictDisplay();
+      }
     );
   };
 
   handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     if (
       event.relatedTarget === null ||
-      ((event.relatedTarget as HTMLElement).id !== 'no-blur' &&
-        (event.relatedTarget as HTMLElement).id !== 'overwrite')
+      // TODO: get rid of IDs here
+      (event.relatedTarget as HTMLElement).id !== 'no-blur'
     ) {
       this.props.toggleInput();
-      this.setState({
-        value: '',
-        userInput: ''
-      });
-      this.props.clearConflicts();
+      this.setState(
+        {
+          value: '',
+          userInput: '',
+          conflicts: []
+        },
+        () => {
+          this._updateConflictDisplay();
+        }
+      );
     }
   };
 
@@ -418,7 +361,7 @@ export class ShortcutInput extends React.Component<
       <div
         className={
           this.props.displayInput
-            ? this.props.newOrReplace === 'new'
+            ? !this._isReplacingExistingKeybinding
               ? 'jp-Shortcuts-InputBox jp-Shortcuts-InputBoxNew'
               : 'jp-Shortcuts-InputBox'
             : 'jp-mod-hidden'
@@ -431,10 +374,11 @@ export class ShortcutInput extends React.Component<
           className={inputClassName}
           onKeyDown={this.handleInput}
           ref={input => input && input.focus()}
+          data-lm-suppress-shortcuts="true"
         >
           <p
             className={
-              this.state.selected && this.props.newOrReplace === 'replace'
+              this.state.selected && this._isReplacingExistingKeybinding
                 ? 'jp-Shortcuts-InputText jp-mod-selected-InputText'
                 : this.state.value === ''
                 ? 'jp-Shortcuts-InputText jp-mod-waiting-InputText'
@@ -456,45 +400,10 @@ export class ShortcutInput extends React.Component<
           }
           id={'no-blur'}
           disabled={!this.state.isAvailable || !this.state.isFunctional}
-          onClick={() => {
-            if (this.props.newOrReplace === 'new') {
-              this.handleUpdate();
-              this.setState({
-                value: '',
-                keys: [],
-                currentChain: ''
-              });
-              this.props.toggleInput();
-            } else {
-              /** don't replace if field has not been edited */
-              if (this.state.selected) {
-                this.props.toggleInput();
-                this.setState({
-                  value: '',
-                  userInput: ''
-                });
-                this.props.clearConflicts();
-              } else {
-                void this.handleReplace();
-              }
-            }
-          }}
+          onClick={this.handleSubmit}
         >
           {this.state.isAvailable ? <checkIcon.react /> : <errorIcon.react />}
         </button>
-        {!this.state.isAvailable && (
-          <button
-            hidden
-            id="overwrite"
-            onClick={() => {
-              void this.handleOverwrite();
-              this.props.clearConflicts();
-              this.props.toggleInput();
-            }}
-          >
-            {trans.__('Overwrite')}
-          </button>
-        )}
       </div>
     );
   }

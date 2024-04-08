@@ -118,7 +118,7 @@
 
 .jp-Shortcuts-ShortcutCell {
   display: flex;
-  min-width: 100px;
+  min-width: max-content;
   flex-wrap: wrap;
 }
 
@@ -140,9 +140,9 @@
   background: var(--jp-layout-color2);
 }
 
-.jp-Shortcuts-Row:hover #add-link,
-.jp-Shortcuts-Row:hover #or {
-  display: block;
+.jp-Shortcuts-Row:hover .jp-Shortcuts-Plus,
+.jp-Shortcuts-Row:hover .jp-Shortcuts-Or {
+  opacity: 1;
 }
 
 .jp-Shortcuts-ErrorMessage {
@@ -199,10 +199,14 @@
 }
 
 .jp-Shortcuts-ConflictContainer {
+  display: table;
+  margin: 6px 12px 6px 15%;
+  width: 400%;
+}
+
+.jp-Shortcuts-Conflict {
   display: flex;
-  flex-wrap: wrap;
-  padding: 6px 12px;
-  margin-left: 20%;
+  flex-wrap: nowrap;
 }
 
 .jp-Shortcuts-ShortcutKeys {
@@ -218,19 +222,15 @@
   margin-left: 12px;
   margin-top: 8px;
   color: var(--jp-content-font-color3);
-  display: none;
+  opacity: 0;
 }
 
 .jp-Shortcuts-Or:hover {
-  display: block;
+  opacity: 1;
 }
 
-.jp-Shortcuts-OrTwo {
-  margin-right: 12px;
-  margin-left: 12px;
-  margin-top: 8px;
-  color: var(--jp-content-font-color3);
-  display: block;
+.jp-Shortcuts-Or-Forced {
+  opacity: 1;
 }
 
 .jp-Shortcuts-Comma {
@@ -240,13 +240,14 @@
 }
 
 .jp-Shortcuts-Plus {
-  display: none;
+  opacity: 0;
   background: var(--jp-brand-color3);
   border-color: var(--jp-layout-color0);
   border-radius: var(--jp-border-radius);
   border-width: var(--jp-border-width);
   margin: 3px 0;
   padding: 5px 6px;
+  color: var(--jp-ui-inverse-font-color1);
 }
 
 .jp-Shortcuts-Plus:hover {

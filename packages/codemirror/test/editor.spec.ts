@@ -40,7 +40,14 @@ describe('CodeMirrorEditor', () => {
     languages = new EditorLanguageRegistry();
     extensionsRegistry = new EditorExtensionRegistry();
     EditorExtensionRegistry.getDefaultExtensions()
-      .filter(ext => ['lineNumbers', 'lineWrap', 'readOnly'].includes(ext.name))
+      .filter(ext =>
+        [
+          'lineNumbers',
+          'lineWrap',
+          'readOnly',
+          'allowMultipleSelections'
+        ].includes(ext.name)
+      )
       .forEach(ext => {
         extensionsRegistry.addExtension(ext);
       });
