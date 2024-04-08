@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime",
-  "version": "4.1.5",
+  "version": "4.1.6",
   "description": "JupyterLab - RenderMime",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -42,13 +42,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.2.5",
-    "@jupyterlab/coreutils": "^6.1.5",
-    "@jupyterlab/nbformat": "^4.1.5",
-    "@jupyterlab/observables": "^5.1.5",
-    "@jupyterlab/rendermime-interfaces": "^3.9.5",
-    "@jupyterlab/services": "^7.1.5",
-    "@jupyterlab/translation": "^4.1.5",
+    "@jupyterlab/apputils": "^4.2.6",
+    "@jupyterlab/coreutils": "^6.1.6",
+    "@jupyterlab/nbformat": "^4.1.6",
+    "@jupyterlab/observables": "^5.1.6",
+    "@jupyterlab/rendermime-interfaces": "^3.9.6",
+    "@jupyterlab/services": "^7.1.6",
+    "@jupyterlab/translation": "^4.1.6",
     "@lumino/coreutils": "^2.1.2",
     "@lumino/messaging": "^2.0.1",
     "@lumino/signaling": "^2.1.2",
@@ -56,7 +56,7 @@
     "lodash.escape": "^4.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.1.5",
+    "@jupyterlab/testing": "^4.1.6",
     "@types/jest": "^29.2.0",
     "@types/lodash.escape": "^4.0.6",
     "fs-extra": "^10.1.0",
