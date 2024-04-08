@@ -217,6 +217,8 @@ const elementAriaLabels = {
     'Open Tabs Section',
     'Kernels Section',
     'Language servers Section',
+    'Recently Closed Section',
+    'Workspaces Section',
     'Terminals Section'
   ],
   'jp-debugger-sidebar': [
