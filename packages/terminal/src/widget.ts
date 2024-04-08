@@ -15,11 +15,11 @@ import type {
   ITerminalInitOnlyOptions,
   ITerminalOptions,
   Terminal as Xterm
-} from 'xterm';
-import type { CanvasAddon } from 'xterm-addon-canvas';
-import type { FitAddon } from 'xterm-addon-fit';
-import type { WebLinksAddon } from 'xterm-addon-web-links';
-import type { WebglAddon } from 'xterm-addon-webgl';
+} from '@xterm/xterm';
+import type { CanvasAddon } from '@xterm/addon-canvas';
+import type { FitAddon } from '@xterm/addon-fit';
+import type { WebLinksAddon } from '@xterm/addon-web-links';
+import type { WebglAddon } from '@xterm/addon-webgl';
 import { ITerminal } from '.';
 
 /**
@@ -602,12 +602,12 @@ namespace Private {
     if (!Xterm_) {
       supportWebGL = hasWebGLContext();
       const [xterm_, fitAddon_, renderer_, weblinksAddon_] = await Promise.all([
-        import('xterm'),
-        import('xterm-addon-fit'),
+        import('@xterm/xterm'),
+        import('@xterm/addon-fit'),
         supportWebGL
-          ? import('xterm-addon-webgl')
-          : import('xterm-addon-canvas'),
-        import('xterm-addon-web-links')
+          ? import('@xterm/addon-webgl')
+          : import('@xterm/addon-canvas'),
+        import('@xterm/addon-web-links')
       ]);
       Xterm_ = xterm_.Terminal;
       FitAddon_ = fitAddon_.FitAddon;
