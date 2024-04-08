@@ -1350,6 +1350,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     if (this.outputsScrolled) {
       this.model.setMetadata('scrolled', true);
     } else {
+      this.outputArea.node.style.height = '';
       this.model.deleteMetadata('scrolled');
     }
   }
