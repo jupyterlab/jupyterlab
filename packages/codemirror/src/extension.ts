@@ -49,7 +49,6 @@ import {
   findNext,
   findPrevious,
   openSearchPanel,
-  selectNextOccurrence,
   selectSelectionMatches
 } from '@codemirror/search';
 
@@ -705,13 +704,36 @@ export namespace EditorExtensionRegistry {
         default: [
           {
             key: 'Mod-Enter',
-            run: StateCommands.preventNewLineOnRun
+            run: StateCommands.insertBlankLineOnRun
           },
           {
             key: 'Enter',
             run: StateCommands.completerOrInsertNewLine
           },
-          ...defaultKeymap,
+          {
+            key: 'Escape',
+            run: StateCommands.simplifySelectionAndMaybeSwitchToCommandMode
+          },
+          ...defaultKeymap.filter(binding => {
+            // - Disable the default Mod-Enter handler as it always prevents default,
+            //   preventing us from running cells with Ctrl + Enter. Instead we provide
+            //   our own handler (insertBlankLineOnRun) which does not prevent default
+            //   when used in code runner editors.
+            // - Disable the default Shift-Mod-k handler because users prefer Ctrl+D
+            //   for deleting lines, and because it prevents opening Table of Contents
+            //   with Ctrl+Shift+K.
+            // - Disable shortcuts for toggling comments ("Mod-/" and "Alt-A")
+            //   as these as handled by lumino command
+            // - Disable Escape handler because it prevents default and we
+            //   want to run a cell action (switch to command mode) on Esc
+            return ![
+              'Mod-Enter',
+              'Shift-Mod-k',
+              'Mod-/',
+              'Alt-A',
+              'Escape'
+            ].includes(binding.key as string);
+          }),
           {
             key: 'Tab',
             run: StateCommands.indentMoreOrInsertTab,
@@ -806,8 +828,7 @@ export namespace EditorExtensionRegistry {
                 key: 'Mod-Shift-l',
                 run: selectSelectionMatches,
                 preventDefault: true
-              },
-              { key: 'Mod-d', run: selectNextOccurrence, preventDefault: true }
+              }
             ])
           )
       }),
