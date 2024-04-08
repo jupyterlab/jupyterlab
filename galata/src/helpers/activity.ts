@@ -60,6 +60,26 @@ export class ActivityHelper {
   }
 
   /**
+   * Continually press navigation key until specified element is focused
+   *
+   * @param selector name of attribute selector
+   * @param key navigation key to press
+   */
+  async keyToElement(
+    selector: string,
+    key: 'Tab' | 'ArrowDown' | 'ArrowUp'
+  ): Promise<void> {
+    while (
+      !(await this.page.evaluate(
+        selector => document.activeElement?.matches(selector),
+        selector
+      ))
+    ) {
+      await this.page.keyboard.press(key);
+    }
+  }
+
+  /**
    * Get a handle on a tab
    *
    * @param name Activity name
