@@ -76,7 +76,7 @@ const entryPoints = packages
 
 module.exports = {
   entryPoints,
-  entryPointStrategy: "packages",
+  entryPointStrategy: 'packages',
   includeVersion: false,
   externalSymbolLinkMappings: {
     '@codemirror/language': {

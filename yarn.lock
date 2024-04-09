@@ -4816,7 +4816,6 @@ __metadata:
     "@jupyterlab/apputils": ^4.3.0-beta.0
     "@jupyterlab/translation": ^4.2.0-beta.0
     rimraf: ~5.0.5
-    typedoc: ~0.24.7
     typescript: ~5.1.6
   languageName: unknown
   linkType: soft
