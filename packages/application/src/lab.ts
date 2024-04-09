@@ -204,56 +204,89 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    *
    * This introduces a slight delay to the command invocation, but no delay to user input.
    */
-  protected evtKeydown(event: KeyboardEvent): void {
+  protected evtKeydown(keyDownEvent: KeyboardEvent): void {
     const permissionToExecute = new PromiseDelegate<boolean>();
 
     // Hold the execution of any keybinding until we know if this event would cause text insertion
-    this.commands.holdKeyBindingExecution(event, permissionToExecute.promise);
+    this.commands.holdKeyBindingExecution(
+      keyDownEvent,
+      permissionToExecute.promise
+    );
 
     // Process the key immediately to invoke the prevent default handlers as needed
-    this.commands.processKeydownEvent(event);
+    this.commands.processKeydownEvent(keyDownEvent);
+
+    // If we do not know the target, we cannot check if input would be inserted
+    // as there is no target to attach the `beforeinput` event listener; in that
+    // case we just permit execution immediately (this may happen for programmatic
+    // uses of keydown)
+    const target = keyDownEvent.target;
+    if (!target) {
+      return permissionToExecute.resolve(true);
+    }
+
+    let onBeforeInput: ((event: InputEvent) => void) | null = null;
+    let onBeforeKeyUp: ((event: KeyboardEvent) => void) | null = null;
+
+    const disconnectListeners = () => {
+      if (onBeforeInput) {
+        target.removeEventListener('beforeinput', onBeforeInput);
+      }
+      if (onBeforeKeyUp) {
+        target.removeEventListener('keyup', onBeforeKeyUp);
+      }
+    };
 
     // Permit the execution conditionally, depending on whether the event would lead to text insertion
     const causesInputPromise = Promise.race([
       new Promise(resolve => {
-        if (!event.target) {
-          return resolve(false);
-        }
-        event.target.addEventListener(
-          'beforeinput',
-          (inputEvent: InputEvent) => {
-            switch (inputEvent.inputType) {
-              case 'historyUndo':
-              case 'historyRedo': {
-                if (
-                  inputEvent.target instanceof Element &&
-                  inputEvent.target.closest('[data-jp-undoer]')
-                ) {
-                  // Allow to use custom undo/redo bindings on `jpUndoer`s
-                  inputEvent.preventDefault();
-                  return resolve(false);
-                }
-                break;
+        onBeforeInput = (inputEvent: InputEvent) => {
+          switch (inputEvent.inputType) {
+            case 'historyUndo':
+            case 'historyRedo': {
+              if (
+                inputEvent.target instanceof Element &&
+                inputEvent.target.closest('[data-jp-undoer]')
+              ) {
+                // Allow to use custom undo/redo bindings on `jpUndoer`s
+                inputEvent.preventDefault();
+                disconnectListeners();
+                return resolve(false);
               }
-              case 'insertLineBreak': {
-                if (
-                  inputEvent.target instanceof Element &&
-                  inputEvent.target.closest('.jp-Cell')
-                ) {
-                  // Allow to override the default action of Shift + Enter on cells as this is used for cell execution
-                  inputEvent.preventDefault();
-                  return resolve(false);
-                }
-                break;
-              }
+              break;
             }
-            return resolve(true);
-          },
-          { once: true }
-        );
+            case 'insertLineBreak': {
+              if (
+                inputEvent.target instanceof Element &&
+                inputEvent.target.closest('.jp-Cell')
+              ) {
+                // Allow to override the default action of Shift + Enter on cells as this is used for cell execution
+                inputEvent.preventDefault();
+                disconnectListeners();
+                return resolve(false);
+              }
+              break;
+            }
+          }
+          disconnectListeners();
+          return resolve(true);
+        };
+        target.addEventListener('beforeinput', onBeforeInput, { once: true });
       }),
       new Promise(resolve => {
-        setTimeout(() => resolve(false), Private.INPUT_GUARD_TIMEOUT);
+        onBeforeKeyUp = (keyUpEvent: KeyboardEvent) => {
+          if (keyUpEvent.code === keyDownEvent.code) {
+            disconnectListeners();
+            return resolve(false);
+          }
+        };
+        target.addEventListener('keyup', onBeforeKeyUp, { once: true });
+      }),
+      new Promise(resolve => {
+        setTimeout(() => {
+          disconnectListeners();
+          return resolve(false);
+        }, Private.INPUT_GUARD_TIMEOUT);
       })
     ]);
     causesInputPromise
