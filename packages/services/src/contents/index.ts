@@ -295,6 +295,8 @@ export namespace Contents {
      */
     readonly serverSettings: ServerConnection.ISettings;
 
+    setDefaultDrive(driveName: string): void;
+
     /**
      * Add an `IDrive` to the manager.
      */
@@ -637,8 +639,30 @@ export class ContentsManager implements Contents.IManager {
   constructor(options: ContentsManager.IOptions = {}) {
     const serverSettings = (this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings());
-    this._defaultDrive = options.defaultDrive ?? new Drive({ serverSettings });
-    this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
+    // Create a drive for the Jupyter Server REST API.
+    let contentsDrive = new Drive({ serverSettings, name: 'contents' });
+    this._additionalDrives.set('contents', contentsDrive);
+    // If a different drive as given in options, also add it.
+    let defaultDriveName = 'contents';
+    if (options.defaultDrive) {
+      defaultDriveName = options.defaultDrive.name;
+      this._additionalDrives.set(
+        options.defaultDrive.name,
+        options.defaultDrive
+      );
+    }
+    this.setDefaultDrive(defaultDriveName);
+  }
+
+  setDefaultDrive(driveName: string): void {
+    let drive = this._additionalDrives.get(driveName);
+    if (drive) {
+      // Remove old signal.
+      this._defaultDrive.fileChanged.disconnect(this._onFileChanged);
+      // Set the new Drive.
+      this._defaultDrive = drive;
+      this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
+    }
   }
 
   /**
