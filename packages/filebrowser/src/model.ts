@@ -234,22 +234,22 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Change directory.
    *
-   * @param path - The path to the file or directory.
+   * @param path The path to the file or directory.
    *
    * @returns A promise with the contents of the directory.
    */
-  async cd(newValue = '.'): Promise<void> {
-    if (newValue !== '.') {
-      newValue = this.manager.services.contents.resolvePath(
+  async cd(path = '.'): Promise<void> {
+    if (path !== '.') {
+      path = this.manager.services.contents.resolvePath(
         this._model.path,
-        newValue
+        path
       );
     } else {
-      newValue = this._pendingPath || this._model.path;
+      path = this._pendingPath || this._model.path;
     }
     if (this._pending) {
       // Collapse requests to the same directory.
-      if (newValue === this._pendingPath) {
+      if (path === this._pendingPath) {
         return this._pending;
       }
       // Otherwise wait for the pending request to complete before continuing.
@@ -257,13 +257,13 @@ export class FileBrowserModel implements IDisposable {
     }
     const oldValue = this.path;
     const options: Contents.IFetchOptions = { content: true };
-    this._pendingPath = newValue;
-    if (oldValue !== newValue) {
+    this._pendingPath = path;
+    if (oldValue !== path) {
       this._sessions.length = 0;
     }
     const services = this.manager.services;
     this._pending = services.contents
-      .get(newValue, options)
+      .get(path, options)
       .then(contents => {
         if (this.isDisposed) {
           return;
@@ -271,17 +271,17 @@ export class FileBrowserModel implements IDisposable {
         this.handleContents(contents);
         this._pendingPath = null;
         this._pending = null;
-        if (oldValue !== newValue) {
+        if (oldValue !== path) {
           // If there is a state database and a unique key, save the new path.
           // We don't need to wait on the save to continue.
           if (this._state && this._key) {
-            void this._state.save(this._key, { path: newValue });
+            void this._state.save(this._key, { path });
           }
 
           this._pathChanged.emit({
             name: 'path',
             oldValue,
-            newValue
+            newValue: path
           });
         }
         this.onRunningChanged(services.sessions, services.sessions.running());
@@ -293,7 +293,7 @@ export class FileBrowserModel implements IDisposable {
         if (
           error.response &&
           error.response.status === 404 &&
-          newValue !== '/'
+          path !== '/'
         ) {
           error.message = this._trans.__(
             'Directory not found: "%1"',

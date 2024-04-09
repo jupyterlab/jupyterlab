@@ -12,7 +12,7 @@ export namespace URLExt {
   /**
    * Parse a url into a URL object.
    *
-   * @param urlString - The URL string to parse.
+   * @param url - The URL string to parse.
    *
    * @returns A URL object.
    */
@@ -89,7 +89,7 @@ export namespace URLExt {
   /**
    * Return a serialized object string suitable for a query.
    *
-   * @param object - The source object.
+   * @param value The source object.
    *
    * @returns an encoded url query.
    *

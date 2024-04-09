@@ -296,16 +296,16 @@ export namespace ILabShell {
       };
     };
   }
-}
 
-/**
- * The restorable description of the top area in the user interface.
- */
-export interface ITopArea {
   /**
-   * Top area visibility in simple mode.
+   * The restorable description of the top area in the user interface.
    */
-  readonly simpleVisibility: boolean;
+  export interface ITopArea {
+    /**
+     * Top area visibility in simple mode.
+     */
+    readonly simpleVisibility: boolean;
+  }
 }
 
 /**
