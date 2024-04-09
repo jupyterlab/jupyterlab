@@ -21,7 +21,7 @@ test.describe('Advanced Plugin Manager', () => {
     });
 
     await page
-      .locator('.jp-pluginmanager .jp-FilterBox input')
+      .locator('.jp-pluginmanager jp-search')
       .evaluate(elem => (elem as any).value)
       .toEqual('Notebook');
 
