@@ -3564,7 +3564,7 @@ function addCommands(
 
   // All commands with isEnabled defined directly or in a semantic commands
   // To simplify here we added all commands as most of them have isEnabled
-  const skip = [CommandIDs.createNew];
+  const skip = [CommandIDs.createNew, CommandIDs.createOutputView];
   const notify = () => {
     Object.values(CommandIDs)
       .filter(id => !skip.includes(id))
