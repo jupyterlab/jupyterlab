@@ -669,7 +669,9 @@ export class ContentsManager implements Contents.IManager {
     let drive = this._additionalDrives.get(driveName);
     if (drive) {
       // Remove the signal from the previous default drive.
-      this._defaultDrive.fileChanged.disconnect(this._onFileChanged);
+      if (this._defaultDrive) {
+        this._defaultDrive.fileChanged.disconnect(this._onFileChanged);
+      }
       // Set the new Drive.
       this._defaultDrive = drive;
       this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
