@@ -20,10 +20,12 @@ test.describe('Advanced Plugin Manager', () => {
       });
     });
 
-    await page
+    const value = await page
       .locator('.jp-pluginmanager jp-search')
-      .evaluate(elem => (elem as any).value)
-      .toEqual('Notebook');
+      .evaluate(elem => elem.value);
+
+    expect(value).toEqual('Notebook');
+
 
     const pluginManager = page.locator('.jp-pluginmanager');
     await page.sidebar.close('left');
