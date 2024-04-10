@@ -27,6 +27,9 @@ API updates
   The ``@jupyterlab/apputils-extension:workspaces`` plugin now only defines the
   workspace MIME type renderer used to open files with ``.jupyterlab-workspace``
   extension as JupyterLab workspaces.
+- The cell toolbar node has been moved from the cell node to the cell input node.
+  Therefore the parent of the cell toolbar has changed and can not be used directly to
+  retrieve the corresponding cell node anymore.
 
 Shortcuts extension rework
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
