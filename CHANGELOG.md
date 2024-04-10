@@ -21,11 +21,11 @@ Users are now able to:
 - re-open recently used files from the main menu:
 
    <img alt="An 'Open Recent' sub-menu in the 'File' menu allowing to re-open recently used files" src="https://raw.githubusercontent.com/krassowski/jupyterlab/ufc4.2/docs/source/getting_started/changelog_assets/4.2-recent-submenu.png" class="jp-screenshot">
-   
+
 - re-open recently closed files from the sidebar:
 
    <img alt="A new 'Recently Closed' section in the 'Running' sidebar" src="https://raw.githubusercontent.com/krassowski/jupyterlab/ufc4.2/docs/source/getting_started/changelog_assets/4.2-recent-sidebar.png" class="jp-screenshot">
-   
+
 - quickly jump to open tabs/recently closed files by using a new searchable modal dialog (press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>A</kbd> to open the dialog, or click on the \[↗\] icon in the sidebar):
 
    <img alt="A modal dialog for quickly jumping to open/closed files" src="https://raw.githubusercontent.com/krassowski/jupyterlab/ufc4.2/docs/source/getting_started/changelog_assets/4.2-recent-modal.png" class="jp-screenshot">
