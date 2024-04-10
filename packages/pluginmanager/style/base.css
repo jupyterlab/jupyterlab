@@ -30,6 +30,6 @@
   max-width: 550px;
 }
 
-.jp-pluginmanager > .jp-FilterBox {
+.jp-pluginmanager-Header > .jp-FilterBox {
   width: 100%;
 }
