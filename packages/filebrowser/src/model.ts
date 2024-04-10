@@ -240,10 +240,7 @@ export class FileBrowserModel implements IDisposable {
    */
   async cd(path = '.'): Promise<void> {
     if (path !== '.') {
-      path = this.manager.services.contents.resolvePath(
-        this._model.path,
-        path
-      );
+      path = this.manager.services.contents.resolvePath(this._model.path, path);
     } else {
       path = this._pendingPath || this._model.path;
     }
@@ -290,11 +287,7 @@ export class FileBrowserModel implements IDisposable {
       .catch(error => {
         this._pendingPath = null;
         this._pending = null;
-        if (
-          error.response &&
-          error.response.status === 404 &&
-          path !== '/'
-        ) {
+        if (error.response && error.response.status === 404 && path !== '/') {
           error.message = this._trans.__(
             'Directory not found: "%1"',
             this._model.path

@@ -794,7 +794,10 @@ export class RunningSessions
    * @param managers Managers
    * @param manager New manager
    */
-  protected async addSection(managers: unknown, manager: IRunningSessions.IManager) {
+  protected async addSection(
+    managers: unknown,
+    manager: IRunningSessions.IManager
+  ) {
     const section = new Section({ manager, translator: this.translator });
     this.addWidget(section);
 
