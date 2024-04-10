@@ -300,11 +300,6 @@
   outline: 0;
 }
 
-/* This file uses container queries, which are supported by all the
- * browsers that JupyterLab works with, but which stylelint cannot
- * validate.
- */
-
 .jp-DirListing-itemModified {
   flex: 1 0 83px;
   text-align: right;
