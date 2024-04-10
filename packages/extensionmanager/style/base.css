@@ -36,6 +36,7 @@
 .jp-extensionmanager-header .jp-FilterBox {
   margin: 4px 10px 0;
   width: calc(100% - 20px);
+  font-weight: normal;
 }
 
 .jp-extensionmanager-disclaimer {
