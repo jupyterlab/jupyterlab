@@ -99,21 +99,21 @@ test('Populate search box with selected text', async ({ page }) => {
 });
 
 test.describe('File search from selection', () => {
-  test('should expand the selection to the next occurence', async ({
+  test('should expand the selection to the next occurrence', async ({
     page
   }) => {
     // This could be improved as the following statement will double click
     // on the last line that will result in the last word being selected.
     await page.getByRole('textbox').getByText('in').last().dblclick();
 
-    await page.keyboard.press('Control+d');
+    await page.keyboard.press('Control+Shift+d');
 
     await expect(
       page.getByRole('main').locator('.cm-selectionBackground')
     ).toHaveCount(2);
   });
 
-  test('should expand the selection to all occurence', async ({ page }) => {
+  test('should expand the selection to all occurrences', async ({ page }) => {
     // This could be improved as the following statement will double click
     // on the last line that will result in the last word being selected.
     await page.getByRole('textbox').getByText('in').last().dblclick();
