@@ -10,7 +10,7 @@
 
 It is now possible to switch and manage [workspaces](https://jupyterlab.readthedocs.io/en/latest/user/workspaces.html) from within JupyterLab.
 
-<img alt="A context menu opened over the sidebar with workspaces list. The menu has options to manager the workspace over which it was opened - clone, rename, reset delete, export and import." src="https://raw.githubusercontent.com/krassowski/jupyterlab/ufc4.2/docs/source/getting_started/changelog_assets/4.2-workspaces-sidebar.png" class="jp-screenshot">
+<img alt="A context menu opened over the sidebar with workspaces list. The menu has options to manage the workspace over which it was opened - clone, rename, reset, delete, export, and import." src="https://raw.githubusercontent.com/krassowski/jupyterlab/ufc4.2/docs/source/getting_started/changelog_assets/4.2-workspaces-sidebar.png" class="jp-screenshot">
 
 ### Recently opened/closed files
 
@@ -32,11 +32,11 @@ Users are now able to:
 
 ### Full notebook windowing mode by default
 
-Notebooks in the `full` windowing mode only render the visible cells, significantly improving the performance of the application. The limitation of `full` mode is that the search function in your browser may produce false negatives - using the [JupyterLab search function](https://jupyterlab.readthedocs.io/en/latest/user/interface.html#searching) is recommended. To revert to the behaviour from JupyterLab 4.1 go to Settings → Settings Editor → Notebook, scroll to "Windowing mode" and choose `defer`.
+Notebooks in the `full` windowing mode only render the visible cells, significantly improving the performance of the application. One limitation of `full` mode is that the search function in your browser may produce false negatives; using the [JupyterLab search function](https://jupyterlab.readthedocs.io/en/latest/user/interface.html#searching) is recommended. To revert to the behaviour from JupyterLab 4.1, go to Settings → Settings Editor → Notebook, scroll to "Windowing mode", and choose `defer`.
 
 ### Improved Shortcuts Editor
 
-Among numerous improvements and bug fixes for keyboard shortcuts editor:
+Among the numerous improvements and bug fixes for the keyboard shortcuts editor:
 
 - it is now possible to remove the default shortcuts,
 - shortcuts are correctly sorted when using a language pack,
@@ -47,7 +47,7 @@ Among numerous improvements and bug fixes for keyboard shortcuts editor:
 ### Dark high contrast theme
 
 A new theme, JupyterLab Dark High Contrast, which is intended to benefit users with the need for higher contrast, following the WCAG AAA accessibility standard for color contrast.
-To select this theme choose from the menu bar: Settings → Theme → JupyterLab Dark High Contrast. Please provide feedback and suggestions on further improvements to this theme.
+To select this theme, from the menu bar, choose Settings → Theme → JupyterLab Dark High Contrast. Please provide feedback and suggestions on further improvements to this theme.
 
 <img alt="A dark high contrast theme" src="https://raw.githubusercontent.com/krassowski/jupyterlab/ufc4.2/docs/source/getting_started/changelog_assets/4.2-dark-high-contrast.png" class="jp-screenshot">
 
