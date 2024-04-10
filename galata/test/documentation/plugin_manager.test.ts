@@ -26,7 +26,6 @@ test.describe('Advanced Plugin Manager', () => {
 
     expect(value).toEqual('Notebook');
 
-
     const pluginManager = page.locator('.jp-pluginmanager');
     await page.sidebar.close('left');
 
