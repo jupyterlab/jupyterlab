@@ -37,6 +37,7 @@ Notebooks in the `full` windowing mode only render the visible cells, significan
 ### Improved Shortcuts Editor
 
 Among numerous improvements and bug fixes for keyboard shortcuts editor:
+
 - it is now possible to remove the default shortcuts,
 - shortcuts are correctly sorted when using a language pack,
 - shortcuts with different arguments are now correctly displayed as individual entries.
@@ -53,6 +54,7 @@ To select this theme choose from the menu bar: Settings → Theme → JupyterLab
 ### Keyboard shortcuts improvements
 
 Following feedback from users, implementation of certain shortcuts was moved from the CodeMirror editor to JupyterLab shortcut system, allowing for better integration:
+
 - the shortcut for deleting a line was restored to <kbd>Ctrl</kbd>+<kbd>D</kbd> as in JupyterLab 3.x; the shortcut for extending (multi-cursor) selection was remapped to <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>. The <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd> shortcut can also be used for deleting lines for compatibility with other editors.
 - the shortcuts for toggling line comments (by default <kbd>Ctrl</kbd>+<kbd>/</kbd>) and block comments (by default <kbd>Alt</kbd>+<kbd>A</kbd>) can be customized in the Shortcuts Editor, enabling users of non-US keyboards to adjust the keybinding to one optimal on their keyboard layout. Please note that the block comment only works in languages which have a dedicated block comment syntax defined in the CodeMirror language data (e.g. C, JavaScript, but not Python). The line comment shortcut can be also used to comment out multiple lines.
 
