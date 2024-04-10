@@ -806,6 +806,63 @@ export class DirListing extends Widget {
     }
   }
 
+  // Update item nodes based on widget state.
+  protected updateNodes(items: Contents.IModel[], nodes: HTMLElement[]) {
+    items.forEach((item, i) => {
+      const node = nodes[i];
+      const ft = this._manager.registry.getFileTypeForModel(item);
+      this.renderer.updateItemNode(
+        node,
+        item,
+        ft,
+        this.translator,
+        this._hiddenColumns,
+        this.selection[item.path]
+      );
+      if (
+        this.selection[item.path] &&
+        this._isCut &&
+        this._model.path === this._prevPath
+      ) {
+        node.classList.add(CUT_CLASS);
+      }
+
+      // add metadata to the node
+      node.setAttribute(
+        'data-isdir',
+        item.type === 'directory' ? 'true' : 'false'
+      );
+    });
+
+    // Handle the selectors on the widget node.
+    const selected = Object.keys(this.selection).length;
+    if (selected) {
+      this.addClass(SELECTED_CLASS);
+      if (selected > 1) {
+        this.addClass(MULTI_SELECTED_CLASS);
+      }
+    }
+
+    // Handle file session statuses.
+    const paths = items.map(item => item.path);
+    for (const session of this._model.sessions()) {
+      const index = ArrayExt.firstIndexOf(paths, session.path);
+      const node = nodes[index];
+      // Node may have been filtered out.
+      if (node) {
+        let name = session.kernel?.name;
+        const specs = this._model.specs;
+
+        node.classList.add(RUNNING_CLASS);
+        if (specs && name) {
+          const spec = specs.kernelspecs[name];
+          name = spec ? spec.display_name : this._trans.__('unknown');
+        }
+        node.title = this._trans.__('%1\nKernel: %2', node.title, name);
+      }
+    }
+  }
+
   /**
    * A handler invoked on an `'update-request'` message.
    */
@@ -879,60 +936,7 @@ export class DirListing extends Widget {
       );
     }
 
-    // Update item nodes based on widget state.
-    items.forEach((item, i) => {
-      const node = nodes[i];
-      const ft = this._manager.registry.getFileTypeForModel(item);
-      renderer.updateItemNode(
-        node,
-        item,
-        ft,
-        this.translator,
-        this._hiddenColumns,
-        this.selection[item.path]
-      );
-      if (
-        this.selection[item.path] &&
-        this._isCut &&
-        this._model.path === this._prevPath
-      ) {
-        node.classList.add(CUT_CLASS);
-      }
-
-      // add metadata to the node
-      node.setAttribute(
-        'data-isdir',
-        item.type === 'directory' ? 'true' : 'false'
-      );
-    });
-
-    // Handle the selectors on the widget node.
-    const selected = Object.keys(this.selection).length;
-    if (selected) {
-      this.addClass(SELECTED_CLASS);
-      if (selected > 1) {
-        this.addClass(MULTI_SELECTED_CLASS);
-      }
-    }
-
-    // Handle file session statuses.
-    const paths = items.map(item => item.path);
-    for (const session of this._model.sessions()) {
-      const index = ArrayExt.firstIndexOf(paths, session.path);
-      const node = nodes[index];
-      // Node may have been filtered out.
-      if (node) {
-        let name = session.kernel?.name;
-        const specs = this._model.specs;
-
-        node.classList.add(RUNNING_CLASS);
-        if (specs && name) {
-          const spec = specs.kernelspecs[name];
-          name = spec ? spec.display_name : this._trans.__('unknown');
-        }
-        node.title = this._trans.__('%1\nKernel: %2', node.title, name);
-      }
-    }
+    this.updateNodes(items, nodes);
 
     this._prevPath = this._model.path;
   }
@@ -941,6 +945,8 @@ export class DirListing extends Widget {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
     this.toggleClass('jp-DirListing-narrow', width < 250);
+    // Rerender item nodes, so that their modified dates update.
+    this.updateNodes(this._sortedItems, this._items);
   }
 
   setColumnVisibility(
@@ -2660,24 +2666,24 @@ export namespace DirListing {
         checkbox.checked = selected ?? false;
       }
 
+      let modText = '';
       let modTitle = '';
       if (model.last_modified) {
-        // Provide multiple formats, with container queries used to display exactly one
-        VirtualDOM.render(
-          ['narrow', 'short', 'long'].map(style =>
-            h.div(
-              { className: `${ITEM_MODIFIED_CLASS}-${style}` },
-              Time.formatHuman(
-                new Date(model.last_modified),
-                style as Time.HumanStyle
-              )
-            )
-          ),
-          modified
+        // Render the date in one of multiple formats, depending on the container's size
+        const modifiedWidth = modified.getBoundingClientRect().width;
+        const modifiedStyle =
+          modifiedWidth < 90
+            ? 'narrow'
+            : modifiedWidth > 110
+            ? 'long'
+            : 'short';
+        modText = Time.formatHuman(
+          new Date(model.last_modified),
+          modifiedStyle as Time.HumanStyle
         );
-
         modTitle = Time.format(new Date(model.last_modified));
       }
+      modified.textContent = modText;
       modified.title = modTitle;
     }
 

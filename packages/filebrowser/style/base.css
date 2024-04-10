@@ -308,57 +308,6 @@
 .jp-DirListing-itemModified {
   flex: 1 0 83px;
   text-align: right;
-  /* stylelint-disable */
-  container-type: inline-size;
-  /* stylelint-enable */
-}
-
-/* stylelint-disable */
-@container (width < 90px) {
-  /* stylelint-enable */
-  .jp-DirListing-itemModified-narrow {
-    display: block;
-  }
-
-  .jp-DirListing-itemModified-short {
-    display: none;
-  }
-
-  .jp-DirListing-itemModified-long {
-    display: none;
-  }
-}
-
-/* stylelint-disable */
-@container (width >= 90px) and (width <= 110px) {
-  /* stylelint-enable */
-  .jp-DirListing-itemModified-narrow {
-    display: none;
-  }
-
-  .jp-DirListing-itemModified-short {
-    display: block;
-  }
-
-  .jp-DirListing-itemModified-long {
-    display: none;
-  }
-}
-
-/* stylelint-disable */
-@container (width > 110px) {
-  /* stylelint-enable */
-  .jp-DirListing-itemModified-narrow {
-    display: none;
-  }
-
-  .jp-DirListing-itemModified-short {
-    display: none;
-  }
-
-  .jp-DirListing-itemModified-long {
-    display: block;
-  }
 }
 
 .jp-DirListing-itemFileSize {
