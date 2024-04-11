@@ -46,6 +46,19 @@ describe('@jupyterlab/docmanager', () => {
       it('should create a new recents manager', () => {
         expect(manager).toBeInstanceOf(RecentsManager);
       });
+
+      it('should emit `changed` signal after loading', async () => {
+        const stateDB = new StateDB();
+        const done = new PromiseDelegate<boolean>();
+        manager = new TestRecentsManager({
+          stateDB,
+          contents: services.contents
+        });
+        manager.changed.connect(() => {
+          done.resolve(true);
+        });
+        expect(await done.promise).toBe(true);
+      });
     });
 
     describe('#isDisposed', () => {
