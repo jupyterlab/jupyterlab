@@ -821,6 +821,21 @@ export class DirListing extends Widget {
         : 'short';
   }
 
+  // Update only the modified dates.
+  protected updateModified(items: Contents.IModel[], nodes: HTMLElement[]) {
+    items.forEach((item, i) => {
+      const node = nodes[i];
+      if (item.last_modified) {
+        const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+        this.renderer.updateItemModified(
+          modified,
+          item.last_modified,
+          this._modifiedStyle
+        );
+      }
+    });
+  }
+
   // Update item nodes based on widget state.
   protected updateNodes(items: Contents.IModel[], nodes: HTMLElement[]) {
     items.forEach((item, i) => {
@@ -962,11 +977,11 @@ export class DirListing extends Widget {
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
     this.toggleClass('jp-DirListing-narrow', width < 250);
 
-    // Rerender item nodes, so that their modified dates update, if the modified style has changed.
+    // Rerender item nodes' modified dates, if the modified style has changed.
     const oldModifiedStyle = this._modifiedStyle;
     this.updateModifiedSize(this.node);
     if (oldModifiedStyle !== this._modifiedStyle) {
-      this.updateNodes(this._sortedItems, this._items);
+      this.updateModified(this._sortedItems, this._items);
     }
   }
 
@@ -2232,6 +2247,21 @@ export namespace DirListing {
     ): HTMLElement;
 
     /**
+     * Update an item's last modified date.
+     *
+     * @param modified - Element containing the file's last modified date.
+     *
+     * @param modifiedDate - String representation of the last modified date.
+     *
+     * @param modifiedStyle - The date style for the modified column: narrow, short, or long
+     */
+    updateItemModified(
+      modified: HTMLElement,
+      modifiedDate: string,
+      modifiedStyle: Time.HumanStyle
+    ): void;
+
+    /**
      * Update an item node to reflect the current state of a model.
      *
      * @param node - A node created by [[createItemNode]].
@@ -2558,6 +2588,31 @@ export namespace DirListing {
     }
 
     /**
+     * Update an item's last modified date.
+     *
+     * @param modified - Element containing the file's last modified date.
+     *
+     * @param modifiedDate - String representation of the last modified date.
+     *
+     * @param modifiedStyle - The date style for the modified column: narrow, short, or long
+     */
+    updateItemModified(
+      modified: HTMLElement,
+      modifiedDate: string,
+      modifiedStyle: Time.HumanStyle
+    ): void {
+      let modText = '';
+      let modTitle = '';
+
+      // Render the date in one of multiple formats, depending on the container's size
+      modText = Time.formatHuman(new Date(modifiedDate), modifiedStyle);
+      modTitle = Time.format(new Date(modifiedDate));
+
+      modified.textContent = modText;
+      modified.title = modTitle;
+    }
+
+    /**
      * Update an item node to reflect the current state of a model.
      *
      * @param node - A node created by [[createItemNode]].
@@ -2694,18 +2749,9 @@ export namespace DirListing {
         checkbox.checked = selected ?? false;
       }
 
-      let modText = '';
-      let modTitle = '';
       if (model.last_modified) {
-        // Render the date in one of multiple formats, depending on the container's size
-        modText = Time.formatHuman(
-          new Date(model.last_modified),
-          modifiedStyle
-        );
-        modTitle = Time.format(new Date(model.last_modified));
+        this.updateItemModified(modified, model.last_modified, modifiedStyle);
       }
-      modified.textContent = modText;
-      modified.title = modTitle;
     }
 
     /**
