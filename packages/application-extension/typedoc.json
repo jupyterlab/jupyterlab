@@ -1,9 +1,5 @@
 {
-  "extends": [
-    "../../typedoc.base.json"
-  ],
-  "entryPoints": [
-    "src/index.tsx"
-  ],
+  "extends": ["../../typedoc.base.json"],
+  "entryPoints": ["src/index.tsx"],
   "name": "application-extension"
 }

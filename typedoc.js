@@ -137,8 +137,10 @@ module.exports = {
         'https://lumino.readthedocs.io/en/latest/api/interfaces/application.IPlugin.html'
     },
     '@lumino/commands': {
-      CommandRegistry: 'https://lumino.readthedocs.io/en/latest/api/classes/commands.CommandRegistry-1.html',
-      'CommandRegistry.ICommandOptions': 'https://lumino.readthedocs.io/en/latest/api/interfaces/commands.CommandRegistry.ICommandOptions.html'
+      CommandRegistry:
+        'https://lumino.readthedocs.io/en/latest/api/classes/commands.CommandRegistry-1.html',
+      'CommandRegistry.ICommandOptions':
+        'https://lumino.readthedocs.io/en/latest/api/interfaces/commands.CommandRegistry.ICommandOptions.html'
     },
     '@lumino/coreutils': {
       JSONObject:
@@ -183,7 +185,8 @@ module.exports = {
         'https://lumino.readthedocs.io/en/stable/api/interfaces/widgets.DockPanel.IOptions.html',
       FocusTracker:
         'https://lumino.readthedocs.io/en/latest/api/classes/widgets.FocusTracker-1.html',
-      'FocusTracker.IChangedArgs': 'https://lumino.readthedocs.io/en/latest/api/interfaces/widgets.FocusTracker.IChangedArgs.html',
+      'FocusTracker.IChangedArgs':
+        'https://lumino.readthedocs.io/en/latest/api/interfaces/widgets.FocusTracker.IChangedArgs.html',
       Menu: 'https://lumino.readthedocs.io/en/stable/api/classes/widgets.Menu-1.html',
       'Menu.IItem':
         'https://lumino.readthedocs.io/en/stable/api/interfaces/widgets.Menu.IItem.html',
