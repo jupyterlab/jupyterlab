@@ -227,6 +227,9 @@ export class DirListing extends Widget {
     this._manager = this._model.manager;
     this._renderer = options.renderer || DirListing.defaultRenderer;
 
+    // Get the width of the "modified" column
+    this.updateModifiedSize(this.node);
+
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     // hide the file size column by default
     this._hiddenColumns.add('file_size');
@@ -806,6 +809,18 @@ export class DirListing extends Widget {
     }
   }
 
+  // Update the modified column's size
+  updateModifiedSize(node: HTMLElement) {
+    const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+    this._modifiedWidth = modified.getBoundingClientRect().width;
+    this._modifiedStyle =
+      this._modifiedWidth < 90
+        ? 'narrow'
+        : this._modifiedWidth > 110
+        ? 'long'
+        : 'short';
+  }
+
   // Update item nodes based on widget state.
   protected updateNodes(items: Contents.IModel[], nodes: HTMLElement[]) {
     items.forEach((item, i) => {
@@ -814,6 +829,7 @@ export class DirListing extends Widget {
       this.renderer.updateItemNode(
         node,
         item,
+        this._modifiedStyle,
         ft,
         this.translator,
         this._hiddenColumns,
@@ -945,8 +961,13 @@ export class DirListing extends Widget {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
     this.toggleClass('jp-DirListing-narrow', width < 250);
-    // Rerender item nodes, so that their modified dates update.
-    this.updateNodes(this._sortedItems, this._items);
+
+    // Rerender item nodes, so that their modified dates update, if the modified style has changed.
+    const oldModifiedStyle = this._modifiedStyle;
+    this.updateModifiedSize(this.node);
+    if (oldModifiedStyle !== this._modifiedStyle) {
+      this.updateNodes(this._sortedItems, this._items);
+    }
   }
 
   setColumnVisibility(
@@ -2100,6 +2121,9 @@ export class DirListing extends Widget {
   private _sortNotebooksFirst = false;
   // _focusIndex should never be set outside the range [0, this._items.length - 1]
   private _focusIndex = 0;
+  // Width of the "last modified" column for an individual file
+  private _modifiedWidth: number;
+  private _modifiedStyle: Time.HumanStyle;
 }
 
 /**
@@ -2214,11 +2238,14 @@ export namespace DirListing {
      *
      * @param model - The model object to use for the item state.
      *
+     * @param modifiedStyle - The date style for the modified column: narrow, short, or long
+     *
      * @param fileType - The file type of the item, if applicable.
      */
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
+      modifiedStyle: Time.HumanStyle,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
@@ -2543,6 +2570,7 @@ export namespace DirListing {
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
+      modifiedStyle: Time.HumanStyle,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
@@ -2670,16 +2698,9 @@ export namespace DirListing {
       let modTitle = '';
       if (model.last_modified) {
         // Render the date in one of multiple formats, depending on the container's size
-        const modifiedWidth = modified.getBoundingClientRect().width;
-        const modifiedStyle =
-          modifiedWidth < 90
-            ? 'narrow'
-            : modifiedWidth > 110
-            ? 'long'
-            : 'short';
         modText = Time.formatHuman(
           new Date(model.last_modified),
-          modifiedStyle as Time.HumanStyle
+          modifiedStyle
         );
         modTitle = Time.format(new Date(model.last_modified));
       }
