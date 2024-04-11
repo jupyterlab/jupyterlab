@@ -219,7 +219,7 @@ module.exports = {
     GitHub: 'https://github.com/jupyterlab/jupyterlab',
     Jupyter: 'https://jupyter.org'
   },
-  name: 'JupyterLab',
+  name: '@jupyterlab',
   plugin: ['typedoc-plugin-mdn-links'],
   out: 'docs/source/api',
   readme: 'README.md',

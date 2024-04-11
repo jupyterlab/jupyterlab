@@ -176,7 +176,8 @@ export async function ensurePackage(
     if (entryPoint) {
       utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
         extends: ['../../typedoc.base.json'],
-        entryPoints: [entryPoint]
+        entryPoints: [entryPoint],
+        name: data.name.replace(/^@jupyterlab\//, '')
       });
     }
   }
