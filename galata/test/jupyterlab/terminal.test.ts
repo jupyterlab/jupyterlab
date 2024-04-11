@@ -118,7 +118,7 @@ test('Terminal web link', async ({ page, tmpPath }) => {
   await page.waitForTimeout(1000);
   await Promise.all([
     terminal.locator('.jp-Terminal-body .xterm-cursor-pointer').waitFor(),
-    terminal.locator('canvas.xterm-cursor-layer').hover({
+    terminal.locator('canvas.xterm-link-layer').hover({
       position: {
         x: 60,
         y: 23
