@@ -726,12 +726,15 @@ export namespace EditorExtensionRegistry {
             //   as these as handled by lumino command
             // - Disable Escape handler because it prevents default and we
             //   want to run a cell action (switch to command mode) on Esc
+            // - Disable default Enter handler because it prevents us from
+            //   accepting a completer suggestion with Enter.
             return ![
               'Mod-Enter',
               'Shift-Mod-k',
               'Mod-/',
               'Alt-A',
-              'Escape'
+              'Escape',
+              'Enter'
             ].includes(binding.key as string);
           }),
           {
