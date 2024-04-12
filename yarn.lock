@@ -4465,8 +4465,8 @@ __metadata:
     stylelint-config-standard: ^34.0.0
     stylelint-csstree-validator: ^3.0.0
     stylelint-prettier: ^4.0.0
-    typedoc: ^0.25.12
-    typedoc-plugin-mdn-links: ^3.1.18
+    typedoc: ~0.25.12
+    typedoc-plugin-mdn-links: ^3.1.20
   languageName: unknown
   linkType: soft
 
@@ -20264,18 +20264,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typedoc-plugin-mdn-links@npm:^3.1.18":
-  version: 3.1.18
-  resolution: "typedoc-plugin-mdn-links@npm:3.1.18"
+"typedoc-plugin-mdn-links@npm:^3.1.20":
+  version: 3.1.20
+  resolution: "typedoc-plugin-mdn-links@npm:3.1.20"
   peerDependencies:
     typedoc: ">= 0.23.14 || 0.24.x || 0.25.x"
-  checksum: f6fd895ef7c9894f3e1d4ea792b9200efa5dd511ce44a1c4a5bc421500dc8b8140bf2012a42d275b7d441771e07b5fc478b3115022934ff0b32fe2d7bd19a5c0
+  checksum: 4df7bf176ec2db52a7db5d022136f3b5af9599ddfa91f454d6a06324f73ab4bc054141bef83aba6c6dd311ed2ebc426431e9f1599ed956ecc24285f291b07eeb
   languageName: node
   linkType: hard
 
-"typedoc@npm:^0.25.12":
-  version: 0.25.12
-  resolution: "typedoc@npm:0.25.12"
+"typedoc@npm:~0.25.12":
+  version: 0.25.13
+  resolution: "typedoc@npm:0.25.13"
   dependencies:
     lunr: ^2.3.9
     marked: ^4.3.0
@@ -20285,7 +20285,7 @@ __metadata:
     typescript: 4.6.x || 4.7.x || 4.8.x || 4.9.x || 5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x
   bin:
     typedoc: bin/typedoc
-  checksum: 6022dd921f78361b62ec9cbb8b847cbcf00e0f2bc45799409d5f6d74edbca8d82d31bf9a7d17a4e1c3c1916ba8265c2266bded50902533faaec53d5cdb558e80
+  checksum: 703d1f48137300b0ef3df1998a25ae745db3ca0b126f8dd1f7262918f11243a94d24dfc916cdba2baeb5a7d85d5a94faac811caf7f4fa6b7d07144dc02f7639f
   languageName: node
   linkType: hard
 
