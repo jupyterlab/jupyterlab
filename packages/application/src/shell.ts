@@ -309,6 +309,13 @@ export namespace ILabShell {
 }
 
 /**
+ * The restorable description of the top area in the user interface.
+ *
+ * @deprecated It has been moved to {@link ILabShell.ITopArea} for consistency.
+ */
+export interface ITopArea extends ILabShell.ITopArea {}
+
+/**
  * The application shell for JupyterLab.
  */
 export class LabShell extends Widget implements JupyterFrontEnd.IShell {
