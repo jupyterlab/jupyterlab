@@ -794,7 +794,10 @@ export class RunningSessions
    * @param managers Managers
    * @param manager New manager
    */
-  protected async addSection(_: unknown, manager: IRunningSessions.IManager) {
+  protected async addSection(
+    managers: unknown,
+    manager: IRunningSessions.IManager
+  ) {
     const section = new Section({ manager, translator: this.translator });
     this.addWidget(section);
 
@@ -1072,7 +1075,7 @@ export class SearchableSessionsList extends Panel {
    * @param managers Managers
    * @param manager New manager
    */
-  protected addSection(_: unknown, manager: IRunningSessions.IManager) {
+  protected addSection(managers: unknown, manager: IRunningSessions.IManager) {
     const section = new TitledSection({
       manager,
       translator: this._translator,

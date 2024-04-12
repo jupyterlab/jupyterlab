@@ -179,8 +179,8 @@ export namespace MetadataForm {
     /**
      * Update the metadata of the current cell or notebook.
      *
-     * @param formData: the cell metadata set in the form.
-     * @param reload: whether to update the form after updating the metadata.
+     * @param formData the cell metadata set in the form.
+     * @param reload whether to update the form after updating the metadata.
      *
      * ## Notes
      * Metadata are updated from root only. If some metadata is nested,

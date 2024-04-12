@@ -78,7 +78,7 @@ export namespace PathStatus {
     /**
      * Construct a new model.
      *
-     * @param docManager: the application document manager. Used to check
+     * @param docManager the application document manager. Used to check
      *   whether the current widget is a document.
      */
     constructor(docManager: IDocumentManager) {

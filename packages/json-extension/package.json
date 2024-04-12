@@ -29,7 +29,6 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "docs": "typedoc src",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -53,7 +52,6 @@
     "@types/react-dom": "^18.0.9",
     "@types/react-highlight-words": "^0.16.4",
     "rimraf": "~5.0.5",
-    "typedoc": "~0.24.7",
     "typescript": "~5.1.6"
   },
   "publishConfig": {

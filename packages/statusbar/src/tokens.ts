@@ -19,11 +19,10 @@ export interface IStatusBar {
   /**
    * Register a new status item.
    *
-   * @param id - a unique id for the status item.
+   * @param id a unique id for the status item.
+   * @param statusItem The options for how to add the status item.
    *
-   * @param options - The options for how to add the status item.
-   *
-   * @returns an `IDisposable` that can be disposed to remove the item.
+   * @returns an {@link IDisposable} that can be disposed to remove the item.
    */
   registerStatusItem(id: string, statusItem: IStatusBar.IItem): IDisposable;
 }
