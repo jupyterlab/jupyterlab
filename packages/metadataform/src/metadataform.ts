@@ -463,8 +463,8 @@ namespace Private {
    * Recursive function to clean the empty nested metadata before updating real metadata.
    * this function is called when a nested metadata is undefined (or default), so maybe some
    * object are now empty.
-   * @param metadataObject: PartialJSONObject representing the metadata to update.
-   * @param metadataKeysList: Array<string> of the undefined nested metadata.
+   * @param metadataObject PartialJSONObject representing the metadata to update.
+   * @param metadataKeysList Array<string> of the undefined nested metadata.
    * @returns PartialJSONObject without empty object.
    */
   export function deleteEmptyNested(

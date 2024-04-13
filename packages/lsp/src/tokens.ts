@@ -624,7 +624,7 @@ export interface IWidgetLSPAdapterTracker<
   /**
    * Find the first instance in the tracker that satisfies a filter function.
    *
-   * @param - fn The filter function to call on each instance.
+   * @param fn The filter function to call on each instance.
    *
    * #### Notes
    * If nothing is found, the value returned is `undefined`.

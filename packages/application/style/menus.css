@@ -35,7 +35,9 @@
   border-left: var(--jp-border-width) solid transparent;
   border-right: var(--jp-border-width) solid transparent;
   border-top: var(--jp-border-width) solid transparent;
-  line-height: calc(var(--jp-private-menubar-height) - var(--jp-border-width));
+  line-height: calc(
+    var(--jp-private-menubar-height) - var(--jp-border-width) * 2
+  );
 }
 
 .lm-MenuBar-content:focus-visible {
