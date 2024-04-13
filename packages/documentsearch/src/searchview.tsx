@@ -218,6 +218,7 @@ interface IReplaceEntryProps {
   preserveCase: boolean;
   replaceOptionsSupport: IReplaceOptionsSupport | undefined;
   replaceText: string;
+  replaceEnabled: boolean;
   translator?: ITranslator;
 }
 
@@ -259,6 +260,7 @@ function ReplaceEntry(props: IReplaceEntryProps): JSX.Element {
         className={REPLACE_BUTTON_WRAPPER_CLASS}
         onClick={() => props.onReplaceCurrent()}
         tabIndex={0}
+        disabled={!props.replaceEnabled}
       >
         <span
           className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -455,7 +457,7 @@ interface ISearchOverlayProps {
    */
   replaceEntryVisible: boolean;
   /**
-   * Whther the filters grid is visible.
+   * Whether the filters grid is visible.
    */
   filtersVisible: boolean;
   /**
@@ -466,6 +468,10 @@ interface ISearchOverlayProps {
    * Replacement expression
    */
   replaceText: string;
+  /**
+   * Whether the replace button is enabled.
+   */
+  replaceEnabled: boolean;
   /**
    * The text in the search entry
    */
@@ -777,6 +783,7 @@ class SearchOverlay extends React.Component<ISearchOverlayProps> {
                 onReplaceAll={() => this.props.onReplaceAll()}
                 replaceOptionsSupport={this.props.replaceOptionsSupport}
                 replaceText={this.props.replaceText}
+                replaceEnabled={this.props.replaceEnabled}
                 preserveCase={this.props.preserveCase}
                 translator={this.translator}
               />
@@ -912,6 +919,7 @@ export class SearchDocumentView extends VDomRenderer<SearchDocumentModel> {
         filtersVisible={this._showFilters}
         replaceOptionsSupport={this.model.replaceOptionsSupport}
         replaceText={this.model.replaceText}
+        replaceEnabled={this.model.replaceEnabled}
         initialSearchText={this.model.initialQuery}
         searchInputRef={
           this._searchInput as React.RefObject<HTMLTextAreaElement>

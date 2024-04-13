@@ -183,6 +183,13 @@ export class SearchDocumentModel
   }
 
   /**
+   * Whether the replace button is enabled or not.
+   */
+  get replaceEnabled(): boolean {
+    return this._replaceEnabled;
+  }
+
+  /**
    * Search expression
    */
   get searchExpression(): string {
@@ -270,7 +277,10 @@ export class SearchDocumentModel
    * Highlight the next match.
    */
   async highlightNext(): Promise<void> {
-    await this.searchProvider.highlightNext();
+    const match = await this.searchProvider.highlightNext();
+    if (match) {
+      this._replaceEnabled = match.node == undefined;
+    }
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -279,7 +289,10 @@ export class SearchDocumentModel
    * Highlight the previous match
    */
   async highlightPrevious(): Promise<void> {
-    await this.searchProvider.highlightPrevious();
+    const match = await this.searchProvider.highlightPrevious();
+    if (match) {
+      this._replaceEnabled = match.node == undefined;
+    }
     // Emit state change as the index needs to be updated
     this.stateChanged.emit();
   }
@@ -386,6 +399,7 @@ export class SearchDocumentModel
   private _initialQuery = '';
   private _filters: IFilters = {};
   private _replaceText: string = '';
+  private _replaceEnabled = true;
   private _searchActive = false;
   private _searchDebouncer: Debouncer;
   private _searchExpression = '';
