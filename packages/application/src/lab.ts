@@ -275,7 +275,8 @@ export namespace JupyterLab {
   /*
    * A read-only subset of the `Token`.
    */
-  interface IToken extends Readonly<Pick<Token<any>, 'name' | 'description'>> {
+  export interface IToken
+    extends Readonly<Pick<Token<any>, 'name' | 'description'>> {
     // no-op
   }
 

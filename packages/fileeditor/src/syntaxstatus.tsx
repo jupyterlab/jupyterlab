@@ -39,7 +39,7 @@ namespace EditorSyntaxComponent {
 /**
  * A pure function that returns a tsx component for an editor syntax item.
  *
- * @param props: the props for the component.
+ * @param props the props for the component.
  *
  * @returns an editor syntax component.
  */
