@@ -624,6 +624,10 @@ test.describe('General', () => {
 
     await page.notebook.createNew();
 
+    // Leave and enter a cell explicitly to ensure focus on a cell
+    await page.notebook.enterCellEditingMode(0);
+    await page.notebook.leaveCellEditingMode(0);
+
     await page.keyboard.press('Control+Shift+H');
 
     expect(await page.locator('.jp-Notebook').screenshot()).toMatchSnapshot(
