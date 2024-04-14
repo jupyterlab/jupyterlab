@@ -80,7 +80,8 @@ test.describe('General', () => {
     await page.mouse.up();
 
     // wait for the debugger bug icon to settle
-    await page
+    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
+    await panel
       .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
       .waitFor();
 
@@ -624,9 +625,8 @@ test.describe('General', () => {
 
     await page.notebook.createNew();
 
-    // Leave and enter a cell explicitly to ensure focus on a cell
+    // Ensure focus on a cell
     await page.notebook.enterCellEditingMode(0);
-    await page.notebook.leaveCellEditingMode(0);
 
     await page.keyboard.press('Control+Shift+H');
 
