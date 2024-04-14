@@ -79,6 +79,11 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
+    // wait for the debugger bug icon to settle
+    await page
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
+
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
