@@ -3643,7 +3643,7 @@ function addCommands(
 
       if (current) {
         return showDialog({
-          body: new CellTagListWidget(current),
+          body: new CellFiltersView(current),
           buttons: []
         });
       }
