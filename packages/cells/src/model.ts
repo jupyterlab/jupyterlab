@@ -648,7 +648,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     // but for performance reason, the diff status is stored in a boolean.
     return this._isDirty;
   }
-
+  
   /**
    * The cell outputs.
    */
@@ -796,6 +796,13 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         newValue: v
       });
     }
+  }
+
+  /**
+   * Public Set whether the cell is dirty or not.
+   */
+  setDirty(dirty: boolean): void {
+    this._setDirty(dirty);
   }
 
   private _executedCode = '';
