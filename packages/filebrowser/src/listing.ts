@@ -812,7 +812,7 @@ export class DirListing extends Widget {
   // Update the modified column's size
   private _updateModifiedSize(node: HTMLElement) {
     const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
-    this._modifiedWidth = modified.getBoundingClientRect().width;
+    this._modifiedWidth = modified?.getBoundingClientRect().width ?? 83;
     this._modifiedStyle =
       this._modifiedWidth < 90
         ? 'narrow'
