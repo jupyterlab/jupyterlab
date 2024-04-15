@@ -196,12 +196,17 @@ JupyterLab:
 
     jupyter labextension develop --overwrite .
 
-.. note::
+.. _important-for-windows-users:
 
-   On Windows, symbolic links can be activated on Windows 10 or above for Python version 3.8 or higher
+Important for Windows users
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. important::
+
+   On Windows, symbolic links need to be activated on Windows 10 or above for Python version 3.8 or higher
    by activating the 'Developer Mode'. That may not be allowed by your administrators.
    See `Activate Developer Mode on Windows <https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development>`__
-   for instructions. Making this and runing ``jupyter labextension develop --overwrite`` is necessary for Windows 11, so that JupyterLab will use an updated build.
+   for instructions.
 
 See the initial extension in action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
