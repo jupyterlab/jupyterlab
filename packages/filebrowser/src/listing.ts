@@ -228,7 +228,7 @@ export class DirListing extends Widget {
     this._renderer = options.renderer || DirListing.defaultRenderer;
 
     // Get the width of the "modified" column
-    this.updateModifiedSize(this.node);
+    this._updateModifiedSize(this.node);
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     // hide the file size column by default
@@ -810,7 +810,7 @@ export class DirListing extends Widget {
   }
 
   // Update the modified column's size
-  updateModifiedSize(node: HTMLElement) {
+  private _updateModifiedSize(node: HTMLElement) {
     const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
     this._modifiedWidth = modified.getBoundingClientRect().width;
     this._modifiedStyle =
@@ -979,7 +979,7 @@ export class DirListing extends Widget {
 
     // Rerender item nodes' modified dates, if the modified style has changed.
     const oldModifiedStyle = this._modifiedStyle;
-    this.updateModifiedSize(this.node);
+    this._updateModifiedSize(this.node);
     if (oldModifiedStyle !== this._modifiedStyle) {
       this.updateModified(this._sortedItems, this._items);
     }
