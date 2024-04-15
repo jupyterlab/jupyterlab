@@ -361,27 +361,32 @@ export abstract class EditorSearchProvider<
         occurred = true;
 
         // Regenerate the match list, then iterate through it.
-        this.updateCodeMirror(this.model.sharedModel.getSource()).then(() => {
-          const allMatches = this.cmHandler.matches;
-          const positionAfterReplacement = match!.position + insertText.length;
-          let nextMatchFound = false;
-          for (
-            let matchIdx = this.currentIndex || 0;
-            matchIdx < allMatches.length;
-            matchIdx++
-          ) {
-            if (allMatches[matchIdx].position >= positionAfterReplacement) {
-              this.currentIndex = matchIdx;
-              nextMatchFound = true;
-              break;
+        this.updateCodeMirror(this.model.sharedModel.getSource())
+          .then(() => {
+            const allMatches = this.cmHandler.matches;
+            const positionAfterReplacement =
+              match!.position + insertText.length;
+            let nextMatchFound = false;
+            for (
+              let matchIdx = this.currentIndex || 0;
+              matchIdx < allMatches.length;
+              matchIdx++
+            ) {
+              if (allMatches[matchIdx].position >= positionAfterReplacement) {
+                this.currentIndex = matchIdx;
+                nextMatchFound = true;
+                break;
+              }
+              // Move the highlight forward.
+              void this.highlightNext();
             }
-            // Move the highlight forward.
-            this.highlightNext();
-          }
-          if (!nextMatchFound) {
-            this.currentIndex = null; // No more matches in this string
-          }
-        });
+            if (!nextMatchFound) {
+              this.currentIndex = null; // No more matches in this string
+            }
+          })
+          .catch(err => {
+            console.error(`Failed to regenerate match list: ${err}`);
+          });
       }
     }
 
