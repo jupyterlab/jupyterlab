@@ -68,7 +68,8 @@
     "@lumino/properties": "^2.0.1",
     "@lumino/signaling": "^2.1.2",
     "@lumino/virtualdom": "^2.0.1",
-    "@rjsf/utils": "^5.13.2",
+    "@lumino/widgets": "^2.3.2",
+    "@rjsf/utils": "^5.13.4",
     "react": "^18.2.0"
   },
   "devDependencies": {
