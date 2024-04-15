@@ -648,7 +648,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     // but for performance reason, the diff status is stored in a boolean.
     return this._isDirty;
   }
-  
+
   /**
    * The cell outputs.
    */

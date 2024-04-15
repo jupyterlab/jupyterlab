@@ -404,7 +404,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     if (ogCell && ogCell.type === 'code') {
         const nCell = this.widgets[from].model as ICodeCellModel;
         dirtyState = nCell.isDirty;
-    } 
+    }
 
     for (let i = 0; i < n; i++) {
       viewModel[i] = {};
@@ -419,10 +419,10 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     this.model!.sharedModel.moveCells(from, boundedTo, n);
 
-    const nogCell = this.widgets[to].model; 
+    const nogCell = this.widgets[to].model;
     if (nogCell && nogCell.type === 'code') {
       (this.widgets[to].model as CodeCellModel).setDirty(dirtyState);
-    } 
+    }
 
 
     for (let i = 0; i < n; i++) {
