@@ -30,7 +30,7 @@ const HALF_SPACING = 4;
 /**
  * A pure functional component for rendering kernel and terminal sessions.
  *
- * @param props: the props for the component.
+ * @param props the props for the component.
  *
  * @returns a tsx component for the running sessions.
  */

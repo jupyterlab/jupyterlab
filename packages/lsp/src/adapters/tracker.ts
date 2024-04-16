@@ -148,7 +148,7 @@ export class WidgetLSPAdapterTracker<
   /**
    * Find the first adapter in the tracker that satisfies a filter function.
    *
-   * @param - fn The filter function to call on each adapter.
+   * @param fn The filter function to call on each adapter.
    *
    * #### Notes
    * If no adapter is found, the value returned is `undefined`.

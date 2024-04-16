@@ -209,7 +209,7 @@ export class DirListing extends Widget {
   /**
    * Construct a new file browser directory listing widget.
    *
-   * @param model - The file browser view model.
+   * @param options The constructor options
    */
   constructor(options: DirListing.IOptions) {
     super({

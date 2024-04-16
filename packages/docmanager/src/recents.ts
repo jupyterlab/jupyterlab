@@ -218,6 +218,7 @@ export class RecentsManager implements IRecentsManager {
         type as 'opened' | 'closed'
       );
     }
+    this._recentsChanged.emit(undefined);
   }
 
   /**
