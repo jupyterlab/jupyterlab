@@ -67,6 +67,9 @@ export const recentsManagerPlugin: JupyterFrontEndPlugin<IRecentsManager> = {
       execute: () => {
         recentsManager.clearRecents();
       },
+      isEnabled: () =>
+        recentsManager.recentlyOpened.length != 0 ||
+        recentsManager.recentlyClosed.length != 0,
       label: trans.__('Clear Recent Documents'),
       caption: trans.__('Clear the list of recently opened items.')
     });
