@@ -13,8 +13,7 @@ import {
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 import {
   FileBrowserModel,
-  IDefaultFileBrowser,
-  IFileBrowserFactory
+  IDefaultFileBrowser
 } from '@jupyterlab/filebrowser';
 import { ILauncher, Launcher, LauncherModel } from '@jupyterlab/launcher';
 import { ITranslator } from '@jupyterlab/translation';
@@ -41,8 +40,7 @@ const plugin: JupyterFrontEndPlugin<ILauncher> = {
   optional: [
     ILabShell,
     ICommandPalette,
-    IDefaultFileBrowser,
-    IFileBrowserFactory
+    IDefaultFileBrowser
   ],
   provides: ILauncher,
   autoStart: true
@@ -61,8 +59,7 @@ function activate(
   translator: ITranslator,
   labShell: ILabShell | null,
   palette: ICommandPalette | null,
-  defaultBrowser: IDefaultFileBrowser | null,
-  factory: IFileBrowserFactory | null
+  defaultBrowser: IDefaultFileBrowser | null
 ): ILauncher {
   const { commands, shell } = app;
   const trans = translator.load('jupyterlab');
