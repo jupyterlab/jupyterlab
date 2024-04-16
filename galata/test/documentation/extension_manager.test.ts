@@ -86,10 +86,10 @@ test.describe('Extension Manager', () => {
 
     await openExtensionSidebar(page);
 
-    await page.fill(
-      '.jp-extensionmanager-view >> [placeholder="Search extensions"]',
-      'drawio'
-    );
+    await page
+      .locator('.jp-extensionmanager-view')
+      .getByRole('searchbox')
+      .type('drawio');
 
     await page.evaluate(() => {
       (document.activeElement as HTMLElement).blur();
