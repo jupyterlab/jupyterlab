@@ -336,8 +336,6 @@ export abstract class EditorSearchProvider<
       return Promise.resolve(false);
     }
 
-    let occurred = false;
-
     if (
       this.currentIndex !== null &&
       this.currentIndex < this.cmHandler.matches.length
@@ -358,39 +356,43 @@ export abstract class EditorSearchProvider<
           match!.position + match!.text.length,
           insertText
         );
-        occurred = true;
 
         // Regenerate the match list, then iterate through it.
-        this.updateCodeMirror(this.model.sharedModel.getSource())
-          .then(() => {
-            const allMatches = this.cmHandler.matches;
-            const positionAfterReplacement =
-              match!.position + insertText.length;
-            let nextMatchFound = false;
-            for (
-              let matchIdx = this.currentIndex || 0;
-              matchIdx < allMatches.length;
-              matchIdx++
-            ) {
-              if (allMatches[matchIdx].position >= positionAfterReplacement) {
-                this.currentIndex = matchIdx;
-                nextMatchFound = true;
-                break;
+        return new Promise((resolve, reject) => {
+          this.updateCodeMirror(this.model.sharedModel.getSource())
+            .then(() => {
+              const allMatches = this.cmHandler.matches;
+              const positionAfterReplacement =
+                match!.position + insertText.length;
+              let nextMatchFound = false;
+              for (
+                let matchIdx = this.currentIndex || 0;
+                matchIdx < allMatches.length;
+                matchIdx++
+              ) {
+                if (allMatches[matchIdx].position >= positionAfterReplacement) {
+                  this.currentIndex = matchIdx;
+                  nextMatchFound = true;
+                  break;
+                }
+                // Move the highlight forward.
+                void this.highlightNext();
               }
-              // Move the highlight forward.
-              void this.highlightNext();
-            }
-            if (!nextMatchFound) {
-              this.currentIndex = null; // No more matches in this string
-            }
-          })
-          .catch(err => {
-            console.error(`Failed to regenerate match list: ${err}`);
-          });
+              if (!nextMatchFound) {
+                this.currentIndex = null; // No more matches in this string
+              }
+              resolve(true);
+            })
+            .catch(err => {
+              const errorMessage = `Failed to regenerate match list: ${err}`;
+              console.error(errorMessage);
+              reject(errorMessage);
+            });
+        });
       }
     }
 
-    return Promise.resolve(occurred);
+    return Promise.resolve(false);
   }
 
   /**
