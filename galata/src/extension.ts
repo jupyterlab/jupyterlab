@@ -5,7 +5,6 @@
  */
 
 // This export the types (and only the types) from extension/token.ts
-// Required for typedoc to be happy otherwise we could have used `from '@jupyterlab/extension/lib/token';`
 
 import type { JupyterFrontEnd } from '@jupyterlab/application';
 import type { IRouter } from '@jupyterlab/application';

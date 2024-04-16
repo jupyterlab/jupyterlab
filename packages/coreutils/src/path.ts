@@ -137,7 +137,7 @@ export namespace PathExt {
   /**
    * Remove the leading slash from a path.
    *
-   * @param path: the path from which to remove a leading slash.
+   * @param path the path from which to remove a leading slash.
    */
   export function removeSlash(path: string): string {
     if (path.indexOf('/') === 0) {

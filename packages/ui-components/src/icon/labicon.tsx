@@ -42,7 +42,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * Resolve an icon name or a \{name, svgstr\} pair into an
    * actual LabIcon.
    *
-   * @param icon - either a string with the name of an existing icon
+   * @param options - icon: either a string with the name of an existing icon
    * or an object with \{name: string, svgstr: string\} fields.
    *
    * @returns a LabIcon instance

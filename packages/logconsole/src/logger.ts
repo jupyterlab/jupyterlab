@@ -193,7 +193,7 @@ export class Logger implements ILogger {
   /**
    * Construct a Logger.
    *
-   * @param source - The name of the log source.
+   * @param options Constructor options
    */
   constructor(options: Logger.IOptions) {
     this.source = options.source;

@@ -430,23 +430,23 @@ export namespace IRenderMime {
     /**
      * Add the link handler to the node.
      *
-     * @param node: the anchor node for which to handle the link.
+     * @param node the anchor node for which to handle the link.
      *
-     * @param path: the path to open when the link is clicked.
+     * @param path the path to open when the link is clicked.
      *
-     * @param id: an optional element id to scroll to when the path is opened.
+     * @param id an optional element id to scroll to when the path is opened.
      */
     handleLink(node: HTMLElement, path: string, id?: string): void;
     /**
      * Add the path handler to the node.
      *
-     * @param node: the anchor node for which to handle the link.
+     * @param node the anchor node for which to handle the link.
      *
-     * @param path: the path to open when the link is clicked.
+     * @param path the path to open when the link is clicked.
      *
-     * @param scope: the scope to which the path is bound.
+     * @param scope the scope to which the path is bound.
      *
-     * @param id: an optional element id to scroll to when the path is opened.
+     * @param id an optional element id to scroll to when the path is opened.
      */
     handlePath?(
       node: HTMLElement,
