@@ -827,11 +827,20 @@ export class DirListing extends Widget {
       const node = nodes[i];
       if (item.last_modified) {
         const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
-        this.renderer.updateItemModified(
-          modified,
-          item.last_modified,
-          this._modifiedStyle
-        );
+        if (this.renderer.updateItemModified !== undefined) {
+          this.renderer.updateItemModified(
+            modified,
+            item.last_modified,
+            this._modifiedStyle
+          );
+        } else {
+          // Render the date in one of multiple formats, depending on the container's size
+          modified.textContent = Time.formatHuman(
+            item.last_modified,
+            this._modifiedStyle
+          );
+          modified.title = Time.format(new Date(item.last_modified));
+        }
       }
     });
   }
@@ -844,11 +853,11 @@ export class DirListing extends Widget {
       this.renderer.updateItemNode(
         node,
         item,
-        this._modifiedStyle,
         ft,
         this.translator,
         this._hiddenColumns,
-        this.selection[item.path]
+        this.selection[item.path],
+        this._modifiedStyle
       );
       if (
         this.selection[item.path] &&
@@ -2255,7 +2264,7 @@ export namespace DirListing {
      *
      * @param modifiedStyle - The date style for the modified column: narrow, short, or long
      */
-    updateItemModified(
+    updateItemModified?(
       modified: HTMLElement,
       modifiedDate: string,
       modifiedStyle: Time.HumanStyle
@@ -2275,11 +2284,11 @@ export namespace DirListing {
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
-      modifiedStyle: Time.HumanStyle,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      selected?: boolean
+      selected?: boolean,
+      modifiedStyle?: Time.HumanStyle
     ): void;
 
     /**
@@ -2604,9 +2613,10 @@ export namespace DirListing {
       let modText = '';
       let modTitle = '';
 
+      const parsedDate = new Date(modifiedDate);
       // Render the date in one of multiple formats, depending on the container's size
-      modText = Time.formatHuman(new Date(modifiedDate), modifiedStyle);
-      modTitle = Time.format(new Date(modifiedDate));
+      modText = Time.formatHuman(parsedDate, modifiedStyle);
+      modTitle = Time.format(parsedDate);
 
       modified.textContent = modText;
       modified.title = modTitle;
@@ -2625,11 +2635,11 @@ export namespace DirListing {
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
-      modifiedStyle: Time.HumanStyle,
       fileType?: DocumentRegistry.IFileType,
       translator?: ITranslator,
       hiddenColumns?: Set<DirListing.ToggleableColumn>,
-      selected?: boolean
+      selected?: boolean,
+      modifiedStyle?: Time.HumanStyle
     ): void {
       if (selected) {
         node.classList.add(SELECTED_CLASS);
@@ -2750,7 +2760,11 @@ export namespace DirListing {
       }
 
       if (model.last_modified) {
-        this.updateItemModified(modified, model.last_modified, modifiedStyle);
+        this.updateItemModified(
+          modified,
+          model.last_modified,
+          modifiedStyle ?? 'short'
+        );
       }
     }
 
