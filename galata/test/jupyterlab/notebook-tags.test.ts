@@ -58,7 +58,7 @@ test.describe('Notebook tags', () => {
   test('should filter on tag', async ({ page }) => {
     await page.getByRole('tab', { name: 'Property Inspector' }).click();
     await page.getByText('Common Tools').click();
-    await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
+    await page.getByTitle('Open the filtering tool').click();
     await page
       .getByRole('listitem')
       .filter({ hasText: 'orange' })
@@ -66,7 +66,7 @@ test.describe('Notebook tags', () => {
       .click();
     await page
       .getByRole('dialog')
-      .getByRole('button', { name: 'Filter Cell(s)' })
+      .getByRole('button', { name: 'Filter Cells' })
       .click();
 
     const visibleCells = page.locator(
@@ -94,11 +94,11 @@ test.describe('Notebook tags', () => {
   test('should filter on cell type', async ({ page }) => {
     await page.getByRole('tab', { name: 'Property Inspector' }).click();
     await page.getByText('Common Tools').click();
-    await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
+    await page.getByTitle('Open the filtering tool').click();
     await page.getByLabel('markdown', { exact: true }).click();
     await page
       .getByRole('dialog')
-      .getByRole('button', { name: 'Filter Cell(s)' })
+      .getByRole('button', { name: 'Filter Cells' })
       .click();
 
     const visibleCells = page.locator('.jp-MarkdownCell');
@@ -124,7 +124,7 @@ test.describe('Notebook tags', () => {
   test('should filter on cell type and tag', async ({ page }) => {
     await page.getByRole('tab', { name: 'Property Inspector' }).click();
     await page.getByText('Common Tools').click();
-    await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
+    await page.getByTitle('Open the filtering tool').click();
     await page.getByLabel('code', { exact: true }).click();
     await page
       .getByRole('listitem')
@@ -133,7 +133,7 @@ test.describe('Notebook tags', () => {
       .click();
     await page
       .getByRole('dialog')
-      .getByRole('button', { name: 'Filter Cell(s)' })
+      .getByRole('button', { name: 'Filter Cells' })
       .click();
 
     const visibleCells = page.locator(
@@ -162,7 +162,7 @@ test.describe('Notebook tags', () => {
   test('should clear all filters', async ({ page }) => {
     await page.getByRole('tab', { name: 'Property Inspector' }).click();
     await page.getByText('Common Tools').click();
-    await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
+    await page.getByTitle('Open the filtering tool').click();
     await page.getByLabel('code', { exact: true }).click();
     await page
       .getByRole('listitem')
@@ -171,12 +171,12 @@ test.describe('Notebook tags', () => {
       .click();
     await page
       .getByRole('dialog')
-      .getByRole('button', { name: 'Filter Cell(s)' })
+      .getByRole('button', { name: 'Filter Cells' })
       .click();
 
     await expect.soft(page.locator('.jp-InputArea')).toHaveCount(1);
 
-    await page.getByRole('button', { name: 'Filter Cell(s)' }).click();
+    await page.getByTitle('Open the filtering tool').click();
     await page
       .getByRole('dialog')
       .getByRole('button', { name: 'Clear Filters' })
