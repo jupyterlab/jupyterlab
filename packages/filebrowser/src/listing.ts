@@ -834,12 +834,11 @@ export class DirListing extends Widget {
             this._modifiedStyle
           );
         } else {
-          // Render the date in one of multiple formats, depending on the container's size
-          modified.textContent = Time.formatHuman(
+          DirListing.defaultRenderer.updateItemModified(
+            modified,
             item.last_modified,
             this._modifiedStyle
           );
-          modified.title = Time.format(new Date(item.last_modified));
         }
       }
     });
