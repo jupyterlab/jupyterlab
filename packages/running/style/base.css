@@ -243,6 +243,10 @@ span.jp-RunningSessions-icon > svg {
   overflow: visible;
 }
 
+.jp-SearchableSessions-filter > .jp-FilterBox {
+  width: 100%;
+}
+
 .jp-SearchableSessions-list {
   overflow: auto;
 }
