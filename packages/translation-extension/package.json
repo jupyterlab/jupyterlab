@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation-extension",
-  "version": "4.2.0-beta.1",
+  "version": "4.2.0-beta.2",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -37,11 +37,11 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.2.0-beta.1",
-    "@jupyterlab/apputils": "^4.3.0-beta.1",
-    "@jupyterlab/mainmenu": "^4.2.0-beta.1",
-    "@jupyterlab/settingregistry": "^4.2.0-beta.1",
-    "@jupyterlab/translation": "^4.2.0-beta.1"
+    "@jupyterlab/application": "^4.2.0-beta.2",
+    "@jupyterlab/apputils": "^4.3.0-beta.2",
+    "@jupyterlab/mainmenu": "^4.2.0-beta.2",
+    "@jupyterlab/settingregistry": "^4.2.0-beta.2",
+    "@jupyterlab/translation": "^4.2.0-beta.2"
   },
   "devDependencies": {
     "rimraf": "~5.0.5",

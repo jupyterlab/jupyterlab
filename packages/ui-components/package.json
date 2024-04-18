@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/ui-components",
-  "version": "4.2.0-beta.1",
+  "version": "4.2.0-beta.2",
   "description": "JupyterLab - UI components written in React",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -42,10 +42,10 @@
   "dependencies": {
     "@jupyter/react-components": "^0.15.3",
     "@jupyter/web-components": "^0.15.3",
-    "@jupyterlab/coreutils": "^6.2.0-beta.1",
-    "@jupyterlab/observables": "^5.2.0-beta.1",
-    "@jupyterlab/rendermime-interfaces": "^3.10.0-beta.1",
-    "@jupyterlab/translation": "^4.2.0-beta.1",
+    "@jupyterlab/coreutils": "^6.2.0-beta.2",
+    "@jupyterlab/observables": "^5.2.0-beta.2",
+    "@jupyterlab/rendermime-interfaces": "^3.10.0-beta.2",
+    "@jupyterlab/translation": "^4.2.0-beta.2",
     "@lumino/algorithm": "^2.0.1",
     "@lumino/commands": "^2.3.0",
     "@lumino/coreutils": "^2.1.2",
@@ -63,7 +63,7 @@
     "typestyle": "^2.0.4"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.2.0-beta.1",
+    "@jupyterlab/testing": "^4.2.0-beta.2",
     "@types/jest": "^29.2.0",
     "@types/react": "^18.0.26",
     "jest": "^29.2.0",

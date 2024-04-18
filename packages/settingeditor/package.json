@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingeditor",
-  "version": "4.2.0-beta.1",
+  "version": "4.2.0-beta.2",
   "description": "The JupyterLab default setting editor interface",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,15 +41,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^4.2.0-beta.1",
-    "@jupyterlab/apputils": "^4.3.0-beta.1",
-    "@jupyterlab/codeeditor": "^4.2.0-beta.1",
-    "@jupyterlab/inspector": "^4.2.0-beta.1",
-    "@jupyterlab/rendermime": "^4.2.0-beta.1",
-    "@jupyterlab/settingregistry": "^4.2.0-beta.1",
-    "@jupyterlab/statedb": "^4.2.0-beta.1",
-    "@jupyterlab/translation": "^4.2.0-beta.1",
-    "@jupyterlab/ui-components": "^4.2.0-beta.1",
+    "@jupyterlab/application": "^4.2.0-beta.2",
+    "@jupyterlab/apputils": "^4.3.0-beta.2",
+    "@jupyterlab/codeeditor": "^4.2.0-beta.2",
+    "@jupyterlab/inspector": "^4.2.0-beta.2",
+    "@jupyterlab/rendermime": "^4.2.0-beta.2",
+    "@jupyterlab/settingregistry": "^4.2.0-beta.2",
+    "@jupyterlab/statedb": "^4.2.0-beta.2",
+    "@jupyterlab/translation": "^4.2.0-beta.2",
+    "@jupyterlab/ui-components": "^4.2.0-beta.2",
     "@lumino/algorithm": "^2.0.1",
     "@lumino/commands": "^2.3.0",
     "@lumino/coreutils": "^2.1.2",
@@ -65,7 +65,7 @@
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@jupyterlab/testing": "^4.2.0-beta.1",
+    "@jupyterlab/testing": "^4.2.0-beta.2",
     "@types/jest": "^29.2.0",
     "@types/react": "^18.0.26",
     "@types/react-test-renderer": "^18.0.0",
