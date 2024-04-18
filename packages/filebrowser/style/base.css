@@ -144,11 +144,11 @@
 }
 
 .jp-DirListing-headerItem.jp-id-name {
-  flex: 1 0 84px;
+  flex: 1 1 126px;
 }
 
 .jp-DirListing-headerItem.jp-id-modified {
-  flex: 0 0 112px;
+  flex: 1 0 70px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
 }
@@ -276,7 +276,7 @@
 }
 
 .jp-DirListing-itemText {
-  flex: 1 0 64px;
+  flex: 1 1 106px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -301,7 +301,7 @@
 }
 
 .jp-DirListing-itemModified {
-  flex: 0 0 125px;
+  flex: 1 0 83px;
   text-align: right;
 }
 
