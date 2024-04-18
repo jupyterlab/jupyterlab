@@ -11,10 +11,7 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
-import {
-  FileBrowserModel,
-  IDefaultFileBrowser
-} from '@jupyterlab/filebrowser';
+import { FileBrowserModel, IDefaultFileBrowser } from '@jupyterlab/filebrowser';
 import { ILauncher, Launcher, LauncherModel } from '@jupyterlab/launcher';
 import { ITranslator } from '@jupyterlab/translation';
 import { addIcon, launcherIcon } from '@jupyterlab/ui-components';
@@ -37,11 +34,7 @@ const plugin: JupyterFrontEndPlugin<ILauncher> = {
   id: '@jupyterlab/launcher-extension:plugin',
   description: 'Provides the launcher tab service.',
   requires: [ITranslator],
-  optional: [
-    ILabShell,
-    ICommandPalette,
-    IDefaultFileBrowser
-  ],
+  optional: [ILabShell, ICommandPalette, IDefaultFileBrowser],
   provides: ILauncher,
   autoStart: true
 };
