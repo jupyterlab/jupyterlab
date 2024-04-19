@@ -191,6 +191,7 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
       ref={props.inputRef}
       value={filter}
       onChange={handleChange}
+      onInput={handleChange}
       placeholder={props.placeholder}
       disabled={props.disabled}
     >
