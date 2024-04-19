@@ -812,11 +812,16 @@ export class DirListing extends Widget {
       this.sort(this.sortState);
       this.update();
     }
+
+    // Adjust the "modified" column's datestamps and titles based on its size
+    this._updateModifiedSize(this.node);
+    this.updateModifiedHeader();
   }
 
   // Update the modified column's size
   private _updateModifiedSize(node: HTMLElement) {
-    const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+    // Look for the modified column's header
+    const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
     this._modifiedWidth = modified?.getBoundingClientRect().width ?? 83;
     this._modifiedStyle =
       this._modifiedWidth < 90
@@ -830,7 +835,7 @@ export class DirListing extends Widget {
   protected updateModified(items: Contents.IModel[], nodes: HTMLElement[]) {
     items.forEach((item, i) => {
       const node = nodes[i];
-      if (item.last_modified) {
+      if (node && item.last_modified) {
         const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
         if (this.renderer.updateItemModified !== undefined) {
           this.renderer.updateItemModified(
@@ -985,6 +990,17 @@ export class DirListing extends Widget {
     this._prevPath = this._model.path;
   }
 
+  protected updateModifiedHeader(): void {
+    const modifiedText = DOMUtils.findElement(
+      DOMUtils.findElement(this.node, MODIFIED_ID_CLASS),
+      HEADER_ITEM_TEXT_CLASS
+    );
+    modifiedText.textContent =
+      this._modifiedWidth >= MODIFIED_COLUMN_LONG_TITLE_WIDTH
+        ? this._trans.__('Last Modified')
+        : this._trans.__('Modified');
+  }
+
   onResize(msg: Widget.ResizeMessage): void {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
@@ -1006,14 +1022,7 @@ export class DirListing extends Widget {
     // Rerender the "Last Modified" column with a longer title, if there is
     // almost certainly enough room for it
     if (modifiedLongTitle !== oldModifiedLongTitle) {
-      const modifiedText = DOMUtils.findElement(
-        DOMUtils.findElement(this.node, MODIFIED_ID_CLASS),
-        HEADER_ITEM_TEXT_CLASS
-      );
-      modifiedText.textContent =
-        this._modifiedWidth >= MODIFIED_COLUMN_LONG_TITLE_WIDTH
-          ? this._trans.__('Last Modified')
-          : this._trans.__('Modified');
+      this.updateModifiedHeader();
     }
   }
 
