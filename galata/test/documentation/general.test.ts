@@ -604,7 +604,7 @@ test.describe('General', () => {
     await freeezeKernelIds();
 
     // Playwright uses shadow-piercing selectors so this works with webcomponents too
-    expect
+    await expect
       .soft(page.locator('.jp-SearchableSessions-modal input'))
       .toBeFocused();
 
