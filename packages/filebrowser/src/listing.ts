@@ -824,9 +824,9 @@ export class DirListing extends Widget {
     const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
     this._modifiedWidth = modified?.getBoundingClientRect().width ?? 83;
     this._modifiedStyle =
-      this._modifiedWidth < 90
+      this._modifiedWidth < 100
         ? 'narrow'
-        : this._modifiedWidth > 110
+        : this._modifiedWidth > 120
         ? 'long'
         : 'short';
   }
