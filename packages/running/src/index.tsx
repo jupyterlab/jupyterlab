@@ -975,7 +975,13 @@ export class SearchableSessions extends Panel {
   private _forceFocusInput(): void {
     this._filterWidget.renderPromise
       ?.then(() => {
-        this._filterWidget.node.querySelector('input')?.focus();
+        const jpSearch = this._filterWidget.node.querySelector('jp-search');
+        const input = jpSearch?.shadowRoot?.querySelector('input');
+        if (!input) {
+          console.warn('Input element not found, cannot focus');
+          return;
+        }
+        input.focus();
       })
       .catch(console.warn);
   }
