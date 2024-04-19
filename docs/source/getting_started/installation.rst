@@ -104,6 +104,7 @@ Usage with Jupyverse
 `Jupyverse <https://github.com/jupyter-server/jupyverse/>`__ is a next-generation Jupyter server based on
 `FastAPI <https://fastapi.tiangolo.com/>`__. It can be used instead of
 `jupyter-server <https://github.com/jupyter-server/jupyter_server/>`__, the Jupyter server installed by default with JupyterLab.
+Note that ``jupyter-server`` extensions won't work with ``jupyverse`` (for which there might be equivalent plugins).
 
 You can install ``jupyverse`` with ``pip``:
 
@@ -115,9 +116,7 @@ or with ``mamba``:
 
 .. code:: bash
 
-    mamba install -c conda-forge jupyverse
-    mamba install -c conda-forge fps-auth
-    mamba install -c conda-forge fps-jupyterlab
+    mamba install -c conda-forge jupyverse fps-auth fps-jupyterlab
 
 And run it with:
 
