@@ -320,6 +320,29 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.2.0b3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0b2...b3f0b44b1136e50b757ad23db4b02d44ccd80740))
+
+### Bugs fixed
+
+- Update resolution for jupyter-ui-toolkit [#16204](https://github.com/jupyterlab/jupyterlab/pull/16204) ([@fcollonval](https://github.com/fcollonval))
+- Ensure that input in recently open files modal is focused [#16199](https://github.com/jupyterlab/jupyterlab/pull/16199) ([@krassowski](https://github.com/krassowski))
+- Fix updating search value on input [#16198](https://github.com/jupyterlab/jupyterlab/pull/16198) ([@fcollonval](https://github.com/fcollonval))
+- Fix error in kernels sidebar when switching kernels, remove unused prop [#16188](https://github.com/jupyterlab/jupyterlab/pull/16188) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Bump follow-redirects from 1.15.4 to 1.15.6 [#16172](https://github.com/jupyterlab/jupyterlab/pull/16172) ([@dependabot](https://github.com/dependabot))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-18&to=2024-04-19&type=c))
+
+[@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-04-18..2024-04-19&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-04-18..2024-04-19&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-18..2024-04-19&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-18..2024-04-19&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
 ## 4.2.0b2
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0b1...6898c5ec3b3bcc0ae473f39b48eca5b94a80b58d))
@@ -357,8 +380,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-09&to=2024-04-18&type=c))
 
 [@AnastasiaSliusar](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAnastasiaSliusar+updated%3A2024-04-09..2024-04-18&type=Issues) | [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2024-04-09..2024-04-18&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2024-04-09..2024-04-18&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2024-04-09..2024-04-18&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-04-09..2024-04-18&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-04-09..2024-04-18&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-04-09..2024-04-18&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-04-09..2024-04-18&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-04-09..2024-04-18&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-09..2024-04-18&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-09..2024-04-18&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-04-09..2024-04-18&type=Issues) | [@Mehak261124](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMehak261124+updated%3A2024-04-09..2024-04-18&type=Issues) | [@milinm](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amilinm+updated%3A2024-04-09..2024-04-18&type=Issues) | [@Tanmay-Deshmukh](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ATanmay-Deshmukh+updated%3A2024-04-09..2024-04-18&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-04-09..2024-04-18&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.2.0b1
 
