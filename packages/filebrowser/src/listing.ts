@@ -203,11 +203,6 @@ const IS_MAC = !!navigator.platform.match(/Mac/i);
 const FACTORY_MIME = 'application/vnd.lumino.widget-factory';
 
 /**
- *  Minimum width to render the "Last Modified" column header with a longer title
- */
-const MODIFIED_COLUMN_LONG_TITLE_WIDTH = 300;
-
-/**
  * A widget which hosts a file list area.
  */
 export class DirListing extends Widget {
@@ -812,10 +807,6 @@ export class DirListing extends Widget {
       this.sort(this.sortState);
       this.update();
     }
-
-    // Adjust the "modified" column's datestamps and titles based on its size
-    this._updateModifiedSize(this.node);
-    this.updateModifiedHeader();
   }
 
   // Update the modified column's size
@@ -990,17 +981,6 @@ export class DirListing extends Widget {
     this._prevPath = this._model.path;
   }
 
-  protected updateModifiedHeader(): void {
-    const modifiedText = DOMUtils.findElement(
-      DOMUtils.findElement(this.node, MODIFIED_ID_CLASS),
-      HEADER_ITEM_TEXT_CLASS
-    );
-    modifiedText.textContent =
-      this._modifiedWidth >= MODIFIED_COLUMN_LONG_TITLE_WIDTH
-        ? this._trans.__('Last Modified')
-        : this._trans.__('Modified');
-  }
-
   onResize(msg: Widget.ResizeMessage): void {
     const { width } =
       msg.width === -1 ? this.node.getBoundingClientRect() : msg;
@@ -1008,21 +988,10 @@ export class DirListing extends Widget {
 
     // Rerender item nodes' modified dates, if the modified style has changed.
     const oldModifiedStyle = this._modifiedStyle;
-    // "Last Modified" vs "Modified" for column title
-    const oldModifiedLongTitle =
-      this._modifiedWidth >= MODIFIED_COLUMN_LONG_TITLE_WIDTH;
     // Update both size and style
     this._updateModifiedSize(this.node);
     if (oldModifiedStyle !== this._modifiedStyle) {
       this.updateModified(this._sortedItems, this._items);
-    }
-    const modifiedLongTitle =
-      this._modifiedWidth >= MODIFIED_COLUMN_LONG_TITLE_WIDTH;
-
-    // Rerender the "Last Modified" column with a longer title, if there is
-    // almost certainly enough room for it
-    if (modifiedLongTitle !== oldModifiedLongTitle) {
-      this.updateModifiedHeader();
     }
   }
 
@@ -2401,7 +2370,10 @@ export namespace DirListing {
       const trans = translator.load('jupyterlab');
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
-      const modified = this.createHeaderItemNode(trans.__('Modified'));
+      const modified = this.createHeaderItemNodeWithSizes({
+        small: trans.__('Modified'),
+        large: trans.__('Last Modified')
+      });
       const fileSize = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
@@ -2875,6 +2847,29 @@ export namespace DirListing {
       icon.className = HEADER_ITEM_ICON_CLASS;
       text.textContent = label;
       node.appendChild(text);
+      node.appendChild(icon);
+      return node;
+    }
+
+    /**
+     * Create a node for a header item with multiple sizes.
+     */
+    protected createHeaderItemNodeWithSizes(labels: {
+      [k: string]: string;
+    }): HTMLElement {
+      const node = document.createElement('div');
+      node.className = HEADER_ITEM_CLASS;
+      const icon = document.createElement('span');
+      icon.className = HEADER_ITEM_ICON_CLASS;
+      for (let k of Object.keys(labels)) {
+        const text = document.createElement('span');
+        text.classList.add(
+          HEADER_ITEM_TEXT_CLASS,
+          HEADER_ITEM_TEXT_CLASS + '-' + k
+        );
+        text.textContent = labels[k];
+        node.appendChild(text);
+      }
       node.appendChild(icon);
       return node;
     }
