@@ -603,6 +603,11 @@ test.describe('General', () => {
     await page.click('jp-button[data-command="running:show-modal"]');
     await freeezeKernelIds();
 
+    // Playwright uses shadow-piercing selectors so this works with webcomponents too
+    await expect
+      .soft(page.locator('.jp-SearchableSessions-modal input'))
+      .toBeFocused();
+
     expect(
       await page
         .locator('.jp-SearchableSessions-modal .jp-Dialog-content')
