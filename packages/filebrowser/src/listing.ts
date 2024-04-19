@@ -203,6 +203,11 @@ const IS_MAC = !!navigator.platform.match(/Mac/i);
 const FACTORY_MIME = 'application/vnd.lumino.widget-factory';
 
 /**
+ *  Minimum width to render the "Last Modified" column header with a longer title
+ */
+const MODIFIED_COLUMN_LONG_TITLE_WIDTH = 300;
+
+/**
  * A widget which hosts a file list area.
  */
 export class DirListing extends Widget {
@@ -987,9 +992,28 @@ export class DirListing extends Widget {
 
     // Rerender item nodes' modified dates, if the modified style has changed.
     const oldModifiedStyle = this._modifiedStyle;
+    // "Last Modified" vs "Modified" for column title
+    const oldModifiedLongTitle =
+      this._modifiedWidth >= MODIFIED_COLUMN_LONG_TITLE_WIDTH;
+    // Update both size and style
     this._updateModifiedSize(this.node);
     if (oldModifiedStyle !== this._modifiedStyle) {
       this.updateModified(this._sortedItems, this._items);
+    }
+    const modifiedLongTitle =
+      this._modifiedWidth >= MODIFIED_COLUMN_LONG_TITLE_WIDTH;
+
+    // Rerender the "Last Modified" column with a longer title, if there is
+    // almost certainly enough room for it
+    if (modifiedLongTitle !== oldModifiedLongTitle) {
+      const modifiedText = DOMUtils.findElement(
+        DOMUtils.findElement(this.node, MODIFIED_ID_CLASS),
+        HEADER_ITEM_TEXT_CLASS
+      );
+      modifiedText.textContent =
+        this._modifiedWidth >= MODIFIED_COLUMN_LONG_TITLE_WIDTH
+          ? this._trans.__('Last Modified')
+          : this._trans.__('Modified');
     }
   }
 
