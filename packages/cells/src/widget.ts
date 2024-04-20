@@ -1605,10 +1605,11 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this.updatePromptOverlayIcon();
 
     // Clear output area when empty
-    if (this.model.outputs.length === 0) {
-      this._lastOutputHeight = this.outputArea.node.style.height;
+    const height = this.outputArea.node.style.height;
+    if (this.model.outputs.length === 0 && height !== '') {
+      this._lastOutputHeight = height;
       this.outputArea.node.style.height = '';
-    } else if (this.model.outputs.length > 0) {
+    } else if (this.model.outputs.length > 0 && height === '') {
       this.outputArea.node.style.height = this._lastOutputHeight;
     }
   }
