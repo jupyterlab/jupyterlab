@@ -1603,6 +1603,11 @@ export class CodeCell extends Cell<ICodeCellModel> {
     }
     // This is to hide/show icon on single line output.
     this.updatePromptOverlayIcon();
+
+    // Clear output area when empty
+    if (this.model.outputs.length === 0) {
+      this.outputArea.node.style.height = '';
+    }
   }
 
   /**
