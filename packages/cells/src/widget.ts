@@ -1593,6 +1593,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
     }
   }
 
+  private _lastOutputHeight = '';
   /**
    * Callback on output changes
    */
@@ -1605,8 +1606,11 @@ export class CodeCell extends Cell<ICodeCellModel> {
     this.updatePromptOverlayIcon();
 
     // Clear output area when empty
+    this._lastOutputHeight = this.outputArea.node.style.height;
     if (this.model.outputs.length === 0) {
       this.outputArea.node.style.height = '';
+    } else if (this.model.outputs.length > 0) {
+      this.outputArea.node.style.height = this._lastOutputHeight;
     }
   }
 
