@@ -182,6 +182,47 @@ describe('@jupyterlab/shortcut-extension', () => {
           selector: 'body'
         });
       });
+
+      it('should replace the default keybinding in presence of non-default keybinding', async () => {
+        const userKeybinding = {
+          keys: ['Ctrl A'],
+          isDefault: false
+        };
+        const defaultKeybinding = {
+          keys: ['Ctrl B'],
+          isDefault: true
+        };
+        const target = {
+          id: 'test-id',
+          command: 'test:command',
+          keybindings: [userKeybinding, defaultKeybinding],
+          args: {},
+          selector: 'body',
+          category: 'test'
+        };
+        registerKeybinding(target, userKeybinding);
+        registerKeybinding(target, defaultKeybinding);
+        await shortcutUI.replaceKeybinding(target, defaultKeybinding, [
+          'Ctrl X'
+        ]);
+        expect(data.user.shortcuts).toHaveLength(3);
+        expect(data.user.shortcuts[0]).toEqual({
+          command: 'test:command',
+          keys: ['Ctrl A'],
+          selector: 'body'
+        });
+        expect(data.user.shortcuts[1]).toEqual({
+          command: 'test:command',
+          keys: ['Ctrl B'],
+          selector: 'body',
+          disabled: true
+        });
+        expect(data.user.shortcuts[2]).toEqual({
+          command: 'test:command',
+          keys: ['Ctrl X'],
+          selector: 'body'
+        });
+      });
     });
 
     describe('#deleteKeybinding()', () => {
