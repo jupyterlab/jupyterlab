@@ -215,6 +215,7 @@
   border-radius: var(--jp-border-radius);
   padding: 5px 6px;
   margin: 3px 0;
+  cursor: pointer;
 }
 
 .jp-Shortcuts-Or {
@@ -248,6 +249,7 @@
   margin: 3px 0;
   padding: 5px 6px;
   color: var(--jp-ui-inverse-font-color1);
+  cursor: pointer;
 }
 
 .jp-Shortcuts-Plus:hover {
@@ -336,25 +338,15 @@
   padding-right: 10px;
 }
 
-.jp-Shortcuts-Search {
-  height: 30px;
-}
-
-.jp-Shortcuts-Search > input {
-  box-shadow: none;
-}
-
-.jp-Shortcuts-AdvancedOptionsSmall {
-  width: 30%;
-}
-
-.jp-Shortcuts-AdvancedOptionsRight {
-  margin-top: 8px;
+.jp-Shortcuts-AdvancedOptions {
+  padding-left: 12px;
 }
 
 .jp-Shortcuts-AdvancedOptionsLink {
   color: var(--jp-content-link-color);
   margin-right: 15px;
+  display: inline-block;
+  cursor: pointer;
 }
 
 .jp-Shortcuts-AdvancedOptionsLink:hover {
