@@ -371,7 +371,20 @@ const mainCommands: JupyterFrontEndPlugin<void> = {
       });
 
       commands.addCommand(CommandIDs.toggleSidebarWidget, {
-        label: trans.__('Toggle Sidebar Element'),
+        label: args =>
+          args === undefined ||
+          args.side === undefined ||
+          args.index === undefined
+            ? trans.__('Toggle Sidebar Element')
+            : args.side === 'right'
+            ? trans.__(
+                'Toggle Element %1 in Right Sidebar',
+                parseInt(args.index as string, 10) + 1
+              )
+            : trans.__(
+                'Toggle Element %1 in Left Sidebar',
+                parseInt(args.index as string, 10) + 1
+              ),
         execute: args => {
           const index = parseInt(args.index as string, 10);
           if (args.side != 'left' && args.side != 'right') {
