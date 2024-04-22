@@ -399,7 +399,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
     }
 
     const viewModel: { [k: string]: any }[] = new Array(n);
-    let dirtyState = false;
+    let dirtyState: boolean[] = new Array(n);
 
     for (let i = 0; i < n; i++) {
       viewModel[i] = {};
@@ -411,16 +411,11 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         }
       } else if (oldCell.model.type === 'code') {
         const oldCodeCell = oldCell.model as ICodeCellModel;
-        dirtyState = oldCodeCell.isDirty;
+        dirtyState[i] = oldCodeCell.isDirty;
       }
     }
 
     this.model!.sharedModel.moveCells(from, boundedTo, n);
-
-    // const nogCell = this.widgets[to].model;
-    // if (nogCell && nogCell.type === 'code') {
-    //   (this.widgets[to].model as CodeCellModel).setDirty(dirtyState);
-    // }
 
     for (let i = 0; i < n; i++) {
       const newCell = this.widgets[to + i];
@@ -429,8 +424,16 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
         // @ts-expect-error Cell has no index signature
         newCell[state] = view[state];
       }
-      if (newCell.model.type == 'code') {
-        (newCell.model as CodeCellModel).isDirty = dirtyState;
+
+      if (from > to) {
+        if (this.widgets[to + i].model.type === 'code') {
+          (this.widgets[to + i].model as CodeCellModel).isDirty = dirtyState[i];
+        }
+      } else {
+        if (this.widgets[to + i - n + 1].model.type === 'code') {
+          (this.widgets[to + i - n + 1].model as CodeCellModel).isDirty =
+            dirtyState[i];
+        }
       }
     }
   }
