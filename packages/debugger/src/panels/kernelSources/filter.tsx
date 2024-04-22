@@ -8,15 +8,22 @@ import React from 'react';
 import { IDebugger } from '../../tokens';
 
 import { Search } from '@jupyter/react-components';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 /**
  * The class name added to the filebrowser crumbs node.
  */
 export interface IFilterBoxProps {
   model: IDebugger.Model.IKernelSources;
+
+  /**
+   * The application language translator
+   */
+  translator?: ITranslator;
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
+  const trans = (props.translator ?? nullTranslator).load('jupyterlab');
   const onFilterChange = (e: any) => {
     const filter = (e.target as HTMLInputElement).value;
     props.model.filter = filter;
@@ -24,7 +31,7 @@ const FilterBox = (props: IFilterBoxProps) => {
   return (
     <Search
       onChange={onFilterChange}
-      placeholder="Filter the kernel sources"
+      placeholder={trans.__('Filter the kernel sources')}
       value={props.model.filter}
     />
   );

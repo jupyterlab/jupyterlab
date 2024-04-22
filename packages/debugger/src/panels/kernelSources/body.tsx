@@ -45,7 +45,8 @@ export class KernelSourcesBody extends ReactWidget {
     super();
     this._model = options.model;
     this._debuggerService = options.service;
-    this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
+    this._translator = options.translator ?? nullTranslator;
+    this._trans = this._translator.load('jupyterlab');
 
     this.addClass('jp-DebuggerKernelSources-body');
   }
@@ -58,7 +59,10 @@ export class KernelSourcesBody extends ReactWidget {
     return (
       <React.Fragment>
         <div className={filterClass} key={'filter'}>
-          <KernelSourcesFilter model={this._model} />
+          <KernelSourcesFilter
+            model={this._model}
+            translator={this._translator}
+          />
         </div>
         <UseSignal signal={this._model.changed}>
           {(_, kernelSources) => {
@@ -119,6 +123,7 @@ export class KernelSourcesBody extends ReactWidget {
 
   private _model: IDebugger.Model.IKernelSources;
   private _debuggerService: IDebugger;
+  private _translator: IRenderMime.ITranslator;
   private _trans: IRenderMime.TranslationBundle;
   private _showFilter = false;
 }
