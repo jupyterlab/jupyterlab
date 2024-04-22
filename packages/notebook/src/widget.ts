@@ -400,11 +400,6 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
 
     const viewModel: { [k: string]: any }[] = new Array(n);
     let dirtyState = false;
-    const ogCell = this.widgets[from].model; // Type assertion to ICodeCellModel
-    if (ogCell && ogCell.type === 'code') {
-        const nCell = this.widgets[from].model as ICodeCellModel;
-        dirtyState = nCell.isDirty;
-    }
 
     for (let i = 0; i < n; i++) {
       viewModel[i] = {};
@@ -414,16 +409,18 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
           // @ts-expect-error Cell has no index signature
           viewModel[i][k] = oldCell[k];
         }
+      } else if (oldCell.model.type === 'code') {
+        const oldCodeCell = oldCell.model as ICodeCellModel;
+        dirtyState = oldCodeCell.isDirty;
       }
     }
 
     this.model!.sharedModel.moveCells(from, boundedTo, n);
 
-    const nogCell = this.widgets[to].model;
-    if (nogCell && nogCell.type === 'code') {
-      (this.widgets[to].model as CodeCellModel).setDirty(dirtyState);
-    }
-
+    // const nogCell = this.widgets[to].model;
+    // if (nogCell && nogCell.type === 'code') {
+    //   (this.widgets[to].model as CodeCellModel).setDirty(dirtyState);
+    // }
 
     for (let i = 0; i < n; i++) {
       const newCell = this.widgets[to + i];
@@ -431,6 +428,9 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       for (const state in view) {
         // @ts-expect-error Cell has no index signature
         newCell[state] = view[state];
+      }
+      if (newCell.model.type == 'code') {
+        (newCell.model as CodeCellModel).isDirty = dirtyState;
       }
     }
   }
