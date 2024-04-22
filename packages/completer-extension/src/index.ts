@@ -460,7 +460,7 @@ const manager: JupyterFrontEndPlugin<ICompletionProviderManager> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<unknown>[] = [
+const plugins = [
   manager,
   defaultProviders,
   inlineHistoryProvider,

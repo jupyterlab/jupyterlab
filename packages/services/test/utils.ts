@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import {
   JSONObject,
   JSONPrimitive,
@@ -98,7 +100,7 @@ export const KERNELSPECS: JSONObject = {
 export function getRequestHandler(
   status: number,
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  body: unknown
+  body: any
 ): ServerConnection.ISettings {
   const customFetch = (info: RequestInfo, init?: RequestInit) => {
     // Normalize the body.
@@ -106,7 +108,7 @@ export function getRequestHandler(
 
     // Create the response and return it as a promise.
     const response = new Response(body, { status });
-    return Promise.resolve(response as unknown);
+    return Promise.resolve(response as any);
   };
   return ServerConnection.makeSettings({ fetch: customFetch });
 }
@@ -122,18 +124,14 @@ export interface IService {
  * Handle a single request with a mock response.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function handleRequest(
-  item: IService,
-  status: number,
-  body: unknown
-): void {
+export function handleRequest(item: IService, status: number, body: any): void {
   // Store the existing fetch function.
   const oldFetch = item.serverSettings.fetch;
 
   // A single use callback.
   const temp = (info: RequestInfo, init: RequestInit) => {
     // Restore fetch.
-    (item.serverSettings as unknown).fetch = oldFetch;
+    (item.serverSettings as any).fetch = oldFetch;
 
     // Normalize the body.
     if (typeof body !== 'string') {
@@ -146,11 +144,11 @@ export function handleRequest(
 
     // Create the response and return it as a promise.
     const response = new Response(body, { status });
-    return Promise.resolve(response as unknown);
+    return Promise.resolve(response as any);
   };
 
   // Override the fetch function.
-  (item.serverSettings as unknown).fetch = temp;
+  (item.serverSettings as any).fetch = temp;
 }
 
 /**
@@ -197,7 +195,7 @@ class SocketTester implements IService {
     }
     this.serverSettings = ServerConnection.makeSettings({
       wsUrl: `ws://localhost:${port!}/`,
-      WebSocket: WebSocket as unknown
+      WebSocket: WebSocket as any
     });
     this._ready = new PromiseDelegate<void>();
     this._server!.on('connection', ws => {
@@ -458,7 +456,7 @@ export class KernelTester extends SocketTester {
   sendMessage<T extends KernelMessage.Message>(
     options: MakeOptional<KernelMessage.IOptions<T>, 'session'>
   ): string {
-    const msg = KernelMessage.createMessage<unknown>({
+    const msg = KernelMessage.createMessage<any>({
       session: this.serverSessionId,
       ...options
     });
@@ -537,7 +535,7 @@ export class KernelTester extends SocketTester {
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
     this.sendStatus(UUID.uuid4(), this.initialStatus);
-    sock.on('message', (msg: unknown) => {
+    sock.on('message', (msg: any) => {
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
       }
@@ -679,7 +677,7 @@ export class SessionTester extends SocketTester {
    */
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
-    sock.on('message', (msg: unknown) => {
+    sock.on('message', (msg: any) => {
       if (msg instanceof Buffer) {
         msg = new Uint8Array(msg).buffer;
       }
@@ -732,7 +730,7 @@ export class TerminalTester extends SocketTester {
 
   protected onSocket(sock: WebSocket): void {
     super.onSocket(sock);
-    sock.on('message', (msg: unknown) => {
+    sock.on('message', (msg: any) => {
       const onMessage = this._onMessage;
       if (onMessage) {
         const data = JSON.parse(msg) as JSONPrimitive[];

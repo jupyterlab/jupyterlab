@@ -14,7 +14,7 @@ describe('DebuggerConfig', () => {
   describe('#getCodeId', () => {
     it('should compute a valid code id when the parameters are set', () => {
       const [prefix, suffix] = ['foo', 'bar'];
-      config.setHashParams({ method: 'Murmur2', seed: 'bar', kernel });
+      config.setHashParams({ method: 'Murmur2', seed: 1, kernel });
       config.setTmpFileParams({ prefix, suffix, kernel });
       const codeId = config.getCodeId('i = 0', kernel);
       expect(codeId.startsWith(prefix)).toBe(true);
@@ -29,7 +29,7 @@ describe('DebuggerConfig', () => {
     });
 
     it('should throw if the kernel does not have tmp file parameters', () => {
-      config.setHashParams({ method: 'Murmur2', seed: 'bar', kernel });
+      config.setHashParams({ method: 'Murmur2', seed: 2, kernel });
       expect(() => {
         config.getCodeId('i = 0', kernel);
       }).toThrow('has no tmp file params');

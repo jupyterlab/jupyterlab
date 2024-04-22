@@ -237,7 +237,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterFrontEndPlugin<unknown>[] = [
+const plugins = [
   factory,
   tracker,
   foreign,

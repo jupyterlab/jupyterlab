@@ -42,7 +42,11 @@ module.exports = {
       }
     },
     {
-      files: ['packages/**/*.spec.ts', 'testutils/**/*.spec.ts'],
+      files: [
+        'packages/**/*.spec.ts',
+        'packages/**/*.spec.tsx',
+        'testutils/**/*.spec.ts'
+      ],
       plugins: ['jest'],
       extends: ['plugin:jest/recommended'],
       rules: {

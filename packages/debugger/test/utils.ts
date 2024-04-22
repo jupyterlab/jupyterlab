@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 // Utils inspired by: packages/services/test/utils.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ServerConnection } from '@jupyterlab/services';
 
@@ -60,18 +61,14 @@ export interface IService {
  * @param body The body for the response.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function handleRequest(
-  item: IService,
-  status: number,
-  body: unknown
-): void {
+export function handleRequest(item: IService, status: number, body: any): void {
   // Store the existing fetch function.
   const oldFetch = item.serverSettings.fetch;
 
   // A single use callback.
   const temp = (info: RequestInfo, init: RequestInit): Promise<void> => {
     // Restore fetch.
-    (item.serverSettings as unknown).fetch = oldFetch;
+    (item.serverSettings as any).fetch = oldFetch;
 
     // Normalize the body.
     if (typeof body !== 'string') {
@@ -80,9 +77,9 @@ export function handleRequest(
 
     // Create the response and return it as a promise.
     const response = new Response(body, { status });
-    return Promise.resolve(response as unknown);
+    return Promise.resolve(response as any);
   };
 
   // Override the fetch function.
-  (item.serverSettings as unknown).fetch = temp;
+  (item.serverSettings as any).fetch = temp;
 }

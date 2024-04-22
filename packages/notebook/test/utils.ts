@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ISessionContext } from '@jupyterlab/apputils';
 import { Context, DocumentRegistry } from '@jupyterlab/docregistry';
@@ -64,7 +65,7 @@ export const mimeTypeService = NBTestUtils.mimeTypeService;
 export const defaultEditorConfig = NBTestUtils.defaultEditorConfig;
 export const clipboard = NBTestUtils.clipboard;
 
-export function defaultRenderMime(): unknown {
+export function defaultRenderMime(): any {
   return NBTestUtils.defaultRenderMime();
 }
 

@@ -2028,7 +2028,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function toggleCurrentHeadingCollapse(notebook: Notebook): unknown {
+  export function toggleCurrentHeadingCollapse(notebook: Notebook): void {
     if (!notebook.activeCell || notebook.activeCellIndex === undefined) {
       return;
     }

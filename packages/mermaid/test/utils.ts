@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
   MERMAID_MIME_TYPE,
@@ -92,7 +93,7 @@ class MockMermaidManager extends MermaidManager {
    * Shim the real mermaid.
    */
   async getMermaid() {
-    return new MockMermaid() as unknown;
+    return new MockMermaid() as any;
   }
 
   /**
