@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { LanguageSupport } from '@codemirror/language';
 import type { Extension, StateEffect } from '@codemirror/state';
@@ -58,7 +59,7 @@ export interface IExtensionsHandler extends IDisposable {
    *
    * It should result in a call to `IExtensionsHandler.reconfigureExtensions`.
    */
-  readonly configChanged: ISignal<this, Record<string, any>>;
+  readonly configChanged: ISignal<this, Record<string, unknown>>;
 
   /**
    * Get a config option for the editor.
@@ -89,7 +90,7 @@ export interface IExtensionsHandler extends IDisposable {
    * the costly update at the end, and not after every option
    * is set.
    */
-  setOptions(options: Record<string, any>): void;
+  setOptions(options: Record<string, unknown>): void;
 
   /**
    * Returns the list of initial extensions of an editor.
@@ -126,7 +127,7 @@ export interface IExtensionsHandler extends IDisposable {
    */
   reconfigureExtensions(
     view: EditorView,
-    configuration: Record<string, any>
+    configuration: Record<string, unknown>
   ): void;
 }
 

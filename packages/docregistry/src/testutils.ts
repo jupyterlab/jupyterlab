@@ -5,6 +5,7 @@
 // with jest 26 masks the @types/jest typings
 
 /// <reference types="jest" />
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 import {

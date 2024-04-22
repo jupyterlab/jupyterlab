@@ -5,7 +5,7 @@ import { KernelMessage, Session } from '@jupyterlab/services';
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
-import { PromiseDelegate } from '@lumino/coreutils';
+import { JSONObject, PromiseDelegate } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -250,7 +250,7 @@ export class DebuggerSession implements IDebugger.ISession {
       type: 'request',
       seq: this._seq++,
       command,
-      arguments: args
+      arguments: args as JSONObject
     });
     return message.content as IDebugger.ISession.Response[K];
   }

@@ -183,7 +183,7 @@ export class ServiceManager implements ServiceManager.IManager {
     return this._readyPromise;
   }
 
-  private _onConnectionFailure(sender: any, err: Error): void {
+  private _onConnectionFailure(sender: unknown, err: Error): void {
     this._connectionFailure.emit(err);
   }
 

@@ -33,6 +33,7 @@ export namespace Clipboard {
   export function copyToSystem(clipboardData: ClipboardData): void {
     const node = document.body;
     const handler = (event: ClipboardEvent) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = event.clipboardData || (window as any).clipboardData;
       if (typeof clipboardData === 'string') {
         data.setData('text', clipboardData);
@@ -69,7 +70,7 @@ export namespace Clipboard {
     let sel = window.getSelection();
 
     // Save the current selection.
-    const savedRanges: any[] = [];
+    const savedRanges: Range[] = [];
     for (let i = 0, len = sel?.rangeCount || 0; i < len; ++i) {
       savedRanges[i] = sel!.getRangeAt(i).cloneRange();
     }

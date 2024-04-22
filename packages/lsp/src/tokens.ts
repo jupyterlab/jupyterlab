@@ -816,7 +816,7 @@ export interface IServerResult {
   [Method.ServerRequest.REGISTER_CAPABILITY]: void;
   [Method.ServerRequest.SHOW_MESSAGE_REQUEST]: lsp.MessageActionItem | null;
   [Method.ServerRequest.UNREGISTER_CAPABILITY]: void;
-  [Method.ServerRequest.WORKSPACE_CONFIGURATION]: any[];
+  [Method.ServerRequest.WORKSPACE_CONFIGURATION]: unknown[];
 }
 
 /**
@@ -1008,7 +1008,7 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    * Signal emitted when the connection receives an error
    * message..
    */
-  errorSignal: ISignal<ILSPConnection, any>;
+  errorSignal: ISignal<ILSPConnection, unknown>;
 
   /**
    * @alpha
@@ -1029,7 +1029,7 @@ export interface ILSPConnection extends ILspConnection, IObservableDisposable {
    *
    * Signal emitted when the connection is initialized.
    */
-  serverInitialized: ISignal<ILSPConnection, lsp.ServerCapabilities<any>>;
+  serverInitialized: ISignal<ILSPConnection, lsp.ServerCapabilities<unknown>>;
 
   /**
    * @alpha

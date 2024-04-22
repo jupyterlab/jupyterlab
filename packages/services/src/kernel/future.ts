@@ -6,7 +6,7 @@ import { DisposableDelegate } from '@lumino/disposable';
 import * as Kernel from './kernel';
 import * as KernelMessage from './messages';
 
-declare let setImmediate: any;
+declare let setImmediate: (func: () => unknown, ...args: unknown[]) => void;
 
 /**
  * Implementation of a kernel future.

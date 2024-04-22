@@ -66,7 +66,7 @@ export interface ILogPayloadBase {
   /**
    * Data
    */
-  data: any;
+  data: unknown;
 }
 
 /**

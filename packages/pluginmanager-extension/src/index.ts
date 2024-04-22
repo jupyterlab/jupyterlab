@@ -169,6 +169,6 @@ const pluginmanager: JupyterFrontEndPlugin<IPluginManager> = {
   }
 };
 
-const plugins: JupyterFrontEndPlugin<any>[] = [pluginmanager];
+const plugins: JupyterFrontEndPlugin<unknown>[] = [pluginmanager];
 
 export default plugins;

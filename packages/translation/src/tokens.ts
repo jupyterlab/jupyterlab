@@ -12,7 +12,10 @@ import { requestTranslationsAPI } from './server';
 /*
  * Translation
  */
-export type Language = { [key: string]: string };
+export type Language = {
+  message: string;
+  data: { [key: string]: string };
+};
 
 /**
  * Translation connection interface.

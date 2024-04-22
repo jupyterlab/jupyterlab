@@ -107,6 +107,7 @@ export namespace NBTestUtils {
       name: 'binding',
       factory: ({ model }) =>
         EditorExtensionRegistry.createImmutableExtension(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ybinding({ ytext: (model.sharedModel as any).ysource })
         )
     });

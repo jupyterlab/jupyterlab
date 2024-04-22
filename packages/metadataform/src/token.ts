@@ -46,7 +46,7 @@ export namespace MetadataForm {
     /**
      * The default value for this metadata.
      */
-    default?: any;
+    default?: unknown;
 
     /**
      * Whether to avoid writing default value in metadata.
@@ -65,7 +65,7 @@ export namespace MetadataForm {
    * RJSF ui:schema options.
    */
   export interface IUiSchemaOption {
-    [option: string]: any;
+    [option: string]: unknown;
   }
 
   /**

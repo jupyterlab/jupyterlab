@@ -104,7 +104,7 @@ export class RawEditor extends SplitPanel {
   /**
    * Emits when the commands passed in at instantiation change.
    */
-  get commandsChanged(): ISignal<any, string[]> {
+  get commandsChanged(): ISignal<unknown, string[]> {
     return this._commandsChanged;
   }
 
@@ -282,7 +282,7 @@ export class RawEditor extends SplitPanel {
   private _commandsChanged = new Signal<this, string[]>(this);
   private _defaults: CodeEditorWrapper;
   private _inspector: Widget;
-  private _onSaveError: (reason: any, translator?: ITranslator) => void;
+  private _onSaveError: (reason: unknown, translator?: ITranslator) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
   private _toolbar = new Toolbar<Widget>();
   private _user: CodeEditorWrapper;
@@ -329,7 +329,7 @@ export namespace RawEditor {
     /**
      * A function the raw editor calls on save errors.
      */
-    onSaveError: (reason: any, translator?: ITranslator) => void;
+    onSaveError: (reason: unknown, translator?: ITranslator) => void;
 
     /**
      * The setting registry used by the editor.

@@ -105,7 +105,7 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): React.ReactElement<any> | null {
+  protected render(): React.ReactElement<unknown> | null {
     // Bail if there is no model.
     if (!this.model) {
       return null;
@@ -140,8 +140,8 @@ export class Launcher extends VDomRenderer<ILauncher.IModel> {
     }
 
     // Variable to help create sections
-    const sections: React.ReactElement<any>[] = [];
-    let section: React.ReactElement<any>;
+    const sections: React.ReactElement<unknown>[] = [];
+    let section: React.ReactElement<unknown>;
 
     // Assemble the final ordered list of categories, beginning with
     // KNOWN_CATEGORIES.
@@ -240,7 +240,7 @@ function Card(
   commands: CommandRegistry,
   trans: TranslationBundle,
   launcherCallback: (widget: Widget) => void
-): React.ReactElement<any> {
+): React.ReactElement<unknown> {
   // Get some properties of the command
   const command = item.command;
   const args = { ...item.args, cwd: launcher.cwd };

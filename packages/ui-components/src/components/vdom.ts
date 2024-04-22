@@ -9,8 +9,8 @@ import * as React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 
 type ReactRenderElement =
-  | Array<React.ReactElement<any>>
-  | React.ReactElement<any>;
+  | Array<React.ReactElement<unknown>>
+  | React.ReactElement<unknown>;
 
 /**
  * An abstract class for a Lumino widget which renders a React component.

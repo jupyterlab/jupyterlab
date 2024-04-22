@@ -35,17 +35,17 @@ export namespace IInspector {
     /**
      * A signal emitted when the inspector should clear all items.
      */
-    cleared: ISignal<any, void>;
+    cleared: ISignal<unknown, void>;
 
     /**
      * A signal emitted when the inspectable is disposed.
      */
-    disposed: ISignal<any, void>;
+    disposed: ISignal<unknown, void>;
 
     /**
      * A signal emitted when an inspector value is generated.
      */
-    inspected: ISignal<any, IInspectorUpdate>;
+    inspected: ISignal<unknown, IInspectorUpdate>;
 
     /**
      * Test whether the inspectable has been disposed.

@@ -65,7 +65,7 @@ export class NotebookSearchProvider extends SearchProvider<NotebookPanel> {
     this._filtersChanged.connect(this._setEnginesSelectionSearchMode, this);
   }
 
-  private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<any>) {
+  private _onNotebookStateChanged(_: Notebook, args: IChangedArgs<unknown>) {
     if (args.name === 'mode') {
       // Delay the update to ensure that `document.activeElement` settled.
       window.setTimeout(() => {

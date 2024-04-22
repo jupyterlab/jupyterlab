@@ -200,4 +200,4 @@ export default [
   hubExtension,
   hubExtensionMenu,
   connectionlost
-] as JupyterFrontEndPlugin<any>[];
+] as JupyterFrontEndPlugin<unknown>[];

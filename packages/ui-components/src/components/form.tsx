@@ -4,7 +4,11 @@
  */
 
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
-import { JSONExt, ReadonlyJSONObject } from '@lumino/coreutils';
+import {
+  JSONExt,
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 
 import Form, { FormProps, IChangeEvent } from '@rjsf/core';
 
@@ -230,7 +234,7 @@ export interface ILabCustomizerOptions<P>
   >;
 }
 
-function customizeForLab<P = any>(
+function customizeForLab<P = unknown>(
   options: ILabCustomizerOptions<P>
 ): React.FunctionComponent<P> {
   const {
@@ -439,7 +443,7 @@ const CustomTemplateFactory = (options: FormComponent.ILabCustomizerProps) =>
     component: props => {
       const trans = (props.translator ?? nullTranslator).load('jupyterlab');
       let isModified = false;
-      let defaultValue: any;
+      let defaultValue: ReadonlyPartialJSONValue | undefined = undefined;
       const {
         formData,
         schema,
@@ -607,11 +611,11 @@ export interface IFormComponentProps<T = ReadonlyJSONObject>
   /**
    *
    */
-  onChange: (e: IChangeEvent<T>) => any;
+  onChange: (e: IChangeEvent<T>) => unknown;
   /**
    *
    */
-  formContext?: unknown;
+  formContext?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 /**
@@ -676,7 +680,5 @@ export function FormComponent(props: IFormComponentProps): JSX.Element {
     ObjectFieldTemplate: objectTemplate
   };
 
-  return (
-    <Form templates={templates} formContext={formContext as any} {...others} />
-  );
+  return <Form templates={templates} formContext={formContext} {...others} />;
 }

@@ -41,7 +41,7 @@ function getExtensionGitHubUser(entry: IEntry) {
 /**
  * VDOM for visualizing an extension entry.
  */
-function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
+function ListEntry(props: ListEntry.IProperties): React.ReactElement<unknown> {
   const { canFetch, entry, supportInstallation, trans } = props;
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
@@ -236,7 +236,7 @@ namespace ListEntry {
 /**
  * List view widget for extensions
  */
-function ListView(props: ListView.IProperties): React.ReactElement<any> {
+function ListView(props: ListView.IProperties): React.ReactElement<unknown> {
   const { canFetch, performAction, supportInstallation, trans } = props;
 
   return (

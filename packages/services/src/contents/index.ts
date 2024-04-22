@@ -88,7 +88,7 @@ export namespace Contents {
     /**
      * The optional file content.
      */
-    readonly content: any;
+    readonly content: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     /**
      * The chunk of the file upload.

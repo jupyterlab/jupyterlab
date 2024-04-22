@@ -2,6 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 declare module 'json-to-html' {
-  function render(value: any): string;
+  function render(value: unknown): string;
   export = render;
 }

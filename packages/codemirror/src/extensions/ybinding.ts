@@ -9,6 +9,7 @@
  */
 import {
   Annotation,
+  ChangeSpec,
   EditorSelection,
   Extension,
   Facet,
@@ -128,7 +129,7 @@ export class YSyncConfig {
   /**
    * @param rpos
    */
-  fromYPos(rpos: RelativePosition | Record<string, any>) {
+  fromYPos(rpos: RelativePosition | Record<string, unknown>) {
     const pos = createAbsolutePositionFromRelativePosition(
       createRelativePositionFromJSON(rpos),
       this.ytext.doc!
@@ -195,12 +196,12 @@ export const ySync = ViewPlugin.fromClass(
       this._observer = (event: YTextEvent, tr: Transaction) => {
         if (tr.origin !== this.conf) {
           const delta = event.delta;
-          const changes: any[] = [];
+          const changes: ChangeSpec[] = [];
           let pos = 0;
           for (let i = 0; i < delta.length; i++) {
             const d = delta[i];
             if (d.insert != null) {
-              changes.push({ from: pos, to: pos, insert: d.insert });
+              changes.push({ from: pos, to: pos, insert: d.insert as string });
             } else if (d.delete != null) {
               changes.push({ from: pos, to: pos + d.delete, insert: '' });
               pos += d.delete;

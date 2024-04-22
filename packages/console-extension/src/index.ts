@@ -237,7 +237,7 @@ const completerPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as the default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins = [
   factory,
   tracker,
   foreign,
@@ -975,7 +975,7 @@ function activateConsoleCompleterService(
     keys: ['Enter'],
     selector: '.jp-ConsolePanel .jp-mod-completer-active'
   });
-  const updateCompleter = async (_: any, consolePanel: ConsolePanel) => {
+  const updateCompleter = async (_: unknown, consolePanel: ConsolePanel) => {
     const completerContext = {
       editor: consolePanel.console.promptCell?.editor ?? null,
       session: consolePanel.console.sessionContext.session,

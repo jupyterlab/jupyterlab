@@ -16,7 +16,8 @@ const HEADER_FIELDS = ['username', 'version', 'session', 'msg_id', 'msg_type'];
  * Required fields and types for contents of various types of `kernel.IMessage`
  * messages on the iopub channel.
  */
-const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const IOPUB_CONTENT_FIELDS: { [key: string]: Record<string, any> } = {
   stream: { name: 'string', text: 'string' },
   display_data: { data: 'object', metadata: 'object' },
   execute_input: { code: 'string', execution_count: 'number' },

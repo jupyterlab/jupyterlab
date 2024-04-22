@@ -2,6 +2,7 @@
 coverage/
 .eslintcache
 .stylelintcache
+.mypy_cache
 
 dev_mode/listings
 dev_mode/schemas

@@ -245,6 +245,7 @@ export class PluginList extends ReactWidget {
   getFilterString(
     filter: (item: string) => Partial<IScore> | null,
     props: ISettingRegistry.IProperty,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     definitions?: any,
     ref?: string
   ): string[] {
@@ -262,6 +263,7 @@ export class PluginList extends ReactWidget {
       // If given properties are an array, advance into the properties
       // for the items instead.
     } else if (props.items) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       props = props.items as any;
       // Otherwise, you've reached the base case and don't need to check for matching properties
     } else {
@@ -284,6 +286,7 @@ export class PluginList extends ReactWidget {
     }
 
     // Iterate through the properties and check for titles / descriptions that match search.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return Object.keys(props).reduce((acc: string[], value: any) => {
       // If this is the base case, check for matching title / description
       const subProps = props[value] as PartialJSONObject;

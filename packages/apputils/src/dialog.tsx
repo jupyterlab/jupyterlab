@@ -539,12 +539,12 @@ export namespace Dialog {
   /**
    * The body input types.
    */
-  export type Body<T> = IBodyWidget<T> | React.ReactElement<any> | string;
+  export type Body<T> = IBodyWidget<T> | React.ReactElement<unknown> | string;
 
   /**
    * The header input types.
    */
-  export type Header = React.ReactElement<any> | string;
+  export type Header = React.ReactElement<unknown> | string;
 
   /**
    * A widget used as a dialog body.
@@ -637,7 +637,7 @@ export namespace Dialog {
     /**
      * Error message
      */
-    message: string | React.ReactElement<any>;
+    message: string | React.ReactElement<unknown>;
   }
 
   /**
@@ -727,7 +727,7 @@ export namespace Dialog {
      *
      * @returns A widget for the body.
      */
-    createBody(body: Body<any>): Widget;
+    createBody(body: Body<unknown>): Widget;
 
     /**
      * Create the footer of the dialog.
@@ -913,7 +913,7 @@ export namespace Dialog {
      *
      * @returns A widget for the body.
      */
-    createBody(value: Body<any>): Widget {
+    createBody(value: Body<unknown>): Widget {
       const styleReactWidget = (widget: ReactWidget) => {
         if (widget.renderPromise !== undefined) {
           widget.renderPromise
@@ -1100,7 +1100,7 @@ export namespace Dialog {
   /**
    * The dialog widget tracker.
    */
-  export const tracker = new WidgetTracker<Dialog<any>>({
+  export const tracker = new WidgetTracker<Dialog<unknown>>({
     namespace: '@jupyterlab/apputils:Dialog'
   });
 }
@@ -1112,7 +1112,7 @@ namespace Private {
   /**
    * The queue for launching dialogs.
    */
-  export const launchQueue: Promise<Dialog.IResult<any>>[] = [];
+  export const launchQueue: Promise<Dialog.IResult<unknown>>[] = [];
 
   export const errorMessagePromiseCache: Map<string, Promise<void>> = new Map();
 

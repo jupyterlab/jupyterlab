@@ -368,7 +368,7 @@ export namespace CodeEditor {
     /**
      * Set config options for the editor.
      */
-    setOptions(options: Record<string, any>): void;
+    setOptions(options: Record<string, unknown>): void;
 
     /**
      * Inject an extension into the editor
@@ -523,7 +523,7 @@ export namespace CodeEditor {
     /**
      * The configuration options for the editor.
      */
-    config?: Record<string, any>;
+    config?: Record<string, unknown>;
 
     /**
      * List of editor extensions to be added.

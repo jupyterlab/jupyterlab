@@ -4,6 +4,7 @@ module.exports = {
     project: 'tsconfig.eslint.json'
   },
   rules: {
-    'jest/no-done-callback': 'off'
+    'jest/no-done-callback': 'off',
+    '@typescript-eslint/no-explicit-any': 'off'
   }
 };

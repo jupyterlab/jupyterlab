@@ -16,7 +16,7 @@ import {
 } from 'vscode-languageserver-protocol';
 
 interface IFlexibleServerCapabilities extends ServerCapabilities {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

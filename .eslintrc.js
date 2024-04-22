@@ -31,7 +31,22 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   overrides: [
     {
-      files: ['packages/**/*.spec.ts', 'testutils/**/*.spec.ts'],
+      files: [
+        'buildutils/**/*.ts',
+        'builder/**/*.ts',
+        'examples/**/*.ts',
+        'packages/testing/**/*.ts'
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off'
+      }
+    },
+    {
+      files: [
+        'packages/**/*.spec.ts',
+        'packages/**/*.spec.tsx',
+        'testutils/**/*.spec.ts'
+      ],
       plugins: ['jest'],
       extends: ['plugin:jest/recommended'],
       rules: {
@@ -42,7 +57,8 @@ module.exports = {
           {
             additionalTestBlockFunctions: ['it']
           }
-        ]
+        ],
+        '@typescript-eslint/no-explicit-any': 'off'
       }
     }
   ],
@@ -60,7 +76,10 @@ module.exports = {
     ],
     '@typescript-eslint/no-unused-vars': ['warn', { args: 'none' }],
     '@typescript-eslint/no-use-before-define': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-explicit-any': [
+      'error',
+      { fixToUnknown: true, ignoreRestArgs: true }
+    ],
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/no-namespace': 'off',
     '@typescript-eslint/interface-name-prefix': 'off',

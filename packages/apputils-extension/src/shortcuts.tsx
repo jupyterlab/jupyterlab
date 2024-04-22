@@ -158,7 +158,7 @@ export function displayShortcuts(options: IOptions) {
   }
 
   // Display shortcuts by group
-  const bindingTable: any = [];
+  const bindingTable = [];
   for (let d = 0; d <= maxDistance; d++) {
     if (groupedBindings.has(d)) {
       bindingTable.push(

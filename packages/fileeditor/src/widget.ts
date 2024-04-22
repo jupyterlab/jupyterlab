@@ -198,7 +198,7 @@ export namespace FileEditor {
   /**
    * File editor default configuration.
    */
-  export const defaultEditorConfig: Record<string, any> = {
+  export const defaultEditorConfig: Record<string, unknown> = {
     lineNumbers: true,
     scrollPastEnd: true
   };

@@ -406,7 +406,7 @@ function activateTsv(
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [csv, tsv];
+const plugins: JupyterFrontEndPlugin<unknown>[] = [csv, tsv];
 export default plugins;
 
 /**

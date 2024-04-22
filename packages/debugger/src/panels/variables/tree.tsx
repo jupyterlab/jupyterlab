@@ -252,7 +252,7 @@ const TreeButtons = (props: ITreeButtonsProps): JSX.Element => {
           !commands.isEnabled(Debugger.CommandIDs.renderMimeVariable, {
             name: variable.name,
             frameID: service.model.callstack.frame?.id
-          } as any)
+          })
         }
         onClick={e => {
           if (!variable || !handleSelectVariable) {
@@ -264,7 +264,7 @@ const TreeButtons = (props: ITreeButtonsProps): JSX.Element => {
             .execute(Debugger.CommandIDs.renderMimeVariable, {
               name: variable.name,
               frameID: service.model.callstack.frame?.id
-            } as any)
+            })
             .catch(reason => {
               console.error(
                 `Failed to render variable ${variable?.name}`,

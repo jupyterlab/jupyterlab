@@ -611,8 +611,9 @@ namespace Private {
       ]);
       Xterm_ = xterm_.Terminal;
       FitAddon_ = fitAddon_.FitAddon;
-      Renderer_ =
-        (renderer_ as any).WebglAddon ?? (renderer_ as any).CanvasAddon;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const anyRenderer = renderer_ as any;
+      Renderer_ = anyRenderer.WebglAddon ?? anyRenderer.CanvasAddon;
       WeblinksAddon_ = weblinksAddon_.WebLinksAddon;
     }
 

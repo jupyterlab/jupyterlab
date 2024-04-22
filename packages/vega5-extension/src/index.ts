@@ -119,7 +119,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     const loader = vega.vega.loader({
       http: { credentials: 'same-origin' }
     });
-    const sanitize = async (uri: string, options: any) => {
+    const sanitize = async (uri: string, options: unknown) => {
       // Use the resolver for any URIs it wants to handle
       const resolver = this._resolver;
       if (resolver?.isLocal && resolver.isLocal(uri)) {
@@ -147,7 +147,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
       typeof embedOptions.scaleFactor === 'number'
         ? embedOptions.scaleFactor
         : embedOptions.scaleFactor
-        ? (embedOptions.scaleFactor as any).png
+        ? embedOptions.scaleFactor.png
         : embedOptions.scaleFactor
     );
     model.setData({

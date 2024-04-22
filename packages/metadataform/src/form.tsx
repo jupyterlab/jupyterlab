@@ -41,6 +41,7 @@ export class FormWidget extends ReactWidget {
       <FormComponent
         validator={validatorAjv8}
         schema={this._props.properties as JSONSchema7}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         formData={this._props.formData as Record<string, any>}
         formContext={formContext}
         uiSchema={this._props.uiSchema}

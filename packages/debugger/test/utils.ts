@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 // Utils inspired by: packages/services/test/utils.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ServerConnection } from '@jupyterlab/services';
 
