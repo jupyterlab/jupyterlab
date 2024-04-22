@@ -161,7 +161,9 @@ describe('@jupyterlab/observables', () => {
         list.pushAll(items);
         list.move(1, 2);
         list.undo();
-        expect((list.get(1) as any)['count']).toBe((items[1] as any)['count']);
+        expect((list.get(1) as unknown)['count']).toBe(
+          (items[1] as unknown)['count']
+        );
       });
     });
 
@@ -218,7 +220,9 @@ describe('@jupyterlab/observables', () => {
         list.move(1, 2);
         list.undo();
         list.redo();
-        expect((list.get(2) as any)['count']).toBe((items[1] as any)['count']);
+        expect((list.get(2) as unknown)['count']).toBe(
+          (items[1] as unknown)['count']
+        );
       });
     });
 

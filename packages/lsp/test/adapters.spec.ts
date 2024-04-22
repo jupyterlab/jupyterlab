@@ -58,7 +58,7 @@ spy.mockImplementation((status, method, setting) => {
       specs,
       version: 2
     })
-  }) as any;
+  }) as unknown;
 });
 
 describe('@jupyterlab/lsp', () => {
@@ -178,7 +178,7 @@ describe('@jupyterlab/lsp', () => {
         model: new CodeEditor.Model()
       });
 
-      const promise = new PromiseDelegate<any>();
+      const promise = new PromiseDelegate<unknown>();
 
       const adapter = new EditorAdapter({
         editor: {
@@ -371,7 +371,7 @@ async function createAdapter(
 
 class MockWidgetLSPAdapter extends WidgetLSPAdapter {
   constructor(
-    public widget: any,
+    public widget: unknown,
     protected options: IAdapterOptions
   ) {
     super(widget, options);
@@ -406,7 +406,7 @@ class MockWidgetLSPAdapter extends WidgetLSPAdapter {
   }
 
   createVirtualDocument(): VirtualDocument {
-    return new VirtualDocument({} as any);
+    return new VirtualDocument({} as unknown);
   }
 
   getEditorIndexAt(position: IVirtualPosition): number {

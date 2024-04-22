@@ -309,10 +309,10 @@ describe('@jupyterlab/apputils', () => {
           kernelPreference: { name: specsManager.specs?.default }
         });
 
-        (mockManager as any).running = () => {
+        (mockManager as unknown).running = () => {
           return [{ path }];
         };
-        (mockManager as any).connectTo = () => {
+        (mockManager as unknown).connectTo = () => {
           throw new Error('mock error');
         };
 
@@ -513,7 +513,7 @@ describe('@jupyterlab/apputils', () => {
       it('should return a matching language', () => {
         const spec =
           specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
-        const kernelspecs: any = {};
+        const kernelspecs: unknown = {};
 
         kernelspecs[spec.name] = spec;
         expect(
@@ -530,7 +530,7 @@ describe('@jupyterlab/apputils', () => {
       it('should return null if a language matches twice', () => {
         const spec =
           specsManager.specs!.kernelspecs[specsManager.specs!.default]!;
-        const kernelspecs: any = {};
+        const kernelspecs: unknown = {};
 
         kernelspecs['foo'] = spec;
         kernelspecs['bar'] = spec;

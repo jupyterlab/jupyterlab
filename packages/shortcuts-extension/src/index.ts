@@ -176,7 +176,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
       });
 
       const component: IFormRenderer = {
-        fieldRenderer: (props: any) => {
+        fieldRenderer: (props: unknown) => {
           return renderShortCut({
             external: getExternalForJupyterLab(
               registry,
@@ -209,7 +209,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
           loaded[plugin] = shortcuts;
           return shortcuts;
         })
-        .concat([cannonicalOverrides as any[]])
+        .concat([cannonicalOverrides as unknown[]])
         .reduce((acc, val) => {
           if (Platform.IS_MAC) {
             return acc.concat(val);

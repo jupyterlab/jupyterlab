@@ -106,7 +106,7 @@ async function setToolbarItems(
       schema.properties![propertyId].default =
         SettingRegistry.reconcileToolbarItems(
           pluginDefaults,
-          schema.properties![propertyId].default as any[],
+          schema.properties![propertyId].default as unknown[],
           true
         )!.sort(
           (a, b) =>
@@ -182,7 +182,7 @@ async function setToolbarItems(
   // React to customization by the user
   settings.changed.connect(() => {
     const newItems: ISettingRegistry.IToolbarItem[] =
-      (settings.composite[propertyId] as any) ?? [];
+      (settings.composite[propertyId] as unknown) ?? [];
 
     transferSettings(newItems);
   });
@@ -196,7 +196,7 @@ async function setToolbarItems(
   };
 
   // Initialize the toolbar
-  transferSettings((settings.composite[propertyId] as any) ?? []);
+  transferSettings((settings.composite[propertyId] as unknown) ?? []);
 
   // React to plugin changes if no other transformer exists, otherwise bail.
   if (!listenPlugin) {
@@ -254,7 +254,7 @@ export function createToolbarFactory(
   propertyId: string = 'toolbar'
 ): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
   const items = new ObservableList<ISettingRegistry.IToolbarItem>({
-    itemCmp: (a, b) => JSONExt.deepEqual(a as any, b as any)
+    itemCmp: (a, b) => JSONExt.deepEqual(a as unknown, b as unknown)
   });
 
   // Get toolbar definition from the settings

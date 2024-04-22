@@ -39,19 +39,25 @@ export async function requestTranslationsAPI<T>(
     throw new ServerConnection.NetworkError(error);
   }
 
-  let data: any = await response.text();
+  const data = await response.text();
+  let parsed: T | null = null;
 
   if (data.length > 0) {
     try {
-      data = JSON.parse(data);
+      parsed = JSON.parse(data);
     } catch (error) {
-      console.error('Not a JSON response body.', response);
+      throw new ServerConnection.ResponseError(
+        response,
+        'Not a JSON response body'
+      );
     }
+  } else {
+    throw new ServerConnection.ResponseError(response, 'Empty response');
   }
 
   if (!response.ok) {
-    throw new ServerConnection.ResponseError(response, data.message || data);
+    throw new ServerConnection.ResponseError(response, data);
   }
 
-  return data;
+  return parsed!;
 }

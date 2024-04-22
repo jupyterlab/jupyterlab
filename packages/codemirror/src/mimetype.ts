@@ -22,7 +22,7 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
   getMimeTypeByLanguage(info: nbformat.ILanguageInfoMetadata): string {
     const ext = info.file_extension || '';
     const mode = this.languages.findBest(
-      (info.codemirror_mode as any) || {
+      (info.codemirror_mode as unknown) || {
         mimetype: info.mimetype,
         name: info.name,
         ext: [ext.split('.').slice(-1)[0]]

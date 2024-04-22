@@ -58,7 +58,7 @@ describe('csvviewer/toolbar', () => {
         const widget = new CSVDelimiter({ widget: viewer });
         const wanted = DELIMITERS[1];
         widget.selectNode.value = wanted;
-        widget.handleEvent({ type: 'change' } as any);
+        widget.handleEvent({ type: 'change' } as unknown);
         expect(viewer.delimiter).toBe(wanted);
         widget.dispose();
       });

@@ -58,7 +58,7 @@ describe('@jupyterlab/shortcut-extension', () => {
         data,
         id: SHORTCUT_PLUGIN_ID,
         raw: '{}',
-        schema: pluginSchema as any,
+        schema: pluginSchema as unknown,
         version: 'test'
       };
       const connector: IDataConnector<ISettingRegistry.IPlugin, string> = {
@@ -69,7 +69,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       };
       const settings = new DummySettings({
         registry: new SettingRegistry({ connector }),
-        plugin: plugin as any
+        plugin: plugin as unknown
       });
       const ready = new PromiseDelegate<void>();
       const element = React.createElement(ShortcutUI, {
@@ -87,7 +87,7 @@ describe('@jupyterlab/shortcut-extension', () => {
           },
           translator: nullTranslator,
           commandRegistry,
-          actionRequested: new Signal<unknown, any>({})
+          actionRequested: new Signal<unknown, unknown>({})
         }
       });
       const rootElement = document.createElement('div');

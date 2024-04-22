@@ -24,7 +24,7 @@ import {
 
 type Dict<T> = { [key: string]: T };
 
-type CoreData = Map<string, any>;
+type CoreData = Map<string, unknown>;
 
 // URL config for this branch
 // Source and target branches
@@ -305,7 +305,7 @@ const SKIP_CSS: Dict<string[]> = {
   ]
 };
 
-const pkgData: Dict<any> = {};
+const pkgData: Dict<unknown> = {};
 const pkgPaths: Dict<string> = {};
 const pkgNames: Dict<string> = {};
 const depCache: Dict<string> = {};
@@ -467,11 +467,11 @@ function ensureMetaPackage(): string[] {
  * Get the core data for the given core paths.
  */
 function getCoreData(corePaths: string[]): CoreData {
-  const coreData = new Map<string, any>();
+  const coreData = new Map<string, unknown>();
 
   corePaths.forEach(pkgPath => {
     const dataPath = path.join(pkgPath, 'package.json');
-    let data: any;
+    let data: unknown;
     try {
       data = utils.readJSONFile(dataPath);
     } catch (e) {
@@ -487,7 +487,7 @@ function getCoreData(corePaths: string[]): CoreData {
 /**
  * Ensure a core package.
  */
-function ensureCorePackage(corePackage: any, corePaths: string[]) {
+function ensureCorePackage(corePackage: unknown, corePaths: string[]) {
   corePackage.jupyterlab.extensions = {};
   corePackage.dependencies = {};
 
@@ -496,7 +496,7 @@ function ensureCorePackage(corePackage: any, corePaths: string[]) {
 
   corePaths.forEach(pkgPath => {
     const dataPath = path.join(pkgPath, 'package.json');
-    let data: any;
+    let data: unknown;
     try {
       data = utils.readJSONFile(dataPath);
     } catch (e) {
@@ -642,7 +642,7 @@ function ensureJupyterlab(): string[] {
   corePackage.jupyterlab.linkedPackages = {};
   utils.getLernaPaths().forEach(pkgPath => {
     const dataPath = path.join(pkgPath, 'package.json');
-    let data: any;
+    let data: unknown;
     try {
       data = utils.readJSONFile(dataPath);
     } catch (e) {
@@ -726,7 +726,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   // Gather all of our package data and other metadata.
   paths.forEach(pkgPath => {
     // Read in the package.json.
-    let data: any;
+    let data: unknown;
     try {
       data = utils.readJSONFile(path.join(pkgPath, 'package.json'));
     } catch (e) {
@@ -760,7 +760,7 @@ export async function ensureIntegrity(): Promise<boolean> {
         return;
       }
 
-      const depData = graph.getNodeData(depName) as any;
+      const depData = graph.getNodeData(depName) as unknown;
       if (typeof depData.style === 'string') {
         cssData[depName] = [depData.style];
       }
@@ -846,7 +846,7 @@ export async function ensureIntegrity(): Promise<boolean> {
 
   // Handle the top level package.
   const corePath = path.resolve('.', 'package.json');
-  const coreData: any = utils.readJSONFile(corePath);
+  const coreData: unknown = utils.readJSONFile(corePath);
   if (utils.writePackageData(corePath, coreData)) {
     messages['top'] = ['Update package.json'];
   }

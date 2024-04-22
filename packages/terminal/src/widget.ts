@@ -612,7 +612,7 @@ namespace Private {
       Xterm_ = xterm_.Terminal;
       FitAddon_ = fitAddon_.FitAddon;
       Renderer_ =
-        (renderer_ as any).WebglAddon ?? (renderer_ as any).CanvasAddon;
+        (renderer_ as unknown).WebglAddon ?? (renderer_ as unknown).CanvasAddon;
       WeblinksAddon_ = weblinksAddon_.WebLinksAddon;
     }
 

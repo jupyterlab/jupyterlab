@@ -51,7 +51,7 @@ namespace Private {
           loaded[plugin] = metadataForms;
           return metadataForms;
         })
-        .concat([schema['jupyter.lab.metadataforms'] as any[]])
+        .concat([schema['jupyter.lab.metadataforms'] as unknown[]])
         .reduce((acc, val) => {
           // If a MetadataForm with the same ID already exists,
           // the metadataKeys will be concatenated to this MetadataForm's metadataKeys .

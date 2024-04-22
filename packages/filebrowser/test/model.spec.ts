@@ -267,7 +267,8 @@ describe('filebrowser/model', () => {
 
       it('should be resilient to a slow initial fetch', async () => {
         const delayedServiceManager = new ServiceManagerMock();
-        (delayedServiceManager as any).contents = new DelayedContentsManager();
+        (delayedServiceManager as unknown).contents =
+          new DelayedContentsManager();
         const contents = await delayedServiceManager.contents.newUntitled({
           type: 'directory'
         });

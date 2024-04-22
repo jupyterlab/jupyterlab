@@ -103,7 +103,7 @@ export class Grid extends Panel {
    *
    * @param message - The `after-attach` message.
    */
-  protected onAfterAttach(message: any): void {
+  protected onAfterAttach(message: unknown): void {
     super.onAfterAttach(message);
     this._updateStyles();
   }
@@ -209,7 +209,7 @@ export class GridModel extends DataModel {
    * @param row The datagrid row
    * @param column The datagrid column
    */
-  data(region: DataModel.CellRegion, row: number, column: number): any {
+  data(region: DataModel.CellRegion, row: number, column: number): unknown {
     if (region === 'row-header') {
       return this._data.name[row];
     }

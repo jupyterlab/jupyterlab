@@ -192,7 +192,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Handle a change in the kernel by updating the document metadata.
    */
   private _onKernelChanged(
-    sender: any,
+    sender: unknown,
     args: Session.ISessionConnection.IKernelChangedArgs
   ): void {
     if (!this.model || !args.newValue) {

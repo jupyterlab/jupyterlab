@@ -10,6 +10,6 @@
 declare module 'vega-statistics' {
   export function quartiles(
     array: number[],
-    accessor?: (t: any) => number
+    accessor?: (t: unknown) => number
   ): [number, number, number];
 }

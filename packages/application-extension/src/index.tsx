@@ -795,7 +795,7 @@ const dirty: JupyterFrontEndPlugin<void> = {
     // https://developer.mozilla.org/en/docs/Web/Events/beforeunload
     window.addEventListener('beforeunload', event => {
       if (app.status.isDirty) {
-        return ((event as any).returnValue = message);
+        return ((event as unknown).returnValue = message);
       }
     });
   }
@@ -831,7 +831,7 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
       .load(shell.id)
       .then(settings => {
         // Add a layer of customization to support app shell mode
-        const customizedLayout = settings.composite['layout'] as any;
+        const customizedLayout = settings.composite['layout'] as unknown;
 
         // Restore the layout.
         void labShell
@@ -864,7 +864,7 @@ const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
           {
             single: labShell.userLayout['single-document'],
             multiple: labShell.userLayout['multiple-document']
-          } as any
+          } as unknown
         )
       ) {
         const result = await showDialog({
@@ -1273,7 +1273,7 @@ const modeSwitchPlugin: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   contextMenuPlugin,
   dirty,
   main,
@@ -1354,7 +1354,7 @@ namespace Private {
       // to define their default value.
       schema.properties!.contextMenu.default = SettingRegistry.reconcileItems(
         pluginDefaults,
-        schema.properties!.contextMenu.default as any[],
+        schema.properties!.contextMenu.default as unknown[],
         true
       )!
         // flatten one level
@@ -1410,7 +1410,7 @@ namespace Private {
     const settings = await registry.load(pluginId);
 
     const contextItems: ISettingRegistry.IContextMenuItem[] =
-      (settings.composite.contextMenu as any) ?? [];
+      (settings.composite.contextMenu as unknown) ?? [];
 
     // Create menu item for non-disabled element
     SettingRegistry.filterDisabledItems(contextItems).forEach(item => {
@@ -1428,7 +1428,7 @@ namespace Private {
     settings.changed.connect(() => {
       // As extension may change the context menu through API,
       // prompt the user to reload if the menu has been updated.
-      const newItems = (settings.composite.contextMenu as any) ?? [];
+      const newItems = (settings.composite.contextMenu as unknown) ?? [];
       if (!JSONExt.deepEqual(contextItems, newItems)) {
         void displayInformation(trans);
       }
@@ -1519,7 +1519,7 @@ namespace Private {
             .set('layout', {
               single: newLayout['single-document'],
               multiple: newLayout['multiple-document']
-            } as any)
+            } as unknown)
             .catch(reason => {
               console.error(
                 'Failed to save user layout customization.',

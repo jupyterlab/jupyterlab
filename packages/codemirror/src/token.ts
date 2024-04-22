@@ -58,7 +58,7 @@ export interface IExtensionsHandler extends IDisposable {
    *
    * It should result in a call to `IExtensionsHandler.reconfigureExtensions`.
    */
-  readonly configChanged: ISignal<this, Record<string, any>>;
+  readonly configChanged: ISignal<this, Record<string, unknown>>;
 
   /**
    * Get a config option for the editor.
@@ -89,7 +89,7 @@ export interface IExtensionsHandler extends IDisposable {
    * the costly update at the end, and not after every option
    * is set.
    */
-  setOptions(options: Record<string, any>): void;
+  setOptions(options: Record<string, unknown>): void;
 
   /**
    * Returns the list of initial extensions of an editor.
@@ -126,7 +126,7 @@ export interface IExtensionsHandler extends IDisposable {
    */
   reconfigureExtensions(
     view: EditorView,
-    configuration: Record<string, any>
+    configuration: Record<string, unknown>
   ): void;
 }
 
@@ -197,7 +197,7 @@ export interface IEditorExtensionRegistry {
    *
    * This is the default configuration.
    */
-  readonly baseConfiguration: Record<string, any>;
+  readonly baseConfiguration: Record<string, unknown>;
 
   /**
    * Add a default editor extension
@@ -217,7 +217,7 @@ export interface IEditorExtensionRegistry {
       /**
        * The configuration options for the editor.
        */
-      config?: Record<string, any>;
+      config?: Record<string, unknown>;
     }
   ): IExtensionsHandler;
 }

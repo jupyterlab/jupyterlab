@@ -31,7 +31,7 @@ class TestConnector extends StateDB {
     return { id, data: { composite, user }, raw, schema, version };
   }
 
-  async list(): Promise<any> {
+  async list(): Promise<unknown> {
     return Promise.reject('list method not implemented');
   }
 }
@@ -139,7 +139,7 @@ describe('@jupyterlab/settingregistry', () => {
 
         connector.schemas[id] = { type: 'object' };
         let called = false;
-        registry.pluginChanged.connect((sender: any, plugin: string) => {
+        registry.pluginChanged.connect((sender: unknown, plugin: string) => {
           expect(id).toBe(plugin);
           called = true;
         });

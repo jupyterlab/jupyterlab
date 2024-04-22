@@ -189,7 +189,7 @@ export async function ensurePackage(
     const sourceFile = ts.createSourceFile(
       fileName,
       fs.readFileSync(fileName).toString(),
-      (ts.ScriptTarget as any).ES6,
+      (ts.ScriptTarget as unknown).ES6,
       /* setParentNodes */ true
     );
     imports = imports.concat(getImports(sourceFile));
@@ -819,7 +819,7 @@ export interface IEnsurePackageOptions {
   /**
    * The package data.
    */
-  data: any;
+  data: unknown;
 
   /**
    * The cache of dependency versions by package.
@@ -930,7 +930,7 @@ function getImports(sourceFile: ts.SourceFile): string[] {
   const imports: string[] = [];
   handleNode(sourceFile);
 
-  function handleNode(node: any): void {
+  function handleNode(node: unknown): void {
     switch (node.kind) {
       case ts.SyntaxKind.ImportDeclaration:
         imports.push(node.moduleSpecifier.text);

@@ -17,7 +17,7 @@ describe('completer/default/kernelprovider', () => {
     const kernel = new KernelMock({});
     const connection = new SessionConnectionMock({}, kernel);
     const context: ICompletionContext = {
-      widget: null as any,
+      widget: null as unknown,
       session: connection
     };
 

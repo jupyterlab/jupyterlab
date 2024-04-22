@@ -83,7 +83,7 @@ export namespace benchmark {
   /**
    * Benchmark test record
    */
-  export interface IRecord extends Record<string, any> {
+  export interface IRecord extends Record<string, unknown> {
     /**
      * Test kind
      */
@@ -289,9 +289,9 @@ interface IMetadata {
    * System information
    */
   systemInformation: {
-    cpu: Record<string, any>;
-    mem: Record<string, any>;
-    osInfo: Record<string, any>;
+    cpu: Record<string, unknown>;
+    mem: Record<string, unknown>;
+    osInfo: Record<string, unknown>;
   };
 }
 
@@ -391,7 +391,7 @@ class BenchmarkReporter implements Reporter {
           .map(raw => {
             const json = JSON.parse(
               raw.body?.toString() ?? '{}'
-            ) as any as benchmark.IRecord;
+            ) as unknown as benchmark.IRecord;
             return { ...json, reference: this._reference };
           })
       );
@@ -473,7 +473,7 @@ class BenchmarkReporter implements Reporter {
       const graphConfigFile = path.resolve(outputDir, `${baseName}.vl.json`);
       const config = this._buildVegaLiteGraph(allData, this._comparison);
       fs.writeFileSync(graphConfigFile, JSON.stringify(config), 'utf-8');
-      const vegaSpec = vl.compile(config as any).spec;
+      const vegaSpec = vl.compile(config as unknown).spec;
 
       const view = new vega.View(vega.parse(vegaSpec), {
         renderer: 'svg'
@@ -677,7 +677,7 @@ class BenchmarkReporter implements Reporter {
   protected defaultVegaLiteConfigFactory(
     allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project' = 'snapshot'
-  ): Record<string, any> {
+  ): Record<string, unknown> {
     const config = generateVegaLiteSpec(
       [...new Set(allData.map(d => d.test))],
       comparison == 'snapshot' ? 'reference' : 'project',
@@ -687,7 +687,7 @@ class BenchmarkReporter implements Reporter {
     return config;
   }
 
-  protected async getMetadata(browser?: string): Promise<any> {
+  protected async getMetadata(browser?: string): Promise<unknown> {
     const cpu = await si.cpu();
     // Keep only non-variable value
     const totalMemory = (await si.mem()).total;
@@ -747,7 +747,7 @@ class BenchmarkReporter implements Reporter {
   private _buildVegaLiteGraph: (
     allData: Array<IReportRecord>,
     comparison: 'snapshot' | 'project'
-  ) => Record<string, any>;
+  ) => Record<string, unknown>;
   private _buildTextReport: (
     allData: Array<IReportRecord>
   ) => Promise<[string, string]>;

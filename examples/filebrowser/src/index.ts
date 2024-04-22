@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-(window as any).__webpack_public_path__ = URLExt.join(
+(window as unknown).__webpack_public_path__ = URLExt.join(
   PageConfig.getBaseUrl(),
   'example/'
 );
@@ -109,7 +109,7 @@ function createApp(
     load: async () => {
       const m = await import('@codemirror/lang-markdown');
       return m.markdown({
-        codeLanguages: (info: string) => languages.findBest(info) as any
+        codeLanguages: (info: string) => languages.findBest(info) as unknown
       });
     }
   });

@@ -47,7 +47,7 @@ export class MathJaxTypesetter implements ILatexTypesetter {
   /**
    * Get an instance of the MathDocument object.
    */
-  async mathDocument(): Promise<MathDocument<any, any, any>> {
+  async mathDocument(): Promise<MathDocument<unknown, unknown, unknown>> {
     await this._ensureInitialized();
     return this._mathDocument;
   }
@@ -69,7 +69,7 @@ export class MathJaxTypesetter implements ILatexTypesetter {
   }
 
   protected _initialized: boolean = false;
-  protected _mathDocument: MathDocument<any, any, any>;
+  protected _mathDocument: MathDocument<unknown, unknown, unknown>;
 }
 
 /**
@@ -85,7 +85,7 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
     app.commands.addCommand(CommandIDs.copy, {
       execute: async () => {
         const md = await typesetter.mathDocument();
-        const oJax: any = md.outputJax;
+        const oJax: unknown = md.outputJax;
         await navigator.clipboard.writeText(oJax.math.math);
       },
       label: 'MathJax Copy Latex'
@@ -113,10 +113,12 @@ export default mathJaxPlugin;
  * A namespace for module-private functionality.
  */
 namespace Private {
-  let _loading: PromiseDelegate<MathDocument<any, any, any>> | null = null;
+  let _loading: PromiseDelegate<
+    MathDocument<unknown, unknown, unknown>
+  > | null = null;
 
   export async function ensureMathDocument(): Promise<
-    MathDocument<any, any, any>
+    MathDocument<unknown, unknown, unknown>
   > {
     if (!_loading) {
       _loading = new PromiseDelegate();
@@ -150,7 +152,7 @@ namespace Private {
       );
 
       class EmptyFont extends TeXFont {
-        protected static defaultFonts = {} as any;
+        protected static defaultFonts = {} as unknown;
       }
 
       const chtml = new CHTML({

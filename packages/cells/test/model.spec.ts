@@ -108,7 +108,7 @@ describe('cells/model', () => {
       it('should signal when model state has changed', () => {
         const model = new CodeCellModel();
         let called = false;
-        const listener = (sender: any, args: IChangedArgs<any>) => {
+        const listener = (sender: unknown, args: IChangedArgs<unknown>) => {
           if (args.name == 'executionCount') {
             // eslint-disable-next-line jest/no-conditional-expect
             expect(args.newValue).toBe(1);
@@ -160,7 +160,7 @@ describe('cells/model', () => {
     describe('#metadataChanged', () => {
       it('should signal when model metadata has changed', () => {
         const model = new CodeCellModel();
-        const listener = (sender: any, args: any) => {
+        const listener = (sender: unknown, args: unknown) => {
           value = args.newValue;
         };
         let value = '';
@@ -562,7 +562,7 @@ describe('cells/model', () => {
         const serialized = model.toJSON();
         expect(serialized).not.toBe(cell);
         expect(serialized).toEqual(cell);
-        const output = serialized.outputs[0] as any;
+        const output = serialized.outputs[0] as unknown;
         expect(output.data['application/json']['bar']).toBe(1);
       });
     });
@@ -611,8 +611,8 @@ describe('cells/model', () => {
           oldValues: [],
           oldIndex: -1,
           newIndex: 0
-        } as any;
-        model['onOutputsChange'](null as any, newEvent0);
+        } as unknown;
+        model['onOutputsChange'](null as unknown, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(1);
         expect(sharedModel.ymodel.get('outputs').get(0)).toEqual(output0);
 
@@ -622,8 +622,8 @@ describe('cells/model', () => {
           oldValues: [],
           oldIndex: -1,
           newIndex: 1
-        } as any;
-        model['onOutputsChange'](null as any, newEvent1);
+        } as unknown;
+        model['onOutputsChange'](null as unknown, newEvent1);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
         expect(sharedModel.ymodel.get('outputs').get(1)).toEqual(output1);
       });
@@ -641,8 +641,8 @@ describe('cells/model', () => {
           oldValues: [output0],
           oldIndex: 0,
           newIndex: 0
-        } as any;
-        model['onOutputsChange'](null as any, newEvent0);
+        } as unknown;
+        model['onOutputsChange'](null as unknown, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
         expect(sharedModel.ymodel.get('outputs').get(0)).toEqual(output2);
         const newEvent1 = {
@@ -651,8 +651,8 @@ describe('cells/model', () => {
           oldValues: [output1],
           oldIndex: 1,
           newIndex: 1
-        } as any;
-        model['onOutputsChange'](null as any, newEvent1);
+        } as unknown;
+        model['onOutputsChange'](null as unknown, newEvent1);
         expect(sharedModel.ymodel.get('outputs').length).toBe(2);
         expect(sharedModel.ymodel.get('outputs').get(1)).toEqual(output2);
       });
@@ -669,8 +669,8 @@ describe('cells/model', () => {
           oldValues: [output0, output1],
           oldIndex: 0,
           newIndex: 0
-        } as any;
-        model['onOutputsChange'](null as any, newEvent0);
+        } as unknown;
+        model['onOutputsChange'](null as unknown, newEvent0);
         expect(sharedModel.ymodel.get('outputs').length).toBe(0);
       });
     });

@@ -404,8 +404,8 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         'Notification is described by {message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
       execute: args => {
-        const { message, type } = args as any;
-        const options = (args.options as any) ?? {};
+        const { message, type } = args as unknown;
+        const options = (args.options as unknown) ?? {};
 
         return Notification.manager.notify(message, type ?? 'default', {
           ...options,
@@ -442,7 +442,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
         'Notification is described by {id: string, message: string, type?: string, options?: {autoClose?: number | false, actions: {label: string, commandId: string, args?: ReadOnlyJSONObject, caption?: string, className?: string}[], data?: ReadOnlyJSONValue}}.'
       ),
       execute: args => {
-        const { id, message, type, ...options } = args as any;
+        const { id, message, type, ...options } = args as unknown;
 
         return Notification.manager.update({
           id,
@@ -479,7 +479,7 @@ export const notificationPlugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.dismiss, {
       label: trans.__('Dismiss a notification'),
       execute: args => {
-        const { id } = args as any;
+        const { id } = args as unknown;
 
         Notification.manager.dismiss(id);
       }
@@ -842,7 +842,7 @@ namespace Private {
    */
   function ToastButton({ action, closeToast }: IToastButtonProps): JSX.Element {
     const clickHandler = (event: React.MouseEvent): void => {
-      action.callback(event as any);
+      action.callback(event as unknown);
       if (!event.defaultPrevented) {
         closeToast();
       }
@@ -927,12 +927,12 @@ namespace Private {
     const toastOptions = {
       autoClose:
         autoClose ?? (actions && actions.length > 0 ? false : undefined),
-      data: data as any,
+      data: data as unknown,
       className: `jp-Notification-Toast-${type}`,
       toastId,
       type: type === 'in-progress' ? null : type,
       isLoading: type === 'in-progress'
-    } as any;
+    } as unknown;
 
     return t(
       ({ closeToast }: { closeToast?: () => void }) =>

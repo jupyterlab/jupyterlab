@@ -44,7 +44,7 @@ export function untilReady(
  * Convert dotted path into dictionary.
  */
 export function expandDottedPaths(obj: ReadonlyJSONObject): ReadonlyJSONObject {
-  const settings: any = [];
+  const settings: unknown = [];
   for (let key in obj) {
     const parsed = expandPath(key.split('.'), obj[key]);
     settings.push(parsed);
@@ -63,10 +63,10 @@ export const expandPath = (
   path: string[],
   value: ReadonlyJSONValue
 ): ReadonlyJSONObject => {
-  const obj: any = Object.create(null);
+  const obj: unknown = Object.create(null);
 
   let curr = obj;
-  path.forEach((prop: string, i: any) => {
+  path.forEach((prop: string, i: unknown) => {
     curr[prop] = Object.create(null);
 
     if (i === path.length - 1) {

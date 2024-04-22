@@ -8,7 +8,7 @@ export function PluginRequiredMessage(props: {
   plugin: JupyterLab.IPluginInfo;
   dependants: JupyterLab.IPluginInfo[];
   trans: TranslationBundle;
-}): React.ReactElement<any> {
+}): React.ReactElement<unknown> {
   return (
     <>
       {props.trans.__(
@@ -29,7 +29,7 @@ export function PluginInUseMessage(props: {
   plugin: JupyterLab.IPluginInfo;
   optionalDependants: JupyterLab.IPluginInfo[];
   trans: TranslationBundle;
-}): React.ReactElement<any> {
+}): React.ReactElement<unknown> {
   return (
     <div className={'jp-pluginmanager-PluginInUseMessage'}>
       {props.trans.__(

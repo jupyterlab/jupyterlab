@@ -57,7 +57,7 @@ export const commandsPlugin: JupyterFrontEndPlugin<void> = {
       if (!('cmView' in node)) {
         return;
       }
-      return (node.cmView as any).view as EditorView;
+      return (node.cmView as unknown).view as EditorView;
     };
 
     const isEnabled = () => {

@@ -30,7 +30,7 @@ export namespace galata {
    * Default user settings:
    * - Deactivate codemirror cursor blinking to avoid noise in screenshots
    */
-  export const DEFAULT_SETTINGS: Record<string, any> = {
+  export const DEFAULT_SETTINGS: Record<string, unknown> = {
     '@jupyterlab/apputils-extension:notification': {
       checkForUpdates: false,
       fetchNews: 'false'
@@ -47,7 +47,7 @@ export namespace galata {
     }
   };
 
-  export const DEFAULT_DOCUMENTATION_STATE: Record<string, any> = {
+  export const DEFAULT_DOCUMENTATION_STATE: Record<string, unknown> = {
     data: {
       'layout-restorer:data': {
         relativeSizes: [0, 1, 0]
@@ -201,7 +201,7 @@ export namespace galata {
     };
 
     // Proxy playwright page object
-    return new Proxy(jlabPage, handler) as any;
+    return new Proxy(jlabPage, handler) as unknown;
   }
 
   export async function initTestPage(
@@ -229,7 +229,7 @@ export namespace galata {
     // Add server mocks
     if (mockConfig) {
       const config: Record<string, JSONObject> =
-        typeof mockConfig !== 'boolean' ? ({ ...mockConfig } as any) : {};
+        typeof mockConfig !== 'boolean' ? ({ ...mockConfig } as unknown) : {};
       await Mock.mockConfig(page, config);
     }
 
@@ -249,7 +249,7 @@ export namespace galata {
     };
     if (mockState) {
       if (typeof mockState !== 'boolean') {
-        workspace.data = { ...mockState } as any;
+        workspace.data = { ...mockState } as unknown;
       }
       // State will be stored in-memory (after loading the initial version from disk)
       await Mock.mockState(page, workspace);
@@ -267,7 +267,7 @@ export namespace galata {
     };
     if (mockUser) {
       if (typeof mockUser !== 'boolean') {
-        user = { ...mockUser } as any;
+        user = { ...mockUser } as unknown;
       }
       // The user will be stored in-memory
       await Mock.mockUser(page, user);
@@ -581,7 +581,7 @@ export namespace galata {
      */
     export async function freezeContentLastModified(
       page: Page,
-      filter?: <T = any>(directoryList: T[]) => T[]
+      filter?: <T = unknown>(directoryList: T[]) => T[]
     ): Promise<void> {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;
@@ -618,7 +618,7 @@ export namespace galata {
               }
               const now = Date.now();
               const aDayAgo = new Date(now - 24 * 3600 * 1000).toISOString();
-              for (const entry of data['content'] as any[]) {
+              for (const entry of data['content'] as unknown[]) {
                 // Mutate the list in-place
                 entry['last_modified'] = aDayAgo;
               }
@@ -789,7 +789,7 @@ export namespace galata {
      */
     export function mockRunners(
       page: Page,
-      runners: Map<string, any>,
+      runners: Map<string, unknown>,
       type: 'sessions' | 'terminals'
     ): Promise<void> {
       const routeRegex =
@@ -866,7 +866,7 @@ export namespace galata {
                 }
                 break;
               }
-              const data = (await response.json()) as any[];
+              const data = (await response.json()) as unknown[];
               const updated = new Set<string>();
               data.forEach(item => {
                 const itemID: string =
@@ -940,7 +940,7 @@ export namespace galata {
                 status: type === 'sessions' ? 201 : 200,
                 body: JSON.stringify(data),
                 contentType: 'application/json',
-                headers: response.headers as any
+                headers: response.headers as unknown
               });
             }
             break;
@@ -1009,7 +1009,7 @@ export namespace galata {
     export function mockSettings(
       page: Page,
       settings: ISettingRegistry.IPlugin[],
-      mockedSettings: Record<string, any>
+      mockedSettings: Record<string, unknown>
     ): Promise<void> {
       // Listen for closing connection (may happen when request are still being processed)
       let isClosed = false;

@@ -402,7 +402,7 @@ export class ShortcutUI
         });
       }
     }
-    await settings.set('shortcuts', newUserShortcuts as any);
+    await settings.set('shortcuts', newUserShortcuts as unknown);
     await this._refreshShortcutList();
   }
 

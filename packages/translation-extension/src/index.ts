@@ -126,7 +126,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 
         const serverSettings = app.serviceManager.serverSettings;
         // Get list of available locales
-        requestTranslationsAPI<any>('', '', {}, serverSettings)
+        requestTranslationsAPI<unknown>('', '', {}, serverSettings)
           .then(data => {
             for (const locale in data['data']) {
               const value = data['data'][locale];
@@ -202,5 +202,5 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [translator, langMenu];
+const plugins: JupyterFrontEndPlugin<unknown>[] = [translator, langMenu];
 export default plugins;

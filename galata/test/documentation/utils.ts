@@ -13,7 +13,7 @@ import path from 'path';
  * @param array Array of content models
  * @returns Filtered array
  */
-export function filterContent(array: any[]): any[] {
+export function filterContent(array: unknown[]): unknown[] {
   return array.filter(
     item =>
       item['type'] !== 'directory' ||

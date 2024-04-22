@@ -120,7 +120,7 @@ describe('ServerConnection', () => {
         const error = await ServerConnection.ResponseError.create({
           ...response,
           json: () => Promise.resolve(response.body ?? {})
-        } as any);
+        } as unknown);
 
         expect(error.message).toEqual(
           response.body?.message ?? 'Invalid response: 456 Dummy error'

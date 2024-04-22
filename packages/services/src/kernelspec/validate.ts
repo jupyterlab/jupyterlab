@@ -1,13 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import type { PartialJSONObject } from '@lumino/coreutils';
 import { ISpecModel, ISpecModels } from './restapi';
 import { validateProperty } from '../validate';
 
 /**
  * Validate a server kernelspec model to a client side model.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
 export function validateSpecModel(data: any): ISpecModel {
   const spec = data.spec;
   if (!spec) {
@@ -19,13 +20,13 @@ export function validateSpecModel(data: any): ISpecModel {
   validateProperty(spec, 'display_name', 'string');
   validateProperty(spec, 'argv', 'array');
 
-  let metadata: any = null;
+  let metadata: PartialJSONObject | undefined = undefined;
   if (spec.hasOwnProperty('metadata')) {
     validateProperty(spec, 'metadata', 'object');
     metadata = spec.metadata;
   }
 
-  let env: any = null;
+  let env: PartialJSONObject | undefined = undefined;
   if (spec.hasOwnProperty('env')) {
     validateProperty(spec, 'env', 'object');
     env = spec.env;
@@ -44,7 +45,7 @@ export function validateSpecModel(data: any): ISpecModel {
 /**
  * Validate a `Kernel.ISpecModels` object.
  */
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
 export function validateSpecModels(data: any): ISpecModels {
   if (!data.hasOwnProperty('kernelspecs')) {
     throw new Error('No kernelspecs found');

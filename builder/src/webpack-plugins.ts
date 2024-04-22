@@ -54,7 +54,7 @@ export namespace WPPlugin {
    * (the non-exported) webpack.IgnoringWatchFileSystem
    */
   class FilterIgnoringWatchFileSystem {
-    constructor(wfs: any, ignored: (path: string) => boolean) {
+    constructor(wfs: unknown, ignored: (path: string) => boolean) {
       this.wfs = wfs;
 
       // ignored should be a callback function that filters the build files
@@ -62,13 +62,13 @@ export namespace WPPlugin {
     }
 
     watch(
-      files: any,
-      dirs: any,
-      missing: any,
-      startTime: any,
-      options: any,
-      callback: any,
-      callbackUndelayed: any
+      files: unknown,
+      dirs: unknown,
+      missing: unknown,
+      startTime: unknown,
+      options: unknown,
+      callback: unknown,
+      callbackUndelayed: unknown
     ) {
       files = Array.from(files);
       dirs = Array.from(dirs);
@@ -83,11 +83,11 @@ export namespace WPPlugin {
         startTime,
         options,
         (
-          err: any,
-          fileTimestamps: any,
-          dirTimestamps: any,
-          changedFiles: any,
-          removedFiles: any
+          err: unknown,
+          fileTimestamps: unknown,
+          dirTimestamps: unknown,
+          changedFiles: unknown,
+          removedFiles: unknown
         ) => {
           if (err) return callback(err);
           for (const path of ignoredFiles) {
@@ -130,7 +130,7 @@ export namespace WPPlugin {
     }
 
     ignored: (path: string) => boolean;
-    wfs: any;
+    wfs: unknown;
   }
 
   /**

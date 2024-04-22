@@ -117,9 +117,9 @@ export function emitIopubMessage(
 ): void {
   const kernel = context!.session!.kernel!;
   const msgId = Private.lastMessageProperty.get(kernel);
-  (msg.parent_header as any).session = kernel.clientId;
-  (msg.parent_header as any).msg_id = msgId;
-  (kernel.iopubMessage as any).emit(msg);
+  (msg.parent_header as unknown).session = kernel.clientId;
+  (msg.parent_header as unknown).msg_id = msgId;
+  (kernel.iopubMessage as unknown).emit(msg);
 }
 
 /**
@@ -134,8 +134,8 @@ export function updateKernelStatus(
   newStatus: KernelMessage.Status
 ): void {
   const kernel = sessionContext.session!.kernel!;
-  (kernel as any).status = newStatus;
-  (sessionContext.statusChanged as any).emit(newStatus);
+  (kernel as unknown).status = newStatus;
+  (sessionContext.statusChanged as unknown).emit(newStatus);
   const msg = KernelMessage.createMessage({
     session: kernel.clientId,
     channel: 'iopub',
@@ -218,16 +218,16 @@ export const SessionContextMock = jest.fn<
   });
 
   session!.pendingInput.connect((_, args) => {
-    (thisObject as any).pendingInput = args;
+    (thisObject as unknown).pendingInput = args;
   });
 
-  (thisObject as any).statusChanged = statusChangedSignal;
-  (thisObject as any).kernelChanged = kernelChangedSignal;
-  (thisObject as any).iopubMessage = iopubMessageSignal;
-  (thisObject as any).propertyChanged = propertyChangedSignal;
-  (thisObject as any).disposed = disposedSignal;
-  (thisObject as any).session = session;
-  (thisObject as any).pendingInput = false;
+  (thisObject as unknown).statusChanged = statusChangedSignal;
+  (thisObject as unknown).kernelChanged = kernelChangedSignal;
+  (thisObject as unknown).iopubMessage = iopubMessageSignal;
+  (thisObject as unknown).propertyChanged = propertyChangedSignal;
+  (thisObject as unknown).disposed = disposedSignal;
+  (thisObject as unknown).session = session;
+  (thisObject as unknown).pendingInput = false;
 
   return thisObject;
 });

@@ -118,7 +118,7 @@ export class JsonSettingEditor extends SplitPanel {
   /**
    * Emits when the commands passed in at instantiation change.
    */
-  get commandsChanged(): ISignal<any, string[]> {
+  get commandsChanged(): ISignal<unknown, string[]> {
     return this._editor.raw.commandsChanged;
   }
 
@@ -318,7 +318,7 @@ export class JsonSettingEditor extends SplitPanel {
   private _saving = false;
   private _state: JsonSettingEditor.ILayoutState =
     JSONExt.deepCopy(DEFAULT_LAYOUT);
-  private _when: Promise<any>;
+  private _when: Promise<unknown>;
 }
 
 /**
@@ -377,7 +377,7 @@ export namespace JsonSettingEditor {
     /**
      * The point after which the editor should restore its state.
      */
-    when?: Promise<any> | Array<Promise<any>>;
+    when?: Promise<unknown> | Array<Promise<unknown>>;
 
     /**
      * The application language translator.

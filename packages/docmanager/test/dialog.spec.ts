@@ -13,7 +13,7 @@ import { ServiceManagerMock } from '@jupyterlab/services/lib/testutils';
 describe('docregistry/dialog', () => {
   let manager: DocumentManager;
   let services: ServiceManager.IManager;
-  let alreadyExistsError: any = {};
+  let alreadyExistsError: unknown = {};
 
   beforeAll(() => {
     const registry = new DocumentRegistry({});

@@ -103,7 +103,7 @@ export namespace MenuFactory {
     menu.addItem({
       ...newItem,
       submenu: submenu ? dataToMenu(submenu, menuFactory) : null
-    } as any);
+    } as unknown);
   }
 
   /**
@@ -123,7 +123,7 @@ export namespace MenuFactory {
     menu.addItem({
       ...newItem,
       submenu: submenu ? dataToMenu(submenu, menuFactory) : null
-    } as any);
+    } as unknown);
   }
 
   /**

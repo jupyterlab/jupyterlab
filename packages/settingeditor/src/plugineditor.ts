@@ -178,7 +178,7 @@ export class PluginEditor extends Widget {
    * Handle layout state changes that need to be saved.
    */
   private _onStateChanged(): void {
-    (this.stateChanged as Signal<any, void>).emit(undefined);
+    (this.stateChanged as Signal<unknown, void>).emit(undefined);
   }
 
   protected translator: ITranslator;

@@ -147,7 +147,7 @@ describe('session', () => {
           msgId,
           content: {}
         });
-        msg.parent_header = { session: session.kernel!.clientId } as any;
+        msg.parent_header = { session: session.kernel!.clientId } as unknown;
         tester.send(msg);
         await emission;
         await expect(tester.shutdown()).resolves.not.toThrow();

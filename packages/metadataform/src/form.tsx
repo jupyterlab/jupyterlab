@@ -41,7 +41,7 @@ export class FormWidget extends ReactWidget {
       <FormComponent
         validator={validatorAjv8}
         schema={this._props.properties as JSONSchema7}
-        formData={this._props.formData as Record<string, any>}
+        formData={this._props.formData as Record<string, unknown>}
         formContext={formContext}
         uiSchema={this._props.uiSchema}
         liveValidate

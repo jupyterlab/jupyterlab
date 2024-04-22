@@ -211,7 +211,8 @@ export namespace Build {
               test: /\.svg/,
               type: 'asset/inline',
               generator: {
-                dataUrl: (content: any) => miniSVGDataURI(content.toString())
+                dataUrl: (content: unknown) =>
+                  miniSVGDataURI(content.toString())
               }
             },
             {

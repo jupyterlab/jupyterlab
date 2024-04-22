@@ -67,6 +67,6 @@ export namespace IStatusBar {
     /**
      * A signal that is fired when the item active state changes.
      */
-    activeStateChanged?: ISignal<any, void>;
+    activeStateChanged?: ISignal<unknown, void>;
   }
 }

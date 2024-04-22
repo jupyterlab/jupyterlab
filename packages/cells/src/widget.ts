@@ -313,7 +313,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Editor configuration
    */
-  get editorConfig(): Record<string, any> {
+  get editorConfig(): Record<string, unknown> {
     return this._editorConfig;
   }
 
@@ -446,7 +446,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Save view collapse state to model
    */
   saveCollapseState(): void {
-    const jupyter = { ...(this.model.getMetadata('jupyter') as any) };
+    const jupyter = { ...(this.model.getMetadata('jupyter') as unknown) };
 
     if (
       (this.inputHidden && jupyter.source_hidden === true) ||
@@ -471,7 +471,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Revert view collapse state from model.
    */
   loadCollapseState(): void {
-    const jupyter = (this.model.getMetadata('jupyter') as any) ?? {};
+    const jupyter = (this.model.getMetadata('jupyter') as unknown) ?? {};
     this.inputHidden = !!jupyter.source_hidden;
   }
 
@@ -553,7 +553,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    *
    * @param v Partial editor configuration
    */
-  updateEditorConfig(v: Record<string, any>): void {
+  updateEditorConfig(v: Record<string, unknown>): void {
     this._editorConfig = { ...this._editorConfig, ...v };
     if (this.editor) {
       this.editor.setOptions(this._editorConfig);
@@ -739,7 +739,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     }
   );
 
-  private _editorConfig: Record<string, any> = {};
+  private _editorConfig: Record<string, unknown> = {};
   private _editorExtensions: Extension[] = [];
   private _input: InputArea | null;
   private _inputHidden = false;
@@ -780,7 +780,7 @@ export namespace Cell {
     /**
      * The configuration options for the text editor widget.
      */
-    editorConfig?: Record<string, any>;
+    editorConfig?: Record<string, unknown>;
 
     /**
      * Editor extensions to be added.
@@ -1576,7 +1576,10 @@ export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Handle changes in the model.
    */
-  protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
+  protected onStateChanged(
+    model: ICellModel,
+    args: IChangedArgs<unknown>
+  ): void {
     switch (args.name) {
       case 'executionCount':
         this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
@@ -1747,7 +1750,7 @@ export namespace CodeCell {
           // If the data is missing, estimate it to now
           // Date was added in 5.1: https://jupyter-client.readthedocs.io/en/stable/messaging.html#message-header
           const value = msg.header.date || new Date().toISOString();
-          const timingInfo: any = Object.assign(
+          const timingInfo: unknown = Object.assign(
             {},
             model.getMetadata('execution')
           );
@@ -1766,7 +1769,7 @@ export namespace CodeCell {
       if (recordTiming) {
         const timingInfo = Object.assign(
           {},
-          model.getMetadata('execution') as any
+          model.getMetadata('execution') as unknown
         );
         const started = msg.metadata.started as string;
         // Started is not in the API, but metadata IPyKernel sends
@@ -1787,7 +1790,7 @@ export namespace CodeCell {
         cell.setPrompt('');
         if (recordTiming && future.isDisposed) {
           // Record the time when the cell execution was aborted
-          const timingInfo: any = Object.assign(
+          const timingInfo: unknown = Object.assign(
             {},
             model.getMetadata('execution')
           );

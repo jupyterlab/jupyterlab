@@ -23,7 +23,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       },
       id: plugin.default.id,
       raw: '{}',
-      schema: pluginSchema as any,
+      schema: pluginSchema as unknown,
       version: 'test'
     };
   });
@@ -81,7 +81,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       void plugin.default.activate(
         {
           commands: new CommandRegistry()
-        } as any,
+        } as unknown,
         settingRegistry
       );
 
@@ -143,7 +143,7 @@ describe('@jupyterlab/shortcut-extension', () => {
         ...shared,
         id: plugin.default.id,
         schema: {
-          ...(pluginSchema as any),
+          ...(pluginSchema as unknown),
           properties: {
             shortcuts: {
               default: [
@@ -194,7 +194,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       void plugin.default.activate(
         {
           commands: new CommandRegistry()
-        } as any,
+        } as unknown,
         settingRegistry
       );
 
@@ -286,7 +286,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       void plugin.default.activate(
         {
           commands: new CommandRegistry()
-        } as any,
+        } as unknown,
         settingRegistry
       );
 

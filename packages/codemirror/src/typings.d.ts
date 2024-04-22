@@ -9,5 +9,5 @@ declare module '@codemirror/legacy-modes/mode/python' {
   export const python: StreamParser<unknown>;
   export const cython: StreamParser<unknown>;
 
-  export function mkPython(parserConf: any): StreamParser<unknown>;
+  export function mkPython(parserConf: unknown): StreamParser<unknown>;
 }

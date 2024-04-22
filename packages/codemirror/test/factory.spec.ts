@@ -16,7 +16,7 @@ describe('CodeMirrorEditorFactory', () => {
   let model: CodeEditor.IModel;
   let extensions: IEditorExtensionRegistry;
 
-  const defaults: Record<string, any> = {
+  const defaults: Record<string, unknown> = {
     lineNumbers: false,
     lineWrap: true
   };
@@ -76,7 +76,7 @@ describe('CodeMirrorEditorFactory', () => {
       }) as CodeMirrorEditor;
       expect(editor).toBeInstanceOf(CodeMirrorEditor);
       for (const key in Object.keys(defaults)) {
-        const option = key as keyof Record<string, any>;
+        const option = key as keyof Record<string, unknown>;
         expect(editor.getOption(option)).toBe(defaults[option]);
       }
       editor.dispose();

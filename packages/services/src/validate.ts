@@ -6,11 +6,11 @@
  * of a given type and among a given set of values.
  */
 export function validateProperty(
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
   object: any,
   name: string,
   typeName?: string,
-  values: any[] = []
+  values: unknown[] = []
 ): void {
   if (!object.hasOwnProperty(name)) {
     throw Error(`Missing property '${name}'`);

@@ -31,7 +31,7 @@ class TestConnector extends StateDB {
     return { id, data: { composite, user }, raw, schema, version };
   }
 
-  async list(): Promise<any> {
+  async list(): Promise<unknown> {
     return Promise.reject('list method not implemented');
   }
 }

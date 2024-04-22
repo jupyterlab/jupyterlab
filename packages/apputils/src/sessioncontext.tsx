@@ -464,13 +464,15 @@ export class SessionContext implements ISessionContext {
     return this._kernelPreference;
   }
   set kernelPreference(value: ISessionContext.IKernelPreference) {
-    if (!JSONExt.deepEqual(value as any, this._kernelPreference as any)) {
+    if (
+      !JSONExt.deepEqual(value as unknown, this._kernelPreference as unknown)
+    ) {
       const oldValue = this._kernelPreference;
       this._kernelPreference = value;
       this._preferenceChanged.emit({
         name: 'kernelPreference',
         oldValue,
-        newValue: JSONExt.deepCopy(value as any)
+        newValue: JSONExt.deepCopy(value as unknown)
       });
     }
   }
@@ -1111,7 +1113,7 @@ export class SessionContext implements ISessionContext {
     if (status === 'dead') {
       const model = sender.kernel?.model;
       if (model?.reason) {
-        const traceback = (model as any).traceback || '';
+        const traceback = (model as unknown).traceback || '';
         void this._displayKernelError(model.reason, traceback);
       }
     }
@@ -1222,7 +1224,7 @@ export class SessionContext implements ISessionContext {
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
-  private _dialog: Dialog<any> | null = null;
+  private _dialog: Dialog<unknown> | null = null;
   private _setBusy: (() => IDisposable) | undefined;
   private _busyDisposable: IDisposable | null = null;
   private _pendingKernelName = '';

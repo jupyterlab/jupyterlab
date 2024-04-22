@@ -383,7 +383,7 @@ export class ThemeManager implements IThemeManager {
    * Initialize the key -> property dict for the overrides
    */
   private _initOverrideProps(): void {
-    const definitions = this._settings.schema.definitions as any;
+    const definitions = this._settings.schema.definitions as unknown;
     const overidesSchema = definitions.cssOverrides.properties;
 
     Object.keys(overidesSchema).forEach(key => {
@@ -546,7 +546,7 @@ export class ThemeManager implements IThemeManager {
   /**
    * Handle a theme error.
    */
-  private _onError(reason: any): void {
+  private _onError(reason: unknown): void {
     void showDialog({
       title: this._trans.__('Error Loading Theme'),
       body: String(reason),

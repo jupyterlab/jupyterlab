@@ -27,6 +27,7 @@ import { KernelSpec, KernelSpecAPI } from '../kernelspec';
 import * as restapi from './restapi';
 
 // Stub for requirejs.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let requirejs: any;
 
 const KERNEL_INFO_TIMEOUT = 3000;
@@ -597,6 +598,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // messages, so set a default for now.
     // See https://github.com/jupyterlab/jupyterlab/issues/6760
     if (reply.content.status === undefined) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (reply.content as any).status = 'ok';
     }
 
@@ -1013,7 +1015,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         channel: msg.channel,
         buffers: msg.buffers ? msg.buffers.slice() : []
       };
-      (updateMsg.header as any).msg_type = 'update_display_data';
+      updateMsg.header.msg_type = 'update_display_data';
 
       await Promise.all(
         parentIds.map(async parentId => {
@@ -1350,7 +1352,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // If we are not 'connecting', reset any reconnection attempts.
     if (connectionStatus !== 'connecting') {
       this._reconnectAttempt = 0;
-      clearTimeout(this._reconnectTimeout);
+      if (this._reconnectTimeout !== null) {
+        clearTimeout(this._reconnectTimeout);
+      }
     }
 
     if (this.status !== 'dead') {
@@ -1497,7 +1501,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._errorIfDisposed();
 
     // Clear any existing reconnection attempt
-    clearTimeout(this._reconnectTimeout);
+    if (this._reconnectTimeout !== null) {
+      clearTimeout(this._reconnectTimeout);
+    }
 
     // Update the connection status and schedule a possible reconnection.
     if (this._reconnectAttempt < this._reconnectLimit) {
@@ -1639,7 +1645,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _username = '';
   private _reconnectLimit = 7;
   private _reconnectAttempt = 0;
-  private _reconnectTimeout: any = null;
+  private _reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private _supportedProtocols: string[] = Object.values(
     KernelMessage.supportedKernelWebSocketProtocols
   );
@@ -1726,8 +1732,9 @@ namespace Private {
   export function loadObject(
     name: string,
     moduleName: string | undefined,
-    registry?: { [key: string]: any }
-  ): Promise<any> {
+    registry?: { [key: string]: unknown }
+  ): Promise<unknown> {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     return new Promise((resolve, reject) => {
       // Try loading the module using require.js
       if (moduleName) {
@@ -1736,6 +1743,7 @@ namespace Private {
         }
         requirejs(
           [moduleName],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (mod: any) => {
             if (mod[name] === void 0) {
               const msg = `Object '${name}' not found in module '${moduleName}'`;

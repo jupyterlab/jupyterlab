@@ -47,8 +47,8 @@ export class GalataInpage implements IGalataInpage {
 
       if (hasPlugin) {
         try {
-          const appAny = app as any;
-          const plugin: any = appAny._plugins
+          const appAny = app as unknown;
+          const plugin: unknown = appAny._plugins
             ? appAny._plugins.get(pluginId)
             : undefined;
           if (plugin.activated) {
@@ -81,7 +81,10 @@ export class GalataInpage implements IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  off(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  off(
+    event: 'dialog',
+    listener: (dialog: Dialog<unknown> | null) => void
+  ): void;
   /**
    * Disconnect a listener to new or updated Jupyter notification events.
    *
@@ -92,7 +95,10 @@ export class GalataInpage implements IGalataInpage {
     event: 'notification',
     listener: (notification: Notification.INotification) => void
   ): void;
-  off(event: 'dialog' | 'notification', listener: (arg: any) => void): void {
+  off(
+    event: 'dialog' | 'notification',
+    listener: (arg: unknown) => void
+  ): void {
     const callback = this.listeners.get(listener);
     if (callback) {
       this.getPlugin(PLUGIN_ID_GALATA_HELPERS)
@@ -125,7 +131,7 @@ export class GalataInpage implements IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  on(event: 'dialog', listener: (dialog: Dialog<unknown> | null) => void): void;
   on(
     event: 'notification',
     listener: (notification: Notification.INotification) => void
@@ -136,15 +142,15 @@ export class GalataInpage implements IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  on(event: 'dialog' | 'notification', listener: (arg: any) => void): void {
+  on(event: 'dialog' | 'notification', listener: (arg: unknown) => void): void {
     this.getPlugin(PLUGIN_ID_GALATA_HELPERS)
       .then(plugin => {
         switch (event) {
           case 'dialog':
             {
               const callback = (
-                tracker: IWidgetTracker<Dialog<any>>,
-                dialog: Dialog<any> | null
+                tracker: IWidgetTracker<Dialog<unknown>>,
+                dialog: Dialog<unknown> | null
               ) => {
                 listener(dialog);
               };
@@ -181,7 +187,10 @@ export class GalataInpage implements IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  once(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
+  once(
+    event: 'dialog',
+    listener: (dialog: Dialog<unknown> | null) => void
+  ): void;
   /**
    * Connect a listener to the next new or updated Jupyter notification event.
    *
@@ -192,15 +201,18 @@ export class GalataInpage implements IGalataInpage {
     event: 'notification',
     listener: (notification: Notification.INotification) => void
   ): void;
-  once(event: 'dialog' | 'notification', listener: (arg: any) => void): void {
-    const onceListener = (arg: any) => {
+  once(
+    event: 'dialog' | 'notification',
+    listener: (arg: unknown) => void
+  ): void {
+    const onceListener = (arg: unknown) => {
       try {
         listener(arg);
       } finally {
-        this.off(event as any, onceListener);
+        this.off(event as unknown, onceListener);
       }
     };
-    this.on(event as any, onceListener);
+    this.on(event as unknown, onceListener);
   }
 
   /**
@@ -552,8 +564,8 @@ export class GalataInpage implements IGalataInpage {
       });
 
       let numTries = 0;
-      let timer: any = null;
-      let timeoutTimer: any = null;
+      let timer: unknown = null;
+      let timeoutTimer: unknown = null;
 
       const clearAndResolve = () => {
         clearInterval(timer);

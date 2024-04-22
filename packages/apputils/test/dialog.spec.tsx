@@ -13,7 +13,7 @@ import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 import { generate, simulate } from 'simulate-event';
 
-class TestDialog extends Dialog<any> {
+class TestDialog extends Dialog<unknown> {
   methods: string[] = [];
   events: string[] = [];
 

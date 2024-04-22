@@ -32,7 +32,7 @@ function compareTree(a: Tree, b: Tree) {
 }
 
 const abbrev: { [abbr: string]: string } = {
-  __proto__: null as any,
+  __proto__: null as unknown,
   CB: 'CodeBlock',
   FC: 'FencedCode',
   Q: 'Blockquote',

@@ -119,8 +119,8 @@ export namespace SavingStatus {
         const oldContext = this._docManager.contextForWidget(oldWidget);
         if (oldContext) {
           oldContext.saveState.disconnect(this._onStatusChange);
-        } else if ((this._widget as any).content?.saveStateChanged) {
-          (this._widget as any).content.saveStateChanged.disconnect(
+        } else if ((this._widget as unknown).content?.saveStateChanged) {
+          (this._widget as unknown).content.saveStateChanged.disconnect(
             this._onStatusChange
           );
         }
@@ -133,8 +133,8 @@ export namespace SavingStatus {
         const widgetContext = this._docManager.contextForWidget(this._widget);
         if (widgetContext) {
           widgetContext.saveState.connect(this._onStatusChange);
-        } else if ((this._widget as any).content?.saveStateChanged) {
-          (this._widget as any).content.saveStateChanged.connect(
+        } else if ((this._widget as unknown).content?.saveStateChanged) {
+          (this._widget as unknown).content.saveStateChanged.connect(
             this._onStatusChange
           );
         }
@@ -145,7 +145,7 @@ export namespace SavingStatus {
      * React to a saving status change from the current document widget.
      */
     private _onStatusChange = (
-      _: any,
+      _: unknown,
       newStatus: DocumentRegistry.SaveState
     ) => {
       this._status = newStatus;

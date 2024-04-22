@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-(window as any).__webpack_public_path__ = URLExt.join(
+(window as unknown).__webpack_public_path__ = URLExt.join(
   PageConfig.getBaseUrl(),
   'example/'
 );
@@ -40,7 +40,7 @@ import {
 
 import { IYText } from '@jupyter/ydoc';
 
-async function main(): Promise<any> {
+async function main(): Promise<unknown> {
   const translator = new TranslationManager();
   await translator.fetch('en');
   const trans = translator.load('jupyterlab');

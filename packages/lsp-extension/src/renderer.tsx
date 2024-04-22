@@ -10,7 +10,7 @@ import React, { useRef, useState } from 'react';
 import { DOMUtils } from '@jupyterlab/apputils';
 
 import type { FieldProps } from '@rjsf/utils';
-type TDict = { [key: string]: any };
+type TDict = { [key: string]: unknown };
 
 interface ISettingPropertyMap {
   [key: string]: ISettingProperty;
@@ -27,7 +27,7 @@ interface ISettingProperty {
   /**
    * Value of setting property
    */
-  value: any;
+  value: unknown;
 }
 const SETTING_NAME = 'languageServers';
 const SERVER_SETTINGS = 'configuration';
@@ -46,7 +46,7 @@ interface ISettingFormProps {
   /**
    * Callback to update the setting item.
    */
-  updateSetting: Debouncer<void, any, [hash: string, newSetting: TDict]>;
+  updateSetting: Debouncer<void, unknown, [hash: string, newSetting: TDict]>;
 
   /**
    * Hash to differentiate the setting fields.
@@ -123,7 +123,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
    */
   const onOtherSettingsChange = (
     property: string,
-    value: any,
+    value: unknown,
     type: string
   ) => {
     let settingValue = value;
@@ -201,7 +201,7 @@ function BuildSettingForm(props: ISettingFormProps): JSX.Element {
   };
   const debouncedSetProperty = new Debouncer<
     void,
-    any,
+    unknown,
     [hash: string, property: ISettingProperty]
   >(setProperty);
   const textInputId = useRef<string>(
@@ -318,12 +318,16 @@ function PropertyFrom(props: {
   hash: string;
   property: ISettingProperty;
   removeProperty: (hash: string) => void;
-  setProperty: Debouncer<void, any, [hash: string, property: ISettingProperty]>;
+  setProperty: Debouncer<
+    void,
+    unknown,
+    [hash: string, property: ISettingProperty]
+  >;
 }): JSX.Element {
   const [state, setState] = useState<{
     property: string;
     type: 'boolean' | 'string' | 'number';
-    value: any;
+    value: unknown;
   }>({ ...props.property });
   const TYPE_MAP = { string: 'text', number: 'number', boolean: 'checkbox' };
 
@@ -338,7 +342,7 @@ function PropertyFrom(props: {
   };
 
   const changeValue = (
-    newValue: any,
+    newValue: unknown,
     type: 'string' | 'boolean' | 'number'
   ) => {
     let value = newValue;
@@ -608,7 +612,7 @@ class SettingRenderer extends React.Component<IProps, IState> {
 
   private _debouncedUpdateSetting: Debouncer<
     void,
-    any,
+    unknown,
     [hash: string, newSetting: TDict]
   >;
 }

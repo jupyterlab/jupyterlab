@@ -766,7 +766,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     'single-document': ILabShell.IUserLayout;
     'multiple-document': ILabShell.IUserLayout;
   } {
-    return JSONExt.deepCopy(this._userLayout as any);
+    return JSONExt.deepCopy(this._userLayout as unknown);
   }
 
   /**
@@ -1694,7 +1694,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Handle a change to the dock area active widget.
    */
   private _onActiveChanged(
-    sender: any,
+    sender: unknown,
     args: FocusTracker.IChangedArgs<Widget>
   ): void {
     if (args.newValue) {
@@ -1713,7 +1713,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Handle a change to the dock area current widget.
    */
   private _onCurrentChanged(
-    sender: any,
+    sender: unknown,
     args: FocusTracker.IChangedArgs<Widget>
   ): void {
     if (args.newValue) {

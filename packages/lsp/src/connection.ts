@@ -180,7 +180,7 @@ enum MessageKind {
 
 interface IMessageLog<T extends AnyMethod = AnyMethod> {
   method: T;
-  message: any;
+  message: unknown;
 }
 
 export class LSPConnection extends LspWsConnection implements ILSPConnection {
@@ -247,7 +247,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
    * Signal emitted when the connection receives an error
    * message.
    */
-  get errorSignal(): ISignal<ILSPConnection, any> {
+  get errorSignal(): ISignal<ILSPConnection, unknown> {
     return this._errorSignal;
   }
 
@@ -256,7 +256,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
    */
   get serverInitialized(): ISignal<
     ILSPConnection,
-    lsp.ServerCapabilities<any>
+    lsp.ServerCapabilities<unknown>
   > {
     return this._serverInitialized;
   }
@@ -383,8 +383,8 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   >(
     methods: typeof Method.ServerNotification | typeof Method.ClientNotification
   ): T {
-    const factory = () => new Signal<any, any>(this);
-    return createMethodMap<T, Signal<any, any>>(methods, factory);
+    const factory = () => new Signal<unknown, unknown>(this);
+    return createMethodMap<T, Signal<unknown, unknown>>(methods, factory);
   }
 
   /**
@@ -397,7 +397,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     return createMethodMap<T, IClientRequestHandler>(
       methods,
       method =>
-        new ClientRequestHandler(this.connection, method as U as any, this)
+        new ClientRequestHandler(this.connection, method as U as unknown, this)
     );
   }
 
@@ -411,7 +411,7 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     return createMethodMap<T, IServerRequestHandler>(
       methods,
       method =>
-        new ServerRequestHandler(this.connection, method as U as any, this)
+        new ServerRequestHandler(this.connection, method as U as unknown, this)
     );
   }
 
@@ -451,7 +451,10 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     for (const method of Object.values(
       Method.ServerNotification
     ) as (keyof ServerNotifications)[]) {
-      const signal = this.serverNotifications[method] as Signal<any, any>;
+      const signal = this.serverNotifications[method] as Signal<
+        unknown,
+        unknown
+      >;
       const disposable = this.connection.onNotification(method, params => {
         this.log(MessageKind.serverNotifiedClient, {
           method,
@@ -465,7 +468,10 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
     for (const method of Object.values(
       Method.ClientNotification
     ) as (keyof ClientNotifications)[]) {
-      const signal = this.clientNotifications[method] as Signal<any, any>;
+      const signal = this.clientNotifications[method] as Signal<
+        unknown,
+        unknown
+      >;
       signal.connect((emitter, params) => {
         this.log(MessageKind.clientNotifiedServer, {
           method,
@@ -539,10 +545,10 @@ export class LSPConnection extends LspWsConnection implements ILSPConnection {
   private _options: ILSPOptions;
 
   private _closeSignal: Signal<ILSPConnection, boolean> = new Signal(this);
-  private _errorSignal: Signal<ILSPConnection, any> = new Signal(this);
+  private _errorSignal: Signal<ILSPConnection, unknown> = new Signal(this);
   private _serverInitialized: Signal<
     ILSPConnection,
-    lsp.ServerCapabilities<any>
+    lsp.ServerCapabilities<unknown>
   > = new Signal(this);
 
   /**

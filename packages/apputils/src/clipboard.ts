@@ -33,7 +33,7 @@ export namespace Clipboard {
   export function copyToSystem(clipboardData: ClipboardData): void {
     const node = document.body;
     const handler = (event: ClipboardEvent) => {
-      const data = event.clipboardData || (window as any).clipboardData;
+      const data = event.clipboardData || (window as unknown).clipboardData;
       if (typeof clipboardData === 'string') {
         data.setData('text', clipboardData);
       } else {
@@ -69,7 +69,7 @@ export namespace Clipboard {
     let sel = window.getSelection();
 
     // Save the current selection.
-    const savedRanges: any[] = [];
+    const savedRanges: unknown[] = [];
     for (let i = 0, len = sel?.rangeCount || 0; i < len; ++i) {
       savedRanges[i] = sel!.getRangeAt(i).cloneRange();
     }

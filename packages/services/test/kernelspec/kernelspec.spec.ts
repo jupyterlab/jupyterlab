@@ -137,7 +137,10 @@ describe('kernel', () => {
       expect(specs.kernelspecs['python']).toHaveProperty('metadata');
       const metadata = specs.kernelspecs['python']!.metadata;
       expect(metadata).toHaveProperty('some_application');
-      expect((metadata as any).some_application).toHaveProperty('key', 'value');
+      expect((metadata as unknown).some_application).toHaveProperty(
+        'key',
+        'value'
+      );
     });
 
     it('should handle env values', async () => {

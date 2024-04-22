@@ -84,7 +84,7 @@ describe('ImageViewer', () => {
     });
 
     it('should keep the title in sync with the file name', async () => {
-      const newPath = ((IMAGE as any).path = UUID.uuid4() + '.png');
+      const newPath = ((IMAGE as unknown).path = UUID.uuid4() + '.png');
       expect(widget.title.label).toBe(context.path);
       let called = false;
       context.pathChanged.connect(() => {

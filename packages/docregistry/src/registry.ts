@@ -803,7 +803,7 @@ export namespace DocumentRegistry {
     /**
      * A signal emitted when the model state changes.
      */
-    stateChanged: ISignal<this, IChangedArgsGeneric<any>>;
+    stateChanged: ISignal<this, IChangedArgsGeneric<unknown>>;
 
     /**
      * The dirty state of the model.

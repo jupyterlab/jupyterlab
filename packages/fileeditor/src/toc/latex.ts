@@ -123,7 +123,7 @@ export class LaTeXTableOfContentsFactory extends EditorTableOfContentsFactory {
     const isApplicable = super.isApplicable(widget);
 
     if (isApplicable) {
-      let mime = (widget as any).content?.model?.mimeType;
+      let mime = (widget as unknown).content?.model?.mimeType;
       return mime && (mime === 'text/x-latex' || mime === 'text/x-stex');
     }
     return false;

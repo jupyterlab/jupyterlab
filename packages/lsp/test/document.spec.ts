@@ -258,7 +258,7 @@ describe('@jupyterlab/lsp', () => {
           ).length
         ).toEqual(1);
 
-        const openForeignSpy = jest.spyOn(document as any, 'openForeign');
+        const openForeignSpy = jest.spyOn(document as unknown, 'openForeign');
         document['_chooseForeignDocument'](standaloneCellExtractor);
 
         expect(

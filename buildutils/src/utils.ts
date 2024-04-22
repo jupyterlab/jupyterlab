@@ -21,7 +21,7 @@ const backSlash = /\\/g;
  *  Exit with an error code on uncaught error.
  */
 export function exitOnUncaughtException(): void {
-  process.on('uncaughtException', function (err: any) {
+  process.on('uncaughtException', function (err: unknown) {
     if (err.status || err.stdout || err.stderr) {
       console.error(`Status: ${err.status}`);
       console.error(`stdout: ${err.stdout?.toString()}`);
@@ -91,7 +91,7 @@ export function getCorePaths(): string[] {
  */
 export function writePackageData(
   pkgJsonPath: string,
-  data: Record<any, any>
+  data: Record<unknown, unknown>
 ): boolean {
   const text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
   const orig = fs.readFileSync(pkgJsonPath, 'utf8').split('\r\n').join('\n');
@@ -105,7 +105,7 @@ export function writePackageData(
 /**
  * Read a json file.
  */
-export function readJSONFile(filePath: string): any {
+export function readJSONFile(filePath: string): unknown {
   try {
     return JSON.parse(fs.readFileSync(filePath, 'utf8'));
   } catch (e) {
@@ -118,16 +118,16 @@ export function readJSONFile(filePath: string): any {
  */
 export function writeJSONFile(
   filePath: string,
-  data: Record<any, any>
+  data: Record<unknown, unknown>
 ): boolean {
-  function sortObjByKey(value: any): any {
+  function sortObjByKey(value: unknown): unknown {
     // https://stackoverflow.com/a/35810961
     return typeof value === 'object'
       ? Array.isArray(value)
         ? value.map(sortObjByKey)
         : Object.keys(value)
             .sort()
-            .reduce((o: any, key) => {
+            .reduce((o: unknown, key) => {
               const v = value[key];
               o[key] = sortObjByKey(v);
               return o;
@@ -301,7 +301,7 @@ export function run(
 export function getPackageGraph(): DepGraph<Dict<unknown>> {
   // Pick up all the package versions.
   const paths = getLernaPaths();
-  const locals: Dict<any> = {};
+  const locals: Dict<unknown> = {};
 
   // These two are not part of the workspaces but should be
   // considered part of the dependency graph.
@@ -311,7 +311,7 @@ export function getPackageGraph(): DepGraph<Dict<unknown>> {
   // Gather all of our package data.
   paths.forEach(pkgPath => {
     // Read in the package.json.
-    let data: any;
+    let data: unknown;
     try {
       data = readJSONFile(path.join(pkgPath, 'package.json'));
     } catch (e) {
@@ -330,7 +330,7 @@ export function getPackageGraph(): DepGraph<Dict<unknown>> {
     const deps: Dict<Array<string>> = data.dependencies || {};
     Object.keys(deps).forEach(depName => {
       if (!graph.hasNode(depName)) {
-        let depData: any;
+        let depData: unknown;
         // get data from locals if available, otherwise from
         // third party library.
         if (depName in locals) {

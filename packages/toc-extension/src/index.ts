@@ -172,7 +172,7 @@ async function activateTOC(
       const updateSettings = (plugin: ISettingRegistry.ISettings) => {
         const composite = plugin.composite;
         for (const key of [...Object.keys(configuration)]) {
-          const value = composite[key] as any;
+          const value = composite[key] as unknown;
           if (value !== undefined) {
             configuration[key] = value;
           }

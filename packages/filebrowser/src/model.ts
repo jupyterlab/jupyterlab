@@ -82,7 +82,7 @@ export class FileBrowserModel implements IDisposable {
       if (this._uploads.length > 0) {
         const confirmationMessage = this._trans.__('Files still uploading');
 
-        (e as any).returnValue = confirmationMessage;
+        (e as unknown).returnValue = confirmationMessage;
         return confirmationMessage;
       }
     };

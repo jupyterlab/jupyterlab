@@ -12,7 +12,7 @@ import * as utils from './utils';
 // Specify the program signature.
 commander
   .description('Prepare the Python package for release')
-  .action(async (options: any) => {
+  .action(async (options: unknown) => {
     utils.exitOnUncaughtException();
 
     const distDir = './dist';

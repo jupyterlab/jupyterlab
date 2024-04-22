@@ -53,7 +53,7 @@ describe('codeeditor', () => {
         refresh: jest.fn(),
         setCursorPosition: jest.fn(),
         setOption: jest.fn()
-      } as any;
+      } as unknown;
     };
 
     beforeEach(() => {

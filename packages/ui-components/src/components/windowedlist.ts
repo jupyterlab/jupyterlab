@@ -246,8 +246,8 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   get stateChanged(): ISignal<
     WindowedListModel,
     IChangedArgs<
-      any,
-      any,
+      unknown,
+      unknown,
       | 'count'
       | 'estimatedWidgetSize'
       | 'index'
@@ -742,8 +742,8 @@ export abstract class WindowedListModel implements WindowedList.IModel {
   protected _stateChanged = new Signal<
     WindowedListModel,
     IChangedArgs<
-      any,
-      any,
+      unknown,
+      unknown,
       | 'count'
       | 'estimatedWidgetSize'
       | 'index'
@@ -771,7 +771,7 @@ export abstract class WindowedListModel implements WindowedList.IModel {
  */
 export class WindowedList<
   T extends WindowedList.IModel = WindowedList.IModel,
-  U = any
+  U = unknown
 > extends Widget {
   /**
    * Default widget size
@@ -1052,7 +1052,7 @@ export class WindowedList<
    *
    * @param event Scroll event
    */
-  protected onScroll(event: Event): void {
+  protected onScroll(event: Event | { currentTarget: HTMLDivElement }): void {
     const { clientHeight, scrollHeight, scrollTop } =
       event.currentTarget as HTMLDivElement;
 
@@ -1109,7 +1109,7 @@ export class WindowedList<
         this._removeListeners();
         if (this.viewModel.windowingActive) {
           this._applyWindowingStyles();
-          this.onScroll({ currentTarget: this.node } as any);
+          this.onScroll({ currentTarget: this.node as HTMLDivElement });
           this._addListeners();
           // Bail as onScroll will trigger update
           return;
@@ -1450,7 +1450,7 @@ export class WindowedList<
     const count = list?.length ?? viewModel.widgetCount;
     for (let index = 0; index < count; index += 1) {
       const item = list?.get?.(index);
-      const element = renderer.createScrollbarItem(this, index, item);
+      const element = renderer.createScrollbarItem(this, index, item as U);
       element.classList.add('jp-WindowedPanel-scrollbar-item');
       element.dataset.index = `${index}`;
       content.appendChild(element);
@@ -1654,10 +1654,10 @@ export class WindowedLayout extends PanelLayout {
 /**
  * Windowed list model interface
  */
-export interface ISimpleObservableList<T = any> {
+export interface ISimpleObservableList<T = unknown> {
   get?: (index: number) => T;
   length: number;
-  changed: ISignal<any, IObservableList.IChangedArgs<any>>;
+  changed: ISignal<unknown, IObservableList.IChangedArgs<unknown>>;
 }
 
 /**
@@ -1667,7 +1667,7 @@ export namespace WindowedList {
   /**
    * The default renderer class for windowed lists.
    */
-  export class Renderer<T = any> implements IRenderer<T> {
+  export class Renderer<T = unknown> implements IRenderer<T> {
     /**
      * Create the outer, root element of the windowed list.
      */
@@ -1707,7 +1707,7 @@ export namespace WindowedList {
   /**
    * Windowed list model interface
    */
-  export interface IModel<T = any> extends IDisposable {
+  export interface IModel<T = unknown> extends IDisposable {
     /**
      * Provide a best guess for the widget size at position index
      *
@@ -1839,8 +1839,8 @@ export namespace WindowedList {
     readonly stateChanged: ISignal<
       IModel,
       IChangedArgs<
-        any,
-        any,
+        unknown,
+        unknown,
         | 'count'
         | 'index'
         | 'list'
@@ -1886,7 +1886,7 @@ export namespace WindowedList {
     /**
      * Dynamic list of items
      */
-    itemsList?: IObservableList<any>;
+    itemsList?: IObservableList<unknown>;
 
     /**
      * Number of widgets to render in addition to those
@@ -1907,7 +1907,7 @@ export namespace WindowedList {
    */
   export interface IOptions<
     T extends WindowedList.IModel = WindowedList.IModel,
-    U = any
+    U = unknown
   > {
     /**
      * Windowed list model to display
@@ -1932,7 +1932,7 @@ export namespace WindowedList {
   /**
    * A windowed list element renderer.
    */
-  export interface IRenderer<T = any> {
+  export interface IRenderer<T = unknown> {
     /**
      * Create the outer, root element of the windowed list.
      */

@@ -56,7 +56,7 @@ export interface ICellModel extends CodeEditor.IModel {
    */
   readonly stateChanged: ISignal<
     ICellModel,
-    IChangedArgs<boolean, boolean, any>
+    IChangedArgs<boolean, boolean, unknown>
   >;
 
   /**
@@ -100,7 +100,7 @@ export interface ICellModel extends CodeEditor.IModel {
    *
    * @param key Metadata key
    */
-  getMetadata(key: string): any;
+  getMetadata(key: string): unknown;
 
   /**
    * Set a metadata
@@ -108,7 +108,7 @@ export interface ICellModel extends CodeEditor.IModel {
    * @param key Metadata key
    * @param value Metadata value
    */
-  setMetadata(key: string, value: any): void;
+  setMetadata(key: string, value: unknown): void;
 
   /**
    * Serialize the model to JSON.
@@ -259,7 +259,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    */
   readonly stateChanged = new Signal<
     this,
-    IChangedArgs<any, any, 'isDirty' | 'trusted' | 'executionCount'>
+    IChangedArgs<unknown, unknown, 'isDirty' | 'trusted' | 'executionCount'>
   >(this);
 
   /**
@@ -319,7 +319,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    *
    * @param key Metadata key
    */
-  deleteMetadata(key: string): any {
+  deleteMetadata(key: string): unknown {
     return this.sharedModel.deleteMetadata(key);
   }
 
@@ -331,7 +331,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    *
    * @param key Metadata key
    */
-  getMetadata(key: string): any {
+  getMetadata(key: string): unknown {
     return this.sharedModel.getMetadata(key);
   }
 
@@ -341,7 +341,7 @@ export abstract class CellModel extends CodeEditor.Model implements ICellModel {
    * @param key Metadata key
    * @param value Metadata value
    */
-  setMetadata(key: string, value: any): void {
+  setMetadata(key: string, value: unknown): void {
     if (typeof value === 'undefined') {
       this.sharedModel.deleteMetadata(key);
     } else {

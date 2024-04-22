@@ -86,7 +86,7 @@ class LogCodeCell extends CodeCell {
     this.methods.push('onUpdateRequest');
   }
 
-  protected onMetadataChanged(model: any, args: any): void {
+  protected onMetadataChanged(model: unknown, args: unknown): void {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
   }
@@ -125,7 +125,7 @@ describe('cells/widget', () => {
       });
 
       it('should accept a custom editorConfig', () => {
-        const editorConfig: Record<string, any> = {
+        const editorConfig: Record<string, unknown> = {
           matchBrackets: false
         };
         const widget = new Cell({
@@ -929,7 +929,7 @@ describe('cells/widget', () => {
         });
         await CodeCell.execute(widget, sessionContext, { recordTiming: true });
         expect(widget.model.getMetadata('execution')).toBeDefined();
-        const timingInfo = widget.model.getMetadata('execution') as any;
+        const timingInfo = widget.model.getMetadata('execution') as unknown;
         for (const key of TIMING_KEYS) {
           expect(timingInfo[key]).toBeDefined();
         }

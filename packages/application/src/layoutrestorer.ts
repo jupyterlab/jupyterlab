@@ -51,7 +51,7 @@ export interface ILayoutRestorer extends IRestorer {
   restore<T extends Widget>(
     tracker: WidgetTracker<T>,
     options: IRestorer.IOptions<T>
-  ): Promise<any>;
+  ): Promise<unknown>;
 }
 
 /**
@@ -219,7 +219,7 @@ export class LayoutRestorer implements ILayoutRestorer {
         leftArea,
         rightArea,
         relativeSizes: relativeSizes || null,
-        topArea: (top as any) ?? null
+        topArea: (top as unknown) ?? null
       };
     } catch (error) {
       return blank;
@@ -236,7 +236,7 @@ export class LayoutRestorer implements ILayoutRestorer {
   async restore(
     tracker: WidgetTracker,
     options: IRestorer.IOptions<Widget>
-  ): Promise<any> {
+  ): Promise<unknown> {
     if (this._firstDone) {
       throw new Error('restore() must be called before `first` has resolved.');
     }
@@ -535,10 +535,10 @@ export class LayoutRestorer implements ILayoutRestorer {
   private _connector: IDataConnector<ReadonlyPartialJSONValue>;
   private _deferred = new Array<WidgetTracker>();
   private _deferredMainArea?: Private.IMainArea | null = null;
-  private _first: Promise<any>;
+  private _first: Promise<unknown>;
   private _firstDone = false;
   private _promisesDone = false;
-  private _promises: Promise<any>[] = [];
+  private _promises: Promise<unknown>[] = [];
   private _restored = new PromiseDelegate<void>();
   private _registry: CommandRegistry;
   private _trackers = new Set<string>();
@@ -565,7 +565,7 @@ export namespace LayoutRestorer {
      * #### Notes
      * This promise should equal the JupyterLab application `started` notifier.
      */
-    first: Promise<any>;
+    first: Promise<unknown>;
 
     /**
      * The application command registry.
@@ -821,7 +821,7 @@ namespace Private {
 
     // Because this data is saved to a foreign data source, its type safety is
     // not guaranteed when it is retrieved, so exhaustive checks are necessary.
-    const type = ((area as any).type as string) || 'unknown';
+    const type = ((area as unknown).type as string) || 'unknown';
     if (type === 'unknown' || (type !== 'tab-area' && type !== 'split-area')) {
       console.warn(`Attempted to deserialize unknown type: ${type}`);
       return null;
@@ -881,8 +881,8 @@ namespace Private {
       return null;
     }
 
-    const name = (area as any).current || null;
-    const dock = (area as any).dock || null;
+    const name = (area as unknown).current || null;
+    const dock = (area as unknown).dock || null;
 
     return {
       currentWidget: (name && names.has(name) && names.get(name)) || null,

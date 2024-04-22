@@ -5,7 +5,7 @@ const fs = require('fs');
 
 import { DSVModel } from '../src';
 
-function readCSV(path: string): any {
+function readCSV(path: string): unknown {
   path = require.resolve(path);
   return fs.readFileSync(path, 'utf8');
 }

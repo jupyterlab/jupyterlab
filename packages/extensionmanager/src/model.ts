@@ -571,7 +571,7 @@ export class ListModel extends VDomModel {
    *
    * @param pending A promise that resolves when the action is completed.
    */
-  protected addPendingAction(pending: Promise<any>): void {
+  protected addPendingAction(pending: Promise<unknown>): void {
     // Add to pending actions collection
     this._pendingActions.push(pending);
 
@@ -623,7 +623,7 @@ export class ListModel extends VDomModel {
 
   private _installed: IEntry[];
   private _lastSearchResult: IEntry[];
-  private _pendingActions: Promise<any>[] = [];
+  private _pendingActions: Promise<unknown>[] = [];
   private _debouncedSearch: Debouncer<void, void>;
 }
 
@@ -669,7 +669,7 @@ namespace Private {
    * @returns The response body interpreted as JSON and the response link header
    */
   export async function requestAPI<T>(
-    queryArgs: { [k: string]: any } = {},
+    queryArgs: { [k: string]: unknown } = {},
     init: RequestInit = {}
   ): Promise<[T, { [key: string]: string }]> {
     // Make request to Jupyter API
@@ -690,7 +690,7 @@ namespace Private {
       throw new ServerConnection.NetworkError(error);
     }
 
-    let data: any = await response.text();
+    let data: unknown = await response.text();
 
     if (data.length > 0) {
       try {

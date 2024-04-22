@@ -7,7 +7,7 @@
 
 /* global globalThis */
 
-globalThis.DragEvent = class DragEvent {} as any;
+globalThis.DragEvent = class DragEvent {} as unknown;
 
 if (
   typeof globalThis.TextDecoder === 'undefined' ||
@@ -18,10 +18,10 @@ if (
   globalThis.TextEncoder = util.TextEncoder;
 }
 
-globalThis.Image = (window as any).Image;
+globalThis.Image = (window as unknown).Image;
 globalThis.Range = function Range() {
   /* no-op */
-} as any;
+} as unknown;
 
 // HACK: Polyfill that allows CodeMirror to render in a JSDOM env.
 const createContextualFragment = (html: string) => {
@@ -31,9 +31,9 @@ const createContextualFragment = (html: string) => {
 };
 
 globalThis.Range.prototype.createContextualFragment = (html: string) =>
-  createContextualFragment(html) as any;
+  createContextualFragment(html) as unknown;
 
-(window as any).document.createRange = function createRange() {
+(window as unknown).document.createRange = function createRange() {
   return {
     setEnd: () => {
       /* no-op */
@@ -64,13 +64,13 @@ window.Element.prototype.scrollTo = (
 
 // https://github.com/jsdom/jsdom/issues/3368
 class ResizeObserverMock {
-  constructor(_callback: any) {
+  constructor(_callback: unknown) {
     // no-op
   }
-  observe(_target: any, _options?: any) {
+  observe(_target: unknown, _options?: unknown) {
     // no-op
   }
-  unobserve(_target: any) {
+  unobserve(_target: unknown) {
     // no-op
   }
   disconnect() {
@@ -98,10 +98,10 @@ class DataTransferItemMock implements DataTransferItem {
     callback(this.value);
   }
   getAsFile() {
-    return null as any;
+    return null as unknown;
   }
   webkitGetAsEntry() {
-    return null as any;
+    return null as unknown;
   }
 }
 
@@ -149,12 +149,12 @@ class ClipboardEventMock extends Event implements ClipboardEvent {
 
 window.ClipboardEvent = ClipboardEventMock;
 
-(window as any).document.elementFromPoint = (left: number, top: number) =>
+(window as unknown).document.elementFromPoint = (left: number, top: number) =>
   document.body;
 
 if (!window.hasOwnProperty('getSelection')) {
   // Minimal getSelection() that supports a fake selection
-  (window as any).getSelection = function getSelection() {
+  (window as unknown).getSelection = function getSelection() {
     return {
       _selection: '',
       selectAllChildren: () => {
@@ -170,7 +170,7 @@ if (!window.hasOwnProperty('getSelection')) {
 }
 
 // Used by xterm.js
-(window as any).matchMedia = function (media: string): MediaQueryList {
+(window as unknown).matchMedia = function (media: string): MediaQueryList {
   return {
     matches: false,
     media,
@@ -199,7 +199,7 @@ process.on('unhandledRejection', (error, promise) => {
   console.error('Unhandled promise rejection somewhere in tests');
   if (error) {
     console.error(error);
-    const stack = (error as any).stack;
+    const stack = (error as unknown).stack;
     if (stack) {
       console.error(stack);
     }
@@ -207,11 +207,11 @@ process.on('unhandledRejection', (error, promise) => {
   promise.catch(err => console.error('promise rejected', err));
 });
 
-if ((window as any).requestIdleCallback === undefined) {
+if ((window as unknown).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
   // eslint-disable-next-line @typescript-eslint/ban-types
-  (window as any).requestIdleCallback = function (handler: Function) {
+  (window as unknown).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {
       handler({
@@ -223,7 +223,7 @@ if ((window as any).requestIdleCallback === undefined) {
     }, 1);
   };
 
-  (window as any).cancelIdleCallback = function (id: number) {
+  (window as unknown).cancelIdleCallback = function (id: number) {
     clearTimeout(id);
   };
 }

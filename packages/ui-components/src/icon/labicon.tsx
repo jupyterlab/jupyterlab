@@ -402,6 +402,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     return this._svgInnerHTML;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   protected get svgReactAttrs(): any | null {
     if (this._svgReactAttrs === undefined) {
       if (this.svgElement === null) {
@@ -640,7 +641,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    */
   protected _svgElement: HTMLElement | null | undefined = undefined;
   protected _svgInnerHTML: string | null | undefined = undefined;
-  protected _svgReactAttrs: any | null | undefined = undefined;
+  protected _svgReactAttrs: unknown | null | undefined = undefined;
 }
 
 /**

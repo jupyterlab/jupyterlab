@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-declare let define: any;
+declare let define: unknown;
 
 if (typeof define !== 'function') {
   // @ts-expect-error Import of a untyped module

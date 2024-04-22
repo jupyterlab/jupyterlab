@@ -92,7 +92,7 @@ class MockMermaidManager extends MermaidManager {
    * Shim the real mermaid.
    */
   async getMermaid() {
-    return new MockMermaid() as any;
+    return new MockMermaid() as unknown;
   }
 
   /**

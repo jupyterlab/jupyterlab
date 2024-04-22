@@ -84,8 +84,8 @@ describe('@jupyterlab/completer', () => {
     sessionContext = await createSessionContext();
     await (sessionContext as SessionContext).initialize();
     reconciliator = new ProviderReconciliator({
-      context: null as any,
-      providers: null as any,
+      context: null as unknown,
+      providers: null as unknown,
       timeout: 0
     });
   });
@@ -220,7 +220,7 @@ describe('@jupyterlab/completer', () => {
         editor.setCursorPosition({ line: 0, column: 2 });
         (
           editor.model.sharedModel.changed as Signal<ISharedText, SourceChange>
-        ).emit({ sourceChange: {} as any });
+        ).emit({ sourceChange: {} as unknown });
         expect(model.methods).toEqual(
           expect.arrayContaining(['handleTextChange'])
         );
@@ -235,7 +235,7 @@ describe('@jupyterlab/completer', () => {
         expect(handler.methods).toEqual(
           expect.not.arrayContaining(['onCompletionSelected'])
         );
-        (completer.selected as any).emit('foo');
+        (completer.selected as unknown).emit('foo');
         expect(handler.methods).toEqual(
           expect.arrayContaining(['onCompletionSelected'])
         );
@@ -253,7 +253,7 @@ describe('@jupyterlab/completer', () => {
         expect(model.methods).toEqual(
           expect.not.arrayContaining(['createPatch'])
         );
-        (completer.selected as any).emit('foo');
+        (completer.selected as unknown).emit('foo');
         expect(model.methods).toEqual(expect.arrayContaining(['createPatch']));
       });
 
@@ -281,7 +281,7 @@ describe('@jupyterlab/completer', () => {
         handler.editor.setCursorPosition({ line, column: column + 3 });
         model.original = request;
         model.cursor = { start: column, end: column + 3 };
-        (completer.selected as any).emit(patch);
+        (completer.selected as unknown).emit(patch);
         expect(handler.editor.model.sharedModel.getSource()).toBe(want);
         expect(handler.editor.getCursorPosition()).toEqual({
           line,
@@ -315,7 +315,7 @@ describe('@jupyterlab/completer', () => {
         model.original = request;
         model.cursor = { start: column, end: column + 3 };
         // Make the completion, check its value and cursor position.
-        (completer.selected as any).emit(patch);
+        (completer.selected as unknown).emit(patch);
         expect(editor.model.sharedModel.getSource()).toBe(want);
         expect(editor.getCursorPosition()).toEqual({
           line,
@@ -352,7 +352,7 @@ describe('@jupyterlab/completer', () => {
         provider = new FooCompletionProvider(true);
         handler = new CompletionHandler({
           reconciliator: new ProviderReconciliator({
-            context: context as any,
+            context: context as unknown,
             providers: [provider],
             timeout: 0
           }),
@@ -458,7 +458,7 @@ describe('@jupyterlab/completer', () => {
       const offset = handler.editor.getOffsetAt({ line, column });
       model.cursor = { start: offset, end: offset };
       // Make the completion, check its value and cursor position.
-      (completer.selected as any).emit(patch);
+      (completer.selected as unknown).emit(patch);
       expect(editor.model.sharedModel.getSource()).toBe(want);
       expect(editor.getCursorPosition()).toEqual({
         line,

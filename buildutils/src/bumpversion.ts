@@ -13,7 +13,7 @@ commander
   .option('--force', 'Force the upgrade')
   .option('--skip-commit', 'Whether to skip commit changes')
   .arguments('<spec>')
-  .action((spec: any, opts: any) => {
+  .action((spec: unknown, opts: unknown) => {
     utils.exitOnUncaughtException();
 
     // Get the previous version.

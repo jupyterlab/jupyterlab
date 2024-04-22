@@ -128,7 +128,7 @@ export class YSyncConfig {
   /**
    * @param rpos
    */
-  fromYPos(rpos: RelativePosition | Record<string, any>) {
+  fromYPos(rpos: RelativePosition | Record<string, unknown>) {
     const pos = createAbsolutePositionFromRelativePosition(
       createRelativePositionFromJSON(rpos),
       this.ytext.doc!
@@ -195,7 +195,7 @@ export const ySync = ViewPlugin.fromClass(
       this._observer = (event: YTextEvent, tr: Transaction) => {
         if (tr.origin !== this.conf) {
           const delta = event.delta;
-          const changes: any[] = [];
+          const changes: unknown[] = [];
           let pos = 0;
           for (let i = 0; i < delta.length; i++) {
             const d = delta[i];

@@ -136,7 +136,7 @@ test.describe('Stdin for ipdb', () => {
 
     const cellInput = await page.notebook.getCellInputLocator(0);
     const editor = cellInput!.locator('.cm-content');
-    const contentAfter = await editor.evaluate((e: any) =>
+    const contentAfter = await editor.evaluate((e: unknown) =>
       e.cmView.view.state.doc.toString()
     );
     expect(contentAfter).toBe(loopedInput);

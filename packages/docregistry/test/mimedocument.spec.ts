@@ -48,7 +48,7 @@ describe('docregistry/mimedocument', () => {
   let dContext: Context<DocumentRegistry.IModel>;
 
   beforeEach(async () => {
-    dContext = (await createFileContextWithMockedServices()) as any;
+    dContext = (await createFileContextWithMockedServices()) as unknown;
   });
 
   afterEach(() => {

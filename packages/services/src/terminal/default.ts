@@ -175,7 +175,9 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     this._errorIfDisposed();
 
     // Clear any existing reconnection attempt
-    clearTimeout(this._reconnectTimeout);
+    if (this._reconnectTimeout !== null) {
+      clearTimeout(this._reconnectTimeout);
+    }
 
     // Update the connection status and schedule a possible reconnection.
     if (this._reconnectAttempt < this._reconnectLimit) {
@@ -329,7 +331,9 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     // If we are not 'connecting', stop any reconnection attempts.
     if (connectionStatus !== 'connecting') {
       this._reconnectAttempt = 0;
-      clearTimeout(this._reconnectTimeout);
+      if (this._reconnectTimeout !== null) {
+        clearTimeout(this._reconnectTimeout);
+      }
     }
 
     // Send the pending messages if we just connected.
@@ -373,7 +377,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
   private _disposed = new Signal<this, void>(this);
   private _messageReceived = new Signal<this, Terminal.IMessage>(this);
   private _name: string;
-  private _reconnectTimeout: any = null;
+  private _reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
   private _ws: WebSocket | null = null;
   private _noOp = () => {
     /* no-op */

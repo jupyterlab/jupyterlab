@@ -205,7 +205,7 @@ describe('@jupyterlab/codemirror', () => {
   });
 
   describe('ExtensionsHandler', () => {
-    function createHandler(config?: Record<string, any>) {
+    function createHandler(config?: Record<string, unknown>) {
       return new ExtensionsHandler({
         baseConfiguration: {
           lineNumbers: true,

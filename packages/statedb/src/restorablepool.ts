@@ -236,7 +236,8 @@ export class RestorablePool<
    * multiple restorable pools and, when ready, asks them each to restore their
    * respective objects.
    */
-  async restore(options: IRestorable.IOptions<T>): Promise<any> {
+  async restore(options: IRestorable.IOptions<T>): Promise<unknown> {
+    // eslint-disable-line @typescript-eslint/no-explicit-any
     if (this._hasRestored) {
       throw new Error('This pool has already been restored.');
     }
@@ -255,7 +256,7 @@ export class RestorablePool<
     const values = await Promise.all(
       saved.ids.map(async (id, index) => {
         const value = saved.values[index];
-        const args = value && (value as any).data;
+        const args = value && (value as any).data; // eslint-disable-line @typescript-eslint/no-explicit-any
 
         if (args === undefined) {
           return connector.remove(id);

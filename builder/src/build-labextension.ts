@@ -75,7 +75,7 @@ commander
 
     let lastHash: string | null = null;
 
-    function compilerCallback(err: any, stats: any) {
+    function compilerCallback(err: unknown, stats: unknown) {
       if (!options.watch || err) {
         // Do not keep cache anymore
         compiler.purgeInputFileSystem();
@@ -128,9 +128,9 @@ commander
       compiler.watch(config[0].watchOptions || {}, compilerCallback);
       console.error('\nwebpack is watching the files…\n');
     } else {
-      compiler.run((err: any, stats: any) => {
+      compiler.run((err: unknown, stats: unknown) => {
         if (compiler.close) {
-          compiler.close((err2: any) => {
+          compiler.close((err2: unknown) => {
             compilerCallback(err || err2, stats);
           });
         } else {

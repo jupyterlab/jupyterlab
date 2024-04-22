@@ -504,8 +504,12 @@ describe('docregistry/context', () => {
 
         // Make sure the both files are there now.
         const model = await manager.contents.get('', { content: true });
-        expect(model.content.find((x: any) => x.name === oldPath)).toBeTruthy();
-        expect(model.content.find((x: any) => x.name === newPath)).toBeTruthy();
+        expect(
+          model.content.find((x: unknown) => x.name === oldPath)
+        ).toBeTruthy();
+        expect(
+          model.content.find((x: unknown) => x.name === newPath)
+        ).toBeTruthy();
 
         // Make sure both files are equal
         const model1 = await manager.contents.get(oldPath, { content: true });
@@ -540,8 +544,12 @@ describe('docregistry/context', () => {
         //expect(context.path).toBe(newPath);
         // Make sure the both files are there now.
         const model = await manager.contents.get('', { content: true });
-        expect(model.content.find((x: any) => x.name === oldPath)).toBeTruthy();
-        expect(model.content.find((x: any) => x.name === newPath)).toBeTruthy();
+        expect(
+          model.content.find((x: unknown) => x.name === oldPath)
+        ).toBeTruthy();
+        expect(
+          model.content.find((x: unknown) => x.name === newPath)
+        ).toBeTruthy();
 
         // Make sure both files are equal
         const model1 = await manager.contents.get(oldPath, { content: true });

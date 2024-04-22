@@ -19,7 +19,7 @@ if (!global.PointerEvent) {
   class PointerEvent extends MouseEvent {
     // no-op
   }
-  global.PointerEvent = PointerEvent as any;
+  global.PointerEvent = PointerEvent as unknown;
 }
 
 const POINTER_EVENTS = [
@@ -36,7 +36,11 @@ const POINTER_EVENTS = [
  * Extends `simulate` from no longer actively developed `simulate-event`
  * with a subset of `pointer` events.
  */
-export function simulate(element: EventTarget, type: string, options?: any) {
+export function simulate(
+  element: EventTarget,
+  type: string,
+  options?: unknown
+) {
   if (POINTER_EVENTS.includes(type)) {
     element.dispatchEvent(new PointerEvent(type, options));
   } else {
@@ -100,7 +104,7 @@ export async function testEmission<T, U, V>(
  * Expect a failure on a promise with the given message.
  */
 export async function expectFailure(
-  promise: Promise<any>,
+  promise: Promise<unknown>,
   message?: string
 ): Promise<void> {
   let called = false;
@@ -184,7 +188,7 @@ export async function isFulfilled<T>(
   delay = 0
 ): Promise<boolean> {
   const x = Object.create(null);
-  let race: any;
+  let race: unknown;
   if (delay > 0) {
     race = sleep(delay, x);
   } else {

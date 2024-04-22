@@ -1290,7 +1290,7 @@ export namespace Completer {
       li: HTMLLIElement,
       matchNode: HTMLElement,
       typesExist: boolean,
-      type: any,
+      type: unknown,
       orderedTypes: string[],
       icon?: LabIcon
     ): HTMLLIElement {

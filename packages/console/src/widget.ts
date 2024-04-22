@@ -191,7 +191,7 @@ export class CodeConsole extends Widget {
   /**
    * The configuration options for the text editor widget.
    */
-  editorConfig: Record<string, any> = CodeConsole.defaultEditorConfig;
+  editorConfig: Record<string, unknown> = CodeConsole.defaultEditorConfig;
 
   /**
    * The list of content cells in the console.
@@ -976,7 +976,7 @@ export namespace CodeConsole {
   /**
    * Default console editor configuration
    */
-  export const defaultEditorConfig: Record<string, any> = {
+  export const defaultEditorConfig: Record<string, unknown> = {
     codeFolding: false,
     lineNumbers: false
   };

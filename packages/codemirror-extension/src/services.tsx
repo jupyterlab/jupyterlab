@@ -70,7 +70,7 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
         ]);
         const mdlang = m.markdown({
           base: m.markdownLanguage,
-          codeLanguages: (info: string) => languages.findBest(info) as any,
+          codeLanguages: (info: string) => languages.findBest(info) as unknown,
           extensions: [
             parseMathIPython(StreamLanguage.define(tex.stexMath).parser)
           ]
@@ -135,8 +135,10 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
       if (settingRegistry) {
         const updateSettings = (settings: ISettingRegistry.ISettings) => {
           registry.baseConfiguration =
-            (settings.get('defaultConfig').composite as Record<string, any>) ??
-            {};
+            (settings.get('defaultConfig').composite as Record<
+              string,
+              unknown
+            >) ?? {};
         };
         void Promise.all([
           settingRegistry.load(SETTINGS_ID),
@@ -151,8 +153,8 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
             const properties = React.useMemo(
               () => registry.settingsSchema,
               []
-            ) as any;
-            const defaultFormData: Record<string, any> = {};
+            ) as unknown;
+            const defaultFormData: Record<string, unknown> = {};
             // Only provide customizable options
             for (const [key, value] of Object.entries(
               registry.defaultConfiguration

@@ -420,13 +420,16 @@ describe('@jupyterlab/apputils', () => {
 
       const barPlugin = await settingRegistry.load(bar.id);
       const baseToolbar = JSONExt.deepCopy(
-        barPlugin.composite['toolbar'] as any
+        barPlugin.composite['toolbar'] as unknown
       );
 
       let waitForChange = new PromiseDelegate<void>();
       barPlugin.changed.connect(() => {
         if (
-          !JSONExt.deepEqual(baseToolbar, barPlugin.composite['toolbar'] as any)
+          !JSONExt.deepEqual(
+            baseToolbar,
+            barPlugin.composite['toolbar'] as unknown
+          )
         ) {
           waitForChange.resolve();
         }

@@ -41,7 +41,7 @@ describe('@jupyterlab/apputils', () => {
         'success',
         'warning'
       ])('should emit a notification of the type %s', type => {
-        const id = Notification.emit('dummy message', type as any);
+        const id = Notification.emit('dummy message', type as unknown);
 
         expect(Notification.manager.count).toEqual(1);
         expect(Notification.manager.notifications[0].id).toEqual(id);

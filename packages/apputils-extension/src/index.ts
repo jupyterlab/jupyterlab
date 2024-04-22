@@ -356,7 +356,7 @@ export const toggleHeader: JupyterFrontEndPlugin<void> = {
  * active item.
  */
 async function updateTabTitle(workspace: string, db: IStateDB, name: string) {
-  const data: any = await db.toJSON();
+  const data: unknown = await db.toJSON();
   let current: string = data['layout-restorer:data']?.main?.current;
   if (current === undefined) {
     document.title = `${PageConfig.getOption('appName') || 'JupyterLab'}${
@@ -604,7 +604,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       label: trans.__('Run First Enabled Command'),
       execute: args => {
         const commands: string[] = args.commands as string[];
-        const commandArgs: any = args.args;
+        const commandArgs: unknown = args.args;
         const argList = Array.isArray(args);
         for (let i = 0; i < commands.length; i++) {
           const cmd = commands[i];
@@ -622,7 +622,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       label: trans.__('Run All Enabled Commands Passed as Args'),
       execute: async args => {
         const commands: string[] = (args.commands as string[]) ?? [];
-        const commandArgs: any = args.args;
+        const commandArgs: unknown = args.args;
         const argList = Array.isArray(args);
         const errorIfNotEnabled: boolean =
           (args.errorIfNotEnabled as boolean) ?? false;
@@ -640,7 +640,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
       },
       isEnabled: args => {
         const commands: string[] = (args.commands as string[]) ?? [];
-        const commandArgs: any = args.args;
+        const commandArgs: unknown = args.args;
         const argList = Array.isArray(args);
 
         return commands.some((cmd, idx) =>
@@ -723,7 +723,7 @@ const sanitizer: JupyterFrontEndPlugin<IRenderMime.ISanitizer> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   announcements,
   kernelStatus,
   notificationPlugin,

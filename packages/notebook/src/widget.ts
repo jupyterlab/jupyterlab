@@ -166,11 +166,11 @@ const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
  */
 export type NotebookMode = 'command' | 'edit';
 
-if ((window as any).requestIdleCallback === undefined) {
+if ((window as unknown).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
   // eslint-disable-next-line @typescript-eslint/ban-types
-  (window as any).requestIdleCallback = function (handler: Function) {
+  (window as unknown).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {
       handler({
@@ -182,7 +182,7 @@ if ((window as any).requestIdleCallback === undefined) {
     }, 1);
   };
 
-  (window as any).cancelIdleCallback = function (id: number) {
+  (window as unknown).cancelIdleCallback = function (id: number) {
     clearTimeout(id);
   };
 }
@@ -397,7 +397,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
       return;
     }
 
-    const viewModel: { [k: string]: any }[] = new Array(n);
+    const viewModel: { [k: string]: unknown }[] = new Array(n);
     for (let i = 0; i < n; i++) {
       viewModel[i] = {};
       const oldCell = this.widgets[from + i];
@@ -868,7 +868,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _updateEditorConfig() {
     for (let i = 0; i < this.widgets.length; i++) {
       const cell = this.widgets[i];
-      let config: Record<string, any> = {};
+      let config: Record<string, unknown> = {};
       switch (cell.model.type) {
         case 'code':
           config = this._editorConfig.code;
@@ -1075,15 +1075,15 @@ export namespace StaticNotebook {
     /**
      * Config options for code cells.
      */
-    readonly code: Record<string, any>;
+    readonly code: Record<string, unknown>;
     /**
      * Config options for markdown cells.
      */
-    readonly markdown: Record<string, any>;
+    readonly markdown: Record<string, unknown>;
     /**
      * Config options for raw cells.
      */
-    readonly raw: Record<string, any>;
+    readonly raw: Record<string, unknown>;
   }
 
   /**
@@ -1376,7 +1376,7 @@ export class Notebook extends StaticNotebook {
   /**
    * A signal emitted when the state of the notebook changes.
    */
-  get stateChanged(): ISignal<this, IChangedArgs<any>> {
+  get stateChanged(): ISignal<this, IChangedArgs<unknown>> {
     return this._stateChanged;
   }
 
@@ -1823,7 +1823,7 @@ export class Notebook extends StaticNotebook {
       };
     }
     return {
-      kind: parts[0] as any,
+      kind: parts[0] as unknown,
       value: parts.slice(1).join('=')
     };
   }
@@ -2319,7 +2319,7 @@ export class Notebook extends StaticNotebook {
           case Cell.HeadingType.Markdown:
             {
               const mdHeading =
-                heading as any as TableOfContentsUtils.Markdown.IMarkdownHeading;
+                heading as unknown as TableOfContentsUtils.Markdown.IMarkdownHeading;
               id = await TableOfContentsUtils.Markdown.getHeadingId(
                 this.rendermime.markdownParser!,
                 mdHeading.raw,
@@ -2940,7 +2940,7 @@ export class Notebook extends StaticNotebook {
   } | null = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
   private _activeCellChanged = new Signal<this, Cell | null>(this);
-  private _stateChanged = new Signal<this, IChangedArgs<any>>(this);
+  private _stateChanged = new Signal<this, IChangedArgs<unknown>>(this);
   private _selectionChanged = new Signal<this, void>(this);
 
   // Attributes for optimized cell refresh:

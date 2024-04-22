@@ -28,7 +28,7 @@ describe('completer/inline', () => {
     insertText: 'test',
     streaming: false,
     provider: exampleProvider,
-    stream: new Signal({} as any)
+    stream: new Signal({} as unknown)
   };
 
   describe('InlineCompleter', () => {

@@ -34,7 +34,9 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     // Create an IInfo dictionary from the options to override the defaults.
     const info = Object.keys(JupyterLab.defaultInfo).reduce((acc, val) => {
       if (val in options) {
-        (acc as any)[val] = JSON.parse(JSON.stringify((options as any)[val]));
+        (acc as unknown)[val] = JSON.parse(
+          JSON.stringify((options as unknown)[val])
+        );
       }
       return acc;
     }, {} as Partial<JupyterLab.IInfo>);
@@ -79,20 +81,20 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     this._paths = {
       urls: Object.keys(defaultURLs).reduce((acc, key) => {
         if (key in optionURLs) {
-          const value = (optionURLs as any)[key];
-          (acc as any)[key] = value;
+          const value = (optionURLs as unknown)[key];
+          (acc as unknown)[key] = value;
         } else {
-          (acc as any)[key] = (defaultURLs as any)[key];
+          (acc as unknown)[key] = (defaultURLs as unknown)[key];
         }
         return acc;
       }, {}),
       directories: Object.keys(JupyterLab.defaultPaths.directories).reduce(
         (acc, key) => {
           if (key in optionDirs) {
-            const value = (optionDirs as any)[key];
-            (acc as any)[key] = value;
+            const value = (optionDirs as unknown)[key];
+            (acc as unknown)[key] = value;
           } else {
-            (acc as any)[key] = (defaultDirs as any)[key];
+            (acc as unknown)[key] = (defaultDirs as unknown)[key];
           }
           return acc;
         },
@@ -174,7 +176,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     let data = mod.default;
     // Handle commonjs exports.
     if (!mod.hasOwnProperty('__esModule')) {
-      data = mod as any;
+      data = mod as unknown;
     }
     if (!Array.isArray(data)) {
       data = [data];
@@ -373,7 +375,7 @@ export namespace JupyterLab {
    * A read-only subset of the `Token`.
    */
   export interface IToken
-    extends Readonly<Pick<Token<any>, 'name' | 'description'>> {
+    extends Readonly<Pick<Token<unknown>, 'name' | 'description'>> {
     // no-op
   }
 
@@ -467,8 +469,8 @@ export namespace JupyterLab {
      * The default export.
      */
     default:
-      | JupyterFrontEndPlugin<any, any, any>
-      | JupyterFrontEndPlugin<any, any, any>[];
+      | JupyterFrontEndPlugin<unknown, unknown, unknown>
+      | JupyterFrontEndPlugin<unknown, unknown, unknown>[];
   }
 }
 

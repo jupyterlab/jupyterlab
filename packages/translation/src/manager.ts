@@ -3,7 +3,12 @@
 
 import { ServerConnection } from '@jupyterlab/services';
 import { Gettext } from './gettext';
-import { ITranslator, TranslationBundle, TranslatorConnector } from './tokens';
+import {
+  ITranslator,
+  Language,
+  TranslationBundle,
+  TranslatorConnector
+} from './tokens';
 import { normalizeDomain } from './utils';
 
 /**
@@ -38,6 +43,7 @@ export class TranslationManager implements ITranslator {
             // If the language is provided by the system set up, we need to retrieve the final
             // language. This is done through the `""` entry in `_languageData` that contains
             // language metadata.
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ((lang as any)['']['language'] as string).replace('_', '-');
           break;
         }
@@ -49,7 +55,7 @@ export class TranslationManager implements ITranslator {
     }
 
     this._domainData = this._languageData?.data ?? {};
-    const message: string = this._languageData?.message;
+    const message = this._languageData?.message;
     if (message && locale !== 'en') {
       console.warn(message);
     }
@@ -92,9 +98,10 @@ export class TranslationManager implements ITranslator {
 
   private _connector: TranslatorConnector;
   private _currentLocale: string;
-  private _domainData: any = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _domainData: Record<string, any> = {};
   private _englishBundle: Gettext;
-  private _languageData: any;
+  private _languageData: Language;
   private _stringsPrefix: string;
-  private _translationBundles: any = {};
+  private _translationBundles: Record<string, TranslationBundle> = {};
 }

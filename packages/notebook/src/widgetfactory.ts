@@ -78,7 +78,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     context: DocumentRegistry.IContext<INotebookModel>,
     source?: NotebookPanel
   ): NotebookPanel {
-    const translator = (context as any).translator;
+    const translator = (context as unknown).translator;
     const kernelHistory = new NotebookHistory({
       sessionContext: context.sessionContext,
       translator: translator

@@ -155,7 +155,7 @@ function handlePayload(
   cell: Cell
 ) {
   const setNextInput = content.payload?.filter(i => {
-    return (i as any).source === 'set_next_input';
+    return (i as unknown).source === 'set_next_input';
   })[0];
 
   if (!setNextInput) {

@@ -129,8 +129,8 @@ describe('@jupyterlab/fileeditor', () => {
                 getSource: () => text
               }
             }
-          } as any
-        } as any);
+          } as unknown
+        } as unknown);
 
         const newHeadings = signalToPromise(model.headingsChanged);
         model.isActive = true; // This will trigger refresh

@@ -394,15 +394,15 @@ export class NotebookHelper {
           ? undefined
           : ({
               onBeforeScroll: async () => {
-                await (window as any)[`${callbackName}_onBeforeScroll`]();
+                await (window as unknown)[`${callbackName}_onBeforeScroll`]();
               },
 
               onAfterScroll: async () => {
-                await (window as any)[`${callbackName}_onAfterScroll`]();
+                await (window as unknown)[`${callbackName}_onAfterScroll`]();
               },
 
               onAfterCellRun: async (cellIndex: number) => {
-                await (window as any)[`${callbackName}_onAfterCellRun`](
+                await (window as unknown)[`${callbackName}_onAfterCellRun`](
                   cellIndex
                 );
               }
@@ -1150,7 +1150,7 @@ export class NotebookHelper {
       return false;
     }
 
-    const clickPosition: any = { x: 15, y: 5 };
+    const clickPosition: unknown = { x: 15, y: 5 };
 
     await startCell.click({ position: clickPosition });
 
@@ -1327,7 +1327,7 @@ export class NotebookHelper {
       await select.selectOption(cellType);
     } else {
       await selectInput.evaluate((el, cellType) => {
-        (el as any).value = cellType;
+        (el as unknown).value = cellType;
       }, cellType);
     }
 

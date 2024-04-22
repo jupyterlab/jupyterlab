@@ -47,7 +47,7 @@ spy.mockImplementation((status, method, setting) => {
       specs,
       version: 2
     })
-  }) as any;
+  }) as unknown;
 });
 
 describe('@jupyterlab/lsp', () => {
@@ -64,7 +64,7 @@ describe('@jupyterlab/lsp', () => {
       document = new VirtualDocument({
         language: 'python',
         path: 'test.ipynb',
-        foreignCodeExtractors: null as any,
+        foreignCodeExtractors: null as unknown,
         standalone: false,
         fileExtension: 'py',
         hasLspSupportedFile: false
@@ -91,7 +91,7 @@ describe('@jupyterlab/lsp', () => {
       it('should unregister and disconnect document', () => {
         manager.unregisterDocument = jest.fn();
         manager.disconnectDocumentSignals = jest.fn();
-        manager.onForeignDocumentClosed(null as any, {
+        manager.onForeignDocumentClosed(null as unknown, {
           foreignDocument: document,
           parentHost: document
         });

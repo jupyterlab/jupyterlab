@@ -192,7 +192,7 @@ export class LanguageServerManager implements ILanguageServerManager {
       return;
     }
 
-    let sessions: { [key: string]: any };
+    let sessions: { [key: string]: unknown };
 
     try {
       const data = await response.json();

@@ -27,9 +27,9 @@ test('All plugins and tokens must have a description', async ({
 
       plugins[id] = window.jupyterapp.getPluginDescription(id);
       const plugin = (
-        (window.jupyterapp as any)._plugins as Map<
+        (window.jupyterapp as unknown)._plugins as Map<
           string,
-          { provides: Token<any> | null }
+          { provides: Token<unknown> | null }
         >
       ).get(id);
       if (plugin?.provides) {

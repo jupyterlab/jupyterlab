@@ -24,7 +24,7 @@ export namespace CommandIDs {
  * The layout of shortcuts settings as defined in schema.
  */
 export interface IShortcutsSettingsLayout {
-  [index: string]: any;
+  [index: string]: unknown;
   shortcuts?: CommandRegistry.IKeyBindingOptions[];
 }
 

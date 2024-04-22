@@ -144,7 +144,7 @@ export const FACTORY = 'Editor';
  * for use by the File Editor extension or other Editor extensions.
  */
 export namespace Commands {
-  let config: Record<string, any> = {};
+  let config: Record<string, unknown> = {};
   let scrollPastEnd = true;
 
   /**
@@ -189,7 +189,7 @@ export namespace Commands {
     commands: CommandRegistry
   ): void {
     config =
-      (settings.get('editorConfig').composite as Record<string, any>) ?? {};
+      (settings.get('editorConfig').composite as Record<string, unknown>) ?? {};
     scrollPastEnd = settings.get('scrollPasteEnd').composite as boolean;
 
     // Trigger a refresh of the rendered commands
@@ -1413,7 +1413,7 @@ export namespace Commands {
 
     app.commands.addCommand(CommandIDs.openCodeViewer, {
       label: trans.__('Open Code Viewer'),
-      execute: (args: any) => {
+      execute: (args: unknown) => {
         return openCodeViewer(args);
       }
     });

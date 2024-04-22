@@ -69,7 +69,7 @@ export const workspacesSidebar: JupyterFrontEndPlugin<void> = {
         return trans.__(
           '%1 workspace with %2 tabs, last modified on %3',
           this._workspace.metadata.id,
-          (this._workspace.data['layout-restorer:data'] as any)?.main?.dock
+          (this._workspace.data['layout-restorer:data'] as unknown)?.main?.dock
             ?.widgets?.length,
           this._workspace.metadata['last_modified']
         );

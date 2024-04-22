@@ -796,7 +796,7 @@ describe('@jupyterlab/notebook', () => {
             kernelPreference: { autoStartDefault: false },
             startKernel: () => Promise.resolve(true)
           } as ISessionContext,
-          { selectKernel: () => Promise.resolve() } as any
+          { selectKernel: () => Promise.resolve() } as unknown
         );
         expect(result).toBe(true);
         const cell = widget.activeCell as CodeCell;

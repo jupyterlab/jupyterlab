@@ -49,7 +49,7 @@ const workspacesMenu: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [
+const plugins: JupyterFrontEndPlugin<unknown>[] = [
   workspacesModel,
   commandsPlugin,
   workspacesSidebar,

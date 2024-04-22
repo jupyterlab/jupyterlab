@@ -8,8 +8,11 @@ import { URLExt } from './url';
 /**
  * Declare stubs for the node variables.
  */
-declare let process: any;
-declare let require: any;
+declare let process: {
+  argv: string[];
+  env: Record<string, string>;
+};
+declare let require: (package: string) => unknown;
 
 /**
  * The namespace for `PageConfig` functions.
@@ -55,12 +58,14 @@ export namespace PageConfig {
     if (!found && typeof process !== 'undefined' && process.argv) {
       try {
         const cli = minimist(process.argv.slice(2));
-        const path: any = require('path');
+        const path = require('path') as {
+          resolve: (...paths: string[]) => string;
+        };
         let fullPath = '';
         if ('jupyter-config-data' in cli) {
           fullPath = path.resolve(cli['jupyter-config-data']);
         } else if ('JUPYTER_CONFIG_DATA' in process.env) {
-          fullPath = path.resolve(process.env['JUPYTER_CONFIG_DATA']);
+          fullPath = path.resolve(process.env['JUPYTER_CONFIG_DATA'] as string);
         }
         if (fullPath) {
           // Force Webpack to ignore this require.

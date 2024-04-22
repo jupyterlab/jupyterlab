@@ -179,7 +179,7 @@ describe('Debugger', () => {
   });
 
   describe('Panel', () => {
-    let toolbarList: any;
+    let toolbarList: unknown;
     beforeEach(() => {
       toolbarList = sidebar.content.node.querySelectorAll(
         '.jp-AccordionPanel-title'

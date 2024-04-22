@@ -23,7 +23,7 @@ describe('session/validate', () => {
     });
 
     it('should fail on missing data', () => {
-      const model: any = {
+      const model: unknown = {
         id: 'foo',
         kernel: { name: 'foo', id: '123' },
         path: 'bar',

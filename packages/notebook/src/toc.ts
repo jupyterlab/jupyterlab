@@ -801,13 +801,13 @@ export async function getIdForHeading(
     elementId = await TableOfContentsUtils.Markdown.getHeadingId(
       parser,
       // Type from TableOfContentsUtils.Markdown.IMarkdownHeading
-      (heading as any).raw,
+      (heading as unknown).raw,
       heading.level,
       sanitizer
     );
   } else if (heading.type === Cell.HeadingType.HTML) {
     // Type from TableOfContentsUtils.IHTMLHeading
-    elementId = (heading as any).id;
+    elementId = (heading as unknown).id;
   }
   return elementId;
 }

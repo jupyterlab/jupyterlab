@@ -451,8 +451,8 @@ export class VirtualDocument implements IDisposable {
     // just to be sure - if anything is accessed after disposal (it should not) we
     // will get altered by errors in the console AND this will limit memory leaks
 
-    this.documentInfo = null as any;
-    this.lineBlocks = null as any;
+    this.documentInfo = null as unknown;
+    this.lineBlocks = null as unknown;
 
     Signal.clearData(this);
   }

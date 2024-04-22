@@ -60,14 +60,18 @@ export interface IService {
  * @param body The body for the response.
  */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function handleRequest(item: IService, status: number, body: any): void {
+export function handleRequest(
+  item: IService,
+  status: number,
+  body: unknown
+): void {
   // Store the existing fetch function.
   const oldFetch = item.serverSettings.fetch;
 
   // A single use callback.
   const temp = (info: RequestInfo, init: RequestInit): Promise<void> => {
     // Restore fetch.
-    (item.serverSettings as any).fetch = oldFetch;
+    (item.serverSettings as unknown).fetch = oldFetch;
 
     // Normalize the body.
     if (typeof body !== 'string') {
@@ -76,9 +80,9 @@ export function handleRequest(item: IService, status: number, body: any): void {
 
     // Create the response and return it as a promise.
     const response = new Response(body, { status });
-    return Promise.resolve(response as any);
+    return Promise.resolve(response as unknown);
   };
 
   // Override the fetch function.
-  (item.serverSettings as any).fetch = temp;
+  (item.serverSettings as unknown).fetch = temp;
 }

@@ -435,7 +435,7 @@ describe('@jupyterlab/ui-components', () => {
           toolbar.insertItem(i, names[i], w);
         }
         toolbar.insertItem(1, names[3], w);
-        const positions = (toolbar as any)._widgetPositions;
+        const positions = (toolbar as unknown)._widgetPositions;
         let stored: number[] = [];
         for (let i = 0; i < 4; i++) {
           stored.push(positions.get(names[i]));
@@ -451,7 +451,7 @@ describe('@jupyterlab/ui-components', () => {
         }
         toolbar.insertItem(-5, names[2], w);
         toolbar.insertItem(10, names[3], w);
-        const positions = (toolbar as any)._widgetPositions;
+        const positions = (toolbar as unknown)._widgetPositions;
         let stored: number[] = [];
         for (let i = 0; i < 4; i++) {
           stored.push(positions.get(names[i]));

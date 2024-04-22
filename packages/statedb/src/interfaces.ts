@@ -67,7 +67,7 @@ export interface IDataConnector<T, U = T, V = string, W = string> {
    * tested for. For example, some back-ends may return a copy of the item of
    * type `T` being removed while others may return no content.
    */
-  remove(id: V): Promise<any>;
+  remove(id: V): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   /**
    * Save a value using the data connector.
@@ -84,7 +84,7 @@ export interface IDataConnector<T, U = T, V = string, W = string> {
    * tested for. For example, some back-ends may return a copy of the item of
    * type `T` being saved while others may return no content.
    */
-  save(id: V, value: U): Promise<any>;
+  save(id: V, value: U): Promise<any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 /**
@@ -169,7 +169,7 @@ export interface IObjectPool<T extends IObservableDisposable>
 export interface IRestorer<
   T extends IRestorable<U> = IRestorable<IObservableDisposable>,
   U extends IObservableDisposable = IObservableDisposable,
-  V = any
+  V = any // eslint-disable-line @typescript-eslint/no-explicit-any
 > {
   /**
    * Restore the objects in a given restorable collection.
@@ -217,7 +217,7 @@ export namespace IRestorer {
     /**
      * The point after which it is safe to restore state.
      */
-    when?: Promise<any> | Array<Promise<any>>;
+    when?: Promise<any> | Array<Promise<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
   }
 }
 
@@ -228,7 +228,8 @@ export namespace IRestorer {
  *
  * @typeparam U - The `restored` promise resolution type. Defaults to `any`.
  */
-export interface IRestorable<T extends IObservableDisposable, U = any> {
+export interface IRestorable<T extends IObservableDisposable, U = unknown> {
+  // eslint-disable-line @typescript-eslint/no-explicit-any
   /**
    * Restore the objects in this restorable collection.
    *

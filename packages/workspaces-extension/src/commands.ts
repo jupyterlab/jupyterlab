@@ -311,8 +311,8 @@ export const commandsPlugin: JupyterFrontEndPlugin<IWorkspaceCommands> = {
 
         const workspace =
           await app.serviceManager.workspaces.fetch(workspaceId);
-        const tabs = (workspace.data['layout-restorer:data'] as any)?.main?.dock
-          ?.widgets?.length;
+        const tabs = (workspace.data['layout-restorer:data'] as unknown)?.main
+          ?.dock?.widgets?.length;
 
         const result = await showDialog({
           title: trans.__('Reset Workspace'),

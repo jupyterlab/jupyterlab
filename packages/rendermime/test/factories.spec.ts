@@ -32,7 +32,7 @@ function encodeChars(txt: string): string {
 }
 
 const sanitizer = new Sanitizer();
-const defaultOptions: any = {
+const defaultOptions: unknown = {
   sanitizer,
   linkHandler: null,
   resolver: null
@@ -417,9 +417,9 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source, true);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         return w.renderModel(model).then(() => {
-          expect((window as any).y).toBeUndefined();
+          expect((window as unknown).y).toBeUndefined();
           Widget.attach(w, document.body);
-          expect((window as any).y).toBe(3);
+          expect((window as unknown).y).toBe(3);
           w.dispose();
         });
       });

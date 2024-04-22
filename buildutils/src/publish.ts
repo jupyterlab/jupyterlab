@@ -29,7 +29,7 @@ commander
   .option('--skip-tags', 'publish assets but do not handle tags')
   .option('--yes', 'Publish without confirmation')
   .option('--dry-run', 'Do not actually push any assets')
-  .action(async (options: any) => {
+  .action(async (options: unknown) => {
     utils.exitOnUncaughtException();
 
     // No-op if we're in release helper dry run
