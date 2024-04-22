@@ -71,10 +71,10 @@ function generateConfig({
 
   const coreData = require(path.join(corePath, 'package.json'));
 
-  let shared: unknown = {};
+  let shared: any = {};
 
   // Start with core package versions.
-  const coreDeps: unknown = {
+  const coreDeps: any = {
     ...coreData.dependencies,
     ...(coreData.resolutions ?? {})
   };
@@ -165,8 +165,8 @@ function generateConfig({
   );
 
   class CleanupPlugin {
-    apply(compiler: unknown) {
-      compiler.hooks.done.tap('Cleanup', (stats: unknown) => {
+    apply(compiler: any) {
+      compiler.hooks.done.tap('Cleanup', (stats: any) => {
         const newlyCreatedAssets = stats.compilation.assets;
 
         // Clear out any remoteEntry files that are stale
@@ -189,7 +189,7 @@ function generateConfig({
 
         // Find the remoteEntry file and add it to the package.json metadata
         const data = fs.readJSONSync(path.join(outputPath, 'package.json'));
-        const _build: unknown = {
+        const _build: any = {
           load: path.join('static', newEntry)
         };
         if (exposes['./extension'] !== undefined) {
@@ -251,7 +251,7 @@ function generateConfig({
     filename += '?v=[contenthash]';
   }
 
-  const rules: unknown = [{ test: /\.html$/, type: 'asset/resource' }];
+  const rules: any = [{ test: /\.html$/, type: 'asset/resource' }];
 
   if (mode === 'development') {
     rules.push({
@@ -286,7 +286,7 @@ function generateConfig({
 
   if (mode === 'development') {
     const logPath = path.join(outputPath, 'build_log.json');
-    function regExpReplacer(key: unknown, value: unknown) {
+    function regExpReplacer(key: any, value: any) {
       if (value instanceof RegExp) {
         return value.toString();
       } else {

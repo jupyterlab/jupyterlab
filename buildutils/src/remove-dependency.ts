@@ -28,7 +28,7 @@ handlePackage(path.resolve('.'));
 function handlePackage(packagePath: string): void {
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
-  let data: unknown;
+  let data: any;
   try {
     data = utils.readJSONFile(packagePath);
   } catch (e) {

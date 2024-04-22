@@ -17,7 +17,7 @@ export async function handlePackage(packagePath: string): Promise<string[]> {
 
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
-  let data: unknown;
+  let data: any;
   try {
     data = utils.readJSONFile(packagePath);
   } catch (e) {
@@ -55,7 +55,7 @@ export async function handlePackage(packagePath: string): Promise<string[]> {
   return cmds;
 }
 
-function flatten(a: unknown[]) {
+function flatten(a: any[]) {
   return a.reduce((acc, val) => acc.concat(val), []);
 }
 
@@ -67,7 +67,7 @@ points to the latest prerelease after it.`
   )
   .option('--lerna', 'Update dist-tags in all lerna packages')
   .option('--path [path]', 'Path to package or monorepo to update')
-  .action(async (args: unknown) => {
+  .action(async (args: any) => {
     const basePath = path.resolve(args.path || '.');
     let cmds: string[][] = [];
     let paths: string[] = [];

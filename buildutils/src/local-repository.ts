@@ -85,8 +85,8 @@ packages:
   }
 
   // Assign as `any`` for compatibility with spawn `OpenMode`` options
-  const out: unknown = fs.openSync(log_file, 'a');
-  const err: unknown = fs.openSync(log_file, 'a');
+  const out: any = fs.openSync(log_file, 'a');
+  const err: any = fs.openSync(log_file, 'a');
 
   const options = { cwd: out_dir, detached: true, stdio: ['ignore', out, err] };
 
@@ -278,7 +278,7 @@ program
   .command('start')
   .option('--port <port>', 'Port to use for the registry')
   .option('--path <path>', 'Path to use for the registry')
-  .action(async (options: unknown) => {
+  .action(async (options: any) => {
     utils.exitOnUncaughtException();
     const out_dir = options.path || DEFAULT_OUT_DIR;
     await startLocalRegistry(out_dir, options.port || DEFAULT_PORT);
@@ -287,7 +287,7 @@ program
 program
   .command('stop')
   .option('--path <path>', 'Path to use for the registry')
-  .action(async (options: unknown) => {
+  .action(async (options: any) => {
     utils.exitOnUncaughtException();
     const out_dir = options.path || DEFAULT_OUT_DIR;
     await stopLocalRegistry(out_dir);
@@ -296,7 +296,7 @@ program
 program
   .command('publish-dists')
   .option('--path <path>', 'Path to the directory with npm tar balls')
-  .action((options: unknown) => {
+  .action((options: any) => {
     utils.exitOnUncaughtException();
     publishPackages(options.path || process.cwd());
   });

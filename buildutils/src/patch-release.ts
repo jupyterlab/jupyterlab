@@ -12,7 +12,7 @@ commander
   .option('--force', 'Force the upgrade')
   .option('--all', 'Patch all JS packages instead of the changed ones')
   .option('--skip-commit', 'Whether to skip commit changes')
-  .action((options: unknown) => {
+  .action((options: any) => {
     utils.exitOnUncaughtException();
 
     // Make sure we can patch release.

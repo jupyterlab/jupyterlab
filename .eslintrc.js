@@ -31,6 +31,12 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   overrides: [
     {
+      files: ['buildutils/**/*.ts', 'builder/**/*.ts', 'examples/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off'
+      }
+    },
+    {
       files: ['packages/**/*.spec.ts', 'testutils/**/*.spec.ts'],
       plugins: ['jest'],
       extends: ['plugin:jest/recommended'],

@@ -41,7 +41,7 @@ for (let i = 0; i < packageConfig.length; i++) {
 function handlePackage(packagePath: string): void {
   // Read in the package.json.
   const packageJSONPath = path.join(packagePath, 'package.json');
-  let data: unknown;
+  let data: any;
   try {
     data = require(packageJSONPath);
   } catch (e) {

@@ -32,7 +32,7 @@ const rules = [
     issuer: /\.css$/,
     type: 'asset',
     generator: {
-      dataUrl: (content: unknown) => miniSVGDataURI(content.toString())
+      dataUrl: (content: any) => miniSVGDataURI(content.toString())
     }
   },
   {

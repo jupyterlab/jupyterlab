@@ -145,7 +145,7 @@ async function handlePackage(
 
   // Read in the package.json.
   packagePath = path.join(packagePath, 'package.json');
-  let data: unknown;
+  let data: any;
   try {
     data = utils.readJSONFile(packagePath);
   } catch (e) {
@@ -212,11 +212,7 @@ commander
   .option('--minimal', 'only update if the change is substantial')
   .arguments('<package> [versionspec]')
   .action(
-    async (
-      name: string | RegExp,
-      version: string = '^latest',
-      args: unknown
-    ) => {
+    async (name: string | RegExp, version: string = '^latest', args: any) => {
       const basePath = path.resolve(args.path || '.');
       const pkg = args.regex ? new RegExp(name) : name;
 
