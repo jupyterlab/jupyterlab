@@ -10,6 +10,7 @@ import {
   DataModel,
   TextRenderer
 } from '@lumino/datagrid';
+import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Panel } from '@lumino/widgets';
 
@@ -103,7 +104,7 @@ export class Grid extends Panel {
    *
    * @param message - The `after-attach` message.
    */
-  protected onAfterAttach(message: unknown): void {
+  protected onAfterAttach(message: Message): void {
     super.onAfterAttach(message);
     this._updateStyles();
   }
@@ -209,7 +210,7 @@ export class GridModel extends DataModel {
    * @param row The datagrid row
    * @param column The datagrid column
    */
-  data(region: DataModel.CellRegion, row: number, column: number): unknown {
+  data(region: DataModel.CellRegion, row: number, column: number): string {
     if (region === 'row-header') {
       return this._data.name[row];
     }

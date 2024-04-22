@@ -1733,8 +1733,8 @@ namespace Private {
     name: string,
     moduleName: string | undefined,
     registry?: { [key: string]: unknown }
-  ): Promise<unknown> {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<any> {
     return new Promise((resolve, reject) => {
       // Try loading the module using require.js
       if (moduleName) {

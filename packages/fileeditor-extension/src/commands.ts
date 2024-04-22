@@ -1,5 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { selectAll } from '@codemirror/commands';
 import { findNext, gotoLine } from '@codemirror/search';
 import { JupyterFrontEnd } from '@jupyterlab/application';
@@ -144,7 +146,7 @@ export const FACTORY = 'Editor';
  * for use by the File Editor extension or other Editor extensions.
  */
 export namespace Commands {
-  let config: Record<string, unknown> = {};
+  let config: Record<string, any> = {};
   let scrollPastEnd = true;
 
   /**
@@ -189,7 +191,7 @@ export namespace Commands {
     commands: CommandRegistry
   ): void {
     config =
-      (settings.get('editorConfig').composite as Record<string, unknown>) ?? {};
+      (settings.get('editorConfig').composite as Record<string, any>) ?? {};
     scrollPastEnd = settings.get('scrollPasteEnd').composite as boolean;
 
     // Trigger a refresh of the rendered commands
@@ -1413,7 +1415,7 @@ export namespace Commands {
 
     app.commands.addCommand(CommandIDs.openCodeViewer, {
       label: trans.__('Open Code Viewer'),
-      execute: (args: unknown) => {
+      execute: (args: any) => {
         return openCodeViewer(args);
       }
     });

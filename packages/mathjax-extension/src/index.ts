@@ -85,7 +85,8 @@ const mathJaxPlugin: JupyterFrontEndPlugin<ILatexTypesetter> = {
     app.commands.addCommand(CommandIDs.copy, {
       execute: async () => {
         const md = await typesetter.mathDocument();
-        const oJax: unknown = md.outputJax;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const oJax = md.outputJax as any;
         await navigator.clipboard.writeText(oJax.math.math);
       },
       label: 'MathJax Copy Latex'
@@ -152,7 +153,8 @@ namespace Private {
       );
 
       class EmptyFont extends TeXFont {
-        protected static defaultFonts = {} as unknown;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        protected static defaultFonts = {} as any;
       }
 
       const chtml = new CHTML({

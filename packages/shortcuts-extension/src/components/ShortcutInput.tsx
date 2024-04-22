@@ -146,7 +146,7 @@ export class ShortcutInput extends React.Component<
     userInput: string,
     keys: Array<string>,
     currentChain: string
-  ): Array<unknown> => {
+  ): [string, string[], string] => {
     let key = EN_US.keyForKeydownEvent(event.nativeEvent);
 
     const modKeys = ['Shift', 'Control', 'Alt', 'Meta', 'Ctrl', 'Accel'];

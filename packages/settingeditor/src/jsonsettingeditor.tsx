@@ -318,7 +318,8 @@ export class JsonSettingEditor extends SplitPanel {
   private _saving = false;
   private _state: JsonSettingEditor.ILayoutState =
     JSONExt.deepCopy(DEFAULT_LAYOUT);
-  private _when: Promise<unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _when: Promise<any>;
 }
 
 /**
@@ -377,7 +378,7 @@ export namespace JsonSettingEditor {
     /**
      * The point after which the editor should restore its state.
      */
-    when?: Promise<unknown> | Array<Promise<unknown>>;
+    when?: Promise<any> | Array<Promise<any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     /**
      * The application language translator.

@@ -451,8 +451,10 @@ export class VirtualDocument implements IDisposable {
     // just to be sure - if anything is accessed after disposal (it should not) we
     // will get altered by errors in the console AND this will limit memory leaks
 
-    this.documentInfo = null as unknown;
-    this.lineBlocks = null as unknown;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.documentInfo = null as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.lineBlocks = null as any;
 
     Signal.clearData(this);
   }

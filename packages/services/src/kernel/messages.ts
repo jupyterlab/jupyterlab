@@ -592,7 +592,7 @@ export interface IDebugEventMsg extends IIOPubMessage<'debug_event'> {
     seq: number;
     type: 'event';
     event: string;
-    body?: unknown;
+    body?: JSONObject;
   };
 }
 
@@ -1146,7 +1146,7 @@ export interface IDebugRequestMsg extends IControlMessage<'debug_request'> {
     seq: number;
     type: 'request';
     command: string;
-    arguments?: unknown;
+    arguments?: JSONObject;
   };
 }
 
@@ -1182,7 +1182,7 @@ export interface IDebugReplyMsg extends IControlMessage<'debug_reply'> {
     success: boolean;
     command: string;
     message?: string;
-    body?: unknown;
+    body?: JSONObject;
   };
 }
 

@@ -2,6 +2,7 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Extension } from '@codemirror/state';
 
@@ -313,7 +314,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Editor configuration
    */
-  get editorConfig(): Record<string, unknown> {
+  get editorConfig(): Record<string, any> {
     return this._editorConfig;
   }
 
@@ -446,7 +447,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Save view collapse state to model
    */
   saveCollapseState(): void {
-    const jupyter = { ...(this.model.getMetadata('jupyter') as unknown) };
+    const jupyter = { ...(this.model.getMetadata('jupyter') as any) };
 
     if (
       (this.inputHidden && jupyter.source_hidden === true) ||
@@ -471,7 +472,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
    * Revert view collapse state from model.
    */
   loadCollapseState(): void {
-    const jupyter = (this.model.getMetadata('jupyter') as unknown) ?? {};
+    const jupyter = (this.model.getMetadata('jupyter') as any) ?? {};
     this.inputHidden = !!jupyter.source_hidden;
   }
 
@@ -739,7 +740,7 @@ export class Cell<T extends ICellModel = ICellModel> extends Widget {
     }
   );
 
-  private _editorConfig: Record<string, unknown> = {};
+  private _editorConfig: Record<string, any> = {};
   private _editorExtensions: Extension[] = [];
   private _input: InputArea | null;
   private _inputHidden = false;
@@ -780,7 +781,7 @@ export namespace Cell {
     /**
      * The configuration options for the text editor widget.
      */
-    editorConfig?: Record<string, unknown>;
+    editorConfig?: Record<string, any>;
 
     /**
      * Editor extensions to be added.
@@ -1750,7 +1751,7 @@ export namespace CodeCell {
           // If the data is missing, estimate it to now
           // Date was added in 5.1: https://jupyter-client.readthedocs.io/en/stable/messaging.html#message-header
           const value = msg.header.date || new Date().toISOString();
-          const timingInfo: unknown = Object.assign(
+          const timingInfo: any = Object.assign(
             {},
             model.getMetadata('execution')
           );
@@ -1769,7 +1770,7 @@ export namespace CodeCell {
       if (recordTiming) {
         const timingInfo = Object.assign(
           {},
-          model.getMetadata('execution') as unknown
+          model.getMetadata('execution') as any
         );
         const started = msg.metadata.started as string;
         // Started is not in the API, but metadata IPyKernel sends
@@ -1790,7 +1791,7 @@ export namespace CodeCell {
         cell.setPrompt('');
         if (recordTiming && future.isDisposed) {
           // Record the time when the cell execution was aborted
-          const timingInfo: unknown = Object.assign(
+          const timingInfo: any = Object.assign(
             {},
             model.getMetadata('execution')
           );

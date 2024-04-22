@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /* global RequestInit */
 
@@ -669,7 +670,7 @@ namespace Private {
    * @returns The response body interpreted as JSON and the response link header
    */
   export async function requestAPI<T>(
-    queryArgs: { [k: string]: unknown } = {},
+    queryArgs: { [k: string]: any } = {},
     init: RequestInit = {}
   ): Promise<[T, { [key: string]: string }]> {
     // Make request to Jupyter API
@@ -690,7 +691,7 @@ namespace Private {
       throw new ServerConnection.NetworkError(error);
     }
 
-    let data: unknown = await response.text();
+    let data: any = await response.text();
 
     if (data.length > 0) {
       try {

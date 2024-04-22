@@ -307,7 +307,7 @@ export class WidgetTracker<T extends Widget = Widget>
    * @param widget - The widget whose existence is being checked.
    */
   has(widget: Widget): boolean {
-    return this._pool.has(widget as unknown);
+    return this._pool.has(widget as T);
   }
 
   /**

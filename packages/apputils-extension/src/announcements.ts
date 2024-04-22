@@ -80,12 +80,15 @@ export const announcements: JupyterFrontEndPlugin<void> = {
         if (change.type !== 'removed') {
           return;
         }
-        const { id, tags }: { id?: string; tags?: Array<string> } = (change
-          .notification.options.data ?? {}) as unknown;
+        const { id, tags } = (change.notification.options.data ?? {}) as {
+          id?: string;
+          tags?: Array<string>;
+        };
         if ((tags ?? []).some(tag => ['news', 'update'].includes(tag)) && id) {
           const update: { [k: string]: INewsState } = {};
           update[id] = { seen: true, dismissed: true };
-          config.update(update as unknown).catch(reason => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          config.update(update as any).catch(reason => {
             console.error(
               `Failed to update the announcements config:\n${reason}`
             );
@@ -186,7 +189,8 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                     callback: () => {
                       const update: { [k: string]: INewsState } = {};
                       update[id] = { seen: true, dismissed: true };
-                      config.update(update as unknown).catch(reason => {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      config.update(update as any).catch(reason => {
                         console.error(
                           `Failed to update the announcements config:\n${reason}`
                         );
@@ -208,7 +212,8 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                   options.autoClose = 5000;
                   const update: { [k: string]: INewsState } = {};
                   update[id] = { seen: true };
-                  config.update(update as unknown).catch(reason => {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  config.update(update as any).catch(reason => {
                     console.error(
                       `Failed to update the announcements config:\n${reason}`
                     );
@@ -277,7 +282,8 @@ export const announcements: JupyterFrontEndPlugin<void> = {
                 options.autoClose = 5000;
                 const update: { [k: string]: INewsState } = {};
                 update[id] = { seen: true };
-                config.update(update as unknown).catch(reason => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                config.update(update as any).catch(reason => {
                   console.error(
                     `Failed to update the announcements config:\n${reason}`
                   );

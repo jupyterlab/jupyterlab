@@ -134,7 +134,8 @@ function activate(
     // This is needed because options is passed and used in addcommand-palette and needs
     // to reflect the current cached values.
     Object.keys(settings.composite).forEach((key: keyof ITerminal.IOptions) => {
-      (options as unknown)[key] = settings.composite[key];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      options[key] = settings.composite[key] as any;
     });
   }
 

@@ -73,7 +73,7 @@ export class EditorAdapter implements IDisposable {
     });
   }
 
-  private _widgetAdapter: WidgetLSPAdapter<unknown>;
+  private _widgetAdapter: WidgetLSPAdapter;
   private _extensions: EditorAdapter.ILSPEditorExtensionFactory[];
 }
 
@@ -126,6 +126,6 @@ export namespace EditorAdapter {
     /**
      * The widget lsp adapter.
      */
-    widgetAdapter: WidgetLSPAdapter<unknown>;
+    widgetAdapter: WidgetLSPAdapter;
   }
 }

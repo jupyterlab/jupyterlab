@@ -17,7 +17,7 @@ export interface IFilterBoxProps {
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
-  const onFilterChange = (e: unknown) => {
+  const onFilterChange = (e: React.FormEvent) => {
     const filter = (e.target as HTMLInputElement).value;
     props.model.filter = filter;
   };

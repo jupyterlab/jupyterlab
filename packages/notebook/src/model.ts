@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 import { ICellModel } from '@jupyterlab/cells';
@@ -82,7 +83,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    *
    * @param key Metadata key
    */
-  getMetadata(key: string): unknown;
+  getMetadata(key: string): any;
 
   /**
    * Set a metadata
@@ -90,7 +91,7 @@ export interface INotebookModel extends DocumentRegistry.IModel {
    * @param key Metadata key
    * @param value Metadata value
    */
-  setMetadata(key: string, value: unknown): void;
+  setMetadata(key: string, value: any): void;
 }
 
 /**
@@ -285,7 +286,7 @@ export class NotebookModel implements INotebookModel {
    *
    * @param key Metadata key
    */
-  getMetadata(key: string): unknown {
+  getMetadata(key: string): any {
     return this.sharedModel.getMetadata(key);
   }
 
@@ -295,7 +296,7 @@ export class NotebookModel implements INotebookModel {
    * @param key Metadata key
    * @param value Metadata value
    */
-  setMetadata(key: string, value: unknown): void {
+  setMetadata(key: string, value: any): void {
     if (typeof value === 'undefined') {
       this.sharedModel.deleteMetadata(key);
     } else {

@@ -257,7 +257,8 @@ export class EditorLanguageRegistry implements IEditorLanguageRegistry {
   // and a class with the same fields but all mandatory. Maybe adopting the same
   // pattern would be less confusing (although far more verbose)
   protected makeSpec(spec: IEditorLanguage): IEditorLanguage {
-    let res = LanguageDescription.of(spec) as unknown;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let res = LanguageDescription.of(spec) as any;
     // CodeMirror does not store/use mime type of a language
     res.mime = spec.mime;
     res.displayName = spec.displayName;
@@ -289,7 +290,8 @@ export namespace EditorLanguageRegistry {
     dialectName: keyof typeof import('@codemirror/lang-sql')
   ): Promise<LanguageSupport> {
     const m = await import('@codemirror/lang-sql');
-    return m.sql({ dialect: (m as unknown)[dialectName] });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return m.sql({ dialect: (m as any)[dialectName] });
   }
 
   /**
@@ -416,7 +418,7 @@ export namespace EditorLanguageRegistry {
         extensions: ['md', 'markdown', 'mkd'],
         async load() {
           const m = await import('@codemirror/lang-markdown');
-          return m.markdown({ codeLanguages: this._modeList as unknown });
+          return m.markdown({ codeLanguages: this._modeList });
         }
       },
       {

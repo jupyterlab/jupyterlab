@@ -8,7 +8,11 @@ import { ISettingRegistry, SettingRegistry } from '@jupyterlab/settingregistry';
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 import { Toolbar } from '@jupyterlab/ui-components';
 import { findIndex } from '@lumino/algorithm';
-import { JSONExt, PartialJSONObject } from '@lumino/coreutils';
+import {
+  JSONExt,
+  PartialJSONObject,
+  ReadonlyPartialJSONValue
+} from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 import { Dialog, showDialog } from '../dialog';
 import { IToolbarWidgetRegistry, ToolbarRegistry } from '../tokens';
@@ -106,7 +110,8 @@ async function setToolbarItems(
       schema.properties![propertyId].default =
         SettingRegistry.reconcileToolbarItems(
           pluginDefaults,
-          schema.properties![propertyId].default as unknown[],
+          schema.properties![propertyId]
+            .default as ISettingRegistry.IToolbarItem[],
           true
         )!.sort(
           (a, b) =>
@@ -182,7 +187,7 @@ async function setToolbarItems(
   // React to customization by the user
   settings.changed.connect(() => {
     const newItems: ISettingRegistry.IToolbarItem[] =
-      (settings.composite[propertyId] as unknown) ?? [];
+      (settings.composite[propertyId] as ISettingRegistry.IToolbarItem[]) ?? [];
 
     transferSettings(newItems);
   });
@@ -196,7 +201,9 @@ async function setToolbarItems(
   };
 
   // Initialize the toolbar
-  transferSettings((settings.composite[propertyId] as unknown) ?? []);
+  transferSettings(
+    (settings.composite[propertyId] as ISettingRegistry.IToolbarItem[]) ?? []
+  );
 
   // React to plugin changes if no other transformer exists, otherwise bail.
   if (!listenPlugin) {
@@ -254,7 +261,11 @@ export function createToolbarFactory(
   propertyId: string = 'toolbar'
 ): (widget: Widget) => IObservableList<ToolbarRegistry.IToolbarItem> {
   const items = new ObservableList<ISettingRegistry.IToolbarItem>({
-    itemCmp: (a, b) => JSONExt.deepEqual(a as unknown, b as unknown)
+    itemCmp: (a, b) =>
+      JSONExt.deepEqual(
+        a as ReadonlyPartialJSONValue,
+        b as ReadonlyPartialJSONValue
+      )
   });
 
   // Get toolbar definition from the settings

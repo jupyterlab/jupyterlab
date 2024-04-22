@@ -374,10 +374,12 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
    * This is the default configuration optionally modified by the user;
    * e.g. through user settings.
    */
-  get baseConfiguration(): Record<string, unknown> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  get baseConfiguration(): Record<string, any> {
     return { ...this.defaultOptions, ...this._baseConfiguration };
   }
-  set baseConfiguration(v: Record<string, unknown>) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  set baseConfiguration(v: Record<string, any>) {
     if (!JSONExt.deepEqual(v, this._baseConfiguration)) {
       this._baseConfiguration = v;
       for (const handler of this.handlers) {
@@ -470,12 +472,14 @@ export class EditorExtensionRegistry implements IEditorExtensionRegistry {
     string,
     IEditorExtensionFactory<unknown>
   >();
-  protected configurationSchema: Record<string, unknown> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected configurationSchema: Record<string, any> = {};
 
   protected defaultOptions: Record<string, unknown> = {};
   protected handlers = new Set<ExtensionsHandler>();
   protected immutableExtensions = new Set<string>();
-  private _baseConfiguration: Record<string, unknown> = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _baseConfiguration: Record<string, any> = {};
 }
 
 /**

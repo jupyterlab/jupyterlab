@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { PageConfig } from '@jupyterlab/coreutils';
 import { Base64ModelFactory } from '@jupyterlab/docregistry';
@@ -34,9 +35,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     // Create an IInfo dictionary from the options to override the defaults.
     const info = Object.keys(JupyterLab.defaultInfo).reduce((acc, val) => {
       if (val in options) {
-        (acc as unknown)[val] = JSON.parse(
-          JSON.stringify((options as unknown)[val])
-        );
+        (acc as any)[val] = JSON.parse(JSON.stringify((options as any)[val]));
       }
       return acc;
     }, {} as Partial<JupyterLab.IInfo>);
@@ -81,20 +80,20 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     this._paths = {
       urls: Object.keys(defaultURLs).reduce((acc, key) => {
         if (key in optionURLs) {
-          const value = (optionURLs as unknown)[key];
-          (acc as unknown)[key] = value;
+          const value = (optionURLs as any)[key];
+          (acc as any)[key] = value;
         } else {
-          (acc as unknown)[key] = (defaultURLs as unknown)[key];
+          (acc as any)[key] = (defaultURLs as any)[key];
         }
         return acc;
       }, {}),
       directories: Object.keys(JupyterLab.defaultPaths.directories).reduce(
         (acc, key) => {
           if (key in optionDirs) {
-            const value = (optionDirs as unknown)[key];
-            (acc as unknown)[key] = value;
+            const value = (optionDirs as any)[key];
+            (acc as any)[key] = value;
           } else {
-            (acc as unknown)[key] = (defaultDirs as unknown)[key];
+            (acc as any)[key] = (defaultDirs as any)[key];
           }
           return acc;
         },
@@ -176,7 +175,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     let data = mod.default;
     // Handle commonjs exports.
     if (!mod.hasOwnProperty('__esModule')) {
-      data = mod as unknown;
+      data = mod as any;
     }
     if (!Array.isArray(data)) {
       data = [data];
@@ -469,8 +468,8 @@ export namespace JupyterLab {
      * The default export.
      */
     default:
-      | JupyterFrontEndPlugin<unknown, unknown, unknown>
-      | JupyterFrontEndPlugin<unknown, unknown, unknown>[];
+      | JupyterFrontEndPlugin<any, any, any>
+      | JupyterFrontEndPlugin<any, any, any>[];
   }
 }
 

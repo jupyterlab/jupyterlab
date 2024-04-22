@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { LanguageSupport, StreamLanguage } from '@codemirror/language';
 import { IYText } from '@jupyter/ydoc';
@@ -70,7 +71,7 @@ export const languagePlugin: JupyterFrontEndPlugin<IEditorLanguageRegistry> = {
         ]);
         const mdlang = m.markdown({
           base: m.markdownLanguage,
-          codeLanguages: (info: string) => languages.findBest(info) as unknown,
+          codeLanguages: (info: string) => languages.findBest(info) as any,
           extensions: [
             parseMathIPython(StreamLanguage.define(tex.stexMath).parser)
           ]
@@ -135,10 +136,8 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
       if (settingRegistry) {
         const updateSettings = (settings: ISettingRegistry.ISettings) => {
           registry.baseConfiguration =
-            (settings.get('defaultConfig').composite as Record<
-              string,
-              unknown
-            >) ?? {};
+            (settings.get('defaultConfig').composite as Record<string, any>) ??
+            {};
         };
         void Promise.all([
           settingRegistry.load(SETTINGS_ID),
@@ -153,8 +152,8 @@ export const extensionPlugin: JupyterFrontEndPlugin<IEditorExtensionRegistry> =
             const properties = React.useMemo(
               () => registry.settingsSchema,
               []
-            ) as unknown;
-            const defaultFormData: Record<string, unknown> = {};
+            ) as any;
+            const defaultFormData: Record<string, any> = {};
             // Only provide customizable options
             for (const [key, value] of Object.entries(
               registry.defaultConfiguration

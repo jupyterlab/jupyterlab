@@ -383,7 +383,8 @@ export class ThemeManager implements IThemeManager {
    * Initialize the key -> property dict for the overrides
    */
   private _initOverrideProps(): void {
-    const definitions = this._settings.schema.definitions as unknown;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const definitions = this._settings.schema.definitions as any;
     const overidesSchema = definitions.cssOverrides.properties;
 
     Object.keys(overidesSchema).forEach(key => {

@@ -161,7 +161,8 @@ function activateSettings(
   settingRegistry.transform(plugin.id, {
     fetch: plugin => {
       const schema = plugin.schema.properties!;
-      const defaultValue: { [key: string]: unknown } = {};
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const defaultValue: { [key: string]: any } = {};
       languageServerManager.sessions.forEach((_, key) => {
         defaultValue[key] = { rank: 50, configuration: {} };
       });
@@ -183,7 +184,8 @@ function activateSettings(
       if (serverUserSettings) {
         serverComposite = { ...serverComposite, ...serverUserSettings };
       }
-      const composite: { [key: string]: unknown } = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const composite: { [key: string]: any } = {
         [LANGUAGE_SERVERS]: serverComposite
       };
       Object.entries(properties).forEach(([key, value]) => {

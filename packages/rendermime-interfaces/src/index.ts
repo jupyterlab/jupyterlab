@@ -160,8 +160,10 @@ export namespace IRenderMime {
      * Interface for generic renderer.
      */
     export interface IRenderer {
-      readonly render: (container: HTMLElement, options?: unknown) => void;
-      readonly unrender?: (container: HTMLElement, options?: unknown) => void;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      readonly render: (container: HTMLElement, options?: any) => void;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      readonly unrender?: (container: HTMLElement, options?: any) => void;
     }
 
     /**

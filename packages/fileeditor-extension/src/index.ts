@@ -155,7 +155,8 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
     // Keep a reference to the code editor config from the settings system.
     const updateIndentUnit = (settings: ISettingRegistry.ISettings): void => {
       item.model!.indentUnit =
-        (settings.get('editorConfig').composite as unknown)?.indentUnit ??
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (settings.get('editorConfig').composite as any)?.indentUnit ??
         extensions.baseConfiguration.indentUnit ??
         null;
     };
@@ -413,7 +414,8 @@ function activate(
               }
               languageMenu.addItem({
                 command: CommandIDs.changeLanguage,
-                args: { ...spec } as unknown // TODO: Casting to `any` until lumino typings are fixed
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                args: { ...spec } as any // TODO: Casting to `any` until lumino typings are fixed
               });
             });
         }

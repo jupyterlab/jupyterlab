@@ -1819,7 +1819,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function collapseAllHeadings(notebook: Notebook): unknown {
+  export function collapseAllHeadings(notebook: Notebook): void {
     const state = Private.getState(notebook);
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
@@ -1836,7 +1836,7 @@ export namespace NotebookActions {
    *
    * @param notebook - The target notebook widget.
    */
-  export function expandAllHeadings(notebook: Notebook): unknown {
+  export function expandAllHeadings(notebook: Notebook): void {
     for (const cell of notebook.widgets) {
       if (NotebookActions.getHeadingInfo(cell).isHeading) {
         NotebookActions.setHeadingCollapse(cell, false, notebook);
@@ -2053,7 +2053,7 @@ export namespace NotebookActions {
    * @param cell - The cell to collapse / expand
    * @param collapsing - Whether to collapse or expand the given cell
    */
-  export function setCellCollapse(cell: Cell, collapsing: boolean): unknown {
+  export function setCellCollapse(cell: Cell, collapsing: boolean): void {
     if (cell instanceof MarkdownCell) {
       cell.headingCollapsed = collapsing;
     } else {

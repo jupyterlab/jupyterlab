@@ -219,7 +219,7 @@ export class LayoutRestorer implements ILayoutRestorer {
         leftArea,
         rightArea,
         relativeSizes: relativeSizes || null,
-        topArea: (top as unknown) ?? null
+        topArea: (top as ILabShell.ITopArea) ?? null
       };
     } catch (error) {
       return blank;
@@ -821,7 +821,7 @@ namespace Private {
 
     // Because this data is saved to a foreign data source, its type safety is
     // not guaranteed when it is retrieved, so exhaustive checks are necessary.
-    const type = ((area as unknown).type as string) || 'unknown';
+    const type = (area.type as string) || 'unknown';
     if (type === 'unknown' || (type !== 'tab-area' && type !== 'split-area')) {
       console.warn(`Attempted to deserialize unknown type: ${type}`);
       return null;
@@ -881,8 +881,8 @@ namespace Private {
       return null;
     }
 
-    const name = (area as unknown).current || null;
-    const dock = (area as unknown).dock || null;
+    const name = (area.current as string) || null;
+    const dock = (area.dock as JSONObject) || null;
 
     return {
       currentWidget: (name && names.has(name) && names.get(name)) || null,

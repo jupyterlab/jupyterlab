@@ -1217,7 +1217,6 @@ export namespace Completer {
       return this._constructNode(
         wrapperNode,
         this._createLabelNode(item.label),
-        !!item.type,
         item.type,
         orderedTypes,
         item.icon
@@ -1289,11 +1288,12 @@ export namespace Completer {
     private _constructNode(
       li: HTMLLIElement,
       matchNode: HTMLElement,
-      typesExist: boolean,
-      type: unknown,
+      type: string | undefined,
       orderedTypes: string[],
       icon?: LabIcon
     ): HTMLLIElement {
+      const typesExist = !!type;
+
       // Add the icon or type monogram
       if (icon) {
         const iconNode = icon.element({

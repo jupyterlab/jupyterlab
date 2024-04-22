@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { DOMUtils } from '@jupyterlab/apputils';
 import {
@@ -166,11 +167,11 @@ const SIDE_BY_SIDE_CLASS = 'jp-mod-sideBySide';
  */
 export type NotebookMode = 'command' | 'edit';
 
-if ((window as unknown).requestIdleCallback === undefined) {
+if ((window as any).requestIdleCallback === undefined) {
   // On Safari, requestIdleCallback is not available, so we use replacement functions for `idleCallbacks`
   // See: https://developer.mozilla.org/en-US/docs/Web/API/Background_Tasks_API#falling_back_to_settimeout
   // eslint-disable-next-line @typescript-eslint/ban-types
-  (window as unknown).requestIdleCallback = function (handler: Function) {
+  (window as any).requestIdleCallback = function (handler: Function) {
     let startTime = Date.now();
     return setTimeout(function () {
       handler({
@@ -182,7 +183,7 @@ if ((window as unknown).requestIdleCallback === undefined) {
     }, 1);
   };
 
-  (window as unknown).cancelIdleCallback = function (id: number) {
+  (window as any).cancelIdleCallback = function (id: number) {
     clearTimeout(id);
   };
 }
@@ -868,7 +869,7 @@ export class StaticNotebook extends WindowedList<NotebookViewModel> {
   private _updateEditorConfig() {
     for (let i = 0; i < this.widgets.length; i++) {
       const cell = this.widgets[i];
-      let config: Record<string, unknown> = {};
+      let config: Record<string, any> = {};
       switch (cell.model.type) {
         case 'code':
           config = this._editorConfig.code;
@@ -1075,15 +1076,15 @@ export namespace StaticNotebook {
     /**
      * Config options for code cells.
      */
-    readonly code: Record<string, unknown>;
+    readonly code: Record<string, any>;
     /**
      * Config options for markdown cells.
      */
-    readonly markdown: Record<string, unknown>;
+    readonly markdown: Record<string, any>;
     /**
      * Config options for raw cells.
      */
-    readonly raw: Record<string, unknown>;
+    readonly raw: Record<string, any>;
   }
 
   /**
@@ -1823,7 +1824,7 @@ export class Notebook extends StaticNotebook {
       };
     }
     return {
-      kind: parts[0] as unknown,
+      kind: parts[0] as 'heading' | 'cell-id',
       value: parts.slice(1).join('=')
     };
   }

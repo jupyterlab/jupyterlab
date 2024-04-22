@@ -15,7 +15,12 @@ import {
   TranslationBundle
 } from '@jupyterlab/translation';
 import { find } from '@lumino/algorithm';
-import { JSONExt, PromiseDelegate, UUID } from '@lumino/coreutils';
+import {
+  JSONExt,
+  PromiseDelegate,
+  ReadonlyPartialJSONValue,
+  UUID
+} from '@lumino/coreutils';
 import { IDisposable, IObservableDisposable } from '@lumino/disposable';
 import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
@@ -465,14 +470,18 @@ export class SessionContext implements ISessionContext {
   }
   set kernelPreference(value: ISessionContext.IKernelPreference) {
     if (
-      !JSONExt.deepEqual(value as unknown, this._kernelPreference as unknown)
+      !JSONExt.deepEqual(
+        value as ReadonlyPartialJSONValue,
+        this._kernelPreference as ReadonlyPartialJSONValue
+      )
     ) {
       const oldValue = this._kernelPreference;
       this._kernelPreference = value;
       this._preferenceChanged.emit({
         name: 'kernelPreference',
         oldValue,
-        newValue: JSONExt.deepCopy(value as unknown)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        newValue: JSONExt.deepCopy(value as any)
       });
     }
   }
@@ -1113,7 +1122,7 @@ export class SessionContext implements ISessionContext {
     if (status === 'dead') {
       const model = sender.kernel?.model;
       if (model?.reason) {
-        const traceback = (model as unknown).traceback || '';
+        const traceback = model.traceback || '';
         void this._displayKernelError(model.reason, traceback);
       }
     }

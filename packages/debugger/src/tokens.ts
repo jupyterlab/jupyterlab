@@ -521,7 +521,7 @@ export namespace IDebugger {
       /**
        * An optional hashing seed provided by the kernel.
        */
-      seed?: unknown;
+      seed?: number;
     };
   }
 

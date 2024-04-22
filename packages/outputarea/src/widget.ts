@@ -679,7 +679,8 @@ export class OutputArea extends Widget {
     const model = this.model;
     const msgType = msg.header.msg_type;
     let output: nbformat.IOutput;
-    const transient = ((msg.content as unknown).transient || {}) as JSONObject;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const transient = ((msg.content as any).transient || {}) as JSONObject;
     const displayId = transient['display_id'] as string;
     let targets: number[] | undefined;
     switch (msgType) {
@@ -739,16 +740,14 @@ export class OutputArea extends Widget {
     if (!payload || !payload.length) {
       return;
     }
-    const pages = payload.filter(
-      (i: unknown) => (i as unknown).source === 'page'
-    );
+    const pages = payload.filter(i => i.source === 'page');
     if (!pages.length) {
       return;
     }
     const page = JSON.parse(JSON.stringify(pages[0]));
     const output: nbformat.IOutput = {
       output_type: 'display_data',
-      data: (page as unknown).data as nbformat.IMimeBundle,
+      data: page.data as nbformat.IMimeBundle,
       metadata: {}
     };
     model.add(output);
@@ -1083,7 +1082,9 @@ export class Stdin extends Widget implements IStdin {
         return;
       }
 
-      const ixFound = (history.slice(0, ixpos) as unknown).findLastIndex(
+      // TODO: remove any case after transition to es2023
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ixFound = (history.slice(0, ixpos) as any).findLastIndex(
         substrFound
       );
       if (ixFound !== -1) {

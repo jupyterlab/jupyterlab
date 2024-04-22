@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { TextItem } from '@jupyterlab/statusbar';
@@ -119,8 +120,8 @@ export namespace SavingStatus {
         const oldContext = this._docManager.contextForWidget(oldWidget);
         if (oldContext) {
           oldContext.saveState.disconnect(this._onStatusChange);
-        } else if ((this._widget as unknown).content?.saveStateChanged) {
-          (this._widget as unknown).content.saveStateChanged.disconnect(
+        } else if ((this._widget as any).content?.saveStateChanged) {
+          (this._widget as any).content.saveStateChanged.disconnect(
             this._onStatusChange
           );
         }
@@ -133,8 +134,8 @@ export namespace SavingStatus {
         const widgetContext = this._docManager.contextForWidget(this._widget);
         if (widgetContext) {
           widgetContext.saveState.connect(this._onStatusChange);
-        } else if ((this._widget as unknown).content?.saveStateChanged) {
-          (this._widget as unknown).content.saveStateChanged.connect(
+        } else if ((this._widget as any).content?.saveStateChanged) {
+          (this._widget as any).content.saveStateChanged.connect(
             this._onStatusChange
           );
         }

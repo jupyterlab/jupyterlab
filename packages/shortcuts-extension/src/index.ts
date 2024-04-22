@@ -24,6 +24,7 @@ import {
 } from '@lumino/coreutils';
 import { DisposableSet, IDisposable } from '@lumino/disposable';
 import { Platform } from '@lumino/domutils';
+import type { FieldProps } from '@rjsf/utils';
 import { CommandIDs, IShortcutsSettingsLayout, IShortcutUI } from './types';
 import { renderShortCut } from './renderer';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -176,7 +177,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
       });
 
       const component: IFormRenderer = {
-        fieldRenderer: (props: unknown) => {
+        fieldRenderer: (props: FieldProps) => {
           return renderShortCut({
             external: getExternalForJupyterLab(
               registry,
@@ -209,7 +210,8 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
           loaded[plugin] = shortcuts;
           return shortcuts;
         })
-        .concat([cannonicalOverrides as unknown[]])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .concat([cannonicalOverrides as any[]])
         .reduce((acc, val) => {
           if (Platform.IS_MAC) {
             return acc.concat(val);

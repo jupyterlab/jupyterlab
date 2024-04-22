@@ -192,7 +192,8 @@ export class LanguageServerManager implements ILanguageServerManager {
       return;
     }
 
-    let sessions: { [key: string]: unknown };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let sessions: { [key: string]: any };
 
     try {
       const data = await response.json();

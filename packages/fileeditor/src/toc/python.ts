@@ -75,7 +75,8 @@ export class PythonTableOfContentsModel extends TableOfContentsModel<
       }
       if (hasKeyword) {
         // Index 0 contains the spaces, index 1 is the keyword group
-        const [start] = (hasKeyword as unknown).indices[1];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const [start] = (hasKeyword as any).indices[1];
         if (indent === 1 && start > 0) {
           indent = start;
         }
@@ -118,8 +119,10 @@ export class PythonTableOfContentsFactory extends EditorTableOfContentsFactory {
     const isApplicable = super.isApplicable(widget);
 
     if (isApplicable) {
-      let mime = (widget as unknown).content?.model?.mimeType;
-      return (
+      let mime = (
+        widget as IDocumentWidget<FileEditor, DocumentRegistry.IModel>
+      ).content?.model?.mimeType;
+      return !!(
         mime &&
         (mime === 'application/x-python-code' || mime === 'text/x-python')
       );

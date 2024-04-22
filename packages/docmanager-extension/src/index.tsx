@@ -312,7 +312,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<void> = {
 
         const onStateChanged = (
           sender: IDocumentManager,
-          change: IChangedArgs<unknown>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          change: IChangedArgs<any>
         ): void => {
           if (
             [

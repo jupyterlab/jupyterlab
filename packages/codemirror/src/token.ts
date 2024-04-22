@@ -2,6 +2,7 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { LanguageSupport } from '@codemirror/language';
 import type { Extension, StateEffect } from '@codemirror/state';
@@ -197,7 +198,7 @@ export interface IEditorExtensionRegistry {
    *
    * This is the default configuration.
    */
-  readonly baseConfiguration: Record<string, unknown>;
+  readonly baseConfiguration: Record<string, any>;
 
   /**
    * Add a default editor extension
@@ -217,7 +218,7 @@ export interface IEditorExtensionRegistry {
       /**
        * The configuration options for the editor.
        */
-      config?: Record<string, unknown>;
+      config?: Record<string, any>;
     }
   ): IExtensionsHandler;
 }

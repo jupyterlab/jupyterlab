@@ -314,7 +314,7 @@ const resources: JupyterFrontEndPlugin<void> = {
       }
     ];
 
-    resources.sort((a: unknown, b: unknown) => {
+    resources.sort((a, b) => {
       return a.text.localeCompare(b.text);
     });
 

@@ -766,7 +766,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     'single-document': ILabShell.IUserLayout;
     'multiple-document': ILabShell.IUserLayout;
   } {
-    return JSONExt.deepCopy(this._userLayout as unknown);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return JSONExt.deepCopy(this._userLayout as any);
   }
 
   /**

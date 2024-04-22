@@ -236,8 +236,8 @@ export class RestorablePool<
    * multiple restorable pools and, when ready, asks them each to restore their
    * respective objects.
    */
-  async restore(options: IRestorable.IOptions<T>): Promise<unknown> {
-    // eslint-disable-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async restore(options: IRestorable.IOptions<T>): Promise<any> {
     if (this._hasRestored) {
       throw new Error('This pool has already been restored.');
     }

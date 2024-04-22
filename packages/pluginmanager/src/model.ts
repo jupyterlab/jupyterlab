@@ -429,7 +429,8 @@ export class PluginListModel extends VDomModel {
    * @returns The response body interpreted as JSON
    */
   private async _requestAPI<T>(
-    queryArgs: { [k: string]: unknown } = {},
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryArgs: { [k: string]: any } = {},
     init: RequestInit = {}
   ): Promise<T> {
     // Make request to Jupyter API
@@ -447,7 +448,8 @@ export class PluginListModel extends VDomModel {
       throw new ServerConnection.NetworkError(error);
     }
 
-    let data: unknown = await response.text();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let data: any = await response.text();
 
     if (data.length > 0) {
       try {

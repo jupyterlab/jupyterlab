@@ -107,7 +107,8 @@ export namespace NBTestUtils {
       name: 'binding',
       factory: ({ model }) =>
         EditorExtensionRegistry.createImmutableExtension(
-          ybinding({ ytext: (model.sharedModel as unknown).ysource })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ybinding({ ytext: (model.sharedModel as any).ysource })
         )
     });
     const factoryService = new CodeMirrorEditorFactory({

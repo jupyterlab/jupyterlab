@@ -68,8 +68,10 @@ export class MarkdownTableOfContentsFactory extends EditorTableOfContentsFactory
     const isApplicable = super.isApplicable(widget);
 
     if (isApplicable) {
-      let mime = (widget as unknown).content?.model?.mimeType;
-      return mime && TableOfContentsUtils.Markdown.isMarkdown(mime);
+      let mime = (
+        widget as IDocumentWidget<FileEditor, DocumentRegistry.IModel>
+      ).content?.model?.mimeType;
+      return !!(mime && TableOfContentsUtils.Markdown.isMarkdown(mime));
     }
     return false;
   }

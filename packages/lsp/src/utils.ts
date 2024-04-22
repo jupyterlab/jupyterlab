@@ -44,7 +44,7 @@ export function untilReady(
  * Convert dotted path into dictionary.
  */
 export function expandDottedPaths(obj: ReadonlyJSONObject): ReadonlyJSONObject {
-  const settings: unknown = [];
+  const settings: ReadonlyJSONObject[] = [];
   for (let key in obj) {
     const parsed = expandPath(key.split('.'), obj[key]);
     settings.push(parsed);
@@ -63,7 +63,8 @@ export const expandPath = (
   path: string[],
   value: ReadonlyJSONValue
 ): ReadonlyJSONObject => {
-  const obj: unknown = Object.create(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const obj: any = Object.create(null);
 
   let curr = obj;
   path.forEach((prop: string, i: unknown) => {

@@ -1,5 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 import { ITranslator } from '@jupyterlab/translation';
@@ -51,12 +52,12 @@ export interface ILabStatus {
   /**
    * A signal for when application changes its busy status.
    */
-  readonly busySignal: ISignal<JupyterFrontEnd<unknown, unknown>, boolean>;
+  readonly busySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
 
   /**
    * A signal for when application changes its dirty status.
    */
-  readonly dirtySignal: ISignal<JupyterFrontEnd<unknown, unknown>, boolean>;
+  readonly dirtySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
 
   /**
    * Whether the application is busy.

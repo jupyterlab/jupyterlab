@@ -126,7 +126,8 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 
         const serverSettings = app.serviceManager.serverSettings;
         // Get list of available locales
-        requestTranslationsAPI<unknown>('', '', {}, serverSettings)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        requestTranslationsAPI<any>('', '', {}, serverSettings)
           .then(data => {
             for (const locale in data['data']) {
               const value = data['data'][locale];
