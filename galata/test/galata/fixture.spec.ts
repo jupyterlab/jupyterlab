@@ -51,9 +51,7 @@ test.describe('mockSettings', () => {
     await page.locator('#jupyterlab-splash').waitFor({ state: 'detached' });
     await page.locator('div[role="main"] >> text=Launcher').waitFor();
 
-    expect(((await response.json()) as unknown).raw).toMatch(
-      /JupyterLab Light/
-    );
+    expect(((await response.json()) as any).raw).toMatch(/JupyterLab Light/);
 
     expect(await page.theme.getTheme()).toEqual('JupyterLab Light');
   });
@@ -95,7 +93,7 @@ test.describe('mockState', () => {
         },
         relativeSizes: [0.4, 0.6, 0]
       }
-    } as unknown
+    } as any
   });
 
   test('should return the mocked state', async ({ page }) => {
@@ -116,7 +114,7 @@ test.describe('sessions', () => {
       async response =>
         response.url().includes('api/sessions') &&
         response.request().method() === 'GET' &&
-        ((await response.json()) as unknown[]).length === 1
+        ((await response.json()) as any[]).length === 1
     );
 
     expect(sessions.size).toEqual(1);
@@ -150,7 +148,7 @@ test.describe('terminals', () => {
       async response =>
         response.url().includes('api/terminals') &&
         response.request().method() === 'GET' &&
-        ((await response.json()) as unknown[]).length === 1
+        ((await response.json()) as any[]).length === 1
     );
 
     expect(terminals.size).toEqual(1);

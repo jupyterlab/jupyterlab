@@ -48,7 +48,7 @@ export interface IGalataHelpers {
   /**
    * JupyterLab dialogs tracker.
    */
-  readonly dialogs: WidgetTracker<Dialog<unknown>>;
+  readonly dialogs: WidgetTracker<Dialog<any>>;
   /**
    * JupyterLab notifications manager.
    */
@@ -158,10 +158,7 @@ export interface IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  off(
-    event: 'dialog',
-    listener: (dialog: Dialog<unknown> | null) => void
-  ): void;
+  off(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
   /**
    * Disconnect a listener to new or updated Jupyter notification events.
    *
@@ -179,7 +176,7 @@ export interface IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  on(event: 'dialog', listener: (dialog: Dialog<unknown> | null) => void): void;
+  on(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
 
   /**
    * Connect a listener to new or updated Jupyter notification events.
@@ -198,10 +195,7 @@ export interface IGalataInpage {
    * @param event Event type
    * @param listener Event listener
    */
-  once(
-    event: 'dialog',
-    listener: (dialog: Dialog<unknown> | null) => void
-  ): void;
+  once(event: 'dialog', listener: (dialog: Dialog<any> | null) => void): void;
 
   /**
    * Connect a listener to the next new or updated Jupyter notification event.

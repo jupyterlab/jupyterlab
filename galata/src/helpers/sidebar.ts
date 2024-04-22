@@ -152,7 +152,7 @@ export class SidebarHelper {
         const currentLayout = (await settingRegistry.get(
           SHELL_ID,
           'layout'
-        )) as unknown;
+        )) as any;
         await settingRegistry.set(SHELL_ID, 'layout', {
           single: { ...currentLayout.single, ...sidebars },
           multiple: { ...currentLayout.multiple, ...sidebars }

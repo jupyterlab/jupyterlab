@@ -311,7 +311,7 @@ test.describe('Workspace in doc mode', () => {
           factory: 'Notebook'
         }
       }
-    } as unknown
+    } as any
   });
 
   test('should restore workspace when switching back to lab mode', async ({
@@ -331,7 +331,7 @@ test.describe('Workspace in doc mode', () => {
         ) {
           return false;
         }
-        let restorerData: unknown = {};
+        let restorerData: any = {};
         let mainRestorerWidgets = [];
         if (request.postDataJSON() && request.postDataJSON().data) {
           restorerData =

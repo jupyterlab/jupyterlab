@@ -66,7 +66,7 @@ function createReporter(options?: {
 }): BenchmarkReporter {
   const rootDir = '../../';
   const reporter = new BenchmarkReporter(options);
-  reporter.onBegin({ rootDir } as unknown, null);
+  reporter.onBegin({ rootDir } as any, null);
   reporter.onTestEnd(
     null,
     mockTestResult([
