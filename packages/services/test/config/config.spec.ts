@@ -57,7 +57,7 @@ describe('config', () => {
   describe('#update()', () => {
     it('should update a config', async () => {
       const config = await ConfigSection.create({ name: randomName() });
-      const data: unknown = await config.update({ foo: 'baz', spam: 'eggs' });
+      const data: any = await config.update({ foo: 'baz', spam: 'eggs' });
       expect(data.foo).toBe('baz');
       expect(config.data['foo']).toBe('baz');
       expect(data['spam']).toBe('eggs');
@@ -70,7 +70,7 @@ describe('config', () => {
         name: randomName(),
         serverSettings
       });
-      const data: unknown = await config.update({ foo: 'baz', spam: 'eggs' });
+      const data: any = await config.update({ foo: 'baz', spam: 'eggs' });
       expect(data.foo).toBe('baz');
       expect(config.data['foo']).toBe('baz');
       expect(data['spam']).toBe('eggs');
@@ -172,7 +172,7 @@ describe('jupyter.services - ConfigWithDefaults', () => {
       const className = 'testclass';
       const section = await ConfigSection.create({ name: randomName() });
       const config = new ConfigWithDefaults({ section, className });
-      let data: unknown = await config.set('foo', 'bar');
+      let data: any = await config.set('foo', 'bar');
       data = section.data['testclass'] as JSONObject;
       expect(data['foo']).toBe('bar');
     });

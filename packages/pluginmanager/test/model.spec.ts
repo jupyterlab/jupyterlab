@@ -25,7 +25,7 @@ spy.mockImplementation((url, init, setting) => {
     ok: true,
     status: 200,
     text: () => JSON.stringify(reply)
-  }) as unknown;
+  }) as any;
 });
 
 async function chooseAcceptInDialog(
@@ -195,7 +195,7 @@ describe('@jupyterlab/pluginmanager', () => {
                 allLocked: true,
                 lockRules: []
               })
-          }) as unknown;
+          }) as any;
         });
         const model = new PluginListModel({
           pluginData: {
@@ -219,7 +219,7 @@ describe('@jupyterlab/pluginmanager', () => {
                 allLocked: false,
                 lockRules: [providerPlugin.id]
               })
-          }) as unknown;
+          }) as any;
         });
         const model = new PluginListModel({
           pluginData: {

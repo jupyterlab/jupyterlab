@@ -25,7 +25,7 @@ describe('kernel/validate', () => {
         session: 'baz',
         content: { comm_id: 'foo', data: {} }
       });
-      delete (msg as unknown).channel;
+      delete (msg as any).channel;
       expect(() => validateMessage(msg)).toThrow();
     });
 
@@ -36,7 +36,7 @@ describe('kernel/validate', () => {
         session: 'baz',
         content: { comm_id: 'foo', data: {} }
       });
-      (msg as unknown).header.username = 1;
+      (msg as any).header.username = 1;
       expect(() => validateMessage(msg)).toThrow();
     });
 
@@ -48,7 +48,7 @@ describe('kernel/validate', () => {
         content: { comm_id: 'foo', data: {} }
       });
       msg.parent_header = msg.header;
-      (msg as unknown).parent_header.username = 1;
+      (msg as any).parent_header.username = 1;
       expect(() => validateMessage(msg)).toThrow();
     });
 
@@ -59,7 +59,7 @@ describe('kernel/validate', () => {
         session: 'baz',
         content: { comm_id: 'foo', data: {} }
       });
-      (msg as unknown).channel = 1;
+      (msg as any).channel = 1;
       expect(() => validateMessage(msg)).toThrow();
     });
 
@@ -81,7 +81,7 @@ describe('kernel/validate', () => {
         channel: 'iopub',
         session: 'baz',
         content: {}
-      } as unknown);
+      } as any);
       expect(() => {
         validateMessage(msg);
       }).not.toThrow();
@@ -92,8 +92,8 @@ describe('kernel/validate', () => {
         msgType: 'error',
         channel: 'iopub',
         session: 'baz',
-        content: {} as unknown
-      } as unknown);
+        content: {} as any
+      } as any);
       expect(() => validateMessage(msg)).toThrow();
     });
 
@@ -102,7 +102,7 @@ describe('kernel/validate', () => {
         msgType: 'clear_output',
         channel: 'iopub',
         session: 'baz',
-        content: { wait: 1 as unknown }
+        content: { wait: 1 as any }
       });
       expect(() => validateMessage(msg)).toThrow();
     });

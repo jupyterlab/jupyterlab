@@ -20,13 +20,13 @@ class TestModel extends VDomModel {
 }
 
 class TestWidget extends VDomRenderer<TestModel> {
-  protected render(): React.ReactElement<unknown> {
+  protected render(): React.ReactElement<any> {
     return React.createElement('span', null, this.model.value);
   }
 }
 
 class TestWidgetNoModel extends VDomRenderer {
-  protected render(): React.ReactElement<unknown> {
+  protected render(): React.ReactElement<any> {
     return React.createElement('span', null, 'No model!');
   }
 }

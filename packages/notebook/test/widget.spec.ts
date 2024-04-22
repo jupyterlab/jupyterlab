@@ -76,7 +76,7 @@ class LogStaticNotebook extends StaticNotebook {
     this.methods.push('onModelChanged');
   }
 
-  protected onMetadataChanged(model: unknown, args: unknown): void {
+  protected onMetadataChanged(model: any, args: any): void {
     super.onMetadataChanged(model, args);
     this.methods.push('onMetadataChanged');
   }
@@ -1370,7 +1370,7 @@ describe('@jupyter/notebook', () => {
           simulate(widget.node, 'focusin');
           widget.mode = 'edit';
           const event = generate('focusout');
-          (event as unknown).relatedTarget = document.body;
+          (event as any).relatedTarget = document.body;
           widget.node.dispatchEvent(event);
           expect(widget.mode).toBe('command');
           MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
@@ -1384,7 +1384,7 @@ describe('@jupyter/notebook', () => {
           simulate(widget.node, 'focusin');
           widget.mode = 'edit';
           const evt = generate('focusout');
-          (evt as unknown).relatedTarget = widget.activeCell!.node;
+          (evt as any).relatedTarget = widget.activeCell!.node;
           widget.node.dispatchEvent(evt);
           expect(widget.mode).toBe('command');
         });
@@ -1546,7 +1546,7 @@ describe('@jupyter/notebook', () => {
           // Wait for the cell to be ready and the signal listener to be set
           await sleep();
           const child = widget.widgets[widget.activeCellIndex];
-          (child.editor!.edgeRequested as unknown).emit('top');
+          (child.editor!.edgeRequested as any).emit('top');
           expect(widget.activeCellIndex).toBe(0);
         });
 
@@ -1556,7 +1556,7 @@ describe('@jupyter/notebook', () => {
           // Wait for the cell to be ready and the signal listener to be set
           await sleep();
           const child = widget.widgets[widget.activeCellIndex];
-          (child.editor!.edgeRequested as unknown).emit('bottom');
+          (child.editor!.edgeRequested as any).emit('bottom');
           expect(widget.activeCellIndex).toBe(1);
         });
       });

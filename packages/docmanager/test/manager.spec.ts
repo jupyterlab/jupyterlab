@@ -31,7 +31,7 @@ class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
  * count
  */
 class CloneTestWidget extends DocumentWidget {
-  constructor(args: unknown) {
+  constructor(args: any) {
     super(args);
     this.counter = args.count;
   }

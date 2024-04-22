@@ -89,7 +89,7 @@ describe('session', () => {
       const sessionModel = createSessionModel();
       const serverSettings = getRequestHandler(200, sessionModel);
       await expect(
-        SessionAPI.startSession(sessionModel as unknown, serverSettings)
+        SessionAPI.startSession(sessionModel as any, serverSettings)
       ).rejects.toThrow();
     });
 
@@ -97,16 +97,16 @@ describe('session', () => {
       const serverSettings = getRequestHandler(500, {});
       const sessionModel = createSessionModel();
       await expect(
-        SessionAPI.startSession(sessionModel as unknown, serverSettings)
+        SessionAPI.startSession(sessionModel as any, serverSettings)
       ).rejects.toThrow();
     });
 
     it('should fail for wrong response model', async () => {
       const sessionModel = createSessionModel();
-      (sessionModel as unknown).path = 1;
+      (sessionModel as any).path = 1;
       const serverSettings = getRequestHandler(201, sessionModel);
       await expect(
-        SessionAPI.startSession(sessionModel as unknown, serverSettings)
+        SessionAPI.startSession(sessionModel as any, serverSettings)
       ).rejects.toThrow(/Property 'path' is not of type 'string'/);
     });
 
@@ -119,7 +119,7 @@ describe('session', () => {
       };
       const serverSettings = getRequestHandler(201, data);
       const model = await SessionAPI.startSession(
-        sessionModel as unknown,
+        sessionModel as any,
         serverSettings
       );
       expect(model).toHaveProperty('id');

@@ -71,7 +71,7 @@ describe('mock', () => {
     describe('.requestHistory()', () => {
       it('should get the history info', async () => {
         const kernel = new Mock.KernelMock({});
-        const reply = await kernel.requestHistory({} as unknown);
+        const reply = await kernel.requestHistory({} as any);
         expect(reply.content.status).toBe('ok');
       });
     });

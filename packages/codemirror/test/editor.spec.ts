@@ -89,7 +89,7 @@ describe('CodeMirrorEditor', () => {
     it('should emit a signal when the top edge is requested', () => {
       let edge: CodeEditor.EdgeLocation | null = null;
       const event = generate('keydown', { keyCode: UP_ARROW });
-      const listener = (sender: unknown, args: CodeEditor.EdgeLocation) => {
+      const listener = (sender: any, args: CodeEditor.EdgeLocation) => {
         edge = args;
       };
       editor.edgeRequested.connect(listener);
@@ -101,7 +101,7 @@ describe('CodeMirrorEditor', () => {
     it('should emit a signal when the bottom edge is requested', () => {
       let edge: CodeEditor.EdgeLocation | null = null;
       const event = generate('keydown', { keyCode: DOWN_ARROW });
-      const listener = (sender: unknown, args: CodeEditor.EdgeLocation) => {
+      const listener = (sender: any, args: CodeEditor.EdgeLocation) => {
         edge = args;
       };
       editor.edgeRequested.connect(listener);

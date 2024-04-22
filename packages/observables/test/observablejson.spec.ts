@@ -31,7 +31,7 @@ describe('@jupyterlab/observables', () => {
         item.set('foo', { bar: 1 });
         const value = item.toJSON();
         value['bar'] = 2;
-        expect((item.get('foo') as unknown)['bar']).toBe(1);
+        expect((item.get('foo') as any)['bar']).toBe(1);
       });
     });
   });

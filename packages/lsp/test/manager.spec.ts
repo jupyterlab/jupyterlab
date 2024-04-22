@@ -39,7 +39,7 @@ spy.mockImplementation((status, method, setting) => {
       specs,
       version: 2
     })
-  }) as unknown;
+  }) as any;
 });
 describe('@jupyterlab/lsp', () => {
   describe('LanguageServerManager', () => {
@@ -50,8 +50,8 @@ describe('@jupyterlab/lsp', () => {
     describe('#fetchSessions', () => {
       it('should fetch session from server', async () => {
         await manager.fetchSessions();
-        expect(manager.sessions.has('pyls' as unknown)).toEqual(true);
-        expect(manager.specs.has('pyls' as unknown)).toEqual(true);
+        expect(manager.sessions.has('pyls' as any)).toEqual(true);
+        expect(manager.specs.has('pyls' as any)).toEqual(true);
       });
     });
 
@@ -83,7 +83,7 @@ describe('@jupyterlab/lsp', () => {
           language: 'python',
           mimeType: 'text/python'
         });
-        expect(match.has('pyls' as unknown)).toEqual(true);
+        expect(match.has('pyls' as any)).toEqual(true);
       });
     });
   });

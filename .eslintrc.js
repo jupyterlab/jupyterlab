@@ -42,7 +42,8 @@ module.exports = {
           {
             additionalTestBlockFunctions: ['it']
           }
-        ]
+        ],
+        '@typescript-eslint/no-explicit-any': 'off'
       }
     }
   ],

@@ -169,7 +169,7 @@ describe('Kernel.IKernel', () => {
         msgId,
         content: {}
       });
-      msg.parent_header = { session: kernel.clientId } as unknown;
+      msg.parent_header = { session: kernel.clientId } as any;
       tester.send(msg);
       await expect(emission).resolves.not.toThrow();
     });
@@ -197,7 +197,7 @@ describe('Kernel.IKernel', () => {
         msgId,
         content: {}
       });
-      msg.parent_header = { session: kernel.clientId } as unknown;
+      msg.parent_header = { session: kernel.clientId } as any;
       tester.send(msg);
 
       await emission;
@@ -227,7 +227,7 @@ describe('Kernel.IKernel', () => {
         msgId: 'message from wrong session',
         content: {}
       });
-      msg1.parent_header = { session: 'wrong session' } as unknown;
+      msg1.parent_header = { session: 'wrong session' } as any;
       tester.send(msg1);
 
       // Send a shell message with the right client (parent) session.
@@ -238,7 +238,7 @@ describe('Kernel.IKernel', () => {
         msgId: msgId,
         content: {}
       });
-      msg2.parent_header = { session: kernel.clientId } as unknown;
+      msg2.parent_header = { session: kernel.clientId } as any;
       tester.send(msg2);
 
       await emission;
@@ -274,7 +274,7 @@ describe('Kernel.IKernel', () => {
         msgId,
         content: {}
       });
-      msg.parent_header = { session: kernel.clientId } as unknown;
+      msg.parent_header = { session: kernel.clientId } as any;
       tester.send(msg);
       await emission;
     });
@@ -285,7 +285,7 @@ describe('Kernel.IKernel', () => {
 
       const emission = testEmission(kernel.anyMessage, {
         test: (k, args) => {
-          expect((args.msg.header as unknown).msg_id).toBe(msgId);
+          expect((args.msg.header as any).msg_id).toBe(msgId);
           expect(args.direction).toBe('recv');
         }
       });
@@ -700,9 +700,9 @@ describe('Kernel.IKernel', () => {
 
   describe('#reconnect()', () => {
     it('should create a new websocket and resolve the returned promise', async () => {
-      const oldWS = (defaultKernel as unknown)._ws;
+      const oldWS = (defaultKernel as any)._ws;
       await defaultKernel.reconnect();
-      expect((defaultKernel as unknown)._ws).not.toBe(oldWS);
+      expect((defaultKernel as any)._ws).not.toBe(oldWS);
     });
 
     it('should emit `"connecting"`, then `"connected"` status', async () => {
@@ -1118,7 +1118,7 @@ describe('Kernel.IKernel', () => {
         kernel.registerMessageHook(parentHeader.msg_id, msg => {
           calls.push('first');
           // not returning should also continue handling
-          return void 0 as unknown;
+          return void 0 as any;
         });
 
         future.onIOPub = () => {

@@ -69,7 +69,7 @@ class FooCompletionProvider implements ICompletionProvider {
   async isApplicable(context: ICompletionContext): Promise<boolean> {
     return true;
   }
-  shouldShowContinuousHint(completerIsVisible: boolean, changed: unknown) {
+  shouldShowContinuousHint(completerIsVisible: boolean, changed: any) {
     return true;
   }
 }
@@ -215,7 +215,7 @@ describe('completer/reconciliator', () => {
           ...defaultOptions,
           providers: [fooProvider1, fooProvider2]
         });
-        await reconciliator.shouldShowContinuousHint(true, null as unknown);
+        await reconciliator.shouldShowContinuousHint(true, null as any);
         expect(fooProvider1.shouldShowContinuousHint).toHaveBeenCalledTimes(1);
         expect(fooProvider2.shouldShowContinuousHint).toHaveBeenCalledTimes(0);
       });

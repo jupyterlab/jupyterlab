@@ -100,7 +100,7 @@ describe('@jupyterlab/statusbar', () => {
         const item = new Widget();
         let active = false;
         const isActive = () => active;
-        const activeStateChanged = new Signal<unknown, void>({});
+        const activeStateChanged = new Signal<any, void>({});
         statusBar.registerStatusItem('item', {
           item,
           isActive,

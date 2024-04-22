@@ -43,7 +43,7 @@ describe('kernelspec/validate', () => {
     });
 
     it('should fail on missing data', () => {
-      const model: unknown = {
+      const model: any = {
         default: 'python'
       };
       expect(() => validateSpecModels(model)).toThrow();

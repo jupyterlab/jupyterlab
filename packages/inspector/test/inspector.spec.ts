@@ -9,7 +9,7 @@ class TestInspectorPanel extends InspectorPanel {
   methods: string[] = [];
 
   protected onInspectorUpdate(
-    sender: unknown,
+    sender: any,
     args: IInspector.IInspectorUpdate
   ): void {
     super.onInspectorUpdate(sender, args);
@@ -90,7 +90,7 @@ describe('inspector/index', () => {
         expect(widget.methods).toEqual(
           expect.not.arrayContaining(['onInspectorUpdate'])
         );
-        (widget.source.inspected as unknown).emit({ content: new Widget() });
+        (widget.source.inspected as any).emit({ content: new Widget() });
         expect(widget.methods).toEqual(
           expect.arrayContaining(['onInspectorUpdate'])
         );

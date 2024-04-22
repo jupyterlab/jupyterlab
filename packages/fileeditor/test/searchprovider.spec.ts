@@ -37,7 +37,7 @@ describe('@jupyterlab/fileeditor', () => {
       name: 'binding',
       factory: ({ model }) => {
         return EditorExtensionRegistry.createImmutableExtension(
-          ybinding({ ytext: (model.sharedModel as unknown).ysource })
+          ybinding({ ytext: (model.sharedModel as any).ysource })
         );
       }
     });

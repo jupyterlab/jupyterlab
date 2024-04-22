@@ -121,7 +121,7 @@ describe('console/history', () => {
           throw new Error('Test history reply is not an "ok" reply');
         }
         const index = mockHistory.content.history.length - 1;
-        const last = (mockHistory.content.history[index] as unknown)[2];
+        const last = (mockHistory.content.history[index] as any)[2];
         expect(result).toBe(last);
       });
     });
@@ -142,7 +142,7 @@ describe('console/history', () => {
           throw new Error('Test history reply is not an "ok" reply');
         }
         const index = mockHistory.content.history.length - 1;
-        const last = (mockHistory.content.history[index] as unknown)[2];
+        const last = (mockHistory.content.history[index] as any)[2];
         expect(result).toBe(last);
       });
     });
@@ -170,9 +170,7 @@ describe('console/history', () => {
         const editor = new CodeMirrorEditor({
           model,
           host,
-          extensions: [
-            ybinding({ ytext: (model.sharedModel as unknown).ysource })
-          ]
+          extensions: [ybinding({ ytext: (model.sharedModel as any).ysource })]
         });
         history.editor = editor;
         model.sharedModel.setSource('foo');
@@ -195,9 +193,7 @@ describe('console/history', () => {
         const editor = new CodeMirrorEditor({
           model,
           host,
-          extensions: [
-            ybinding({ ytext: (model.sharedModel as unknown).ysource })
-          ]
+          extensions: [ybinding({ ytext: (model.sharedModel as any).ysource })]
         });
         history.editor = editor;
         history.push('foo');

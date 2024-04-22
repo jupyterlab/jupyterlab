@@ -54,7 +54,7 @@ describe('@jupyterlab/shortcut-extension', () => {
       };
       const settingRegistry = new SettingRegistry({ connector });
       const settings = new DummySettings({
-        plugin: plugin as unknown,
+        plugin: plugin as any,
         registry: settingRegistry
       });
       options = { commandRegistry, settings };

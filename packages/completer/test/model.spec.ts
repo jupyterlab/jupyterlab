@@ -32,7 +32,7 @@ describe('completer/model', () => {
       it('should signal when model items have changed', () => {
         let model = new CompleterModel();
         let called = 0;
-        let listener = (sender: unknown, args: void) => {
+        let listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -47,7 +47,7 @@ describe('completer/model', () => {
       it('should not signal when items have not changed', () => {
         let model = new CompleterModel();
         let called = 0;
-        let listener = (sender: unknown, args: void) => {
+        let listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -77,7 +77,7 @@ describe('completer/model', () => {
       it('should signal when original request changes', () => {
         const model = new CompleterModel();
         let called = 0;
-        const listener = (sender: unknown, args: void) => {
+        const listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -91,7 +91,7 @@ describe('completer/model', () => {
       it('should not signal when original request has not changed', () => {
         const model = new CompleterModel();
         let called = 0;
-        const listener = (sender: unknown, args: void) => {
+        const listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -112,7 +112,7 @@ describe('completer/model', () => {
         const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         const request = makeState(currentValue);
         const change = makeState(newValue);
-        const listener = (sender: unknown, args: void) => {
+        const listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -134,7 +134,7 @@ describe('completer/model', () => {
         const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         const request = makeState(currentValue);
         const change = makeState(newValue);
-        const listener = (sender: unknown, args: void) => {
+        const listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -159,7 +159,7 @@ describe('completer/model', () => {
           editorUpdate: 0,
           reset: 0
         };
-        const listener = (sender: unknown, args: Completer.IQueryChange) => {
+        const listener = (sender: any, args: Completer.IQueryChange) => {
           called[args.origin]++;
         };
         model.queryChanged.connect(listener);
@@ -178,7 +178,7 @@ describe('completer/model', () => {
           editorUpdate: 0,
           reset: 0
         };
-        const listener = (sender: unknown, args: Completer.IQueryChange) => {
+        const listener = (sender: any, args: Completer.IQueryChange) => {
           called[args.origin]++;
         };
         model.queryChanged.connect(listener);
@@ -204,7 +204,7 @@ describe('completer/model', () => {
         const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         const request = makeState(currentValue);
         const change = makeState(newValue);
-        const listener = (sender: unknown, args: Completer.IQueryChange) => {
+        const listener = (sender: any, args: Completer.IQueryChange) => {
           called[args.origin]++;
         };
         model.queryChanged.connect(listener);
@@ -227,7 +227,7 @@ describe('completer/model', () => {
         const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         const request = makeState(currentValue);
         const change = makeState(newValue);
-        const listener = (sender: unknown, args: Completer.IQueryChange) => {
+        const listener = (sender: any, args: Completer.IQueryChange) => {
           called[args.origin]++;
         };
         model.queryChanged.connect(listener);
@@ -469,7 +469,7 @@ describe('completer/model', () => {
         const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
         const request = makeState(currentValue);
         const change = makeState(newValue);
-        (change as unknown).column = 4;
+        (change as any).column = 4;
         model.original = request;
         model.cursor = cursor;
         expect(model.current).toBe(request);
@@ -482,9 +482,9 @@ describe('completer/model', () => {
         const currentValue = 'foo';
         const newValue = 'foo ';
         const request = makeState(currentValue);
-        (request as unknown).column = 3;
+        (request as any).column = 3;
         const change = makeState(newValue);
-        (change as unknown).column = 0;
+        (change as any).column = 0;
         model.original = request;
         expect(model.original).toBe(request);
         model.handleTextChange(change);

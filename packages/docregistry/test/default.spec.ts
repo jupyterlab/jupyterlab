@@ -556,7 +556,7 @@ describe('docregistry/default', () => {
       context = (await createFileContextWithMockedServices(
         false,
         manager
-      )) as unknown;
+      )) as any;
       content = new Widget();
       widget = new DocumentWidget({ context, content });
     };

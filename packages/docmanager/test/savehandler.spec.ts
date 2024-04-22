@@ -109,7 +109,7 @@ describe('docregistry/savehandler', () => {
       it('should continue to save', async () => {
         let called = 0;
         // Lower the duration multiplier.
-        (handler as unknown)._multiplier = 1;
+        (handler as any)._multiplier = 1;
         const promise = testEmission(context.fileChanged, {
           test: () => {
             if (called === 0) {
@@ -130,7 +130,7 @@ describe('docregistry/savehandler', () => {
         const delegate = new PromiseDelegate();
 
         // Lower the duration multiplier.
-        (handler as unknown)._multiplier = 1;
+        (handler as any)._multiplier = 1;
         context.model.fromString('foo');
         await context.initialize(true);
 
@@ -170,7 +170,7 @@ describe('docregistry/savehandler', () => {
         };
 
         // Lower the duration multiplier.
-        (handler as unknown)._multiplier = 1;
+        (handler as any)._multiplier = 1;
 
         await context.initialize(true);
         context.model.fromString('foo');

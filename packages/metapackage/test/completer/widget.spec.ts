@@ -203,7 +203,7 @@ describe('completer/widget', () => {
           model: new CompleterModel()
         };
         let value = '';
-        let listener = (sender: unknown, selected: string) => {
+        let listener = (sender: any, selected: string) => {
           value = selected;
         };
         options.model!.setCompletionItems([
@@ -231,7 +231,7 @@ describe('completer/widget', () => {
           model: new CompleterModel()
         };
         let value = '';
-        let listener = (sender: unknown, selected: string) => {
+        let listener = (sender: any, selected: string) => {
           value = selected;
         };
         options.model!.setCompletionItems([{ label: 'foo' }, { label: 'baz' }]);
@@ -745,7 +745,7 @@ describe('completer/widget', () => {
             model
           };
           let value = '';
-          let listener = (sender: unknown, selected: string) => {
+          let listener = (sender: any, selected: string) => {
             value = selected;
           };
           model.setCompletionItems([
@@ -785,7 +785,7 @@ describe('completer/widget', () => {
           model
         };
         let value = '';
-        const listener = (sender: unknown, selected: string) => {
+        const listener = (sender: any, selected: string) => {
           value = selected;
         };
         model.setCompletionItems([{ label: 'foo' }]);
@@ -810,7 +810,7 @@ describe('completer/widget', () => {
           model
         };
         let value = '';
-        const listener = (sender: unknown, selected: string) => {
+        const listener = (sender: any, selected: string) => {
           value = selected;
         };
         model.setCompletionItems([{ label: 'foo', insertText: 'bar' }]);
@@ -836,7 +836,7 @@ describe('completer/widget', () => {
             model
           };
           let value = '';
-          let listener = (sender: unknown, selected: string) => {
+          let listener = (sender: any, selected: string) => {
             value = selected;
           };
           model.setCompletionItems([
@@ -871,7 +871,7 @@ describe('completer/widget', () => {
             model
           };
           let value = '';
-          let listener = (sender: unknown, selected: string) => {
+          let listener = (sender: any, selected: string) => {
             value = selected;
           };
           model.setCompletionItems([{ label: 'foo' }, { label: 'bar' }]);
@@ -897,7 +897,7 @@ describe('completer/widget', () => {
             model
           };
           let value = '';
-          let listener = (sender: unknown, selected: string) => {
+          let listener = (sender: any, selected: string) => {
             value = selected;
           };
           model.setCompletionItems([{ label: 'foo' }, { label: 'bar' }]);
@@ -922,7 +922,7 @@ describe('completer/widget', () => {
             editor: anchor.editor,
             model
           };
-          let listener = (sender: unknown, selected: string) => {
+          let listener = (sender: any, selected: string) => {
             // no op
           };
           model.setCompletionItems([{ label: 'foo' }, { label: 'bar' }]);
@@ -1339,8 +1339,8 @@ describe('completer/widget', () => {
       it('should update the documentation panel of selected item', async () => {
         let args = '';
         const spy = jest
-          .spyOn(widget as unknown, '_updateDocPanel')
-          .mockImplementation(async (item: unknown) => {
+          .spyOn(widget as any, '_updateDocPanel')
+          .mockImplementation(async (item: any) => {
             if (item) {
               args = (await item).label;
             }

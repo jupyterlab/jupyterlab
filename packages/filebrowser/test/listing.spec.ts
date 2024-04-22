@@ -141,7 +141,7 @@ describe('filebrowser/listing', () => {
       it('backspace during rename does not trigger goUp method', async () => {
         dirListing.selectNext();
         const newNamePromise = dirListing.rename();
-        const goUpSpy = jest.spyOn(dirListing as unknown, 'goUp');
+        const goUpSpy = jest.spyOn(dirListing as any, 'goUp');
         const editNode = dirListing['_editNode'];
         simulate(editNode, 'keydown', {
           key: 'Backspace',
@@ -386,7 +386,7 @@ describe('filebrowser/listing', () => {
         dirListing['_selectItem'](0, true);
         dirListing['_selectItem'](1, true);
         dirListing['_focusItem'](2);
-        const handleOpenSpy = jest.spyOn(dirListing as unknown, 'handleOpen');
+        const handleOpenSpy = jest.spyOn(dirListing as any, 'handleOpen');
         const itemNode = dirListing['_items'][2];
         const nameNode = dirListing['_renderer'].getNameNode(itemNode);
         simulate(nameNode, 'keydown', {
@@ -571,13 +571,13 @@ describe('filebrowser/listing', () => {
           // JSDOM doesn't render anything, which means that all the elements have
           // zero dimensions, so this is needed in order for the DirListing
           // mousedown handler to believe that the mousedown event is relevant.
-          itemNodes[0].getBoundingClientRect = (): unknown => ({
+          itemNodes[0].getBoundingClientRect = (): any => ({
             left: 0,
             right: 10,
             top: 0,
             bottom: 10
           });
-          itemNodes[1].getBoundingClientRect = (): unknown => ({
+          itemNodes[1].getBoundingClientRect = (): any => ({
             left: 0,
             right: 10,
             top: 10,
@@ -649,7 +649,7 @@ describe('filebrowser/listing', () => {
 
         it('should not become unchecked due to right-click on selected item', async () => {
           const itemNode = dirListing.contentNode.children[0] as HTMLElement;
-          itemNode.getBoundingClientRect = (): unknown => ({
+          itemNode.getBoundingClientRect = (): any => ({
             left: 0,
             right: 10,
             top: 0,
