@@ -79,6 +79,12 @@ test.describe('General', () => {
     await page.mouse.move(viewerBBox.x + 0.5 * viewerBBox.width, 600);
     await page.mouse.up();
 
+    // wait for the debugger bug icon to settle
+    const panel = (await page.activity.getPanelLocator('Lorenz.ipynb'))!;
+    await panel
+      .locator('.jp-DebuggerBugButton[aria-disabled="false"]')
+      .waitFor();
+
     expect(await page.screenshot()).toMatchSnapshot('jupyterlab.png');
   });
 
@@ -597,6 +603,11 @@ test.describe('General', () => {
     await page.click('jp-button[data-command="running:show-modal"]');
     await freeezeKernelIds();
 
+    // Playwright uses shadow-piercing selectors so this works with webcomponents too
+    await expect
+      .soft(page.locator('.jp-SearchableSessions-modal input'))
+      .toBeFocused();
+
     expect(
       await page
         .locator('.jp-SearchableSessions-modal .jp-Dialog-content')
@@ -618,6 +629,9 @@ test.describe('General', () => {
     await page.goto(`tree/${tmpPath}`);
 
     await page.notebook.createNew();
+
+    // Ensure focus on a cell
+    await page.notebook.enterCellEditingMode(0);
 
     await page.keyboard.press('Control+Shift+H');
 

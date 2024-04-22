@@ -74,8 +74,8 @@ export namespace StateCommands {
     dispatch: (transaction: Transaction) => void;
   }): boolean {
     if (target.dom.parentElement?.classList.contains(COMPLETER_ACTIVE_CLASS)) {
-      // return true to avoid handling the default Enter from codemirror defaultKeymap.
-      return true;
+      // do not prevent default to allow completer `enter` action
+      return false;
     }
 
     const arg = { state: target.state, dispatch: target.dispatch };

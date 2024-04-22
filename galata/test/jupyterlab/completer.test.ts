@@ -13,7 +13,9 @@ test.describe('Completer', () => {
       await page.notebook.createNew(fileName);
     });
 
-    test('Open completer on notebook', async ({ page }) => {
+    test('Open completer on notebook and accept suggestion', async ({
+      page
+    }) => {
       await page.notebook.setCell(
         0,
         'code',
@@ -35,7 +37,11 @@ test.describe('Completer', () => {
       completer = page.locator(COMPLETER_SELECTOR);
       await completer.waitFor();
       const imageName = 'completer.png';
-      expect(await completer.screenshot()).toMatchSnapshot(imageName);
+      expect.soft(await completer.screenshot()).toMatchSnapshot(imageName);
+      // Accept the completion
+      await page.keyboard.press('Enter');
+      const textAfter = await page.notebook.getCellTextInput(1);
+      expect(textAfter).toBe('option_1');
     });
 
     test('Show documentation panel', async ({ page, tmpPath }) => {

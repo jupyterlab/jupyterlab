@@ -320,6 +320,67 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 
 <!-- <START NEW CHANGELOG ENTRY> -->
 
+## 4.2.0b3
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0b2...b3f0b44b1136e50b757ad23db4b02d44ccd80740))
+
+### Bugs fixed
+
+- Update resolution for jupyter-ui-toolkit [#16204](https://github.com/jupyterlab/jupyterlab/pull/16204) ([@fcollonval](https://github.com/fcollonval))
+- Ensure that input in recently open files modal is focused [#16199](https://github.com/jupyterlab/jupyterlab/pull/16199) ([@krassowski](https://github.com/krassowski))
+- Fix updating search value on input [#16198](https://github.com/jupyterlab/jupyterlab/pull/16198) ([@fcollonval](https://github.com/fcollonval))
+- Fix error in kernels sidebar when switching kernels, remove unused prop [#16188](https://github.com/jupyterlab/jupyterlab/pull/16188) ([@krassowski](https://github.com/krassowski))
+
+### Maintenance and upkeep improvements
+
+- Bump follow-redirects from 1.15.4 to 1.15.6 [#16172](https://github.com/jupyterlab/jupyterlab/pull/16172) ([@dependabot](https://github.com/dependabot))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-18&to=2024-04-19&type=c))
+
+[@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-04-18..2024-04-19&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-04-18..2024-04-19&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-18..2024-04-19&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-18..2024-04-19&type=Issues)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
+
+## 4.2.0b2
+
+([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0b1...6898c5ec3b3bcc0ae473f39b48eca5b94a80b58d))
+
+### Enhancements made
+
+- Use toolkit search input for all search inputs: filebrowser, extension manager, debugger kernel source [#16046](https://github.com/jupyterlab/jupyterlab/pull/16046) ([@Mehak261124](https://github.com/Mehak261124))
+- Much smaller "Last Modified" column, date [#15948](https://github.com/jupyterlab/jupyterlab/pull/15948) ([@JasonWeill](https://github.com/JasonWeill))
+
+### Bugs fixed
+
+- Remove unused `IDefaultFileBrowser` dependency from `launcher-extension` [#16173](https://github.com/jupyterlab/jupyterlab/pull/16173) ([@milinm](https://github.com/milinm))
+- Fix accepting completion with `Enter` [#16156](https://github.com/jupyterlab/jupyterlab/pull/16156) ([@krassowski](https://github.com/krassowski))
+- Fix recents menu not getting updated after loading history [#16149](https://github.com/jupyterlab/jupyterlab/pull/16149) ([@krassowski](https://github.com/krassowski))
+- Adjust text alignment in the menu bar [#16142](https://github.com/jupyterlab/jupyterlab/pull/16142) ([@JasonWeill](https://github.com/JasonWeill))
+- Improve the keybinding input guard using proposed lumino features [#15927](https://github.com/jupyterlab/jupyterlab/pull/15927) ([@krassowski](https://github.com/krassowski))
+- Move the cell toolbar widget from the cell to the cell input [#15422](https://github.com/jupyterlab/jupyterlab/pull/15422) ([@brichet](https://github.com/brichet))
+
+### Maintenance and upkeep improvements
+
+- Fix documentation snapshots test [#16159](https://github.com/jupyterlab/jupyterlab/pull/16159) ([@krassowski](https://github.com/krassowski))
+- Bump the actions group with 2 updates [#16081](https://github.com/jupyterlab/jupyterlab/pull/16081) ([@dependabot](https://github.com/dependabot))
+
+### Documentation improvements
+
+- Clarify the LSP documentation [#16160](https://github.com/jupyterlab/jupyterlab/pull/16160) ([@krassowski](https://github.com/krassowski))
+- Add information about configuration Windows 11 for building an extension [#16154](https://github.com/jupyterlab/jupyterlab/pull/16154) ([@AnastasiaSliusar](https://github.com/AnastasiaSliusar))
+- Removed broken gif links in README.md files [#16151](https://github.com/jupyterlab/jupyterlab/pull/16151) ([@Tanmay-Deshmukh](https://github.com/Tanmay-Deshmukh))
+- Improve API documentation [#16140](https://github.com/jupyterlab/jupyterlab/pull/16140) ([@fcollonval](https://github.com/fcollonval))
+- User-facing changelog for JupyterLab 4.2 [#16103](https://github.com/jupyterlab/jupyterlab/pull/16103) ([@krassowski](https://github.com/krassowski))
+- Move the cell toolbar widget from the cell to the cell input [#15422](https://github.com/jupyterlab/jupyterlab/pull/15422) ([@brichet](https://github.com/brichet))
+
+### Contributors to this release
+
+([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-09&to=2024-04-18&type=c))
+
+[@AnastasiaSliusar](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAnastasiaSliusar+updated%3A2024-04-09..2024-04-18&type=Issues) | [@andrii-i](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aandrii-i+updated%3A2024-04-09..2024-04-18&type=Issues) | [@bollwyvl](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abollwyvl+updated%3A2024-04-09..2024-04-18&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2024-04-09..2024-04-18&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-04-09..2024-04-18&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-04-09..2024-04-18&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-04-09..2024-04-18&type=Issues) | [@JasonWeill](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AJasonWeill+updated%3A2024-04-09..2024-04-18&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-04-09..2024-04-18&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-09..2024-04-18&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-09..2024-04-18&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-04-09..2024-04-18&type=Issues) | [@Mehak261124](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AMehak261124+updated%3A2024-04-09..2024-04-18&type=Issues) | [@milinm](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Amilinm+updated%3A2024-04-09..2024-04-18&type=Issues) | [@Tanmay-Deshmukh](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ATanmay-Deshmukh+updated%3A2024-04-09..2024-04-18&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-04-09..2024-04-18&type=Issues)
+
 ## 4.2.0b1
 
 ([Full Changelog](https://github.com/jupyterlab/jupyterlab/compare/v4.2.0b0...130274fc34869de92b6d1ae476d19c9827897d94))
@@ -363,8 +424,6 @@ To ease code migration to JupyterLab 4, developers should review the [migration 
 ([GitHub contributors page for this release](https://github.com/jupyterlab/jupyterlab/graphs/contributors?from=2024-04-02&to=2024-04-09&type=c))
 
 [@Alanhou1222](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AAlanhou1222+updated%3A2024-04-02..2024-04-09&type=Issues) | [@brichet](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Abrichet+updated%3A2024-04-02..2024-04-09&type=Issues) | [@davidbrochart](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adavidbrochart+updated%3A2024-04-02..2024-04-09&type=Issues) | [@dependabot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Adependabot+updated%3A2024-04-02..2024-04-09&type=Issues) | [@e218736](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ae218736+updated%3A2024-04-02..2024-04-09&type=Issues) | [@echarles](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aecharles+updated%3A2024-04-02..2024-04-09&type=Issues) | [@fcollonval](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Afcollonval+updated%3A2024-04-02..2024-04-09&type=Issues) | [@FoSuCloud](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3AFoSuCloud+updated%3A2024-04-02..2024-04-09&type=Issues) | [@gabalafou](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agabalafou+updated%3A2024-04-02..2024-04-09&type=Issues) | [@github-actions](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Agithub-actions+updated%3A2024-04-02..2024-04-09&type=Issues) | [@itsmevichu](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Aitsmevichu+updated%3A2024-04-02..2024-04-09&type=Issues) | [@jtpio](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajtpio+updated%3A2024-04-02..2024-04-09&type=Issues) | [@jupyterlab-probot](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Ajupyterlab-probot+updated%3A2024-04-02..2024-04-09&type=Issues) | [@krassowski](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Akrassowski+updated%3A2024-04-02..2024-04-09&type=Issues) | [@lumberbot-app](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Alumberbot-app+updated%3A2024-04-02..2024-04-09&type=Issues) | [@m158261](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Am158261+updated%3A2024-04-02..2024-04-09&type=Issues) | [@pre-commit-ci](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Apre-commit-ci+updated%3A2024-04-02..2024-04-09&type=Issues) | [@Susilkessav](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3ASusilkessav+updated%3A2024-04-02..2024-04-09&type=Issues) | [@welcome](https://github.com/search?q=repo%3Ajupyterlab%2Fjupyterlab+involves%3Awelcome+updated%3A2024-04-02..2024-04-09&type=Issues)
-
-<!-- <END NEW CHANGELOG ENTRY> -->
 
 ## 4.2.0b0
 
