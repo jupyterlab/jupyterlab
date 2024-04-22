@@ -653,7 +653,7 @@ export const exportPlugin: JupyterFrontEndPlugin<void> = {
         return;
       }
 
-      const formatLabels: unknown = Private.getFormatLabels(translator);
+      const formatLabels = Private.getFormatLabels(translator);
 
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
