@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
-import { InputGroup } from './inputgroup';
 import { ReactWidget } from './vdom';
 import { StringExt } from '@lumino/algorithm';
 import React, { useEffect, useState } from 'react';
+import { Search } from '@jupyter/react-components';
+import { searchIcon } from '../icon';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -186,16 +186,17 @@ export const FilterBox = (props: IFilterBoxProps): JSX.Element => {
   };
 
   return (
-    <InputGroup
+    <Search
       className="jp-FilterBox"
-      inputRef={props.inputRef}
-      type="text"
-      disabled={props.disabled}
-      rightIcon="ui-components:search"
-      placeholder={props.placeholder}
-      onChange={handleChange}
+      ref={props.inputRef}
       value={filter}
-    />
+      onChange={handleChange}
+      onInput={handleChange}
+      placeholder={props.placeholder}
+      disabled={props.disabled}
+    >
+      <searchIcon.react slot="end" tag={null} />
+    </Search>
   );
 };
 
