@@ -31,7 +31,12 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   overrides: [
     {
-      files: ['buildutils/**/*.ts', 'builder/**/*.ts', 'examples/**/*.ts'],
+      files: [
+        'buildutils/**/*.ts',
+        'builder/**/*.ts',
+        'examples/**/*.ts',
+        'packages/testing/**/*.ts'
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'off'
       }

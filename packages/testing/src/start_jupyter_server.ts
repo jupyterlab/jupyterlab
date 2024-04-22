@@ -167,11 +167,7 @@ namespace Private {
    * Install a spec in the data directory.
    */
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  export function installSpec(
-    dataDir: string,
-    name: string,
-    spec: unknown
-  ): void {
+  export function installSpec(dataDir: string, name: string, spec: any): void {
     const specDir = path.join(dataDir, 'kernels', name);
     fs.mkdirSync(specDir, { recursive: true });
     fs.writeFileSync(path.join(specDir, 'kernel.json'), JSON.stringify(spec));
