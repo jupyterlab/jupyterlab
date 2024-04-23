@@ -375,7 +375,9 @@ function createFileMenu(
     execute: () => {
       return showDialog({
         title: trans.__('Shutdown confirmation'),
-        body: trans.__('Please confirm you want to shut down ' + app.name + '.'),
+        body: trans.__(
+          'Please confirm you want to shut down ' + app.name + '.'
+        ),
         buttons: [
           Dialog.cancelButton(),
           Dialog.warnButton({ label: trans.__('Shut Down') })
