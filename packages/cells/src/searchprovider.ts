@@ -131,13 +131,12 @@ class CodeCellSearchProvider extends CellSearchProvider {
     loop?: boolean,
     options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
-    // Need to record whether all matches in the current cell have been processed,
-    // and to treat it here as a sign to move to the next cell.
+    // If we're scanning from the previous match, test whether we're
+    // at the end of the matches list.
+    const from = options?.from ?? '';
     if (
       this.matchesCount === 0 ||
-      (options &&
-        options.from &&
-        options.from === 'previous-match' &&
+      (from === 'previous-match' &&
         this.currentIndex !== null &&
         this.currentIndex + 1 >= this.cmHandler.matches.length) ||
       !this.isActive
