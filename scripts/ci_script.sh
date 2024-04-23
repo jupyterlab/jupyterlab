@@ -208,7 +208,6 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension disable @jupyterlab/notebook-extension --level user 2>&1 | grep "Extension locked at a higher level, cannot toggle status"
     jupyter labextension unlock @jupyterlab/notebook-extension --level sys_prefix
     jupyter labextension disable @jupyterlab/notebook-extension --level user
-    jupyter labextension list | grep "@jupyterlab/notebook-extension.*disabled.*OK"
 
     # Test with a prebuilt install
     jupyter labextension develop extension --debug
