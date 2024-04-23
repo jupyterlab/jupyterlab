@@ -375,8 +375,8 @@ export abstract class EditorSearchProvider<
                   nextMatchFound = true;
                   break;
                 }
-                // Move the highlight forward.
-                void this.highlightNext();
+                // Move the highlight forward from the previous match, not looping.
+                void this.highlightNext(false, { from: 'previous-match' });
               }
               if (!nextMatchFound) {
                 this.currentIndex = null; // No more matches in this string

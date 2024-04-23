@@ -131,11 +131,21 @@ class CodeCellSearchProvider extends CellSearchProvider {
     loop?: boolean,
     options?: IHighlightAdjacentMatchOptions
   ): Promise<ISearchMatch | undefined> {
-    if (this.matchesCount === 0 || !this.isActive) {
+    // Need to record whether all matches in the current cell have been processed,
+    // and to treat it here as a sign to move to the next cell.
+    if (
+      this.matchesCount === 0 ||
+      (options &&
+        options.from &&
+        options.from === 'previous-match' &&
+        this.currentIndex !== null &&
+        this.currentIndex + 1 >= this.cmHandler.matches.length) ||
+      !this.isActive
+    ) {
       this.currentIndex = null;
     } else {
       if (this.currentProviderIndex === -1) {
-        const match = await super.highlightNext(true, options);
+        const match = await super.highlightNext(loop, options);
         if (match) {
           this.currentIndex = this.cmHandler.currentIndex;
           return match;
