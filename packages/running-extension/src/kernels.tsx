@@ -221,7 +221,6 @@ namespace Private {
       const { _name, spec } = this;
       return spec?.display_name || _name;
     }
-
     get children(): IRunningSessions.IRunningItem[] {
       return this._kernels;
     }
@@ -239,7 +238,7 @@ namespace Private {
   type DocumentWidgetWithKernelItem = Omit<
     IRunningSessions.IRunningItem,
     'label'
-  > & { label(): string };
+  > & { label(): ReactNode; name(): string };
 
   export class RunningKernel implements IRunningSessions.IRunningItem {
     constructor(options: RunningKernel.IOptions) {
@@ -283,8 +282,17 @@ namespace Private {
                 : type === 'notebook'
                 ? notebookIcon
                 : jupyterIcon,
-            label: () => name,
-            labelTitle: () => path
+            label: () => {
+              const kernelIdPrefix = this.kernel.id.split('-')[0];
+              return (
+                <>
+                  {name}{' '}
+                  <span className={KERNEL_LABEL_ID}>({kernelIdPrefix})</span>
+                </>
+              );
+            },
+            labelTitle: () => path,
+            name: () => name
           });
         }
       }
@@ -323,16 +331,16 @@ namespace Private {
       return title.join('\n\n');
     }
 
-    private get _summary(): string {
+    private get _summary(): string | undefined {
       const children = this.children;
       if (children.length === 0) {
         return this.trans.__('No sessions connected');
       } else if (children.length == 1) {
-        return children[0].label();
+        return children[0].name();
       } else {
         return this.trans.__(
           '%1 and %2 more',
-          children[0].label(),
+          children[0].name(),
           children.length - 1
         );
       }
