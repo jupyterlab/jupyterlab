@@ -500,9 +500,9 @@ export class InlineCompleter extends Widget {
 /**
  * Map between old and new inline completion position in the list.
  */
-type IndexMap = Map<number, number>;
+export type IndexMap = Map<number, number>;
 
-interface ISuggestionsChangedArgs {
+export interface ISuggestionsChangedArgs {
   /**
    * Whether completions were set (new query) or appended (for existing query)
    */

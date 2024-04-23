@@ -168,11 +168,18 @@ export async function ensurePackage(
 
   // Make sure typedoc config files are consistent
   if (fs.existsSync(path.join(pkgPath, 'typedoc.json'))) {
-    const name = data.name.split('/');
-    utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
-      out: `../../docs/api/${name[name.length - 1]}`,
-      theme: '../../typedoc-theme'
-    });
+    let entryPoint = fs.existsSync(path.join(pkgPath, 'src/index.ts'))
+      ? 'src/index.ts'
+      : fs.existsSync(path.join(pkgPath, 'src/index.tsx'))
+      ? 'src/index.tsx'
+      : null;
+    if (entryPoint) {
+      utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
+        extends: ['../../typedoc.base.json'],
+        entryPoints: [entryPoint],
+        name: data.name.replace(/^@jupyterlab\//, '')
+      });
+    }
   }
 
   let imports: string[] = [];
@@ -315,15 +322,6 @@ export async function ensurePackage(
         );
       }
     });
-  }
-
-  // Handle typedoc config output.
-  const tdOptionsPath = path.join(pkgPath, 'tdoptions.json');
-  if (fs.existsSync(tdOptionsPath)) {
-    const tdConfigData = utils.readJSONFile(tdOptionsPath);
-    const pkgDirName = pkgPath.split('/').pop();
-    tdConfigData['out'] = `../../docs/api/${pkgDirName}`;
-    utils.writeJSONFile(tdOptionsPath, tdConfigData);
   }
 
   // Handle references.
@@ -874,12 +872,12 @@ export interface IEnsurePackageOptions {
  * do nothing and return an empty array. If they don't match, overwrite the
  * file and return an array with an update message.
  *
- * @param fpath: The path to the file being checked. The file must exist,
+ * @param fpath The path to the file being checked. The file must exist,
  * or else this function does nothing.
  *
- * @param contents: The desired file contents.
+ * @param contents The desired file contents.
  *
- * @param prettify: default = true. If true, format the contents with
+ * @param prettify default = true. If true, format the contents with
  * `prettier` before comparing/writing. Set to false only if you already
  * know your code won't be modified later by the `prettier` git commit hook.
  *

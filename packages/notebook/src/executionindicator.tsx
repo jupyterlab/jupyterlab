@@ -32,7 +32,7 @@ import { IChangedArgs } from '@jupyterlab/coreutils';
  */
 export function ExecutionIndicatorComponent(
   props: ExecutionIndicatorComponent.IProps
-): React.ReactElement<ExecutionIndicatorComponent.IProps> {
+): JSX.Element {
   const translator = props.translator || nullTranslator;
   const kernelStatuses = translateKernelStatuses(translator);
   const trans = translator.load('jupyterlab');

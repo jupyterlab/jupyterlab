@@ -18,12 +18,12 @@ import { normalizeDomain } from './utils';
 /**
  * A plural form function.
  */
-type PluralForm = (n: number) => number;
+export type PluralForm = (n: number) => number;
 
 /**
  * Metadata for a language pack.
  */
-interface IJsonDataHeader {
+export interface IJsonDataHeader {
   /**
    * Language locale. Example: es_CO, es-CO.
    */
@@ -48,7 +48,7 @@ interface IJsonDataHeader {
 /**
  * Translatable string messages.
  */
-interface IJsonDataMessages {
+export interface IJsonDataMessages {
   /**
    * Translation strings for a given msg_id.
    */
@@ -58,7 +58,7 @@ interface IJsonDataMessages {
 /**
  * Translatable string messages incluing metadata.
  */
-interface IJsonData extends IJsonDataMessages {
+export interface IJsonData extends IJsonDataMessages {
   /**
    * Metadata of the language bundle.
    */
@@ -68,7 +68,7 @@ interface IJsonData extends IJsonDataMessages {
 /**
  * Configurable options for the Gettext constructor.
  */
-interface IOptions {
+export interface IOptions {
   /**
    * Language locale. Example: es_CO, es-CO.
    */

@@ -1583,7 +1583,7 @@ export namespace NotebookActions {
   /**
    * Show the code on all code cells.
    *
-   * @param widget - The target notebook widget.
+   * @param notebook The target notebook widget.
    */
   export function showAllCode(notebook: Notebook): void {
     if (!notebook.model || !notebook.activeCell) {
