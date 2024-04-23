@@ -46,7 +46,7 @@ export const KernelSourcesFilter = (props: IFilterBoxProps) => {
       signal={props.model.filterChanged}
       initialArgs={props.model.filter}
     >
-      {model => <FilterBox model={props.model} />}
+      {model => <FilterBox model={props.model} translator={props.translator} />}
     </UseSignal>
   );
 };
