@@ -250,3 +250,126 @@ test('Opening Keyboard Shortcuts settings does not mangle user shortcuts', async
     .count();
   expect(userPanelLines).toBeLessThan(10);
 });
+
+test.describe('shorcuts list @A11y', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.evaluate(async () => {
+      await window.jupyterapp.commands.execute('settingeditor:open', {
+        query: 'Keyboard Shortcuts'
+      });
+    });
+    await expect(
+      page.locator('.jp-Shortcuts-ShortcutListContainer')
+    ).toHaveCount(1);
+
+    const shorcutRow = page.locator('.jp-Shortcuts-Row').first();
+    const shorcutRowTitle = await shorcutRow.getAttribute('title');
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      await page.keyboard.press('Tab');
+      let activeElementId = await page.evaluate(
+        () => document.activeElement?.getAttribute('title')
+      );
+      if (activeElementId === shorcutRowTitle) {
+        break;
+      }
+    }
+  });
+
+  test('Should focus shortcuts container first row using tab key', async ({
+    page
+  }) => {
+    const shorcutRow = page.locator('.jp-Shortcuts-Row').first();
+    await expect(shorcutRow).toBeFocused();
+  });
+
+  test('Should retain tab order by focusing property inspector using tab key', async ({
+    page
+  }) => {
+    const propertyInspector = page.getByTitle('Property Inspector');
+
+    while (
+      !(await page.evaluate(
+        selector => document.activeElement?.matches(selector),
+        `[title='Property Inspector']`
+      ))
+    ) {
+      await page.keyboard.press('Tab');
+    }
+
+    await expect(propertyInspector).toBeFocused();
+  });
+
+  test('Should retain tab order by focusing search input using shift tab', async ({
+    page
+  }) => {
+    const searchInput = page.locator(`[placeholder='Search…']`);
+
+    while (
+      !(await page.evaluate(
+        selector => document.activeElement?.matches(selector),
+        `[placeholder='Search…']`
+      ))
+    ) {
+      await page.keyboard.press('Shift+Tab');
+    }
+
+    await expect(searchInput).toBeFocused();
+  });
+  test('Should enter row and navigate buttons using arrow keys', async ({
+    page
+  }) => {
+    const shortcutRows = page.locator('.jp-Shortcuts-Row');
+
+    for (let i = 0; i < (await shortcutRows.count()); i++) {
+      await shortcutRows.nth(i).focus();
+      await page.keyboard.press('ArrowRight');
+      let activeElementClass = await page.evaluate(
+        () => document.activeElement?.getAttribute('class')
+      );
+      expect(activeElementClass).toContain('jp-Shortcuts-ShortcutKeys');
+    }
+  });
+  test('Should navigate rows using down arrow key', async ({ page }) => {
+    const shortcutRows = page.locator('.jp-Shortcuts-Row');
+
+    for (let i = 0; i < (await shortcutRows.count()) - 1; i++) {
+      await shortcutRows.nth(i).focus();
+      await page.keyboard.press('ArrowDown');
+
+      if (shortcutRows.nth(i) !== shortcutRows.last()) {
+        await expect(shortcutRows.nth(i + 1)).toBeFocused();
+      }
+    }
+  });
+
+  test('Should navigate rows using up arrow keys', async ({ page }) => {
+    const shortcutRows = page.locator('.jp-Shortcuts-Row');
+
+    for (let i = (await shortcutRows.count()) - 1; i > 0; i--) {
+      await shortcutRows.nth(i).focus();
+      await page.keyboard.press('ArrowUp');
+
+      if (shortcutRows.nth(i) !== shortcutRows.first()) {
+        await expect(shortcutRows.nth(i - 1)).toBeFocused();
+      }
+    }
+  });
+
+  test('Should navigate to parent row from buttons using escape key', async ({
+    page
+  }) => {
+    const shortcutRows = page.locator('.jp-Shortcuts-Row');
+
+    for (let i = 0; i < (await shortcutRows.count()) - 1; i++) {
+      const shortcutListButton = shortcutRows.nth(i).locator('button').first();
+
+      await shortcutListButton.focus();
+
+      await page.keyboard.press('Escape');
+
+      await expect(shortcutRows.nth(i)).toBeFocused();
+    }
+  });
+});

@@ -162,6 +162,10 @@ export class ShortcutInput extends React.Component<
         keys: keys,
         currentChain: currentChain
       });
+    } else if (event.key === 'Escape') {
+      const focusedElement = document.activeElement;
+      const parentRow = focusedElement?.closest('.jp-Shortcuts-Row');
+      (parentRow as HTMLDivElement).focus();
     } else if (event.key !== 'CapsLock') {
       const lastKey = userInput
         .substr(userInput.lastIndexOf(' ') + 1, userInput.length)
@@ -367,6 +371,7 @@ export class ShortcutInput extends React.Component<
             : 'jp-mod-hidden'
         }
         onBlur={event => this.handleBlur(event)}
+        aria-label={trans.__('keyboard shortcut Input Box')}
       >
         <div
           tabIndex={0}

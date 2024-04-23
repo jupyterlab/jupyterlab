@@ -140,8 +140,18 @@
   background: var(--jp-layout-color2);
 }
 
+.jp-Shortcuts-Row:focus-within .jp-Shortcuts-ShortcutKeys {
+  border-color: var(--jp-border-color1);
+  background: var(--jp-layout-color2);
+}
+
 .jp-Shortcuts-Row:hover .jp-Shortcuts-Plus,
 .jp-Shortcuts-Row:hover .jp-Shortcuts-Or {
+  opacity: 1;
+}
+
+.jp-Shortcuts-Row:focus-within .jp-Shortcuts-Plus,
+.jp-Shortcuts-Row:focus-within .jp-Shortcuts-Or {
   opacity: 1;
 }
 
@@ -192,6 +202,10 @@
   background: var(--jp-layout-color3);
 }
 
+.jp-Shortcuts-ShortcutContainer:focus-within .jp-Shortcuts-ShortcutKeys {
+  background: var(--jp-layout-color3);
+}
+
 .jp-Shortcuts-ShortcutKeysContainer {
   font-size: var(--jp-code-font-size);
   font-family: var(--jp-ui-font-family);
@@ -213,8 +227,11 @@
   border-width: var(--jp-border-width);
   border-color: var(--jp-layout-color0);
   border-radius: var(--jp-border-radius);
+  color: var(--jp-ui-font-color0);
   padding: 5px 6px;
   margin: 3px 0;
+  background: none;
+  border: none;
 }
 
 .jp-Shortcuts-Or {
@@ -247,10 +264,15 @@
   border-width: var(--jp-border-width);
   margin: 3px 0;
   padding: 5px 6px;
+  border: none;
   color: var(--jp-ui-inverse-font-color1);
 }
 
 .jp-Shortcuts-Plus:hover {
+  background-color: var(--jp-brand-color2);
+}
+
+.jp-Shortcuts-Plus:focus {
   background-color: var(--jp-brand-color2);
 }
 
@@ -260,10 +282,16 @@
 
 .jp-Shortcuts-Reset {
   color: var(--jp-brand-color2);
-  padding-left: 10px;
+  margin-left: 10px;
+  background: none;
+  border: none;
 }
 
 .jp-Shortcuts-Reset:hover {
+  color: var(--jp-brand-color1);
+}
+
+.jp-Shortcuts-Reset:focus {
   color: var(--jp-brand-color1);
 }
 
