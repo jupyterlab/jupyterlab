@@ -185,8 +185,8 @@
   "properties": {
     "navigateToCurrentDirectory": {
       "type": "boolean",
-      "title": "Navigate to current directory",
-      "description": "Whether to automatically navigate to a document's current directory",
+      "title": "Navigate to current folder",
+      "description": "Whether to automatically navigate to a document's current folder",
       "default": false
     },
     "useFuzzyFilter": {
@@ -197,8 +197,8 @@
     },
     "filterDirectories": {
       "type": "boolean",
-      "title": "Filter directories",
-      "description": "Whether to apply the search on directories",
+      "title": "Filter folders",
+      "description": "Whether to apply the search on folders",
       "default": true
     },
     "showLastModifiedColumn": {
