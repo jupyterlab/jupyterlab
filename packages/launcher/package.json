@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/launcher",
-  "version": "4.2.0-beta.1",
+  "version": "4.2.0-beta.3",
   "description": "JupyterLab - Launcher Panel",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,13 +33,12 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
-    "docs": "typedoc src",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^4.3.0-beta.1",
-    "@jupyterlab/translation": "^4.2.0-beta.1",
-    "@jupyterlab/ui-components": "^4.2.0-beta.1",
+    "@jupyterlab/apputils": "^4.3.0-beta.3",
+    "@jupyterlab/translation": "^4.2.0-beta.3",
+    "@jupyterlab/ui-components": "^4.2.0-beta.3",
     "@lumino/algorithm": "^2.0.1",
     "@lumino/commands": "^2.3.0",
     "@lumino/coreutils": "^2.1.2",
@@ -51,7 +50,6 @@
   "devDependencies": {
     "@types/react": "^18.0.26",
     "rimraf": "~5.0.5",
-    "typedoc": "~0.24.7",
     "typescript": "~5.1.6"
   },
   "publishConfig": {

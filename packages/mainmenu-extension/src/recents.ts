@@ -52,6 +52,7 @@ class RecentsMenu extends Menu {
     super(options);
     this._manager = options.manager;
     this._showDirectories = options.showDirectories;
+    this.updateItems();
     this._manager.changed.connect(this.updateItems, this);
   }
 
@@ -230,7 +231,7 @@ export const recentsMenuPlugin: JupyterFrontEndPlugin<void> = {
     });
     submenu.title.label = trans.__('Open Recent');
     mainMenu.fileMenu.addItem({
-      type: 'submenu' as Menu.ItemType,
+      type: 'submenu',
       submenu,
       rank: 1
     });

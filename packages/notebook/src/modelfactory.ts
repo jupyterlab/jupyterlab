@@ -79,7 +79,7 @@ export class NotebookModelFactory
   /**
    * Create a new model for a given path.
    *
-   * @param languagePreference - An optional kernel language preference.
+   * @param options Model options.
    *
    * @returns A new document model.
    */

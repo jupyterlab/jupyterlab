@@ -1603,6 +1603,15 @@ export class CodeCell extends Cell<ICodeCellModel> {
     }
     // This is to hide/show icon on single line output.
     this.updatePromptOverlayIcon();
+
+    // Clear output area when empty
+    const height = this.outputArea.node.style.height;
+    if (this.model.outputs.length === 0 && height !== '') {
+      this._lastOutputHeight = height;
+      this.outputArea.node.style.height = '';
+    } else if (this.model.outputs.length > 0 && height === '') {
+      this.outputArea.node.style.height = this._lastOutputHeight;
+    }
   }
 
   /**
@@ -1656,6 +1665,7 @@ export class CodeCell extends Cell<ICodeCellModel> {
   private _syncScrolled = false;
   private _lastOnCaretMovedHandler: () => void;
   private _lastTarget: HTMLElement | null = null;
+  private _lastOutputHeight = '';
 }
 
 /**

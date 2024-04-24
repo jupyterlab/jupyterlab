@@ -17,6 +17,10 @@ const UNITS: { name: Intl.RelativeTimeFormatUnit; milliseconds: number }[] = [
  * The namespace for date functions.
  */
 export namespace Time {
+  // Intl.RelativeTimeFormatStyle contains these, but it requires `ES2020.Intl`.
+  // We currently compile to an `ES2018` target.
+  export type HumanStyle = 'long' | 'short' | 'narrow';
+
   /**
    * Convert a timestring to a human readable string (e.g. 'two minutes ago').
    *
@@ -24,9 +28,15 @@ export namespace Time {
    *
    * @returns A formatted date.
    */
-  export function formatHuman(value: string | Date): string {
+  export function formatHuman(
+    value: string | Date,
+    format: HumanStyle = 'long'
+  ): string {
     const lang = document.documentElement.lang || 'en';
-    const formatter = new Intl.RelativeTimeFormat(lang, { numeric: 'auto' });
+    const formatter = new Intl.RelativeTimeFormat(lang, {
+      numeric: 'auto',
+      style: format
+    });
     const delta = new Date(value).getTime() - Date.now();
     for (let unit of UNITS) {
       const amount = Math.ceil(delta / unit.milliseconds);

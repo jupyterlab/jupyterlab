@@ -550,6 +550,8 @@ While authoring a prebuilt extension, you can use the ``labextension develop`` c
 
 Then rebuilding your extension and refreshing JupyterLab in the browser should pick up changes in your prebuilt extension source code.
 
+If using Windows, you may need to configure your operating system for the ``develop`` command described above to work, please see the note: :ref:`important-for-windows-users`
+
 If you are developing your prebuilt extension against the JupyterLab source repo, you can run JupyterLab with ``jupyter lab --dev-mode --extensions-in-dev-mode`` to have the development version of JupyterLab load prebuilt extensions. It would be best if you had in mind that the JupyterLab packages that your extension depends on may differ from those published; this means that your extension doesn’t build with JupyterLab dependencies from your node_modules folder but those in JupyterLab source code.
 
 If you are using TypeScript, the TypeScript compiler would complain because the dependencies of your extension may differ from those in JupyterLab. For that reason, you need to add to your ``tsconfig.json`` the path where to search for these dependencies by adding the option `paths <https://www.typescriptlang.org/tsconfig#paths>`_:

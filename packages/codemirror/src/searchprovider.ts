@@ -59,7 +59,7 @@ import { ISharedText, SourceChange } from '@jupyter/ydoc';
  * - `'selection-start'` - search from selection head/anchor whichever is smaller
  * - `'start'` - from start of the editor
  */
-type SearchStartAnchor =
+export type SearchStartAnchor =
   | 'auto'
   | 'selection'
   | 'selection-start'

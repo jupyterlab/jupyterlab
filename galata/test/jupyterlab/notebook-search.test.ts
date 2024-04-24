@@ -334,6 +334,7 @@ test.describe('Notebook Search', () => {
 
     // Switch back to command mode
     await page.keyboard.press('Escape');
+    await page.getByText(`Mode: Command`, { exact: true }).waitFor();
 
     // Select two cells below
     await page.keyboard.press('Shift+ArrowDown');

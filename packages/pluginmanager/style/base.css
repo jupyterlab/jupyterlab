@@ -29,3 +29,7 @@
 .jp-pluginmanager-PluginInUseMessage {
   max-width: 550px;
 }
+
+.jp-pluginmanager-Header > .jp-FilterBox {
+  width: 100%;
+}

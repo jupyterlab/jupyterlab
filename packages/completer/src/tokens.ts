@@ -81,7 +81,7 @@ export interface ICompletionProvider<
 
   /**
    * Is completion provider applicable to specified context?
-   * @param request - the completion request text and details
+   *
    * @param context - additional information about context of completion request
    */
   isApplicable(context: ICompletionContext): Promise<boolean>;

@@ -304,7 +304,7 @@ export namespace Contents {
      * Given a path of the form `drive:local/portion/of/it.txt`
      * get the local part of it.
      *
-     * @param path: the path.
+     * @param path the path.
      *
      * @returns The local part of the path.
      */
@@ -315,7 +315,7 @@ export namespace Contents {
      * leading slashes from the local part of the path, while retaining
      * the drive name if it exists.
      *
-     * @param path: the path.
+     * @param path the path.
      *
      * @returns The normalized path.
      */
@@ -328,7 +328,7 @@ export namespace Contents {
      *  - if root has a drive name, the result is prefixed with "<drive>:"
      *  - before adding drive name, leading slashes are removed
      *
-     * @param path: the path.
+     * @param path the path.
      *
      * @returns The normalized path.
      */
@@ -339,7 +339,7 @@ export namespace Contents {
      * get the name of the drive. If the path is missing
      * a drive portion, returns an empty string.
      *
-     * @param path: the path.
+     * @param path the path.
      *
      * @returns The drive name for the path, or the empty string.
      */
@@ -355,9 +355,9 @@ export namespace Contents {
     /**
      * Get a file or directory.
      *
-     * @param path: The path to the file.
+     * @param path The path to the file.
      *
-     * @param options: The options used to fetch the file.
+     * @param options The options used to fetch the file.
      *
      * @returns A promise which resolves with the file content.
      */
@@ -377,7 +377,7 @@ export namespace Contents {
     /**
      * Create a new untitled file or directory in the specified directory path.
      *
-     * @param options: The options used to create the file.
+     * @param options The options used to create the file.
      *
      * @returns A promise which resolves with the created file content when the
      *    file is created.
@@ -502,9 +502,9 @@ export namespace Contents {
     /**
      * Get a file or directory.
      *
-     * @param localPath: The path to the file.
+     * @param localPath The path to the file.
      *
-     * @param options: The options used to fetch the file.
+     * @param options The options used to fetch the file.
      *
      * @returns A promise which resolves with the file content.
      */
@@ -524,7 +524,7 @@ export namespace Contents {
     /**
      * Create a new untitled file or directory in the specified directory path.
      *
-     * @param options: The options used to create the file.
+     * @param options The options used to create the file.
      *
      * @returns A promise which resolves with the created file content when the
      *    file is created.
@@ -693,7 +693,7 @@ export class ContentsManager implements Contents.IManager {
    * Given a path of the form `drive:local/portion/of/it.txt`
    * get the local part of it.
    *
-   * @param path: the path.
+   * @param path the path.
    *
    * @returns The local part of the path.
    */
@@ -711,7 +711,7 @@ export class ContentsManager implements Contents.IManager {
    * leading slashes from the local part of the path, while retaining
    * the drive name if it exists.
    *
-   * @param path: the path.
+   * @param path the path.
    *
    * @returns The normalized path.
    */
@@ -730,7 +730,7 @@ export class ContentsManager implements Contents.IManager {
    *  - if root has a drive name, the result is prefixed with "<drive>:"
    *  - before adding drive name, leading slashes are removed
    *
-   * @param path: the path.
+   * @param path the path.
    *
    * @returns The normalized path.
    */
@@ -746,7 +746,7 @@ export class ContentsManager implements Contents.IManager {
    * get the name of the drive. If the path is missing
    * a drive portion, returns an empty string.
    *
-   * @param path: the path.
+   * @param path the path.
    *
    * @returns The drive name for the path, or the empty string.
    */
@@ -765,9 +765,9 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Get a file or directory.
    *
-   * @param path: The path to the file.
+   * @param path The path to the file.
    *
-   * @param options: The options used to fetch the file.
+   * @param options The options used to fetch the file.
    *
    * @returns A promise which resolves with the file content.
    */
@@ -816,7 +816,7 @@ export class ContentsManager implements Contents.IManager {
   /**
    * Create a new untitled file or directory in the specified directory path.
    *
-   * @param options: The options used to create the file.
+   * @param options The options used to create the file.
    *
    * @returns A promise which resolves with the created file content when the
    *    file is created.
@@ -993,9 +993,9 @@ export class ContentsManager implements Contents.IManager {
    * Given a drive and a local path, construct a fully qualified
    * path. The inverse of `_driveForPath`.
    *
-   * @param drive: an `IDrive`.
+   * @param drive an `IDrive`.
    *
-   * @param localPath: the local path on the drive.
+   * @param localPath the local path on the drive.
    *
    * @returns the fully qualified path.
    */
@@ -1013,7 +1013,7 @@ export class ContentsManager implements Contents.IManager {
    * `'driveName:path/to/file'`. If there is no `driveName`
    * prepended to the path, it returns the default drive.
    *
-   * @param path: a path to a file.
+   * @param path a path to a file.
    *
    * @returns A tuple containing an `IDrive` object for the path,
    * and a local path for that drive.
@@ -1121,9 +1121,9 @@ export class Drive implements Contents.IDrive {
   /**
    * Get a file or directory.
    *
-   * @param localPath: The path to the file.
+   * @param localPath The path to the file.
    *
-   * @param options: The options used to fetch the file.
+   * @param options The options used to fetch the file.
    *
    * @returns A promise which resolves with the file content.
    *
@@ -1187,7 +1187,7 @@ export class Drive implements Contents.IDrive {
   /**
    * Create a new untitled file or directory in the specified directory path.
    *
-   * @param options: The options used to create the file.
+   * @param options The options used to create the file.
    *
    * @returns A promise which resolves with the created file content when the
    *    file is created.
