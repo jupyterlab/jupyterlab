@@ -412,7 +412,8 @@ function createFileMenu(
                 );
                 const p2 = document.createElement('p');
                 p2.textContent = trans.__(
-                  'To use "%1" again, you will need to relaunch it.', app.name
+                  'To use "%1" again, you will need to relaunch it.',
+                  app.name
                 );
 
                 body.appendChild(p1);
