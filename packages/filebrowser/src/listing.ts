@@ -811,12 +811,13 @@ export class DirListing extends Widget {
 
   // Update the modified column's size
   private _updateModifiedSize(node: HTMLElement) {
-    const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+    // Look for the modified column's header
+    const modified = DOMUtils.findElement(node, MODIFIED_ID_CLASS);
     this._modifiedWidth = modified?.getBoundingClientRect().width ?? 83;
     this._modifiedStyle =
-      this._modifiedWidth < 90
+      this._modifiedWidth < 100
         ? 'narrow'
-        : this._modifiedWidth > 110
+        : this._modifiedWidth > 120
         ? 'long'
         : 'short';
   }
@@ -825,7 +826,7 @@ export class DirListing extends Widget {
   protected updateModified(items: Contents.IModel[], nodes: HTMLElement[]) {
     items.forEach((item, i) => {
       const node = nodes[i];
-      if (item.last_modified) {
+      if (node && item.last_modified) {
         const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
         if (this.renderer.updateItemModified !== undefined) {
           this.renderer.updateItemModified(
@@ -987,6 +988,7 @@ export class DirListing extends Widget {
 
     // Rerender item nodes' modified dates, if the modified style has changed.
     const oldModifiedStyle = this._modifiedStyle;
+    // Update both size and style
     this._updateModifiedSize(this.node);
     if (oldModifiedStyle !== this._modifiedStyle) {
       this.updateModified(this._sortedItems, this._items);
@@ -2368,7 +2370,10 @@ export namespace DirListing {
       const trans = translator.load('jupyterlab');
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
-      const modified = this.createHeaderItemNode(trans.__('Modified'));
+      const modified = this._createHeaderItemNodeWithSizes({
+        small: trans.__('Modified'),
+        large: trans.__('Last Modified')
+      });
       const fileSize = this.createHeaderItemNode(trans.__('File Size'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
@@ -2842,6 +2847,29 @@ export namespace DirListing {
       icon.className = HEADER_ITEM_ICON_CLASS;
       text.textContent = label;
       node.appendChild(text);
+      node.appendChild(icon);
+      return node;
+    }
+
+    /**
+     * Create a node for a header item with multiple sizes.
+     */
+    private _createHeaderItemNodeWithSizes(labels: {
+      [k: string]: string;
+    }): HTMLElement {
+      const node = document.createElement('div');
+      node.className = HEADER_ITEM_CLASS;
+      const icon = document.createElement('span');
+      icon.className = HEADER_ITEM_ICON_CLASS;
+      for (let k of Object.keys(labels)) {
+        const text = document.createElement('span');
+        text.classList.add(
+          HEADER_ITEM_TEXT_CLASS,
+          HEADER_ITEM_TEXT_CLASS + '-' + k
+        );
+        text.textContent = labels[k];
+        node.appendChild(text);
+      }
       node.appendChild(icon);
       return node;
     }
