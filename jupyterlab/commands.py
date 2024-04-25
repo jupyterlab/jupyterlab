@@ -30,6 +30,7 @@ from urllib.request import Request, quote, urljoin, urlopen
 from jupyter_core.paths import jupyter_config_dir
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from jupyterlab_server.config import (
+    get_allowed_levels,
     get_federated_extensions,
     get_package_url,
     get_page_config,
@@ -1104,12 +1105,32 @@ class _AppHandler:
         self._write_build_config(config)
         return True
 
+    def _is_extension_locked(self, extension, level="sys_prefix", include_higher_levels=True):
+        app_settings_dir = osp.join(self.app_dir, "settings")
+        page_config = get_static_page_config(
+            app_settings_dir=app_settings_dir,
+            logger=self.logger,
+            level=level,
+            include_higher_levels=True,
+        )
+
+        locked = page_config.get("lockedExtensions", {})
+        return locked.get(extension, False)
+
     def toggle_extension(self, extension, value, level="sys_prefix"):
         """Enable or disable a lab extension.
 
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         app_settings_dir = osp.join(self.app_dir, "settings")
+
+        # If extension is locked at a higher level, we don't toggle it.
+        allowed = get_allowed_levels()
+        if self._is_extension_locked(
+            extension, level=allowed[allowed.index(level) + 1], include_higher_levels=True
+        ):
+            self.logger.info("Extension locked at a higher level, cannot toggle status")
+            return False
 
         page_config = get_static_page_config(
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
@@ -1118,6 +1139,7 @@ class _AppHandler:
         disabled = page_config.get("disabledExtensions", {})
         did_something = False
         is_disabled = disabled.get(extension, False)
+
         if value and not is_disabled:
             disabled[extension] = True
             did_something = True
@@ -1158,6 +1180,12 @@ class _AppHandler:
     def toggle_extension_lock(self, extension, value, level="sys_prefix"):
         """Lock or unlock a lab extension (/plugin)."""
         app_settings_dir = osp.join(self.app_dir, "settings")
+        allowed = get_allowed_levels()
+        if self._is_extension_locked(
+            extension, level=allowed[allowed.index(level) + 1], include_higher_levels=True
+        ):
+            self.logger.info("Extension locked at a higher level, cannot toggle")
+            return
 
         page_config = get_static_page_config(
             app_settings_dir=app_settings_dir, logger=self.logger, level=level
@@ -1165,7 +1193,7 @@ class _AppHandler:
 
         locked = page_config.get("lockedExtensions", {})
         locked[extension] = value
-
+        page_config["lockedExtensions"] = locked
         write_page_config(page_config, level=level)
 
     def check_extension(self, extension, check_installed_only=False):

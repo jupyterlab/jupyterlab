@@ -452,6 +452,36 @@ describe('@jupyter/notebook', () => {
       });
     });
 
+    describe('#moveCell()', () => {
+      it('should preserve isDirty state after moving a code cell', () => {
+        const widget = createWidget();
+        widget.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code' },
+          { cell_type: 'code' }
+        ]);
+        (widget.widgets[0].model as CodeCellModel).isDirty = true;
+        widget.moveCell(0, 1);
+        expect((widget.widgets[1].model as CodeCellModel).isDirty).toBe(true);
+      });
+
+      it('should preserve isDirty state after moving multiple code cells', () => {
+        const widget = createWidget();
+        widget.model!.sharedModel.insertCells(0, [
+          { cell_type: 'code' },
+          { cell_type: 'code' },
+          { cell_type: 'code' },
+          { cell_type: 'code' },
+          { cell_type: 'code' }
+        ]);
+        (widget.widgets[0].model as CodeCellModel).isDirty = true;
+        (widget.widgets[2].model as CodeCellModel).isDirty = true;
+        widget.moveCell(0, 4, 3);
+        expect((widget.widgets[2].model as CodeCellModel).isDirty).toBe(true);
+        expect((widget.widgets[3].model as CodeCellModel).isDirty).toBe(false);
+        expect((widget.widgets[4].model as CodeCellModel).isDirty).toBe(true);
+      });
+    });
+
     describe('#onModelChanged()', () => {
       it('should be called when the model changes', () => {
         const widget = new LogStaticNotebook(options);
