@@ -2370,7 +2370,7 @@ export namespace DirListing {
       const trans = translator.load('jupyterlab');
       const name = this.createHeaderItemNode(trans.__('Name'));
       const narrow = document.createElement('div');
-      const modified = this.createHeaderItemNodeWithSizes({
+      const modified = this._createHeaderItemNodeWithSizes({
         small: trans.__('Modified'),
         large: trans.__('Last Modified')
       });
@@ -2854,7 +2854,7 @@ export namespace DirListing {
     /**
      * Create a node for a header item with multiple sizes.
      */
-    protected createHeaderItemNodeWithSizes(labels: {
+    private _createHeaderItemNodeWithSizes(labels: {
       [k: string]: string;
     }): HTMLElement {
       const node = document.createElement('div');
