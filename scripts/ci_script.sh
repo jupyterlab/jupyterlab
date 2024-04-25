@@ -206,12 +206,13 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension enable @jupyterlab/notebook-extension --debug
 
     # Test enable/disable on system level
-    sudo jupyter labextension disable @jupyterlab/notebook-extension --level system
-    sudo jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep "@jupyterlab/notebook-extension.*disabled.*OK"
-    sudo jupyter labextension enable @jupyterlab/notebook-extension --level system
-    sudo jupyter labextension list 1>labextensions 2>&1
-    cat labextensions | grep -L "@jupyterlab/notebook-extension.*disabled.*OK"
+    JUPYTER_BIN=$(which jupyter)
+    sudo $JUPYTER_BIN labextension disable @jupyterlab/notebook-extension --level system
+    sudo $JUPYTER_BIN labextension list 1>labextensions 2>&1
+    cat labextensions | grep "@jupyterlab/notebook-extension (all plugins)"
+    sudo $JUPYTER_BIN labextension enable @jupyterlab/notebook-extension --level system
+    sudo $JUPYTER_BIN labextension list 1>labextensions 2>&1
+    cat labextensions | grep -L "@jupyterlab/notebook-extension (all plugins)"
 
     # Test locking at higher level
     jupyter labextension lock @jupyterlab/notebook-extension --level sys_prefix
