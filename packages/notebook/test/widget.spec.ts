@@ -569,6 +569,22 @@ describe('@jupyter/notebook', () => {
     });
   });
 
+  describe('#moveCell()', () => {
+    it('should update the dirty dot after moving multiple cells to overlapping positions', () => {
+      const widget = createWidget();
+      widget.model!.sharedModel.insertCells(0, [
+        { cell_type: 'code' },
+        { cell_type: 'code' },
+        { cell_type: 'code' },
+        { cell_type: 'code' },
+        { cell_type: 'code' }
+      ]);
+      (widget.widgets[0].model as CodeCellModel).isDirty = true;
+      widget.moveCell(0, 2, 1);
+      expect(widget.dirty).toBe(true);
+    });
+  });
+  
   describe('Notebook', () => {
     describe('#stateChanged', () => {
       it('should be emitted when the state of the notebook changes', () => {
