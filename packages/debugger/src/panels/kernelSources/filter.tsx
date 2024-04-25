@@ -8,7 +8,7 @@ import React from 'react';
 import { IDebugger } from '../../tokens';
 
 import { Search } from '@jupyter/react-components';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The class name added to the filebrowser crumbs node.
@@ -19,11 +19,10 @@ export interface IFilterBoxProps {
   /**
    * The application language translator
    */
-  translator?: ITranslator;
+  trans: TranslationBundle;
 }
 
 const FilterBox = (props: IFilterBoxProps) => {
-  const trans = (props.translator ?? nullTranslator).load('jupyterlab');
   const onFilterChange = (e: any) => {
     const filter = (e.target as HTMLInputElement).value;
     props.model.filter = filter;
@@ -31,7 +30,7 @@ const FilterBox = (props: IFilterBoxProps) => {
   return (
     <Search
       onChange={onFilterChange}
-      placeholder={trans.__('Filter the kernel sources')}
+      placeholder={props.trans.__('Filter the kernel sources')}
       value={props.model.filter}
     />
   );
@@ -46,7 +45,7 @@ export const KernelSourcesFilter = (props: IFilterBoxProps) => {
       signal={props.model.filterChanged}
       initialArgs={props.model.filter}
     >
-      {model => <FilterBox model={props.model} translator={props.translator} />}
+      {model => <FilterBox model={props.model} trans={props.trans} />}
     </UseSignal>
   );
 };
