@@ -305,7 +305,6 @@ function List(props: {
   child?: boolean;
   runningItems: IRunningSessions.IRunningItem[];
   shutdownLabel?: string | ((item: IRunningSessions.IRunningItem) => string);
-  shutdownAllLabel?: string;
   shutdownItemIcon?: LabIcon;
   filter?: (item: IRunningSessions.IRunningItem) => Partial<IScore> | null;
   translator?: ITranslator;
@@ -420,7 +419,6 @@ class ListWidget extends ReactWidget {
     private _options: {
       manager: IRunningSessions.IManager;
       runningItems: IRunningSessions.IRunningItem[];
-      shutdownAllLabel: string;
       filterProvider?: IFilterProvider;
       translator?: ITranslator;
       collapseToggled: ISignal<Section, boolean>;
@@ -461,7 +459,6 @@ class ListWidget extends ReactWidget {
               <List
                 runningItems={options.runningItems}
                 shutdownLabel={options.manager.shutdownLabel}
-                shutdownAllLabel={options.shutdownAllLabel}
                 shutdownItemIcon={options.manager.shutdownItemIcon}
                 filter={options.filterProvider?.filter}
                 translator={options.translator}
@@ -539,7 +536,6 @@ class Section extends PanelWithToolbar {
     this.addWidget(
       new ListWidget({
         runningItems,
-        shutdownAllLabel: this._shutdownAllLabel,
         collapseToggled: this._collapseToggled,
         ...options
       })
@@ -975,7 +971,13 @@ export class SearchableSessions extends Panel {
   private _forceFocusInput(): void {
     this._filterWidget.renderPromise
       ?.then(() => {
-        this._filterWidget.node.querySelector('input')?.focus();
+        const jpSearch = this._filterWidget.node.querySelector('jp-search');
+        const input = jpSearch?.shadowRoot?.querySelector('input');
+        if (!input) {
+          console.warn('Input element not found, cannot focus');
+          return;
+        }
+        input.focus();
       })
       .catch(console.warn);
   }
