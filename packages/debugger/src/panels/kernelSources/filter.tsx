@@ -17,7 +17,7 @@ export interface IFilterBoxProps {
   model: IDebugger.Model.IKernelSources;
 
   /**
-   * The application language translator
+   * The language bundle.
    */
   trans: TranslationBundle;
 }
