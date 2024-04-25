@@ -209,6 +209,7 @@ if [[ $GROUP == usage ]]; then
     JUPYTER_BIN=$(which jupyter)
     sudo $JUPYTER_BIN labextension disable @jupyterlab/notebook-extension --level system
     sudo $JUPYTER_BIN labextension list 1>labextensions 2>&1
+    cat labextensions
     cat labextensions | grep "@jupyterlab/notebook-extension (all plugins)"
     sudo $JUPYTER_BIN labextension enable @jupyterlab/notebook-extension --level system
     sudo $JUPYTER_BIN labextension list 1>labextensions 2>&1
