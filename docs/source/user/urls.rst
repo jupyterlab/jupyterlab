@@ -24,15 +24,15 @@ the nomenclature of the classic notebook; these URLs are ``/tree`` URLs:
 
   http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb
 
-By default, the file browser will navigate to the directory containing the requested
+By default, the file browser will navigate to the folder containing the requested
 file. This behavior can be changed with the optional ``file-browser-path`` query parameter:
 
 .. code-block:: none
 
   http(s)://<server:port>/<lab-location>/lab/tree/path/to/notebook.ipynb?file-browser-path=/
 
-Entering the above URL will show the workspace root directory instead of the ``/path/to/``
-directory in the file browser.
+Entering the above URL will show the workspace root folder instead of the ``/path/to/``
+folder in the file browser.
 
 
 Linking Notebook Sections
