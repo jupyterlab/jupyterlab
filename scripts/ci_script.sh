@@ -204,6 +204,10 @@ if [[ $GROUP == usage ]]; then
     cat labextensions | grep "Uninstalled core extensions:"
     jupyter labextension install @jupyterlab/notebook-extension --no-build --debug
     jupyter labextension enable @jupyterlab/notebook-extension --debug
+    jupyter labextension lock @jupyterlab/notebook-extension --level sys_prefix
+    jupyter labextension disable @jupyterlab/notebook-extension --level user 2>&1 | grep "Extension locked at a higher level, cannot toggle status"
+    jupyter labextension unlock @jupyterlab/notebook-extension --level sys_prefix
+    jupyter labextension disable @jupyterlab/notebook-extension --level user
 
     # Test with a prebuilt install
     jupyter labextension develop extension --debug
