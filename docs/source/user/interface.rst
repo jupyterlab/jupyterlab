@@ -41,7 +41,7 @@ The menu bar at the top of JupyterLab has top-level menus that expose
 actions available in JupyterLab with their keyboard shortcuts. The
 default menus are:
 
--  **File**: actions related to files and directories
+-  **File**: actions related to files and folders
 -  **Edit**: actions related to editing documents and other activities
 -  **View**: actions that alter the appearance of JupyterLab
 -  **Run**: actions for running code in different activities such as
