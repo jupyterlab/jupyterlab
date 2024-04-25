@@ -138,7 +138,7 @@ How to create a new ``LabIcon`` from an external svg file
 Although you can copy-and-paste an svg directly into the ``LabIcon``
 constructor, the best practice is to keep the svg for each of your icons
 in its own separate svg file. You will need to have an ``svg.d.ts`` file
-at the root of your project’s ``src`` directory:
+at the root of your project’s ``src`` folder:
 
 .. code:: typescript
 
