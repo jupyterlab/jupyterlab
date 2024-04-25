@@ -584,7 +584,7 @@ describe('@jupyter/notebook', () => {
       expect(widget.dirty).toBe(true);
     });
   });
-  
+
   describe('Notebook', () => {
     describe('#stateChanged', () => {
       it('should be emitted when the state of the notebook changes', () => {
