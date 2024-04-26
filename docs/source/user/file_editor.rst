@@ -34,7 +34,7 @@ browser or drag it into the main work area:
 
 .. _create-file-button:
 
-To create a new text file in the current directory of the file browser,
+To create a new text file in the current folder of the file browser,
 click the ``+`` button at the top of the file browser to create a new
 Launcher tab, and click the “Text Editor” card in the Launcher:
 
