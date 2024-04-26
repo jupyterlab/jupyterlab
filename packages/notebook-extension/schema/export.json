@@ -13,7 +13,7 @@
             "rank": 10,
             "submenu": {
               "id": "jp-mainmenu-file-notebookexport",
-              "label": "Save and Export Notebook As"
+              "label": "Save and Export Notebook As…"
             }
           },
           {
